@@ -17,9 +17,23 @@ To get the source code of our SDKs and samples via **git** just type:
 
 Our Windows SDK makes it incredibly easy to use Mobile Services from your Windows Store applications. You can [download the SDK](http://go.microsoft.com/fwlink/?LinkId=257545&clcid=0x409) directly or you can download the source code using the instructions above and then you will find the Windows Client SDK under ```/azure-mobile-services/sdk/windows```.
 
+### Prerequisities
+
+The SDK requires Windows 8 RTM and Visual Studio 2012 RTM.
+
+### Running the Tests
+
+The Windows SDK has a suite of unit tests but the process for running these tests might be unfamiliar. 
+
+1. Open the ```/azure-mobile-services/sdk/windows/win8sdk.sln``` solution file in Visual Studio 2012.
+2. Right click on the ```Microsoft.Azure.Zumo.Windows.CSharp.Test``` project in the solution explorer and select ```Set as StartUp Project```.
+3. Press F5
+4. A Windows Store application will appear with a prompt for a Runtime Uri and Tags. You can safely ignore this prompt and just click the Start button.
+5. The test suite will run and display the results.
+
 ## Need Help?
 
-Be sure to check out the Windows Azure [Developer Forums](http://social.msdn.microsoft.com/Forums/en-US/azuremobile/) if you have trouble with the provided code.
+Be sure to check out the Mobile Services [Developer Forum](http://social.msdn.microsoft.com/Forums/en-US/azuremobile/) if you are having trouble. The Mobile Services product team actively monitors the forum and will be more than happy to assist you.
 
 ## Contribute Code or Provide Feedback
 
