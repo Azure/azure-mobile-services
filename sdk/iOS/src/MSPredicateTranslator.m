@@ -73,7 +73,8 @@ NSString *const decimalConstant = @"%@m";
 NSString *const floatConstant = @"%gf";
 NSString *const doubleConstant = @"%gd";
 NSString *const intConstant = @"%d";
-NSString *const longConstant = @"%ldl";
+NSString *const longConstant = @"%ld";
+NSString *const lonLongConstant = @"%lldl";
 
 
 #pragma mark * MSPredicateTranslator Implementation
@@ -431,6 +432,9 @@ static NSDictionary *staticFunctionInfoLookup;
     }
     else if(strcmp(@encode(long), cType) == 0) {
         result = [NSString stringWithFormat:longConstant, [number longValue]];
+    } 
+    else if(strcmp(@encode(long long), cType) == 0) {
+        result = [NSString stringWithFormat:lonLongConstant, [number longLongValue]];
     }
 
     return result;

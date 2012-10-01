@@ -85,10 +85,10 @@ static MSJSONSerializer *serializer;
     NSDictionary *item = @{ @"id" : @5, @"name" : @"bob" };
     NSError *error = nil;
     NSNumber *itemId = [serializer itemIdFromItem:item orError:&error];
-    long expected = 5;
+    long long expected = 5;
     
     STAssertNil(error, @"error should have been nil.");
-    STAssertEquals(expected, [itemId longValue], @"itemId was not correct.");
+    STAssertEquals(expected, [itemId longLongValue], @"itemId was not correct.");
     
     NSLog(@"%@ end", self.name);
 }

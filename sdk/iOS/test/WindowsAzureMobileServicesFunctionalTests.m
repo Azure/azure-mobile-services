@@ -33,7 +33,7 @@
 {
     NSLog(@"%@ setUp", self.name);
 
-    testsEnabled = NO;
+    testsEnabled = YES;
     STAssertTrue(testsEnabled, @"The functiontional tests are currently disabled.");
     
     // These functional tests requires a working Windows Mobile Azure Service
@@ -42,8 +42,8 @@
     // 'testsEnabled' BOOL above to YES.
     
     client = [MSClient
-              clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
-              withApplicationKey:@"<Application Key>"];
+              clientWithApplicationURLString:@"https://iosclientendtoend.azure-mobile.net/"
+              withApplicationKey:@"uLnPzbAwamiGDbgxldoKqxZYenkiwG40"];
     done = NO;
     
     STAssertNotNil(client, @"Could not create test client.");
@@ -91,8 +91,8 @@
             [todoTable delete:updatedItem onSuccess:^(NSNumber *itemId) {
                 
                 // Verify that the delete succeeded
-                STAssertTrue([itemId longValue] ==
-                            [[updatedItem objectForKey:@"id"] longValue],
+                STAssertTrue([itemId longLongValue] ==
+                            [[updatedItem objectForKey:@"id"] longLongValue],
                             @"itemId deleted was: %d.", itemId);
                 done = YES;
                 

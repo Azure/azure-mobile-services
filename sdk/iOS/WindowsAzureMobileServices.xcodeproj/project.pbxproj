@@ -1,0 +1,543 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		E87BB01C161A28FC008053F9 /* MSClientTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB01B161A28FC008053F9 /* MSClientTests.m */; };
+		E87BB01F161A446C008053F9 /* MSTableURLBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB01E161A446C008053F9 /* MSTableURLBuilder.m */; };
+		E8F33ADF1616659C002DD7C6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F33ADE1616659C002DD7C6 /* Foundation.framework */; };
+		E8F33AEE1616659C002DD7C6 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F33AED1616659C002DD7C6 /* SenTestingKit.framework */; };
+		E8F33AF11616659C002DD7C6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F33ADE1616659C002DD7C6 /* Foundation.framework */; };
+		E8F33AF41616659C002DD7C6 /* libWindowsAzureMobileServices.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F33ADB1616659C002DD7C6 /* libWindowsAzureMobileServices.a */; };
+		E8F33AFA1616659C002DD7C6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E8F33AF81616659C002DD7C6 /* InfoPlist.strings */; };
+		E8F33B15161667CE002DD7C6 /* MSClient.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B0B161667CE002DD7C6 /* MSClient.m */; };
+		E8F33B16161667CE002DD7C6 /* MSError.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B0D161667CE002DD7C6 /* MSError.m */; };
+		E8F33B17161667CE002DD7C6 /* MSQuery.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B0F161667CE002DD7C6 /* MSQuery.m */; };
+		E8F33B18161667CE002DD7C6 /* MSTable.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B11161667CE002DD7C6 /* MSTable.m */; };
+		E8F33B19161667CE002DD7C6 /* MSUser.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B13161667CE002DD7C6 /* MSUser.m */; };
+		E8F33B2416166822002DD7C6 /* MSClientConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B1F16166822002DD7C6 /* MSClientConnection.m */; };
+		E8F33B2516166822002DD7C6 /* MSTableConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B2116166822002DD7C6 /* MSTableConnection.m */; };
+		E8F33B2616166822002DD7C6 /* MSTableRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B2316166822002DD7C6 /* MSTableRequest.m */; };
+		E8F33B2A16166837002DD7C6 /* MSJSONSerializer.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B2816166837002DD7C6 /* MSJSONSerializer.m */; };
+		E8F33B2F1616684F002DD7C6 /* MSPredicateTranslator.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B2C1616684F002DD7C6 /* MSPredicateTranslator.m */; };
+		E8F33B301616684F002DD7C6 /* MSQueryDateTimeFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B2E1616684F002DD7C6 /* MSQueryDateTimeFormatter.m */; };
+		E8F33B3C16166945002DD7C6 /* WindowsAzureMobileServicesFunctionalTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B34161668C4002DD7C6 /* WindowsAzureMobileServicesFunctionalTests.m */; };
+		E8F33B3D1616694C002DD7C6 /* MSQueryTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B3A161668ED002DD7C6 /* MSQueryTests.m */; };
+		E8F33B3E16166956002DD7C6 /* MSJSONSerializerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B36161668DA002DD7C6 /* MSJSONSerializerTests.m */; };
+		E8F33B3F1616695E002DD7C6 /* MSPredicateTranslatorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8F33B38161668E4002DD7C6 /* MSPredicateTranslatorTests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		E8F33AF21616659C002DD7C6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E8F33AD21616659C002DD7C6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E8F33ADA1616659C002DD7C6;
+			remoteInfo = WindowsAzureMobileServices;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E8F33AD91616659C002DD7C6 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/${PRODUCT_NAME}";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		E87BB01B161A28FC008053F9 /* MSClientTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSClientTests.m; sourceTree = "<group>"; };
+		E87BB01D161A446C008053F9 /* MSTableURLBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSTableURLBuilder.h; sourceTree = "<group>"; };
+		E87BB01E161A446C008053F9 /* MSTableURLBuilder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableURLBuilder.m; sourceTree = "<group>"; };
+		E8F33ADB1616659C002DD7C6 /* libWindowsAzureMobileServices.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWindowsAzureMobileServices.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		E8F33ADE1616659C002DD7C6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		E8F33AE21616659C002DD7C6 /* WindowsAzureMobileServices-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WindowsAzureMobileServices-Prefix.pch"; sourceTree = "<group>"; };
+		E8F33AEC1616659C002DD7C6 /* WindowsAzureMobileServicesTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WindowsAzureMobileServicesTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E8F33AED1616659C002DD7C6 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		E8F33AF71616659C002DD7C6 /* WindowsAzureMobileServicesTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "WindowsAzureMobileServicesTests-Info.plist"; sourceTree = "<group>"; };
+		E8F33AF91616659C002DD7C6 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		E8F33B0A161667CE002DD7C6 /* MSClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSClient.h; sourceTree = "<group>"; };
+		E8F33B0B161667CE002DD7C6 /* MSClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSClient.m; sourceTree = "<group>"; };
+		E8F33B0C161667CE002DD7C6 /* MSError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSError.h; sourceTree = "<group>"; };
+		E8F33B0D161667CE002DD7C6 /* MSError.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSError.m; sourceTree = "<group>"; };
+		E8F33B0E161667CE002DD7C6 /* MSQuery.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSQuery.h; sourceTree = "<group>"; };
+		E8F33B0F161667CE002DD7C6 /* MSQuery.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSQuery.m; sourceTree = "<group>"; };
+		E8F33B10161667CE002DD7C6 /* MSTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSTable.h; sourceTree = "<group>"; };
+		E8F33B11161667CE002DD7C6 /* MSTable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTable.m; sourceTree = "<group>"; };
+		E8F33B12161667CE002DD7C6 /* MSUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSUser.h; sourceTree = "<group>"; };
+		E8F33B13161667CE002DD7C6 /* MSUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSUser.m; sourceTree = "<group>"; };
+		E8F33B14161667CE002DD7C6 /* WindowsAzureMobileServices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WindowsAzureMobileServices.h; sourceTree = "<group>"; };
+		E8F33B1D1616680E002DD7C6 /* Localizable.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
+		E8F33B1E16166822002DD7C6 /* MSClientConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSClientConnection.h; sourceTree = "<group>"; };
+		E8F33B1F16166822002DD7C6 /* MSClientConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSClientConnection.m; sourceTree = "<group>"; };
+		E8F33B2016166822002DD7C6 /* MSTableConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSTableConnection.h; sourceTree = "<group>"; };
+		E8F33B2116166822002DD7C6 /* MSTableConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableConnection.m; sourceTree = "<group>"; };
+		E8F33B2216166822002DD7C6 /* MSTableRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSTableRequest.h; sourceTree = "<group>"; };
+		E8F33B2316166822002DD7C6 /* MSTableRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableRequest.m; sourceTree = "<group>"; };
+		E8F33B2716166837002DD7C6 /* MSJSONSerializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSJSONSerializer.h; sourceTree = "<group>"; };
+		E8F33B2816166837002DD7C6 /* MSJSONSerializer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSJSONSerializer.m; sourceTree = "<group>"; };
+		E8F33B2916166837002DD7C6 /* MSSerializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSSerializer.h; sourceTree = "<group>"; };
+		E8F33B2B1616684F002DD7C6 /* MSPredicateTranslator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSPredicateTranslator.h; sourceTree = "<group>"; };
+		E8F33B2C1616684F002DD7C6 /* MSPredicateTranslator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPredicateTranslator.m; sourceTree = "<group>"; };
+		E8F33B2D1616684F002DD7C6 /* MSQueryDateTimeFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSQueryDateTimeFormatter.h; sourceTree = "<group>"; };
+		E8F33B2E1616684F002DD7C6 /* MSQueryDateTimeFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSQueryDateTimeFormatter.m; sourceTree = "<group>"; };
+		E8F33B34161668C4002DD7C6 /* WindowsAzureMobileServicesFunctionalTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WindowsAzureMobileServicesFunctionalTests.m; sourceTree = "<group>"; };
+		E8F33B36161668DA002DD7C6 /* MSJSONSerializerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSJSONSerializerTests.m; sourceTree = "<group>"; };
+		E8F33B38161668E4002DD7C6 /* MSPredicateTranslatorTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPredicateTranslatorTests.m; sourceTree = "<group>"; };
+		E8F33B3A161668ED002DD7C6 /* MSQueryTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSQueryTests.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		E8F33AD81616659C002DD7C6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8F33ADF1616659C002DD7C6 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E8F33AE81616659C002DD7C6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8F33AEE1616659C002DD7C6 /* SenTestingKit.framework in Frameworks */,
+				E8F33AF11616659C002DD7C6 /* Foundation.framework in Frameworks */,
+				E8F33AF41616659C002DD7C6 /* libWindowsAzureMobileServices.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E8F33AD01616659C002DD7C6 = {
+			isa = PBXGroup;
+			children = (
+				E8F33AE01616659C002DD7C6 /* Source */,
+				E8F33AF51616659C002DD7C6 /* Test */,
+				E8F33ADD1616659C002DD7C6 /* Frameworks */,
+				E8F33ADC1616659C002DD7C6 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E8F33ADC1616659C002DD7C6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E8F33ADB1616659C002DD7C6 /* libWindowsAzureMobileServices.a */,
+				E8F33AEC1616659C002DD7C6 /* WindowsAzureMobileServicesTests.octest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E8F33ADD1616659C002DD7C6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E8F33ADE1616659C002DD7C6 /* Foundation.framework */,
+				E8F33AED1616659C002DD7C6 /* SenTestingKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E8F33AE01616659C002DD7C6 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				E8F33B0A161667CE002DD7C6 /* MSClient.h */,
+				E8F33B0B161667CE002DD7C6 /* MSClient.m */,
+				E8F33B0C161667CE002DD7C6 /* MSError.h */,
+				E8F33B0D161667CE002DD7C6 /* MSError.m */,
+				E8F33B0E161667CE002DD7C6 /* MSQuery.h */,
+				E8F33B0F161667CE002DD7C6 /* MSQuery.m */,
+				E8F33B10161667CE002DD7C6 /* MSTable.h */,
+				E8F33B11161667CE002DD7C6 /* MSTable.m */,
+				E8F33B12161667CE002DD7C6 /* MSUser.h */,
+				E8F33B13161667CE002DD7C6 /* MSUser.m */,
+				E8F33B14161667CE002DD7C6 /* WindowsAzureMobileServices.h */,
+				E8F33B1A161667E2002DD7C6 /* Connection */,
+				E8F33B1B161667EC002DD7C6 /* Serialization */,
+				E8F33B1C161667F6002DD7C6 /* Query */,
+				E8F33AE11616659C002DD7C6 /* Supporting Files */,
+			);
+			name = Source;
+			path = src;
+			sourceTree = "<group>";
+		};
+		E8F33AE11616659C002DD7C6 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				E8F33B1D1616680E002DD7C6 /* Localizable.strings */,
+				E8F33AE21616659C002DD7C6 /* WindowsAzureMobileServices-Prefix.pch */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E8F33AF51616659C002DD7C6 /* Test */ = {
+			isa = PBXGroup;
+			children = (
+				E87BB01B161A28FC008053F9 /* MSClientTests.m */,
+				E8F33B3A161668ED002DD7C6 /* MSQueryTests.m */,
+				E8F33B34161668C4002DD7C6 /* WindowsAzureMobileServicesFunctionalTests.m */,
+				E8F33B3116166889002DD7C6 /* Connection */,
+				E8F33B321616689A002DD7C6 /* Serialization */,
+				E8F33B33161668AA002DD7C6 /* Query */,
+				E8F33AF61616659C002DD7C6 /* Supporting Files */,
+			);
+			name = Test;
+			path = test;
+			sourceTree = "<group>";
+		};
+		E8F33AF61616659C002DD7C6 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				E8F33AF71616659C002DD7C6 /* WindowsAzureMobileServicesTests-Info.plist */,
+				E8F33AF81616659C002DD7C6 /* InfoPlist.strings */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		E8F33B1A161667E2002DD7C6 /* Connection */ = {
+			isa = PBXGroup;
+			children = (
+				E8F33B1E16166822002DD7C6 /* MSClientConnection.h */,
+				E8F33B1F16166822002DD7C6 /* MSClientConnection.m */,
+				E8F33B2016166822002DD7C6 /* MSTableConnection.h */,
+				E8F33B2116166822002DD7C6 /* MSTableConnection.m */,
+				E8F33B2216166822002DD7C6 /* MSTableRequest.h */,
+				E8F33B2316166822002DD7C6 /* MSTableRequest.m */,
+				E87BB01D161A446C008053F9 /* MSTableURLBuilder.h */,
+				E87BB01E161A446C008053F9 /* MSTableURLBuilder.m */,
+			);
+			name = Connection;
+			sourceTree = "<group>";
+		};
+		E8F33B1B161667EC002DD7C6 /* Serialization */ = {
+			isa = PBXGroup;
+			children = (
+				E8F33B2716166837002DD7C6 /* MSJSONSerializer.h */,
+				E8F33B2816166837002DD7C6 /* MSJSONSerializer.m */,
+				E8F33B2916166837002DD7C6 /* MSSerializer.h */,
+			);
+			name = Serialization;
+			sourceTree = "<group>";
+		};
+		E8F33B1C161667F6002DD7C6 /* Query */ = {
+			isa = PBXGroup;
+			children = (
+				E8F33B2B1616684F002DD7C6 /* MSPredicateTranslator.h */,
+				E8F33B2C1616684F002DD7C6 /* MSPredicateTranslator.m */,
+				E8F33B2D1616684F002DD7C6 /* MSQueryDateTimeFormatter.h */,
+				E8F33B2E1616684F002DD7C6 /* MSQueryDateTimeFormatter.m */,
+			);
+			name = Query;
+			sourceTree = "<group>";
+		};
+		E8F33B3116166889002DD7C6 /* Connection */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Connection;
+			sourceTree = "<group>";
+		};
+		E8F33B321616689A002DD7C6 /* Serialization */ = {
+			isa = PBXGroup;
+			children = (
+				E8F33B36161668DA002DD7C6 /* MSJSONSerializerTests.m */,
+			);
+			name = Serialization;
+			sourceTree = "<group>";
+		};
+		E8F33B33161668AA002DD7C6 /* Query */ = {
+			isa = PBXGroup;
+			children = (
+				E8F33B38161668E4002DD7C6 /* MSPredicateTranslatorTests.m */,
+			);
+			name = Query;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E8F33ADA1616659C002DD7C6 /* WindowsAzureMobileServices */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E8F33B001616659C002DD7C6 /* Build configuration list for PBXNativeTarget "WindowsAzureMobileServices" */;
+			buildPhases = (
+				E8F33AD71616659C002DD7C6 /* Sources */,
+				E8F33AD81616659C002DD7C6 /* Frameworks */,
+				E8F33AD91616659C002DD7C6 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WindowsAzureMobileServices;
+			productName = WindowsAzureMobileServices;
+			productReference = E8F33ADB1616659C002DD7C6 /* libWindowsAzureMobileServices.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		E8F33AEB1616659C002DD7C6 /* WindowsAzureMobileServicesTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E8F33B031616659C002DD7C6 /* Build configuration list for PBXNativeTarget "WindowsAzureMobileServicesTests" */;
+			buildPhases = (
+				E8F33AE71616659C002DD7C6 /* Sources */,
+				E8F33AE81616659C002DD7C6 /* Frameworks */,
+				E8F33AE91616659C002DD7C6 /* Resources */,
+				E8F33AEA1616659C002DD7C6 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E8F33AF31616659C002DD7C6 /* PBXTargetDependency */,
+			);
+			name = WindowsAzureMobileServicesTests;
+			productName = WindowsAzureMobileServicesTests;
+			productReference = E8F33AEC1616659C002DD7C6 /* WindowsAzureMobileServicesTests.octest */;
+			productType = "com.apple.product-type.bundle";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E8F33AD21616659C002DD7C6 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0440;
+				ORGANIZATIONNAME = "Windows Azure";
+			};
+			buildConfigurationList = E8F33AD51616659C002DD7C6 /* Build configuration list for PBXProject "WindowsAzureMobileServices" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = E8F33AD01616659C002DD7C6;
+			productRefGroup = E8F33ADC1616659C002DD7C6 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E8F33ADA1616659C002DD7C6 /* WindowsAzureMobileServices */,
+				E8F33AEB1616659C002DD7C6 /* WindowsAzureMobileServicesTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		E8F33AE91616659C002DD7C6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8F33AFA1616659C002DD7C6 /* InfoPlist.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		E8F33AEA1616659C002DD7C6 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		E8F33AD71616659C002DD7C6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8F33B15161667CE002DD7C6 /* MSClient.m in Sources */,
+				E8F33B16161667CE002DD7C6 /* MSError.m in Sources */,
+				E8F33B17161667CE002DD7C6 /* MSQuery.m in Sources */,
+				E8F33B18161667CE002DD7C6 /* MSTable.m in Sources */,
+				E8F33B19161667CE002DD7C6 /* MSUser.m in Sources */,
+				E8F33B2416166822002DD7C6 /* MSClientConnection.m in Sources */,
+				E8F33B2516166822002DD7C6 /* MSTableConnection.m in Sources */,
+				E8F33B2616166822002DD7C6 /* MSTableRequest.m in Sources */,
+				E8F33B2A16166837002DD7C6 /* MSJSONSerializer.m in Sources */,
+				E8F33B2F1616684F002DD7C6 /* MSPredicateTranslator.m in Sources */,
+				E8F33B301616684F002DD7C6 /* MSQueryDateTimeFormatter.m in Sources */,
+				E87BB01F161A446C008053F9 /* MSTableURLBuilder.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E8F33AE71616659C002DD7C6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8F33B3C16166945002DD7C6 /* WindowsAzureMobileServicesFunctionalTests.m in Sources */,
+				E8F33B3D1616694C002DD7C6 /* MSQueryTests.m in Sources */,
+				E8F33B3E16166956002DD7C6 /* MSJSONSerializerTests.m in Sources */,
+				E8F33B3F1616695E002DD7C6 /* MSPredicateTranslatorTests.m in Sources */,
+				E87BB01C161A28FC008053F9 /* MSClientTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E8F33AF31616659C002DD7C6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E8F33ADA1616659C002DD7C6 /* WindowsAzureMobileServices */;
+			targetProxy = E8F33AF21616659C002DD7C6 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		E8F33AF81616659C002DD7C6 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E8F33AF91616659C002DD7C6 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		E8F33AFE1616659C002DD7C6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		E8F33AFF1616659C002DD7C6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		E8F33B011616659C002DD7C6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DSTROOT = /tmp/WindowsAzureMobileServices.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "src/WindowsAzureMobileServices-Prefix.pch";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		E8F33B021616659C002DD7C6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DSTROOT = /tmp/WindowsAzureMobileServices.dst;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "src/WindowsAzureMobileServices-Prefix.pch";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		E8F33B041616659C002DD7C6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"\"$(SDKROOT)/Developer/Library/Frameworks\"",
+					"\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "src/WindowsAzureMobileServices-Prefix.pch";
+				INFOPLIST_FILE = "test/WindowsAzureMobileServicesTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Debug;
+		};
+		E8F33B051616659C002DD7C6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"\"$(SDKROOT)/Developer/Library/Frameworks\"",
+					"\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "src/WindowsAzureMobileServices-Prefix.pch";
+				INFOPLIST_FILE = "test/WindowsAzureMobileServicesTests-Info.plist";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		E8F33AD51616659C002DD7C6 /* Build configuration list for PBXProject "WindowsAzureMobileServices" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E8F33AFE1616659C002DD7C6 /* Debug */,
+				E8F33AFF1616659C002DD7C6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E8F33B001616659C002DD7C6 /* Build configuration list for PBXNativeTarget "WindowsAzureMobileServices" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E8F33B011616659C002DD7C6 /* Debug */,
+				E8F33B021616659C002DD7C6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E8F33B031616659C002DD7C6 /* Build configuration list for PBXNativeTarget "WindowsAzureMobileServicesTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E8F33B041616659C002DD7C6 /* Debug */,
+				E8F33B051616659C002DD7C6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = E8F33AD21616659C002DD7C6 /* Project object */;
+}

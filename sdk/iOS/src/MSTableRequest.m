@@ -15,6 +15,7 @@
 //
 
 #import "MSTableRequest.h"
+#import "MSTableURLBuilder.h"
 
 
 #pragma mark * HTTP Method and Header String Constants
@@ -116,8 +117,7 @@ NSString *const jsonContentType = @"application/json";
     MSTableItemRequest *request = nil;
     
     // Create the URL
-    NSString *urlString = [MSTableRequest URLStringForTable:table];
-    NSURL *url = [MSTableRequest percentEscapedURLFromString:urlString];
+    NSURL *url = [MSTableURLBuilder URLForTable:table];
     
     // Create the request
     request = [[MSTableItemRequest alloc] initWithURL:url
@@ -162,9 +162,7 @@ NSString *const jsonContentType = @"application/json";
     NSNumber *itemId = [serializer itemIdFromItem:item orError:&error];
     if (itemId) {
         
-        NSString *urlString = [MSTableRequest URLStringForTable:table
-                                                 withItemId:itemId];
-        NSURL *url = [MSTableRequest percentEscapedURLFromString:urlString];
+        NSURL *url = [MSTableURLBuilder URLForTable:table withItem:itemId];
     
         // Create the request
         request = [[MSTableItemRequest alloc] initWithURL:url
@@ -231,9 +229,7 @@ NSString *const jsonContentType = @"application/json";
     MSTableDeleteRequest *request = nil;
     
     // Create the URL
-    NSString *urlString = [MSTableRequest URLStringForTable:table
-                                                 withItemId:itemId];
-    NSURL *url = [MSTableRequest percentEscapedURLFromString:urlString];
+    NSURL *url = [MSTableURLBuilder URLForTable:table withItem:itemId];
     
     // Create the request
     request = [[MSTableDeleteRequest alloc] initWithURL:url
@@ -259,9 +255,7 @@ NSString *const jsonContentType = @"application/json";
     MSTableItemRequest *request = nil;
     
     // Create the URL
-    NSString *urlString = [MSTableRequest URLStringForTable:table
-                                                 withItemId:itemId];
-    NSURL *url = [MSTableRequest percentEscapedURLFromString:urlString];
+    NSURL *url =  [MSTableURLBuilder URLForTable:table withItem:itemId];
     
     // Create the request
     request = [[MSTableItemRequest alloc] initWithURL:url
@@ -287,9 +281,7 @@ NSString *const jsonContentType = @"application/json";
     MSTableReadQueryRequest *request = nil;
     
     // Create the URL
-    NSString *urlString = [MSTableRequest URLStringForTable:table
-                                                  withQuery:queryString];
-    NSURL *url = [MSTableRequest percentEscapedURLFromString:urlString];
+    NSURL *url = [MSTableURLBuilder URLForTable:table withQuery:queryString];
     
     // Create the request
     request = [[MSTableReadQueryRequest alloc] initWithURL:url
@@ -338,38 +330,6 @@ NSString *const jsonContentType = @"application/json";
     return [NSError errorWithDomain:error.domain
                                code:error.code
                            userInfo:userInfo];
-}
-
-
-#pragma mark * Private URL generator methods
-
-
-+(NSString *) URLStringForTable:(MSTable *)table
-{
-    NSString *appURLString = table.client.applicationURL.absoluteString;
-    NSString *tableName = table.name;
-    
-    return [NSString stringWithFormat:@"%@tables/%@/", appURLString, tableName];
-}
-
-+(NSString *) URLStringForTable:(MSTable *)table withQuery:(NSString *)query
-{    
-    NSString *baseURLString = [self URLStringForTable:table];
-    return [NSString stringWithFormat:@"%@?%@", baseURLString, query];
-}
-
-+(NSString *) URLStringForTable:(MSTable *)table withItemId:(NSNumber *)itemId
-{
-    
-    NSString *baseURLString = [self URLStringForTable:table];
-    return [NSString stringWithFormat:@"%@%ld/", baseURLString, [itemId longValue]];
-}
-
-+(NSURL *) percentEscapedURLFromString:(NSString *)urlString
-{
-    NSString *escaped = [urlString stringByAddingPercentEscapesUsingEncoding:
-                         NSUTF8StringEncoding ];
-    return [NSURL URLWithString:escaped];
 }
 
 @end

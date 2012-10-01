@@ -40,7 +40,10 @@
 +(MSClient *) clientWithApplicationURLString:(NSString *)urlString
                            withApplicationKey:(NSString *)key
 {
-    NSURL *url = [NSURL URLWithString:urlString];
+    NSString  *urlStringEncoded =
+    [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    
+    NSURL *url = [NSURL URLWithString:urlStringEncoded];
     return [MSClient clientWithApplicationURL:url withApplicationKey:key];
 }
 
@@ -69,7 +72,7 @@
     self = [super init];
     if(self)
     {
-        applicationURL_ = [MSClient normalizedAndEncodedURL:url];
+        applicationURL_ = url;
         applicationKey_ = key;
     }
     return self;
@@ -109,33 +112,6 @@
 -(MSTable *) getTable:(NSString *)tableName
 {
     return [[MSTable alloc] initWithName:tableName andClient:self];
-}
-
-
-#pragma mark * Private Methods
-
-
-+(NSURL*) normalizedAndEncodedURL:(NSURL *)url
-{
-    NSURL *newUrl = nil;
-    
-    if (url) {
-        
-        // Ensure that the URL ends with '/' as all other URL generation
-        // will assume this is the case.
-        NSString *normalizedURL = (![url.absoluteString hasSuffix:@"/"]) ?
-        [   NSString stringWithFormat:@"%@/", url.absoluteString] :
-            url.absoluteString;
-        
-        // Percent escape the URL
-        NSString *encodedURL =
-            [normalizedURL stringByAddingPercentEscapesUsingEncoding:
-             NSUTF8StringEncoding];
-        
-        newUrl = [NSURL URLWithString:encodedURL];
-    }
-    
-    return newUrl;
 }
 
 @end
