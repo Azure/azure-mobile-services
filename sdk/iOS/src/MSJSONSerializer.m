@@ -90,22 +90,51 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
         *error = [self errorForNilItem];
     }
     else {
-        
-        // Then get the value of the id key, which must be present or else
-        // it is an error.
-        itemId = [item objectForKey:idKey];
-        if (!itemId) {
-            *error = [self errorForMissingItemId];
+        if (![item isKindOfClass:[NSDictionary class]]) {
+            *error = [self errorForInvalidItem];
         }
-        else if(![itemId isKindOfClass:[NSNumber class]]) {
+        else {
             
-            // The id was there, but it wasn't a number--this is also an error.
-            *error = [self errorForInvalidItemId];
-            itemId = nil;
+            // Then get the value of the id key, which must be present or else
+            // it is an error.
+            itemId = [item objectForKey:idKey];
+            if (!itemId) {
+                *error = [self errorForMissingItemId];
+            }
+            else if(![itemId isKindOfClass:[NSNumber class]]) {
+                
+                // The id was there, but it wasn't a number--this is also an
+                // error.
+                *error = [self errorForInvalidItemId];
+                itemId = nil;
+            }
         }
     }
 
     return itemId;;
+}
+
+
+-(NSString *) stringFromItemId:(id)itemId orError:(NSError **)error
+{
+    NSString *idAsString = nil;
+    
+    // Ensure there is an item id
+    if (!itemId) {
+        *error = [self errorForExpectedItemId];
+    }
+    else if(![itemId isKindOfClass:[NSNumber class]]) {
+        
+        // The id was there, but it wasn't a number--this is also an
+        // error.
+        *error = [self errorForInvalidItemId];
+    }
+    else {
+        // Convert the id into a string
+        idAsString = [NSString stringWithFormat:@"%lld",[itemId longLongValue]];
+    }
+    
+    return idAsString;
 }
 
 -(id) itemFromData:(NSData *)data
@@ -269,55 +298,60 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
 
 -(NSError *) errorForNilItem
 {
-    return [self errorWithDescriptionKey:@"MSJSONSerializer-NilItem"
+    return [self errorWithDescriptionKey:@"No item was provided."
                             andErrorCode:MSExpectedItemWithRequest];
 }
 
 -(NSError *) errorForInvalidItem
 {
-    return [self errorWithDescriptionKey:@"MSJSONSerializer-InvalidItem"
+    return [self errorWithDescriptionKey:@"The item provided was not valid."
                             andErrorCode:MSInvalidItemWithRequest];
 }
 
 -(NSError *) errorForMissingItemId
 {
-    return [self errorWithDescriptionKey:@"MSJSONSerializer-MissingItemId"
+    return [self errorWithDescriptionKey:@"The item provided did not have an id."
                             andErrorCode:MSMissingItemIdWithRequest];
 }
 
+-(NSError *) errorForExpectedItemId
+{
+    return [self errorWithDescriptionKey:@"The item id was not provided."
+                            andErrorCode:MSExpectedItemIdWithRequest];
+}
 -(NSError *) errorForInvalidItemId
 {
-    return [self errorWithDescriptionKey:@"MSJSONSerializer-InvalidItemId"
+    return [self errorWithDescriptionKey:@"The item provided did not have a valid id."
                             andErrorCode:MSInvalidItemIdWithRequest];
 }
 
 -(NSError *) errorForNilData
 {
-    return [self errorWithDescriptionKey:@"MSJSONSerializer-NilData"
+    return [self errorWithDescriptionKey:@"The server did return any data."
                             andErrorCode:MSExpectedBodyWithResponse];
 }
 
 -(NSError *) errorForExpectedItem
 {
-    return [self errorWithDescriptionKey:@"MSJSONSerializer-ExpectedItem"
+    return [self errorWithDescriptionKey:@"The server did not return the expected item."
                             andErrorCode:MSExpectedItemWithResponse];
 }
 
 -(NSError *) errorForMissingTotalCount
 {
-    return [self errorWithDescriptionKey:@"MSJSONSerializer-MissingTotalCount"
+    return [self errorWithDescriptionKey:@"The server did not return the expected total count."
                             andErrorCode:MSExpectedTotalCountWithResponse];
 }
 
 -(NSError *) errorForMissingItems
 {
-    return [self errorWithDescriptionKey:@"MSJSONSerializer-MissingItems"
+    return [self errorWithDescriptionKey:@"The server did not return the expected items."
                             andErrorCode:MSExpectedItemsWithResponse];
 }
 
 -(NSError *) errorWithoutMessage
 {
-    return [self errorWithDescriptionKey:@"MSJSONSerializer-ErrorWithoutMessage"
+    return [self errorWithDescriptionKey:@"The server returned an error."
                             andErrorCode:MSErrorNoMessageErrorCode];
 }
 

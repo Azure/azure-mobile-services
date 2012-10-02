@@ -39,6 +39,8 @@
 // Called to obtain the id of an item.
 -(id) itemIdFromItem:(id)item orError:(NSError **)error;
 
+// Called to obtain a string representation of an id of an item.
+-(NSString *) stringFromItemId:(id)itemId orError:(NSError **)error;
 
 #pragma mark * Deserialization Methods
 

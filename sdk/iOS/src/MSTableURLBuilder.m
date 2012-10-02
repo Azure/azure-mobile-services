@@ -40,19 +40,15 @@
                  URLByAppendingPathComponent:tablePathEncoded];
 }
 
-+(NSURL *) URLForTable:(MSTable *)table withItem:(NSNumber *)itemId
-{
-    // Convert the id into a string
-    NSString *itemIdPath = [NSString stringWithFormat:@"%lld",
-                              [itemId longLongValue]];
-    
++(NSURL *) URLForTable:(MSTable *)table withItemIdString:(NSString *)itemId
+{    
     // Percent encode it
-    NSString *itemIdPathEncoded =
-    [MSTableURLBuilder stringPercentEncoded:itemIdPath];
+    NSString *itemIdEncoded =
+    [MSTableURLBuilder stringPercentEncoded:itemId];
     
     // Append it to the table URL
     return [[self URLForTable:table]
-            URLByAppendingPathComponent:itemIdPathEncoded];
+            URLByAppendingPathComponent:itemIdEncoded];
 }
 
 +(NSURL *) URLForTable:(MSTable *)table withQuery:(NSString *)query

@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		E87BB01C161A28FC008053F9 /* MSClientTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB01B161A28FC008053F9 /* MSClientTests.m */; };
 		E87BB01F161A446C008053F9 /* MSTableURLBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB01E161A446C008053F9 /* MSTableURLBuilder.m */; };
+		E87BB022161B57C8008053F9 /* MSUserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB021161B57C8008053F9 /* MSUserTests.m */; };
+		E87BB025161B5A4D008053F9 /* MSTableTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB024161B5A4D008053F9 /* MSTableTests.m */; };
 		E8F33ADF1616659C002DD7C6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F33ADE1616659C002DD7C6 /* Foundation.framework */; };
 		E8F33AEE1616659C002DD7C6 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F33AED1616659C002DD7C6 /* SenTestingKit.framework */; };
 		E8F33AF11616659C002DD7C6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F33ADE1616659C002DD7C6 /* Foundation.framework */; };
@@ -57,6 +59,8 @@
 		E87BB01B161A28FC008053F9 /* MSClientTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSClientTests.m; sourceTree = "<group>"; };
 		E87BB01D161A446C008053F9 /* MSTableURLBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSTableURLBuilder.h; sourceTree = "<group>"; };
 		E87BB01E161A446C008053F9 /* MSTableURLBuilder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableURLBuilder.m; sourceTree = "<group>"; };
+		E87BB021161B57C8008053F9 /* MSUserTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSUserTests.m; sourceTree = "<group>"; };
+		E87BB024161B5A4D008053F9 /* MSTableTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableTests.m; sourceTree = "<group>"; };
 		E8F33ADB1616659C002DD7C6 /* libWindowsAzureMobileServices.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWindowsAzureMobileServices.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8F33ADE1616659C002DD7C6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E8F33AE21616659C002DD7C6 /* WindowsAzureMobileServices-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WindowsAzureMobileServices-Prefix.pch"; sourceTree = "<group>"; };
@@ -75,7 +79,6 @@
 		E8F33B12161667CE002DD7C6 /* MSUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSUser.h; sourceTree = "<group>"; };
 		E8F33B13161667CE002DD7C6 /* MSUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSUser.m; sourceTree = "<group>"; };
 		E8F33B14161667CE002DD7C6 /* WindowsAzureMobileServices.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WindowsAzureMobileServices.h; sourceTree = "<group>"; };
-		E8F33B1D1616680E002DD7C6 /* Localizable.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
 		E8F33B1E16166822002DD7C6 /* MSClientConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSClientConnection.h; sourceTree = "<group>"; };
 		E8F33B1F16166822002DD7C6 /* MSClientConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSClientConnection.m; sourceTree = "<group>"; };
 		E8F33B2016166822002DD7C6 /* MSTableConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSTableConnection.h; sourceTree = "<group>"; };
@@ -148,6 +151,7 @@
 		E8F33AE01616659C002DD7C6 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				E8F33B14161667CE002DD7C6 /* WindowsAzureMobileServices.h */,
 				E8F33B0A161667CE002DD7C6 /* MSClient.h */,
 				E8F33B0B161667CE002DD7C6 /* MSClient.m */,
 				E8F33B0C161667CE002DD7C6 /* MSError.h */,
@@ -158,7 +162,6 @@
 				E8F33B11161667CE002DD7C6 /* MSTable.m */,
 				E8F33B12161667CE002DD7C6 /* MSUser.h */,
 				E8F33B13161667CE002DD7C6 /* MSUser.m */,
-				E8F33B14161667CE002DD7C6 /* WindowsAzureMobileServices.h */,
 				E8F33B1A161667E2002DD7C6 /* Connection */,
 				E8F33B1B161667EC002DD7C6 /* Serialization */,
 				E8F33B1C161667F6002DD7C6 /* Query */,
@@ -171,7 +174,6 @@
 		E8F33AE11616659C002DD7C6 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				E8F33B1D1616680E002DD7C6 /* Localizable.strings */,
 				E8F33AE21616659C002DD7C6 /* WindowsAzureMobileServices-Prefix.pch */,
 			);
 			name = "Supporting Files";
@@ -180,9 +182,11 @@
 		E8F33AF51616659C002DD7C6 /* Test */ = {
 			isa = PBXGroup;
 			children = (
+				E8F33B34161668C4002DD7C6 /* WindowsAzureMobileServicesFunctionalTests.m */,
 				E87BB01B161A28FC008053F9 /* MSClientTests.m */,
 				E8F33B3A161668ED002DD7C6 /* MSQueryTests.m */,
-				E8F33B34161668C4002DD7C6 /* WindowsAzureMobileServicesFunctionalTests.m */,
+				E87BB024161B5A4D008053F9 /* MSTableTests.m */,
+				E87BB021161B57C8008053F9 /* MSUserTests.m */,
 				E8F33B3116166889002DD7C6 /* Connection */,
 				E8F33B321616689A002DD7C6 /* Serialization */,
 				E8F33B33161668AA002DD7C6 /* Query */,
@@ -382,6 +386,8 @@
 				E8F33B3E16166956002DD7C6 /* MSJSONSerializerTests.m in Sources */,
 				E8F33B3F1616695E002DD7C6 /* MSPredicateTranslatorTests.m in Sources */,
 				E87BB01C161A28FC008053F9 /* MSClientTests.m in Sources */,
+				E87BB022161B57C8008053F9 /* MSUserTests.m in Sources */,
+				E87BB025161B5A4D008053F9 /* MSTableTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

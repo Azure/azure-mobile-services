@@ -46,6 +46,6 @@
 
 
 // Initializes an |MSUser| instance with the given user id.
--(id) initWithUserId:(NSString *)user;
+-(id) initWithUserId:(NSString *)userId;
 
 @end

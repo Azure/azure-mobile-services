@@ -469,7 +469,7 @@ static NSDictionary *staticFunctionInfoLookup;
 
 +(NSError *) errorForUnsupportedPredicate
 {
-    NSString *description = NSLocalizedString(@"MSPredicateTranslator-PredicateNotSupported", nil);
+    NSString *description = NSLocalizedString(@"The predicate is not supported.", nil);
     NSDictionary *userInfo = @{ NSLocalizedDescriptionKey :description };
     
     return [NSError errorWithDomain:MSErrorDomain

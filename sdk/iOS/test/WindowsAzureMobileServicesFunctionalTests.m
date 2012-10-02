@@ -42,8 +42,8 @@
     // 'testsEnabled' BOOL above to YES.
     
     client = [MSClient
-              clientWithApplicationURLString:@"https://iosclientendtoend.azure-mobile.net/"
-              withApplicationKey:@"uLnPzbAwamiGDbgxldoKqxZYenkiwG40"];
+              clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
+              withApplicationKey:@"<Application Key>"];
     done = NO;
     
     STAssertNotNil(client, @"Could not create test client.");
@@ -55,7 +55,7 @@
 }
 
 
-#pragma mark * Create, Update and Delete a TodoItem Tests
+#pragma mark * End-to-End Positive Insert, Update, Delete and Read Tests
 
 
 - (void) testCreateUpdateAndDeleteTodoItem
@@ -122,10 +122,6 @@
     STAssertTrue([self waitForTest:90.0], @"Test timed out.");
 }
 
-
-#pragma mark * Create items and Query Tests
-
-
 - (void) testCreateAndQueryTodoItem
 {
     MSTable *todoTable = [client getTable:@"todoItem"];
@@ -143,14 +139,22 @@
                      error.localizedDescription);
         done = YES;
     };
-
+    
+    
+    id query4AfterQuery3 = ^(NSDictionary *item) {
+        STAssertNotNil(item, @"item should not have been nil.");
+        [self deleteAllItemswithTable:todoTable
+                            onSuccess:^() { done = YES; }
+                              onError:errorBlock];
+    };
+    
     id query3AfterQuery2 = ^(NSArray *items, NSInteger totalCount) {
         STAssertTrue(items.count == 1, @"Should have been one item.");
-        [self deleteAllItemswithTable:todoTable
-                     onSuccess:^() { done = YES; }
-                       onError:errorBlock];
+        [todoTable readWithId:[[items objectAtIndex:0] valueForKey:@"id"]
+                    onSuccess:query4AfterQuery3
+                     onError:errorBlock];
     };
-
+    
     id query2AfterQuery1 = ^(NSArray *items, NSInteger totalCount) {
         STAssertTrue(items.count == 2, @"Should have been two items.");
         NSPredicate *predicate = [NSPredicate predicateWithFormat:
@@ -170,13 +174,13 @@
     
     id insertAfterDeleteAll = ^(){
         [self insertItems:items withTable:todoTable
-         onSuccess:query1AfterInsert
-           onError:errorBlock];
+                onSuccess:query1AfterInsert
+                  onError:errorBlock];
     };
     
     [self deleteAllItemswithTable:todoTable
-                 onSuccess:insertAfterDeleteAll
-                   onError:errorBlock];
+                        onSuccess:insertAfterDeleteAll
+                          onError:errorBlock];
     
     
     
@@ -184,7 +188,271 @@
 }
 
 
+#pragma mark * Negative Insert Tests
+
+
+- (void) testInsertItemForNonExistentTable
+{
+    MSTable *todoTable = [client getTable:@"NoSuchTable"];
+    
+    // Create the item
+    NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
+    
+    // Insert the item
+    [todoTable insert:item onSuccess:^(id newItem) {
+        
+        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
+        
+    } onError:^(NSError *error) {
+        
+        STAssertNotNil(error, @"error should not have been nil.");
+        STAssertTrue(error.domain == MSErrorDomain,
+                     @"error domain should have been MSErrorDomain.");
+        STAssertTrue(error.code == MSErrorMessageErrorCode,
+                     @"error code should have been MSErrorMessageErrorCode.");
+        
+        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        STAssertTrue([description isEqualToString:@"Table 'NoSuchTable' does not exist."],
+                     @"description was: %@", description);
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:90.0], @"Test timed out.");
+}
+
+
+#pragma mark * Negative Update Tests
+
+
+- (void) testUpdateItemForNonExistentTable
+{
+    MSTable *todoTable = [client getTable:@"NoSuchTable"];
+    
+    // Update the item
+    NSDictionary *item = @{
+    @"text":@"Write E2E test!",
+    @"complete": @(NO),
+    @"id":@100
+    };
+    
+    // Insert the item
+    [todoTable update:item onSuccess:^(id newItem) {
+        
+        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
+        
+    } onError:^(NSError *error) {
+        
+        STAssertNotNil(error, @"error should not have been nil.");
+        STAssertTrue(error.domain == MSErrorDomain,
+                     @"error domain should have been MSErrorDomain.");
+        STAssertTrue(error.code == MSErrorMessageErrorCode,
+                     @"error code should have been MSErrorMessageErrorCode.");
+        
+        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        STAssertTrue([description isEqualToString:@"Table 'NoSuchTable' does not exist."],
+                     @"description was: %@", description);
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:90.0], @"Test timed out.");
+}
+
+- (void) testUpdateItemForNonExistentItemId
+{
+    MSTable *todoTable = [client getTable:@"todoItem"];
+    
+    // Create the item
+    NSDictionary *item = @{
+    @"text":@"Write update E2E test!",
+    @"complete": @(NO),
+    @"id":@-5
+    };
+    
+    // Update the item
+    [todoTable update:item onSuccess:^(id newItem) {
+        
+        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
+        
+    } onError:^(NSError *error) {
+        
+        STAssertNotNil(error, @"error should not have been nil.");
+        STAssertTrue(error.domain == MSErrorDomain,
+                     @"error domain should have been MSErrorDomain.");
+        STAssertTrue(error.code == MSErrorMessageErrorCode,
+                     @"error code should have been MSErrorMessageErrorCode.");
+        
+        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        STAssertTrue([description isEqualToString:@"An item with id '-5' does not exist."],
+                     @"description was: %@", description);
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:90.0], @"Test timed out.");
+}
+
+
+#pragma mark * Negative Delete Tests
+
+
+- (void) testDeleteItemForNonExistentTable
+{
+    MSTable *todoTable = [client getTable:@"NoSuchTable"];
+    
+    // Create the item
+    NSDictionary *item = @{
+        @"text":@"Write E2E test!",
+        @"complete": @(NO),
+        @"id":@100
+    };
+    
+    // Delete the item
+    [todoTable delete:item onSuccess:^(id newItem) {
+        
+        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
+        
+    } onError:^(NSError *error) {
+        
+        STAssertNotNil(error, @"error should not have been nil.");
+        STAssertTrue(error.domain == MSErrorDomain,
+                     @"error domain should have been MSErrorDomain.");
+        STAssertTrue(error.code == MSErrorMessageErrorCode,
+                     @"error code should have been MSErrorMessageErrorCode.");
+        
+        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        STAssertTrue([description isEqualToString:@"Table 'NoSuchTable' does not exist."],
+                     @"description was: %@", description);
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:90.0], @"Test timed out.");
+}
+
+- (void) testDeleteItemForNonExistentItemId
+{
+    MSTable *todoTable = [client getTable:@"todoItem"];
+    
+    // Create the item
+    NSDictionary *item = @{
+        @"text":@"Write update E2E test!",
+        @"complete": @(NO),
+        @"id":@-5
+    };
+    
+    // Delete the item
+    [todoTable delete:item onSuccess:^(id newItem) {
+        
+        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
+        
+    } onError:^(NSError *error) {
+        
+        STAssertNotNil(error, @"error should not have been nil.");
+        STAssertTrue(error.domain == MSErrorDomain,
+                     @"error domain should have been MSErrorDomain.");
+        STAssertTrue(error.code == MSErrorMessageErrorCode,
+                     @"error code should have been MSErrorMessageErrorCode.");
+        
+        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        STAssertTrue([description isEqualToString:@"An item with id '-5' does not exist."],
+                     @"description was: %@", description);
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:90.0], @"Test timed out.");
+}
+
+- (void) testDeleteItemWithIdForNonExistentItemId
+{
+    MSTable *todoTable = [client getTable:@"todoItem"];
+    
+    // Delete the item
+    [todoTable deleteWithId:@-5 onSuccess:^(id newItem) {
+        
+        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
+        
+    } onError:^(NSError *error) {
+        
+        STAssertNotNil(error, @"error should not have been nil.");
+        STAssertTrue(error.domain == MSErrorDomain,
+                     @"error domain should have been MSErrorDomain.");
+        STAssertTrue(error.code == MSErrorMessageErrorCode,
+                     @"error code should have been MSErrorMessageErrorCode.");
+        
+        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        STAssertTrue([description isEqualToString:@"An item with id '-5' does not exist."],
+                     @"description was: %@", description);
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:90.0], @"Test timed out.");
+}
+
+
+#pragma mark * Negative ReadWithId Tests
+
+
+- (void) testReadWithIdForNonExistentTable
+{
+    MSTable *todoTable = [client getTable:@"NoSuchTable"];
+
+    // Insert the item
+    [todoTable readWithId:@100 onSuccess:^(id newItem) {
+        
+        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
+        
+    } onError:^(NSError *error) {
+        
+        STAssertNotNil(error, @"error should not have been nil.");
+        STAssertTrue(error.domain == MSErrorDomain,
+                     @"error domain should have been MSErrorDomain.");
+        STAssertTrue(error.code == MSErrorMessageErrorCode,
+                     @"error code should have been MSErrorMessageErrorCode.");
+        
+        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        STAssertTrue([description isEqualToString:@"Table 'NoSuchTable' does not exist."],
+                     @"description was: %@", description);
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:90.0], @"Test timed out.");
+}
+
+- (void) testReadWithIdForNonExistentItemId
+{
+    MSTable *todoTable = [client getTable:@"todoItem"];
+    
+    // Insert the item
+    [todoTable readWithId:@-5 onSuccess:^(id newItem) {
+        
+        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
+        
+    } onError:^(NSError *error) {
+        
+        STAssertNotNil(error, @"error should not have been nil.");
+        STAssertTrue(error.domain == MSErrorDomain,
+                     @"error domain should have been MSErrorDomain.");
+        STAssertTrue(error.code == MSErrorMessageErrorCode,
+                     @"error code should have been MSErrorMessageErrorCode.");
+        
+        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        STAssertTrue([description isEqualToString:@"An item with id '-5' does not exist."],
+                     @"description was: %@", description);
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:90.0], @"Test timed out.");
+}
+
+
 #pragma mark * Async Test Helper Method
+
 
 -(void) insertItems:(NSArray *)items
           withTable:(MSTable *)table
@@ -255,13 +523,13 @@
     
     NSDate *timeoutAt = [NSDate dateWithTimeIntervalSinceNow:testDuration];
     
-    do {
+    while (!done) {
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
                                  beforeDate:timeoutAt];
         if([timeoutAt timeIntervalSinceNow] <= 0.0) {
             break;
         }
-    } while (!done);
+    };
     
     return done;
 }

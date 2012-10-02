@@ -157,39 +157,49 @@ NSString *const jsonContentType = @"application/json";
 {
     MSTableItemRequest *request = nil;
     
-    // Create the URL
-    NSError *error = nil;
-    NSNumber *itemId = [serializer itemIdFromItem:item orError:&error];
+    // Ensure we can get an itemId
+    NSNumber *itemId = [MSTableRequest idFromItem:item
+                                   withSerializer:serializer
+                                          onError:onError];
     if (itemId) {
-        
-        NSURL *url = [MSTableURLBuilder URLForTable:table withItem:itemId];
-    
-        // Create the request
-        request = [[MSTableItemRequest alloc] initWithURL:url
-                                                withTable:table
-                                           withSerializer:serializer];
-    
-        // Create the body or capture the error from serialization
-        NSError *error = nil;
-        NSData *data = [serializer dataFromItem:item orError:&error];
-        if (!data) {
-            request = nil;
-            if (onError) {
-                onError(error);
-            }
-        }
-        else {
-            // Set the body
-            request.HTTPBody = data;
-            
-            // Set the properties
-            request.requestType = MSTableUpdateRequestType;
-            request.item = item;
 
+        // Ensure we can get a string from the item Id
+        NSString *idString = [MSTableRequest stringFromItemId:itemId
+                                               withSerializer:serializer
+                                                      onError:onError];
+        if (idString) {
             
-            // Set the method and headers
-            request.HTTPMethod = httpPatch;
-            [request configureHeaders];
+            // Create the URL
+            NSURL *url = [MSTableURLBuilder URLForTable:table
+                                       withItemIdString:idString];
+        
+            // Create the request
+            request = [[MSTableItemRequest alloc] initWithURL:url
+                                                    withTable:table
+                                               withSerializer:serializer];
+        
+            // Create the body or capture the error from serialization
+            NSError *error = nil;
+            NSData *data = [serializer dataFromItem:item orError:&error];
+            if (!data) {
+                request = nil;
+                if (onError) {
+                    onError(error);
+                }
+            }
+            else {
+                // Set the body
+                request.HTTPBody = data;
+                
+                // Set the properties
+                request.requestType = MSTableUpdateRequestType;
+                request.item = item;
+
+                
+                // Set the method and headers
+                request.HTTPMethod = httpPatch;
+                [request configureHeaders];
+            }
         }
     }
     
@@ -203,9 +213,10 @@ NSString *const jsonContentType = @"application/json";
 {
     MSTableDeleteRequest *request = nil;
     
-    // Get the item Id
-    NSError *error = nil;
-    NSNumber *itemId = [serializer itemIdFromItem:item orError:&error];
+    // Ensure we can get the item Id
+    NSNumber *itemId = [MSTableRequest idFromItem:item
+                                   withSerializer:serializer
+                                          onError:onError];
     if (itemId) {
         
         // Get the request from the other constructor
@@ -228,21 +239,29 @@ NSString *const jsonContentType = @"application/json";
 {
     MSTableDeleteRequest *request = nil;
     
-    // Create the URL
-    NSURL *url = [MSTableURLBuilder URLForTable:table withItem:itemId];
+    // Ensure we can get the id as a string
+    NSString *idString = [MSTableRequest stringFromItemId:itemId
+                                           withSerializer:serializer
+                                                  onError:onError];
+    if (idString) {
     
-    // Create the request
-    request = [[MSTableDeleteRequest alloc] initWithURL:url
-                                              withTable:table
-                                         withSerializer:serializer];
-    
-    // Set the additional properties
-    request.requestType = MSTableDeleteRequestType;
-    request.itemId = itemId;
-    
-    // Set the method and headers
-    request.HTTPMethod = httpDelete;
-    [request configureHeaders];
+        // Create the URL
+        NSURL *url = [MSTableURLBuilder URLForTable:table
+                                   withItemIdString:idString];
+        
+        // Create the request
+        request = [[MSTableDeleteRequest alloc] initWithURL:url
+                                                  withTable:table
+                                             withSerializer:serializer];
+        
+        // Set the additional properties
+        request.requestType = MSTableDeleteRequestType;
+        request.itemId = itemId;
+        
+        // Set the method and headers
+        request.HTTPMethod = httpDelete;
+        [request configureHeaders];
+    }
     
     return request;
 }
@@ -254,21 +273,28 @@ NSString *const jsonContentType = @"application/json";
 {
     MSTableItemRequest *request = nil;
     
-    // Create the URL
-    NSURL *url =  [MSTableURLBuilder URLForTable:table withItem:itemId];
-    
-    // Create the request
-    request = [[MSTableItemRequest alloc] initWithURL:url
-                                            withTable:table
-                                       withSerializer:serializer];
-    
-    // Set the additional properties
-    request.requestType = MSTableReadRequestType;
-    request.itemId = itemId;
-    
-    // Set the method and headers
-    request.HTTPMethod = httpGet;
-    [request configureHeaders];
+    // Ensure we can get the id as a string
+    NSString *idString = [MSTableRequest stringFromItemId:itemId
+                                          withSerializer:serializer
+                                                 onError:onError];
+    if (idString) {
+        // Create the URL
+        NSURL *url =  [MSTableURLBuilder URLForTable:table
+                                    withItemIdString:idString];
+        
+        // Create the request
+        request = [[MSTableItemRequest alloc] initWithURL:url
+                                                withTable:table
+                                           withSerializer:serializer];
+        
+        // Set the additional properties
+        request.requestType = MSTableReadRequestType;
+        request.itemId = itemId;
+        
+        // Set the method and headers
+        request.HTTPMethod = httpGet;
+        [request configureHeaders];
+    }
     
     return request;
 }
@@ -330,6 +356,38 @@ NSString *const jsonContentType = @"application/json";
     return [NSError errorWithDomain:error.domain
                                code:error.code
                            userInfo:userInfo];
+}
+
++(NSString *) stringFromItemId:(NSNumber *)itemId
+                withSerializer:serializer
+                       onError:(MSErrorBlock)onError
+{
+    NSError *error = nil;
+    
+    NSString *idString = [serializer stringFromItemId:itemId orError:&error];
+    if (!idString) {
+        if (onError) {
+            onError(error);
+        }
+    }
+    
+    return idString;
+}
+
++(NSNumber *) idFromItem:(NSDictionary *)item
+                withSerializer:serializer
+                onError:(MSErrorBlock)onError
+{
+    NSError *error = nil;
+    
+    NSNumber *itemId = [serializer itemIdFromItem:item orError:&error];
+    if (!itemId) {
+        if (onError) {
+            onError(error);
+        }
+    }
+    
+    return itemId;
 }
 
 @end

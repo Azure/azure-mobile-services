@@ -31,7 +31,7 @@
 +(NSURL *) URLForTable:(MSTable *)table;
 
 // Returns a URL for a particular item in the table.
-+(NSURL *) URLForTable:(MSTable *)table withItem:(NSNumber *)itemId;
++(NSURL *) URLForTable:(MSTable *)table withItemIdString:(NSString *)itemId;
 
 // Returns a URL for querying a table with the given query string.
 +(NSURL *) URLForTable:(MSTable *)table withQuery:(NSString *)query;
