@@ -16,6 +16,7 @@
 
 #import "MSJSONSerializer.h"
 #import "MSClient.h"
+#import "MSNaiveISODateFormatter.h"
 
 
 #pragma mark * Mobile Services Special Keys String Constants
@@ -55,18 +56,22 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
 -(NSData *) dataFromItem:(id)item orError:(NSError **)error
 {
     NSData *data = nil;
+    NSError *localError = nil;
     
     // First, ensure there is an item...
     if (!item) {
-        *error = [self errorForNilItem];
+        localError = [self errorForNilItem];
     }
     else {
         
+        // Convert any NSDate instances into strings formatted with the date.
+        item = [self preSerializeItem:item];
+
         // ... then make sure the |NSJSONSerializer| can serialize it, otherwise
         // the |NSJSONSerializer| will throw an exception, which we don't
         // want--we'd rather return an error.
         if (![NSJSONSerialization isValidJSONObject:item]) {
-            *error = [self errorForInvalidItem];
+            localError = [self errorForInvalidItem];
         }
         else {
             
@@ -78,20 +83,25 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
         }
     }
     
+    if (localError && error) {
+        *error = localError;
+    }
+    
     return data;
 }
 
 -(NSNumber *) itemIdFromItem:(NSDictionary *)item orError:(NSError **)error
 {
     NSNumber *itemId = nil;
+    NSError *localError = nil;
     
     // Ensure there is an item
     if (!item) {
-        *error = [self errorForNilItem];
+        localError = [self errorForNilItem];
     }
     else {
         if (![item isKindOfClass:[NSDictionary class]]) {
-            *error = [self errorForInvalidItem];
+            localError = [self errorForInvalidItem];
         }
         else {
             
@@ -99,16 +109,20 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
             // it is an error.
             itemId = [item objectForKey:idKey];
             if (!itemId) {
-                *error = [self errorForMissingItemId];
+                localError = [self errorForMissingItemId];
             }
             else if(![itemId isKindOfClass:[NSNumber class]]) {
                 
                 // The id was there, but it wasn't a number--this is also an
                 // error.
-                *error = [self errorForInvalidItemId];
+                localError = [self errorForInvalidItemId];
                 itemId = nil;
             }
         }
+    }
+    
+    if (localError && error) {
+        *error = localError;
     }
 
     return itemId;;
@@ -118,20 +132,25 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
 -(NSString *) stringFromItemId:(id)itemId orError:(NSError **)error
 {
     NSString *idAsString = nil;
+    NSError *localError = nil;
     
     // Ensure there is an item id
     if (!itemId) {
-        *error = [self errorForExpectedItemId];
+        localError = [self errorForExpectedItemId];
     }
     else if(![itemId isKindOfClass:[NSNumber class]]) {
         
         // The id was there, but it wasn't a number--this is also an
         // error.
-        *error = [self errorForInvalidItemId];
+        localError = [self errorForInvalidItemId];
     }
     else {
         // Convert the id into a string
         idAsString = [NSString stringWithFormat:@"%lld",[itemId longLongValue]];
+    }
+    
+    if (localError && error) {
+        *error = localError;
     }
     
     return idAsString;
@@ -142,10 +161,11 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
             orError:(NSError **)error
 {
     id item = nil;
+    NSError *localError = nil;
     
     // Ensure there is data
     if (!data) {
-        *error = [self errorForNilData];
+        localError = [self errorForNilData];
     }
     else {
         
@@ -161,21 +181,31 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
             // dictionary and not an array or string, etc.
             if (![item isKindOfClass:[NSDictionary class]]) {
                 item = nil;
-                *error = [self errorForExpectedItem];
+                localError = [self errorForExpectedItem];
             }
-            else if (originalItem) {
+            else {
                 
-                // If the originalitem was provided, update it with the values
-                // from the new item.
-                for (NSString *key in [item allKeys]) {
-                    id value = [item objectForKey:key];
-                    [originalItem setValue:value forKey:key];
+                // Convert any date-like strings into NSDate instances
+                item = [self postDeserializeItem:item];
+                
+                if (originalItem) {
+                    
+                    // If the originalitem was provided, update it with the values
+                    // from the new item.
+                    for (NSString *key in [item allKeys]) {
+                        id value = [item objectForKey:key];
+                        [originalItem setValue:value forKey:key];
+                    }
+                    
+                    // And return the original value instead
+                    item = originalItem;
                 }
-                
-                // And return the original value instead
-                item = originalItem;
             }
         }
+    }
+    
+    if (localError && error) {
+        *error = localError;
     }
     
     return item;
@@ -186,10 +216,12 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
                         orError:(NSError **)error
 {
     NSInteger totalCount = -1;
+    NSError *localError = nil;
+    NSArray *localItems = nil;
     
     // Ensure there is data
     if (!data) {
-        *error = [self errorForNilData];
+        localError = [self errorForNilData];
     }
     else
     {
@@ -203,8 +235,9 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
             // The JSONObject could be either an array or a dictionary
             if ([JSONObject isKindOfClass:[NSArray class]]) {
                 
-                // The JSONObject was just an array, so it is just the items
-                *items = JSONObject;
+                // The JSONObject was just an array, so it is the items.
+                // Convert any date-like strings into NSDate instances
+                localItems = JSONObject;
             }
             else if ([JSONObject isKindOfClass:[NSDictionary class]]) {
             
@@ -212,26 +245,36 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
                 // count, which is a number...
                 id count = [JSONObject objectForKey:countKey];
                 if (![count isKindOfClass:[NSNumber class]]) {
-                    *error = [self errorForMissingTotalCount];
+                    localError = [self errorForMissingTotalCount];
                 }
                 else {
                     totalCount = [count integerValue];
                 
                     // ...and it has to have the array of items.
-                    *items = [JSONObject objectForKey:resultsKey];
-                    if (![*items isKindOfClass:[NSArray class]]) {
-                        *error = [self errorForMissingItems];
-                        *items = nil;
+                    id results = [JSONObject objectForKey:resultsKey];
+                    if (![results isKindOfClass:[NSArray class]]) {
+                        localError = [self errorForMissingItems];
                         totalCount = -1;
+                    }
+                    else {
+                        localItems = results;
                     }
                 }
             }
             else {
                 // The JSONObject was neither a dictionary nor an array, so that
                 // is also an error.
-                *error = [self errorForMissingItems];
+                localError = [self errorForMissingItems];
             }
         }
+    }
+    
+    if (localItems) {
+        *items = [self postDeserializeItem:localItems];
+    }
+    
+    if (localError && error) {
+        *error = localError;
     }
     
     return totalCount;
@@ -293,7 +336,76 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
 }
 
 
-#pragma mark * NSError Generation Methods
+#pragma mark * Private Pre/Post Serialization Methods
+
+
+-(id) preSerializeItem:(id)item
+{
+    id preSerializedItem = nil;
+    
+    if ([item isKindOfClass:[NSDictionary class]]) {
+        preSerializedItem = [item mutableCopy];
+        for (NSString *key in [preSerializedItem allKeys]) {
+            id value = [preSerializedItem valueForKey:key];
+            id preSerializedValue = [self preSerializeItem:value];
+            [preSerializedItem setObject:preSerializedValue forKey:key];
+        }
+    }
+    else if([item isKindOfClass:[NSArray class]]) {
+        preSerializedItem = [item mutableCopy];
+        for (NSInteger i = 0; i < [preSerializedItem count]; i++) {
+            id value = [preSerializedItem objectAtIndex:i];
+            id preSerializedValue = [self preSerializeItem:value];
+            [preSerializedItem setObject:preSerializedValue atIndex:i];
+        }
+    }
+    else if ([item isKindOfClass:[NSDate class]]) {
+        NSDateFormatter *formatter =
+        [MSNaiveISODateFormatter naiveISODateFormatter];
+        preSerializedItem = [formatter stringFromDate:item];
+    }
+    else {
+        preSerializedItem = item;
+    }
+    
+    return preSerializedItem;
+}
+
+-(id) postDeserializeItem:(id)item
+{
+    id postDeserializedItem = nil;
+    
+    if ([item isKindOfClass:[NSDictionary class]]) {
+        postDeserializedItem = [item mutableCopy];
+        for (NSString *key in [postDeserializedItem allKeys]) {
+            id value = [postDeserializedItem valueForKey:key];
+            id preSerializedValue = [self postDeserializeItem:value];
+            [postDeserializedItem setObject:preSerializedValue forKey:key];
+        }
+    }
+    else if([item isKindOfClass:[NSArray class]]) {
+        postDeserializedItem = [item mutableCopy];
+        for (NSInteger i = 0; i < [postDeserializedItem count]; i++) {
+            id value = [postDeserializedItem objectAtIndex:i];
+            id preSerializedValue = [self postDeserializeItem:value];
+            [postDeserializedItem setObject:preSerializedValue atIndex:i];
+        }
+    }
+    else if ([item isKindOfClass:[NSString class]]) {
+        NSDateFormatter *formatter =
+        [MSNaiveISODateFormatter naiveISODateFormatter];
+        NSDate *date = [formatter dateFromString:item];
+        postDeserializedItem = (date) ? date : item;
+    }
+    else {
+        postDeserializedItem = item;
+    }
+    
+    return postDeserializedItem;
+}
+
+
+#pragma mark * Private NSError Generation Methods
 
 
 -(NSError *) errorForNilItem

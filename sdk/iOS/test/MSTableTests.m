@@ -34,7 +34,6 @@
 
 -(void) setUp
 {
-    
     NSLog(@"%@ setUp", self.name);
     
     client = [MSClient clientWithApplicationURL:nil];
@@ -44,7 +43,6 @@
 
 -(void) tearDown
 {
-    
     NSLog(@"%@ tearDown", self.name);
 }
 
@@ -136,6 +134,7 @@
     
     STAssertTrue([self waitForTest:1.0], @"Test timed out.");
 }
+
 
 #pragma mark * Update Method Tests
 

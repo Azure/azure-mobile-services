@@ -30,10 +30,14 @@
 
 @implementation MSQueryTests
 
+
 #pragma mark * Setup and TearDown
 
-- (void) setUp {
+
+- (void) setUp
+{
     NSLog(@"%@ setUp", self.name);
+    
     client = [MSClient clientWithApplicationURLString:@"http://someAppUrl"];
     STAssertNotNil(client, @"Could not create test client.");
     
@@ -41,13 +45,14 @@
     STAssertNotNil(table, @"Could not create test table.");
 }
 
-- (void) tearDown {
-
+- (void) tearDown
+{
     NSLog(@"%@ tearDown", self.name);
 }
 
 
 #pragma mark * Init Method Tests
+
 
 -(void)testMSQueryInitWithNilPredicateIsAllowed
 {
@@ -62,123 +67,95 @@
 }
 
 -(void)testMSQueryInitWithSimplePredicate
-{
-    NSLog(@"%@ start", self.name);
-    
+{    
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name == 'bob'"];
     
     query = [[MSQuery alloc] initWithTable:table withPredicate:predicate];
-    STAssertTrue([query.description isEqualToString:@"$filter=(name eq 'bob')&$inlinecount=none"],
+    STAssertTrue([query.description
+                  isEqualToString:@"$filter=(name eq 'bob')&$inlinecount=none"],
                  @"OData query string was: %@",
                  query.description);
-    
-    NSLog(@"%@ end", self.name);
 }
+
 
 #pragma mark * Property Tests
 
+
 -(void)testMSQueryTableProperty
 {
-    NSLog(@"%@ start", self.name);
-    
     query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
     STAssertEqualObjects(query.table,
                          table,
                          @"'table' property didn't return the table from init.");
-    
-    NSLog(@"%@ end", self.name);
 }
 
--(void)testMSQueryTopPropertyCanBeSet
+-(void)testMSQueryFetchLimitPropertyCanBeSet
 {
-    NSLog(@"%@ start", self.name);
-    
     query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
     query.fetchLimit = 22;
     STAssertTrue([query.description isEqualToString:
                   @"$top=22&$inlinecount=none"],
                   @"OData query string was: %@",
                   query.description);
-
-    NSLog(@"%@ end", self.name);
 }
 
--(void)testMSQuerySkipPropertyCanBeSet
+-(void)testMSQueryFetchOffsetPropertyCanBeSet
 {
-    NSLog(@"%@ start", self.name);
-    
     query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
     query.fetchOffset = 542;
     STAssertTrue([query.description isEqualToString:@"$inlinecount=none&$skip=542"],
                  @"OData query string was: %@",
                  query.description);
-    
-    NSLog(@"%@ end", self.name);
 }
 
 -(void)testMSQueryIncludeTotalCountPropertySetToTrue
 {
-    NSLog(@"%@ start", self.name);
-    
     query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
     query.includeTotalCount = YES;
     STAssertTrue([query.description isEqualToString:@"$inlinecount=allpages"],
                  @"Query string was: %@",
                  query.description);
-    
-    NSLog(@"%@ end", self.name);
 }
 
 -(void)testMSQueryIncludeTotalCountPropertySetToFalse
 {
-    NSLog(@"%@ start", self.name);
-    
     query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
     query.includeTotalCount = NO;
     STAssertTrue([query.description isEqualToString:@"$inlinecount=none"],
                  @"Query string was: %@",
                  query.description);
-    
-    NSLog(@"%@ end", self.name);
 }
 
 -(void)testMSQueryParametersPropertyCanBeSet
-{
-    NSLog(@"%@ start", self.name);
-    
+{    
     query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
     query.parameters = @{
         @"key1": @"someValue",
         @"$top": @"14",
     };
+    
     STAssertTrue([query.description isEqualToString:
                  @"$top=14&key1=someValue&$inlinecount=none"],
                  @"Query string was: %@",
                  query.description);
-    
-    NSLog(@"%@ end", self.name);
 }
 
 -(void)testMSQuerySelectFieldsPropertyCanBeSet
 {
-    NSLog(@"%@ start", self.name);
-    
     query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
     query.selectFields = @[ @"address", @"birthdate" ];
     STAssertTrue([query.description isEqualToString:
                  @"$select=address,birthdate&$inlinecount=none"],
                  @"Query string was: %@",
                  query.description);
-    
-    NSLog(@"%@ end", self.name);
 }
+
 
 #pragma mark * OrderBy Methods
 
+
 -(void)testMSQueryOrderByCapturesMethodCallOrder
 {
-    NSLog(@"%@ start", self.name);
-    
     query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
     [query orderByAscending:@"name"];
     [query orderByDescending:@"zipcode"];
@@ -187,8 +164,6 @@
                 @"$orderby=name asc,zipcode desc,birthdate asc&$inlinecount=none"],
                  @"Query string was: %@",
                  query.description);
-    
-    NSLog(@"%@ end", self.name);
 }
 
 @end

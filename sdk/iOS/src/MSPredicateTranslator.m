@@ -15,7 +15,7 @@
 //
 
 #import "MSPredicateTranslator.h"
-#import "MSQueryDateTimeFormatter.h"
+#import "MSNaiveISODateFormatter.h"
 #import "MSError.h"
 
 
@@ -74,7 +74,8 @@ NSString *const floatConstant = @"%gf";
 NSString *const doubleConstant = @"%gd";
 NSString *const intConstant = @"%d";
 NSString *const longConstant = @"%ld";
-NSString *const lonLongConstant = @"%lldl";
+NSString *const longLongConstant = @"%lldl";
+NSString *const dateTimeConstant = @"datetime'%@'";
 
 
 #pragma mark * MSPredicateTranslator Implementation
@@ -93,7 +94,7 @@ static NSDictionary *staticFunctionInfoLookup;
 {
     NSString *queryFilter = [MSPredicateTranslator visitPredicate:predicate];
     
-    if (!queryFilter) {
+    if (!queryFilter && error) {
         *error = [MSPredicateTranslator errorForUnsupportedPredicate];
     }
 
@@ -394,16 +395,35 @@ static NSDictionary *staticFunctionInfoLookup;
         result = [NSString stringWithFormat:stringConstant, constant];
     }
     else if ([constant isKindOfClass:[NSDate class]]) {
-        result = [MSQueryDateTimeFormatter stringFromDate:constant];
+        result = [MSPredicateTranslator visitDateConstant:constant];
     }
     else if ([constant isKindOfClass:[NSDecimalNumber class]]) {
         const NSDecimal decimal = [constant decimalValue];
         result = [NSString stringWithFormat:decimalConstant,
-                                            NSDecimalString(&decimal, nil)];
+                  NSDecimalString(&decimal, nil)];
     }
     else if ([constant isKindOfClass:[NSNumber class]]) {
         // Except for decimals, all number types and bools will be this case
         result = [MSPredicateTranslator visitNumberConstant:constant];
+    }
+    
+    return result;
+}
+
+
++(NSString *) visitDateConstant:(NSDate *)date
+{
+    NSString *result = nil;
+    
+    // Get the formatter
+    MSNaiveISODateFormatter *formatter =
+    [MSNaiveISODateFormatter naiveISODateFormatter];
+    
+    // Try to get a formatted date as a string
+    NSString *dateString = [formatter stringFromDate:date];
+    
+    if (dateString) {
+        result = [NSString stringWithFormat:dateTimeConstant, dateString];
     }
     
     return result;
@@ -434,7 +454,7 @@ static NSDictionary *staticFunctionInfoLookup;
         result = [NSString stringWithFormat:longConstant, [number longValue]];
     } 
     else if(strcmp(@encode(long long), cType) == 0) {
-        result = [NSString stringWithFormat:lonLongConstant, [number longLongValue]];
+        result = [NSString stringWithFormat:longLongConstant, [number longLongValue]];
     }
 
     return result;

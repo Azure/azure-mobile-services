@@ -21,13 +21,11 @@
 #import "MSClientConnection.h"
 
 
-@interface MSJSONSerializerTests : SenTestCase
+@interface MSJSONSerializerTests : SenTestCase {
+    MSJSONSerializer *serializer;
+}
 
 @end
-
-
-static MSJSONSerializer *serializer;
-
 
 @implementation MSJSONSerializerTests
 
@@ -35,17 +33,15 @@ static MSJSONSerializer *serializer;
 # pragma mark * Setup and TearDown Methods
 
 
-- (void) setUp {
-    
+- (void) setUp
+{
     NSLog(@"%@ setUp", self.name);
     
-    if (serializer == nil) {
-        serializer = [MSJSONSerializer JSONSerializer];
-    }
+    serializer = [MSJSONSerializer JSONSerializer];
 }
 
-- (void) tearDown {
-
+- (void) tearDown
+{
     NSLog(@"%@ tearDown", self.name);
 }
 
@@ -55,8 +51,6 @@ static MSJSONSerializer *serializer;
 
 -(void)testDataFromItemReturnsData
 {
-    NSLog(@"%@ start", self.name);
-    
     NSDictionary *item = @{ @"id" : @5, @"name" : @"bob" };
     
     NSError *error = nil;
@@ -70,8 +64,63 @@ static MSJSONSerializer *serializer;
                                              encoding:NSUTF8StringEncoding];
     
     STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+}
 
-    NSLog(@"%@ end", self.name);
+-(void)testDataFromItemErrorForNilItem
+{
+    NSError *error = nil;
+    NSData *data = [serializer dataFromItem:nil orError:&error];
+    
+    STAssertNil(data, @"data was not nil after serializing item.");
+    STAssertNotNil(error, @"error was nil after serializing item.");
+    STAssertTrue(error.domain == MSErrorDomain,
+                 @"error domain should have been MSErrorDomain.");
+    STAssertTrue(error.code == MSExpectedItemWithRequest,
+                 @"error code should have been MSExpectedItemWithRequest.");
+    
+    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+    STAssertTrue([description isEqualToString:@"No item was provided."],
+                 @"description was: %@", description);
+}
+
+-(void)testDataFromItemReturnsDataWithDatesSerialized
+{
+    // Create some dates
+    NSDateComponents *dateParts = [[NSDateComponents alloc] init];
+    dateParts.year = 1999;
+    dateParts.month = 12;
+    dateParts.day = 3;
+    dateParts.hour = 15;
+    dateParts.minute = 44;
+    dateParts.calendar = [[NSCalendar alloc]
+                          initWithCalendarIdentifier:NSGregorianCalendar];
+    dateParts.calendar.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
+    
+    NSDate *date1 = dateParts.date;
+    dateParts.second = 29;
+    NSDate *date2 = dateParts.date;
+    NSDate *date3 = [date2 dateByAddingTimeInterval:0.3];
+    
+    NSDictionary *item = @{
+        @"id" : @5,
+        @"x" : @[
+            date1,
+            @{ @"y" : date2 }
+        ],
+        @"z" : date3
+    };
+    
+    NSError *error = nil;
+    NSData *data = [serializer dataFromItem:item orError:&error];
+    
+    STAssertNotNil(data, @"data was nil after serializing item.");
+    STAssertNil(error, @"error was not nil after serializing item.");
+    
+    NSString *expected = @"{\"id\":5,\"x\":[\"1999-12-03T15:44:00.000Z\",{\"y\":\"1999-12-03T15:44:29.000Z\"}],\"z\":\"1999-12-03T15:44:29.300Z\"}";
+    NSString *actual = [[NSString alloc] initWithData:data
+                                             encoding:NSUTF8StringEncoding];
+    
+    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
 }
 
 
@@ -80,8 +129,6 @@ static MSJSONSerializer *serializer;
 
 -(void)testItemIdFromItemReturnsId
 {
-    NSLog(@"%@ start", self.name);
-    
     NSDictionary *item = @{ @"id" : @5, @"name" : @"bob" };
     NSError *error = nil;
     NSNumber *itemId = [serializer itemIdFromItem:item orError:&error];
@@ -89,14 +136,10 @@ static MSJSONSerializer *serializer;
     
     STAssertNil(error, @"error should have been nil.");
     STAssertEquals(expected, [itemId longLongValue], @"itemId was not correct.");
-    
-    NSLog(@"%@ end", self.name);
 }
 
 -(void)testItemIdFromItemThrowsForMissingId
 {
-    NSLog(@"%@ start", self.name);
-    
     NSDictionary *item = @{ @"name" : @"bob" };
 
     NSError *error = nil;
@@ -104,14 +147,10 @@ static MSJSONSerializer *serializer;
     
     STAssertNotNil(error, @"error should not have been nil.");
     STAssertNil(itemId, @"itemId should have been nil.");
-    
-    NSLog(@"%@ end", self.name);
 }
 
 -(void)testItemIdFromItemThrowsForNonNumericMissingId
 {
-    NSLog(@"%@ start", self.name);
-    
     NSDictionary *item = @{ @"id" : @"anId", @"name" : @"bob" };
     
     NSError *error = nil;
@@ -119,8 +158,6 @@ static MSJSONSerializer *serializer;
     
     STAssertNotNil(error, @"error should not have been nil.");
     STAssertNil(itemId, @"itemId should have been nil.");
-    
-    NSLog(@"%@ end", self.name);
 }
 
 
@@ -129,8 +166,6 @@ static MSJSONSerializer *serializer;
 
 -(void)testItemFromDataReturnsOriginalItemUpdated
 {
-    NSLog(@"%@ start", self.name);
-    
     NSDictionary *originalItem = @{ @"id" : @5, @"name" : @"fred" };
     NSMutableDictionary *mutableOriginalItem =
                     [NSMutableDictionary dictionaryWithDictionary:originalItem];
@@ -147,14 +182,10 @@ static MSJSONSerializer *serializer;
     STAssertNil(error, @"error was not nil after deserializing item.");
     STAssertTrue([[newItem objectForKey:@"name"] isEqualToString:@"bob"],
                  @"The name key should have been updated to 'bob'.");
-    
-    NSLog(@"%@ end", self.name);
 }
 
 -(void)testItemFromDataReturnsNewItem
 {
-    NSLog(@"%@ start", self.name);
-    
     NSString* stringData = @"{\"id\":5,\"name\":\"bob\"}";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -167,14 +198,10 @@ static MSJSONSerializer *serializer;
     STAssertNil(error, @"error was not nil after deserializing item.");
     STAssertTrue([[newItem objectForKey:@"name"] isEqualToString:@"bob"],
                  @"The name key should have been updated to 'bob'.");
-    
-    NSLog(@"%@ end", self.name);
 }
 
 -(void)testItemFromDataReturnsErrorIfReadFails
 {
-    NSLog(@"%@ start", self.name);
-
     NSString* stringData = @"This isn't proper JSON";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -189,14 +216,10 @@ static MSJSONSerializer *serializer;
                  @"error domain was: %@", [error domain]);
     STAssertTrue([error code] == 3840, // JSON Parse Error
                  @"error code was: %d",[error code]);
-    
-    NSLog(@"%@ end", self.name);
 }
 
 -(void)testItemFromDataReturnsErrorIfItemIsNotObject
 {
-    NSLog(@"%@ start", self.name);
-
     NSString* stringData = @"[ 5, \"This is not an object!\"  ]";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -211,16 +234,14 @@ static MSJSONSerializer *serializer;
                  @"error domain was: %@", [error domain]);
     STAssertTrue([error code] == MSExpectedItemWithResponse,
                  @"error code was: %d",[error code]);
-    
-    NSLog(@"%@ end", self.name);
 }
+
 
 # pragma mark * totalCountAndItems: Tests
 
+
 -(void)testTotalCountAndItemsReturnsItems
 {
-    NSLog(@"%@ start", self.name);
-    
     NSString* stringData = @"[{\"id\":5,\"name\":\"bob\"},{\"id\":6,\"name\":\"mary\"}]";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -240,14 +261,10 @@ static MSJSONSerializer *serializer;
     STAssertTrue([[[items objectAtIndex:0] objectForKey:@"name"]
                   isEqualToString:@"bob"],
                  @"The name key should have been updated to 'bob'.");
-    
-    NSLog(@"%@ end", self.name);
 }
 
 -(void)testTotalCountAndItemsReturnsTotalCount
 {
-    NSLog(@"%@ start", self.name);
-    
     NSString* stringData = @"{\"results\":[{\"id\":5,\"name\":\"bob\"},{\"id\":6,\"name\":\"mary\"}],\"count\":50}";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -267,8 +284,6 @@ static MSJSONSerializer *serializer;
     STAssertTrue([[[items objectAtIndex:0] objectForKey:@"name"]
                   isEqualToString:@"bob"],
                  @"The name key should have been updated to 'bob'.");
-    
-    NSLog(@"%@ end", self.name);
 }
 
 -(void)testTotalCountAndItemsReturnsErrorIfReadFails
@@ -292,14 +307,10 @@ static MSJSONSerializer *serializer;
                  @"error domain was: %@", [error domain]);
     STAssertTrue([error code] == 3840, // JSON Parse Error
                  @"error code was: %d",[error code]);
-    
-    NSLog(@"%@ end", self.name);
 }
 
 -(void)testTotalCountAndItemsReturnsErrorIfMissingCount
 {
-    NSLog(@"%@ start", self.name);
-    
     NSString* stringData = @"{\"results\":[{\"id\":5,\"name\":\"bob\"},{\"id\":6,\"name\":\"mary\"}]}";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -317,14 +328,10 @@ static MSJSONSerializer *serializer;
                  @"error domain was: %@", [error domain]);
     STAssertTrue([error code] == MSExpectedTotalCountWithResponse,
                  @"error code was: %d",[error code]);
-    
-    NSLog(@"%@ end", self.name);
 }
 
 -(void)testTotalCountAndItemsReturnsErrorIfMissingResults
 {
-    NSLog(@"%@ start", self.name);
-    
     NSString* stringData = @"{\"results\":5,\"count\":50}";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -342,16 +349,14 @@ static MSJSONSerializer *serializer;
                  @"error domain was: %@", [error domain]);
     STAssertTrue([error code] == MSExpectedItemsWithResponse,
                  @"error code was: %d",[error code]);
-    
-    NSLog(@"%@ end", self.name);
 }
+
 
 # pragma mark * errorFromData: Tests
 
+
 -(void)testErrorFromDataReturnsError
 {
-    NSLog(@"%@ start", self.name);
-    
     NSString* stringData = @"\"This is an Error Message!\"";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -365,14 +370,10 @@ static MSJSONSerializer *serializer;
     STAssertTrue([[error localizedDescription] isEqualToString:
                   @"This is an Error Message!"],
                  @"error description was: %@", [error localizedDescription]);
-        
-    NSLog(@"%@ end", self.name);
 }
 
 -(void)testErrorFromDataReturnsErrorFromObjectWithErrorKey
 {
-    NSLog(@"%@ start", self.name);
-    
     NSString* stringData = @"{\"error\":\"This is another Error Message!\"}";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -386,14 +387,10 @@ static MSJSONSerializer *serializer;
     STAssertTrue([[error localizedDescription] isEqualToString:
                   @"This is another Error Message!"],
                  @"error description was: %@", [error localizedDescription]);
-    
-    NSLog(@"%@ end", self.name);
 }
 
 -(void)testErrorFromDataReturnsErrorFromObjectWithDescriptionKey
-{
-    NSLog(@"%@ start", self.name);
-    
+{    
     NSString* stringData = @"{\"description\":\"This is another Error Message!\"}";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -407,14 +404,10 @@ static MSJSONSerializer *serializer;
     STAssertTrue([[error localizedDescription] isEqualToString:
                   @"This is another Error Message!"],
                  @"error description was: %@", [error localizedDescription]);
-    
-    NSLog(@"%@ end", self.name);
 }
 
 -(void)testErrorFromDataReturnsErrorIfReadFails
 {
-    NSLog(@"%@ start", self.name);
-    
     NSString* stringData = @"invalid JSON!";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -425,14 +418,10 @@ static MSJSONSerializer *serializer;
                  @"error domain was: %@", [error domain]);
     STAssertTrue([error code] == 3840, // JSON Parse Error
                  @"error code was: %d",[error code]);
-    
-    NSLog(@"%@ end", self.name);
 }
 
 -(void)testErrorFromDataReturnsNilIfNoError
 {
-    NSLog(@"%@ start", self.name);
-    
     NSString* stringData = @"{}";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -443,8 +432,6 @@ static MSJSONSerializer *serializer;
                  @"error domain was: %@", [error domain]);
     STAssertTrue([error code] == MSErrorNoMessageErrorCode,
                  @"error code was: %d",[error code]);
-
-    NSLog(@"%@ end", self.name);
 }
 
 @end

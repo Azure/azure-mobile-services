@@ -25,8 +25,6 @@
 
 -(void) testSimplePredicateStrings
 {
-    NSLog(@"%@ start", self.name);
-    
     // Create some dates with no seconds, seconds and fractional seconds
     NSDateComponents *dateParts = [[NSDateComponents alloc] init];
     dateParts.year = 2012;
@@ -34,6 +32,7 @@
     dateParts.day = 21;
     dateParts.calendar = [[NSCalendar alloc]
                            initWithCalendarIdentifier:NSGregorianCalendar];
+    dateParts.calendar.timeZone = [NSTimeZone timeZoneForSecondsFromGMT:0];
     
     NSDate *date1 = dateParts.date;
     dateParts.second = 29;
@@ -118,18 +117,14 @@
            @"name CONTAINS 'b'"],
     
         // Test cases for date times
-        @[ @"(Created eq datetime'2012-05-21T00:00')",
+        @[ @"(Created eq datetime'2012-05-21T00:00:00.000Z')",
            @"Created == %@", date1],
     
-        @[ @"(Created eq datetime'2012-05-21T00:00:29')",
+        @[ @"(Created eq datetime'2012-05-21T00:00:29.000Z')",
            @"Created == %@", date2],
     
-        @[ @"(Created eq datetime'2012-05-21T00:00:29.3000000')",
+        @[ @"(Created eq datetime'2012-05-21T00:00:29.300Z')",
            @"Created == %@", date3],
-    
-        // Test cases for evaluated expressions
-        //@[ @"(Count gt -2)",
-        //   @"Count > (5+2-9)"],
     ];
 
     
@@ -161,8 +156,6 @@
         
         NSLog(@"%@ test case end", expected);
     }
-    
-    NSLog(@"%@ end", self.name);
 }
 
 @end

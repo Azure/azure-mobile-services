@@ -30,43 +30,42 @@
 {
     // Create the table path
     NSString *tablePath = [NSString stringWithFormat:@"tables/%@", table.name];
-    
-    // Percent encode it
-    NSString *tablePathEncoded =
-    [MSTableURLBuilder stringPercentEncoded:tablePath];
-    
-    // Append it to the application URL
+
+    // Append it to the application URL; Don't percent encode the tablePath
+    // because URLByAppending will percent encode for us
     return [table.client.applicationURL
-                 URLByAppendingPathComponent:tablePathEncoded];
+                 URLByAppendingPathComponent:tablePath];
 }
 
 +(NSURL *) URLForTable:(MSTable *)table withItemIdString:(NSString *)itemId
-{    
-    // Percent encode it
-    NSString *itemIdEncoded =
-    [MSTableURLBuilder stringPercentEncoded:itemId];
-    
-    // Append it to the table URL
+{        
+    // Append it to the table URL; Don't percent encode the tablePath
+    // because URLByAppending will percent encode for us
     return [[self URLForTable:table]
-            URLByAppendingPathComponent:itemIdEncoded];
+                URLByAppendingPathComponent:itemId];
 }
 
 +(NSURL *) URLForTable:(MSTable *)table withQuery:(NSString *)query
 {
-    NSURL *tableURL = [self URLForTable:table];
+    NSURL *url = [self URLForTable:table];
     
-    // Recreate the URL with the query appended
-    NSString *urlString = [NSString stringWithFormat:@"%@%@%@",
-                           tableURL.absoluteString,
-                           tableURL.query ? @"&" : @"?",
-                           query];
+    if (query) {
+        
+        // Percent encode just the query... the table URL is already
+        // percent encoded.
+        NSString *queryEncoded = [MSTableURLBuilder stringPercentEncoded:query];
+        
+        // Recreate the URL with the query appended
+        NSString *urlString = [NSString stringWithFormat:@"%@%@%@",
+                               url.absoluteString,
+                               url.query ? @"&" : @"?",
+                               queryEncoded];
+        
+        // Get the URL
+        url = [NSURL URLWithString:urlString];
+    }
     
-    // Percent encode it
-    NSString *urlStringEncoded =
-    [MSTableURLBuilder stringPercentEncoded:urlString];
-    
-    // Return the URL
-    return[NSURL URLWithString:urlStringEncoded];
+    return url;
 }
 
 

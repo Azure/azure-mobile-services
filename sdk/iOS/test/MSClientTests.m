@@ -28,13 +28,13 @@
 #pragma mark * Setup and TearDown
 
 
--(void) setUp {
-    
+-(void) setUp
+{
     NSLog(@"%@ setUp", self.name);
 }
 
--(void) tearDown {
-    
+-(void) tearDown
+{
     NSLog(@"%@ tearDown", self.name);
 }
 
@@ -147,12 +147,9 @@
     MSClient *client = [[MSClient alloc] initWithApplicationURL:nil];
     
     STAssertNotNil(client, @"client should not be nil.");
-    
     STAssertNil(client.applicationURL, @"client.applicationURL should be nil.");
-    
     STAssertNil(client.applicationKey, @"client.applicationKey should be nil.");
 }
-
 
 -(void) testInitWithApplicationURLAndApplicationKey
 {
@@ -176,6 +173,7 @@
 
 
 #pragma mark * GetTable Method Tests
+
 
 -(void) testGetTableReturnsTable
 {

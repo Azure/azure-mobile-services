@@ -27,7 +27,9 @@
 
 @implementation WindowsAzureMobileServicesFunctionalTests
 
+
 #pragma mark * Setup and TearDown
+
 
 - (void) setUp
 {
@@ -42,8 +44,8 @@
     // 'testsEnabled' BOOL above to YES.
     
     client = [MSClient
-              clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
-              withApplicationKey:@"<Application Key>"];
+              clientWithApplicationURLString:@"https://iosclientendtoend.azure-mobile.net/"
+              withApplicationKey:@"uLnPzbAwamiGDbgxldoKqxZYenkiwG40"];
     done = NO;
     
     STAssertNotNil(client, @"Could not create test client.");
@@ -141,22 +143,55 @@
     };
     
     
-    id query4AfterQuery3 = ^(NSDictionary *item) {
-        STAssertNotNil(item, @"item should not have been nil.");
+    id query7AfterQuery6 = ^(NSArray *items, NSInteger totalCount) {
+        STAssertTrue(items.count == 2, @"items.count was: %d", items.count);
+        STAssertTrue(totalCount == 3, @"totalCount was: %d", totalCount);
+        
         [self deleteAllItemswithTable:todoTable
                             onSuccess:^() { done = YES; }
                               onError:errorBlock];
     };
     
+    id query6AfterQuery5 = ^(NSArray *items, NSInteger totalCount) {
+        STAssertTrue(items.count == 2, @"items.count was: %d", items.count);
+        STAssertTrue(totalCount == 3, @"totalCount was: %d", totalCount);
+        
+        MSQuery *query = [todoTable query];
+        query.fetchOffset = 1;
+        query.includeTotalCount = YES;
+        [query readOnSuccess:query7AfterQuery6 onError:errorBlock];
+    };
+    
+    id query5AfterQuery4 = ^(NSArray *items, NSInteger totalCount) {
+        STAssertTrue(items.count == 3, @"items.count was: %d", items.count);
+        STAssertTrue(totalCount == -1, @"totalCount was: %d", totalCount);
+        
+        [todoTable readWithQueryString:@"$top=2&$inlinecount=allpages"
+                            onSuccess:query6AfterQuery5
+                              onError:errorBlock];
+    };
+    
+    id query4AfterQuery3 = ^(NSDictionary *item) { 
+        STAssertNotNil(item, @"item should not have been nil.");
+        
+        [todoTable readWithQueryString:nil
+                             onSuccess:query5AfterQuery4
+                               onError:errorBlock];
+    };
+    
     id query3AfterQuery2 = ^(NSArray *items, NSInteger totalCount) {
-        STAssertTrue(items.count == 1, @"Should have been one item.");
+        STAssertTrue(items.count == 1, @"items.count was: %d", items.count);
+        STAssertTrue(totalCount == -1, @"totalCount was: %d", totalCount);
+        
         [todoTable readWithId:[[items objectAtIndex:0] valueForKey:@"id"]
                     onSuccess:query4AfterQuery3
                      onError:errorBlock];
     };
     
     id query2AfterQuery1 = ^(NSArray *items, NSInteger totalCount) {
-        STAssertTrue(items.count == 2, @"Should have been two items.");
+        STAssertTrue(items.count == 2, @"items.count was: %d", items.count);
+        STAssertTrue(totalCount == -1, @"totalCount was: %d", totalCount);
+        
         NSPredicate *predicate = [NSPredicate predicateWithFormat:
                                   @"text ENDSWITH 'B' AND complete == TRUE"];
         [todoTable readWhere:predicate

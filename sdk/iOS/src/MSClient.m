@@ -40,6 +40,8 @@
 +(MSClient *) clientWithApplicationURLString:(NSString *)urlString
                            withApplicationKey:(NSString *)key
 {
+    // NSURL will be nil for non-percent escaped url strings so we have to
+    // percent escape here
     NSString  *urlStringEncoded =
     [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     

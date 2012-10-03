@@ -28,13 +28,13 @@
 #pragma mark * Setup and TearDown
 
 
--(void) setUp {
-    
+-(void) setUp
+{    
     NSLog(@"%@ setUp", self.name);
 }
 
--(void) tearDown {
-    
+-(void) tearDown
+{    
     NSLog(@"%@ tearDown", self.name);
 }
 
