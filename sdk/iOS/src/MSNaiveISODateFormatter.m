@@ -19,8 +19,7 @@
 
 #pragma mark * DateTime Format
 
-
-NSString *const format = @"yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'SSS'Z'";
+NSString *const format = @"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
 
 #pragma mark * MSDateFormatter Implementation

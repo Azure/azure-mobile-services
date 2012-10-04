@@ -200,6 +200,37 @@
                  @"The name key should have been updated to 'bob'.");
 }
 
+-(void)testItemFromDataReturnsNewItemWithDates
+{
+    NSString* stringData = @"{\"id\":5,\"date\":\"1999-12-03T15:44:29.000Z\"}";
+    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    
+    NSError *error = nil;
+    id newItem = [serializer itemFromData:data
+                         withOriginalItem:nil
+                                  orError:&error];
+    
+    STAssertNotNil(newItem, @"item was nil after deserializing item.");
+    STAssertNil(error, @"error was not nil after deserializing item.");
+    
+    NSDate *date = [newItem objectForKey:@"date"];
+    STAssertNotNil(date, @"date was nil after deserializing item.");
+    
+    NSCalendar *gregorian = [[NSCalendar alloc]
+                             initWithCalendarIdentifier:NSGregorianCalendar];
+    [gregorian setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    NSDateComponents *dateParts =
+        [gregorian components:(NSYearCalendarUnit |
+                               NSHourCalendarUnit |
+                               NSSecondCalendarUnit)
+                     fromDate:date];
+
+    STAssertTrue(dateParts.year == 1999, @"year was: %d", dateParts.year);
+    STAssertTrue(dateParts.hour == 15, @"hour was: %d", dateParts.hour);
+    STAssertTrue(dateParts.second == 29, @"second was: %d", dateParts.second);
+}
+
+
 -(void)testItemFromDataReturnsErrorIfReadFails
 {
     NSString* stringData = @"This isn't proper JSON";
@@ -261,6 +292,62 @@
     STAssertTrue([[[items objectAtIndex:0] objectForKey:@"name"]
                   isEqualToString:@"bob"],
                  @"The name key should have been updated to 'bob'.");
+}
+
+-(void)testTotalCountAndItemsReturnsItemsWithDates
+{
+    NSString* stringData = @"[{\"id\":5,\"name\":\"bob\",\"dates\":[\"1999-12-03T15:44:29.0Z\"]},{\"id\":6,\"name\":\"mary\",\"date\":\"2012-11-03T8:44:00.0Z\"}]";
+    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    
+    NSError *error = nil;
+    NSArray *items = nil;
+    NSInteger totalCount = [serializer totalCountAndItems:&items
+                                                 fromData:data
+                                                  orError:&error];
+    
+    STAssertNotNil(items, @"items was nil after deserializing item.");
+    STAssertNil(error, @"error was not nil after deserializing item.");
+    STAssertTrue(totalCount == -1,
+                 @"The totalCount should have been -1 since it was not given.");
+    STAssertTrue(items.count == 2,
+                 @"The items array should have had 2 items in it.");
+    
+    STAssertTrue([[[items objectAtIndex:0] objectForKey:@"name"]
+                  isEqualToString:@"bob"],
+                 @"The name key should have been updated to 'bob'.");
+    
+    
+    NSArray *dates = [[items objectAtIndex:0] objectForKey:@"dates"];
+    STAssertNotNil(dates, @"dates was nil after deserializing item.");
+    
+    NSDate *date = [dates objectAtIndex:0];
+    STAssertNotNil(date, @"date was nil after deserializing item.");
+    
+    NSCalendar *gregorian = [[NSCalendar alloc]
+                             initWithCalendarIdentifier:NSGregorianCalendar];
+    [gregorian setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    NSDateComponents *dateParts =
+    [gregorian components:(NSYearCalendarUnit |
+                           NSHourCalendarUnit |
+                           NSSecondCalendarUnit)
+                 fromDate:date];
+    
+    STAssertTrue(dateParts.year == 1999, @"year was: %d", dateParts.year);
+    STAssertTrue(dateParts.hour == 15, @"hour was: %d", dateParts.hour);
+    STAssertTrue(dateParts.second == 29, @"second was: %d", dateParts.second);
+    
+    NSDate *date2 = [[items objectAtIndex:1] objectForKey:@"date"];
+    STAssertNotNil(date2, @"date was nil after deserializing item.");
+
+    NSDateComponents *dateParts2 =
+    [gregorian components:(NSYearCalendarUnit |
+                           NSHourCalendarUnit |
+                           NSSecondCalendarUnit)
+                 fromDate:date2];
+    
+    STAssertTrue(dateParts2.year == 2012, @"year was: %d", dateParts2.year);
+    STAssertTrue(dateParts2.hour == 8, @"hour was: %d", dateParts2.hour);
+    STAssertTrue(dateParts2.second == 0, @"second was: %d", dateParts2.second);
 }
 
 -(void)testTotalCountAndItemsReturnsTotalCount

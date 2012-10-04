@@ -35,7 +35,7 @@
 {
     NSLog(@"%@ setUp", self.name);
 
-    testsEnabled = YES;
+    testsEnabled = NO;
     STAssertTrue(testsEnabled, @"The functiontional tests are currently disabled.");
     
     // These functional tests requires a working Windows Mobile Azure Service
@@ -44,8 +44,8 @@
     // 'testsEnabled' BOOL above to YES.
     
     client = [MSClient
-              clientWithApplicationURLString:@"https://iosclientendtoend.azure-mobile.net/"
-              withApplicationKey:@"uLnPzbAwamiGDbgxldoKqxZYenkiwG40"];
+              clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
+              withApplicationKey:@"<Application Key>"];
     done = NO;
     
     STAssertNotNil(client, @"Could not create test client.");
