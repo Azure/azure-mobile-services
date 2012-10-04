@@ -94,8 +94,6 @@
 		E8F33B2916166837002DD7C6 /* MSSerializer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSSerializer.h; sourceTree = "<group>"; };
 		E8F33B2B1616684F002DD7C6 /* MSPredicateTranslator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSPredicateTranslator.h; sourceTree = "<group>"; };
 		E8F33B2C1616684F002DD7C6 /* MSPredicateTranslator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPredicateTranslator.m; sourceTree = "<group>"; };
-		E8F33B2D1616684F002DD7C6 /* MSQueryDateTimeFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSQueryDateTimeFormatter.h; sourceTree = "<group>"; };
-		E8F33B2E1616684F002DD7C6 /* MSQueryDateTimeFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSQueryDateTimeFormatter.m; sourceTree = "<group>"; };
 		E8F33B34161668C4002DD7C6 /* WindowsAzureMobileServicesFunctionalTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WindowsAzureMobileServicesFunctionalTests.m; sourceTree = "<group>"; };
 		E8F33B36161668DA002DD7C6 /* MSJSONSerializerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSJSONSerializerTests.m; sourceTree = "<group>"; };
 		E8F33B38161668E4002DD7C6 /* MSPredicateTranslatorTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPredicateTranslatorTests.m; sourceTree = "<group>"; };
@@ -241,8 +239,6 @@
 			children = (
 				E8F33B2B1616684F002DD7C6 /* MSPredicateTranslator.h */,
 				E8F33B2C1616684F002DD7C6 /* MSPredicateTranslator.m */,
-				E8F33B2D1616684F002DD7C6 /* MSQueryDateTimeFormatter.h */,
-				E8F33B2E1616684F002DD7C6 /* MSQueryDateTimeFormatter.m */,
 			);
 			name = Query;
 			sourceTree = "<group>";

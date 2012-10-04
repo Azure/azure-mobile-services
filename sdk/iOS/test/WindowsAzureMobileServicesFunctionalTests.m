@@ -42,10 +42,11 @@
     // with a table named "todoItem". Simply enter the application URL and
     // application key for the Windows Mobile Azure Service below and set the
     // 'testsEnabled' BOOL above to YES.
-    
+        
     client = [MSClient
               clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
               withApplicationKey:@"<Application Key>"];
+    
     done = NO;
     
     STAssertNotNil(client, @"Could not create test client.");

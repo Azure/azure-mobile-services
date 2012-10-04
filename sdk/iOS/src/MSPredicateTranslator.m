@@ -174,9 +174,22 @@ static NSDictionary *staticFunctionInfoLookup;
     
     BOOL useInfixNotation = YES;
     BOOL leftThenRightExpressions = YES;
+    NSPredicate *replacementPredicate = nil;
     NSString *operator = nil;
 
-    // Lookup the operator and whether using infix notation or not
+    
+    // If the case insensitive option is being used, wrap both expressions
+    // in tolower() function calls
+    if ((predicate.options & NSCaseInsensitivePredicateOption) ==
+         NSCaseInsensitivePredicateOption) {
+        
+        predicate =
+        [MSPredicateTranslator replacementPredicateForCaseInsensitivePredicate:predicate];
+    }
+    
+    // Lookup the operator and whether using infix notation, or determine
+    // if this predicte should be replaced with another equivalent
+    // predicate.
     switch (predicate.predicateOperatorType) {
         case NSLessThanPredicateOperatorType:
             operator = lessThanOperator;
@@ -209,9 +222,12 @@ static NSDictionary *staticFunctionInfoLookup;
             leftThenRightExpressions = NO;
             operator = substringOfOperator;
             break;
+        case NSInPredicateOperatorType:
+            replacementPredicate =
+            [MSPredicateTranslator replacementPredicateForInPredicate:predicate];
+            break;
         case NSMatchesPredicateOperatorType:
         case NSLikePredicateOperatorType:
-        case NSInPredicateOperatorType:
         case NSCustomSelectorPredicateOperatorType:
         case NSBetweenPredicateOperatorType:
         default:
@@ -219,9 +235,13 @@ static NSDictionary *staticFunctionInfoLookup;
             break;
     }
 
-    if (operator) {
+    if (replacementPredicate) {
+        result = [MSPredicateTranslator visitPredicate:replacementPredicate];
+    }
+    else if (operator) {
         
-        // Get the expressions in the correct order for the operator
+        // Get the expressions in the correct order for the operator if not
+        // already set
         NSArray *expressions = nil;
         if (leftThenRightExpressions) {
             expressions = [NSArray arrayWithObjects:
@@ -277,6 +297,67 @@ static NSDictionary *staticFunctionInfoLookup;
     }
     
     return result;
+}
+
++(NSComparisonPredicate *) replacementPredicateForCaseInsensitivePredicate:(NSComparisonPredicate *)predicate
+{
+    NSExpression *newRightExpression =
+    [NSExpression expressionForFunction:toLowerFunction
+                              arguments:@[predicate.rightExpression]];
+    
+    NSExpression *newLeftExpression =
+    [NSExpression expressionForFunction:toLowerFunction
+                              arguments:@[predicate.leftExpression]];
+    
+    NSPredicate *replacementPredicate =
+    [NSComparisonPredicate predicateWithLeftExpression:newLeftExpression
+                                      rightExpression:newRightExpression
+                                      modifier:predicate.comparisonPredicateModifier
+                                      type:predicate.predicateOperatorType
+                                      options:predicate.options];
+    
+    return (NSComparisonPredicate *)replacementPredicate;
+}
+
++(NSPredicate *) replacementPredicateForInPredicate:(NSComparisonPredicate *)predicate
+{
+    NSMutableArray *subPredicates = [NSMutableArray array];
+    
+    // The rightExpression will be an array of expressions/items. For each
+    // of these expressions/items we will build an equals predicate and then
+    // 'or' together all of these subpredicates in order to replace this
+    // 'IN' predicate
+    NSExpression *rightExpression = predicate.rightExpression;
+    NSExpression *leftExpression = predicate.leftExpression;
+    
+    // ConstantValue will be an array in this case
+    for (id item in rightExpression.constantValue) {
+        
+        // The new right-side expression we are going to build
+        NSExpression *newRightExpression = nil;
+        
+        // If variable substitution was used, we'll need to create epressions
+        // out of the array items, otherwise they should already be expressions
+        if ([item isKindOfClass:[NSExpression class]]) {
+            newRightExpression = item;
+        }
+        else {
+            newRightExpression = [NSExpression expressionForConstantValue:item];
+        }
+        
+        // Build the equals-to predicate and add it to the array of subPredicates
+        NSPredicate *subPredicate =
+        [NSComparisonPredicate predicateWithLeftExpression:leftExpression
+                               rightExpression:newRightExpression
+                               modifier:predicate.comparisonPredicateModifier
+                               type:NSEqualToPredicateOperatorType
+                               options:predicate.options];
+    
+        [subPredicates addObject:subPredicate];
+    }
+    
+    // Return the or'd compound of all of the sub predicates.
+    return [NSCompoundPredicate orPredicateWithSubpredicates:subPredicates];
 }
 
 
