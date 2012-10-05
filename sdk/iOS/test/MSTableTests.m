@@ -20,7 +20,7 @@
 
 @interface MSTableTests : SenTestCase {
     MSClient *client;
-    BOOL done;
+        BOOL done;
 }
 
 @end
@@ -102,7 +102,7 @@
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:1.0], @"Test timed out.");
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInsertItemWithInvalidItem
@@ -132,7 +132,7 @@
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:1.0], @"Test timed out.");
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 
@@ -196,7 +196,7 @@
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:1.0], @"Test timed out.");
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testUpdateItemWithNoItemId

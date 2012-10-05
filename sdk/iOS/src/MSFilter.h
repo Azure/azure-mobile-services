@@ -14,14 +14,19 @@
 // limitations under the License.
 //
 
-#ifndef WindowsAzureMobileServices_WindowsAzureMobileServices_h
-#define WindowsAzureMobileServices_WindowsAzureMobileServices_h
-
-#import "MSClient.h"
-#import "MSTable.h"
-#import "MSQuery.h"
-#import "MSUser.h"
-#import "MSFilter.h"
+#import <Foundation/Foundation.h>
 #import "MSError.h"
 
-#endif
+typedef void (^MSFilterResponseBlock)(NSHTTPURLResponse *response, NSData *data);
+
+typedef void (^MSFilterNextBlock)(NSURLRequest *request,
+                                  MSFilterResponseBlock onResponse,
+                                  MSErrorBlock onError);
+
+@protocol MSFilter <NSObject>
+
+-(void) handleRequest:(NSURLRequest *)request
+               onNext:(MSFilterNextBlock)onNext
+           onResponse:(MSFilterResponseBlock)onResponse
+              onError:(MSErrorBlock)onError;
+@end

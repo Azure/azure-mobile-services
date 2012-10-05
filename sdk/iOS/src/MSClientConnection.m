@@ -15,19 +15,36 @@
 //
 
 #import "MSClientConnection.h"
+#import "MSFilter.h"
+
+
+#pragma mark * MSConnectionDelegate Private Interface
+
+
+// The |MSConnectionDelegate| is a private class that implements the
+// |NSURLConnectionDataDelegate| and surfaces success and error blocks. It
+// is used only by the |MSClientConnection|.
+@interface MSConnectionDelegate : NSObject <NSURLConnectionDataDelegate>
+
+@property (nonatomic, strong)               NSData *data;
+@property (nonatomic, strong)               NSHTTPURLResponse *response;
+@property (nonatomic, strong, readonly)     MSSuccessBlock successBlock;
+@property (nonatomic, strong, readonly)     MSErrorBlock errorBlock;
+
+-(id) initWithOnSuccess:(MSSuccessBlock)onSuccess
+                onError:(MSErrorBlock)onError;
+@end
 
 
 #pragma mark * MSClientConnection Private Interface
 
 
-@interface MSClientConnection () 
+@interface MSClientConnection ()
 
 // Private properties
-@property (nonatomic, strong)               NSURLConnection *urlConnection;
-@property (nonatomic, strong)               NSData *data;
-@property (nonatomic, strong)               NSHTTPURLResponse *response;
-@property (nonatomic, strong, readonly)     MSSuccessBlock successBlock;
-@property (nonatomic, strong, readonly)     MSErrorBlock errorBlock;
+@property (nonatomic, strong, readonly)     NSURLRequest *request;
+@property (nonatomic, copy, readonly)       MSSuccessBlock onSuccess;
+@property (nonatomic, copy, readonly)       MSErrorBlock onError;
 
 @end
 
@@ -38,11 +55,9 @@
 @implementation MSClientConnection
 
 @synthesize client = client_;
-@synthesize urlConnection = urlConnection_;
-@synthesize successBlock = successBlock_;
-@synthesize errorBlock = errorBlock_;
-@synthesize data = data_;
-@synthesize response = response_;
+@synthesize request = request_;
+@synthesize onSuccess = onSuccess_;
+@synthesize onError = onError_;
 
 
 # pragma mark * Public Initializer Methods
@@ -56,20 +71,98 @@
     self = [super init];
     if (self) {
         client_ = client;
-        successBlock_ = [onSuccess copy];
-        errorBlock_ = [onError copy];
-        urlConnection_ = [[NSURLConnection alloc]
-                                initWithRequest:request
-                                delegate:self];
+        request_ = request;
+        onSuccess_ = onSuccess;
+        onError_ = onError;
     }
     
     return self;
 }
 
--(void) dealloc
+
+#pragma mark * Public Start Method
+
+
+-(void) start
 {
-    // Cancel any outstanding NSUrlConnection
-    [urlConnection_ cancel];
+    [MSClientConnection invokeNextFilter:self.client.filters
+                             withRequest:self.request
+                              onResponse:self.onSuccess
+                                 onError:self.onError];
+}
+
+
+# pragma mark * Private Static InvokeNextFilter Method
+
+
++(void) invokeNextFilter:(NSArray *)filters
+             withRequest:(NSURLRequest *)request
+               onResponse:(MSFilterResponseBlock)onResponse
+                 onError:(MSErrorBlock)onError
+{
+    if (!filters || filters.count == 0) {
+        
+        // No filters to invoke so use |NSURLConnection | to actually
+        // send the request.
+        MSConnectionDelegate *delegate = [[MSConnectionDelegate alloc]
+                                          initWithOnSuccess:onResponse
+                                          onError:onError];
+        [NSURLConnection connectionWithRequest:request delegate:delegate];
+    }
+    else {
+        
+        // Since we have at least one more filter, construct the nextBlock
+        // for it and then invoke the filter
+        id<MSFilter> nextFilter = [filters objectAtIndex:0];
+        NSArray *nextFilters = [filters subarrayWithRange:
+                                NSMakeRange(1, filters.count - 1)];
+    
+        MSFilterNextBlock onNext =
+        [^(NSURLRequest *onNextRequest,
+           MSFilterResponseBlock onNextResponse,
+           MSErrorBlock onNextError)
+        {
+            [MSClientConnection invokeNextFilter:nextFilters
+                                     withRequest:onNextRequest
+                                      onResponse:onNextResponse
+                                         onError:onNextError];
+                                    
+        } copy];
+        
+        [nextFilter handleRequest:request
+                           onNext:onNext
+                       onResponse:onResponse
+                          onError:onError];
+    }
+}
+
+@end
+
+
+#pragma mark * MSConnectionDelegate Private Implementation
+
+
+@implementation MSConnectionDelegate
+
+@synthesize successBlock = successBlock_;
+@synthesize errorBlock = errorBlock_;
+@synthesize data = data_;
+@synthesize response = response_;
+
+
+# pragma mark * Public Initializer Methods
+
+
+-(id) initWithOnSuccess:(MSSuccessBlock)onSuccess
+                onError:(MSErrorBlock)onError
+{
+    self = [super init];
+    if (self) {
+        successBlock_ = [onSuccess copy];
+        errorBlock_ = [onError copy];
+    }
+    
+    return self;
 }
 
 
@@ -89,7 +182,7 @@
 
 
 - (void)connection:(NSURLConnection *)connection
-            didReceiveResponse:(NSURLResponse *)response
+didReceiveResponse:(NSURLResponse *)response
 {
     // We should only be making HTTP requests
     self.response = (NSHTTPURLResponse *)response;
@@ -126,3 +219,4 @@
 }
 
 @end
+

@@ -22,7 +22,7 @@
 
 // The |MSUser| class represents an end user that can login to a Windows Azure
 // Mobile Service on a client device.
-@interface MSUser : NSObject
+@interface MSUser : NSObject <NSCopying>
 
 
 #pragma mark * Public Readonly Properties

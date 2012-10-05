@@ -11,6 +11,8 @@
 		E87BB01F161A446C008053F9 /* MSTableURLBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB01E161A446C008053F9 /* MSTableURLBuilder.m */; };
 		E87BB022161B57C8008053F9 /* MSUserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB021161B57C8008053F9 /* MSUserTests.m */; };
 		E87BB025161B5A4D008053F9 /* MSTableTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB024161B5A4D008053F9 /* MSTableTests.m */; };
+		E8E37904161E2FC500C13F00 /* MSTestFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = E8E37903161E2FC500C13F00 /* MSTestFilter.m */; };
+		E8E37907161F4D0D00C13F00 /* MSFilterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E8E37906161F4D0D00C13F00 /* MSFilterTest.m */; };
 		E8EA24BD161CFC5300BE055D /* MSNaiveISODateFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = E8EA24BC161CFC5300BE055D /* MSNaiveISODateFormatter.m */; };
 		E8EA24C0161CFCF400BE055D /* MSTableURLBuilderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8EA24BE161CFC6400BE055D /* MSTableURLBuilderTests.m */; };
 		E8F33ADF1616659C002DD7C6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F33ADE1616659C002DD7C6 /* Foundation.framework */; };
@@ -62,6 +64,10 @@
 		E87BB01E161A446C008053F9 /* MSTableURLBuilder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableURLBuilder.m; sourceTree = "<group>"; };
 		E87BB021161B57C8008053F9 /* MSUserTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSUserTests.m; sourceTree = "<group>"; };
 		E87BB024161B5A4D008053F9 /* MSTableTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableTests.m; sourceTree = "<group>"; };
+		E8E378FF161E14E800C13F00 /* MSFilter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSFilter.h; sourceTree = "<group>"; };
+		E8E37902161E2FC500C13F00 /* MSTestFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSTestFilter.h; sourceTree = "<group>"; };
+		E8E37903161E2FC500C13F00 /* MSTestFilter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTestFilter.m; sourceTree = "<group>"; };
+		E8E37906161F4D0D00C13F00 /* MSFilterTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSFilterTest.m; sourceTree = "<group>"; };
 		E8EA24BB161CFC5300BE055D /* MSNaiveISODateFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSNaiveISODateFormatter.h; sourceTree = "<group>"; };
 		E8EA24BC161CFC5300BE055D /* MSNaiveISODateFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSNaiveISODateFormatter.m; sourceTree = "<group>"; };
 		E8EA24BE161CFC6400BE055D /* MSTableURLBuilderTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableURLBuilderTests.m; sourceTree = "<group>"; };
@@ -122,6 +128,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E8E37901161E2F8D00C13F00 /* Filters */ = {
+			isa = PBXGroup;
+			children = (
+				E8E37902161E2FC500C13F00 /* MSTestFilter.h */,
+				E8E37903161E2FC500C13F00 /* MSTestFilter.m */,
+			);
+			name = Filters;
+			sourceTree = "<group>";
+		};
 		E8F33AD01616659C002DD7C6 = {
 			isa = PBXGroup;
 			children = (
@@ -164,6 +179,7 @@
 				E8F33B11161667CE002DD7C6 /* MSTable.m */,
 				E8F33B12161667CE002DD7C6 /* MSUser.h */,
 				E8F33B13161667CE002DD7C6 /* MSUser.m */,
+				E8E378FF161E14E800C13F00 /* MSFilter.h */,
 				E8F33B1A161667E2002DD7C6 /* Connection */,
 				E8F33B1B161667EC002DD7C6 /* Serialization */,
 				E8F33B1C161667F6002DD7C6 /* Query */,
@@ -189,6 +205,8 @@
 				E8F33B3A161668ED002DD7C6 /* MSQueryTests.m */,
 				E87BB024161B5A4D008053F9 /* MSTableTests.m */,
 				E87BB021161B57C8008053F9 /* MSUserTests.m */,
+				E8E37906161F4D0D00C13F00 /* MSFilterTest.m */,
+				E8E37901161E2F8D00C13F00 /* Filters */,
 				E8F33B3116166889002DD7C6 /* Connection */,
 				E8F33B321616689A002DD7C6 /* Serialization */,
 				E8F33B33161668AA002DD7C6 /* Query */,
@@ -392,6 +410,8 @@
 				E87BB022161B57C8008053F9 /* MSUserTests.m in Sources */,
 				E87BB025161B5A4D008053F9 /* MSTableTests.m in Sources */,
 				E8EA24C0161CFCF400BE055D /* MSTableURLBuilderTests.m in Sources */,
+				E8E37904161E2FC500C13F00 /* MSTestFilter.m in Sources */,
+				E8E37907161F4D0D00C13F00 /* MSFilterTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
