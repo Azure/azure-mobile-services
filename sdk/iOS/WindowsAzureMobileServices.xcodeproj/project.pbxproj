@@ -6,6 +6,21 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		E8E37977161F8E6B00C13F00 /* Framework */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = E8E37978161F8E6B00C13F00 /* Build configuration list for PBXAggregateTarget "Framework" */;
+			buildPhases = (
+				E8E3797D161F8ED900C13F00 /* ShellScript */,
+			);
+			dependencies = (
+				E8E3797C161F8EB400C13F00 /* PBXTargetDependency */,
+			);
+			name = Framework;
+			productName = Framework;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		E87BB01C161A28FC008053F9 /* MSClientTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB01B161A28FC008053F9 /* MSClientTests.m */; };
 		E87BB01F161A446C008053F9 /* MSTableURLBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB01E161A446C008053F9 /* MSTableURLBuilder.m */; };
@@ -13,6 +28,21 @@
 		E87BB025161B5A4D008053F9 /* MSTableTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB024161B5A4D008053F9 /* MSTableTests.m */; };
 		E8E37904161E2FC500C13F00 /* MSTestFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = E8E37903161E2FC500C13F00 /* MSTestFilter.m */; };
 		E8E37907161F4D0D00C13F00 /* MSFilterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E8E37906161F4D0D00C13F00 /* MSFilterTest.m */; };
+		E8E3790D161F769D00C13F00 /* WindowsAzureMobileServices.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B14161667CE002DD7C6 /* WindowsAzureMobileServices.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E8E3790E161F769D00C13F00 /* MSClient.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B0A161667CE002DD7C6 /* MSClient.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E8E3790F161F769D00C13F00 /* MSError.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B0C161667CE002DD7C6 /* MSError.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E8E37910161F769D00C13F00 /* MSQuery.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B0E161667CE002DD7C6 /* MSQuery.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E8E37911161F769D00C13F00 /* MSTable.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B10161667CE002DD7C6 /* MSTable.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E8E37912161F769D00C13F00 /* MSUser.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B12161667CE002DD7C6 /* MSUser.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E8E37913161F769D00C13F00 /* MSFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = E8E378FF161E14E800C13F00 /* MSFilter.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		E8E37914161F769D00C13F00 /* MSClientConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B1E16166822002DD7C6 /* MSClientConnection.h */; };
+		E8E37915161F769D00C13F00 /* MSTableConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B2016166822002DD7C6 /* MSTableConnection.h */; };
+		E8E37916161F769D00C13F00 /* MSTableRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B2216166822002DD7C6 /* MSTableRequest.h */; };
+		E8E37917161F769D00C13F00 /* MSTableURLBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = E87BB01D161A446C008053F9 /* MSTableURLBuilder.h */; };
+		E8E37918161F769D00C13F00 /* MSNaiveISODateFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = E8EA24BB161CFC5300BE055D /* MSNaiveISODateFormatter.h */; };
+		E8E37919161F769D00C13F00 /* MSSerializer.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B2916166837002DD7C6 /* MSSerializer.h */; };
+		E8E3791A161F769D00C13F00 /* MSJSONSerializer.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B2716166837002DD7C6 /* MSJSONSerializer.h */; };
+		E8E3791B161F769D00C13F00 /* MSPredicateTranslator.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B2B1616684F002DD7C6 /* MSPredicateTranslator.h */; };
 		E8EA24BD161CFC5300BE055D /* MSNaiveISODateFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = E8EA24BC161CFC5300BE055D /* MSNaiveISODateFormatter.m */; };
 		E8EA24C0161CFCF400BE055D /* MSTableURLBuilderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8EA24BE161CFC6400BE055D /* MSTableURLBuilderTests.m */; };
 		E8F33ADF1616659C002DD7C6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F33ADE1616659C002DD7C6 /* Foundation.framework */; };
@@ -37,6 +67,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		E8E3797B161F8EB400C13F00 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E8F33AD21616659C002DD7C6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E8F33ADA1616659C002DD7C6;
+			remoteInfo = WindowsAzureMobileServices;
+		};
 		E8F33AF21616659C002DD7C6 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E8F33AD21616659C002DD7C6 /* Project object */;
@@ -47,13 +84,14 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		E8F33AD91616659C002DD7C6 /* CopyFiles */ = {
+		E8F33AD91616659C002DD7C6 /* Copy Files */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "include/${PRODUCT_NAME}";
 			dstSubfolderSpec = 16;
 			files = (
 			);
+			name = "Copy Files";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -287,6 +325,31 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		E8E3790C161F766400C13F00 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E8E3790D161F769D00C13F00 /* WindowsAzureMobileServices.h in Headers */,
+				E8E3790E161F769D00C13F00 /* MSClient.h in Headers */,
+				E8E37911161F769D00C13F00 /* MSTable.h in Headers */,
+				E8E37910161F769D00C13F00 /* MSQuery.h in Headers */,
+				E8E37912161F769D00C13F00 /* MSUser.h in Headers */,
+				E8E37913161F769D00C13F00 /* MSFilter.h in Headers */,
+				E8E3790F161F769D00C13F00 /* MSError.h in Headers */,
+				E8E37914161F769D00C13F00 /* MSClientConnection.h in Headers */,
+				E8E37915161F769D00C13F00 /* MSTableConnection.h in Headers */,
+				E8E37916161F769D00C13F00 /* MSTableRequest.h in Headers */,
+				E8E37917161F769D00C13F00 /* MSTableURLBuilder.h in Headers */,
+				E8E37918161F769D00C13F00 /* MSNaiveISODateFormatter.h in Headers */,
+				E8E37919161F769D00C13F00 /* MSSerializer.h in Headers */,
+				E8E3791A161F769D00C13F00 /* MSJSONSerializer.h in Headers */,
+				E8E3791B161F769D00C13F00 /* MSPredicateTranslator.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		E8F33ADA1616659C002DD7C6 /* WindowsAzureMobileServices */ = {
 			isa = PBXNativeTarget;
@@ -294,7 +357,9 @@
 			buildPhases = (
 				E8F33AD71616659C002DD7C6 /* Sources */,
 				E8F33AD81616659C002DD7C6 /* Frameworks */,
-				E8F33AD91616659C002DD7C6 /* CopyFiles */,
+				E8E3790C161F766400C13F00 /* Headers */,
+				E8F33AD91616659C002DD7C6 /* Copy Files */,
+				E8E37A27161FAA9600C13F00 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -347,6 +412,7 @@
 			targets = (
 				E8F33ADA1616659C002DD7C6 /* WindowsAzureMobileServices */,
 				E8F33AEB1616659C002DD7C6 /* WindowsAzureMobileServicesTests */,
+				E8E37977161F8E6B00C13F00 /* Framework */,
 			);
 		};
 /* End PBXProject section */
@@ -363,6 +429,32 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		E8E3797D161F8ED900C13F00 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\n\n# Don't call this script from this script\nif [[ ${WAMS_BUILDING:0} ]]; then\n    exit 0\nfi\nexport WAMS_BUILDING=1\n\n# Set some variables\nOUTPUT=${BUILT_PRODUCTS_DIR}\nWAMS=\"WindowsAzureMobileServices\"\nWAMS_FRAMEWORK=\"${WAMS}.framework\"\nWAMS_LIB=\"lib${WAMS}.a\"\n\n# Determine whether device or simulator and the version of the SDK \nif [[ ! \"$SDK_NAME\" =~ ([A-Za-z]+)([0-9]+.*$) ]]; then\n    echo \"Unsupported SDK: $SDK-NAME\"\n    exit 1\nfi\n\n# Determine the other (device/simulator) and arch\nif [[ ${BASH_REMATCH[1]} == \"iphoneos\" ]]; then\n    OTHER_SDK=iphonesimulator${BASH_REMATCH[2]}\n    OTHER_OUTPUT=${BUILD_DIR}/${CONFIGURATION}-iphonesimulator\n    OTHER_TEMP_OUTPUT=${PROJECT_TEMP_DIR}/${CONFIGURATION}-iphonesimulator\n    OTHER_ARCH=i386\nelse\n    OTHER_SDK=iphoneos${BASH_REMATCH[2]}\n    OTHER_OUTPUT=${BUILD_DIR}/${CONFIGURATION}-iphoneos\n    OTHER_TEMP_OUTPUT=${PROJECT_TEMP_DIR}/${CONFIGURATION}-iphoneos\n    OTHER_ARCH=\"armv6 armv7\"\nfi\n\n# Build the other library\nxcodebuild -project \"${PROJECT_FILE_PATH}\" -target \"${TARGET_NAME}\" -configuration \"${CONFIGURATION}\" -sdk ${OTHER_SDK} BUILD_DIR=\"${BUILD_DIR}\" CONFIGURATION_TEMP_DIR=\"${OTHER_TEMP_OUTPUT}\" ARCHS=\"${OTHER_ARCH}\" $ACTION\n\n# Merge the libraries with lipo for both output dirs\nlipo -create \"${OUTPUT}/${WAMS_LIB}\" \"${OTHER_OUTPUT}/${WAMS_LIB}\" -output \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/A/${WAMS}\"\nlipo -create \"${OUTPUT}/${WAMS_LIB}\" \"${OTHER_OUTPUT}/${WAMS_LIB}\" -output \"${OTHER_OUTPUT}/${WAMS_FRAMEWORK}/Versions/A/${WAMS}\"";
+		};
+		E8E37A27161FAA9600C13F00 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Exit immediately on any errors\nset -e\n\n# Set some variables\nOUTPUT=${BUILT_PRODUCTS_DIR}\nWAMS=\"WindowsAzureMobileServices\"\nWAMS_FRAMEWORK=\"${WAMS}.framework\"\nWAMS_LIB=\"lib${WAMS}.a\"\nHEADERS=\"Headers\"\n\n# Create the needed directories for the framework\nmkdir -p \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/A\"\nmkdir -p \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/A/Headers\"\n\n# Add the headers and lib to the framework\ncp -a \"${OUTPUT}/${HEADERS}/\" \"${BUILT_PRODUCTS_DIR}/${WAMS_FRAMEWORK}/Versions/A/Headers\"\nlipo -create \"${OUTPUT}/${WAMS_LIB}\" -output \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/A/${WAMS}\"\n\n# Set up the links to complete the framework\nln -sf Versions/Current/Headers \"${OUTPUT}/${WAMS_FRAMEWORK}/Headers\"\nln -sf \"Versions/Current/${WAMS}\" \"${OUTPUT}/${WAMS_FRAMEWORK}/${WAMS}\"\nln -sf A \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/Current\"";
+		};
 		E8F33AEA1616659C002DD7C6 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -418,6 +510,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		E8E3797C161F8EB400C13F00 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E8F33ADA1616659C002DD7C6 /* WindowsAzureMobileServices */;
+			targetProxy = E8E3797B161F8EB400C13F00 /* PBXContainerItemProxy */;
+		};
 		E8F33AF31616659C002DD7C6 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = E8F33ADA1616659C002DD7C6 /* WindowsAzureMobileServices */;
@@ -437,6 +534,20 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		E8E37979161F8E6B00C13F00 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		E8E3797A161F8E6B00C13F00 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		E8F33AFE1616659C002DD7C6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -486,24 +597,32 @@
 		E8F33B011616659C002DD7C6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = NO;
 				DSTROOT = /tmp/WindowsAzureMobileServices.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "src/WindowsAzureMobileServices-Prefix.pch";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = headers;
 				SKIP_INSTALL = YES;
+				STRIP_STYLE = "non-global";
 			};
 			name = Debug;
 		};
 		E8F33B021616659C002DD7C6 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DEAD_CODE_STRIPPING = NO;
 				DSTROOT = /tmp/WindowsAzureMobileServices.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "src/WindowsAzureMobileServices-Prefix.pch";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = headers;
 				SKIP_INSTALL = YES;
+				STRIP_STYLE = "non-global";
 			};
 			name = Release;
 		};
@@ -540,6 +659,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		E8E37978161F8E6B00C13F00 /* Build configuration list for PBXAggregateTarget "Framework" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E8E37979161F8E6B00C13F00 /* Debug */,
+				E8E3797A161F8E6B00C13F00 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		E8F33AD51616659C002DD7C6 /* Build configuration list for PBXProject "WindowsAzureMobileServices" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
