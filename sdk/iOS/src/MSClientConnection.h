@@ -40,6 +40,7 @@ typedef void (^MSSuccessBlock)(NSHTTPURLResponse *response, NSData *data);
 
 // The client that created the connection
 @property (nonatomic, strong, readonly)     MSClient *client;
+@property (nonatomic, strong, readonly)     NSURLRequest *request;
 
 
 #pragma  mark * Public Initializer Methods

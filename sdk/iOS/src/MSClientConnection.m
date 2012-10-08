@@ -15,7 +15,18 @@
 //
 
 #import "MSClientConnection.h"
+#import "MSUserAgentBuilder.h"
 #import "MSFilter.h"
+
+
+#pragma mark * HTTP Header String Constants
+
+
+NSString *const xApplicationHeader = @"X-ZUMO-APPLICATION";
+NSString *const contentTypeHeader = @"Content-Type";
+NSString *const userAgentHeader = @"User-Agent";
+NSString *const jsonContentType = @"application/json";
+
 
 
 #pragma mark * MSConnectionDelegate Private Interface
@@ -42,7 +53,6 @@
 @interface MSClientConnection ()
 
 // Private properties
-@property (nonatomic, strong, readonly)     NSURLRequest *request;
 @property (nonatomic, copy, readonly)       MSSuccessBlock onSuccess;
 @property (nonatomic, copy, readonly)       MSErrorBlock onError;
 
@@ -71,7 +81,8 @@
     self = [super init];
     if (self) {
         client_ = client;
-        request_ = request;
+        request_ = [MSClientConnection configureHeadersOnRequest:request
+                                                      withClient:client];
         onSuccess_ = onSuccess;
         onError_ = onError;
     }
@@ -92,7 +103,7 @@
 }
 
 
-# pragma mark * Private Static InvokeNextFilter Method
+# pragma mark * Private Static Methods
 
 
 +(void) invokeNextFilter:(NSArray *)filters
@@ -135,6 +146,30 @@
                           onError:onError];
     }
 }
+
++(NSURLRequest *) configureHeadersOnRequest:(NSURLRequest *)request
+                                 withClient:(MSClient *)client
+{
+    NSMutableURLRequest *mutableRequest = [request mutableCopy];
+    
+    // TODO: Add the authentication header
+    
+    // Set the User Agent header
+    NSString *userAgentValue = [MSUserAgentBuilder userAgent];
+    [mutableRequest setValue:userAgentValue forHTTPHeaderField:userAgentHeader];
+    
+    // Set the special Application key header
+    NSString *appKey = client.applicationKey;
+    if (appKey != nil) {
+        [mutableRequest setValue:appKey forHTTPHeaderField:xApplicationHeader];
+    }
+
+    // Set the content type header
+    [mutableRequest setValue:jsonContentType forHTTPHeaderField:contentTypeHeader];
+    
+    return mutableRequest;
+}
+
 
 @end
 

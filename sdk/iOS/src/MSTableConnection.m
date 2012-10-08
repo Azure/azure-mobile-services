@@ -25,7 +25,6 @@
 
 // Private properties
 @property (nonatomic, strong, readwrite)        MSErrorBlock errorBlock;
-@property (nonatomic, strong, readwrite)        MSTableRequest *request;
 @property (nonatomic, strong, readwrite)        id<MSSerializer> serializer;
 
 @end
@@ -38,7 +37,6 @@
 
 @synthesize table = table_;
 @synthesize errorBlock = errorBlock_;
-@synthesize request = request_;
 @synthesize serializer = serializer_;
 
 
@@ -166,7 +164,6 @@
                           onError:onError];
     
     if (self) {
-        request_ = request;
         table_ = request.table;
         serializer_ = request.serializer;
         errorBlock_ = onError;

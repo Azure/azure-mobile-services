@@ -18,16 +18,13 @@
 #import "MSTableURLBuilder.h"
 
 
-#pragma mark * HTTP Method and Header String Constants
+#pragma mark * HTTP Method String Constants
 
 
 NSString *const httpGet = @"GET";
 NSString *const httpPatch = @"PATCH";
 NSString *const httpPost = @"POST";
 NSString *const httpDelete = @"DELETE";
-NSString *const xApplicationHeader = @"X-ZUMO-APPLICATION";
-NSString *const contentTypeHeader = @"Content-Type";
-NSString *const jsonContentType = @"application/json";
 
 
 #pragma mark * MSTableRequest Private Interface
@@ -143,7 +140,6 @@ NSString *const jsonContentType = @"application/json";
         
         // Set the method and headers
         request.HTTPMethod = httpPost;
-        [request configureHeaders];
     }
     
     return request;
@@ -198,7 +194,6 @@ NSString *const jsonContentType = @"application/json";
                 
                 // Set the method and headers
                 request.HTTPMethod = httpPatch;
-                [request configureHeaders];
             }
         }
     }
@@ -260,7 +255,6 @@ NSString *const jsonContentType = @"application/json";
         
         // Set the method and headers
         request.HTTPMethod = httpDelete;
-        [request configureHeaders];
     }
     
     return request;
@@ -293,7 +287,6 @@ NSString *const jsonContentType = @"application/json";
         
         // Set the method and headers
         request.HTTPMethod = httpGet;
-        [request configureHeaders];
     }
     
     return request;
@@ -320,26 +313,12 @@ NSString *const jsonContentType = @"application/json";
     
     // Set the method and headers
     request.HTTPMethod = httpGet;
-    [request configureHeaders];
     
     return request;
 }
 
 
 #pragma mark * Private Methods
-
-
--(void) configureHeaders
-{
-    // TODO: Add the authentication header
-    
-    NSString *appKey = self.table.client.applicationKey;
-    if (appKey != nil) {
-        [self setValue:appKey forHTTPHeaderField:xApplicationHeader];
-    }
-    
-    [self setValue:jsonContentType forHTTPHeaderField:contentTypeHeader];
-}
 
 
 +(NSError *) errorWithRequest:(MSTableRequest *)request

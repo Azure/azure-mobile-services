@@ -22,6 +22,10 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		E84CA4CF162369BD009B2588 /* MSUserAgentBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = E84CA4CD162369BD009B2588 /* MSUserAgentBuilder.h */; };
+		E84CA4D0162369BD009B2588 /* MSUserAgentBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = E84CA4CE162369BD009B2588 /* MSUserAgentBuilder.m */; };
+		E84CA4D316236A6E009B2588 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E84CA4D216236A6E009B2588 /* UIKit.framework */; };
+		E84CA4D6162373E2009B2588 /* MSUserAgentBuilderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E84CA4D5162373E2009B2588 /* MSUserAgentBuilderTests.m */; };
 		E87BB01C161A28FC008053F9 /* MSClientTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB01B161A28FC008053F9 /* MSClientTests.m */; };
 		E87BB01F161A446C008053F9 /* MSTableURLBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB01E161A446C008053F9 /* MSTableURLBuilder.m */; };
 		E87BB022161B57C8008053F9 /* MSUserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB021161B57C8008053F9 /* MSUserTests.m */; };
@@ -97,6 +101,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E84CA4CD162369BD009B2588 /* MSUserAgentBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSUserAgentBuilder.h; sourceTree = "<group>"; };
+		E84CA4CE162369BD009B2588 /* MSUserAgentBuilder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSUserAgentBuilder.m; sourceTree = "<group>"; };
+		E84CA4D216236A6E009B2588 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		E84CA4D5162373E2009B2588 /* MSUserAgentBuilderTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSUserAgentBuilderTests.m; sourceTree = "<group>"; };
 		E87BB01B161A28FC008053F9 /* MSClientTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSClientTests.m; sourceTree = "<group>"; };
 		E87BB01D161A446C008053F9 /* MSTableURLBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSTableURLBuilder.h; sourceTree = "<group>"; };
 		E87BB01E161A446C008053F9 /* MSTableURLBuilder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableURLBuilder.m; sourceTree = "<group>"; };
@@ -149,6 +157,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E84CA4D316236A6E009B2588 /* UIKit.framework in Frameworks */,
 				E8F33ADF1616659C002DD7C6 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -197,6 +206,7 @@
 		E8F33ADD1616659C002DD7C6 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E84CA4D216236A6E009B2588 /* UIKit.framework */,
 				E8F33ADE1616659C002DD7C6 /* Foundation.framework */,
 				E8F33AED1616659C002DD7C6 /* SenTestingKit.framework */,
 			);
@@ -274,6 +284,8 @@
 				E8F33B2316166822002DD7C6 /* MSTableRequest.m */,
 				E87BB01D161A446C008053F9 /* MSTableURLBuilder.h */,
 				E87BB01E161A446C008053F9 /* MSTableURLBuilder.m */,
+				E84CA4CD162369BD009B2588 /* MSUserAgentBuilder.h */,
+				E84CA4CE162369BD009B2588 /* MSUserAgentBuilder.m */,
 			);
 			name = Connection;
 			sourceTree = "<group>";
@@ -303,6 +315,7 @@
 			isa = PBXGroup;
 			children = (
 				E8EA24BE161CFC6400BE055D /* MSTableURLBuilderTests.m */,
+				E84CA4D5162373E2009B2588 /* MSUserAgentBuilderTests.m */,
 			);
 			name = Connection;
 			sourceTree = "<group>";
@@ -345,6 +358,7 @@
 				E8E37919161F769D00C13F00 /* MSSerializer.h in Headers */,
 				E8E3791A161F769D00C13F00 /* MSJSONSerializer.h in Headers */,
 				E8E3791B161F769D00C13F00 /* MSPredicateTranslator.h in Headers */,
+				E84CA4CF162369BD009B2588 /* MSUserAgentBuilder.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -487,6 +501,7 @@
 				E8F33B2F1616684F002DD7C6 /* MSPredicateTranslator.m in Sources */,
 				E87BB01F161A446C008053F9 /* MSTableURLBuilder.m in Sources */,
 				E8EA24BD161CFC5300BE055D /* MSNaiveISODateFormatter.m in Sources */,
+				E84CA4D0162369BD009B2588 /* MSUserAgentBuilder.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -504,6 +519,7 @@
 				E8EA24C0161CFCF400BE055D /* MSTableURLBuilderTests.m in Sources */,
 				E8E37904161E2FC500C13F00 /* MSTestFilter.m in Sources */,
 				E8E37907161F4D0D00C13F00 /* MSFilterTest.m in Sources */,
+				E84CA4D6162373E2009B2588 /* MSUserAgentBuilderTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
