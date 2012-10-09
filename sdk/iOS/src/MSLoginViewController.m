@@ -38,7 +38,12 @@
 @synthesize onSuccess = _onSuccess;
 
 UIWebView *hostedWebView;
-NSError *lastError;
+
+- (void) dealloc {
+    if (hostedWebView) {
+        hostedWebView.delegate = nil;
+    }
+}
 
 - (id) initWithStartUrl:(NSURL *)startUrl
                  endUrl:(NSURL *)endUrl
@@ -54,43 +59,20 @@ NSError *lastError;
     return self;
 }
 
-- (void)viewDidLoad
-{
-    [super viewDidLoad];
-
+- (void) loadView {
+    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0,0,0,0)];
+    view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    hostedWebView = [[UIWebView alloc] initWithFrame:CGRectMake(0,0,0,0)];
+    hostedWebView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     hostedWebView.delegate = self;
-    
     NSURLRequest *request = [NSURLRequest requestWithURL:self.startUrl];
     [hostedWebView loadRequest:request];
-}
-
-- (void) loadView {
-    // TODO - make the view expand to fit
-    // TODO - make cancel button visibleb
-    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0,0,320,480)];
-    
-    hostedWebView = [[UIWebView alloc] initWithFrame:CGRectMake(0,0, 320, 416)];
     [view addSubview:hostedWebView];
-    
-    UIToolbar *toolbar = [[UIToolbar alloc] initWithFrame:CGRectMake(0, 416, 320, 480)];
-    
-    UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithTitle:@"cancel"
-                                                               style:UIBarButtonItemStyleBordered
-                                                              target:self
-                                                              action:@selector(cancel:)];
-    [toolbar setItems:@[button] animated:YES];
-    
-    [view addSubview:toolbar];
-    
+    UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:(UIBarButtonSystemItemCancel)
+                                                                            target:self
+                                                                            action:@selector(cancel:)];
+    self.navigationItem.leftBarButtonItem = button;
     self.view = view;
-}
-
-- (void) viewDidAppear:(BOOL)animated {
-    if (lastError) {
-        if (self.onError)
-            self.onError(lastError);
-        lastError = nil;
-    }
 }
 
 - (IBAction)cancel:(id)sender {
@@ -101,8 +83,10 @@ NSError *lastError;
 
 - (BOOL) webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {    
     if ([request.URL.absoluteString rangeOfString:self.endUrl.absoluteString].location == 0) {
-        if (self.onSuccess)
+        if (self.onSuccess) {
             self.onSuccess(request.URL);
+        }
+    
         return NO;
     }
         
@@ -110,19 +94,20 @@ NSError *lastError;
 }
 
 - (void) webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
-    if (self.onError)
+    if (self.onError) {
         self.onError(error);
+    }
 }
 
 - (void) webViewDidFinishLoad:(UIWebView *)webView {
-    NSString* body = [webView stringByEvaluatingJavaScriptFromString:@"document.body.innerText"];
-    NSError *error;
-    id json = [NSJSONSerialization JSONObjectWithData:[body dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
-    int statusCode = [[json objectForKey:@"code"] intValue];
-    if (!error && statusCode >= 400) {
-        // The last error is set here and will cause onError callback to be called only in viewDidAppear
-        // to avoid overallaping UI animations.
-        lastError = [NSError errorWithDomain:MSErrorDomain code:MSLoginFailed userInfo:json];
+    if (self.onError) {
+        NSString* body = [webView stringByEvaluatingJavaScriptFromString:@"document.body.innerText"];
+        NSError *error;
+        id json = [NSJSONSerialization JSONObjectWithData:[body dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
+        int statusCode = [[json objectForKey:@"code"] intValue];
+        if (!error && statusCode >= 400) {
+            self.onError([NSError errorWithDomain:MSErrorDomain code:MSLoginFailed userInfo:json]);
+        }
     }
 }
 

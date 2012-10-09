@@ -114,7 +114,7 @@ typedef void (^MSClientLoginSuccessBlock)(MSUser *user);
 
 
 // Logs in the current end user with the given provider.
--(MSLoginViewController *) loginViewControllerWithProvider:(NSString *)provider
+-(UINavigationController *) loginViewControllerWithProvider:(NSString *)provider
                                                  onSuccess:(MSClientLoginSuccessBlock)onSuccess
                                                   onCancel:(MSNavigationCancelled)onCancel
                                                    onError:(MSErrorBlock)onError;

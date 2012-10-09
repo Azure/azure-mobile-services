@@ -103,28 +103,31 @@ MSClientConnection *connection;
     id json = [NSJSONSerialization JSONObjectWithData:response options:0 error:&error];
     if (error || ![json isKindOfClass:[NSDictionary class]]) {
         // Token is not a JSON object
-        if (onError)
+        if (onError) {
             onError([NSError errorWithDomain:MSErrorDomain
                                         code:MSLoginInvalidResponseSyntax
                                     userInfo:@{@"token": [[NSString alloc] initWithData:response
                                                                                encoding:NSUTF8StringEncoding]}]);
+        }
     }
     else {
         id userId = [[json objectForKey:@"user"] objectForKey:@"userId"];
         id authenticationToken = [json objectForKey:@"authenticationToken"];
         if (![userId isKindOfClass:[NSString class]] || ![authenticationToken isKindOfClass:[NSString class]]) {
             // userId or authenticationToken are not strings
-            if (onError)
+            if (onError) {
                 onError([NSError errorWithDomain:MSErrorDomain
                                             code:MSLoginInvalidResponseSyntax
                                         userInfo:@{@"token": [[NSString alloc] initWithData:response
                                                                                    encoding:NSUTF8StringEncoding]}]);
+            }
         }
         else {
             self.currentUser = [[MSUser alloc] initWithUserId:userId];
             self.currentUser.mobileServiceAuthenticationToken = authenticationToken;
-            if (onSuccess)
+            if (onSuccess) {
                 onSuccess(self.currentUser);
+            }
         }
     }
     
@@ -156,7 +159,7 @@ MSClientConnection *connection;
 
 #pragma mark * Public Authentication Methods
 
--(MSLoginViewController *) loginViewControllerWithProvider:(NSString *)provider
+-(UINavigationController *) loginViewControllerWithProvider:(NSString *)provider
                                                  onSuccess:(MSClientLoginSuccessBlock)onSuccess
                                                   onCancel:(MSNavigationCancelled)onCancel
                                                    onError:(MSErrorBlock)onError
@@ -200,7 +203,9 @@ MSClientConnection *connection;
                                   onCancel:onCancel
                                   onError:onError];
     
-    return lvc;
+    UINavigationController* nav = [[UINavigationController alloc] initWithRootViewController:lvc];
+    
+    return nav;
 }
 
 -(void) loginWithProvider:(NSString *)provider
@@ -222,8 +227,10 @@ MSClientConnection *connection;
     NSError *error;
     request.HTTPBody = [NSJSONSerialization dataWithJSONObject:token options:(0) error:&error];
     if (error) {
-        if (onError)
+        if (onError) {
             onError(error);
+        }
+        
         return;
     }
     
@@ -234,8 +241,9 @@ MSClientConnection *connection;
     
     __block MSErrorBlock onErrorWrap = ^(NSError *error) {
         connection = nil;
-        if (onError)
+        if (onError) {
             onError(error);
+        }
     };
     
     connection = [[MSClientConnection alloc] initWithRequest:request
