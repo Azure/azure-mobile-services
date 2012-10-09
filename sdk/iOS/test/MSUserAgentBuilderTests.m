@@ -14,15 +14,38 @@
 // limitations under the License.
 //
 
-#ifndef WindowsAzureMobileServices_WindowsAzureMobileServices_h
-#define WindowsAzureMobileServices_WindowsAzureMobileServices_h
+#import <SenTestingKit/SenTestingKit.h>
+#import "MSUserAgentBuilder.h"
 
-#import "MSClient.h"
-#import "MSTable.h"
-#import "MSQuery.h"
-#import "MSUser.h"
-#import "MSFilter.h"
-#import "MSError.h"
-#import "MSLoginViewController.h"
+@interface MSUserAgentBuilderTests : SenTestCase
 
-#endif
+@end
+
+@implementation MSUserAgentBuilderTests
+
+#pragma mark * Setup and TearDown
+
+
+-(void) setUp
+{
+    NSLog(@"%@ setUp", self.name);
+}
+
+-(void) tearDown
+{
+    NSLog(@"%@ tearDown", self.name);
+}
+
+
+#pragma mark * UserAgent Method Tests
+
+
+-(void) testURLForTable
+{
+    NSString *userAgent = [MSUserAgentBuilder userAgent];
+    
+    STAssertTrue([userAgent isEqualToString:@"ZUMO/1.0 (iOSSimulator -- -- objective-c) --/--"],
+                 @"user agent was: %@", userAgent);
+}
+
+@end

@@ -14,15 +14,18 @@
 // limitations under the License.
 //
 
-#ifndef WindowsAzureMobileServices_WindowsAzureMobileServices_h
-#define WindowsAzureMobileServices_WindowsAzureMobileServices_h
-
-#import "MSClient.h"
-#import "MSTable.h"
-#import "MSQuery.h"
-#import "MSUser.h"
+#import <Foundation/Foundation.h>
 #import "MSFilter.h"
-#import "MSError.h"
-#import "MSLoginViewController.h"
 
-#endif
+typedef NSURLRequest *(^MSInspectRequestBlock)(NSURLRequest *request);
+
+@interface MSTestFilter : NSObject <MSFilter>
+
+@property (nonatomic, strong)   NSURLRequest *requestToUse;
+@property (nonatomic, copy)     MSInspectRequestBlock onInspectRequest;
+@property (nonatomic, strong)   NSHTTPURLResponse *responseToUse;
+@property (nonatomic, strong)   NSData *dataToUse;
+@property (nonatomic, strong)   NSError *errorToUse;
+@property (nonatomic)           BOOL ignoreNextFilter;
+
+@end

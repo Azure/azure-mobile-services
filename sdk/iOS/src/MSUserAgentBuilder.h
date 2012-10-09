@@ -14,15 +14,25 @@
 // limitations under the License.
 //
 
-#ifndef WindowsAzureMobileServices_WindowsAzureMobileServices_h
-#define WindowsAzureMobileServices_WindowsAzureMobileServices_h
+#import <Foundation/Foundation.h>
 
-#import "MSClient.h"
-#import "MSTable.h"
-#import "MSQuery.h"
-#import "MSUser.h"
-#import "MSFilter.h"
-#import "MSError.h"
-#import "MSLoginViewController.h"
 
-#endif
+#pragma  mark * MSUserAgentBuilder Public Interface
+
+
+// The |MSUserAgentBuilder| class encapsulates the logic for building the
+// appropriate HTTP 'User-Agent' header value for all |MSClient| requests.
+// Windows Azure Mobile Services expects the 'User-Agent' to be of the form:
+//
+//     ZUMO/<sdk-version> (<Device> <OS> <OS-version> <sdk-language>) <application>/<app-version>
+//
+@interface MSUserAgentBuilder : NSObject
+
+
+#pragma  mark * Public UserAgent Method
+
+
+// The HTTP 'User-Agent' value to use with all |MSClient| requests
++(NSString *) userAgent;
+
+@end

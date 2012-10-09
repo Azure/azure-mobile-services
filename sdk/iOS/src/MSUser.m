@@ -39,4 +39,16 @@
     return self;
 }
 
+
+#pragma mark * NSCopying Methods
+
+
+-(id) copyWithZone:(NSZone *)zone
+{
+    MSUser *user = [[MSUser allocWithZone:zone] initWithUserId:self.userId];
+    user.mobileServiceAuthenticationToken = self.mobileServiceAuthenticationToken;
+    
+    return user;
+}
+
 @end

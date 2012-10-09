@@ -29,10 +29,10 @@ typedef void (^MSSuccessBlock)(NSHTTPURLResponse *response, NSData *data);
 #pragma  mark * MSClient Public Interface
 
 
-// The |MSClientConnection| class is an implementation of the
-// |NSURLConnectionDelegate| that provides either the response and response
-// data or an error via block callbacks.
-@interface MSClientConnection : NSObject <NSURLConnectionDataDelegate>
+// The |MSClientConnection| class sends an HTTP request asynchronously and
+// returns either the response and response data or an error via block
+// callbacks.
+@interface MSClientConnection : NSObject
 
 
 #pragma mark * Public Readonly Properties
@@ -40,15 +40,20 @@ typedef void (^MSSuccessBlock)(NSHTTPURLResponse *response, NSData *data);
 
 // The client that created the connection
 @property (nonatomic, strong, readonly)     MSClient *client;
+@property (nonatomic, strong, readonly)     NSURLRequest *request;
 
 
 #pragma  mark * Public Initializer Methods
 
 
 // Initializes an |MSClientConnection| with the given client sends the given
-// request. 
+// request. NOTE: The request is not sent until |start| is called.
 -(id) initWithRequest:(NSURLRequest *)request
            withClient:(MSClient *)client
             onSuccess:(MSSuccessBlock)onSuccess
               onError:(MSErrorBlock)onError;
+
+// Sends the request.
+-(void) start;
+
 @end

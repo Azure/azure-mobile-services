@@ -17,6 +17,18 @@
 #import "MSClient.h"
 #import "MSTable.h"
 #import "MSClientConnection.h"
+#import "MSUser.h"
+
+
+#pragma mark * MSClient Private Interface
+
+
+@interface MSClient ()
+
+// Public readonly, private readwrite properties
+@property (nonatomic, strong, readwrite)         NSArray *filters;
+
+@end
 
 
 #pragma mark * MSClient Implementation
@@ -77,7 +89,7 @@ MSClientConnection *connection;
     if(self)
     {
         applicationURL_ = url;
-        applicationKey_ = key;
+        applicationKey_ = [key copy];
     }
     return self;
 }
@@ -117,6 +129,30 @@ MSClientConnection *connection;
     }
     
 }
+
+#pragma mark * Public Filter Methods
+
+
+-(MSClient *) clientwithFilter:(id<MSFilter>)filter
+{
+    // Create a deep copy of the client (except for the filters)
+    MSClient *newClient = [self copy];
+    
+    // Either copy or create a new filters array
+    NSMutableArray *filters = [self.filters mutableCopy];
+    if (!filters) {
+        filters = [NSMutableArray arrayWithCapacity:1];
+    }
+    
+    // Add the filter to the filters array
+    [filters addObject:filter];
+    
+    // Set the new filters on the copied client
+    newClient.filters = filters;
+    
+    return newClient;
+}
+
 
 #pragma mark * Public Authentication Methods
 
@@ -220,6 +256,22 @@ MSClientConnection *connection;
 -(MSTable *) getTable:(NSString *)tableName
 {
     return [[MSTable alloc] initWithName:tableName andClient:self];
+}
+
+
+#pragma mark * NSCopying Methods
+
+
+-(id) copyWithZone:(NSZone *)zone
+{
+    MSClient *client = [[MSClient allocWithZone:zone]
+                            initWithApplicationURL:self.applicationURL
+                                withApplicationKey:self.applicationKey];
+                                                                            
+    client.currentUser = [self.currentUser copyWithZone:zone];
+    client.filters = [self.filters copyWithZone:zone];
+
+    return client;
 }
 
 @end

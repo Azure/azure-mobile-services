@@ -40,16 +40,19 @@
 
 
 // Creates a connection for an update, insert, or readWithId request.
+// NOTE: The request is not sent until |start| is called.
 +(MSTableConnection *) connectionWithItemRequest:(MSTableItemRequest *)request
                                 onSuccess:(MSItemSuccessBlock)onSuccess
                                 onError:(MSErrorBlock)onError;
 
-// Creates a connection for a delete request.
+// Creates a connection for a delete request. NOTE: The request is not sent
+// until |start| is called.
 +(MSTableConnection *) connectionWithDeleteRequest:(MSTableDeleteRequest *)request
                                 onSuccess:(MSDeleteSuccessBlock)onSuccess
                                 onError:(MSErrorBlock)onError;
 
-// Creates a connection for read with query request.
+// Creates a connection for read with query request. NOTE: The request is not
+// sent until |start| is called.
 +(MSTableConnection *) connectionWithReadRequest:(MSTableReadQueryRequest *)request
                                 onSuccess:(MSReadQuerySuccessBlock)onSuccess
                                 onError:(MSErrorBlock)onError;

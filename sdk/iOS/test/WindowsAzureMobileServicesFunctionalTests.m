@@ -16,6 +16,7 @@
 
 #import <SenTestingKit/SenTestingKit.h>
 #import "WindowsAzureMobileServices.h"
+#import "MSTestFilter.h"
 
 @interface WindowsAzureMobileServicesFunctionalTests : SenTestCase {
     MSClient *client;
@@ -42,7 +43,7 @@
     // with a table named "todoItem". Simply enter the application URL and
     // application key for the Windows Mobile Azure Service below and set the
     // 'testsEnabled' BOOL above to YES.
-        
+    
     client = [MSClient
               clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
               withApplicationKey:@"<Application Key>"];
@@ -61,7 +62,7 @@
 #pragma mark * End-to-End Positive Insert, Update, Delete and Read Tests
 
 
-- (void) testCreateUpdateAndDeleteTodoItem
+-(void) testCreateUpdateAndDeleteTodoItem
 {
     MSTable *todoTable = [client getTable:@"todoItem"];
     
@@ -125,7 +126,7 @@
     STAssertTrue([self waitForTest:90.0], @"Test timed out.");
 }
 
-- (void) testCreateAndQueryTodoItem
+-(void) testCreateAndQueryTodoItem
 {
     MSTable *todoTable = [client getTable:@"todoItem"];
     
@@ -224,10 +225,141 @@
 }
 
 
+#pragma mark * End-to-End Filter Tests
+
+
+-(void) testFilterThatModifiesRequest
+{
+    // Create a filter that will replace the request with one requesting
+    // a table that doesn't exit.
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    
+    NSURL *badURL = [client.applicationURL
+                     URLByAppendingPathComponent:@"tables/NoSuchTable"];
+    NSURLRequest *badRequest = [NSURLRequest requestWithURL:badURL];
+    
+    testFilter.requestToUse = badRequest;
+    
+    // Create the client and the table
+    MSClient *filterClient = [client clientwithFilter:testFilter];
+    
+    MSTable *todoTable = [filterClient getTable:@"todoItem"];
+    
+    // Create the item
+    NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
+    
+    // Insert the item
+    [todoTable insert:item onSuccess:^(id newItem) {
+        
+        STAssertTrue(NO, @"onError should have been called.");
+        
+    } onError:^(NSError *error) {
+        
+        STAssertNotNil(error, @"error should not have been nil.");
+        STAssertTrue(error.domain == MSErrorDomain,
+                     @"error domain should have been MSErrorDomain.");
+        STAssertTrue(error.code == MSErrorMessageErrorCode,
+                     @"error code should have been MSErrorMessageErrorCode.");
+        
+        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        STAssertTrue([description isEqualToString:@"Table 'NoSuchTable' does not exist."],
+                     @"description was: %@", description);
+        
+        done = YES;
+
+    }];
+        
+    STAssertTrue([self waitForTest:90.0], @"Test timed out.");
+}
+
+-(void) testFilterThatModifiesResponse
+{
+    // Create a filter that will replace the response with one that has
+    // a 400 status code and an error message
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    
+    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                                   initWithURL:nil
+                                   statusCode:400
+                                   HTTPVersion:nil headerFields:nil];
+    NSString* stringData = @"\"This is an Error Message for the testFilterThatModifiesResponse test!\"";
+    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    
+    testFilter.responseToUse = response;
+    testFilter.dataToUse = data;
+    
+    // Create the client and the table
+    MSClient *filterClient = [client clientwithFilter:testFilter];
+    
+    MSTable *todoTable = [filterClient getTable:@"todoItem"];
+    
+    // Create the item
+    NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
+    
+    // Insert the item
+    [todoTable insert:item onSuccess:^(id newItem) {
+        
+        STAssertTrue(NO, @"onError should have been called.");
+        
+    } onError:^(NSError *error) {
+        
+        STAssertNotNil(error, @"error was nil after deserializing item.");
+        STAssertTrue([error domain] == MSErrorDomain,
+                     @"error domain was: %@", [error domain]);
+        STAssertTrue([error code] == MSErrorMessageErrorCode,
+                     @"error code was: %d",[error code]);
+        STAssertTrue([[error localizedDescription] isEqualToString:
+                      @"This is an Error Message for the testFilterThatModifiesResponse test!"],
+                     @"error description was: %@", [error localizedDescription]);
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:90.0], @"Test timed out.");
+}
+
+-(void) testFilterThatReturnsError
+{
+    // Create a filter that will replace the error
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    
+    NSError *error = [NSError errorWithDomain:@"SomeDomain"
+                                         code:-102
+                                     userInfo:nil];
+    testFilter.errorToUse = error;
+    
+    // Create the client and the table
+    MSClient *filterClient = [client clientwithFilter:testFilter];
+    
+    MSTable *todoTable = [filterClient getTable:@"todoItem"];
+    
+    // Create the item
+    NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
+    
+    // Insert the item
+    [todoTable insert:item onSuccess:^(id newItem) {
+        
+        STAssertTrue(NO, @"onError should have been called.");
+        
+    } onError:^(NSError *error) {
+        
+        STAssertNotNil(error, @"error was nil after deserializing item.");
+        STAssertTrue([error domain] == @"SomeDomain",
+                     @"error domain was: %@", [error domain]);
+        STAssertTrue([error code] == -102,
+                     @"error code was: %d",[error code]);
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+
 #pragma mark * Negative Insert Tests
 
 
-- (void) testInsertItemForNonExistentTable
+-(void) testInsertItemForNonExistentTable
 {
     MSTable *todoTable = [client getTable:@"NoSuchTable"];
     
@@ -261,15 +393,15 @@
 #pragma mark * Negative Update Tests
 
 
-- (void) testUpdateItemForNonExistentTable
+-(void) testUpdateItemForNonExistentTable
 {
     MSTable *todoTable = [client getTable:@"NoSuchTable"];
     
     // Update the item
     NSDictionary *item = @{
-    @"text":@"Write E2E test!",
-    @"complete": @(NO),
-    @"id":@100
+        @"text":@"Write E2E test!",
+        @"complete": @(NO),
+        @"id":@100
     };
     
     // Insert the item
@@ -295,7 +427,7 @@
     STAssertTrue([self waitForTest:90.0], @"Test timed out.");
 }
 
-- (void) testUpdateItemForNonExistentItemId
+-(void) testUpdateItemForNonExistentItemId
 {
     MSTable *todoTable = [client getTable:@"todoItem"];
     
@@ -333,7 +465,7 @@
 #pragma mark * Negative Delete Tests
 
 
-- (void) testDeleteItemForNonExistentTable
+-(void) testDeleteItemForNonExistentTable
 {
     MSTable *todoTable = [client getTable:@"NoSuchTable"];
     
@@ -367,7 +499,7 @@
     STAssertTrue([self waitForTest:90.0], @"Test timed out.");
 }
 
-- (void) testDeleteItemForNonExistentItemId
+-(void) testDeleteItemForNonExistentItemId
 {
     MSTable *todoTable = [client getTable:@"todoItem"];
     
@@ -401,7 +533,7 @@
     STAssertTrue([self waitForTest:90.0], @"Test timed out.");
 }
 
-- (void) testDeleteItemWithIdForNonExistentItemId
+-(void) testDeleteItemWithIdForNonExistentItemId
 {
     MSTable *todoTable = [client getTable:@"todoItem"];
     
@@ -432,7 +564,7 @@
 #pragma mark * Negative ReadWithId Tests
 
 
-- (void) testReadWithIdForNonExistentTable
+-(void) testReadWithIdForNonExistentTable
 {
     MSTable *todoTable = [client getTable:@"NoSuchTable"];
 
@@ -459,7 +591,7 @@
     STAssertTrue([self waitForTest:90.0], @"Test timed out.");
 }
 
-- (void) testReadWithIdForNonExistentItemId
+-(void) testReadWithIdForNonExistentItemId
 {
     MSTable *todoTable = [client getTable:@"todoItem"];
     

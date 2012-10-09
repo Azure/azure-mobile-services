@@ -18,6 +18,7 @@
 #import "MSError.h"
 #import "MSLoginViewController.h"
 #import "MSUser.h"
+#import "MSFilter.h"
 
 @class MSTable;
 @class MSUser;
@@ -39,7 +40,7 @@ typedef void (^MSClientLoginSuccessBlock)(MSUser *user);
 // allows the developer to get |MSTable| instances, which are used to work with
 // the data of the Windows Azure Mobile Service, as well as login and logout an
 // end user.
-@interface MSClient : NSObject
+@interface MSClient : NSObject <NSCopying>
 
 
 #pragma mark * Public Readonly Properties
@@ -56,6 +57,11 @@ typedef void (^MSClientLoginSuccessBlock)(MSUser *user);
 // level permissions.
 @property (nonatomic, copy, readonly)     NSString *applicationKey;
 
+// A collection of |MSFilter| instances to apply to use with the requests and
+// responses sent and received by the client. The property is readonly and the
+// array is not-mutable. To apply a filter to a client, use the |withFilter:|
+// method.
+@property (nonatomic, strong, readonly)         NSArray *filters;
 
 #pragma mark * Public ReadWrite Properties
 
@@ -95,6 +101,13 @@ typedef void (^MSClientLoginSuccessBlock)(MSUser *user);
 // Intiliazes a client with the given URL and application key for the Windows
 // Azure Mobile Service.
 -(id) initWithApplicationURL:(NSURL *)url withApplicationKey:(NSString *)key;
+
+
+#pragma mark * Public Filter Methods
+
+
+// Creates a clone of the client with the given filter applied to the new client.
+-(MSClient *) clientwithFilter:(id<MSFilter>)filter;
 
 
 #pragma  mark * Public Login and Logout Methods

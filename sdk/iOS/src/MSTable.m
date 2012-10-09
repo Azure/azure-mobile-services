@@ -72,9 +72,11 @@
                                    onError:onError];
     // Send the request
     if (request) {
-        [MSTableConnection connectionWithItemRequest:request
-                                           onSuccess:onSuccess
-                                             onError:onError];
+        MSTableConnection *connection =
+            [MSTableConnection connectionWithItemRequest:request
+                                               onSuccess:onSuccess
+                                                 onError:onError];
+        [connection start];
     }
 }
 
@@ -90,9 +92,11 @@
                                    onError:onError];
     // Send the request
     if (request) {
-        [MSTableConnection connectionWithItemRequest:request
-                                           onSuccess:onSuccess
-                                             onError:onError];
+        MSTableConnection *connection =
+            [MSTableConnection connectionWithItemRequest:request
+                                               onSuccess:onSuccess
+                                                 onError:onError];
+        [connection start];
     }
 }
 
@@ -108,9 +112,11 @@
                                      onError:onError];
     // Send the request
     if (request) {
-        [MSTableConnection connectionWithDeleteRequest:request
-                                             onSuccess:onSuccess
-                                               onError:onError];
+        MSTableConnection *connection =
+            [MSTableConnection connectionWithDeleteRequest:request
+                                                 onSuccess:onSuccess
+                                                   onError:onError];
+        [connection start];
     }
 }
 
@@ -126,9 +132,11 @@
                                      onError:onError];
     // Send the request
     if (request) {
-        [MSTableConnection connectionWithDeleteRequest:request
-                                             onSuccess:onSuccess
-                                               onError:onError];
+        MSTableConnection *connection = 
+            [MSTableConnection connectionWithDeleteRequest:request
+                                                 onSuccess:onSuccess
+                                                   onError:onError];
+        [connection start];
     }
 }
 
@@ -148,9 +156,11 @@
                                    onError:onError];
     // Send the request
     if (request) {
-        [MSTableConnection connectionWithItemRequest:request
-                                           onSuccess:onSuccess
-                                             onError:onError];
+        MSTableConnection *connection =
+            [MSTableConnection connectionWithItemRequest:request
+                                               onSuccess:onSuccess
+                                                 onError:onError];
+        [connection start];
     }
 }
 
@@ -166,9 +176,11 @@
                                         onError:onError];
     // Send the request
     if (request) {
-        [MSTableConnection connectionWithReadRequest:request
-                                           onSuccess:onSuccess
-                                             onError:onError];
+        MSTableConnection *connection =
+            [MSTableConnection connectionWithReadRequest:request
+                                               onSuccess:onSuccess
+                                                 onError:onError];
+        [connection start];
     }
 }
 
