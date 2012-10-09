@@ -26,6 +26,7 @@ NSString *const xApplicationHeader = @"X-ZUMO-APPLICATION";
 NSString *const contentTypeHeader = @"Content-Type";
 NSString *const userAgentHeader = @"User-Agent";
 NSString *const jsonContentType = @"application/json";
+NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 
 
 
@@ -152,7 +153,9 @@ NSString *const jsonContentType = @"application/json";
 {
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
     
-    // TODO: Add the authentication header
+    if (client.currentUser && client.currentUser.mobileServiceAuthenticationToken) {
+        [mutableRequest setValue:client.currentUser.mobileServiceAuthenticationToken forHTTPHeaderField:xZumoAuth];
+    }
     
     // Set the User Agent header
     NSString *userAgentValue = [MSUserAgentBuilder userAgent];
