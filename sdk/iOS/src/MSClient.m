@@ -16,6 +16,7 @@
 
 #import "MSClient.h"
 #import "MSTable.h"
+#import "MSClientConnection.h"
 
 
 #pragma mark * MSClient Implementation
@@ -27,6 +28,7 @@
 @synthesize applicationKey = applicationKey_;
 @synthesize currentUser = currentUser_;
 
+MSClientConnection *connection;
 
 #pragma mark * Public Static Constructor Methods
 
@@ -80,31 +82,135 @@
     return self;
 }
 
+#pragma mark * Private Authentication Methods
+
+-(void) parseLoginResponse:(NSData *)response
+                 onSuccess:(MSClientLoginSuccessBlock)onSuccess
+                   onError:(MSErrorBlock)onError {
+    NSError *error;
+    id json = [NSJSONSerialization JSONObjectWithData:response options:0 error:&error];
+    if (error || ![json isKindOfClass:[NSDictionary class]]) {
+        // Token is not a JSON object
+        if (onError)
+            onError([NSError errorWithDomain:MSErrorDomain
+                                        code:MSLoginInvalidResponseSyntax
+                                    userInfo:@{@"token": [[NSString alloc] initWithData:response
+                                                                               encoding:NSUTF8StringEncoding]}]);
+    }
+    else {
+        id userId = [[json objectForKey:@"user"] objectForKey:@"userId"];
+        id authenticationToken = [json objectForKey:@"authenticationToken"];
+        if (![userId isKindOfClass:[NSString class]] || ![authenticationToken isKindOfClass:[NSString class]]) {
+            // userId or authenticationToken are not strings
+            if (onError)
+                onError([NSError errorWithDomain:MSErrorDomain
+                                            code:MSLoginInvalidResponseSyntax
+                                        userInfo:@{@"token": [[NSString alloc] initWithData:response
+                                                                                   encoding:NSUTF8StringEncoding]}]);
+        }
+        else {
+            self.currentUser = [[MSUser alloc] initWithUserId:userId];
+            self.currentUser.mobileServiceAuthenticationToken = authenticationToken;
+            if (onSuccess)
+                onSuccess(self.currentUser);
+        }
+    }
+    
+}
 
 #pragma mark * Public Authentication Methods
 
-
--(void) loginWithProvider:(NSString *)provider
-         onSuccess:(MSClientLoginSuccessBlock)onSuccess
-           onError:(MSErrorBlock)onError
+-(MSLoginViewController *) loginViewControllerWithProvider:(NSString *)provider
+                                                 onSuccess:(MSClientLoginSuccessBlock)onSuccess
+                                                  onCancel:(MSNavigationCancelled)onCancel
+                                                   onError:(MSErrorBlock)onError
 {
-    // TODO: Implement
-    NSAssert(FALSE, @"Not yet implemented.");
+    NSURL* startUrl = [NSURL URLWithString:[NSString stringWithFormat:@"login/%@", provider] relativeToURL:self.applicationURL];
+    NSURL* endUrl = [NSURL URLWithString:@"login/done" relativeToURL:self.applicationURL];
+    
+    __block MSEndUrlNavigatedTo onSuccessWrap = ^(NSURL* url) {
+        // The endUrl has been reached
+        NSInteger match = [url.absoluteString rangeOfString:@"#token="].location;
+        if (match > 0) {
+            // Process returned token
+            NSString* jsonToken = [[url.absoluteString substringFromIndex:(match + 7)]
+                                   stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+            [self parseLoginResponse:[jsonToken dataUsingEncoding:NSUTF8StringEncoding]
+                           onSuccess:onSuccess
+                             onError:onError];
+        }
+        else if (onError) {
+            match = [url.absoluteString rangeOfString:@"#error="].location;
+            if (match > 0) {
+                // Process error
+                onError([NSError errorWithDomain:MSErrorDomain
+                                            code:MSLoginFailed
+                                        userInfo:@{@"error": [[url.absoluteString substringFromIndex:(match + 7)]
+                                                              stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]}]);
+            }
+            else {
+                // Unrecognized response
+                onError([NSError errorWithDomain:MSErrorDomain
+                                            code:MSLoginInvalidResponseSyntax
+                                        userInfo:@{@"error": url.absoluteString}]);
+            }
+        }
+    };
+        
+    MSLoginViewController* lvc = [[MSLoginViewController alloc]
+                                  initWithStartUrl:startUrl
+                                  endUrl:endUrl
+                                  onSuccess:onSuccessWrap
+                                  onCancel:onCancel
+                                  onError:onError];
+    
+    return lvc;
 }
 
 -(void) loginWithProvider:(NSString *)provider
-                withToken:(NSString *)token
-         onSuccess:(MSClientLoginSuccessBlock)onSuccess
-           onError:(MSErrorBlock)onError
+                withToken:(NSDictionary *)token
+                onSuccess:(MSClientLoginSuccessBlock)onSuccess
+                  onError:(MSErrorBlock)onError
 {
-    // TODO: Implement
-    NSAssert(FALSE, @"Not yet implemented.");
+    if (connection) {
+        if (onError)
+            onError([NSError errorWithDomain:MSErrorDomain
+                                        code:MSLoginAlreadyInProgress
+                                    userInfo:nil]);
+        return;
+    }
+    
+    NSMutableURLRequest *request = [[NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"login/%@", provider]
+                                                   relativeToURL:self.applicationURL]] mutableCopy];
+    request.HTTPMethod = @"POST";
+    NSError *error;
+    request.HTTPBody = [NSJSONSerialization dataWithJSONObject:token options:(0) error:&error];
+    if (error) {
+        if (onError)
+            onError(error);
+        return;
+    }
+    
+    __block MSSuccessBlock onSuccessWrap = ^(NSHTTPURLResponse *response, NSData *data) {
+        connection = nil;
+        [self parseLoginResponse:data onSuccess:onSuccess onError:onError];
+    };
+    
+    __block MSErrorBlock onErrorWrap = ^(NSError *error) {
+        connection = nil;
+        if (onError)
+            onError(error);
+    };
+    
+    connection = [[MSClientConnection alloc] initWithRequest:request
+                                                  withClient:self
+                                                   onSuccess:onSuccessWrap
+                                                     onError:onErrorWrap];
 }
 
 -(void) logout
 {
-    // TODO: Implement
-    NSAssert(FALSE, @"Not yet implemented.");
+    self.currentUser = nil;
 }
 
 

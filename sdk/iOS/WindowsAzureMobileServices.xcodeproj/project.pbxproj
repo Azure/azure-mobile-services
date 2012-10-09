@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		402774FA161F73AB00A23A8F /* MSLoginViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 402774F9161F73AB00A23A8F /* MSLoginViewController.m */; };
 		E87BB01C161A28FC008053F9 /* MSClientTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB01B161A28FC008053F9 /* MSClientTests.m */; };
 		E87BB01F161A446C008053F9 /* MSTableURLBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB01E161A446C008053F9 /* MSTableURLBuilder.m */; };
 		E87BB022161B57C8008053F9 /* MSUserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB021161B57C8008053F9 /* MSUserTests.m */; };
@@ -57,6 +58,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		402774F8161F73AB00A23A8F /* MSLoginViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSLoginViewController.h; sourceTree = "<group>"; };
+		402774F9161F73AB00A23A8F /* MSLoginViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSLoginViewController.m; sourceTree = "<group>"; };
 		E87BB01B161A28FC008053F9 /* MSClientTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSClientTests.m; sourceTree = "<group>"; };
 		E87BB01D161A446C008053F9 /* MSTableURLBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSTableURLBuilder.h; sourceTree = "<group>"; };
 		E87BB01E161A446C008053F9 /* MSTableURLBuilder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableURLBuilder.m; sourceTree = "<group>"; };
@@ -168,6 +171,8 @@
 				E8F33B1B161667EC002DD7C6 /* Serialization */,
 				E8F33B1C161667F6002DD7C6 /* Query */,
 				E8F33AE11616659C002DD7C6 /* Supporting Files */,
+				402774F8161F73AB00A23A8F /* MSLoginViewController.h */,
+				402774F9161F73AB00A23A8F /* MSLoginViewController.m */,
 			);
 			name = Source;
 			path = src;
@@ -377,6 +382,7 @@
 				E8F33B2F1616684F002DD7C6 /* MSPredicateTranslator.m in Sources */,
 				E87BB01F161A446C008053F9 /* MSTableURLBuilder.m in Sources */,
 				E8EA24BD161CFC5300BE055D /* MSNaiveISODateFormatter.m in Sources */,
+				402774FA161F73AB00A23A8F /* MSLoginViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -16,6 +16,8 @@
 
 #import <Foundation/Foundation.h>
 #import "MSError.h"
+#import "MSLoginViewController.h"
+#import "MSUser.h"
 
 @class MSTable;
 @class MSUser;
@@ -99,14 +101,15 @@ typedef void (^MSClientLoginSuccessBlock)(MSUser *user);
 
 
 // Logs in the current end user with the given provider.
--(void) loginWithProvider:(NSString *)provider
-                onSuccess:(MSClientLoginSuccessBlock)onSuccess
-                  onError:(MSErrorBlock)onError;
+-(MSLoginViewController *) loginViewControllerWithProvider:(NSString *)provider
+                                                 onSuccess:(MSClientLoginSuccessBlock)onSuccess
+                                                  onCancel:(MSNavigationCancelled)onCancel
+                                                   onError:(MSErrorBlock)onError;
 
 // Logs in the current end user with the given provider and the given token for
 // the provider.
 -(void) loginWithProvider:(NSString *)provider
-                withToken:(NSString *)token
+                withToken:(NSDictionary *)token
                 onSuccess:(MSClientLoginSuccessBlock)onSuccess
                   onError:(MSErrorBlock)onError;
 
