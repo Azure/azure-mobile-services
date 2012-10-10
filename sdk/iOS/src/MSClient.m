@@ -99,15 +99,16 @@ MSClientConnection *connection;
 -(void) parseLoginResponse:(NSData *)response
                  onSuccess:(MSClientLoginSuccessBlock)onSuccess
                    onError:(MSErrorBlock)onError {
-    NSError *error;
+    NSError *error = nil;
     id json = [NSJSONSerialization JSONObjectWithData:response options:0 error:&error];
     if (error || ![json isKindOfClass:[NSDictionary class]]) {
         // Token is not a JSON object
         if (onError) {
             onError([NSError errorWithDomain:MSErrorDomain
                                         code:MSLoginInvalidResponseSyntax
-                                    userInfo:@{@"token": [[NSString alloc] initWithData:response
-                                                                               encoding:NSUTF8StringEncoding]}]);
+                                    userInfo:@{
+                                    @"token":[[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding],
+                   NSLocalizedDescriptionKey:NSLocalizedString(@"The token in the login response must be a JSON object.", nil)}]);
         }
     }
     else {
@@ -118,8 +119,10 @@ MSClientConnection *connection;
             if (onError) {
                 onError([NSError errorWithDomain:MSErrorDomain
                                             code:MSLoginInvalidResponseSyntax
-                                        userInfo:@{@"token": [[NSString alloc] initWithData:response
-                                                                                   encoding:NSUTF8StringEncoding]}]);
+                                        userInfo:@{
+                                        @"token":[[NSString alloc] initWithData:response encoding:NSUTF8StringEncoding],
+                       NSLocalizedDescriptionKey:NSLocalizedString(
+                                                    @"The token in the login response does not contain userId or authenticationToken.", nil)}]);
             }
         }
         else {
@@ -164,8 +167,8 @@ MSClientConnection *connection;
                                                   onCancel:(MSNavigationCancelled)onCancel
                                                    onError:(MSErrorBlock)onError
 {
-    NSURL* startUrl = [NSURL URLWithString:[NSString stringWithFormat:@"login/%@", provider] relativeToURL:self.applicationURL];
-    NSURL* endUrl = [NSURL URLWithString:@"login/done" relativeToURL:self.applicationURL];
+    NSURL* startUrl = [self.applicationURL URLByAppendingPathComponent:[NSString stringWithFormat:@"login/%@", provider]];
+    NSURL* endUrl = [self.applicationURL URLByAppendingPathComponent:@"login/done"];
     
     __block MSEndUrlNavigatedTo onSuccessWrap = ^(NSURL* url) {
         // The endUrl has been reached
@@ -184,7 +187,8 @@ MSClientConnection *connection;
                 // Process error
                 onError([NSError errorWithDomain:MSErrorDomain
                                             code:MSLoginFailed
-                                        userInfo:@{@"error": [[url.absoluteString substringFromIndex:(match + 7)]
+                                        userInfo:@{
+                                        @"error":[[url.absoluteString substringFromIndex:(match + 7)]
                                                               stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]}]);
             }
             else {
@@ -217,14 +221,15 @@ MSClientConnection *connection;
         if (onError)
             onError([NSError errorWithDomain:MSErrorDomain
                                         code:MSLoginAlreadyInProgress
-                                    userInfo:nil]);
+                                    userInfo:@{
+                   NSLocalizedDescriptionKey:NSLocalizedString(@"Cannot start a login operation while another login operation is in progress.", nil)}]);
         return;
     }
     
     NSMutableURLRequest *request = [[NSURLRequest requestWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"login/%@", provider]
                                                    relativeToURL:self.applicationURL]] mutableCopy];
     request.HTTPMethod = @"POST";
-    NSError *error;
+    NSError *error = nil;
     request.HTTPBody = [NSJSONSerialization dataWithJSONObject:token options:(0) error:&error];
     if (error) {
         if (onError) {

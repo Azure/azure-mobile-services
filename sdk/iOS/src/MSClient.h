@@ -17,7 +17,6 @@
 #import <Foundation/Foundation.h>
 #import "MSError.h"
 #import "MSLoginViewController.h"
-#import "MSUser.h"
 #import "MSFilter.h"
 
 @class MSTable;

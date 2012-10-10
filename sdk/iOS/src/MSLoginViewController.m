@@ -21,9 +21,9 @@
 // Private instance properties
 @property (nonatomic, strong, readwrite) NSURL* startUrl;
 @property (nonatomic, strong, readwrite) NSURL* endUrl;
-@property (nonatomic, strong, readwrite) MSEndUrlNavigatedTo onSuccess;
-@property (nonatomic, strong, readwrite) MSNavigationCancelled onCancel;
-@property (nonatomic, strong, readwrite) MSErrorBlock onError;
+@property (nonatomic, copy, readwrite) MSEndUrlNavigatedTo onSuccess;
+@property (nonatomic, copy, readwrite) MSNavigationCancelled onCancel;
+@property (nonatomic, copy, readwrite) MSErrorBlock onError;
 
 - (IBAction)cancel:(id)sender;
 
@@ -31,11 +31,11 @@
 
 @implementation MSLoginViewController
 
-@synthesize startUrl = _startUrl;
-@synthesize endUrl = _endUrl;
-@synthesize onError = _onError;
-@synthesize onCancel = _onCancel;
-@synthesize onSuccess = _onSuccess;
+@synthesize startUrl = startUrl_;
+@synthesize endUrl = endUrl_;
+@synthesize onError = onError_;
+@synthesize onCancel = onCancel_;
+@synthesize onSuccess = onSuccess_;
 
 UIWebView *hostedWebView;
 
@@ -50,16 +50,21 @@ UIWebView *hostedWebView;
               onSuccess:(MSEndUrlNavigatedTo)onSuccess
                onCancel:(MSNavigationCancelled)onCancel
                 onError:(MSErrorBlock)onError {
-    _startUrl = startUrl;
-    _endUrl = endUrl;
-    _onSuccess = onSuccess;
-    _onCancel = onCancel;
-    _onError = onError;
+    self = [super initWithNibName:nil bundle:nil];
+    if (self) {
+        startUrl_ = startUrl;
+        endUrl_ = endUrl;
+        self.onSuccess = onSuccess;
+        self.onCancel = onCancel;
+        self.onError = onError;
+    }
     
     return self;
 }
 
 - (void) loadView {
+    [super loadView];
+    
     UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0,0,0,0)];
     view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     hostedWebView = [[UIWebView alloc] initWithFrame:CGRectMake(0,0,0,0)];
@@ -106,7 +111,11 @@ UIWebView *hostedWebView;
         id json = [NSJSONSerialization JSONObjectWithData:[body dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
         int statusCode = [[json objectForKey:@"code"] intValue];
         if (!error && statusCode >= 400) {
-            self.onError([NSError errorWithDomain:MSErrorDomain code:MSLoginFailed userInfo:json]);
+            self.onError([NSError errorWithDomain:MSErrorDomain
+                                             code:MSLoginFailed
+                                         userInfo:@{
+                        NSLocalizedDescriptionKey:NSLocalizedString(@"Authentication failed.", nil),
+                                      @"response":body}]);
         }
     }
 }

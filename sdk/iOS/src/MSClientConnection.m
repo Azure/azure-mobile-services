@@ -17,6 +17,7 @@
 #import "MSClientConnection.h"
 #import "MSUserAgentBuilder.h"
 #import "MSFilter.h"
+#import "MSUser.h"
 
 
 #pragma mark * HTTP Header String Constants
