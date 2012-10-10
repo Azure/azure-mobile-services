@@ -170,6 +170,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E8F33AEE1616659C002DD7C6 /* SenTestingKit.framework in Frameworks */,
+				E84CA4D316236A6E009B2588 /* UIKit.framework in Frameworks */,
 				E8F33AF11616659C002DD7C6 /* Foundation.framework in Frameworks */,
 				E8F33AF41616659C002DD7C6 /* libWindowsAzureMobileServices.a in Frameworks */,
 			);
