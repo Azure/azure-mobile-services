@@ -205,6 +205,9 @@ namespace Microsoft.WindowsAzure.MobileServices
                     case JTokenType.String:
                         propertyValue = value.AsString();
                         break;
+                    case JTokenType.Date:
+                        propertyValue = value.ToObject<DateTime>(); // AsDateTime() doesn't make sense since DateTime is a reference not object type.  (Can't use 'as' operator)
+                        break;
                     case JTokenType.Null:
                         break;
                     case JTokenType.Object:
