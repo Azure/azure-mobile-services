@@ -23,6 +23,5 @@
 #import "MSUser.h"
 #import "MSFilter.h"
 #import "MSError.h"
-#import "MSLoginViewController.h"
 
 #endif

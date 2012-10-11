@@ -27,6 +27,8 @@
 		E84CA4D0162369BD009B2588 /* MSUserAgentBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = E84CA4CE162369BD009B2588 /* MSUserAgentBuilder.m */; };
 		E84CA4D316236A6E009B2588 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E84CA4D216236A6E009B2588 /* UIKit.framework */; };
 		E84CA4D6162373E2009B2588 /* MSUserAgentBuilderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E84CA4D5162373E2009B2588 /* MSUserAgentBuilderTests.m */; };
+		E84CA4DE16272371009B2588 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E84CA4D216236A6E009B2588 /* UIKit.framework */; };
+		E84CA4E116272C15009B2588 /* MSLoginViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 402774F8161F73AB00A23A8F /* MSLoginViewController.h */; };
 		E87BB01C161A28FC008053F9 /* MSClientTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB01B161A28FC008053F9 /* MSClientTests.m */; };
 		E87BB01F161A446C008053F9 /* MSTableURLBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB01E161A446C008053F9 /* MSTableURLBuilder.m */; };
 		E87BB022161B57C8008053F9 /* MSUserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB021161B57C8008053F9 /* MSUserTests.m */; };
@@ -170,7 +172,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E8F33AEE1616659C002DD7C6 /* SenTestingKit.framework in Frameworks */,
-				E84CA4D316236A6E009B2588 /* UIKit.framework in Frameworks */,
+				E84CA4DE16272371009B2588 /* UIKit.framework in Frameworks */,
 				E8F33AF11616659C002DD7C6 /* Foundation.framework in Frameworks */,
 				E8F33AF41616659C002DD7C6 /* libWindowsAzureMobileServices.a in Frameworks */,
 			);
@@ -179,6 +181,15 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E84CA4E016272BA2009B2588 /* Login */ = {
+			isa = PBXGroup;
+			children = (
+				402774F8161F73AB00A23A8F /* MSLoginViewController.h */,
+				402774F9161F73AB00A23A8F /* MSLoginViewController.m */,
+			);
+			name = Login;
+			sourceTree = "<group>";
+		};
 		E8E37901161E2F8D00C13F00 /* Filters */ = {
 			isa = PBXGroup;
 			children = (
@@ -232,12 +243,11 @@
 				E8F33B12161667CE002DD7C6 /* MSUser.h */,
 				E8F33B13161667CE002DD7C6 /* MSUser.m */,
 				E8E378FF161E14E800C13F00 /* MSFilter.h */,
+				E84CA4E016272BA2009B2588 /* Login */,
 				E8F33B1A161667E2002DD7C6 /* Connection */,
 				E8F33B1B161667EC002DD7C6 /* Serialization */,
 				E8F33B1C161667F6002DD7C6 /* Query */,
 				E8F33AE11616659C002DD7C6 /* Supporting Files */,
-				402774F8161F73AB00A23A8F /* MSLoginViewController.h */,
-				402774F9161F73AB00A23A8F /* MSLoginViewController.m */,
 			);
 			name = Source;
 			path = src;
@@ -356,6 +366,7 @@
 				E8E37912161F769D00C13F00 /* MSUser.h in Headers */,
 				E8E37913161F769D00C13F00 /* MSFilter.h in Headers */,
 				E8E3790F161F769D00C13F00 /* MSError.h in Headers */,
+				E84CA4E116272C15009B2588 /* MSLoginViewController.h in Headers */,
 				E8E37914161F769D00C13F00 /* MSClientConnection.h in Headers */,
 				E8E37915161F769D00C13F00 /* MSTableConnection.h in Headers */,
 				E8E37916161F769D00C13F00 /* MSTableRequest.h in Headers */,

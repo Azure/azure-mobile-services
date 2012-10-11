@@ -112,11 +112,12 @@ typedef void (^MSClientLoginSuccessBlock)(MSUser *user);
 #pragma  mark * Public Login and Logout Methods
 
 
-// Logs in the current end user with the given provider.
+// Returns a |UINavigationController| that can be used to log in the current
+// end user with the given provider.
 -(UINavigationController *) loginViewControllerWithProvider:(NSString *)provider
-                                                 onSuccess:(MSClientLoginSuccessBlock)onSuccess
-                                                  onCancel:(MSNavigationCancelled)onCancel
-                                                   onError:(MSErrorBlock)onError;
+                                onSuccess:(MSClientLoginSuccessBlock)onSuccess
+                                onCancel:(MSNavigationCancelled)onCancel
+                                onError:(MSErrorBlock)onError;
 
 // Logs in the current end user with the given provider and the given token for
 // the provider.

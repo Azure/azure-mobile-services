@@ -18,17 +18,19 @@
 #import <UIKit/UIKit.h>
 #import "MSError.h"
 
-#ifndef WindowsAzureMobileServices_MSLoginViewController_h
-#define WindowsAzureMobileServices_MSLoginViewController_h
-
 
 #pragma mark * Block Type Definitions
+
 
 // Callback for navigation to the end URL of the MSLoginViewController
 typedef void (^MSEndUrlNavigatedTo)(NSURL *url);
 
 // Callback for user cancelled MSLoginViewController
 typedef void (^MSNavigationCancelled)();
+
+
+#pragma  mark * MSLoginViewController Public Interface
+
 
 @interface MSLoginViewController : UIViewController<UIWebViewDelegate>
 
@@ -39,5 +41,3 @@ typedef void (^MSNavigationCancelled)();
                  onError:(MSErrorBlock) onError;
 
 @end
-
-#endif
