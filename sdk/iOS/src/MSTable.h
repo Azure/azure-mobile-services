@@ -23,20 +23,23 @@
 #pragma mark * Block Type Definitions
 
 
-// Callback for successful updates, inserts or readWithId requests. The
-// |item| will always be non-nil and will also have an associated 'id'.
-typedef void (^MSItemSuccessBlock)(NSDictionary *item);
+// Callback for updates, inserts or readWithId requests. If there was an
+// error, the |error| will be non-nil.
+typedef void (^MSItemBlock)(NSDictionary *item, NSError *error);
 
-// Callback for successful deletes. The |itemId| will always be non-nil and
-// will be the id of the item that was deleted.
-typedef void (^MSDeleteSuccessBlock)(NSNumber *itemId);
+// Callback for deletes. If there was an error, the |error| will be non-nil.
 
-// Callback for successful reads. The |items| array will always be non-nil
+typedef void (^MSDeleteBlock)(NSNumber *itemId, NSError *error);
+
+// Callback for reads. If there was an error, the |error| will be non-nil. If
+// there was not an error, then the |items| array will always be non-nil
 // but may be empty if the query returned no results. If the query included a
 // request for the total count of items on the server (not just those returned
 // in |items| array), the |totalCount| will have this value; otherwise
 // |totalCount| will be -1.
-typedef void (^MSReadQuerySuccessBlock)(NSArray *items, NSInteger totalCount);
+typedef void (^MSReadQueryBlock)(NSArray *items,
+                                 NSInteger totalCount,
+                                 NSError *error);
 
 
 #pragma mark * MSTable Public Interface
@@ -72,27 +75,19 @@ typedef void (^MSReadQuerySuccessBlock)(NSArray *items, NSInteger totalCount);
 
 // Sends a request to the Windows Azure Mobile Service to insert the given
 // item into the table. The item does not need to have an id.
--(void) insert:(NSDictionary *)item
-            onSuccess:(MSItemSuccessBlock)onSuccess
-            onError:(MSErrorBlock)onError;
+-(void) insert:(NSDictionary *)item completion:(MSItemBlock)completion;
 
 // Sends a request to the Windows Azure Mobile Service to update the given
 // item in the table. The item must have an id.
--(void) update:(NSDictionary *)item
-            onSuccess:(MSItemSuccessBlock)onSuccess
-            onError:(MSErrorBlock)onError;
+-(void) update:(NSDictionary *)item completion:(MSItemBlock)completion;
 
 // Sends a request to the Windows Azure Mobile Service to delete the given
 // item from the table. The item must have an id.
--(void) delete:(NSDictionary *)item
-            onSuccess:(MSDeleteSuccessBlock)onSuccess
-            onError:(MSErrorBlock)onError;
+-(void) delete:(NSDictionary *)item completion:(MSDeleteBlock)completion;
 
 // Sends a request to the Windows Azure Mobile Service to delete the item
 // with the given id in from table.
--(void) deleteWithId:(NSNumber *)itemId
-            onSuccess:(MSDeleteSuccessBlock)onSuccess
-            onError:(MSErrorBlock)onError;
+-(void) deleteWithId:(NSNumber *)itemId completion:(MSDeleteBlock)completion;
 
 
 #pragma mark * Public Read Methods
@@ -100,27 +95,22 @@ typedef void (^MSReadQuerySuccessBlock)(NSArray *items, NSInteger totalCount);
 
 // Sends a request to the Windows Azure Mobile Service to return the item
 // with the given id from the table.
--(void) readWithId:(NSNumber *)itemId
-            onSuccess:(MSItemSuccessBlock)onSuccess
-            onError:(MSErrorBlock)onError;
+-(void) readWithId:(NSNumber *)itemId completion:(MSItemBlock)completion;;
 
 // Sends a request to the Windows Azure Mobile Service to return all items
 // fromm the table that meet the conditions of the given query.
 -(void) readWithQueryString:(NSString *)queryString
-            onSuccess:(MSReadQuerySuccessBlock)onSuccess
-            onError:(MSErrorBlock)onError;
+                 completion:(MSReadQueryBlock)completion;
 
 // Sends a request to the Windows Azure Mobile Service to return all items
-// from the table. The serWindows Azure Mobile Servicever will apply a default
+// from the table. The Windows Azure Mobile Service will apply a default
 // limit to the number of items returned.
--(void) readOnSuccess:(MSReadQuerySuccessBlock)onSuccess
-            onError:(MSErrorBlock)onError;
+-(void) readWithCompletion:(MSReadQueryBlock)completion;
 
 // Sends a request to the Windows Azure Mobile Service to return all items
 // from the table that meet the conditions of the given predicate.
 -(void) readWhere:(NSPredicate *) predicate
-            onSuccess:(MSReadQuerySuccessBlock)onSuccess
-            onError:(MSErrorBlock)onError;
+            completion:(MSReadQueryBlock)completion;
 
 
 #pragma mark * Public Query Constructor Methods

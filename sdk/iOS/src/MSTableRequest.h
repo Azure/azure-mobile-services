@@ -69,37 +69,37 @@ typedef enum MSTableRequestTypeEnum {
 +(MSTableItemRequest *) requestToInsertItem:(id)item
                                 withTable:(MSTable *)table
                                 withSerializer:(id<MSSerializer>)serializer
-                                onError:(MSErrorBlock)onError;
+                                completion:(MSItemBlock)completion;
 
 // Creates a request to update the item in the given table.
 +(MSTableItemRequest *) requestToUpdateItem:(id)item
                                 withTable:(MSTable *)table
                                 withSerializer:(id<MSSerializer>)serializer
-                                onError:(MSErrorBlock)onError;
+                                completion:(MSItemBlock)completion;
 
 // Creates a request to delete the item from the given table.
 +(MSTableDeleteRequest *) requestToDeleteItem:(id)item
                                 withTable:(MSTable *)table
                                 withSerializer:(id<MSSerializer>)serializer
-                                onError:(MSErrorBlock)onError;
+                                completion:(MSDeleteBlock)completion;
 
 // Creates a request to delete the item with the given id from the given table.
 +(MSTableDeleteRequest *) requestToDeleteItemWithId:(id)itemId
                                 withTable:(MSTable *)table
                                 withSerializer:(id<MSSerializer>)serializer
-                                onError:(MSErrorBlock)onError;
+                                completion:(MSDeleteBlock)completion;
 
 // Creates a request to read the item with the given ide from the given table.
 +(MSTableItemRequest *) requestToReadWithId:(id)itemId
                                 withTable:(MSTable *)table
                                 withSerializer:(id<MSSerializer>)serializer
-                                onError:(MSErrorBlock)onError;
+                                completion:(MSItemBlock)completion;
 
 // Creates a request to the read the given table with the given query.
 +(MSTableReadQueryRequest*) requestToReadItemsWithQuery:(NSString *)queryString
                                 withTable:(MSTable *)table
                                 withSerializer:(id<MSSerializer>)serializer
-                                onError:(MSErrorBlock)onError;
+                                completion:(MSReadQueryBlock)completion;
 
 @end
 

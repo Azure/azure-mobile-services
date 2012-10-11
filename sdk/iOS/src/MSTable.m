@@ -60,82 +60,70 @@
 #pragma mark * Public Insert, Update, Delete Methods
 
 
--(void) insert:(NSDictionary *)item
-            onSuccess:(MSItemSuccessBlock)onSuccess
-            onError:(MSErrorBlock)onError
+-(void) insert:(NSDictionary *)item completion:(MSItemBlock)completion
 {
     // Create the request
     MSTableItemRequest *request = [MSTableRequest
                                    requestToInsertItem:item
                                    withTable:self
                                    withSerializer:self.serializer
-                                   onError:onError];
+                                   completion:completion];
     // Send the request
     if (request) {
         MSTableConnection *connection =
             [MSTableConnection connectionWithItemRequest:request
-                                               onSuccess:onSuccess
-                                                 onError:onError];
+                                              completion:completion];
         [connection start];
     }
 }
 
--(void) update:(NSDictionary *)item
-            onSuccess:(MSItemSuccessBlock)onSuccess
-            onError:(MSErrorBlock)onError
+-(void) update:(NSDictionary *)item completion:(MSItemBlock)completion
 {
     // Create the request
     MSTableItemRequest *request = [MSTableRequest
                                    requestToUpdateItem:item
                                    withTable:self
                                    withSerializer:self.serializer
-                                   onError:onError];
+                                   completion:completion];
     // Send the request
     if (request) {
         MSTableConnection *connection =
             [MSTableConnection connectionWithItemRequest:request
-                                               onSuccess:onSuccess
-                                                 onError:onError];
+                                              completion:completion];
         [connection start];
     }
 }
 
--(void) delete:(NSDictionary *)item
-            onSuccess:(MSDeleteSuccessBlock)onSuccess
-            onError:(MSErrorBlock)onError
+-(void) delete:(NSDictionary *)item completion:(MSDeleteBlock)completion
 {
     // Create the request
     MSTableDeleteRequest *request = [MSTableRequest
                                      requestToDeleteItem:item
                                      withTable:self
                                      withSerializer:self.serializer
-                                     onError:onError];
+                                     completion:completion];
     // Send the request
     if (request) {
         MSTableConnection *connection =
             [MSTableConnection connectionWithDeleteRequest:request
-                                                 onSuccess:onSuccess
-                                                   onError:onError];
+                                                completion:completion];
         [connection start];
     }
 }
 
--(void) deleteWithId:(NSNumber *)itemId
-            onSuccess:(MSDeleteSuccessBlock)onSuccess
-            onError:(MSErrorBlock)onError
+-(void) deleteWithId:(NSNumber *)itemId completion:(MSDeleteBlock)completion
 {
     // Create the request
     MSTableDeleteRequest *request = [MSTableRequest
                                      requestToDeleteItemWithId:itemId
                                      withTable:self
                                      withSerializer:self.serializer
-                                     onError:onError];
+                                     completion:completion];
     // Send the request
     if (request) {
         MSTableConnection *connection = 
             [MSTableConnection connectionWithDeleteRequest:request
-                                                 onSuccess:onSuccess
-                                                   onError:onError];
+                                                completion:completion];
         [connection start];
     }
 }
@@ -144,65 +132,55 @@
 #pragma mark * Public Read Methods
 
 
--(void) readWithId:(NSNumber *)itemId
-            onSuccess:(MSItemSuccessBlock)onSuccess
-            onError:(MSErrorBlock)onError
+-(void) readWithId:(NSNumber *)itemId completion:(MSItemBlock)completion
 {
     // Create the request
     MSTableItemRequest *request = [MSTableRequest
                                    requestToReadWithId:itemId
                                    withTable:self
                                    withSerializer:self.serializer
-                                   onError:onError];
+                                   completion:completion];
     // Send the request
     if (request) {
         MSTableConnection *connection =
             [MSTableConnection connectionWithItemRequest:request
-                                               onSuccess:onSuccess
-                                                 onError:onError];
+                                              completion:completion];
         [connection start];
     }
 }
 
 -(void) readWithQueryString:(NSString *)queryString
-            onSuccess:(MSReadQuerySuccessBlock)onSuccess
-            onError:(MSErrorBlock)onError
+                 completion:(MSReadQueryBlock)completion
 {
     // Create the request
     MSTableReadQueryRequest *request = [MSTableRequest
                                         requestToReadItemsWithQuery:queryString
                                         withTable:self
                                         withSerializer:self.serializer
-                                        onError:onError];
+                                        completion:completion];
     // Send the request
     if (request) {
         MSTableConnection *connection =
             [MSTableConnection connectionWithReadRequest:request
-                                               onSuccess:onSuccess
-                                                 onError:onError];
+                                              completion:completion];
         [connection start];
     }
 }
 
--(void) readOnSuccess:(MSReadQuerySuccessBlock)onSuccess
-              onError:(MSErrorBlock)onError;
+-(void) readWithCompletion:(MSReadQueryBlock)completion
 {
     // Read without a query string
-    [self readWithQueryString:nil
-                   onSuccess:onSuccess
-                     onError:onError];
-    
+    [self readWithQueryString:nil completion:completion];
 }
 
 -(void) readWhere:(NSPredicate *) predicate
-            onSuccess:(MSReadQuerySuccessBlock)onSuccess
-            onError:(MSErrorBlock)onError
+            completion:(MSReadQueryBlock)completion
 {
     // Create the query from the predicate
     MSQuery *query = [self queryWhere:predicate];
     
     // Call read on the query
-    [query readOnSuccess:onSuccess onError:onError];
+    [query readWithCompletion:completion];
 }
 
 

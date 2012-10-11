@@ -93,8 +93,7 @@
 
 
 // Executes the query by sending a request to the Windows Azure Mobile Service.
--(void) readOnSuccess:(MSReadQuerySuccessBlock)onSuccess
-              onError:(MSErrorBlock)onError;
+-(void) readWithCompletion:(MSReadQueryBlock)completion;
 
 
 #pragma mark * Public QueryString Methods
@@ -102,6 +101,6 @@
 
 // Generates a query string for current state of the |MSQuery| instance or an
 // error if the query string could not be generated.
--(NSString *) queryStringorError:(NSError **)error;
+-(NSString *) queryStringOrError:(NSError **)error;
 
 @end

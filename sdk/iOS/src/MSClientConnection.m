@@ -41,23 +41,9 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 
 @property (nonatomic, strong)               NSData *data;
 @property (nonatomic, strong)               NSHTTPURLResponse *response;
-@property (nonatomic, strong, readonly)     MSSuccessBlock successBlock;
-@property (nonatomic, strong, readonly)     MSErrorBlock errorBlock;
+@property (nonatomic, copy, readonly)       MSResponseBlock completion;
 
--(id) initWithOnSuccess:(MSSuccessBlock)onSuccess
-                onError:(MSErrorBlock)onError;
-@end
-
-
-#pragma mark * MSClientConnection Private Interface
-
-
-@interface MSClientConnection ()
-
-// Private properties
-@property (nonatomic, copy, readonly)       MSSuccessBlock onSuccess;
-@property (nonatomic, copy, readonly)       MSErrorBlock onError;
-
+-(id) initWithCompletion:(MSResponseBlock)completion;
 @end
 
 
@@ -68,8 +54,7 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 
 @synthesize client = client_;
 @synthesize request = request_;
-@synthesize onSuccess = onSuccess_;
-@synthesize onError = onError_;
+@synthesize completion = completion_;
 
 
 # pragma mark * Public Initializer Methods
@@ -77,16 +62,14 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 
 -(id) initWithRequest:(NSURLRequest *)request
            withClient:(MSClient *)client
-            onSuccess:(MSSuccessBlock)onSuccess
-              onError:(MSErrorBlock)onError
+            completion:(MSResponseBlock)completion
 {
     self = [super init];
     if (self) {
         client_ = client;
         request_ = [MSClientConnection configureHeadersOnRequest:request
                                                       withClient:client];
-        onSuccess_ = onSuccess;
-        onError_ = onError;
+        completion_ = [completion copy];
     }
     
     return self;
@@ -100,8 +83,7 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 {
     [MSClientConnection invokeNextFilter:self.client.filters
                              withRequest:self.request
-                              onResponse:self.onSuccess
-                                 onError:self.onError];
+                              completion:self.completion];
 }
 
 
@@ -110,16 +92,14 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 
 +(void) invokeNextFilter:(NSArray *)filters
              withRequest:(NSURLRequest *)request
-               onResponse:(MSFilterResponseBlock)onResponse
-                 onError:(MSErrorBlock)onError
+               completion:(MSFilterResponseBlock)completion
 {
     if (!filters || filters.count == 0) {
         
         // No filters to invoke so use |NSURLConnection | to actually
         // send the request.
         MSConnectionDelegate *delegate = [[MSConnectionDelegate alloc]
-                                          initWithOnSuccess:onResponse
-                                          onError:onError];
+                                          initWithCompletion:completion];
         [NSURLConnection connectionWithRequest:request delegate:delegate];
     }
     else {
@@ -132,20 +112,17 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
     
         MSFilterNextBlock onNext =
         [^(NSURLRequest *onNextRequest,
-           MSFilterResponseBlock onNextResponse,
-           MSErrorBlock onNextError)
+           MSFilterResponseBlock onNextResponse)
         {
             [MSClientConnection invokeNextFilter:nextFilters
                                      withRequest:onNextRequest
-                                      onResponse:onNextResponse
-                                         onError:onNextError];
+                                      completion:onNextResponse];
                                     
         } copy];
         
         [nextFilter handleRequest:request
                            onNext:onNext
-                       onResponse:onResponse
-                          onError:onError];
+                       onResponse:completion];
     }
 }
 
@@ -154,8 +131,11 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 {
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
     
+    // Add the authentication header if the user is logged in
     if (client.currentUser && client.currentUser.mobileServiceAuthenticationToken) {
-        [mutableRequest setValue:client.currentUser.mobileServiceAuthenticationToken forHTTPHeaderField:xZumoAuth];
+        [mutableRequest
+         setValue:client.currentUser.mobileServiceAuthenticationToken
+         forHTTPHeaderField:xZumoAuth];
     }
     
     // Set the User Agent header
@@ -183,8 +163,7 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 
 @implementation MSConnectionDelegate
 
-@synthesize successBlock = successBlock_;
-@synthesize errorBlock = errorBlock_;
+@synthesize completion = completion_;
 @synthesize data = data_;
 @synthesize response = response_;
 
@@ -192,13 +171,11 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 # pragma mark * Public Initializer Methods
 
 
--(id) initWithOnSuccess:(MSSuccessBlock)onSuccess
-                onError:(MSErrorBlock)onError
+-(id) initWithCompletion:(MSResponseBlock)completion
 {
     self = [super init];
     if (self) {
-        successBlock_ = [onSuccess copy];
-        errorBlock_ = [onError copy];
+        completion_ = [completion copy];
     }
     
     return self;
@@ -211,8 +188,8 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 -(void) connection:(NSURLConnection *)connection
   didFailWithError:(NSError *)error
 {
-    if (self.errorBlock) {
-        self.errorBlock(error);
+    if (self.completion) {
+        self.completion(nil, nil, error);
     }
 }
 
@@ -252,8 +229,8 @@ didReceiveResponse:(NSURLResponse *)response
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection
 {
-    if (self.successBlock) {
-        self.successBlock(self.response, self.data);
+    if (self.completion) {
+        self.completion(self.response, self.data, nil);
     }
 }
 

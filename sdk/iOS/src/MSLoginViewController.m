@@ -21,9 +21,7 @@
 // Private instance properties
 @property (nonatomic, strong, readwrite) NSURL* startUrl;
 @property (nonatomic, strong, readwrite) NSURL* endUrl;
-@property (nonatomic, copy, readwrite) MSEndUrlNavigatedTo onSuccess;
-@property (nonatomic, copy, readwrite) MSNavigationCancelled onCancel;
-@property (nonatomic, copy, readwrite) MSErrorBlock onError;
+@property (nonatomic, copy, readwrite) MSEndUrlNavigatedTo completion;
 
 - (IBAction)cancel:(id)sender;
 
@@ -33,13 +31,12 @@
 
 @synthesize startUrl = startUrl_;
 @synthesize endUrl = endUrl_;
-@synthesize onError = onError_;
-@synthesize onCancel = onCancel_;
-@synthesize onSuccess = onSuccess_;
+@synthesize completion = completion_;
 
 UIWebView *hostedWebView;
 
-- (void) dealloc {
+- (void) dealloc
+{
     if (hostedWebView) {
         hostedWebView.delegate = nil;
     }
@@ -47,22 +44,20 @@ UIWebView *hostedWebView;
 
 - (id) initWithStartUrl:(NSURL *)startUrl
                  endUrl:(NSURL *)endUrl
-              onSuccess:(MSEndUrlNavigatedTo)onSuccess
-               onCancel:(MSNavigationCancelled)onCancel
-                onError:(MSErrorBlock)onError {
+             completion:(MSEndUrlNavigatedTo)completion
+{
     self = [super initWithNibName:nil bundle:nil];
     if (self) {
         startUrl_ = startUrl;
         endUrl_ = endUrl;
-        self.onSuccess = onSuccess;
-        self.onCancel = onCancel;
-        self.onError = onError;
+        self.completion = completion;
     }
     
     return self;
 }
 
-- (void) loadView {
+- (void) loadView
+{
     [super loadView];
     
     UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0,0,0,0)];
@@ -80,16 +75,27 @@ UIWebView *hostedWebView;
     self.view = view;
 }
 
-- (IBAction)cancel:(id)sender {
-    self.onCancel();
+- (IBAction)cancel:(id)sender
+{
+    NSDictionary *userInfo = @{
+        NSLocalizedDescriptionKey:NSLocalizedString(@"Authentication canceled.", nil)
+    };
+    
+    NSError *error =[NSError errorWithDomain:MSErrorDomain
+                                        code:MSLoginCanceled
+                                    userInfo:userInfo];
+    self.completion(nil, error);
 }
+
 
 #pragma mark * UIWebViewDelegate methods
 
-- (BOOL) webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {    
+
+- (BOOL) webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
+{
     if ([request.URL.absoluteString rangeOfString:self.endUrl.absoluteString].location == 0) {
-        if (self.onSuccess) {
-            self.onSuccess(request.URL);
+        if (self.completion) {
+            self.completion(request.URL, nil);
         }
     
         return NO;
@@ -98,24 +104,32 @@ UIWebView *hostedWebView;
     return YES;
 }
 
-- (void) webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error {
-    if (self.onError) {
-        self.onError(error);
+- (void) webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error
+{
+    if (self.completion) {
+        self.completion(nil, error);
     }
 }
 
-- (void) webViewDidFinishLoad:(UIWebView *)webView {
-    if (self.onError) {
+- (void) webViewDidFinishLoad:(UIWebView *)webView
+{
+    if (self.completion) {
         NSString* body = [webView stringByEvaluatingJavaScriptFromString:@"document.body.innerText"];
         NSError *error;
         id json = [NSJSONSerialization JSONObjectWithData:[body dataUsingEncoding:NSUTF8StringEncoding] options:0 error:&error];
         int statusCode = [[json objectForKey:@"code"] intValue];
         if (!error && statusCode >= 400) {
-            self.onError([NSError errorWithDomain:MSErrorDomain
-                                             code:MSLoginFailed
-                                         userInfo:@{
-                        NSLocalizedDescriptionKey:NSLocalizedString(@"Authentication failed.", nil),
-                                      @"response":body}]);
+            
+            NSDictionary *userInfo = @{
+                NSLocalizedDescriptionKey:NSLocalizedString(@"Authentication failed.", nil),
+                MSErrorResponseKey:body
+            };
+            
+            NSError *error =[NSError errorWithDomain:MSErrorDomain
+                                                code:MSLoginFailed
+                                            userInfo:userInfo];
+            
+            self.completion(nil, error);
         }
     }
 }

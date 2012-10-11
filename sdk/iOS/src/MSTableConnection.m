@@ -24,7 +24,6 @@
 @interface MSTableConnection ()
 
 // Private properties
-@property (nonatomic, strong, readwrite)        MSErrorBlock errorBlock;
 @property (nonatomic, strong, readwrite)        id<MSSerializer> serializer;
 
 @end
@@ -36,7 +35,6 @@
 @implementation MSTableConnection
 
 @synthesize table = table_;
-@synthesize errorBlock = errorBlock_;
 @synthesize serializer = serializer_;
 
 
@@ -44,109 +42,125 @@
 
 
 +(MSTableConnection *) connectionWithItemRequest:(MSTableItemRequest *)request
-                                       onSuccess:(MSItemSuccessBlock)onSuccess
-                                         onError:(MSErrorBlock)onError
+                                      completion:(MSItemBlock)completion
 {
     // We'll use the conection in the response block below but won't set
     // it until the init at the end, so we need to use __block
     __block MSTableConnection *connection = nil;
     
-    // Create an HTTP response success block that will invoke the
-    // MSItemSuccessBlock
-    MSSuccessBlock responseSuccess =
+    // Create an HTTP response block that will invoke the MSItemBlock
+    MSResponseBlock responseCompletion = nil;
     
-        ^(NSHTTPURLResponse *response, NSData *data)
+    if (completion) {
+    
+        responseCompletion = 
+        ^(NSHTTPURLResponse *response, NSData *data, NSError *error)
         {
-            // |isSuccessfulResponse:withData| will call the onError block
-            // if there is an error.
-            if ([connection isSuccessfulResponse:response withData:data]) {
+            id item = nil;
+            
+            if (!error) {
                 
-                // |itemFromData:withResponse:| will call the onError block
-                // if there is an error.
-                id item = [connection itemFromData:data withResponse:response];
-                
-                if (item && onSuccess) {
-                    onSuccess(item);
+                [connection isSuccessfulResponse:response
+                                        withData:data
+                                         orError:&error];
+                if (!error)
+                {
+                    item = [connection itemFromData:data
+                                       withResponse:response
+                                            orError:&error];
                 }
             }
-                
+            
+            [connection addRequestAndResponse:response toError:&error];
+            completion(item, error);
         };
+    }
     
-    // Now create the connection with the MSSuccessBlock
+    // Now create the connection with the MSResponseBlock
     connection = [[MSTableConnection alloc] initWithTableRequest:request
-                                                       onSuccess:responseSuccess
-                                                         onError:onError];
+                                                      completion:responseCompletion];
     return connection;
 }
 
 +(MSTableConnection *) connectionWithDeleteRequest:(MSTableDeleteRequest *)request
-                                         onSuccess:(MSDeleteSuccessBlock)onSuccess
-                                           onError:(MSErrorBlock)onError
+                                        completion:(MSDeleteBlock)completion
 {
     // We'll use the conection in the response block below but won't set
     // it until the init at the end, so we need to use __block
     __block MSTableConnection *connection = nil;
     
-    // Create an HTTP response success block that will invoke the
-    // MSDeleteSuccessBlock
-    MSSuccessBlock responseSuccess =
+    // Create an HTTP response block that will invoke the MSDeleteBlock
+    MSResponseBlock responseCompletion = nil;
     
-        ^(NSHTTPURLResponse *response, NSData *data)
+    if (completion) {
+    
+        responseCompletion =
+        ^(NSHTTPURLResponse *response, NSData *data, NSError *error)
         {
-            // |isSuccessfulResponse:withData| will call the onError block
-            // if there is an error.
-            if ([connection isSuccessfulResponse:response withData:data]) {
-                
-                if (onSuccess) {
-                    onSuccess(request.itemId );
-                }
+            
+            if (!error) {
+                [connection isSuccessfulResponse:response
+                                        withData:data
+                                         orError:&error];
+            }
+            
+            if (error) {
+                [connection addRequestAndResponse:response toError:&error];
+                completion(nil, error);
+            }
+            else {
+                completion(request.itemId, nil);
             }
             
         };
+    }
     
-    // Now create the connection with the MSSuccessBlock
+    // Now create the connection with the MSResponseBlock
     connection = [[MSTableConnection alloc] initWithTableRequest:request
-                                                       onSuccess:responseSuccess
-                                                         onError:onError];
+                                                      completion:responseCompletion];
     return connection;
 
 }
                                       
 +(MSTableConnection *) connectionWithReadRequest:(MSTableReadQueryRequest *)request
-                                       onSuccess:(MSReadQuerySuccessBlock)onSuccess
-                                         onError:(MSErrorBlock)onError
+                                      completion:(MSReadQueryBlock)completion
 {
     // We'll use the conection in the response block below but won't set
     // it until the init at the end, so we need to use __block
     __block MSTableConnection *connection = nil;
     
-    // Create an HTTP response success block that will invoke the
-    // MSReadQuerySuccessBlock
-    MSSuccessBlock responseSuccess =
+    // Create an HTTP response block that will invoke the MSReadQueryBlock
+    MSResponseBlock responseCompletion = nil;
     
-        ^(NSHTTPURLResponse *response, NSData *data)
+    if (completion) {
+    
+        responseCompletion =
+        ^(NSHTTPURLResponse *response, NSData *data, NSError *error)
         {
-            // |isSuccessfulResponse:withData| will call the onError block
-            // if there is an error.
-            if ([connection isSuccessfulResponse:response withData:data]) {
+            NSArray *items = nil;
+            NSInteger totalCount = -1;
+            
+            if (!error) {
                 
-                // |items:fromData:withResponse:| will call the onError block
-                // if there is an error.
-                NSArray *items;
-                NSInteger totalCount = [connection items:&items
-                                                fromData:data
-                                            withResponse:response];
-                if (items && onSuccess) {
-                    onSuccess(items, totalCount);
+                [connection isSuccessfulResponse:response
+                                        withData:data
+                                         orError:&error];
+                if (!error) {
+                    totalCount = [connection items:&items
+                                          fromData:data
+                                      withResponse:response
+                                           orError:&error];
                 }
             }
             
+            [connection addRequestAndResponse:response toError:&error];
+            completion(items, totalCount, error);
         };
+    }
     
     // Now create the connection with the MSSuccessBlock
     connection = [[MSTableConnection alloc] initWithTableRequest:request
-                                                       onSuccess:responseSuccess
-                                                         onError:onError];
+                                                      completion:responseCompletion];
     return connection;
 }
 
@@ -155,18 +169,14 @@
 
 
 -(id) initWithTableRequest:(MSTableRequest *)request
-                 onSuccess:(MSSuccessBlock)onSuccess
-                   onError:(MSErrorBlock)onError
-{
+                 completion:(MSResponseBlock)completion{
     self = [super initWithRequest:request
                        withClient:request.table.client
-                        onSuccess:onSuccess
-                          onError:onError];
+                        completion:completion];
     
     if (self) {
         table_ = request.table;
         serializer_ = request.serializer;
-        errorBlock_ = onError;
     }
     
     return self;
@@ -176,55 +186,34 @@
 # pragma mark * Private Methods
 
 
--(BOOL) isSuccessfulResponse:(NSHTTPURLResponse *)response
+-(void) isSuccessfulResponse:(NSHTTPURLResponse *)response
                     withData:(NSData *)data
+                     orError:(NSError **)error
 {
     // Success is determined just by the HTTP status code
     BOOL isSuccessful = response.statusCode < 400;
     
-    if (!isSuccessful && self.errorBlock) {
+    if (!isSuccessful && self.completion && error) {
         
-        NSError *error = nil;
-        
-        // Try to read the error message from the response body
-        if (data) {
-            error =[self.serializer errorFromData:data];
-        }
-        
-        // Otherwise use a generic error message
-        if (!error) {
-            NSString *description =
-                NSLocalizedString(@"HTTPResponseErrorStatusSansMessage", nil);
-            
-            // Include the request and response in the userInfo
-            NSDictionary *userInfo = @{
-                NSLocalizedDescriptionKey : description,
-                MSErrorRequestKey : self.request,
-                MSErrorResponseKey : response
-            };
-            
-            error = [NSError errorWithDomain:MSErrorDomain
-                                        code:MSErrorNoMessageErrorCode
-                                    userInfo:userInfo];
-        }
-        
-        self.errorBlock(error);
-        
+        // Read the error message from the response body
+        *error =[self.serializer errorFromData:data];
+        [self addRequestAndResponse:response toError:error];
     }
-
-    return isSuccessful;
 }
 
--(id) itemFromData:(NSData *)data withResponse:(NSHTTPURLResponse *)response
+-(id) itemFromData:(NSData *)data
+      withResponse:(NSHTTPURLResponse *)response
+           orError:(NSError **)error
 {
     // Try to deserialize the data
-    NSError *error = nil;
     id item = [self.serializer itemFromData:data
                            withOriginalItem:nil
-                                    orError:&error];
+                                    orError:error];
     
-    // If there was an error, invoke the errorBlock
-    [self callErrorBlockIfError:error withResponse:response];
+    // If there was an error, add the request and response
+    if (error && *error) {
+        [self addRequestAndResponse:response toError:error];
+    }
     
     return item;
 }
@@ -232,36 +221,38 @@
 -(NSInteger) items:(NSArray **)items
                 fromData:(NSData *)data
                 withResponse:(NSHTTPURLResponse *)response
+                orError:(NSError **)error
 {
     // Try to deserialize the data
-    NSError *error = nil;
     NSInteger totalCount = [self.serializer totalCountAndItems:items
                                                       fromData:data
-                                                       orError:&error];
+                                                       orError:error];
     
-    // If there was an error, invoke the errorBlock
-    [self callErrorBlockIfError:error withResponse:response];
+    // If there was an error, add the request and response
+    if (error && *error) {
+        [self addRequestAndResponse:response toError:error];
+    }
     
     return totalCount;
 }
 
--(void) callErrorBlockIfError:(NSError *)error
-                 withResponse:(NSHTTPURLResponse *)response
+-(void) addRequestAndResponse:(NSHTTPURLResponse *)response
+                toError:(NSError **)error
 {
-    if (error && self.errorBlock) {
-        
+    if (error && *error) {        
         // Create a new error with request and the response in the userInfo...
-        NSMutableDictionary *userInfo = [error.userInfo mutableCopy];
+        NSMutableDictionary *userInfo = [(*error).userInfo mutableCopy];
         [userInfo setObject:self.request forKey:MSErrorRequestKey];
-        [userInfo setObject:response forKey:MSErrorResponseKey];
         
-        NSError *newError = [NSError errorWithDomain:error.domain
-                                                code:error.code
-                                            userInfo:userInfo];
+        if (response) {
+            [userInfo setObject:response forKey:MSErrorResponseKey];
+        }
         
-        // and then call the error block
-        self.errorBlock(newError);
+        *error = [NSError errorWithDomain:(*error).domain
+                                    code:(*error).code
+                                userInfo:userInfo];
     }
+
 }
 
 @end

@@ -97,24 +97,22 @@ NSString *const inlineCountNone = @"none";
 #pragma mark * Public Read Methods
 
 
--(void) readOnSuccess:(MSReadQuerySuccessBlock)onSuccess
-              onError:(MSErrorBlock)onError;
+-(void) readWithCompletion:(MSReadQueryBlock)completion;
 {
     // Get the query string
     NSError *error = nil;
-    NSString *queryString = [self queryStringorError:&error];
+    NSString *queryString = [self queryStringOrError:&error];
     
     if (!queryString) {
         // Query string is invalid, so call error handler
-        if (onError) {
-            onError(error);
+        if (completion) {
+            completion(nil, -1, error);
         }
     }
     else {
         // Call read with the query string
         [self.table readWithQueryString:queryString
-                              onSuccess:onSuccess
-                                onError:onError];
+                              completion:completion];
     }
 }
 
@@ -137,7 +135,7 @@ NSString *const inlineCountNone = @"none";
 }
 
 
--(NSString *) queryStringorError:(NSError **)error
+-(NSString *) queryStringOrError:(NSError **)error
 {
     NSMutableString *queryString = nil;
     NSString *filterValue = nil;
@@ -231,7 +229,7 @@ NSString *const inlineCountNone = @"none";
 
 -(NSString *) description
 {
-    return [self queryStringorError:nil];
+    return [self queryStringOrError:nil];
 }
 
 @end

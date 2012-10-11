@@ -83,11 +83,9 @@
     MSTable *todoTable = [client getTable:@"todoItem"];
     
     // Insert the item
-    [todoTable insert:nil onSuccess:^(id newItem) {
-        
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+    [todoTable insert:nil completion:^(NSDictionary *item, NSError *error) {
+    
+        STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -113,11 +111,9 @@
     id item = [[NSDate alloc] initWithTimeIntervalSinceReferenceDate:0.0];
     
     // Insert the item
-    [todoTable insert:item onSuccess:^(id newItem) {
-        
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+    
+        STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -147,11 +143,9 @@
     MSTable *todoTable = [client getTable:@"todoItem"];
     
     // Update the item
-    [todoTable update:nil onSuccess:^(id updatedItem) {
-        
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+    [todoTable update:nil completion:^(NSDictionary *item, NSError *error) {
+    
+        STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -177,11 +171,9 @@
     id item = [[NSDate alloc] initWithTimeIntervalSinceReferenceDate:0.0];
     
     // Update the item
-    [todoTable update:item onSuccess:^(id updatedItem) {
+    [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
         
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+        STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -207,11 +199,9 @@
     NSDictionary *item = @{ @"text":@"Write unit tests!", @"complete": @(NO) };
     
     // Update the item
-    [todoTable update:item onSuccess:^(id updatedItem) {
-        
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+    [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
+  
+        STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -237,11 +227,9 @@
     NSDictionary *item = @{ @"text":@"Write unit tests!", @"id":@"I'm not valid." };
     
     // Update the item
-    [todoTable update:item onSuccess:^(id updatedItem) {
-        
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+    [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
+    
+        STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -271,11 +259,9 @@
     MSTable *todoTable = [client getTable:@"todoItem"];
     
     // Update the item
-    [todoTable delete:nil onSuccess:^(id itemId) {
-        
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+    [todoTable delete:nil completion:^(NSNumber *itemId, NSError *error) {
+  
+        STAssertNil(itemId, @"itemId should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -301,11 +287,9 @@
     id item = [[NSDate alloc] initWithTimeIntervalSinceReferenceDate:0.0];
     
     // Update the item
-    [todoTable delete:item onSuccess:^(id itemId) {
+    [todoTable delete:item completion:^(NSNumber *itemId, NSError *error) {
         
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+        STAssertNil(itemId, @"itemId should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -331,11 +315,9 @@
     NSDictionary *item = @{ @"text":@"Write unit tests!", @"complete": @(NO) };
     
     // Update the item
-    [todoTable delete:item onSuccess:^(id itemId) {
-        
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+    [todoTable delete:item completion:^(NSNumber *itemId, NSError *error) {
+    
+        STAssertNil(itemId, @"itemId should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -361,11 +343,9 @@
     NSDictionary *item = @{ @"text":@"Write unit tests!", @"id":@"I'm not valid." };
     
     // Update the item
-    [todoTable delete:item onSuccess:^(id itemId) {
+    [todoTable delete:item completion:^(NSNumber *itemId, NSError *error) {
         
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+        STAssertNil(itemId, @"itemId should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -388,11 +368,9 @@
     MSTable *todoTable = [client getTable:@"todoItem"];
 
     // Update the item
-    [todoTable deleteWithId:nil onSuccess:^(id itemId) {
-        
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+    [todoTable deleteWithId:nil completion:^(NSNumber *itemId, NSError *error) {
+    
+        STAssertNil(itemId, @"itemId should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -418,11 +396,9 @@
     id itemId = [[NSDate alloc] initWithTimeIntervalSince1970:0.0];
     
     // Update the item
-    [todoTable deleteWithId:itemId onSuccess:^(id newItem) {
+    [todoTable deleteWithId:itemId completion:^(NSNumber *itemId, NSError *error) {
         
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+        STAssertNil(itemId, @"itemId should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -453,11 +429,9 @@
     MSTable *todoTable = [client getTable:@"todoItem"];
     
     // Update the item
-    [todoTable readWithId:nil onSuccess:^(id itemId) {
-        
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+    [todoTable readWithId:nil completion:^(NSDictionary *item, NSError *error) {
+    
+        STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -483,11 +457,9 @@
     id itemId = [[NSDate alloc] initWithTimeIntervalSince1970:0.0];
     
     // Update the item
-    [todoTable readWithId:itemId onSuccess:^(id newItem) {
-        
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+    [todoTable readWithId:itemId completion:^(NSDictionary *item, NSError *error) {
+     
+        STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,

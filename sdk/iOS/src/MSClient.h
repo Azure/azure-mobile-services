@@ -26,8 +26,9 @@
 #pragma mark * Block Type Definitions
 
 
-// Callback for successful logins. The |user| will be non-nil.
-typedef void (^MSClientLoginSuccessBlock)(MSUser *user);
+// Callback loggging in an end user. If there was an error or the login was
+// cancelled, |error| will be non-nil.
+typedef void (^MSClientLoginBlock)(MSUser *user, NSError *error);
 
 
 #pragma  mark * MSClient Public Interface
@@ -115,16 +116,13 @@ typedef void (^MSClientLoginSuccessBlock)(MSUser *user);
 // Returns a |UINavigationController| that can be used to log in the current
 // end user with the given provider.
 -(UINavigationController *) loginViewControllerWithProvider:(NSString *)provider
-                                onSuccess:(MSClientLoginSuccessBlock)onSuccess
-                                onCancel:(MSNavigationCancelled)onCancel
-                                onError:(MSErrorBlock)onError;
+                                completion:(MSClientLoginBlock)completion;
 
 // Logs in the current end user with the given provider and the given token for
 // the provider.
 -(void) loginWithProvider:(NSString *)provider
                 withToken:(NSDictionary *)token
-                onSuccess:(MSClientLoginSuccessBlock)onSuccess
-                  onError:(MSErrorBlock)onError;
+                completion:(MSClientLoginBlock)completion;
 
 // Logs out the current end user.
 -(void) logout;

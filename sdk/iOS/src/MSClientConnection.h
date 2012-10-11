@@ -21,9 +21,12 @@
 #pragma mark * Block Type Definitions
 
 
-// Callback for successful connections. The |response| will be non-nil, but
+// Callback for connections. If there was an error, the |error| will be non-nil.
+// If there was not an error, the |response| will be non-nil, but
 // the |data| may or may not be nil depending on if the response had content.
-typedef void (^MSSuccessBlock)(NSHTTPURLResponse *response, NSData *data);
+typedef void (^MSResponseBlock)(NSHTTPURLResponse *response,
+                                NSData *data,
+                                NSError *error);
 
 
 #pragma  mark * MSClient Public Interface
@@ -41,6 +44,7 @@ typedef void (^MSSuccessBlock)(NSHTTPURLResponse *response, NSData *data);
 // The client that created the connection
 @property (nonatomic, strong, readonly)     MSClient *client;
 @property (nonatomic, strong, readonly)     NSURLRequest *request;
+@property (nonatomic, copy, readonly)       MSResponseBlock completion;
 
 
 #pragma  mark * Public Initializer Methods
@@ -50,8 +54,7 @@ typedef void (^MSSuccessBlock)(NSHTTPURLResponse *response, NSData *data);
 // request. NOTE: The request is not sent until |start| is called.
 -(id) initWithRequest:(NSURLRequest *)request
            withClient:(MSClient *)client
-            onSuccess:(MSSuccessBlock)onSuccess
-              onError:(MSErrorBlock)onError;
+            completion:(MSResponseBlock)completion;
 
 // Sends the request.
 -(void) start;

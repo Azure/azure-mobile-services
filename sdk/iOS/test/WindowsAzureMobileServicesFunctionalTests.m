@@ -70,7 +70,13 @@
     NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
     
     // Insert the item
-    [todoTable insert:item onSuccess:^(id newItem) {
+    [todoTable insert:item completion:^(NSDictionary *newItem, NSError *error) {
+        
+        // Check for an error
+        if (error) {
+            STAssertTrue(FALSE, @"Insert failed with error: %@", error.localizedDescription);
+            done = YES;
+        }
         
         // Verify that the insert succeeded
         STAssertNotNil(newItem, @"newItem should not be nil.");
@@ -84,7 +90,13 @@
             @"complete": @(YES)
         };
         
-        [todoTable update:itemToUpdate onSuccess:^(id updatedItem) {
+        [todoTable update:itemToUpdate completion:^(NSDictionary *updatedItem, NSError *error) {
+            
+            // Check for an error
+            if (error) {
+                STAssertTrue(FALSE, @"Update failed with error: %@", error.localizedDescription);
+                done = YES;
+            }
             
             // Verify that the update succeeded
             STAssertNotNil(updatedItem, @"updatedItem should not be nil.");
@@ -92,7 +104,13 @@
                            @"updatedItem should now be completed.");
             
             // Delete the item
-            [todoTable delete:updatedItem onSuccess:^(NSNumber *itemId) {
+            [todoTable delete:updatedItem completion:^(NSNumber *itemId, NSError *error) {
+ 
+                // Check for an error
+                if (error) {
+                    STAssertTrue(FALSE, @"Delete failed with error: %@", error.localizedDescription);
+                    done = YES;
+                }
                 
                 // Verify that the delete succeeded
                 STAssertTrue([itemId longLongValue] ==
@@ -100,27 +118,8 @@
                             @"itemId deleted was: %d.", itemId);
                 done = YES;
                 
-            } onError:^(NSError *error) {
-                STAssertTrue(FALSE,
-                             @"Delete failed with error: %@",
-                             error.localizedDescription);
-                done = YES;
-
             }];
-
-        } onError:^(NSError *error) {
-            STAssertTrue(FALSE,
-                         @"Update failed with error: %@",
-                         error.localizedDescription);
-            done = YES;
-
         }];
-        
-    } onError:^(NSError *error) {
-        STAssertTrue(FALSE,
-                     @"Insert failed with error: %@",
-                     error.localizedDescription);
-        done = YES;
     }];
     
     STAssertTrue([self waitForTest:90.0], @"Test timed out.");
@@ -135,91 +134,120 @@
     NSDictionary *item2 = @{ @"text":@"ItemB", @"complete": @(YES) };
     NSDictionary *item3 = @{ @"text":@"ItemB", @"complete": @(NO) };
     NSArray *items = @[item1,item2, item3];
-    
-    // Create an error block
-    id errorBlock = ^(NSError *error) {
-        STAssertTrue(FALSE,
-                     @"Test failed with error: %@",
-                     error.localizedDescription);
-        done = YES;
-    };
-    
-    
-    id query7AfterQuery6 = ^(NSArray *items, NSInteger totalCount) {
+
+    id query7AfterQuery6 = ^(NSArray *items, NSInteger totalCount, NSError *error) {
+        
+        // Check for an error
+        if (error) {
+            STAssertTrue(FALSE, @"Test failed with error: %@", error.localizedDescription);
+            done = YES;
+        }
+        
         STAssertTrue(items.count == 2, @"items.count was: %d", items.count);
         STAssertTrue(totalCount == 3, @"totalCount was: %d", totalCount);
         
-        [self deleteAllItemswithTable:todoTable
-                            onSuccess:^() { done = YES; }
-                              onError:errorBlock];
+        [self deleteAllItemswithTable:todoTable completion:^(NSError *error) { done = YES; }];
     };
     
-    id query6AfterQuery5 = ^(NSArray *items, NSInteger totalCount) {
+    id query6AfterQuery5 = ^(NSArray *items, NSInteger totalCount, NSError *error) {
+        
+        // Check for an error
+        if (error) {
+            STAssertTrue(FALSE, @"Test failed with error: %@", error.localizedDescription);
+            done = YES;
+        }
+        
         STAssertTrue(items.count == 2, @"items.count was: %d", items.count);
         STAssertTrue(totalCount == 3, @"totalCount was: %d", totalCount);
         
         MSQuery *query = [todoTable query];
         query.fetchOffset = 1;
         query.includeTotalCount = YES;
-        [query readOnSuccess:query7AfterQuery6 onError:errorBlock];
+        [query readWithCompletion:query7AfterQuery6];
     };
     
-    id query5AfterQuery4 = ^(NSArray *items, NSInteger totalCount) {
+    id query5AfterQuery4 = ^(NSArray *items, NSInteger totalCount, NSError *error) {
+        
+        // Check for an error
+        if (error) {
+            STAssertTrue(FALSE, @"Test failed with error: %@", error.localizedDescription);
+            done = YES;
+        }
+        
         STAssertTrue(items.count == 3, @"items.count was: %d", items.count);
         STAssertTrue(totalCount == -1, @"totalCount was: %d", totalCount);
         
         [todoTable readWithQueryString:@"$top=2&$inlinecount=allpages"
-                            onSuccess:query6AfterQuery5
-                              onError:errorBlock];
+                            completion:query6AfterQuery5];
     };
     
-    id query4AfterQuery3 = ^(NSDictionary *item) { 
+    id query4AfterQuery3 = ^(NSDictionary *item, NSError *error) {
+        
+        // Check for an error
+        if (error) {
+            STAssertTrue(FALSE, @"Test failed with error: %@", error.localizedDescription);
+            done = YES;
+        }
+        
         STAssertNotNil(item, @"item should not have been nil.");
         
-        [todoTable readWithQueryString:nil
-                             onSuccess:query5AfterQuery4
-                               onError:errorBlock];
+        [todoTable readWithQueryString:nil completion:query5AfterQuery4];
     };
     
-    id query3AfterQuery2 = ^(NSArray *items, NSInteger totalCount) {
+    id query3AfterQuery2 = ^(NSArray *items, NSInteger totalCount, NSError *error) {
+        
+        // Check for an error
+        if (error) {
+            STAssertTrue(FALSE, @"Test failed with error: %@", error.localizedDescription);
+            done = YES;
+        }
+        
         STAssertTrue(items.count == 1, @"items.count was: %d", items.count);
         STAssertTrue(totalCount == -1, @"totalCount was: %d", totalCount);
         
         [todoTable readWithId:[[items objectAtIndex:0] valueForKey:@"id"]
-                    onSuccess:query4AfterQuery3
-                     onError:errorBlock];
+                    completion:query4AfterQuery3];
     };
     
-    id query2AfterQuery1 = ^(NSArray *items, NSInteger totalCount) {
+    id query2AfterQuery1 = ^(NSArray *items, NSInteger totalCount, NSError *error) {
+        
+        // Check for an error
+        if (error) {
+            STAssertTrue(FALSE, @"Test failed with error: %@", error.localizedDescription);
+            done = YES;
+        }
+        
         STAssertTrue(items.count == 2, @"items.count was: %d", items.count);
         STAssertTrue(totalCount == -1, @"totalCount was: %d", totalCount);
         
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:
-                                  @"text ENDSWITH 'B' AND complete == TRUE"];
-        [todoTable readWhere:predicate
-                   onSuccess:query3AfterQuery2
-                     onError:errorBlock];
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"text ENDSWITH 'B' AND complete == TRUE"];
+        [todoTable readWhere:predicate completion:query3AfterQuery2];
     };
     
-    id query1AfterInsert = ^() {
-        NSPredicate *predicate = [NSPredicate predicateWithFormat:
-                                  @"text ENDSWITH 'B'"];
-        [todoTable readWhere:predicate
-                   onSuccess:query2AfterQuery1
-                     onError:errorBlock];
+    id query1AfterInsert = ^(NSError *error) {
+        
+        // Check for an error
+        if (error) {
+            STAssertTrue(FALSE, @"Test failed with error: %@", error.localizedDescription);
+            done = YES;
+        }
+        
+        NSPredicate *predicate = [NSPredicate predicateWithFormat:@"text ENDSWITH 'B'"];
+        [todoTable readWhere:predicate completion:query2AfterQuery1];
     };
     
-    id insertAfterDeleteAll = ^(){
-        [self insertItems:items withTable:todoTable
-                onSuccess:query1AfterInsert
-                  onError:errorBlock];
+    id insertAfterDeleteAll = ^(NSError *error){
+        
+        // Check for an error
+        if (error) {
+            STAssertTrue(FALSE, @"Test failed with error: %@", error.localizedDescription);
+            done = YES;
+        }
+        
+        [self insertItems:items withTable:todoTable completion:query1AfterInsert];
     };
     
-    [self deleteAllItemswithTable:todoTable
-                        onSuccess:insertAfterDeleteAll
-                          onError:errorBlock];
-    
-    
+    [self deleteAllItemswithTable:todoTable completion:insertAfterDeleteAll];
     
     STAssertTrue([self waitForTest:90.0], @"Test timed out.");
 }
@@ -249,11 +277,9 @@
     NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
     
     // Insert the item
-    [todoTable insert:item onSuccess:^(id newItem) {
-        
-        STAssertTrue(NO, @"onError should have been called.");
-        
-    } onError:^(NSError *error) {
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+
+        STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -297,12 +323,10 @@
     NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
     
     // Insert the item
-    [todoTable insert:item onSuccess:^(id newItem) {
-        
-        STAssertTrue(NO, @"onError should have been called.");
-        
-    } onError:^(NSError *error) {
-        
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+
+        STAssertNil(item, @"item should have been nil.");
+
         STAssertNotNil(error, @"error was nil after deserializing item.");
         STAssertTrue([error domain] == MSErrorDomain,
                      @"error domain was: %@", [error domain]);
@@ -337,12 +361,10 @@
     NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
     
     // Insert the item
-    [todoTable insert:item onSuccess:^(id newItem) {
-        
-        STAssertTrue(NO, @"onError should have been called.");
-        
-    } onError:^(NSError *error) {
-        
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+
+        STAssertNil(item, @"item should have been nil.");
+
         STAssertNotNil(error, @"error was nil after deserializing item.");
         STAssertTrue([error domain] == @"SomeDomain",
                      @"error domain was: %@", [error domain]);
@@ -352,7 +374,7 @@
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    STAssertTrue([self waitForTest:90.0], @"Test timed out.");
 }
 
 
@@ -367,11 +389,9 @@
     NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
     
     // Insert the item
-    [todoTable insert:item onSuccess:^(id newItem) {
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+        STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -405,11 +425,9 @@
     };
     
     // Insert the item
-    [todoTable update:item onSuccess:^(id newItem) {
+    [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
         
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+        STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -439,11 +457,9 @@
     };
     
     // Update the item
-    [todoTable update:item onSuccess:^(id newItem) {
+    [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
         
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+        STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -477,11 +493,9 @@
     };
     
     // Delete the item
-    [todoTable delete:item onSuccess:^(id newItem) {
+    [todoTable delete:item completion:^(NSNumber *itemId, NSError *error) {
         
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+        STAssertNil(itemId, @"itemId should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -511,11 +525,9 @@
     };
     
     // Delete the item
-    [todoTable delete:item onSuccess:^(id newItem) {
+    [todoTable delete:item completion:^(NSNumber *itemId, NSError *error) {
         
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+        STAssertNil(itemId, @"itemId should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -538,11 +550,9 @@
     MSTable *todoTable = [client getTable:@"todoItem"];
     
     // Delete the item
-    [todoTable deleteWithId:@-5 onSuccess:^(id newItem) {
-        
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+    [todoTable deleteWithId:@-5 completion:^(NSNumber *itemId, NSError *error) {
+
+        STAssertNil(itemId, @"itemId should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -569,11 +579,9 @@
     MSTable *todoTable = [client getTable:@"NoSuchTable"];
 
     // Insert the item
-    [todoTable readWithId:@100 onSuccess:^(id newItem) {
-        
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+    [todoTable readWithId:@100 completion:^(NSDictionary *item, NSError *error) {
+    
+        STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -596,11 +604,9 @@
     MSTable *todoTable = [client getTable:@"todoItem"];
     
     // Insert the item
-    [todoTable readWithId:@-5 onSuccess:^(id newItem) {
-        
-        STAssertTrue(FALSE, @"The onSuccess block should not have been called.");
-        
-    } onError:^(NSError *error) {
+    [todoTable readWithId:@-5 completion:^(NSDictionary *item, NSError *error) {
+    
+        STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,
@@ -624,66 +630,71 @@
 
 -(void) insertItems:(NSArray *)items
           withTable:(MSTable *)table
-            onSuccess:(void (^)())onSuccess
-            onError:(void (^)(NSError *))onError
+            completion:(void (^)(NSError *))completion
 {
     __block NSInteger lastItemIndex = -1;
     
-    __block void (^nextInsertBlock)(id);
-    nextInsertBlock = [^(id newItem) {
-        if (lastItemIndex + 1  < items.count) {
-            lastItemIndex++;
-            id itemToInsert = [items objectAtIndex:lastItemIndex];
-            [table insert:itemToInsert
-             onSuccess:nextInsertBlock onError:onError];
+    __block void (^nextInsertBlock)(id, NSError *error);
+    nextInsertBlock = [^(id newItem, NSError *error) {
+        if (error) {
+            completion(error);
         }
         else {
-            onSuccess();
+            if (lastItemIndex + 1  < items.count) {
+                lastItemIndex++;
+                id itemToInsert = [items objectAtIndex:lastItemIndex];
+                [table insert:itemToInsert completion:nextInsertBlock];
+            }
+            else {
+                completion(nil);
+            }
         }
     } copy];
     
-    nextInsertBlock(nil);
+    nextInsertBlock(nil, nil);
 }
 
 -(void) deleteAllItemswithTable:(MSTable *)table
-               onSuccess:(void (^)())onSuccess
-                 onError:(void (^)(NSError *))onError
+                     completion:(void (^)(NSError *))completion
 {
-    __block MSReadQuerySuccessBlock readSuccessBlock;
-    readSuccessBlock = ^(NSArray *items, NSInteger totalCount) {
-        [self deleteItems:items
-                withTable:table
-         onSuccess:onSuccess
-           onError:onError];
+    __block MSReadQueryBlock readCompletion;
+    readCompletion = ^(NSArray *items, NSInteger totalCount, NSError *error) {
+        if (error) {
+            completion(error);
+        }
+        else {
+            [self deleteItems:items withTable:table completion:completion];
+        }
     };
     
-    [table readWithQueryString:@"$top=500"
-             onSuccess:readSuccessBlock
-               onError:onError];
+    [table readWithQueryString:@"$top=500" completion:readCompletion];
 }
 
 
 -(void) deleteItems:(NSArray *)items
           withTable:(MSTable *)table
-   onSuccess:(void (^)())onSuccess
-     onError:(void (^)(NSError *))onError
+         completion:(void (^)(NSError *))completion
 {
     __block NSInteger lastItemIndex = -1;
     
-    __block void (^nextDeleteBlock)(NSNumber *);
-    nextDeleteBlock = [^(NSNumber *itemId) {
-        if (lastItemIndex + 1  < items.count) {
-            lastItemIndex++;
-            id itemToDelete = [items objectAtIndex:lastItemIndex];
-            [table delete:itemToDelete
-         onSuccess:nextDeleteBlock onError:onError];
+    __block void (^nextDeleteBlock)(NSNumber *, NSError *error);
+    nextDeleteBlock = [^(NSNumber *itemId, NSError *error) {
+        if (error) {
+            completion(error);
         }
         else {
-            onSuccess();
+            if (lastItemIndex + 1  < items.count) {
+                lastItemIndex++;
+                id itemToDelete = [items objectAtIndex:lastItemIndex];
+                [table delete:itemToDelete completion:nextDeleteBlock];
+            }
+            else {
+                completion(nil);
+            }
         }
     } copy];
     
-    nextDeleteBlock(0);
+    nextDeleteBlock(0, nil);
 }
 
 

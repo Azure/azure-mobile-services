@@ -76,12 +76,10 @@
     NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
     
     // Insert the item
-    [todoTable insert:item onSuccess:^(id newItem) {
-        
-        STAssertTrue(NO, @"onError should have been called.");
-        
-    } onError:^(NSError *error) {
-        
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+
+        STAssertNil(item, @"item should have been nil.");
+
         STAssertNotNil(error, @"error was nil after deserializing item.");
         STAssertTrue([error domain] == MSErrorDomain,
                      @"error domain was: %@", [error domain]);
@@ -117,11 +115,9 @@
     NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
     
     // Insert the item
-    [todoTable insert:item onSuccess:^(id newItem) {
-        
-        STAssertTrue(NO, @"onError should have been called.");
-        
-    } onError:^(NSError *error) {
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+    
+        STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error was nil after deserializing item.");
         STAssertTrue([error domain] == @"SomeDomain",
@@ -180,11 +176,9 @@
     NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
     
     // Insert the item
-    [todoTable insert:item onSuccess:^(id newItem) {
-        
-        STAssertTrue(NO, @"onError should have been called.");
-        
-    } onError:^(NSError *error) {
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+    
+        STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == @"TestErrorDomain",

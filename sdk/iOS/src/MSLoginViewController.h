@@ -23,10 +23,7 @@
 
 
 // Callback for navigation to the end URL of the MSLoginViewController
-typedef void (^MSEndUrlNavigatedTo)(NSURL *url);
-
-// Callback for user cancelled MSLoginViewController
-typedef void (^MSNavigationCancelled)();
+typedef void (^MSEndUrlNavigatedTo)(NSURL *url, NSError *error);
 
 
 #pragma  mark * MSLoginViewController Public Interface
@@ -34,10 +31,8 @@ typedef void (^MSNavigationCancelled)();
 
 @interface MSLoginViewController : UIViewController<UIWebViewDelegate>
 
-- (id) initWithStartUrl: (NSURL *)startUrl
+- (id) initWithStartUrl:(NSURL *)startUrl
                  endUrl:(NSURL *)endUrl
-                 onSuccess:(MSEndUrlNavigatedTo)onSuccess
-                 onCancel:(MSNavigationCancelled)onCancel
-                 onError:(MSErrorBlock) onError;
+                 completion:(MSEndUrlNavigatedTo)completion;
 
 @end

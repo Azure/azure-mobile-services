@@ -22,14 +22,13 @@
 
 
 // Callback that the filter should invoke once an HTTP response (with or
-// without data) has been received by the filter.
-typedef void (^MSFilterResponseBlock)(NSHTTPURLResponse *response, NSData *data);
+// without data) or an error has been received by the filter.
+typedef void (^MSFilterResponseBlock)(NSHTTPURLResponse *response, NSData *data, NSError *error);
 
 // Callback that the filter should invoke to allow the next filter to handle
 // the given request.
 typedef void (^MSFilterNextBlock)(NSURLRequest *request,
-                                  MSFilterResponseBlock onResponse,
-                                  MSErrorBlock onError);
+                                  MSFilterResponseBlock onResponse);
 
 
 #pragma  mark * MSFilter Public Protocol
@@ -42,6 +41,5 @@ typedef void (^MSFilterNextBlock)(NSURLRequest *request,
 
 -(void) handleRequest:(NSURLRequest *)request
                onNext:(MSFilterNextBlock)onNext
-           onResponse:(MSFilterResponseBlock)onResponse
-              onError:(MSErrorBlock)onError;
+           onResponse:(MSFilterResponseBlock)onResponse;
 @end

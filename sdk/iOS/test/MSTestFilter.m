@@ -28,7 +28,6 @@
 -(void) handleRequest:(NSURLRequest *)request
                onNext:(MSFilterNextBlock)onNext
            onResponse:(MSFilterResponseBlock)onResponse
-              onError:(MSErrorBlock)onError
 {
     
     // Replace the request if we have one to replace it with
@@ -47,12 +46,12 @@
             
             // A mock error was provided, so we'll call onError
             // with it
-            onError(self.errorToUse);
+            onResponse(nil, nil, self.errorToUse);
         }
         else {
             
             // Otherwise we'll assume a mock response/data are available
-            onResponse(self.responseToUse, self.dataToUse);
+            onResponse(self.responseToUse, self.dataToUse, nil);
         }
     }
     else {
@@ -61,10 +60,10 @@
         // replace the response/data or error when the server replies so
         // we'll wrap the onResponse and onError callbacks with our own
         MSFilterResponseBlock localOnResponse =
-        [^(NSHTTPURLResponse *response, NSData *data){
+        [^(NSHTTPURLResponse *response, NSData *data, NSError *error){
             
             if(self.errorToUse) {
-                onError(self.errorToUse);
+                onResponse(nil, nil, self.errorToUse);
             }
             else {
             
@@ -76,24 +75,13 @@
                     data = self.dataToUse;
                 }
                 
-                onResponse(response, data);
+                onResponse(response, data, error);
             }
-            
-        } copy];
-        
-        MSErrorBlock localOnError =
-        [^(NSError *error){
-            
-            if (self.errorToUse) {
-                error = self.errorToUse;
-            }
-            
-            onError(error);
             
         } copy];
 
         // Call the next filter
-        onNext(request, localOnResponse, localOnError);
+        onNext(request, localOnResponse);
     }
 }
 

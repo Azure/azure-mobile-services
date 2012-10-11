@@ -18,13 +18,6 @@
 #define WindowsAzureMobileServices_MSError_h
 
 
-#pragma mark * Block Type Definitions
-
-
-// Callback for any error that occurs during an asynchronous operation.
-typedef void (^MSErrorBlock)(NSError *error);
-
-
 #pragma mark * MSErrorDomain
 
 
@@ -52,60 +45,63 @@ NSString *const MSErrorResponseKey;
 
 // Indicates that a request to the Windows Azure Mobile Service failed because
 // a nil item was used.
-#define MSExpectedItemWithRequest               -101
+#define MSExpectedItemWithRequest               -1101
 
 // Indicates that a request to the Windows Azure Mobile Service failed because
 // an item without an id was used
-#define MSMissingItemIdWithRequest              -102
+#define MSMissingItemIdWithRequest              -1102
 
 // Indicates that a request to the Windows Azure Mobile Service failed because
 // an invalid item was used.
-#define MSInvalidItemWithRequest                -103
+#define MSInvalidItemWithRequest                -1103
 
 // Indicates that a request to the Windows Azure Mobile Service failed because
 // a nil itemId was used.
-#define MSExpectedItemIdWithRequest             -104
+#define MSExpectedItemIdWithRequest             -1104
 
 // Indicates that a request to the Windows Azure Mobile Service failed because
 // an invalid itemId was used.
-#define MSInvalidItemIdWithRequest              -105
+#define MSInvalidItemIdWithRequest              -1105
 
 // Indicates that the response from the Windows Azure Mobile Service did not
 // inlcude an item as expected.
-#define MSExpectedItemWithResponse              -201
+#define MSExpectedItemWithResponse              -1201
 
 // Indicates that the response from the Windows Azure Mobile Service did not
 // include an array of items as expected.
-#define MSExpectedItemsWithResponse             -202
+#define MSExpectedItemsWithResponse             -1202
 
 // Indicates that the response from the Windows Azure Mobile Service did not
 // include a total count as expected.
-#define MSExpectedTotalCountWithResponse        -203
+#define MSExpectedTotalCountWithResponse        -1203
 
 // Indicates that the response from the Windows Azure Mobile Service did not
 // have body content as expected.
-#define MSExpectedBodyWithResponse              -204
+#define MSExpectedBodyWithResponse              -1204
 
 // Indicates that the response from the Windows Azure Mobile Service indicated
 // there was an error but that an error message was not provided.
-#define MSErrorNoMessageErrorCode               -301
+#define MSErrorNoMessageErrorCode               -1301
 
 // Indicates that the response from the Windows Azure Mobile Service indicated
 // there was an error and an error message was provided.
-#define MSErrorMessageErrorCode                 -302
+#define MSErrorMessageErrorCode                 -1302
 
 // Indicates that a request to the Windows Azure Mobile Service failed becaus
 // the |NSPredicate| used in the query could not be translated into a query
 // string supported by the Windows Azure Mobile Service.
-#define MSPRedicateNotSupported                 -400
+#define MSPRedicateNotSupported                 -1400
 
-// Indicates that the login attempt has failed
-#define MSLoginFailed                           -401
+// Indicates that the login attempt has failed.
+#define MSLoginFailed                           -1501
 
-// The server returned a login response with invalid syntax
-#define MSLoginInvalidResponseSyntax            -402
+// The server returned a login response with invalid syntax.
+#define MSLoginInvalidResponseSyntax            -1502
 
-// A login operation is already in progress
-#define MSLoginAlreadyInProgress                -403
+// The login operation was canceled.
+#define MSLoginCanceled                         -1503
+
+// A login operation is already in progress.
+#define MSLoginAlreadyInProgress                -1504
 
 #endif
