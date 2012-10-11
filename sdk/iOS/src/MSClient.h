@@ -15,8 +15,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 #import "MSError.h"
-#import "MSLoginViewController.h"
 #import "MSFilter.h"
 
 @class MSTable;

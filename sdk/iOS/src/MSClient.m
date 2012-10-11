@@ -17,6 +17,7 @@
 #import "MSClient.h"
 #import "MSTable.h"
 #import "MSClientConnection.h"
+#import "MSLoginViewController.h"
 #import "MSUser.h"
 
 
