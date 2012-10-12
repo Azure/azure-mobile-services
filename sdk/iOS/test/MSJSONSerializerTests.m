@@ -160,6 +160,17 @@
     STAssertNil(itemId, @"itemId should have been nil.");
 }
 
+-(void)testItemIdFromItemReturnsErrorIfIdIsNotLowercased
+{
+    NSDictionary *item = @{ @"Id" : @"5", @"name" : @"bob" };
+    
+    NSError *error = nil;
+    NSNumber *itemId = [serializer itemIdFromItem:item orError:&error];
+    
+    STAssertNotNil(error, @"error should not have been nil.");
+    STAssertNil(itemId, @"itemId should have been nil.");
+}
+
 
 # pragma mark * itemFromData: Tests
 

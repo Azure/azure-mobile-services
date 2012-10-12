@@ -103,6 +103,9 @@
         @[ @"(name eq 'bob')",
            @"name = 'bob'"],
     
+        @[ @"(text eq 'This text has a '' in it!')",
+            @"text = %@", @"This text has a ' in it!"],
+    
         @[ @"(tolower(name) eq tolower('bob'))",
            @"name =[c] 'bob'"],
     

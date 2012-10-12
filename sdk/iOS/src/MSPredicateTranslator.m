@@ -473,7 +473,7 @@ static NSDictionary *staticFunctionInfoLookup;
         result = nullConstant;
     }
     else if ([constant isKindOfClass:[NSString class]]) {
-        result = [NSString stringWithFormat:stringConstant, constant];
+        result = [MSPredicateTranslator visitStringConstant:constant];
     }
     else if ([constant isKindOfClass:[NSDate class]]) {
         result = [MSPredicateTranslator visitDateConstant:constant];
@@ -491,6 +491,11 @@ static NSDictionary *staticFunctionInfoLookup;
     return result;
 }
 
++(NSString *) visitStringConstant:(NSString *)string
+{
+    string = [string stringByReplacingOccurrencesOfString:@"'" withString:@"''"];
+    return [NSString stringWithFormat:stringConstant, string];
+}
 
 +(NSString *) visitDateConstant:(NSDate *)date
 {
