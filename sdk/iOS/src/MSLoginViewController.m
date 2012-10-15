@@ -19,9 +19,10 @@
 @interface MSLoginViewController ()
 
 // Private instance properties
-@property (nonatomic, strong, readwrite) NSURL* startUrl;
-@property (nonatomic, strong, readwrite) NSURL* endUrl;
-@property (nonatomic, copy, readwrite) MSEndUrlNavigatedTo completion;
+@property (nonatomic, strong, readwrite)    NSURL* startUrl;
+@property (nonatomic, strong, readwrite)    NSURL* endUrl;
+@property (nonatomic, strong, readwrite)    UIActivityIndicatorView *activityView;
+@property (nonatomic, copy, readwrite)      MSEndUrlNavigatedTo completion;
 
 - (IBAction)cancel:(id)sender;
 
@@ -32,15 +33,6 @@
 @synthesize startUrl = startUrl_;
 @synthesize endUrl = endUrl_;
 @synthesize completion = completion_;
-
-UIWebView *hostedWebView;
-
-- (void) dealloc
-{
-    if (hostedWebView) {
-        hostedWebView.delegate = nil;
-    }
-}
 
 - (id) initWithStartUrl:(NSURL *)startUrl
                  endUrl:(NSURL *)endUrl
@@ -62,21 +54,30 @@ UIWebView *hostedWebView;
     
     UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0,0,0,0)];
     view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    hostedWebView = [[UIWebView alloc] initWithFrame:CGRectMake(0,0,0,0)];
+    UIWebView *hostedWebView = [[UIWebView alloc] initWithFrame:CGRectMake(0,0,0,0)];
     hostedWebView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     hostedWebView.delegate = self;
     NSURLRequest *request = [NSURLRequest requestWithURL:self.startUrl];
     [hostedWebView loadRequest:request];
     [view addSubview:hostedWebView];
+    
+    // Create and add cancel button
     UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:(UIBarButtonSystemItemCancel)
                                                                             target:self
                                                                             action:@selector(cancel:)];
     self.navigationItem.leftBarButtonItem = button;
+    
+    // Create and add activity indicator view
+    self.activityView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleWhite];
+    UIBarButtonItem *activityButton = [[UIBarButtonItem alloc] initWithCustomView:self.activityView];
+    self.navigationItem.rightBarButtonItem = activityButton;
+    
     self.view = view;
 }
 
 - (IBAction)cancel:(id)sender
 {
+    [self.activityView stopAnimating];
     NSDictionary *userInfo = @{
         NSLocalizedDescriptionKey:NSLocalizedString(@"Authentication canceled.", nil)
     };
@@ -91,21 +92,25 @@ UIWebView *hostedWebView;
 #pragma mark * UIWebViewDelegate methods
 
 
-- (BOOL) webView:(UIWebView *)webView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType
+- (BOOL) webView:(UIWebView *)webView
+            shouldStartLoadWithRequest:(NSURLRequest *)request
+            navigationType:(UIWebViewNavigationType)navigationType
 {
     if ([request.URL.absoluteString rangeOfString:self.endUrl.absoluteString].location == 0) {
         if (self.completion) {
             self.completion(request.URL, nil);
         }
-    
+        
         return NO;
     }
-        
+    
     return YES;
 }
 
-- (void) webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error
+- (void) webView:(UIWebView *)webView
+            didFailLoadWithError:(NSError *)error
 {
+    [self.activityView stopAnimating];
     if (self.completion) {
         self.completion(nil, error);
     }
@@ -113,6 +118,7 @@ UIWebView *hostedWebView;
 
 - (void) webViewDidFinishLoad:(UIWebView *)webView
 {
+    [self.activityView stopAnimating];
     if (self.completion) {
         NSString* body = [webView stringByEvaluatingJavaScriptFromString:@"document.body.innerText"];
         NSError *error;
@@ -121,8 +127,8 @@ UIWebView *hostedWebView;
         if (!error && statusCode >= 400) {
             
             NSDictionary *userInfo = @{
-                NSLocalizedDescriptionKey:NSLocalizedString(@"Authentication failed.", nil),
-                MSErrorResponseKey:body
+        NSLocalizedDescriptionKey:NSLocalizedString(@"Authentication failed.", nil),
+        MSErrorResponseKey:body
             };
             
             NSError *error =[NSError errorWithDomain:MSErrorDomain
@@ -132,6 +138,11 @@ UIWebView *hostedWebView;
             self.completion(nil, error);
         }
     }
+}
+
+- (void)webViewDidStartLoad:(UIWebView *)webView
+{
+    [self.activityView startAnimating];
 }
 
 @end
