@@ -48,6 +48,12 @@
     return self;
 }
 
+- (void)dealloc
+{
+    UIWebView *webView = (UIWebView *)self.view;
+    webView.delegate = nil;
+}
+
 - (void) loadView
 {
     [super loadView];
@@ -100,8 +106,6 @@
         if (self.completion) {
             self.completion(request.URL, nil);
         }
-        
-        return NO;
     }
     
     return YES;
