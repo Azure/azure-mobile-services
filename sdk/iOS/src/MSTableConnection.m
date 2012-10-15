@@ -73,6 +73,7 @@
             
             [connection addRequestAndResponse:response toError:&error];
             completion(item, error);
+            connection = nil;
         };
     }
     
@@ -111,7 +112,7 @@
             else {
                 completion(request.itemId, nil);
             }
-            
+            connection = nil;
         };
     }
     
@@ -155,6 +156,7 @@
             
             [connection addRequestAndResponse:response toError:&error];
             completion(items, totalCount, error);
+            connection = nil;
         };
     }
     

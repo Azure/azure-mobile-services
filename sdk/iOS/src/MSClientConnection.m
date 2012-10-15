@@ -41,7 +41,7 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 
 @property (nonatomic, strong)               NSData *data;
 @property (nonatomic, strong)               NSHTTPURLResponse *response;
-@property (nonatomic, copy, readonly)       MSResponseBlock completion;
+@property (nonatomic, copy)                 MSResponseBlock completion;
 
 -(id) initWithCompletion:(MSResponseBlock)completion;
 @end
@@ -116,8 +116,7 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
         {
             [MSClientConnection invokeNextFilter:nextFilters
                                      withRequest:onNextRequest
-                                      completion:onNextResponse];
-                                    
+                                      completion:onNextResponse];                                    
         } copy];
         
         [nextFilter handleRequest:request
@@ -190,6 +189,7 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 {
     if (self.completion) {
         self.completion(nil, nil, error);
+        self.completion = nil;
     }
 }
 
@@ -231,6 +231,7 @@ didReceiveResponse:(NSURLResponse *)response
 {
     if (self.completion) {
         self.completion(self.response, self.data, nil);
+        self.completion = nil;
     }
 }
 
