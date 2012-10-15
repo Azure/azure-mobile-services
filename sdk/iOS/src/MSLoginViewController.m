@@ -23,6 +23,7 @@
 @property (nonatomic, strong, readwrite)    NSURL* endUrl;
 @property (nonatomic, strong, readwrite)    UIActivityIndicatorView *activityView;
 @property (nonatomic, copy, readwrite)      MSEndUrlNavigatedTo completion;
+@property (nonatomic, strong, readwrite)    UIWebView *hostedWebView;
 
 - (IBAction)cancel:(id)sender;
 
@@ -33,6 +34,7 @@
 @synthesize startUrl = startUrl_;
 @synthesize endUrl = endUrl_;
 @synthesize completion = completion_;
+@synthesize hostedWebView = hostedWebView_;
 
 - (id) initWithStartUrl:(NSURL *)startUrl
                  endUrl:(NSURL *)endUrl
@@ -50,8 +52,7 @@
 
 - (void)dealloc
 {
-    UIWebView *webView = (UIWebView *)self.view;
-    webView.delegate = nil;
+    self.hostedWebView.delegate = nil;
 }
 
 - (void) loadView
@@ -60,12 +61,12 @@
     
     UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0,0,0,0)];
     view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    UIWebView *hostedWebView = [[UIWebView alloc] initWithFrame:CGRectMake(0,0,0,0)];
-    hostedWebView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    hostedWebView.delegate = self;
+    self.hostedWebView = [[UIWebView alloc] initWithFrame:CGRectMake(0,0,0,0)];
+    self.hostedWebView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.hostedWebView.delegate = self;
     NSURLRequest *request = [NSURLRequest requestWithURL:self.startUrl];
-    [hostedWebView loadRequest:request];
-    [view addSubview:hostedWebView];
+    [self.hostedWebView loadRequest:request];
+    [view addSubview:self.hostedWebView];
     
     // Create and add cancel button
     UIBarButtonItem *button = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:(UIBarButtonSystemItemCancel)
