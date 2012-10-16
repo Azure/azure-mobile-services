@@ -4,7 +4,7 @@ With Windows Azure Mobile Services you can add a scalable backend to your connec
 
 ## Getting Started
 
-If you are new to Mobile Services, [this tutorial](https://www.windowsazure.com/en-us/develop/mobile/tutorials/get-started/) will walk you through the process of creating your first Mobile Service and accessing it from a Windows Store application.
+If you are new to Mobile Services, you can get started by following our tutorials for connecting your Mobile Services cloud backend to [Windows Store apps](https://www.windowsazure.com/en-us/develop/mobile/tutorials/get-started/) and [iOS apps](https://www.windowsazure.com/en-us/develop/mobile/tutorials/get-started-ios/).
 
 ## Download Source Code
 
@@ -14,10 +14,9 @@ To get the source code of our SDKs and samples via **git** just type:
     cd ./azure-mobile-services/
 
 ## iOS Client SDK
+Note: This iOS client is released as a preview. It is currently under development.
 
-Add a cloud backend to your iOS application in minutes with our iOS client SDK. You can [download the iOS SDK](https://go.microsoft.com/fwLink/?LinkID=266533&clcid=0x409) directly or you can download the source code using the instructions above and then you will find the SDK under ```azure-mobile-services/sdk/iOS```.
-
-This work is in progress. As always we’re excited to get your feedback on this early version of the library on [our issues page](https://github.com/WindowsAzure/azure-mobile-services/issues), and welcome your [contributions](http://windowsazure.github.com/guidelines.html). 
+Add a cloud backend to your iOS application in minutes with our iOS client SDK. You can [download the iOS SDK](https://go.microsoft.com/fwLink/?LinkID=266533&clcid=0x409) directly or you can download the source code using the instructions above and then you will find the SDK under ```azure-mobile-services/sdk/iOS```. As always we’re excited to get your feedback on this early version of the library on [our issues page](https://github.com/WindowsAzure/azure-mobile-services/issues), and welcome your [contributions](http://windowsazure.github.com/guidelines.html). 
 
 ## Windows Client SDK
 
