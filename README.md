@@ -13,6 +13,10 @@ To get the source code of our SDKs and samples via **git** just type:
     git clone https://github.com/WindowsAzure/azure-mobile-services.git
     cd ./azure-mobile-services/
 
+## iOS Client SDK
+
+Add a cloud backend to your iOS application in minutes with our iOS client SDK. You can [download the iOS SDK](https://go.microsoft.com/fwLink/?LinkID=266533&clcid=0x409) directly or you can download the source code - its under the [dev](https://github.com/WindowsAzure/azure-mobile-services/tree/dev/sdk/iOS) branch, in ```azure-mobile-services/sdk/iOS```.
+
 ## Windows Client SDK
 
 Our Windows SDK makes it incredibly easy to use Mobile Services from your Windows Store applications. You can [download the SDK](http://go.microsoft.com/fwlink/?LinkId=257545&clcid=0x409) directly or you can download the source code using the instructions above and then you will find the Windows Client SDK under ```/azure-mobile-services/sdk/windows```.
