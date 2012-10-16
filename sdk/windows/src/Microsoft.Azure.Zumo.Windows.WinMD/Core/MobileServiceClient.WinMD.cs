@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Net;
 using Windows.Data.Json;
 using Windows.Foundation;
+using Windows.Foundation.Metadata;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -31,6 +32,40 @@ namespace Microsoft.WindowsAzure.MobileServices
         public IAsyncOperation<MobileServiceUser> LoginAsync(string authenticationToken)
         {
             return this.SendLoginAsync(authenticationToken).AsAsyncOperation();
+        }
+
+        /// <summary>
+        /// Log a user into a Mobile Services application given a provider name and optional token object.
+        /// </summary>
+        /// <param name="provider" type="MobileServiceAuthenticationProvider">
+        /// Authentication provider to use.
+        /// </param>
+        /// <param name="token" type="JsonObject">
+        /// Optional, provider specific object with existing OAuth token to log in with.
+        /// </param>
+        /// <returns>
+        /// Task that will complete when the user has finished authentication.
+        /// </returns>
+        [SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Login", Justification = "Login is more appropriate than LogOn for our usage.")]
+        public IAsyncOperation<MobileServiceUser> LoginAsync(MobileServiceAuthenticationProvider provider, JsonObject token)
+        {
+            return this.SendLoginAsync(provider, token).AsAsyncOperation();
+        }
+
+        /// <summary>
+        /// Log a user into a Mobile Services application given a provider name.
+        /// </summary>
+        /// <param name="provider" type="MobileServiceAuthenticationProvider">
+        /// Authentication provider to use.
+        /// </param>
+        /// <returns>
+        /// Task that will complete when the user has finished authentication.
+        /// </returns>
+        [SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Login", Justification = "Login is more appropriate than LogOn for our usage.")]
+        [DefaultOverloadAttribute]
+        public IAsyncOperation<MobileServiceUser> LoginAsync(MobileServiceAuthenticationProvider provider)
+        {
+            return this.SendLoginAsync(provider, null).AsAsyncOperation();
         }
 
         /// <summary>

@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Net;
 using System.Threading.Tasks;
 using Windows.Data.Json;
+using Windows.Security.Authentication.Web;
 using Windows.Storage;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -38,7 +39,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Relative URI fragment of the login endpoint.
         /// </summary>
-        private const string LoginAsyncUriFragment = "login?mode=authenticationToken";
+        private const string LoginAsyncUriFragment = "login";
+
+        /// <summary>
+        /// Relative URI fragment of the login/done endpoint.
+        /// </summary>
+        private const string LoginAsyncDoneUriFragment = "login/done";
 
         /// <summary>
         /// Name of the Installation ID header included on each request.
@@ -85,6 +91,15 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// applied.
         /// </summary>
         private IServiceFilter filter = null;
+
+        /// <summary>
+        /// Indicates whether a login operation is currently in progress.
+        /// </summary>
+        public bool LoginInProgress
+        {
+            get;
+            private set;
+        }
 
         /// <summary>
         /// Initialize the shared applicationInstallationId.
@@ -276,6 +291,95 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
+        /// Log a user into a Mobile Services application given a provider name and optional token object.
+        /// </summary>
+        /// <param name="provider" type="MobileServiceAuthenticationProvider">
+        /// Authentication provider to use.
+        /// </param>
+        /// <param name="token" type="JsonObject">
+        /// Optional, provider specific object with existing OAuth token to log in with.
+        /// </param>
+        /// <returns>
+        /// Task that will complete when the user has finished authentication.
+        /// </returns>
+        internal async Task<MobileServiceUser> SendLoginAsync(MobileServiceAuthenticationProvider provider, JsonObject token = null)
+        {
+            if (this.LoginInProgress)
+            {
+                throw new InvalidOperationException(Resources.MobileServiceClient_Login_In_Progress);
+            }
+
+            if (!Enum.IsDefined(typeof(MobileServiceAuthenticationProvider), provider)) 
+            {
+                throw new ArgumentOutOfRangeException("provider");
+            }
+
+            string providerName = provider.ToString().ToLower();
+
+            this.LoginInProgress = true;
+            try
+            {
+                IJsonValue response = null;
+                if (token != null)
+                {
+                    // Invoke the POST endpoint to exchange provider-specific token for a Windows Azure Mobile Services token
+
+                    response = await this.RequestAsync("POST", LoginAsyncUriFragment + "/" + providerName, token);
+                }
+                else
+                {
+                    // Use WebAuthenicationBroker to launch server side OAuth flow using the GET endpoint
+
+                    Uri startUri = new Uri(this.ApplicationUri, LoginAsyncUriFragment + "/" + providerName);
+                    Uri endUri = new Uri(this.ApplicationUri, LoginAsyncDoneUriFragment);
+
+                    WebAuthenticationResult result = await WebAuthenticationBroker.AuthenticateAsync(
+                        WebAuthenticationOptions.None, startUri, endUri);
+
+                    if (result.ResponseStatus == WebAuthenticationStatus.ErrorHttp)
+                    {
+                        throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, Resources.Authentication_Failed, result.ResponseErrorDetail));
+                    }
+                    else if (result.ResponseStatus == WebAuthenticationStatus.UserCancel)
+                    {
+                        throw new InvalidOperationException(Resources.Authentication_Canceled);
+                    }
+
+                    int i = result.ResponseData.IndexOf("#token=");
+                    if (i > 0)
+                    {
+                        response = JsonValue.Parse(Uri.UnescapeDataString(result.ResponseData.Substring(i + 7)));
+                    }
+                    else
+                    {
+                        i = result.ResponseData.IndexOf("#error=");
+                        if (i > 0)
+                        {
+                            throw new InvalidOperationException(string.Format(
+                                CultureInfo.InvariantCulture, 
+                                Resources.MobileServiceClient_Login_Error_Response,
+                                Uri.UnescapeDataString(result.ResponseData.Substring(i + 7))));
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException(Resources.MobileServiceClient_Login_Invalid_Response_Format);
+                        }
+                    }
+                }
+
+                // Get the Mobile Services auth token and user data
+                this.currentUserAuthenticationToken = response.Get(LoginAsyncAuthenticationTokenKey).AsString();
+                this.CurrentUser = new MobileServiceUser(response.Get("user").Get("userId").AsString());
+            }
+            finally
+            {
+                this.LoginInProgress = false;
+            }
+
+            return this.CurrentUser;
+        }
+
+        /// <summary>
         /// Log a user out of a Mobile Services application.
         /// </summary>
         [SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Logout", Justification = "Logout is preferred by design")]
@@ -385,33 +489,39 @@ namespace Microsoft.WindowsAzure.MobileServices
             string message = null;
             if (response.StatusCode >= 400)
             {
-                // Get the error message, but default to the status message
-                // if there's no error message present.
-                string error =
-                    body.Get("error").AsString() ??
-                    body.Get("description").AsString() ??
-                    response.StatusDescription;
-
-                // Get the status code, text
-                int code = body.Get("code").AsInteger() ?? response.StatusCode;
-
-                // Combine the pieces and throw the exception
-                message =
-                    string.Format(CultureInfo.InvariantCulture,
-                        Resources.MobileServiceClient_ThrowInvalidResponse_ErrorMessage,
-                        code,
-                        (HttpStatusCode)code,
-                        error,
-                        response.Content);
+                if (body != null)
+                {
+                    if (body.ValueType == JsonValueType.String)
+                    {
+                        // User scripts might return errors with just a plain string message as the
+                        // body content, so use it as the exception message
+                        message = body.GetString();
+                    }
+                    else if (body.ValueType == JsonValueType.Object)
+                    {
+                        // Get the error message, but default to the status description
+                        // below if there's no error message present.
+                        message = body.Get("error").AsString() ??
+                                  body.Get("description").AsString();
+                    }
+                }
+                
+                if (string.IsNullOrWhiteSpace(message))
+                {
+                    message = string.Format(
+                        CultureInfo.InvariantCulture,
+                        Resources.MobileServiceClient_ErrorMessage,
+                        response.StatusDescription);
+                }
             }
             else
-            {                
+            {
                 message = string.Format(
                     CultureInfo.InvariantCulture,
-                    Resources.MobileServiceClient_ThrowConnectionFailure_ErrorMessage,
+                    Resources.MobileServiceClient_ErrorMessage,
                     response.ResponseStatus);
             }
-            
+
             // Combine the pieces and throw the exception
             throw CreateMobileServiceException(message, request, response);
         }

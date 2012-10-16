@@ -101,7 +101,7 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
                 
             Assert.IsNotNull(current);
             Assert.AreEqual("123456", current.UserId);
-            Assert.EndsWith(hijack.Request.Uri.ToString(), "login?mode=authenticationToken");
+            Assert.EndsWith(hijack.Request.Uri.ToString(), "login");
             string input = JsonValue.Parse(hijack.Request.Content).Get("authenticationToken").AsString();
             Assert.AreEqual("donkey", input);
             Assert.AreEqual("POST", hijack.Request.Method);
@@ -195,7 +195,7 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             }
             catch (InvalidOperationException ex)
             {
-                Assert.Contains(ex.Message, "error message");
+                Assert.Equals(ex.Message, "error message");
             }
 
             // Verify all of the exception parameters
@@ -212,7 +212,7 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             }
             catch (MobileServiceInvalidOperationException ex)
             {
-                Assert.StartsWith(ex.Message, "error message");
+                Assert.Equals(ex.Message, "error message");
                 Assert.AreEqual((int)HttpStatusCode.Unauthorized, ex.Response.StatusCode);
                 Assert.Contains(ex.Response.Content, "donkey");
                 Assert.StartsWith(ex.Request.Uri.ToString(), appUrl);
@@ -231,7 +231,7 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             }
             catch (InvalidOperationException ex)
             {
-                Assert.StartsWith(ex.Message, "YOU SHALL NOT PASS.");
+                Assert.Equals("The request could not be completed.  (YOU SHALL NOT PASS).", ex.Message);
             }
         }
 
