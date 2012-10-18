@@ -90,9 +90,6 @@
     <Compile Include="..\Microsoft.Azure.Zumo.WindowsPhone8.WinMD\Core\JsonExtensions.cs">
       <Link>Core\JsonExtensions.cs</Link>
     </Compile>
-    <Compile Include="..\Microsoft.Azure.Zumo.WindowsPhone8.WinMD\Core\MobileServiceAuthenticationProvider.cs">
-      <Link>Core\MobileServiceAuthenticationProvider.cs</Link>
-    </Compile>
     <Compile Include="..\Microsoft.Azure.Zumo.WindowsPhone8.WinMD\Core\MobileServiceClient.cs">
       <Link>Core\MobileServiceClient.cs</Link>
     </Compile>
