@@ -56,12 +56,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return null;
             }
-            else if (value.Type == JTokenType.Integer)
+            else if (value.Type == JTokenType.Integer || value.Type == JTokenType.Float)
             {
-                return (double)((int)value);
-            }
-            else if (value.Type == JTokenType.Float)
-            {
+                // Unlike the AsInteger() case, converting an integer type to double
+                // does not require explicit casting.  Even though, in some corner
+                // cases (long.MinValue) this would still result in a loss of precision.
                 return (double)value;
             }
             else
@@ -87,6 +86,8 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
             else if (value.Type == JTokenType.Float)
             {
+                // Loss of precision requires explicit casting to convince the 
+                // runtime "Yes, we meant to do this.".
                 return (int)((double)value);
             }
             else
