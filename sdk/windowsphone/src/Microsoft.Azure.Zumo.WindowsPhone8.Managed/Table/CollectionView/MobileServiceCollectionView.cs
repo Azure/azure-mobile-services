@@ -31,7 +31,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         IObservableVector<T>,
         System.Collections.IList,
         INotifyPropertyChanged,
-        INotifyCollectionChanged       
+        INotifyCollectionChanged,
+        ITotalCountProvider
     {
         /// <summary>
         /// The table associated with the query represented by this data
@@ -44,6 +45,13 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// of our collection interfaces.
         /// </summary>
         private List<T> data = null;
+
+        /// <summary>
+        /// The total count for all the records that would have been
+        /// returned ignoring any take paging/limit clause specified by client
+        /// or server. Value is -1 if the query did not request a total count. 
+        /// </summary>
+        private long totalCount = -1;
 
         /// <summary>
         /// The query that when evaluated will populate the data souce with
@@ -180,6 +188,16 @@ namespace Microsoft.WindowsAzure.MobileServices
             get { return !this.IsCurrentBeforeFirst && !this.IsCurrentAfterLast; }
         }
 
+        /// <summary>
+        /// Gets the total count for all the records that would have been
+        /// returned ignoring any take paging/limit clause specified by client
+        /// or server.
+        /// </summary>
+        long ITotalCountProvider.TotalCount
+        {
+            get { return this.totalCount; }
+        }
+
         #region Collection members
         /// <summary>
         /// Gets the number of items in the collection.
@@ -274,11 +292,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         private async void EvaluateQueryAsync()
         {
             // Invoke the query on the server and get our data
-            IEnumerable<T> data = await MobileServiceTable<T>.EvaluateQueryAsync<T>(this.table, this.query);
+            TotalCountEnumerable<T> data = await MobileServiceTable<T>.EvaluateQueryAsync<T>(this.table, this.query) as TotalCountEnumerable<T>;
 
             // Reset the collection with the new data
             this.data.Clear();
             this.data.AddRange(data);
+            this.totalCount = data.TotalCount;
 
             this.OnCollectionChanged(
                 new NotifyCollectionChangedEventArgs(

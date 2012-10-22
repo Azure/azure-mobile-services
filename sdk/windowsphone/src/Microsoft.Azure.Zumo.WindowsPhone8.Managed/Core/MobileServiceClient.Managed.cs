@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -55,6 +56,40 @@ namespace Microsoft.WindowsAzure.MobileServices
         public Task<MobileServiceUser> LoginAsync(string authenticationToken)
         {
             return this.SendLoginAsync(authenticationToken);
+        }
+
+        /// <summary>
+        /// Log a user into a Mobile Services application given a provider name and optional token object.
+        /// </summary>
+        /// <param name="provider" type="MobileServiceAuthenticationProvider">
+        /// Authentication provider to use.
+        /// </param>
+        /// <param name="token" type="JObject">
+        /// Optional, provider specific object with existing OAuth token to log in with.
+        /// </param>
+        /// <returns>
+        /// Task that will complete when the user has finished authentication.
+        /// </returns>
+
+        //[SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Login", Justification = "Login is more appropriate than LogOn for our usage.")]
+        public Task<MobileServiceUser> LoginAsync(MobileServiceAuthenticationProvider provider, JObject token)
+        {
+            return this.SendLoginAsync(provider, token);
+        }
+
+        /// <summary>
+        /// Log a user into a Mobile Services application given a provider name.
+        /// </summary>
+        /// <param name="provider" type="MobileServiceAuthenticationProvider">
+        /// Authentication provider to use.
+        /// </param>
+        /// <returns>
+        /// Task that will complete when the user has finished authentication.
+        /// </returns>
+        [SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Login", Justification = "Login is more appropriate than LogOn for our usage.")]
+        public Task<MobileServiceUser> LoginAsync(MobileServiceAuthenticationProvider provider)
+        {
+            return this.SendLoginAsync(provider, null);
         }
 
         /// <summary>

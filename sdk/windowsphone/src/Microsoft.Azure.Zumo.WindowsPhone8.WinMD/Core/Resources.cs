@@ -45,16 +45,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Gets a format string for throwing InvalidOperationExceptions when
         /// a web request results in a failure.
         /// </summary>
-        public static string MobileServiceClient_ThrowInvalidResponse_ErrorMessage
-        {
-            get { return "{2}  ({0} {1} - Details: {3})"; }
-        }
-
-        /// <summary>
-        /// Gets a format string for throwing InvalidOperationExceptions when
-        /// a web request results in a failure.
-        /// </summary>
-        public static string MobileServiceClient_ThrowConnectionFailure_ErrorMessage
+        public static string MobileServiceClient_ErrorMessage
         {
             get { return "The request could not be completed.  ({0})"; }
         }
@@ -67,6 +58,46 @@ namespace Microsoft.WindowsAzure.MobileServices
         public static string JsonExtensions_TrySetValue_CannotRoundtripNumericValue
         {
             get { return "The value {0} for member {1} is outside the valid range for numeric columns."; }
+        }
+
+        /// <summary>
+        /// Looks up a string similar to "Cannot start a login operation because login is already in progress."
+        /// </summary>
+        public static string MobileServiceClient_Login_In_Progress
+        {
+            get { return "Cannot start a login operation because login is already in progress."; }
+        }
+
+        /// <summary>
+        /// Looks up a string similar to "Authentication failed with HTTP response code {0}.".
+        /// </summary>
+        public static string Authentication_Failed
+        {
+            get { return "Authentication failed with HTTP response code {0}."; }
+        }
+
+        /// <summary>
+        /// Looks up a string similar to "Authentication was cancelled by the user.".
+        /// </summary>
+        public static string Authentication_Canceled
+        {
+            get { return "Authentication was cancelled by the user."; }
+        }
+
+        /// <summary>
+        /// Looks up a string similar to "Invalid format of the authentication response.".
+        /// </summary>
+        public static string MobileServiceClient_Login_Invalid_Response_Format
+        {
+            get { return "Invalid format of the authentication response."; }
+        }
+
+        /// <summary>
+        /// Looks up a string similar to "Login failed: {0}".
+        /// </summary>
+        public static string MobileServiceClient_Login_Error_Response
+        {
+            get { return "Login failed: {0}"; }
         }
     }
 }

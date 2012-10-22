@@ -91,6 +91,9 @@
     <Compile Include="..\Microsoft.Azure.Zumo.WindowsPhone8.WinMD\Core\JsonExtensions.cs">
       <Link>Core\JsonExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\Microsoft.Azure.Zumo.WindowsPhone8.WinMD\Core\MobileServiceAuthenticationProvider.cs">
+      <Link>Core\MobileServiceAuthenticationProvider.cs</Link>
+    </Compile>
     <Compile Include="..\Microsoft.Azure.Zumo.WindowsPhone8.WinMD\Core\MobileServiceClient.cs">
       <Link>Core\MobileServiceClient.cs</Link>
     </Compile>
@@ -139,6 +142,7 @@
     <Compile Include="Core\MobileServiceInvalidOperationException.cs" />
     <Compile Include="Core\MobileServiceTable.Generic.cs" />
     <Compile Include="Core\MobileServiceTable.Managed.cs" />
+    <Compile Include="PhoneWebAuthentication.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.cs" />
     <Compile Include="Table\CollectionView\MobileServiceCollectionView.cs" />
