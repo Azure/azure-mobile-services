@@ -407,8 +407,15 @@ namespace Microsoft.WindowsAzure.MobileServices
             double converted = Convert.ToDouble(value, CultureInfo.InvariantCulture);
             try
             {
-                object roundtripped = Convert.ChangeType(converted, desiredType, CultureInfo.InvariantCulture);
-                canRoundtrip = original.Equals(roundtripped);
+                JValue jv = new JValue(converted);
+                string jvString = jv.ToString();
+                JValue reverse = JValue.Parse(jvString) as JValue;
+
+                if (reverse != null)
+                {
+                    object roundtripped = Convert.ChangeType(reverse.Value, desiredType, CultureInfo.InvariantCulture);
+                    canRoundtrip = original.Equals(roundtripped);
+                }
             }
             catch (InvalidCastException)
             {
