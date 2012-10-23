@@ -13,12 +13,12 @@
     SupportedOrientations="Portrait" Orientation="Portrait"
     shell:SystemTray.IsVisible="True">
     <phone:PhoneApplicationPage.Resources>
-        <CollectionViewSource x:Name="cvsTests"/>
     </phone:PhoneApplicationPage.Resources>
 
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
@@ -43,7 +43,62 @@
          -->
 
         <!--TitlePanel contains the name of the application and page title-->
-        <StackPanel x:Name="TitlePanel" Grid.Row="0" Margin="12,17,0,28">
+        <StackPanel Grid.Row="0">
+            <TextBlock Text="PROJECT ZUMO" Style="{StaticResource PhoneTextNormalStyle}" FontSize="20" FontWeight="Bold"/>
+            <TextBlock Text="Client library unit tests" Style="{StaticResource PhoneTextAccentStyle}" Foreground="#0094ff" FontSize="30" />
+            <TextBlock TextWrapping="Wrap" Visibility="Collapsed" x:Name="lblStatus" Text="Status pending..."  Style="{StaticResource PhoneTextNormalStyle}"/>
+            <Grid x:Name="testSettings">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock VerticalAlignment="Center" Style="{StaticResource PhoneTextNormalStyle}" Text="Runtime Uri:" Grid.Column="0" Grid.Row="0"/>
+                <TextBlock VerticalAlignment="Center" Style="{StaticResource PhoneTextNormalStyle}" Text="Tags:" Grid.Column="0" Grid.Row="1"/>
+                <TextBox x:Name="txtRuntimeUri" Grid.Column="1" Grid.Row="0"  BorderThickness="0" Padding="0" FontSize="20"/>
+                <TextBox x:Name="txtTags" Grid.Column="1" Grid.Row="1" FontSize="20"  BorderThickness="0" Padding="0" />
+                <Button Grid.Column="1" Content="Start" Grid.Row="2" Click="ExecuteTests" Margin="0" Padding="0" FontSize="20"/>
+            </Grid>
+        </StackPanel>
+
+        <!--ContentPanel - place additional content here-->
+        <StackPanel x:Name="ContentPanel" Grid.Row="1" Margin="12,12,12,12">
+            <phone:LongListSelector
+        		Height="560" 
+        		Width="456"
+        		x:Name="lstTests"               
+        		IsGroupingEnabled="True" 
+        		BorderBrush="Red"
+                BorderThickness="2">
+                <phone:LongListSelector.GroupHeaderTemplate>
+                    <DataTemplate>
+                        <Border BorderThickness="0 0 0 1" BorderBrush="#666666" Margin="0 5 0 0" HorizontalAlignment="Stretch">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                                <TextBlock Text="{Binding Name}" FontSize="30" />
+                                <TextBlock Text=" tests" FontSize="30"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </phone:LongListSelector.GroupHeaderTemplate>
+
+                <phone:LongListSelector.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="8 0">
+                            <TextBlock Text="{Binding Name}" Foreground="{Binding Brush}" FontSize="25" />
+                            <ItemsControl ItemsSource="{Binding Details}" Margin="15 0 0 0" FontSize="20" Foreground="LightGray" />
+                        </StackPanel>
+                    </DataTemplate>
+                </phone:LongListSelector.ItemTemplate>
+            </phone:LongListSelector>         
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Margin="12,0,12,0">
+            <ProgressBar x:Name="progress"/>
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Zumo tests " Style="{StaticResource PhoneTextNormalStyle}"/>
                 <TextBlock x:Name="lblCurrentTestNumber" Text="0"/>
@@ -53,16 +108,8 @@
                 <TextBlock x:Name="lblFailureNumber" Text="0"/>
                 <TextBlock Text=" failures)"/>
             </StackPanel>
-            <TextBlock x:Name="lblStatus" Text="Status pending..."/>
-            <TextBlock x:Name="lblResults" Text="Results pending..."/>
+            <TextBlock Foreground="#ffd800" x:Name="lblResults" Text="Results pending..." Style="{StaticResource PhoneTextNormalStyle}"/>
         </StackPanel>
-
-        <!--ContentPanel - place additional content here-->
-        <Grid x:Name="ContentPanel" Grid.Row="1" Margin="12,0,12,0">
-            <ScrollViewer HorizontalAlignment="Left" Height="696" VerticalAlignment="Top" Width="456">
-                <TextBlock Name="tbOutput" />
-            </ScrollViewer>
-        </Grid>
 
         <!--Uncomment to see an alignment grid to help ensure your controls are
             aligned on common boundaries.  The image has a top margin of -32px to

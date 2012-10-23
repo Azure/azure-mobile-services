@@ -12,7 +12,7 @@ namespace Microsoft.Azure.Zumo.WindowsPhone8.CSharp.Test
     /// <summary>
     /// UI model for a test group.
     /// </summary>
-    public class GroupDescription : INotifyPropertyChanged
+    public class GroupDescription : ObservableCollection<TestDescription>
     {
         private string _name;
         
@@ -22,26 +22,11 @@ namespace Microsoft.Azure.Zumo.WindowsPhone8.CSharp.Test
             set
             {
                 _name = value;
-                OnPropertyChanged();
             }
         }
-
-        public ObservableCollection<TestDescription> Tests { get; private set; }
 
         public GroupDescription()
         {
-            Tests = new ObservableCollection<TestDescription>();
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged([CallerMemberName] string memberName = "")
-        {
-            PropertyChangedEventHandler handler = PropertyChanged;
-            if (handler != null)
-            {
-                handler(this, new PropertyChangedEventArgs(memberName));
-            }
         }
     }
 }

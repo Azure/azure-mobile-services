@@ -28,14 +28,35 @@ namespace Microsoft.Azure.Zumo.WindowsPhone8.CSharp.Test
         {
             InitializeComponent();
 
+            // Copy the test settings into the UI
+            string url = null;
+            App.Harness.Settings.Custom.TryGetValue("MobileServiceRuntimeUrl", out url);
+            txtRuntimeUri.Text = url ?? "";
+            txtTags.Text = App.Harness.Settings.TagExpression ?? "";
+
             // Setup the groups data source
             _groups = new ObservableCollection<GroupDescription>();
-            cvsTests.Source = _groups;
+            lstTests.ItemsSource = _groups;
+   
+        }
+
+        private void ExecuteTests(object sender, RoutedEventArgs e)
+        {
+            // Get the test settings from the UI
+            App.Harness.Settings.Custom["MobileServiceRuntimeUrl"] = txtRuntimeUri.Text;
+            App.Harness.Settings.TagExpression = txtTags.Text;
+
+            // Hide Test Settings UI
+            testSettings.Visibility = System.Windows.Visibility.Collapsed;
+
+            // Display Status UI
+            lblStatus.Visibility = System.Windows.Visibility.Visible;
 
             // Start a test run
             App.Harness.Reporter = this;
-            Task.Factory.StartNew(() => App.Harness.RunAsync());
+            Task.Factory.StartNew(() => App.Harness.RunAsync());     
         }
+
         public void StartRun(TestHarness harness)
         {
             Dispatcher.BeginInvoke(() =>
@@ -43,8 +64,7 @@ namespace Microsoft.Azure.Zumo.WindowsPhone8.CSharp.Test
                 lblCurrentTestNumber.Text = harness.Progress.ToString();
                 lblTotalTestNumber.Text = harness.Count.ToString();
                 lblFailureNumber.Tag = harness.Failures.ToString() ?? "0";
-                //progress.Value = 1;
-                //pnlFooter.Visibility = Visibility.Visible;
+                progress.Value = 1;
             });
         }
 
@@ -52,7 +72,6 @@ namespace Microsoft.Azure.Zumo.WindowsPhone8.CSharp.Test
         {
             Dispatcher.BeginInvoke(() =>
             {
-                //pnlFooter.Visibility = Visibility.Collapsed;
                 if (harness.Failures > 0)
                 {
                     lblResults.Text = string.Format(CultureInfo.InvariantCulture, "{0}/{1} tests failed!", harness.Failures, harness.Count);
@@ -78,7 +97,7 @@ namespace Microsoft.Azure.Zumo.WindowsPhone8.CSharp.Test
                 {
                     value = value * 100.0 / (double)count;
                 }
-                //progress.Value = value;
+                progress.Value = value;
             });
         }
 
@@ -104,12 +123,15 @@ namespace Microsoft.Azure.Zumo.WindowsPhone8.CSharp.Test
             Dispatcher.BeginInvoke(() =>
             {
                 _currentTest = new TestDescription { Name = test.Name };
-                _currentGroup.Tests.Add(_currentTest);
+                _currentGroup.Add(_currentTest);
 
                 Dispatcher.BeginInvoke(() =>
                 {
-                    //lstTests.ScrollIntoView(_currentTest);
-                    tbOutput.Text = tbOutput.Text + '\n' + test.Name;
+                    if(_currentTest != null)
+                    {
+                        // This causes an exception to be throws on app resume
+                        // lstTests.ScrollTo(_currentTest);
+                    }
                 });
             });
         }
