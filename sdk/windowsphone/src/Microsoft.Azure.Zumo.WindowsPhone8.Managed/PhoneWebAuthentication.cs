@@ -1,4 +1,8 @@
-﻿using Microsoft.Phone.Controls;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using Microsoft.Phone.Controls;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
