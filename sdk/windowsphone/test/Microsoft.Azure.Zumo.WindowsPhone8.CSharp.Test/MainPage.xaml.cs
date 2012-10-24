@@ -34,10 +34,14 @@ namespace Microsoft.Azure.Zumo.WindowsPhone8.CSharp.Test
             txtRuntimeUri.Text = url ?? "";
             txtTags.Text = App.Harness.Settings.TagExpression ?? "";
 
+            this.Loaded += MainPage_Loaded;  
+        }
+
+        void MainPage_Loaded(object sender, RoutedEventArgs e)
+        {
             // Setup the groups data source
             _groups = new ObservableCollection<GroupDescription>();
             lstTests.ItemsSource = _groups;
-   
         }
 
         private void ExecuteTests(object sender, RoutedEventArgs e)
@@ -122,16 +126,13 @@ namespace Microsoft.Azure.Zumo.WindowsPhone8.CSharp.Test
         {
             Dispatcher.BeginInvoke(() =>
             {
-                _currentTest = new TestDescription { Name = test.Name };
+                TestDescription testDescription = new TestDescription { Name = test.Name };
+                _currentTest = testDescription;
                 _currentGroup.Add(_currentTest);
 
                 Dispatcher.BeginInvoke(() =>
                 {
-                    if(_currentTest != null)
-                    {
-                        // This causes an exception to be throws on app resume
-                        // lstTests.ScrollTo(_currentTest);
-                    }
+                    lstTests.ScrollTo(testDescription);
                 });
             });
         }
