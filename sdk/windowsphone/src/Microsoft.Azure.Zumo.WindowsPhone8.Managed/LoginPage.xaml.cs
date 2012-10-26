@@ -125,7 +125,16 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             WebBrowserNavigationException navEx = e.Exception as WebBrowserNavigationException;
 
-            responseErrorDetail = (uint)navEx.StatusCode;
+            if (navEx != null)
+            {
+                // Pass along the provided error information.
+                responseErrorDetail = (uint)navEx.StatusCode;
+            }
+            else
+            {
+                // No error information available.
+                responseErrorDetail = 0;
+            }
             responseStatus = PhoneAuthenticationStatus.ErrorHttp;
 
             authenticationFinished = true;
