@@ -4,4 +4,4 @@ obj/
 *.suo
 AppPackages/
 packages/
-
+_ReSharper*
