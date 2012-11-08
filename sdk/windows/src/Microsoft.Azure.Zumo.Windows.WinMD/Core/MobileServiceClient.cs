@@ -6,11 +6,9 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Net;
 using System.Threading.Tasks;
 using Windows.Data.Json;
 using Windows.Security.Authentication.Web;
-using Windows.Storage;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -19,17 +17,6 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// </summary>
     public sealed partial class MobileServiceClient
     {
-        /// <summary>
-        /// Name of the config setting that stores the installation ID.
-        /// </summary>
-        private const string ConfigureAsyncInstallationConfigPath = "MobileServices.Installation.config";
-
-        /// <summary>
-        /// Name of the JSON member in the config setting that stores the
-        /// installation ID.
-        /// </summary>
-        private const string ConfigureAsyncApplicationIdKey = "applicationInstallationId";
-
         /// <summary>
         /// Name of the  JSON member in the config setting that stores the
         /// authentication token.
@@ -68,11 +55,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         private const string RequestJsonContentType = "application/json";
 
         /// <summary>
-        /// Gets or sets the ID used to identify this installation of the
-        /// application to provide telemetry data.  It will either be retrieved
-        /// from local settings or generated fresh.
+        /// The ID used to identify this installation of the application to 
+        /// provide telemetry data.
         /// </summary>
-        private static string applicationInstallationId = null;
+        private static readonly string applicationInstallationId = MobileServiceApplication.InstallationId;
 
         /// <summary>
         /// A JWT token representing the current user's successful OAUTH
@@ -99,35 +85,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             get;
             private set;
-        }
-
-        /// <summary>
-        /// Initialize the shared applicationInstallationId.
-        /// </summary>
-        [SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline", Justification = "Initialization is nontrivial.")]
-        static MobileServiceClient()
-        {
-            // Try to get the AppInstallationId from settings
-            object setting = null;
-            if (ApplicationData.Current.LocalSettings.Values.TryGetValue(ConfigureAsyncInstallationConfigPath, out setting))
-            {
-                JsonValue config = null;
-                if (JsonValue.TryParse(setting as string, out config))
-                {
-                    applicationInstallationId = config.Get(ConfigureAsyncApplicationIdKey).AsString();
-                }
-            }
-
-            // Generate a new AppInstallationId if we failed to find one
-            if (applicationInstallationId == null)
-            {
-                applicationInstallationId = Guid.NewGuid().ToString();
-                string configText =
-                    new JsonObject()
-                    .Set(ConfigureAsyncApplicationIdKey, applicationInstallationId)
-                    .Stringify();
-                ApplicationData.Current.LocalSettings.Values[ConfigureAsyncInstallationConfigPath] = configText;
-            }
         }
 
         /// <summary>

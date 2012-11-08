@@ -100,7 +100,7 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             }
             catch (MobileServiceInvalidOperationException e)
             {
-                Assert.AreEqual("An item with id '9999999' does not exist.", e.Message);
+                Assert.Contains(e.Message, "An item with id '9999999' does not exist.");
             }
         }
 
