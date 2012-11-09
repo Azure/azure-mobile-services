@@ -3,4 +3,5 @@ obj/
 *.user
 *.suo
 AppPackages/
+packages/
 _ReSharper*

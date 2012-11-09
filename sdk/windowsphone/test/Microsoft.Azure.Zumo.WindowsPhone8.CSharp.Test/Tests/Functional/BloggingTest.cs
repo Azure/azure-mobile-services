@@ -7,10 +7,10 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Azure.Zumo.Win8.Test;
+using Microsoft.Azure.Zumo.WindowsPhone8.Test;
 using Microsoft.WindowsAzure.MobileServices;
 
-namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
+namespace Microsoft.Azure.Zumo.WindowsPhone8.CSharp.Test
 {
     [DataTable(Name = "blog_posts")]
     public class BlogPost
@@ -96,11 +96,11 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             // runtime.
             try
             {
-                await postTable.DeleteAsync(new BlogPost() { CommentCount = 5, Id = 9999999});
+                await postTable.DeleteAsync(new BlogPost() { CommentCount = 5, Id = 9999999 });
             }
             catch (MobileServiceInvalidOperationException e)
             {
-                Assert.Contains(e.Message, "An item with id '9999999' does not exist.");
+                Assert.AreEqual("An item with id '9999999' does not exist.", e.Message);
             }
         }
 
@@ -114,7 +114,7 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             // with a 400 and an error message string in the response body.
             try
             {
-                await postTable.InsertAsync(new BlogPost() {});
+                await postTable.InsertAsync(new BlogPost() { });
             }
             catch (MobileServiceInvalidOperationException e)
             {

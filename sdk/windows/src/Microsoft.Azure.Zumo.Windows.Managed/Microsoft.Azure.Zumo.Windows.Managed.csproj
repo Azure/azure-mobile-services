@@ -122,6 +122,9 @@
     <Compile Include="..\Microsoft.Azure.Zumo.Windows.WinMD\Core\MobileServiceClient.cs">
       <Link>Core\MobileServiceClient.cs</Link>
     </Compile>
+    <Compile Include="..\Microsoft.Azure.Zumo.Windows.WinMD\Core\MobileServiceApplication.cs">
+      <Link>Core\MobileServiceApplication.cs</Link>
+    </Compile>
     <Compile Include="..\Microsoft.Azure.Zumo.Windows.WinMD\Core\MobileServiceTable.cs">
       <Link>Core\MobileServiceTable.cs</Link>
     </Compile>

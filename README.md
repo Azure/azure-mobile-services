@@ -13,9 +13,9 @@ To get the source code of our SDKs and samples via **git** just type:
     git clone https://github.com/WindowsAzure/azure-mobile-services.git
     cd ./azure-mobile-services/
 
-## Windows Client SDK
+## Windows 8 and Windows Phone 8 Client SDK
 
-Our Windows SDK makes it incredibly easy to use Mobile Services from your Windows Store applications. You can [download the SDK](http://go.microsoft.com/fwlink/?LinkId=257545&clcid=0x409) directly or you can download the source code using the instructions above and then you will find the Windows Client SDK under ```/azure-mobile-services/sdk/windows```.
+Our Windows SDK makes it incredibly easy to use Mobile Services from your Windows Store and Windows Phone 8 applications. You can [download the SDK](http://go.microsoft.com/fwlink/?LinkId=257545&clcid=0x409) directly or you can download the source code using the instructions above. The Windows Client SDK can be found under ```/azure-mobile-services/sdk/windows``` and the Windows Phone 8 Client SDK is under ```/azure-mobile-services/sdk/windowsphone```.
 
 ## iOS Client SDK
 Note: This iOS client is released as a preview. It is currently under development.

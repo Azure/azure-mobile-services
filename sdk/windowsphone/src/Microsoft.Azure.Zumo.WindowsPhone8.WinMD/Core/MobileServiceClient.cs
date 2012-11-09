@@ -6,9 +6,10 @@ using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Net;
 using System.Threading.Tasks;
-using Windows.Data.Json;
-using Windows.Security.Authentication.Web;
+using Newtonsoft.Json.Linq;
+using System.IO.IsolatedStorage;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -17,6 +18,17 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// </summary>
     public sealed partial class MobileServiceClient
     {
+        /// <summary>
+        /// Name of the config setting that stores the installation ID.
+        /// </summary>
+        private const string ConfigureAsyncInstallationConfigPath = "MobileServices.Installation.config";
+
+        /// <summary>
+        /// Name of the JSON member in the config setting that stores the
+        /// installation ID.
+        /// </summary>
+        private const string ConfigureAsyncApplicationIdKey = "applicationInstallationId";
+
         /// <summary>
         /// Name of the  JSON member in the config setting that stores the
         /// authentication token.
@@ -55,10 +67,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         private const string RequestJsonContentType = "application/json";
 
         /// <summary>
-        /// The ID used to identify this installation of the application to 
-        /// provide telemetry data.
+        /// Gets or sets the ID used to identify this installation of the
+        /// application to provide telemetry data.  It will either be retrieved
+        /// from local settings or generated fresh.
         /// </summary>
-        private static readonly string applicationInstallationId = MobileServiceApplication.InstallationId;
+        private static string applicationInstallationId = null;
 
         /// <summary>
         /// A JWT token representing the current user's successful OAUTH
@@ -85,6 +98,38 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             get;
             private set;
+        }
+
+        /// <summary>
+        /// Initialize the shared applicationInstallationId.
+        /// </summary>
+        [SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline", Justification = "Initialization is nontrivial.")]
+        static MobileServiceClient()
+        {
+            // Try to get the AppInstallationId from settings
+            if (IsolatedStorageSettings.ApplicationSettings.Contains(ConfigureAsyncApplicationIdKey))
+            {
+                JToken config = null;
+                try
+                {
+                    config = JToken.Parse(IsolatedStorageSettings.ApplicationSettings[ConfigureAsyncApplicationIdKey] as string);
+                    applicationInstallationId = config.Get(ConfigureAsyncApplicationIdKey).AsString();
+                }
+                catch (Exception)
+                {
+                }
+            }
+
+            // Generate a new AppInstallationId if we failed to find one
+            if (applicationInstallationId == null)
+            {
+                applicationInstallationId = Guid.NewGuid().ToString();
+                string configText =
+                    new JObject()
+                    .Set(ConfigureAsyncApplicationIdKey, applicationInstallationId)
+                    .ToString();
+                IsolatedStorageSettings.ApplicationSettings[ConfigureAsyncInstallationConfigPath] = configText;
+            }
         }
 
         /// <summary>
@@ -236,9 +281,9 @@ namespace Microsoft.WindowsAzure.MobileServices
             // an exception?).  For now we just overwrite the the current user
             // and their token on a successful login.
 
-            JsonObject request = new JsonObject()
+            JToken request = new JObject()
                 .Set(LoginAsyncAuthenticationTokenKey, authenticationToken);
-            IJsonValue response = await this.RequestAsync("POST", LoginAsyncUriFragment, request);
+            JToken response = await this.RequestAsync("POST", LoginAsyncUriFragment, request);
             
             // Get the Mobile Services auth token and user data
             this.currentUserAuthenticationToken = response.Get(LoginAsyncAuthenticationTokenKey).AsString();
@@ -253,20 +298,20 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="provider" type="MobileServiceAuthenticationProvider">
         /// Authentication provider to use.
         /// </param>
-        /// <param name="token" type="JsonObject">
+        /// <param name="token" type="JObject">
         /// Optional, provider specific object with existing OAuth token to log in with.
         /// </param>
         /// <returns>
         /// Task that will complete when the user has finished authentication.
         /// </returns>
-        internal async Task<MobileServiceUser> SendLoginAsync(MobileServiceAuthenticationProvider provider, JsonObject token = null)
+        internal async Task<MobileServiceUser> SendLoginAsync(MobileServiceAuthenticationProvider provider, JObject token = null)
         {
             if (this.LoginInProgress)
             {
                 throw new InvalidOperationException(Resources.MobileServiceClient_Login_In_Progress);
             }
 
-            if (!Enum.IsDefined(typeof(MobileServiceAuthenticationProvider), provider)) 
+            if (!Enum.IsDefined(typeof(MobileServiceAuthenticationProvider), provider))
             {
                 throw new ArgumentOutOfRangeException("provider");
             }
@@ -276,7 +321,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.LoginInProgress = true;
             try
             {
-                IJsonValue response = null;
+                JToken response = null;
                 if (token != null)
                 {
                     // Invoke the POST endpoint to exchange provider-specific token for a Windows Azure Mobile Services token
@@ -285,19 +330,18 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
                 else
                 {
-                    // Use WebAuthenicationBroker to launch server side OAuth flow using the GET endpoint
+                    // Use PhoneWebAuthenticationBroker to launch server side OAuth flow using the GET endpoint
 
                     Uri startUri = new Uri(this.ApplicationUri, LoginAsyncUriFragment + "/" + providerName);
                     Uri endUri = new Uri(this.ApplicationUri, LoginAsyncDoneUriFragment);
 
-                    WebAuthenticationResult result = await WebAuthenticationBroker.AuthenticateAsync(
-                        WebAuthenticationOptions.None, startUri, endUri);
+                    PhoneAuthenticationResponse result = await PhoneWebAuthenticationBroker.AuthenticateAsync(startUri, endUri);
 
-                    if (result.ResponseStatus == WebAuthenticationStatus.ErrorHttp)
+                    if (result.ResponseStatus == PhoneAuthenticationStatus.ErrorHttp)
                     {
                         throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, Resources.Authentication_Failed, result.ResponseErrorDetail));
                     }
-                    else if (result.ResponseStatus == WebAuthenticationStatus.UserCancel)
+                    else if (result.ResponseStatus == PhoneAuthenticationStatus.UserCancel)
                     {
                         throw new InvalidOperationException(Resources.Authentication_Canceled);
                     }
@@ -305,7 +349,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     int i = result.ResponseData.IndexOf("#token=");
                     if (i > 0)
                     {
-                        response = JsonValue.Parse(Uri.UnescapeDataString(result.ResponseData.Substring(i + 7)));
+                        response = JToken.Parse(Uri.UnescapeDataString(result.ResponseData.Substring(i + 7)));
                     }
                     else
                     {
@@ -313,7 +357,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                         if (i > 0)
                         {
                             throw new InvalidOperationException(string.Format(
-                                CultureInfo.InvariantCulture, 
+                                CultureInfo.InvariantCulture,
                                 Resources.MobileServiceClient_Login_Error_Response,
                                 Uri.UnescapeDataString(result.ResponseData.Substring(i + 7))));
                         }
@@ -361,7 +405,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Optional content to send to the resource.
         /// </param>
         /// <returns>The JSON value of the response.</returns>
-        internal async Task<IJsonValue> RequestAsync(string method, string uriFragment, IJsonValue content)
+        internal async Task<JToken> RequestAsync(string method, string uriFragment, JToken content)
         {
             Debug.Assert(!string.IsNullOrEmpty(method), "method cannot be null or empty!");
             Debug.Assert(!string.IsNullOrEmpty(uriFragment), "uriFragment cannot be null or empty!");
@@ -388,12 +432,12 @@ namespace Microsoft.WindowsAzure.MobileServices
             if (content != null)
             {
                 request.ContentType = RequestJsonContentType;
-                request.Content = content.Stringify();
+                request.Content = content.ToString();
             }
 
             // Send the request and get the response back as JSON
             IServiceFilterResponse response = await ServiceFilter.ApplyAsync(request, this.filter);
-            IJsonValue body = GetResponseJsonAsync(response);
+            JToken body = GetResponseJsonAsync(response);
 
             // Throw errors for any failing responses
             if (response.ResponseStatus != ServiceFilterResponseStatus.Success || response.StatusCode >= 400)
@@ -412,15 +456,21 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Task that will complete when the response text has been obtained.
         /// </returns>
         [SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "Windows.Data.Json.JsonValue.TryParse(System.String,Windows.Data.Json.JsonValue@)", Justification = "We don't want to do anything if the Parse fails - just return null")]
-        private static IJsonValue GetResponseJsonAsync(IServiceFilterResponse response)
+        private static JToken GetResponseJsonAsync(IServiceFilterResponse response)
         {
             Debug.Assert(response != null, "response cannot be null.");
             
             // Try to parse the response as JSON
-            JsonValue result = null;
+            JToken result = null;
             if (response.Content != null)
             {
-                JsonValue.TryParse(response.Content, out result);                
+                try
+                {
+                    result = JToken.Parse(response.Content);
+                }
+                catch (Newtonsoft.Json.JsonException)
+                {
+                }
             }
             return result;
         }
@@ -431,7 +481,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="request">The request.</param>
         /// <param name="response">The response.</param>
         /// <param name="body">The body of the response as JSON.</param>
-        private static void ThrowInvalidResponse(IServiceFilterRequest request, IServiceFilterResponse response, IJsonValue body)
+        private static void ThrowInvalidResponse(IServiceFilterRequest request, IServiceFilterResponse response, JToken body)
         {
             Debug.Assert(request != null, "request cannot be null!");
             Debug.Assert(response != null, "response cannot be null!");
@@ -448,13 +498,13 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 if (body != null)
                 {
-                    if (body.ValueType == JsonValueType.String)
+                    if (body.Type == JTokenType.String)
                     {
                         // User scripts might return errors with just a plain string message as the
                         // body content, so use it as the exception message
-                        message = body.GetString();
+                        message = body.ToString();
                     }
-                    else if (body.ValueType == JsonValueType.Object)
+                    else if (body.Type == JTokenType.Object)
                     {
                         // Get the error message, but default to the status description
                         // below if there's no error message present.
@@ -462,7 +512,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                                   body.Get("description").AsString();
                     }
                 }
-                
+
                 if (string.IsNullOrWhiteSpace(message))
                 {
                     message = string.Format(
