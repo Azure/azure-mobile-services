@@ -195,7 +195,7 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             }
             catch (InvalidOperationException ex)
             {
-                Assert.Equals(ex.Message, "error message");
+                Assert.AreEqual(ex.Message, "error message");
             }
 
             // Verify all of the exception parameters
@@ -212,7 +212,7 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             }
             catch (MobileServiceInvalidOperationException ex)
             {
-                Assert.Equals(ex.Message, "error message");
+                Assert.AreEqual(ex.Message, "error message");
                 Assert.AreEqual((int)HttpStatusCode.Unauthorized, ex.Response.StatusCode);
                 Assert.Contains(ex.Response.Content, "donkey");
                 Assert.StartsWith(ex.Request.Uri.ToString(), appUrl);
@@ -231,7 +231,7 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             }
             catch (InvalidOperationException ex)
             {
-                Assert.Equals("The request could not be completed.  (YOU SHALL NOT PASS).", ex.Message);
+                Assert.AreEqual("The request could not be completed.  (YOU SHALL NOT PASS.)", ex.Message);
             }
         }
 
