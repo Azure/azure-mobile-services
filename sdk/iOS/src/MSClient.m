@@ -17,7 +17,7 @@
 #import "MSClient.h"
 #import "MSTable.h"
 #import "MSClientConnection.h"
-#import "MSLoginViewController.h"
+#import "MSLogin.h"
 #import "MSUser.h"
 
 
@@ -28,6 +28,9 @@
 
 // Public readonly, private readwrite properties
 @property (nonatomic, strong, readwrite)         NSArray *filters;
+
+// Private properties
+@property (nonatomic, strong, readonly)         MSLogin *login;
 
 @end
 
@@ -40,6 +43,7 @@
 @synthesize applicationURL = applicationURL_;
 @synthesize applicationKey = applicationKey_;
 @synthesize currentUser = currentUser_;
+@synthesize login = login_;
 
 MSClientConnection *connection;
 
@@ -92,6 +96,7 @@ MSClientConnection *connection;
     {
         applicationURL_ = url;
         applicationKey_ = [key copy];
+        login_ = [[MSLogin alloc] initWithClient:self];
     }
     return self;
 }
@@ -124,122 +129,31 @@ MSClientConnection *connection;
 #pragma mark * Public Authentication Methods
 
 
--(UINavigationController *) loginViewControllerWithProvider:(NSString *)provider
-                                completion:(MSClientLoginBlock)completion
+-(void) loginWithProvider:(NSString *)provider
+             onController:(UIViewController *)controller
+                 animated:(BOOL)animated
+               completion:(MSClientLoginBlock)completion
 {
-    NSURL* startUrl = [self.applicationURL URLByAppendingPathComponent:
-                       [NSString stringWithFormat:@"login/%@", provider]];
-    NSURL* endUrl = [self.applicationURL URLByAppendingPathComponent:@"login/done"];
-    
-    __block MSEndUrlNavigatedTo endURLCompletion =
-    
-    ^(NSURL* url, NSError *error)
-    {
-        if (completion) {
-            if (!error) {
-                
-                // The endUrl has been reached
-                NSInteger match = [url.absoluteString rangeOfString:@"#token="].location;
-                if (match > 0) {
-                    
-                    // Process returned token
-                    NSString* jsonToken = [[url.absoluteString substringFromIndex:(match + 7)]
-                                           stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-                    [self parseLoginResponse:[jsonToken dataUsingEncoding:NSUTF8StringEncoding]
-                                  completion:completion];
-                }
-                else {
-                    match = [url.absoluteString rangeOfString:@"#error="].location;
-                    if (match > 0) {
-                        
-                        NSString * errorDescription = [[url.absoluteString
-                                            substringFromIndex:(match + 7)]
-                                            stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-                        NSDictionary *userInfo = @{
-                            NSLocalizedDescriptionKey:errorDescription
-                        };
-                        
-                        error = [NSError errorWithDomain:MSErrorDomain
-                                                    code:MSLoginFailed
-                                                userInfo:userInfo];
-                    }
-                    else {
-                        
-                        // Unrecognized response
-                        error = [NSError errorWithDomain:MSErrorDomain
-                                                    code:MSLoginInvalidResponseSyntax
-                                                userInfo:@{@"error": url.absoluteString}];
-                    }
-                }
-            }
-        }
-        
-        if (error) {
-            completion(nil, error);
-        }
-    };
-        
-    MSLoginViewController* lvc = [[MSLoginViewController alloc]
-                                  initWithStartUrl:startUrl
-                                  endUrl:endUrl
-                                  completion:endURLCompletion];
-    
-    UINavigationController* nav = [[UINavigationController alloc]
-                                   initWithRootViewController:lvc];
-    
-    return nav;
+    return [self.login loginWithProvider:provider
+                            onController:controller
+                                animated:animated
+                              completion:completion];
+}
+
+-(MSLoginController *) loginViewControllerWithProvider:(NSString *)provider
+                                      completion:(MSClientLoginBlock)completion
+{
+    return [self.login loginViewControllerWithProvider:provider
+                                            completion:completion];
 }
 
 -(void) loginWithProvider:(NSString *)provider
                 withToken:(NSDictionary *)token
-                completion:(MSClientLoginBlock)completion;
+               completion:(MSClientLoginBlock)completion;
 {
-    NSError *error = nil;
-    
-    if (connection) {
-        if (completion) {
-            NSDictionary *userInfo = @{
-                NSLocalizedDescriptionKey:NSLocalizedString(@"Cannot start a login operation while another login operation is in progress.", nil)
-            };
-            
-            error = [NSError errorWithDomain:MSErrorDomain
-                                        code:MSLoginAlreadyInProgress
-                                    userInfo:userInfo];
-        }
-    }
-    else {
-        NSURL *requestURL = [self.applicationURL URLByAppendingPathComponent:
-                             [NSString stringWithFormat:@"login/%@", provider]];
-        NSMutableURLRequest *request = [NSMutableURLRequest
-                                        requestWithURL:requestURL];
-        request.HTTPMethod = @"POST";
-        request.HTTPBody = [NSJSONSerialization dataWithJSONObject:token options:(0) error:&error];
-        if (!error) {
-            
-            __block MSResponseBlock responseCompletion = nil;
-            if (completion) {
-            
-                responseCompletion =
-                ^(NSHTTPURLResponse *response, NSData *data, NSError *responseError) {
-                    connection = nil;
-                    if (responseError) {
-                        completion(nil, responseError);
-                    }
-                    [self parseLoginResponse:data completion:completion];
-                };
-            }
-            
-            connection = [[MSClientConnection alloc] initWithRequest:request
-                                                          withClient:self
-                                                          completion:responseCompletion];
-            [connection start];
-        }
-
-    };
-            
-    if (error && completion) {
-        completion(nil, error);
-    }
+   return [self.login loginWithProvider:provider
+                              withToken:token
+                             completion:completion];
 }
 
 -(void) logout
@@ -270,57 +184,6 @@ MSClientConnection *connection;
     client.filters = [self.filters copyWithZone:zone];
 
     return client;
-}
-
-
-#pragma mark * Private Authentication Methods
-
-
--(void) parseLoginResponse:(NSData *)data
-                 completion:(MSClientLoginBlock)completion
-{
-    if (completion) {
-        NSError *error = nil;
-        id json = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
-        if (error || ![json isKindOfClass:[NSDictionary class]]) {
-            
-            // Token is not a JSON object
-            NSDictionary *userInfo = @{
-                @"token":[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding],
-                NSLocalizedDescriptionKey:NSLocalizedString(@"The token in the login response must be a JSON object.", nil)
-            };
-            
-            error = [NSError errorWithDomain:MSErrorDomain
-                                            code:MSLoginInvalidResponseSyntax
-                                        userInfo:userInfo];
-        }
-        else {
-            id userId = [[json objectForKey:@"user"] objectForKey:@"userId"];
-            id authenticationToken = [json objectForKey:@"authenticationToken"];
-            if (![userId isKindOfClass:[NSString class]] ||
-                ![authenticationToken isKindOfClass:[NSString class]]) {
-                
-                // userId or authenticationToken are not strings
-                NSDictionary *userInfo = @{
-                    @"token":[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding],
-                    NSLocalizedDescriptionKey:NSLocalizedString(@"The token in the login response does not contain userId or authenticationToken.", nil)
-                };
-                
-                error = [NSError errorWithDomain:MSErrorDomain
-                                                code:MSLoginInvalidResponseSyntax
-                                            userInfo:userInfo];
-            }
-            else {
-                self.currentUser = [[MSUser alloc] initWithUserId:userId];
-                self.currentUser.mobileServiceAuthenticationToken = authenticationToken;
-                completion(self.currentUser, nil);
-            }
-        }
-        
-        if (error) {
-            completion(nil, error);
-        }
-    }
 }
 
 @end

@@ -76,12 +76,19 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 }
 
 
-#pragma mark * Public Start Method
+#pragma mark * Public Start Methods
 
 
 -(void) start
 {
     [MSClientConnection invokeNextFilter:self.client.filters
+                             withRequest:self.request
+                              completion:self.completion];
+}
+
+-(void) startWithoutFilters
+{
+    [MSClientConnection invokeNextFilter:nil
                              withRequest:self.request
                               completion:self.completion];
 }
@@ -130,25 +137,34 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 {
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
     
-    // Add the authentication header if the user is logged in
-    if (client.currentUser && client.currentUser.mobileServiceAuthenticationToken) {
-        [mutableRequest
-         setValue:client.currentUser.mobileServiceAuthenticationToken
-         forHTTPHeaderField:xZumoAuth];
-    }
-    
-    // Set the User Agent header
-    NSString *userAgentValue = [MSUserAgentBuilder userAgent];
-    [mutableRequest setValue:userAgentValue forHTTPHeaderField:userAgentHeader];
-    
-    // Set the special Application key header
-    NSString *appKey = client.applicationKey;
-    if (appKey != nil) {
-        [mutableRequest setValue:appKey forHTTPHeaderField:xApplicationHeader];
-    }
+    NSString *requestURLString = request.URL.absoluteString;
+    NSString *applicationURLString = client.applicationURL.absoluteString;
+    if ([requestURLString rangeOfString:applicationURLString].location == 0)
+    {
+        // Add the authentication header if the user is logged in
+        if (client.currentUser &&
+            client.currentUser.mobileServiceAuthenticationToken) {
+            [mutableRequest
+             setValue:client.currentUser.mobileServiceAuthenticationToken
+             forHTTPHeaderField:xZumoAuth];
+        }
+        
+        // Set the User Agent header
+        NSString *userAgentValue = [MSUserAgentBuilder userAgent];
+        [mutableRequest setValue:userAgentValue
+              forHTTPHeaderField:userAgentHeader];
+        
+        // Set the special Application key header
+        NSString *appKey = client.applicationKey;
+        if (appKey != nil) {
+            [mutableRequest setValue:appKey
+                  forHTTPHeaderField:xApplicationHeader];
+        }
 
-    // Set the content type header
-    [mutableRequest setValue:jsonContentType forHTTPHeaderField:contentTypeHeader];
+        // Set the content type header
+        [mutableRequest setValue:jsonContentType
+              forHTTPHeaderField:contentTypeHeader];
+    }
     
     return mutableRequest;
 }
