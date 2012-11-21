@@ -39,11 +39,14 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 // is used only by the |MSClientConnection|.
 @interface MSConnectionDelegate : NSObject <NSURLConnectionDataDelegate>
 
+@property (nonatomic, strong)               MSClient *client;
 @property (nonatomic, strong)               NSData *data;
 @property (nonatomic, strong)               NSHTTPURLResponse *response;
 @property (nonatomic, copy)                 MSResponseBlock completion;
 
--(id) initWithCompletion:(MSResponseBlock)completion;
+-(id) initWithClient:(MSClient *)client
+          completion:(MSResponseBlock)completion;
+
 @end
 
 
@@ -82,6 +85,7 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 -(void) start
 {
     [MSClientConnection invokeNextFilter:self.client.filters
+                              withClient:self.client
                              withRequest:self.request
                               completion:self.completion];
 }
@@ -89,6 +93,7 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 -(void) startWithoutFilters
 {
     [MSClientConnection invokeNextFilter:nil
+                              withClient:self.client
                              withRequest:self.request
                               completion:self.completion];
 }
@@ -98,6 +103,7 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 
 
 +(void) invokeNextFilter:(NSArray *)filters
+              withClient:(MSClient *)client
              withRequest:(NSURLRequest *)request
                completion:(MSFilterResponseBlock)completion
 {
@@ -106,7 +112,8 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
         // No filters to invoke so use |NSURLConnection | to actually
         // send the request.
         MSConnectionDelegate *delegate = [[MSConnectionDelegate alloc]
-                                          initWithCompletion:completion];
+                                          initWithClient:client
+                                              completion:completion];
         [NSURLConnection connectionWithRequest:request delegate:delegate];
     }
     else {
@@ -122,6 +129,7 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
            MSFilterResponseBlock onNextResponse)
         {
             [MSClientConnection invokeNextFilter:nextFilters
+                                      withClient:client
                                      withRequest:onNextRequest
                                       completion:onNextResponse];                                    
         } copy];
@@ -137,9 +145,9 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 {
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
     
-    NSString *requestURLString = request.URL.absoluteString;
-    NSString *applicationURLString = client.applicationURL.absoluteString;
-    if ([requestURLString rangeOfString:applicationURLString].location == 0)
+    NSString *requestHost = request.URL.host;
+    NSString *applicationHost = client.applicationURL.host;
+    if ([applicationHost isEqualToString:requestHost])
     {
         // Add the authentication header if the user is logged in
         if (client.currentUser &&
@@ -178,6 +186,7 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 
 @implementation MSConnectionDelegate
 
+@synthesize client = client_;
 @synthesize completion = completion_;
 @synthesize data = data_;
 @synthesize response = response_;
@@ -186,10 +195,12 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 # pragma mark * Public Initializer Methods
 
 
--(id) initWithCompletion:(MSResponseBlock)completion
+-(id) initWithClient:(MSClient *)client
+          completion:(MSResponseBlock)completion
 {
     self = [super init];
     if (self) {
+        client_ = client;
         completion_ = [completion copy];
     }
     
@@ -205,7 +216,7 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 {
     if (self.completion) {
         self.completion(nil, nil, error);
-        self.completion = nil;
+        [self cleanup];
     }
 }
 
@@ -213,14 +224,14 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 # pragma mark * NSURLConnectionDataDelegate Methods
 
 
-- (void)connection:(NSURLConnection *)connection
+-(void) connection:(NSURLConnection *)connection
 didReceiveResponse:(NSURLResponse *)response
 {
     // We should only be making HTTP requests
     self.response = (NSHTTPURLResponse *)response;
 }
 
-- (void)connection:(NSURLConnection *)connection
+-(void)connection: (NSURLConnection *)connection
     didReceiveData:(NSData *)data
 {
     // If we haven't received any data before, just take this data instance
@@ -236,19 +247,45 @@ didReceiveResponse:(NSURLResponse *)response
     }
 }
 
-- (NSCachedURLResponse *)connection:(NSURLConnection *)connection
+-(NSCachedURLResponse *) connection:(NSURLConnection *)connection
                   willCacheResponse:(NSCachedURLResponse *)cachedResponse
 {
     // We don't want to cache anything
     return nil;
 }
 
-- (void)connectionDidFinishLoading:(NSURLConnection *)connection
+-(NSURLRequest *) connection:(NSURLConnection *)connection
+             willSendRequest:(NSURLRequest *)request
+            redirectResponse:(NSURLResponse *)response
+{
+    NSURLRequest *newRequest = nil;
+    
+    // Only follow redirects to the Windows Azure Mobile Service and not
+    // to other hosts
+    NSString *requestHost = request.URL.host;
+    NSString *applicationHost = self.client.applicationURL.host;
+    if ([applicationHost isEqualToString:requestHost])
+    {
+        newRequest = request;
+    }
+    
+    return newRequest;
+}
+
+-(void) connectionDidFinishLoading:(NSURLConnection *)connection
 {
     if (self.completion) {
         self.completion(self.response, self.data, nil);
-        self.completion = nil;
+        [self cleanup];
     }
+}
+
+-(void) cleanup
+{
+    self.client = nil;
+    self.data = nil;
+    self.response = nil;
+    self.completion = nil;
 }
 
 @end

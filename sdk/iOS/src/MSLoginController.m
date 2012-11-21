@@ -238,6 +238,9 @@
                 newError = [self.serializer errorFromData:data];
             }
         }
+        else {
+            newError = error;
+        }
     }
     
     return newError;

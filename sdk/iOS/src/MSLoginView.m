@@ -143,36 +143,27 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
             shouldStartLoadWithRequest:(NSURLRequest *)request
             navigationType:(UIWebViewNavigationType)navigationType;
 {
-    // The UIWebView by default will make requests itself.  This doesn't work
-    // for the MSLoginView scenarios  because it needs access to the
-    // response, which UIWebview doesn't allow. Therefore, we will
-    // make all requests using an MSClientConnection and then have the
-    // WebView simply load the response data that we get. In this method, we
-    // have to distinguish between when the user clicked on a link and when
-    // we explicilty asked the WebView to load the response data
-    
     BOOL shouldLoad = NO;
     
     NSURL *requestURL = request.URL;
     NSString *requestURLString = request.URL.absoluteString;
     
-    // Check if we've reached the end URL and we're done
+    // Now check if we've reached the end URL and we're done
     if ([requestURLString rangeOfString:self.endURLString].location == 0) {
         [self callCompletion:requestURL orError:nil];
     }
     else {
         
-        // Check if this request has already been made using the
-        // MSClientConnection so that we can go ahead and load the response
-        // in the webView
-        if ([requestURL isEqual:self.currentURL] ||
-             navigationType == UIWebViewNavigationTypeOther) {
+        // Check if this request is to the Windows Azure Mobile Service and
+        // if so, make the request with the MSClientConnection so that we
+        // can inspect the response
+        NSString *appURLString = self.client.applicationURL.absoluteString;
+        if ([self.currentURL isEqual:requestURL] ||
+            [requestURLString rangeOfString:appURLString].location != 0)
+        {
             shouldLoad = YES;
         }
         else {
-            
-            // A user clicked on a link/form from the current page, so we
-            // need to use an MSClientConnection to make the request
             [self makeRequest:request];
         }
     }
@@ -181,7 +172,13 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
 }
 
 -(void) webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error
-{
+{    
+    // Ignore "Fame Load Interrupted" errors.  These are caused by us
+    // taking over the HTTP calls to the Windows Azure Mobile Service
+    if (error.code == 102 && [error.domain isEqual:@"WebKitErrorDomain"]) {
+        return;
+    }
+
     [self callCompletion:nil orError:error];
 }
 
@@ -262,8 +259,6 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
             // Shorten the webview to make room for the toolbar at the bottom
             webViewHeightOffset = toolBarHeight;
         }
-        
-        
     }
     
     // Set the webview's frame
@@ -288,7 +283,6 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
                                                       andData:data];
         }
         
-        
         // If the connection had an error or we got an error status code,
         // then we call the completion block
         if (error) {
@@ -296,13 +290,27 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
         }
         else {
             
-            // The request was successful, so ask the WebView to load the
-            // response data
-            self.currentURL = response.URL;
-            [self.webView loadData:data
-                          MIMEType:response.MIMEType
-                  textEncodingName:response.textEncodingName
-                           baseURL:self.currentURL];
+            // Check for a redirect and if so, build a new request. Otherwise
+            // just have the WebView load the response data.
+            if (response.statusCode >= 300) {
+                NSString *newURLString = [response.allHeaderFields valueForKey:@"Location"];
+                NSURL *newURL = [NSURL URLWithString:newURLString];
+                NSURLRequest *newRequest = [NSURLRequest requestWithURL:newURL];
+                [self.webView loadRequest:newRequest];
+            }
+            else {
+                // The request was successful, so ask the WebView to load the
+                // response data
+                NSURL *URL = response.URL;
+                NSString *MIMEType = response.MIMEType;
+                NSString *textEncodingName = response.textEncodingName;
+                
+                self.currentURL = URL;
+                [self.webView loadData:data
+                              MIMEType:MIMEType
+                      textEncodingName:textEncodingName
+                               baseURL:self.currentURL];
+            }
         }
     };
     
