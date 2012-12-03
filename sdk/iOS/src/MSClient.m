@@ -45,8 +45,6 @@
 @synthesize currentUser = currentUser_;
 @synthesize login = login_;
 
-MSClientConnection *connection;
-
 
 #pragma mark * Public Static Constructor Methods
 

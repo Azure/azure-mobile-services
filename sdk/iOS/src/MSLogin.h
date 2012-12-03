@@ -32,7 +32,7 @@
 
 
 // The client associated with this |MSLogin|.
-@property (nonatomic, strong, readonly) MSClient* client;
+@property (nonatomic, weak, readonly) MSClient* client;
 
 
 #pragma  mark * Public Initializer Methods
