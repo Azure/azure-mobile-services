@@ -47,7 +47,7 @@
     client = [MSClient
               clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
               withApplicationKey:@"<Application Key>"];
-
+    
     done = NO;
     
     STAssertNotNil(client, @"Could not create test client.");
@@ -328,7 +328,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"Table 'NoSuchTable' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: Table 'NoSuchTable' does not exist."],
                      @"description was: %@", description);
         
         done = YES;
@@ -440,7 +440,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"Table 'NoSuchTable' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: Table 'NoSuchTable' does not exist."],
                      @"description was: %@", description);
         
         done = YES;
@@ -476,7 +476,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"Table 'NoSuchTable' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: Table 'NoSuchTable' does not exist."],
                      @"description was: %@", description);
         
         done = YES;
@@ -508,7 +508,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"An item with id '-5' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: An item with id '-5' does not exist."],
                      @"description was: %@", description);
         
         done = YES;
@@ -544,7 +544,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"Table 'NoSuchTable' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: Table 'NoSuchTable' does not exist."],
                      @"description was: %@", description);
         
         done = YES;
@@ -576,7 +576,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"An item with id '-5' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: An item with id '-5' does not exist."],
                      @"description was: %@", description);
         
         done = YES;
@@ -601,7 +601,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"An item with id '-5' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: An item with id '-5' does not exist."],
                      @"description was: %@", description);
         
         done = YES;
@@ -630,7 +630,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"Table 'NoSuchTable' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: Table 'NoSuchTable' does not exist."],
                      @"description was: %@", description);
         
         done = YES;
@@ -655,7 +655,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"An item with id '-5' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: An item with id '-5' does not exist."],
                      @"description was: %@", description);
         
         done = YES;

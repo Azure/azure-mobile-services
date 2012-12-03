@@ -92,16 +92,20 @@ NSString *const MSErrorResponseKey;
 // string supported by the Windows Azure Mobile Service.
 #define MSPRedicateNotSupported                 -1400
 
-// Indicates that the login attempt has failed.
+// Indicates that the login operation has failed.
 #define MSLoginFailed                           -1501
 
-// The server returned a login response with invalid syntax.
+// Indicates that the Windows Azure Mobile Service returned a login response
+// with invalid syntax.
 #define MSLoginInvalidResponseSyntax            -1502
 
-// The login operation was canceled.
+// Indicates that the login operation was canceled.
 #define MSLoginCanceled                         -1503
 
-// A login operation is already in progress.
-#define MSLoginAlreadyInProgress                -1504
+// Indicates that the login operation failed because a nil token was used.
+#define MSLoginExpectedToken                    -1504
+
+// Indicates that the login operation failed because an invalid token was used.
+#define MSLoginInvalidToken                     -1505
 
 #endif
