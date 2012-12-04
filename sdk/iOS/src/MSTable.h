@@ -28,7 +28,6 @@
 typedef void (^MSItemBlock)(NSDictionary *item, NSError *error);
 
 // Callback for deletes. If there was an error, the |error| will be non-nil.
-
 typedef void (^MSDeleteBlock)(NSNumber *itemId, NSError *error);
 
 // Callback for reads. If there was an error, the |error| will be non-nil. If

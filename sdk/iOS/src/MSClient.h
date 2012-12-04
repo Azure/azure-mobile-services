@@ -18,17 +18,10 @@
 #import <UIKit/UIKit.h>
 #import "MSError.h"
 #import "MSFilter.h"
+#import "MSLoginController.h"
 
 @class MSTable;
 @class MSUser;
-
-
-#pragma mark * Block Type Definitions
-
-
-// Callback loggging in an end user. If there was an error or the login was
-// cancelled, |error| will be non-nil.
-typedef void (^MSClientLoginBlock)(MSUser *user, NSError *error);
 
 
 #pragma  mark * MSClient Public Interface
@@ -112,10 +105,16 @@ typedef void (^MSClientLoginBlock)(MSUser *user, NSError *error);
 
 #pragma  mark * Public Login and Logout Methods
 
+// Logs in the current end user with the given provider by presenting the
+// MSLoginController with the given |controller|.
+-(void) loginWithProvider:(NSString *)provider
+             onController:(UIViewController *)controller
+                 animated:(BOOL)animated
+               completion:(MSClientLoginBlock)completion;
 
-// Returns a |UINavigationController| that can be used to log in the current
+// Returns an |MSLoginController| that can be used to log in the current
 // end user with the given provider.
--(UINavigationController *) loginViewControllerWithProvider:(NSString *)provider
+-(MSLoginController *) loginViewControllerWithProvider:(NSString *)provider
                                 completion:(MSClientLoginBlock)completion;
 
 // Logs in the current end user with the given provider and the given token for
