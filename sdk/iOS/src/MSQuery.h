@@ -50,7 +50,7 @@
 // Indicates if the Windows Azure Mobile Service should also include the total
 // count of items on the server (not just the count of items returned) with
 // the query results.
-@property (nonatomic) bool includeTotalCount;
+@property (nonatomic) BOOL includeTotalCount;
 
 // A dictionary of string key-value pairs that can include user-defined
 // parameters to use with the query.

@@ -579,7 +579,7 @@ static NSDictionary *staticFunctionInfoLookup;
     NSDictionary *userInfo = @{ NSLocalizedDescriptionKey :description };
     
     return [NSError errorWithDomain:MSErrorDomain
-                               code:MSPRedicateNotSupported
+                               code:MSPredicateNotSupported
                            userInfo:userInfo];
 }
 

@@ -90,7 +90,7 @@ NSString *const MSErrorResponseKey;
 // Indicates that a request to the Windows Azure Mobile Service failed becaus
 // the |NSPredicate| used in the query could not be translated into a query
 // string supported by the Windows Azure Mobile Service.
-#define MSPRedicateNotSupported                 -1400
+#define MSPredicateNotSupported                 -1400
 
 // Indicates that the login operation has failed.
 #define MSLoginFailed                           -1501
