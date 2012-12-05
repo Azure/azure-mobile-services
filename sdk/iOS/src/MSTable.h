@@ -28,7 +28,6 @@
 typedef void (^MSItemBlock)(NSDictionary *item, NSError *error);
 
 // Callback for deletes. If there was an error, the |error| will be non-nil.
-
 typedef void (^MSDeleteBlock)(NSNumber *itemId, NSError *error);
 
 // Callback for reads. If there was an error, the |error| will be non-nil. If
@@ -72,12 +71,6 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
 
 #pragma mark * Public Insert, Update and Delete Methods
 
-// OBSOLETE: Use |insert:completion| instead.
-// Sends a request to the Windows Azure Mobile Service to insert the given
-// item into the table. The item does not need to have an id.
--(void) insert:(NSDictionary *)item
-        onSuccess:(void (^)(NSDictionary *))onSuccess
-        onError:(void (^)(NSError *))onError;
 
 // Sends a request to the Windows Azure Mobile Service to insert the given
 // item into the table. The item does not need to have an id.
