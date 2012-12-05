@@ -60,21 +60,6 @@
 #pragma mark * Public Insert, Update, Delete Methods
 
 
--(void) insert:(NSDictionary *)item
-            onSuccess:(void (^)(NSDictionary *))onSuccess
-            onError:(void (^)(NSError *))onError
-{
-    MSItemBlock completion = ^(NSDictionary *insertedItem, NSError *error) {
-        if (error && onError) {
-            onError(error);
-        } else if (insertedItem && onSuccess) {
-            onSuccess(insertedItem);
-        }
-    };
-    
-    [self insert:item completion:completion];
-}
-
 -(void) insert:(NSDictionary *)item completion:(MSItemBlock)completion
 {
     // Create the request

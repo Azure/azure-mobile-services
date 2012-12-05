@@ -47,7 +47,7 @@
     client = [MSClient
               clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
               withApplicationKey:@"<Application Key>"];
-
+    
     done = NO;
     
     STAssertNotNil(client, @"Could not create test client.");
@@ -252,46 +252,6 @@
     STAssertTrue([self waitForTest:90.0], @"Test timed out.");
 }
 
--(void) testForObsoleteInsert
-{
-    MSTable *todoTable = [client getTable:@"todoItem"];
-    
-    // Create the item
-    NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
-    
-    // Insert the item
-    [todoTable insert:item onSuccess:^(NSDictionary * newItem) {
-        
-        // Verify that the insert succeeded
-        STAssertNotNil(newItem, @"newItem should not be nil.");
-        STAssertNotNil([newItem objectForKey:@"id"],
-                       @"newItem should now have an id.");
-        
-        // Delete the item
-        [todoTable delete:newItem completion:^(NSNumber *itemId, NSError *error) {
-            
-            // Check for an error
-            if (error) {
-                STAssertTrue(FALSE, @"Delete failed with error: %@", error.localizedDescription);
-                done = YES;
-            }
-            
-            // Verify that the delete succeeded
-            STAssertTrue([itemId longLongValue] ==
-                         [[newItem objectForKey:@"id"] longLongValue],
-                         @"itemId deleted was: %d.", itemId);
-            done = YES;
-            
-        }];
-    } onError:^(NSError *error) {
-        if (error) {
-            STAssertTrue(FALSE, @"Insert failed with error: %@", error.localizedDescription);
-            done = YES;
-        }
-    }];
-    
-    STAssertTrue([self waitForTest:90.0], @"Test timed out.");
-}
 
 #pragma mark * End-to-End Filter Tests
 
@@ -328,7 +288,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"Table 'NoSuchTable' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: Table 'NoSuchTable' does not exist."],
                      @"description was: %@", description);
         
         done = YES;
@@ -440,7 +400,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"Table 'NoSuchTable' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: Table 'NoSuchTable' does not exist."],
                      @"description was: %@", description);
         
         done = YES;
@@ -476,7 +436,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"Table 'NoSuchTable' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: Table 'NoSuchTable' does not exist."],
                      @"description was: %@", description);
         
         done = YES;
@@ -508,7 +468,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"An item with id '-5' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: An item with id '-5' does not exist."],
                      @"description was: %@", description);
         
         done = YES;
@@ -544,7 +504,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"Table 'NoSuchTable' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: Table 'NoSuchTable' does not exist."],
                      @"description was: %@", description);
         
         done = YES;
@@ -576,7 +536,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"An item with id '-5' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: An item with id '-5' does not exist."],
                      @"description was: %@", description);
         
         done = YES;
@@ -601,7 +561,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"An item with id '-5' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: An item with id '-5' does not exist."],
                      @"description was: %@", description);
         
         done = YES;
@@ -630,7 +590,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"Table 'NoSuchTable' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: Table 'NoSuchTable' does not exist."],
                      @"description was: %@", description);
         
         done = YES;
@@ -655,7 +615,7 @@
                      @"error code should have been MSErrorMessageErrorCode.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"An item with id '-5' does not exist."],
+        STAssertTrue([description isEqualToString:@"Error: An item with id '-5' does not exist."],
                      @"description was: %@", description);
         
         done = YES;

@@ -56,7 +56,14 @@ typedef void (^MSResponseBlock)(NSHTTPURLResponse *response,
            withClient:(MSClient *)client
             completion:(MSResponseBlock)completion;
 
+
+#pragma mark * Public Start Methods
+
+
 // Sends the request.
 -(void) start;
+
+// Sends the request without using the client's filters
+-(void) startWithoutFilters;
 
 @end
