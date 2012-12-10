@@ -17,7 +17,8 @@
 @implementation ZumoTestStore
 
 + (NSArray *)createTests {
-    return [NSArray arrayWithObjects:[self createInsertAndVerifyTests],
+    return [NSArray arrayWithObjects:
+            [self createInsertAndVerifyTests],
             [self createQueryTests],
             [self createCUDTests],
             [self createLoginTests],
@@ -26,7 +27,7 @@
 
 + (ZumoTestGroup *)createLoginTests {
     ZumoTestGroup *result = [[ZumoTestGroup alloc] init];
-    [result setName:@"4. Login tests"];
+    [result setName:@"Login tests"];
     [result setHelpText:[ZumoLoginTests helpText]];
     NSArray *tests = [ZumoLoginTests createTests];
     ZumoTest *test;
@@ -39,7 +40,7 @@
 
 + (ZumoTestGroup *)createCUDTests {
     ZumoTestGroup *result = [[ZumoTestGroup alloc] init];
-    [result setName:@"3. Update / Delete"];
+    [result setName:@"Update / Delete"];
     [result setHelpText:[ZumoCUDTests helpText]];
     
     NSArray *tests = [ZumoCUDTests createTests];
@@ -53,7 +54,7 @@
 
 + (ZumoTestGroup *)createInsertAndVerifyTests {
     ZumoTestGroup *result = [[ZumoTestGroup alloc] init];
-    [result setName:@"1. Insert and verify"];
+    [result setName:@"Insert and verify"];
     [result setHelpText:[ZumoRoundTripTests helpText]];
     
     NSArray *tests = [ZumoRoundTripTests createTests];
@@ -67,7 +68,7 @@
 
 + (ZumoTestGroup *)createQueryTests {
     ZumoTestGroup *result = [[ZumoTestGroup alloc] init];
-    [result setName:@"2. Query"];
+    [result setName:@"Query"];
     [result setHelpText:[ZumoQueryTests helpText]];
     NSArray *tests = [ZumoQueryTests createTests];
     ZumoTest *test;

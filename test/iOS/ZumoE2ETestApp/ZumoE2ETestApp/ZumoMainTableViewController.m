@@ -8,6 +8,8 @@
 
 #import "ZumoMainTableViewController.h"
 #import "ZumoTestGroup.h"
+#import "ZumoTestGlobals.h"
+#import "ZumoTestGroupTableViewController.h"
 
 @interface ZumoMainTableViewController ()
 
@@ -30,11 +32,7 @@
 {
     [super viewDidLoad];
 
-    // Uncomment the following line to preserve selection between presentations.
-    // self.clearsSelectionOnViewWillAppear = NO;
- 
-    // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-    // self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    [[self navigationItem] setTitle:@"Azure Mobile Service E2E Tests"];
 }
 
 - (void)didReceiveMemoryWarning
@@ -77,7 +75,7 @@
     }
 
     ZumoTestGroup *testGroup = [[self testGroups] objectAtIndex:[indexPath row]];
-    [[cell textLabel] setText:[NSString stringWithFormat:@"%d. %@", [indexPath row] + 1, [testGroup description]]];
+    [[cell textLabel] setText:[NSString stringWithFormat:@"%d. %@", [indexPath row] + 1, [testGroup name]]];
     
     return cell;
 }
@@ -102,16 +100,25 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UIAlertView *av = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Not implemented yet" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [av show];
+    if (![[ZumoTestGlobals sharedInstance] client]) {
+        NSString *appUrl = [appUrlField text];
+        NSString *appKey = [appKeyField text];
+        if ([appUrl length] == 0 || [appKey length] == 0) {
+            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Please set the application URL and key before proceeding" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+            [alert show];
+            return;
+        } else {
+            [[ZumoTestGlobals sharedInstance] initializeClientWithAppUrl:appUrl andKey:appKey];
+            [appUrlField setEnabled:NO];
+            [appKeyField setEnabled:NO];
+            [resetClientButton setEnabled:YES];
+        }
+    }
 
-    // Navigation logic may go here. Create and push another view controller.
-    /*
-     <#DetailViewController#> *detailViewController = [[<#DetailViewController#> alloc] initWithNibName:@"<#Nib name#>" bundle:nil];
-     // ...
-     // Pass the selected object to the new view controller.
-     [self.navigationController pushViewController:detailViewController animated:YES];
-     */
+    ZumoTestGroup *subgroup = [[self testGroups] objectAtIndex:[indexPath row]];
+    ZumoTestGroupTableViewController *subview = [[ZumoTestGroupTableViewController alloc] init];
+    [subview setTests:subgroup];
+    [[self navigationController] pushViewController:subview animated:YES];
 }
 
 #pragma mark - ZumoTestGroup delegate
