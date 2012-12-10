@@ -10,6 +10,7 @@
 #import "ZumoTestGroup.h"
 #import "ZumoTestGlobals.h"
 #import "ZumoTestGroupTableViewController.h"
+#import "ZumoSavedAppsTableViewController.h"
 
 @interface ZumoMainTableViewController ()
 
@@ -19,13 +20,23 @@
 
 @synthesize testGroups;
 
+- (id)init
+{
+    self = [super initWithStyle:UITableViewStyleGrouped];
+    if (self) {
+        NSString *savedAppsPath = [self savedAppsArchivePath];
+        savedApps = [NSKeyedUnarchiver unarchiveObjectWithFile:savedAppsPath];
+        if (!savedApps) {
+            savedApps = [[NSMutableArray alloc] init];
+        }
+    }
+    
+    return self;
+}
+
 - (id)initWithStyle:(UITableViewStyle)style
 {
-    self = [super initWithStyle:style];
-    if (self) {
-        // Custom initialization
-    }
-    return self;
+    return [self init];
 }
 
 - (void)viewDidLoad
@@ -33,6 +44,16 @@
     [super viewDidLoad];
 
     [[self navigationItem] setTitle:@"Azure Mobile Service E2E Tests"];
+}
+
+- (NSString *)savedAppsArchivePath {
+    NSArray *documentDirectories = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+    NSString *documentDirectory = [documentDirectories objectAtIndex:0];
+    return [documentDirectory stringByAppendingPathComponent:@"savedapps.archive"];
+}
+
+- (void)saveApps {
+    [NSKeyedArchiver archiveRootObject:self->savedApps toFile:[self savedAppsArchivePath]];
 }
 
 - (void)didReceiveMemoryWarning
@@ -48,9 +69,39 @@
     [appKeyField setEnabled:YES];
 }
 
-- (IBAction)managedSavedApps:(id)sender {
-    UIAlertView *av = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Not implemented yet" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-    [av show];
+- (IBAction)loadSavedApp:(id)sender {
+    if ([savedApps count] > 0) {
+        ZumoSavedAppsTableViewController *savedAppsController = [[ZumoSavedAppsTableViewController alloc] init];
+        [savedAppsController setSavedApps:savedApps];
+        void (^completion)(void) = ^(void) {
+            NSString *appUrl = [savedAppsController selectedAppUrl];
+            NSString *appKey = [savedAppsController selectedAppKey];
+            if (appUrl && appKey) {
+                [appUrlField setText:appUrl];
+                [appKeyField setText:appKey];
+            }
+            
+            if ([savedAppsController savedAppsChanged]) {
+                NSArray *newApps = [savedAppsController savedApps];
+                savedApps = [NSMutableArray arrayWithArray:newApps];
+                [self saveApps];
+            }
+        };
+        [savedAppsController setCompletion:completion];
+        [self presentViewController:savedAppsController animated:YES completion:nil];
+    } else {
+        UIAlertView *av = [[UIAlertView alloc] initWithTitle:@"Error" message:@"No saved apps" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [av show];
+    }
+}
+
+- (IBAction)saveAppInfo:(id)sender {
+    NSString *appUrl = [appUrlField text];
+    NSString *appKey = [appKeyField text];
+    if ([self validateAppInfoForUrl:appUrl andKey:appKey]) {
+        [savedApps addObject:[NSArray arrayWithObjects:appUrl, appKey, nil]];
+        [self saveApps];
+    }
 }
 
 #pragma mark - Table view data source
@@ -96,6 +147,16 @@
     return [[self headerView] bounds].size.height;
 }
 
+- (BOOL)validateAppInfoForUrl:(NSString *)appUrl andKey:(NSString *)appKey {
+    if ([appUrl length] == 0 || [appKey length] == 0) {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Please set the application URL and key before proceeding" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [alert show];
+        return NO;
+    } else {
+        return YES;
+    }
+}
+
 #pragma mark - Table view delegate
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -103,9 +164,7 @@
     if (![[ZumoTestGlobals sharedInstance] client]) {
         NSString *appUrl = [appUrlField text];
         NSString *appKey = [appKeyField text];
-        if ([appUrl length] == 0 || [appKey length] == 0) {
-            UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Please set the application URL and key before proceeding" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-            [alert show];
+        if (![self validateAppInfoForUrl:appUrl andKey:appKey]) {
             return;
         } else {
             [[ZumoTestGlobals sharedInstance] initializeClientWithAppUrl:appUrl andKey:appKey];

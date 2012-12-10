@@ -31,6 +31,8 @@
 		872B031916759FF2003613A1 /* ZumoCUDTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 872B031816759FF1003613A1 /* ZumoCUDTests.m */; };
 		872B031C16759FF9003613A1 /* ZumoLoginTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 872B031B16759FF9003613A1 /* ZumoLoginTests.m */; };
 		872B031F1675A128003613A1 /* ZumoTestStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 872B031E1675A127003613A1 /* ZumoTestStore.m */; };
+		872B0324167660C2003613A1 /* ZumoSavedAppsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 872B0323167660C2003613A1 /* ZumoSavedAppsTableViewController.m */; };
+		872B032A16768EF0003613A1 /* ZumoSavedAppsHeader.xib in Resources */ = {isa = PBXBuildFile; fileRef = 872B032916768EF0003613A1 /* ZumoSavedAppsHeader.xib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -75,6 +77,9 @@
 		872B031B16759FF9003613A1 /* ZumoLoginTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZumoLoginTests.m; sourceTree = "<group>"; };
 		872B031D1675A127003613A1 /* ZumoTestStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZumoTestStore.h; sourceTree = "<group>"; };
 		872B031E1675A127003613A1 /* ZumoTestStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZumoTestStore.m; sourceTree = "<group>"; };
+		872B0322167660C2003613A1 /* ZumoSavedAppsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZumoSavedAppsTableViewController.h; sourceTree = "<group>"; };
+		872B0323167660C2003613A1 /* ZumoSavedAppsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZumoSavedAppsTableViewController.m; sourceTree = "<group>"; };
+		872B032916768EF0003613A1 /* ZumoSavedAppsHeader.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ZumoSavedAppsHeader.xib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,6 +128,7 @@
 		872B02C41672A73B003613A1 /* ZumoE2ETestApp */ = {
 			isa = PBXGroup;
 			children = (
+				872B032116766077003613A1 /* SavedApplications */,
 				872B031016759F56003613A1 /* Tests */,
 				872B02FB1673F48B003613A1 /* TestTableViewControllers */,
 				872B02E81673EE5D003613A1 /* HelpController */,
@@ -203,6 +209,16 @@
 			name = Tests;
 			sourceTree = "<group>";
 		};
+		872B032116766077003613A1 /* SavedApplications */ = {
+			isa = PBXGroup;
+			children = (
+				872B0322167660C2003613A1 /* ZumoSavedAppsTableViewController.h */,
+				872B0323167660C2003613A1 /* ZumoSavedAppsTableViewController.m */,
+				872B032916768EF0003613A1 /* ZumoSavedAppsHeader.xib */,
+			);
+			name = SavedApplications;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -262,6 +278,7 @@
 				872B02EE1673EE91003613A1 /* ZumoTestHelpViewController.xib in Resources */,
 				872B03001673F594003613A1 /* ZumoMainTableHeader.xib in Resources */,
 				872B030F167580A4003613A1 /* ZumoTestGroupTableHeader.xib in Resources */,
+				872B032A16768EF0003613A1 /* ZumoSavedAppsHeader.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,6 +302,7 @@
 				872B031916759FF2003613A1 /* ZumoCUDTests.m in Sources */,
 				872B031C16759FF9003613A1 /* ZumoLoginTests.m in Sources */,
 				872B031F1675A128003613A1 /* ZumoTestStore.m in Sources */,
+				872B0324167660C2003613A1 /* ZumoSavedAppsTableViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

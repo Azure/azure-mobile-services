@@ -16,7 +16,7 @@
     IBOutlet UIView *headerView;
 }
 
-@property ZumoTestGroup *tests;
+@property (nonatomic, strong) ZumoTestGroup *tests;
 
 - (IBAction)runTests:(id)sender;
 - (IBAction)resetTests:(id)sender;

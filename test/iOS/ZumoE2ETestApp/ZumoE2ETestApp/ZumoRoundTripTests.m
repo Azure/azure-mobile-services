@@ -206,8 +206,8 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
                       @"1. Create an application on Windows azure portal.",
                       @"2. Create TodoItem table in portal.",
                       @"3. Add Valid Application URL and Application Key.",
-                      @"4. Click on the '1.1 RoundTripDataType' button.\n",
-                      @"5. Make sure all the scenario are passed.\n",
+                      @"4. Click on the '1.1 RoundTripDataType' button.",
+                      @"5. Make sure all the tests pass.",
                       nil];
     return [lines componentsJoinedByString:@"\n"];
 }

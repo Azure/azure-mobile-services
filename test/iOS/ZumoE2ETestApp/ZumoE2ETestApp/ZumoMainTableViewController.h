@@ -15,12 +15,14 @@
     IBOutlet UITextField *appKeyField;
     IBOutlet UIView *headerView;
     IBOutlet UIButton *resetClientButton;
+    NSMutableArray *savedApps;
 }
 
 @property (nonatomic, copy) NSArray *testGroups;
 
 - (UIView *)headerView;
 - (IBAction)resetClient:(id)sender;
-- (IBAction)managedSavedApps:(id)sender;
+- (IBAction)loadSavedApp:(id)sender;
+- (IBAction)saveAppInfo:(id)sender;
 
 @end
