@@ -7,6 +7,8 @@
 //
 
 #import "ZumoAppDelegate.h"
+#import "ZumoMainTableViewController.h"
+#import "ZumoTestStore.h"
 
 @implementation ZumoAppDelegate
 
@@ -14,6 +16,15 @@
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
+    
+    ZumoMainTableViewController *mainController = [[ZumoMainTableViewController alloc] init];
+    UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:mainController];
+    [navController setTitle:@"Azure Mobile Service E2E Tests"];
+    self.window.rootViewController = navController;
+    
+    NSArray *allTests = [ZumoTestStore createTests];
+    [mainController setTestGroups:allTests];
+    
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     return YES;
