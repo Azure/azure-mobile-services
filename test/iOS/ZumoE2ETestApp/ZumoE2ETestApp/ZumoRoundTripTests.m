@@ -26,6 +26,11 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
             if (err) {
                 [weakRef addLog:@"Error inserting data to create schema"];
                 [weakRef setTestStatus:TSFailed];
+                NSDictionary *errorData = [err userInfo];
+                [weakRef addLog:[NSString stringWithFormat:@"UserInfo: %@", errorData]];
+                NSHTTPURLResponse *resp = [errorData objectForKey:MSErrorResponseKey];
+                NSLog(@"Status code: %d", resp.statusCode);
+                NSLog(@"Headers: %@", resp.allHeaderFields);
                 completion(NO);
             } else {
                 [weakRef addLog:@"Inserted item to create schema"];
@@ -50,8 +55,14 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
     [result addObject:[self createRoundTripForType:RTTString withValue:[NSNull null] andName:@"Round trip nil string"]];
     
     [result addObject:[self createRoundTripForType:RTTString withValue:[@"" stringByPaddingToLength:1000 withString:@"*" startingAtIndex:0] andName:@"Round trip large (1000) string"]];
-    [result addObject:[self createRoundTripForType:RTTString withValue:[@"" stringByPaddingToLength:10000 withString:@"*" startingAtIndex:0] andName:@"Round trip large (10000) string"]];
-    
+    [result addObject:[self createRoundTripForType:RTTString withValue:[@"" stringByPaddingToLength:65537 withString:@"*" startingAtIndex:0] andName:@"Round trip large (64k+) string"]];
+
+    [result addObject:[self createRoundTripForType:RTTString withValue:@"ãéìôü ÇñÑ" andName:@"String with non-ASCII characters - Latin"]];
+    [result addObject:[self createRoundTripForType:RTTString withValue:@"الكتاب على الطاولة" andName:@"String with non-ASCII characters - Arabic"]];
+    [result addObject:[self createRoundTripForType:RTTString withValue:@"这本书在桌子上" andName:@"String with non-ASCII characters - Chinese"]];
+    [result addObject:[self createRoundTripForType:RTTString withValue:@"本は机の上に" andName:@"String with non-ASCII characters - Japanese"]];
+    [result addObject:[self createRoundTripForType:RTTString withValue:@"הספר הוא על השולחן" andName:@"String with non-ASCII characters - Hebrew"]];
+
     // Date scenarios
     [result addObject:[self createRoundTripForType:RTTDate withValue:[NSDate date] andName:@"Round trip current date"]];
     [result addObject:[self createRoundTripForType:RTTDate withValue:[ZumoTestGlobals createDateWithYear:2012 month:12 day:12] andName:@"Round trip specific date"]];
@@ -204,9 +215,9 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
 + (NSString *)helpText {
     NSArray *lines = [NSArray arrayWithObjects:
                       @"1. Create an application on Windows azure portal.",
-                      @"2. Create TodoItem table in portal.",
+                      @"2. Create a table called 'iOSTodoItem'.",
                       @"3. Add Valid Application URL and Application Key.",
-                      @"4. Click on the '1.1 RoundTripDataType' button.",
+                      @"4. Click on the '1 RoundTripDataType' button.",
                       @"5. Make sure all the tests pass.",
                       nil];
     return [lines componentsJoinedByString:@"\n"];

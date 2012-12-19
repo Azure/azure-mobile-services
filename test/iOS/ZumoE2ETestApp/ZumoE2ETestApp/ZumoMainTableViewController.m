@@ -71,26 +71,28 @@
 
 - (IBAction)loadSavedApp:(id)sender {
     if ([savedApps count] > 0) {
-        ZumoSavedAppsTableViewController *savedAppsController = [[ZumoSavedAppsTableViewController alloc] init];
+        __block ZumoSavedAppsTableViewController *savedAppsController = [[ZumoSavedAppsTableViewController alloc] init];
+        ZumoSavedAppsTableViewController *weakControllerRef = savedAppsController;
         [savedAppsController setSavedApps:savedApps];
-        void (^completion)(void) = ^(void) {
-            NSString *appUrl = [savedAppsController selectedAppUrl];
-            NSString *appKey = [savedAppsController selectedAppKey];
+        [savedAppsController setCompletion:^(void) {
+            NSString *appUrl = [weakControllerRef selectedAppUrl];
+            NSString *appKey = [weakControllerRef selectedAppKey];
             if (appUrl && appKey) {
                 [appUrlField setText:appUrl];
                 [appKeyField setText:appKey];
             }
             
-            if ([savedAppsController savedAppsChanged]) {
-                NSArray *newApps = [savedAppsController savedApps];
+            if ([weakControllerRef savedAppsChanged]) {
+                NSArray *newApps = [weakControllerRef savedApps];
                 savedApps = [NSMutableArray arrayWithArray:newApps];
                 [self saveApps];
+                UIAlertView *av = [[UIAlertView alloc] initWithTitle:@"Saved" message:@"The modifications in the saved apps were saved to the local storage." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+                [av show];
             }
-        };
-        [savedAppsController setCompletion:completion];
+        }];
         [self presentViewController:savedAppsController animated:YES completion:nil];
     } else {
-        UIAlertView *av = [[UIAlertView alloc] initWithTitle:@"Error" message:@"No saved apps" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        UIAlertView *av = [[UIAlertView alloc] initWithTitle:@"Error" message:@"No saved apps." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
         [av show];
     }
 }
@@ -101,6 +103,8 @@
     if ([self validateAppInfoForUrl:appUrl andKey:appKey]) {
         [savedApps addObject:[NSArray arrayWithObjects:appUrl, appKey, nil]];
         [self saveApps];
+        UIAlertView *av = [[UIAlertView alloc] initWithTitle:@"Saved" message:@"The application URL and key were saved to the local storage." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [av show];
     }
 }
 
@@ -178,6 +182,11 @@
     ZumoTestGroupTableViewController *subview = [[ZumoTestGroupTableViewController alloc] init];
     [subview setTests:subgroup];
     [[self navigationController] pushViewController:subview animated:YES];
+}
+
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [textField resignFirstResponder];
+    return YES;
 }
 
 #pragma mark - ZumoTestGroup delegate

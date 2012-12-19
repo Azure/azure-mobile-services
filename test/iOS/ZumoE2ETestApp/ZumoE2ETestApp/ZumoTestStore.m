@@ -13,6 +13,7 @@
 #import "ZumoQueryTests.h"
 #import "ZumoCUDTests.h"
 #import "ZumoLoginTests.h"
+#import "ZumoMiscTests.h"
 
 @implementation ZumoTestStore
 
@@ -22,7 +23,21 @@
             [self createQueryTests],
             [self createCUDTests],
             [self createLoginTests],
+            [self createMiscTests],
             nil];
+}
+
++ (ZumoTestGroup *)createMiscTests {
+    ZumoTestGroup *result = [[ZumoTestGroup alloc] init];
+    [result setName:@"Other tests"];
+    [result setHelpText:[ZumoMiscTests helpText]];
+    NSArray *tests = [ZumoMiscTests createTests];
+    ZumoTest *test;
+    for (test in tests) {
+        [result addTest:test];
+    }
+    
+    return result;
 }
 
 + (ZumoTestGroup *)createLoginTests {

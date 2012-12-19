@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "ZumoTestGroupCallbacks.h"
 
-@interface ZumoMainTableViewController : UITableViewController <ZumoTestGroupCallbacks>
+@interface ZumoMainTableViewController : UITableViewController <ZumoTestGroupCallbacks, UITextFieldDelegate>
 {
     IBOutlet UITextField *appUrlField;
     IBOutlet UITextField *appKeyField;
