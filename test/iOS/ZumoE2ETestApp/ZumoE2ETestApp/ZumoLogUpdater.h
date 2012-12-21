@@ -8,11 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface ZumoLogUpdater : NSObject <NSURLConnectionDelegate>
-{
-    NSMutableData *receivedData;
-    NSURLConnection *connection;
-}
+@interface ZumoLogUpdater : NSObject
 
 -(void)uploadLogs:(NSString *)logText toUrl:(NSString *)url;
 

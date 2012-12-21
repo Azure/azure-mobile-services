@@ -8,6 +8,14 @@
 
 #import "ZumoLogUpdater.h"
 
+@interface ZumoLogUpdater () <NSURLConnectionDelegate>
+{
+    NSMutableData *receivedData;
+    NSURLConnection *connection;
+}
+
+@end
+
 @implementation ZumoLogUpdater
 
 -(void)uploadLogs:(NSString *)logText toUrl:(NSString *)url {
@@ -22,11 +30,6 @@
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
     UIAlertView *av = [[UIAlertView alloc] initWithTitle:@"Error uploading logs" message:[error localizedDescription] delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
     [av show];
-    receivedData = nil;
-}
-
-- (void)dealloc {
-    connection = nil;
     receivedData = nil;
 }
 

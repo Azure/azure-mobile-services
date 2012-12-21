@@ -77,6 +77,10 @@ static NSString *queryTestsTableName = @"iosMovies";
     [result addObject:[self createQueryTestWithName:@"Bool: equal to TRUE - Best picture winners before 1950" andPredicate:[NSPredicate predicateWithFormat:@"BestPictureWinner = TRUE and Year < 1950"]]];
     [result addObject:[self createQueryTestWithName:@"Bool: equal to FALSE - Best picture winners after 2000" andPredicate:[NSPredicate predicateWithFormat:@"not(BestPictureWinner = FALSE) and Year >= 2000"]]];
     [result addObject:[self createQueryTestWithName:@"Bool: not equal to FALSE - Best picture winners after 2000" andPredicate:[NSPredicate predicateWithFormat:@"BestPictureWinner != FALSE and Year >= 2000"]]];
+    
+    // Predicate with substitution variables
+    [result addObject:[self createQueryTestWithName:@"IN - Movies from the even years in the 2000s with rating PG, PG-13 or R" andPredicate:[NSPredicate predicateWithFormat:@"Year IN %@ and Rating IN %@", @[@2000, @2002, @2004, @2006, @2008], @[@"R", @"PG", @"PG-13"]] andTop:@100 andSkip:nil]];
+    [result addObject:[self createQueryTestWithName:@"%K, %d substitution - Movies from 2000 rated PG-13" andPredicate:[NSPredicate predicateWithFormat:@"%K >= %d and %K = %@", @"Year", @2000, @"Rating", @"PG-13"]]];
 
     // Top and skip
     [result addObject:[self createQueryTestWithName:@"Get all using large $top - fetchLimit = 500" andPredicate:nil andTop:@500 andSkip:nil]];
@@ -142,6 +146,7 @@ static NSString *queryTestsTableName = @"iosMovies";
     
     NSArray *unsupportedPredicates = [NSArray arrayWithObjects:
                                       @"average(Duration) > 120",
+                                      @"predicate from block",
                                       nil];
     for (NSString *unsupportedPredicate in unsupportedPredicates) {
         ZumoTest *negTest = [ZumoTest createTestWithName:[NSString stringWithFormat:@"(Neg) Unsupported predicate: %@", unsupportedPredicate] andExecution:nil];
@@ -149,7 +154,15 @@ static NSString *queryTestsTableName = @"iosMovies";
         [negTest setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
             MSClient *client = [[ZumoTestGlobals sharedInstance] client];
             MSTable *table = [client getTable:queryTestsTableName];
-            NSPredicate *predicate = [NSPredicate predicateWithFormat:unsupportedPredicate];
+            NSPredicate *predicate;
+            if ([unsupportedPredicate isEqualToString:@"predicate from block"]) {
+                predicate = [NSPredicate predicateWithBlock:^BOOL(id evaluatedObject, NSDictionary *bindings) {
+                    return [[(NSDictionary *)evaluatedObject objectForKey:@"BestPictureWinner"] boolValue];
+                }];
+            } else {
+                predicate = [NSPredicate predicateWithFormat:unsupportedPredicate];
+            }
+            
             [table readWhere:predicate completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
                 BOOL passed = NO;
                 if (!error) {
@@ -418,6 +431,7 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
                       @"   ",
                       @"   function populateTable(table, request, films) {",
                       @"       var index = 0;",
+                      @"       films.forEach(fixReleaseDate);"
                       @"       var insertNext = function() {",
                       @"           if (index >= films.length) {",
                       @"               request.respond(201, {id : 1, status : 'Table populated successfully'});",
@@ -426,7 +440,9 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
                       @"               table.insert(toInsert, {",
                       @"               success: function() {",
                       @"                   index++;",
-                      @"                   console.log('Inserted %d items', index);",
+                      @"                   if ((index % 20) === 0) {",
+                      @"                       console.log('Inserted %d items', index);",
+                      @"                   }",
                       @"                   insertNext();",
                       @"               }",
                       @"               });",
@@ -434,6 +450,13 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
                       @"       };",
                       @"       ",
                       @"       insertNext();",
+                      @"   }",
+                      @"   ",
+                      @"   function fixReleaseDate(movie) {",
+                      @"       var releaseDate = movie.ReleaseDate;",
+                      @"       if (typeof releaseDate === 'string') {",
+                      @"           movie.ReleaseDate = new Date(releaseDate);",
+                      @"       }",
                       @"   }",
                       @"4. Click the 'Query Tests' button.",
                       @"5. Make sure all the scenarios pass.", nil];
