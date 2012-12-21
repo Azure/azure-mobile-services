@@ -63,6 +63,14 @@ NSString *const MSErrorResponseKey;
 // an invalid itemId was used.
 #define MSInvalidItemIdWithRequest              -1105
 
+// Indicates that a request to the Windows Azure Mobile Service failed because
+// an invalid user-parameter in the query string.
+#define MSInvalidUserParameterWithRequest       -1106
+
+// Indicates that a request to the Windows Azure Mobile Service failed because
+// an item with an id was used
+#define MSExistingItemIdWithRequest             -1107
+
 // Indicates that the response from the Windows Azure Mobile Service did not
 // inlcude an item as expected.
 #define MSExpectedItemWithResponse              -1201

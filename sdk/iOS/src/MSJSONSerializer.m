@@ -53,7 +53,9 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
 # pragma mark * MSSerializer Protocol Implementation
 
 
--(NSData *) dataFromItem:(id)item orError:(NSError **)error
+-(NSData *) dataFromItem:(id)item
+               idAllowed:(BOOL)idAllowed
+                 orError:(NSError **)error
 {
     NSData *data = nil;
     NSError *localError = nil;
@@ -64,6 +66,28 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
     }
     else {
         
+        // Ensure that the item doesn't already have an id if
+        // an id is not allows
+        if (!idAllowed) {
+            
+            // Make sure this is a dictionary before trying to get the id
+            if (![item isKindOfClass:[NSDictionary class]]) {
+                localError = [self errorForInvalidItem];
+            }
+            else {
+                
+                // Then get the value of the id key; if it exists,
+                // this is an error
+                id itemId = [item objectForKey:idKey];
+                if (itemId) {
+                    localError = [self errorForExistingItemId];
+                }
+            }
+        }
+    }
+    
+    if (!localError)
+    {
         // Convert any NSDate instances into strings formatted with the date.
         item = [self preSerializeItem:item];
 
@@ -424,6 +448,12 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
 {
     return [self errorWithDescriptionKey:@"The item provided did not have an id."
                             andErrorCode:MSMissingItemIdWithRequest];
+}
+
+-(NSError *) errorForExistingItemId
+{
+    return [self errorWithDescriptionKey:@"The item provided must not have an id."
+                            andErrorCode:MSExistingItemIdWithRequest];
 }
 
 -(NSError *) errorForExpectedItemId

@@ -73,20 +73,48 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
 
 
 // Sends a request to the Windows Azure Mobile Service to insert the given
-// item into the table. The item does not need to have an id.
+// item into the table. The item should not have an id.
 -(void) insert:(NSDictionary *)item completion:(MSItemBlock)completion;
+
+// Sends a request to the Windows Azure Mobile Service to insert the given
+// item into the table. Addtional user-defined parameters are sent in the
+// request query string. The item should not have an id.
+-(void) insert:(NSDictionary *)item
+    parameters:(NSDictionary *)parameters
+    completion:(MSItemBlock)completion;
 
 // Sends a request to the Windows Azure Mobile Service to update the given
 // item in the table. The item must have an id.
 -(void) update:(NSDictionary *)item completion:(MSItemBlock)completion;
 
+// Sends a request to the Windows Azure Mobile Service to update the given
+// item in the table. Addtional user-defined parameters are sent in the
+// request query string. The item must have an id.
+-(void) update:(NSDictionary *)item
+    parameters:(NSDictionary *)parameters
+    completion:(MSItemBlock)completion;
+
 // Sends a request to the Windows Azure Mobile Service to delete the given
 // item from the table. The item must have an id.
 -(void) delete:(NSDictionary *)item completion:(MSDeleteBlock)completion;
 
+// Sends a request to the Windows Azure Mobile Service to delete the given
+// item from the table. Addtional user-defined parameters are sent in the
+// request query string. The item must have an id.
+-(void) delete:(NSDictionary *)item
+    parameters:(NSDictionary *)parameters
+    completion:(MSDeleteBlock)completion;
+
 // Sends a request to the Windows Azure Mobile Service to delete the item
 // with the given id in from table.
 -(void) deleteWithId:(NSNumber *)itemId completion:(MSDeleteBlock)completion;
+
+// Sends a request to the Windows Azure Mobile Service to delete the item
+// with the given id in from table. Addtional user-defined parameters are
+// sent in the request query string.
+-(void) deleteWithId:(NSNumber *)itemId
+          parameters:(NSDictionary *)parameters
+          completion:(MSDeleteBlock)completion;
 
 
 #pragma mark * Public Read Methods
@@ -94,7 +122,14 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
 
 // Sends a request to the Windows Azure Mobile Service to return the item
 // with the given id from the table.
--(void) readWithId:(NSNumber *)itemId completion:(MSItemBlock)completion;;
+-(void) readWithId:(NSNumber *)itemId completion:(MSItemBlock)completion;
+
+// Sends a request to the Windows Azure Mobile Service to return the item
+// with the given id from the table. Addtional user-defined parameters are
+// sent in the request query string.
+-(void) readWithId:(NSNumber *)itemId
+        parameters:(NSDictionary *)parameters
+        completion:(MSItemBlock)completion;
 
 // Sends a request to the Windows Azure Mobile Service to return all items
 // fromm the table that meet the conditions of the given query.
@@ -109,7 +144,7 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
 // Sends a request to the Windows Azure Mobile Service to return all items
 // from the table that meet the conditions of the given predicate.
 -(void) readWhere:(NSPredicate *) predicate
-            completion:(MSReadQueryBlock)completion;
+       completion:(MSReadQueryBlock)completion;
 
 
 #pragma mark * Public Query Constructor Methods

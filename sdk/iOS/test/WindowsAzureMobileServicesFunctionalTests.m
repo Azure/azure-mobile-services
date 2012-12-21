@@ -378,6 +378,104 @@
 }
 
 
+#pragma mark * End-to-End URL Encoding Tests
+
+-(void) testFilterConstantsAreURLEncoded
+{
+    MSTable *todoTable = [client getTable:@"todoItem"];
+    
+    NSString *predicateString = @"text == '#?&$ encode me!'";
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:predicateString];
+    
+    // Create the item
+    NSDictionary *item = @{ @"text":@"#?&$ encode me!", @"complete": @(NO) };
+    
+    // Insert the item
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+        
+        STAssertNotNil(item, @"item should not have been nil.");
+        STAssertNil(error, @"error from insert should have been null.");
+        
+        // Now try to query the item and make sure we don't error
+        [todoTable readWhere:predicate completion:^(NSArray *items,
+                                                    NSInteger totalCount,
+                                                    NSError *error) {
+            
+            STAssertNotNil(items, @"items should not have been nil.");
+            STAssertTrue([items count] > 0, @"items should have matched something.");
+            STAssertNil(error, @"error from query should have been null.");
+            
+            // Now delete the inserted item so as not to corrupt future tests
+            NSNumber *itemIdToDelete = [item objectForKey:@"id"];
+            [todoTable deleteWithId:itemIdToDelete completion:^(NSNumber *itemId,
+                                                                NSError *error) {
+                STAssertNil(error, @"error from delete should have been null.");
+                done = YES;
+            }];
+        }];
+    }];
+
+    STAssertTrue([self waitForTest:90.0], @"Test timed out.");
+}
+
+-(void) testUserParametersAreURLEncodedWithQuery
+{
+    MSTable *todoTable = [client getTable:@"todoItem"];
+    
+    MSQuery *query = [todoTable query];
+    query.parameters = @{@"encodeMe$?": @"No really $#%& encode me!"};
+    [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        
+        STAssertNotNil(items, @"items should not have been nil.");
+        STAssertNil(error, @"error from query was: %@",
+                    [error.userInfo objectForKey:NSLocalizedDescriptionKey]);
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:90.0], @"Test timed out.");
+}
+
+-(void) testUserParametersAreURLEncodedWithInsertUpdateAndDelete
+{
+    MSTable *todoTable = [client getTable:@"todoItem"];
+
+    // Create the item
+    NSDictionary *item = @{ @"text":@"some text", @"complete": @(NO) };
+    NSDictionary *parameters = @{@"encodeMe$?": @"No really $#%& encode me!"};
+    
+    // Insert the item
+    [todoTable insert:item
+           parameters:parameters
+           completion:^(NSDictionary *item, NSError *error) {
+        
+        STAssertNotNil(item, @"item should not have been nil.");
+        STAssertNil(error, @"error from insert should have been null.");
+        
+        // Now update the inserted item
+        [todoTable update:item
+               parameters:parameters
+               completion:^(NSDictionary *updatedItem, NSError *error) {
+                          
+            STAssertNotNil(updatedItem, @"updatedItem should not have been nil.");
+            STAssertNil(error, @"error from update should have been null.");
+
+            // Now delete the inserted item so as not to corrupt future tests
+            NSNumber *itemIdToDelete = [updatedItem objectForKey:@"id"];
+            [todoTable deleteWithId:itemIdToDelete
+                        parameters:parameters
+                         completion:^(NSNumber *itemId, NSError *error) {
+                STAssertNil(error, @"error from delete should have been null.");
+                done = YES;
+            }];
+        }];
+    }];
+    
+    STAssertTrue([self waitForTest:90.0], @"Test timed out.");
+}
+
+
+
 #pragma mark * Negative Insert Tests
 
 
