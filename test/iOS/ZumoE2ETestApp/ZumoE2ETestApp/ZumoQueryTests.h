@@ -2,7 +2,6 @@
 //  ZumoQueryTests.h
 //  ZumoE2ETestApp
 //
-//  Created by Carlos Figueira on 12/9/12.
 //  Copyright (c) 2012 Microsoft. All rights reserved.
 //
 
