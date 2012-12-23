@@ -8,6 +8,8 @@
 #import <Foundation/Foundation.h>
 #import <WindowsAzureMobileServices/WindowsAzureMobileServices.h>
 
+typedef void (^ZumoHttpRequestCompletion)(NSHTTPURLResponse *response, NSData *responseBody, NSError *error);
+
 @interface ZumoTestGlobals : NSObject
 {
     
@@ -21,9 +23,6 @@
 // Helper methods
 +(NSDate *)createDateWithYear:(NSInteger)year month:(NSInteger)month day:(NSInteger)day;
 +(BOOL)compareDate:(NSDate *)date1 withDate:(NSDate *)date2;
-
-// Data used in multiple tests
-+(NSMutableDictionary *)propertyBag;
-extern NSString * const ZumoKeyStringValue;
++(void)sendAsyncRequest:(NSString *)method url:(NSString *)url headers:(NSDictionary *)headers body:(NSString *)body completion:(ZumoHttpRequestCompletion)completion;
 
 @end

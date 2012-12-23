@@ -12,6 +12,8 @@
 
 @implementation ZumoRoundTripTests
 
+static NSString *tableName = @"iosTodoItem";
+
 typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTripTestColumnType;
 
 + (NSArray *)createTests {
@@ -19,7 +21,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
     __weak ZumoTest *weakRef = firstTest;
     [firstTest setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        MSTable *table = [client getTable:@"TodoItem"];
+        MSTable *table = [client getTable:tableName];
         NSDictionary *item = @{@"string1":@"test", @"date1": [ZumoTestGlobals createDateWithYear:2011 month:11 day:11], @"bool1": [NSNumber numberWithBool:NO], @"number": [NSNumber numberWithInt:-1], @"longnum":[NSNumber numberWithLong:0], @"intnum":[NSNumber numberWithInt:0], @"setindex":@"setindex"};
         [table insert:item completion:^(NSDictionary *inserted, NSError *err) {
             if (err) {
@@ -49,7 +51,6 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
                               ' ' + (rand() % 95),
                               ' ' + (rand() % 95),
                               ' ' + (rand() % 95)];
-    [[ZumoTestGlobals propertyBag] setValue:simpleString forKey:ZumoKeyStringValue];
     [result addObject:[self createRoundTripForType:RTTString withValue:simpleString andName:@"Round trip simple string"]];
     [result addObject:[self createRoundTripForType:RTTString withValue:[NSNull null] andName:@"Round trip nil string"]];
     
@@ -79,12 +80,52 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
     [result addObject:[self createRoundTripForType:RTTLong withValue:[NSNumber numberWithLong:123456789012345L] andName:@"Round trip long number"]];
     [result addObject:[self createRoundTripForType:RTTLong withValue:[NSNumber numberWithLong:-123456789012345L] andName:@"Round trip negative long"]];
     
-    // Negative scenarios
-    ZumoTest *test = [ZumoTest createTestWithName:@"New column with null value" andExecution:nil];
+    // Complex object scenarios
+    ZumoTest *test = [ZumoTest createTestWithName:@"Object with complex member" andExecution:nil];
     __weak ZumoTest *weakTest = test;
     [test setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+        NSDictionary *order = @{
+            @"date":[NSDate date],
+            @"client":@"John Doe",
+            @"products":@[
+                @{@"name":@"Bread",@"price":@2.99},
+                @{@"name":@"Milk",@"price":@2.50},
+                @{@"name":@"Egg",@"price":@3.29},
+            ]};
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        MSTable *table = [client getTable:@"TodoItem"];
+        MSTable *table = [client getTable:tableName];
+        [table insert:order completion:^(NSDictionary *item, NSError *error) {
+            BOOL passed = NO;
+            if (error) {
+                [weakRef addLog:[NSString stringWithFormat:@"Error inserting complex object: %@", error]];
+            } else {
+                double totalPrice = 0;
+                NSArray *products = order[@"products"];
+                int productCount = [products count];
+                for (int i = 0; i < productCount; i++) {
+                    totalPrice += [products[i][@"price"] doubleValue];
+                }
+                
+                double rtTotalPrice = [item[@"totalPrice"] doubleValue];
+                if (fabs(rtTotalPrice - totalPrice) > 0.000001) {
+                    [weakRef addLog:[NSString stringWithFormat:@"Incorrect round-tripped total price: expected = %lf, actual=%lf", totalPrice, rtTotalPrice]];
+                } else {
+                    passed = YES;
+                }
+            }
+            
+            [weakRef setTestStatus:(passed ? TSPassed : TSFailed)];
+            completion(passed);
+        }];
+    }];
+    [result addObject:test];
+    
+    // Negative scenarios
+    test = [ZumoTest createTestWithName:@"New column with null value" andExecution:nil];
+    weakTest = test;
+    [test setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+        MSClient *client = [[ZumoTestGlobals sharedInstance] client];
+        MSTable *table = [client getTable:tableName];
         [table insert:@{@"ColumnWhichDoesNotExist":[NSNull null]} completion:^(NSDictionary *item, NSError *err) {
             BOOL passed;
             if (!err) {
@@ -115,7 +156,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
     __weak ZumoTest *weakRef = result;
     [result setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        MSTable *table = [client getTable:@"TodoItem"];
+        MSTable *table = [client getTable:tableName];
         NSMutableDictionary *item = [[NSMutableDictionary alloc] init];
         if (type == RTTString) {
             [item setObject:value forKey:@"string1"];

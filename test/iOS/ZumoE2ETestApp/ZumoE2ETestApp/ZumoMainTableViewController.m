@@ -10,6 +10,7 @@
 #import "ZumoTestGlobals.h"
 #import "ZumoTestGroupTableViewController.h"
 #import "ZumoSavedAppsTableViewController.h"
+#import "ZumoTestHelpViewController.h"
 
 @interface ZumoMainTableViewController ()
 
@@ -59,13 +60,6 @@
 {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
-}
-
-- (IBAction)resetClient:(id)sender {
-    [appUrlField setText:@""];
-    [appKeyField setText:@""];
-    [appUrlField setEnabled:YES];
-    [appKeyField setEnabled:YES];
 }
 
 - (IBAction)loadSavedApp:(id)sender {
@@ -164,16 +158,25 @@
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    if (![[ZumoTestGlobals sharedInstance] client]) {
-        NSString *appUrl = [appUrlField text];
-        NSString *appKey = [appKeyField text];
+    MSClient *currentClient = [[ZumoTestGlobals sharedInstance] client];
+    NSString *appUrl = [appUrlField text];
+    NSString *appKey = [appKeyField text];
+    BOOL needRefreshClient;
+    if (!currentClient) {
+        // client not yet set
+        needRefreshClient = YES;
+    } else if ([[[currentClient applicationURL] absoluteString] isEqualToString:appUrl] && [[currentClient applicationKey] isEqualToString:appKey]) {
+        // Same application, no need to reinitialize the client
+        needRefreshClient = NO;
+    } else {
+        needRefreshClient = YES;
+    }
+
+    if (needRefreshClient) {
         if (![self validateAppInfoForUrl:appUrl andKey:appKey]) {
             return;
         } else {
             [[ZumoTestGlobals sharedInstance] initializeClientWithAppUrl:appUrl andKey:appKey];
-            [appUrlField setEnabled:NO];
-            [appKeyField setEnabled:NO];
-            [resetClientButton setEnabled:YES];
         }
     }
 
@@ -186,6 +189,26 @@
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
     [textField resignFirstResponder];
     return YES;
+}
+
+- (IBAction)displayHelp:(id)sender {
+    NSArray *lines = [NSArray arrayWithObjects:
+                      @"To run this test application:",
+                      @"1. Create (or reuse) an application using either the portal or the CLI",
+                      @"2. On the application, create the following tables:",
+                      @"2.1. iosTodoItem (used for round-trip, update and delete tests), no special setting",
+                      @"2.2. iosMovies (used for query tests), with the appropriate script",
+                      @"2.3. iosApplication (used for login tests), set permissions to 'Application Key'",
+                      @"2.4. iosAuthenticated (used for login tests), set permissions to 'Authenticated Users'",
+                      @"2.5. iosAdmin (used for login tests), set permissions to 'Admin and Scripts'",
+                      @"3. Create applications in all supported identity providers (for login tests)",
+                      @"4. Configure the identity tab of the Zumo app to point to the providers (for login tests)",
+                      @"5. Run the desired tests by selecing the test group, then tapping 'Run Tests'",
+                      @"6. Make sure all the scenarios pass.", nil];
+    NSString *helpText = [lines componentsJoinedByString:@"\n"];
+    ZumoTestHelpViewController *hvc = [[ZumoTestHelpViewController alloc] init];
+    [hvc setTitle:@"General E2E Test App Help" andHelpText:helpText];
+    [self presentViewController:hvc animated:YES completion:nil];
 }
 
 #pragma mark - ZumoTestGroup delegate
