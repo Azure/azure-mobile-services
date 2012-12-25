@@ -10,12 +10,14 @@
 @implementation ZumoTest
 
 @synthesize testName, execution, delegate, testStatus;
+@synthesize propertyBag = _propertyBag;
 
 - (id)init {
     self = [super init];
     if (self) {
         [self setTestStatus:TSNotRun];
         logs = [[NSMutableArray alloc] init];
+        _propertyBag = [[NSMutableDictionary alloc] init];
     }
     
     return self;

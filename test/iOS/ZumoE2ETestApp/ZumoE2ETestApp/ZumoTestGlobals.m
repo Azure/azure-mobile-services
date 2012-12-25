@@ -7,70 +7,9 @@
 
 #import "ZumoTestGlobals.h"
 
-@interface ZumoAPMRequest : NSObject <NSURLConnectionDelegate>
-{
-    NSURLConnection *connection;
-    NSMutableData *responseData;
-    NSHTTPURLResponse *response;
-    ZumoHttpRequestCompletion responseCallback;
-}
-
-- (id)initWithMethod:(NSString *)method url:(NSString *)url headers:(NSDictionary *)headers body:(NSString *)body withResponse:(ZumoHttpRequestCompletion)responseblock;
-- (void)sendRequest;
-
-@end
-
-@implementation ZumoAPMRequest
-
-- (id)initWithMethod:(NSString *)method url:(NSString *)url headers:(NSDictionary *)headers body:(NSString *)body withResponse:(ZumoHttpRequestCompletion)responseBlock {
-    self = [super init];
-    if (self) {
-        responseData = [[NSMutableData alloc] init];
-        NSURL *theUrl = [NSURL URLWithString:url];
-        NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:theUrl];
-        [request setHTTPMethod:method];
-        if (headers) {
-            [request setValuesForKeysWithDictionary:headers];
-        }
-        
-        NSData *requestBody = [body dataUsingEncoding:NSUTF8StringEncoding];
-        [request setHTTPBody:requestBody];
-        
-        connection = [[NSURLConnection alloc] initWithRequest:request delegate:self startImmediately:NO];
-        responseCallback = responseBlock;
-        response = nil;
-    }
-    
-    return self;
-}
-
-- (void)sendRequest {
-    [connection start];
-}
-
-- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    responseCallback(nil, nil, error);
-}
-
-- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)theResponse {
-    response = (NSHTTPURLResponse *)theResponse;
-    [responseData setLength:0];
-}
-
-- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
-    [responseData appendData:data];
-}
-
-- (void)connectionDidFinishLoading:(NSURLConnection *)conn {
-    NSData *responseBody = [responseData copy];
-    responseCallback(response, responseBody, nil);
-}
-
-@end
-
 @implementation ZumoTestGlobals
 
-@synthesize client;
+@synthesize client, deviceToken, remoteNotificationRegistrationStatus, pushNotificationDelegate;
 
 +(ZumoTestGlobals *)sharedInstance {
     static ZumoTestGlobals *instance = nil;
@@ -114,11 +53,6 @@
     }
     
     return dict;
-}
-
-+(void)sendAsyncRequest:(NSString *)method url:(NSString *)url headers:(NSDictionary *)headers body:(NSString *)body completion:(ZumoHttpRequestCompletion)completion {
-    ZumoAPMRequest *apmRequest = [[ZumoAPMRequest alloc] initWithMethod:method url:url headers:headers body:body withResponse:completion];
-    [apmRequest sendRequest];
 }
 
 @end

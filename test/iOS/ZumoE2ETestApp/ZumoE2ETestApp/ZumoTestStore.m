@@ -13,6 +13,7 @@
 #import "ZumoCUDTests.h"
 #import "ZumoLoginTests.h"
 #import "ZumoMiscTests.h"
+#import "ZumoPushTests.h"
 
 @implementation ZumoTestStore
 
@@ -22,6 +23,7 @@
             [self createQueryTests],
             [self createCUDTests],
             [self createLoginTests],
+            [self createPushTests],
             [self createMiscTests],
             nil];
 }
@@ -31,6 +33,19 @@
     [result setName:@"Other tests"];
     [result setHelpText:[ZumoMiscTests helpText]];
     NSArray *tests = [ZumoMiscTests createTests];
+    ZumoTest *test;
+    for (test in tests) {
+        [result addTest:test];
+    }
+    
+    return result;
+}
+
++ (ZumoTestGroup *)createPushTests {
+    ZumoTestGroup *result = [[ZumoTestGroup alloc] init];
+    [result setName:@"Push notification tests"];
+    [result setHelpText:[ZumoPushTests helpText]];
+    NSArray *tests = [ZumoPushTests createTests];
     ZumoTest *test;
     for (test in tests) {
         [result addTest:test];

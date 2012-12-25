@@ -23,6 +23,7 @@ typedef enum { TSNotRun, TSRunning, TSFailed, TSPassed } TestStatus;
 @property (nonatomic, strong) NSString *testName;
 @property (nonatomic, copy) ZumoTestExecution execution;
 @property (nonatomic) TestStatus testStatus;
+@property (nonatomic, strong) NSMutableDictionary *propertyBag;
 
 + (ZumoTest *)createTestWithName:(NSString *)name andExecution:(ZumoTestExecution)steps;
 
