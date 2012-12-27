@@ -17,9 +17,9 @@
     NSTimer *timer;
 }
 
-@property (nonatomic, weak) ZumoTest *test;
-@property (nonatomic, strong) ZumoTestCompletion completion;
-@property (nonatomic, strong) NSDictionary *payload;
+@property (nonatomic, readonly, weak) ZumoTest *test;
+@property (nonatomic, readonly, strong) ZumoTestCompletion completion;
+@property (nonatomic, readonly, strong) NSDictionary *payload;
 
 @end
 
@@ -32,6 +32,7 @@
     if (self) {
         _test = test;
         _completion = completion;
+        _payload = [payload copy];
         timer = [NSTimer scheduledTimerWithTimeInterval:seconds target:self selector:@selector(timerFired:) userInfo:nil repeats:NO];
         [[ZumoTestGlobals sharedInstance] setPushNotificationDelegate:self];
     }
@@ -48,9 +49,79 @@
 - (void)pushReceived:(NSDictionary *)userInfo {
     [timer invalidate];
     [_test addLog:[NSString stringWithFormat:@"Push notification received: %@", userInfo]];
-    // PPP compare data received with payload passed to it
-    [_test setTestStatus:TSPassed];
-    _completion(YES);
+    NSDictionary *expectedPushInfo = [self zumoPayloadToApsPayload:_payload];
+    if ([self compareExpectedPayload:expectedPushInfo withActual:userInfo]) {
+        [_test setTestStatus:TSPassed];
+        _completion(YES);
+    } else {
+        [_test addLog:[NSString stringWithFormat:@"Error, payloads are different. Expected: %@, actual: %@", expectedPushInfo, userInfo]];
+        [_test setTestStatus:TSFailed];
+        _completion(NO);
+    }
+}
+
+- (BOOL)compareExpectedPayload:(NSDictionary *)expected withActual:(NSDictionary *)actual {
+    BOOL allEqual = YES;
+    for (NSString *key in [expected keyEnumerator]) {
+        id actualValue = actual[key];
+        if (!actualValue) {
+            allEqual = NO;
+            [_test addLog:[NSString stringWithFormat:@"Key %@ in the expected payload, but not in the push received", key]];
+        } else {
+            id expectedValue = [expected objectForKey:key];
+            if ([actualValue isKindOfClass:[NSDictionary class]] && [expectedValue isKindOfClass:[NSDictionary class]]) {
+                // Compare recursively
+                if (![self compareExpectedPayload:(NSDictionary *)expectedValue withActual:(NSDictionary *)actualValue]) {
+                    [_test addLog:[NSString stringWithFormat:@"Value for key %@ in the expected payload is different than the one on the push received", key]];
+                    allEqual = NO;
+                }
+            } else {
+                // Use simple comparison
+                if (![expectedValue isEqual:actualValue]) {
+                    [_test addLog:[NSString stringWithFormat:@"Value for key %@ in the expected payload (%@) is different than the one on the push received (%@)", key, expectedValue, actualValue]];
+                    allEqual = NO;
+                }
+            }
+        }
+    }
+    
+    if (allEqual) {
+        for (NSString *key in [actual keyEnumerator]) {
+            if (!expected[key]) {
+                allEqual = NO;
+                [_test addLog:[NSString stringWithFormat:@"Key %@ in the push received, but not in the expected payload", key]];
+            }
+        }
+    }
+    
+    return allEqual;
+}
+
+- (NSDictionary *)zumoPayloadToApsPayload:(NSDictionary *)originalPayload {
+    NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
+    NSMutableDictionary *aps = [[NSMutableDictionary alloc] init];
+    [result setValue:aps forKey:@"aps"];
+    id alert = originalPayload[@"alert"];
+    if (alert) {
+        [aps setValue:alert forKey:@"alert"];
+    }
+    
+    id badge = originalPayload[@"badge"];
+    if (badge) {
+        [aps setValue:badge forKey:@"badge"];
+    }
+    
+    id sound = originalPayload[@"sound"];
+    if (sound) {
+        [aps setValue:sound forKey:@"sound"];
+    }
+    
+    NSDictionary *payload = originalPayload[@"payload"];
+    if (payload) {
+        [result addEntriesFromDictionary:payload];
+    }
+    
+    return result;
 }
 
 @end
@@ -68,6 +139,10 @@ static NSString *pushClientKey = @"PushClientKey";
     [result addObject:[self createPushTestWithName:@"Push simple alert" forPayload:@{@"alert":@"push received"} withDelay:0]];
     [result addObject:[self createPushTestWithName:@"Push simple badge" forPayload:@{@"badge":@9} withDelay:0]];
     [result addObject:[self createPushTestWithName:@"Push simple sound and alert" forPayload:@{@"alert":@"push received",@"sound":@"default"} withDelay:0]];
+    [result addObject:[self createPushTestWithName:@"Push alert with loc info and parameters" forPayload:@{@"alert":@{@"loc-key":@"LOC_STRING",@"loc-args":@[@"first",@"second"]}} withDelay:0]];
+    [result addObject:[self createPushTestWithName:@"Push with only custom info (no alert / badge / sound)" forPayload:@{@"payload":@{@"foo":@"bar"}} withDelay:0]];
+    [result addObject:[self createPushTestWithName:@"Push with alert, badge and sound" forPayload:@{@"alert":@"simple alert", @"badge":@7, @"sound":@"default", @"payload":@{@"custom":@"value"}} withDelay:0]];
+    [result addObject:[self createPushTestWithName:@"Push with alert with non-ASCII characters" forPayload:@{@"alert":@"Latin-ãéìôü ÇñÑ, arabic-لكتاب على الطاولة, chinese-这本书在桌子上"} withDelay:0]];
     return result;
 }
 
