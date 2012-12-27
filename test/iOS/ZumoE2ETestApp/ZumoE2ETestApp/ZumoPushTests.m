@@ -41,20 +41,32 @@
 }
 
 - (void)timerFired:(NSTimer *)theTimer {
-    [_test addLog:@"Push notification not received within the allowed time. Need to retry?"];
-    [_test setTestStatus:TSFailed];
-    _completion(NO);
+    if (_payload) {
+        [_test addLog:@"Push notification not received within the allowed time. Need to retry?"];
+        [_test setTestStatus:TSFailed];
+        _completion(NO);
+    } else {
+        [_test addLog:@"Push notification not received for invalid payload - success."];
+        [_test setTestStatus:TSPassed];
+        _completion(YES);
+    }
 }
 
 - (void)pushReceived:(NSDictionary *)userInfo {
     [timer invalidate];
     [_test addLog:[NSString stringWithFormat:@"Push notification received: %@", userInfo]];
-    NSDictionary *expectedPushInfo = [self zumoPayloadToApsPayload:_payload];
-    if ([self compareExpectedPayload:expectedPushInfo withActual:userInfo]) {
-        [_test setTestStatus:TSPassed];
-        _completion(YES);
+    if (_payload) {
+        NSDictionary *expectedPushInfo = [self zumoPayloadToApsPayload:_payload];
+        if ([self compareExpectedPayload:expectedPushInfo withActual:userInfo]) {
+            [_test setTestStatus:TSPassed];
+            _completion(YES);
+        } else {
+            [_test addLog:[NSString stringWithFormat:@"Error, payloads are different. Expected: %@, actual: %@", expectedPushInfo, userInfo]];
+            [_test setTestStatus:TSFailed];
+            _completion(NO);
+        }
     } else {
-        [_test addLog:[NSString stringWithFormat:@"Error, payloads are different. Expected: %@, actual: %@", expectedPushInfo, userInfo]];
+        [_test addLog:@"This is a negative test, the payload should not have been received!"];
         [_test setTestStatus:TSFailed];
         _completion(NO);
     }
@@ -143,6 +155,9 @@ static NSString *pushClientKey = @"PushClientKey";
     [result addObject:[self createPushTestWithName:@"Push with only custom info (no alert / badge / sound)" forPayload:@{@"payload":@{@"foo":@"bar"}} withDelay:0]];
     [result addObject:[self createPushTestWithName:@"Push with alert, badge and sound" forPayload:@{@"alert":@"simple alert", @"badge":@7, @"sound":@"default", @"payload":@{@"custom":@"value"}} withDelay:0]];
     [result addObject:[self createPushTestWithName:@"Push with alert with non-ASCII characters" forPayload:@{@"alert":@"Latin-ãéìôü ÇñÑ, arabic-لكتاب على الطاولة, chinese-这本书在桌子上"} withDelay:0]];
+    
+    [result addObject:[self createPushTestWithName:@"(Neg) Push with large payload" forPayload:@{@"alert":[@"" stringByPaddingToLength:256 withString:@"*" startingAtIndex:0]} withDelay:0 isNegativeTest:YES]];
+    
     return result;
 }
 
@@ -177,6 +192,10 @@ static NSString *pushClientKey = @"PushClientKey";
 }
 
 + (ZumoTest *)createPushTestWithName:(NSString *)name forPayload:(NSDictionary *)payload withDelay:(int)seconds {
+    return [self createPushTestWithName:name forPayload:payload withDelay:0 isNegativeTest:NO];
+}
+
++ (ZumoTest *)createPushTestWithName:(NSString *)name forPayload:(NSDictionary *)payload withDelay:(int)seconds isNegativeTest:(BOOL)isNegative {
     ZumoTest *result = [[ZumoTest alloc] init];
     [result setTestName:name];
     __weak ZumoTest *weakRef = result;
@@ -190,14 +209,15 @@ static NSString *pushClientKey = @"PushClientKey";
             MSClient *client = [[ZumoTestGlobals sharedInstance] client];
             MSTable *table = [client getTable:tableName];
             NSDictionary *item = @{@"method" : @"send", @"payload" : payload, @"token": deviceToken, @"delay": @(seconds)};
-            [table insert:item completion:^(NSDictionary *item, NSError *error) {
+            [table insert:item completion:^(NSDictionary *insertedItem, NSError *error) {
                 if (error) {
                     [weakRef addLog:[NSString stringWithFormat:@"Error requesting push: %@", error]];
                     [weakRef setTestStatus:TSFailed];
                     completion(NO);
                 } else {
                     NSTimeInterval timeToWait = 5;
-                    ZumoPushClient *pushClient = [[ZumoPushClient alloc] initForTest:weakRef withPayload:payload waitFor:timeToWait withTestCompletion:completion];
+                    NSDictionary *expectedPayload = isNegative ? nil : payload;
+                    ZumoPushClient *pushClient = [[ZumoPushClient alloc] initForTest:weakRef withPayload:expectedPayload waitFor:timeToWait withTestCompletion:completion];
                     [[weakRef propertyBag] setValue:pushClient forKey:pushClientKey];
                     
                     // completion will be called on the push client...
