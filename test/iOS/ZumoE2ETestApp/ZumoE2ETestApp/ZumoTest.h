@@ -2,7 +2,6 @@
 //  ZumoTest.h
 //  ZumoE2ETestApp
 //
-//  Created by Carlos Figueira on 12/7/12.
 //  Copyright (c) 2012 Microsoft. All rights reserved.
 //
 
@@ -24,6 +23,7 @@ typedef enum { TSNotRun, TSRunning, TSFailed, TSPassed } TestStatus;
 @property (nonatomic, strong) NSString *testName;
 @property (nonatomic, copy) ZumoTestExecution execution;
 @property (nonatomic) TestStatus testStatus;
+@property (nonatomic, strong) NSMutableDictionary *propertyBag;
 
 + (ZumoTest *)createTestWithName:(NSString *)name andExecution:(ZumoTestExecution)steps;
 

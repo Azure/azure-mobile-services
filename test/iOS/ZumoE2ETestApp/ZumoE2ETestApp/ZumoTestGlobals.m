@@ -2,17 +2,14 @@
 //  ZumoTestGlobals.m
 //  ZumoE2ETestApp
 //
-//  Created by Carlos Figueira on 12/8/12.
 //  Copyright (c) 2012 Microsoft. All rights reserved.
 //
 
 #import "ZumoTestGlobals.h"
 
-NSString * const ZumoKeyStringValue = @"sharedStringValue";
-
 @implementation ZumoTestGlobals
 
-@synthesize client;
+@synthesize client, deviceToken, remoteNotificationRegistrationStatus, pushNotificationDelegate;
 
 +(ZumoTestGlobals *)sharedInstance {
     static ZumoTestGlobals *instance = nil;

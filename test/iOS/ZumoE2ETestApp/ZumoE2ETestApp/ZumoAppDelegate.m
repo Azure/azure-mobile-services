@@ -2,13 +2,13 @@
 //  ZumoAppDelegate.m
 //  ZumoE2ETestApp
 //
-//  Created by Carlos Figueira on 12/7/12.
 //  Copyright (c) 2012 Microsoft. All rights reserved.
 //
 
 #import "ZumoAppDelegate.h"
 #import "ZumoMainTableViewController.h"
 #import "ZumoTestStore.h"
+#import "ZumoTestGlobals.h"
 
 @implementation ZumoAppDelegate
 
@@ -16,6 +16,8 @@
 {
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     // Override point for customization after application launch.
+    
+    [[UIApplication sharedApplication] registerForRemoteNotificationTypes:(UIRemoteNotificationTypeAlert | UIRemoteNotificationTypeBadge | UIRemoteNotificationTypeSound)];
     
     ZumoMainTableViewController *mainController = [[ZumoMainTableViewController alloc] init];
     UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:mainController];
@@ -28,6 +30,24 @@
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];
     return YES;
+}
+
+- (void)application:(UIApplication *)application didFailToRegisterForRemoteNotificationsWithError:(NSError *)error {
+    [[ZumoTestGlobals sharedInstance] setRemoteNotificationRegistrationStatus:[NSString stringWithFormat:@"Failed to register for remote notification: %@", error]];
+}
+
+- (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
+    [[ZumoTestGlobals sharedInstance] setRemoteNotificationRegistrationStatus:@"Successfully registered for remote notifications"];
+    NSString *token = [deviceToken description];
+    token = [token stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"<>"]];
+    [[ZumoTestGlobals sharedInstance] setDeviceToken:token];
+}
+
+- (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {
+    id<PushNotificationReceiver> pushReceiver = [[ZumoTestGlobals sharedInstance] pushNotificationDelegate];
+    if (pushReceiver) {
+        [pushReceiver pushReceived:userInfo];
+    }
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application

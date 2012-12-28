@@ -2,7 +2,6 @@
 //  ZumoLoginTests.m
 //  ZumoE2ETestApp
 //
-//  Created by Carlos Figueira on 12/9/12.
 //  Copyright (c) 2012 Microsoft. All rights reserved.
 //
 
@@ -15,10 +14,11 @@
 
 + (NSArray *)createTests {
     NSMutableArray *result = [[NSMutableArray alloc] init];
+    [result addObject:[self createClearAuthCookiesTest]];
     [result addObject:[self createLogoutTest]];
-    [result addObject:[self createCRUDTestForProvider:nil forTable:@"Application" ofType:ZumoTableApplication andAuthenticated:NO]];
-    [result addObject:[self createCRUDTestForProvider:nil forTable:@"Authenticated" ofType:ZumoTableAuthenticated andAuthenticated:NO]];
-    [result addObject:[self createCRUDTestForProvider:nil forTable:@"Admin" ofType:ZumoTableAdminScripts andAuthenticated:NO]];
+    [result addObject:[self createCRUDTestForProvider:nil forTable:@"iosApplication" ofType:ZumoTableApplication andAuthenticated:NO]];
+    [result addObject:[self createCRUDTestForProvider:nil forTable:@"iosAuthenticated" ofType:ZumoTableAuthenticated andAuthenticated:NO]];
+    [result addObject:[self createCRUDTestForProvider:nil forTable:@"iosAdmin" ofType:ZumoTableAdminScripts andAuthenticated:NO]];
     
     NSArray *providers = [NSArray arrayWithObjects:@"facebook", @"google", @"twitter", @"microsoftaccount", nil];
     NSString *provider;
@@ -28,9 +28,9 @@
             BOOL useSimplified = useSimplifiedLogin == 1;
             [result addObject:[self createLogoutTest]];
             [result addObject:[self createLoginTestForProvider:provider usingSimplifiedMode:useSimplified]];
-            [result addObject:[self createCRUDTestForProvider:provider forTable:@"Application" ofType:ZumoTableApplication andAuthenticated:YES]];
-            [result addObject:[self createCRUDTestForProvider:provider forTable:@"Authenticated" ofType:ZumoTableAuthenticated andAuthenticated:YES]];
-            [result addObject:[self createCRUDTestForProvider:provider forTable:@"Admin" ofType:ZumoTableAdminScripts andAuthenticated:YES]];
+            [result addObject:[self createCRUDTestForProvider:provider forTable:@"iosApplication" ofType:ZumoTableApplication andAuthenticated:YES]];
+            [result addObject:[self createCRUDTestForProvider:provider forTable:@"iosAuthenticated" ofType:ZumoTableAuthenticated andAuthenticated:YES]];
+            [result addObject:[self createCRUDTestForProvider:provider forTable:@"iosAdmin" ofType:ZumoTableAdminScripts andAuthenticated:YES]];
         }
     }
     
@@ -161,6 +161,25 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
     return result;
 }
 
++ (ZumoTest *)createClearAuthCookiesTest {
+    ZumoTest *result = [ZumoTest createTestWithName:@"Clear login cookies" andExecution:nil];
+    __weak ZumoTest *weakRef = result;
+    [result setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+        NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+        NSPredicate *isAuthCookie = [NSPredicate predicateWithFormat:@"domain ENDSWITH '.facebook.com' or domain ENDSWITH '.google.com' or domain ENDSWITH '.live.com' or domain ENDSWITH '.twitter.com'"];
+        NSArray *cookiesToRemove = [[cookieStorage cookies] filteredArrayUsingPredicate:isAuthCookie];
+        for (NSHTTPCookie *cookie in cookiesToRemove) {
+            NSLog(@"Removed cookie from %@", [cookie domain]);
+            [cookieStorage deleteCookie:cookie];
+        }
+
+        [weakRef addLog:@"Removed authentication-related cookies from this app."];
+        completion(YES);
+    }];
+
+    return result;
+}
+
 + (ZumoTest *)createLogoutTest {
     ZumoTest *result = [ZumoTest createTestWithName:@"Logout" andExecution:nil];
     __weak ZumoTest *weakRef = result;
@@ -186,9 +205,9 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
     NSArray *lines = [NSArray arrayWithObjects:
                       @"1. Create an application on Windows azure portal.",
                       @"2. Create three tables in the application:",
-                      @"2.1. Application (set permissions to 'Application Key'):",
-                      @"2.2. Authenticated (set permissions to 'Authenticated Users'):",
-                      @"2.3. Admin (set permissions to 'Admin and Scripts'):",
+                      @"2.1. iosApplication (set permissions to 'Application Key'):",
+                      @"2.2. iosAuthenticated (set permissions to 'Authenticated Users'):",
+                      @"2.3. iosAdmin (set permissions to 'Admin and Scripts'):",
                       @"3. Create applications in all supported identity providers",
                       @"4. Configure the identity tab of the Zumo app to point to the providers",
                       @"5. Run the 'Login' tests, entering valid credentials when prompted.",
