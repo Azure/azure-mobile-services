@@ -2,12 +2,12 @@
 //  ZumoTestGroupTableViewController.m
 //  ZumoE2ETestApp
 //
-//  Created by Carlos Figueira on 12/9/12.
 //  Copyright (c) 2012 Microsoft. All rights reserved.
 //
 
 #import "ZumoTestGroupTableViewController.h"
 #import "ZumoTestHelpViewController.h"
+#import "ZumoLogUpdater.h"
 
 @interface ZumoTestGroupTableViewController ()
 
@@ -118,8 +118,6 @@
 - (IBAction)uploadLogs:(id)sender {
     ZumoTestHelpViewController *helpController = [[ZumoTestHelpViewController alloc] init];
     NSMutableArray *arr = [[NSMutableArray alloc] init];
-    [arr addObject:@"This currently only display test logs, doesn't upload them"];
-    [arr addObject:@""];
     ZumoTest *test;
     for (test in [[self tests] tests]) {
         NSString *testStatus;
@@ -152,9 +150,16 @@
         [arr addObject:@"---------------------"];
     }
     
-    [helpController setTitle:@"Test logs" andHelpText:[arr componentsJoinedByString:@"\n"]];
+    NSString *allLogs = [arr componentsJoinedByString:@"\n"];
+    [helpController setTitle:@"Test logs" andHelpText:allLogs];
     [helpController setModalPresentationStyle:UIModalPresentationFullScreen];
-    [self presentViewController:helpController animated:YES completion:nil];
+    NSString *urlToUpload = [uploadUrl text];
+    [self presentViewController:helpController animated:YES completion:^(void) {
+        if (urlToUpload && [urlToUpload length]) {
+            ZumoLogUpdater *updater = [[ZumoLogUpdater alloc] init];
+            [updater uploadLogs:allLogs toUrl:urlToUpload];
+        }
+    }];
 }
 
 - (IBAction)showHelp:(id)sender {

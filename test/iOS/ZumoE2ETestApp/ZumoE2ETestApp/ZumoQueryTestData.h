@@ -1,5 +1,5 @@
 //
-//  ZumoQueryTests.h
+//  ZumoQueryTestData.h
 //  ZumoE2ETestApp
 //
 //  Copyright (c) 2012 Microsoft. All rights reserved.
@@ -7,9 +7,8 @@
 
 #import <Foundation/Foundation.h>
 
-@interface ZumoQueryTests : NSObject
+@interface ZumoQueryTestData : NSObject
 
-+ (NSArray *)createTests;
-+ (NSString *)helpText;
++ (NSArray *)getMovies;
 
 @end

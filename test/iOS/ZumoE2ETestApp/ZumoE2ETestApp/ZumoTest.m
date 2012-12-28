@@ -2,7 +2,6 @@
 //  ZumoTest.m
 //  ZumoE2ETestApp
 //
-//  Created by Carlos Figueira on 12/7/12.
 //  Copyright (c) 2012 Microsoft. All rights reserved.
 //
 
@@ -11,12 +10,14 @@
 @implementation ZumoTest
 
 @synthesize testName, execution, delegate, testStatus;
+@synthesize propertyBag = _propertyBag;
 
 - (id)init {
     self = [super init];
     if (self) {
         [self setTestStatus:TSNotRun];
         logs = [[NSMutableArray alloc] init];
+        _propertyBag = [[NSMutableDictionary alloc] init];
     }
     
     return self;
