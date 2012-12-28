@@ -73,7 +73,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             // Send the query
             string odata = query.ToString();
-            IJsonValue response = await table.ReadAsync(odata);
+            IJsonValue response = await table.ReadAsync(odata, query.Parameters);
 
             // Parse the results
             long totalCount;
@@ -171,13 +171,26 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="id">The ID of the element.</param>
         /// <returns>The desired element.</returns>
-        public async Task<T> LookupAsync(object id)
+        public new async Task<T> LookupAsync(object id)
+        {
+            return await this.LookupAsync(id, null);
+        }
+
+        /// <summary>
+        /// Get an element from a table by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the element.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in the request URI query string.
+        /// </param>
+        /// <returns>The desired element.</returns>
+        public new async Task<T> LookupAsync(object id, IDictionary<string, string> parameters)
         {
             // TODO: At some point in the future this will be involved in our
             // caching story and relationships across tables via foreign
             // keys.
 
-            IJsonValue value = await this.SendLookupAsync(id);
+            IJsonValue value = await this.SendLookupAsync(id, parameters);
             return MobileServiceTableSerializer.Deserialize<T>(value.AsObject());
         }
 
@@ -191,6 +204,22 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public async Task RefreshAsync(T instance)
         {
+            await this.RefreshAsync(instance, null);
+        }
+
+        /// <summary>
+        /// Refresh the current instance with the latest values from the
+        /// table.
+        /// </summary>
+        /// <param name="instance">The instance to refresh.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in the request URI query string.
+        /// </param>
+        /// <returns>
+        /// A task that will complete when the refresh has finished.
+        /// </returns>
+        public async Task RefreshAsync(T instance, IDictionary<string, string> parameters)
+        {
             if (instance == null)
             {
                 throw new ArgumentNullException("instance");
@@ -202,7 +231,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             if (!SerializableType.IsDefaultIdValue(id))
             {
                 // Get the latest version of this element
-                JsonObject obj = await this.GetSingleValueAsync(id);
+                JsonObject obj = await this.GetSingleValueAsync(id, parameters);
 
                 // Deserialize that value back into the current instance
                 MobileServiceTableSerializer.Deserialize(obj, instance);
@@ -213,18 +242,21 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Get an element from a table by its ID.
         /// </summary>
         /// <param name="id">The ID of the element.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in the request URI query string.
+        /// </param>
         /// <returns>The desired element as JSON object.</returns>
-        private async Task<JsonObject> GetSingleValueAsync(object id)
+        private async Task<JsonObject> GetSingleValueAsync(object id, IDictionary<string, string> parameters)
         {
             // Create a query for just this item
             string query = string.Format(
                 CultureInfo.InvariantCulture,
                 "$filter={0} eq {1}",
-                IdPropertyName,
+                MobileServiceTableUrlBuilder.IdPropertyName,
                 TypeExtensions.ToODataConstant(id));
 
             // Send the query
-            IJsonValue response = await this.ReadAsync(query);
+            IJsonValue response = await this.ReadAsync(query, parameters);
 
             // Get the first element in the response
             JsonObject obj = response.AsObject();
@@ -258,6 +290,21 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public async Task InsertAsync(T instance)
         {
+            await this.InsertAsync(instance, null);
+        }
+
+        /// <summary>
+        /// Insert a new instance into the table.
+        /// </summary>
+        /// <param name="instance">The instance to insert.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in the request URI query string.
+        /// </param>
+        /// <returns>
+        /// A task that will complete when the insertion has finished.
+        /// </returns>
+        public async Task InsertAsync(T instance, IDictionary<string, string> parameters)
+        {
             if (instance == null)
             {
                 throw new ArgumentNullException("instance");
@@ -267,7 +314,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             JsonObject value = MobileServiceTableSerializer.Serialize(instance).AsObject();
 
             // Send the request
-            IJsonValue response = await this.InsertAsync(value);
+            IJsonValue response = await this.InsertAsync(value, parameters);
 
             // Deserialize the response back into the instance in case any
             // server scripts changed values of the instance.
@@ -283,6 +330,21 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public async Task UpdateAsync(T instance)
         {
+            await this.UpdateAsync(instance, null);
+        }
+
+        /// <summary>
+        /// Updates an instance in the table.
+        /// </summary>
+        /// <param name="instance">The instance to update.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in the request URI query string.
+        /// </param>
+        /// <returns>
+        /// A task that will complete when the update has finished.
+        /// </returns>
+        public async Task UpdateAsync(T instance, IDictionary<string, string> parameters)
+        {
             if (instance == null)
             {
                 throw new ArgumentNullException("instance");
@@ -292,7 +354,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             JsonObject value = MobileServiceTableSerializer.Serialize(instance).AsObject();
 
             // Send the request
-            IJsonValue response = await this.UpdateAsync(value);
+            IJsonValue response = await this.UpdateAsync(value, parameters);
 
             // Deserialize the response back into the instance in case any
             // server scripts changed values of the instance.
@@ -308,6 +370,21 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public async Task DeleteAsync(T instance)
         {
+            await this.DeleteAsync(instance, null);
+        }
+
+        /// <summary>
+        /// Delete an instance from the table.
+        /// </summary>
+        /// <param name="instance">The instance to delete.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in the request URI query string.
+        /// </param>
+        /// <returns>
+        /// A task that will complete when the delete has finished.
+        /// </returns>
+        public async Task DeleteAsync(T instance, IDictionary<string, string> parameters)
+        {
             if (instance == null)
             {
                 throw new ArgumentNullException("instance");
@@ -317,7 +394,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             JsonObject value = MobileServiceTableSerializer.Serialize(instance).AsObject();
 
             // Send the request
-            await this.DeleteAsync(value);
+            await this.DeleteAsync(value, parameters);
 
             // Clear the instance ID since it's no longer associated with that
             // ID on the server (note that reflection is goodly enough to turn

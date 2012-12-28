@@ -172,6 +172,7 @@
     <Compile Include="Core\MobileServiceTable.Generic.cs" />
     <Compile Include="Core\MobileServiceTable.Managed.cs" />
     <Compile Include="Core\MobileServiceInvalidOperationException.cs" />
+    <Compile Include="Core\MobileServiceTableUrlBuilder.cs" />
     <Compile Include="Table\CollectionView\VectorChangedEventArgs.cs" />
     <Compile Include="Table\Query\FilterBuildingExpressionVisitor.cs" />
     <Compile Include="Table\Query\ITotalCountProvider.cs" />

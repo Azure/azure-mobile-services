@@ -34,6 +34,14 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
         public bool Deadly { get; set; }
     }
 
+    public class DuplicateKeyType
+    {
+        [DataMember(Name = "ColorId")]
+        public int OtherThanColorId { get; set; }
+
+        public int ColorId { get; set; }
+    }
+
     public class Hyperlink
     {
         public int ID { get; set; }
@@ -240,6 +248,26 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
 
             SimpleTree second = MobileServiceTableSerializer.Deserialize<SimpleTree>(family);
             Assert.AreEqual(tree.Children[0].Name, second.Children[0].Name);
+        }
+
+        [TestMethod]
+        public void DuplicateKeyType()
+        {
+            var instance = new DuplicateKeyType();
+
+            Exception expectedException = null;
+            try
+            {
+                MobileServiceTableSerializer.Serialize(instance);
+            }
+            catch (InvalidOperationException exception)
+            {
+                expectedException = exception;
+            }
+
+            Assert.IsNotNull(expectedException);
+
+            Assert.AreEqual(expectedException.Message, "Two or more members of type 'DuplicateKeyType' are mapped to the same name 'ColorId'. Verify that your DataMember annotations are correct.");
         }
     }
 }

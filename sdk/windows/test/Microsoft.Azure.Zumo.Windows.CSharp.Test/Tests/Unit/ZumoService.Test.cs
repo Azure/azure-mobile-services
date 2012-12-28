@@ -101,15 +101,19 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
                 
             Assert.IsNotNull(current);
             Assert.AreEqual("123456", current.UserId);
+            Assert.AreEqual("rhubarb", current.MobileServiceAuthenticationToken);
             Assert.EndsWith(hijack.Request.Uri.ToString(), "login");
             string input = JsonValue.Parse(hijack.Request.Content).Get("authenticationToken").AsString();
             Assert.AreEqual("donkey", input);
             Assert.AreEqual("POST", hijack.Request.Method);
             Assert.AreSame(current, service.CurrentUser);
 
+            // Set the Auth Token
+            service.CurrentUser.MobileServiceAuthenticationToken = "Not rhubarb";
+
             // Verify that the user token is sent with each request
             IJsonValue response = await service.GetTable("foo").ReadAsync("bar");
-            Assert.AreEqual("rhubarb", hijack.Request.Headers["X-ZUMO-AUTH"]);
+            Assert.AreEqual("Not rhubarb", hijack.Request.Headers["X-ZUMO-AUTH"]);
                 
             // Verify error cases
             ThrowsAsync<ArgumentNullException>(async () => await service.LoginAsync(null));
@@ -248,6 +252,7 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             string appKey = "secret...";
             string collection = "tests";
             string query = "$filter=id eq 12";
+            var userDefinedParameters = new Dictionary<string, string>() { { "tags", "#pizza #beer" } };
 
             TestServiceFilter hijack = new TestServiceFilter();
             MobileServiceClient service = new MobileServiceClient(appUrl, appKey)
@@ -257,13 +262,17 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
                 new JsonArray()
                     .Append(new JsonObject().Set("id", 12).Set("value", "test"))
                     .Stringify();
-            IJsonValue response = await service.GetTable(collection).ReadAsync(query);
+            IJsonValue response = await service.GetTable(collection).ReadAsync(query, userDefinedParameters);
 
             Assert.Contains(hijack.Request.Uri.ToString(), collection);
-            Assert.EndsWith(hijack.Request.Uri.ToString(), query);
+            Assert.Contains(hijack.Request.Uri.AbsoluteUri, "tags=%23pizza%20%23beer");
+            Assert.Contains(hijack.Request.Uri.ToString(), query);
 
             ThrowsAsync<ArgumentNullException>(async () => await service.GetTable(null).ReadAsync(query));
             ThrowsAsync<ArgumentException>(async () => await service.GetTable("").ReadAsync(query));
+
+            var invalidUserDefinedParameters = new Dictionary<string, string>() { { "$this is invalid", "since it starts with a '$'" } };
+            ThrowsAsync<ArgumentException>(async () => await service.GetTable(collection).ReadAsync(query, invalidUserDefinedParameters));
         }
 
         [AsyncTestMethod]
@@ -292,6 +301,7 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
         {
             string appUrl = "http://www.test.com";
             string appKey = "secret...";
+            var userDefinedParameters = new Dictionary<string, string>() { { "state", "CA"} };
 
             TestServiceFilter hijack = new TestServiceFilter();
             MobileServiceClient service = new MobileServiceClient(appUrl, appKey)
@@ -303,7 +313,8 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
                     .Stringify();
 
             IMobileServiceTable<Person> table = service.GetTable<Person>();
-            Person bob = await table.LookupAsync(12);
+            Person bob = await table.LookupAsync(12, userDefinedParameters);
+            Assert.Contains(hijack.Request.Uri.Query, "state=CA");
             Assert.AreEqual(12L, bob.Id);
             Assert.AreEqual("Bob", bob.Name);
 
@@ -326,6 +337,7 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             string appUrl = "http://www.test.com";
             string appKey = "secret...";
             string collection = "tests";
+            var userDefinedParameters = new Dictionary<string, string>() {{ "state", "AL" }};
 
             TestServiceFilter hijack = new TestServiceFilter();
             MobileServiceClient service = new MobileServiceClient(appUrl, appKey)
@@ -334,14 +346,15 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             JsonObject obj = new JsonObject().Set("value", "new");
             hijack.Response.Content =
                 new JsonObject().Set("id", 12).Set("value", "new").Stringify();
-            await service.GetTable(collection).InsertAsync(obj);
+            await service.GetTable(collection).InsertAsync(obj, userDefinedParameters);
 
             Assert.AreEqual(12, obj.Get("id").AsInteger());
             Assert.Contains(hijack.Request.Uri.ToString(), collection);
+            Assert.Contains(hijack.Request.Uri.Query, "state=AL");
 
             ThrowsAsync<ArgumentNullException>(
                 async () => await service.GetTable(collection).InsertAsync(null));
-            
+
             // Verify we throw if ID is set on both JSON and strongly typed
             // instances
             ThrowsAsync<ArgumentException>(
@@ -375,6 +388,7 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             string appUrl = "http://www.test.com";
             string appKey = "secret...";
             string collection = "tests";
+            var userDefinedParameters = new Dictionary<string, string>() { { "state", "FL" } };
 
             TestServiceFilter hijack = new TestServiceFilter();
             MobileServiceClient service = new MobileServiceClient(appUrl, appKey)
@@ -388,10 +402,11 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
                     .Set("other", "123")
                     .Stringify();
             IMobileServiceTable table = service.GetTable(collection);
-            await table.UpdateAsync(obj);
+            await table.UpdateAsync(obj, userDefinedParameters);
 
             Assert.AreEqual("123", obj.Get("other").AsString());
             Assert.Contains(hijack.Request.Uri.ToString(), collection);
+            Assert.Contains(hijack.Request.Uri.Query, "state=FL");
 
             ThrowsAsync<ArgumentNullException>(async () => await table.UpdateAsync(null));
             ThrowsAsync<ArgumentException>(async () => await table.UpdateAsync(new JsonObject()));
@@ -403,6 +418,7 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             string appUrl = "http://www.test.com";
             string appKey = "secret...";
             string collection = "tests";
+            var userDefinedParameters = new Dictionary<string, string>() { { "state", "WY" } };
 
             TestServiceFilter hijack = new TestServiceFilter();
             MobileServiceClient service = new MobileServiceClient(appUrl, appKey)
@@ -410,9 +426,11 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
 
             JsonObject obj = new JsonObject().Set("id", 12).Set("value", "new");
             IMobileServiceTable table = service.GetTable(collection);
-            await table.DeleteAsync(obj);
+            await table.DeleteAsync(obj, userDefinedParameters);
                 
             Assert.Contains(hijack.Request.Uri.ToString(), collection);
+            Assert.IsNull(hijack.Request.Content);
+            Assert.Contains(hijack.Request.Uri.Query, "state=WY");
 
             ThrowsAsync<ArgumentNullException>(async () => await table.DeleteAsync(null));
             ThrowsAsync<ArgumentException>(async () => await table.DeleteAsync(new JsonObject()));

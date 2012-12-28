@@ -91,6 +91,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         public bool IncludeTotalCount { get; set; }
 
         /// <summary>
+        /// The user-defined query string parameters to include with the query.
+        /// </summary>
+        public IDictionary<string, string> Parameters { get; set; }
+
+        /// <summary>
         /// Convert the query structure into the standard OData URI protocol
         /// for queries.
         /// </summary>

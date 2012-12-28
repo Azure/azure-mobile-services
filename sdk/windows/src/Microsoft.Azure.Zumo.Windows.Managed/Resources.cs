@@ -140,5 +140,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             get { return "'{0}' is not supported in a 'Where' Mobile Services query expression."; }
         }
+
+        /// <summary>
+        /// Get a format string for throwing an InvalidOperationException when we
+        /// find a SerializableType with two members with the same name.
+        /// </summary>
+        public static string SerializableType_DuplicateKey
+        {
+            get { return "Two or more members of type '{0}' are mapped to the same name '{1}'. Verify that your DataMember annotations are correct."; }
+        }
     }
 }

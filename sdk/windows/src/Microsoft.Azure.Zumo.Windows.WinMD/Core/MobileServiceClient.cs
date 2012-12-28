@@ -61,16 +61,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         private static readonly string applicationInstallationId = MobileServiceApplication.InstallationId;
 
         /// <summary>
-        /// A JWT token representing the current user's successful OAUTH
-        /// authorization.
-        /// </summary>
-        /// <remarks>
-        /// This is passed on every request (when it exists) as the X-ZUMO-AUTH
-        /// header.
-        /// </remarks>
-        private string currentUserAuthenticationToken = null;
-
-        /// <summary>
         /// Represents a filter used to process HTTP requests and responses
         /// made by the Mobile Service.  This can only be set by calling
         /// WithFilter to create a new MobileServiceClient with the filter
@@ -132,7 +122,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.ApplicationUri = service.ApplicationUri;
             this.ApplicationKey = service.ApplicationKey;
             this.CurrentUser = service.CurrentUser;
-            this.currentUserAuthenticationToken = service.currentUserAuthenticationToken;
             this.filter = service.filter;
         }
 
@@ -152,7 +141,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The current authenticated user provided after a successful call to
         /// MobileServiceClient.Login().
         /// </summary>
-        public MobileServiceUser CurrentUser { get; private set; }
+        public MobileServiceUser CurrentUser { get; set; }
 
         /// <summary>
         /// Gets a reference to a table and its data operations.
@@ -241,8 +230,8 @@ namespace Microsoft.WindowsAzure.MobileServices
             IJsonValue response = await this.RequestAsync("POST", LoginAsyncUriFragment, request);
             
             // Get the Mobile Services auth token and user data
-            this.currentUserAuthenticationToken = response.Get(LoginAsyncAuthenticationTokenKey).AsString();
             this.CurrentUser = new MobileServiceUser(response.Get("user").Get("userId").AsString());
+            this.CurrentUser.MobileServiceAuthenticationToken = response.Get(LoginAsyncAuthenticationTokenKey).AsString();
 
             return this.CurrentUser;
         }
@@ -325,8 +314,8 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
 
                 // Get the Mobile Services auth token and user data
-                this.currentUserAuthenticationToken = response.Get(LoginAsyncAuthenticationTokenKey).AsString();
                 this.CurrentUser = new MobileServiceUser(response.Get("user").Get("userId").AsString());
+                this.CurrentUser.MobileServiceAuthenticationToken = response.Get(LoginAsyncAuthenticationTokenKey).AsString();
             }
             finally
             {
@@ -343,7 +332,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         public void Logout()
         {
             this.CurrentUser = null;
-            this.currentUserAuthenticationToken = null;
         }
 
         /// <summary>
@@ -379,9 +367,9 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 request.Headers[RequestApplicationKeyHeader] = this.ApplicationKey;
             }
-            if (!string.IsNullOrEmpty(this.currentUserAuthenticationToken))
+            if (this.CurrentUser != null && !string.IsNullOrEmpty(this.CurrentUser.MobileServiceAuthenticationToken))
             {
-                request.Headers[RequestAuthenticationHeader] = this.currentUserAuthenticationToken;
+                request.Headers[RequestAuthenticationHeader] = this.CurrentUser.MobileServiceAuthenticationToken;
             }
 
             // Add any request as JSON
