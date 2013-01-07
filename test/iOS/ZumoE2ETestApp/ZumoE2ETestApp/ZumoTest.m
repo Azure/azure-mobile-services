@@ -34,7 +34,7 @@
     testStatus = TSRunning;
     ZumoTestExecution steps = [self execution];
     __weak ZumoTest *weakSelf = self;
-    steps(currentViewController, ^(BOOL testPassed) {
+    steps(self, currentViewController, ^(BOOL testPassed) {
         [weakSelf setTestStatus: (testPassed ? TSPassed : TSFailed)];
         [[weakSelf delegate] zumoTestFinished:[weakSelf testName] withResult:testPassed];
     });

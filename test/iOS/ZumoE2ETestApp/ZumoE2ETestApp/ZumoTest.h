@@ -9,8 +9,11 @@
 #import <Foundation/Foundation.h>
 #import "ZumoTestCallbacks.h"
 
+// Forward decoration
+@class ZumoTest;
+
 typedef void (^ZumoTestCompletion)(BOOL testPassed);
-typedef void (^ZumoTestExecution)(UIViewController *viewController, ZumoTestCompletion completion);
+typedef void (^ZumoTestExecution)(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion);
 
 typedef enum { TSNotRun, TSRunning, TSFailed, TSPassed } TestStatus;
 

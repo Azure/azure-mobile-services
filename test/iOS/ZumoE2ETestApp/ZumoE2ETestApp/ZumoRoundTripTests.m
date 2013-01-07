@@ -16,20 +16,18 @@
 typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTripTestColumnType;
 
 + (NSArray *)createTests {
-    ZumoTest *firstTest = [ZumoTest createTestWithName:@"Setup dynamic schema" andExecution:nil];
-    __weak ZumoTest *weakRef = firstTest;
-    [firstTest setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+    ZumoTest *firstTest = [ZumoTest createTestWithName:@"Setup dynamic schema" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client getTable:@"TodoItem"];
         NSDictionary *item = @{@"string1":@"test", @"date1": [ZumoTestGlobals createDateWithYear:2011 month:11 day:11], @"bool1": [NSNumber numberWithBool:NO], @"number": [NSNumber numberWithInt:-1], @"longnum":[NSNumber numberWithLong:0], @"intnum":[NSNumber numberWithInt:0], @"setindex":@"setindex"};
         [table insert:item completion:^(NSDictionary *inserted, NSError *err) {
             if (err) {
-                [weakRef addLog:@"Error inserting data to create schema"];
-                [weakRef setTestStatus:TSFailed];
+                [test addLog:@"Error inserting data to create schema"];
+                [test setTestStatus:TSFailed];
                 completion(NO);
             } else {
-                [weakRef addLog:@"Inserted item to create schema"];
-                [weakRef setTestStatus:TSPassed];
+                [test addLog:@"Inserted item to create schema"];
+                [test setTestStatus:TSPassed];
                 completion(YES);
             }
         }];
@@ -70,27 +68,25 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
     [result addObject:[self createRoundTripForType:RTTLong withValue:[NSNumber numberWithLong:-123456789012345L] andName:@"Round trip negative long"]];
     
     // Negative scenarios
-    ZumoTest *test = [ZumoTest createTestWithName:@"New column with null value" andExecution:nil];
-    __weak ZumoTest *weakTest = test;
-    [test setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+    ZumoTest *test = [ZumoTest createTestWithName:@"New column with null value" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client getTable:@"TodoItem"];
         [table insert:@{@"ColumnWhichDoesNotExist":[NSNull null]} completion:^(NSDictionary *item, NSError *err) {
             BOOL passed;
             if (!err) {
-                [weakTest addLog:[NSString stringWithFormat:@"Error, adding new column with null element should fail, but insert worked: %@", item]];
+                [test addLog:[NSString stringWithFormat:@"Error, adding new column with null element should fail, but insert worked: %@", item]];
                 passed = NO;
             } else {
                 if (err.code == MSErrorMessageErrorCode) {
-                    [weakTest addLog:@"Test passed, got correct error"];
+                    [test addLog:@"Test passed, got correct error"];
                     passed = YES;
                 } else {
-                    [weakTest addLog:[NSString stringWithFormat:@"Expected error code %d, got %d", MSErrorMessageErrorCode, err.code]];
+                    [test addLog:[NSString stringWithFormat:@"Expected error code %d, got %d", MSErrorMessageErrorCode, err.code]];
                     passed = NO;
                 }
             }
             
-            [weakTest setTestStatus:(passed ? TSPassed : TSFailed)];
+            [test setTestStatus:(passed ? TSPassed : TSFailed)];
             completion(passed);
         }];
     }];
@@ -100,10 +96,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
 }
 
 + (ZumoTest *)createRoundTripForType:(RoundTripTestColumnType)type withValue:(id)value andName:(NSString *)testName {
-    ZumoTest *result = [[ZumoTest alloc] init];
-    [result setTestName:testName];
-    __weak ZumoTest *weakRef = result;
-    [result setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+    ZumoTest *result = [ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client getTable:@"TodoItem"];
         NSMutableDictionary *item = [[NSMutableDictionary alloc] init];
@@ -123,15 +116,15 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
         
         [table insert:item completion:^(NSDictionary *inserted, NSError *err) {
             if (err) {
-                [weakRef addLog:[NSString stringWithFormat:@"Error inserting: %@", err]];
-                [weakRef setTestStatus:TSFailed];
+                [test addLog:[NSString stringWithFormat:@"Error inserting: %@", err]];
+                [test setTestStatus:TSFailed];
                 completion(NO);
             } else {
                 NSNumber *itemId = [inserted objectForKey:@"id"];
                 [table readWithId:itemId completion:^(NSDictionary *retrieved, NSError *err2) {
                     if (err2) {
-                        [weakRef addLog:[NSString stringWithFormat:@"Error retrieving: %@", err2]];
-                        [weakRef setTestStatus:TSFailed];
+                        [test addLog:[NSString stringWithFormat:@"Error retrieving: %@", err2]];
+                        [test setTestStatus:TSFailed];
                         completion(NO);
                     } else {
                         BOOL failed = NO;
@@ -141,7 +134,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
                                 // all are null, ok
                             } else {
                                 if (![rtString isEqualToString:value]) {
-                                    [weakRef addLog:[NSString stringWithFormat:@"Value is incorrect: %@ != %@", value, rtString]];
+                                    [test addLog:[NSString stringWithFormat:@"Value is incorrect: %@ != %@", value, rtString]];
                                     failed = YES;
                                 }
                             }
@@ -149,13 +142,13 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
                             NSNumber *rtBool = [retrieved objectForKey:@"bool1"];
                             if ([rtBool boolValue] != [((NSNumber *)value) boolValue]) {
                                 failed = YES;
-                                [weakRef addLog:[NSString stringWithFormat:@"Value is incorrect: %@ != %@", value, rtBool]];
+                                [test addLog:[NSString stringWithFormat:@"Value is incorrect: %@ != %@", value, rtBool]];
                             }
                         } else if (type == RTTDate) {
                             NSDate *rtDate = [retrieved objectForKey:@"date1"];
                             if (![ZumoTestGlobals compareDate:rtDate withDate:((NSDate *)value)]) {
                                 failed = YES;
-                                [weakRef addLog:[NSString stringWithFormat:@"Value is incorrect: %@ != %@", value, rtDate]];
+                                [test addLog:[NSString stringWithFormat:@"Value is incorrect: %@ != %@", value, rtDate]];
                             }
                         } else if (type == RTTDouble) {
                             NSNumber *rtNumber = [retrieved objectForKey:@"number"];
@@ -165,31 +158,31 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
                             double error = delta / dbl1;
                             if (error > 0.000000001) {
                                 failed = YES;
-                                [weakRef addLog:[NSString stringWithFormat:@"Value is incorrect: %@ != %@", value, rtNumber]];
+                                [test addLog:[NSString stringWithFormat:@"Value is incorrect: %@ != %@", value, rtNumber]];
                             }
                         } else if (type == RTTInt) {
                             NSNumber *rtNumber = [retrieved objectForKey:@"intnum"];
                             if (![rtNumber isEqualToNumber:value]) {
                                 failed = YES;
-                                [weakRef addLog:[NSString stringWithFormat:@"Value is incorrect: %@ != %@", value, rtNumber]];
+                                [test addLog:[NSString stringWithFormat:@"Value is incorrect: %@ != %@", value, rtNumber]];
                             }
                         } else if (type == RTTLong) {
                             NSNumber *rtNumber = [retrieved objectForKey:@"longnum"];
                             if (![rtNumber isEqualToNumber:value]) {
                                 failed = YES;
-                                [weakRef addLog:[NSString stringWithFormat:@"Value is incorrect: %@ != %@", value, rtNumber]];
+                                [test addLog:[NSString stringWithFormat:@"Value is incorrect: %@ != %@", value, rtNumber]];
                             }
                         } else {
                             failed = YES;
-                            [weakRef addLog:@"Test not implemented for this type"];
+                            [test addLog:@"Test not implemented for this type"];
                         }
                         
                         if (failed) {
-                            [weakRef setTestStatus:TSFailed];
+                            [test setTestStatus:TSFailed];
                             completion(NO);
                         } else {
-                            [weakRef addLog:@"Test passed"];
-                            [weakRef setTestStatus:TSPassed];
+                            [test addLog:@"Test passed"];
+                            [test setTestStatus:TSPassed];
                             completion(YES);
                         }
                     }
