@@ -64,39 +64,36 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
     }
     
     NSString *testName = [NSString stringWithFormat:@"CRUD, %@ auth, table with %@ permissions", providerName, tableTypeName];
-    ZumoTest *result = [ZumoTest createTestWithName:testName andExecution:nil];
-    __weak ZumoTest *weakRef = result;
     BOOL crudShouldWork = tableType == ZumoTableUnauthenticated || tableType == ZumoTableApplication || (tableType == ZumoTableAuthenticated && isAuthenticated);
-    
-    [result setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+    ZumoTest *result = [ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client getTable:tableName];
         [table insert:@{@"foo":@"bar"} completion:^(NSDictionary *inserted, NSError *insertError) {
-            if (![self validateCRUDResultForTest:weakRef andOperation:@"Insert" andError:insertError andExpected:crudShouldWork]) {
+            if (![self validateCRUDResultForTest:test andOperation:@"Insert" andError:insertError andExpected:crudShouldWork]) {
                 completion(NO);
                 return;
             }
             
             NSDictionary *toUpdate = crudShouldWork ? inserted : @{@"foo":@"bar",@"id":[NSNumber numberWithInt:1]};
             [table update:toUpdate completion:^(NSDictionary *updated, NSError *updateError) {
-                if (![self validateCRUDResultForTest:weakRef andOperation:@"Update" andError:updateError andExpected:crudShouldWork]) {
+                if (![self validateCRUDResultForTest:test andOperation:@"Update" andError:updateError andExpected:crudShouldWork]) {
                     completion(NO);
                     return;
                 }
                 
                 NSNumber *itemId = crudShouldWork ? [inserted objectForKey:@"id"] : [NSNumber numberWithInt:1];
                 [table readWithId:itemId completion:^(NSDictionary *read, NSError *readError) {
-                    if (![self validateCRUDResultForTest:weakRef andOperation:@"Read" andError:readError andExpected:crudShouldWork]) {
+                    if (![self validateCRUDResultForTest:test andOperation:@"Read" andError:readError andExpected:crudShouldWork]) {
                         completion(NO);
                         return;
                     }
                     
                     [table deleteWithId:itemId completion:^(NSNumber *deletedId, NSError *deleteError) {
-                        if (![self validateCRUDResultForTest:weakRef andOperation:@"Delete" andError:deleteError andExpected:crudShouldWork]) {
+                        if (![self validateCRUDResultForTest:test andOperation:@"Delete" andError:deleteError andExpected:crudShouldWork]) {
                             completion(NO);
                         } else {
-                            [weakRef setTestStatus:TSPassed];
-                            [weakRef addLog:@"Validation succeeded for all operations"];
+                            [test setTestStatus:TSPassed];
+                            [test addLog:@"Validation succeeded for all operations"];
                             completion(YES);
                         }
                     }];
@@ -129,19 +126,17 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
 }
 
 + (ZumoTest *)createLoginTestForProvider:(NSString *)provider usingSimplifiedMode:(BOOL)useSimplified {
-    ZumoTest *result = [ZumoTest createTestWithName:[NSString stringWithFormat:@"%@Login for %@", useSimplified ? @"Simplified " : @"", provider] andExecution:nil];
-    __weak ZumoTest *weakRef = result;
-    [result setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+    ZumoTest *result = [ZumoTest createTestWithName:[NSString stringWithFormat:@"%@Login for %@", useSimplified ? @"Simplified " : @"", provider] andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         BOOL shouldDismissControllerInBlock = !useSimplified;
         MSClientLoginBlock loginBlock = ^(MSUser *user, NSError *error) {
             if (error) {
-                [weakRef addLog:[NSString stringWithFormat:@"Error logging in: %@", error]];
-                [weakRef setTestStatus:TSFailed];
+                [test addLog:[NSString stringWithFormat:@"Error logging in: %@", error]];
+                [test setTestStatus:TSFailed];
                 completion(NO);
             } else {
-                [weakRef addLog:[NSString stringWithFormat:@"Logged in as %@", [user userId]]];
-                [weakRef setTestStatus:TSPassed];
+                [test addLog:[NSString stringWithFormat:@"Logged in as %@", [user userId]]];
+                [test setTestStatus:TSPassed];
                 completion(YES);
             }
             
@@ -162,9 +157,7 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
 }
 
 + (ZumoTest *)createClearAuthCookiesTest {
-    ZumoTest *result = [ZumoTest createTestWithName:@"Clear login cookies" andExecution:nil];
-    __weak ZumoTest *weakRef = result;
-    [result setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+    ZumoTest *result = [ZumoTest createTestWithName:@"Clear login cookies" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         NSHTTPCookieStorage *cookieStorage = [NSHTTPCookieStorage sharedHTTPCookieStorage];
         NSPredicate *isAuthCookie = [NSPredicate predicateWithFormat:@"domain ENDSWITH '.facebook.com' or domain ENDSWITH '.google.com' or domain ENDSWITH '.live.com' or domain ENDSWITH '.twitter.com'"];
         NSArray *cookiesToRemove = [[cookieStorage cookies] filteredArrayUsingPredicate:isAuthCookie];
@@ -173,7 +166,7 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
             [cookieStorage deleteCookie:cookie];
         }
 
-        [weakRef addLog:@"Removed authentication-related cookies from this app."];
+        [test addLog:@"Removed authentication-related cookies from this app."];
         completion(YES);
     }];
 
@@ -181,19 +174,17 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
 }
 
 + (ZumoTest *)createLogoutTest {
-    ZumoTest *result = [ZumoTest createTestWithName:@"Logout" andExecution:nil];
-    __weak ZumoTest *weakRef = result;
-    [result setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+    ZumoTest *result = [ZumoTest createTestWithName:@"Logout" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         [client logout];
-        [weakRef addLog:@"Logged out"];
+        [test addLog:@"Logged out"];
         MSUser *loggedInUser = [client currentUser];
         if (loggedInUser == nil) {
-            [weakRef setTestStatus:TSPassed];
+            [test setTestStatus:TSPassed];
             completion(YES);
         } else {
-            [weakRef addLog:[NSString stringWithFormat:@"Error, user for client is not null: %@", loggedInUser]];
-            [weakRef setTestStatus:TSFailed];
+            [test addLog:[NSString stringWithFormat:@"Error, user for client is not null: %@", loggedInUser]];
+            [test setTestStatus:TSFailed];
             completion(NO);
         }
     }];

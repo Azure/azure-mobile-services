@@ -92,33 +92,30 @@ static NSString *queryTestsTableName = @"iosMovies";
     [result addObject:[self createQueryTestWithName:@"Order by number - 30 shorter movies since 1970" andPredicate:[NSPredicate predicateWithFormat:@"Year >= 1970"] andTop:@30 andSkip:nil andOrderBy:[NSArray arrayWithObjects:[OrderByClause ascending:@"Duration"], [OrderByClause ascending:@"Title"], nil] andIncludeTotalCount:YES]];
     
     for (int i = -1; i <= 0; i++) {
-        ZumoTest *negativeLookupTest = [[ZumoTest alloc] init];
-        [negativeLookupTest setTestName:[NSString stringWithFormat:@"(Neg) MSTable readWithId:%d", i]];
-        __weak ZumoTest *weakNegTest = negativeLookupTest;
-        [negativeLookupTest setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+        ZumoTest *negativeLookupTest = [ZumoTest createTestWithName:[NSString stringWithFormat:@"(Neg) MSTable readWithId:%d", i] andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
             MSClient *client = [[ZumoTestGlobals sharedInstance] client];
             MSTable *table = [client getTable:@"TodoItem"];
             [table readWithId:[NSNumber numberWithInt:i] completion:^(NSDictionary *item, NSError *err) {
                 BOOL passed = NO;
                 if (err) {
                     if (err.code != MSErrorMessageErrorCode) {
-                        [weakNegTest addLog:[NSString stringWithFormat:@"Invalid error code: %d", err.code]];
+                        [test addLog:[NSString stringWithFormat:@"Invalid error code: %d", err.code]];
                     } else {
                         NSHTTPURLResponse *httpResponse = [[err userInfo] objectForKey:MSErrorResponseKey];
                         int statusCode = [httpResponse statusCode];
                         if (statusCode == 404) {
-                            [weakNegTest addLog:@"Got expected error"];
+                            [test addLog:@"Got expected error"];
                             passed = YES;
                         } else {
-                            [weakNegTest addLog:[NSString stringWithFormat:@"Invalid response status code: %d", statusCode]];
+                            [test addLog:[NSString stringWithFormat:@"Invalid response status code: %d", statusCode]];
                             passed = NO;
                         }
                     }
                 } else {
-                    [weakNegTest addLog:[NSString stringWithFormat:@"Expected error for lookup with id:%d, but got data back: %@", i, item]];
+                    [test addLog:[NSString stringWithFormat:@"Expected error for lookup with id:%d, but got data back: %@", i, item]];
                 }
                 
-                [weakNegTest setTestStatus:(passed ? TSPassed : TSFailed)];
+                [test setTestStatus:(passed ? TSPassed : TSFailed)];
                 completion(passed);
             }];
         }];
@@ -148,9 +145,7 @@ static NSString *queryTestsTableName = @"iosMovies";
                                       @"predicate from block",
                                       nil];
     for (NSString *unsupportedPredicate in unsupportedPredicates) {
-        ZumoTest *negTest = [ZumoTest createTestWithName:[NSString stringWithFormat:@"(Neg) Unsupported predicate: %@", unsupportedPredicate] andExecution:nil];
-        __weak ZumoTest *weakNegTest = negTest;
-        [negTest setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+        ZumoTest *negTest = [ZumoTest createTestWithName:[NSString stringWithFormat:@"(Neg) Unsupported predicate: %@", unsupportedPredicate] andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
             MSClient *client = [[ZumoTestGlobals sharedInstance] client];
             MSTable *table = [client getTable:queryTestsTableName];
             NSPredicate *predicate;
@@ -165,17 +160,17 @@ static NSString *queryTestsTableName = @"iosMovies";
             [table readWhere:predicate completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
                 BOOL passed = NO;
                 if (!error) {
-                    [weakNegTest addLog:[NSString stringWithFormat:@"Expected error, got result: %@", items]];
+                    [test addLog:[NSString stringWithFormat:@"Expected error, got result: %@", items]];
                 } else {
                     if ([error code] == MSPredicateNotSupported) {
-                        [weakNegTest addLog:[NSString stringWithFormat:@"Got expected error: %@", error]];
+                        [test addLog:[NSString stringWithFormat:@"Got expected error: %@", error]];
                         passed = YES;
                     } else {
-                        [weakNegTest addLog:[NSString stringWithFormat:@"Wrong error received: %@", error]];
+                        [test addLog:[NSString stringWithFormat:@"Wrong error received: %@", error]];
                     }
                 }
                 
-                [weakNegTest setTestStatus:(passed ? TSPassed : TSFailed)];
+                [test setTestStatus:(passed ? TSPassed : TSFailed)];
                 completion(passed);
             }];
         }];
@@ -186,22 +181,19 @@ static NSString *queryTestsTableName = @"iosMovies";
 }
 
 + (ZumoTest *)createPopulateTest {
-    ZumoTest *result = [[ZumoTest alloc] init];
-    [result setTestName:@"Populate table, if necessary, for query tests"];
-    __weak ZumoTest *weakRef = result;
-    [result setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+    ZumoTest *result = [ZumoTest createTestWithName:@"Populate table, if necessary, for query tests" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         NSArray *movies = [ZumoQueryTestData getMovies];
         NSDictionary *item = @{@"movies" : movies};
         MSTable *table = [client getTable:queryTestsTableName];
         [table insert:item completion:^(NSDictionary *item, NSError *error) {
             if (error) {
-                [weakRef addLog:[NSString stringWithFormat:@"Error populating table: %@", error]];
-                [weakRef setTestStatus:TSFailed];
+                [test addLog:[NSString stringWithFormat:@"Error populating table: %@", error]];
+                [test setTestStatus:TSFailed];
                 completion(NO);
             } else {
-                [weakRef addLog:@"Table is populated and ready for query tests"];
-                [weakRef setTestStatus:TSPassed];
+                [test addLog:@"Table is populated and ready for query tests"];
+                [test setTestStatus:TSPassed];
                 completion(YES);
             }
         }];
@@ -214,28 +206,25 @@ typedef void (^ActionQuery)(MSQuery *query);
 typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
 
 + (ZumoTest *)createNegativeTestWithName:(NSString *)name andQuerySettings:(ActionQuery)settings andQueryValidation:(QueryValidation)queryValidation {
-    ZumoTest *result = [[ZumoTest alloc] init];
-    [result setTestName:name];
-    __weak ZumoTest *weakRef = result;
-    [result setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+    ZumoTest *result = [ZumoTest createTestWithName:name andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client getTable:queryTestsTableName];
         MSQuery *query = [table query];
         settings(query);
         [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
             if (error) {
-                if (queryValidation(weakRef, error)) {
-                    [weakRef addLog:[NSString stringWithFormat:@"Got expected error: %@", error]];
-                    [weakRef setTestStatus:TSPassed];
+                if (queryValidation(test, error)) {
+                    [test addLog:[NSString stringWithFormat:@"Got expected error: %@", error]];
+                    [test setTestStatus:TSPassed];
                     completion(YES);
                 } else {
-                    [weakRef addLog:[NSString stringWithFormat:@"Error wasn't the expected one: %@", error]];
-                    [weakRef setTestStatus:TSFailed];
+                    [test addLog:[NSString stringWithFormat:@"Error wasn't the expected one: %@", error]];
+                    [test setTestStatus:TSFailed];
                     completion(NO);
                 }
             } else {
-                [weakRef addLog:@"Query should fail, but succeeded"];
-                [weakRef setTestStatus:TSFailed];
+                [test addLog:@"Query should fail, but succeeded"];
+                [test setTestStatus:TSFailed];
                 completion(NO);
             }
         }];
@@ -257,10 +246,7 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
 }
 
 + (ZumoTest *)createQueryTestWithName:(NSString *)name andPredicate:(NSPredicate *)predicate andTop:(NSNumber *)top andSkip:(NSNumber *)skip andOrderBy:(NSArray *)orderByClauses andIncludeTotalCount:(BOOL)includeTotalCount {
-    ZumoTest *result = [[ZumoTest alloc] init];
-    [result setTestName:name];
-    __weak ZumoTest *weakRef = result;
-    [result setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+    ZumoTest *result = [ZumoTest createTestWithName:name andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client getTable:queryTestsTableName];
         NSArray *allItems = [ZumoQueryTestData getMovies];
@@ -268,18 +254,18 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
             // use simple readWithPredicate
             [table readWhere:predicate completion:^(NSArray *queriedItems, NSInteger totalCount2, NSError *readWhereError) {
                 if (readWhereError) {
-                    [weakRef addLog:[NSString stringWithFormat:@"Error calling readWhere: %@", readWhereError]];
-                    [weakRef setTestStatus:TSFailed];
+                    [test addLog:[NSString stringWithFormat:@"Error calling readWhere: %@", readWhereError]];
+                    [test setTestStatus:TSFailed];
                     completion(NO);
                 } else {
                     NSArray *filteredArray = [allItems filteredArrayUsingPredicate:predicate];
-                    BOOL passed = [self compareExpectedArray:filteredArray withActual:queriedItems forTest:weakRef];
+                    BOOL passed = [self compareExpectedArray:filteredArray withActual:queriedItems forTest:test];
                     if (passed) {
-                        [weakRef addLog:@"Test passed"];
-                        [weakRef setTestStatus:TSPassed];
+                        [test addLog:@"Test passed"];
+                        [test setTestStatus:TSPassed];
                         completion(YES);
                     } else {
-                        [weakRef setTestStatus:TSFailed];
+                        [test setTestStatus:TSFailed];
                         completion(NO);
                     }
                 }
@@ -310,8 +296,8 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
                     
             [query readWithCompletion:^(NSArray *queriedItems, NSInteger totalCount, NSError *queryReadError) {
                 if (queryReadError) {
-                    [weakRef addLog:[NSString stringWithFormat:@"Error calling MSQuery readWithCompletion: %@", queryReadError]];
-                    [weakRef setTestStatus:TSFailed];
+                    [test addLog:[NSString stringWithFormat:@"Error calling MSQuery readWithCompletion: %@", queryReadError]];
+                    [test setTestStatus:TSFailed];
                     completion(NO);
                 } else {
                     NSArray *filteredArray;
@@ -325,7 +311,7 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
                     int expectedTotalItems = [filteredArray count];
                     
                     if (includeTotalCount && totalCount != expectedTotalItems) {
-                        [weakRef addLog:[NSString stringWithFormat:@"Error in 'totalCount'. Expected: %d, actual: %d", expectedTotalItems, totalCount]];
+                        [test addLog:[NSString stringWithFormat:@"Error in 'totalCount'. Expected: %d, actual: %d", expectedTotalItems, totalCount]];
                     } else {
                         if (orderByClauses) {
                             NSMutableArray *sortDescriptors = [[NSMutableArray alloc] init];
@@ -350,14 +336,14 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
                             filteredArray = [filteredArray subarrayWithRange:NSMakeRange(rangeStart, rangeLen)];
                         }
 
-                        passed = [self compareExpectedArray:filteredArray withActual:queriedItems forTest:weakRef];
+                        passed = [self compareExpectedArray:filteredArray withActual:queriedItems forTest:test];
                     }
                     
                     if (passed) {
-                        [weakRef addLog:@"Received expected result"];
-                        [weakRef setTestStatus:TSPassed];
+                        [test addLog:@"Received expected result"];
+                        [test setTestStatus:TSPassed];
                     } else {
-                        [weakRef setTestStatus:TSFailed];
+                        [test setTestStatus:TSFailed];
                     }
                     
                     completion(passed);

@@ -122,9 +122,7 @@
 }
 
 + (ZumoTest *)createUserAgentTest {
-    ZumoTest *result = [ZumoTest createTestWithName:@"User-Agent test" andExecution:nil];
-    __weak ZumoTest *weakRef = result;
-    [result setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+    ZumoTest *result = [ZumoTest createTestWithName:@"User-Agent test" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         UserAgentGrabberFilter *filter = [[UserAgentGrabberFilter alloc] init];
         client = [client clientwithFilter:filter];
@@ -133,20 +131,20 @@
         [table insert:item completion:^(NSDictionary *inserted, NSError *error) {
             BOOL passed = NO;
             if (error) {
-                [weakRef addLog:[NSString stringWithFormat:@"Error: %@", error]];
+                [test addLog:[NSString stringWithFormat:@"Error: %@", error]];
             } else {
                 NSNumber *itemId = inserted[@"id"];
                 [table deleteWithId:itemId completion:nil]; // clean-up after this test
                 NSString *userAgent = [filter userAgent];
                 if ([userAgent rangeOfString:@"objective-c"].location == NSNotFound) {
-                    [weakRef addLog:[NSString stringWithFormat:@"Error, user-agent does not contain 'objective-c': %@", userAgent]];
+                    [test addLog:[NSString stringWithFormat:@"Error, user-agent does not contain 'objective-c': %@", userAgent]];
                 } else {
                     passed = YES;
-                    [weakRef addLog:[NSString stringWithFormat:@"User-Agent: %@", userAgent]];
+                    [test addLog:[NSString stringWithFormat:@"User-Agent: %@", userAgent]];
                 }
             }
 
-            [weakRef setTestStatus:(passed ? TSPassed : TSFailed)];
+            [test setTestStatus:(passed ? TSPassed : TSFailed)];
             completion(passed);
         }];
     }];
@@ -155,13 +153,11 @@
 }
 
 + (ZumoTest *)createFilterWithMultipleRequestsTest {
-    ZumoTest *result = [ZumoTest createTestWithName:@"Filter which maps one request to many" andExecution:nil];
-    __weak ZumoTest *weakRef = result;
-    [result setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+    ZumoTest *result = [ZumoTest createTestWithName:@"Filter which maps one request to many" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         SendMultipleRequestsFilter *filter = [[SendMultipleRequestsFilter alloc] init];
         int numberOfRequests = rand() % 3 + 2; // between 2 and 4 requests sent
-        [weakRef addLog:[NSString stringWithFormat:@"Using a filter to send %d requests", numberOfRequests]];
+        [test addLog:[NSString stringWithFormat:@"Using a filter to send %d requests", numberOfRequests]];
         [filter setNumberOfRequests:numberOfRequests];
         client = [client clientwithFilter:filter];
         MSTable *table = [client getTable:@"iosTodoItem"];
@@ -169,14 +165,14 @@
         NSDictionary *item = @{@"name":uuid};
         [table insert:item completion:^(NSDictionary *inserted, NSError *error) {
             if (error) {
-                [weakRef addLog:[NSString stringWithFormat:@"Error inserting: %@", error]];
-                [weakRef setTestStatus:TSFailed];
+                [test addLog:[NSString stringWithFormat:@"Error inserting: %@", error]];
+                [test setTestStatus:TSFailed];
                 completion(NO);
             } else {
                 if ([filter testFailed]) {
                     for (NSString *log in [filter testLogs]) {
-                        [weakRef addLog:log];
-                        [weakRef setTestStatus:TSFailed];
+                        [test addLog:log];
+                        [test setTestStatus:TSFailed];
                         completion(NO);
                     }
                 } else {
@@ -186,23 +182,23 @@
                     [query setSelectFields:@[@"name"]];
                     [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
                         BOOL passed = NO;
-                        [weakRef addLog:@"Filter logs:"];
+                        [test addLog:@"Filter logs:"];
                         for (NSString *log in [filter testLogs]) {
-                            [weakRef addLog:log];
+                            [test addLog:log];
                         }
 
                         if (error || [filter testFailed]) {
-                            [weakRef addLog:[NSString stringWithFormat:@"Error reading: %@", error]];
+                            [test addLog:[NSString stringWithFormat:@"Error reading: %@", error]];
                         } else {
                             if ([items count] == numberOfRequests) {
-                                [weakRef addLog:@"Got correct number of items inserted"];
+                                [test addLog:@"Got correct number of items inserted"];
                                 passed = YES;
                             } else {
-                                [weakRef addLog:[NSString stringWithFormat:@"Error, expected %d items to be returned, but this is what was: %@", numberOfRequests, items]];
+                                [test addLog:[NSString stringWithFormat:@"Error, expected %d items to be returned, but this is what was: %@", numberOfRequests, items]];
                             }
                         }
                         
-                        [weakRef setTestStatus:(passed ? TSPassed : TSFailed)];
+                        [test setTestStatus:(passed ? TSPassed : TSFailed)];
                         completion(passed);
                     }];
                 }
