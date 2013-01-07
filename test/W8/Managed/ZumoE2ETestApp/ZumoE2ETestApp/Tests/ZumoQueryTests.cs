@@ -137,42 +137,6 @@ namespace ZumoE2ETestApp.Tests
 
             public bool IsAscending { get; private set; }
             public string FieldName { get; private set; }
-
-            public Expression<Func<Movie, TKey>> GetKeySelector<TKey>()
-            {
-                string fieldName = this.FieldName.ToLowerInvariant();
-                if (typeof(TKey) == typeof(string))
-                {
-                    if (fieldName == "title")
-                    {
-                        return m => (TKey)(object)m.Title;
-                    }
-                    else if (fieldName == "rating")
-                    {
-                        return m => (TKey)(object)m.Rating;
-                    }
-                }
-                else if (typeof(TKey) == typeof(int))
-                {
-                    if (fieldName == "year")
-                    {
-                        return m => (TKey)(object)m.Year;
-                    }
-                    else if (fieldName == "duration")
-                    {
-                        return m => (TKey)(object)m.Duration;
-                    }
-                }
-                else if (typeof(TKey) == typeof(DateTime))
-                {
-                    if (fieldName == "releasedate")
-                    {
-                        return m => (TKey)(object)m.ReleaseDate;
-                    }
-                }
-
-                throw new InvalidOperationException(string.Format("Cannot create a selector for field {0} with type {1}.", FieldName, typeof(TKey)));
-            }
         }
 
         private static ZumoTest CreateQueryTest(

@@ -367,7 +367,15 @@ namespace ZumoE2ETestApp.Tests
                     }
                     else
                     {
-                        return true;
+                        if (typeof(TExpectedException) == typeof(ExceptionTypeWhichWillNeverBeThrown))
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            test.AddLog("Error, test should have failed with {0}, but succeeded.", typeof(TExpectedException).FullName);
+                            return false;
+                        }
                     }
                 }
                 catch (TExpectedException ex)
