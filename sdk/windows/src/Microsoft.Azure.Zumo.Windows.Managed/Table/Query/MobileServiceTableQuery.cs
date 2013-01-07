@@ -37,7 +37,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// ignoring any take paging/limit clause specified by client or
         /// server.
         /// </param>
-        internal MobileServiceTableQuery(MobileServiceTable<T> table, bool includeTotalCount = false)
+        /// <param name="parameters">
+        /// The optional user-defined query string parameters to include with the query.
+        /// </param>
+        internal MobileServiceTableQuery(MobileServiceTable<T> table, bool includeTotalCount = false, IDictionary<string, string> parameters = null)
         {
             if (table == null)
             {
@@ -46,6 +49,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             this.Table = table;
             this.RequestTotalCount = includeTotalCount;
+            this.Parameters = parameters;
 
             // Create a default queryable to serve as the root
             this.Query = new T[0].AsQueryable();
@@ -62,6 +66,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// any take paging/limit clause specified by client or server.
         /// </summary>
         internal bool RequestTotalCount { get; private set; }
+
+        /// <summary>
+        /// The user-defined query string parameters to include with the query.
+        /// </summary>
+        internal IDictionary<string, string> Parameters { get; private set; }
 
         /// <summary>
         /// Gets the underlying IQueryable associated with this query.
@@ -83,18 +92,39 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// RequestTotalProperty instead (this is specifically so that our
         /// IncludeTotalCount method will preserve state on the old query).
         /// </param>
+        /// <param name="parameters">
+        /// The optional user-defined query string parameters to include with the query.
+        /// </param>
         /// <returns>The new query.</returns>
-        internal static MobileServiceTableQuery<T> Create(MobileServiceTableQuery<T> baseQuery, IQueryable<T> query, bool? includeTotalCount = null)
+        internal static MobileServiceTableQuery<T> Create(MobileServiceTableQuery<T> baseQuery, IQueryable<T> query, bool? includeTotalCount = null, IDictionary<string, string> parameters = null)
         {
             Debug.Assert(baseQuery != null, "baseQuery cannot be null!");
             Debug.Assert(query != null, "query cannot be null!");
+
+            // Merge parameters if the baseQuery already has a collection of parameters
+            if (baseQuery.Parameters != null)
+            {
+                if (parameters == null)
+                {
+                    parameters = baseQuery.Parameters;
+                }
+                else
+                {
+                    parameters = new Dictionary<string, string>(parameters);
+                    foreach (var parameter in baseQuery.Parameters)
+                    {
+                        parameters.Add(parameter);
+                    }
+                }
+            }
 
             // NOTE: Make sure any changes to this logic are reflected in the
             // Select method below which has its own version of this code to
             // work around type changes for its projection.
             return new MobileServiceTableQuery<T>(
                 baseQuery.Table,
-                includeTotalCount ?? baseQuery.RequestTotalCount)
+                includeTotalCount ?? baseQuery.RequestTotalCount,
+                parameters)
                 {
                     Query = query
                 };
@@ -112,6 +142,9 @@ namespace Microsoft.WindowsAzure.MobileServices
             
             // Forward along the request for the total count
             compiledQuery.IncludeTotalCount = this.RequestTotalCount;
+
+            // Forward along the user-defined query string parameters
+            compiledQuery.Parameters = this.Parameters;
 
             // Associate the current table with the compiled query
             if (string.IsNullOrEmpty(compiledQuery.TableName))
@@ -168,7 +201,8 @@ namespace Microsoft.WindowsAzure.MobileServices
                 this.Table.MobileServiceClient);
             return new MobileServiceTableQuery<U>(
                 table,
-                this.RequestTotalCount)
+                this.RequestTotalCount,
+                this.Parameters)
                 {
                     Query = Queryable.Select(this.Query, selector)
                 };
@@ -276,6 +310,18 @@ namespace Microsoft.WindowsAzure.MobileServices
         public MobileServiceTableQuery<T> Take(int count)
         {
             return Create(this, Queryable.Take(this.Query, count));
+        }
+
+        /// <summary>
+        /// Applies to the source query the specified string key-value 
+        /// pairs to be used as user-defined parameters with the request URI 
+        /// query stirng.
+        /// </summary>
+        /// <param name="parameters">The parameters to apply.</param>
+        /// <returns>The composed query.</returns>
+        public MobileServiceTableQuery<T> WithParameters(IDictionary<string, string> parameters)
+        {
+            return Create(this, this.Query, this.RequestTotalCount, parameters);
         }
 
         /// <summary>

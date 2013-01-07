@@ -38,10 +38,26 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will return with results when the query finishes.
         /// </returns>
-        [SuppressMessage("Microsoft.Naming", "CA1719:ParameterNamesShouldNotMatchMemberNames", MessageId = "1#", Justification = "Query is both a verb and noun.")]
         public Task<IJsonValue> ReadAsync(string query)
         {
-            return this.SendReadAsync(query);
+            return this.SendReadAsync(query, null);
+        }
+
+        /// <summary>
+        /// Excute a query against a table.
+        /// </summary>
+        /// <param name="query">
+        /// An object defining the query to execute.
+        /// </param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in the request URI query string.
+        /// </param>
+        /// <returns>
+        /// A task that will return with results when the query finishes.
+        /// </returns>
+        public Task<IJsonValue> ReadAsync(string query, IDictionary<string, string> parameters)
+        {
+            return this.SendReadAsync(query, parameters);
         }
 
         /// <summary>
@@ -55,7 +71,24 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public Task<IJsonValue> InsertAsync(JsonObject instance)
         {
-            return this.SendInsertAsync(instance);
+            return this.SendInsertAsync(instance, null);
+        }
+
+        /// <summary>
+        /// Insert a new object into a table.
+        /// </summary>
+        /// <param name="instance">
+        /// The instance to insert into the table.
+        /// </param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in the request URI query string.
+        /// </param>
+        /// <returns>
+        /// A task that will complete when the insert finishes.
+        /// </returns>
+        public Task<IJsonValue> InsertAsync(JsonObject instance, IDictionary<string, string> parameters)
+        {
+            return this.SendInsertAsync(instance, parameters);
         }
 
         /// <summary>
@@ -69,7 +102,24 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public Task<IJsonValue> UpdateAsync(JsonObject instance)
         {
-            return this.SendUpdateAsync(instance);
+            return this.SendUpdateAsync(instance, null);
+        }
+
+        /// <summary>
+        /// Update an object in a given table.
+        /// </summary>
+        /// <param name="instance">
+        /// The instance to update in the table.
+        /// </param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in the request URI query string.
+        /// </param>
+        /// <returns>
+        /// A task that will complete when the update finishes.
+        /// </returns>
+        public Task<IJsonValue> UpdateAsync(JsonObject instance, IDictionary<string, string> parameters)
+        {
+            return this.SendUpdateAsync(instance, parameters);
         }
 
         /// <summary>
@@ -83,7 +133,55 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public Task DeleteAsync(JsonObject instance)
         {
-            return this.SendDeleteAsync(instance);
+            return this.SendDeleteAsync(instance, null);
+        }
+
+        /// <summary>
+        /// Delete an object from a given table.
+        /// </summary>
+        /// <param name="instance">
+        /// The instance to delete from the table.
+        /// </param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in the request URI query string.
+        /// </param>
+        /// <returns>
+        /// A task that will complete when the delete finishes.
+        /// </returns>
+        public Task DeleteAsync(JsonObject instance, IDictionary<string, string> parameters)
+        {
+            return this.SendDeleteAsync(instance, parameters);
+        }
+
+        /// <summary>
+        /// Execute a lookup against a table.
+        /// </summary>
+        /// <param name="id">
+        /// The id of the object to lookup.
+        /// </param>
+        /// <returns>
+        /// A task that will return with a result when the lookup finishes.
+        /// </returns>
+        public Task<IJsonValue> LookupAsync(object id)
+        {
+            return this.SendLookupAsync(id, null);
+        }
+
+        /// <summary>
+        /// Execute a lookup against a table.
+        /// </summary>
+        /// <param name="id">
+        /// The id of the object to lookup.
+        /// </param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in the request URI query string.
+        /// </param>
+        /// <returns>
+        /// A task that will return with a result when the lookup finishes.
+        /// </returns>
+        public Task<IJsonValue> LookupAsync(object id, IDictionary<string, string> parameters)
+        {
+            return this.SendLookupAsync(id, parameters);
         }
     }
 }

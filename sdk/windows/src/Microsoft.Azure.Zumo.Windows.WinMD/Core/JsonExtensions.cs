@@ -341,10 +341,10 @@ namespace Microsoft.WindowsAzure.MobileServices
                             name,
                             value,
                             string.Format(
+                                CultureInfo.InvariantCulture,
                                 Resources.JsonExtensions_TrySetValue_CannotRoundtripNumericValue,
                                 value,
-                                name,
-                                CultureInfo.InvariantCulture));
+                                name));
                     }
 
                     obj.Set(name, Convert.ToDouble(value, CultureInfo.InvariantCulture));
@@ -385,6 +385,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// True if the value can roundtrip, false otherwise.
         /// </returns>
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Only used by the Managed project")]
         private static bool NumericCanRoundtrip(object value, Type desiredType)
         {
             // Make sure that the value can roundtrip

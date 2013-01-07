@@ -60,11 +60,12 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             MobileServiceClient client = GetClient();
             IMobileServiceTable<BlogPost> postTable = client.GetTable<BlogPost>();
             IMobileServiceTable<BlogComment> commentTable = client.GetTable<BlogComment>();
+            var userDefinedParameters = new Dictionary<string, string>() { { "state", "NY"}, {"tags" , "#pizza #beer" } };
 
             // Add a few posts and a comment
             Log("Adding posts");
             BlogPost post = new BlogPost { Title = "Windows 8" };
-            await postTable.InsertAsync(post);
+            await postTable.InsertAsync(post, userDefinedParameters);
             BlogPost highlight = new BlogPost { Title = "ZUMO" };
             await postTable.InsertAsync(highlight);
             await commentTable.InsertAsync(new BlogComment {
@@ -75,7 +76,11 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
                 BlogPostId = highlight.Id,
                 UserName = "Anonymous",
                 Text = "Whooooo" });
-            Assert.AreEqual(2, (await postTable.Where(p => p.Id >= post.Id).ToListAsync()).Count);
+            Assert.AreEqual(2, (await postTable.Where(p => p.Id >= post.Id)
+                                               .WithParameters(userDefinedParameters)
+                                               .ToListAsync()).Count);
+
+
 
             // Navigate to the first post and add a comment
             Log("Adding comment to first post");

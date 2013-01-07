@@ -47,7 +47,17 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="id">The ID of the element.</param>
         /// <returns>The desired element.</returns>
-        Task<T> LookupAsync(object id);
+        new Task<T> LookupAsync(object id);
+
+        /// <summary>
+        /// Lookup an element from a table by its ID.
+        /// </summary>
+        /// <param name="id">The ID of the element.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in the request URI query string.
+        /// </param>
+        /// <returns>The desired element.</returns>
+        new Task<T> LookupAsync(object id, IDictionary<string, string> parameters);
 
         /// <summary>
         /// Refresh the current instance with the latest values from the
@@ -60,6 +70,19 @@ namespace Microsoft.WindowsAzure.MobileServices
         Task RefreshAsync(T instance);
 
         /// <summary>
+        /// Refresh the current instance with the latest values from the
+        /// table.
+        /// </summary>
+        /// <param name="instance">The instance to refresh.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in the request URI query string.
+        /// </param>
+        /// <returns>
+        /// A task that will complete when the refresh has finished.
+        /// </returns>
+        Task RefreshAsync(T instance, IDictionary<string, string> parameters);
+
+        /// <summary>
         /// Insert a new instance into the table.
         /// </summary>
         /// <param name="instance">The instance to insert.</param>
@@ -67,6 +90,18 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// A task that will complete when the insertion has finished.
         /// </returns>
         Task InsertAsync(T instance);
+
+        /// <summary>
+        /// Insert a new instance into the table.
+        /// </summary>
+        /// <param name="instance">The instance to insert.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in the request URI query string.
+        /// </param>
+        /// <returns>
+        /// A task that will complete when the insertion has finished.
+        /// </returns>
+        Task InsertAsync(T instance, IDictionary<string, string> parameters);
 
         /// <summary>
         /// Updates an instance in the table.
@@ -78,6 +113,18 @@ namespace Microsoft.WindowsAzure.MobileServices
         Task UpdateAsync(T instance);
 
         /// <summary>
+        /// Updates an instance in the table.
+        /// </summary>
+        /// <param name="instance">The instance to update.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in the request URI query string.
+        /// </param>
+        /// <returns>
+        /// A task that will complete when the update has finished.
+        /// </returns>
+        Task UpdateAsync(T instance, IDictionary<string, string> parameters);
+
+        /// <summary>
         /// Delete an instance from the table.
         /// </summary>
         /// <param name="instance">The instance to delete.</param>
@@ -85,6 +132,18 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// A task that will complete when the delete has finished.
         /// </returns>
         Task DeleteAsync(T instance);
+
+        /// <summary>
+        /// Delete an instance from the table.
+        /// </summary>
+        /// <param name="instance">The instance to delete.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in the request URI query string.
+        /// </param>
+        /// <returns>
+        /// A task that will complete when the delete has finished.
+        /// </returns>
+        Task DeleteAsync(T instance, IDictionary<string, string> parameters);
 
         /// <summary>
         /// Creates a query by applying the specified filter predicate.

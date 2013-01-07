@@ -4,6 +4,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -35,6 +36,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="date">The date to convert.</param>
         /// <returns></returns>
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Only used by the Managed project")]
         public static string ToRoundtripDateString(this DateTime date)
         {
             return date.ToUniversalTime().ToString(

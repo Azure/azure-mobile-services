@@ -84,18 +84,18 @@ namespace Microsoft.WindowsAzure.MobileServices
             foreach (PropertyInfo property in GetSerializableMembers(hasContract, type.GetProperties))
             {
                 SerializableMember member = new SerializableMember(property);
-                this.Members.Add(member.Name, member);
+                this.AddMemberWithDuplicateCheck(member);
             }
             foreach (FieldInfo field in GetSerializableMembers(hasContract, type.GetFields))
             {
                 SerializableMember member = new SerializableMember(field);
-                this.Members.Add(member.Name, member);
+                this.AddMemberWithDuplicateCheck(member);
             }
 
             // Ensure we have a valid ID field (and check a couple of variants
             // to enable POCOs).
             SerializableMember id = null;
-            if (!this.Members.TryGetValue(MobileServiceTable.IdPropertyName, out id) &&
+            if (!this.Members.TryGetValue(MobileServiceTableUrlBuilder.IdPropertyName, out id) &&
                 !this.Members.TryGetValue(IdPropertyName, out id) &&
                 !this.Members.TryGetValue(IdPropertyName.ToUpperInvariant(), out id) &&
                 !this.Members.TryGetValue(IdPropertyName.ToLowerInvariant(), out id))
@@ -104,17 +104,17 @@ namespace Microsoft.WindowsAzure.MobileServices
                     string.Format(
                         CultureInfo.InvariantCulture,
                         Resources.SerializableType_Ctor_MemberNotFound,
-                        MobileServiceTable.IdPropertyName,
+                        MobileServiceTableUrlBuilder.IdPropertyName,
                         type.FullName));
             }
 
             // Coerce the name of the ID property to the required format if
             // we've got a POCO with a slightly different name.
-            if (id.Name != MobileServiceTable.IdPropertyName)
+            if (id.Name != MobileServiceTableUrlBuilder.IdPropertyName)
             {
                 this.Members.Remove(id.Name);
-                id.Name = MobileServiceTable.IdPropertyName;
-                this.Members.Add(id.Name, id);
+                id.Name = MobileServiceTableUrlBuilder.IdPropertyName;
+                this.AddMemberWithDuplicateCheck(id);
             }
             this.IdMember = id;
         }
@@ -286,6 +286,26 @@ namespace Microsoft.WindowsAzure.MobileServices
             return value == null ||
                 object.Equals(value, 0) ||
                 object.Equals(value, 0L);
+        }
+
+        /// <summary>
+        /// Adds the SerializableMember to the Members dictionary or throws
+        /// if there is already a member with the same name.
+        /// </summary>
+        /// <param name="member">The member to add to the Members dictionary.</param>
+        private void AddMemberWithDuplicateCheck(SerializableMember member)
+        {
+            if (this.Members.ContainsKey(member.Name))
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        Resources.SerializableType_DuplicateKey,
+                        this.Type.Name,
+                        member.Name));
+            }
+
+            this.Members.Add(member.Name, member);
         }
     }
 }

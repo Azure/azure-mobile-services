@@ -3,6 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -33,6 +34,15 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
+        /// Gets a format string for throwing ArgumentExceptions when a user-defined
+        /// query string parameter is invalid because it begins with a '$'.
+        /// </summary>
+        public static string InvalidParameterBeginsWithDollarSign
+        {
+            get { return "{0} is an invalid user-defined query string parameter. User-defined query string parameters must not begin with a \'$\'."; }
+        }
+
+        /// <summary>
         /// Gets a format string for throwing ArgumentExceptions when an object
         /// is passed for insertion and has its ID already set.
         /// </summary>
@@ -55,6 +65,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// asked to serialize a long/ulong requiring more precision than a
         /// double.
         /// </summary>
+        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "Only used by the Managed project")]
         public static string JsonExtensions_TrySetValue_CannotRoundtripNumericValue
         {
             get { return "The value {0} for member {1} is outside the valid range for numeric columns."; }
