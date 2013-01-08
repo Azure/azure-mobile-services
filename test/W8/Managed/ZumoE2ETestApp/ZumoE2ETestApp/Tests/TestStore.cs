@@ -15,6 +15,7 @@ namespace ZumoE2ETestApp.Tests
             {
                 ZumoRoundTripTests.CreateTests(),
                 ZumoQueryTests.CreateTests(),
+                ZumoCUDTests.CreateTests(),
             };
 
             return result;

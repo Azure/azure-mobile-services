@@ -155,6 +155,13 @@ namespace ZumoE2ETestApp.Tests
                 "Untyped complex (array): array with null elements",
                 JsonObject.Parse(@"{""complexType1"":[{""Name"":""Scooby"",""Age"":10}, null, {""Name"":""Shaggy"",""Age"":19}]}")));
 
+            result.AddTest(CreateSimpleUntypedRoundTripTest<ArgumentException>("(Neg) Insert item with non-default 'id' property",
+                JsonObject.Parse("{\"id\":1,\"value\":2}")));
+            result.AddTest(CreateSimpleUntypedRoundTripTest<MobileServiceInvalidOperationException>("(Neg) Insert item with non-default 'ID' property",
+                JsonObject.Parse("{\"ID\":1,\"value\":2}")));
+            result.AddTest(CreateSimpleUntypedRoundTripTest<MobileServiceInvalidOperationException>("(Neg) Insert item with non-default 'Id' property",
+                JsonObject.Parse("{\"Id\":1,\"value\":2}")));
+
             return result;
         }
 
@@ -236,48 +243,71 @@ namespace ZumoE2ETestApp.Tests
                 }
             }
 
-            return CreateSimpleUntypedRoundTripTest(testName, item);
+            return CreateSimpleUntypedRoundTripTest<ExceptionTypeWhichWillNeverBeThrown>(testName, item);
         }
 
         private static ZumoTest CreateSimpleUntypedRoundTripTest(string testName, JsonObject item)
+        {
+            return CreateSimpleUntypedRoundTripTest<ExceptionTypeWhichWillNeverBeThrown>(testName, item);
+        }
+
+        private static ZumoTest CreateSimpleUntypedRoundTripTest<TExpectedException>(string testName, JsonObject item)
+            where TExpectedException : Exception
         {
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable(ZumoTestGlobals.RoundTripTableName);
-                string originalItem = item == null ? "null" : item.Stringify();
 
-                await table.InsertAsync(item);
-                int id = (int)item["id"].GetNumber();
-                test.AddLog("Inserted item, id = {0}", id);
-                if (id <= 0)
+                try
                 {
-                    test.AddLog("Error, insert didn't succeed (id == 0)");
-                    return false;
-                }
+                    string originalItem = item == null ? "null" : item.Stringify();
 
-                IJsonValue roundTripped = await table.LookupAsync(id);
-                if (roundTripped.ValueType != JsonValueType.Object)
-                {
-                    test.AddLog("Result of Lookup is not an object: {0}", roundTripped);
-                    return false;
-                }
-
-                test.AddLog("Retrieved the item from the service");
-
-                List<string> errors = new List<string>();
-                if (!Util.CompareJson(item, roundTripped, errors))
-                {
-                    foreach (var error in errors)
+                    await table.InsertAsync(item);
+                    int id = (int)item["id"].GetNumber();
+                    test.AddLog("Inserted item, id = {0}", id);
+                    if (id <= 0)
                     {
-                        test.AddLog(error);
+                        test.AddLog("Error, insert didn't succeed (id == 0)");
+                        return false;
                     }
 
-                    test.AddLog("Round-tripped item is different! Expected: {0}; actual: {1}", originalItem, roundTripped);
-                    return false;
+                    IJsonValue roundTripped = await table.LookupAsync(id);
+                    if (roundTripped.ValueType != JsonValueType.Object)
+                    {
+                        test.AddLog("Result of Lookup is not an object: {0}", roundTripped);
+                        return false;
+                    }
+
+                    test.AddLog("Retrieved the item from the service");
+
+                    List<string> errors = new List<string>();
+                    if (!Util.CompareJson(item, roundTripped, errors))
+                    {
+                        foreach (var error in errors)
+                        {
+                            test.AddLog(error);
+                        }
+
+                        test.AddLog("Round-tripped item is different! Expected: {0}; actual: {1}", originalItem, roundTripped);
+                        return false;
+                    }
+                    else
+                    {
+                        if (typeof(TExpectedException) == typeof(ExceptionTypeWhichWillNeverBeThrown))
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            test.AddLog("Error, test should have failed with {0}, but succeeded.", typeof(TExpectedException).FullName);
+                            return false;
+                        }
+                    }
                 }
-                else
+                catch (TExpectedException ex)
                 {
+                    test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                     return true;
                 }
             });

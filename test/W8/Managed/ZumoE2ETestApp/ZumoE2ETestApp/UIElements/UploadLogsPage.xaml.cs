@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -23,14 +26,20 @@ namespace ZumoE2ETestApp.UIElements
     {
         public event EventHandler CloseRequested;
 
-        public UploadLogsPage(string testGroupName, string logs)
+        private string uploadUrl;
+        public string logs;
+
+        public UploadLogsPage(string testGroupName, string logs, string uploadUrl)
         {
             this.InitializeComponent();
             this.lblTitle.Text = "Logs for " + testGroupName;
-            this.txtArea.Text = "Logs currently not being uploaded yet, only displayed.\n*******************\n" + logs;
             var bounds = Window.Current.Bounds;
             this.grdRootPanel.Width = bounds.Width;
             this.grdRootPanel.Height = bounds.Height;
+
+            this.uploadUrl = uploadUrl;
+            this.logs = logs;
+            this.txtArea.Text = logs;
         }
 
         /// <summary>
@@ -38,8 +47,25 @@ namespace ZumoE2ETestApp.UIElements
         /// </summary>
         /// <param name="e">Event data that describes how this page was reached.  The Parameter
         /// property is typically used to configure the page.</param>
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
+            if (!string.IsNullOrEmpty(this.uploadUrl))
+            {
+                using (var client = new HttpClient())
+                {
+                    using (var request = new HttpRequestMessage(HttpMethod.Post, this.uploadUrl))
+                    {
+                        request.Content = new StringContent(this.logs, Encoding.UTF8, "text/plain");
+                        using (var response = await client.SendAsync(request))
+                        {
+                            var body = await response.Content.ReadAsStringAsync();
+                            var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
+                            var dialog = new MessageDialog(body, title);
+                            await dialog.ShowAsync();
+                        }
+                    }
+                }
+            }
         }
 
         private void btnClose_Click_1(object sender, RoutedEventArgs e)

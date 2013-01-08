@@ -49,6 +49,20 @@ namespace ZumoE2ETestApp.Tests.Types
         [DataMemberJsonConverter(ConverterType = typeof(CustomMobileServiceTableSerializationConverter<ComplexType2>))]
         public ComplexType2 ComplexType2 { get; set; }
 
+        public RoundTripTableItem() { }
+        public RoundTripTableItem(Random rndGen)
+        {
+            this.String1 = Util.CreateSimpleRandomString(rndGen, 5);
+            this.Date1 = new DateTime(rndGen.Next(1980, 2000), rndGen.Next(1, 12), rndGen.Next(1, 25), rndGen.Next(0, 24), rndGen.Next(0, 60), rndGen.Next(0, 60), DateTimeKind.Utc);
+            this.Bool1 = rndGen.Next(2) == 0;
+            this.Double1 = rndGen.Next(10000) * rndGen.NextDouble();
+            this.EnumType = (Types.EnumType)rndGen.Next(3);
+            this.Int1 = rndGen.Next();
+            this.Long1 = rndGen.Next();
+            this.ComplexType1 = new ComplexType[] { new ComplexType(rndGen) };
+            this.ComplexType2 = new ComplexType2(rndGen);
+        }
+
         public RoundTripTableItem Clone()
         {
             RoundTripTableItem result = new RoundTripTableItem
