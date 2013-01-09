@@ -84,22 +84,31 @@ namespace ZumoE2ETestApp
             }
         }
 
-        private void btnLoadAppInfo_Click_1(object sender, RoutedEventArgs e)
+        private async void btnLoadAppInfo_Click_1(object sender, RoutedEventArgs e)
         {
-            Popup popup = new Popup();
-            SaveAppsPage page = new SaveAppsPage();
-            page.CloseRequested += (snd, ea) =>
+            SavedAppInfo savedAppInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
+            if (savedAppInfo.MobileServices.Count == 0)
             {
-                if (page.ApplicationUrl != null && page.ApplicationKey != null)
+                await Alert("Error", "There are no saved applications.");
+            }
+            else
+            {
+                Popup popup = new Popup();
+                SaveAppsPage page = new SaveAppsPage(savedAppInfo.MobileServices);
+                page.CloseRequested += (snd, ea) =>
                 {
-                    this.txtAppUrl.Text = page.ApplicationUrl;
-                    this.txtAppKey.Text = page.ApplicationKey;
-                    popup.IsOpen = false;
-                }
-            };
+                    if (page.ApplicationUrl != null && page.ApplicationKey != null)
+                    {
+                        this.txtAppUrl.Text = page.ApplicationUrl;
+                        this.txtAppKey.Text = page.ApplicationKey;
+                    }
 
-            popup.Child = page;
-            popup.IsOpen = true;
+                    popup.IsOpen = false;
+                };
+
+                popup.Child = page;
+                popup.IsOpen = true;
+            }
         }
 
         private void lstTestGroups_SelectionChanged_1(object sender, SelectionChangedEventArgs e)

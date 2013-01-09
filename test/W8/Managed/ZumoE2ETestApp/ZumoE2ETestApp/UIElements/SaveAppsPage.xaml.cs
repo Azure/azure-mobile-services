@@ -27,9 +27,13 @@ namespace ZumoE2ETestApp.UIElements
 
         public event EventHandler CloseRequested;
 
-        public SaveAppsPage()
+        public SaveAppsPage(List<MobileServiceInfo> savedServices)
         {
             this.InitializeComponent();
+            var bounds = Window.Current.Bounds;
+            this.grdRootPanel.Width = bounds.Width;
+            this.grdRootPanel.Height = bounds.Height;
+            this.lstApps.ItemsSource = savedServices;
         }
 
         /// <summary>
@@ -39,8 +43,6 @@ namespace ZumoE2ETestApp.UIElements
         /// property is typically used to configure the page.</param>
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
-            var savedAppsInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
-            this.lstApps.ItemsSource = savedAppsInfo.MobileServices;
         }
 
         private async void btnSelect_Click_1(object sender, RoutedEventArgs e)
@@ -74,7 +76,7 @@ namespace ZumoE2ETestApp.UIElements
 
         private void lstApps_DoubleTapped_1(object sender, DoubleTappedRoutedEventArgs e)
         {
-
+            btnSelect_Click_1(sender, e);
         }
     }
 }

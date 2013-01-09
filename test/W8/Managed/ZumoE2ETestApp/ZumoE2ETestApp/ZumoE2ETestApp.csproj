@@ -125,6 +125,7 @@
     <Compile Include="Tests\Types\Movie.cs" />
     <Compile Include="Tests\Types\RoundTripTableItem.cs" />
     <Compile Include="Tests\ZumoCUDTests.cs" />
+    <Compile Include="Tests\ZumoLoginTests.cs" />
     <Compile Include="Tests\ZumoQueryTestData.cs" />
     <Compile Include="Tests\ZumoQueryTests.cs" />
     <Compile Include="Tests\ZumoRoundTripTests.cs" />
