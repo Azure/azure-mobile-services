@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -32,10 +33,6 @@ namespace ZumoE2ETestApp
         {
             this.InitializeComponent();
             this.allTests = TestStore.CreateTests();
-            foreach (var testGroup in allTests)
-            {
-                testGroup.TestFinished += testGroup_TestFinished;
-            }
         }
 
         /// <summary>
@@ -189,14 +186,20 @@ namespace ZumoE2ETestApp
             }
         }
 
-        void testGroup_TestFinished(object sender, ZumoTestEventArgs e)
-        {
-            // Refresh list view
-        }
-
         private void btnResetTests_Click_1(object sender, RoutedEventArgs e)
         {
-            Alert("Error", "Not implemented yet");
+            int selectedIndex = this.lstTestGroups.SelectedIndex;
+            if (selectedIndex >= 0)
+            {
+                foreach (var test in this.allTests[selectedIndex].AllTests)
+                {
+                    test.Reset();
+                }
+            }
+            else
+            {
+                Alert("Error", "Please select a group to reset the tests from.");
+            }
         }
 
         private async void btnSendLogs_Click_1(object sender, RoutedEventArgs e)
@@ -240,7 +243,36 @@ namespace ZumoE2ETestApp
 
         private Task Alert(string title, string text)
         {
-            return new Windows.UI.Popups.MessageDialog(text, title).ShowAsync().AsTask();
+            return new MessageDialog(text, title).ShowAsync().AsTask();
+        }
+
+        private void lstTests_DoubleTapped_1(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            int selectedGroup = this.lstTestGroups.SelectedIndex;
+            if (selectedGroup >= 0)
+            {
+                ZumoTestGroup testGroup = allTests[selectedGroup];
+                int selectedTest = this.lstTests.SelectedIndex;
+                List<ZumoTest> tests = testGroup.AllTests.ToList();
+                if (selectedTest >= 0 && selectedTest < tests.Count)
+                {
+                    ZumoTest test = tests[selectedTest];
+                    Popup popup = new Popup();
+                    List<string> lines = new List<string>();
+                    lines.Add(string.Format("Logs for test {0} (status = {1})", test.Name, test.Status));
+                    lines.AddRange(test.GetLogs());
+                    lines.Add("-----------------------");
+
+                    UploadLogsPage uploadLogsPage = new UploadLogsPage(testGroup.Name, string.Join("\n", lines), null);
+                    popup.Child = uploadLogsPage;
+                    uploadLogsPage.CloseRequested += (snd, ea) =>
+                    {
+                        popup.IsOpen = false;
+                    };
+
+                    popup.IsOpen = true;
+                }
+            }
         }
     }
 }

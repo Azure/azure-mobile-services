@@ -15,7 +15,7 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="ZumoE2ETestApp.App">
-      <VisualElements DisplayName="ZumoE2ETestApp" Logo="Assets\Logo.png" SmallLogo="Assets\SmallLogo.png" Description="ZumoE2ETestApp" ForegroundText="light" BackgroundColor="#464646">
+      <VisualElements DisplayName="ZumoE2ETestApp" Logo="Assets\Logo.png" SmallLogo="Assets\SmallLogo.png" Description="ZumoE2ETestApp" ForegroundText="light" BackgroundColor="#464646" ToastCapable="true">
         <DefaultTile ShowName="allLogos" />
         <SplashScreen Image="Assets\SplashScreen.png" />
       </VisualElements>

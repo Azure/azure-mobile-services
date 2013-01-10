@@ -6,7 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Data.Json;
+using Windows.UI.Xaml.Controls.Primitives;
 using ZumoE2ETestApp.Framework;
+using ZumoE2ETestApp.UIElements;
 
 namespace ZumoE2ETestApp.Tests
 {
@@ -20,6 +22,8 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateCRUDTest("w8Authenticated", null, TablePermission.User, false));
             result.AddTest(CreateCRUDTest("w8Admin", null, TablePermission.Admin, false));
 
+            result.AddTest(CreateTestWithSingleAlert("In the next few tests you will be prompted for username / password four times."));
+
             foreach (MobileServiceAuthenticationProvider provider in Enum.GetValues(typeof(MobileServiceAuthenticationProvider)))
             {
                 result.AddTest(CreateLogoutTest());
@@ -28,6 +32,26 @@ namespace ZumoE2ETestApp.Tests
                 result.AddTest(CreateCRUDTest("w8Authenticated", provider.ToString(), TablePermission.User, true));
                 result.AddTest(CreateCRUDTest("w8Admin", provider.ToString(), TablePermission.Admin, true));
             }
+
+            result.AddTest(CreateYesNoTest("Were you prompted for username / password four times?", true));
+
+            result.AddTest(CreateTestWithSingleAlert("We'll log in again; you may or may not be asked for password in the next few moments."));
+            foreach (MobileServiceAuthenticationProvider provider in Enum.GetValues(typeof(MobileServiceAuthenticationProvider)))
+            {
+                result.AddTest(CreateLogoutTest());
+                result.AddTest(CreateLoginTest(provider, true));
+                result.AddTest(CreateCRUDTest("w8Authenticated", provider.ToString(), TablePermission.User, true));
+            }
+
+            result.AddTest(CreateTestWithSingleAlert("Now we'll continue running the tests, but you *should not be prompted for the username anymore, and in some even the password should also not be required."));
+            foreach (MobileServiceAuthenticationProvider provider in Enum.GetValues(typeof(MobileServiceAuthenticationProvider)))
+            {
+                result.AddTest(CreateLogoutTest());
+                result.AddTest(CreateLoginTest(provider, true));
+                result.AddTest(CreateCRUDTest("w8Authenticated", provider.ToString(), TablePermission.User, true));
+            }
+
+            result.AddTest(CreateYesNoTest("Were you prompted for the username in any of the providers?", false));
 
             return result;
         }
@@ -41,6 +65,37 @@ namespace ZumoE2ETestApp.Tests
                 var user = await client.LoginAsync(provider, useSingleSignOn);
                 test.AddLog("Logged in as {0}", user.UserId);
                 return true;
+            });
+        }
+
+        private static ZumoTest CreateTestWithSingleAlert(string alert)
+        {
+            return new ZumoTest("Simple alert", async delegate(ZumoTest test)
+            {
+                InputDialog dialog = new InputDialog("Information", alert, "OK");
+                await dialog.Display();
+                return true;
+            });
+        }
+
+        private static ZumoTest CreateYesNoTest(string question, bool expectedAnswer)
+        {
+            string testName = string.Format(CultureInfo.InvariantCulture, "Validation: {0} (expected {1})", question, expectedAnswer ? "Yes" : "No");
+            return new ZumoTest(testName, async delegate(ZumoTest test)
+            {
+                InputDialog dialog = new InputDialog("Question", question, "No", "Yes");
+                await dialog.Display();
+                bool answerWasYes = !dialog.Cancelled;
+                if (expectedAnswer != answerWasYes)
+                {
+                    test.AddLog("Test failed. The answer to <<{0}>> was {1}, it should have been {2}",
+                        question, answerWasYes ? "Yes" : "No", expectedAnswer ? "Yes" : "No");
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
             });
         }
 

@@ -19,10 +19,10 @@ namespace ZumoE2ETestApp.UIElements
         {
             this.index = index;
             this.test = test;
-            test.TestFinished += test_TestFinished;
+            test.TestStatusChanged += test_TestStatusChanged;
         }
 
-        void test_TestFinished(object sender, ZumoTestEventArgs e)
+        void test_TestStatusChanged(object sender, TestStatusChangedEventArgs e)
         {
             if (this.PropertyChanged != null)
             {

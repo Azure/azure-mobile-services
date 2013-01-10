@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,16 @@ using System.Threading.Tasks;
 namespace ZumoE2ETestApp.Framework
 {
     public delegate Task<bool> TestExecution(ZumoTest test);
+
+    public class TestStatusChangedEventArgs : EventArgs
+    {
+        public TestStatusChangedEventArgs(TestStatus status)
+        {
+            this.NewStatus = status;
+        }
+
+        public TestStatus NewStatus { get; private set; }
+    }
 
     public class ZumoTest
     {
@@ -18,8 +29,7 @@ namespace ZumoE2ETestApp.Framework
         private TestExecution execution;
         private List<string> logs;
 
-        public event EventHandler TestStarted;
-        public event EventHandler<ZumoTestEventArgs> TestFinished;
+        public event EventHandler<TestStatusChangedEventArgs> TestStatusChanged;
 
         public ZumoTest(string name, TestExecution execution)
         {
@@ -44,6 +54,10 @@ namespace ZumoE2ETestApp.Framework
         {
             this.logs.Clear();
             this.Status = TestStatus.NotRun;
+            if (this.TestStatusChanged != null)
+            {
+                this.TestStatusChanged(this, new TestStatusChangedEventArgs(this.Status));
+            }
         }
 
         public IEnumerable<string> GetLogs()
@@ -54,9 +68,9 @@ namespace ZumoE2ETestApp.Framework
         public async Task<bool> Run()
         {
             this.Status = TestStatus.Running;
-            if (this.TestStarted != null)
+            if (this.TestStatusChanged != null)
             {
-                this.TestStarted(this, new EventArgs());
+                this.TestStatusChanged(this, new TestStatusChangedEventArgs(this.Status));
             }
 
             bool passed;
@@ -73,9 +87,9 @@ namespace ZumoE2ETestApp.Framework
                 this.Status = TestStatus.Failed;
             }
 
-            if (this.TestFinished != null)
+            if (this.TestStatusChanged != null)
             {
-                this.TestFinished(this, new ZumoTestEventArgs { TestStatus = this.Status });
+                this.TestStatusChanged(this, new TestStatusChangedEventArgs(this.Status));
             }
 
             return passed;

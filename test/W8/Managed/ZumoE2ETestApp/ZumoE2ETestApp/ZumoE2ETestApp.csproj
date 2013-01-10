@@ -127,10 +127,15 @@
     <Compile Include="Tests\Types\RoundTripTableItem.cs" />
     <Compile Include="Tests\ZumoCUDTests.cs" />
     <Compile Include="Tests\ZumoLoginTests.cs" />
+    <Compile Include="Tests\ZumoMiscTests.cs" />
+    <Compile Include="Tests\ZumoPushTests.cs" />
     <Compile Include="Tests\ZumoQueryTestData.cs" />
     <Compile Include="Tests\ZumoQueryTests.cs" />
     <Compile Include="Tests\ZumoRoundTripTests.cs" />
     <Compile Include="UIElements\AppInfoRepository.cs" />
+    <Compile Include="UIElements\InputDialog.xaml.cs">
+      <DependentUpon>InputDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UIElements\ListViewForTestGroup.cs" />
     <Compile Include="UIElements\ListViewForTest.cs" />
     <Compile Include="UIElements\SaveAppsPage.xaml.cs">
@@ -152,6 +157,10 @@
     <Content Include="Assets\SmallLogo.png" />
     <Content Include="Assets\SplashScreen.png" />
     <Content Include="Assets\StoreLogo.png" />
+    <Page Include="UIElements\InputDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <None Include="Package.StoreAssociation.xml" />
     <Page Include="UIElements\SaveAppsPage.xaml">
       <SubType>Designer</SubType>

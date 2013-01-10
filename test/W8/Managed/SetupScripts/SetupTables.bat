@@ -11,4 +11,4 @@ azure mobile table update -p insert=user,read=user,update=user,delete=user ogfio
 
 azure mobile script upload ogfiostestapp table/w8Movies.insert -f iosMovies.insert.js
 azure mobile script upload ogfiostestapp table/w8RoundTripTable.insert -f w8RoundTripTable.insert.js
-REM azure mobile script upload ogfiostestapp table/iosPushTest.insert -f iosPushTest.insert.js
+azure mobile script upload ogfiostestapp table/w8PushTest.insert -f w8PushTest.insert.js
