@@ -91,6 +91,10 @@ static NSString *queryTestsTableName = @"iosMovies";
     [result addObject:[self createQueryTestWithName:@"Order by date and string - 50 movies, ordered by release date, then title" andPredicate:nil andTop:@50 andSkip:nil andOrderBy:[NSArray arrayWithObjects:[OrderByClause descending:@"ReleaseDate"], [OrderByClause ascending:@"Title"], nil]]];
     [result addObject:[self createQueryTestWithName:@"Order by number - 30 shorter movies since 1970" andPredicate:[NSPredicate predicateWithFormat:@"Year >= 1970"] andTop:@30 andSkip:nil andOrderBy:[NSArray arrayWithObjects:[OrderByClause ascending:@"Duration"], [OrderByClause ascending:@"Title"], nil] andIncludeTotalCount:YES]];
     
+    // Select
+    [result addObject:[self createQueryTestWithName:@"Select single field - Title of movies since 2000" andPredicate:[NSPredicate predicateWithFormat:@"Year >= 2000"] andTop:@200 andSkip:nil andOrderBy:nil andIncludeTotalCount:NO andSelectFields:[NSArray arrayWithObject:@"Title"]]];
+    [result addObject:[self createQueryTestWithName:@"Select multiple fields - Title, BestPictureWinner, Duration, ordered by release date, movies from the 1990" andPredicate:[NSPredicate predicateWithFormat:@"Year >= 1990 and Year < 2000"] andTop:@300 andSkip:nil andOrderBy:[NSArray arrayWithObject:[OrderByClause ascending:@"Title"]] andIncludeTotalCount:NO andSelectFields:[NSArray arrayWithObjects:@"Title", @"BestPictureWinner", @"Duration", nil]]];
+    
     for (int i = -1; i <= 0; i++) {
         ZumoTest *negativeLookupTest = [ZumoTest createTestWithName:[NSString stringWithFormat:@"(Neg) MSTable readWithId:%d", i] andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
             MSClient *client = [[ZumoTestGlobals sharedInstance] client];
@@ -246,11 +250,15 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
 }
 
 + (ZumoTest *)createQueryTestWithName:(NSString *)name andPredicate:(NSPredicate *)predicate andTop:(NSNumber *)top andSkip:(NSNumber *)skip andOrderBy:(NSArray *)orderByClauses andIncludeTotalCount:(BOOL)includeTotalCount {
+    return [self createQueryTestWithName:name andPredicate:predicate andTop:top andSkip:skip andOrderBy:orderByClauses andIncludeTotalCount:includeTotalCount andSelectFields:nil];
+}
+
++ (ZumoTest *)createQueryTestWithName:(NSString *)name andPredicate:(NSPredicate *)predicate andTop:(NSNumber *)top andSkip:(NSNumber *)skip andOrderBy:(NSArray *)orderByClauses andIncludeTotalCount:(BOOL)includeTotalCount andSelectFields:(NSArray *)selectFields {
     ZumoTest *result = [ZumoTest createTestWithName:name andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client getTable:queryTestsTableName];
         NSArray *allItems = [ZumoQueryTestData getMovies];
-        if (!top && !skip && !orderByClauses && !includeTotalCount) {
+        if (!top && !skip && !orderByClauses && !includeTotalCount && !selectFields) {
             // use simple readWithPredicate
             [table readWhere:predicate completion:^(NSArray *queriedItems, NSInteger totalCount2, NSError *readWhereError) {
                 if (readWhereError) {
@@ -293,6 +301,10 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
             if (includeTotalCount) {
                 [query setIncludeTotalCount:YES];
             }
+            
+            if (selectFields) {
+                [query setSelectFields:selectFields];
+            }
                     
             [query readWithCompletion:^(NSArray *queriedItems, NSInteger totalCount, NSError *queryReadError) {
                 if (queryReadError) {
@@ -334,6 +346,17 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
                             }
                             
                             filteredArray = [filteredArray subarrayWithRange:NSMakeRange(rangeStart, rangeLen)];
+                        }
+                        
+                        if (selectFields) {
+                            NSMutableArray *projectedArray = [[NSMutableArray alloc] init];
+                            for (int i = 0; i < [filteredArray count]; i++) {
+                                NSDictionary *item = filteredArray[i];
+                                item = [item dictionaryWithValuesForKeys:selectFields];
+                                [projectedArray addObject:item];
+                            }
+                            
+                            filteredArray = projectedArray;
                         }
 
                         passed = [self compareExpectedArray:filteredArray withActual:queriedItems forTest:test];

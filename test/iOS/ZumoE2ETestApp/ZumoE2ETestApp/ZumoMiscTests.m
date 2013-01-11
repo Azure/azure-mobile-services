@@ -13,19 +13,72 @@
 // Private classes
 
 // Filter which will save the User-Agent request header
-@interface UserAgentGrabberFilter : NSObject <MSFilter>
+@interface FilterToCaptureHttpTraffic : NSObject <MSFilter>
 
 @property (nonatomic, copy) NSString *userAgent;
+@property (nonatomic, copy) NSString *responseContent;
+@property (nonatomic, strong) NSDictionary *requestHeaders;
+@property (nonatomic, strong) NSDictionary *responseHeaders;
 
 @end
 
-@implementation UserAgentGrabberFilter
+@implementation FilterToCaptureHttpTraffic
 
-@synthesize userAgent;
+@synthesize userAgent, responseContent;
+@synthesize requestHeaders = _requestHeaders;
+@synthesize responseHeaders = _responseHeaders;
+
+- (id)init {
+    self = [super init];
+    if (self) {
+        _requestHeaders = [[NSMutableDictionary alloc] init];
+        _responseHeaders = [[NSMutableDictionary alloc] init];
+    }
+    
+    return self;
+}
 
 - (void)handleRequest:(NSURLRequest *)request onNext:(MSFilterNextBlock)onNext onResponse:(MSFilterResponseBlock)onResponse {
+    NSDictionary *headers = [request allHTTPHeaderFields];
+    _requestHeaders = [NSMutableDictionary new];
+    [_requestHeaders setValuesForKeysWithDictionary:headers];
     userAgent = request.allHTTPHeaderFields[@"User-Agent"];
-    onNext(request, onResponse);
+    onNext(request, ^(NSHTTPURLResponse *response, NSData *data, NSError *error) {
+        NSDictionary *respHeaders = [response allHeaderFields];
+        _responseHeaders = [NSMutableDictionary new];
+        [_responseHeaders setValuesForKeysWithDictionary:respHeaders];
+        onResponse(response, data, error);
+    });
+}
+
+@end
+
+// Filter which will bypass the service, responding directly to the caller
+@interface FilterToBypassService : NSObject <MSFilter>
+
+@property (nonatomic) int statusCode;
+@property (nonatomic, copy) NSString *contentType;
+@property (nonatomic, copy) NSString *body;
+@property (nonatomic, strong) NSError *errorToReturn;
+
+@end
+
+@implementation FilterToBypassService
+
+@synthesize statusCode, contentType, body, errorToReturn;
+
+- (void)handleRequest:(NSURLRequest *)request onNext:(MSFilterNextBlock)onNext onResponse:(MSFilterResponseBlock)onResponse {
+    NSHTTPURLResponse *resp = nil;
+    NSData *data = nil;
+    NSError *error = nil;
+    if ([self errorToReturn]) {
+        error = [self errorToReturn];
+    } else {
+        resp = [[NSHTTPURLResponse alloc] initWithURL:[request URL] statusCode:[self statusCode] HTTPVersion:@"1.1" headerFields:@{@"Content-Type": [self contentType]}];
+        data = [[self body] dataUsingEncoding:NSUTF8StringEncoding];
+    }
+    
+    onResponse(resp, data, error);
 }
 
 @end
@@ -108,6 +161,8 @@
     NSMutableArray *result = [[NSMutableArray alloc] init];
     [result addObject:[self createUserAgentTest]];
     [result addObject:[self createFilterWithMultipleRequestsTest]];
+    [result addObject:[self createFilterTestWhichBypassesService]];
+    [result addObject:[self createFilterTestToEnsureWithFilterDoesNotChangeClient]];
     return result;
 }
 
@@ -124,9 +179,9 @@
 + (ZumoTest *)createUserAgentTest {
     ZumoTest *result = [ZumoTest createTestWithName:@"User-Agent test" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        UserAgentGrabberFilter *filter = [[UserAgentGrabberFilter alloc] init];
-        client = [client clientwithFilter:filter];
-        MSTable *table = [client getTable:@"iosTodoItem"];
+        FilterToCaptureHttpTraffic *filter = [[FilterToCaptureHttpTraffic alloc] init];
+        MSClient *filteredClient = [client clientwithFilter:filter];
+        MSTable *table = [filteredClient getTable:@"iosTodoItem"];
         NSDictionary *item = @{@"name":@"john doe"};
         [table insert:item completion:^(NSDictionary *inserted, NSError *error) {
             BOOL passed = NO;
@@ -134,7 +189,8 @@
                 [test addLog:[NSString stringWithFormat:@"Error: %@", error]];
             } else {
                 NSNumber *itemId = inserted[@"id"];
-                [table deleteWithId:itemId completion:nil]; // clean-up after this test
+                MSTable *unfilteredTable = [client getTable:@"iosTodoItem"];
+                [unfilteredTable deleteWithId:itemId completion:nil]; // clean-up after this test
                 NSString *userAgent = [filter userAgent];
                 if ([userAgent rangeOfString:@"objective-c"].location == NSNotFound) {
                     [test addLog:[NSString stringWithFormat:@"Error, user-agent does not contain 'objective-c': %@", userAgent]];
@@ -150,6 +206,63 @@
     }];
     
     return result;
+}
+
++ (ZumoTest *)createFilterTestWhichBypassesService {
+    return [ZumoTest createTestWithName:@"Filter which bypasses service" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+        MSClient *client = [[ZumoTestGlobals sharedInstance] client];
+        FilterToBypassService *filter = [[FilterToBypassService alloc] init];
+        NSString *json = @"{\"id\":1,\"name\":\"John Doe\",\"age\":33}";
+        [filter setBody:json];
+        [filter setContentType:@"application/json"];
+        [filter setStatusCode:201];
+        [filter setErrorToReturn:nil];
+        MSClient *mockedClient = [client clientwithFilter:filter];
+        MSTable *table = [mockedClient getTable:@"TableWhichDoesNotExist"];
+        [table insert:@{@"does":@"not matter"} completion:^(NSDictionary *item, NSError *error) {
+            BOOL passed = NO;
+            if (error) {
+                [test addLog:[NSString stringWithFormat:@"Error during insert: %@", error]];
+            } else {
+                [test addLog:[NSString stringWithFormat:@"Inserted item in the mocked service: %@", item]];
+                NSString *name = item[@"name"];
+                NSNumber *age = item[@"age"];
+                if ([name isEqualToString:@"John Doe"] && [age intValue] == 33) {
+                    [test addLog:@"Received the correct value from the filter"];
+                    passed = YES;
+                } else {
+                    [test addLog:@"Error, value received from the filter is not correct"];
+                }
+            }
+            
+            [test setTestStatus:(passed ? TSPassed : TSFailed)];
+            completion(passed);
+        }];
+    }];
+}
+
++ (ZumoTest *)createFilterTestToEnsureWithFilterDoesNotChangeClient {
+    return [ZumoTest createTestWithName:@"MSClient clientWithFilter does not change client" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+        MSClient *client = [[ZumoTestGlobals sharedInstance] client];
+        FilterToBypassService *filter = [[FilterToBypassService alloc] init];
+        NSError *errorToReturn = [NSError errorWithDomain:@"MyDomain" code:-1234 userInfo:@{@"one":@"two"}];
+        [filter setErrorToReturn:errorToReturn];
+        MSClient *mockedClient = [client clientwithFilter:filter];
+        [test addLog:[NSString stringWithFormat:@"Created a client with filter: %@", mockedClient.filters]];
+        MSTable *table = [client getTable:@"iosTodoItem"];
+        [table insert:@{@"string1":@"does not matter"} completion:^(NSDictionary *item, NSError *error) {
+            BOOL passed = NO;
+            if (error) {
+                [test addLog:[NSString stringWithFormat:@"Error during insert: %@", error]];
+            } else {
+                [test addLog:[NSString stringWithFormat:@"Inserted succeeded: %@", item]];
+                passed = YES;
+            }
+            
+            [test setTestStatus:(passed ? TSPassed : TSFailed)];
+            completion(passed);
+        }];
+    }];
 }
 
 + (ZumoTest *)createFilterWithMultipleRequestsTest {
