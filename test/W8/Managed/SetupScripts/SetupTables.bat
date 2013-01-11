@@ -4,6 +4,7 @@ azure mobile table create ogfiostestapp w8Authenticated
 azure mobile table create ogfiostestapp w8RoundTripTable
 azure mobile table create ogfiostestapp w8Movies
 azure mobile table create ogfiostestapp w8PushTest
+azure mobile table create ogfiostestapp ParamsTestTable
 
 azure mobile table update -p insert=admin,read=admin,update=admin,delete=admin ogfiostestapp w8Admin
 azure mobile table update -p insert=application,read=application,update=application,delete=application ogfiostestapp w8Application

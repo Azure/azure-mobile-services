@@ -77,6 +77,7 @@ namespace ZumoE2ETestApp
                 {
                     appInfo.MobileServices.Add(new MobileServiceInfo { AppUrl = appUrl, AppKey = appKey });
                     await AppInfoRepository.Instance.SaveAppInfo(appInfo);
+                    await Alert("Information", "Mobile service info successfully saved");
                 }
             }
         }

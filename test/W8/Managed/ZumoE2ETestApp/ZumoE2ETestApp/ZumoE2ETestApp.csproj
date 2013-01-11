@@ -132,6 +132,7 @@
     <Compile Include="Tests\ZumoQueryTestData.cs" />
     <Compile Include="Tests\ZumoQueryTests.cs" />
     <Compile Include="Tests\ZumoRoundTripTests.cs" />
+    <Compile Include="Tests\ZumoTestCommon.cs" />
     <Compile Include="UIElements\AppInfoRepository.cs" />
     <Compile Include="UIElements\InputDialog.xaml.cs">
       <DependentUpon>InputDialog.xaml</DependentUpon>
@@ -157,6 +158,7 @@
     <Content Include="Assets\SmallLogo.png" />
     <Content Include="Assets\SplashScreen.png" />
     <Content Include="Assets\StoreLogo.png" />
+    <Content Include="Assets\WideLogo.png" />
     <Page Include="UIElements\InputDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

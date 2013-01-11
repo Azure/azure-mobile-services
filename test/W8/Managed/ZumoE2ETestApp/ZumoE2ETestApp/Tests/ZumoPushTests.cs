@@ -19,14 +19,77 @@ namespace ZumoE2ETestApp.Tests
         {
             ZumoTestGroup result = new ZumoTestGroup("Push tests");
             const string imageUrl = "http://zumotestserver.azurewebsites.net/content/zumo2.png";
+            const string wideImageUrl = "http://zumotestserver.azurewebsites.net/content/zumo1.png";
             result.AddTest(CreateRegisterChannelTest());
             result.AddTest(CreateToastPushTest("sendToastText01", "hello world"));
-            result.AddTest(CreateToastPushTest("sendToastImageAndText03", "hello", "world", null, imageUrl, "zumo"));
-            result.AddTest(CreateToastPushTest("sendToastImageAndText04", "hello", "world", "how are you", imageUrl, "zumo"));
+            result.AddTest(CreateToastPushTest("sendToastImageAndText03", "ts-iat3-1", "ts-iat3-2", null, imageUrl, "zumo"));
+            result.AddTest(CreateToastPushTest("sendToastImageAndText04", "ts-iat4-1", "ts-iat4-2", "ts-iat4-3", imageUrl, "zumo"));
             result.AddTest(CreateBadgePushTest(4));
             result.AddTest(CreateBadgePushTest("playing"));
+            result.AddTest(CreateRawPushTest("hello world"));
+            result.AddTest(CreateRawPushTest("foobaráéíóú"));
+            result.AddTest(CreateTilePushTest("TileWideImageAndText02", new[] { "tl-wiat2-1", "tl-wiat2-2" }, new[] { wideImageUrl }, new[] { "zumowide" }));
+            result.AddTest(CreateTilePushTest("TileWideImageCollection",
+                new string[0], 
+                new[] { wideImageUrl, imageUrl, imageUrl, imageUrl, imageUrl },
+                new[] { "zumowide", "zumo", "zumo", "zumo", "zumo" }));
+            result.AddTest(CreateTilePushTest("TileWideText02",
+                new[] { "large caption", "tl-wt2-1", "tl-wt2-2", "tl-wt2-3", "tl-wt2-4", "tl-wt2-5", "tl-wt2-6", "tl-wt2-7", "tl-wt2-8" },
+                new string[0], new string[0]));
+            result.AddTest(CreateTilePushTest("TileSquarePeekImageAndText01",
+                new[] { "tl-spiat1-1", "tl-spiat1-2", "tl-spiat1-3", "tl-spiat1-4" },
+                new[] { imageUrl }, new[] { "zumo img" }));
+            result.AddTest(CreateTilePushTest("TileSquareBlock",
+                new[] { "24", "aliquam" },
+                new string[0], new string[0]));
+
             result.AddTest(CreateUnregisterChannelTest());
             return result;
+        }
+
+        private static ZumoTest CreateRawPushTest(string rawData)
+        {
+            XElement expected = new XElement("raw", new XText(rawData));
+            JsonValue payload = JsonValue.CreateStringValue(rawData);
+            return CreatePushTest("sendRaw", payload, expected);
+        }
+
+        private static ZumoTest CreateTilePushTest(string template, string[] texts, string[] imageUrls, string[] imageAlts)
+        {
+            if (imageAlts.Length != imageAlts.Length)
+            {
+                throw new ArgumentException("Size of 'imageUrls' and 'imageAlts' arrays must be the same");
+            }
+
+            if (texts.Any(t => t == null) || imageAlts.Any(i => i == null) || imageUrls.Any(i => i == null))
+            {
+                throw new ArgumentException("No nulls allowed in the arrays");
+            }
+
+            XElement binding = new XElement("binding", new XAttribute("template", template));
+            JsonObject payload = new JsonObject();
+
+            for (int i = 0; i < imageAlts.Length; i++)
+            {
+                payload.Add("image" + (i + 1) + "src", JsonValue.CreateStringValue(imageUrls[i]));
+                payload.Add("image" + (i + 1) + "alt", JsonValue.CreateStringValue(imageAlts[i]));
+                binding.Add(new XElement("image",
+                    new XAttribute("id", (i + 1)),
+                    new XAttribute("src", imageUrls[i]),
+                    new XAttribute("alt", imageAlts[i])));
+            }
+
+            for (int i = 0; i < texts.Length; i++)
+            {
+                payload.Add("text" + (i + 1), JsonValue.CreateStringValue(texts[i]));
+                binding.Add(new XElement("text", new XAttribute("id", (i + 1)), new XText(texts[i])));
+            }
+
+            XElement expected = new XElement("tile",
+                new XElement("visual",
+                    binding));
+
+            return CreatePushTest("send" + template, payload, expected);
         }
 
         private static ZumoTest CreateToastPushTest(string wnsMethod, string text1, string text2 = null, string text3 = null, string imageUrl = null, string imageAlt = null)
@@ -55,7 +118,7 @@ namespace ZumoE2ETestApp.Tests
 
             if (text3 != null)
             {
-                binding.Add(new XElement("text", new XAttribute("id", 3), new XText(text2)));
+                binding.Add(new XElement("text", new XAttribute("id", 3), new XText(text3)));
             }
 
             XElement expectedResult = new XElement("toast",

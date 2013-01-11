@@ -12,6 +12,7 @@ namespace ZumoE2ETestApp.Framework
         public const string RoundTripTableName = "w8RoundTripTable";
         public const string MoviesTableName = "w8Movies";
         public const string PushTestTableName = "w8PushTest";
+        public const string ParamsTestTableName = "ParamsTestTable";
 
         private static ZumoTestGlobals instance = new ZumoTestGlobals();
 
