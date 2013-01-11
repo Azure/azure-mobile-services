@@ -15,6 +15,10 @@ namespace ZumoE2ETestApp.Tests
             {
                 ZumoRoundTripTests.CreateTests(),
                 ZumoQueryTests.CreateTests(),
+                ZumoCUDTests.CreateTests(),
+                ZumoLoginTests.CreateTests(),
+                ZumoMiscTests.CreateTests(),
+                ZumoPushTests.CreateTests(),
             };
 
             return result;

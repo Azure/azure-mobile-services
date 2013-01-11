@@ -98,6 +98,13 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateQueryTest("Order by number - 30 shortest movies since 1970",
                 m => m.Year >= 1970, 30, null, new[] { new OrderByClause("Duration", true), new OrderByClause("Title", true) }, null, true));
 
+            // Select
+            result.AddTest(CreateQueryTest("Select one field - Only title of movies from 2008",
+                m => m.Year == 2008, null, null, null, m => m.Title));
+            result.AddTest(CreateQueryTest("Select multiple fields - Nicely formatted list of movies from the 2000's",
+                m => m.Year >= 2000, 200, null, new[] { new OrderByClause("ReleaseDate", false), new OrderByClause("Title", true) },
+                m => string.Format("{0} {1} - {2} minutes", m.Title.PadRight(30), m.BestPictureWinner ? "(best picture)" : "", m.Duration)));
+
             // Negative tests
             result.AddTest(CreateQueryTest<MobileServiceInvalidOperationException>("(Neg) Very large top value", m => m.Year > 2000, 1001));
             result.AddTest(CreateQueryTest<ArgumentException>("(Neg) Unsupported predicate: unsupported arithmetic",
@@ -137,56 +144,20 @@ namespace ZumoE2ETestApp.Tests
 
             public bool IsAscending { get; private set; }
             public string FieldName { get; private set; }
-
-            public Expression<Func<Movie, TKey>> GetKeySelector<TKey>()
-            {
-                string fieldName = this.FieldName.ToLowerInvariant();
-                if (typeof(TKey) == typeof(string))
-                {
-                    if (fieldName == "title")
-                    {
-                        return m => (TKey)(object)m.Title;
-                    }
-                    else if (fieldName == "rating")
-                    {
-                        return m => (TKey)(object)m.Rating;
-                    }
-                }
-                else if (typeof(TKey) == typeof(int))
-                {
-                    if (fieldName == "year")
-                    {
-                        return m => (TKey)(object)m.Year;
-                    }
-                    else if (fieldName == "duration")
-                    {
-                        return m => (TKey)(object)m.Duration;
-                    }
-                }
-                else if (typeof(TKey) == typeof(DateTime))
-                {
-                    if (fieldName == "releasedate")
-                    {
-                        return m => (TKey)(object)m.ReleaseDate;
-                    }
-                }
-
-                throw new InvalidOperationException(string.Format("Cannot create a selector for field {0} with type {1}.", FieldName, typeof(TKey)));
-            }
         }
 
         private static ZumoTest CreateQueryTest(
             string name, Expression<Func<Movie, bool>> whereClause,
             int? top = null, int? skip = null, OrderByClause[] orderBy = null,
-            string[] selectFields = null, bool? includeTotalCount = null)
+            Expression<Func<Movie, string>> selectExpression = null, bool? includeTotalCount = null)
         {
-            return CreateQueryTest<ExceptionTypeWhichWillNeverBeThrown>(name, whereClause, top, skip, orderBy, selectFields, includeTotalCount);
+            return CreateQueryTest<ExceptionTypeWhichWillNeverBeThrown>(name, whereClause, top, skip, orderBy, selectExpression, includeTotalCount);
         }
 
         private static ZumoTest CreateQueryTest<TExpectedException>(
             string name, Expression<Func<Movie, bool>> whereClause, 
             int? top = null, int? skip = null, OrderByClause[] orderBy = null,
-            string[] selectFields = null, bool? includeTotalCount = null)
+            Expression<Func<Movie, string>> selectExpression = null, bool? includeTotalCount = null)
             where TExpectedException : Exception
         {
             return new ZumoTest(name, async delegate(ZumoTest test)
@@ -195,6 +166,7 @@ namespace ZumoE2ETestApp.Tests
                 {
                     var table = ZumoTestGlobals.Instance.Client.GetTable<Movie>();
                     MobileServiceTableQuery<Movie> query = null;
+                    MobileServiceTableQuery<string> selectedQuery = null;
 
                     if (whereClause != null)
                     {
@@ -221,9 +193,9 @@ namespace ZumoE2ETestApp.Tests
                         query = query == null ? table.Skip(skip.Value) : query.Skip(skip.Value);
                     }
 
-                    if (selectFields != null)
+                    if (selectExpression != null)
                     {
-                        throw new ArgumentException("Select tests not implemented yet");
+                        selectedQuery = query == null ? table.Select(selectExpression) : query.Select(selectExpression);
                     }
 
                     if (includeTotalCount.HasValue)
@@ -231,15 +203,26 @@ namespace ZumoE2ETestApp.Tests
                         query = query.IncludeTotalCount();
                     }
 
-                    var readData = await query.ToEnumerableAsync();
+                    IEnumerable<Movie> readMovies = null;
+                    IEnumerable<string> readProjectedMovies = null;
+                    if (selectedQuery == null)
+                    {
+                        readMovies = await query.ToEnumerableAsync();
+                    }
+                    else
+                    {
+                        readProjectedMovies = await selectedQuery.ToEnumerableAsync();
+                    }
+
                     long actualTotalCount = -1;
-                    ITotalCountProvider totalCountProvider = readData as ITotalCountProvider;
+                    ITotalCountProvider totalCountProvider = (readMovies as ITotalCountProvider) ?? (readProjectedMovies as ITotalCountProvider);
                     if (totalCountProvider != null)
                     {
                         actualTotalCount = totalCountProvider.TotalCount;
                     }
 
-                    var data = readData.ToArray();
+                    //var data = readMovies.ToArray();
+
                     IEnumerable<Movie> expectedData = ZumoQueryTestData.AllMovies;
                     if (whereClause != null)
                     {
@@ -267,7 +250,6 @@ namespace ZumoE2ETestApp.Tests
                         expectedData = expectedData.Take(top.Value);
                     }
 
-                    List<string> errors = new List<string>();
 
                     if (includeTotalCount.HasValue)
                     {
@@ -278,7 +260,20 @@ namespace ZumoE2ETestApp.Tests
                         }
                     }
 
-                    if (!Util.CompareArrays(expectedData.ToArray(), data, errors))
+                    List<string> errors = new List<string>();
+                    bool expectedDataIsSameAsReadData;
+
+                    if (selectExpression != null)
+                    {
+                        string[] expectedProjectedData = expectedData.Select(selectExpression.Compile()).ToArray();
+                        expectedDataIsSameAsReadData = Util.CompareArrays(expectedProjectedData, readProjectedMovies.ToArray(), errors);
+                    }
+                    else
+                    {
+                        expectedDataIsSameAsReadData = Util.CompareArrays(expectedData.ToArray(), readMovies.ToArray(), errors);
+                    }
+
+                    if (!expectedDataIsSameAsReadData)
                     {
                         foreach (var error in errors)
                         {

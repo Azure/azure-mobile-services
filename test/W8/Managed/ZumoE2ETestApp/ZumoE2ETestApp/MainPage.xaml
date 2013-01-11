@@ -78,7 +78,7 @@
                         Margin="10" Content="Reset" Name="btnResetTests" Click="btnResetTests_Click_1" />
                 <Button Margin="10" Content="Send logs to: " Grid.Column="0" Grid.Row="2" Name="btnSendLogs" Click="btnSendLogs_Click_1" />
                 <TextBox Name="txtUploadLogsUrl" Margin="10" Grid.Column="1" Grid.Row="2" />
-                <ListBox Margin="10" Name="lstTests" Grid.Row="3" Grid.ColumnSpan="2">
+                <ListBox Margin="10" Name="lstTests" Grid.Row="3" Grid.ColumnSpan="2" DoubleTapped="lstTests_DoubleTapped_1">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Foreground="{Binding Path=ColorFromStatus}"

@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Text;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Popups;
@@ -22,24 +20,20 @@ namespace ZumoE2ETestApp.UIElements
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class UploadLogsPage : Page
+    public sealed partial class SaveAppsPage : Page
     {
+        public string ApplicationUrl { get; set; }
+        public string ApplicationKey { get; set; }
+
         public event EventHandler CloseRequested;
 
-        private string uploadUrl;
-        public string logs;
-
-        public UploadLogsPage(string testGroupName, string logs, string uploadUrl)
+        public SaveAppsPage(List<MobileServiceInfo> savedServices)
         {
             this.InitializeComponent();
-            this.lblTitle.Text = "Logs for " + testGroupName;
             var bounds = Window.Current.Bounds;
             this.grdRootPanel.Width = bounds.Width;
             this.grdRootPanel.Height = bounds.Height;
-
-            this.uploadUrl = uploadUrl;
-            this.logs = logs;
-            this.txtArea.Text = logs;
+            this.lstApps.ItemsSource = savedServices;
         }
 
         /// <summary>
@@ -47,33 +41,42 @@ namespace ZumoE2ETestApp.UIElements
         /// </summary>
         /// <param name="e">Event data that describes how this page was reached.  The Parameter
         /// property is typically used to configure the page.</param>
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            if (!string.IsNullOrEmpty(this.uploadUrl))
+        }
+
+        private async void btnSelect_Click_1(object sender, RoutedEventArgs e)
+        {
+            int selectedIndex = this.lstApps.SelectedIndex;
+            if (selectedIndex >= 0)
             {
-                using (var client = new HttpClient())
+                MobileServiceInfo info = (MobileServiceInfo)this.lstApps.SelectedItem;
+                this.ApplicationUrl = info.AppUrl;
+                this.ApplicationKey = info.AppKey;
+                if (this.CloseRequested != null)
                 {
-                    using (var request = new HttpRequestMessage(HttpMethod.Post, this.uploadUrl))
-                    {
-                        request.Content = new StringContent(this.logs, Encoding.UTF8, "text/plain");
-                        using (var response = await client.SendAsync(request))
-                        {
-                            var body = await response.Content.ReadAsStringAsync();
-                            var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
-                            var dialog = new MessageDialog(body, title);
-                            await dialog.ShowAsync();
-                        }
-                    }
+                    this.CloseRequested(this, EventArgs.Empty);
                 }
+            }
+            else
+            {
+                await new MessageDialog("Please select a service first", "Error").ShowAsync();
             }
         }
 
         private void btnClose_Click_1(object sender, RoutedEventArgs e)
         {
+            this.ApplicationUrl = null;
+            this.ApplicationKey = null;
             if (this.CloseRequested != null)
             {
                 this.CloseRequested(this, EventArgs.Empty);
             }
+        }
+
+        private void lstApps_DoubleTapped_1(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            btnSelect_Click_1(sender, e);
         }
     }
 }

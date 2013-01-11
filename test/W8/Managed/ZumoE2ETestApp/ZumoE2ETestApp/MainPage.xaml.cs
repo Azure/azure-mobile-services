@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -32,10 +33,6 @@ namespace ZumoE2ETestApp
         {
             this.InitializeComponent();
             this.allTests = TestStore.CreateTests();
-            foreach (var testGroup in allTests)
-            {
-                testGroup.TestFinished += testGroup_TestFinished;
-            }
         }
 
         /// <summary>
@@ -43,10 +40,17 @@ namespace ZumoE2ETestApp
         /// </summary>
         /// <param name="e">Event data that describes how this page was reached.  The Parameter
         /// property is typically used to configure the page.</param>
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             List<ListViewForTestGroup> sources = allTests.Select((tg, i) => new ListViewForTestGroup(i + 1, tg)).ToList();
             this.lstTestGroups.ItemsSource = sources;
+            SavedAppInfo savedAppInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
+            this.txtUploadLogsUrl.Text = savedAppInfo.LastUploadUrl ?? "";
+            if (savedAppInfo.LastService != null && !string.IsNullOrEmpty(savedAppInfo.LastService.AppUrl) && !string.IsNullOrEmpty(savedAppInfo.LastService.AppKey))
+            {
+                this.txtAppUrl.Text = savedAppInfo.LastService.AppUrl;
+                this.txtAppKey.Text = savedAppInfo.LastService.AppKey;
+            }
         }
 
         private void btnMainHelp_Click_1(object sender, RoutedEventArgs e)
@@ -54,14 +58,55 @@ namespace ZumoE2ETestApp
             Alert("Error", "Not implemented yet");
         }
 
-        private void btnSaveAppInfo_Click_1(object sender, RoutedEventArgs e)
+        private async void btnSaveAppInfo_Click_1(object sender, RoutedEventArgs e)
         {
-            Alert("Error", "Not implemented yet");
+            SavedAppInfo appInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
+            string appUrl = this.txtAppUrl.Text;
+            string appKey = this.txtAppKey.Text;
+            if (string.IsNullOrEmpty(appUrl) || string.IsNullOrEmpty(appKey))
+            {
+                await Alert("Error", "Please enter valid application URL / key");
+            }
+            else
+            {
+                if (appInfo.MobileServices.Any(ms => ms.AppKey == appKey && ms.AppUrl == appUrl))
+                {
+                    await Alert("Information", "Mobile service info already saved");
+                }
+                else
+                {
+                    appInfo.MobileServices.Add(new MobileServiceInfo { AppUrl = appUrl, AppKey = appKey });
+                    await AppInfoRepository.Instance.SaveAppInfo(appInfo);
+                    await Alert("Information", "Mobile service info successfully saved");
+                }
+            }
         }
 
-        private void btnLoadAppInfo_Click_1(object sender, RoutedEventArgs e)
+        private async void btnLoadAppInfo_Click_1(object sender, RoutedEventArgs e)
         {
-            Alert("Error", "Not implemented yet");
+            SavedAppInfo savedAppInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
+            if (savedAppInfo.MobileServices.Count == 0)
+            {
+                await Alert("Error", "There are no saved applications.");
+            }
+            else
+            {
+                Popup popup = new Popup();
+                SaveAppsPage page = new SaveAppsPage(savedAppInfo.MobileServices);
+                page.CloseRequested += (snd, ea) =>
+                {
+                    if (page.ApplicationUrl != null && page.ApplicationKey != null)
+                    {
+                        this.txtAppUrl.Text = page.ApplicationUrl;
+                        this.txtAppKey.Text = page.ApplicationKey;
+                    }
+
+                    popup.IsOpen = false;
+                };
+
+                popup.Child = page;
+                popup.IsOpen = true;
+            }
         }
 
         private void lstTestGroups_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
@@ -85,12 +130,13 @@ namespace ZumoE2ETestApp
             int selectedIndex = this.lstTestGroups.SelectedIndex;
             if (selectedIndex >= 0)
             {
-                bool clientInitialized = false;
+                var appUrl = this.txtAppUrl.Text;
+                var appKey = this.txtAppKey.Text;
+
                 string error = null;
                 try
                 {
-                    ZumoTestGlobals.Instance.InitializeClient(this.txtAppUrl.Text, this.txtAppKey.Text);
-                    clientInitialized = true;
+                    ZumoTestGlobals.Instance.InitializeClient(appUrl, appKey);
                 }
                 catch (Exception ex)
                 {
@@ -101,10 +147,38 @@ namespace ZumoE2ETestApp
                 {
                     await Alert("Error", error);
                 }
-                else if (clientInitialized)
+                else
                 {
                     ZumoTestGroup testGroup = allTests[selectedIndex];
-                    await testGroup.Run();
+                    try
+                    {
+                        await testGroup.Run();
+                    }
+                    catch (Exception ex)
+                    {
+                        error = ex.Message;
+                    }
+
+                    if (error != null)
+                    {
+                        await Alert("Error", error);
+                    }
+                    else
+                    {
+                        // Saving app info for future runs
+                        var savedAppInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
+                        if (savedAppInfo.LastService == null || savedAppInfo.LastService.AppUrl != appUrl || savedAppInfo.LastService.AppKey != appKey)
+                        {
+                            if (savedAppInfo.LastService == null)
+                            {
+                                savedAppInfo.LastService = new MobileServiceInfo();
+                            }
+
+                            savedAppInfo.LastService.AppKey = appKey;
+                            savedAppInfo.LastService.AppUrl = appUrl;
+                            await AppInfoRepository.Instance.SaveAppInfo(savedAppInfo);
+                        }
+                    }
                 }
             }
             else
@@ -113,14 +187,20 @@ namespace ZumoE2ETestApp
             }
         }
 
-        void testGroup_TestFinished(object sender, ZumoTestEventArgs e)
-        {
-            // Refresh list view
-        }
-
         private void btnResetTests_Click_1(object sender, RoutedEventArgs e)
         {
-            Alert("Error", "Not implemented yet");
+            int selectedIndex = this.lstTestGroups.SelectedIndex;
+            if (selectedIndex >= 0)
+            {
+                foreach (var test in this.allTests[selectedIndex].AllTests)
+                {
+                    test.Reset();
+                }
+            }
+            else
+            {
+                Alert("Error", "Please select a group to reset the tests from.");
+            }
         }
 
         private async void btnSendLogs_Click_1(object sender, RoutedEventArgs e)
@@ -128,6 +208,15 @@ namespace ZumoE2ETestApp
             int selectedIndex = this.lstTestGroups.SelectedIndex;
             if (selectedIndex >= 0)
             {
+                // Saves URL in local storage
+                SavedAppInfo appInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
+                string uploadUrl = this.txtUploadLogsUrl.Text;
+                if (appInfo.LastUploadUrl != uploadUrl)
+                {
+                    appInfo.LastUploadUrl = uploadUrl;
+                    await AppInfoRepository.Instance.SaveAppInfo(appInfo);
+                }
+
                 ZumoTestGroup testGroup = allTests[selectedIndex];
                 Popup popup = new Popup();
                 List<string> lines = new List<string>();
@@ -138,7 +227,7 @@ namespace ZumoE2ETestApp
                     lines.Add("-----------------------");
                 }
 
-                UploadLogsPage uploadLogsPage = new UploadLogsPage(testGroup.Name, string.Join("\n", lines));
+                UploadLogsPage uploadLogsPage = new UploadLogsPage(testGroup.Name, string.Join("\n", lines), uploadUrl);
                 popup.Child = uploadLogsPage;
                 uploadLogsPage.CloseRequested += (snd, ea) =>
                 {
@@ -153,14 +242,38 @@ namespace ZumoE2ETestApp
             }
         }
 
-        void uploadLogsPage_CloseRequested(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
         private Task Alert(string title, string text)
         {
-            return new Windows.UI.Popups.MessageDialog(text, title).ShowAsync().AsTask();
+            return new MessageDialog(text, title).ShowAsync().AsTask();
+        }
+
+        private void lstTests_DoubleTapped_1(object sender, DoubleTappedRoutedEventArgs e)
+        {
+            int selectedGroup = this.lstTestGroups.SelectedIndex;
+            if (selectedGroup >= 0)
+            {
+                ZumoTestGroup testGroup = allTests[selectedGroup];
+                int selectedTest = this.lstTests.SelectedIndex;
+                List<ZumoTest> tests = testGroup.AllTests.ToList();
+                if (selectedTest >= 0 && selectedTest < tests.Count)
+                {
+                    ZumoTest test = tests[selectedTest];
+                    Popup popup = new Popup();
+                    List<string> lines = new List<string>();
+                    lines.Add(string.Format("Logs for test {0} (status = {1})", test.Name, test.Status));
+                    lines.AddRange(test.GetLogs());
+                    lines.Add("-----------------------");
+
+                    UploadLogsPage uploadLogsPage = new UploadLogsPage(testGroup.Name, string.Join("\n", lines), null);
+                    popup.Child = uploadLogsPage;
+                    uploadLogsPage.CloseRequested += (snd, ea) =>
+                    {
+                        popup.IsOpen = false;
+                    };
+
+                    popup.IsOpen = true;
+                }
+            }
         }
     }
 }
