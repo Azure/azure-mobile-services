@@ -180,6 +180,8 @@ static NSString *pushClientKey = @"PushClientKey";
             [test setTestStatus:TSPassed];
             completion(YES);
         } else {
+            UIAlertView *av = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Push tests will not work on the emulator; if this is the case, all subsequent tests will fail, and that's expected." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+            [av show];
             [test setTestStatus:TSFailed];
             completion(NO);
         }
