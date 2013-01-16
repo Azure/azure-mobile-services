@@ -24,11 +24,17 @@ namespace ZumoE2ETestApp.UIElements
 
         void test_TestStatusChanged(object sender, TestStatusChangedEventArgs e)
         {
-            if (this.PropertyChanged != null)
+            var propChanged = this.PropertyChanged;
+            if (propChanged != null)
             {
-                this.PropertyChanged(this, new PropertyChangedEventArgs("ColorFromStatus"));
-                this.PropertyChanged(this, new PropertyChangedEventArgs("TestName"));
+                propChanged(this, new PropertyChangedEventArgs("ColorFromStatus"));
+                propChanged(this, new PropertyChangedEventArgs("TestName"));
             }
+        }
+
+        internal ZumoTest Test
+        {
+            get { return this.test; }
         }
 
         public string TestName

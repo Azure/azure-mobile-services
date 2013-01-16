@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -130,17 +131,43 @@ namespace ZumoE2ETestApp
             int selectedIndex = this.lstTestGroups.SelectedIndex;
             if (selectedIndex >= 0)
             {
-                var appUrl = this.txtAppUrl.Text;
-                var appKey = this.txtAppKey.Text;
+                ZumoTestGroup testGroup = allTests[selectedIndex];
+                await this.RunTestGroup(testGroup);
+            }
+            else
+            {
+                await Alert("Error", "Please select a test group.");
+            }
+        }
 
-                string error = null;
+        private async Task RunTestGroup(ZumoTestGroup testGroup)
+        {
+            var appUrl = this.txtAppUrl.Text;
+            var appKey = this.txtAppKey.Text;
+
+            string error = null;
+            try
+            {
+                ZumoTestGlobals.Instance.InitializeClient(appUrl, appKey);
+            }
+            catch (Exception ex)
+            {
+                error = string.Format(CultureInfo.InvariantCulture, "{0}", ex);
+            }
+
+            if (error != null)
+            {
+                await Alert("Error initializing client", error);
+            }
+            else
+            {
                 try
                 {
-                    ZumoTestGlobals.Instance.InitializeClient(appUrl, appKey);
+                    await testGroup.Run();
                 }
                 catch (Exception ex)
                 {
-                    error = ex.Message;
+                    error = string.Format(CultureInfo.InvariantCulture, "Unhandled exception: {0}", ex);
                 }
 
                 if (error != null)
@@ -149,57 +176,43 @@ namespace ZumoE2ETestApp
                 }
                 else
                 {
-                    ZumoTestGroup testGroup = allTests[selectedIndex];
-                    try
+                    // Saving app info for future runs
+                    var savedAppInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
+                    if (savedAppInfo.LastService == null || savedAppInfo.LastService.AppUrl != appUrl || savedAppInfo.LastService.AppKey != appKey)
                     {
-                        await testGroup.Run();
-                    }
-                    catch (Exception ex)
-                    {
-                        error = ex.Message;
-                    }
-
-                    if (error != null)
-                    {
-                        await Alert("Error", error);
-                    }
-                    else
-                    {
-                        // Saving app info for future runs
-                        var savedAppInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
-                        if (savedAppInfo.LastService == null || savedAppInfo.LastService.AppUrl != appUrl || savedAppInfo.LastService.AppKey != appKey)
+                        if (savedAppInfo.LastService == null)
                         {
-                            if (savedAppInfo.LastService == null)
-                            {
-                                savedAppInfo.LastService = new MobileServiceInfo();
-                            }
-
-                            savedAppInfo.LastService.AppKey = appKey;
-                            savedAppInfo.LastService.AppUrl = appUrl;
-                            await AppInfoRepository.Instance.SaveAppInfo(savedAppInfo);
+                            savedAppInfo.LastService = new MobileServiceInfo();
                         }
+
+                        savedAppInfo.LastService.AppKey = appKey;
+                        savedAppInfo.LastService.AppUrl = appUrl;
+                        await AppInfoRepository.Instance.SaveAppInfo(savedAppInfo);
                     }
                 }
-            }
-            else
-            {
-                await Alert("Error", "Please select a test group.");
             }
         }
 
         private void btnResetTests_Click_1(object sender, RoutedEventArgs e)
         {
-            int selectedIndex = this.lstTestGroups.SelectedIndex;
-            if (selectedIndex >= 0)
+            try
             {
-                foreach (var test in this.allTests[selectedIndex].AllTests)
+                int selectedIndex = this.lstTestGroups.SelectedIndex;
+                if (selectedIndex >= 0)
                 {
-                    test.Reset();
+                    foreach (var test in this.allTests[selectedIndex].AllTests)
+                    {
+                        test.Reset();
+                    }
+                }
+                else
+                {
+                    Alert("Error", "Please select a group to reset the tests from.");
                 }
             }
-            else
+            catch (Exception ex)
             {
-                Alert("Error", "Please select a group to reset the tests from.");
+                Alert("Error", string.Format(CultureInfo.InvariantCulture, "Unhandled exception: {0}", ex));
             }
         }
 
@@ -273,6 +286,38 @@ namespace ZumoE2ETestApp
 
                     popup.IsOpen = true;
                 }
+            }
+        }
+
+        private async void btnRunSelected_Click_1(object sender, RoutedEventArgs e)
+        {
+            var items = this.lstTests.SelectedItems;
+            if (items.Count == 0)
+            {
+                await Alert("Error", "No tests selected");
+            }
+            else
+            {
+                ZumoTestGroup partialGroup = new ZumoTestGroup("Partial test group");
+                foreach (ListViewForTest test in items)
+                {
+                    partialGroup.AddTest(test.Test);
+                }
+
+                await this.RunTestGroup(partialGroup);
+            }
+        }
+
+        private void lstTests_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedItems = this.lstTests.SelectedItems;
+            if (selectedItems.Count > 0)
+            {
+                this.btnRunSelected.Visibility = Windows.UI.Xaml.Visibility.Visible;
+            }
+            else
+            {
+                this.btnRunSelected.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
             }
         }
     }
