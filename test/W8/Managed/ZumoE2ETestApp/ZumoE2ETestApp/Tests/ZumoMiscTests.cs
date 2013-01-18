@@ -154,6 +154,18 @@ namespace ZumoE2ETestApp.Tests
 
                 testPassed = testPassed && ValidateParameters(test, "read", expectedParameters, actualParameters);
 
+                if (useTypedTable)
+                {
+                    // Refresh operation only exists for typed tables
+                    dict["operation"] = "read";
+                    expectedParameters["operation"] = JsonValue.CreateStringValue("read");
+                    typedItem.Id = 1;
+                    typedItem.parameters = "";
+                    await typed.RefreshAsync(typedItem, dict);
+                    actualParameters = JsonObject.Parse(typedItem.parameters);
+                    testPassed = testPassed && ValidateParameters(test, "refresh", expectedParameters, actualParameters);
+                }
+
                 // Delete operation doesn't populate the object with the response, so we'll use a filter to capture that
                 var filter = new FilterToCaptureHttpTraffic();
                 client = client.WithFilter(filter);

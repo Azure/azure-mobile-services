@@ -139,6 +139,9 @@
     </Compile>
     <Compile Include="UIElements\ListViewForTestGroup.cs" />
     <Compile Include="UIElements\ListViewForTest.cs" />
+    <Compile Include="UIElements\MoviesDisplayPage.xaml.cs">
+      <DependentUpon>MoviesDisplayPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="UIElements\SaveAppsPage.xaml.cs">
       <DependentUpon>SaveAppsPage.xaml</DependentUpon>
     </Compile>
@@ -159,6 +162,10 @@
     <Content Include="Assets\SplashScreen.png" />
     <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\WideLogo.png" />
+    <Page Include="UIElements\MoviesDisplayPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="UIElements\InputDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

@@ -20,35 +20,15 @@ namespace ZumoE2ETestApp.UIElements
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class InputDialog : Page
+    public sealed partial class MoviesDisplayPage : Page
     {
-        public bool Cancelled { get; private set; }
-
-        public InputDialog(string caption, string text, string cancelButtonText, string okButtonText)
+        public MoviesDisplayPage()
         {
             this.InitializeComponent();
 
-            this.btnCancel.Content = cancelButtonText;
-            this.lblTitle.Text = caption;
-            this.txtText.Text = text;
-            if (okButtonText == null)
-            {
-                this.btnOk.Visibility = Visibility.Collapsed;
-            }
-            else
-            {
-                this.btnOk.Visibility = Visibility.Visible;
-                this.btnOk.Content = okButtonText;
-            }
-
             var bounds = Window.Current.Bounds;
-            this.grdRootPanel.Height = bounds.Height;
             this.grdRootPanel.Width = bounds.Width;
-        }
-
-        public InputDialog(string caption, string text, string cancelButtonText)
-            : this(caption, text, cancelButtonText, null)
-        {
+            this.grdRootPanel.Height = bounds.Height;
         }
 
         /// <summary>
@@ -60,19 +40,12 @@ namespace ZumoE2ETestApp.UIElements
         {
         }
 
-        private void btnCancel_Click_1(object sender, RoutedEventArgs e)
+        internal void SetMoviesSource(object itemsSource)
         {
-            this.Cancelled = true;
-            ((Popup)this.Parent).IsOpen = false;
+            this.lstMovies.ItemsSource = itemsSource;
         }
 
-        private void btnOk_Click_1(object sender, RoutedEventArgs e)
-        {
-            this.Cancelled = false;
-            ((Popup)this.Parent).IsOpen = false;
-        }
-
-        public Task Display()
+        internal Task Display()
         {
             Popup popup = new Popup();
             popup.Child = this;
@@ -84,6 +57,11 @@ namespace ZumoE2ETestApp.UIElements
             };
 
             return tcs.Task;
+        }
+
+        private void btnClose_Click_1(object sender, RoutedEventArgs e)
+        {
+            ((Popup)this.Parent).IsOpen = false;
         }
     }
 }

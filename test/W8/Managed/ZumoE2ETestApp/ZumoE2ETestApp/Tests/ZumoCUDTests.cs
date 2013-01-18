@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Data.Json;
+using Windows.Foundation;
 using ZumoE2ETestApp.Framework;
 using ZumoE2ETestApp.Tests.Types;
 
@@ -38,7 +39,7 @@ namespace ZumoE2ETestApp.Tests
                 ""long1"":1234,
                 ""date1"":""2012-12-13T09:23:12.000Z"",
                 ""complexType1"":[{""Name"":""John Doe"",""Age"":33}, null],
-                ""complexType2"":{""Name"":""John Doe"",""Age"":33,""Friends"":null}
+                ""complexType2"":{""Name"":""John Doe"",""Age"":33,""Friends"":[""Jane""]}
             }";
 
             string toUpdateJsonString = @"{
@@ -49,7 +50,7 @@ namespace ZumoE2ETestApp.Tests
                 ""long1"":77777777,
                 ""date1"":""1999-05-23T19:15:54.000Z"",
                 ""complexType1"":[{""Name"":""Jane Roe"",""Age"":23}, null],
-                ""complexType2"":{""Name"":""Jane Roe"",""Age"":23,""Friends"":null}
+                ""complexType2"":{""Name"":""Jane Roe"",""Age"":23,""Friends"":[""John""]}
             }";
 
             result.AddTest(CreateUntypedUpdateTest("Update typed item", JsonObject.Parse(toInsertJsonString), JsonObject.Parse(toUpdateJsonString)));
@@ -78,7 +79,60 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateDeleteTest("(Neg) Delete untyped item with non-existing id", false, DeleteTestType.NonExistingId));
             result.AddTest(CreateDeleteTest("(Neg) Delete untyped item without id field", false, DeleteTestType.NoIdField));
 
+            result.AddTest(new ZumoTest("Refresh - updating item with server modifications", async delegate(ZumoTest test)
+            {
+                var client = ZumoTestGlobals.Instance.Client;
+                var table = client.GetTable<RoundTripTableItem>();
+                int randomSeed = Environment.TickCount;
+                test.AddLog("Using random seed {0}", randomSeed);
+                Random random = new Random(randomSeed);
+                var item = new RoundTripTableItem(random);
+                test.AddLog("Item to be inserted: {0}", item);
+                await table.InsertAsync(item);
+                test.AddLog("Added item with id = {0}", item.Id);
+
+                var item2 = new RoundTripTableItem(random);
+                item2.Id = item.Id;
+                test.AddLog("Item to update: {0}", item2);
+                await table.UpdateAsync(item2);
+                test.AddLog("Updated item");
+
+                test.AddLog("Now refreshing first object");
+                await table.RefreshAsync(item);
+                test.AddLog("Refreshed item: {0}", item);
+
+                if (item.Equals(item2))
+                {
+                    test.AddLog("Item was refreshed successfully");
+                    return true;
+                }
+                else
+                {
+                    test.AddLog("Error, refresh didn't happen successfully");
+                    return false;
+                }
+            }));
+
+            result.AddTest(new ZumoTest("Refresh item without id does not send request", async delegate(ZumoTest test)
+            {
+                var client = ZumoTestGlobals.Instance.Client.WithFilter(new FilterWhichThrows());
+                var table = client.GetTable<RoundTripTableItem>();
+                var item = new RoundTripTableItem(new Random());
+                item.Id = 0;
+                await table.RefreshAsync(item);
+                test.AddLog("Call to RefreshAsync didn't go to the network, as expected.");
+                return true;
+            }));
+
             return result;
+        }
+
+        class FilterWhichThrows : IServiceFilter
+        {
+            public IAsyncOperation<IServiceFilterResponse> Handle(IServiceFilterRequest request, IServiceFilterContinuation continuation)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         enum DeleteTestType { ValidDelete, NonExistingId, NoIdField }

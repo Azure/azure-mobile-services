@@ -193,7 +193,7 @@ namespace ZumoE2ETestApp.Tests.Types
         {
             this.Name = Util.CreateSimpleRandomString(rndGen, 10);
             this.Age = rndGen.Next(80);
-            this.Friends = Enumerable.Range(0, 5)
+            this.Friends = Enumerable.Range(1, 5)
                 .Select(_ => Util.CreateSimpleRandomString(rndGen, 5))
                 .ToArray();
         }
@@ -230,7 +230,15 @@ namespace ZumoE2ETestApp.Tests.Types
             JsonObject jo = value.GetObject();
             this.Name = jo["Name"].GetString();
             this.Age = (int)jo["Age"].GetNumber();
-            this.Friends = jo["Friends"].GetArray().Select(jv => jv.GetString()).ToArray();
+            var friends = jo["Friends"];
+            if (friends == null || friends.ValueType == JsonValueType.Null)
+            {
+                this.Friends = null;
+            }
+            else
+            {
+                this.Friends = friends.GetArray().Select(jv => jv.GetString()).ToArray();
+            }
         }
 
         public IJsonValue Serialize()

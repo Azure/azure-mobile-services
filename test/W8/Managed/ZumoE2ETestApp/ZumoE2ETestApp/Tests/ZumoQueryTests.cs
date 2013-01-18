@@ -1,12 +1,14 @@
 ﻿using Microsoft.WindowsAzure.MobileServices;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using ZumoE2ETestApp.Framework;
 using ZumoE2ETestApp.Tests.Types;
+using ZumoE2ETestApp.UIElements;
 
 namespace ZumoE2ETestApp.Tests
 {
@@ -115,7 +117,7 @@ namespace ZumoE2ETestApp.Tests
 
             // Negative tests
             result.AddTest(CreateQueryTest<MobileServiceInvalidOperationException>("(Neg) Very large top value", m => m.Year > 2000, 1001));
-            result.AddTest(CreateQueryTest<ArgumentException>("(Neg) Unsupported predicate: unsupported arithmetic",
+            result.AddTest(CreateQueryTest<NotSupportedException>("(Neg) Unsupported predicate: unsupported arithmetic",
                 m => Math.Sqrt(m.Year) > 43));
             
             // Invalid lookup
@@ -131,13 +133,33 @@ namespace ZumoE2ETestApp.Tests
                         test.AddLog("Error, LookupAsync for id = {0} should have failed, but succeeded: {1}", id, item);
                         return false;
                     }
-                    catch (ArgumentException ex)
+                    catch (MobileServiceInvalidOperationException ex)
                     {
                         test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                         return true;
                     }
                 }));
             }
+
+            result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("The next test will show a dialog with certain movies. Please validate that movie titles and release years are shown correctly in the list."));
+            result.AddTest(new ZumoTest("ToCollectionView - displaying movies on a ListBox", async delegate(ZumoTest test)
+            {
+                var client = ZumoTestGlobals.Instance.Client;
+                var table = client.GetTable<Movie>();
+                var query = from m in table
+                            where m.Year > 1980
+                            orderby m.ReleaseDate descending
+                            select new
+                            {
+                                Date = m.ReleaseDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                                Title = m.Title
+                            };
+                var newPage = new MoviesDisplayPage();
+                newPage.SetMoviesSource(query.ToCollectionView());
+                await newPage.Display();
+                return true;
+            }));
+            result.AddTest(ZumoTestCommon.CreateYesNoTest("Were the movies displayed correctly?", true));
 
             return result;
         }
@@ -215,7 +237,18 @@ namespace ZumoE2ETestApp.Tests
                     IEnumerable<string> readProjectedMovies = null;
                     if (selectedQuery == null)
                     {
-                        readMovies = await query.ToEnumerableAsync();
+                        // Both ways of querying should be equivalent, so using both with equal probability here.
+                        var tickCount = Environment.TickCount;
+                        if ((tickCount % 2) == 0)
+                        {
+                            test.AddLog("Querying using MobileServiceTableQuery<T>.ToEnumerableAsync");
+                            readMovies = await query.ToEnumerableAsync();
+                        }
+                        else
+                        {
+                            test.AddLog("Querying using IMobileServiceTable<T>.ReadAsync(MobileServiceTableQuery<U>)");
+                            readMovies = await table.ReadAsync(query);
+                        }
                     }
                     else
                     {
@@ -228,8 +261,6 @@ namespace ZumoE2ETestApp.Tests
                     {
                         actualTotalCount = totalCountProvider.TotalCount;
                     }
-
-                    //var data = readMovies.ToArray();
 
                     IEnumerable<Movie> expectedData = ZumoQueryTestData.AllMovies;
                     if (whereClause != null)
