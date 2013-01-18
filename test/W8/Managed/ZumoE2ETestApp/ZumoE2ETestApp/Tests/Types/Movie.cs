@@ -17,7 +17,7 @@ namespace ZumoE2ETestApp.Tests.Types
         public int Id { get; set; }
         public string Title { get; set; }
         public int Duration { get; set; }
-        public string Rating { get; set; }
+        public string MPAARating { get; set; }
         public DateTime ReleaseDate { get; set; }
         public bool BestPictureWinner { get; set; }
         public int Year { get; set; }
@@ -25,7 +25,7 @@ namespace ZumoE2ETestApp.Tests.Types
         public override string ToString()
         {
             return string.Format(CultureInfo.InvariantCulture, "Movie[Title={0},Duration={1},Rating={2},ReleaseDate={3},BestPictureWinner={4},Year={5}",
-                Title, Duration, Rating,
+                Title, Duration, MPAARating,
                 ReleaseDate.ToUniversalTime().ToString("yyyy-MM-dd:HH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 BestPictureWinner, Year);
         }
@@ -35,7 +35,7 @@ namespace ZumoE2ETestApp.Tests.Types
             int result = 0;
             if (Title != null) result ^= Title.GetHashCode();
             result ^= Duration.GetHashCode();
-            if (Rating != null) result ^= Rating.GetHashCode();
+            if (MPAARating != null) result ^= MPAARating.GetHashCode();
             result ^= ReleaseDate.ToUniversalTime().GetHashCode();
             result ^= BestPictureWinner.GetHashCode();
             result ^= Year.GetHashCode();
@@ -48,7 +48,7 @@ namespace ZumoE2ETestApp.Tests.Types
             if (other == null) return false;
             if (this.Title != other.Title) return false;
             if (this.Duration != other.Duration) return false;
-            if (this.Rating != other.Rating) return false;
+            if (this.MPAARating != other.MPAARating) return false;
             if (!this.ReleaseDate.ToUniversalTime().Equals(other.ReleaseDate.ToUniversalTime())) return false;
             if (this.BestPictureWinner != other.BestPictureWinner) return false;
             if (this.Year != other.Year) return false;

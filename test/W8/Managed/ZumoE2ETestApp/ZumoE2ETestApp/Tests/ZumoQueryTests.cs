@@ -34,7 +34,7 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateQueryTest("Compound statement - OR of ANDs - Movies from the 30s and 50s",
                 m => ((m.Year >= 1930) && (m.Year < 1940)) || ((m.Year >= 1950) && (m.Year < 1960))));
             result.AddTest(CreateQueryTest("Division, equal and different - Movies from the year 2000 with rating other than R",
-                m => ((m.Year / 1000.0) == 2) && (m.Rating != "R")));
+                m => ((m.Year / 1000.0) == 2) && (m.MPAARating != "R")));
             result.AddTest(CreateQueryTest("Addition, subtraction, relational, AND - Movies from the 1980s which last less than 2 hours",
                 m => ((m.Year - 1900) >= 80) && (m.Year + 10 < 2000) && (m.Duration < 120)));
 
@@ -49,6 +49,14 @@ namespace ZumoE2ETestApp.Tests
                 m => m.Title.ToUpper().Contains("ONE")));
 
             // TODO: Add more string functions
+
+            // String fields
+            result.AddTest(CreateQueryTest("String equals - Movies since 1980 with rating PG-13",
+                m => m.Year >= 1980 && m.MPAARating == "PG-13", 100));
+            result.AddTest(CreateQueryTest("String field, comparison to null - Movies since 1980 without a MPAA rating",
+                m => m.Year >= 1980 && m.MPAARating == null));
+            result.AddTest(CreateQueryTest("String field, comparison (not equal) to null - Movies before 1970 with a MPAA rating",
+                m => m.Year < 1970 && m.MPAARating != null));
 
             // Numeric functions
             result.AddTest(CreateQueryTest("Floor - Movies which last more than 3 hours",
