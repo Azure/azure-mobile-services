@@ -54,7 +54,7 @@ static NSString *queryTestsTableName = @"iosMovies";
     [result addObject:[self createQueryTestWithName:@"GreaterThan and LessThan - Movies from the 90s" andPredicate:[NSPredicate predicateWithFormat:@"(Year > 1989) and (Year < 2000)"]]];
     [result addObject:[self createQueryTestWithName:@"GreaterEqual and LessEqual - Movies from the 90s" andPredicate:[NSPredicate predicateWithFormat:@"(Year >= 1990) and (Year <= 1999)"]]];
     [result addObject:[self createQueryTestWithName:@"Compound statement - OR of ANDs - Movies from the 30s and 50s" andPredicate:[NSPredicate predicateWithFormat:@"((Year >= 1930) && (Year < 1940)) || ((Year >= 1950) && (Year < 1960))"]]];
-    [result addObject:[self createQueryTestWithName:@"Division, equal and different - Movies from the year 2000 with rating other than R" andPredicate:[NSPredicate predicateWithFormat:@"((Year / 1000.0) = 2) and (Rating != 'R')"]]];
+    [result addObject:[self createQueryTestWithName:@"Division, equal and different - Movies from the year 2000 with rating other than R" andPredicate:[NSPredicate predicateWithFormat:@"((Year / 1000.0) = 2) and (MPAARating != 'R')"]]];
     [result addObject:[self createQueryTestWithName:@"Addition, subtraction, relational, AND - Movies from the 1980s which last less than 2 hours" andPredicate:[NSPredicate predicateWithFormat:@"((Year - 1900) >= 80) and (Year + 10 < 2000) and (Duration < 120)"]]];
     
     // String functions
@@ -62,6 +62,12 @@ static NSString *queryTestsTableName = @"iosMovies";
     [result addObject:[self createQueryTestWithName:@"StartsWith, case insensitive - Movies which start with 'the'" andPredicate:[NSPredicate predicateWithFormat:@"Title BEGINSWITH[c] %@", @"the"] andTop:@100 andSkip:nil]];
     [result addObject:[self createQueryTestWithName:@"EndsWith, case insensitive - Movies which end with 'r'" andPredicate:[NSPredicate predicateWithFormat:@"Title ENDSWITH[c] 'r'"]]];
     [result addObject:[self createQueryTestWithName:@"Contains - Movies which contain the word 'one', case insensitive" andPredicate:[NSPredicate predicateWithFormat:@"Title CONTAINS[c] %@", @"one"]]];
+    [result addObject:[self createQueryTestWithName:@"Contains (non-ASCII) - Movies containing the 'é' character" andPredicate:[NSPredicate predicateWithFormat:@"Title CONTAINS[c] 'é'"]]];
+    
+    // String fields
+    [result addObject:[self createQueryTestWithName:@"Equals - Movies since 1980 with rating PG-13" andPredicate:[NSPredicate predicateWithFormat:@"MPAARating = 'PG-13' and Year >= 1980"] andTop:@100 andSkip:nil]];
+    [result addObject:[self createQueryTestWithName:@"Comparison to nil - Movies since 1980 without a MPAA rating" andPredicate:[NSPredicate predicateWithFormat:@"MPAARating = %@ and Year >= 1980", nil]]];
+    [result addObject:[self createQueryTestWithName:@"Comparison to nil (not NULL) - Movies before 1970 with a MPAA rating" andPredicate:[NSPredicate predicateWithFormat:@"MPAARating <> %@ and Year < 1970", nil]]];
     
     // Numeric functions
     [result addObject:[self createQueryTestWithName:@"Floor - Movies which last more than 3 hours" andPredicate:[NSPredicate predicateWithFormat:@"floor(Duration / 60.0) >= 3"]]];
@@ -78,8 +84,8 @@ static NSString *queryTestsTableName = @"iosMovies";
     [result addObject:[self createQueryTestWithName:@"Bool: not equal to FALSE - Best picture winners after 2000" andPredicate:[NSPredicate predicateWithFormat:@"BestPictureWinner != FALSE and Year >= 2000"]]];
     
     // Predicate with substitution variables
-    [result addObject:[self createQueryTestWithName:@"IN - Movies from the even years in the 2000s with rating PG, PG-13 or R" andPredicate:[NSPredicate predicateWithFormat:@"Year IN %@ and Rating IN %@", @[@2000, @2002, @2004, @2006, @2008], @[@"R", @"PG", @"PG-13"]] andTop:@100 andSkip:nil]];
-    [result addObject:[self createQueryTestWithName:@"%K, %d substitution - Movies from 2000 rated PG-13" andPredicate:[NSPredicate predicateWithFormat:@"%K >= %d and %K = %@", @"Year", @2000, @"Rating", @"PG-13"]]];
+    [result addObject:[self createQueryTestWithName:@"IN - Movies from the even years in the 2000s with rating PG, PG-13 or R" andPredicate:[NSPredicate predicateWithFormat:@"Year IN %@ and MPAARating IN %@", @[@2000, @2002, @2004, @2006, @2008], @[@"R", @"PG", @"PG-13"]] andTop:@100 andSkip:nil]];
+    [result addObject:[self createQueryTestWithName:@"%K, %d substitution - Movies from 2000 rated PG-13" andPredicate:[NSPredicate predicateWithFormat:@"%K >= %d and %K = %@", @"Year", @2000, @"MPAARating", @"PG-13"]]];
 
     // Top and skip
     [result addObject:[self createQueryTestWithName:@"Get all using large $top - fetchLimit = 500" andPredicate:nil andTop:@500 andSkip:nil]];
@@ -268,6 +274,13 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
                 } else {
                     NSArray *filteredArray = [allItems filteredArrayUsingPredicate:predicate];
                     BOOL passed = [self compareExpectedArray:filteredArray withActual:queriedItems forTest:test];
+
+                    int queriedCount = [queriedItems count];
+                    int maxTrace = queriedCount > 5 ? 5 : queriedCount;
+                    NSArray *toTrace = [queriedItems subarrayWithRange:NSMakeRange(0, maxTrace)];
+                    NSString *continuation = queriedCount > 5 ? @" (and more items)" : @"";
+                    [test addLog:[NSString stringWithFormat:@"Queried items: %@%@", toTrace, continuation]];
+                    
                     if (passed) {
                         [test addLog:@"Test passed"];
                         [test setTestStatus:TSPassed];
