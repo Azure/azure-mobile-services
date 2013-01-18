@@ -30,24 +30,21 @@
 typedef enum { UpdateUsingObject, NegUpdateObjectInvalidId, NegUpdateObjectNoId } UpdateTestType;
 
 + (ZumoTest *)createUpdateTestWithName:(NSString *)name andType:(UpdateTestType)type {
-    ZumoTest *result = [[ZumoTest alloc] init];
-    [result setTestName:name];
-    __weak ZumoTest *weakRef = result;
-    [result setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+    ZumoTest *result = [ZumoTest createTestWithName:name andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client getTable:@"TodoItem"];
         [table insert:@{@"name":@"John Doe",@"age":[NSNumber numberWithInt:33]} completion:^(NSDictionary *inserted, NSError *insertError) {
             if (insertError) {
-                [weakRef addLog:[NSString stringWithFormat:@"Error inserting data: %@", insertError]];
-                [weakRef setTestStatus:TSFailed];
+                [test addLog:[NSString stringWithFormat:@"Error inserting data: %@", insertError]];
+                [test setTestStatus:TSFailed];
                 completion(NO);
             } else {
                 NSNumber *itemId = [inserted objectForKey:@"id"];
-                [weakRef addLog:[NSString stringWithFormat:@"Inserted element %d to be deleted", [itemId intValue]]];
+                [test addLog:[NSString stringWithFormat:@"Inserted element %d to be deleted", [itemId intValue]]];
                 [table readWithId:itemId completion:^(NSDictionary *roundTripped, NSError *rtError) {
                     if (rtError) {
-                        [weakRef addLog:[NSString stringWithFormat:@"Error retrieving inserted item: %@", rtError]];
-                        [weakRef setTestStatus:TSFailed];
+                        [test addLog:[NSString stringWithFormat:@"Error retrieving inserted item: %@", rtError]];
+                        [test setTestStatus:TSFailed];
                         completion(NO);
                     } else {
                         BOOL isPositiveTest = type == UpdateUsingObject;
@@ -66,38 +63,38 @@ typedef enum { UpdateUsingObject, NegUpdateObjectInvalidId, NegUpdateObjectNoId 
                             if (isPositiveTest) {
                                 if (updateError) {
                                     passed = NO;
-                                    [weakRef addLog:[NSString stringWithFormat:@"Error updating item: %@", updateError]];
+                                    [test addLog:[NSString stringWithFormat:@"Error updating item: %@", updateError]];
                                 } else {
                                     if (![updatedValue isEqualToNumber:[updatedItem objectForKey:@"age"]]) {
                                         passed = NO;
-                                        [weakRef addLog:[NSString stringWithFormat:@"Incorrect value for updated object: %@", updatedItem]];
+                                        [test addLog:[NSString stringWithFormat:@"Incorrect value for updated object: %@", updatedItem]];
                                     }
                                 }
                             } else {
                                 if (!updateError) {
                                     passed = NO;
-                                    [weakRef addLog:[NSString stringWithFormat:@"Expected error, but update succeeded for item: %@", itemToUpdate]];
+                                    [test addLog:[NSString stringWithFormat:@"Expected error, but update succeeded for item: %@", itemToUpdate]];
                                 } else if (type == NegUpdateObjectNoId) {
                                     if (updateError.code != MSMissingItemIdWithRequest) {
-                                        [weakRef addLog:[NSString stringWithFormat:@"Unexpected error code: %d", updateError.code]];
+                                        [test addLog:[NSString stringWithFormat:@"Unexpected error code: %d", updateError.code]];
                                         passed = NO;
                                     }
                                 } else if (updateError.code != MSErrorMessageErrorCode) {
-                                    [weakRef addLog:[NSString stringWithFormat:@"Unexpected error code: %d", updateError.code]];
+                                    [test addLog:[NSString stringWithFormat:@"Unexpected error code: %d", updateError.code]];
                                     passed = NO;
                                 } else {
                                     NSHTTPURLResponse *resp = [[updateError userInfo] objectForKey:MSErrorResponseKey];
                                     if (resp.statusCode != 404) {
-                                        [weakRef addLog:[NSString stringWithFormat:@"Invalid response status code, expected 404, found %d", resp.statusCode]];
+                                        [test addLog:[NSString stringWithFormat:@"Invalid response status code, expected 404, found %d", resp.statusCode]];
                                         passed = NO;
                                     }
                                 }
                             }
                             
                             if (isPositiveTest && passed) {
-                                [self validateUpdateForTest:weakRef andTable:table andId:itemId andExpectedValue:updatedValue withCompletion:completion];
+                                [self validateUpdateForTest:test andTable:table andId:itemId andExpectedValue:updatedValue withCompletion:completion];
                             } else {
-                                [weakRef setTestStatus:(passed ? TSPassed : TSFailed)];
+                                [test setTestStatus:(passed ? TSPassed : TSFailed)];
                                 completion(passed);
                             }
                         }];
@@ -133,24 +130,21 @@ typedef enum { UpdateUsingObject, NegUpdateObjectInvalidId, NegUpdateObjectNoId 
 typedef enum { DeleteUsingId, DeleteUsingObject, NegDeleteUsingInvalidId, NegDeleteObjectInvalidId, NegDeleteObjectNoId } DeleteTestType;
 
 + (ZumoTest *)createDeleteTestWithName:(NSString *)name andType:(DeleteTestType)type {
-    ZumoTest *result = [[ZumoTest alloc] init];
-    [result setTestName:name];
-    __weak ZumoTest *weakRef = result;
-    [result setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+    ZumoTest *result = [ZumoTest createTestWithName:name andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client getTable:@"TodoItem"];
         [table insert:@{@"name":@"John Doe",@"age":[NSNumber numberWithInt:33]} completion:^(NSDictionary *inserted, NSError *insertError) {
             if (insertError) {
-                [weakRef addLog:[NSString stringWithFormat:@"Error inserting data: %@", insertError]];
-                [weakRef setTestStatus:TSFailed];
+                [test addLog:[NSString stringWithFormat:@"Error inserting data: %@", insertError]];
+                [test setTestStatus:TSFailed];
                 completion(NO);
             } else {
                 NSNumber *itemId = [inserted objectForKey:@"id"];
-                [weakRef addLog:[NSString stringWithFormat:@"Inserted element %d to be deleted", [itemId intValue]]];
+                [test addLog:[NSString stringWithFormat:@"Inserted element %d to be deleted", [itemId intValue]]];
                 [table readWithId:itemId completion:^(NSDictionary *roundTripped, NSError *rtError) {
                     if (rtError) {
-                        [weakRef addLog:[NSString stringWithFormat:@"Error retrieving inserted item: %@", rtError]];
-                        [weakRef setTestStatus:TSFailed];
+                        [test addLog:[NSString stringWithFormat:@"Error retrieving inserted item: %@", rtError]];
+                        [test setTestStatus:TSFailed];
                         completion(NO);
                     } else {
                         BOOL isPositiveTest = type == DeleteUsingId || type == DeleteUsingObject;
@@ -161,28 +155,28 @@ typedef enum { DeleteUsingId, DeleteUsingObject, NegDeleteUsingInvalidId, NegDel
                                 if (isPositiveTest) {
                                     if (deleteError) {
                                         passed = NO;
-                                        [weakRef addLog:[NSString stringWithFormat:@"Error deleting item: %@", deleteError]];
+                                        [test addLog:[NSString stringWithFormat:@"Error deleting item: %@", deleteError]];
                                     } else if (![itemId isEqualToNumber:deletedItemId]) {
-                                        [weakRef addLog:[NSString stringWithFormat:@"Invalid returned value after deleting: %@", deletedItemId]];
+                                        [test addLog:[NSString stringWithFormat:@"Invalid returned value after deleting: %@", deletedItemId]];
                                         passed = NO;
                                     }
                                 } else {
                                     if (!deleteError) {
                                         passed = NO;
-                                        [weakRef addLog:[NSString stringWithFormat:@"Expected error, but delete succeeded for item: %@", deletedItemId]];
+                                        [test addLog:[NSString stringWithFormat:@"Expected error, but delete succeeded for item: %@", deletedItemId]];
                                     } else if (deleteError.code != MSErrorMessageErrorCode) {
-                                        [weakRef addLog:[NSString stringWithFormat:@"Unexpected error code: %d", deleteError.code]];
+                                        [test addLog:[NSString stringWithFormat:@"Unexpected error code: %d", deleteError.code]];
                                         passed = NO;
                                     } else {
                                         NSHTTPURLResponse *resp = [[deleteError userInfo] objectForKey:MSErrorResponseKey];
                                         if (resp.statusCode != 404) {
-                                            [weakRef addLog:[NSString stringWithFormat:@"Invalid response status code, expected 404, found %d", resp.statusCode]];
+                                            [test addLog:[NSString stringWithFormat:@"Invalid response status code, expected 404, found %d", resp.statusCode]];
                                             passed = NO;
                                         }
                                     }
                                 }
                                 
-                                [weakRef setTestStatus:(passed ? TSPassed : TSFailed)];
+                                [test setTestStatus:(passed ? TSPassed : TSFailed)];
                                 completion(passed);
                             }];
                         } else {
@@ -198,36 +192,36 @@ typedef enum { DeleteUsingId, DeleteUsingObject, NegDeleteUsingInvalidId, NegDel
                                 if (isPositiveTest) {
                                     if (deleteError) {
                                         passed = NO;
-                                        [weakRef addLog:[NSString stringWithFormat:@"Error deleting item: %@", deleteError]];
+                                        [test addLog:[NSString stringWithFormat:@"Error deleting item: %@", deleteError]];
                                     } else if (![itemId isEqualToNumber:deletedItemId]) {
-                                        [weakRef addLog:[NSString stringWithFormat:@"Invalid returned value after deleting: %@", deletedItemId]];
+                                        [test addLog:[NSString stringWithFormat:@"Invalid returned value after deleting: %@", deletedItemId]];
                                         passed = NO;
                                     }
                                 } else {
                                     if (!deleteError) {
                                         passed = NO;
-                                        [weakRef addLog:[NSString stringWithFormat:@"Expected error, but delete succeeded for item: %@", deletedItemId]];
+                                        [test addLog:[NSString stringWithFormat:@"Expected error, but delete succeeded for item: %@", deletedItemId]];
                                     } else if (type == NegDeleteObjectNoId) {
                                         if (deleteError.code != MSMissingItemIdWithRequest) {
-                                            [weakRef addLog:[NSString stringWithFormat:@"Unexpected error code: %d", deleteError.code]];
+                                            [test addLog:[NSString stringWithFormat:@"Unexpected error code: %d", deleteError.code]];
                                             passed = NO;
                                         }
                                     } else if (deleteError.code != MSErrorMessageErrorCode) {
-                                        [weakRef addLog:[NSString stringWithFormat:@"Unexpected error code: %d", deleteError.code]];
+                                        [test addLog:[NSString stringWithFormat:@"Unexpected error code: %d", deleteError.code]];
                                         passed = NO;
                                     } else {
                                         NSHTTPURLResponse *resp = [[deleteError userInfo] objectForKey:MSErrorResponseKey];
                                         if (resp.statusCode != 404) {
-                                            [weakRef addLog:[NSString stringWithFormat:@"Invalid response status code, expected 404, found %d", resp.statusCode]];
+                                            [test addLog:[NSString stringWithFormat:@"Invalid response status code, expected 404, found %d", resp.statusCode]];
                                             passed = NO;
                                         }
                                     }
                                 }
                                 
                                 if (isPositiveTest && passed) {
-                                    [self validateDeletionForTest:weakRef andTable:table andId:itemId withCompletion:completion];
+                                    [self validateDeletionForTest:test andTable:table andId:itemId withCompletion:completion];
                                 } else {
-                                    [weakRef setTestStatus:(passed ? TSPassed : TSFailed)];
+                                    [test setTestStatus:(passed ? TSPassed : TSFailed)];
                                     completion(passed);
                                 }
                             }];

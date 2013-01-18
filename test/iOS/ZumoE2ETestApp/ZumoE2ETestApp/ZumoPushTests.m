@@ -172,18 +172,17 @@ static NSString *pushClientKey = @"PushClientKey";
 }
 
 + (ZumoTest *)createValidatePushRegistrationTest {
-    ZumoTest *result = [[ZumoTest alloc] init];
-    [result setTestName:@"Validate push registration"];
-    __weak ZumoTest *weakRef = result;
-    [result setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+    ZumoTest *result = [ZumoTest createTestWithName:@"Validate push registration" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         ZumoTestGlobals *globals = [ZumoTestGlobals sharedInstance];
-        [weakRef addLog:[globals remoteNotificationRegistrationStatus]];
+        [test addLog:[globals remoteNotificationRegistrationStatus]];
         if ([globals deviceToken]) {
-            [weakRef addLog:[NSString stringWithFormat:@"Device token: %@", [globals deviceToken]]];
-            [weakRef setTestStatus:TSPassed];
+            [test addLog:[NSString stringWithFormat:@"Device token: %@", [globals deviceToken]]];
+            [test setTestStatus:TSPassed];
             completion(YES);
         } else {
-            [weakRef setTestStatus:TSFailed];
+            UIAlertView *av = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Push tests will not work on the emulator; if this is the case, all subsequent tests will fail, and that's expected." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+            [av show];
+            [test setTestStatus:TSFailed];
             completion(NO);
         }
     }];
@@ -196,14 +195,11 @@ static NSString *pushClientKey = @"PushClientKey";
 }
 
 + (ZumoTest *)createPushTestWithName:(NSString *)name forPayload:(NSDictionary *)payload withDelay:(int)seconds isNegativeTest:(BOOL)isNegative {
-    ZumoTest *result = [[ZumoTest alloc] init];
-    [result setTestName:name];
-    __weak ZumoTest *weakRef = result;
-    [result setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+    ZumoTest *result = [ZumoTest createTestWithName:name andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         NSString *deviceToken = [[ZumoTestGlobals sharedInstance] deviceToken];
         if (!deviceToken) {
-            [weakRef addLog:@"Device not correctly registered for push"];
-            [weakRef setTestStatus:TSFailed];
+            [test addLog:@"Device not correctly registered for push"];
+            [test setTestStatus:TSFailed];
             completion(NO);
         } else {
             MSClient *client = [[ZumoTestGlobals sharedInstance] client];
@@ -211,14 +207,14 @@ static NSString *pushClientKey = @"PushClientKey";
             NSDictionary *item = @{@"method" : @"send", @"payload" : payload, @"token": deviceToken, @"delay": @(seconds)};
             [table insert:item completion:^(NSDictionary *insertedItem, NSError *error) {
                 if (error) {
-                    [weakRef addLog:[NSString stringWithFormat:@"Error requesting push: %@", error]];
-                    [weakRef setTestStatus:TSFailed];
+                    [test addLog:[NSString stringWithFormat:@"Error requesting push: %@", error]];
+                    [test setTestStatus:TSFailed];
                     completion(NO);
                 } else {
                     NSTimeInterval timeToWait = 5;
                     NSDictionary *expectedPayload = isNegative ? nil : payload;
-                    ZumoPushClient *pushClient = [[ZumoPushClient alloc] initForTest:weakRef withPayload:expectedPayload waitFor:timeToWait withTestCompletion:completion];
-                    [[weakRef propertyBag] setValue:pushClient forKey:pushClientKey];
+                    ZumoPushClient *pushClient = [[ZumoPushClient alloc] initForTest:test withPayload:expectedPayload waitFor:timeToWait withTestCompletion:completion];
+                    [[test propertyBag] setValue:pushClient forKey:pushClientKey];
                     
                     // completion will be called on the push client...
                 }
@@ -230,12 +226,10 @@ static NSString *pushClientKey = @"PushClientKey";
 }
 
 + (ZumoTest *)createFeedbackTest {
-    ZumoTest *result = [ZumoTest createTestWithName:@"Simple feedback test" andExecution:nil];
-    __weak ZumoTest *weakRef = result;
-    [result setExecution:^(UIViewController *viewController, ZumoTestCompletion completion) {
+    ZumoTest *result = [ZumoTest createTestWithName:@"Simple feedback test" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         if (![[ZumoTestGlobals sharedInstance] deviceToken]) {
-            [weakRef addLog:@"Device not correctly registered for push"];
-            [weakRef setTestStatus:TSFailed];
+            [test addLog:@"Device not correctly registered for push"];
+            [test setTestStatus:TSFailed];
             completion(NO);
         } else {
             MSClient *client = [[ZumoTestGlobals sharedInstance] client];
@@ -244,18 +238,18 @@ static NSString *pushClientKey = @"PushClientKey";
             [table insert:item completion:^(NSDictionary *item, NSError *error) {
                 BOOL passed = NO;
                 if (error) {
-                    [weakRef addLog:[NSString stringWithFormat:@"Error requesting feedback: %@", error]];
+                    [test addLog:[NSString stringWithFormat:@"Error requesting feedback: %@", error]];
                 } else {
                     NSArray *devices = item[@"devices"];
                     if (devices) {
-                        [weakRef addLog:[NSString stringWithFormat:@"Retrieved devices from feedback script: %@", devices]];
+                        [test addLog:[NSString stringWithFormat:@"Retrieved devices from feedback script: %@", devices]];
                         passed = YES;
                     } else {
-                        [weakRef addLog:[NSString stringWithFormat:@"No 'devices' field in response: %@", item]];
+                        [test addLog:[NSString stringWithFormat:@"No 'devices' field in response: %@", item]];
                     }
                 }
                 
-                [weakRef setTestStatus:(passed ? TSPassed : TSFailed)];
+                [test setTestStatus:(passed ? TSPassed : TSFailed)];
                 completion(passed);
             }];
         }
