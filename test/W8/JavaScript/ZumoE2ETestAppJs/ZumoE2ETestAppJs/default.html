@@ -54,7 +54,7 @@
                 </table>
             </td>
             <td id='testsTableCell' class='borderedCell' style="vertical-align: text-top;">
-                <table id='tblTests' border="1" style="width: 100%; height: 100%;">
+                <table id='tblTests' style="width: 100%; height: 100%;">
                     <thead id="tblTestsHead">
                         <tr>
                             <th id='testsTitle' class='testsTitle'>Tests for group: XXX</th>
@@ -131,6 +131,18 @@
             WinJS.Application.local.writeText('savedAppInfo.txt', JSON.stringify(state));
         }
 
+        function getTestDisplayColor(test) {
+            if (test.status === zumo.TSFailed) {
+                return 'Red';
+            } else if (test.status == zumo.TSPassed) {
+                return 'Lime';
+            } else if (test.status == zumo.TSRunning) {
+                return 'Gray';
+            } else {
+                return 'White';
+            }
+        }
+
         document.getElementById('btnRunTests').onclick = function (evt) {
             if (zumo.currentGroup < 0) {
                 alert('Please select a test group to run');
@@ -145,7 +157,7 @@
                 saveLastUsedAppInfo();
 
                 var groupDone = function (testsPassed, testsFailed) {
-                    var logs = currentGroup.getLogs();
+                    var logs = 'Test group finished';
                     logs = logs + '\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n';
                     logs = logs + 'Tests passed: ' + testsPassed + '\n';
                     logs = logs + 'Tests failed: ' + testsFailed;
@@ -155,6 +167,7 @@
                     var tblTests = document.getElementById('tblTestsBody');
                     var tr = tblTests.childNodes[index];
                     var td = tr.firstChild;
+                    td.style.color = getTestDisplayColor(test);
                     td.innerText = "" + (index + 1) + ". " + test.displayText();
                 }
                 var testFinished = updateTest;
@@ -174,11 +187,21 @@
                 tblTests.removeChild(tblTests.children[i]);
             }
 
+            function viewTestLogs(groupIndex, testIndex) {
+                var test = zumo.testGroups[groupIndex].tests[testIndex];
+                var logs = test.getLogs();
+                alert(logs);
+            }
+
             group.tests.forEach(function (test, index) {
                 var tr = document.createElement('tr');
                 var td = document.createElement('td');
                 td.innerText = "" + (index + 1) + ". " + test.displayText();
                 tr.appendChild(td);
+                td.style.color = getTestDisplayColor(test);
+                td.ondblclick = function () {
+                    viewTestLogs(zumo.currentGroup, index);
+                }
                 tblTests.appendChild(tr);
             });
         }

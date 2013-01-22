@@ -140,6 +140,122 @@ function createZumoNamespace() {
         return client;
     }
 
+    function compareValues(expected, actual, errors) {
+        var i, key;
+        if (expected === actual) {
+            // easy case
+            return true;
+        }
+
+        if ((expected === null) != (actual === null)) {
+            return false;
+        }
+
+        if (expected === null) {
+            return true;
+        }
+
+        function getValueType(value) {
+            var result = typeof value;
+            if (result === 'object') {
+                var objType = Object.prototype.toString.call(value);
+                if (objType === '[object Date]') {
+                    result = 'date';
+                } else if (objType === '[object Array]') {
+                    result = 'array';
+                }
+            }
+
+            return result;
+        }
+
+        var expectedType = getValueType(expected);
+        var actualType = getValueType(actual);
+        if (expectedType !== actualType) {
+            if (errors && errors.push) {
+                errors.push('Different types: expected: ' + expectedType + ', actual: ' + actualType);
+                return false;
+            }
+        }
+
+        switch (expectedType) {
+            case 'boolean':
+            case 'string':
+                // not the same, comparison done in easy case
+                if (errors && errors.push) {
+                    errors.push('Expected: ' + expected + ', actual: ' + actual);
+                }
+                return false;
+            case 'date':
+                var dExpected = expected.getTime();
+                var dActual = actual.getTime();
+                if (dExpected !== dActual) {
+                    if (errors && errors.push) {
+                        errors.push('Expected: ' + expected + '(' + dExpected + '), actual: ' + actual + '(' + dActual + ')');
+                    }
+                    return false;
+                } else {
+                    return true;
+                }
+            case 'number':
+                var acceptableDelta = 1e-8;
+                var delta = 1 - expected / actual;
+                if (Math.abs(delta) > acceptableEpsilon) {
+                    if (errors && errors.push) {
+                        errors.push('Numbers differ by more than the allowed difference: ' + expected + ' - ' + actual);
+                    }
+                    return false;
+                } else {
+                    return true;
+                }
+            case 'array':
+                if (expected.length !== actual.length) {
+                    if (errors && errors.push) {
+                        errors.push('Size of arrays are different: ' + expected + ' - ' + actual);
+                    }
+                    return false;
+                }
+
+                for (i = 0; i < expected.length; i++) {
+                    if (!compareValues(expected[i], actual[i], errors)) {
+                        if (errors && errors.push) {
+                            errors.push('Difference in array at index ' + i);
+                        }
+                        return false;
+                    }
+                }
+
+                return true;
+            case 'object':
+                for (key in expected) {
+                    if (expected.hasOwnProperty(key)) {
+                        var actualValue = actual[key];
+                        var expectedValue = expected[key];
+                        if (expectedValue === undefined) {
+                            if (errors && errors.push) {
+                                errors.push('Expected object has member with key ' + key + ', actual does not.');
+                            }
+                            return false;
+                        }
+
+                        if (!compareValues(expectedValue, actualValue, errors)) {
+                            if (errors && errors.push) {
+                                errors.push('Difference in object member with key: ' + key);
+                            }
+                            return false;
+                        }
+                    }
+                }
+
+                return true;
+            default:
+                if (errors && errors.push) {
+                    errors.push('Don\'t know how to compare object with type ' + expectedType);
+                }
+                return false;
+        }
+    }
+
     return {
         testGroups: testGroups,
         currentGroup: currentGroup,
@@ -151,7 +267,10 @@ function createZumoNamespace() {
         TSRunning: TSRunning,
         Test: ZumoTest,
         Group: ZumoTestGroup,
-        tests: {}
+        tests: {},
+        util: {
+            compare: compareValues
+        }
     };
 }
 
