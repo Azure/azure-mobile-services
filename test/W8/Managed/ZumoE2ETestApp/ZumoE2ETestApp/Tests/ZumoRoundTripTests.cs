@@ -251,11 +251,12 @@ namespace ZumoE2ETestApp.Tests
             return CreateSimpleUntypedRoundTripTest<ExceptionTypeWhichWillNeverBeThrown>(testName, item);
         }
 
-        private static ZumoTest CreateSimpleUntypedRoundTripTest<TExpectedException>(string testName, JsonObject item)
+        private static ZumoTest CreateSimpleUntypedRoundTripTest<TExpectedException>(string testName, JsonObject templateItem)
             where TExpectedException : Exception
         {
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
+                JsonObject item = JsonObject.Parse(templateItem.Stringify()); // prevent outer object from being captured and reused
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable(ZumoTestGlobals.RoundTripTableName);
 
