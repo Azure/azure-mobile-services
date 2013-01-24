@@ -65,6 +65,7 @@
     <Content Include="js\tests\queryTestData.js" />
     <Content Include="js\tests\queryTests.js" />
     <Content Include="js\tests\roundTripTests.js" />
+    <Content Include="js\tests\updateDeleteTests.js" />
     <Content Include="lib\jquery.js" />
     <None Include="ZumoE2ETestAppJs_TemporaryKey.pfx" />
   </ItemGroup>

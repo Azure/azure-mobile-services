@@ -89,7 +89,7 @@ function defineQueryTestsNamespace() {
         function (item) { return item.MPAARating == null && item.Year >= 1980; }));
     tests.push(createQueryTest('Comparison to null (not null) - Movies before 1970 with a MPAA rating',
         function (table) { return table.where(function () { return this.MPAARating != null && this.Year < 1970; }); },
-        function (item) { return item.MPAARating != null && item.Year < 1970; }, { debug: true }));
+        function (item) { return item.MPAARating != null && item.Year < 1970; }));
 
     // Numeric functions
     tests.push(createQueryTest('Math.floor - Movies which last more than 3 hours',
@@ -114,8 +114,8 @@ function defineQueryTestsNamespace() {
         function (table) { return table.where(function (d1, d2) { return this.ReleaseDate >= d1 && this.ReleaseDate <= d2; }, date1980, dateBefore1990); },
         function (item) { return item.ReleaseDate >= date1980 && item.ReleaseDate <= dateBefore1990; }));
     tests.push(createQueryTest('Date: Equals - Movies released on 1994-10-14 (Shawshank Redemption / Pulp Fiction)',
-        function (table) { return table.where(function (d) { return this.ReleaseDate === d; }, dateOfPulpFiction); },
-        function (item) { return item.ReleaseDate === dateOfPulpFiction; }));
+        function (table) { return table.where({ ReleaseDate: dateOfPulpFiction }); },
+        function (item) { return item.ReleaseDate.getTime() === dateOfPulpFiction.getTime(); }));
 
     // Date functions
     tests.push(createQueryTest('Date (month): Movies released in November',
@@ -269,13 +269,6 @@ function defineQueryTestsNamespace() {
                 var allMovies = zumo.tests.getQueryTestData();
                 var table = client.getTable(tableName);
 
-                if (test.name == 'String.substring (2 parameters) - movies with \'father\' starting at position 7' ||
-                    test.name == 'Date: Greater than, less than - Movies with release date in the 70s' ||
-                    test.name == 'Date: Equals - Movies released on 1994-10-14 (Shawshank Redemption / Pulp Fiction)' ||
-                    test.name == 'Date (day): Movies released in the first day of the month') {
-                    debug = true;
-                }
-
                 if (getQueryFunction) {
                     query = getQueryFunction(table);
                 } else {
@@ -411,13 +404,7 @@ function defineQueryTestsNamespace() {
                 }
             }, function (err) {
                 test.addLog('Read called the error callback: ' + JSON.stringify(err));
-                if (err.request) {
-                    var xhr = err.request;
-                    test.addLog('Response info:');
-                    test.addLog('  Status code: ' + xhr.status);
-                    test.addLog('  Headers: ' + xhr.getAllResponseHeaders());
-                    test.addLog('  Body: ' + xhr.responseText);
-                }
+                zumo.util.traceResponse(test, err.request);
                 if (isNegativeServerValidation) {
                     test.addLog('Error was expected');
                     done(true);

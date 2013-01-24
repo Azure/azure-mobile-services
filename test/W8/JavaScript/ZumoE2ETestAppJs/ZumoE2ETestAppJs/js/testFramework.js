@@ -80,21 +80,29 @@ function createZumoNamespace() {
                 }
 
                 testToRun.status = TSRunning;
-                testToRun.runTest(function (result) {
-                    testToRun.status = result ? TSPassed : TSFailed;
-                    if (result) {
-                        passed++;
-                    } else {
-                        failed++;
-                    }
+                try {
+                    testToRun.runTest(function (result) {
+                        testToRun.status = result ? TSPassed : TSFailed;
+                        if (result) {
+                            passed++;
+                        } else {
+                            failed++;
+                        }
 
-                    if (testDone) {
-                        testDone(testToRun, index);
-                    }
+                        if (testDone) {
+                            testDone(testToRun, index);
+                        }
 
-                    testToRun.addLog('Test ' + (result ? 'passed' : 'failed'));
+                        testToRun.addLog('Test ' + (result ? 'passed' : 'failed'));
+                        runNextTest(index + 1);
+                    });
+                } catch (ex) {
+                    testToRun.addLog('Caught exception running test: ' + JSON.stringify(ex));
+                    testToRun.status = TSFailed;
+                    failed++;
+                    testToRun.addLog('Test failed');
                     runNextTest(index + 1);
-                });
+                }
             }
         }
 
@@ -200,7 +208,7 @@ function createZumoNamespace() {
             case 'number':
                 var acceptableDelta = 1e-8;
                 var delta = 1 - expected / actual;
-                if (Math.abs(delta) > acceptableEpsilon) {
+                if (Math.abs(delta) > acceptableDelta) {
                     if (errors && errors.push) {
                         errors.push('Numbers differ by more than the allowed difference: ' + expected + ' - ' + actual);
                     }
@@ -256,6 +264,17 @@ function createZumoNamespace() {
         }
     }
 
+    function traceResponse(test, xhr) {
+        if (xhr) {
+            test.addLog('Response info:');
+            test.addLog('  Status code: ' + xhr.status);
+            test.addLog('  Headers: ' + xhr.getAllResponseHeaders());
+            test.addLog('  Body: ' + xhr.responseText);
+        } else {
+            test.addLog('No XMLHttpRequest information');
+        }
+    }
+
     return {
         testGroups: testGroups,
         currentGroup: currentGroup,
@@ -269,7 +288,8 @@ function createZumoNamespace() {
         Group: ZumoTestGroup,
         tests: {},
         util: {
-            compare: compareValues
+            compare: compareValues,
+            traceResponse: traceResponse
         }
     };
 }
