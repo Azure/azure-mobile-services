@@ -18,6 +18,7 @@
     <!-- Zumo tests; the order of the references is important -->
     <script src="js/testFramework.js"></script>
     <script src="js/tests/roundTripTests.js"></script>
+    <script src="js/tests/queryTestData.js"></script>
     <script src="js/tests/queryTests.js"></script>
     <script src="js/tests/allTests.js"></script>
 </head>
@@ -125,7 +126,8 @@
         function saveLastUsedAppInfo() {
             var state = {
                 lastAppUrl: document.getElementById('txtAppUrl').value,
-                lastAppKey: document.getElementById('txtAppKey').value
+                lastAppKey: document.getElementById('txtAppKey').value,
+                lastUploadUrl: document.getElementById('txtSendLogsUrl').value
             };
 
             WinJS.Application.local.writeText('savedAppInfo.txt', JSON.stringify(state));
@@ -174,6 +176,49 @@
                 var testStarted = updateTest;
                 currentGroup.runTests(testStarted, testFinished, groupDone);
             }
+        }
+
+        document.getElementById('btnResetTests').onclick = function (evt) {
+            if (zumo.currentGroup < 0) {
+                alert('Please select a test group to reset its tests');
+                return;
+            }
+
+            var currentGroup = zumo.testGroups[zumo.currentGroup];
+            var tests = currentGroup.tests;
+            var tblTests = document.getElementById('tblTestsBody');
+            tests.forEach(function (test, index) {
+                test.status = zumo.TSNotRun;
+                var tr = tblTests.childNodes[index];
+                var td = tr.firstChild;
+                td.style.color = getTestDisplayColor(test);
+                td.innerText = "" + (index + 1) + ". " + test.displayText();
+            });
+        }
+
+        document.getElementById('btnSendLogs').onclick = function (evt) {
+            if (zumo.currentGroup < 0) {
+                alert('Please select a test group to upload the logs for');
+                return;
+            }
+
+            var uploadUrl = document.getElementById('txtSendLogsUrl').value;
+            if (uploadUrl.trim() == '') {
+                alert('Please enter a valid upload url');
+                return;
+            }
+
+            var currentGroup = zumo.testGroups[zumo.currentGroup];
+            var logs = currentGroup.getLogs();
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    alert(xhr.responseText);
+                }
+            }
+            xhr.open('POST', uploadUrl, true);
+            xhr.setRequestHeader('content-type', 'text/plain');
+            xhr.send(logs);
         }
 
         var testGroups = zumo.testGroups;

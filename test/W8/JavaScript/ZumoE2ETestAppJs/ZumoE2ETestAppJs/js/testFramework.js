@@ -211,7 +211,7 @@ function createZumoNamespace() {
             case 'array':
                 if (expected.length !== actual.length) {
                     if (errors && errors.push) {
-                        errors.push('Size of arrays are different: ' + expected + ' - ' + actual);
+                        errors.push('Size of arrays are different: ' + expected.length + ' - ' + actual.length);
                     }
                     return false;
                 }

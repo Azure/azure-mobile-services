@@ -62,6 +62,7 @@
     <Content Include="css\default.css" />
     <Content Include="js\testFramework.js" />
     <Content Include="js\tests\allTests.js" />
+    <Content Include="js\tests\queryTestData.js" />
     <Content Include="js\tests\queryTests.js" />
     <Content Include="js\tests\roundTripTests.js" />
     <Content Include="lib\jquery.js" />

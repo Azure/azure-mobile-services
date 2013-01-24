@@ -23,13 +23,17 @@
                     if (exists) {
                         return app.local.readText('savedAppInfo.txt').then(function (data) {
                             var state = JSON.parse(data);
-                            var lastAppUrl = state['lastAppUrl'];
-                            var lastAppKey = state['lastAppKey'];
+                            var lastAppUrl = state.lastAppUrl;
+                            var lastAppKey = state.lastAppKey;
+                            var lastUploadUrl = state.lastUploadUrl;
                             if (lastAppUrl) {
                                 document.getElementById('txtAppUrl').value = lastAppUrl;
                             }
                             if (lastAppKey) {
                                 document.getElementById('txtAppKey').value = lastAppKey;
+                            }
+                            if (lastUploadUrl) {
+                                document.getElementById('txtSendLogsUrl').value = lastUploadUrl;
                             }
                         });
                     } else {
