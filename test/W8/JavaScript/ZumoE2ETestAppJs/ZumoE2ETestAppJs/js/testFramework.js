@@ -14,7 +14,17 @@ function createZumoNamespace() {
         this.logs = [];
     }
 
-    ZumoTest.prototype.addLog = function (text) {
+    ZumoTest.prototype.addLog = function (text, args) {
+        /// <summary>
+        /// Adds a new log entry to the test
+        /// </summary>
+        /// <param name="text" type="String">The text to be added to the log</param>
+        /// <param name="args" optional="true">Any additional arguments, which will be
+        ///       JSON.stringify'ed and concatenated with the text.</param>
+        for (var i = 1; i < arguments.length; i++) {
+            text = text + JSON.stringify(arguments[i]);
+        }
+
         this.logs.push(text);
     }
 
@@ -145,6 +155,12 @@ function createZumoNamespace() {
     }
 
     function getClient() {
+        /// <summary>
+        /// Returns the shared MobileServiceClient instance.
+        /// </summary>
+        /// <returns type="Microsoft.WindowsAzure.MobileServices.MobileServiceClient">
+        /// The shared cliens instance.
+        /// </returns>
         return client;
     }
 
