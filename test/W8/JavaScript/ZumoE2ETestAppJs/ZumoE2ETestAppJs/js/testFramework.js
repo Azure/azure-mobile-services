@@ -22,7 +22,12 @@ function createZumoNamespace() {
         /// <param name="args" optional="true">Any additional arguments, which will be
         ///       JSON.stringify'ed and concatenated with the text.</param>
         for (var i = 1; i < arguments.length; i++) {
-            text = text + JSON.stringify(arguments[i]);
+            var arg = arguments[i];
+            if (typeof arg === 'string') {
+                text = text + arg;
+            } else {
+                text = text + JSON.stringify(arg);
+            }
         }
 
         this.logs.push(text);
@@ -111,6 +116,9 @@ function createZumoNamespace() {
                     testToRun.status = TSFailed;
                     failed++;
                     testToRun.addLog('Test failed');
+                    if (testDone) {
+                        testDone(testToRun, index);
+                    }
                     runNextTest(index + 1);
                 }
             }

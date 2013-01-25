@@ -63,6 +63,7 @@
     <Content Include="js\testFramework.js" />
     <Content Include="js\tests\allTests.js" />
     <Content Include="js\tests\loginTests.js" />
+    <Content Include="js\tests\miscTests.js" />
     <Content Include="js\tests\queryTestData.js" />
     <Content Include="js\tests\queryTests.js" />
     <Content Include="js\tests\roundTripTests.js" />

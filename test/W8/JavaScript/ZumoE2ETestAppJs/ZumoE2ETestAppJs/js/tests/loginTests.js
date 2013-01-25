@@ -4,7 +4,6 @@
 function defineLoginTestsNamespace() {
     var tests = [];
     var i;
-    var tableName = 'w8jsRoundTripTable';
     var TABLE_PERMISSION_PUBLIC = 1;
     var TABLE_PERMISSION_APPLICATION = 2;
     var TABLE_PERMISSION_USER = 3;
