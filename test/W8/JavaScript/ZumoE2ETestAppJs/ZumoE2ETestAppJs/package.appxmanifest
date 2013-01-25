@@ -15,7 +15,7 @@
   </Resources>
   <Applications>
     <Application Id="App" StartPage="default.html">
-      <VisualElements DisplayName="ZumoE2ETestApp" Logo="images\logo.png" SmallLogo="images\smalllogo.png" Description="ZumoE2ETestAppJs" ForegroundText="light" BackgroundColor="#464646">
+      <VisualElements DisplayName="ZumoE2ETestApp" Logo="images\logo.png" SmallLogo="images\smalllogo.png" Description="ZumoE2ETestAppJs" ForegroundText="light" BackgroundColor="#464646" ToastCapable="true">
         <DefaultTile ShowName="allLogos" />
         <SplashScreen Image="images\splashscreen.png" />
       </VisualElements>

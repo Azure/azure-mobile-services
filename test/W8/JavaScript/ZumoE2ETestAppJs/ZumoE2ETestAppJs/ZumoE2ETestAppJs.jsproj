@@ -47,7 +47,8 @@
     <TargetPlatformIdentifier>Windows</TargetPlatformIdentifier>
     <TargetPlatformVersion>8.0</TargetPlatformVersion>
     <DefaultLanguage>en-US</DefaultLanguage>
-    <PackageCertificateKeyFile>ZumoE2ETestAppJs_TemporaryKey.pfx</PackageCertificateKeyFile>
+    <PackageCertificateKeyFile>ZumoE2ETestAppJs_StoreKey.pfx</PackageCertificateKeyFile>
+    <PackageCertificateThumbprint>78F12570D4DE2DF0B25E3DBC7C1BBF95AD8325C6</PackageCertificateThumbprint>
   </PropertyGroup>
   <ItemGroup>
     <AppxManifest Include="package.appxmanifest">
@@ -64,11 +65,14 @@
     <Content Include="js\tests\allTests.js" />
     <Content Include="js\tests\loginTests.js" />
     <Content Include="js\tests\miscTests.js" />
+    <Content Include="js\tests\pushTests.js" />
     <Content Include="js\tests\queryTestData.js" />
     <Content Include="js\tests\queryTests.js" />
     <Content Include="js\tests\roundTripTests.js" />
     <Content Include="js\tests\updateDeleteTests.js" />
     <Content Include="lib\jquery.js" />
+    <None Include="ZumoE2ETestAppJs_StoreKey.pfx" />
+    <None Include="Package.StoreAssociation.xml" />
     <None Include="ZumoE2ETestAppJs_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
