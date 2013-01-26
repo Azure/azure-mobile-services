@@ -108,7 +108,12 @@ function defineLoginTestsNamespace() {
                     item.id = item.id || 1;
                     table.where({ id: item.id }).read().done(function (items) {
                         test.addLog('Read items: ', items);
-                        readCallback();
+                        if (items.length !== 1) {
+                            test.addLog('Error, query should have returned exactly one item');
+                            done(false);
+                        } else {
+                            readCallback();
+                        }
                     }, function (err) {
                         readCallback(err);
                     });
@@ -131,6 +136,16 @@ function defineLoginTestsNamespace() {
 
             table.insert(item).done(function (newItem) {
                 test.addLog('Inserted item: ', newItem);
+                if (tablePermission === TABLE_PERMISSION_USER) {
+                    var currentUser = client.currentUser.userId;
+                    if (currentUser === newItem.userId) {
+                        test.addLog('User id correctly added by the server script');
+                    } else {
+                        test.addLog('Error, user id not set by the server script');
+                        done(false);
+                        return;
+                    }
+                }
                 insertCallback();
             }, function (err) {
                 insertCallback(err);

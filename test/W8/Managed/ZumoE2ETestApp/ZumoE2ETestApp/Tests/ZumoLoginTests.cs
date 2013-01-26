@@ -90,6 +90,7 @@ namespace ZumoE2ETestApp.Tests
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
                 var client = ZumoTestGlobals.Instance.Client;
+                var currentUser = client.CurrentUser;
                 var table = client.GetTable(tableName);
                 var crudShouldWork = tableType == TablePermission.Public || 
                     tableType == TablePermission.Application || 
@@ -103,6 +104,20 @@ namespace ZumoE2ETestApp.Tests
                     await table.InsertAsync(item);
                     test.AddLog("Inserted item: {0}", item.Stringify());
                     id = (int)item["id"].GetNumber();
+                    if (tableType == TablePermission.User)
+                    {
+                        // script added user id to the document. Validating it
+                        var userId = item["userId"].GetString();
+                        if (userId == currentUser.UserId)
+                        {
+                            test.AddLog("User id correctly added by the server script");
+                        }
+                        else
+                        {
+                            test.AddLog("Error, user id not set by the server script");
+                            return false;
+                        }
+                    }
                 }
                 catch (MobileServiceInvalidOperationException e)
                 {
@@ -136,7 +151,28 @@ namespace ZumoE2ETestApp.Tests
                 try
                 {
                     var item2 = await table.LookupAsync(id);
-                    test.AddLog("Retrieved item: {0}", item2.Stringify());
+                    test.AddLog("Retrieved item via Lookup: {0}", item2.Stringify());
+                }
+                catch (MobileServiceInvalidOperationException e)
+                {
+                    ex = e;
+                }
+
+                if (!ValidateExpectedError(test, ex, crudShouldWork))
+                {
+                    return false;
+                }
+
+                ex = null;
+                try
+                {
+                    var items = await table.ReadAsync("$filter=id eq " + id);
+                    test.AddLog("Retrieved items via Read: {0}", items.Stringify());
+                    if (items.GetArray().Count != 1)
+                    {
+                        test.AddLog("Error, query should have returned exactly one item");
+                        return false;
+                    }
                 }
                 catch (MobileServiceInvalidOperationException e)
                 {

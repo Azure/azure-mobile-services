@@ -31,5 +31,9 @@ azure mobile script upload %1 table/ParamsTestTable.insert -f ParamsTestTable.in
 azure mobile script upload %1 table/ParamsTestTable.read -f ParamsTestTable.read.js
 azure mobile script upload %1 table/ParamsTestTable.update -f ParamsTestTable.update.js
 azure mobile script upload %1 table/ParamsTestTable.delete -f ParamsTestTable.delete.js
+azure mobile script upload %1 table/w8Authenticated.insert -f w8Authenticated.insert.js
+azure mobile script upload %1 table/w8Authenticated.read -f w8Authenticated.read.js
+azure mobile script upload %1 table/w8Authenticated.update -f w8Authenticated.update.js
+azure mobile script upload %1 table/w8Authenticated.delete -f w8Authenticated.delete.js
 
 :TheEnd
