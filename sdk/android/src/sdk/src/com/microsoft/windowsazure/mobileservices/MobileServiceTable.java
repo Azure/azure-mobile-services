@@ -383,16 +383,17 @@ public final class MobileServiceTable {
 		idPropertyNames[1] = "Id";
 		idPropertyNames[2] = "iD";
 		idPropertyNames[3] = "ID";
-		
-		for(int i = 0; i < 4; i++) {
+
+		for (int i = 0; i < 4; i++) {
 			String idProperty = idPropertyNames[i];
 			if (json.has(idProperty)) {
 				JsonElement idElement = json.get(idProperty);
 				if (!idElement.isJsonNull() && idElement.getAsInt() != 0) {
 					throw new InvalidParameterException(
-							"The entity to insert should not have " + idProperty + " property defined");
+							"The entity to insert should not have "
+									+ idProperty + " property defined");
 				}
-	
+
 				json.remove(idProperty);
 			}
 		}
@@ -412,7 +413,7 @@ public final class MobileServiceTable {
 			throws InvalidParameterException {
 
 		removeIdFromJson(element);
-		
+
 		String content = element.toString();
 
 		ServiceFilterRequest post = new ServiceFilterRequestImpl(new HttpPost(

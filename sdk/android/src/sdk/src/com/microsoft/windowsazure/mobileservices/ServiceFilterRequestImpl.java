@@ -21,9 +21,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
  * 
  */
 class ServiceFilterRequestImpl implements ServiceFilterRequest {
-	
+
 	private static DefaultHttpClient mHttpClient;
-	
+
 	/**
 	 * The request to execute
 	 */
@@ -37,7 +37,7 @@ class ServiceFilterRequestImpl implements ServiceFilterRequest {
 	static {
 		mHttpClient = new DefaultHttpClient();
 	}
-	
+
 	/**
 	 * Constructor
 	 * 
