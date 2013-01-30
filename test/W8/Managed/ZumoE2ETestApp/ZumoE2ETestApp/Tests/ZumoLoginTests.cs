@@ -1,4 +1,5 @@
-﻿using Microsoft.WindowsAzure.MobileServices;
+﻿using Microsoft.Live;
+using Microsoft.WindowsAzure.MobileServices;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -54,6 +55,10 @@ namespace ZumoE2ETestApp.Tests
 
             result.AddTest(ZumoTestCommon.CreateYesNoTest("Were you prompted for username / password four times?", true));
 
+            result.AddTest(CreateLogoutTest());
+            result.AddTest(CreateLiveSDKLoginTest());
+            result.AddTest(CreateCRUDTest("w8Authenticated", "Microsoft via Live SDK", TablePermission.User, true));
+
             result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("We'll log in again; you may or may not be asked for password in the next few moments."));
             foreach (MobileServiceAuthenticationProvider provider in Enum.GetValues(typeof(MobileServiceAuthenticationProvider)))
             {
@@ -101,6 +106,41 @@ namespace ZumoE2ETestApp.Tests
         }
 
         enum TablePermission { Public, Application, User, Admin }
+
+        private static ZumoTest CreateLiveSDKLoginTest()
+        {
+            return new ZumoTest("Login via token with Live SDK", async delegate(ZumoTest test)
+            {
+                var client = ZumoTestGlobals.Instance.Client;
+                var uri = client.ApplicationUri.ToString();
+                var liveIdClient = new LiveAuthClient(uri);
+                var liveLoginResult = await liveIdClient.LoginAsync("wl.basic wl.signin".Split());
+                if (liveLoginResult.Status == LiveConnectSessionStatus.Connected)
+                {
+                    var liveConnectClient = new LiveConnectClient(liveLoginResult.Session);
+                    var me = await liveConnectClient.GetAsync("me");
+                    test.AddLog("Logged in as {0}", me.RawResult);
+                    if (liveLoginResult.Session.AuthenticationToken == null)
+                    {
+                        test.AddLog("Error, authentication token in the live login result is null");
+                        return false;
+                    }
+                    else
+                    {
+                        JsonObject token = new JsonObject();
+                        token.Add("authenticationToken", JsonValue.CreateStringValue(liveLoginResult.Session.AuthenticationToken));
+                        var user = await client.LoginAsync(MobileServiceAuthenticationProvider.MicrosoftAccount, token);
+                        test.AddLog("Logged in as {0}", user.UserId);
+                        return true;
+                    }
+                }
+                else
+                {
+                    test.AddLog("Login failed.");
+                    return false;
+                }
+            });
+        }
 
         private static ZumoTest CreateClientSideLoginTest(MobileServiceAuthenticationProvider provider)
         {
