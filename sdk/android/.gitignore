@@ -1,0 +1,10 @@
+bin
+gen
+target
+*.keystore
+*.swp
+*.orig
+*.log
+seed.txt
+map.txt
+.metadata

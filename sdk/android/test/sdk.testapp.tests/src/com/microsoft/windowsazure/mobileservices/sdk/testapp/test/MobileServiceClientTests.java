@@ -1,0 +1,364 @@
+package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
+
+import java.net.MalformedURLException;
+import java.util.concurrent.CountDownLatch;
+
+import junit.framework.Assert;
+
+import org.apache.http.Header;
+import org.apache.http.protocol.HTTP;
+
+import android.os.Build;
+import android.test.InstrumentationTestCase;
+
+import com.google.gson.JsonElement;
+import com.microsoft.windowsazure.mobileservices.MobileServiceAuthenticationProvider;
+import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
+import com.microsoft.windowsazure.mobileservices.MobileServiceUser;
+import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
+import com.microsoft.windowsazure.mobileservices.ServiceFilter;
+import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
+import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
+import com.microsoft.windowsazure.mobileservices.TableJsonQueryCallback;
+import com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback;
+
+public class MobileServiceClientTests extends InstrumentationTestCase {
+	String appUrl = "";
+	String appKey = "";
+
+	protected void setUp() throws Exception {
+		appUrl = "http://myapp.com/";
+		appKey = "qwerty";
+		super.setUp();
+	}
+
+	protected void tearDown() throws Exception {
+		super.tearDown();
+	}
+
+	public void testNewMobileServiceClientShouldReturnMobileServiceClient()
+			throws MalformedURLException {
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey);
+		assertEquals(appUrl, client.getAppUrl().toString());
+		assertEquals(appKey, client.getAppKey());
+	}
+
+	public void testNewMobileServiceClientWithEmptyAppUrlShouldThrowException() {
+		try {
+			new MobileServiceClient("", appKey);
+			fail("Expected Exception MalformedURLException");
+		} catch (MalformedURLException e) {
+			// do nothing, it's OK
+		}
+	}
+
+	public void testNewMobileServiceClientWithNullAppUrlShouldThrowException() {
+		try {
+			new MobileServiceClient((String) null, appKey);
+			fail("Expected Exception MalformedURLException");
+		} catch (MalformedURLException e) {
+			// do nothing, it's OK
+		}
+	}
+
+	public void testNewMobileServiceClientWithEmptyAppKeyShouldThrowException() {
+		try {
+			new MobileServiceClient(appUrl, "");
+			fail("Expected Exception MalformedURLException");
+		} catch (IllegalArgumentException e) {
+			// do nothing, it's OK
+		} catch (MalformedURLException e) {
+			fail("This should not happen");
+		}
+	}
+
+	public void testNewMobileServiceClientWithNullAppKeyShouldThrowException() {
+		try {
+			new MobileServiceClient(appUrl, null);
+			fail("Expected Exception MalformedURLException");
+		} catch (IllegalArgumentException e) {
+			// do nothing, it's OK
+		} catch (MalformedURLException e) {
+			fail("This should not happen");
+		}
+	}
+
+	public void testMobileServiceClientWithNullServiceFilterShouldThrowException() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey);
+		} catch (MalformedURLException e1) {
+			fail("This should not happen");
+		}
+
+		try {
+			client.withFilter(null);
+			fail("Expected Exception IllegalArgumentException");
+		} catch (IllegalArgumentException e) {
+			// do nothing, it's OK
+		}
+	}
+
+	public void testIsLoginInProgressShouldReturnFalse()
+			throws MalformedURLException {
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey);
+		assertFalse(client.isLoginInProgress());
+	}
+
+	public void testSetAndGetCurrentUserShouldReturnUser()
+			throws MalformedURLException {
+		String userId = "myUserId";
+		MobileServiceUser user = new MobileServiceUser(userId);
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey);
+
+		client.setCurrentUser(user);
+		MobileServiceUser currentUser = client.getCurrentUser();
+
+		assertEquals(user, currentUser);
+		assertEquals(userId, user.getUserId());
+		assertEquals(userId, currentUser.getUserId());
+	}
+
+	public void testGetCurrentUserWithNoLoggedUserShouldReturnNull()
+			throws MalformedURLException {
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey);
+		MobileServiceUser currentUser = client.getCurrentUser();
+
+		assertNull(currentUser);
+	}
+
+	public void testGetTableShouldReturnTableWithGivenNameAndClient()
+			throws MalformedURLException {
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey);
+		MobileServiceTable table = client.getTable("MyTable");
+
+		assertNotNull(table);
+	}
+
+	public void testGetTableWithEmptyNameShouldThrowException() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey);
+		} catch (MalformedURLException e1) {
+			fail("This should not fail");
+		}
+
+		try {
+			client.getTable("");
+			fail("Expected Exception IllegalArgumentException");
+		} catch (IllegalArgumentException e) {
+			// do nothing, it's OK
+		}
+	}
+
+	public void testGetTableWithWhiteSpacedNameShouldThrowException() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey);
+		} catch (MalformedURLException e1) {
+			fail("This should not fail");
+		}
+
+		try {
+
+			client.getTable(" ");
+			fail("Expected Exception IllegalArgumentException");
+		} catch (IllegalArgumentException e) {
+			// do nothing, it's OK
+		}
+	}
+
+	public void testGetTableWithNullNameShouldThrowException() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey);
+		} catch (MalformedURLException e1) {
+			fail("This should not happen");
+		}
+		try {
+			client.getTable(null);
+			fail("Expected Exception IllegalArgumentException");
+		} catch (IllegalArgumentException e) {
+			// do nothing, it's OK
+		}
+	}
+
+	public void testLoginShouldParseJsonUserCorreclty() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String userId = "id";
+		final String userToken = "userToken";
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+				try {
+					client = new MobileServiceClient(appUrl, appKey);
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				client = client.withFilter(new ServiceFilter() {
+
+					@Override
+					public void handleRequest(
+							ServiceFilterRequest request,
+							NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+						// User JSon Template
+						String userJsonTemplate = "{\"user\":{\"userId\":\"%s\"}, \"authenticationToken\":\"%s\"}";
+						// Create a mock response simulating an error
+						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+						response.setStatus(new StatusLineMock(200));
+						response.setContent(String.format(userJsonTemplate,
+								userId, userToken));
+
+						// create a mock request to replace the existing one
+						ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(
+								response);
+						nextServiceFilterCallback.onNext(requestMock,
+								responseCallback);
+					}
+				});
+
+				try {
+					client.login(MobileServiceAuthenticationProvider.Facebook,
+							"oAuthToken", new UserAuthenticationCallback() {
+
+								@Override
+								public void onSuccess(MobileServiceUser user) {
+									container.setUser(user);
+									latch.countDown();
+								}
+
+								@Override
+								public void onError(Exception exception,
+										ServiceFilterResponse response) {
+									latch.countDown();
+								}
+							});
+				} catch (Exception e) {
+					latch.countDown();
+				}
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		MobileServiceUser user = container.getUser();
+		assertNotNull(user);
+		assertEquals(userId, user.getUserId());
+		assertEquals(userToken, user.getAuthenticationToken());
+	}
+
+	public void testOperationShouldAddHeaders() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				// Create client
+				MobileServiceClient client = null;
+				try {
+					client = new MobileServiceClient(appUrl, appKey);
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				final String expectedAppKey = client.getAppKey();
+
+				// Add a new filter to the client
+				client = client.withFilter(new ServiceFilter() {
+
+					@Override
+					public void handleRequest(
+							ServiceFilterRequest request,
+							NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+
+						int zumoAppHeaderIndex = -1;
+						int userAgentHeaderIndex = -1;
+						int contentTypeHeaderIndex = -1;
+						int acceptHeaderIndex = -1;
+
+						String appHeader = "X-ZUMO-APPLICATION";
+						String userAgentHeader = HTTP.USER_AGENT;
+						String contentTypeHeader = HTTP.CONTENT_TYPE;
+						String acceptHeader = "Accept";
+
+						Header[] headers = request.getHeaders();
+						for (int i = 0; i < headers.length; i++) {
+							if (headers[i].getName() == appHeader) {
+								zumoAppHeaderIndex = i;
+							} else if (headers[i].getName() == userAgentHeader) {
+								userAgentHeaderIndex = i;
+							} else if (headers[i].getName() == contentTypeHeader) {
+								contentTypeHeaderIndex = i;
+							} else if (headers[i].getName() == acceptHeader) {
+								acceptHeaderIndex = i;
+							}
+						}
+
+						if (zumoAppHeaderIndex == -1) {
+							Assert.fail();
+						}
+						if (userAgentHeaderIndex == -1) {
+							Assert.fail();
+						}
+						if (contentTypeHeaderIndex == -1) {
+							Assert.fail();
+						}
+						if (acceptHeaderIndex == -1) {
+							Assert.fail();
+						}
+
+						String expectedUserAgent = String
+								.format("ZUMO/%s (lang=%s; os=%s; os_version=%s; arch=%s)",
+										"1.0", "Java", "Android",
+										Build.VERSION.RELEASE, Build.CPU_ABI);
+
+						assertEquals(expectedAppKey,
+								headers[zumoAppHeaderIndex].getValue());
+						assertEquals(expectedUserAgent,
+								headers[userAgentHeaderIndex].getValue());
+						assertEquals("application/json",
+								headers[contentTypeHeaderIndex].getValue());
+						assertEquals("application/json",
+								headers[acceptHeaderIndex].getValue());
+
+						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+						response.setContent("{}");
+
+						responseCallback.onResponse(response);
+					}
+				});
+
+				client.getTable("dummy").all()
+						.execute(new TableJsonQueryCallback() {
+
+							@Override
+							public void onSuccess(JsonElement result, int count) {
+								latch.countDown();
+							}
+
+							@Override
+							public void onError(Exception exception,
+									ServiceFilterResponse response) {
+								latch.countDown();
+							}
+						});
+			}
+		});
+
+		latch.await();
+	}
+
+}

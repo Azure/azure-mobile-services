@@ -1,0 +1,2 @@
+This directory should contain the following JARs:
+	- android-support-v4.jar
