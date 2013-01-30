@@ -14,6 +14,8 @@ namespace ZumoE2ETestApp.Tests
 {
     internal static class ZumoLoginTests
     {
+        private static JsonObject lastUserIdentityObject = null;
+
         public static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Login tests");
@@ -21,6 +23,15 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateCRUDTest("w8Application", null, TablePermission.Application, false));
             result.AddTest(CreateCRUDTest("w8Authenticated", null, TablePermission.User, false));
             result.AddTest(CreateCRUDTest("w8Admin", null, TablePermission.Admin, false));
+
+            Dictionary<MobileServiceAuthenticationProvider, bool> providersWithRecycledTokenSupport;
+            providersWithRecycledTokenSupport = new Dictionary<MobileServiceAuthenticationProvider, bool>
+            {
+                { MobileServiceAuthenticationProvider.Facebook, true },
+                { MobileServiceAuthenticationProvider.Google, true },
+                { MobileServiceAuthenticationProvider.MicrosoftAccount, false },
+                { MobileServiceAuthenticationProvider.Twitter, false },
+            };
 
             result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("In the next few tests you will be prompted for username / password four times."));
 
@@ -31,6 +42,14 @@ namespace ZumoE2ETestApp.Tests
                 result.AddTest(CreateCRUDTest("w8Application", provider.ToString(), TablePermission.Application, true));
                 result.AddTest(CreateCRUDTest("w8Authenticated", provider.ToString(), TablePermission.User, true));
                 result.AddTest(CreateCRUDTest("w8Admin", provider.ToString(), TablePermission.Admin, true));
+
+                bool supportsTokenRecycling;
+                if (providersWithRecycledTokenSupport.TryGetValue(provider, out supportsTokenRecycling) && supportsTokenRecycling)
+                {
+                    result.AddTest(CreateLogoutTest());
+                    result.AddTest(CreateClientSideLoginTest(provider));
+                    result.AddTest(CreateCRUDTest("w8Authenticated", provider.ToString(), TablePermission.User, true));
+                }
             }
 
             result.AddTest(ZumoTestCommon.CreateYesNoTest("Were you prompted for username / password four times?", true));
@@ -82,6 +101,39 @@ namespace ZumoE2ETestApp.Tests
         }
 
         enum TablePermission { Public, Application, User, Admin }
+
+        private static ZumoTest CreateClientSideLoginTest(MobileServiceAuthenticationProvider provider)
+        {
+            return new ZumoTest("Login via token for " + provider, async delegate(ZumoTest test)
+            {
+                var client = ZumoTestGlobals.Instance.Client;
+                var lastIdentity = lastUserIdentityObject;
+                if (lastIdentity == null)
+                {
+                    test.AddLog("Last identity object is null. Cannot run this test.");
+                    return false;
+                }
+
+                test.AddLog("Last user identity object: {0}", lastIdentity.Stringify());
+                JsonObject token = new JsonObject();
+                switch (provider)
+                {
+                    case MobileServiceAuthenticationProvider.Facebook:
+                        token.Add("access_token", lastIdentity["facebook"].GetObject()["accessToken"]);
+                        break;
+                    case MobileServiceAuthenticationProvider.Google:
+                        token.Add("access_token", lastIdentity["google"].GetObject()["accessToken"]);
+                        break;
+                    default:
+                        test.AddLog("Client-side login test for {0} is not implemented or not supported.", provider);
+                        return false;
+                }
+
+                var user = await client.LoginAsync(provider, token);
+                test.AddLog("Logged in as {0}", user.UserId);
+                return true;
+            });
+        }
 
         private static ZumoTest CreateCRUDTest(string tableName, string providerName, TablePermission tableType, bool userIsAuthenticated)
         {
@@ -152,6 +204,22 @@ namespace ZumoE2ETestApp.Tests
                 {
                     var item2 = await table.LookupAsync(id);
                     test.AddLog("Retrieved item via Lookup: {0}", item2.Stringify());
+                    var obj = item2.GetObject();
+                    if (obj.ContainsKey("Identities"))
+                    {
+                        string identities = obj["Identities"].GetString();
+                        try
+                        {
+                            JsonObject identitiesObj = JsonObject.Parse(identities);
+                            test.AddLog("Identities object: {0}", identitiesObj.Stringify());
+                            lastUserIdentityObject = identitiesObj;
+                        }
+                        catch (Exception ex2)
+                        {
+                            test.AddLog("Could not parse the identites object as JSON: {0}", ex2);
+                            lastUserIdentityObject = null;
+                        }
+                    }
                 }
                 catch (MobileServiceInvalidOperationException e)
                 {
