@@ -390,7 +390,7 @@ public final class MobileServiceTable {
 				JsonElement idElement = json.get(idProperty);
 				if (!idElement.isJsonNull() && idElement.getAsInt() != 0) {
 					throw new InvalidParameterException(
-							"The entity to insert should not have" + idProperty + "property defined");
+							"The entity to insert should not have " + idProperty + " property defined");
 				}
 	
 				json.remove(idProperty);
