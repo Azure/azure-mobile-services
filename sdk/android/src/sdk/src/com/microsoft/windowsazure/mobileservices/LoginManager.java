@@ -421,33 +421,32 @@ class LoginManager {
 		new RequestAsyncTask(request, connection) {
 			@Override
 			protected void onPostExecute(ServiceFilterResponse response) {
-				if (mTaskException == null && response != null) {
-					MobileServiceUser user = null;
-					try {
-						// Get the user from the response and create a
-						// MobileServiceUser object from the JSON
-						String content = response.getContent();
-						user = createUserFromJSON((JsonObject) new JsonParser()
-								.parse((content.trim())));
-
-					} catch (Exception e) {
+				if (callback != null) {
+					
+					if (mTaskException == null && response != null) {
+						MobileServiceUser user = null;
+						try {
+							// Get the user from the response and create a
+							// MobileServiceUser object from the JSON
+							String content = response.getContent();
+							user = createUserFromJSON((JsonObject) new JsonParser()
+									.parse((content.trim())));
+	
+						} catch (Exception e) {
+							// Something went wrong, call onError method
+							callback.onError(new MobileServiceException(
+									"Error while authenticating user.", e),
+									response);
+							return;
+						}
+	
+						// Call success method
+						callback.onSuccess(user);
+					} else {
 						// Something went wrong, call onError method
 						callback.onError(new MobileServiceException(
-								"Error while authenticating user.", e),
-								response);
-						return;
-					}
-
-					// Call success method
-					if (callback != null) {
-						callback.onSuccess(user);
-					}
-				} else {
-					// Something went wrong, call onError method
-					if (callback != null) {
-						callback.onError(new MobileServiceException(
-								"Error while authenticating user.",
-								mTaskException), response);
+							"Error while authenticating user.",
+							mTaskException), response);
 					}
 				}
 			}

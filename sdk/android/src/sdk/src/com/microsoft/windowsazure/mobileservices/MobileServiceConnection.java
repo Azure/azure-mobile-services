@@ -91,14 +91,17 @@ class MobileServiceConnection {
 
 				} catch (Exception e) {
 					// Something went wrong, call onError method
-					responseCallback.onError(new MobileServiceException(
-							"Error while processing request.", e), response);
-					return;
+					if (responseCallback != null) {
+						responseCallback.onError(new MobileServiceException(
+								"Error while processing request.", e), response);
+						return;
+					}
 				}
 
 				// Call onResponse method
-				responseCallback.onResponse(response);
-
+				if (responseCallback != null) {
+					responseCallback.onResponse(response);
+				}
 			}
 		}, responseCallback);
 	}
