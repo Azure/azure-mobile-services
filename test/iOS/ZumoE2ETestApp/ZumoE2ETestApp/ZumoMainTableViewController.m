@@ -196,7 +196,7 @@
                       @"To run this test application:",
                       @"1. Create (or reuse) an application using either the portal or the CLI",
                       @"2. On the application, create the following tables:",
-                      @"2.1. iosTodoItem (used for round-trip, update and delete tests), no special setting",
+                      @"2.1. iosRoundTripTable (used for round-trip, update and delete tests), no special setting",
                       @"2.2. iosMovies (used for query tests), with the appropriate script",
                       @"2.3. iosApplication (used for login tests), set permissions to 'Application Key'",
                       @"2.4. iosAuthenticated (used for login tests), set permissions to 'Authenticated Users'",
