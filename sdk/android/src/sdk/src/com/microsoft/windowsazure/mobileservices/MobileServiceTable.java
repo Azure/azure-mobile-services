@@ -9,6 +9,7 @@ import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -1109,6 +1110,18 @@ public final class MobileServiceTable {
 			this.querySteps.add(MobileServiceQueryOperations.val(s));
 			return this;
 		}
+		
+		/**
+		 * Specifies a date value
+		 * 
+		 * @param number
+		 *            The date value to use
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery val(Date date) {
+			this.querySteps.add(MobileServiceQueryOperations.val(date));
+			return this;
+		}
 
 		/****** Logical Operators ******/
 
@@ -1221,6 +1234,18 @@ public final class MobileServiceTable {
 					.ge(MobileServiceQueryOperations.val(numberValue)));
 			return this;
 		}
+		
+		/**
+		 * Greater than or equal comparison operator.
+		 * 
+		 * @param dateValue
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery ge(Date dateValue) {
+			this.querySteps.add(MobileServiceQueryOperations
+					.ge(MobileServiceQueryOperations.val(dateValue)));
+			return this;
+		}
 
 		/**
 		 * Less than or equal comparison operator.
@@ -1246,12 +1271,24 @@ public final class MobileServiceTable {
 		/**
 		 * Less than or equal comparison operator.
 		 * 
-		 * @param otherQuery
+		 * @param numberValue
 		 * @return MobileServiceQuery
 		 */
 		public MobileServiceQuery le(Number numberValue) {
 			this.querySteps.add(MobileServiceQueryOperations
 					.le(MobileServiceQueryOperations.val(numberValue)));
+			return this;
+		}
+		
+		/**
+		 * Less than or equal comparison operator.
+		 * 
+		 * @param dateValue
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery le(Date dateValue) {
+			this.querySteps.add(MobileServiceQueryOperations
+					.le(MobileServiceQueryOperations.val(dateValue)));
 			return this;
 		}
 
@@ -1287,6 +1324,18 @@ public final class MobileServiceTable {
 					.gt(MobileServiceQueryOperations.val(numberValue)));
 			return this;
 		}
+		
+		/**
+		 * Greater than comparison operator.
+		 * 
+		 * @param dateValue
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery gt(Date dateValue) {
+			this.querySteps.add(MobileServiceQueryOperations
+					.gt(MobileServiceQueryOperations.val(dateValue)));
+			return this;
+		}
 
 		/**
 		 * Less than comparison operator.
@@ -1318,6 +1367,18 @@ public final class MobileServiceTable {
 		public MobileServiceQuery lt(Number numberValue) {
 			this.querySteps.add(MobileServiceQueryOperations
 					.lt(MobileServiceQueryOperations.val(numberValue)));
+			return this;
+		}
+		
+		/**
+		 * Less than comparison operator.
+		 * 
+		 * @param dateValue
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery lt(Date dateValue) {
+			this.querySteps.add(MobileServiceQueryOperations
+					.lt(MobileServiceQueryOperations.val(dateValue)));
 			return this;
 		}
 
@@ -1377,6 +1438,18 @@ public final class MobileServiceTable {
 					.eq(MobileServiceQueryOperations.val(stringValue)));
 			return this;
 		}
+		
+		/**
+		 * Equal comparison operator.
+		 * 
+		 * @param dateValue
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery eq(Date dateValue) {
+			this.querySteps.add(MobileServiceQueryOperations
+					.eq(MobileServiceQueryOperations.val(dateValue)));
+			return this;
+		}
 
 		/**
 		 * Not equal comparison operator.
@@ -1432,6 +1505,18 @@ public final class MobileServiceTable {
 		public MobileServiceQuery ne(String stringValue) {
 			this.querySteps.add(MobileServiceQueryOperations
 					.ne(MobileServiceQueryOperations.val(stringValue)));
+			return this;
+		}
+		
+		/**
+		 * Not equal comparison operator.
+		 * 
+		 * @param dateValue
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery ne(Date dateValue) {
+			this.querySteps.add(MobileServiceQueryOperations
+					.ne(MobileServiceQueryOperations.val(dateValue)));
 			return this;
 		}
 
@@ -2161,9 +2246,13 @@ public final class MobileServiceTable {
 		 */
 		public static MobileServiceQuery val(Number number) {
 			MobileServiceQuery query = table.new MobileServiceQuery();
-
-			query.setQueryText(number.toString());
-
+			
+			if (number == null) {
+				query.setQueryText("null");
+			} else {
+				query.setQueryText(number.toString());
+			}
+			
 			return query;
 		}
 
@@ -2198,6 +2287,26 @@ public final class MobileServiceTable {
 				query.setQueryText("null");
 			} else {
 				query.setQueryText("'" + sanitize(s) + "'");
+			}
+
+			return query;
+		}
+		
+		/**
+		 * Creates a MobileServiceQuery representing a date value
+		 * 
+		 * @param date
+		 *            the date to represent
+		 * @return the MobileServiceQuery
+		 */
+		public static MobileServiceQuery val(Date date) {
+
+			MobileServiceQuery query = table.new MobileServiceQuery();
+
+			if (date == null) {
+				query.setQueryText("null");
+			} else {
+				query.setQueryText("'" + sanitize(DateSerializer.serialize(date)) + "'");
 			}
 
 			return query;
@@ -2303,6 +2412,16 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery ge(Number numberValue) {
 			return ge(MobileServiceQueryOperations.val(numberValue));
 		}
+		
+		/**
+		 * Greater than or equal comparison operator.
+		 * 
+		 * @param dateValue
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery ge(Date dateValue) {
+			return ge(MobileServiceQueryOperations.val(dateValue));
+		}
 
 		/**
 		 * Less than or equal comparison operator.
@@ -2332,6 +2451,16 @@ public final class MobileServiceTable {
 		 */
 		public static MobileServiceQuery le(Number numberValue) {
 			return le(MobileServiceQueryOperations.val(numberValue));
+		}
+		
+		/**
+		 * Less than or equal comparison operator.
+		 * 
+		 * @param dateValue
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery le(Date dateValue) {
+			return le(MobileServiceQueryOperations.val(dateValue));
 		}
 
 		/**
@@ -2363,6 +2492,16 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery gt(Number numberValue) {
 			return gt(MobileServiceQueryOperations.val(numberValue));
 		}
+		
+		/**
+		 * Greater than comparison operator.
+		 * 
+		 * @param dateValue
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery gt(Date dateValue) {
+			return gt(MobileServiceQueryOperations.val(dateValue));
+		}
 
 		/**
 		 * Less than comparison operator.
@@ -2392,6 +2531,16 @@ public final class MobileServiceTable {
 		 */
 		public static MobileServiceQuery lt(Number numberValue) {
 			return lt(MobileServiceQueryOperations.val(numberValue));
+		}
+		
+		/**
+		 * Less than comparison operator.
+		 * 
+		 * @param dateValue
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery lt(Date dateValue) {
+			return lt(MobileServiceQueryOperations.val(dateValue));
 		}
 
 		/**
@@ -2443,6 +2592,16 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery eq(String stringValue) {
 			return eq(MobileServiceQueryOperations.val(stringValue));
 		}
+		
+		/**
+		 * Equal comparison operator.
+		 * 
+		 * @param dateValue
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery eq(Date dateValue) {
+			return eq(MobileServiceQueryOperations.val(dateValue));
+		}
 
 		/**
 		 * Not equal comparison operator.
@@ -2492,6 +2651,16 @@ public final class MobileServiceTable {
 		 */
 		public static MobileServiceQuery ne(String stringValue) {
 			return ne(MobileServiceQueryOperations.val(stringValue));
+		}
+		
+		/**
+		 * Not equal comparison operator.
+		 * 
+		 * @param dateValue
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery ne(Date dateValue) {
+			return ne(MobileServiceQueryOperations.val(dateValue));
 		}
 
 		/****** Arithmetic Operators ******/

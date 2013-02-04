@@ -5,6 +5,10 @@ import static com.microsoft.windowsazure.mobileservices.MobileServiceTable.Mobil
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
 import android.test.InstrumentationTestCase;
 
@@ -240,6 +244,37 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
 
 		// Assert
 		expectedFilters = "age ne (3)";
+		assertEquals("", query.getRowSetModifiers());
+		assertEquals(expectedFilters, query.toString());
+	}
+	
+	private static Date getUTCDate(int year, int month, int day, int hour, int minute, int second) {
+		GregorianCalendar calendar = new GregorianCalendar(
+				TimeZone.getTimeZone("utc"));
+		int dateMonth = month - 1;
+		calendar.set(year, dateMonth, day, hour, minute, second);
+		calendar.set(Calendar.MILLISECOND, 0);
+		
+		return calendar.getTime();
+	}
+	
+	public void testDate() throws Throwable {
+
+		// Create query
+		
+		MobileServiceQuery query = table.where().field("birthdate").eq().val(getUTCDate(1986, 6, 30, 0, 0, 0));
+
+		// Assert
+		String expectedFilters = "birthdate eq '1986-06-30T00:00:00.000Z'";
+		assertEquals("", query.getRowSetModifiers());
+		assertEquals(expectedFilters, query.toString());
+
+		// Create query
+
+		query = table.where().field("birthdate").eq(getUTCDate(1986, 6, 30, 0, 0, 0));
+
+		// Assert
+		expectedFilters = "birthdate eq ('1986-06-30T00:00:00.000Z')";
 		assertEquals("", query.getRowSetModifiers());
 		assertEquals(expectedFilters, query.toString());
 	}
