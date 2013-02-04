@@ -187,22 +187,13 @@ public class MobileServiceClient {
 				new UserAuthenticationCallback() {
 
 					@Override
-					public void onSuccess(MobileServiceUser user) {
+					public void onCompleted(MobileServiceUser user,
+							Exception exception, ServiceFilterResponse response) {
 						mCurrentUser = user;
 						mLoginInProgress = false;
+						
 						if (externalCallback != null) {
-							externalCallback.onSuccess(user);
-						}
-					}
-
-					@Override
-					public void onError(Exception exception,
-							ServiceFilterResponse response) {
-						mCurrentUser = null;
-						mLoginInProgress = false;
-
-						if (externalCallback != null) {
-							externalCallback.onError(exception, response);
+							externalCallback.onCompleted(user, exception, response);
 						}
 					}
 				});
@@ -246,22 +237,13 @@ public class MobileServiceClient {
 				new UserAuthenticationCallback() {
 
 					@Override
-					public void onSuccess(MobileServiceUser user) {
+					public void onCompleted(MobileServiceUser user,
+							Exception exception, ServiceFilterResponse response) {
 						mCurrentUser = user;
 						mLoginInProgress = false;
-
+						
 						if (externalCallback != null) {
-							externalCallback.onSuccess(user);
-						}
-					}
-
-					@Override
-					public void onError(Exception exception,
-							ServiceFilterResponse response) {
-						mCurrentUser = null;
-						mLoginInProgress = false;
-						if (externalCallback != null) {
-							externalCallback.onError(exception, response);
+							externalCallback.onCompleted(user, exception, response);
 						}
 					}
 				});

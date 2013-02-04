@@ -17,16 +17,10 @@ public interface TableOperationCallback<E> {
 	 * 
 	 * @param entity
 	 *            The obtained entity
-	 */
-	public void onSuccess(E entity);
-
-	/**
-	 * Method to call if the operation fails
-	 * 
 	 * @param exception
-	 *            The exception representing the error
+	 *            An exception representing the error, in case there was one
 	 * @param response
 	 *            Response object
 	 */
-	public void onError(Exception exception, ServiceFilterResponse response);
+	public void onCompleted(E entity, Exception exception, ServiceFilterResponse response);
 }

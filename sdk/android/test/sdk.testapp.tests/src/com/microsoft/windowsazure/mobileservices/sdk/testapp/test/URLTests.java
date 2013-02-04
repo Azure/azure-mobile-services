@@ -74,7 +74,7 @@ public class URLTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent("{authenticationToken:'123abc', user:{userId:'123456'}}");
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -82,14 +82,13 @@ public class URLTests extends InstrumentationTestCase {
 						new UserAuthenticationCallback() {
 
 							@Override
-							public void onSuccess(MobileServiceUser user) {
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(MobileServiceUser user,
+									Exception exception,
 									ServiceFilterResponse response) {
-								Assert.fail();
+								if (exception != null) {
+									Assert.fail();
+								}
+								
 								latch.countDown();
 							}
 						});
@@ -139,21 +138,18 @@ public class URLTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent("{}");
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
 				client.getTable(tableName).update(person,
 						new TableOperationCallback<PersonTestObject>() {
-							@Override
-							public void onError(Exception exception,
-									ServiceFilterResponse response) {
-								latch.countDown();
-							}
 
 							@Override
-							public void onSuccess(PersonTestObject entity) {
-								latch.countDown();
+							public void onCompleted(PersonTestObject entity,
+									Exception exception,
+									ServiceFilterResponse response) {
+								latch.countDown();	
 							}
 						});
 			}
@@ -200,20 +196,17 @@ public class URLTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent("{}");
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
 				client.getTable(tableName).insert(person,
 						new TableOperationCallback<PersonTestObject>() {
-							@Override
-							public void onError(Exception exception,
-									ServiceFilterResponse response) {
-								latch.countDown();
-							}
 
 							@Override
-							public void onSuccess(PersonTestObject entity) {
+							public void onCompleted(PersonTestObject entity,
+									Exception exception,
+									ServiceFilterResponse response) {
 								latch.countDown();
 							}
 						});
@@ -260,7 +253,7 @@ public class URLTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent("{}");
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -268,12 +261,8 @@ public class URLTests extends InstrumentationTestCase {
 						new TableJsonOperationCallback() {
 
 							@Override
-							public void onSuccess(JsonObject jsonEntity) {
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(JsonObject jsonEntity,
+									Exception exception,
 									ServiceFilterResponse response) {
 								latch.countDown();
 							}
@@ -321,7 +310,7 @@ public class URLTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent("{}");
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -329,12 +318,7 @@ public class URLTests extends InstrumentationTestCase {
 						new TableDeleteCallback() {
 
 							@Override
-							public void onSuccess() {
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(Exception exception,
 									ServiceFilterResponse response) {
 								latch.countDown();
 							}
@@ -381,7 +365,7 @@ public class URLTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent("{}");
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -389,12 +373,8 @@ public class URLTests extends InstrumentationTestCase {
 						.execute(new TableJsonQueryCallback() {
 
 							@Override
-							public void onSuccess(JsonElement result, int count) {
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(JsonElement result,
+									int count, Exception exception,
 									ServiceFilterResponse response) {
 								latch.countDown();
 							}

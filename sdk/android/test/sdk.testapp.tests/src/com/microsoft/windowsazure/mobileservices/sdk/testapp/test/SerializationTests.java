@@ -339,7 +339,7 @@ public class SerializationTests extends InstrumentationTestCase {
 						container.setRequestContent(request.getContent());
 						ServiceFilterResponseMock mockedResponse = new ServiceFilterResponseMock();
 						mockedResponse.setContent("{}");
-						responseCallback.onResponse(mockedResponse);
+						responseCallback.onResponse(mockedResponse, null);
 					}
 				});
 
@@ -349,12 +349,8 @@ public class SerializationTests extends InstrumentationTestCase {
 						new TableOperationCallback<DateTestObject>() {
 
 							@Override
-							public void onSuccess(DateTestObject entity) {
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(DateTestObject entity,
+									Exception exception,
 									ServiceFilterResponse response) {
 								latch.countDown();
 							}
@@ -409,7 +405,7 @@ public class SerializationTests extends InstrumentationTestCase {
 						response.setStatus(new StatusLineMock(404));
 						response.setContent("{\"date\":\"2013-01-22T14:30:40.000Z\"}");
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -419,14 +415,10 @@ public class SerializationTests extends InstrumentationTestCase {
 						new TableOperationCallback<DateTestObject>() {
 
 							@Override
-							public void onSuccess(DateTestObject entity) {
-								container.setDateTestObject(entity);
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(DateTestObject entity,
+									Exception exception,
 									ServiceFilterResponse response) {
+								container.setDateTestObject(entity);
 								latch.countDown();
 							}
 						});
@@ -486,7 +478,7 @@ public class SerializationTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock mockedResponse = new ServiceFilterResponseMock();
 						mockedResponse.setContent("{}");
 
-						responseCallback.onResponse(mockedResponse);
+						responseCallback.onResponse(mockedResponse, null);
 					}
 				});
 
@@ -513,12 +505,9 @@ public class SerializationTests extends InstrumentationTestCase {
 						new TableOperationCallback<ComplexPersonTestObject>() {
 
 							@Override
-							public void onSuccess(ComplexPersonTestObject entity) {
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(
+									ComplexPersonTestObject entity,
+									Exception exception,
 									ServiceFilterResponse response) {
 								latch.countDown();
 							}
@@ -570,7 +559,7 @@ public class SerializationTests extends InstrumentationTestCase {
 						response.setStatus(new StatusLineMock(404));
 						response.setContent("{\"address\":{\"zipcode\":1313,\"country\":\"US\",\"streetaddress\":\"1345 Washington St\"},\"firstName\":\"John\",\"lastName\":\"Doe\"}");
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -599,14 +588,11 @@ public class SerializationTests extends InstrumentationTestCase {
 						new TableOperationCallback<ComplexPersonTestObject>() {
 
 							@Override
-							public void onSuccess(ComplexPersonTestObject entity) {
-								container.setComplexPerson(entity);
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(
+									ComplexPersonTestObject entity,
+									Exception exception,
 									ServiceFilterResponse response) {
+								container.setComplexPerson(entity);
 								latch.countDown();
 							}
 						});

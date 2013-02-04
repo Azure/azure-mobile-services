@@ -75,7 +75,7 @@ public class LoginTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent("{authenticationToken:'123abc', user:{userId:'123456'}}");
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -83,18 +83,19 @@ public class LoginTests extends InstrumentationTestCase {
 						new UserAuthenticationCallback() {
 
 							@Override
-							public void onSuccess(MobileServiceUser user) {
-								assertEquals("123456", user.getUserId());
-								assertEquals("123abc",
-										user.getAuthenticationToken());
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(MobileServiceUser user,
+									Exception exception,
 									ServiceFilterResponse response) {
-								Assert.fail();
+								if (exception == null) {
+									assertEquals("123456", user.getUserId());
+									assertEquals("123abc",
+											user.getAuthenticationToken());
+								} else {
+									Assert.fail();
+								}
+								
 								latch.countDown();
+								
 							}
 						});
 			}
@@ -167,7 +168,7 @@ public class LoginTests extends InstrumentationTestCase {
 							}
 						});
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -175,18 +176,18 @@ public class LoginTests extends InstrumentationTestCase {
 						new UserAuthenticationCallback() {
 
 							@Override
-							public void onSuccess(MobileServiceUser user) {
-								Assert.fail();
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(MobileServiceUser user,
+									Exception exception,
 									ServiceFilterResponse response) {
-								assertTrue(exception instanceof MobileServiceException);
-								MobileServiceException cause = (MobileServiceException) exception
-										.getCause();
-								assertEquals(errorMessage, cause.getMessage());
+								if (exception == null) {
+									Assert.fail();
+								} else {
+									assertTrue(exception instanceof MobileServiceException);
+									MobileServiceException cause = (MobileServiceException) exception
+											.getCause();
+									assertEquals(errorMessage, cause.getMessage());
+								}
+								
 								latch.countDown();
 							}
 						});
@@ -239,7 +240,7 @@ public class LoginTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent("{}");
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -247,12 +248,8 @@ public class LoginTests extends InstrumentationTestCase {
 						.execute(new TableJsonQueryCallback() {
 
 							@Override
-							public void onSuccess(JsonElement result, int count) {
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(JsonElement result,
+									int count, Exception exception,
 									ServiceFilterResponse response) {
 								latch.countDown();
 							}

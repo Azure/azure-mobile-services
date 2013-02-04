@@ -18,16 +18,11 @@ public interface TableJsonQueryCallback {
 	 *            JSON result
 	 * @param count
 	 *            Number of results
-	 */
-	public void onSuccess(JsonElement result, int count);
-
-	/**
-	 * Method to call if the operation fails
-	 * 
 	 * @param exception
-	 *            The exception representing the error
+	 *            An exception representing the error, in case there was one
 	 * @param response
 	 *            Response object
 	 */
-	public void onError(Exception exception, ServiceFilterResponse response);
+	public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response);
+
 }

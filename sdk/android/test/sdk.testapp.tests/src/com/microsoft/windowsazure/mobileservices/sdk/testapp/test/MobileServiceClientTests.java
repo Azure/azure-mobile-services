@@ -232,14 +232,10 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 							"oAuthToken", new UserAuthenticationCallback() {
 
 								@Override
-								public void onSuccess(MobileServiceUser user) {
-									container.setUser(user);
-									latch.countDown();
-								}
-
-								@Override
-								public void onError(Exception exception,
+								public void onCompleted(MobileServiceUser user,
+										Exception exception,
 										ServiceFilterResponse response) {
+									container.setUser(user);
 									latch.countDown();
 								}
 							});
@@ -337,7 +333,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent("{}");
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -345,12 +341,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 						.execute(new TableJsonQueryCallback() {
 
 							@Override
-							public void onSuccess(JsonElement result, int count) {
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(JsonElement result,
+									int count, Exception exception,
 									ServiceFilterResponse response) {
 								latch.countDown();
 							}

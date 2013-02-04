@@ -15,16 +15,8 @@ public interface ServiceFilterResponseCallback {
 	 * 
 	 * @param response
 	 *            The response to process
-	 */
-	public void onResponse(ServiceFilterResponse response);
-
-	/**
-	 * Method to execute when there is an error
-	 * 
 	 * @param exception
-	 *            The exception representing the error
-	 * @param response
-	 *            The response that caused the error
+	 *            An exception representing the error, in case there was one
 	 */
-	public void onError(Exception exception, ServiceFilterResponse response);
+	public void onResponse(ServiceFilterResponse response, Exception exception);
 }

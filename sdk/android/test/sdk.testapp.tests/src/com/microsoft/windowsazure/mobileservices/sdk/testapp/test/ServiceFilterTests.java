@@ -47,8 +47,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 				try {
 					client = new MobileServiceClient(appUrl, appKey);
 				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+					
 				}
 
 				// Add a new filter to the client
@@ -64,7 +63,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 						container.setRequestContent("Filter1");
 
 						responseCallback
-								.onResponse(new ServiceFilterResponseMock());
+								.onResponse(new ServiceFilterResponseMock(), null);
 					}
 				});
 
@@ -73,13 +72,8 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 						new TableJsonOperationCallback() {
 
 							@Override
-							public void onSuccess(JsonObject jsonEntity) {
-								latch.countDown();
-
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(JsonObject jsonEntity,
+									Exception exception,
 									ServiceFilterResponse response) {
 								latch.countDown();
 
@@ -111,8 +105,6 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 				try {
 					client = new MobileServiceClient(appUrl, appKey);
 				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 
 				// Add 2 new filters to the client.
@@ -156,12 +148,8 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 						new TableJsonOperationCallback() {
 
 							@Override
-							public void onSuccess(JsonObject jsonEntity) {
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(JsonObject jsonEntity,
+									Exception exception,
 									ServiceFilterResponse response) {
 								latch.countDown();
 							}
@@ -191,8 +179,6 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 				try {
 					client = new MobileServiceClient(appUrl, appKey);
 				} catch (MalformedURLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
 				}
 
 				// Add 2 new filters to the client.
@@ -228,15 +214,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 						container.setRequestContent(currentContent);
 
 						ServiceFilterResponse response = null;
-						for (int i = 0; i < 3; i++) {
-							try {
-								response = request.execute();
-							} catch (Exception e) {
-								responseCallback.onError(e, response);
-							}
-						}
-
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, new Exception("Dummy Exception"));
 					}
 				});
 
@@ -245,12 +223,8 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 						new TableJsonOperationCallback() {
 
 							@Override
-							public void onSuccess(JsonObject jsonEntity) {
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(JsonObject jsonEntity,
+									Exception exception,
 									ServiceFilterResponse response) {
 								latch.countDown();
 							}
@@ -284,8 +258,6 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 				try {
 					client = new MobileServiceClient(appUrl, appKey);
 				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 
 				// Create ServiceFilterRequestMock that returns the given
@@ -303,8 +275,8 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 							NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
-						responseCallback.onError(new MobileServiceException(
-								"Error in filter 1"), response);
+						responseCallback.onResponse(response, new MobileServiceException(
+								"Error in filter 1"));
 					}
 				});
 
@@ -313,15 +285,14 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 						new TableJsonOperationCallback() {
 
 							@Override
-							public void onSuccess(JsonObject jsonEntity) {
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(JsonObject jsonEntity,
+									Exception exception,
 									ServiceFilterResponse response) {
-								container.setErrorMessage(exception
-										.getMessage());
+								if (exception != null) {
+									container.setErrorMessage(exception
+											.getMessage());
+								}
+								
 								latch.countDown();
 							}
 						});
@@ -348,8 +319,6 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 				try {
 					client = new MobileServiceClient(appUrl, appKey);
 				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 
 				// Create ServiceFilterResponseMock
@@ -381,8 +350,8 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 							ServiceFilterRequest request,
 							NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
-						responseCallback.onError(new MobileServiceException(
-								"Error in filter 2"), response);
+						responseCallback.onResponse(response, new MobileServiceException(
+								"Error in filter 2"));
 					}
 				});
 
@@ -391,15 +360,14 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 						new TableJsonOperationCallback() {
 
 							@Override
-							public void onSuccess(JsonObject jsonEntity) {
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(JsonObject jsonEntity,
+									Exception exception,
 									ServiceFilterResponse response) {
-								container.setErrorMessage(exception
-										.getMessage());
+								if (exception != null) {
+									container.setErrorMessage(exception
+											.getMessage());
+								}
+								
 								latch.countDown();
 							}
 						});

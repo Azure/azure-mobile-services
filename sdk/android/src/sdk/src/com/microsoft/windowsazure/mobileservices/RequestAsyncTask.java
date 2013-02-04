@@ -1,5 +1,5 @@
 /*
- * RequestAsyncTask.java
+w * RequestAsyncTask.java
  */
 
 package com.microsoft.windowsazure.mobileservices;
@@ -58,13 +58,8 @@ abstract class RequestAsyncTask extends
 		mConnection.start(mRequest, new ServiceFilterResponseCallback() {
 
 			@Override
-			public void onResponse(ServiceFilterResponse response) {
-				mTaskResponse = response;
-			}
-
-			@Override
-			public void onError(Exception exception,
-					ServiceFilterResponse response) {
+			public void onResponse(ServiceFilterResponse response,
+					Exception exception) {
 				mTaskResponse = response;
 				mTaskException = exception;
 			}

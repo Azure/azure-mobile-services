@@ -18,16 +18,10 @@ public interface TableQueryCallback<E> {
 	 *            List of entities
 	 * @param count
 	 *            Number of results
-	 */
-	public void onSuccess(List<E> result, int count);
-
-	/**
-	 * Method to call if the operation fails
-	 * 
 	 * @param exception
-	 *            The exception representing the error
+	 *            An exception representing the error, in case there was one
 	 * @param response
 	 *            Response object
 	 */
-	public void onError(Exception exception, ServiceFilterResponse response);
+	public void onCompleted(List<E> result, int count, Exception exception, ServiceFilterResponse response);
 }

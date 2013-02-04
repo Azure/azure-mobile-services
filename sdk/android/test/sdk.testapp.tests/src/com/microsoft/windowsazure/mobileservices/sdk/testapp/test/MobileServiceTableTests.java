@@ -164,7 +164,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent("{\"id\":38, \"firstName\":\"John\", \"lastName\":\"Foo\", \"Age\":29}");
 						// call onResponse with the mocked response
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -176,15 +176,9 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						new TableOperationCallback<PersonTestObject>() {
 
 							@Override
-							public void onError(Exception exception,
+							public void onCompleted(PersonTestObject entity,
+									Exception exception,
 									ServiceFilterResponse response) {
-								latch.countDown();
-							}
-
-							@Override
-							public void onSuccess(PersonTestObject entity) {
-								// If the operation success, save the entity in
-								// the container to do the asserts
 								container.setPerson(entity);
 								latch.countDown();
 							}
@@ -243,7 +237,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent("{\"id\":38}");
 						// call onResponse with the mocked response
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -254,15 +248,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				msTable.insert(jsonPerson, new TableJsonOperationCallback() {
 
 					@Override
-					public void onError(Exception exception,
-							ServiceFilterResponse response) {
-						latch.countDown();
-					}
-
-					@Override
-					public void onSuccess(JsonObject jsonEntity) {
-						// If the operation success, save the entity in the
-						// container to do the asserts
+					public void onCompleted(JsonObject jsonEntity,
+							Exception exception, ServiceFilterResponse response) {
 						container.setResponseValue(jsonEntity.toString());
 						latch.countDown();
 					}
@@ -330,8 +317,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 						response.setContent("{'error': 'Internal server error'}");
 						// call onResponse with the mocked response
-						responseCallback.onError(new MobileServiceException(
-								"ERROR"), response);
+						responseCallback.onResponse(response, new MobileServiceException(
+								"ERROR"));
 					}
 				});
 
@@ -345,15 +332,13 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				msTable.insert(json, new TableJsonOperationCallback() {
 
 					@Override
-					public void onError(Exception exception,
-							ServiceFilterResponse response) {
-						assertTrue(exception instanceof MobileServiceException);
-						latch.countDown();
-					}
-
-					@Override
-					public void onSuccess(JsonObject jsonEntity) {
-						Assert.fail();
+					public void onCompleted(JsonObject jsonEntity,
+							Exception exception, ServiceFilterResponse response) {
+						if (exception == null) {
+							Assert.fail();
+						} else {
+							assertTrue(exception instanceof MobileServiceException);
+						}
 						latch.countDown();
 					}
 				});
@@ -412,15 +397,14 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 						response.setContent(null);
 						// call onResponse with the mocked response
-						responseCallback.onError(
+						responseCallback.onResponse(response,
 								new MobileServiceException(
 										"Error while processing request",
 										new MobileServiceException(
 												String.format(
 														"{'code': %d}",
 														response.getStatus()
-																.getStatusCode()))),
-								response);
+																.getStatusCode()))));
 					}
 				});
 
@@ -434,17 +418,17 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				msTable.insert(json, new TableJsonOperationCallback() {
 
 					@Override
-					public void onError(Exception exception,
-							ServiceFilterResponse response) {
-						assertTrue(exception instanceof MobileServiceException);
-						Throwable cause = exception.getCause();
-						assertTrue(cause.getMessage().contains("500"));
-						latch.countDown();
-					}
-
-					@Override
-					public void onSuccess(JsonObject jsonEntity) {
-						Assert.fail();
+					public void onCompleted(JsonObject jsonEntity,
+							Exception exception, ServiceFilterResponse response) {
+						if (exception == null) {
+							Assert.fail();
+						} else {
+							assertTrue(exception instanceof MobileServiceException);
+							Throwable cause = exception.getCause();
+							assertTrue(cause.getMessage().contains("500"));
+							latch.countDown();
+						}
+						
 						latch.countDown();
 					}
 				});
@@ -492,7 +476,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent("{\"firstName\":\"Mike\", \"age\":50}");
 						// call onResponse with the mocked response
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -504,15 +488,9 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						new TableOperationCallback<PersonTestObject>() {
 
 							@Override
-							public void onError(Exception exception,
+							public void onCompleted(PersonTestObject entity,
+									Exception exception,
 									ServiceFilterResponse response) {
-								latch.countDown();
-							}
-
-							@Override
-							public void onSuccess(PersonTestObject entity) {
-								// If the operation success, save the entity in
-								// the container to do the asserts
 								container.setPerson(entity);
 								latch.countDown();
 							}
@@ -574,7 +552,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent("{\"firstName\":\"Mike\", \"age\":50}");
 						// call onResponse with the mocked response
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -585,17 +563,10 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				msTable.update(jsonPerson, new TableJsonOperationCallback() {
 
 					@Override
-					public void onError(Exception exception,
-							ServiceFilterResponse response) {
-						latch.countDown();
-					}
-
-					@Override
-					public void onSuccess(JsonObject jsonEntity) {
-						// If the operation success, save the jsonEntity in the
-						// container to do the asserts
+					public void onCompleted(JsonObject jsonEntity,
+							Exception exception, ServiceFilterResponse response) {
 						container.setResponseValue(jsonEntity.toString());
-						latch.countDown();
+						latch.countDown();	
 					}
 				});
 
@@ -652,7 +623,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						container.setRequestUrl(request.getUrl());
 						// call onResponse with the mocked response
 						responseCallback
-								.onResponse(new ServiceFilterResponseMock());
+								.onResponse(new ServiceFilterResponseMock(), null);
 					}
 				});
 
@@ -663,16 +634,9 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				msTable.delete(person, new TableDeleteCallback() {
 
 					@Override
-					public void onError(Exception exception,
+					public void onCompleted(Exception exception,
 							ServiceFilterResponse response) {
-						latch.countDown();
-						container.setOperationSucceded(false);
-					}
-
-					@Override
-					public void onSuccess() {
-						// If the operation success, set operationSucceed true
-						container.setOperationSucceded(true);
+						container.setOperationSucceded(exception == null);
 						latch.countDown();
 					}
 				});
@@ -726,7 +690,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						container.setRequestUrl(request.getUrl());
 						// call onResponse with the mocked response
 						responseCallback
-								.onResponse(new ServiceFilterResponseMock());
+								.onResponse(new ServiceFilterResponseMock(), null);
 					}
 				});
 
@@ -737,16 +701,9 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				msTable.delete(personId, new TableDeleteCallback() {
 
 					@Override
-					public void onError(Exception exception,
+					public void onCompleted(Exception exception,
 							ServiceFilterResponse response) {
-						container.setOperationSucceded(false);
-						latch.countDown();
-					}
-
-					@Override
-					public void onSuccess() {
-						// If the operation success, set operationSucceed true
-						container.setOperationSucceded(true);
+						container.setOperationSucceded(exception == null);
 						latch.countDown();
 					}
 				});
@@ -804,7 +761,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						container.setRequestUrl(request.getUrl());
 						// call onResponse with the mocked response
 						responseCallback
-								.onResponse(new ServiceFilterResponseMock());
+								.onResponse(new ServiceFilterResponseMock(), null);
 					}
 				});
 
@@ -815,16 +772,9 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				msTable.delete(jsonPerson, new TableDeleteCallback() {
 
 					@Override
-					public void onError(Exception exception,
+					public void onCompleted(Exception exception,
 							ServiceFilterResponse response) {
-						latch.countDown();
-						container.setOperationSucceded(false);
-					}
-
-					@Override
-					public void onSuccess() {
-						// If the operation success, set operationSucceed true
-						container.setOperationSucceded(true);
+						container.setOperationSucceded(exception == null);
 						latch.countDown();
 					}
 				});
@@ -884,7 +834,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent(responseContent);
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -892,16 +842,12 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						.all()
 						.execute(PersonTestObject.class,
 								new TableQueryCallback<PersonTestObject>() {
-									@Override
-									public void onError(Exception exception,
-											ServiceFilterResponse response) {
-										latch.countDown();
-									}
 
 									@Override
-									public void onSuccess(
+									public void onCompleted(
 											List<PersonTestObject> result,
-											int count) {
+											int count, Exception exception,
+											ServiceFilterResponse response) {
 										container.setPeopleResult(result);
 										container.setCount(count);
 										latch.countDown();
@@ -920,7 +866,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		assertEquals(p.get(1).getId(), 2);
 		assertEquals(p.get(0).getLastName(), "Foo");
 		assertEquals(p.get(1).getLastName(), "Doe");
-		assertEquals(-1, container.getCount());
+		assertEquals(0, container.getCount());
 
 	}
 
@@ -964,20 +910,17 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent(responseContent);
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
 				client.getTable(tableName).all()
 						.execute(new TableJsonQueryCallback() {
-							@Override
-							public void onError(Exception exception,
-									ServiceFilterResponse response) {
-								latch.countDown();
-							}
 
 							@Override
-							public void onSuccess(JsonElement result, int count) {
+							public void onCompleted(JsonElement result,
+									int count, Exception exception,
+									ServiceFilterResponse response) {
 								container.setResponseValue(result.toString());
 								container.setCount(count);
 								latch.countDown();
@@ -990,7 +933,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 		// Asserts
 		assertEquals(responseContent, container.getResponseValue());
-		assertEquals(-1, container.getCount());
+		assertEquals(0, container.getCount());
 
 	}
 
@@ -1029,7 +972,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent(responseContent);
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -1037,16 +980,12 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						.all()
 						.execute(PersonTestObject.class,
 								new TableQueryCallback<PersonTestObject>() {
-									@Override
-									public void onError(Exception exception,
-											ServiceFilterResponse response) {
-										latch.countDown();
-									}
 
 									@Override
-									public void onSuccess(
+									public void onCompleted(
 											List<PersonTestObject> result,
-											int count) {
+											int count, Exception exception,
+											ServiceFilterResponse response) {
 										container.setPeopleResult(result);
 										container.setCount(count);
 										latch.countDown();
@@ -1061,7 +1000,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		List<PersonTestObject> p = container.getPeopleResult();
 		assertNotNull("A list of people is expected", p);
 		assertEquals(0, p.size());
-		assertEquals(-1, container.getCount());
+		assertEquals(0, container.getCount());
 
 	}
 
@@ -1101,20 +1040,17 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent(responseContent);
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
 				client.getTable(tableName).all()
 						.execute(new TableJsonQueryCallback() {
-							@Override
-							public void onError(Exception exception,
-									ServiceFilterResponse response) {
-								latch.countDown();
-							}
 
 							@Override
-							public void onSuccess(JsonElement result, int count) {
+							public void onCompleted(JsonElement result,
+									int count, Exception exception,
+									ServiceFilterResponse response) {
 								container.setResponseValue(result.toString());
 								container.setCount(count);
 								latch.countDown();
@@ -1127,7 +1063,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 		// Asserts
 		assertEquals("[]", container.getResponseValue());
-		assertEquals(-1, container.getCount());
+		assertEquals(0, container.getCount());
 
 	}
 
@@ -1175,7 +1111,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent(responseContent);
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -1183,16 +1119,12 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						.all()
 						.execute(PersonTestObject.class,
 								new TableQueryCallback<PersonTestObject>() {
+									
 									@Override
-									public void onError(Exception exception,
-											ServiceFilterResponse response) {
-										latch.countDown();
-									}
-
-									@Override
-									public void onSuccess(
+									public void onCompleted(
 											List<PersonTestObject> result,
-											int count) {
+											int count, Exception exception,
+											ServiceFilterResponse response) {
 										container.setPeopleResult(result);
 										container.setCount(count);
 										latch.countDown();
@@ -1254,7 +1186,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						response.setContent(String.format(personJsonTemplate,
 								4, "John", "Doe", 35));
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
@@ -1263,14 +1195,10 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						new TableOperationCallback<PersonTestObject>() {
 
 							@Override
-							public void onSuccess(PersonTestObject result) {
-								container.setPerson(result);
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(PersonTestObject entity,
+									Exception exception,
 									ServiceFilterResponse response) {
+								container.setPerson(entity);
 								latch.countDown();
 							}
 						});
@@ -1330,22 +1258,20 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent(personJsonString);
 
-						responseCallback.onResponse(response);
+						responseCallback.onResponse(response, null);
 					}
 				});
 
 				client.getTable(tableName).lookUp(personId,
 						new TableJsonOperationCallback() {
 							@Override
-							public void onError(Exception exception,
+							public void onCompleted(JsonObject jsonEntity,
+									Exception exception,
 									ServiceFilterResponse response) {
-								latch.countDown();
-							}
-
-							@Override
-							public void onSuccess(JsonObject jsonEntity) {
-								container.setResponseValue(jsonEntity
-										.toString());
+								if (exception == null) {
+									container.setResponseValue(jsonEntity
+											.toString());
+								}
 								latch.countDown();
 							}
 						});
@@ -1410,15 +1336,15 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						new TableOperationCallback<PersonTestObject>() {
 
 							@Override
-							public void onSuccess(PersonTestObject result) {
-								latch.countDown();
-							}
-
-							@Override
-							public void onError(Exception exception,
+							public void onCompleted(PersonTestObject entity,
+									Exception exception,
 									ServiceFilterResponse response) {
-								container.setResponseValue(response
+								if (exception != null)
+								{
+									container.setResponseValue(response
 										.getContent());
+								}
+								
 								latch.countDown();
 							}
 						});
@@ -1482,16 +1408,15 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client.getTable(tableName).lookUp(personId,
 						new TableJsonOperationCallback() {
 							@Override
-							public void onError(Exception exception,
+							public void onCompleted(JsonObject jsonEntity,
+									Exception exception,
 									ServiceFilterResponse response) {
-								container.setResponseValue(response
-										.getContent());
+								if (exception != null) {
+									container.setResponseValue(response
+											.getContent());
+								}
 								latch.countDown();
-							}
-
-							@Override
-							public void onSuccess(JsonObject jsonEntity) {
-								latch.countDown();
+								
 							}
 						});
 			}

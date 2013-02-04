@@ -10,16 +10,11 @@ package com.microsoft.windowsazure.mobileservices;
 public interface TableDeleteCallback {
 	/**
 	 * Method to call if the operation finishes successfully
-	 */
-	public void onSuccess();
-
-	/**
-	 * Method to call if the operation fails
 	 * 
 	 * @param exception
-	 *            The exception representing the error
+	 *            An exception representing the error, in case there was one
 	 * @param response
 	 *            Response object
 	 */
-	public void onError(Exception exception, ServiceFilterResponse response);
+	public void onCompleted(Exception exception, ServiceFilterResponse response);;
 }

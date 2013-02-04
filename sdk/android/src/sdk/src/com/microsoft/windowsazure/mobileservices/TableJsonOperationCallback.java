@@ -16,16 +16,11 @@ public interface TableJsonOperationCallback {
 	 * 
 	 * @param jsonEntity
 	 *            The obtained jsonEntity
-	 */
-	public void onSuccess(JsonObject jsonEntity);
-
-	/**
-	 * Method to call if the operation fails
-	 * 
 	 * @param exception
-	 *            The exception representing the error
+	 *            An exception representing the error, in case there was one
 	 * @param response
 	 *            Response object
+
 	 */
-	public void onError(Exception exception, ServiceFilterResponse response);
+	public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response);
 }

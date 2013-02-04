@@ -166,45 +166,24 @@ public final class MobileServiceTable {
 	public <E> void lookUp(Object id, final Class<E> clazz,
 			final TableOperationCallback<E> callback) {
 
-		// Create request URL
-		String url = null;
-		try {
-			url = mClient.getAppUrl().toString()
-					+ TABLES_URL
-					+ URLEncoder.encode(mTableName,
-							MobileServiceClient.UTF8_ENCODING)
-					+ "/"
-					+ URLEncoder.encode(id.toString(),
-							MobileServiceClient.UTF8_ENCODING);
-		} catch (UnsupportedEncodingException e) {
-			if (callback != null) {
-				callback.onError(e, null);
-			}
-			return;
-		}
-
-		executeGetRecords(url, new TableJsonQueryCallback() {
-
+		lookUp(id, new TableJsonOperationCallback() {
+			
 			@Override
-			public void onError(Exception exception,
+			public void onCompleted(JsonObject jsonEntity, Exception exception,
 					ServiceFilterResponse response) {
 				if (callback != null) {
-					callback.onError(exception, response);
-				}
-			}
-
-			@Override
-			public void onSuccess(JsonElement results, int count) {
-				if (callback != null) {
-					List<E> result = parseResults(results, clazz);
-
-					if (result.size() > 0) {
-						callback.onSuccess(result.get(0));
+					if (exception == null) {
+						E entity = null;
+						Exception ex = null;
+						try {
+							entity = parseResults(jsonEntity, clazz).get(0);
+						} catch (Exception e) {
+							ex = e;
+						}
+						
+						callback.onCompleted(entity, ex, response);
 					} else {
-						callback.onError(
-								new MobileServiceException(
-										"A record with the specified Id cannot be found"),
-								null);
+						callback.onCompleted(null, exception, response);
 					}
 				}
 			}
@@ -221,33 +200,40 @@ public final class MobileServiceTable {
 	 */
 	public void lookUp(Object id, final TableJsonOperationCallback callback) {
 		// Create request URL
-		String url = mClient.getAppUrl().toString() + TABLES_URL
-				+ URLEncoder.encode(mTableName) + "/"
-				+ URLEncoder.encode(id.toString());
+		String url = null;
+		try {
+			url = mClient.getAppUrl().toString()
+					+ TABLES_URL
+					+ URLEncoder.encode(mTableName,
+							MobileServiceClient.UTF8_ENCODING)
+					+ "/"
+					+ URLEncoder.encode(id.toString(),
+							MobileServiceClient.UTF8_ENCODING);
+		} catch (UnsupportedEncodingException e) {
+			if (callback != null) {
+				callback.onCompleted(null, e, null);
+			}
+			return;
+		}
 
 		executeGetRecords(url, new TableJsonQueryCallback() {
 
 			@Override
-			public void onError(Exception exception,
-					ServiceFilterResponse response) {
+			public void onCompleted(JsonElement results, int count,
+					Exception exception, ServiceFilterResponse response) {
 				if (callback != null) {
-					callback.onError(exception, response);
-				}
-			}
-
-			@Override
-			public void onSuccess(JsonElement results, int count) {
-				if (callback != null) {
-					if (results.isJsonArray()) {
-						JsonArray elements = results.getAsJsonArray();
-						if (elements.size() > 0) {
-							callback.onSuccess(elements.get(0)
-									.getAsJsonObject());
-						} else {
-							callback.onSuccess(null);
+					if (exception == null) {
+						if (results.isJsonArray()) { // empty result
+							// TODO: VERIFY THIS!
+							callback.onCompleted(
+									null,
+									new MobileServiceException("A record with the specified Id cannot be found"),
+									response);
+						} else { // Lookup result
+							callback.onCompleted(results.getAsJsonObject(), exception, response);
 						}
-					} else { // Lookup result
-						callback.onSuccess(results.getAsJsonObject());
+					} else {
+						callback.onCompleted(null, exception, response);
 					}
 				}
 			}
@@ -269,40 +255,31 @@ public final class MobileServiceTable {
 		final JsonObject json = mClient.getGsonBuilder().create().toJsonTree(element)
 				.getAsJsonObject();
 
-		removeIdFromJson(json);
-
-		String content = json.toString();
-
-		ServiceFilterRequest post = new ServiceFilterRequestImpl(new HttpPost(
-				mClient.getAppUrl().toString() + TABLES_URL + mTableName));
-		try {
-			post.setContent(content);
-		} catch (Exception e) {
-			// this should never happen
-		}
-
-		executeTableOperation(post, new TableJsonOperationCallback() {
+		insert(json, new TableJsonOperationCallback() {
+			
+			@SuppressWarnings("unchecked")
 			@Override
-			public void onSuccess(JsonObject jsonEntity) {
-				if (callback != null) {
-					JsonObject patchedJson = patchOriginalEntityWithResponseEntity(
-							json, jsonEntity);
-					@SuppressWarnings("unchecked")
-					E newEntity = (E) parseResults(patchedJson,
-							element.getClass()).get(0);
-
-					callback.onSuccess(newEntity);
-				}
-			}
-
-			@Override
-			public void onError(Exception exception,
+			public void onCompleted(JsonObject jsonEntity, Exception exception,
 					ServiceFilterResponse response) {
 				if (callback != null) {
-					callback.onError(exception, response);
+					if (exception == null) {
+						E entity = null;
+						Exception ex = null;
+						try {
+							entity = (E) parseResults(jsonEntity, element.getClass()).get(0);
+						} catch (Exception e) {
+							ex = e;
+						}
+						
+						callback.onCompleted(entity, ex, response);
+					} else {
+						callback.onCompleted(null, exception, response);
+					}
 				}
 			}
 		});
+		
+		
 	}
 
 	private void removeIdFromJson(final JsonObject json) {
@@ -345,30 +322,41 @@ public final class MobileServiceTable {
 
 		String content = element.toString();
 
-		ServiceFilterRequest post = new ServiceFilterRequestImpl(new HttpPost(
-				mClient.getAppUrl().toString() + TABLES_URL + mTableName));
+		ServiceFilterRequest post;
+		try {
+			post = new ServiceFilterRequestImpl(new HttpPost(
+					mClient.getAppUrl().toString() + TABLES_URL + URLEncoder.encode(mTableName,
+							MobileServiceClient.UTF8_ENCODING)));
+		} catch (UnsupportedEncodingException e) {
+			if (callback != null) {
+				callback.onCompleted(null, e, null);
+			}
+			return;
+		}
+		
 		try {
 			post.setContent(content);
 		} catch (Exception e) {
-			// this should never happen
+			if (callback != null) {
+				callback.onCompleted(null, e, null);
+			}
+			return;
 		}
 
 		executeTableOperation(post, new TableJsonOperationCallback() {
 
 			@Override
-			public void onSuccess(JsonObject jsonEntity) {
-				if (callback != null) {
-					JsonObject patchedJson = patchOriginalEntityWithResponseEntity(
-							element, jsonEntity);
-					callback.onSuccess(patchedJson);
-				}
-			}
-
-			@Override
-			public void onError(Exception exception,
+			public void onCompleted(JsonObject jsonEntity, Exception exception,
 					ServiceFilterResponse response) {
 				if (callback != null) {
-					callback.onError(exception, response);
+					if (exception == null) {
+						JsonObject patchedJson = patchOriginalEntityWithResponseEntity(
+								element, jsonEntity);
+						
+						callback.onCompleted(patchedJson, exception, response);
+					} else {
+						callback.onCompleted(jsonEntity, exception, response);
+					}
 				}
 			}
 		});
@@ -386,37 +374,27 @@ public final class MobileServiceTable {
 			final TableOperationCallback<E> callback) {
 		final JsonObject json = mClient.getGsonBuilder().create().toJsonTree(element)
 				.getAsJsonObject();
-		String content = json.toString();
-
-		ServiceFilterRequest patch = new ServiceFilterRequestImpl(
-				new HttpPatch(mClient.getAppUrl().toString() + TABLES_URL
-						+ mTableName + "/"
-						+ Integer.valueOf(getObjectId(element)).toString()));
-		try {
-			patch.setContent(content);
-		} catch (Exception e) {
-			// this will never happen
-		}
-
-		executeTableOperation(patch, new TableJsonOperationCallback() {
+		
+		update(json, new TableJsonOperationCallback() {
+			
+			@SuppressWarnings("unchecked")
 			@Override
-			public void onSuccess(JsonObject jsonEntity) {
-				if (callback != null) {
-					JsonObject patchedJson = patchOriginalEntityWithResponseEntity(
-							json, jsonEntity);
-					@SuppressWarnings("unchecked")
-					E newEntity = (E) parseResults(patchedJson,
-							element.getClass()).get(0);
-
-					callback.onSuccess(newEntity);
-				}
-			}
-
-			@Override
-			public void onError(Exception exception,
+			public void onCompleted(JsonObject jsonEntity, Exception exception,
 					ServiceFilterResponse response) {
 				if (callback != null) {
-					callback.onError(exception, response);
+					if (exception == null) {
+						E entity = null;
+						Exception ex = null;
+						try {
+							entity = (E) parseResults(jsonEntity, element.getClass()).get(0);
+						} catch (Exception e) {
+							ex = e;
+						}
+						
+						callback.onCompleted(entity, ex, response);
+					} else {
+						callback.onCompleted(null, exception, response);
+					}
 				}
 			}
 		});
@@ -433,32 +411,42 @@ public final class MobileServiceTable {
 	public void update(final JsonObject element,
 			final TableJsonOperationCallback callback) {
 		String content = element.toString();
-		ServiceFilterRequest patch = new ServiceFilterRequestImpl(
-				new HttpPatch(mClient.getAppUrl().toString() + TABLES_URL
-						+ mTableName + "/"
-						+ Integer.valueOf(getObjectId(element)).toString()));
+		
+		ServiceFilterRequest patch;
+		try {
+			patch = new ServiceFilterRequestImpl(new HttpPatch(
+					mClient.getAppUrl().toString() + TABLES_URL + URLEncoder.encode(mTableName,
+							MobileServiceClient.UTF8_ENCODING) + "/" +
+							Integer.valueOf(getObjectId(element)).toString()));
+		} catch (UnsupportedEncodingException e) {
+			if (callback != null) {
+				callback.onCompleted(null, e, null);
+			}
+			return;
+		}
+		
 		try {
 			patch.setContent(content);
 		} catch (Exception e) {
-			// this will never happen
+			if (callback != null) {
+				callback.onCompleted(null, e, null);
+			}
+			return;
 		}
 
 		executeTableOperation(patch, new TableJsonOperationCallback() {
 
 			@Override
-			public void onSuccess(JsonObject jsonEntity) {
-				if (callback != null) {
-					JsonObject patchedJson = patchOriginalEntityWithResponseEntity(
-							element, jsonEntity);
-					callback.onSuccess(patchedJson);
-				}
-			}
-
-			@Override
-			public void onError(Exception exception,
+			public void onCompleted(JsonObject jsonEntity, Exception exception,
 					ServiceFilterResponse response) {
 				if (callback != null) {
-					callback.onError(exception, response);
+					if (exception == null) {
+						JsonObject patchedJson = patchOriginalEntityWithResponseEntity(
+								element, jsonEntity);
+						callback.onCompleted(patchedJson, exception, response);
+					} else {
+						callback.onCompleted(jsonEntity, exception, response);
+					}
 				}
 			}
 		});
@@ -488,21 +476,26 @@ public final class MobileServiceTable {
 	 */
 	public void delete(int id, final TableDeleteCallback callback) {
 		// Create delete request
-		HttpDelete delete = new HttpDelete(mClient.getAppUrl().toString()
-				+ TABLES_URL + mTableName + "/"
-				+ Integer.valueOf(id).toString());
-
+		ServiceFilterRequest delete;
+		try {
+			delete = new ServiceFilterRequestImpl(new HttpDelete(
+					mClient.getAppUrl().toString() + TABLES_URL + URLEncoder.encode(mTableName,
+							MobileServiceClient.UTF8_ENCODING) + "/" +
+							Integer.valueOf(id).toString()));
+		} catch (UnsupportedEncodingException e) {
+			if (callback != null) {
+				callback.onCompleted(e, null);
+			}
+			return;
+		}
+		
 		// Create AsyncTask to execute the request
-		new RequestAsyncTask(new ServiceFilterRequestImpl(delete),
+		new RequestAsyncTask(delete,
 				mClient.createConnection()) {
 			@Override
 			protected void onPostExecute(ServiceFilterResponse result) {
 				if (callback != null) {
-					if (mTaskException == null && result != null) {
-						callback.onSuccess();
-					} else {
-						callback.onError(mTaskException, result);
-					}
+					callback.onCompleted(mTaskException, result);
 				}
 			}
 		}.execute();
@@ -531,10 +524,10 @@ public final class MobileServiceTable {
 						newEntityJson = new JsonParser().parse(content)
 								.getAsJsonObject();
 
-						callback.onSuccess(newEntityJson);
+						callback.onCompleted(newEntityJson, null, result);
 
 					} else {
-						callback.onError(mTaskException, result);
+						callback.onCompleted(null, mTaskException, result);;
 					}
 				}
 			}
@@ -623,7 +616,7 @@ public final class MobileServiceTable {
 
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
-				callback.onError(e, null);
+				callback.onCompleted(null, 0, e, null);
 			}
 			return;
 		}
@@ -682,7 +675,7 @@ public final class MobileServiceTable {
 					if (mTaskException == null && response != null) {
 						JsonElement results = null;
 
-						int count = -1;
+						int count = 0;
 
 						try {
 							// Parse the results using the given Entity class
@@ -705,17 +698,16 @@ public final class MobileServiceTable {
 								results = json;
 							}
 						} catch (Exception e) {
-							callback.onError(
-									new MobileServiceException(
+							callback.onCompleted(null, 0, new MobileServiceException(
 											"Error while retrieving data from response.",
 											e), response);
 							return;
 						}
 
-						callback.onSuccess(results, count);
+						callback.onCompleted(results, count, null, response);
 
 					} else {
-						callback.onError(mTaskException, response);
+						callback.onCompleted(null, 0, mTaskException, response);
 					}
 				}
 			}
@@ -936,19 +928,24 @@ public final class MobileServiceTable {
 		public <E> void execute(final Class<E> clazz,
 				final TableQueryCallback<E> callback) {
 			getTable().executeQuery(this, new TableJsonQueryCallback() {
+				
 				@Override
-				public void onSuccess(JsonElement results, int count) {
+				public void onCompleted(JsonElement result, int count,
+						Exception exception, ServiceFilterResponse response) {
 					if (callback != null) {
-						List<E> result = parseResults(results, clazz);
-						callback.onSuccess(result, count);
-					}
-				}
-
-				@Override
-				public void onError(Exception exception,
-						ServiceFilterResponse response) {
-					if (callback != null) {
-						callback.onError(exception, response);
+						if (exception == null) {
+							Exception ex = null;
+							List<E> elements = null;
+							try {
+								elements = parseResults(result, clazz);
+							} catch (Exception e) {
+								ex = e;
+							}
+							
+							callback.onCompleted(elements, count, ex, response);
+						} else {
+							callback.onCompleted(null, count, exception, response);
+						}
 					}
 				}
 			});

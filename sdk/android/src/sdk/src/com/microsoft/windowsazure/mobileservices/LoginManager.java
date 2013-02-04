@@ -111,37 +111,36 @@ class LoginManager {
 				new LoginUIOperationCallback() {
 
 					@Override
-					public void onSuccess(String url) {
-						MobileServiceUser user = null;
-						try {
-							String decodedUrl = URLDecoder.decode(url,
-									MobileServiceClient.UTF8_ENCODING);
+					public void onCompleted(String url, Exception exception) {
+						if (externalCallback != null) {
+							if (exception == null) {
+								MobileServiceUser user = null;
+								try {
+									String decodedUrl = URLDecoder.decode(url,
+											MobileServiceClient.UTF8_ENCODING);
 
-							JsonObject json = (JsonObject) new JsonParser()
-									.parse(decodedUrl.substring(decodedUrl
-											.indexOf(TOKEN_MARK)
-											+ TOKEN_MARK.length()));
+									JsonObject json = (JsonObject) new JsonParser()
+											.parse(decodedUrl.substring(decodedUrl
+													.indexOf(TOKEN_MARK)
+													+ TOKEN_MARK.length()));
 
-							user = createUserFromJSON(json);
-						} catch (Exception e) {
-							// If exists an external callback, call success
-							// method with null parameter
-							if (externalCallback != null) {
-								externalCallback.onError(e, null);
+									user = createUserFromJSON(json);
+								} catch (Exception e) {
+									// If exists an external callback, call onComplete method
+									// method with exception
+									if (externalCallback != null) {
+										externalCallback.onCompleted(null, e, null);
+									}
+									return;
+								}
+
+								// If exists an external callback, call onComplete method
+								if (externalCallback != null) {
+									externalCallback.onCompleted(user, null, null);
+								}
+							} else {
+								externalCallback.onCompleted(null, exception, null);
 							}
-							return;
-						}
-
-						// If exists an external callback, call success method
-						if (externalCallback != null) {
-							externalCallback.onSuccess(user);
-						}
-					}
-
-					@Override
-					public void onError(Exception e) {
-						if (externalCallback != null) {
-							externalCallback.onError(e, null);
 						}
 					}
 
@@ -217,7 +216,7 @@ class LoginManager {
 			@Override
 			public void onCancel(DialogInterface dialog) {
 				if (externalCallback != null) {
-					externalCallback.onError(new MobileServiceException(
+					externalCallback.onCompleted(null, new MobileServiceException(
 							"User Canceled"));
 				}
 			}
@@ -230,8 +229,7 @@ class LoginManager {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (externalCallback != null) {
-							externalCallback
-									.onError(new MobileServiceException(
+							externalCallback.onCompleted(null, new MobileServiceException(
 											"User Canceled"));
 						}
 						wv.destroy();
@@ -281,7 +279,7 @@ class LoginManager {
 				// format, the login process finished
 				if (isFinalUrl(url)) {
 					if (externalCallback != null) {
-						externalCallback.onSuccess(url);
+						externalCallback.onCompleted(url, null);
 					}
 
 					dialog.dismiss();
@@ -312,7 +310,7 @@ class LoginManager {
 			public void onReceivedError(WebView view, int errorCode,
 					String description, String failingUrl) {
 				if (externalCallback != null) {
-					externalCallback.onError(new MobileServiceException(
+					externalCallback.onCompleted(null, new MobileServiceException(
 							description));
 				}
 
@@ -323,8 +321,7 @@ class LoginManager {
 			public void onPageFinished(WebView view, String url) {
 				if (isStartUrl(url)) {
 					if (externalCallback != null) {
-						externalCallback
-								.onError(new MobileServiceException(
+						externalCallback.onCompleted(null, new MobileServiceException(
 										"Logging in with the selected authentication provider is not enabled"));
 					}
 
@@ -433,18 +430,18 @@ class LoginManager {
 									.parse((content.trim())));
 	
 						} catch (Exception e) {
-							// Something went wrong, call onError method
-							callback.onError(new MobileServiceException(
+							// Something went wrong, call onCompleted method with exception
+							callback.onCompleted(null, new MobileServiceException(
 									"Error while authenticating user.", e),
 									response);
 							return;
 						}
 	
-						// Call success method
-						callback.onSuccess(user);
+						// Call onCompleted method
+						callback.onCompleted(user, null, response);
 					} else {
-						// Something went wrong, call onError method
-						callback.onError(new MobileServiceException(
+						// Something went wrong, call onCompleted method with exception
+						callback.onCompleted(null, new MobileServiceException(
 							"Error while authenticating user.",
 							mTaskException), response);
 					}
@@ -463,15 +460,9 @@ class LoginManager {
 		 * 
 		 * @param url
 		 *            The final login URL
+		 * @param e	An exception representing the error, in case there was one
 		 */
-		void onSuccess(String url);
+		void onCompleted(String url, Exception exception);
 
-		/**
-		 * Method to call if the operation fails
-		 * 
-		 * @param e
-		 *            The exception that caused the operation to fail
-		 */
-		void onError(Exception e);
 	}
 }
