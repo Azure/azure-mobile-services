@@ -133,7 +133,9 @@ class MobileServiceConnection {
 		request.addHeader(X_ZUMO_APPLICATION_HEADER, mClient.getAppKey());
 
 		// Set the special Installation ID header
-		request.addHeader(X_ZUMO_INSTALLATION_ID_HEADER, MobileServiceApplication.getInstallationId(mClient.getContext()));
+		request.addHeader(
+				X_ZUMO_INSTALLATION_ID_HEADER,
+				MobileServiceApplication.getInstallationId(mClient.getContext()));
 
 		// Set the content type header
 		request.addHeader(HTTP.CONTENT_TYPE, JSON_CONTENTTYPE);

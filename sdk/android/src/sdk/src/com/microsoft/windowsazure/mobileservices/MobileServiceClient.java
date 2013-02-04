@@ -55,12 +55,12 @@ public class MobileServiceClient {
 	 * Context where the MobileServiceClient is created
 	 */
 	private Context mContext;
-	
+
 	/**
 	 * UTF-8 encoding
 	 */
 	public static final String UTF8_ENCODING = "UTF-8";
-	
+
 	/**
 	 * Creates a GsonBuilder with custom serializers to use with Windows Azure
 	 * Mobile Services
@@ -101,7 +101,8 @@ public class MobileServiceClient {
 	 */
 	public MobileServiceClient(MobileServiceClient client) {
 		initialize(client.getAppUrl(), client.getAppKey(),
-				client.getCurrentUser(), client.getGsonBuilder(), client.getContext());
+				client.getCurrentUser(), client.getGsonBuilder(),
+				client.getContext());
 	}
 
 	/**
@@ -113,12 +114,11 @@ public class MobileServiceClient {
 	 *            Mobile Service application key
 	 * @param context
 	 *            The Context where the MobileServiceClient is created
-	 
 	 */
 	public MobileServiceClient(URL appUrl, String appKey, Context context) {
 		GsonBuilder gsonBuilder = createMobileServiceGsonBuilder();
 		gsonBuilder.serializeNulls(); // by default, add null serialization
-		
+
 		initialize(appUrl, appKey, null, gsonBuilder, context);
 	}
 
@@ -131,7 +131,8 @@ public class MobileServiceClient {
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
-	public void login(MobileServiceAuthenticationProvider provider, UserAuthenticationCallback callback) {
+	public void login(MobileServiceAuthenticationProvider provider,
+			UserAuthenticationCallback callback) {
 		mLoginInProgress = true;
 
 		final UserAuthenticationCallback externalCallback = callback;
@@ -367,7 +368,8 @@ public class MobileServiceClient {
 	 *            The Context where the MobileServiceClient is created
 	 */
 	private void initialize(URL appUrl, String appKey,
-			MobileServiceUser currentUser, GsonBuilder gsonBuiler, Context context) {
+			MobileServiceUser currentUser, GsonBuilder gsonBuiler,
+			Context context) {
 		if (appUrl == null || appUrl.toString().trim().length() == 0) {
 			throw new IllegalArgumentException("Invalid Application URL");
 		}
@@ -375,7 +377,7 @@ public class MobileServiceClient {
 		if (appKey == null || appKey.toString().trim().length() == 0) {
 			throw new IllegalArgumentException("Invalid Application Key");
 		}
-		
+
 		if (context == null) {
 			throw new IllegalArgumentException("Context cannot be null");
 		}

@@ -29,7 +29,7 @@ class DateSerializer implements JsonSerializer<Date>, JsonDeserializer<Date> {
 		} catch (ParseException e) {
 			throw new JsonParseException(e);
 		}
-		
+
 	}
 
 	@Override
@@ -38,7 +38,7 @@ class DateSerializer implements JsonSerializer<Date>, JsonDeserializer<Date> {
 		JsonElement element = new JsonPrimitive(serialize(date));
 		return element;
 	}
-	
+
 	public static Date deserialize(String strVal) throws ParseException {
 		// Change Z to +00:00 to adapt the string to a format
 		// that can be parsed in Java
@@ -60,14 +60,14 @@ class DateSerializer implements JsonSerializer<Date>, JsonDeserializer<Date> {
 
 		return date;
 	}
-	
+
 	public static String serialize(Date date) {
 		SimpleDateFormat dateFormat = new SimpleDateFormat(
 				"yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", Locale.getDefault());
 		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
 		String formatted = dateFormat.format(date);
-		
+
 		return formatted;
 	}
 

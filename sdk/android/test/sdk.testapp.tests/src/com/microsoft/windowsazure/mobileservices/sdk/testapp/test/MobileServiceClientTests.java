@@ -40,14 +40,16 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 
 	public void testNewMobileServiceClientShouldReturnMobileServiceClient()
 			throws MalformedURLException {
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey,
+				getInstrumentation().getTargetContext());
 		assertEquals(appUrl, client.getAppUrl().toString());
 		assertEquals(appKey, client.getAppKey());
 	}
 
 	public void testNewMobileServiceClientWithEmptyAppUrlShouldThrowException() {
 		try {
-			new MobileServiceClient("", appKey, getInstrumentation().getTargetContext());
+			new MobileServiceClient("", appKey, getInstrumentation()
+					.getTargetContext());
 			fail("Expected Exception MalformedURLException");
 		} catch (MalformedURLException e) {
 			// do nothing, it's OK
@@ -56,7 +58,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 
 	public void testNewMobileServiceClientWithNullAppUrlShouldThrowException() {
 		try {
-			new MobileServiceClient((String) null, appKey, getInstrumentation().getTargetContext());
+			new MobileServiceClient((String) null, appKey, getInstrumentation()
+					.getTargetContext());
 			fail("Expected Exception MalformedURLException");
 		} catch (MalformedURLException e) {
 			// do nothing, it's OK
@@ -65,7 +68,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 
 	public void testNewMobileServiceClientWithEmptyAppKeyShouldThrowException() {
 		try {
-			new MobileServiceClient(appUrl, "", getInstrumentation().getTargetContext());
+			new MobileServiceClient(appUrl, "", getInstrumentation()
+					.getTargetContext());
 			fail("Expected Exception MalformedURLException");
 		} catch (IllegalArgumentException e) {
 			// do nothing, it's OK
@@ -76,7 +80,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 
 	public void testNewMobileServiceClientWithNullAppKeyShouldThrowException() {
 		try {
-			new MobileServiceClient(appUrl, null, getInstrumentation().getTargetContext());
+			new MobileServiceClient(appUrl, null, getInstrumentation()
+					.getTargetContext());
 			fail("Expected Exception MalformedURLException");
 		} catch (IllegalArgumentException e) {
 			// do nothing, it's OK
@@ -88,7 +93,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 	public void testMobileServiceClientWithNullServiceFilterShouldThrowException() {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey,
+					getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e1) {
 			fail("This should not happen");
 		}
@@ -103,7 +109,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 
 	public void testIsLoginInProgressShouldReturnFalse()
 			throws MalformedURLException {
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey,
+				getInstrumentation().getTargetContext());
 		assertFalse(client.isLoginInProgress());
 	}
 
@@ -111,7 +118,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 			throws MalformedURLException {
 		String userId = "myUserId";
 		MobileServiceUser user = new MobileServiceUser(userId);
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey,
+				getInstrumentation().getTargetContext());
 
 		client.setCurrentUser(user);
 		MobileServiceUser currentUser = client.getCurrentUser();
@@ -123,7 +131,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 
 	public void testGetCurrentUserWithNoLoggedUserShouldReturnNull()
 			throws MalformedURLException {
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey,
+				getInstrumentation().getTargetContext());
 		MobileServiceUser currentUser = client.getCurrentUser();
 
 		assertNull(currentUser);
@@ -131,7 +140,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 
 	public void testGetTableShouldReturnTableWithGivenNameAndClient()
 			throws MalformedURLException {
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey,
+				getInstrumentation().getTargetContext());
 		MobileServiceTable table = client.getTable("MyTable");
 
 		assertNotNull(table);
@@ -140,7 +150,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 	public void testGetTableWithEmptyNameShouldThrowException() {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey,
+					getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e1) {
 			fail("This should not fail");
 		}
@@ -156,7 +167,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 	public void testGetTableWithWhiteSpacedNameShouldThrowException() {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey,
+					getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e1) {
 			fail("This should not fail");
 		}
@@ -173,7 +185,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 	public void testGetTableWithNullNameShouldThrowException() {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey,
+					getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e1) {
 			fail("This should not happen");
 		}
@@ -199,7 +212,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -264,7 +278,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -307,7 +322,6 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 							}
 						}
 
-
 						if (zumoInstallationHeaderIndex == -1) {
 							Assert.fail();
 						}
@@ -329,7 +343,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 										"1.0", "Java", "Android",
 										Build.VERSION.RELEASE, Build.CPU_ABI);
 
-						assertNotNull(headers[zumoInstallationHeaderIndex].getValue());
+						assertNotNull(headers[zumoInstallationHeaderIndex]
+								.getValue());
 						assertEquals(expectedAppKey,
 								headers[zumoAppHeaderIndex].getValue());
 						assertEquals(expectedUserAgent,

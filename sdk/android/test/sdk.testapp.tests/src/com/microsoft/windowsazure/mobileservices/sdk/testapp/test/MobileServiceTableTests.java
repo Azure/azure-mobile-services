@@ -49,18 +49,20 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	public void testNewMobileServiceTableShouldReturnMobileServiceTable()
 			throws MalformedURLException {
 		String tableName = "MyTableName";
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey,
+				getInstrumentation().getTargetContext());
 		MobileServiceTable msTable = new MobileServiceTable(tableName, client);
 
 		assertEquals(client, msTable.getClient());
 		assertEquals(tableName, msTable.getTableName());
-		
+
 	}
 
 	public void testNewMobileServiceTableWithNullNameShouldThrowException() {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey,
+					getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e1) {
 			fail("This should not happen");
 		}
@@ -75,7 +77,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	public void testNewMobileServiceTableWithEmptyNameShouldThrowException() {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey,
+					getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e1) {
 			fail("This should not happen");
 		}
@@ -90,7 +93,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	public void testNewMobileServiceTableWithWhiteSpacedNameShouldThrowException() {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey,
+					getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e1) {
 			fail("This should not happen");
 		}
@@ -115,7 +119,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		MobileServiceClient client = null;
 		MobileServiceTable msTable = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey,
+					getInstrumentation().getTargetContext());
 			String tableName = "MyTableName";
 			msTable = new MobileServiceTable(tableName, client);
 		} catch (MalformedURLException e1) {
@@ -148,7 +153,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -221,7 +227,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -283,7 +290,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -363,7 +371,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -463,7 +472,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -538,7 +548,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -609,7 +620,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -676,7 +688,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -747,7 +760,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -809,7 +823,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -896,7 +911,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -955,7 +971,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1023,7 +1040,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1086,7 +1104,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1166,7 +1185,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1242,7 +1262,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1307,7 +1328,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1380,7 +1402,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1433,14 +1456,12 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		assertTrue(container.getResponseValue().contains(
 				"{\"error\":404,\"message\":\"entity does not exist\"}"));
 	}
-	
-	public void testQueryShouldIncludeFilter()
-			throws Throwable {
+
+	public void testQueryShouldIncludeFilter() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
-
 
 		final String tableName = "MyTableName";
 
@@ -1451,7 +1472,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1477,16 +1499,19 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceTable msTable = client.getTable(tableName);
 
 				// Call the update method
-				msTable.where().field("fieldName").eq(1).execute(new TableJsonQueryCallback() {
-					
-					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception,
-							ServiceFilterResponse response) {
-						container.setOperationSucceded(exception == null);
-						latch.countDown();
-						
-					}
-				});
+				msTable.where().field("fieldName").eq(1)
+						.execute(new TableJsonQueryCallback() {
+
+							@Override
+							public void onCompleted(JsonElement result,
+									int count, Exception exception,
+									ServiceFilterResponse response) {
+								container
+										.setOperationSucceded(exception == null);
+								latch.countDown();
+
+							}
+						});
 			}
 		});
 
@@ -1497,14 +1522,12 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				container.getOperationSucceded());
 		assertTrue(container.getRequestUrl().contains("?$filter="));
 	}
-	
-	public void testQueryShouldIncludeTop()
-			throws Throwable {
+
+	public void testQueryShouldIncludeTop() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
-
 
 		final String tableName = "MyTableName";
 
@@ -1515,7 +1538,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1542,13 +1566,13 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 				// Call the update method
 				msTable.all().top(10).execute(new TableJsonQueryCallback() {
-					
+
 					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception,
-							ServiceFilterResponse response) {
+					public void onCompleted(JsonElement result, int count,
+							Exception exception, ServiceFilterResponse response) {
 						container.setOperationSucceded(exception == null);
 						latch.countDown();
-						
+
 					}
 				});
 			}
@@ -1561,14 +1585,12 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				container.getOperationSucceded());
 		assertTrue(container.getRequestUrl().contains("?$top=10"));
 	}
-	
-	public void testQueryShouldIncludeSkip()
-			throws Throwable {
+
+	public void testQueryShouldIncludeSkip() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
-
 
 		final String tableName = "MyTableName";
 
@@ -1579,7 +1601,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1606,13 +1629,13 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 				// Call the update method
 				msTable.all().skip(10).execute(new TableJsonQueryCallback() {
-					
+
 					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception,
-							ServiceFilterResponse response) {
+					public void onCompleted(JsonElement result, int count,
+							Exception exception, ServiceFilterResponse response) {
 						container.setOperationSucceded(exception == null);
 						latch.countDown();
-						
+
 					}
 				});
 			}
@@ -1625,14 +1648,12 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				container.getOperationSucceded());
 		assertTrue(container.getRequestUrl().contains("?$skip=10"));
 	}
-	
-	public void testQueryShouldIncludeInlineCount()
-			throws Throwable {
+
+	public void testQueryShouldIncludeInlineCount() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
-
 
 		final String tableName = "MyTableName";
 
@@ -1643,7 +1664,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1669,16 +1691,19 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceTable msTable = client.getTable(tableName);
 
 				// Call the update method
-				msTable.all().includeInlineCount().execute(new TableJsonQueryCallback() {
-					
-					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception,
-							ServiceFilterResponse response) {
-						container.setOperationSucceded(exception == null);
-						latch.countDown();
-						
-					}
-				});
+				msTable.all().includeInlineCount()
+						.execute(new TableJsonQueryCallback() {
+
+							@Override
+							public void onCompleted(JsonElement result,
+									int count, Exception exception,
+									ServiceFilterResponse response) {
+								container
+										.setOperationSucceded(exception == null);
+								latch.countDown();
+
+							}
+						});
 			}
 		});
 
@@ -1689,14 +1714,12 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				container.getOperationSucceded());
 		assertTrue(container.getRequestUrl().contains("?$inlinecount=allpages"));
 	}
-	
-	public void testQueryShouldIncludeOrderBy()
-			throws Throwable {
+
+	public void testQueryShouldIncludeOrderBy() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
-
 
 		final String tableName = "MyTableName";
 
@@ -1707,7 +1730,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1733,16 +1757,19 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceTable msTable = client.getTable(tableName);
 
 				// Call the update method
-				msTable.all().orderBy("myField", QueryOrder.Ascending).execute(new TableJsonQueryCallback() {
-					
-					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception,
-							ServiceFilterResponse response) {
-						container.setOperationSucceded(exception == null);
-						latch.countDown();
-						
-					}
-				});
+				msTable.all().orderBy("myField", QueryOrder.Ascending)
+						.execute(new TableJsonQueryCallback() {
+
+							@Override
+							public void onCompleted(JsonElement result,
+									int count, Exception exception,
+									ServiceFilterResponse response) {
+								container
+										.setOperationSucceded(exception == null);
+								latch.countDown();
+
+							}
+						});
 			}
 		});
 
@@ -1753,14 +1780,12 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				container.getOperationSucceded());
 		assertTrue(container.getRequestUrl().contains("?$orderby="));
 	}
-	
-	public void testQueryShouldIncludeProjection()
-			throws Throwable {
+
+	public void testQueryShouldIncludeProjection() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
-
 
 		final String tableName = "MyTableName";
 
@@ -1771,7 +1796,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey,
+							getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1797,16 +1823,19 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceTable msTable = client.getTable(tableName);
 
 				// Call the update method
-				msTable.all().select("myField", "otherField").execute(new TableJsonQueryCallback() {
-					
-					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception,
-							ServiceFilterResponse response) {
-						container.setOperationSucceded(exception == null);
-						latch.countDown();
-						
-					}
-				});
+				msTable.all().select("myField", "otherField")
+						.execute(new TableJsonQueryCallback() {
+
+							@Override
+							public void onCompleted(JsonElement result,
+									int count, Exception exception,
+									ServiceFilterResponse response) {
+								container
+										.setOperationSucceded(exception == null);
+								latch.countDown();
+
+							}
+						});
 			}
 		});
 
