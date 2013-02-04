@@ -22,5 +22,6 @@ public interface TableOperationCallback<E> {
 	 * @param response
 	 *            Response object
 	 */
-	public void onCompleted(E entity, Exception exception, ServiceFilterResponse response);
+	public void onCompleted(E entity, Exception exception,
+			ServiceFilterResponse response);
 }

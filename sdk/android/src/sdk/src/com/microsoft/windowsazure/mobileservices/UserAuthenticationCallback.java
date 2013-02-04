@@ -18,5 +18,6 @@ public interface UserAuthenticationCallback {
 	 * @param response
 	 *            Response object
 	 */
-	public void onCompleted(MobileServiceUser user, Exception exception, ServiceFilterResponse response);
+	public void onCompleted(MobileServiceUser user, Exception exception,
+			ServiceFilterResponse response);
 }

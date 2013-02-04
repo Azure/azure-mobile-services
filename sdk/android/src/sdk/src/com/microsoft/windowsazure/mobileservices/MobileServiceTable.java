@@ -27,6 +27,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSerializer;
+
 //
 
 /**
@@ -167,7 +168,7 @@ public final class MobileServiceTable {
 			final TableOperationCallback<E> callback) {
 
 		lookUp(id, new TableJsonOperationCallback() {
-			
+
 			@Override
 			public void onCompleted(JsonObject jsonEntity, Exception exception,
 					ServiceFilterResponse response) {
@@ -180,7 +181,7 @@ public final class MobileServiceTable {
 						} catch (Exception e) {
 							ex = e;
 						}
-						
+
 						callback.onCompleted(entity, ex, response);
 					} else {
 						callback.onCompleted(null, exception, response);
@@ -227,10 +228,12 @@ public final class MobileServiceTable {
 							// TODO: VERIFY THIS!
 							callback.onCompleted(
 									null,
-									new MobileServiceException("A record with the specified Id cannot be found"),
+									new MobileServiceException(
+											"A record with the specified Id cannot be found"),
 									response);
 						} else { // Lookup result
-							callback.onCompleted(results.getAsJsonObject(), exception, response);
+							callback.onCompleted(results.getAsJsonObject(),
+									exception, response);
 						}
 					} else {
 						callback.onCompleted(null, exception, response);
@@ -252,11 +255,11 @@ public final class MobileServiceTable {
 	public <E> void insert(final E element,
 			final TableOperationCallback<E> callback)
 			throws InvalidParameterException {
-		final JsonObject json = mClient.getGsonBuilder().create().toJsonTree(element)
-				.getAsJsonObject();
+		final JsonObject json = mClient.getGsonBuilder().create()
+				.toJsonTree(element).getAsJsonObject();
 
 		insert(json, new TableJsonOperationCallback() {
-			
+
 			@SuppressWarnings("unchecked")
 			@Override
 			public void onCompleted(JsonObject jsonEntity, Exception exception,
@@ -266,11 +269,12 @@ public final class MobileServiceTable {
 						E entity = null;
 						Exception ex = null;
 						try {
-							entity = (E) parseResults(jsonEntity, element.getClass()).get(0);
+							entity = (E) parseResults(jsonEntity,
+									element.getClass()).get(0);
 						} catch (Exception e) {
 							ex = e;
 						}
-						
+
 						callback.onCompleted(entity, ex, response);
 					} else {
 						callback.onCompleted(null, exception, response);
@@ -278,8 +282,7 @@ public final class MobileServiceTable {
 				}
 			}
 		});
-		
-		
+
 	}
 
 	private void removeIdFromJson(final JsonObject json) {
@@ -318,14 +321,23 @@ public final class MobileServiceTable {
 			final TableJsonOperationCallback callback)
 			throws InvalidParameterException {
 
-		removeIdFromJson(element);
+		try {
+			removeIdFromJson(element);
+		} catch (InvalidParameterException e) {
+			if (callback != null) {
+				callback.onCompleted(null, e, null);
+			}
+			return;
+		}
 
 		String content = element.toString();
 
 		ServiceFilterRequest post;
 		try {
-			post = new ServiceFilterRequestImpl(new HttpPost(
-					mClient.getAppUrl().toString() + TABLES_URL + URLEncoder.encode(mTableName,
+			post = new ServiceFilterRequestImpl(new HttpPost(mClient
+					.getAppUrl().toString()
+					+ TABLES_URL
+					+ URLEncoder.encode(mTableName,
 							MobileServiceClient.UTF8_ENCODING)));
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
@@ -333,7 +345,7 @@ public final class MobileServiceTable {
 			}
 			return;
 		}
-		
+
 		try {
 			post.setContent(content);
 		} catch (Exception e) {
@@ -352,7 +364,7 @@ public final class MobileServiceTable {
 					if (exception == null) {
 						JsonObject patchedJson = patchOriginalEntityWithResponseEntity(
 								element, jsonEntity);
-						
+
 						callback.onCompleted(patchedJson, exception, response);
 					} else {
 						callback.onCompleted(jsonEntity, exception, response);
@@ -372,11 +384,11 @@ public final class MobileServiceTable {
 	 */
 	public <E> void update(final E element,
 			final TableOperationCallback<E> callback) {
-		final JsonObject json = mClient.getGsonBuilder().create().toJsonTree(element)
-				.getAsJsonObject();
-		
+		final JsonObject json = mClient.getGsonBuilder().create()
+				.toJsonTree(element).getAsJsonObject();
+
 		update(json, new TableJsonOperationCallback() {
-			
+
 			@SuppressWarnings("unchecked")
 			@Override
 			public void onCompleted(JsonObject jsonEntity, Exception exception,
@@ -386,11 +398,12 @@ public final class MobileServiceTable {
 						E entity = null;
 						Exception ex = null;
 						try {
-							entity = (E) parseResults(jsonEntity, element.getClass()).get(0);
+							entity = (E) parseResults(jsonEntity,
+									element.getClass()).get(0);
 						} catch (Exception e) {
 							ex = e;
 						}
-						
+
 						callback.onCompleted(entity, ex, response);
 					} else {
 						callback.onCompleted(null, exception, response);
@@ -411,20 +424,23 @@ public final class MobileServiceTable {
 	public void update(final JsonObject element,
 			final TableJsonOperationCallback callback) {
 		String content = element.toString();
-		
+
 		ServiceFilterRequest patch;
 		try {
-			patch = new ServiceFilterRequestImpl(new HttpPatch(
-					mClient.getAppUrl().toString() + TABLES_URL + URLEncoder.encode(mTableName,
-							MobileServiceClient.UTF8_ENCODING) + "/" +
-							Integer.valueOf(getObjectId(element)).toString()));
+			patch = new ServiceFilterRequestImpl(new HttpPatch(mClient
+					.getAppUrl().toString()
+					+ TABLES_URL
+					+ URLEncoder.encode(mTableName,
+							MobileServiceClient.UTF8_ENCODING)
+					+ "/"
+					+ Integer.valueOf(getObjectId(element)).toString()));
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}
 			return;
 		}
-		
+
 		try {
 			patch.setContent(content);
 		} catch (Exception e) {
@@ -478,20 +494,22 @@ public final class MobileServiceTable {
 		// Create delete request
 		ServiceFilterRequest delete;
 		try {
-			delete = new ServiceFilterRequestImpl(new HttpDelete(
-					mClient.getAppUrl().toString() + TABLES_URL + URLEncoder.encode(mTableName,
-							MobileServiceClient.UTF8_ENCODING) + "/" +
-							Integer.valueOf(id).toString()));
+			delete = new ServiceFilterRequestImpl(new HttpDelete(mClient
+					.getAppUrl().toString()
+					+ TABLES_URL
+					+ URLEncoder.encode(mTableName,
+							MobileServiceClient.UTF8_ENCODING)
+					+ "/"
+					+ Integer.valueOf(id).toString()));
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(e, null);
 			}
 			return;
 		}
-		
+
 		// Create AsyncTask to execute the request
-		new RequestAsyncTask(delete,
-				mClient.createConnection()) {
+		new RequestAsyncTask(delete, mClient.createConnection()) {
 			@Override
 			protected void onPostExecute(ServiceFilterResponse result) {
 				if (callback != null) {
@@ -527,7 +545,8 @@ public final class MobileServiceTable {
 						callback.onCompleted(newEntityJson, null, result);
 
 					} else {
-						callback.onCompleted(null, mTaskException, result);;
+						callback.onCompleted(null, mTaskException, result);
+						;
 					}
 				}
 			}
@@ -577,8 +596,8 @@ public final class MobileServiceTable {
 		if (element instanceof JsonObject) {
 			id = ((JsonObject) element).get("id").getAsInt();
 		} else {
-			JsonObject json = mClient.getGsonBuilder().create().toJsonTree(element)
-					.getAsJsonObject();
+			JsonObject json = mClient.getGsonBuilder().create()
+					.toJsonTree(element).getAsJsonObject();
 			id = json.get("id").getAsInt();
 		}
 
@@ -698,7 +717,10 @@ public final class MobileServiceTable {
 								results = json;
 							}
 						} catch (Exception e) {
-							callback.onCompleted(null, 0, new MobileServiceException(
+							callback.onCompleted(
+									null,
+									0,
+									new MobileServiceException(
 											"Error while retrieving data from response.",
 											e), response);
 							return;
@@ -928,7 +950,7 @@ public final class MobileServiceTable {
 		public <E> void execute(final Class<E> clazz,
 				final TableQueryCallback<E> callback) {
 			getTable().executeQuery(this, new TableJsonQueryCallback() {
-				
+
 				@Override
 				public void onCompleted(JsonElement result, int count,
 						Exception exception, ServiceFilterResponse response) {
@@ -941,10 +963,11 @@ public final class MobileServiceTable {
 							} catch (Exception e) {
 								ex = e;
 							}
-							
+
 							callback.onCompleted(elements, count, ex, response);
 						} else {
-							callback.onCompleted(null, count, exception, response);
+							callback.onCompleted(null, count, exception,
+									response);
 						}
 					}
 				}
@@ -1151,7 +1174,7 @@ public final class MobileServiceTable {
 			this.querySteps.add(MobileServiceQueryOperations.not(otherQuery));
 			return this;
 		}
-		
+
 		/**
 		 * Logical not.
 		 * 
@@ -1159,7 +1182,8 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public MobileServiceQuery not(boolean booleanValue) {
-			this.querySteps.add(MobileServiceQueryOperations.not(MobileServiceQueryOperations.val(booleanValue)));
+			this.querySteps.add(MobileServiceQueryOperations
+					.not(MobileServiceQueryOperations.val(booleanValue)));
 			return this;
 		}
 
@@ -1185,7 +1209,7 @@ public final class MobileServiceTable {
 			this.querySteps.add(MobileServiceQueryOperations.ge(otherQuery));
 			return this;
 		}
-		
+
 		/**
 		 * Greater than or equal comparison operator.
 		 * 
@@ -1193,7 +1217,8 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public MobileServiceQuery ge(Number numberValue) {
-			this.querySteps.add(MobileServiceQueryOperations.ge(MobileServiceQueryOperations.val(numberValue)));
+			this.querySteps.add(MobileServiceQueryOperations
+					.ge(MobileServiceQueryOperations.val(numberValue)));
 			return this;
 		}
 
@@ -1217,7 +1242,7 @@ public final class MobileServiceTable {
 			this.querySteps.add(MobileServiceQueryOperations.le(otherQuery));
 			return this;
 		}
-		
+
 		/**
 		 * Less than or equal comparison operator.
 		 * 
@@ -1225,7 +1250,8 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public MobileServiceQuery le(Number numberValue) {
-			this.querySteps.add(MobileServiceQueryOperations.le(MobileServiceQueryOperations.val(numberValue)));
+			this.querySteps.add(MobileServiceQueryOperations
+					.le(MobileServiceQueryOperations.val(numberValue)));
 			return this;
 		}
 
@@ -1249,7 +1275,7 @@ public final class MobileServiceTable {
 			this.querySteps.add(MobileServiceQueryOperations.gt(otherQuery));
 			return this;
 		}
-		
+
 		/**
 		 * Greater than comparison operator.
 		 * 
@@ -1257,7 +1283,8 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public MobileServiceQuery gt(Number numberValue) {
-			this.querySteps.add(MobileServiceQueryOperations.gt(MobileServiceQueryOperations.val(numberValue)));
+			this.querySteps.add(MobileServiceQueryOperations
+					.gt(MobileServiceQueryOperations.val(numberValue)));
 			return this;
 		}
 
@@ -1281,7 +1308,7 @@ public final class MobileServiceTable {
 			this.querySteps.add(MobileServiceQueryOperations.lt(otherQuery));
 			return this;
 		}
-		
+
 		/**
 		 * Less than comparison operator.
 		 * 
@@ -1289,7 +1316,8 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public MobileServiceQuery lt(Number numberValue) {
-			this.querySteps.add(MobileServiceQueryOperations.lt(MobileServiceQueryOperations.val(numberValue)));
+			this.querySteps.add(MobileServiceQueryOperations
+					.lt(MobileServiceQueryOperations.val(numberValue)));
 			return this;
 		}
 
@@ -1313,7 +1341,7 @@ public final class MobileServiceTable {
 			this.querySteps.add(MobileServiceQueryOperations.eq(otherQuery));
 			return this;
 		}
-		
+
 		/**
 		 * Equal comparison operator.
 		 * 
@@ -1321,10 +1349,11 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public MobileServiceQuery eq(Number numberValue) {
-			this.querySteps.add(MobileServiceQueryOperations.eq(MobileServiceQueryOperations.val(numberValue)));
+			this.querySteps.add(MobileServiceQueryOperations
+					.eq(MobileServiceQueryOperations.val(numberValue)));
 			return this;
 		}
-		
+
 		/**
 		 * Equal comparison operator.
 		 * 
@@ -1332,10 +1361,11 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public MobileServiceQuery eq(boolean booleanValue) {
-			this.querySteps.add(MobileServiceQueryOperations.eq(MobileServiceQueryOperations.val(booleanValue)));
+			this.querySteps.add(MobileServiceQueryOperations
+					.eq(MobileServiceQueryOperations.val(booleanValue)));
 			return this;
 		}
-		
+
 		/**
 		 * Equal comparison operator.
 		 * 
@@ -1343,7 +1373,8 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public MobileServiceQuery eq(String stringValue) {
-			this.querySteps.add(MobileServiceQueryOperations.eq(MobileServiceQueryOperations.val(stringValue)));
+			this.querySteps.add(MobileServiceQueryOperations
+					.eq(MobileServiceQueryOperations.val(stringValue)));
 			return this;
 		}
 
@@ -1352,8 +1383,8 @@ public final class MobileServiceTable {
 		 * 
 		 * @return MobileServiceQuery
 		 */
-		public MobileServiceQuery neq() {
-			this.querySteps.add(MobileServiceQueryOperations.neq());
+		public MobileServiceQuery ne() {
+			this.querySteps.add(MobileServiceQueryOperations.ne());
 			return this;
 		}
 
@@ -1363,41 +1394,44 @@ public final class MobileServiceTable {
 		 * @param otherQuery
 		 * @return MobileServiceQuery
 		 */
-		public MobileServiceQuery neq(MobileServiceQuery otherQuery) {
-			this.querySteps.add(MobileServiceQueryOperations.neq(otherQuery));
+		public MobileServiceQuery ne(MobileServiceQuery otherQuery) {
+			this.querySteps.add(MobileServiceQueryOperations.ne(otherQuery));
 			return this;
 		}
-		
+
 		/**
 		 * Not equal comparison operator.
 		 * 
 		 * @param numberValue
 		 * @return MobileServiceQuery
 		 */
-		public MobileServiceQuery neq(Number numberValue) {
-			this.querySteps.add(MobileServiceQueryOperations.neq(MobileServiceQueryOperations.val(numberValue)));
+		public MobileServiceQuery ne(Number numberValue) {
+			this.querySteps.add(MobileServiceQueryOperations
+					.ne(MobileServiceQueryOperations.val(numberValue)));
 			return this;
 		}
-		
+
 		/**
 		 * Not equal comparison operator.
 		 * 
 		 * @param booleanValue
 		 * @return MobileServiceQuery
 		 */
-		public MobileServiceQuery neq(boolean booleanValue) {
-			this.querySteps.add(MobileServiceQueryOperations.neq(MobileServiceQueryOperations.val(booleanValue)));
+		public MobileServiceQuery ne(boolean booleanValue) {
+			this.querySteps.add(MobileServiceQueryOperations
+					.ne(MobileServiceQueryOperations.val(booleanValue)));
 			return this;
 		}
-		
+
 		/**
 		 * Not equal comparison operator.
 		 * 
 		 * @param stringValue
 		 * @return MobileServiceQuery
 		 */
-		public MobileServiceQuery neq(String stringValue) {
-			this.querySteps.add(MobileServiceQueryOperations.neq(MobileServiceQueryOperations.val(stringValue)));
+		public MobileServiceQuery ne(String stringValue) {
+			this.querySteps.add(MobileServiceQueryOperations
+					.ne(MobileServiceQueryOperations.val(stringValue)));
 			return this;
 		}
 
@@ -1616,7 +1650,100 @@ public final class MobileServiceTable {
 		}
 
 		/****** String Operators ******/
-
+		
+		/**
+		 * String value with the contents of the parameter value converted to
+		 * lower case.
+		 * 
+		 * @param exp
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery toLower(MobileServiceQuery exp) {
+			this.querySteps.add(MobileServiceQueryOperations.toLower(exp));
+			return this;
+		}
+		
+		/**
+		 * String value with the contents of the parameter value converted to
+		 * lower case.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery toLower(String field) {
+			this.querySteps.add(MobileServiceQueryOperations.toLower(field));
+			return this;
+		}
+		
+		/**
+		 * String value with the contents of the parameter value converted to
+		 * upper case.
+		 * 
+		 * @param exp
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery toUpper(MobileServiceQuery exp) {
+			this.querySteps.add(MobileServiceQueryOperations.toUpper(exp));
+			return this;
+		}
+		
+		/**
+		 * String value with the contents of the parameter value converted to
+		 * upper case.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery toUpper(String field) {
+			this.querySteps.add(MobileServiceQueryOperations.toUpper(field));
+			return this;
+		}
+		
+		/**
+		 * The number of characters in the specified parameter value.
+		 * 
+		 * @param exp
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery length(MobileServiceQuery exp) {
+			this.querySteps.add(MobileServiceQueryOperations.length(exp));
+			return this;
+		}
+		
+		/**
+		 * The number of characters in the specified parameter value.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery length(String field) {
+			this.querySteps.add(MobileServiceQueryOperations.length(field));
+			return this;
+		}
+		
+		/**
+		 * String value with the contents of the parameter value with all
+		 * leading and trailing white-space characters removed.
+		 * 
+		 * @param exp
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery trim(MobileServiceQuery exp) {
+			this.querySteps.add(MobileServiceQueryOperations.trim(exp));
+			return this;
+		}
+		
+		/**
+		 * String value with the contents of the parameter value with all
+		 * leading and trailing white-space characters removed.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery trim(String field) {
+			this.querySteps.add(MobileServiceQueryOperations.trim(field));
+			return this;
+		}
 		/**
 		 * Whether the beginning of the first parameter values matches the
 		 * second parameter value.
@@ -1629,6 +1756,23 @@ public final class MobileServiceTable {
 		 */
 		public MobileServiceQuery startsWith(MobileServiceQuery field,
 				MobileServiceQuery start) {
+			this.querySteps.add(MobileServiceQueryOperations.startsWith(field,
+					start));
+			return this;
+		}
+		
+		/**
+		 * Whether the beginning of the first parameter values matches the
+		 * second parameter value.
+		 * 
+		 * @param field
+		 *            The field to evaluate
+		 * @param start
+		 *            Start value
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery startsWith(String field,
+				String start) {
 			this.querySteps.add(MobileServiceQueryOperations.startsWith(field,
 					start));
 			return this;
@@ -1650,9 +1794,26 @@ public final class MobileServiceTable {
 					end));
 			return this;
 		}
+		
+		/**
+		 * Whether the end of the first parameter value matches the second
+		 * parameter value.
+		 * 
+		 * @param field
+		 *            The field to evaluate
+		 * @param end
+		 *            End value
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery endsWith(String field,
+				String end) {
+			this.querySteps.add(MobileServiceQueryOperations.endsWith(field,
+					end));
+			return this;
+		}
 
 		/**
-		 * Whether the second parameter string value occurs in the first
+		 * Whether the first parameter string value occurs in the second
 		 * parameter string value.
 		 * 
 		 * @param str1
@@ -1665,6 +1826,22 @@ public final class MobileServiceTable {
 				MobileServiceQuery str2) {
 			this.querySteps.add(MobileServiceQueryOperations.subStringOf(str1,
 					str2));
+			return this;
+		}
+		
+		/**
+		 * Whether the string parameter occurs in the field
+		 * 
+		 * @param str2
+		 *            String to search
+		 * @param field
+		 *            Field to search in
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery subStringOf(String str,
+				String field) {
+			this.querySteps.add(MobileServiceQueryOperations.subStringOf(str,
+					field));
 			return this;
 		}
 
@@ -1701,6 +1878,23 @@ public final class MobileServiceTable {
 					needle));
 			return this;
 		}
+		
+		/**
+		 * Index of the first occurrence of the second parameter value in the
+		 * first parameter value or -1 otherwise.
+		 * 
+		 * @param field
+		 *            Field to search in
+		 * @param str
+		 *            Value to search for
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery indexOf(String field,
+				String needle) {
+			this.querySteps.add(MobileServiceQueryOperations.indexOf(field,
+					needle));
+			return this;
+		}
 
 		/**
 		 * String value starting at the character index specified by the second
@@ -1716,6 +1910,23 @@ public final class MobileServiceTable {
 				MobileServiceQuery pos) {
 			this.querySteps.add(MobileServiceQueryOperations
 					.substring(str, pos));
+			return this;
+		}
+		
+		/**
+		 * String value starting at the character index specified by the second
+		 * parameter value in the first parameter string value.
+		 * 
+		 * @param field
+		 *            Field to scan
+		 * @param pos
+		 *            Starting position
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery substring(String field,
+				int pos) {
+			this.querySteps.add(MobileServiceQueryOperations
+					.substring(field, pos));
 			return this;
 		}
 
@@ -1737,6 +1948,25 @@ public final class MobileServiceTable {
 					pos, length));
 			return this;
 		}
+		
+		/**
+		 * String value starting at the character index specified by the second
+		 * parameter value in the first parameter string value.
+		 * 
+		 * @param field
+		 *            Field to scan
+		 * @param pos
+		 *            Starting position
+		 * @param length
+		 *            Length
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery substring(String field,
+				int pos, int length) {
+			this.querySteps.add(MobileServiceQueryOperations.substring(field,
+					pos, length));
+			return this;
+		}
 
 		/**
 		 * Finds the second string parameter in the first parameter string value
@@ -1753,6 +1983,25 @@ public final class MobileServiceTable {
 		public MobileServiceQuery replace(MobileServiceQuery str,
 				MobileServiceQuery find, MobileServiceQuery replace) {
 			this.querySteps.add(MobileServiceQueryOperations.replace(str, find,
+					replace));
+			return this;
+		}
+		
+		/**
+		 * Finds the second string parameter in the first parameter string value
+		 * and replaces it with the third parameter value.
+		 * 
+		 * @param field
+		 *            Field to scan
+		 * @param find
+		 *            Search value
+		 * @param replace
+		 *            Replace value
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery replace(String field,
+				String find, String replace) {
+			this.querySteps.add(MobileServiceQueryOperations.replace(field, find,
 					replace));
 			return this;
 		}
@@ -1811,7 +2060,7 @@ public final class MobileServiceTable {
 
 			return query;
 		}
-
+		
 		/**
 		 * Sanitizes the string to use in a oData query
 		 * 
@@ -1825,6 +2074,14 @@ public final class MobileServiceTable {
 			} else {
 				return null;
 			}
+		}
+		
+		public static MobileServiceQuery query(MobileServiceQuery subQuery) {
+			MobileServiceQuery query = table.new MobileServiceQuery();
+
+			query.addInternalValue(subQuery);
+			
+			return query;
 		}
 
 		public static MobileServiceQuery field(String fieldName) {
@@ -1949,7 +2206,7 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery not(MobileServiceQuery otherQuery) {
 			return simpleOperator(otherQuery, "not");
 		}
-		
+
 		/**
 		 * Logical not.
 		 * 
@@ -1981,7 +2238,7 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery ge(MobileServiceQuery otherQuery) {
 			return simpleOperator(otherQuery, "ge");
 		}
-		
+
 		/**
 		 * Greater than or equal comparison operator.
 		 * 
@@ -2021,7 +2278,7 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery le(Number numberValue) {
 			return le(MobileServiceQueryOperations.val(numberValue));
 		}
-		
+
 		/**
 		 * Greater than comparison operator.
 		 * 
@@ -2051,7 +2308,7 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery gt(Number numberValue) {
 			return gt(MobileServiceQueryOperations.val(numberValue));
 		}
-		
+
 		/**
 		 * Less than comparison operator.
 		 * 
@@ -2071,7 +2328,7 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery lt(MobileServiceQuery otherQuery) {
 			return simpleOperator(otherQuery, "lt");
 		}
-		
+
 		/**
 		 * Less than comparison operator.
 		 * 
@@ -2101,7 +2358,7 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery eq(MobileServiceQuery otherQuery) {
 			return simpleOperator(otherQuery, "eq");
 		}
-		
+
 		/**
 		 * Equal comparison operator.
 		 * 
@@ -2111,7 +2368,7 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery eq(Number numberValue) {
 			return eq(MobileServiceQueryOperations.val(numberValue));
 		}
-		
+
 		/**
 		 * Equal comparison operator.
 		 * 
@@ -2121,7 +2378,7 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery eq(boolean booleanValue) {
 			return eq(MobileServiceQueryOperations.val(booleanValue));
 		}
-		
+
 		/**
 		 * Equal comparison operator.
 		 * 
@@ -2131,15 +2388,15 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery eq(String stringValue) {
 			return eq(MobileServiceQueryOperations.val(stringValue));
 		}
-		
+
 		/**
 		 * Not equal comparison operator.
 		 * 
 		 * @return MobileServiceQuery
 		 */
-		public static MobileServiceQuery neq() {
+		public static MobileServiceQuery ne() {
 			MobileServiceQuery nullQuery = null;
-			return neq(nullQuery);
+			return ne(nullQuery);
 		}
 
 		/**
@@ -2148,8 +2405,8 @@ public final class MobileServiceTable {
 		 * @param otherQuery
 		 * @return MobileServiceQuery
 		 */
-		public static MobileServiceQuery neq(MobileServiceQuery otherQuery) {
-			return simpleOperator(otherQuery, "neq");
+		public static MobileServiceQuery ne(MobileServiceQuery otherQuery) {
+			return simpleOperator(otherQuery, "ne");
 		}
 
 		/**
@@ -2158,30 +2415,30 @@ public final class MobileServiceTable {
 		 * @param numberValue
 		 * @return MobileServiceQuery
 		 */
-		public static MobileServiceQuery neq(Number numberValue) {
-			return neq(MobileServiceQueryOperations.val(numberValue));
+		public static MobileServiceQuery ne(Number numberValue) {
+			return ne(MobileServiceQueryOperations.val(numberValue));
 		}
-		
+
 		/**
 		 * Not equal comparison operator.
 		 * 
 		 * @param booleanValue
 		 * @return MobileServiceQuery
 		 */
-		public static MobileServiceQuery neq(boolean booleanValue) {
-			return neq(MobileServiceQueryOperations.val(booleanValue));
+		public static MobileServiceQuery ne(boolean booleanValue) {
+			return ne(MobileServiceQueryOperations.val(booleanValue));
 		}
-		
+
 		/**
 		 * Not equal comparison operator.
 		 * 
 		 * @param stringValue
 		 * @return MobileServiceQuery
 		 */
-		public static MobileServiceQuery neq(String stringValue) {
-			return neq(MobileServiceQueryOperations.val(stringValue));
+		public static MobileServiceQuery ne(String stringValue) {
+			return ne(MobileServiceQueryOperations.val(stringValue));
 		}
-		
+
 		/****** Arithmetic Operators ******/
 
 		/**
@@ -2384,7 +2641,18 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public static MobileServiceQuery toLower(MobileServiceQuery exp) {
-			return function("toLower", exp);
+			return function("tolower", exp);
+		}
+		
+		/**
+		 * String value with the contents of the parameter value converted to
+		 * lower case.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery toLower(String field) {
+			return function("tolower", field(field));
 		}
 
 		/**
@@ -2395,7 +2663,18 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public static MobileServiceQuery toUpper(MobileServiceQuery exp) {
-			return function("toUpper", exp);
+			return function("toupper", exp);
+		}
+		
+		/**
+		 * String value with the contents of the parameter value converted to
+		 * upper case
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery toUpper(String field) {
+			return function("toupper", field(field));
 		}
 
 		/**
@@ -2407,6 +2686,16 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery length(MobileServiceQuery exp) {
 			return function("length", exp);
 		}
+		
+		/**
+		 * The number of characters in the specified parameter value.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery length(String field) {
+			return function("length", field(field));
+		}
 
 		/**
 		 * String value with the contents of the parameter value with all
@@ -2417,6 +2706,17 @@ public final class MobileServiceTable {
 		 */
 		public static MobileServiceQuery trim(MobileServiceQuery exp) {
 			return function("trim", exp);
+		}
+		
+		/**
+		 * String value with the contents of the parameter value with all
+		 * leading and trailing white-space characters removed.
+		 * 
+		 * @param exp
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery trim(String field) {
+			return function("trim", field(field));
 		}
 
 		/**
@@ -2433,6 +2733,21 @@ public final class MobileServiceTable {
 				MobileServiceQuery start) {
 			return function("startswith", field, start);
 		}
+		
+		/**
+		 * Whether the beginning of the first parameter values matches the
+		 * second parameter value.
+		 * 
+		 * @param field
+		 *            The field to evaluate.
+		 * @param start
+		 *            Start value.
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery startsWith(String field,
+				String start) {
+			return function("startswith", field(field), val(start));
+		}
 
 		/**
 		 * Whether the end of the first parameter value matches the second
@@ -2448,9 +2763,24 @@ public final class MobileServiceTable {
 				MobileServiceQuery end) {
 			return function("endswith", field, end);
 		}
+		
+		/**
+		 * Whether the end of the first parameter value matches the second
+		 * parameter value.
+		 * 
+		 * @param field
+		 *            The field to evaluate.
+		 * @param end
+		 *            End value.
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery endsWith(String field,
+				String end) {
+			return function("endswith", field(field), val(end));
+		}
 
 		/**
-		 * Whether the second parameter string value occurs in the first
+		 * Whether the first parameter string value occurs in the second
 		 * parameter string value.
 		 * 
 		 * @param str1
@@ -2462,6 +2792,20 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery subStringOf(MobileServiceQuery str1,
 				MobileServiceQuery str2) {
 			return function("substringof", str1, str2);
+		}
+		
+		/**
+		 * Whether the string parameter occurs in the field
+		 * 
+		 * @param str
+		 *            String to search
+		 * @param field
+		 *            Field to search in
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery subStringOf(String str,
+				String field) {
+			return function("substringof", val(str), field(field));
 		}
 
 		/**
@@ -2493,6 +2837,21 @@ public final class MobileServiceTable {
 				MobileServiceQuery needle) {
 			return function("indexof", haystack, needle);
 		}
+		
+		/**
+		 * Index of the first occurrence of the second parameter value in the
+		 * first parameter value or -1 otherwise.
+		 * 
+		 * @param field
+		 *            Field to seach in
+		 * @param str
+		 *            Value to search for
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery indexOf(String field,
+				String str) {
+			return function("indexof", field(field), val(str));
+		}
 
 		/**
 		 * String value starting at the character index specified by the second
@@ -2507,6 +2866,21 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery substring(MobileServiceQuery str,
 				MobileServiceQuery pos) {
 			return function("substring", str, pos);
+		}
+		
+		/**
+		 * String value starting at the character index specified by the second
+		 * parameter value in the first parameter string value.
+		 * 
+		 * @param field
+		 *            Field to scan
+		 * @param pos
+		 *            Starting position
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery substring(String field,
+				int pos) {
+			return function("substring", field(field), val(pos));
 		}
 
 		/**
@@ -2525,6 +2899,23 @@ public final class MobileServiceTable {
 				MobileServiceQuery pos, MobileServiceQuery length) {
 			return function("substring", str, pos, length);
 		}
+		
+		/**
+		 * String value starting at the character index specified by the second
+		 * parameter value in the first parameter string value.
+		 * 
+		 * @param field
+		 *            Field to scan
+		 * @param pos
+		 *            Starting position
+		 * @param length
+		 *            Length
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery substring(String field,
+				int pos, int length) {
+			return function("substring", field(field), val(pos), val(length));
+		}
 
 		/**
 		 * Finds the second string parameter in the first parameter string value
@@ -2541,6 +2932,23 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery replace(MobileServiceQuery str,
 				MobileServiceQuery find, MobileServiceQuery replace) {
 			return function("replace", str, find, replace);
+		}
+		
+		/**
+		 * Finds the second string parameter in the first parameter string value
+		 * and replaces it with the third parameter value.
+		 * 
+		 * @param field
+		 *            Field to scan
+		 * @param find
+		 *            Search value
+		 * @param replace
+		 *            Replace value
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery replace(String field,
+				String find, String replace) {
+			return function("replace", field(field), val(find), val(replace));
 		}
 	}
 

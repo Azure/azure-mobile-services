@@ -23,5 +23,6 @@ public interface TableQueryCallback<E> {
 	 * @param response
 	 *            Response object
 	 */
-	public void onCompleted(List<E> result, int count, Exception exception, ServiceFilterResponse response);
+	public void onCompleted(List<E> result, int count, Exception exception,
+			ServiceFilterResponse response);
 }

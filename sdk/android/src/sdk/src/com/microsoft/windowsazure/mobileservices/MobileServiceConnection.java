@@ -90,10 +90,12 @@ class MobileServiceConnection {
 					}
 
 				} catch (Exception e) {
-					// Something went wrong, call onResponse with exception method
+					// Something went wrong, call onResponse with exception
+					// method
 					if (responseCallback != null) {
-						responseCallback.onResponse(response, new MobileServiceException(
-								"Error while processing request.", e));
+						responseCallback.onResponse(response,
+								new MobileServiceException(
+										"Error while processing request.", e));
 						return;
 					}
 				}

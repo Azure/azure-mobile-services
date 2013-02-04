@@ -317,8 +317,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 						response.setContent("{'error': 'Internal server error'}");
 						// call onResponse with the mocked response
-						responseCallback.onResponse(response, new MobileServiceException(
-								"ERROR"));
+						responseCallback.onResponse(response,
+								new MobileServiceException("ERROR"));
 					}
 				});
 
@@ -397,14 +397,16 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 						response.setContent(null);
 						// call onResponse with the mocked response
-						responseCallback.onResponse(response,
-								new MobileServiceException(
-										"Error while processing request",
+						responseCallback
+								.onResponse(
+										response,
 										new MobileServiceException(
-												String.format(
-														"{'code': %d}",
-														response.getStatus()
-																.getStatusCode()))));
+												"Error while processing request",
+												new MobileServiceException(
+														String.format(
+																"{'code': %d}",
+																response.getStatus()
+																		.getStatusCode()))));
 					}
 				});
 
@@ -428,7 +430,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 							assertTrue(cause.getMessage().contains("500"));
 							latch.countDown();
 						}
-						
+
 						latch.countDown();
 					}
 				});
@@ -566,7 +568,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 					public void onCompleted(JsonObject jsonEntity,
 							Exception exception, ServiceFilterResponse response) {
 						container.setResponseValue(jsonEntity.toString());
-						latch.countDown();	
+						latch.countDown();
 					}
 				});
 
@@ -622,8 +624,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 						container.setRequestUrl(request.getUrl());
 						// call onResponse with the mocked response
-						responseCallback
-								.onResponse(new ServiceFilterResponseMock(), null);
+						responseCallback.onResponse(
+								new ServiceFilterResponseMock(), null);
 					}
 				});
 
@@ -689,8 +691,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 						container.setRequestUrl(request.getUrl());
 						// call onResponse with the mocked response
-						responseCallback
-								.onResponse(new ServiceFilterResponseMock(), null);
+						responseCallback.onResponse(
+								new ServiceFilterResponseMock(), null);
 					}
 				});
 
@@ -760,8 +762,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 						container.setRequestUrl(request.getUrl());
 						// call onResponse with the mocked response
-						responseCallback
-								.onResponse(new ServiceFilterResponseMock(), null);
+						responseCallback.onResponse(
+								new ServiceFilterResponseMock(), null);
 					}
 				});
 
@@ -1119,7 +1121,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						.all()
 						.execute(PersonTestObject.class,
 								new TableQueryCallback<PersonTestObject>() {
-									
+
 									@Override
 									public void onCompleted(
 											List<PersonTestObject> result,
@@ -1339,12 +1341,11 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 							public void onCompleted(PersonTestObject entity,
 									Exception exception,
 									ServiceFilterResponse response) {
-								if (exception != null)
-								{
+								if (exception != null) {
 									container.setResponseValue(response
-										.getContent());
+											.getContent());
 								}
-								
+
 								latch.countDown();
 							}
 						});
@@ -1416,7 +1417,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 											.getContent());
 								}
 								latch.countDown();
-								
+
 							}
 						});
 			}

@@ -58,7 +58,7 @@ public class MobileServiceClient {
 	 * Service filter to execute the request
 	 */
 	private ServiceFilter mServiceFilter;
-	
+
 	/**
 	 * GsonBuilder used to in JSON Serialization/Deserialization
 	 */
@@ -68,47 +68,52 @@ public class MobileServiceClient {
 	 * UTF-8 encoding
 	 */
 	public static final String UTF8_ENCODING = "UTF-8";
-	
+
 	/**
-	 * Creates a GsonBuilder with custom serializers to use
-	 * with Windows Azure Mobile Services
+	 * Creates a GsonBuilder with custom serializers to use with Windows Azure
+	 * Mobile Services
+	 * 
 	 * @return
 	 */
 	public static GsonBuilder createMobileServiceGsonBuilder() {
 		GsonBuilder gsonBuilder = new GsonBuilder();
 
 		// Register custom date deserializer
-		gsonBuilder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
-			@SuppressLint("SimpleDateFormat")
-			@Override
-			public Date deserialize(JsonElement element, Type type,
-					JsonDeserializationContext ctx) throws JsonParseException {
-				String strVal = element.getAsString();
+		gsonBuilder.registerTypeAdapter(Date.class,
+				new JsonDeserializer<Date>() {
+					@SuppressLint("SimpleDateFormat")
+					@Override
+					public Date deserialize(JsonElement element, Type type,
+							JsonDeserializationContext ctx)
+							throws JsonParseException {
+						String strVal = element.getAsString();
 
-				// Change Z to +00:00 to adapt the string to a format that can
-				// be parsed in Java
-				String s = strVal.replace("Z", "+00:00");
-				try {
-					// Remove the ":" character to adapt the string to a format
-					// that can be parsed in Java
-					s = s.substring(0, 26) + s.substring(27);
-				} catch (IndexOutOfBoundsException e) {
-					throw new JsonParseException("Invalid length");
-				}
+						// Change Z to +00:00 to adapt the string to a format
+						// that can
+						// be parsed in Java
+						String s = strVal.replace("Z", "+00:00");
+						try {
+							// Remove the ":" character to adapt the string to a
+							// format
+							// that can be parsed in Java
+							s = s.substring(0, 26) + s.substring(27);
+						} catch (IndexOutOfBoundsException e) {
+							throw new JsonParseException("Invalid length");
+						}
 
-				try {
-					// Parse the well-formatted date string
-					SimpleDateFormat dateFormat = new SimpleDateFormat(
-							"yyyy-MM-dd'T'HH:mm:ss'.'SSSZ");
-					dateFormat.setTimeZone(TimeZone.getDefault());
-					Date date = dateFormat.parse(s);
+						try {
+							// Parse the well-formatted date string
+							SimpleDateFormat dateFormat = new SimpleDateFormat(
+									"yyyy-MM-dd'T'HH:mm:ss'.'SSSZ");
+							dateFormat.setTimeZone(TimeZone.getDefault());
+							Date date = dateFormat.parse(s);
 
-					return date;
-				} catch (ParseException e) {
-					throw new JsonParseException(e);
-				}
-			}
-		});
+							return date;
+						} catch (ParseException e) {
+							throw new JsonParseException(e);
+						}
+					}
+				});
 
 		// Register custom date serializer
 		gsonBuilder.registerTypeAdapter(Date.class, new JsonSerializer<Date>() {
@@ -125,7 +130,7 @@ public class MobileServiceClient {
 				return element;
 			}
 		});
-		
+
 		return gsonBuilder;
 	}
 
@@ -191,9 +196,10 @@ public class MobileServiceClient {
 							Exception exception, ServiceFilterResponse response) {
 						mCurrentUser = user;
 						mLoginInProgress = false;
-						
+
 						if (externalCallback != null) {
-							externalCallback.onCompleted(user, exception, response);
+							externalCallback.onCompleted(user, exception,
+									response);
 						}
 					}
 				});
@@ -241,9 +247,10 @@ public class MobileServiceClient {
 							Exception exception, ServiceFilterResponse response) {
 						mCurrentUser = user;
 						mLoginInProgress = false;
-						
+
 						if (externalCallback != null) {
-							externalCallback.onCompleted(user, exception, response);
+							externalCallback.onCompleted(user, exception,
+									response);
 						}
 					}
 				});
@@ -433,13 +440,13 @@ public class MobileServiceClient {
 		mServiceFilter = null;
 		mLoginInProgress = false;
 		mCurrentUser = currentUser;
-		
+
 		mGsonBuilder = createMobileServiceGsonBuilder();
 		mGsonBuilder.serializeNulls(); // by default, add null serialization
 	}
 
 	/**
-	 * Gets the GsonBuilder used to in JSON Serialization/Deserialization 
+	 * Gets the GsonBuilder used to in JSON Serialization/Deserialization
 	 */
 	public GsonBuilder getGsonBuilder() {
 		return mGsonBuilder;
@@ -447,7 +454,9 @@ public class MobileServiceClient {
 
 	/**
 	 * Sets the GsonBuilder used to in JSON Serialization/Deserialization
-	 * @param mGsonBuilder The GsonBuilder to set
+	 * 
+	 * @param mGsonBuilder
+	 *            The GsonBuilder to set
 	 */
 	public void setGsonBuilder(GsonBuilder gsonBuilder) {
 		mGsonBuilder = gsonBuilder;

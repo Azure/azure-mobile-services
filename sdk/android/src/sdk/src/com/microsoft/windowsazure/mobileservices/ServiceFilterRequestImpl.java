@@ -74,7 +74,7 @@ class ServiceFilterRequestImpl implements ServiceFilterRequest {
 	@Override
 	public void setContent(String content) throws UnsupportedEncodingException {
 		((HttpEntityEnclosingRequestBase) mRequest).setEntity(new StringEntity(
-				content, "utf-8"));
+				content, MobileServiceClient.UTF8_ENCODING));
 		mContent = content;
 	}
 

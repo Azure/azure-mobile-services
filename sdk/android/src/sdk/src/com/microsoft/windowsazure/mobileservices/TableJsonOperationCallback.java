@@ -20,7 +20,7 @@ public interface TableJsonOperationCallback {
 	 *            An exception representing the error, in case there was one
 	 * @param response
 	 *            Response object
-
 	 */
-	public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response);
+	public void onCompleted(JsonObject jsonEntity, Exception exception,
+			ServiceFilterResponse response);
 }

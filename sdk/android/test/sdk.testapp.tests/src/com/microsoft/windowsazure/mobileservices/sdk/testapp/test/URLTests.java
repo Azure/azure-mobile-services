@@ -88,7 +88,7 @@ public class URLTests extends InstrumentationTestCase {
 								if (exception != null) {
 									Assert.fail();
 								}
-								
+
 								latch.countDown();
 							}
 						});
@@ -149,7 +149,7 @@ public class URLTests extends InstrumentationTestCase {
 							public void onCompleted(PersonTestObject entity,
 									Exception exception,
 									ServiceFilterResponse response) {
-								latch.countDown();	
+								latch.countDown();
 							}
 						});
 			}

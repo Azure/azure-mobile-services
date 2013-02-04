@@ -228,18 +228,18 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
 	public void testNotEquals() throws Throwable {
 
 		// Create query
-		MobileServiceQuery query = table.where().field("age").neq().val(3);
+		MobileServiceQuery query = table.where().field("age").ne().val(3);
 
 		// Assert
-		String expectedFilters = "age neq 3";
+		String expectedFilters = "age ne 3";
 		assertEquals("", query.getRowSetModifiers());
 		assertEquals(expectedFilters, query.toString());
 
 		// Create query
-		query = table.where().field("age").neq(3);
+		query = table.where().field("age").ne(3);
 
 		// Assert
-		expectedFilters = "age neq (3)";
+		expectedFilters = "age ne (3)";
 		assertEquals("", query.getRowSetModifiers());
 		assertEquals(expectedFilters, query.toString());
 	}

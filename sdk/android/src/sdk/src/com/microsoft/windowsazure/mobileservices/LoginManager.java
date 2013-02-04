@@ -119,27 +119,32 @@ class LoginManager {
 									String decodedUrl = URLDecoder.decode(url,
 											MobileServiceClient.UTF8_ENCODING);
 
-									JsonObject json = (JsonObject) new JsonParser()
-											.parse(decodedUrl.substring(decodedUrl
+									JsonObject json = (JsonObject) new JsonParser().parse(decodedUrl
+											.substring(decodedUrl
 													.indexOf(TOKEN_MARK)
 													+ TOKEN_MARK.length()));
 
 									user = createUserFromJSON(json);
 								} catch (Exception e) {
-									// If exists an external callback, call onComplete method
+									// If exists an external callback, call
+									// onComplete method
 									// method with exception
 									if (externalCallback != null) {
-										externalCallback.onCompleted(null, e, null);
+										externalCallback.onCompleted(null, e,
+												null);
 									}
 									return;
 								}
 
-								// If exists an external callback, call onComplete method
+								// If exists an external callback, call
+								// onComplete method
 								if (externalCallback != null) {
-									externalCallback.onCompleted(user, null, null);
+									externalCallback.onCompleted(user, null,
+											null);
 								}
 							} else {
-								externalCallback.onCompleted(null, exception, null);
+								externalCallback.onCompleted(null, exception,
+										null);
 							}
 						}
 					}
@@ -216,8 +221,8 @@ class LoginManager {
 			@Override
 			public void onCancel(DialogInterface dialog) {
 				if (externalCallback != null) {
-					externalCallback.onCompleted(null, new MobileServiceException(
-							"User Canceled"));
+					externalCallback.onCompleted(null,
+							new MobileServiceException("User Canceled"));
 				}
 			}
 		});
@@ -229,8 +234,10 @@ class LoginManager {
 					@Override
 					public void onClick(DialogInterface dialog, int which) {
 						if (externalCallback != null) {
-							externalCallback.onCompleted(null, new MobileServiceException(
-											"User Canceled"));
+							externalCallback
+									.onCompleted(null,
+											new MobileServiceException(
+													"User Canceled"));
 						}
 						wv.destroy();
 					}
@@ -310,8 +317,8 @@ class LoginManager {
 			public void onReceivedError(WebView view, int errorCode,
 					String description, String failingUrl) {
 				if (externalCallback != null) {
-					externalCallback.onCompleted(null, new MobileServiceException(
-							description));
+					externalCallback.onCompleted(null,
+							new MobileServiceException(description));
 				}
 
 				dialog.dismiss();
@@ -321,8 +328,11 @@ class LoginManager {
 			public void onPageFinished(WebView view, String url) {
 				if (isStartUrl(url)) {
 					if (externalCallback != null) {
-						externalCallback.onCompleted(null, new MobileServiceException(
-										"Logging in with the selected authentication provider is not enabled"));
+						externalCallback
+								.onCompleted(
+										null,
+										new MobileServiceException(
+												"Logging in with the selected authentication provider is not enabled"));
 					}
 
 					dialog.dismiss();
@@ -419,7 +429,7 @@ class LoginManager {
 			@Override
 			protected void onPostExecute(ServiceFilterResponse response) {
 				if (callback != null) {
-					
+
 					if (mTaskException == null && response != null) {
 						MobileServiceUser user = null;
 						try {
@@ -428,22 +438,25 @@ class LoginManager {
 							String content = response.getContent();
 							user = createUserFromJSON((JsonObject) new JsonParser()
 									.parse((content.trim())));
-	
+
 						} catch (Exception e) {
-							// Something went wrong, call onCompleted method with exception
-							callback.onCompleted(null, new MobileServiceException(
-									"Error while authenticating user.", e),
-									response);
+							// Something went wrong, call onCompleted method
+							// with exception
+							callback.onCompleted(null,
+									new MobileServiceException(
+											"Error while authenticating user.",
+											e), response);
 							return;
 						}
-	
+
 						// Call onCompleted method
 						callback.onCompleted(user, null, response);
 					} else {
-						// Something went wrong, call onCompleted method with exception
+						// Something went wrong, call onCompleted method with
+						// exception
 						callback.onCompleted(null, new MobileServiceException(
-							"Error while authenticating user.",
-							mTaskException), response);
+								"Error while authenticating user.",
+								mTaskException), response);
 					}
 				}
 			}
@@ -460,7 +473,8 @@ class LoginManager {
 		 * 
 		 * @param url
 		 *            The final login URL
-		 * @param e	An exception representing the error, in case there was one
+		 * @param e
+		 *            An exception representing the error, in case there was one
 		 */
 		void onCompleted(String url, Exception exception);
 

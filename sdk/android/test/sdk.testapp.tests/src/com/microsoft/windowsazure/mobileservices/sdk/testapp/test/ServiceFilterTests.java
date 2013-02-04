@@ -47,7 +47,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 				try {
 					client = new MobileServiceClient(appUrl, appKey);
 				} catch (MalformedURLException e) {
-					
+
 				}
 
 				// Add a new filter to the client
@@ -62,8 +62,8 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 						container.setCount(1);
 						container.setRequestContent("Filter1");
 
-						responseCallback
-								.onResponse(new ServiceFilterResponseMock(), null);
+						responseCallback.onResponse(
+								new ServiceFilterResponseMock(), null);
 					}
 				});
 
@@ -214,7 +214,8 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 						container.setRequestContent(currentContent);
 
 						ServiceFilterResponse response = null;
-						responseCallback.onResponse(response, new Exception("Dummy Exception"));
+						responseCallback.onResponse(response, new Exception(
+								"Dummy Exception"));
 					}
 				});
 
@@ -275,8 +276,10 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 							NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
-						responseCallback.onResponse(response, new MobileServiceException(
-								"Error in filter 1"));
+						responseCallback
+								.onResponse(response,
+										new MobileServiceException(
+												"Error in filter 1"));
 					}
 				});
 
@@ -292,7 +295,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 									container.setErrorMessage(exception
 											.getMessage());
 								}
-								
+
 								latch.countDown();
 							}
 						});
@@ -350,8 +353,10 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 							ServiceFilterRequest request,
 							NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
-						responseCallback.onResponse(response, new MobileServiceException(
-								"Error in filter 2"));
+						responseCallback
+								.onResponse(response,
+										new MobileServiceException(
+												"Error in filter 2"));
 					}
 				});
 
@@ -367,7 +372,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 									container.setErrorMessage(exception
 											.getMessage());
 								}
-								
+
 								latch.countDown();
 							}
 						});

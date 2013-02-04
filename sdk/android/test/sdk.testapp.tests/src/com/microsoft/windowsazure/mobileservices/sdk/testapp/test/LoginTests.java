@@ -93,9 +93,9 @@ public class LoginTests extends InstrumentationTestCase {
 								} else {
 									Assert.fail();
 								}
-								
+
 								latch.countDown();
-								
+
 							}
 						});
 			}
@@ -185,9 +185,10 @@ public class LoginTests extends InstrumentationTestCase {
 									assertTrue(exception instanceof MobileServiceException);
 									MobileServiceException cause = (MobileServiceException) exception
 											.getCause();
-									assertEquals(errorMessage, cause.getMessage());
+									assertEquals(errorMessage,
+											cause.getMessage());
 								}
-								
+
 								latch.countDown();
 							}
 						});
