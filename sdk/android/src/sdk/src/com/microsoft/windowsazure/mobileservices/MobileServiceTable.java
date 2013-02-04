@@ -591,8 +591,13 @@ public final class MobileServiceTable {
 	 * @return The id of the element
 	 */
 	private int getObjectId(Object element) {
+		if (element == null) {
+			throw new InvalidParameterException("Element cannot be null"); 
+		} else if (element instanceof Integer) {
+			return ((Integer) element).intValue();
+		}
+			
 		int id;
-
 		if (element instanceof JsonObject) {
 			id = ((JsonObject) element).get("id").getAsInt();
 		} else {

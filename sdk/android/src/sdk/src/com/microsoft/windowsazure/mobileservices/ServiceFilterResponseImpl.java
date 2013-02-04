@@ -45,19 +45,23 @@ public class ServiceFilterResponseImpl implements ServiceFilterResponse {
 
 		// Get the response's content
 		HttpEntity entity = mResponse.getEntity();
-		InputStream instream = entity.getContent();
-		BufferedReader reader = new BufferedReader(new InputStreamReader(
-				instream));
-
-		StringBuilder sb = new StringBuilder();
-		String content = reader.readLine();
-		while (content != null) {
-			sb.append(content);
-			sb.append('\n');
-			content = reader.readLine();
+		if (entity != null) {
+			InputStream instream = entity.getContent();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					instream));
+	
+			StringBuilder sb = new StringBuilder();
+			String content = reader.readLine();
+			while (content != null) {
+				sb.append(content);
+				sb.append('\n');
+				content = reader.readLine();
+			}
+	
+			mResponseContent = sb.toString();
+		} else {
+			mResponseContent = null;
 		}
-
-		mResponseContent = sb.toString();
 	}
 
 	@Override

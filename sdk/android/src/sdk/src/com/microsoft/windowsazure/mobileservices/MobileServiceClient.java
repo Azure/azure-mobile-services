@@ -72,6 +72,9 @@ public class MobileServiceClient {
 
 		// Register custom date serializer/deserializer
 		gsonBuilder.registerTypeAdapter(Date.class, new DateSerializer());
+		LongSerializer longSerializer = new LongSerializer();
+		gsonBuilder.registerTypeAdapter(Long.class, longSerializer);
+		gsonBuilder.registerTypeAdapter(long.class, longSerializer);
 
 		return gsonBuilder;
 	}
