@@ -26,7 +26,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
 		appUrl = "http://myapp.com/";
 		appKey = "qwerty";
 		gsonBuilder = new GsonBuilder();
-		client = new MobileServiceClient(appUrl, appKey);
+		client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 		table = client.getTable("TableName");
 		super.setUp();
 	}

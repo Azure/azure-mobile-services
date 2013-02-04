@@ -55,7 +55,7 @@ public class URLTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey);
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 				}
 
@@ -119,7 +119,7 @@ public class URLTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey);
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 				}
 
@@ -177,7 +177,7 @@ public class URLTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey);
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 				}
 
@@ -234,7 +234,7 @@ public class URLTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey);
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 				}
 
@@ -291,7 +291,7 @@ public class URLTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey);
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 				}
 
@@ -346,7 +346,7 @@ public class URLTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey);
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 				}
 

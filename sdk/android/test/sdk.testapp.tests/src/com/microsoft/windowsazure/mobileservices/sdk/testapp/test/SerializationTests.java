@@ -323,7 +323,7 @@ public class SerializationTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey);
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -387,7 +387,7 @@ public class SerializationTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey);
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -460,7 +460,7 @@ public class SerializationTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey);
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -541,7 +541,7 @@ public class SerializationTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey);
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}

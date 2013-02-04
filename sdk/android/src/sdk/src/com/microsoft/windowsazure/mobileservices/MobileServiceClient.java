@@ -65,10 +65,15 @@ public class MobileServiceClient {
 	private GsonBuilder mGsonBuilder;
 
 	/**
+	 * Context where the MobileServiceClient is created
+	 */
+	private Context mContext;
+	
+	/**
 	 * UTF-8 encoding
 	 */
 	public static final String UTF8_ENCODING = "UTF-8";
-
+	
 	/**
 	 * Creates a GsonBuilder with custom serializers to use with Windows Azure
 	 * Mobile Services
@@ -141,11 +146,14 @@ public class MobileServiceClient {
 	 *            Mobile Service URL
 	 * @param appKey
 	 *            Mobile Service application key
+	 * @param context
+	 *            The Context where the MobileServiceClient is created
 	 * @throws MalformedURLException
+	 * 
 	 */
-	public MobileServiceClient(String appUrl, String appKey)
+	public MobileServiceClient(String appUrl, String appKey, Context context)
 			throws MalformedURLException {
-		initialize(new URL(appUrl), appKey, null);
+		this(new URL(appUrl), appKey, context);
 	}
 
 	/**
@@ -156,7 +164,7 @@ public class MobileServiceClient {
 	 */
 	public MobileServiceClient(MobileServiceClient client) {
 		initialize(client.getAppUrl(), client.getAppKey(),
-				client.getCurrentUser());
+				client.getCurrentUser(), client.getGsonBuilder(), client.getContext());
 	}
 
 	/**
@@ -166,9 +174,15 @@ public class MobileServiceClient {
 	 *            Mobile Service URL
 	 * @param appKey
 	 *            Mobile Service application key
+	 * @param context
+	 *            The Context where the MobileServiceClient is created
+	 
 	 */
-	public MobileServiceClient(URL appUrl, String appKey) {
-		initialize(appUrl, appKey, null);
+	public MobileServiceClient(URL appUrl, String appKey, Context context) {
+		GsonBuilder gsonBuilder = createMobileServiceGsonBuilder();
+		gsonBuilder.serializeNulls(); // by default, add null serialization
+		
+		initialize(appUrl, appKey, null, gsonBuilder, context);
 	}
 
 	/**
@@ -177,18 +191,15 @@ public class MobileServiceClient {
 	 * 
 	 * @param provider
 	 *            The provider used for the authentication process
-	 * @param context
-	 *            The context used to create the authentication dialog
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
-	public void login(MobileServiceAuthenticationProvider provider,
-			Context context, UserAuthenticationCallback callback) {
+	public void login(MobileServiceAuthenticationProvider provider, UserAuthenticationCallback callback) {
 		mLoginInProgress = true;
 
 		final UserAuthenticationCallback externalCallback = callback;
 
-		mloginManager.authenticate(provider, context,
+		mloginManager.authenticate(provider, mContext,
 				new UserAuthenticationCallback() {
 
 					@Override
@@ -413,15 +424,23 @@ public class MobileServiceClient {
 	 *            Mobile Service application key
 	 * @param currentUser
 	 *            The Mobile Service user used to authenticate requests
+	 * @param gsonBuilder
+	 *            the GsonBuilder used to in JSON Serialization/Deserialization
+	 * @param context
+	 *            The Context where the MobileServiceClient is created
 	 */
 	private void initialize(URL appUrl, String appKey,
-			MobileServiceUser currentUser) {
+			MobileServiceUser currentUser, GsonBuilder gsonBuiler, Context context) {
 		if (appUrl == null || appUrl.toString().trim().length() == 0) {
 			throw new IllegalArgumentException("Invalid Application URL");
 		}
 
 		if (appKey == null || appKey.toString().trim().length() == 0) {
 			throw new IllegalArgumentException("Invalid Application Key");
+		}
+		
+		if (context == null) {
+			throw new IllegalArgumentException("Context cannot be null");
 		}
 
 		URL normalizedAppURL = appUrl;
@@ -440,9 +459,8 @@ public class MobileServiceClient {
 		mServiceFilter = null;
 		mLoginInProgress = false;
 		mCurrentUser = currentUser;
-
-		mGsonBuilder = createMobileServiceGsonBuilder();
-		mGsonBuilder.serializeNulls(); // by default, add null serialization
+		mContext = context;
+		mGsonBuilder = gsonBuiler;
 	}
 
 	/**
@@ -460,5 +478,13 @@ public class MobileServiceClient {
 	 */
 	public void setGsonBuilder(GsonBuilder gsonBuilder) {
 		mGsonBuilder = gsonBuilder;
+	}
+
+	public Context getContext() {
+		return mContext;
+	}
+
+	public void setContext(Context mContext) {
+		this.mContext = mContext;
 	}
 }

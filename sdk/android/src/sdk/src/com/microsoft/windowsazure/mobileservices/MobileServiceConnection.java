@@ -24,6 +24,11 @@ class MobileServiceConnection {
 	private static final String X_ZUMO_APPLICATION_HEADER = "X-ZUMO-APPLICATION";
 
 	/**
+	 * Request header to indicate the Mobile Service Installation ID
+	 */
+	private static final String X_ZUMO_INSTALLATION_ID_HEADER = "X-ZUMO-INSTALLATION-ID";
+
+	/**
 	 * Request header to indicate the Mobile Service user authentication token
 	 */
 	private static final String X_ZUMO_AUTH_HEADER = "X-ZUMO-AUTH";
@@ -126,6 +131,9 @@ class MobileServiceConnection {
 
 		// Set the special Application key header
 		request.addHeader(X_ZUMO_APPLICATION_HEADER, mClient.getAppKey());
+
+		// Set the special Installation ID header
+		request.addHeader(X_ZUMO_INSTALLATION_ID_HEADER, MobileServiceApplication.getInstallationId(mClient.getContext()));
 
 		// Set the content type header
 		request.addHeader(HTTP.CONTENT_TYPE, JSON_CONTENTTYPE);
