@@ -226,7 +226,6 @@ public final class MobileServiceTable {
 				if (callback != null) {
 					if (exception == null) {
 						if (results.isJsonArray()) { // empty result
-							// TODO: VERIFY THIS!
 							callback.onCompleted(
 									null,
 									new MobileServiceException(
@@ -626,11 +625,10 @@ public final class MobileServiceTable {
 
 			if (filtersUrl.length() > 0) {
 				url += "?$filter=" + filtersUrl + query.getRowSetModifiers();
-				;
 			} else {
 				String rowSetModifiers = query.getRowSetModifiers();
 				if (rowSetModifiers.length() > 0) {
-					url += query.getRowSetModifiers().substring(1);
+					url += "?" + query.getRowSetModifiers().substring(1);
 				}
 			}
 
@@ -1694,6 +1692,17 @@ public final class MobileServiceTable {
 			this.querySteps.add(MobileServiceQueryOperations.year(otherQuery));
 			return this;
 		}
+		
+		/**
+		 * The year component value of the parameter value.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery year(String field) {
+			this.querySteps.add(MobileServiceQueryOperations.year(field));
+			return this;
+		}
 
 		/**
 		 * The month component value of the parameter value.
@@ -1703,6 +1712,17 @@ public final class MobileServiceTable {
 		 */
 		public MobileServiceQuery month(MobileServiceQuery otherQuery) {
 			this.querySteps.add(MobileServiceQueryOperations.month(otherQuery));
+			return this;
+		}
+		
+		/**
+		 * The month component value of the parameter value.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery month(String field) {
+			this.querySteps.add(MobileServiceQueryOperations.month(field));
 			return this;
 		}
 
@@ -1716,6 +1736,17 @@ public final class MobileServiceTable {
 			this.querySteps.add(MobileServiceQueryOperations.day(otherQuery));
 			return this;
 		}
+		
+		/**
+		 * The day component value of the parameter value.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery day(String field) {
+			this.querySteps.add(MobileServiceQueryOperations.day(field));
+			return this;
+		}
 
 		/**
 		 * The hour component value of the parameter value.
@@ -1725,6 +1756,17 @@ public final class MobileServiceTable {
 		 */
 		public MobileServiceQuery hour(MobileServiceQuery otherQuery) {
 			this.querySteps.add(MobileServiceQueryOperations.hour(otherQuery));
+			return this;
+		}
+		
+		/**
+		 * The hour component value of the parameter value.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery hour(String field) {
+			this.querySteps.add(MobileServiceQueryOperations.hour(field));
 			return this;
 		}
 
@@ -1739,6 +1781,18 @@ public final class MobileServiceTable {
 					.add(MobileServiceQueryOperations.minute(otherQuery));
 			return this;
 		}
+		
+		/**
+		 * The minute component value of the parameter value.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery minute(String field) {
+			this.querySteps
+					.add(MobileServiceQueryOperations.minute(field));
+			return this;
+		}
 
 		/**
 		 * The second component value of the parameter value.
@@ -1749,6 +1803,18 @@ public final class MobileServiceTable {
 		public MobileServiceQuery second(MobileServiceQuery otherQuery) {
 			this.querySteps
 					.add(MobileServiceQueryOperations.second(otherQuery));
+			return this;
+		}
+		
+		/**
+		 * The second component value of the parameter value.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery second(String field) {
+			this.querySteps
+					.add(MobileServiceQueryOperations.second(field));
 			return this;
 		}
 
@@ -2827,6 +2893,16 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery year(MobileServiceQuery exp) {
 			return function("year", exp);
 		}
+		
+		/**
+		 * The year component value of the parameter value.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery year(String field) {
+			return function("year", field(field));
+		}
 
 		/**
 		 * The month component value of the parameter value.
@@ -2836,6 +2912,16 @@ public final class MobileServiceTable {
 		 */
 		public static MobileServiceQuery month(MobileServiceQuery exp) {
 			return function("month", exp);
+		}
+		
+		/**
+		 * The month component value of the parameter value.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery month(String field) {
+			return function("month", field(field));
 		}
 
 		/**
@@ -2847,6 +2933,16 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery day(MobileServiceQuery exp) {
 			return function("day", exp);
 		}
+		
+		/**
+		 * The day component value of the parameter value.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery day(String field) {
+			return function("day", field(field));
+		}
 
 		/**
 		 * The hour component value of the parameter value.
@@ -2856,6 +2952,16 @@ public final class MobileServiceTable {
 		 */
 		public static MobileServiceQuery hour(MobileServiceQuery exp) {
 			return function("hour", exp);
+		}
+		
+		/**
+		 * The hour component value of the parameter value.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery hour(String field) {
+			return function("hour", field(field));
 		}
 
 		/**
@@ -2867,6 +2973,16 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery minute(MobileServiceQuery exp) {
 			return function("minute", exp);
 		}
+		
+		/**
+		 * The minute component value of the parameter value.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery minute(String field) {
+			return function("minute", field(field));
+		}
 
 		/**
 		 * The second component value of the parameter value.
@@ -2876,6 +2992,16 @@ public final class MobileServiceTable {
 		 */
 		public static MobileServiceQuery second(MobileServiceQuery exp) {
 			return function("second", exp);
+		}
+		
+		/**
+		 * The second component value of the parameter value.
+		 * 
+		 * @param field
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery second(String field) {
+			return function("second", field(field));
 		}
 
 		/****** Math Functions ******/
