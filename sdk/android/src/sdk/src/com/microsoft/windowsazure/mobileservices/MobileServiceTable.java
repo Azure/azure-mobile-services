@@ -1457,6 +1457,17 @@ public final class MobileServiceTable {
 			this.querySteps.add(MobileServiceQueryOperations.add(otherQuery));
 			return this;
 		}
+		
+		/**
+		 * Add operator.
+		 * 
+		 * @param val
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery add(Number val) {
+			this.querySteps.add(MobileServiceQueryOperations.add(val));
+			return this;
+		}
 
 		/**
 		 * Subtract operator.
@@ -1476,6 +1487,17 @@ public final class MobileServiceTable {
 		 */
 		public MobileServiceQuery sub(MobileServiceQuery otherQuery) {
 			this.querySteps.add(MobileServiceQueryOperations.sub(otherQuery));
+			return this;
+		}
+		
+		/**
+		 * Subtract operator.
+		 * 
+		 * @param val
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery sub(Number val) {
+			this.querySteps.add(MobileServiceQueryOperations.sub(val));
 			return this;
 		}
 
@@ -1501,6 +1523,17 @@ public final class MobileServiceTable {
 		}
 
 		/**
+		 * Multiply operator.
+		 * 
+		 * @param otherQuery
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery mul(Number val) {
+			this.querySteps.add(MobileServiceQueryOperations.mul(val));
+			return this;
+		}
+
+		/**
 		 * Divide operator.
 		 * 
 		 * @return MobileServiceQuery
@@ -1518,6 +1551,17 @@ public final class MobileServiceTable {
 		 */
 		public MobileServiceQuery div(MobileServiceQuery otherQuery) {
 			this.querySteps.add(MobileServiceQueryOperations.div(otherQuery));
+			return this;
+		}
+		
+		/**
+		 * Divide operator.
+		 * 
+		 * @param val
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery div(Number val) {
+			this.querySteps.add(MobileServiceQueryOperations.div(val));
 			return this;
 		}
 
@@ -1542,6 +1586,17 @@ public final class MobileServiceTable {
 			return this;
 		}
 
+		/**
+		 * Reminder (or modulo) operator.
+		 * 
+		 * @param val
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery mod(Number val) {
+			this.querySteps.add(MobileServiceQueryOperations.mod(val));
+			return this;
+		}
+		
 		/****** Date Operators ******/
 
 		/**
@@ -1906,10 +1961,10 @@ public final class MobileServiceTable {
 		 *            Starting position
 		 * @return MobileServiceQuery
 		 */
-		public MobileServiceQuery substring(MobileServiceQuery str,
+		public MobileServiceQuery subString(MobileServiceQuery str,
 				MobileServiceQuery pos) {
 			this.querySteps.add(MobileServiceQueryOperations
-					.substring(str, pos));
+					.subString(str, pos));
 			return this;
 		}
 		
@@ -1923,10 +1978,10 @@ public final class MobileServiceTable {
 		 *            Starting position
 		 * @return MobileServiceQuery
 		 */
-		public MobileServiceQuery substring(String field,
+		public MobileServiceQuery subString(String field,
 				int pos) {
 			this.querySteps.add(MobileServiceQueryOperations
-					.substring(field, pos));
+					.subString(field, pos));
 			return this;
 		}
 
@@ -1942,9 +1997,9 @@ public final class MobileServiceTable {
 		 *            Length
 		 * @return MobileServiceQuery
 		 */
-		public MobileServiceQuery substring(MobileServiceQuery str,
+		public MobileServiceQuery subString(MobileServiceQuery str,
 				MobileServiceQuery pos, MobileServiceQuery length) {
-			this.querySteps.add(MobileServiceQueryOperations.substring(str,
+			this.querySteps.add(MobileServiceQueryOperations.subString(str,
 					pos, length));
 			return this;
 		}
@@ -1961,9 +2016,9 @@ public final class MobileServiceTable {
 		 *            Length
 		 * @return MobileServiceQuery
 		 */
-		public MobileServiceQuery substring(String field,
+		public MobileServiceQuery subString(String field,
 				int pos, int length) {
-			this.querySteps.add(MobileServiceQueryOperations.substring(field,
+			this.querySteps.add(MobileServiceQueryOperations.subString(field,
 					pos, length));
 			return this;
 		}
@@ -2447,7 +2502,8 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public static MobileServiceQuery add() {
-			return add(null);
+			MobileServiceQuery nullQuery = null;
+			return add(nullQuery);
 		}
 
 		/**
@@ -2459,6 +2515,17 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery add(MobileServiceQuery otherQuery) {
 			return simpleOperator(otherQuery, "add");
 		}
+		
+
+		/**
+		 * Add operator.
+		 * 
+		 * @param val
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery add(Number val) {
+			return add(val(val));
+		}
 
 		/**
 		 * Subtract operator.
@@ -2466,7 +2533,8 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public static MobileServiceQuery sub() {
-			return sub(null);
+			MobileServiceQuery nullQuery = null;
+			return sub(nullQuery);
 		}
 
 		/**
@@ -2478,6 +2546,16 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery sub(MobileServiceQuery otherQuery) {
 			return simpleOperator(otherQuery, "sub");
 		}
+		
+		/**
+		 * Subtract operator.
+		 * 
+		 * @param val
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery sub(Number val) {
+			return sub(val(val));
+		}
 
 		/**
 		 * Multiply operator.
@@ -2485,7 +2563,8 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public static MobileServiceQuery mul() {
-			return mul(null);
+			MobileServiceQuery nullQuery = null;
+			return mul(nullQuery);
 		}
 
 		/**
@@ -2497,6 +2576,16 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery mul(MobileServiceQuery otherQuery) {
 			return simpleOperator(otherQuery, "mul");
 		}
+		
+		/**
+		 * Multiply operator.
+		 * 
+		 * @param val
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery mul(Number val) {
+			return mul(val(val));
+		}
 
 		/**
 		 * Divide operator.
@@ -2504,7 +2593,8 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public static MobileServiceQuery div() {
-			return div(null);
+			MobileServiceQuery nullQuery = null;
+			return div(nullQuery);
 		}
 
 		/**
@@ -2516,6 +2606,16 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery div(MobileServiceQuery otherQuery) {
 			return simpleOperator(otherQuery, "div");
 		}
+		
+		/**
+		 * Divide operator.
+		 * 
+		 * @param val
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery div(Number val) {
+			return div(val(val));
+		}
 
 		/**
 		 * Reminder (or modulo) operator.
@@ -2523,7 +2623,8 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public static MobileServiceQuery mod() {
-			return mod(null);
+			MobileServiceQuery nullQuery = null;
+			return mod(nullQuery);
 		}
 
 		/**
@@ -2534,6 +2635,16 @@ public final class MobileServiceTable {
 		 */
 		public static MobileServiceQuery mod(MobileServiceQuery otherQuery) {
 			return simpleOperator(otherQuery, "mod");
+		}
+		
+		/**
+		 * Reminder (or modulo) operator.
+		 * 
+		 * @param val
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery mod(Number val) {
+			return mod(val(val));
 		}
 
 		/****** Date Functions ******/
@@ -2652,7 +2763,7 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public static MobileServiceQuery toLower(String field) {
-			return function("tolower", field(field));
+			return toLower(field(field));
 		}
 
 		/**
@@ -2674,7 +2785,7 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public static MobileServiceQuery toUpper(String field) {
-			return function("toupper", field(field));
+			return toUpper(field(field));
 		}
 
 		/**
@@ -2694,7 +2805,7 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public static MobileServiceQuery length(String field) {
-			return function("length", field(field));
+			return length(field(field));
 		}
 
 		/**
@@ -2716,7 +2827,7 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public static MobileServiceQuery trim(String field) {
-			return function("trim", field(field));
+			return trim(field(field));
 		}
 
 		/**
@@ -2746,7 +2857,7 @@ public final class MobileServiceTable {
 		 */
 		public static MobileServiceQuery startsWith(String field,
 				String start) {
-			return function("startswith", field(field), val(start));
+			return startsWith(field(field), val(start));
 		}
 
 		/**
@@ -2776,7 +2887,7 @@ public final class MobileServiceTable {
 		 */
 		public static MobileServiceQuery endsWith(String field,
 				String end) {
-			return function("endswith", field(field), val(end));
+			return endsWith(field(field), val(end));
 		}
 
 		/**
@@ -2805,7 +2916,7 @@ public final class MobileServiceTable {
 		 */
 		public static MobileServiceQuery subStringOf(String str,
 				String field) {
-			return function("substringof", val(str), field(field));
+			return subStringOf(val(str), field(field));
 		}
 
 		/**
@@ -2850,7 +2961,7 @@ public final class MobileServiceTable {
 		 */
 		public static MobileServiceQuery indexOf(String field,
 				String str) {
-			return function("indexof", field(field), val(str));
+			return indexOf(field(field), val(str));
 		}
 
 		/**
@@ -2863,7 +2974,7 @@ public final class MobileServiceTable {
 		 *            Starting position
 		 * @return MobileServiceQuery
 		 */
-		public static MobileServiceQuery substring(MobileServiceQuery str,
+		public static MobileServiceQuery subString(MobileServiceQuery str,
 				MobileServiceQuery pos) {
 			return function("substring", str, pos);
 		}
@@ -2878,9 +2989,9 @@ public final class MobileServiceTable {
 		 *            Starting position
 		 * @return MobileServiceQuery
 		 */
-		public static MobileServiceQuery substring(String field,
+		public static MobileServiceQuery subString(String field,
 				int pos) {
-			return function("substring", field(field), val(pos));
+			return subString(field(field), val(pos));
 		}
 
 		/**
@@ -2895,7 +3006,7 @@ public final class MobileServiceTable {
 		 *            Length
 		 * @return MobileServiceQuery
 		 */
-		public static MobileServiceQuery substring(MobileServiceQuery str,
+		public static MobileServiceQuery subString(MobileServiceQuery str,
 				MobileServiceQuery pos, MobileServiceQuery length) {
 			return function("substring", str, pos, length);
 		}
@@ -2912,9 +3023,9 @@ public final class MobileServiceTable {
 		 *            Length
 		 * @return MobileServiceQuery
 		 */
-		public static MobileServiceQuery substring(String field,
+		public static MobileServiceQuery subString(String field,
 				int pos, int length) {
-			return function("substring", field(field), val(pos), val(length));
+			return subString(field(field), val(pos), val(length));
 		}
 
 		/**
@@ -2948,7 +3059,7 @@ public final class MobileServiceTable {
 		 */
 		public static MobileServiceQuery replace(String field,
 				String find, String replace) {
-			return function("replace", field(field), val(find), val(replace));
+			return replace(field(field), val(find), val(replace));
 		}
 	}
 

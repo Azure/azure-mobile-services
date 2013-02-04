@@ -586,7 +586,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
 
 		// Create query
 		MobileServiceQuery query = table.where()
-				.substring(field("ProductCode"), val(3)).eq().val("FOO");
+				.subString(field("ProductCode"), val(3)).eq().val("FOO");
 
 		// Assert
 		String expectedFilters = "substring(ProductCode,3) eq 'FOO'";
@@ -594,7 +594,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
 		assertEquals(expectedFilters, query.toString());
 
 		// Create query
-		query = table.where().substring(field("ProductCode"), val(1), val(2))
+		query = table.where().subString(field("ProductCode"), val(1), val(2))
 				.eq().val("FC");
 		expectedFilters = "substring(ProductCode,1,2) eq 'FC'";
 		assertEquals("", query.getRowSetModifiers());
