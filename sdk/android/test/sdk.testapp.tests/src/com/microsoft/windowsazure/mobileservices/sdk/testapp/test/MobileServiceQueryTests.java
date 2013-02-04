@@ -138,7 +138,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
 		assertEquals(expectedFilters, query.toString());
 
 		// Create query
-		query = table.where().field("age").gt(val(3));
+		query = table.where().field("age").gt(3);
 
 		// Assert
 		expectedFilters = "age gt (3)";
@@ -157,7 +157,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
 		assertEquals(expectedFilters, query.toString());
 
 		// Create query
-		query = table.where().field("age").ge(val(3));
+		query = table.where().field("age").ge(3);
 
 		// Assert
 		expectedFilters = "age ge (3)";
@@ -177,7 +177,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
 		assertEquals(expectedFilters, query.toString());
 
 		// Create query
-		query = table.where().field("age").le(val(3));
+		query = table.where().field("age").le(3);
 
 		// Assert
 		expectedFilters = "age le (3)";
@@ -197,7 +197,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
 		assertEquals(expectedFilters, query.toString());
 
 		// Create query
-		query = table.where().field("age").le(val(3));
+		query = table.where().field("age").le(3);
 
 		// Assert
 		expectedFilters = "age le (3)";
@@ -217,7 +217,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
 		assertEquals(expectedFilters, query.toString());
 
 		// Create query
-		query = table.where().field("age").eq(val(3));
+		query = table.where().field("age").eq(3);
 
 		// Assert
 		expectedFilters = "age eq (3)";
@@ -236,7 +236,7 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
 		assertEquals(expectedFilters, query.toString());
 
 		// Create query
-		query = table.where().field("age").neq(val(3));
+		query = table.where().field("age").neq(3);
 
 		// Assert
 		expectedFilters = "age neq (3)";

@@ -8,34 +8,26 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.security.InvalidParameterException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TimeZone;
 
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
-//
-import android.annotation.SuppressLint;
+
 import android.util.Pair;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+//
 
 /**
  * Represents a Mobile Service Table
@@ -46,11 +38,6 @@ public final class MobileServiceTable {
 	 * Tables URI part
 	 */
 	private static final String TABLES_URL = "tables/";
-
-	/**
-	 * GsonBuilder used to in JSON Serialization/Deserialization
-	 */
-	private GsonBuilder mGsonBuilder;
 
 	/**
 	 * The MobileServiceClient used to invoke table operations
@@ -88,56 +75,6 @@ public final class MobileServiceTable {
 
 		mClient = client;
 		mTableName = name;
-		mGsonBuilder = new GsonBuilder();
-
-		// Register custom date deserializer
-		this.registerDeserializer(Date.class, new JsonDeserializer<Date>() {
-			@SuppressLint("SimpleDateFormat")
-			@Override
-			public Date deserialize(JsonElement element, Type type,
-					JsonDeserializationContext ctx) throws JsonParseException {
-				String strVal = element.getAsString();
-
-				// Change Z to +00:00 to adapt the string to a format that can
-				// be parsed in Java
-				String s = strVal.replace("Z", "+00:00");
-				try {
-					// Remove the ":" character to adapt the string to a format
-					// that can be parsed in Java
-					s = s.substring(0, 26) + s.substring(27);
-				} catch (IndexOutOfBoundsException e) {
-					throw new JsonParseException("Invalid length");
-				}
-
-				try {
-					// Parse the well-formatted date string
-					SimpleDateFormat dateFormat = new SimpleDateFormat(
-							"yyyy-MM-dd'T'HH:mm:ss'.'SSSZ");
-					dateFormat.setTimeZone(TimeZone.getDefault());
-					Date date = dateFormat.parse(s);
-
-					return date;
-				} catch (ParseException e) {
-					throw new JsonParseException(e);
-				}
-			}
-		});
-
-		// Register custom date serializer
-		this.registerSerializer(Date.class, new JsonSerializer<Date>() {
-			@Override
-			public JsonElement serialize(Date date, Type type,
-					JsonSerializationContext ctx) {
-				SimpleDateFormat dateFormat = new SimpleDateFormat(
-						"yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", Locale.getDefault());
-				dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-
-				String formatted = dateFormat.format(date);
-
-				JsonElement element = new JsonPrimitive(formatted);
-				return element;
-			}
-		});
 	}
 
 	/**
@@ -192,14 +129,6 @@ public final class MobileServiceTable {
 	}
 
 	/**
-	 * Returns the GsonBuilder used to serialize/deserialize objects with this
-	 * table
-	 */
-	public GsonBuilder getGsonBuilder() {
-		return mGsonBuilder;
-	}
-
-	/**
 	 * Registers a JsonSerializer for the specified type
 	 * 
 	 * @param type
@@ -208,7 +137,7 @@ public final class MobileServiceTable {
 	 *            The serializer to use in the registration
 	 */
 	public <T> void registerSerializer(Type type, JsonSerializer<T> serializer) {
-		mGsonBuilder.registerTypeAdapter(type, serializer);
+		mClient.getGsonBuilder().registerTypeAdapter(type, serializer);
 	}
 
 	/**
@@ -221,7 +150,7 @@ public final class MobileServiceTable {
 	 */
 	public <T> void registerDeserializer(Type type,
 			JsonDeserializer<T> deserializer) {
-		mGsonBuilder.registerTypeAdapter(type, deserializer);
+		mClient.getGsonBuilder().registerTypeAdapter(type, deserializer);
 	}
 
 	/**
@@ -337,7 +266,7 @@ public final class MobileServiceTable {
 	public <E> void insert(final E element,
 			final TableOperationCallback<E> callback)
 			throws InvalidParameterException {
-		final JsonObject json = mGsonBuilder.create().toJsonTree(element)
+		final JsonObject json = mClient.getGsonBuilder().create().toJsonTree(element)
 				.getAsJsonObject();
 
 		removeIdFromJson(json);
@@ -455,7 +384,7 @@ public final class MobileServiceTable {
 	 */
 	public <E> void update(final E element,
 			final TableOperationCallback<E> callback) {
-		final JsonObject json = mGsonBuilder.create().toJsonTree(element)
+		final JsonObject json = mClient.getGsonBuilder().create().toJsonTree(element)
 				.getAsJsonObject();
 		String content = json.toString();
 
@@ -625,7 +554,7 @@ public final class MobileServiceTable {
 	private JsonObject patchOriginalEntityWithResponseEntity(
 			Object originalEntity, JsonObject newEntity) {
 		// Patch the object to return with the new values
-		Gson gson = mGsonBuilder.create();
+		Gson gson = mClient.getGsonBuilder().create();
 		JsonObject patchedEntityJson;
 
 		if (originalEntity instanceof JsonObject) {
@@ -655,7 +584,7 @@ public final class MobileServiceTable {
 		if (element instanceof JsonObject) {
 			id = ((JsonObject) element).get("id").getAsInt();
 		} else {
-			JsonObject json = mGsonBuilder.create().toJsonTree(element)
+			JsonObject json = mClient.getGsonBuilder().create().toJsonTree(element)
 					.getAsJsonObject();
 			id = json.get("id").getAsInt();
 		}
@@ -712,7 +641,7 @@ public final class MobileServiceTable {
 	 * @return List of entities
 	 */
 	private <E> List<E> parseResults(JsonElement results, final Class<E> clazz) {
-		Gson gson = mGsonBuilder.create();
+		Gson gson = mClient.getGsonBuilder().create();
 		List<E> result = new ArrayList<E>();
 
 		// Parse results
@@ -1225,6 +1154,17 @@ public final class MobileServiceTable {
 			this.querySteps.add(MobileServiceQueryOperations.not(otherQuery));
 			return this;
 		}
+		
+		/**
+		 * Logical not.
+		 * 
+		 * @param booleanValue
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery not(boolean booleanValue) {
+			this.querySteps.add(MobileServiceQueryOperations.not(MobileServiceQueryOperations.val(booleanValue)));
+			return this;
+		}
 
 		/****** Comparison Operators ******/
 
@@ -1248,6 +1188,17 @@ public final class MobileServiceTable {
 			this.querySteps.add(MobileServiceQueryOperations.ge(otherQuery));
 			return this;
 		}
+		
+		/**
+		 * Greater than or equal comparison operator.
+		 * 
+		 * @param numberValue
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery ge(Number numberValue) {
+			this.querySteps.add(MobileServiceQueryOperations.ge(MobileServiceQueryOperations.val(numberValue)));
+			return this;
+		}
 
 		/**
 		 * Less than or equal comparison operator.
@@ -1267,6 +1218,17 @@ public final class MobileServiceTable {
 		 */
 		public MobileServiceQuery le(MobileServiceQuery otherQuery) {
 			this.querySteps.add(MobileServiceQueryOperations.le(otherQuery));
+			return this;
+		}
+		
+		/**
+		 * Less than or equal comparison operator.
+		 * 
+		 * @param otherQuery
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery le(Number numberValue) {
+			this.querySteps.add(MobileServiceQueryOperations.le(MobileServiceQueryOperations.val(numberValue)));
 			return this;
 		}
 
@@ -1290,6 +1252,17 @@ public final class MobileServiceTable {
 			this.querySteps.add(MobileServiceQueryOperations.gt(otherQuery));
 			return this;
 		}
+		
+		/**
+		 * Greater than comparison operator.
+		 * 
+		 * @param numberValue
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery gt(Number numberValue) {
+			this.querySteps.add(MobileServiceQueryOperations.gt(MobileServiceQueryOperations.val(numberValue)));
+			return this;
+		}
 
 		/**
 		 * Less than comparison operator.
@@ -1309,6 +1282,17 @@ public final class MobileServiceTable {
 		 */
 		public MobileServiceQuery lt(MobileServiceQuery otherQuery) {
 			this.querySteps.add(MobileServiceQueryOperations.lt(otherQuery));
+			return this;
+		}
+		
+		/**
+		 * Less than comparison operator.
+		 * 
+		 * @param numberValue
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery lt(Number numberValue) {
+			this.querySteps.add(MobileServiceQueryOperations.lt(MobileServiceQueryOperations.val(numberValue)));
 			return this;
 		}
 
@@ -1332,6 +1316,39 @@ public final class MobileServiceTable {
 			this.querySteps.add(MobileServiceQueryOperations.eq(otherQuery));
 			return this;
 		}
+		
+		/**
+		 * Equal comparison operator.
+		 * 
+		 * @param numberValue
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery eq(Number numberValue) {
+			this.querySteps.add(MobileServiceQueryOperations.eq(MobileServiceQueryOperations.val(numberValue)));
+			return this;
+		}
+		
+		/**
+		 * Equal comparison operator.
+		 * 
+		 * @param booleanValue
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery eq(boolean booleanValue) {
+			this.querySteps.add(MobileServiceQueryOperations.eq(MobileServiceQueryOperations.val(booleanValue)));
+			return this;
+		}
+		
+		/**
+		 * Equal comparison operator.
+		 * 
+		 * @param stringValue
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery eq(String stringValue) {
+			this.querySteps.add(MobileServiceQueryOperations.eq(MobileServiceQueryOperations.val(stringValue)));
+			return this;
+		}
 
 		/**
 		 * Not equal comparison operator.
@@ -1351,6 +1368,39 @@ public final class MobileServiceTable {
 		 */
 		public MobileServiceQuery neq(MobileServiceQuery otherQuery) {
 			this.querySteps.add(MobileServiceQueryOperations.neq(otherQuery));
+			return this;
+		}
+		
+		/**
+		 * Not equal comparison operator.
+		 * 
+		 * @param numberValue
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery neq(Number numberValue) {
+			this.querySteps.add(MobileServiceQueryOperations.neq(MobileServiceQueryOperations.val(numberValue)));
+			return this;
+		}
+		
+		/**
+		 * Not equal comparison operator.
+		 * 
+		 * @param booleanValue
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery neq(boolean booleanValue) {
+			this.querySteps.add(MobileServiceQueryOperations.neq(MobileServiceQueryOperations.val(booleanValue)));
+			return this;
+		}
+		
+		/**
+		 * Not equal comparison operator.
+		 * 
+		 * @param stringValue
+		 * @return MobileServiceQuery
+		 */
+		public MobileServiceQuery neq(String stringValue) {
+			this.querySteps.add(MobileServiceQueryOperations.neq(MobileServiceQueryOperations.val(stringValue)));
 			return this;
 		}
 
@@ -1902,6 +1952,16 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery not(MobileServiceQuery otherQuery) {
 			return simpleOperator(otherQuery, "not");
 		}
+		
+		/**
+		 * Logical not.
+		 * 
+		 * @param booleanValue
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery not(boolean booleanValue) {
+			return not(MobileServiceQueryOperations.val(booleanValue));
+		}
 
 		/****** Comparison Operators ******/
 
@@ -1911,7 +1971,8 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public static MobileServiceQuery ge() {
-			return ge(null);
+			MobileServiceQuery nullQuery = null;
+			return ge(nullQuery);
 		}
 
 		/**
@@ -1923,6 +1984,16 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery ge(MobileServiceQuery otherQuery) {
 			return simpleOperator(otherQuery, "ge");
 		}
+		
+		/**
+		 * Greater than or equal comparison operator.
+		 * 
+		 * @param numberValue
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery ge(Number numberValue) {
+			return ge(MobileServiceQueryOperations.val(numberValue));
+		}
 
 		/**
 		 * Less than or equal comparison operator.
@@ -1930,7 +2001,8 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public static MobileServiceQuery le() {
-			return le(null);
+			MobileServiceQuery nullQuery = null;
+			return le(nullQuery);
 		}
 
 		/**
@@ -1944,12 +2016,23 @@ public final class MobileServiceTable {
 		}
 
 		/**
+		 * Less than or equal comparison operator.
+		 * 
+		 * @param numberValue
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery le(Number numberValue) {
+			return le(MobileServiceQueryOperations.val(numberValue));
+		}
+		
+		/**
 		 * Greater than comparison operator.
 		 * 
 		 * @return MobileServiceQuery
 		 */
 		public static MobileServiceQuery gt() {
-			return gt(null);
+			MobileServiceQuery nullQuery = null;
+			return gt(nullQuery);
 		}
 
 		/**
@@ -1963,12 +2046,23 @@ public final class MobileServiceTable {
 		}
 
 		/**
+		 * Greater than comparison operator.
+		 * 
+		 * @param numberValue
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery gt(Number numberValue) {
+			return gt(MobileServiceQueryOperations.val(numberValue));
+		}
+		
+		/**
 		 * Less than comparison operator.
 		 * 
 		 * @return MobileServiceQuery
 		 */
 		public static MobileServiceQuery lt() {
-			return lt(null);
+			MobileServiceQuery nullQuery = null;
+			return lt(nullQuery);
 		}
 
 		/**
@@ -1980,6 +2074,16 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery lt(MobileServiceQuery otherQuery) {
 			return simpleOperator(otherQuery, "lt");
 		}
+		
+		/**
+		 * Less than comparison operator.
+		 * 
+		 * @param numberValue
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery lt(Number numberValue) {
+			return lt(MobileServiceQueryOperations.val(numberValue));
+		}
 
 		/**
 		 * Equal comparison operator.
@@ -1987,7 +2091,8 @@ public final class MobileServiceTable {
 		 * @return MobileServiceQuery
 		 */
 		public static MobileServiceQuery eq() {
-			return eq(null);
+			MobileServiceQuery nullQuery = null;
+			return eq(nullQuery);
 		}
 
 		/**
@@ -1999,14 +2104,45 @@ public final class MobileServiceTable {
 		public static MobileServiceQuery eq(MobileServiceQuery otherQuery) {
 			return simpleOperator(otherQuery, "eq");
 		}
-
+		
+		/**
+		 * Equal comparison operator.
+		 * 
+		 * @param numberValue
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery eq(Number numberValue) {
+			return eq(MobileServiceQueryOperations.val(numberValue));
+		}
+		
+		/**
+		 * Equal comparison operator.
+		 * 
+		 * @param booleanValue
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery eq(boolean booleanValue) {
+			return eq(MobileServiceQueryOperations.val(booleanValue));
+		}
+		
+		/**
+		 * Equal comparison operator.
+		 * 
+		 * @param stringValue
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery eq(String stringValue) {
+			return eq(MobileServiceQueryOperations.val(stringValue));
+		}
+		
 		/**
 		 * Not equal comparison operator.
 		 * 
 		 * @return MobileServiceQuery
 		 */
 		public static MobileServiceQuery neq() {
-			return neq(null);
+			MobileServiceQuery nullQuery = null;
+			return neq(nullQuery);
 		}
 
 		/**
@@ -2019,6 +2155,36 @@ public final class MobileServiceTable {
 			return simpleOperator(otherQuery, "neq");
 		}
 
+		/**
+		 * Not equal comparison operator.
+		 * 
+		 * @param numberValue
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery neq(Number numberValue) {
+			return neq(MobileServiceQueryOperations.val(numberValue));
+		}
+		
+		/**
+		 * Not equal comparison operator.
+		 * 
+		 * @param booleanValue
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery neq(boolean booleanValue) {
+			return neq(MobileServiceQueryOperations.val(booleanValue));
+		}
+		
+		/**
+		 * Not equal comparison operator.
+		 * 
+		 * @param stringValue
+		 * @return MobileServiceQuery
+		 */
+		public static MobileServiceQuery neq(String stringValue) {
+			return neq(MobileServiceQueryOperations.val(stringValue));
+		}
+		
 		/****** Arithmetic Operators ******/
 
 		/**
