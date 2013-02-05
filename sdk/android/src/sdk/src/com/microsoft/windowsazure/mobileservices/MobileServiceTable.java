@@ -25,6 +25,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSerializer;
@@ -477,8 +478,14 @@ public final class MobileServiceTable {
 	 *            Callback to invoke when the operation is completed
 	 */
 	public void delete(Object element, TableDeleteCallback callback) {
-		int id = getObjectId(element);
-
+		int id = -1;
+		try {
+			id = getObjectId(element);
+		} catch (Exception e) {
+			callback.onCompleted(e, null);
+			return;
+		}
+		
 		this.delete(id, callback);
 	}
 
@@ -597,16 +604,20 @@ public final class MobileServiceTable {
 			return ((Integer) element).intValue();
 		}
 			
-		int id;
+		JsonObject jsonElement;
 		if (element instanceof JsonObject) {
-			id = ((JsonObject) element).get("id").getAsInt();
+			jsonElement = (JsonObject)element;
 		} else {
-			JsonObject json = mClient.getGsonBuilder().create()
+			jsonElement = mClient.getGsonBuilder().create()
 					.toJsonTree(element).getAsJsonObject();
-			id = json.get("id").getAsInt();
+		}
+		
+		JsonElement idProperty = jsonElement.get("id");
+		if (idProperty instanceof JsonNull) {
+			throw new InvalidParameterException("Element must contain id property");
 		}
 
-		return id;
+		return idProperty.getAsInt();
 	}
 
 	/**
