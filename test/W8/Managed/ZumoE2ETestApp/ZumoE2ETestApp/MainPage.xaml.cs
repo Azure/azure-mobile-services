@@ -231,7 +231,6 @@ namespace ZumoE2ETestApp
                 }
 
                 ZumoTestGroup testGroup = allTests[selectedIndex];
-                Popup popup = new Popup();
                 List<string> lines = new List<string>();
                 foreach (var test in testGroup.AllTests)
                 {
@@ -241,13 +240,7 @@ namespace ZumoE2ETestApp
                 }
 
                 UploadLogsPage uploadLogsPage = new UploadLogsPage(testGroup.Name, string.Join("\n", lines), uploadUrl);
-                popup.Child = uploadLogsPage;
-                uploadLogsPage.CloseRequested += (snd, ea) =>
-                {
-                    popup.IsOpen = false;
-                };
-
-                popup.IsOpen = true;
+                await uploadLogsPage.Display();
             }
             else
             {
@@ -271,20 +264,13 @@ namespace ZumoE2ETestApp
                 if (selectedTest >= 0 && selectedTest < tests.Count)
                 {
                     ZumoTest test = tests[selectedTest];
-                    Popup popup = new Popup();
                     List<string> lines = new List<string>();
                     lines.Add(string.Format("Logs for test {0} (status = {1})", test.Name, test.Status));
                     lines.AddRange(test.GetLogs());
                     lines.Add("-----------------------");
 
                     UploadLogsPage uploadLogsPage = new UploadLogsPage(testGroup.Name, string.Join("\n", lines), null);
-                    popup.Child = uploadLogsPage;
-                    uploadLogsPage.CloseRequested += (snd, ea) =>
-                    {
-                        popup.IsOpen = false;
-                    };
-
-                    popup.IsOpen = true;
+                    uploadLogsPage.Display();
                 }
             }
         }

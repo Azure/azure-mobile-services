@@ -157,6 +157,8 @@
 // Main implementation
 @implementation ZumoMiscTests
 
+static NSString *tableName = @"iOSRoundTripTable";
+
 + (NSArray *)createTests {
     NSMutableArray *result = [[NSMutableArray alloc] init];
     [result addObject:[self createUserAgentTest]];
@@ -169,7 +171,7 @@
 + (NSString *)helpText {
     NSArray *lines = [NSArray arrayWithObjects:
                       @"1. Create an application on Windows azure portal.",
-                      @"2. Create a table called 'iOSTodoItem'.",
+                      @"2. Create a table called 'iOSRoundTripTable'.",
                       @"3. Click on the 'Misc Tests' button.",
                       @"4. Make sure all the tests pass.",
                       nil];
@@ -181,7 +183,7 @@
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         FilterToCaptureHttpTraffic *filter = [[FilterToCaptureHttpTraffic alloc] init];
         MSClient *filteredClient = [client clientwithFilter:filter];
-        MSTable *table = [filteredClient getTable:@"iosTodoItem"];
+        MSTable *table = [filteredClient getTable:tableName];
         NSDictionary *item = @{@"name":@"john doe"};
         [table insert:item completion:^(NSDictionary *inserted, NSError *error) {
             BOOL passed = NO;
@@ -189,7 +191,7 @@
                 [test addLog:[NSString stringWithFormat:@"Error: %@", error]];
             } else {
                 NSNumber *itemId = inserted[@"id"];
-                MSTable *unfilteredTable = [client getTable:@"iosTodoItem"];
+                MSTable *unfilteredTable = [client getTable:tableName];
                 [unfilteredTable deleteWithId:itemId completion:nil]; // clean-up after this test
                 NSString *userAgent = [filter userAgent];
                 if ([userAgent rangeOfString:@"objective-c"].location == NSNotFound) {
@@ -249,7 +251,7 @@
         [filter setErrorToReturn:errorToReturn];
         MSClient *mockedClient = [client clientwithFilter:filter];
         [test addLog:[NSString stringWithFormat:@"Created a client with filter: %@", mockedClient.filters]];
-        MSTable *table = [client getTable:@"iosTodoItem"];
+        MSTable *table = [client getTable:tableName];
         [table insert:@{@"string1":@"does not matter"} completion:^(NSDictionary *item, NSError *error) {
             BOOL passed = NO;
             if (error) {
@@ -273,7 +275,7 @@
         [test addLog:[NSString stringWithFormat:@"Using a filter to send %d requests", numberOfRequests]];
         [filter setNumberOfRequests:numberOfRequests];
         client = [client clientwithFilter:filter];
-        MSTable *table = [client getTable:@"iosTodoItem"];
+        MSTable *table = [client getTable:tableName];
         NSString *uuid = [[NSUUID UUID] UUIDString];
         NSDictionary *item = @{@"name":uuid};
         [table insert:item completion:^(NSDictionary *inserted, NSError *error) {
