@@ -32,9 +32,22 @@ function insert(item, user, request) {
         error: errorFunction
     };
     
-    var wnsFunction = push.wns[method];
-    if (wnsFunction) {
-        wnsFunction(channelUri, payload, options);
+    if (method === 'sendToastText01') {
+        push.wns.sendToastText01(channelUri, payload, options);
+    } else if (method === 'sendToastText02') {
+        push.wns.sendToastText02(channelUri, payload, options);
+    } else if (method === 'sendToastText03') {
+        push.wns.sendToastText03(channelUri, payload, options);
+    } else if (method === 'sendToastText04') {
+        push.wns.sendToastText04(channelUri, payload, options);
+    } else if (method === 'sendToastImageAndText01') {
+        push.wns.sendToastImageAndText01(channelUri, payload, options);
+    } else if (method === 'sendToastImageAndText02') {
+        push.wns.sendToastImageAndText02(channelUri, payload, options);
+    } else if (method === 'sendToastImageAndText03') {
+        push.wns.sendToastImageAndText03(channelUri, payload, options);
+    } else if (method === 'sendToastImageAndText04') {
+        push.wns.sendToastImageAndText04(channelUri, payload, options);
     } else {
         request.respond(400, { error: 'method not supported: ' + method });
     }
