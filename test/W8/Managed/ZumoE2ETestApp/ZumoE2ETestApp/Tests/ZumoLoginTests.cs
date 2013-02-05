@@ -21,6 +21,7 @@ namespace ZumoE2ETestApp.Tests
         {
             ZumoTestGroup result = new ZumoTestGroup("Login tests");
             result.AddTest(CreateLogoutTest());
+            result.AddTest(CreateCRUDTest("w8Public", null, TablePermission.Public, false));
             result.AddTest(CreateCRUDTest("w8Application", null, TablePermission.Application, false));
             result.AddTest(CreateCRUDTest("w8Authenticated", null, TablePermission.User, false));
             result.AddTest(CreateCRUDTest("w8Admin", null, TablePermission.Admin, false));
@@ -55,9 +56,9 @@ namespace ZumoE2ETestApp.Tests
 
             result.AddTest(ZumoTestCommon.CreateYesNoTest("Were you prompted for username / password four times?", true));
 
-            result.AddTest(CreateLogoutTest());
-            result.AddTest(CreateLiveSDKLoginTest());
-            result.AddTest(CreateCRUDTest("w8Authenticated", "Microsoft via Live SDK", TablePermission.User, true));
+            //result.AddTest(CreateLogoutTest());
+            //result.AddTest(CreateLiveSDKLoginTest());
+            //result.AddTest(CreateCRUDTest("w8Authenticated", "Microsoft via Live SDK", TablePermission.User, true));
 
             result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("We'll log in again; you may or may not be asked for password in the next few moments."));
             foreach (MobileServiceAuthenticationProvider provider in Enum.GetValues(typeof(MobileServiceAuthenticationProvider)))
@@ -114,7 +115,7 @@ namespace ZumoE2ETestApp.Tests
                 var client = ZumoTestGlobals.Instance.Client;
                 var uri = client.ApplicationUri.ToString();
                 var liveIdClient = new LiveAuthClient(uri);
-                var liveLoginResult = await liveIdClient.LoginAsync("wl.basic wl.signin".Split());
+                var liveLoginResult = await liveIdClient.LoginAsync(new string[] { "wl.basic" });
                 if (liveLoginResult.Status == LiveConnectSessionStatus.Connected)
                 {
                     var liveConnectClient = new LiveConnectClient(liveLoginResult.Session);
@@ -178,7 +179,7 @@ namespace ZumoE2ETestApp.Tests
         private static ZumoTest CreateCRUDTest(string tableName, string providerName, TablePermission tableType, bool userIsAuthenticated)
         {
             string testName = string.Format(CultureInfo.InvariantCulture, "CRUD, {0}, table with {1} permissions",
-                userIsAuthenticated ? "unauthenticated" : ("auth by " + providerName), tableType);
+                userIsAuthenticated ? ("auth by " + providerName) : "unauthenticated", tableType);
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
                 var client = ZumoTestGlobals.Instance.Client;
@@ -220,6 +221,12 @@ namespace ZumoE2ETestApp.Tests
                 if (!ValidateExpectedError(test, ex, crudShouldWork))
                 {
                     return false;
+                }
+
+                if (tableType == TablePermission.Public)
+                {
+                    // Update, Read and Delete are public; we don't need the app key anymore
+                    client = new MobileServiceClient(client.ApplicationUri);
                 }
 
                 ex = null;
