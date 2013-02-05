@@ -12,7 +12,7 @@
 
 @implementation ZumoRoundTripTests
 
-static NSString *tableName = @"iosTodoItem";
+static NSString *tableName = @"iosRoundTripTable";
 
 typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTripTestColumnType;
 
@@ -240,7 +240,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
 + (NSString *)helpText {
     NSArray *lines = [NSArray arrayWithObjects:
                       @"1. Create an application on Windows azure portal.",
-                      @"2. Create a table called 'iOSTodoItem'.",
+                      @"2. Create a table called 'iOSRoundTripTable'.",
                       @"3. Add Valid Application URL and Application Key.",
                       @"4. Click on the '1 RoundTripDataType' button.",
                       @"5. Make sure all the tests pass.",

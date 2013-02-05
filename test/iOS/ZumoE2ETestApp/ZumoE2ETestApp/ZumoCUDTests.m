@@ -12,6 +12,8 @@
 
 @implementation ZumoCUDTests
 
+static NSString *tableName = @"iosRoundTripTable";
+
 + (NSArray *)createTests {
     NSMutableArray *result = [[NSMutableArray alloc] init];
     [result addObject:[self createDeleteTestWithName:@"Delete with id" andType:DeleteUsingId]];
@@ -32,7 +34,7 @@ typedef enum { UpdateUsingObject, NegUpdateObjectInvalidId, NegUpdateObjectNoId 
 + (ZumoTest *)createUpdateTestWithName:(NSString *)name andType:(UpdateTestType)type {
     ZumoTest *result = [ZumoTest createTestWithName:name andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        MSTable *table = [client getTable:@"TodoItem"];
+        MSTable *table = [client getTable:tableName];
         [table insert:@{@"name":@"John Doe",@"age":[NSNumber numberWithInt:33]} completion:^(NSDictionary *inserted, NSError *insertError) {
             if (insertError) {
                 [test addLog:[NSString stringWithFormat:@"Error inserting data: %@", insertError]];
@@ -132,7 +134,7 @@ typedef enum { DeleteUsingId, DeleteUsingObject, NegDeleteUsingInvalidId, NegDel
 + (ZumoTest *)createDeleteTestWithName:(NSString *)name andType:(DeleteTestType)type {
     ZumoTest *result = [ZumoTest createTestWithName:name andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        MSTable *table = [client getTable:@"TodoItem"];
+        MSTable *table = [client getTable:tableName];
         [table insert:@{@"name":@"John Doe",@"age":[NSNumber numberWithInt:33]} completion:^(NSDictionary *inserted, NSError *insertError) {
             if (insertError) {
                 [test addLog:[NSString stringWithFormat:@"Error inserting data: %@", insertError]];
@@ -251,7 +253,7 @@ typedef enum { DeleteUsingId, DeleteUsingObject, NegDeleteUsingInvalidId, NegDel
 + (NSString *)helpText {
     NSArray *lines = [NSArray arrayWithObjects:
                       @"1. Create an application on Windows azure portal.",
-                      @"2. Create TodoItem table in portal.",
+                      @"2. Create a table called 'iOSRoundTripTable'.",
                       @"3. Add Valid Application URL and Application Key.",
                       @"4. Run the 'Create/Update/Delete' tests.",
                       @"5. Make sure all the scenarios pass.", nil];

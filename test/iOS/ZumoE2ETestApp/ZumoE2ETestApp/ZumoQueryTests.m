@@ -104,7 +104,7 @@ static NSString *queryTestsTableName = @"iosMovies";
     for (int i = -1; i <= 0; i++) {
         ZumoTest *negativeLookupTest = [ZumoTest createTestWithName:[NSString stringWithFormat:@"(Neg) MSTable readWithId:%d", i] andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
             MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-            MSTable *table = [client getTable:@"TodoItem"];
+            MSTable *table = [client getTable:queryTestsTableName];
             [table readWithId:[NSNumber numberWithInt:i] completion:^(NSDictionary *item, NSError *err) {
                 BOOL passed = NO;
                 if (err) {
