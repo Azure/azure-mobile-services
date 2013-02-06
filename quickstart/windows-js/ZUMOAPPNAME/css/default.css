@@ -1,0 +1,25 @@
+﻿body {
+}
+
+.tasknumber {
+    color: #b9b9b9; 
+    font-size: 45pt; 
+    border-right: 1px solid #b9b9b9; 
+    min-width: 65px; 
+    text-align: center; 
+    margin-right: 10px
+}
+
+
+
+@media screen and (-ms-view-state: fullscreen-landscape) {
+}
+
+@media screen and (-ms-view-state: filled) {
+}
+
+@media screen and (-ms-view-state: snapped) {
+}
+
+@media screen and (-ms-view-state: fullscreen-portrait) {
+}
