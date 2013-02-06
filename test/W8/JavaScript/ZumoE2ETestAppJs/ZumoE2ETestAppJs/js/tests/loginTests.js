@@ -8,16 +8,30 @@ function defineLoginTestsNamespace() {
     var TABLE_PERMISSION_APPLICATION = 2;
     var TABLE_PERMISSION_USER = 3;
     var TABLE_PERMISSION_ADMIN = 4;
+    var TABLE_NAME_PUBLIC = 'w8Public';
+    var TABLE_NAME_APPLICATION = 'w8Application';
+    var TABLE_NAME_AUTHENTICATED = 'w8Authenticated';
+    var TABLE_NAME_ADMIN = 'w8Admin';
 
     var tables = [
-        { name: 'w8Application', permission: TABLE_PERMISSION_APPLICATION },
-        { name: 'w8Authenticated', permission: TABLE_PERMISSION_USER },
-        { name: 'w8Admin', permission: TABLE_PERMISSION_ADMIN }];
+        { name: TABLE_NAME_PUBLIC, permission: TABLE_PERMISSION_PUBLIC },
+        { name: TABLE_NAME_APPLICATION, permission: TABLE_PERMISSION_APPLICATION },
+        { name: TABLE_NAME_AUTHENTICATED, permission: TABLE_PERMISSION_USER },
+        { name: TABLE_NAME_ADMIN, permission: TABLE_PERMISSION_ADMIN }];
+
+    var supportRecycledToken = {
+        facebook: true,
+        google: true,
+        twitter: false,
+        microsoftaccount: false
+    };
 
     tests.push(createLogoutTest());
     tables.forEach(function (table) {
         tests.push(createCRUDTest(table.name, null, table.permission, false));
     });
+
+    var lastUserIdentityObject = null;
 
     var providers = ['facebook', 'google', 'twitter', 'microsoftaccount'];
     for (i = 0; i < providers.length; i++) {
@@ -25,7 +39,50 @@ function defineLoginTestsNamespace() {
         tests.push(createLogoutTest());
         tests.push(createLoginTest(provider));
         tables.forEach(function (table) {
-            tests.push(createCRUDTest(table.name, provider, table.permission, true));
+            if (table.permission !== TABLE_PERMISSION_PUBLIC) {
+                tests.push(createCRUDTest(table.name, provider, table.permission, true));
+            }
+        });
+
+        if (supportRecycledToken[provider]) {
+            tests.push(createLogoutTest());
+            tests.push(createClientSideLoginTest(provider));
+            tests.push(createCRUDTest(TABLE_NAME_AUTHENTICATED, provider, TABLE_PERMISSION_USER, true));
+        }
+    }
+
+    providers.forEach(function (provider) {
+        tests.push(createLogoutTest());
+        tests.push(createLoginTest(provider, true));
+        tests.push(createCRUDTest(TABLE_NAME_AUTHENTICATED, provider, TABLE_PERMISSION_USER, true));
+    });
+
+    function createClientSideLoginTest(provider) {
+        /// <param name="provider" type="String" mayBeNull="true">The name of the authentication provider for
+        ///            the client. Currently only 'facebook' and 'google' are supported for this test.</param>
+        return new zumo.Test('Login via token for ' + provider, function (test, done) {
+            /// <param name="test" type="zumo.Test">The test associated with this execution.</param>
+            var client = zumo.getClient();
+            var lastIdentity = lastUserIdentityObject;
+            if (!lastIdentity) {
+                test.addLog('Last identity object is null. Cannot run this test.');
+                done(false);
+            } else {
+                var token = {};
+                if (provider === 'facebook' || provider === 'google') {
+                    token.access_token = lastIdentity[provider].accessToken;
+                    client.login(provider, token).done(function (user) {
+                        test.addLog('Logged in as ', user);
+                        done(true);
+                    }, function (err) {
+                        test.addLog('Error on login: ', err);
+                        done(false);
+                    });
+                } else {
+                    test.addLog('Client-side login for ' + provider + ' is not implemented or not supported.');
+                    done(false);
+                }
+            }
         });
     }
 
@@ -49,6 +106,7 @@ function defineLoginTestsNamespace() {
                 (tablePermission === TABLE_PERMISSION_USER && userIsAuthenticated);
             var client = zumo.getClient();
             var table = client.getTable(tableName);
+            var currentUser = client.currentUser;
             var item = { text: 'hello' };
 
             var validateCRUDResult = function (operation, error) {
@@ -112,6 +170,10 @@ function defineLoginTestsNamespace() {
                             test.addLog('Error, query should have returned exactly one item');
                             done(false);
                         } else {
+                            if (items[0].Identities) {
+                                lastUserIdentityObject = JSON.parse(items[0].Identities);
+                                test.addLog('Identities object: ', lastUserIdentityObject);
+                            }
                             readCallback();
                         }
                     }, function (err) {
@@ -123,6 +185,11 @@ function defineLoginTestsNamespace() {
             // called by the callback for insert.
             function insertCallback(error) {
                 if (validateCRUDResult('insert', error)) {
+                    if (tablePermission === TABLE_PERMISSION_PUBLIC) {
+                        // No need for app key anymore
+                        client = new Microsoft.WindowsAzure.MobileServices.MobileServiceClient(client.applicationUrl);
+                        table = client.getTable(tableName);
+                    }
                     item.id = item.id || 1;
                     item.text = 'world';
                     table.update(item).done(function (newItem) {
@@ -153,27 +220,29 @@ function defineLoginTestsNamespace() {
         });
     }
 
-    function createLoginTest(provider, token, useSingleSignOn) {
+    function createLoginTest(provider, useSingleSignOn) {
         /// <param name="provider" type="String">The authentication provider to use.</param>
+        /// <param name="useSingleSignOn" type="Boolean">Whether to use the single sign-on parameter for login.</param>
         /// <return type="zumo.Test" />
         return new zumo.Test('Login with ' + provider + (useSingleSignOn ? ' (using single sign-on)' : ''), function (test, done) {
             /// <param name="test" type="zumo.Test">The test associated with this execution.</param>
-            if (useSingleSignOn || token) {
-                test.addLog('Test using token and for single-sign on have yet to be implemented');
-                done(false);
-                return;
-            }
-
             var client = zumo.getClient();
-            client.login(provider).done(function (user) {
+            var successFunction = function (user) {
                 test.addLog('Logged in: ', user);
                 done(true);
-            }, function (err) {
+            };
+            var errorFunction = function (err) {
                 test.addLog('Error during login: ', err);
                 done(false);
-            });
+            };
+            if (useSingleSignOn) {
+                client.login(provider, true).done(successFunction, errorFunction);
+            } else {
+                client.login(provider).done(successFunction, errorFunction);
+            }
         });
     }
+
     function createLogoutTest() {
         return new zumo.Test('Log out', function (test, done) {
             var client = zumo.getClient();

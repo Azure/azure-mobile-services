@@ -227,6 +227,7 @@ namespace ZumoE2ETestApp.Tests
                 {
                     // Update, Read and Delete are public; we don't need the app key anymore
                     client = new MobileServiceClient(client.ApplicationUri);
+                    table = client.GetTable(tableName);
                 }
 
                 ex = null;
