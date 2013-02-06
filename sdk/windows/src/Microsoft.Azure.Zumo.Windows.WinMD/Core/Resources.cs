@@ -74,7 +74,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Looks up a string similar to "Cannot start a login operation because login is already in progress."
         /// </summary>
-        public static string MobileServiceClient_Login_In_Progress
+        public static string Platform_Login_Error_Response
         {
             get { return "Cannot start a login operation because login is already in progress."; }
         }
@@ -98,7 +98,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Looks up a string similar to "Invalid format of the authentication response.".
         /// </summary>
-        public static string MobileServiceClient_Login_Invalid_Response_Format
+        public static string Platform_Login_Invalid_Response_Format
         {
             get { return "Invalid format of the authentication response."; }
         }
@@ -106,7 +106,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Looks up a string similar to "Login failed: {0}".
         /// </summary>
-        public static string MobileServiceClient_Login_Error_Response
+        public static string MobileServiceLogin_Login_Error_Response
         {
             get { return "Login failed: {0}"; }
         }    

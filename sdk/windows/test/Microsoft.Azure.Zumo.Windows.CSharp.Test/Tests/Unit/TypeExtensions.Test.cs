@@ -435,9 +435,10 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             Assert.AreEqual("10f", TypeExtensions.ToODataConstant(10f));
             Assert.AreEqual("1M", TypeExtensions.ToODataConstant(1M));
             Assert.AreEqual("'test'", TypeExtensions.ToODataConstant("test"));
-            Assert.AreEqual("'It''s Bob''s Test'", TypeExtensions.ToODataConstant("It's Bob's Test"));
+            Assert.AreEqual("'It%27%27s%20Bob%27%27s%20Test'", TypeExtensions.ToODataConstant("It's Bob's Test"));
             Assert.AreEqual("'a'", TypeExtensions.ToODataConstant('a'));
-            Assert.AreEqual("''''", TypeExtensions.ToODataConstant('\''));
+            Assert.AreEqual("'%27%27'", TypeExtensions.ToODataConstant('\''));
+            Assert.AreEqual("'%3F'", TypeExtensions.ToODataConstant('?'));
             Assert.AreEqual(
                 "datetime'2000-01-02T03:04:05.000Z'",
                 TypeExtensions.ToODataConstant(new DateTime(2000, 1, 2, 3, 4, 5, DateTimeKind.Utc).ToLocalTime()));

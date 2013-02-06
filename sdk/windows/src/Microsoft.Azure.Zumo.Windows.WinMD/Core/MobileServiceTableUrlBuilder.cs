@@ -99,7 +99,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             string parametersString = null;
 
-            if (parameters != null)
+            if (parameters != null && parameters.Count > 0)
             {
                 parametersString = "";
                 string formatString = "{0}={1}";

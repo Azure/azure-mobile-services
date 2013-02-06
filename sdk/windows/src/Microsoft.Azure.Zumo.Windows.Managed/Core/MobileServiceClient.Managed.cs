@@ -92,6 +92,27 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
+        /// Log a user into a Mobile Services application given a provider name.
+        /// </summary>
+        /// <param name="provider" type="MobileServiceAuthenticationProvider">
+        /// Authentication provider to use.
+        /// </param>
+        /// <param name="useSingleSignOn">
+        /// Indicates that single sign-on should be used. Single sign-on requires that the
+        /// application's Package SID be registered with the Windows Azure Mobile Service, but it
+        /// provides a better experience as HTTP cookies are supported so that users do not have to
+        /// login in everytime the application is launched.
+        /// </param>
+        /// <returns>
+        /// Task that will complete when the user has finished authentication.
+        /// </returns>
+        [SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Login", Justification = "Login is more appropriate than LogOn for our usage.")]
+        public Task<MobileServiceUser> LoginAsync(MobileServiceAuthenticationProvider provider, bool useSingleSignOn)
+        {
+            return this.SendLoginAsync(provider, null, useSingleSignOn);
+        }
+
+        /// <summary>
         /// Gets a reference to a table and its data operations.
         /// </summary>
         /// <typeparam name="T">

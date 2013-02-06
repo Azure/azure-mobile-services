@@ -18,22 +18,6 @@ namespace Microsoft.WindowsAzure.MobileServices
     public sealed partial class MobileServiceClient
     {
         /// <summary>
-        /// Name of the  JSON member in the config setting that stores the
-        /// authentication token.
-        /// </summary>
-        private const string LoginAsyncAuthenticationTokenKey = "authenticationToken";
-
-        /// <summary>
-        /// Relative URI fragment of the login endpoint.
-        /// </summary>
-        private const string LoginAsyncUriFragment = "login";
-
-        /// <summary>
-        /// Relative URI fragment of the login/done endpoint.
-        /// </summary>
-        private const string LoginAsyncDoneUriFragment = "login/done";
-
-        /// <summary>
         /// Name of the Installation ID header included on each request.
         /// </summary>
         private const string RequestInstallationIdHeader = "X-ZUMO-INSTALLATION-ID";
@@ -58,7 +42,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The ID used to identify this installation of the application to 
         /// provide telemetry data.
         /// </summary>
-        private static readonly string applicationInstallationId = MobileServiceApplication.InstallationId;
+        private static readonly string applicationInstallationId = MobileServiceApplication.Current.InstallationId;
 
         /// <summary>
         /// Represents a filter used to process HTTP requests and responses
@@ -69,13 +53,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         private IServiceFilter filter = null;
 
         /// <summary>
-        /// Indicates whether a login operation is currently in progress.
+        /// The login used for all login functionality that the 
+        /// client supports.
         /// </summary>
-        public bool LoginInProgress
-        {
-            get;
-            private set;
-        }
+        private MobileServiceLogin login = null;
 
         /// <summary>
         /// Initializes a new instance of the MobileServiceClient class.
@@ -106,6 +87,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             this.ApplicationUri = applicationUri;
             this.ApplicationKey = applicationKey;
+            this.login = new MobileServiceLogin(this);
         }
 
         /// <summary>
@@ -123,6 +105,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.ApplicationKey = service.ApplicationKey;
             this.CurrentUser = service.CurrentUser;
             this.filter = service.filter;
+            this.login = new MobileServiceLogin(this);
         }
 
         /// <summary>
@@ -142,6 +125,17 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// MobileServiceClient.Login().
         /// </summary>
         public MobileServiceUser CurrentUser { get; set; }
+
+        /// <summary>
+        /// Indicates whether a login operation is currently in progress.
+        /// </summary>
+        public bool LoginInProgress
+        {
+            get
+            {
+                return this.login.LoginInProgress;
+            }
+        }
 
         /// <summary>
         /// Gets a reference to a table and its data operations.
@@ -207,33 +201,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         internal async Task<MobileServiceUser> SendLoginAsync(string authenticationToken)
         {
-            if (authenticationToken == null)
-            {
-                throw new ArgumentNullException("authenticationToken");
-            }
-            else if (string.IsNullOrEmpty(authenticationToken))
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        Resources.EmptyArgumentExceptionMessage,
-                        "authenticationToken"));
-            }
-
-            // TODO: Decide what we should do when CurrentUser isn't null
-            // (i.e., do we just log out the current user or should we throw
-            // an exception?).  For now we just overwrite the the current user
-            // and their token on a successful login.
-
-            JsonObject request = new JsonObject()
-                .Set(LoginAsyncAuthenticationTokenKey, authenticationToken);
-            IJsonValue response = await this.RequestAsync("POST", LoginAsyncUriFragment, request);
-            
-            // Get the Mobile Services auth token and user data
-            this.CurrentUser = new MobileServiceUser(response.Get("user").Get("userId").AsString());
-            this.CurrentUser.MobileServiceAuthenticationToken = response.Get(LoginAsyncAuthenticationTokenKey).AsString();
-
-            return this.CurrentUser;
+            return await this.login.SendLoginAsync(authenticationToken);
         }
 
         /// <summary>
@@ -245,84 +213,18 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="token" type="JsonObject">
         /// Optional, provider specific object with existing OAuth token to log in with.
         /// </param>
+        /// <param name="useSingleSignOn">
+        /// Optional, indicates that single sign-on should be used. Single sign-on requires that the
+        /// application's Package SID be registered with the Windows Azure Mobile Service, but it
+        /// provides a better experience as HTTP cookies are supported so that users do not have to
+        /// login in everytime the application is launched.
+        /// </param>
         /// <returns>
         /// Task that will complete when the user has finished authentication.
         /// </returns>
-        internal async Task<MobileServiceUser> SendLoginAsync(MobileServiceAuthenticationProvider provider, JsonObject token = null)
+        internal async Task<MobileServiceUser> SendLoginAsync(MobileServiceAuthenticationProvider provider, JsonObject token = null, bool useSingleSignOn = false)
         {
-            if (this.LoginInProgress)
-            {
-                throw new InvalidOperationException(Resources.MobileServiceClient_Login_In_Progress);
-            }
-
-            if (!Enum.IsDefined(typeof(MobileServiceAuthenticationProvider), provider)) 
-            {
-                throw new ArgumentOutOfRangeException("provider");
-            }
-
-            string providerName = provider.ToString().ToLower();
-
-            this.LoginInProgress = true;
-            try
-            {
-                IJsonValue response = null;
-                if (token != null)
-                {
-                    // Invoke the POST endpoint to exchange provider-specific token for a Windows Azure Mobile Services token
-
-                    response = await this.RequestAsync("POST", LoginAsyncUriFragment + "/" + providerName, token);
-                }
-                else
-                {
-                    // Use WebAuthenicationBroker to launch server side OAuth flow using the GET endpoint
-
-                    Uri startUri = new Uri(this.ApplicationUri, LoginAsyncUriFragment + "/" + providerName);
-                    Uri endUri = new Uri(this.ApplicationUri, LoginAsyncDoneUriFragment);
-
-                    WebAuthenticationResult result = await WebAuthenticationBroker.AuthenticateAsync(
-                        WebAuthenticationOptions.None, startUri, endUri);
-
-                    if (result.ResponseStatus == WebAuthenticationStatus.ErrorHttp)
-                    {
-                        throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, Resources.Authentication_Failed, result.ResponseErrorDetail));
-                    }
-                    else if (result.ResponseStatus == WebAuthenticationStatus.UserCancel)
-                    {
-                        throw new InvalidOperationException(Resources.Authentication_Canceled);
-                    }
-
-                    int i = result.ResponseData.IndexOf("#token=");
-                    if (i > 0)
-                    {
-                        response = JsonValue.Parse(Uri.UnescapeDataString(result.ResponseData.Substring(i + 7)));
-                    }
-                    else
-                    {
-                        i = result.ResponseData.IndexOf("#error=");
-                        if (i > 0)
-                        {
-                            throw new InvalidOperationException(string.Format(
-                                CultureInfo.InvariantCulture, 
-                                Resources.MobileServiceClient_Login_Error_Response,
-                                Uri.UnescapeDataString(result.ResponseData.Substring(i + 7))));
-                        }
-                        else
-                        {
-                            throw new InvalidOperationException(Resources.MobileServiceClient_Login_Invalid_Response_Format);
-                        }
-                    }
-                }
-
-                // Get the Mobile Services auth token and user data
-                this.CurrentUser = new MobileServiceUser(response.Get("user").Get("userId").AsString());
-                this.CurrentUser.MobileServiceAuthenticationToken = response.Get(LoginAsyncAuthenticationTokenKey).AsString();
-            }
-            finally
-            {
-                this.LoginInProgress = false;
-            }
-
-            return this.CurrentUser;
+            return await this.login.SendLoginAsync(provider, token, useSingleSignOn);
         }
 
         /// <summary>
@@ -348,8 +250,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="content">
         /// Optional content to send to the resource.
         /// </param>
+        /// <param name="ignoreFilters">
+        /// Optional parameter to indicate if the client filters should be ignored
+        /// and the request should be sent directly. Is <c>false</c> by default.
+        /// </param>
         /// <returns>The JSON value of the response.</returns>
-        internal async Task<IJsonValue> RequestAsync(string method, string uriFragment, IJsonValue content)
+        internal async Task<IJsonValue> RequestAsync(string method, string uriFragment, IJsonValue content, bool ignoreFilters = false)
         {
             Debug.Assert(!string.IsNullOrEmpty(method), "method cannot be null or empty!");
             Debug.Assert(!string.IsNullOrEmpty(uriFragment), "uriFragment cannot be null or empty!");
@@ -372,6 +278,9 @@ namespace Microsoft.WindowsAzure.MobileServices
                 request.Headers[RequestAuthenticationHeader] = this.CurrentUser.MobileServiceAuthenticationToken;
             }
 
+            // TODO: Set the User-Agent header; currently HttpWebRequest throws when the
+            // User-Agent header is set.
+
             // Add any request as JSON
             if (content != null)
             {
@@ -380,7 +289,8 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             // Send the request and get the response back as JSON
-            IServiceFilterResponse response = await ServiceFilter.ApplyAsync(request, this.filter);
+            IServiceFilter filter = ignoreFilters ? null : this.filter;
+            IServiceFilterResponse response = await ServiceFilter.ApplyAsync(request, filter);
             IJsonValue body = GetResponseJsonAsync(response);
 
             // Throw errors for any failing responses
