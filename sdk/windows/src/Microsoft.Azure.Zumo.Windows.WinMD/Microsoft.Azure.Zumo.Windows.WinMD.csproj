@@ -110,6 +110,7 @@
     <Compile Include="Core\JsonExtensions.cs" />
     <Compile Include="Core\MobileServiceApplication.cs" />
     <Compile Include="Core\MobileServiceAuthenticationProvider.cs" />
+    <Compile Include="Core\MobileServiceLogin.cs" />
     <Compile Include="Core\MobileServiceTable.cs" />
     <Compile Include="Core\MobileServiceTable.WinMD.cs" />
     <Compile Include="Core\MobileServiceTableUrlBuilder.cs" />

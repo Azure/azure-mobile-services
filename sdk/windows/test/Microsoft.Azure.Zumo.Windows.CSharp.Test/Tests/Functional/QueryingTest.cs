@@ -136,6 +136,8 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
                 select p);
 
             await Query<Book, Book>(table => table.Where(p => !(p.Id > 0)));
+
+            await Query<Book, Book>(table => table.Where(p => (p.Title == "How do I dial this # & such 'things'?")));
         }
 
         [AsyncTestMethod]

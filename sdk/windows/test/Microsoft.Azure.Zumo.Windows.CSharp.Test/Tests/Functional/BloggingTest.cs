@@ -2,10 +2,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.Zumo.Win8.Test;
 using Microsoft.WindowsAzure.MobileServices;
@@ -43,7 +41,7 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
     internal class DataContractBlogPost
     {
         [DataMember]
-        public int Id;
+        public int Id = 0;
 
         [DataMember(Name = "title")]
         public string Title;

@@ -83,67 +83,11 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             Throws<ArgumentNullException>(() => service.WithFilter(null));            
         }
 
-        [AsyncTestMethod]
-        public async Task LoginAsync()
+        [TestMethod]
+        public void Logout()
         {
-            TestServiceFilter hijack = new TestServiceFilter();
-            MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...")
-                .WithFilter(hijack);
-
-            // Send back a successful login response
-            hijack.Response.Content =
-                new JsonObject()
-                    .Set("authenticationToken", "rhubarb")
-                    .Set("user",
-                        new JsonObject()
-                            .Set("userId", "123456")).Stringify();
-            MobileServiceUser current = await service.LoginAsync("donkey");
-                
-            Assert.IsNotNull(current);
-            Assert.AreEqual("123456", current.UserId);
-            Assert.AreEqual("rhubarb", current.MobileServiceAuthenticationToken);
-            Assert.EndsWith(hijack.Request.Uri.ToString(), "login");
-            string input = JsonValue.Parse(hijack.Request.Content).Get("authenticationToken").AsString();
-            Assert.AreEqual("donkey", input);
-            Assert.AreEqual("POST", hijack.Request.Method);
-            Assert.AreSame(current, service.CurrentUser);
-
-            // Set the Auth Token
-            service.CurrentUser.MobileServiceAuthenticationToken = "Not rhubarb";
-
-            // Verify that the user token is sent with each request
-            IJsonValue response = await service.GetTable("foo").ReadAsync("bar");
-            Assert.AreEqual("Not rhubarb", hijack.Request.Headers["X-ZUMO-AUTH"]);
-                
-            // Verify error cases
-            ThrowsAsync<ArgumentNullException>(async () => await service.LoginAsync(null));
-            ThrowsAsync<ArgumentException>(async () => await service.LoginAsync(""));
-
-            // Send back a failure and ensure it throws
-            hijack.Response.Content =
-                new JsonObject().Set("error", "login failed").Stringify();
-            hijack.Response.StatusCode = 401;
-            ThrowsAsync<InvalidOperationException>(async () =>
-            {
-                current = await service.LoginAsync("donkey");
-            });
-        }
-
-        [AsyncTestMethod]
-        public async Task Logout()
-        {
-            TestServiceFilter hijack = new TestServiceFilter();
-            MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...")
-                .WithFilter(hijack);
-
-            // Send back a successful login response
-            hijack.Response.Content =
-                new JsonObject()
-                    .Set("authenticationToken", "rhubarb")
-                    .Set("user",
-                        new JsonObject()
-                            .Set("userId", "123456")).Stringify();
-            MobileServiceUser current = await service.LoginAsync("donkey");
+            MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
+            service.CurrentUser = new MobileServiceUser("123456");
             Assert.IsNotNull(service.CurrentUser);
 
             service.Logout();
@@ -161,6 +105,8 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
             TestServiceFilter hijack = new TestServiceFilter();
             MobileServiceClient service = new MobileServiceClient(appUrl, appKey)
                 .WithFilter(hijack);
+            service.CurrentUser = new MobileServiceUser("someUser");
+            service.CurrentUser.MobileServiceAuthenticationToken = "Not rhubarb";
 
             hijack.Response.Content =
                 new JsonArray()
@@ -170,7 +116,8 @@ namespace Microsoft.Azure.Zumo.Win8.CSharp.Test
 
             Assert.IsNotNull(hijack.Request.Headers["X-ZUMO-INSTALLATION-ID"]);
             Assert.AreEqual("secret...", hijack.Request.Headers["X-ZUMO-APPLICATION"]);
-            Assert.AreEqual("application/json", hijack.Request.Accept);    
+            Assert.AreEqual("application/json", hijack.Request.Accept);
+            Assert.AreEqual("Not rhubarb", hijack.Request.Headers["X-ZUMO-AUTH"]);
         }
 
         [AsyncTestMethod]
