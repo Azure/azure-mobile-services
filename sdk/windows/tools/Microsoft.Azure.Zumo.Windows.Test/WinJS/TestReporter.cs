@@ -144,9 +144,9 @@ namespace Microsoft.Azure.Zumo.Win8.Test.WinJS
         /// The test method has finished executing.
         /// </summary>
         /// <param name="method">The test method.</param>
-        public void EndTest(TestMethod method)
+        public void EndTest(TestMethod test)
         {
-            this.RaiseEvent(this.ExecuteEndTest, method);
+            this.RaiseEvent(this.ExecuteEndTest, test);
         }
 
         /// <summary>

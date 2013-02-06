@@ -59,8 +59,8 @@ namespace Microsoft.Azure.Zumo.Win8.Test
         /// <summary>
         /// The test method has finished executing.
         /// </summary>
-        /// <param name="method">The test method.</param>
-        void EndTest(TestMethod method);
+        /// <param name="test">The test method.</param>
+        void EndTest(TestMethod test);
 
         /// <summary>
         /// A message has been logged.

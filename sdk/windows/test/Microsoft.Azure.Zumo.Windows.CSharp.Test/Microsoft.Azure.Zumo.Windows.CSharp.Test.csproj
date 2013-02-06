@@ -129,7 +129,9 @@
     <Compile Include="Tests\Functional\QueryingTest.cs" />
     <Compile Include="Tests\Functional\ToDoTest.cs" />
     <Compile Include="Tests\Functional\VersioningTest.cs" />
+    <Compile Include="Tests\Unit\MobileServiceApplication.Test.cs" />
     <Compile Include="Tests\Unit\JsonExtensions.Test.cs" />
+    <Compile Include="Tests\Unit\MobileServiceLogin.Test.cs" />
     <Compile Include="Tests\Unit\MobileServiceTableUrlBuilder.Test.cs" />
     <Compile Include="Tests\Unit\TypeExtensions.Test.cs" />
     <Compile Include="Tests\Unit\ZumoQuery.Test.cs" />

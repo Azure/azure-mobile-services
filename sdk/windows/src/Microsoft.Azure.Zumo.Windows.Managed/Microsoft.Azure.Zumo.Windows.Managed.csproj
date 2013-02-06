@@ -137,6 +137,12 @@
     <Compile Include="..\Microsoft.Azure.Zumo.Windows.WinMD\Core\TypeExtensions.cs">
       <Link>Core\TypeExtensions.cs</Link>
     </Compile>
+    <Compile Include="..\Microsoft.Azure.Zumo.Windows.WinMD\Core\MobileServiceLogin.cs">
+      <Link>Core\MobileServiceLogin.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.Azure.Zumo.Windows.WinMD\Core\MobileServiceTableUrlBuilder.cs">
+      <Link>Core\MobileServiceTableUrlBuilder.cs</Link>
+    </Compile>
     <Compile Include="..\Microsoft.Azure.Zumo.Windows.WinMD\GlobalSuppressions.cs">
       <Link>GlobalSuppressions.cs</Link>
     </Compile>
@@ -172,7 +178,6 @@
     <Compile Include="Core\MobileServiceTable.Generic.cs" />
     <Compile Include="Core\MobileServiceTable.Managed.cs" />
     <Compile Include="Core\MobileServiceInvalidOperationException.cs" />
-    <Compile Include="Core\MobileServiceTableUrlBuilder.cs" />
     <Compile Include="Table\CollectionView\VectorChangedEventArgs.cs" />
     <Compile Include="Table\Query\FilterBuildingExpressionVisitor.cs" />
     <Compile Include="Table\Query\ITotalCountProvider.cs" />

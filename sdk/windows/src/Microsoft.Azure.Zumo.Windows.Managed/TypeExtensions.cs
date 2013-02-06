@@ -409,23 +409,19 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
             else if (handle.Equals(typeof(string).TypeHandle))
             {
-                // Wrap strings in single quotes (and escape existing single
-                // quotes with a pair of single quotes)
+                // Escape the string constant by: (1) replacing single quotes with a 
+                // pair of single quotes, and (2) Uri escaping with percent encoding
                 string text = value as string ?? string.Empty;
-                return string.Format(
-                    CultureInfo.InvariantCulture,
-                    "'{0}'",
-                    text.Replace("'", "''"));
+                string textEscaped = Uri.EscapeDataString(text.Replace("'", "''"));
+                return string.Format(CultureInfo.InvariantCulture, "'{0}'", textEscaped);
             }
             else if (handle.Equals(typeof(char).TypeHandle))
             {
-                // Wrap strings in single quotes (and escape existing single
-                // quotes with a pair of single quotes)
+                // Escape the char constant by: (1) replacing a single quote with a 
+                // pair of single quotes, and (2) Uri escaping with percent encoding
                 char ch = (char)value;
-                return string.Format(
-                    CultureInfo.InvariantCulture,
-                    "'{0}'",
-                    ch == '\'' ? "''" : ch.ToString());
+                string charEscaped = Uri.EscapeDataString(ch == '\'' ? "''" : ch.ToString());
+                return string.Format(CultureInfo.InvariantCulture, "'{0}'", charEscaped);
             }
             else if (handle.Equals(typeof(DateTime).TypeHandle))
             {
