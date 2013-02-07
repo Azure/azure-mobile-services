@@ -228,7 +228,17 @@
 
         var testGroups = zumo.testGroups;
 
+        function highlightSelectedGroup(groupIndex) {
+            var testsGroupBody = document.getElementById('tblTestsGroupBody');
+            for (var i = 0; i < testsGroupBody.children.length; i++) {
+                var tr = testsGroupBody.children[i];
+                var td = tr.firstElementChild;
+                td.style.fontWeight = i == groupIndex ? 'bold' : 'normal';
+            }
+        }
+
         function testGroupSelected(index) {
+            highlightSelectedGroup(index);
             var group = testGroups[index];
             zumo.currentGroup = index;
             document.getElementById('testsTitle').innerText = 'Tests for group: ' + group.name;
