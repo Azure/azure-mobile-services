@@ -45,7 +45,7 @@ public class ToDoActivity extends Activity {
 			// Mobile Service URL and key
 			mClient = new MobileServiceClient(
 					"ZUMOAPPURL",
-					"ZUMOAPPKEY"
+					"ZUMOAPPKEY", this
 					);
 
 			// Get the Mobile Service Table instance to use
@@ -88,17 +88,17 @@ public class ToDoActivity extends Activity {
 		mProgressDialog.show();
 		mToDoTable.update(item, new TableOperationCallback<ToDoItem>() {
 
-			public void onSuccess(ToDoItem entity) {
-				if (entity.isComplete()) {
-					mAdapter.remove(entity);
-				}
-				mProgressDialog.dismiss();
-			}
-
-			public void onError(Exception exception,
+			public void onCompleted(ToDoItem entity, Exception exception,
 					ServiceFilterResponse response) {
-				mProgressDialog.dismiss();
-				createAndShowDialog(exception, "Error");
+				if(exception == null){
+					if (entity.isComplete()) {
+						mAdapter.remove(entity);
+					}
+					mProgressDialog.dismiss();
+				} else {
+					mProgressDialog.dismiss();
+					createAndShowDialog(exception, "Error");	
+				}
 			}
 
 		});
@@ -124,17 +124,19 @@ public class ToDoActivity extends Activity {
 		mProgressDialog.show();
 		// Insert the new item
 		mToDoTable.insert(item, new TableOperationCallback<ToDoItem>() {
-			public void onSuccess(ToDoItem entity) {
-				if (!entity.isComplete()) {
-					mAdapter.add(entity);
-					mProgressDialog.dismiss();
-				}
-			}
-
-			public void onError(Exception exception,
+			
+			public void onCompleted(ToDoItem entity, Exception exception,
 					ServiceFilterResponse response) {
-				mProgressDialog.dismiss();
-				createAndShowDialog(exception, "Error");
+				if(exception == null){
+					if (!entity.isComplete()) {
+						mAdapter.add(entity);
+						mProgressDialog.dismiss();
+					}
+				} else {
+					mProgressDialog.dismiss();
+					createAndShowDialog(exception, "Error");
+				}
+				
 			}
 		});
 
@@ -150,20 +152,22 @@ public class ToDoActivity extends Activity {
 		// adapter
 		mToDoTable.where().field("complete").eq(val(false))
 				.execute(ToDoItem.class, new TableQueryCallback<ToDoItem>() {
-					public void onSuccess(List<ToDoItem> result, int count) {
-						mAdapter.clear();
-
-						for (ToDoItem item : result) {
-							mAdapter.add(item);
+					
+					public void onCompleted(List<ToDoItem> result, int count,
+							Exception exception, ServiceFilterResponse response) {
+						
+						if(exception == null){
+							mAdapter.clear();
+	
+							for (ToDoItem item : result) {
+								mAdapter.add(item);
+							}
+	
+							mProgressDialog.dismiss();
+						} else {
+							mProgressDialog.dismiss();
+							createAndShowDialog(exception, "Error");
 						}
-
-						mProgressDialog.dismiss();
-					}
-
-					public void onError(Exception exception,
-							ServiceFilterResponse response) {
-						mProgressDialog.dismiss();
-						createAndShowDialog(exception, "Error");
 					}
 				});
 	}
