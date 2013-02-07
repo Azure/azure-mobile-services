@@ -80,7 +80,7 @@ function defineLoginTestsNamespace() {
                 test.addLog('Logged in via Live SDK: ', wlLoginResult);
                 WL.api({ path: 'me', method: 'GET' }).then(function (wlMeResult) {
                     test.addLog('My information: ', wlMeResult);
-                    var token = {authenticationToken: wlLoginResult.session.authenticationToken};
+                    var token = { authenticationToken: wlLoginResult.session.authentication_token };
                     client.login('microsoftaccount', token).done(function (user) {
                         test.addLog('Logged in as ', user);
                         done(true);
