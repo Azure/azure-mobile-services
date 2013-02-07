@@ -13,6 +13,7 @@
     <script type="text/javascript" src="/lib/jquery.js"></script>
     <link href="/css/default.css" rel="stylesheet" />
     <script src="/js/default.js"></script>
+    <script src="/LiveSDKHTML/js/wl.js"></script>
     <script src="/MobileServicesJavaScriptClient/MobileServices.js"></script>
 
     <!-- Zumo tests; the order of the references is important -->
@@ -192,7 +193,7 @@
             var tests = currentGroup.tests;
             var tblTests = document.getElementById('tblTestsBody');
             tests.forEach(function (test, index) {
-                test.status = zumo.TSNotRun;
+                test.reset();
                 var tr = tblTests.childNodes[index];
                 var td = tr.firstChild;
                 td.style.color = getTestDisplayColor(test);

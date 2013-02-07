@@ -1,4 +1,5 @@
 ﻿/// <reference path="/MobileServicesJavaScriptClient/MobileServices.js" />
+/// <reference path="/LiveSDKHTML/js/wl.js" />
 /// <reference path="../testFramework.js" />
 
 function defineLoginTestsNamespace() {
@@ -51,11 +52,52 @@ function defineLoginTestsNamespace() {
         }
     }
 
+    tests.push(createLogoutTest());
+    tests.push(createLiveSDKLoginTest());
+    tests.push(createCRUDTest(TABLE_NAME_AUTHENTICATED, 'microsoftaccount', TABLE_PERMISSION_USER, true));
+
     providers.forEach(function (provider) {
-        tests.push(createLogoutTest());
-        tests.push(createLoginTest(provider, true));
-        tests.push(createCRUDTest(TABLE_NAME_AUTHENTICATED, provider, TABLE_PERMISSION_USER, true));
+        if (provider === 'microsoftaccount') {
+            // Known issue - SSO for MS account does not work in application which also uses the Live SDK
+        } else {
+            tests.push(createLogoutTest());
+            tests.push(createLoginTest(provider, true));
+            tests.push(createCRUDTest(TABLE_NAME_AUTHENTICATED, provider, TABLE_PERMISSION_USER, true));
+        }
     });
+
+    function createLiveSDKLoginTest() {
+        var liveSDKInitialized = false;
+        return new zumo.Test('Login via token with the Live SDK', function (test, done) {
+            /// <param name="test" type="zumo.Test">The test associated with this execution.</param>
+            var client = zumo.getClient();
+            if (!liveSDKInitialized) {
+                WL.init({ redirect_uri: client.applicationUrl });
+                liveSDKInitialized = true;
+                test.addLog('Initialized the WL object');
+            }
+            WL.login({ scope: 'wl.basic' }).then(function (wlLoginResult) {
+                test.addLog('Logged in via Live SDK: ', wlLoginResult);
+                WL.api({ path: 'me', method: 'GET' }).then(function (wlMeResult) {
+                    test.addLog('My information: ', wlMeResult);
+                    var token = {authenticationToken: wlLoginResult.session.authenticationToken};
+                    client.login('microsoftaccount', token).done(function (user) {
+                        test.addLog('Logged in as ', user);
+                        done(true);
+                    }, function (err) {
+                        test.addLog('Error logging into the mobile service: ', err);
+                        done(false);
+                    });
+                }, function (err) {
+                    test.addLog('Error calling WL.api: ', err);
+                    done(false);
+                });
+            }, function (err) {
+                test.addLog('Error logging in via Live SDK: ', err);
+                done(false);
+            });
+        });
+    }
 
     function createClientSideLoginTest(provider) {
         /// <param name="provider" type="String" mayBeNull="true">The name of the authentication provider for

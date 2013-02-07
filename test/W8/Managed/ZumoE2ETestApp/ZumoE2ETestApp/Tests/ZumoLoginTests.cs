@@ -15,16 +15,21 @@ namespace ZumoE2ETestApp.Tests
 {
     internal static class ZumoLoginTests
     {
+        private const string TablePublicPermission = "w8Public";
+        private const string TableApplicationPermission = "w8Application";
+        private const string TableUserPermission = "w8Authenticated";
+        private const string TableAdminPermission = "w8Admin";
+
         private static JsonObject lastUserIdentityObject = null;
 
         public static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Login tests");
             result.AddTest(CreateLogoutTest());
-            result.AddTest(CreateCRUDTest("w8Public", null, TablePermission.Public, false));
-            result.AddTest(CreateCRUDTest("w8Application", null, TablePermission.Application, false));
-            result.AddTest(CreateCRUDTest("w8Authenticated", null, TablePermission.User, false));
-            result.AddTest(CreateCRUDTest("w8Admin", null, TablePermission.Admin, false));
+            result.AddTest(CreateCRUDTest(TablePublicPermission, null, TablePermission.Public, false));
+            result.AddTest(CreateCRUDTest(TableApplicationPermission, null, TablePermission.Application, false));
+            result.AddTest(CreateCRUDTest(TableUserPermission, null, TablePermission.User, false));
+            result.AddTest(CreateCRUDTest(TableAdminPermission, null, TablePermission.Admin, false));
 
             Dictionary<MobileServiceAuthenticationProvider, bool> providersWithRecycledTokenSupport;
             providersWithRecycledTokenSupport = new Dictionary<MobileServiceAuthenticationProvider, bool>
@@ -41,39 +46,51 @@ namespace ZumoE2ETestApp.Tests
             {
                 result.AddTest(CreateLogoutTest());
                 result.AddTest(CreateLoginTest(provider, false));
-                result.AddTest(CreateCRUDTest("w8Application", provider.ToString(), TablePermission.Application, true));
-                result.AddTest(CreateCRUDTest("w8Authenticated", provider.ToString(), TablePermission.User, true));
-                result.AddTest(CreateCRUDTest("w8Admin", provider.ToString(), TablePermission.Admin, true));
+                result.AddTest(CreateCRUDTest(TableApplicationPermission, provider.ToString(), TablePermission.Application, true));
+                result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, true));
+                result.AddTest(CreateCRUDTest(TableAdminPermission, provider.ToString(), TablePermission.Admin, true));
 
                 bool supportsTokenRecycling;
                 if (providersWithRecycledTokenSupport.TryGetValue(provider, out supportsTokenRecycling) && supportsTokenRecycling)
                 {
                     result.AddTest(CreateLogoutTest());
                     result.AddTest(CreateClientSideLoginTest(provider));
-                    result.AddTest(CreateCRUDTest("w8Authenticated", provider.ToString(), TablePermission.User, true));
+                    result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, true));
                 }
             }
 
             result.AddTest(ZumoTestCommon.CreateYesNoTest("Were you prompted for username / password four times?", true));
 
-            //result.AddTest(CreateLogoutTest());
-            //result.AddTest(CreateLiveSDKLoginTest());
-            //result.AddTest(CreateCRUDTest("w8Authenticated", "Microsoft via Live SDK", TablePermission.User, true));
+            result.AddTest(CreateLogoutTest());
+            result.AddTest(CreateLiveSDKLoginTest());
+            result.AddTest(CreateCRUDTest(TableUserPermission, "Microsoft via Live SDK", TablePermission.User, true));
 
             result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("We'll log in again; you may or may not be asked for password in the next few moments."));
             foreach (MobileServiceAuthenticationProvider provider in Enum.GetValues(typeof(MobileServiceAuthenticationProvider)))
             {
+                if (provider == MobileServiceAuthenticationProvider.MicrosoftAccount)
+                {
+                    // Known issue - SSO with MS account will not work if Live SDK is also used
+                    continue;
+                }
+
                 result.AddTest(CreateLogoutTest());
                 result.AddTest(CreateLoginTest(provider, true));
-                result.AddTest(CreateCRUDTest("w8Authenticated", provider.ToString(), TablePermission.User, true));
+                result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, true));
             }
 
-            result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("Now we'll continue running the tests, but you *should not be prompted for the username anymore, and in some even the password should also not be required."));
+            result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("Now we'll continue running the tests, but you *should not be prompted for the username or password anymore*."));
             foreach (MobileServiceAuthenticationProvider provider in Enum.GetValues(typeof(MobileServiceAuthenticationProvider)))
             {
+                if (provider == MobileServiceAuthenticationProvider.MicrosoftAccount)
+                {
+                    // Known issue - SSO with MS account will not work if Live SDK is also used
+                    continue;
+                }
+
                 result.AddTest(CreateLogoutTest());
                 result.AddTest(CreateLoginTest(provider, true));
-                result.AddTest(CreateCRUDTest("w8Authenticated", provider.ToString(), TablePermission.User, true));
+                result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, true));
             }
 
             result.AddTest(ZumoTestCommon.CreateYesNoTest("Were you prompted for the username in any of the providers?", false));
