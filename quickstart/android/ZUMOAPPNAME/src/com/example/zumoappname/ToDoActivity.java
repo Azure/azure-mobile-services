@@ -1,6 +1,6 @@
 package com.example.zumoappname;
 
-import static com.microsoft.windowsazure.mobileservices.MobileServiceTable.MobileServiceQueryOperations.val;
+import static com.microsoft.windowsazure.mobileservices.MobileServiceQueryOperations.*;
 
 import java.net.MalformedURLException;
 import java.util.List;
@@ -21,10 +21,29 @@ import com.microsoft.windowsazure.mobileservices.TableQueryCallback;
 
 public class ToDoActivity extends Activity {
 	
+	/**
+	 * Mobile Service Client reference
+	 */
 	private MobileServiceClient mClient;
-	private MobileServiceTable mToDoTable;
+
+	/**
+	 * Mobile Service Table used to access data
+	 */
+	private MobileServiceTable<ToDoItem> mToDoTable;
+
+	/**
+	 * Adapter to sync the items list with the view
+	 */
 	private ToDoItemAdapter mAdapter;
+
+	/**
+	 * EditText containing the "New ToDo" text
+	 */
 	private EditText mTextNewToDo;
+
+	/**
+	 * Progress dialog to use for table operations
+	 */
 	private ProgressDialog mProgressDialog;
 
 	/**
@@ -49,7 +68,7 @@ public class ToDoActivity extends Activity {
 					);
 
 			// Get the Mobile Service Table instance to use
-			mToDoTable = mClient.getTable("todoitem");
+			mToDoTable = mClient.getTable("todoitem", ToDoItem.class);
 
 			mTextNewToDo = (EditText) findViewById(R.id.textNewToDo);
 
@@ -90,13 +109,13 @@ public class ToDoActivity extends Activity {
 
 			public void onCompleted(ToDoItem entity, Exception exception,
 					ServiceFilterResponse response) {
+
+				mProgressDialog.dismiss();
 				if(exception == null){
 					if (entity.isComplete()) {
 						mAdapter.remove(entity);
 					}
-					mProgressDialog.dismiss();
 				} else {
-					mProgressDialog.dismiss();
 					createAndShowDialog(exception, "Error");	
 				}
 			}
@@ -127,13 +146,13 @@ public class ToDoActivity extends Activity {
 			
 			public void onCompleted(ToDoItem entity, Exception exception,
 					ServiceFilterResponse response) {
+
+				mProgressDialog.dismiss();
 				if(exception == null){
 					if (!entity.isComplete()) {
 						mAdapter.add(entity);
-						mProgressDialog.dismiss();
 					}
 				} else {
-					mProgressDialog.dismiss();
 					createAndShowDialog(exception, "Error");
 				}
 				
@@ -151,11 +170,12 @@ public class ToDoActivity extends Activity {
 		// Get the items that weren't marked as completed and add them in the
 		// adapter
 		mToDoTable.where().field("complete").eq(val(false))
-				.execute(ToDoItem.class, new TableQueryCallback<ToDoItem>() {
+				.execute(new TableQueryCallback<ToDoItem>() {
 					
 					public void onCompleted(List<ToDoItem> result, int count,
 							Exception exception, ServiceFilterResponse response) {
 						
+						mProgressDialog.dismiss();
 						if(exception == null){
 							mAdapter.clear();
 	
@@ -163,9 +183,7 @@ public class ToDoActivity extends Activity {
 								mAdapter.add(item);
 							}
 	
-							mProgressDialog.dismiss();
 						} else {
-							mProgressDialog.dismiss();
 							createAndShowDialog(exception, "Error");
 						}
 					}
@@ -174,8 +192,10 @@ public class ToDoActivity extends Activity {
 
 	/**
 	 * Creates a dialog and shows it
-	 * @param exception The exception to show in the dialog
-	 * @param title The dialog title
+	 * @param exception 
+	 *            The exception to show in the dialog
+	 * @param title 
+	 *            The dialog title
 	 */
 	private void createAndShowDialog(Exception exception, String title) {
 		createAndShowDialog(exception.toString(), title);

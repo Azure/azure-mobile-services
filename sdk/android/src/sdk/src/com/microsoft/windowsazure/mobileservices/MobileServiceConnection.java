@@ -1,4 +1,23 @@
 /*
+Copyright (c) Microsoft Open Technologies, Inc.
+All Rights Reserved
+Apache 2.0 License
+ 
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+ 
+     http://www.apache.org/licenses/LICENSE-2.0
+ 
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ 
+See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
+ */
+/*
  * MobileServiceConnection.java
  */
 
@@ -61,8 +80,7 @@ class MobileServiceConnection {
 	 * @param responseCallback
 	 *            Callback to invoke after the request is executed
 	 */
-	public void start(final ServiceFilterRequest request,
-			ServiceFilterResponseCallback responseCallback) {
+	public void start(final ServiceFilterRequest request, ServiceFilterResponseCallback responseCallback) {
 		if (request == null) {
 			throw new IllegalArgumentException("Request can not be null");
 		}
@@ -73,8 +91,7 @@ class MobileServiceConnection {
 		filter.handleRequest(request, new NextServiceFilterCallback() {
 
 			@Override
-			public void onNext(ServiceFilterRequest request,
-					ServiceFilterResponseCallback responseCallback) {
+			public void onNext(ServiceFilterRequest request, ServiceFilterResponseCallback responseCallback) {
 
 				ServiceFilterResponse response = null;
 
@@ -85,12 +102,10 @@ class MobileServiceConnection {
 					// If the response has error throw exception
 					if (statusCode < 200 || statusCode >= 300) {
 						String responseContent = response.getContent();
-						if (responseContent != null
-								&& responseContent.trim() != "") {
+						if (responseContent != null && responseContent.trim() != "") {
 							throw new MobileServiceException(responseContent);
 						} else {
-							throw new MobileServiceException(String.format(
-									"{'code': %d}", statusCode));
+							throw new MobileServiceException(String.format("{'code': %d}", statusCode));
 						}
 					}
 
@@ -98,9 +113,7 @@ class MobileServiceConnection {
 					// Something went wrong, call onResponse with exception
 					// method
 					if (responseCallback != null) {
-						responseCallback.onResponse(response,
-								new MobileServiceException(
-										"Error while processing request.", e));
+						responseCallback.onResponse(response, new MobileServiceException("Error while processing request.", e));
 						return;
 					}
 				}
@@ -133,9 +146,7 @@ class MobileServiceConnection {
 		request.addHeader(X_ZUMO_APPLICATION_HEADER, mClient.getAppKey());
 
 		// Set the special Installation ID header
-		request.addHeader(
-				X_ZUMO_INSTALLATION_ID_HEADER,
-				MobileServiceApplication.getInstallationId(mClient.getContext()));
+		request.addHeader(X_ZUMO_INSTALLATION_ID_HEADER, MobileServiceApplication.getInstallationId(mClient.getContext()));
 
 		// Set the content type header
 		request.addHeader(HTTP.CONTENT_TYPE, JSON_CONTENTTYPE);
@@ -143,10 +154,11 @@ class MobileServiceConnection {
 		request.addHeader("Accept", JSON_CONTENTTYPE);
 	}
 
+	/**
+	 * Generates the User-Agent
+	 */
 	private String getUserAgent() {
-		String userAgent = String.format(
-				"ZUMO/%s (lang=%s; os=%s; os_version=%s; arch=%s)",
-				SDK_VERSION, "Java", "Android", Build.VERSION.RELEASE,
+		String userAgent = String.format("ZUMO/%s (lang=%s; os=%s; os_version=%s; arch=%s)", SDK_VERSION, "Java", "Android", Build.VERSION.RELEASE,
 				Build.CPU_ABI);
 
 		return userAgent;

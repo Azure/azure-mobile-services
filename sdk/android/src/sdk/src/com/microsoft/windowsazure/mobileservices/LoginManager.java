@@ -1,3 +1,22 @@
+/*
+Copyright (c) Microsoft Open Technologies, Inc.
+All Rights Reserved
+Apache 2.0 License
+ 
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+ 
+     http://www.apache.org/licenses/LICENSE-2.0
+ 
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ 
+See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
+ */
 /**
  * LoginManager.java
  */
@@ -91,65 +110,54 @@ class LoginManager {
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
-	public void authenticate(MobileServiceAuthenticationProvider provider,
-			Context context, final UserAuthenticationCallback callback) {
+	public void authenticate(MobileServiceAuthenticationProvider provider, Context context, final UserAuthenticationCallback callback) {
 		if (context == null) {
 			throw new IllegalArgumentException("context can not be null");
 		}
 
 		// Create login URL
-		String startUrl = mClient.getAppUrl().toString()
-				+ LoginManager.START_URL
-				+ provider.toString().toLowerCase(Locale.getDefault());
+		String startUrl = mClient.getAppUrl().toString() + LoginManager.START_URL + provider.toString().toLowerCase(Locale.getDefault());
 		// Create the expected end URL
 		String endUrl = mClient.getAppUrl().toString() + LoginManager.END_URL;
 
 		final UserAuthenticationCallback externalCallback = callback;
 
 		// Shows an interactive view with the provider's login
-		showLoginUI(provider, startUrl, endUrl, context,
-				new LoginUIOperationCallback() {
+		showLoginUI(provider, startUrl, endUrl, context, new LoginUIOperationCallback() {
 
-					@Override
-					public void onCompleted(String url, Exception exception) {
-						if (externalCallback != null) {
-							if (exception == null) {
-								MobileServiceUser user = null;
-								try {
-									String decodedUrl = URLDecoder.decode(url,
-											MobileServiceClient.UTF8_ENCODING);
+			@Override
+			public void onCompleted(String url, Exception exception) {
+				if (externalCallback != null) {
+					if (exception == null) {
+						MobileServiceUser user = null;
+						try {
+							String decodedUrl = URLDecoder.decode(url, MobileServiceClient.UTF8_ENCODING);
 
-									JsonObject json = (JsonObject) new JsonParser().parse(decodedUrl
-											.substring(decodedUrl
-													.indexOf(TOKEN_MARK)
-													+ TOKEN_MARK.length()));
+							JsonObject json = (JsonObject) new JsonParser().parse(decodedUrl.substring(decodedUrl.indexOf(TOKEN_MARK) + TOKEN_MARK.length()));
 
-									user = createUserFromJSON(json);
-								} catch (Exception e) {
-									// If exists an external callback, call
-									// onComplete method
-									// method with exception
-									if (externalCallback != null) {
-										externalCallback.onCompleted(null, e,
-												null);
-									}
-									return;
-								}
-
-								// If exists an external callback, call
-								// onComplete method
-								if (externalCallback != null) {
-									externalCallback.onCompleted(user, null,
-											null);
-								}
-							} else {
-								externalCallback.onCompleted(null, exception,
-										null);
+							user = createUserFromJSON(json);
+						} catch (Exception e) {
+							// If exists an external callback, call
+							// onComplete method
+							// method with exception
+							if (externalCallback != null) {
+								externalCallback.onCompleted(null, e, null);
 							}
+							return;
 						}
-					}
 
-				});
+						// If exists an external callback, call
+						// onComplete method
+						if (externalCallback != null) {
+							externalCallback.onCompleted(user, null, null);
+						}
+					} else {
+						externalCallback.onCompleted(null, exception, null);
+					}
+				}
+			}
+
+		});
 
 	}
 
@@ -165,16 +173,13 @@ class LoginManager {
 	 *            Callback to invoke when the authentication process finishes
 	 */
 
-	public void authenticate(MobileServiceAuthenticationProvider provider,
-			String oAuthToken, final UserAuthenticationCallback callback) {
+	public void authenticate(MobileServiceAuthenticationProvider provider, String oAuthToken, final UserAuthenticationCallback callback) {
 		if (oAuthToken == null || oAuthToken.trim() == "") {
-			throw new IllegalArgumentException(
-					"oAuthToken can not be null or empty");
+			throw new IllegalArgumentException("oAuthToken can not be null or empty");
 		}
 
 		// Create the login URL
-		String url = mClient.getAppUrl().toString() + LoginManager.START_URL
-				+ provider.toString().toLowerCase(Locale.getDefault());
+		String url = mClient.getAppUrl().toString() + LoginManager.START_URL + provider.toString().toLowerCase(Locale.getDefault());
 
 		authenticateWithToken(oAuthToken, url, callback);
 	}
@@ -193,17 +198,14 @@ class LoginManager {
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
-	protected void showLoginUI(MobileServiceAuthenticationProvider provider,
-			final String startUrl, final String endUrl, final Context context,
+	protected void showLoginUI(MobileServiceAuthenticationProvider provider, final String startUrl, final String endUrl, final Context context,
 			LoginUIOperationCallback callback) {
 		if (startUrl == null || startUrl == "") {
-			throw new IllegalArgumentException(
-					"startUrl can not be null or empty");
+			throw new IllegalArgumentException("startUrl can not be null or empty");
 		}
 
 		if (endUrl == null || endUrl == "") {
-			throw new IllegalArgumentException(
-					"endUrl can not be null or empty");
+			throw new IllegalArgumentException("endUrl can not be null or empty");
 		}
 
 		if (context == null) {
@@ -221,27 +223,22 @@ class LoginManager {
 			@Override
 			public void onCancel(DialogInterface dialog) {
 				if (externalCallback != null) {
-					externalCallback.onCompleted(null,
-							new MobileServiceException("User Canceled"));
+					externalCallback.onCompleted(null, new MobileServiceException("User Canceled"));
 				}
 			}
 		});
 
 		// Set cancel button's action
-		builder.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
+		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						if (externalCallback != null) {
-							externalCallback
-									.onCompleted(null,
-											new MobileServiceException(
-													"User Canceled"));
-						}
-						wv.destroy();
-					}
-				});
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				if (externalCallback != null) {
+					externalCallback.onCompleted(null, new MobileServiceException("User Canceled"));
+				}
+				wv.destroy();
+			}
+		});
 
 		wv.getSettings().setJavaScriptEnabled(true);
 
@@ -251,8 +248,7 @@ class LoginManager {
 			@Override
 			public boolean onTouch(View view, MotionEvent event) {
 				int action = event.getAction();
-				if (action == MotionEvent.ACTION_DOWN
-						|| action == MotionEvent.ACTION_UP) {
+				if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_UP) {
 					if (!view.hasFocus()) {
 						view.requestFocus();
 					}
@@ -314,11 +310,9 @@ class LoginManager {
 			}
 
 			@Override
-			public void onReceivedError(WebView view, int errorCode,
-					String description, String failingUrl) {
+			public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
 				if (externalCallback != null) {
-					externalCallback.onCompleted(null,
-							new MobileServiceException(description));
+					externalCallback.onCompleted(null, new MobileServiceException(description));
 				}
 
 				dialog.dismiss();
@@ -328,11 +322,7 @@ class LoginManager {
 			public void onPageFinished(WebView view, String url) {
 				if (isStartUrl(url)) {
 					if (externalCallback != null) {
-						externalCallback
-								.onCompleted(
-										null,
-										new MobileServiceException(
-												"Logging in with the selected authentication provider is not enabled"));
+						externalCallback.onCompleted(null, new MobileServiceException("Logging in with the selected authentication provider is not enabled"));
 					}
 
 					dialog.dismiss();
@@ -353,8 +343,7 @@ class LoginManager {
 	 * @return The created user if it is a valid JSON object. Null otherwise
 	 * @throws MobileServiceException
 	 */
-	private MobileServiceUser createUserFromJSON(JsonObject json)
-			throws MobileServiceException {
+	private MobileServiceUser createUserFromJSON(JsonObject json) throws MobileServiceException {
 		if (json == null) {
 			throw new IllegalArgumentException("json can not be null");
 		}
@@ -364,27 +353,23 @@ class LoginManager {
 			JsonObject jsonUser = json.getAsJsonObject(USER_JSON_PROPERTY);
 
 			if (!jsonUser.has(USERID_JSON_PROPERTY)) {
-				throw new JsonParseException(USERID_JSON_PROPERTY
-						+ " property expected");
+				throw new JsonParseException(USERID_JSON_PROPERTY + " property expected");
 			}
 			String userId = jsonUser.get(USERID_JSON_PROPERTY).getAsString();
 
 			MobileServiceUser user = new MobileServiceUser(userId);
 
 			if (!json.has(TOKEN_JSON_PARAMETER)) {
-				throw new JsonParseException(TOKEN_JSON_PARAMETER
-						+ " property expected");
+				throw new JsonParseException(TOKEN_JSON_PARAMETER + " property expected");
 			}
 
-			user.setAuthenticationToken(json.get(TOKEN_JSON_PARAMETER)
-					.getAsString());
+			user.setAuthenticationToken(json.get(TOKEN_JSON_PARAMETER).getAsString());
 			return user;
 		} else {
 			// If the JSON contains an error property show it, otherwise raise
 			// an error with JSON content
 			if (json.has("error")) {
-				throw new MobileServiceException(json.get("error")
-						.getAsString());
+				throw new MobileServiceException(json.get("error").getAsString());
 			} else {
 				throw new JsonParseException(json.toString());
 			}
@@ -402,8 +387,7 @@ class LoginManager {
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
-	private void authenticateWithToken(String token, String url,
-			final UserAuthenticationCallback callback) {
+	private void authenticateWithToken(String token, String url, final UserAuthenticationCallback callback) {
 		if (token == null) {
 			throw new IllegalArgumentException("token can not be null");
 		}
@@ -413,8 +397,7 @@ class LoginManager {
 		}
 
 		// Create a request
-		final ServiceFilterRequest request = new ServiceFilterRequestImpl(
-				new HttpPost(url));
+		final ServiceFilterRequest request = new ServiceFilterRequestImpl(new HttpPost(url));
 
 		try {
 			// Set request's content with the token
@@ -436,16 +419,12 @@ class LoginManager {
 							// Get the user from the response and create a
 							// MobileServiceUser object from the JSON
 							String content = response.getContent();
-							user = createUserFromJSON((JsonObject) new JsonParser()
-									.parse((content.trim())));
+							user = createUserFromJSON((JsonObject) new JsonParser().parse((content.trim())));
 
 						} catch (Exception e) {
 							// Something went wrong, call onCompleted method
 							// with exception
-							callback.onCompleted(null,
-									new MobileServiceException(
-											"Error while authenticating user.",
-											e), response);
+							callback.onCompleted(null, new MobileServiceException("Error while authenticating user.", e), response);
 							return;
 						}
 
@@ -454,9 +433,7 @@ class LoginManager {
 					} else {
 						// Something went wrong, call onCompleted method with
 						// exception
-						callback.onCompleted(null, new MobileServiceException(
-								"Error while authenticating user.",
-								mTaskException), response);
+						callback.onCompleted(null, new MobileServiceException("Error while authenticating user.", mTaskException), response);
 					}
 				}
 			}

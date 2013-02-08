@@ -7,7 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 
 /**
  * Adapter to bind a ToDoItem List to a view
@@ -46,17 +45,18 @@ public class ToDoItemAdapter extends ArrayAdapter<ToDoItem> {
 		}
 
 		row.setTag(currentItem);
-		CheckBox checkBox = (CheckBox) row.findViewById(R.id.checkToDoItem);
+		final CheckBox checkBox = (CheckBox) row
+				.findViewById(R.id.checkToDoItem);
 		checkBox.setText(currentItem.getText());
 		checkBox.setChecked(false);
 		checkBox.setEnabled(true);
 
-		checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+		checkBox.setOnClickListener(new View.OnClickListener() {
 
-			public void onCheckedChanged(CompoundButton buttonView,
-					boolean isChecked) {
-				if (isChecked) {
-					buttonView.setEnabled(false);
+			@Override
+			public void onClick(View arg0) {
+				if (checkBox.isChecked()) {
+					checkBox.setEnabled(false);
 					if (mContext instanceof ToDoActivity) {
 						ToDoActivity activity = (ToDoActivity) mContext;
 						activity.checkItem(currentItem);

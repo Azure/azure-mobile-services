@@ -1,8 +1,28 @@
 /*
+Copyright (c) Microsoft Open Technologies, Inc.
+All Rights Reserved
+Apache 2.0 License
+ 
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+ 
+     http://www.apache.org/licenses/LICENSE-2.0
+ 
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ 
+See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
+ */
+/*
  * MobileServiceClient.java
  */
 package com.microsoft.windowsazure.mobileservices;
 
+import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
@@ -10,7 +30,9 @@ import java.util.Date;
 import android.content.Context;
 
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializer;
 
 /**
  * Entry-point for Windows Azure Mobile Services interactions
@@ -19,7 +41,7 @@ public class MobileServiceClient {
 	/**
 	 * LoginManager used for login methods
 	 */
-	private LoginManager mloginManager;
+	private LoginManager mLoginManager;
 
 	/**
 	 * Mobile Service application key
@@ -91,8 +113,7 @@ public class MobileServiceClient {
 	 * @throws MalformedURLException
 	 * 
 	 */
-	public MobileServiceClient(String appUrl, String appKey, Context context)
-			throws MalformedURLException {
+	public MobileServiceClient(String appUrl, String appKey, Context context) throws MalformedURLException {
 		this(new URL(appUrl), appKey, context);
 	}
 
@@ -103,9 +124,7 @@ public class MobileServiceClient {
 	 *            An existing MobileServiceClient
 	 */
 	public MobileServiceClient(MobileServiceClient client) {
-		initialize(client.getAppUrl(), client.getAppKey(),
-				client.getCurrentUser(), client.getGsonBuilder(),
-				client.getContext());
+		initialize(client.getAppUrl(), client.getAppKey(), client.getCurrentUser(), client.getGsonBuilder(), client.getContext());
 	}
 
 	/**
@@ -134,27 +153,23 @@ public class MobileServiceClient {
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
-	public void login(MobileServiceAuthenticationProvider provider,
-			UserAuthenticationCallback callback) {
+	public void login(MobileServiceAuthenticationProvider provider, UserAuthenticationCallback callback) {
 		mLoginInProgress = true;
 
 		final UserAuthenticationCallback externalCallback = callback;
 
-		mloginManager.authenticate(provider, mContext,
-				new UserAuthenticationCallback() {
+		mLoginManager.authenticate(provider, mContext, new UserAuthenticationCallback() {
 
-					@Override
-					public void onCompleted(MobileServiceUser user,
-							Exception exception, ServiceFilterResponse response) {
-						mCurrentUser = user;
-						mLoginInProgress = false;
+			@Override
+			public void onCompleted(MobileServiceUser user, Exception exception, ServiceFilterResponse response) {
+				mCurrentUser = user;
+				mLoginInProgress = false;
 
-						if (externalCallback != null) {
-							externalCallback.onCompleted(user, exception,
-									response);
-						}
-					}
-				});
+				if (externalCallback != null) {
+					externalCallback.onCompleted(user, exception, response);
+				}
+			}
+		});
 	}
 
 	/**
@@ -169,8 +184,11 @@ public class MobileServiceClient {
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
-	public void login(MobileServiceAuthenticationProvider provider,
-			JsonObject oAuthToken, UserAuthenticationCallback callback) {
+	public void login(MobileServiceAuthenticationProvider provider, JsonObject oAuthToken, UserAuthenticationCallback callback) {
+		if (oAuthToken == null) {
+			throw new IllegalArgumentException("oAuthToken cannot be null");
+		}
+
 		login(provider, oAuthToken.toString(), callback);
 	}
 
@@ -185,27 +203,27 @@ public class MobileServiceClient {
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
-	public void login(MobileServiceAuthenticationProvider provider,
-			String oAuthToken, UserAuthenticationCallback callback) {
+	public void login(MobileServiceAuthenticationProvider provider, String oAuthToken, UserAuthenticationCallback callback) {
+		if (oAuthToken == null) {
+			throw new IllegalArgumentException("oAuthToken cannot be null");
+		}
+
 		mLoginInProgress = true;
 
 		final UserAuthenticationCallback externalCallback = callback;
 
-		mloginManager.authenticate(provider, oAuthToken,
-				new UserAuthenticationCallback() {
+		mLoginManager.authenticate(provider, oAuthToken, new UserAuthenticationCallback() {
 
-					@Override
-					public void onCompleted(MobileServiceUser user,
-							Exception exception, ServiceFilterResponse response) {
-						mCurrentUser = user;
-						mLoginInProgress = false;
+			@Override
+			public void onCompleted(MobileServiceUser user, Exception exception, ServiceFilterResponse response) {
+				mCurrentUser = user;
+				mLoginInProgress = false;
 
-						if (externalCallback != null) {
-							externalCallback.onCompleted(user, exception,
-									response);
-						}
-					}
-				});
+				if (externalCallback != null) {
+					externalCallback.onCompleted(user, exception, response);
+				}
+			}
+		});
 	}
 
 	/**
@@ -254,18 +272,40 @@ public class MobileServiceClient {
 	}
 
 	/**
+	 * Creates a MobileServiceJsonTable
+	 * 
+	 * @param name
+	 *            Table name
+	 * @return MobileServiceJsonTable with the given name
+	 */
+	public MobileServiceJsonTable getTable(String name) {
+		return new MobileServiceJsonTable(name, this);
+	}
+
+	/**
 	 * Creates a MobileServiceTable
 	 * 
 	 * @param name
 	 *            Table name
+	 * @param clazz
+	 *            The class used for data serialization
+	 * 
 	 * @return MobileServiceTable with the given name
 	 */
-	public MobileServiceTable getTable(String name) {
-		if (name == null || name.toString().trim().length() == 0) {
-			throw new IllegalArgumentException("Invalid Table Name");
-		}
+	public <E> MobileServiceTable<E> getTable(String name, Class<E> clazz) {
+		return new MobileServiceTable<E>(name, this, clazz);
+	}
 
-		return new MobileServiceTable(name, this);
+	/**
+	 * Creates a MobileServiceTable
+	 * 
+	 * @param clazz
+	 *            The class used for table name and data serialization
+	 * 
+	 * @return MobileServiceTable with the given name
+	 */
+	public <E> MobileServiceTable<E> getTable(Class<E> clazz) {
+		return new MobileServiceTable<E>(clazz.getSimpleName(), this, clazz);
 	}
 
 	/**
@@ -298,25 +338,18 @@ public class MobileServiceClient {
 				ServiceFilter internalServiceFilter = oldServiceFilter;
 
 				@Override
-				public void handleRequest(
-						ServiceFilterRequest request,
-						final NextServiceFilterCallback nextServiceFilterCallback,
+				public void handleRequest(ServiceFilterRequest request, final NextServiceFilterCallback nextServiceFilterCallback,
 						ServiceFilterResponseCallback responseCallback) {
 
 					// Executes new ServiceFilter
-					externalServiceFilter.handleRequest(request,
-							new NextServiceFilterCallback() {
+					externalServiceFilter.handleRequest(request, new NextServiceFilterCallback() {
 
-								@Override
-								public void onNext(
-										ServiceFilterRequest request,
-										ServiceFilterResponseCallback responseCallback) {
-									// Execute existing ServiceFilter
-									internalServiceFilter.handleRequest(
-											request, nextServiceFilterCallback,
-											responseCallback);
-								}
-							}, responseCallback);
+						@Override
+						public void onNext(ServiceFilterRequest request, ServiceFilterResponseCallback responseCallback) {
+							// Execute existing ServiceFilter
+							internalServiceFilter.handleRequest(request, nextServiceFilterCallback, responseCallback);
+						}
+					}, responseCallback);
 
 				}
 			};
@@ -336,8 +369,7 @@ public class MobileServiceClient {
 			return new ServiceFilter() {
 
 				@Override
-				public void handleRequest(ServiceFilterRequest request,
-						NextServiceFilterCallback nextServiceFilterCallback,
+				public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 						ServiceFilterResponseCallback responseCallback) {
 					nextServiceFilterCallback.onNext(request, responseCallback);
 				}
@@ -352,7 +384,7 @@ public class MobileServiceClient {
 	 * 
 	 * @return MobileServiceConnection
 	 */
-	public MobileServiceConnection createConnection() {
+	MobileServiceConnection createConnection() {
 		return new MobileServiceConnection(this);
 	}
 
@@ -370,9 +402,7 @@ public class MobileServiceClient {
 	 * @param context
 	 *            The Context where the MobileServiceClient is created
 	 */
-	private void initialize(URL appUrl, String appKey,
-			MobileServiceUser currentUser, GsonBuilder gsonBuiler,
-			Context context) {
+	private void initialize(URL appUrl, String appKey, MobileServiceUser currentUser, GsonBuilder gsonBuiler, Context context) {
 		if (appUrl == null || appUrl.toString().trim().length() == 0) {
 			throw new IllegalArgumentException("Invalid Application URL");
 		}
@@ -397,7 +427,7 @@ public class MobileServiceClient {
 		}
 		mAppUrl = normalizedAppURL;
 		mAppKey = appKey;
-		mloginManager = new LoginManager(this);
+		mLoginManager = new LoginManager(this);
 		mServiceFilter = null;
 		mLoginInProgress = false;
 		mCurrentUser = currentUser;
@@ -413,6 +443,30 @@ public class MobileServiceClient {
 	}
 
 	/**
+	 * Registers a JsonSerializer for the specified type
+	 * 
+	 * @param type
+	 *            The type to use in the registration
+	 * @param serializer
+	 *            The serializer to use in the registration
+	 */
+	public <T> void registerSerializer(Type type, JsonSerializer<T> serializer) {
+		mGsonBuilder.registerTypeAdapter(type, serializer);
+	}
+
+	/**
+	 * Registers a JsonDeserializer for the specified type
+	 * 
+	 * @param type
+	 *            The type to use in the registration
+	 * @param deserializer
+	 *            The deserializer to use in the registration
+	 */
+	public <T> void registerDeserializer(Type type, JsonDeserializer<T> deserializer) {
+		mGsonBuilder.registerTypeAdapter(type, deserializer);
+	}
+
+	/**
 	 * Sets the GsonBuilder used to in JSON Serialization/Deserialization
 	 * 
 	 * @param mGsonBuilder
@@ -422,10 +476,16 @@ public class MobileServiceClient {
 		mGsonBuilder = gsonBuilder;
 	}
 
+	/**
+	 * Gets the Context object used to create the MobileServiceClient
+	 */
 	public Context getContext() {
 		return mContext;
 	}
 
+	/**
+	 * Sets the Context object for the MobileServiceClient
+	 */
 	public void setContext(Context mContext) {
 		this.mContext = mContext;
 	}
