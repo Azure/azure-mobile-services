@@ -7,20 +7,26 @@ import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
+import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
+import com.microsoft.windowsazure.mobileservices.ServiceFilter;
+import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.TableOperationCallback;
 import com.microsoft.windowsazure.mobileservices.TableQueryCallback;
 
 public class ToDoActivity extends Activity {
-	
+
 	/**
 	 * Mobile Service Client reference
 	 */
@@ -42,9 +48,9 @@ public class ToDoActivity extends Activity {
 	private EditText mTextNewToDo;
 
 	/**
-	 * Progress dialog to use for table operations
+	 * Progress spinner to use for table operations
 	 */
-	private ProgressDialog mProgressDialog;
+	private ProgressBar mProgressBar;
 
 	/**
 	 * Initializes the activity
@@ -53,22 +59,19 @@ public class ToDoActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_to_do);
+		
+		mProgressBar = (ProgressBar) findViewById(R.id.loadingProgressBar);
 
-		// Initialize the progress dialog
-		mProgressDialog = new ProgressDialog(this);
-		mProgressDialog.setMessage("Loading...");
-		mProgressDialog.setCancelable(false);
-
+		// Initialize the progress bar
+		mProgressBar.setVisibility(ProgressBar.GONE);
+		
 		try {
 			// Create the Mobile Service Client instance, using the provided
 			// Mobile Service URL and key
-			mClient = new MobileServiceClient(
-					"ZUMOAPPURL",
-					"ZUMOAPPKEY", this
-					);
+			mClient = new MobileServiceClient("ZUMOAPPURL", "ZUMOAPPKEY", this).withFilter(new ProgressFilter());
 
 			// Get the Mobile Service Table instance to use
-			mToDoTable = mClient.getTable("todoitem", ToDoItem.class);
+			mToDoTable = mClient.getTable(ToDoItem.class);
 
 			mTextNewToDo = (EditText) findViewById(R.id.textNewToDo);
 
@@ -77,17 +80,33 @@ public class ToDoActivity extends Activity {
 			ListView listViewToDo = (ListView) findViewById(R.id.listViewToDo);
 			listViewToDo.setAdapter(mAdapter);
 
-			mProgressDialog.show();
-
 			// Load the items from the Mobile Service
 			refreshItemsFromTable();
 
 		} catch (MalformedURLException e) {
-			createAndShowDialog(
-					new Exception(
-							"There was an error creating the Mobile Service. Verify the URL"),
-					"Error");
+			createAndShowDialog(new Exception("There was an error creating the Mobile Service. Verify the URL"), "Error");
 		}
+	}
+	
+	/**
+	 * Initializes the activity menu
+	 */
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.activity_main, menu);
+		return true;
+	}
+	
+	/**
+	 * Select an option from the menu
+	 */
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		if (item.getItemId() == R.id.menu_refresh) {
+			refreshItemsFromTable();
+		}
+		
+		return true;
 	}
 
 	/**
@@ -103,20 +122,16 @@ public class ToDoActivity extends Activity {
 
 		// Set the item as completed and update it in the table
 		item.setComplete(true);
-
-		mProgressDialog.show();
+		
 		mToDoTable.update(item, new TableOperationCallback<ToDoItem>() {
 
-			public void onCompleted(ToDoItem entity, Exception exception,
-					ServiceFilterResponse response) {
-
-				mProgressDialog.dismiss();
-				if(exception == null){
+			public void onCompleted(ToDoItem entity, Exception exception, ServiceFilterResponse response) {
+				if (exception == null) {
 					if (entity.isComplete()) {
 						mAdapter.remove(entity);
 					}
 				} else {
-					createAndShowDialog(exception, "Error");	
+					createAndShowDialog(exception, "Error");
 				}
 			}
 
@@ -139,23 +154,20 @@ public class ToDoActivity extends Activity {
 
 		item.setText(mTextNewToDo.getText().toString());
 		item.setComplete(false);
-
-		mProgressDialog.show();
+		
 		// Insert the new item
 		mToDoTable.insert(item, new TableOperationCallback<ToDoItem>() {
-			
-			public void onCompleted(ToDoItem entity, Exception exception,
-					ServiceFilterResponse response) {
 
-				mProgressDialog.dismiss();
-				if(exception == null){
+			public void onCompleted(ToDoItem entity, Exception exception, ServiceFilterResponse response) {
+				
+				if (exception == null) {
 					if (!entity.isComplete()) {
 						mAdapter.add(entity);
 					}
 				} else {
 					createAndShowDialog(exception, "Error");
 				}
-				
+
 			}
 		});
 
@@ -169,32 +181,29 @@ public class ToDoActivity extends Activity {
 
 		// Get the items that weren't marked as completed and add them in the
 		// adapter
-		mToDoTable.where().field("complete").eq(val(false))
-				.execute(new TableQueryCallback<ToDoItem>() {
-					
-					public void onCompleted(List<ToDoItem> result, int count,
-							Exception exception, ServiceFilterResponse response) {
-						
-						mProgressDialog.dismiss();
-						if(exception == null){
-							mAdapter.clear();
-	
-							for (ToDoItem item : result) {
-								mAdapter.add(item);
-							}
-	
-						} else {
-							createAndShowDialog(exception, "Error");
-						}
+		mToDoTable.where().field("complete").eq(val(false)).execute(new TableQueryCallback<ToDoItem>() {
+
+			public void onCompleted(List<ToDoItem> result, int count, Exception exception, ServiceFilterResponse response) {
+				if (exception == null) {
+					mAdapter.clear();
+
+					for (ToDoItem item : result) {
+						mAdapter.add(item);
 					}
-				});
+
+				} else {
+					createAndShowDialog(exception, "Error");
+				}
+			}
+		});
 	}
 
 	/**
 	 * Creates a dialog and shows it
-	 * @param exception 
+	 * 
+	 * @param exception
 	 *            The exception to show in the dialog
-	 * @param title 
+	 * @param title
 	 *            The dialog title
 	 */
 	private void createAndShowDialog(Exception exception, String title) {
@@ -215,5 +224,36 @@ public class ToDoActivity extends Activity {
 		builder.setMessage(message);
 		builder.setTitle(title);
 		builder.create().show();
+	}
+	
+	private class ProgressFilter implements ServiceFilter {
+		
+		@Override
+		public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+				final ServiceFilterResponseCallback responseCallback) {
+			runOnUiThread(new Runnable() {
+
+				@Override
+				public void run() {
+					mProgressBar.setVisibility(ProgressBar.VISIBLE);
+				}
+			});
+			
+			nextServiceFilterCallback.onNext(request, new ServiceFilterResponseCallback() {
+				
+				@Override
+				public void onResponse(ServiceFilterResponse response, Exception exception) {
+					runOnUiThread(new Runnable() {
+
+						@Override
+						public void run() {
+							mProgressBar.setVisibility(ProgressBar.GONE);
+						}
+					});
+					
+					responseCallback.onResponse(response, exception);
+				}
+			});
+		}
 	}
 }
