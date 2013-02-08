@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Todo list: ZUMOAPPNAME</title>
+        <link rel='stylesheet' href='styles.css' />
+        <!--[if lt IE 9]><script src="http://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.6.1/html5shiv.js"></script><![endif]-->
+    </head>
+    <body>
+        <div id='container'>
+            <header>Todo list</header>
+
+            <form id='add-item'>
+                <button type='submit'>Add</button>
+                <div><input type='text' id='new-item-text' placeholder='Enter new task' /></div>
+            </form>
+
+            <article>
+                <ul id='todo-items'></ul>
+                <p id='summary'>Loading...</p>
+            </article>
+
+            <footer>
+                <a href='http://www.windowsazure.com/en-us/develop/mobile/'>
+                    Learn more about Windows Azure Mobile Services
+                </a>
+            </footer>
+        </div>
+
+        <script src='http://code.jquery.com/jquery-1.9.0.min.js'></script>
+        <script src='ZUMOAPPURL/js/MobileServices.Web.js'></script>
+        <script src='app.js'></script>
+    </body>
+</html>

@@ -1,0 +1,29 @@
+/* Reset and define common styles */
+* { box-sizing: border-box; -moz-box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: Arial, Helvetica; background-color: #505564; }
+button { border: 1px solid #999; color: #555; background-color: #eee; padding: 0 10px; }
+button:hover { background-color: white; }
+input[type=text], input:not([type]) { padding: 0 10px; }
+
+/* Main sections */
+#container { max-width: 800px; margin: 20px auto; padding: 0 30px; }
+header { font-size: 2em; font-weight: bold; color: #ddd; margin: 10px 0; }
+article { background-color: #eee; box-shadow: 0 0 12px black; border-radius: 4px; }
+footer { text-align: center; font-size: 0.8em; margin-top: 20px; }
+footer a { color: #aaa; }
+#summary { text-align: center; padding: 8px 0; }
+
+/* "Add new" form */
+#add-item { height: 40px; margin-bottom: 20px; font-size: 1.1em }
+#add-item div { overflow: hidden; }
+#add-item button { float: right; margin-left: 10px; padding: 0 10px; height: 100%; border-radius: 4px; }
+#new-item-text { width: 100%; height: 40px; border: 1px solid #999; font-size: 1em; border-radius: 4px; }
+
+/* List of items */
+#todo-items li { list-style-type: none; height: 36px; padding: 0px 5px; border-bottom: 1px solid #ddd;  }
+.item-complete { float: left; margin: 0 8px 0 10px; height: 100%; }
+.item-delete { float: right; margin: 5px; margin-right: 0; height: 26px; }
+
+#todo-items li div { overflow: hidden; padding: 5px 2px; }
+.item-text { width: 100%; height: 26px; border: 1px solid transparent; background-color: transparent; }
+.item-text:focus, .item-text:hover { border-color: #bbb; background-color: white; }
