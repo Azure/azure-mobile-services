@@ -2,10 +2,12 @@
 
 function defineQueryTestsNamespace() {
     var tests = [];
+    var serverSideTests = [];
     var i;
     var tableName = 'w8jsMovies';
+    var tableNameForServerSideFilterTest = 'w8jsServerQueryMovies';
 
-    tests.push(new zumo.Test('Populate table, if necessary', function (test, done) {
+    var populateTableTest = new zumo.Test('Populate table, if necessary', function (test, done) {
         test.addLog('Populating the table');
         var item = {
             movies: zumo.tests.getQueryTestData()
@@ -20,177 +22,211 @@ function defineQueryTestsNamespace() {
             test.addLog('Error populating the table: ' + JSON.stringify(err));
             done(false);
         });
-    }));
+    });
 
-    tests.push(createQueryTest('GreaterThan and LessThen - Movies from the 90s', function (table) {
-        return table.where(function () { return this.Year > 1989 && this.Year < 2000; });
-    }, function (item) { return item.Year > 1989 && item.Year < 2000; }));
-    tests.push(createQueryTest('GreaterEqual and LessEqual - Movies from the 90s', function (table) {
-        return table.where(function () { return this.Year >= 1990 && this.Year <= 1999; });
-    }, function (item) { return item.Year > 1989 && item.Year < 2000; }));
-    tests.push(createQueryTest('Compound statement - OR of ANDs - Movies from the 30s and 50s', function (table) {
-        return table.where(function () { return (this.Year >= 1930 && this.Year < 1940) || (this.Year >= 1950 && this.Year < 1960); });
-    }, function (item) { return (item.Year >= 1930 && item.Year < 1940) || (item.Year >= 1950 && item.Year < 1960); }));
-    tests.push(createQueryTest('Division, equal and different - Movies from the year 2000 with rating other than R', function (table) {
-        return table.where(function () { return ((this.Year / 1000.0) == 2) && this.MPAARating != 'R'; });
-    }, function (item) { return ((item.Year / 1000.0) == 2) && item.MPAARating != 'R'; }));
-    tests.push(createQueryTest('Addition, subtraction, relational, AND - Movies from the 1980s which last less than 2 hours', function (table) {
-        return table.where(function () { return ((this.Year - 1900) >= 80) && (this.Year + 10 < 2000) && (this.Duration < 120); });
-    }, function (item) { return ((item.Year - 1900) >= 80) && (item.Year + 10 < 2000) && (item.Duration < 120); }));
+    tests.push(populateTableTest);
+    serverSideTests.push(populateTableTest);
 
-    tests.push(createQueryTest('Query via template object - Movies from the year 2000 with rating R', function (table) {
-        return table.where({Year: 2000, MPAARating: 'R'});
-    }, function (item) { return item.Year == 2000 && item.MPAARating == 'R'; }));
+    // For server-side filtering tests, we will create a function to add the tests;
+    // We'll then compare with the function which we expect from the client, to make
+    // sure that we're testing the same thing.
+    var getWhereClauseCreatorHeader = 'function getWhereClauseCreator(testName) {\n    switch (testName) {\n';
+    var getWhereClauseCreatorFooter = '    }\n    return null;\n}';
+    var getWhereClauseSwitchBody = '';
+
+    function addQueryTest(testName, getQueryFunction, filter, options) {
+        tests.push(createQueryTest(testName, getQueryFunction, filter, options));
+        options = options || {};
+
+        if (!getQueryFunction || !filter) {
+            // Not interesting
+            return;
+        }
+
+        if (options.isNegativeClientValidation || options.isNegativeServerValidation) {
+            // Not interesting
+            return;
+        }
+        if (testName.indexOf('Date: Greater') === 0 || testName.indexOf('String.length - Movie with small names') === 0) {
+            // Use captured variables, cannot pass to the server
+            return;
+        }
+
+        serverSideTests.push(createServerSideQueryTest(testName, filter, options));
+        var getQueryFunctionBody = getQueryFunction.toString();
+        getWhereClauseSwitchBody += '        case \'' + testName + '\':\n';
+        getWhereClauseSwitchBody += '            return ' + getQueryFunctionBody + ';\n';
+    }
+
+    addQueryTest('GreaterThan and LessThen - Movies from the 90s',
+        function (table) { return table.where(function () { return this.Year > 1989 && this.Year < 2000; }); },
+        function (item) { return item.Year > 1989 && item.Year < 2000; });
+    addQueryTest('GreaterEqual and LessEqual - Movies from the 90s', 
+        function (table) { return table.where(function () { return this.Year >= 1990 && this.Year <= 1999; }); },
+        function (item) { return item.Year > 1989 && item.Year < 2000; });
+    addQueryTest('Compound statement - OR of ANDs - Movies from the 30s and 50s', 
+        function (table) { return table.where(function () { return (this.Year >= 1930 && this.Year < 1940) || (this.Year >= 1950 && this.Year < 1960); }); },
+        function (item) { return (item.Year >= 1930 && item.Year < 1940) || (item.Year >= 1950 && item.Year < 1960); });
+    addQueryTest('Division, equal and different - Movies from the year 2000 with rating other than R', 
+        function (table) { return table.where(function () { return ((this.Year / 1000.0) == 2) && this.MPAARating != 'R'; }); },
+        function (item) { return ((item.Year / 1000.0) == 2) && item.MPAARating != 'R'; });
+    addQueryTest('Addition, subtraction, relational, AND - Movies from the 1980s which last less than 2 hours', 
+        function (table) { return table.where(function () { return ((this.Year - 1900) >= 80) && (this.Year + 10 < 2000) && (this.Duration < 120); }); },
+        function (item) { return ((item.Year - 1900) >= 80) && (item.Year + 10 < 2000) && (item.Duration < 120); });
+
+    addQueryTest('Query via template object - Movies from the year 2000 with rating R',
+        function (table) { return table.where({ Year: 2000, MPAARating: 'R' }); },
+        function (item) { return item.Year == 2000 && item.MPAARating == 'R'; });
 
     // String functions
-    tests.push(createQueryTest('String.indexOf - Movies which start with \'The\'',
+    addQueryTest('String.indexOf - Movies which start with "The"',
         function (table) { return table.where(function () { return this.Title.indexOf('The') === 0; }); },
-        function (item) { return item.Title.indexOf('The') === 0; }, { top: 100 }));
-    tests.push(createQueryTest('String.toUpperCase - Finding \'THE GODFATHER\'',
+        function (item) { return item.Title.indexOf('The') === 0; }, { top: 100 });
+    addQueryTest('String.toUpperCase - Finding "THE GODFATHER"',
         function (table) { return table.where(function () { return this.Title.toUpperCase() === 'THE GODFATHER'; }); },
-        function (item) { return item.Title.toUpperCase() === 'THE GODFATHER'; }));
-    tests.push(createQueryTest('String.toLowerCase - Finding \'pulp fiction\'',
+        function (item) { return item.Title.toUpperCase() === 'THE GODFATHER'; });
+    addQueryTest('String.toLowerCase - Finding "pulp fiction"',
         function (table) { return table.where(function () { return this.Title.toLowerCase() === 'pulp fiction'; }); },
-        function (item) { return item.Title.toLowerCase() === 'pulp fiction'; }));
-    tests.push(createQueryTest('String.indexOf, String.toLowerCase - Movie which start with \'the\'',
+        function (item) { return item.Title.toLowerCase() === 'pulp fiction'; });
+    addQueryTest('String.indexOf, String.toLowerCase - Movie which start with "the"',
         function (table) { return table.where(function () { return this.Title.toLowerCase().indexOf('the') === 0; }); },
-        function (item) { return item.Title.toLowerCase().indexOf('the') === 0; }, { top: 100 }));
-    tests.push(createQueryTest('String.indexOf, String.toUpperCase - Movie which start with \'THE\'',
+        function (item) { return item.Title.toLowerCase().indexOf('the') === 0; }, { top: 100 });
+    addQueryTest('String.indexOf, String.toUpperCase - Movie which start with "THE"',
         function (table) { return table.where(function () { return this.Title.toUpperCase().indexOf('THE') === 0; }); },
-        function (item) { return item.Title.toUpperCase().indexOf('THE') === 0; }, { top: 100 }));
+        function (item) { return item.Title.toUpperCase().indexOf('THE') === 0; }, { top: 100 });
     for (i = 0; i < 2; i++) {
         var characters = (i + 1) * 6;
-        tests.push(createQueryTest('String.length - Movie with small names (< ' + characters + ' characters)',
+        addQueryTest('String.length - Movie with small names (< ' + characters + ' characters)',
             function (table) { return table.where(function (numCharacters) { return this.Title.length <= numCharacters; }, characters); },
-            function (item) { return item.Title.length <= characters; }, { top: 100 }));
+            function (item) { return item.Title.length <= characters; }, { top: 100 });
     }
-    tests.push(createQueryTest('String.indexOf (non-ASCII) - movies containing the \'é\' character',
+    addQueryTest('String.indexOf (non-ASCII) - movies containing the "é" character',
         function (table) { return table.where(function () { return this.Title.indexOf('é') >= 0; }); },
-        function (item) { return item.Title.indexOf('é') >= 0; }));
-    tests.push(createQueryTest('String.replace, trim - movies starting with \'godfather\', after removing starting \'the\'',
+        function (item) { return item.Title.indexOf('é') >= 0; });
+    addQueryTest('String.replace, trim - movies starting with "godfather", after removing starting "the"',
         function (table) { return table.where(function () { return this.Title.replace('The', '').trim().indexOf('Godfather') === 0; }); },
-        function (item) { return item.Title.replace('The', '').trim().indexOf('Godfather') === 0; }));
-    tests.push(createQueryTest('String.substring, length - movies which end with \'r\'',
+        function (item) { return item.Title.replace('The', '').trim().indexOf('Godfather') === 0; });
+    addQueryTest('String.substring, length - movies which end with "r"',
         function (table) { return table.where(function () { return this.Title.substring(this.Title.length - 1, 1) === 'r'; }); },
-        function (item) { return /r$/.test(item.Title); }));
-    tests.push(createQueryTest('String.substring (2 parameters) - movies with \'father\' starting at position 7',
+        function (item) { return /r$/.test(item.Title); });
+    addQueryTest('String.substring (2 parameters) - movies with "father" starting at position 7',
         function (table) { return table.where(function () { return this.Title.substring(7, 13) === 'father'; }); },
-        function (item) { var result = item.Title.substring(7, 13) === 'father'; return result; }, { debug: true }));
-    tests.push(createQueryTest('String.substr - movies with \'father\' starting at position 7',
+        function (item) { var result = item.Title.substring(7, 13) === 'father'; return result; }, { debug: true });
+    addQueryTest('String.substr - movies with "father" starting at position 7',
         function (table) { return table.where(function () { return this.Title.substr(7, 6) === 'father'; }); },
-        function (item) { var result = item.Title.substr(7, 6) === 'father'; return result; }, { debug: true }));
+        function (item) { var result = item.Title.substr(7, 6) === 'father'; return result; }, { debug: true });
 
     // String fields
-    tests.push(createQueryTest('Equals - movies since 1980 with rating PG-13',
+    addQueryTest('Equals - movies since 1980 with rating PG-13',
         function (table) { return table.where(function () { return this.MPAARating === 'PG-13' && this.Year >= 1980; }); },
-        function (item) { return item.MPAARating == 'PG-13' && item.Year >= 1980; }, { top: 100 }));
-    tests.push(createQueryTest('Comparison to null - Movies since 1980 without a MPAA rating',
-        function (table) { return table.where(function () { return this.MPAARating == null && this.Year >= 1980; }); },
-        function (item) { return item.MPAARating == null && item.Year >= 1980; }));
-    tests.push(createQueryTest('Comparison to null (not null) - Movies before 1970 with a MPAA rating',
-        function (table) { return table.where(function () { return this.MPAARating != null && this.Year < 1970; }); },
-        function (item) { return item.MPAARating != null && item.Year < 1970; }));
+        function (item) { return item.MPAARating == 'PG-13' && item.Year >= 1980; }, { top: 100 });
+    addQueryTest('Comparison to null - Movies since 1980 without a MPAA rating',
+        function (table) { return table.where(function () { return this.MPAARating === null && this.Year >= 1980; }); },
+        function (item) { return item.MPAARating == null && item.Year >= 1980; });
+    addQueryTest('Comparison to null (not null) - Movies before 1970 with a MPAA rating',
+        function (table) { return table.where(function () { return this.MPAARating !== null && this.Year < 1970; }); },
+        function (item) { return item.MPAARating != null && item.Year < 1970; });
 
     // Numeric functions
-    tests.push(createQueryTest('Math.floor - Movies which last more than 3 hours',
+    addQueryTest('Math.floor - Movies which last more than 3 hours',
         function (table) { return table.where(function () { return Math.floor(this.Duration / 60.0) >= 3; }); },
-        function (item) { return Math.floor(item.Duration / 60.0) >= 3; }));
-    tests.push(createQueryTest('Math.ceil - Movies which last at most 2 hours',
+        function (item) { return Math.floor(item.Duration / 60.0) >= 3; });
+    addQueryTest('Math.ceil - Movies which last at most 2 hours',
         function (table) { return table.where(function () { return Math.ceil(this.Duration / 60.0) == 2; }); },
-        function (item) { return Math.ceil(item.Duration / 60.0) == 2; }, { top: 200 }));
-    tests.push(createQueryTest('Math.round - Movies which last between 2.5 (inclusive) and 3.5 (exclusive) hours',
+        function (item) { return Math.ceil(item.Duration / 60.0) == 2; }, { top: 200 });
+    addQueryTest('Math.round - Movies which last between 2.5 (inclusive) and 3.5 (exclusive) hours',
         function (table) { return table.where(function () { return Math.round(this.Duration / 60.0) == 3; }); },
-        function (item) { return Math.round(item.Duration / 60.0) == 3; }));
+        function (item) { return Math.round(item.Duration / 60.0) == 3; });
 
     // Date fields
     var dateBefore1970 = new Date(Date.UTC(1969, 12 - 1, 31, 23, 59, 59));
     var date1980 = new Date(Date.UTC(1980, 1 - 1, 1));
     var dateBefore1990 = new Date(Date.UTC(1989, 12 - 1, 31, 23, 59, 59));
     var dateOfPulpFiction = new Date(Date.UTC(1994, 10 - 1, 14));
-    tests.push(createQueryTest('Date: Greater than, less than - Movies with release date in the 70s',
+    addQueryTest('Date: Greater than, less than - Movies with release date in the 70s',
         function (table) { return table.where(function (d1, d2) { return this.ReleaseDate > d1 && this.ReleaseDate < d2; }, dateBefore1970, date1980); },
-        function (item) { return item.ReleaseDate > dateBefore1970 && item.ReleaseDate < date1980; }));
-    tests.push(createQueryTest('Date: Greater or equal, less or equal - Movies with release date in the 80s',
+        function (item) { return item.ReleaseDate > dateBefore1970 && item.ReleaseDate < date1980; });
+    addQueryTest('Date: Greater or equal, less or equal - Movies with release date in the 80s',
         function (table) { return table.where(function (d1, d2) { return this.ReleaseDate >= d1 && this.ReleaseDate <= d2; }, date1980, dateBefore1990); },
-        function (item) { return item.ReleaseDate >= date1980 && item.ReleaseDate <= dateBefore1990; }));
-    tests.push(createQueryTest('Date: Equals - Movies released on 1994-10-14 (Shawshank Redemption / Pulp Fiction)',
-        function (table) { return table.where({ ReleaseDate: dateOfPulpFiction }); },
-        function (item) { return item.ReleaseDate.getTime() === dateOfPulpFiction.getTime(); }));
+        function (item) { return item.ReleaseDate >= date1980 && item.ReleaseDate <= dateBefore1990; });
+    addQueryTest('Date: Equals - Movies released on 1994-10-14 (Shawshank Redemption / Pulp Fiction)',
+        function (table) { return table.where({ ReleaseDate: new Date(Date.UTC(1994, 10 - 1, 14)) }); },
+        function (item) { return item.ReleaseDate.getTime() === dateOfPulpFiction.getTime(); });
 
     // Date functions
-    tests.push(createQueryTest('Date (month): Movies released in November',
+    addQueryTest('Date (month): Movies released in November',
         function (table) { return table.where(function () { return this.ReleaseDate.getMonth() == (11 - 1); }); },
-        function (item) { return item.ReleaseDate.getMonth() == (11 - 1); }));
-    tests.push(createQueryTest('Date (day): Movies released in the first day of the month',
+        function (item) { return item.ReleaseDate.getMonth() == (11 - 1); });
+    addQueryTest('Date (day): Movies released in the first day of the month',
         function (table) { return table.where(function () { return this.ReleaseDate.getDate() == 1; }); },
-        function (item) { return item.ReleaseDate.getDate() == 1; }));
-    tests.push(createQueryTest('Date (year): Movies whose year is different than its release year',
+        function (item) { return item.ReleaseDate.getDate() == 1; });
+    addQueryTest('Date (year): Movies whose year is different than its release year',
         function (table) { return table.where(function () { return this.ReleaseDate.getFullYear() !== this.Year; }); },
-        function (item) { return item.ReleaseDate.getFullYear() !== item.Year; }, { debug: true, top: 100 }));
+        function (item) { return item.ReleaseDate.getFullYear() !== item.Year; }, { debug: true, top: 100 });
 
     // Boolean fields
-    tests.push(createQueryTest('Boolean: equal to true - Best picture winners before 1950',
+    addQueryTest('Boolean: equal to true - Best picture winners before 1950',
         function (table) { return table.where(function () { return this.BestPictureWinner === true && this.Year < 1950; }); },
-        function (item) { return item.BestPictureWinner === true && item.Year < 1950; }, { debug: true }));
-    tests.push(createQueryTest('Boolean: not and equal to false - Best picture winners since 2000',
+        function (item) { return item.BestPictureWinner === true && item.Year < 1950; }, { debug: true });
+    addQueryTest('Boolean: not and equal to false - Best picture winners since 2000',
         function (table) { return table.where(function () { return !(this.BestPictureWinner === false) && this.Year >= 2000; }); },
-        function (item) { return !(item.BestPictureWinner === false) && item.Year >= 2000; }));
-    tests.push(createQueryTest('Boolean: not equal to false - Best picture winners since 2000',
+        function (item) { return !(item.BestPictureWinner === false) && item.Year >= 2000; });
+    addQueryTest('Boolean: not equal to false - Best picture winners since 2000',
         function (table) { return table.where(function () { return this.BestPictureWinner !== false && this.Year >= 2000; }); },
-        function (item) { return item.BestPictureWinner !== false && item.Year >= 2000; }));
+        function (item) { return item.BestPictureWinner !== false && item.Year >= 2000; });
 
     // In operator
-    tests.push(createQueryTest('In operator: Movies since 2000 with MPAA ratings of \'G\', \'PG\' or \' PG-13\'',
+    addQueryTest('In operator: Movies since 2000 with MPAA ratings of "G", "PG" or " PG-13"',
         function (table) { return table.where(function (ratings) { return this.Year >= 2000 && this.MPAARating in ratings; }, ['G', 'PG', 'PG-13']); },
-        function (item) { return item.Year >= 2000 && ['G', 'PG', 'PG-13'].indexOf(item.MPAARating) >= 0; }));
+        function (item) { return item.Year >= 2000 && ['G', 'PG', 'PG-13'].indexOf(item.MPAARating) >= 0; });
 
     // Top and skip
-    tests.push(createQueryTest('Get all using large $top: take(500)', null, null, { top: 500 }));
-    tests.push(createQueryTest('Skip all using large skip: skip(500)', null, null, { skip: 500 }));
-    tests.push(createQueryTest('Skip, take and includeTotalCount: movies 11-20, ordered by title', null, null,
-        { top: 10, skip: 10, includeTotalCount: true, sortFields: [new OrderByClause('Title', true)] }));
-    tests.push(createQueryTest('Skip, take and includeTotalCount with filter: movies 11-20, which won the best picture, ordered by release date',
+    addQueryTest('Get all using large $top: take(500)', null, null, { top: 500 });
+    addQueryTest('Skip all using large skip: skip(500)', null, null, { skip: 500 });
+    addQueryTest('Skip, take and includeTotalCount: movies 11-20, ordered by title', null, null,
+        { top: 10, skip: 10, includeTotalCount: true, sortFields: [new OrderByClause('Title', true)] });
+    addQueryTest('Skip, take and includeTotalCount with filter: movies 11-20, which won the best picture, ordered by release date',
         function (table) { return table.where({ BestPictureWinner: true }); },
         function (item) { return item.BestPictureWinner; },
-        { top: 10, skip: 10, includeTotalCount: true, sortFields: [new OrderByClause('ReleaseDate', false)] }));
+        { top: 10, skip: 10, includeTotalCount: true, sortFields: [new OrderByClause('ReleaseDate', false)] });
 
     // Orderby
-    tests.push(createQueryTest('Order by date and string - 50 movies, ordered by release date, then title', null, null,
-        { top: 50, sortFields: [new OrderByClause('ReleaseDate', false), new OrderByClause('Title', true)] }));
-    tests.push(createQueryTest('Order by number - 30 shortest movies since 1970', 
+    addQueryTest('Order by date and string - 50 movies, ordered by release date, then title', null, null,
+        { top: 50, sortFields: [new OrderByClause('ReleaseDate', false), new OrderByClause('Title', true)] });
+    addQueryTest('Order by number - 30 shortest movies since 1970', 
         function (table) { return table.where(function () { return this.Year >= 1970; }); },
         function (item) { return item.Year >= 1970; },
-        { top: 30, sortFields: [new OrderByClause('Duration', true), new OrderByClause('Title', true)] }));
+        { top: 30, sortFields: [new OrderByClause('Duration', true), new OrderByClause('Title', true)] });
 
     // Select
-    tests.push(createQueryTest('Select single field - Title of movies since 2000',
+    addQueryTest('Select single field - Title of movies since 2000',
         function (table) { return table.where(function () { return this.Year >= 2000; }); },
         function (item) { return item.Year >= 2000; },
-        { top: 200, selectFields: ['Title'] }));
-    tests.push(createQueryTest('Select multiple fields - Title, BestPictureWinner, Duration, order by release date, of movies from the 1990s',
+        { top: 200, selectFields: ['Title'] });
+    addQueryTest('Select multiple fields - Title, BestPictureWinner, Duration, order by release date, of movies from the 1990s',
         function (table) { return table.where(function () { return this.Year >= 1990 && this.Year < 2000; }); },
         function (item) { return item.Year >= 1990 && item.Year < 2000; },
         {
             top: 200,
             selectFields: ['Title', 'BestPictureWinner', 'Duration'],
             sortFields: [new OrderByClause('ReleaseDate', true), new OrderByClause('Title', true)]
-        }));
+        });
 
     // Negative tests
-    tests.push(createQueryTest('(Neg) Unsupported predicate: lastIndexOf',
+    addQueryTest('(Neg) Unsupported predicate: lastIndexOf',
         function (table) { return table.where(function () { return this.Title.lastIndexOf('r') >= 0; }); },
-        function (item) { item.lastIndexOf('r') == item.length - 1 }, { isNegativeClientValidation: true }));
-    tests.push(createQueryTest('(Neg) Unsupported predicate: regular expression',
+        function (item) { item.lastIndexOf('r') == item.length - 1 }, { isNegativeClientValidation: true });
+    addQueryTest('(Neg) Unsupported predicate: regular expression',
         function (table) { return table.where(function () { return /Godfather/.test(this.Title); }); },
-        function (item) { return /Godfather/.test(item.Title); }, { isNegativeClientValidation: true }));
-    tests.push(createQueryTest('(Neg) Unsupported predicate: function with multiple statements',
+        function (item) { return /Godfather/.test(item.Title); }, { isNegativeClientValidation: true });
+    addQueryTest('(Neg) Unsupported predicate: function with multiple statements',
         function (table) { return table.where(function () { var year = 2000; return this.Year > year; }); },
-        function (item) { var year = 2000; return item.Title > year; }, { isNegativeClientValidation: true }));
+        function (item) { var year = 2000; return item.Title > year; }, { isNegativeClientValidation: true });
     var someVariable = 2000;
-    tests.push(createQueryTest('(Neg) Unsupported predicate: using variables from closure',
+    addQueryTest('(Neg) Unsupported predicate: using variables from closure',
         function (table) { return table.where(function () { return this.Year > someVariable; }); },
-        function (item) { return item.Title > someVariable; }, { isNegativeClientValidation: true }));
-    tests.push(createQueryTest('(Neg) Very large \'top\'', null, null, { top: 1001, isNegativeServerValidation: true }));
+        function (item) { return item.Title > someVariable; }, { isNegativeClientValidation: true });
+    addQueryTest('(Neg) Very large "top"', null, null, { top: 1001, isNegativeServerValidation: true });
     
     for (i = -1; i <= 0; i++) {
         var id = i;
@@ -206,6 +242,31 @@ function defineQueryTestsNamespace() {
             });
         }));
     }
+
+    // Now that all server-side tests have been added, will add one test to validate the server-side script
+    var getWhereClauseCreator = getWhereClauseCreatorHeader + getWhereClauseSwitchBody + getWhereClauseCreatorFooter;
+    serverSideTests.splice(0, 0, new zumo.Test('Validate getWhereClauseCreator server function', function (test, done) {
+        /// <param name="test" type="zumo.Test">The test being executed</param>
+        test.addLog('Will validate that the server implementation of the getWhereClauseCreator function is the expected one.');
+        var client = zumo.getClient();
+        var table = client.getTable(tableNameForServerSideFilterTest);
+        table.read({ testName: 'getWhereClauseCreator' }).done(function (results) {
+            var actualGetWhereClauseCreator = results[0].code;
+            if (getWhereClauseCreator === actualGetWhereClauseCreator) {
+                test.addLog('Function matches');
+                done(true);
+            } else {
+                test.addLog('Error, functions do not match. Expected:');
+                test.addLog(getWhereClauseCreator);
+                test.addLog('Actual:');
+                test.addLog(actualGetWhereClauseCreator);
+                done(false);
+            }
+        }, function (err) {
+            test.addLog('Error retrieving the "getWhereClauseCreator" method from the server: ', err);
+            done(false);
+        });
+    }));
 
     function OrderByClause(fieldName, isAscending) {
         this.fieldName = fieldName;
@@ -235,6 +296,88 @@ function defineQueryTestsNamespace() {
         }
 
         return result;
+    }
+
+    function createServerSideQueryTest(testName, filter, options) {
+        return new zumo.Test('[Server] ' + testName, function (test, done) {
+            var client = zumo.getClient();
+            var table = client.getTable(tableNameForServerSideFilterTest);
+            table.read({ testName: testName, options: JSON.stringify(options) }).done(function (results) {
+                test.addLog('Received results from the server');
+                var filteredMovies = zumo.tests.getQueryTestData();
+                if (filter) {
+                    filteredMovies = filteredMovies.filter(filter);
+                }
+                filteredMovies = applyOptions(filteredMovies, options);
+                var errors = [];
+                if (!zumo.util.compare(filteredMovies, results, errors)) {
+                    errors.forEach(function (error) {
+                        test.addLog(error);
+                    });
+                    test.addLog('Retrieved data is not the expected');
+                    test.addLog('Expected: ' + JSON.stringify(filteredMovies));
+                    test.addLog('Actual: ' + JSON.stringify(results));
+                    done(false);
+                } else {
+                    done(true);
+                }
+            }, function (err) {
+                test.addLog('Error retrieving data: ', err);
+                done(false);
+            });
+        });
+    }
+
+    function applyOptions(filteredMovies, options) {
+        /// <param name='movies' type='Array'/>
+        /// <param name='options' type='Object'>
+        /// {
+        ///   top (number): number of elements to 'take'
+        ///   skip (number): number of elements to 'skip'
+        ///   sortFields (array of OrderByClause): fields to sort the data by
+        ///   selectFields (array of string): fields to retrieve
+        /// }
+        /// </param>
+        options = options || {};
+        if (options.sortFields && options.sortFields.length) {
+            var compareFunction = function (a, b) {
+                var i;
+                for (i = 0; i < options.sortFields.length; i++) {
+                    var temp = options.sortFields[i].getSortFunction(a, b);
+                    if (temp !== 0) {
+                        return temp;
+                    }
+                }
+
+                return 0;
+            }
+            filteredMovies = filteredMovies.sort(compareFunction);
+        }
+
+        if (options.skip) {
+            filteredMovies = filteredMovies.slice(options.skip, 1000);
+        }
+
+        if (options.top) {
+            filteredMovies = filteredMovies.slice(0, options.top);
+        }
+
+        if (options.selectFields && options.selectFields.length) {
+            filteredMovies = filteredMovies.map(function (obj) {
+                var result = {};
+                var key;
+                for (key in obj) {
+                    if (obj.hasOwnProperty(key)) {
+                        if (options.selectFields.indexOf(key) >= 0) {
+                            result[key] = obj[key];
+                        }
+                    }
+                }
+                return result;
+            });
+        }
+
+        return filteredMovies;
     }
 
     // options structure:
@@ -287,6 +430,8 @@ function defineQueryTestsNamespace() {
                     query = query.includeTotalCount();
                 }
 
+                filteredMovies = applyOptions(filteredMovies, options);
+
                 if (sortFields && sortFields.length) {
                     for (i = 0; i < sortFields.length; i++) {
                         if (sortFields[i].isAscending) {
@@ -295,45 +440,18 @@ function defineQueryTestsNamespace() {
                             query = query.orderByDescending(sortFields[i].fieldName);
                         }
                     }
-
-                    var compareFunction = function (a, b) {
-                        var i;
-                        for (i = 0; i < sortFields.length; i++) {
-                            var temp = sortFields[i].getSortFunction(a, b);
-                            if (temp !== 0) {
-                                return temp;
-                            }
-                        }
-
-                        return 0;
-                    }
-                    filteredMovies = filteredMovies.sort(compareFunction);
                 }
 
                 if (skip) {
                     query = query.skip(skip);
-                    filteredMovies = filteredMovies.slice(skip, 1000);
                 }
 
                 if (top) {
                     query = query.take(top);
-                    filteredMovies = filteredMovies.slice(0, top);
                 }
 
                 if (selectFields && selectFields.length) {
                     query.select(selectFields.join(','));
-                    filteredMovies = filteredMovies.map(function (obj) {
-                        var result = {};
-                        var key;
-                        for (key in obj) {
-                            if (obj.hasOwnProperty(key)) {
-                                if (selectFields.indexOf(key) >= 0) {
-                                    result[key] = obj[key];
-                                }
-                            }
-                        }
-                        return result;
-                    });
                 }
             } catch (ex) {
                 exception = ex;
@@ -417,7 +535,8 @@ function defineQueryTestsNamespace() {
 
     return {
         name: 'Query',
-        tests: tests
+        tests: tests,
+        serverSideTests: serverSideTests
     };
 }
 

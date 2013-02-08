@@ -18,6 +18,7 @@ azure mobile table create %1 w8RoundTripTable
 azure mobile table create %1 w8Movies
 azure mobile table create %1 w8jsRoundTripTable
 azure mobile table create %1 w8jsMovies
+azure mobile table create %1 w8jsServerQueryMovies
 azure mobile table create %1 w8PushTest
 azure mobile table create %1 ParamsTestTable
 
@@ -25,6 +26,7 @@ azure mobile table update -p insert=admin,read=admin,update=admin,delete=admin %
 azure mobile table update -p insert=application,read=application,update=application,delete=application %1 w8Application
 azure mobile table update -p insert=user,read=user,update=user,delete=user %1 w8Authenticated
 azure mobile table update -p insert=application,read=public,update=public,delete=public %1 w8Public
+azure mobile table update -p insert=admin,read=application,update=admin,delete=admin %1 w8jsServerQueryMovies
 
 azure mobile script upload %1 table/w8Movies.insert -f w8Movies.insert.js
 azure mobile script upload %1 table/w8RoundTripTable.insert -f w8RoundTripTable.insert.js
@@ -44,5 +46,6 @@ azure mobile script upload %1 table/w8jsMovies.insert -f w8jsMovies.insert.js
 azure mobile script upload %1 table/w8jsRoundTripTable.insert -f w8jsRoundTripTable.insert.js
 azure mobile script upload %1 table/w8jsRoundTripTable.read -f w8jsRoundTripTable.read.js
 azure mobile script upload %1 table/w8jsRoundTripTable.update -f w8jsRoundTripTable.update.js
+azure mobile script upload %1 table/w8jsServerQueryMovies.read -f w8jsServerQueryMovies.read.js
 
 :TheEnd
