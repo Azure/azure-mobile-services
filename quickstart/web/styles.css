@@ -3,7 +3,7 @@
 body { font-family: Arial, Helvetica; background-color: #505564; }
 button { border: 1px solid #999; color: #555; background-color: #eee; padding: 0 10px; }
 button:hover { background-color: white; }
-input[type=text], input:not([type]) { padding: 0 10px; }
+input[type=text], input:not([type]) { padding: 0 10px; text-overflow: ellipsis; }
 
 /* Main sections */
 #container { max-width: 800px; margin: 20px auto; padding: 0 30px; }
@@ -25,5 +25,5 @@ footer a { color: #aaa; }
 .item-delete { float: right; margin: 5px; margin-right: 0; height: 26px; }
 
 #todo-items li div { overflow: hidden; padding: 5px 2px; }
-.item-text { width: 100%; height: 26px; border: 1px solid transparent; background-color: transparent; }
+.item-text { width: 100%; height: 26px; line-height: 24px; border: 1px solid transparent; background-color: transparent; }
 .item-text:focus, .item-text:hover { border-color: #bbb; background-color: white; }
