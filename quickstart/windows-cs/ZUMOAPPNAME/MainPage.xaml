@@ -31,7 +31,7 @@
             <Grid Grid.Row="1">
                 <StackPanel>
 
-                    <local:Task Number="1" Title="Insert a TodoItem" Description="Enter some text below and click Save to insert a new todo item into your database" />
+                    <local:QuickStartTask Number="1" Title="Insert a TodoItem" Description="Enter some text below and click Save to insert a new todo item into your database" />
 
                     <StackPanel Orientation="Horizontal" Margin="72,0,0,0">
                         <TextBox Name="TextInput" Margin="5" MinWidth="300"></TextBox>
@@ -47,7 +47,7 @@
                     <RowDefinition />
                 </Grid.RowDefinitions>
                 <StackPanel>
-                    <local:Task Number="2" Title="Query and Update Data" Description="Click refresh below to load the unfinished TodoItems from your database. Use the checkbox to complete and update your TodoItems" />
+                    <local:QuickStartTask Number="2" Title="Query and Update Data" Description="Click refresh below to load the unfinished TodoItems from your database. Use the checkbox to complete and update your TodoItems" />
                     <Button Margin="72,0,0,0" Name="ButtonRefresh" Click="ButtonRefresh_Click">Refresh</Button>
                 </StackPanel>
 

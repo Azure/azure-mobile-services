@@ -13,6 +13,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using System.Collections.ObjectModel;
 
 namespace ZUMOAPPNAME
 {    
@@ -29,10 +30,7 @@ namespace ZUMOAPPNAME
 
     public sealed partial class MainPage : Page
     {
-        // MobileServiceCollectionView implements ICollectionView (useful for databinding to lists) and 
-        // is integrated with your Mobile Service to make it easy to bind your data to the ListView
-        private MobileServiceCollectionView<TodoItem> items;
-
+        private ObservableCollection<TodoItem> items;
         private IMobileServiceTable<TodoItem> todoTable = App.MobileService.GetTable<TodoItem>();
 
         public MainPage()
@@ -48,13 +46,15 @@ namespace ZUMOAPPNAME
             items.Add(todoItem);                        
         }
 
-        private void RefreshTodoItems()
+        private async void RefreshTodoItems()
         {
-            // This code refreshes the entries in the list view be querying the TodoItems table.
+            // This code refreshes the entries in the list view by querying the TodoItems table.
             // The query excludes completed TodoItems
-            items = todoTable
+            var results = await todoTable
                 .Where(todoItem => todoItem.Complete == false)
-                .ToCollectionView();
+                .ToListAsync();
+
+            items = new ObservableCollection<TodoItem>(results);
             ListItems.ItemsSource = items;
         }
 
