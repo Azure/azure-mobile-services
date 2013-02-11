@@ -68,7 +68,10 @@ public class ToDoActivity extends Activity {
 		try {
 			// Create the Mobile Service Client instance, using the provided
 			// Mobile Service URL and key
-			mClient = new MobileServiceClient("ZUMOAPPURL", "ZUMOAPPKEY", this).withFilter(new ProgressFilter());
+			mClient = new MobileServiceClient(
+					"ZUMOAPPURL",
+					"ZUMOAPPKEY", 
+					this).withFilter(new ProgressFilter());
 
 			// Get the Mobile Service Table instance to use
 			mToDoTable = mClient.getTable(ToDoItem.class);
@@ -79,7 +82,7 @@ public class ToDoActivity extends Activity {
 			mAdapter = new ToDoItemAdapter(this, R.layout.row_list_to_do);
 			ListView listViewToDo = (ListView) findViewById(R.id.listViewToDo);
 			listViewToDo.setAdapter(mAdapter);
-
+		
 			// Load the items from the Mobile Service
 			refreshItemsFromTable();
 
