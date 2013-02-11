@@ -70,7 +70,7 @@ public class ToDoActivity extends Activity {
 			// Mobile Service URL and key
 			mClient = new MobileServiceClient(
 					"ZUMOAPPURL",
-					"ZUMOAPPKEY", 
+					"ZUMOAPPKEY",
 					this).withFilter(new ProgressFilter());
 
 			// Get the Mobile Service Table instance to use
@@ -238,7 +238,7 @@ public class ToDoActivity extends Activity {
 
 				@Override
 				public void run() {
-					mProgressBar.setVisibility(ProgressBar.VISIBLE);
+					if (mProgressBar != null) mProgressBar.setVisibility(ProgressBar.VISIBLE);
 				}
 			});
 			
@@ -250,11 +250,11 @@ public class ToDoActivity extends Activity {
 
 						@Override
 						public void run() {
-							mProgressBar.setVisibility(ProgressBar.GONE);
+							if (mProgressBar != null) mProgressBar.setVisibility(ProgressBar.GONE);
 						}
 					});
 					
-					responseCallback.onResponse(response, exception);
+					if (responseCallback != null)  responseCallback.onResponse(response, exception);
 				}
 			});
 		}
