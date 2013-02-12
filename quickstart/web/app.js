@@ -17,9 +17,8 @@ $(function() {
                     .append($('<div>').append($('<input class="item-text">').val(item.text)));
             });
 
-            $('#todo-items').empty().append(listItems);
+            $('#todo-items').empty().append(listItems).toggle(listItems.length > 0);
             $('#summary').html('<strong>' + todoItems.length + '</strong> item(s)');
-            $('article').toggle(listItems.length > 0);
         });
     }
 

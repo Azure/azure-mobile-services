@@ -6,15 +6,18 @@
         <!--[if lt IE 9]><script src="http://cdnjs.cloudflare.com/ajax/libs/html5shiv/3.6.1/html5shiv.js"></script><![endif]-->
     </head>
     <body>
-        <div id='container'>
-            <header>Todo list</header>
-
-            <form id='add-item'>
-                <button type='submit'>Add</button>
-                <div><input type='text' id='new-item-text' placeholder='Enter new task' /></div>
-            </form>
-
+        <div id='wrapper'>
             <article>
+                <header>
+                    <h2>Windows Azure</h2>
+                    <h1>Mobile Services</h1>
+
+                    <form id='add-item'>
+                        <button type='submit'>Add</button>
+                        <div><input type='text' id='new-item-text' placeholder='Enter new task' /></div>
+                    </form>
+                </header>
+
                 <ul id='todo-items'></ul>
                 <p id='summary'>Loading...</p>
             </article>
