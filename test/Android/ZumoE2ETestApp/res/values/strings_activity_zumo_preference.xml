@@ -8,6 +8,8 @@
 	<string name="pref_mobile_service_url">Mobile Service URL</string>
     <string name="pref_default_mobile_service_url">https://myappurl.azure-mobile.net</string>
     <string name="pref_mobile_service_key">Mobile Service Key</string>
-    <string name="pref_default_mobile_service_key">1a2s3c4d</string>
+    <string name="pref_default_mobile_service_key">1a2b3c4d</string>
+    <string name="pref_log_post_url">Log POST URL</string>
+    <string name="pref_default_log_post_url"></string>
     
 </resources>

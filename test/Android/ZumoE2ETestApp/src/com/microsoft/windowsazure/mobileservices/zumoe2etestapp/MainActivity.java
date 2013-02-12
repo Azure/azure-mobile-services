@@ -20,23 +20,30 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.List;
+
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.ClipboardManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebView;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
 
@@ -152,20 +159,52 @@ public class MainActivity extends Activity {
 			AlertDialog.Builder logDialogBuilder = new AlertDialog.Builder(this);
 			logDialogBuilder.setTitle("Log");
 
-			final EditText editText = new EditText(this);
-			editText.setText(mLog.toString());
-			editText.setKeyListener(null);
-
+			final WebView webView = new WebView(this);
+			
+			String logContent = TextUtils.htmlEncode(mLog.toString()).replace("\n", "<br />");
+			String logHtml = "<html><body><pre>" + logContent + "</pre></body></html>";
+			webView.loadData(logHtml, "text/html", "utf-8");
+			
 			logDialogBuilder.setPositiveButton("Copy", new DialogInterface.OnClickListener() {
 
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					ClipboardManager clipboardManager = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
-					clipboardManager.setText(editText.getText());
+					clipboardManager.setText(mLog.toString());
+				}
+			});
+			
+			final String postContent = mLog.toString();
+			
+			logDialogBuilder.setNeutralButton("Post data", new DialogInterface.OnClickListener() {
+				
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					new AsyncTask<Void, Void, Void>() {
+
+						@Override
+						protected Void doInBackground(Void... params) {
+							try {
+								String url = getLogPostURL();
+								if (url != null && url.trim() != "") {
+									HttpPost post = new HttpPost();
+									post.setEntity(new StringEntity(postContent, MobileServiceClient.UTF8_ENCODING));
+									
+									post.setURI(new URI(url));
+									
+									new DefaultHttpClient().execute(post);
+								}
+							} catch (Exception e) {
+								// Wasn't able to post the data. Do nothing
+							}
+							
+							return null;
+						}	
+					}.execute();
 				}
 			});
 
-			logDialogBuilder.setView(editText);
+			logDialogBuilder.setView(webView);
 
 			logDialogBuilder.create().show();
 			return true;
@@ -228,6 +267,7 @@ public class MainActivity extends Activity {
 				if (e != null) {
 					StringBuilder sb = new StringBuilder();
 					while (e != null) {
+						sb.append(e.getClass().getSimpleName() + ": ");
 						sb.append(e.getMessage());
 						sb.append(" // ");
 						e = e.getCause();
@@ -240,11 +280,18 @@ public class MainActivity extends Activity {
 				adapter.notifyDataSetChanged();
 				log("TEST LOG", test.getLog());
 				log("TEST COMPLETED", test.getName() + " - " + result.getStatus().toString() + " - Ex: " + exMessage);
+				logSeparator();
 			}
 		});
 
 	}
 
+	private void logSeparator() {
+		mLog.append("\n");
+		mLog.append("----\n");
+		mLog.append("\n");
+	}
+	
 	@SuppressWarnings("unused")
 	private void log(String content) {
 		log("Info", content);
@@ -264,6 +311,10 @@ public class MainActivity extends Activity {
 
 	private String getMobileServiceKey() {
 		return mPrefManager.getString(Constants.PREFERENCE_MOBILE_SERVICE_KEY, "");
+	}
+	
+	private String getLogPostURL() {
+		return mPrefManager.getString(Constants.PREFERENCE_LOG_POST_URL, "");
 	}
 
 	private MobileServiceClient createMobileServiceClient() throws MalformedURLException {
