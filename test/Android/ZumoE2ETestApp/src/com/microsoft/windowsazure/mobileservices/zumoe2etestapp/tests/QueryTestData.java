@@ -92,7 +92,7 @@ public class QueryTestData {
 		allMovies.add(new Movie(false, 130, "PG", getUTCDate(1947, 1, 6),
 				"It's a Wonderful Life", 1946));
 		allMovies.add(new Movie(false, 110, "R", getUTCDate(1994, 11, 18),
-				"L?on: The Professional", 1994));
+				"Léon: The Professional", 1994));
 		allMovies.add(new Movie(false, 110, null, getUTCDate(1950, 8, 24),
 				"Sunset Blvd.", 1950));
 		allMovies.add(new Movie(false, 113, "R", getUTCDate(2000, 10, 11),
@@ -154,7 +154,7 @@ public class QueryTestData {
 		allMovies.add(new Movie(false, 154, "R", getUTCDate(1986, 7, 18),
 				"Aliens", 1986));
 		allMovies.add(new Movie(false, 98, "G", getUTCDate(2008, 6, 27),
-				"WALL?E", 2008));
+				"WALL-E", 2008));
 		allMovies.add(new Movie(false, 137, "R", getUTCDate(2006, 3, 23),
 				"The Lives of Others", 2006));
 		allMovies.add(new Movie(false, 136, "R", getUTCDate(1972, 2, 2),
@@ -487,6 +487,8 @@ public class QueryTestData {
 				"Rosemary's Baby", 1968));
 		allMovies.add(new Movie(false, 104, null, getUTCDate(1950, 10, 12),
 				"Harvey", 1950));
+		allMovies.add(new Movie(false, 117, "PG", getUTCDate(1984, 3, 11),
+				"Nauticaä of the Valley of the Wind", 1984));
 		allMovies.add(new Movie(false, 109, "R", getUTCDate(2009, 1, 30),
 				"The Wrestler", 2008));
 		allMovies.add(new Movie(true, 133, null, getUTCDate(1930, 8, 23),

@@ -57,8 +57,8 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.Roun
 
 public class MiscTests extends TestGroup {
 
-	protected static final String ROUND_TRIP_TABLE_NAME = "roundTripTable";
-	protected static final String PARAM_TEST_TABLE_NAME = "paramsTestTable";
+	protected static final String ROUND_TRIP_TABLE_NAME = "droidRoundTripTable";
+	protected static final String PARAM_TEST_TABLE_NAME = "ParamsTestTable";
 	
 	
 	public MiscTests() {

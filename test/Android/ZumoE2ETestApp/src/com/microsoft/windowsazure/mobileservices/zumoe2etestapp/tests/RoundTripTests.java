@@ -48,7 +48,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.Roun
 
 public class RoundTripTests extends TestGroup {
 
-	protected static final String ROUND_TRIP_TABLE_NAME = "roundTripTable";
+	protected static final String ROUND_TRIP_TABLE_NAME = "droidRoundTripTable";
 
 	public RoundTripTests() {
 		super("RoundTrip tests");
