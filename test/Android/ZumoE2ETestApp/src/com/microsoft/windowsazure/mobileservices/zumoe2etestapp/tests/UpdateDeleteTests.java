@@ -50,7 +50,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.Roun
 
 public class UpdateDeleteTests extends TestGroup {
 
-	protected static final String ROUNDTRIP_TABLE_NAME = "roundTripTable";
+	protected static final String ROUNDTRIP_TABLE_NAME = "droidRoundTripTable";
 
 	public UpdateDeleteTests() {
 		super("Insert/Update/Delete Tests");

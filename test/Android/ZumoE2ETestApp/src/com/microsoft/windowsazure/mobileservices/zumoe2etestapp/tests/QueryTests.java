@@ -66,7 +66,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.Movi
 
 public class QueryTests extends TestGroup {
 
-	protected static final String MOVIES_TABLE_NAME = "movies";
+	protected static final String MOVIES_TABLE_NAME = "droidMovies";
 
 	@SuppressWarnings("unchecked")
 	public QueryTests() {

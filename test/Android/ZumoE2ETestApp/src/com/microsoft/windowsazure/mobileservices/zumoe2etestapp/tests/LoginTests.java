@@ -39,22 +39,24 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestSt
 
 public class LoginTests extends TestGroup {
 
-	protected static final String MOVIES_TABLE_NAME = "movies";
+	protected static final String APPLICATION_PERMISSION_TABLE_NAME = "droidApplication";
+	protected static final String USER_PERMISSION_TABLE_NAME = "droidAuthenticated";
+	protected static final String ADMIN_PERMISSION_TABLE_NAME = "droidAdmin";
 
 	public LoginTests() {
 		super("Login tests");
 
 		this.addTest(createLogoutTest());
-		this.addTest(createCRUDTest("application", null, TablePermission.Application, false));
-		this.addTest(createCRUDTest("authenticated", null, TablePermission.User, false));
-		this.addTest(createCRUDTest("admin", null, TablePermission.Admin, false));
+		this.addTest(createCRUDTest(APPLICATION_PERMISSION_TABLE_NAME, null, TablePermission.Application, false));
+		this.addTest(createCRUDTest(USER_PERMISSION_TABLE_NAME, null, TablePermission.User, false));
+		this.addTest(createCRUDTest(ADMIN_PERMISSION_TABLE_NAME, null, TablePermission.Admin, false));
 
 		for (MobileServiceAuthenticationProvider provider : MobileServiceAuthenticationProvider.values()) {
 			this.addTest(createLogoutTest());
 			this.addTest(createLoginTest(provider));
-			this.addTest(createCRUDTest("Application", provider, TablePermission.Application, true));
-			this.addTest(createCRUDTest("Authenticated", provider, TablePermission.User, true));
-			this.addTest(createCRUDTest("Admin", provider, TablePermission.Admin, true));
+			this.addTest(createCRUDTest(APPLICATION_PERMISSION_TABLE_NAME, provider, TablePermission.Application, true));
+			this.addTest(createCRUDTest(USER_PERMISSION_TABLE_NAME, provider, TablePermission.User, true));
+			this.addTest(createCRUDTest(ADMIN_PERMISSION_TABLE_NAME, provider, TablePermission.Admin, true));
 		}
 	}
 
@@ -69,6 +71,7 @@ public class LoginTests extends TestGroup {
 					@Override
 					public void onCompleted(MobileServiceUser user, Exception exception, ServiceFilterResponse response) {
 						TestResult result = new TestResult();
+						log("Logged in as " + user.getUserId());
 						result.setStatus(client.getCurrentUser() != null ? TestStatus.Passed : TestStatus.Failed);
 						result.setTestCase(testCase);
 
@@ -92,8 +95,9 @@ public class LoginTests extends TestGroup {
 
 			@Override
 			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
-
+				
 				client.logout();
+				log("Logged out");
 				TestResult result = new TestResult();
 				result.setTestCase(this);
 				result.setStatus(client.getCurrentUser() == null ? TestStatus.Passed : TestStatus.Failed);
