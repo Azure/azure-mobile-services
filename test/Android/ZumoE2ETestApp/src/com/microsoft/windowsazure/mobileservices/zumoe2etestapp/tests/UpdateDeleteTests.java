@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
 
-import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
@@ -91,11 +90,11 @@ public class UpdateDeleteTests extends TestGroup {
 				.getAsJsonObject(), true, null));
 
 		JsonObject toUpdate = parser.parse(toUpdateJsonString).getAsJsonObject();
-		toUpdate.add("string1", JsonNull.INSTANCE);
-		toUpdate.add("bool1", JsonNull.INSTANCE);
-		toUpdate.add("complexType2", JsonNull.INSTANCE);
-		toUpdate.add("complexType1", JsonNull.INSTANCE);
-		toUpdate.add("int1", JsonNull.INSTANCE);
+		toUpdate.add("string1", null);
+		toUpdate.add("bool1", null);
+		toUpdate.add("complexType2", null);
+		toUpdate.add("complexType1", null);
+		toUpdate.add("int1", null);
 
 		this.addTest(createUntypedUpdateTest("Update typed item, setting values to null", parser.parse(toInsertJsonString).getAsJsonObject(), toUpdate, true,
 				null));
