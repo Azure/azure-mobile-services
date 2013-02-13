@@ -380,7 +380,7 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
     
     [userInfo setValue:description forKey:NSLocalizedDescriptionKey];
     
-    return [NSError errorWithDomain:MSErrorDomain
+    return [NSError errorWithDomain:MSLoginViewErrorDomain
                                code:errorCode
                            userInfo:userInfo];
 }

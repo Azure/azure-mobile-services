@@ -166,11 +166,14 @@
     // If there is not an MSLoginView, create one
     if (!loginView) {
         
+        // Ensure we are using HTTPS
+        NSURL *baseUrl = [[NSURL alloc] initWithScheme:@"https"
+                                        host:self.client.applicationURL.host
+                                        path:self.client.applicationURL.path];
         CGRect frame = [[UIScreen mainScreen] applicationFrame];
-        NSURL *start = [self.client.applicationURL URLByAppendingPathComponent:
+        NSURL *start = [baseUrl URLByAppendingPathComponent:
                         [NSString stringWithFormat:@"login/%@", self.provider]];
-        NSURL *end = [self.client.applicationURL
-                        URLByAppendingPathComponent:@"login/done"];
+        NSURL *end = [baseUrl URLByAppendingPathComponent:@"login/done"];
         
         MSLoginViewBlock viewCompletion = nil;
         
@@ -228,7 +231,7 @@
     if (error) {
         
         // Convert LoginView errors into general Login errors
-        if (error.domain == MSLoginViewErrorDomain) {
+        if ([error.domain isEqualToString:MSLoginViewErrorDomain]) {
             if (error.code == MSLoginViewCanceled) {
                 newError = [self errorForLoginCanceled];
             }
