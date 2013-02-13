@@ -141,6 +141,24 @@
                  @"description was: %@", description);
 }
 
+-(void)testDataFromItemErrorWithIdUpperCaseNotAllowed
+{
+    NSError *error = nil;
+    NSDictionary *item = @{ @"Id" : @5, @"name" : @"bob" };
+    NSData *data = [serializer dataFromItem:item idAllowed:NO orError:&error];
+    
+    STAssertNil(data, @"data was not nil after serializing item.");
+    STAssertNotNil(error, @"error was nil after serializing item.");
+    STAssertTrue(error.domain == MSErrorDomain,
+                 @"error domain should have been MSErrorDomain.");
+    STAssertTrue(error.code == MSExistingItemIdWithRequest,
+                 @"error code should have been MSExistingItemIdWithRequest.");
+    
+    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+    STAssertTrue([description isEqualToString:@"The item provided must not have an id."],
+                 @"description was: %@", description);
+}
+
 -(void)testDataFromItemErrorWithIdNotAllowedAndNoId
 {
     NSError *error = nil;
@@ -156,7 +174,6 @@
     
     STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
 }
-
 
 # pragma mark * itemIdFromItem: Tests
 

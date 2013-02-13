@@ -23,10 +23,10 @@
 
 
 NSString *const idKey = @"id";
-NSString *const resultsKey =@"results";
-NSString *const countKey =@"count";
-NSString *const errorKey =@"error";
-NSString *const descriptionKey =@"description";
+NSString *const resultsKey = @"results";
+NSString *const countKey = @"count";
+NSString *const errorKey = @"error";
+NSString *const descriptionKey = @"description";
 
 
 #pragma mark * MSJSONSerializer Implementation
@@ -35,7 +35,7 @@ NSString *const descriptionKey =@"description";
 @implementation MSJSONSerializer
 
 static MSJSONSerializer *staticJSONSerializerSingleton;
-
+static NSArray *allIdKeys;
 
 #pragma mark * Public Static Singleton Constructor
 
@@ -49,6 +49,14 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
     return  staticJSONSerializerSingleton;
 }
 
++(NSArray *) AllIdKeys
+{
+    if (allIdKeys == nil) {
+        allIdKeys = [NSArray arrayWithObjects:idKey, @"Id", @"ID", @"iD", nil];
+    }
+    
+    return  allIdKeys;
+}
 
 # pragma mark * MSSerializer Protocol Implementation
 
@@ -77,10 +85,13 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
             else {
                 
                 // Then get the value of the id key; if it exists,
-                // this is an error
-                id itemId = [item objectForKey:idKey];
-                if (itemId) {
-                    localError = [self errorForExistingItemId];
+                // this is an error; look for all id's regardless of case
+                for (id key in MSJSONSerializer.AllIdKeys) {
+                    id itemId = [item objectForKey:key];
+                    if (itemId) {
+                        localError = [self errorForExistingItemId];
+                        break;
+                    }
                 }
             }
         }

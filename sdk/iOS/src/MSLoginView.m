@@ -361,7 +361,7 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
 -(NSError *) errorForLoginViewCanceled
 {
     return [self errorWithDescriptionKey:@"The login operation was canceled."
-                            andErrorCode:MSLoginViewFailed
+                            andErrorCode:MSLoginViewCanceled
                              andUserInfo:nil];
 }
 

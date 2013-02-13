@@ -76,7 +76,7 @@ NSString *const inlineCountNone = @"none";
     
     // Add the itemId; NSURL will do the right thing and account for the
     // query string if there is one
-    if (url) {
+    if (itemId) {
         url = [url URLByAppendingPathComponent:itemId];
     }
     

@@ -73,12 +73,12 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
 
 
 // Sends a request to the Windows Azure Mobile Service to insert the given
-// item into the table. The item should not have an id.
+// item into the table. The item must not have an id.
 -(void) insert:(NSDictionary *)item completion:(MSItemBlock)completion;
 
 // Sends a request to the Windows Azure Mobile Service to insert the given
 // item into the table. Addtional user-defined parameters are sent in the
-// request query string. The item should not have an id.
+// request query string. The item must not have an id.
 -(void) insert:(NSDictionary *)item
     parameters:(NSDictionary *)parameters
     completion:(MSItemBlock)completion;
