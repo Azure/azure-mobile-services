@@ -75,7 +75,7 @@ static NSArray *allIdKeys;
     else {
         
         // Ensure that the item doesn't already have an id if
-        // an id is not allows
+        // an id is not allowed
         if (!idAllowed) {
             
             // Make sure this is a dictionary before trying to get the id
