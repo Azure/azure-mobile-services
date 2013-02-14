@@ -23,7 +23,7 @@
 
 NSString *const sdkVersion = @"1.0";
 NSString *const sdkLanguage = @"objective-c";
-NSString *const userAgentValueFormat = @"ZUMO/%@ (%@ %@ %@ %@) %@/%@";
+NSString *const userAgentValueFormat = @"ZUMO/%@ (lang=%@; os=%@; os_version=%@; arch=%@)";
 NSString *const simulatorModel = @"iOSSimulator";
 NSString *const unknownValue = @"--";
 
@@ -42,8 +42,6 @@ NSString *const unknownValue = @"--";
     NSString *model = nil;
     NSString *OS = nil;
     NSString *OSversion = nil;
-    NSString *appName = nil;
-    NSString *appVersion = nil;
     
     // Get the device related info
 #if TARGET_IPHONE_SIMULATOR
@@ -57,28 +55,13 @@ NSString *const unknownValue = @"--";
     OSversion = [currentDevice systemVersion];
 #endif
     
-    // Get the app related info
-    NSDictionary *bundleInfo = [[NSBundle mainBundle] infoDictionary];
-    
-    appName = [bundleInfo objectForKey:(NSString*)kCFBundleNameKey];
-    if (!appName) {
-        appName = unknownValue;
-    }
-    
-    appVersion = [bundleInfo objectForKey:(NSString*)kCFBundleVersionKey];
-    if (!appVersion) {
-        appVersion = unknownValue;
-    }
-    
     // Build the user agent string
     NSString *userAgent = [NSString stringWithFormat:userAgentValueFormat,
                            sdkVersion,
-                           model,
+                           sdkLanguage,
                            OS,
                            OSversion,
-                           sdkLanguage,
-                           appName,
-                           appVersion];
+                           model];
     
     return userAgent;
 }
