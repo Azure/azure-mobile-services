@@ -159,7 +159,7 @@ namespace ZumoE2ETestApp.Tests
                             orderby m.ReleaseDate descending
                             select new
                             {
-                                Date = m.ReleaseDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                                Date = m.ReleaseDate.ToUniversalTime().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                                 Title = m.Title
                             };
                 var newPage = new MoviesDisplayPage();
