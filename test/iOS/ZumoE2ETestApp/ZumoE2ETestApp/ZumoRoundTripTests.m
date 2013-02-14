@@ -112,7 +112,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
     }]];
     
     // Negative scenarios
-    [result addObject:[ZumoTest createTestWithName:@"New column with null value" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+    [result addObject:[ZumoTest createTestWithName:@"(Neg) New column with null value" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client getTable:tableName];
         [table insert:@{@"ColumnWhichDoesNotExist":[NSNull null]} completion:^(NSDictionary *item, NSError *err) {
@@ -134,6 +134,38 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
             completion(passed);
         }];
     }]];
+    
+    NSArray *idNames = @[@"id", @"ID", @"Id", @"iD"];
+    for (NSString *name in idNames) {
+        NSString *idName = name;
+        NSString *testName = [NSString stringWithFormat:@"(Neg) Insert element with id field: '%@'", idName];
+        [result addObject:[ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+            MSClient *client = [[ZumoTestGlobals sharedInstance] client];
+            MSTable *table = [client getTable:tableName];
+            NSMutableDictionary *item = [[NSMutableDictionary alloc] init];
+            [item setValue:@"hello" forKey:@"string1"];
+            [item setValue:@1 forKey:idName];
+            [table insert:item completion:^(NSDictionary *inserted, NSError *err) {
+                BOOL passed;
+                if (!err) {
+                    [test addLog:[NSString stringWithFormat:@"Error, adding item with 'id' field should fail, but insert worked: %@", inserted]];
+                    passed = NO;
+                } else {
+                    if (err.code == MSExistingItemIdWithRequest) {
+                        [test addLog:@"Test passed, got correct error"];
+                        passed = YES;
+                    } else {
+                        [test addLog:[NSString stringWithFormat:@"Expected error code %d, got %d", MSExistingItemIdWithRequest, err.code]];
+                        passed = NO;
+                    }
+                }
+                
+                [test setTestStatus:(passed ? TSPassed : TSFailed)];
+                completion(passed);
+            }];
+
+        }]];
+    }
     
     return result;
 }
