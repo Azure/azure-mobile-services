@@ -188,7 +188,7 @@
 # pragma mark * Private Methods
 
 
--(void) isSuccessfulResponse:(NSHTTPURLResponse *)response
+-(BOOL) isSuccessfulResponse:(NSHTTPURLResponse *)response
                     withData:(NSData *)data
                      orError:(NSError **)error
 {
@@ -201,6 +201,8 @@
         *error =[self.serializer errorFromData:data];
         [self addRequestAndResponse:response toError:error];
     }
+    
+    return isSuccessful;
 }
 
 -(id) itemFromData:(NSData *)data
@@ -238,9 +240,11 @@
     return totalCount;
 }
 
--(void) addRequestAndResponse:(NSHTTPURLResponse *)response
+-(BOOL) addRequestAndResponse:(NSHTTPURLResponse *)response
                 toError:(NSError **)error
 {
+    BOOL isSuccessful = YES;
+    
     if (error && *error) {        
         // Create a new error with request and the response in the userInfo...
         NSMutableDictionary *userInfo = [(*error).userInfo mutableCopy];
@@ -253,8 +257,10 @@
         *error = [NSError errorWithDomain:(*error).domain
                                     code:(*error).code
                                 userInfo:userInfo];
+        isSuccessful = NO;
     }
-
+    
+    return isSuccessful;
 }
 
 @end

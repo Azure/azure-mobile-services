@@ -108,32 +108,38 @@ NSString *const httpDelete = @"DELETE";
 
 +(MSTableItemRequest *) requestToInsertItem:(id)item
                                   withTable:(MSTable *)table
+                             withParameters:(NSDictionary *)parameters
                              withSerializer:(id<MSSerializer>)serializer
                                  completion:(MSItemBlock)completion
 {
     MSTableItemRequest *request = nil;
     NSError *error = nil;
-    
+
     // Create the URL
-    NSURL *url = [MSTableURLBuilder URLForTable:table];
-    
-    // Create the request
-    request = [[MSTableItemRequest alloc] initWithURL:url
-                                            withTable:table
-                                       withSerializer:serializer];
-    
-    // Create the body or capture the error from serialization
-    NSData *data = [serializer dataFromItem:item orError:&error];
+    NSURL *url = [MSTableURLBuilder URLForTable:table
+                                 withParameters:parameters
+                                        orError:&error];
     if (!error) {
-        // Set the body
-        request.HTTPBody = data;
+        // Create the request
+        request = [[MSTableItemRequest alloc] initWithURL:url
+                                                withTable:table
+                                           withSerializer:serializer];
         
-        // Set the additionl properties
-        request.requestType = MSTableInsertRequestType;
-        request.item = item;
-        
-        // Set the method and headers
-        request.HTTPMethod = httpPost;
+        // Create the body or capture the error from serialization
+        NSData *data = [serializer dataFromItem:item
+                                      idAllowed:NO
+                                        orError:&error];
+        if (!error) {
+            // Set the body
+            request.HTTPBody = data;
+            
+            // Set the additionl properties
+            request.requestType = MSTableInsertRequestType;
+            request.item = item;
+            
+            // Set the method and headers
+            request.HTTPMethod = httpPost;
+        }
     }
     
     // If there was an error, call the completion and make sure
@@ -150,6 +156,7 @@ NSString *const httpDelete = @"DELETE";
 
 +(MSTableItemRequest *) requestToUpdateItem:(id)item
                                   withTable:(MSTable *)table
+                             withParameters:(NSDictionary *)parameters
                              withSerializer:(id<MSSerializer>)serializer
                                  completion:(MSItemBlock)completion
 
@@ -166,28 +173,33 @@ NSString *const httpDelete = @"DELETE";
 
             // Create the URL
             NSURL *url = [MSTableURLBuilder URLForTable:table
-                                       withItemIdString:idString];
-        
-            // Create the request
-            request = [[MSTableItemRequest alloc] initWithURL:url
-                                                    withTable:table
-                                               withSerializer:serializer];
-        
-            // Create the body or capture the error from serialization
-            NSError *error = nil;
-            NSData *data = [serializer dataFromItem:item orError:&error];
+                                       withItemIdString:idString
+                                         withParameters:parameters
+                                                orError:&error];
             if (!error) {
-
-                // Set the body
-                request.HTTPBody = data;
                 
-                // Set the properties
-                request.requestType = MSTableUpdateRequestType;
-                request.item = item;
+                // Create the request
+                request = [[MSTableItemRequest alloc] initWithURL:url
+                                                        withTable:table
+                                                   withSerializer:serializer];
+            
+                // Create the body or capture the error from serialization
+                NSData *data = [serializer dataFromItem:item
+                                              idAllowed:YES
+                                                orError:&error];
+                if (!error) {
 
-                
-                // Set the method and headers
-                request.HTTPMethod = httpPatch;
+                    // Set the body
+                    request.HTTPBody = data;
+                    
+                    // Set the properties
+                    request.requestType = MSTableUpdateRequestType;
+                    request.item = item;
+
+                    
+                    // Set the method and headers
+                    request.HTTPMethod = httpPatch;
+                }
             }
         }
     }
@@ -206,6 +218,7 @@ NSString *const httpDelete = @"DELETE";
 
 +(MSTableDeleteRequest *) requestToDeleteItem:(id)item
                                     withTable:(MSTable *)table
+                               withParameters:(NSDictionary *)parameters
                                withSerializer:(id<MSSerializer>)serializer
                                    completion:(MSDeleteBlock)completion
 {
@@ -219,6 +232,7 @@ NSString *const httpDelete = @"DELETE";
         // Get the request from the other constructor
         request = [MSTableRequest requestToDeleteItemWithId:itemId
                                                   withTable:table
+                                             withParameters:parameters
                                              withSerializer:serializer
                                                     completion:completion];
         
@@ -239,9 +253,10 @@ NSString *const httpDelete = @"DELETE";
 }
 
 +(MSTableDeleteRequest *) requestToDeleteItemWithId:(id)itemId
-                                    withTable:(MSTable *)table
-                               withSerializer:(id<MSSerializer>)serializer
-                                      completion:(MSDeleteBlock)completion
+                                          withTable:(MSTable *)table
+                                     withParameters:(NSDictionary *)parameters
+                                     withSerializer:(id<MSSerializer>)serializer
+                                         completion:(MSDeleteBlock)completion
 {
     MSTableDeleteRequest *request = nil;
     NSError *error = nil;
@@ -252,19 +267,23 @@ NSString *const httpDelete = @"DELETE";
     
         // Create the URL
         NSURL *url = [MSTableURLBuilder URLForTable:table
-                                   withItemIdString:idString];
-        
-        // Create the request
-        request = [[MSTableDeleteRequest alloc] initWithURL:url
-                                                  withTable:table
-                                             withSerializer:serializer];
-        
-        // Set the additional properties
-        request.requestType = MSTableDeleteRequestType;
-        request.itemId = itemId;
-        
-        // Set the method and headers
-        request.HTTPMethod = httpDelete;
+                                   withItemIdString:idString
+                                     withParameters:parameters
+                                            orError:&error];
+        if (!error) {
+            
+            // Create the request
+            request = [[MSTableDeleteRequest alloc] initWithURL:url
+                                                      withTable:table
+                                                 withSerializer:serializer];
+            
+            // Set the additional properties
+            request.requestType = MSTableDeleteRequestType;
+            request.itemId = itemId;
+            
+            // Set the method and headers
+            request.HTTPMethod = httpDelete;
+        }
     }
     
     // If there was an error, call the completion and make sure
@@ -281,6 +300,7 @@ NSString *const httpDelete = @"DELETE";
 
 +(MSTableItemRequest *) requestToReadWithId:(id)itemId
                                   withTable:(MSTable *)table
+                             withParameters:(NSDictionary *)parameters
                              withSerializer:(id<MSSerializer>)serializer
                                  completion:(MSItemBlock)completion
 {
@@ -293,19 +313,23 @@ NSString *const httpDelete = @"DELETE";
 
         // Create the URL
         NSURL *url =  [MSTableURLBuilder URLForTable:table
-                                    withItemIdString:idString];
-        
-        // Create the request
-        request = [[MSTableItemRequest alloc] initWithURL:url
-                                                withTable:table
-                                           withSerializer:serializer];
-        
-        // Set the additional properties
-        request.requestType = MSTableReadRequestType;
-        request.itemId = itemId;
-        
-        // Set the method and headers
-        request.HTTPMethod = httpGet;
+                                    withItemIdString:idString
+                                      withParameters:parameters
+                                             orError:&error];
+        if (!error) {
+            
+            // Create the request
+            request = [[MSTableItemRequest alloc] initWithURL:url
+                                                    withTable:table
+                                               withSerializer:serializer];
+            
+            // Set the additional properties
+            request.requestType = MSTableReadRequestType;
+            request.itemId = itemId;
+            
+            // Set the method and headers
+            request.HTTPMethod = httpGet;
+        }
     }
     
     // If there was an error, call the completion and make sure
@@ -332,7 +356,7 @@ NSString *const httpDelete = @"DELETE";
     
     // Create the request
     request = [[MSTableReadQueryRequest alloc] initWithURL:url
-                                                withTable:table
+                                                 withTable:table
                                             withSerializer:serializer];
     
     // Set the additional properties
