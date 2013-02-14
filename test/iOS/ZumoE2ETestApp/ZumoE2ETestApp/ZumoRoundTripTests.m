@@ -256,9 +256,36 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
                             [test setTestStatus:TSFailed];
                             completion(NO);
                         } else {
-                            [test addLog:@"Test passed"];
-                            [test setTestStatus:TSPassed];
-                            completion(YES);
+                            if (type == RTTString && value != [NSNull null] && ((NSString *)value).length < 100) {
+                                // Additional validation: query for the inserted data
+                                NSString *rtString = value;
+                                NSPredicate *predicate = [NSPredicate predicateWithFormat:@"id == %d && string1 == %@", [itemId intValue], rtString];
+                                [table readWhere:predicate completion:^(NSArray *items, NSInteger totalCount, NSError *err3) {
+                                    BOOL passed = NO;
+                                    if (err3) {
+                                        [test addLog:[NSString stringWithFormat:@"Error retrieving data: %@", err3]];
+                                    } else {
+                                        if ([items count] != 1) {
+                                            [test addLog:[NSString stringWithFormat:@"Expected to receive 1 element; received %d: %@", [items count], items]];
+                                        } else {
+                                            NSNumber *readId = items[0][@"id"];
+                                            if ([itemId isEqualToNumber:readId]) {
+                                                [test addLog:@"Test passed"];
+                                                passed = YES;
+                                            } else {
+                                                [test addLog:[NSString stringWithFormat:@"Received invalid item: %@", items]];
+                                            }
+                                        }
+                                    }
+                                    
+                                    [test setTestStatus:(passed ? TSPassed : TSFailed)];
+                                    completion(passed);
+                                }];
+                            } else {
+                                [test addLog:@"Test passed"];
+                                [test setTestStatus:TSPassed];
+                                completion(YES);
+                            }
                         }
                     }
                 }];
