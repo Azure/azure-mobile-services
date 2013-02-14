@@ -71,7 +71,17 @@ public class LoginTests extends TestGroup {
 					@Override
 					public void onCompleted(MobileServiceUser user, Exception exception, ServiceFilterResponse response) {
 						TestResult result = new TestResult();
-						log("Logged in as " + user.getUserId());
+						String userName;
+						if(user == null)
+						{
+							userName = "NULL";
+						}
+						else
+						{
+							userName = user.getUserId();
+						}
+						
+						log("Logged in as " + userName);
 						result.setStatus(client.getCurrentUser() != null ? TestStatus.Passed : TestStatus.Failed);
 						result.setTestCase(testCase);
 
