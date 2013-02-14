@@ -310,15 +310,6 @@ class LoginManager {
 			}
 
 			@Override
-			public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-				if (externalCallback != null) {
-					externalCallback.onCompleted(null, new MobileServiceException(description));
-				}
-
-				dialog.dismiss();
-			}
-
-			@Override
 			public void onPageFinished(WebView view, String url) {
 				if (isStartUrl(url)) {
 					if (externalCallback != null) {
