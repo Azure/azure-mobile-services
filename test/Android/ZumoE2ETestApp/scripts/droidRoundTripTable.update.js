@@ -1,4 +1,4 @@
-function insert(item, user, request) {
+function update(item, user, request) {
     if (item.complexType1) {
         item.complexType1 = JSON.stringify(item.complexType1);
     }

@@ -1,6 +1,6 @@
 function insert(item, user, request) {
     item.id = 1;
-    var table = tables.getTable('movies');
+    var table = tables.getTable('droidMovies');
     table.take(1).read({
         success: function(items) {
             if (items.length > 0) {
@@ -45,3 +45,4 @@ function changeReleaseDate(obj) {
         obj.ReleaseDate = releaseDate;
     }
 }
+
