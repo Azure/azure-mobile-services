@@ -1,3 +1,22 @@
+/*
+Copyright (c) Microsoft Open Technologies, Inc.
+All Rights Reserved
+Apache 2.0 License
+ 
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+ 
+     http://www.apache.org/licenses/LICENSE-2.0
+ 
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ 
+See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
+ */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
 import java.lang.reflect.Type;
@@ -126,80 +145,65 @@ public class SerializationTests extends InstrumentationTestCase {
 		// Serialize instance with all fields defined
 		Person person = new Person(1, "John", 23);
 		String serializedObject = new Gson().toJson(person);
-		JsonObject jsonPerson = new JsonParser().parse(serializedObject)
-				.getAsJsonObject();
+		JsonObject jsonPerson = new JsonParser().parse(serializedObject).getAsJsonObject();
 
 		// Asserts
-		assertEquals("{\"age\":23,\"id\":1,\"name\":\"John\"}",
-				serializedObject);
-		assertEquals(person.getmAge().intValue(), jsonPerson.get("age")
-				.getAsInt());
-		assertEquals(person.getmId().intValue(), jsonPerson.get("id")
-				.getAsInt());
+		assertEquals("{\"age\":23,\"id\":1,\"name\":\"John\"}", serializedObject);
+		assertEquals(person.getmAge().intValue(), jsonPerson.get("age").getAsInt());
+		assertEquals(person.getmId().intValue(), jsonPerson.get("id").getAsInt());
 		assertEquals(person.getmName(), jsonPerson.get("name").getAsString());
 
 		// Serialize instance with not id defined
 		Person person2 = new Person("John", 23);
 		String serializedObject2 = new Gson().toJson(person2);
-		JsonObject jsonPerson2 = new JsonParser().parse(serializedObject2)
-				.getAsJsonObject();
+		JsonObject jsonPerson2 = new JsonParser().parse(serializedObject2).getAsJsonObject();
 
 		// Asserts
 		assertEquals("{\"age\":23,\"name\":\"John\"}", serializedObject2);
-		assertEquals(person.getmAge().intValue(), jsonPerson2.get("age")
-				.getAsInt());
+		assertEquals(person.getmAge().intValue(), jsonPerson2.get("age").getAsInt());
 		assertNull(jsonPerson2.get("id"));
 		assertEquals(person.getmName(), jsonPerson2.get("name").getAsString());
 
 		// Serialize instance with all fields null except id
 		Person person3 = new Person(1);
 		String serializedObject3 = new Gson().toJson(person3);
-		JsonObject jsonPerson3 = new JsonParser().parse(serializedObject3)
-				.getAsJsonObject();
+		JsonObject jsonPerson3 = new JsonParser().parse(serializedObject3).getAsJsonObject();
 
 		// Asserts
 		assertEquals("{\"id\":1}", serializedObject3);
 		assertNull(jsonPerson3.get("age"));
-		assertEquals(person3.getmId().intValue(), jsonPerson3.get("id")
-				.getAsInt());
+		assertEquals(person3.getmId().intValue(), jsonPerson3.get("id").getAsInt());
 		assertNull(jsonPerson3.get("name"));
 	}
 
 	public void testSimpleDeserialization() throws Throwable {
 		// Deserialize instance with all fields defined
 		String serializedObject = "{\"age\":23,\"id\":1,\"name\":\"John\"}";
-		JsonObject jsonPerson = new JsonParser().parse(serializedObject)
-				.getAsJsonObject();
+		JsonObject jsonPerson = new JsonParser().parse(serializedObject).getAsJsonObject();
 		Person person = new Gson().fromJson(serializedObject, Person.class);
 
 		// Asserts
-		assertEquals(jsonPerson.get("age").getAsInt(), person.getmAge()
-				.intValue());
-		assertEquals(jsonPerson.get("id").getAsInt(), person.getmId()
-				.intValue());
+		assertEquals(jsonPerson.get("age").getAsInt(), person.getmAge().intValue());
+		assertEquals(jsonPerson.get("id").getAsInt(), person.getmId().intValue());
 		assertEquals(jsonPerson.get("name").getAsString(), person.getmName());
 
 		// Serialize instance with not id defined
 		String serializedObject2 = "{\"age\":23,\"name\":\"John\"}";
-		JsonObject jsonPerson2 = new JsonParser().parse(serializedObject2)
-				.getAsJsonObject();
+		JsonObject jsonPerson2 = new JsonParser().parse(serializedObject2).getAsJsonObject();
 		Person person2 = new Gson().fromJson(serializedObject2, Person.class);
 
 		// Asserts
-		assertEquals(jsonPerson2.get("age").getAsInt(), person2.getmAge()
-				.intValue());
+		assertEquals(jsonPerson2.get("age").getAsInt(), person2.getmAge().intValue());
 		assertNull(person2.getmId());
 		assertEquals(jsonPerson2.get("name").getAsString(), person2.getmName());
 
 		// Serialize instance with all fields null except id
 		String serializedObject3 = "{\"id\":1}";
-		JsonObject jsonPerson3 = new JsonParser().parse(serializedObject3)
-				.getAsJsonObject();
+		JsonObject jsonPerson3 = new JsonParser().parse(serializedObject3).getAsJsonObject();
 		Person person3 = new Gson().fromJson(serializedObject3, Person.class);
 
 		// Asserts
-		assertEquals(jsonPerson3.get("id").getAsInt(), person3.getmId()
-				.intValue());
+		assertEquals(jsonPerson3.get("id").getAsInt(), person3.getmId().intValue());
 		assertNull(person3.getmName());
 		assertNull(person3.getmAge());
 	}
@@ -208,41 +212,34 @@ public class SerializationTests extends InstrumentationTestCase {
 		// Serialize instance with all fields defined, but excluding those
 		// without Expose attribute
 		Person person = new Person(1, "John", 23);
-		String serializedObject = gsonBuilder
-				.excludeFieldsWithoutExposeAnnotation().create().toJson(person);
+		String serializedObject = gsonBuilder.excludeFieldsWithoutExposeAnnotation().create().toJson(person);
 
-		JsonObject jsonPerson = new JsonParser().parse(serializedObject)
-				.getAsJsonObject();
+		JsonObject jsonPerson = new JsonParser().parse(serializedObject).getAsJsonObject();
 
 		// Asserts
 		assertEquals("{\"id\":1,\"name\":\"John\"}", serializedObject);
 		assertNull(jsonPerson.get("age"));
-		assertEquals(person.getmId().intValue(), jsonPerson.get("id")
-				.getAsInt());
+		assertEquals(person.getmId().intValue(), jsonPerson.get("id").getAsInt());
 		assertEquals(person.getmName(), jsonPerson.get("name").getAsString());
 
 	}
 
 	public void testCustomSerializationWithoutUsingMobileServiceTable() {
-		ComplexPersonTestObject person = new ComplexPersonTestObject("John",
-				"Doe", new Address("1345 Washington St", 1313, "US"));
+		ComplexPersonTestObject person = new ComplexPersonTestObject("John", "Doe", new Address("1345 Washington St", 1313, "US"));
 
-		gsonBuilder.registerTypeAdapter(Address.class,
-				new JsonSerializer<Address>() {
+		gsonBuilder.registerTypeAdapter(Address.class, new JsonSerializer<Address>() {
 
-					@Override
-					public JsonElement serialize(Address arg0, Type arg1,
-							JsonSerializationContext arg2) {
+			@Override
+			public JsonElement serialize(Address arg0, Type arg1, JsonSerializationContext arg2) {
 
-						JsonObject json = new JsonObject();
-						json.addProperty("zipcode", arg0.getZipCode());
-						json.addProperty("country", arg0.getCountry());
-						json.addProperty("streetaddress",
-								arg0.getStreetAddress());
+				JsonObject json = new JsonObject();
+				json.addProperty("zipcode", arg0.getZipCode());
+				json.addProperty("country", arg0.getCountry());
+				json.addProperty("streetaddress", arg0.getStreetAddress());
 
-						return json;
-					}
-				});
+				return json;
+			}
+		});
 
 		String serializedObject = gsonBuilder.create().toJson(person);
 
@@ -254,37 +251,28 @@ public class SerializationTests extends InstrumentationTestCase {
 
 	public void testCustomDeserializationUsingWithoutUsingMobileServiceTable() {
 		String serializedObject = "{\"address\":{\"zipcode\":1313,\"country\":\"US\",\"streetaddress\":\"1345 Washington St\"},\"firstName\":\"John\",\"lastName\":\"Doe\"}";
-		JsonObject jsonObject = new JsonParser().parse(serializedObject)
-				.getAsJsonObject();
+		JsonObject jsonObject = new JsonParser().parse(serializedObject).getAsJsonObject();
 
-		gsonBuilder.registerTypeAdapter(Address.class,
-				new JsonDeserializer<Address>() {
+		gsonBuilder.registerTypeAdapter(Address.class, new JsonDeserializer<Address>() {
 
-					@Override
-					public Address deserialize(JsonElement arg0, Type arg1,
-							JsonDeserializationContext arg2)
-							throws JsonParseException {
-						Address a = new Address(arg0.getAsJsonObject()
-								.get("streetaddress").getAsString(), arg0
-								.getAsJsonObject().get("zipcode").getAsInt(),
-								arg0.getAsJsonObject().get("country")
-										.getAsString());
+			@Override
+			public Address deserialize(JsonElement arg0, Type arg1, JsonDeserializationContext arg2) throws JsonParseException {
+				Address a = new Address(arg0.getAsJsonObject().get("streetaddress").getAsString(), arg0.getAsJsonObject().get("zipcode").getAsInt(), arg0
+						.getAsJsonObject().get("country").getAsString());
 
-						return a;
-					}
+				return a;
+			}
 
-				});
+		});
 
-		ComplexPersonTestObject deserializedPerson = gsonBuilder.create()
-				.fromJson(jsonObject, ComplexPersonTestObject.class);
+		ComplexPersonTestObject deserializedPerson = gsonBuilder.create().fromJson(jsonObject, ComplexPersonTestObject.class);
 
 		// Asserts
 		assertEquals("John", deserializedPerson.getFirstName());
 		assertEquals("Doe", deserializedPerson.getLastName());
 		assertEquals(1313, deserializedPerson.getAddress().getZipCode());
 		assertEquals("US", deserializedPerson.getAddress().getCountry());
-		assertEquals("1345 Washington St", deserializedPerson.getAddress()
-				.getStreetAddress());
+		assertEquals("1345 Washington St", deserializedPerson.getAddress().getStreetAddress());
 	}
 
 	public void testSimpleTreeSerialization() {
@@ -302,8 +290,7 @@ public class SerializationTests extends InstrumentationTestCase {
 				serializedObject);
 	}
 
-	public void testDateSerializationShouldReturnExpectedJson()
-			throws Throwable {
+	public void testDateSerializationShouldReturnExpectedJson() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -311,8 +298,7 @@ public class SerializationTests extends InstrumentationTestCase {
 
 		final String tableName = "MyTableName";
 
-		final GregorianCalendar date = new GregorianCalendar(2013, 0, 22, 10,
-				30, 40);
+		final GregorianCalendar date = new GregorianCalendar(2013, 0, 22, 10, 30, 40);
 		date.setTimeZone(TimeZone.getTimeZone("GMT-4"));
 
 		final DateTestObject dateObject = new DateTestObject(date.getTime());
@@ -323,8 +309,7 @@ public class SerializationTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -332,9 +317,7 @@ public class SerializationTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 						// Store the request content
 						container.setRequestContent(request.getContent());
@@ -344,18 +327,15 @@ public class SerializationTests extends InstrumentationTestCase {
 					}
 				});
 
-				MobileServiceTable table = client.getTable(tableName);
+				MobileServiceTable<DateTestObject> table = client.getTable(tableName, DateTestObject.class);
 
-				table.insert(dateObject,
-						new TableOperationCallback<DateTestObject>() {
+				table.insert(dateObject, new TableOperationCallback<DateTestObject>() {
 
-							@Override
-							public void onCompleted(DateTestObject entity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								latch.countDown();
-							}
-						});
+					@Override
+					public void onCompleted(DateTestObject entity, Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -363,12 +343,10 @@ public class SerializationTests extends InstrumentationTestCase {
 
 		// Asserts
 		// Date should have UTC format (+4 that date value)
-		assertEquals("{\"date\":\"2013-01-22T14:30:40.000Z\"}",
-				container.getRequestContent());
+		assertEquals("{\"date\":\"2013-01-22T14:30:40.000Z\"}", container.getRequestContent());
 	}
 
-	public void testDateDeserializationShouldReturnExpectedEntity()
-			throws Throwable {
+	public void testDateDeserializationShouldReturnExpectedEntity() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -376,8 +354,7 @@ public class SerializationTests extends InstrumentationTestCase {
 
 		final String tableName = "MyTableName";
 
-		final GregorianCalendar calendar = new GregorianCalendar(2013, 0, 22,
-				10, 30, 40);
+		final GregorianCalendar calendar = new GregorianCalendar(2013, 0, 22, 10, 30, 40);
 		calendar.setTimeZone(TimeZone.getTimeZone("GMT-4"));
 
 		final DateTestObject dateObject = new DateTestObject(calendar.getTime());
@@ -388,8 +365,7 @@ public class SerializationTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -397,9 +373,7 @@ public class SerializationTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						// Create a mock response simulating an error
@@ -411,19 +385,16 @@ public class SerializationTests extends InstrumentationTestCase {
 					}
 				});
 
-				MobileServiceTable table = client.getTable(tableName);
+				MobileServiceTable<DateTestObject> table = client.getTable(tableName, DateTestObject.class);
 
-				table.insert(dateObject,
-						new TableOperationCallback<DateTestObject>() {
+				table.insert(dateObject, new TableOperationCallback<DateTestObject>() {
 
-							@Override
-							public void onCompleted(DateTestObject entity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								container.setDateTestObject(entity);
-								latch.countDown();
-							}
-						});
+					@Override
+					public void onCompleted(DateTestObject entity, Exception exception, ServiceFilterResponse response) {
+						container.setDateTestObject(entity);
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -444,8 +415,7 @@ public class SerializationTests extends InstrumentationTestCase {
 		assertEquals(expctedDate.getSeconds(), d.getSeconds());
 	}
 
-	public void testSerializationWithComplexObjectsShouldReturnExpectedJsonUsingUsingMobileServiceTable()
-			throws Throwable {
+	public void testSerializationWithComplexObjectsShouldReturnExpectedJsonUsingUsingMobileServiceTable() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -453,8 +423,7 @@ public class SerializationTests extends InstrumentationTestCase {
 
 		final String tableName = "MyTableName";
 
-		final ComplexPersonTestObject person = new ComplexPersonTestObject(
-				"John", "Doe", new Address("1345 Washington St", 1313, "US"));
+		final ComplexPersonTestObject person = new ComplexPersonTestObject("John", "Doe", new Address("1345 Washington St", 1313, "US"));
 
 		runTestOnUiThread(new Runnable() {
 
@@ -462,8 +431,7 @@ public class SerializationTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -471,9 +439,7 @@ public class SerializationTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 						// Store the request content
 						container.setRequestContent(request.getContent());
@@ -485,36 +451,29 @@ public class SerializationTests extends InstrumentationTestCase {
 					}
 				});
 
-				MobileServiceTable table = client.getTable(tableName);
+				MobileServiceTable<ComplexPersonTestObject> table = client.getTable(tableName, ComplexPersonTestObject.class);
 
-				table.registerSerializer(Address.class,
-						new JsonSerializer<Address>() {
+				client.registerSerializer(Address.class, new JsonSerializer<Address>() {
 
-							@Override
-							public JsonElement serialize(Address arg0,
-									Type arg1, JsonSerializationContext arg2) {
+					@Override
+					public JsonElement serialize(Address arg0, Type arg1, JsonSerializationContext arg2) {
 
-								JsonObject json = new JsonObject();
-								json.addProperty("zipcode", arg0.getZipCode());
-								json.addProperty("country", arg0.getCountry());
-								json.addProperty("streetaddress",
-										arg0.getStreetAddress());
+						JsonObject json = new JsonObject();
+						json.addProperty("zipcode", arg0.getZipCode());
+						json.addProperty("country", arg0.getCountry());
+						json.addProperty("streetaddress", arg0.getStreetAddress());
 
-								return json;
-							}
-						});
+						return json;
+					}
+				});
 
-				table.insert(person,
-						new TableOperationCallback<ComplexPersonTestObject>() {
+				table.insert(person, new TableOperationCallback<ComplexPersonTestObject>() {
 
-							@Override
-							public void onCompleted(
-									ComplexPersonTestObject entity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								latch.countDown();
-							}
-						});
+					@Override
+					public void onCompleted(ComplexPersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -526,8 +485,7 @@ public class SerializationTests extends InstrumentationTestCase {
 				container.getRequestContent());
 	}
 
-	public void testDeserializationWithComplexObjectsShouldReturnExpectedEntityUsingMobileServiceTable()
-			throws Throwable {
+	public void testDeserializationWithComplexObjectsShouldReturnExpectedEntityUsingMobileServiceTable() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -535,8 +493,7 @@ public class SerializationTests extends InstrumentationTestCase {
 
 		final String tableName = "MyTableName";
 
-		final ComplexPersonTestObject person = new ComplexPersonTestObject(
-				"John", "Doe", new Address("1345 Washington St", 1313, "US"));
+		final ComplexPersonTestObject person = new ComplexPersonTestObject("John", "Doe", new Address("1345 Washington St", 1313, "US"));
 
 		runTestOnUiThread(new Runnable() {
 
@@ -544,8 +501,7 @@ public class SerializationTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -553,9 +509,7 @@ public class SerializationTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						// Create a mock response simulating an error
@@ -567,39 +521,28 @@ public class SerializationTests extends InstrumentationTestCase {
 					}
 				});
 
-				MobileServiceTable table = client.getTable(tableName);
+				MobileServiceTable<ComplexPersonTestObject> table = client.getTable(tableName, ComplexPersonTestObject.class);
 
-				table.registerDeserializer(Address.class,
-						new JsonDeserializer<Address>() {
+				client.registerDeserializer(Address.class, new JsonDeserializer<Address>() {
 
-							@Override
-							public Address deserialize(JsonElement arg0,
-									Type arg1, JsonDeserializationContext arg2)
-									throws JsonParseException {
+					@Override
+					public Address deserialize(JsonElement arg0, Type arg1, JsonDeserializationContext arg2) throws JsonParseException {
 
-								Address a = new Address(arg0.getAsJsonObject()
-										.get("streetaddress").getAsString(),
-										arg0.getAsJsonObject().get("zipcode")
-												.getAsInt(), arg0
-												.getAsJsonObject()
-												.get("country").getAsString());
+						Address a = new Address(arg0.getAsJsonObject().get("streetaddress").getAsString(), arg0.getAsJsonObject().get("zipcode").getAsInt(),
+								arg0.getAsJsonObject().get("country").getAsString());
 
-								return a;
-							}
-						});
+						return a;
+					}
+				});
 
-				table.insert(person,
-						new TableOperationCallback<ComplexPersonTestObject>() {
+				table.insert(person, new TableOperationCallback<ComplexPersonTestObject>() {
 
-							@Override
-							public void onCompleted(
-									ComplexPersonTestObject entity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								container.setComplexPerson(entity);
-								latch.countDown();
-							}
-						});
+					@Override
+					public void onCompleted(ComplexPersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+						container.setComplexPerson(entity);
+						latch.countDown();
+					}
+				});
 			}
 		});
 

@@ -1,7 +1,28 @@
+/*
+Copyright (c) Microsoft Open Technologies, Inc.
+All Rights Reserved
+Apache 2.0 License
+ 
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+ 
+     http://www.apache.org/licenses/LICENSE-2.0
+ 
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ 
+See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
+ */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
 import java.net.MalformedURLException;
+import java.net.URLEncoder;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
 import junit.framework.Assert;
@@ -17,6 +38,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.QueryOrder;
@@ -46,28 +68,33 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		super.tearDown();
 	}
 
-	public void testNewMobileServiceTableShouldReturnMobileServiceTable()
-			throws MalformedURLException {
+	public void testNewMobileServiceTableShouldReturnMobileServiceTable() throws MalformedURLException {
 		String tableName = "MyTableName";
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey,
-				getInstrumentation().getTargetContext());
-		MobileServiceTable msTable = new MobileServiceTable(tableName, client);
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		MobileServiceTable<Object> msTable = new MobileServiceTable<Object>(tableName, client, Object.class);
 
-		assertEquals(client, msTable.getClient());
 		assertEquals(tableName, msTable.getTableName());
+
+	}
+
+	public void testNewMobileServiceTableWithNameFromClassShouldReturnMobileServiceTable() throws MalformedURLException {
+		String tableName = "address";
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		MobileServiceTable<Address> msTable = client.getTable(Address.class);
+
+		assertEquals(tableName.toLowerCase(Locale.getDefault()), msTable.getTableName().toLowerCase(Locale.getDefault()));
 
 	}
 
 	public void testNewMobileServiceTableWithNullNameShouldThrowException() {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey,
-					getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e1) {
 			fail("This should not happen");
 		}
 		try {
-			new MobileServiceTable(null, client);
+			new MobileServiceTable<Object>(null, client, Object.class);
 			fail("Expected Exception IllegalArgumentException");
 		} catch (IllegalArgumentException e) {
 			// do nothing, it's OK
@@ -77,13 +104,12 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	public void testNewMobileServiceTableWithEmptyNameShouldThrowException() {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey,
-					getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e1) {
 			fail("This should not happen");
 		}
 		try {
-			new MobileServiceTable("", client);
+			new MobileServiceTable<Object>("", client, Object.class);
 			fail("Expected Exception IllegalArgumentException");
 		} catch (IllegalArgumentException e) {
 			// do nothing, it's OK
@@ -93,13 +119,12 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	public void testNewMobileServiceTableWithWhiteSpacedNameShouldThrowException() {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey,
-					getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e1) {
 			fail("This should not happen");
 		}
 		try {
-			new MobileServiceTable(" ", client);
+			new MobileServiceTable<Object>(" ", client, Object.class);
 			fail("Expected Exception IllegalArgumentException");
 		} catch (IllegalArgumentException e) {
 			// do nothing, it's OK
@@ -108,7 +133,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 	public void testNewMobileServiceTableWithNullClientShouldThrowException() {
 		try {
-			new MobileServiceTable("MyTableName", null);
+			new MobileServiceTable<Object>("MyTableName", null, Object.class);
 			fail("Expected Exception IllegalArgumentException");
 		} catch (IllegalArgumentException e) {
 			// do nothing, it's OK
@@ -117,12 +142,11 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 	public void testWhereWithNullQueryShouldThrowException() {
 		MobileServiceClient client = null;
-		MobileServiceTable msTable = null;
+		MobileServiceTable<Object> msTable = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey,
-					getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 			String tableName = "MyTableName";
-			msTable = new MobileServiceTable(tableName, client);
+			msTable = new MobileServiceTable<Object>(tableName, client, Object.class);
 		} catch (MalformedURLException e1) {
 			fail("This should not happen");
 		}
@@ -153,8 +177,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -164,9 +187,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
@@ -177,20 +198,17 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				});
 
 				// Create get the MobileService table
-				MobileServiceTable msTable = client.getTable(tableName);
+				MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
 
 				// Call the insert method
-				msTable.insert(person,
-						new TableOperationCallback<PersonTestObject>() {
+				msTable.insert(person, new TableOperationCallback<PersonTestObject>() {
 
-							@Override
-							public void onCompleted(PersonTestObject entity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								container.setPerson(entity);
-								latch.countDown();
-							}
-						});
+					@Override
+					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+						container.setPerson(entity);
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -215,8 +233,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		// Object to insert
 		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
 
-		final JsonObject jsonPerson = gsonBuilder.create().toJsonTree(person)
-				.getAsJsonObject();
+		final JsonObject jsonPerson = gsonBuilder.create().toJsonTree(person).getAsJsonObject();
 
 		runTestOnUiThread(new Runnable() {
 
@@ -227,8 +244,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -238,9 +254,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
@@ -251,14 +265,13 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				});
 
 				// Create get the MobileService table
-				MobileServiceTable msTable = client.getTable(tableName);
+				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				// Call the insert method
 				msTable.insert(jsonPerson, new TableJsonOperationCallback() {
 
 					@Override
-					public void onCompleted(JsonObject jsonEntity,
-							Exception exception, ServiceFilterResponse response) {
+					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
 						container.setResponseValue(jsonEntity.toString());
 						latch.countDown();
 					}
@@ -269,8 +282,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		latch.await();
 
 		// Asserts
-		PersonTestObject p = gsonBuilder.create().fromJson(
-				container.getResponseValue(), PersonTestObject.class);
+		PersonTestObject p = gsonBuilder.create().fromJson(container.getResponseValue(), PersonTestObject.class);
 		Assert.assertNotNull("Person expected", p);
 		Assert.assertEquals(38, p.getId());
 		Assert.assertEquals(person.getFirstName(), p.getFirstName());
@@ -290,8 +302,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -301,9 +312,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
@@ -327,23 +336,20 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 						response.setContent("{'error': 'Internal server error'}");
 						// call onResponse with the mocked response
-						responseCallback.onResponse(response,
-								new MobileServiceException("ERROR"));
+						responseCallback.onResponse(response, new MobileServiceException("ERROR"));
 					}
 				});
 
 				// Create get the MobileService table
-				MobileServiceTable msTable = client.getTable(tableName);
+				MobileServiceJsonTable msTable = client.getTable(tableName);
 
-				JsonObject json = new JsonParser().parse(
-						"{'myField': 'invalid value'}").getAsJsonObject();
+				JsonObject json = new JsonParser().parse("{'myField': 'invalid value'}").getAsJsonObject();
 
 				// Call the insert method
 				msTable.insert(json, new TableJsonOperationCallback() {
 
 					@Override
-					public void onCompleted(JsonObject jsonEntity,
-							Exception exception, ServiceFilterResponse response) {
+					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
 						if (exception == null) {
 							Assert.fail();
 						} else {
@@ -358,8 +364,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		latch.await();
 	}
 
-	public void testOperationWithErrorAndNoContentShowStatusCode()
-			throws Throwable {
+	public void testOperationWithErrorAndNoContentShowStatusCode() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		runTestOnUiThread(new Runnable() {
@@ -371,8 +376,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -382,9 +386,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
@@ -408,31 +410,23 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 						response.setContent(null);
 						// call onResponse with the mocked response
-						responseCallback
-								.onResponse(
-										response,
-										new MobileServiceException(
-												"Error while processing request",
-												new MobileServiceException(
-														String.format(
-																"{'code': %d}",
-																response.getStatus()
-																		.getStatusCode()))));
+						responseCallback.onResponse(
+								response,
+								new MobileServiceException("Error while processing request", new MobileServiceException(String.format("{'code': %d}", response
+										.getStatus().getStatusCode()))));
 					}
 				});
 
 				// Create get the MobileService table
-				MobileServiceTable msTable = client.getTable(tableName);
+				MobileServiceJsonTable msTable = client.getTable(tableName);
 
-				JsonObject json = new JsonParser().parse(
-						"{'myField': 'invalid value'}").getAsJsonObject();
+				JsonObject json = new JsonParser().parse("{'myField': 'invalid value'}").getAsJsonObject();
 
 				// Call the insert method
 				msTable.insert(json, new TableJsonOperationCallback() {
 
 					@Override
-					public void onCompleted(JsonObject jsonEntity,
-							Exception exception, ServiceFilterResponse response) {
+					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
 						if (exception == null) {
 							Assert.fail();
 						} else {
@@ -451,8 +445,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		latch.await();
 	}
 
-	public void testUpdateShouldReturnEntityWithDifferentNameAndAge()
-			throws Throwable {
+	public void testUpdateShouldReturnEntityWithDifferentNameAndAge() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store the object after the insertion, we need this to do
@@ -472,8 +465,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -483,9 +475,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent("{\"firstName\":\"Mike\", \"age\":50}");
@@ -495,20 +485,17 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				});
 
 				// Get the MobileService table
-				MobileServiceTable msTable = client.getTable(tableName);
+				MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
 
 				// Call the delete method
-				msTable.update(person,
-						new TableOperationCallback<PersonTestObject>() {
+				msTable.update(person, new TableOperationCallback<PersonTestObject>() {
 
-							@Override
-							public void onCompleted(PersonTestObject entity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								container.setPerson(entity);
-								latch.countDown();
-							}
-						});
+					@Override
+					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+						container.setPerson(entity);
+						latch.countDown();
+					}
+				});
 
 			}
 		});
@@ -524,8 +511,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		Assert.assertEquals(50, p.getAge());
 	}
 
-	public void testUpdateShouldReturnJSONWithDifferentNameAndAge()
-			throws Throwable {
+	public void testUpdateShouldReturnJSONWithDifferentNameAndAge() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store the object after the insertion, we need this to do
@@ -536,8 +522,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
 		person.setId(10);
 
-		final JsonObject jsonPerson = gsonBuilder.create().toJsonTree(person)
-				.getAsJsonObject();
+		final JsonObject jsonPerson = gsonBuilder.create().toJsonTree(person).getAsJsonObject();
 
 		runTestOnUiThread(new Runnable() {
 
@@ -548,8 +533,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -559,9 +543,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
@@ -572,14 +554,13 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				});
 
 				// Get the MobileService table
-				MobileServiceTable msTable = client.getTable(tableName);
+				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				// Call the delete method
 				msTable.update(jsonPerson, new TableJsonOperationCallback() {
 
 					@Override
-					public void onCompleted(JsonObject jsonEntity,
-							Exception exception, ServiceFilterResponse response) {
+					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
 						container.setResponseValue(jsonEntity.toString());
 						latch.countDown();
 					}
@@ -591,8 +572,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		latch.await();
 
 		// Asserts
-		PersonTestObject p = gsonBuilder.create().fromJson(
-				container.getResponseValue(), PersonTestObject.class);
+		PersonTestObject p = gsonBuilder.create().fromJson(container.getResponseValue(), PersonTestObject.class);
 		Assert.assertNotNull("Person expected", p);
 		Assert.assertEquals(person.getId(), p.getId());
 		Assert.assertEquals("Mike", p.getFirstName());
@@ -600,8 +580,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		Assert.assertEquals(50, p.getAge());
 	}
 
-	public void testDeleteUsingEntityShouldReturnTheExpectedRequestUrl()
-			throws Throwable {
+	public void testDeleteUsingEntityShouldReturnTheExpectedRequestUrl() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -620,8 +599,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -631,27 +609,23 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						container.setRequestUrl(request.getUrl());
 						// call onResponse with the mocked response
-						responseCallback.onResponse(
-								new ServiceFilterResponseMock(), null);
+						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
 					}
 				});
 
 				// Get the MobileService table
-				MobileServiceTable msTable = client.getTable(tableName);
+				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				// Call the delete method sending the entity to delete
 				msTable.delete(person, new TableDeleteCallback() {
 
 					@Override
-					public void onCompleted(Exception exception,
-							ServiceFilterResponse response) {
+					public void onCompleted(Exception exception, ServiceFilterResponse response) {
 						container.setOperationSucceded(exception == null);
 						latch.countDown();
 					}
@@ -662,15 +636,11 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		latch.await();
 
 		// Asserts
-		Assert.assertTrue("Opperation should have succeded",
-				container.getOperationSucceded());
-		assertEquals(
-				this.appUrl + "tables/" + tableName + "/" + person.getId(),
-				container.getRequestUrl());
+		Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
+		assertEquals(this.appUrl + "tables/" + tableName + "/" + person.getId(), container.getRequestUrl());
 	}
 
-	public void testDeleteUsingIdShouldReturnTheExpectedRequestUrl()
-			throws Throwable {
+	public void testDeleteUsingIdShouldReturnTheExpectedRequestUrl() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -688,8 +658,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -699,27 +668,23 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						container.setRequestUrl(request.getUrl());
 						// call onResponse with the mocked response
-						responseCallback.onResponse(
-								new ServiceFilterResponseMock(), null);
+						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
 					}
 				});
 
 				// Create get the MobileService table
-				MobileServiceTable msTable = client.getTable(tableName);
+				MobileServiceJsonTable msTable = client.getTable(tableName);
 
-				// Call the update method
+				// Call the delete method
 				msTable.delete(personId, new TableDeleteCallback() {
 
 					@Override
-					public void onCompleted(Exception exception,
-							ServiceFilterResponse response) {
+					public void onCompleted(Exception exception, ServiceFilterResponse response) {
 						container.setOperationSucceded(exception == null);
 						latch.countDown();
 					}
@@ -731,14 +696,11 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		latch.await();
 
 		// Asserts
-		Assert.assertTrue("Opperation should have succeded",
-				container.getOperationSucceded());
-		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId,
-				container.getRequestUrl());
+		Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
+		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId, container.getRequestUrl());
 	}
 
-	public void testDeleteUsingJSONShouldReturnTheExpectedRequestUrl()
-			throws Throwable {
+	public void testDeleteUsingJSONShouldReturnTheExpectedRequestUrl() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -748,8 +710,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
 		person.setId(10);
 
-		final JsonObject jsonPerson = gsonBuilder.create().toJsonTree(person)
-				.getAsJsonObject();
+		final JsonObject jsonPerson = gsonBuilder.create().toJsonTree(person).getAsJsonObject();
 
 		final String tableName = "MyTableName";
 
@@ -760,8 +721,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -771,27 +731,23 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						container.setRequestUrl(request.getUrl());
 						// call onResponse with the mocked response
-						responseCallback.onResponse(
-								new ServiceFilterResponseMock(), null);
+						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
 					}
 				});
 
 				// Get the MobileService table
-				MobileServiceTable msTable = client.getTable(tableName);
+				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				// Call the delete method sending the entity to delete
 				msTable.delete(jsonPerson, new TableDeleteCallback() {
 
 					@Override
-					public void onCompleted(Exception exception,
-							ServiceFilterResponse response) {
+					public void onCompleted(Exception exception, ServiceFilterResponse response) {
 						container.setOperationSucceded(exception == null);
 						latch.countDown();
 					}
@@ -802,14 +758,11 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		latch.await();
 
 		// Asserts
-		Assert.assertTrue("Opperation should have succeded",
-				container.getOperationSucceded());
-		assertEquals(
-				this.appUrl + "tables/" + tableName + "/" + person.getId(),
-				container.getRequestUrl());
+		Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
+		assertEquals(this.appUrl + "tables/" + tableName + "/" + person.getId(), container.getRequestUrl());
 	}
 
-	public void testSimpleSelectShouldReturnResults() throws Throwable {
+	public void testSimpleQueryShouldReturnResults() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -823,8 +776,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -832,9 +784,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						// PersonTestObject JSon template
@@ -842,10 +792,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 						// Generate JSon string with 2 objects
 						String responseContent = "[";
-						responseContent += String.format(personJsonTemplate, 1,
-								"Mike", "Foo", 27) + ",";
-						responseContent += String.format(personJsonTemplate, 2,
-								"John", "Doe", 35);
+						responseContent += String.format(personJsonTemplate, 1, "Mike", "Foo", 27) + ",";
+						responseContent += String.format(personJsonTemplate, 2, "John", "Doe", 35);
 						responseContent += "]";
 
 						// Create a mock response and set the mocked JSon
@@ -857,21 +805,15 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 					}
 				});
 
-				client.getTable(tableName)
-						.all()
-						.execute(PersonTestObject.class,
-								new TableQueryCallback<PersonTestObject>() {
+				client.getTable(tableName, PersonTestObject.class).execute(new TableQueryCallback<PersonTestObject>() {
 
-									@Override
-									public void onCompleted(
-											List<PersonTestObject> result,
-											int count, Exception exception,
-											ServiceFilterResponse response) {
-										container.setPeopleResult(result);
-										container.setCount(count);
-										latch.countDown();
-									}
-								});
+					@Override
+					public void onCompleted(List<PersonTestObject> result, int count, Exception exception, ServiceFilterResponse response) {
+						container.setPeopleResult(result);
+						container.setCount(count);
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -889,7 +831,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 	}
 
-	public void testSimpleSelectShouldReturnJSONResults() throws Throwable {
+	public void testSimpleQueryShouldReturnJSONResults() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -901,8 +843,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		String personJsonTemplate = "{\"id\":%d,\"firstName\":\"%s\",\"lastName\":\"%s\",\"age\":%d}";
 
 		// Generate JSon string with 2 objects
-		final String responseContent = "["
-				+ String.format(personJsonTemplate, 1, "Mike", "Foo", 27) + ","
+		final String responseContent = "[" + String.format(personJsonTemplate, 1, "Mike", "Foo", 27) + ","
 				+ String.format(personJsonTemplate, 2, "John", "Doe", 35) + "]";
 
 		runTestOnUiThread(new Runnable() {
@@ -911,8 +852,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -920,9 +860,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						// Create a mock response and set the mocked JSon
@@ -934,18 +872,15 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 					}
 				});
 
-				client.getTable(tableName).all()
-						.execute(new TableJsonQueryCallback() {
+				client.getTable(tableName).execute(new TableJsonQueryCallback() {
 
-							@Override
-							public void onCompleted(JsonElement result,
-									int count, Exception exception,
-									ServiceFilterResponse response) {
-								container.setResponseValue(result.toString());
-								container.setCount(count);
-								latch.countDown();
-							}
-						});
+					@Override
+					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
+						container.setResponseValue(result.toString());
+						container.setCount(count);
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -957,7 +892,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 	}
 
-	public void testSimpleSelectShouldReturnEmptyArray() throws Throwable {
+	public void testSimpleQueryShouldReturnEmptyArray() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -971,8 +906,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -980,9 +914,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						// Generate JSon string with 2 objects
@@ -997,21 +929,15 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 					}
 				});
 
-				client.getTable(tableName)
-						.all()
-						.execute(PersonTestObject.class,
-								new TableQueryCallback<PersonTestObject>() {
+				client.getTable(tableName, PersonTestObject.class).execute(new TableQueryCallback<PersonTestObject>() {
 
-									@Override
-									public void onCompleted(
-											List<PersonTestObject> result,
-											int count, Exception exception,
-											ServiceFilterResponse response) {
-										container.setPeopleResult(result);
-										container.setCount(count);
-										latch.countDown();
-									}
-								});
+					@Override
+					public void onCompleted(List<PersonTestObject> result, int count, Exception exception, ServiceFilterResponse response) {
+						container.setPeopleResult(result);
+						container.setCount(count);
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -1025,8 +951,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 	}
 
-	public void testSimpleJSONSelectShouldReturnEmptyJSONArray()
-			throws Throwable {
+	public void testSimpleJSONSelectShouldReturnEmptyJSONArray() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -1040,8 +965,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1049,9 +973,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						// Generate JSon string with 2 objects
@@ -1066,18 +988,15 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 					}
 				});
 
-				client.getTable(tableName).all()
-						.execute(new TableJsonQueryCallback() {
+				client.getTable(tableName).execute(new TableJsonQueryCallback() {
 
-							@Override
-							public void onCompleted(JsonElement result,
-									int count, Exception exception,
-									ServiceFilterResponse response) {
-								container.setResponseValue(result.toString());
-								container.setCount(count);
-								latch.countDown();
-							}
-						});
+					@Override
+					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
+						container.setResponseValue(result.toString());
+						container.setCount(count);
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -1089,8 +1008,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 	}
 
-	public void testInlineCountSelectShouldReturnResultsWithCount()
-			throws Throwable {
+	public void testInlineCountSelectShouldReturnResultsWithCount() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -1104,8 +1022,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1113,19 +1030,15 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 						// PersonTestObject JSon template
 						String personJsonTemplate = "{\"id\": %d,\"firstName\":\"%s\",\"lastName\":\"%s\",\"age\":%d}";
 
 						// Create string with results and count values.
 						String responseContent = "{\"results\":[";
-						responseContent += String.format(personJsonTemplate, 1,
-								"Mike", "Foo", 27) + ",";
-						responseContent += String.format(personJsonTemplate, 2,
-								"John", "Doe", 35);
+						responseContent += String.format(personJsonTemplate, 1, "Mike", "Foo", 27) + ",";
+						responseContent += String.format(personJsonTemplate, 2, "John", "Doe", 35);
 						responseContent += "]";
 						responseContent += ",\"count\":\"15\"}";
 
@@ -1138,21 +1051,15 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 					}
 				});
 
-				client.getTable(tableName)
-						.all()
-						.execute(PersonTestObject.class,
-								new TableQueryCallback<PersonTestObject>() {
+				client.getTable(tableName, PersonTestObject.class).execute(new TableQueryCallback<PersonTestObject>() {
 
-									@Override
-									public void onCompleted(
-											List<PersonTestObject> result,
-											int count, Exception exception,
-											ServiceFilterResponse response) {
-										container.setPeopleResult(result);
-										container.setCount(count);
-										latch.countDown();
-									}
-								});
+					@Override
+					public void onCompleted(List<PersonTestObject> result, int count, Exception exception, ServiceFilterResponse response) {
+						container.setPeopleResult(result);
+						container.setCount(count);
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -1185,8 +1092,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1194,9 +1100,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 						// Store the request URL
 						container.setRequestUrl(request.getUrl());
@@ -1207,25 +1111,20 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						// Create a mock response and set the mocked JSon
 						// content
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent(String.format(personJsonTemplate,
-								4, "John", "Doe", 35));
+						response.setContent(String.format(personJsonTemplate, 4, "John", "Doe", 35));
 
 						responseCallback.onResponse(response, null);
 					}
 				});
 
-				client.getTable(tableName).lookUp(personId,
-						PersonTestObject.class,
-						new TableOperationCallback<PersonTestObject>() {
+				client.getTable(tableName, PersonTestObject.class).lookUp(personId, new TableOperationCallback<PersonTestObject>() {
 
-							@Override
-							public void onCompleted(PersonTestObject entity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								container.setPerson(entity);
-								latch.countDown();
-							}
-						});
+					@Override
+					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+						container.setPerson(entity);
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -1236,8 +1135,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		assertNotNull("A person expected", p);
 		assertEquals(4, p.getId());
 		assertEquals("Doe", p.getLastName());
-		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId,
-				container.getRequestUrl());
+		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId, container.getRequestUrl());
 	}
 
 	public void testLookupShouldReturnAJSONPerson() throws Throwable {
@@ -1253,8 +1151,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		// PersonTestObject JSon template
 		String personJsonTemplate = "{\"id\":%d,\"firstName\":\"%s\",\"lastName\":\"%s\",\"age\":%d}";
 
-		final String personJsonString = String.format(personJsonTemplate, 4,
-				"John", "Doe", 35);
+		final String personJsonString = String.format(personJsonTemplate, 4, "John", "Doe", 35);
 
 		runTestOnUiThread(new Runnable() {
 
@@ -1262,8 +1159,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1271,9 +1167,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 						// Store the request URL
 						container.setRequestUrl(request.getUrl());
@@ -1287,19 +1181,15 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 					}
 				});
 
-				client.getTable(tableName).lookUp(personId,
-						new TableJsonOperationCallback() {
-							@Override
-							public void onCompleted(JsonObject jsonEntity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								if (exception == null) {
-									container.setResponseValue(jsonEntity
-											.toString());
-								}
-								latch.countDown();
-							}
-						});
+				client.getTable(tableName).lookUp(personId, new TableJsonOperationCallback() {
+					@Override
+					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+						if (exception == null) {
+							container.setResponseValue(jsonEntity.toString());
+						}
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -1307,12 +1197,10 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 		// Asserts
 		assertEquals(personJsonString, container.getResponseValue());
-		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId,
-				container.getRequestUrl());
+		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId, container.getRequestUrl());
 	}
 
-	public void testLookupShouldReturnErrorIfAPersonDoesNotExist()
-			throws Throwable {
+	public void testLookupShouldReturnErrorIfAPersonDoesNotExist() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -1328,8 +1216,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1337,9 +1224,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 						// Store the request URL
 						container.setRequestUrl(request.getUrl());
@@ -1350,43 +1235,33 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						response.setContent("{\"error\":404,\"message\":\"entity does not exist\"}");
 
 						// create a mock request to replace the existing one
-						ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(
-								response);
-						nextServiceFilterCallback.onNext(requestMock,
-								responseCallback);
+						ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
+						nextServiceFilterCallback.onNext(requestMock, responseCallback);
 					}
 				});
 
-				client.getTable(tableName).lookUp(personId,
-						PersonTestObject.class,
-						new TableOperationCallback<PersonTestObject>() {
+				client.getTable(tableName, PersonTestObject.class).lookUp(personId, new TableOperationCallback<PersonTestObject>() {
 
-							@Override
-							public void onCompleted(PersonTestObject entity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								if (exception != null) {
-									container.setResponseValue(response
-											.getContent());
-								}
+					@Override
+					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setResponseValue(response.getContent());
+						}
 
-								latch.countDown();
-							}
-						});
+						latch.countDown();
+					}
+				});
 			}
 		});
 
 		latch.await();
 
 		// Asserts
-		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId,
-				container.getRequestUrl());
-		assertTrue(container.getResponseValue().contains(
-				"{\"error\":404,\"message\":\"entity does not exist\"}"));
+		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId, container.getRequestUrl());
+		assertTrue(container.getResponseValue().contains("{\"error\":404,\"message\":\"entity does not exist\"}"));
 	}
 
-	public void testLookupWithJSONShouldReturnErrorIfAPersonDoesNotExist()
-			throws Throwable {
+	public void testLookupWithJSONShouldReturnErrorIfAPersonDoesNotExist() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -1402,8 +1277,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1411,9 +1285,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 						// Store the request URL
 						container.setRequestUrl(request.getUrl());
@@ -1424,37 +1296,29 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 						response.setContent("{\"error\":404,\"message\":\"entity does not exist\"}");
 
 						// create a mock request to replace the existing one
-						ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(
-								response);
-						nextServiceFilterCallback.onNext(requestMock,
-								responseCallback);
+						ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
+						nextServiceFilterCallback.onNext(requestMock, responseCallback);
 					}
 				});
 
-				client.getTable(tableName).lookUp(personId,
-						new TableJsonOperationCallback() {
-							@Override
-							public void onCompleted(JsonObject jsonEntity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								if (exception != null) {
-									container.setResponseValue(response
-											.getContent());
-								}
-								latch.countDown();
+				client.getTable(tableName).lookUp(personId, new TableJsonOperationCallback() {
+					@Override
+					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setResponseValue(response.getContent());
+						}
+						latch.countDown();
 
-							}
-						});
+					}
+				});
 			}
 		});
 
 		latch.await();
 
 		// Asserts
-		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId,
-				container.getRequestUrl());
-		assertTrue(container.getResponseValue().contains(
-				"{\"error\":404,\"message\":\"entity does not exist\"}"));
+		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId, container.getRequestUrl());
+		assertTrue(container.getResponseValue().contains("{\"error\":404,\"message\":\"entity does not exist\"}"));
 	}
 
 	public void testQueryShouldIncludeFilter() throws Throwable {
@@ -1472,8 +1336,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1483,44 +1346,48 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						container.setRequestUrl(request.getUrl());
 						// call onResponse with the mocked response
-						responseCallback.onResponse(
-								new ServiceFilterResponseMock(), null);
+						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
 					}
 				});
 
 				// Create get the MobileService table
-				MobileServiceTable msTable = client.getTable(tableName);
+				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				// Call the update method
-				msTable.where().field("fieldName").eq(1)
-						.execute(new TableJsonQueryCallback() {
+				msTable.where().field("fieldName").eq(1).execute(new TableJsonQueryCallback() {
 
-							@Override
-							public void onCompleted(JsonElement result,
-									int count, Exception exception,
-									ServiceFilterResponse response) {
-								container
-										.setOperationSucceded(exception == null);
-								latch.countDown();
+					@Override
+					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
+						container.setOperationSucceded(exception == null);
+						latch.countDown();
 
-							}
-						});
+					}
+				});
 			}
 		});
 
 		latch.await();
 
 		// Asserts
-		Assert.assertTrue("Opperation should have succeded",
-				container.getOperationSucceded());
-		assertTrue(container.getRequestUrl().contains("?$filter="));
+		Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
+		assertEquals(queryUrl(tableName) + "?$filter=" + urlencode("fieldName eq (1)"), container.getRequestUrl());
+	}
+
+	private String urlencode(String s) {
+		try {
+			return URLEncoder.encode(s, "utf-8");
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	private String queryUrl(String tableName) {
+		return this.appUrl + "tables/" + tableName;
 	}
 
 	public void testQueryShouldIncludeTop() throws Throwable {
@@ -1538,8 +1405,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1549,27 +1415,23 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						container.setRequestUrl(request.getUrl());
 						// call onResponse with the mocked response
-						responseCallback.onResponse(
-								new ServiceFilterResponseMock(), null);
+						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
 					}
 				});
 
 				// Create get the MobileService table
-				MobileServiceTable msTable = client.getTable(tableName);
+				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				// Call the update method
-				msTable.all().top(10).execute(new TableJsonQueryCallback() {
+				msTable.top(10).execute(new TableJsonQueryCallback() {
 
 					@Override
-					public void onCompleted(JsonElement result, int count,
-							Exception exception, ServiceFilterResponse response) {
+					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
 						container.setOperationSucceded(exception == null);
 						latch.countDown();
 
@@ -1581,9 +1443,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		latch.await();
 
 		// Asserts
-		Assert.assertTrue("Opperation should have succeded",
-				container.getOperationSucceded());
-		assertTrue(container.getRequestUrl().contains("?$top=10"));
+		Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
+		assertEquals(queryUrl(tableName) + "?$top=10", container.getRequestUrl());
 	}
 
 	public void testQueryShouldIncludeSkip() throws Throwable {
@@ -1601,8 +1462,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1612,27 +1472,23 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						container.setRequestUrl(request.getUrl());
 						// call onResponse with the mocked response
-						responseCallback.onResponse(
-								new ServiceFilterResponseMock(), null);
+						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
 					}
 				});
 
 				// Create get the MobileService table
-				MobileServiceTable msTable = client.getTable(tableName);
+				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				// Call the update method
-				msTable.all().skip(10).execute(new TableJsonQueryCallback() {
+				msTable.skip(10).execute(new TableJsonQueryCallback() {
 
 					@Override
-					public void onCompleted(JsonElement result, int count,
-							Exception exception, ServiceFilterResponse response) {
+					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
 						container.setOperationSucceded(exception == null);
 						latch.countDown();
 
@@ -1644,9 +1500,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		latch.await();
 
 		// Asserts
-		Assert.assertTrue("Opperation should have succeded",
-				container.getOperationSucceded());
-		assertTrue(container.getRequestUrl().contains("?$skip=10"));
+		Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
+		assertEquals(queryUrl(tableName) + "?$skip=10", container.getRequestUrl());
 	}
 
 	public void testQueryShouldIncludeInlineCount() throws Throwable {
@@ -1664,8 +1519,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1675,44 +1529,36 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						container.setRequestUrl(request.getUrl());
 						// call onResponse with the mocked response
-						responseCallback.onResponse(
-								new ServiceFilterResponseMock(), null);
+						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
 					}
 				});
 
 				// Create get the MobileService table
-				MobileServiceTable msTable = client.getTable(tableName);
+				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				// Call the update method
-				msTable.all().includeInlineCount()
-						.execute(new TableJsonQueryCallback() {
+				msTable.includeInlineCount().execute(new TableJsonQueryCallback() {
 
-							@Override
-							public void onCompleted(JsonElement result,
-									int count, Exception exception,
-									ServiceFilterResponse response) {
-								container
-										.setOperationSucceded(exception == null);
-								latch.countDown();
+					@Override
+					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
+						container.setOperationSucceded(exception == null);
+						latch.countDown();
 
-							}
-						});
+					}
+				});
 			}
 		});
 
 		latch.await();
 
 		// Asserts
-		Assert.assertTrue("Opperation should have succeded",
-				container.getOperationSucceded());
-		assertTrue(container.getRequestUrl().contains("?$inlinecount=allpages"));
+		Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
+		assertEquals(queryUrl(tableName) + "?$inlinecount=allpages", container.getRequestUrl());
 	}
 
 	public void testQueryShouldIncludeOrderBy() throws Throwable {
@@ -1730,8 +1576,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1741,44 +1586,36 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						container.setRequestUrl(request.getUrl());
 						// call onResponse with the mocked response
-						responseCallback.onResponse(
-								new ServiceFilterResponseMock(), null);
+						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
 					}
 				});
 
 				// Create get the MobileService table
-				MobileServiceTable msTable = client.getTable(tableName);
+				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				// Call the update method
-				msTable.all().orderBy("myField", QueryOrder.Ascending)
-						.execute(new TableJsonQueryCallback() {
+				msTable.orderBy("myField", QueryOrder.Ascending).execute(new TableJsonQueryCallback() {
 
-							@Override
-							public void onCompleted(JsonElement result,
-									int count, Exception exception,
-									ServiceFilterResponse response) {
-								container
-										.setOperationSucceded(exception == null);
-								latch.countDown();
+					@Override
+					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
+						container.setOperationSucceded(exception == null);
+						latch.countDown();
 
-							}
-						});
+					}
+				});
 			}
 		});
 
 		latch.await();
 
 		// Asserts
-		Assert.assertTrue("Opperation should have succeded",
-				container.getOperationSucceded());
-		assertTrue(container.getRequestUrl().contains("?$orderby="));
+		Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
+		assertEquals(queryUrl(tableName) + "?$orderby=" + urlencode("myField asc"), container.getRequestUrl());
 	}
 
 	public void testQueryShouldIncludeProjection() throws Throwable {
@@ -1796,8 +1633,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceClient client = null;
 
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -1807,43 +1643,35 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						container.setRequestUrl(request.getUrl());
 						// call onResponse with the mocked response
-						responseCallback.onResponse(
-								new ServiceFilterResponseMock(), null);
+						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
 					}
 				});
 
 				// Create get the MobileService table
-				MobileServiceTable msTable = client.getTable(tableName);
+				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				// Call the update method
-				msTable.all().select("myField", "otherField")
-						.execute(new TableJsonQueryCallback() {
+				msTable.select("myField", "otherField").execute(new TableJsonQueryCallback() {
 
-							@Override
-							public void onCompleted(JsonElement result,
-									int count, Exception exception,
-									ServiceFilterResponse response) {
-								container
-										.setOperationSucceded(exception == null);
-								latch.countDown();
+					@Override
+					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
+						container.setOperationSucceded(exception == null);
+						latch.countDown();
 
-							}
-						});
+					}
+				});
 			}
 		});
 
 		latch.await();
 
 		// Asserts
-		Assert.assertTrue("Opperation should have succeded",
-				container.getOperationSucceded());
-		assertTrue(container.getRequestUrl().contains("?$select"));
+		Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
+		assertEquals(queryUrl(tableName) + "?$select=" + urlencode("myField,otherField"), container.getRequestUrl());
 	}
 }

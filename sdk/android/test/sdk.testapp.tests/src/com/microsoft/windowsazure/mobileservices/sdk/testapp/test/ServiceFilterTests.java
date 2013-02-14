@@ -1,3 +1,22 @@
+/*
+Copyright (c) Microsoft Open Technologies, Inc.
+All Rights Reserved
+Apache 2.0 License
+ 
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+ 
+     http://www.apache.org/licenses/LICENSE-2.0
+ 
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ 
+See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
+ */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
 import java.net.MalformedURLException;
@@ -31,8 +50,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 		super.tearDown();
 	}
 
-	public void testClientWithFilterShouldReturnResponseWithHeaderAddedInFilter()
-			throws Throwable {
+	public void testClientWithFilterShouldReturnResponseWithHeaderAddedInFilter() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container for results
@@ -45,8 +63,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 
 				}
@@ -55,31 +72,25 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						container.setCount(1);
 						container.setRequestContent("Filter1");
 
-						responseCallback.onResponse(
-								new ServiceFilterResponseMock(), null);
+						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
 					}
 				});
 
 				// Execute any action in order to generate a request
-				client.getTable("TestTable").lookUp(1,
-						new TableJsonOperationCallback() {
+				client.getTable("TestTable").lookUp(1, new TableJsonOperationCallback() {
 
-							@Override
-							public void onCompleted(JsonObject jsonEntity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								latch.countDown();
+					@Override
+					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
 
-							}
-						});
+					}
+				});
 			}
 		});
 
@@ -90,8 +101,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 		assertEquals("Filter1", container.getRequestContent());
 	}
 
-	public void testClientWithFilterShouldReturnResponseWithHeadersAddedInOrder()
-			throws Throwable {
+	public void testClientWithFilterShouldReturnResponseWithHeadersAddedInOrder() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container for results
@@ -104,8 +114,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 				}
 
@@ -113,26 +122,20 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						int currentCount = container.getCount() + 1;
 						container.setCount(currentCount);
-						String currentContent = container.getRequestContent()
-								+ "Filter1";
+						String currentContent = container.getRequestContent() + "Filter1";
 						container.setRequestContent(currentContent);
 
-						nextServiceFilterCallback.onNext(request,
-								responseCallback);
+						nextServiceFilterCallback.onNext(request, responseCallback);
 					}
 				}).withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						int currentCount = container.getCount() + 1;
@@ -140,22 +143,18 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 						String currentContent = "Filter2";
 						container.setRequestContent(currentContent);
 
-						nextServiceFilterCallback.onNext(request,
-								responseCallback);
+						nextServiceFilterCallback.onNext(request, responseCallback);
 					}
 				});
 
 				// Execute any action in order to generate a request
-				client.getTable("TestTable").lookUp(1,
-						new TableJsonOperationCallback() {
+				client.getTable("TestTable").lookUp(1, new TableJsonOperationCallback() {
 
-							@Override
-							public void onCompleted(JsonObject jsonEntity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								latch.countDown();
-							}
-						});
+					@Override
+					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -166,8 +165,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 		assertEquals("Filter2Filter1", container.getRequestContent());
 	}
 
-	public void testClientWithFilterShouldNotExecuteTheFirstFilter()
-			throws Throwable {
+	public void testClientWithFilterShouldNotExecuteTheFirstFilter() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container for results
@@ -179,8 +177,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e1) {
 				}
 
@@ -188,27 +185,21 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						int currentCount = container.getCount() + 1;
 						container.setCount(currentCount);
-						String currentContent = container.getRequestContent()
-								+ "Filter1";
+						String currentContent = container.getRequestContent() + "Filter1";
 						container.setRequestContent(currentContent);
 
-						nextServiceFilterCallback.onNext(request,
-								responseCallback);
+						nextServiceFilterCallback.onNext(request, responseCallback);
 					}
 
 				}).withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						int currentCount = container.getCount() + 1;
@@ -217,22 +208,18 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 						container.setRequestContent(currentContent);
 
 						ServiceFilterResponse response = null;
-						responseCallback.onResponse(response, new Exception(
-								"Dummy Exception"));
+						responseCallback.onResponse(response, new Exception("Dummy Exception"));
 					}
 				});
 
 				// Execute any action in order to generate a request
-				client.getTable("TestTable").lookUp(1,
-						new TableJsonOperationCallback() {
+				client.getTable("TestTable").lookUp(1, new TableJsonOperationCallback() {
 
-							@Override
-							public void onCompleted(JsonObject jsonEntity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								latch.countDown();
-							}
-						});
+					@Override
+					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -243,8 +230,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 		assertEquals("Filter2", container.getRequestContent());
 	}
 
-	public void testClientWithFilterShouldThrowExceptionWhenExecutingFilter()
-			throws Throwable {
+	public void testClientWithFilterShouldThrowExceptionWhenExecutingFilter() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		final ResultsContainer container = new ResultsContainer();
@@ -260,49 +246,38 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 				// Create client and connection
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 				}
 
 				// Create ServiceFilterRequestMock that returns the given
 				// response
-				ServiceFilterRequestMock request = new ServiceFilterRequestMock(
-						response);
+				ServiceFilterRequestMock request = new ServiceFilterRequestMock(response);
 				request.setHasErrorOnExecute(true);
 
 				// Add a new filter to the client
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
-						responseCallback
-								.onResponse(response,
-										new MobileServiceException(
-												"Error in filter 1"));
+						responseCallback.onResponse(response, new MobileServiceException("Error in filter 1"));
 					}
 				});
 
 				// Execute any action in order to generate a request
-				client.getTable("TestTable").lookUp(1,
-						new TableJsonOperationCallback() {
+				client.getTable("TestTable").lookUp(1, new TableJsonOperationCallback() {
 
-							@Override
-							public void onCompleted(JsonObject jsonEntity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								if (exception != null) {
-									container.setErrorMessage(exception
-											.getMessage());
-								}
+					@Override
+					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setErrorMessage(exception.getMessage());
+						}
 
-								latch.countDown();
-							}
-						});
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -312,8 +287,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 		assertTrue(container.getErrorMessage().startsWith("Error in filter 1"));
 	}
 
-	public void testClientWithFilterShouldThrowExceptionWhenExecutingTheFirstFilter()
-			throws Throwable {
+	public void testClientWithFilterShouldThrowExceptionWhenExecutingTheFirstFilter() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		final ResultsContainer container = new ResultsContainer();
@@ -324,8 +298,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 				}
 
@@ -336,51 +309,38 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 
 				// Create ServiceFilterRequestMock that returns the given
 				// response
-				ServiceFilterRequestMock request = new ServiceFilterRequestMock(
-						response);
+				ServiceFilterRequestMock request = new ServiceFilterRequestMock(response);
 				request.setHasErrorOnExecute(true);
 				// Add a new filter to the client
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
-						container
-								.setErrorMessage("this handler should never be called");
+						container.setErrorMessage("this handler should never be called");
 					}
 				}).withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
-						responseCallback
-								.onResponse(response,
-										new MobileServiceException(
-												"Error in filter 2"));
+						responseCallback.onResponse(response, new MobileServiceException("Error in filter 2"));
 					}
 				});
 
 				// Execute any action in order to generate a request
-				client.getTable("TestTable").lookUp(1,
-						new TableJsonOperationCallback() {
+				client.getTable("TestTable").lookUp(1, new TableJsonOperationCallback() {
 
-							@Override
-							public void onCompleted(JsonObject jsonEntity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								if (exception != null) {
-									container.setErrorMessage(exception
-											.getMessage());
-								}
+					@Override
+					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setErrorMessage(exception.getMessage());
+						}
 
-								latch.countDown();
-							}
-						});
+						latch.countDown();
+					}
+				});
 			}
 		});
 

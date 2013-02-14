@@ -1,3 +1,22 @@
+/*
+Copyright (c) Microsoft Open Technologies, Inc.
+All Rights Reserved
+Apache 2.0 License
+ 
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+ 
+     http://www.apache.org/licenses/LICENSE-2.0
+ 
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ 
+See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
+ */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
 import java.net.MalformedURLException;
@@ -14,7 +33,7 @@ import android.test.InstrumentationTestCase;
 import com.google.gson.JsonElement;
 import com.microsoft.windowsazure.mobileservices.MobileServiceAuthenticationProvider;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
+import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.MobileServiceUser;
 import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.ServiceFilter;
@@ -38,18 +57,15 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 		super.tearDown();
 	}
 
-	public void testNewMobileServiceClientShouldReturnMobileServiceClient()
-			throws MalformedURLException {
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey,
-				getInstrumentation().getTargetContext());
+	public void testNewMobileServiceClientShouldReturnMobileServiceClient() throws MalformedURLException {
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 		assertEquals(appUrl, client.getAppUrl().toString());
 		assertEquals(appKey, client.getAppKey());
 	}
 
 	public void testNewMobileServiceClientWithEmptyAppUrlShouldThrowException() {
 		try {
-			new MobileServiceClient("", appKey, getInstrumentation()
-					.getTargetContext());
+			new MobileServiceClient("", appKey, getInstrumentation().getTargetContext());
 			fail("Expected Exception MalformedURLException");
 		} catch (MalformedURLException e) {
 			// do nothing, it's OK
@@ -58,8 +74,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 
 	public void testNewMobileServiceClientWithNullAppUrlShouldThrowException() {
 		try {
-			new MobileServiceClient((String) null, appKey, getInstrumentation()
-					.getTargetContext());
+			new MobileServiceClient((String) null, appKey, getInstrumentation().getTargetContext());
 			fail("Expected Exception MalformedURLException");
 		} catch (MalformedURLException e) {
 			// do nothing, it's OK
@@ -68,8 +83,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 
 	public void testNewMobileServiceClientWithEmptyAppKeyShouldThrowException() {
 		try {
-			new MobileServiceClient(appUrl, "", getInstrumentation()
-					.getTargetContext());
+			new MobileServiceClient(appUrl, "", getInstrumentation().getTargetContext());
 			fail("Expected Exception MalformedURLException");
 		} catch (IllegalArgumentException e) {
 			// do nothing, it's OK
@@ -80,8 +94,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 
 	public void testNewMobileServiceClientWithNullAppKeyShouldThrowException() {
 		try {
-			new MobileServiceClient(appUrl, null, getInstrumentation()
-					.getTargetContext());
+			new MobileServiceClient(appUrl, null, getInstrumentation().getTargetContext());
 			fail("Expected Exception MalformedURLException");
 		} catch (IllegalArgumentException e) {
 			// do nothing, it's OK
@@ -93,8 +106,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 	public void testMobileServiceClientWithNullServiceFilterShouldThrowException() {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey,
-					getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e1) {
 			fail("This should not happen");
 		}
@@ -107,19 +119,15 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 		}
 	}
 
-	public void testIsLoginInProgressShouldReturnFalse()
-			throws MalformedURLException {
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey,
-				getInstrumentation().getTargetContext());
+	public void testIsLoginInProgressShouldReturnFalse() throws MalformedURLException {
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 		assertFalse(client.isLoginInProgress());
 	}
 
-	public void testSetAndGetCurrentUserShouldReturnUser()
-			throws MalformedURLException {
+	public void testSetAndGetCurrentUserShouldReturnUser() throws MalformedURLException {
 		String userId = "myUserId";
 		MobileServiceUser user = new MobileServiceUser(userId);
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey,
-				getInstrumentation().getTargetContext());
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
 		client.setCurrentUser(user);
 		MobileServiceUser currentUser = client.getCurrentUser();
@@ -129,20 +137,16 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 		assertEquals(userId, currentUser.getUserId());
 	}
 
-	public void testGetCurrentUserWithNoLoggedUserShouldReturnNull()
-			throws MalformedURLException {
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey,
-				getInstrumentation().getTargetContext());
+	public void testGetCurrentUserWithNoLoggedUserShouldReturnNull() throws MalformedURLException {
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 		MobileServiceUser currentUser = client.getCurrentUser();
 
 		assertNull(currentUser);
 	}
 
-	public void testGetTableShouldReturnTableWithGivenNameAndClient()
-			throws MalformedURLException {
-		MobileServiceClient client = new MobileServiceClient(appUrl, appKey,
-				getInstrumentation().getTargetContext());
-		MobileServiceTable table = client.getTable("MyTable");
+	public void testGetTableShouldReturnTableWithGivenNameAndClient() throws MalformedURLException {
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		MobileServiceJsonTable table = client.getTable("MyTable");
 
 		assertNotNull(table);
 	}
@@ -150,8 +154,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 	public void testGetTableWithEmptyNameShouldThrowException() {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey,
-					getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e1) {
 			fail("This should not fail");
 		}
@@ -167,8 +170,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 	public void testGetTableWithWhiteSpacedNameShouldThrowException() {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey,
-					getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e1) {
 			fail("This should not fail");
 		}
@@ -185,13 +187,12 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 	public void testGetTableWithNullNameShouldThrowException() {
 		MobileServiceClient client = null;
 		try {
-			client = new MobileServiceClient(appUrl, appKey,
-					getInstrumentation().getTargetContext());
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 		} catch (MalformedURLException e1) {
 			fail("This should not happen");
 		}
 		try {
-			client.getTable(null);
+			client.getTable((String) null);
 			fail("Expected Exception IllegalArgumentException");
 		} catch (IllegalArgumentException e) {
 			// do nothing, it's OK
@@ -212,8 +213,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 			public void run() {
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -221,38 +221,30 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 						// User JSon Template
 						String userJsonTemplate = "{\"user\":{\"userId\":\"%s\"}, \"authenticationToken\":\"%s\"}";
 						// Create a mock response simulating an error
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setStatus(new StatusLineMock(200));
-						response.setContent(String.format(userJsonTemplate,
-								userId, userToken));
+						response.setContent(String.format(userJsonTemplate, userId, userToken));
 
 						// create a mock request to replace the existing one
-						ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(
-								response);
-						nextServiceFilterCallback.onNext(requestMock,
-								responseCallback);
+						ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
+						nextServiceFilterCallback.onNext(requestMock, responseCallback);
 					}
 				});
 
 				try {
-					client.login(MobileServiceAuthenticationProvider.Facebook,
-							"oAuthToken", new UserAuthenticationCallback() {
+					client.login(MobileServiceAuthenticationProvider.Facebook, "oAuthToken", new UserAuthenticationCallback() {
 
-								@Override
-								public void onCompleted(MobileServiceUser user,
-										Exception exception,
-										ServiceFilterResponse response) {
-									container.setUser(user);
-									latch.countDown();
-								}
-							});
+						@Override
+						public void onCompleted(MobileServiceUser user, Exception exception, ServiceFilterResponse response) {
+							container.setUser(user);
+							latch.countDown();
+						}
+					});
 				} catch (Exception e) {
 					latch.countDown();
 				}
@@ -278,8 +270,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 					e.printStackTrace();
 				}
@@ -290,9 +281,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						int zumoInstallationHeaderIndex = -1;
@@ -338,21 +327,14 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 							Assert.fail();
 						}
 
-						String expectedUserAgent = String
-								.format("ZUMO/%s (lang=%s; os=%s; os_version=%s; arch=%s)",
-										"1.0", "Java", "Android",
-										Build.VERSION.RELEASE, Build.CPU_ABI);
+						String expectedUserAgent = String.format("ZUMO/%s (lang=%s; os=%s; os_version=%s; arch=%s)", "1.0", "Java", "Android",
+								Build.VERSION.RELEASE, Build.CPU_ABI);
 
-						assertNotNull(headers[zumoInstallationHeaderIndex]
-								.getValue());
-						assertEquals(expectedAppKey,
-								headers[zumoAppHeaderIndex].getValue());
-						assertEquals(expectedUserAgent,
-								headers[userAgentHeaderIndex].getValue());
-						assertEquals("application/json",
-								headers[contentTypeHeaderIndex].getValue());
-						assertEquals("application/json",
-								headers[acceptHeaderIndex].getValue());
+						assertNotNull(headers[zumoInstallationHeaderIndex].getValue());
+						assertEquals(expectedAppKey, headers[zumoAppHeaderIndex].getValue());
+						assertEquals(expectedUserAgent, headers[userAgentHeaderIndex].getValue());
+						assertEquals("application/json", headers[contentTypeHeaderIndex].getValue());
+						assertEquals("application/json", headers[acceptHeaderIndex].getValue());
 
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 						response.setContent("{}");
@@ -361,16 +343,13 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 					}
 				});
 
-				client.getTable("dummy").all()
-						.execute(new TableJsonQueryCallback() {
+				client.getTable("dummy").execute(new TableJsonQueryCallback() {
 
-							@Override
-							public void onCompleted(JsonElement result,
-									int count, Exception exception,
-									ServiceFilterResponse response) {
-								latch.countDown();
-							}
-						});
+					@Override
+					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
 			}
 		});
 

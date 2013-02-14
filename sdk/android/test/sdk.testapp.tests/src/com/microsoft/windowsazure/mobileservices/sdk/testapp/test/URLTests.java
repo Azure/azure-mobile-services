@@ -1,3 +1,22 @@
+/*
+Copyright (c) Microsoft Open Technologies, Inc.
+All Rights Reserved
+Apache 2.0 License
+ 
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+ 
+     http://www.apache.org/licenses/LICENSE-2.0
+ 
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ 
+See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
+ */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
 import java.net.MalformedURLException;
@@ -43,8 +62,7 @@ public class URLTests extends InstrumentationTestCase {
 		testLoginURL(MobileServiceAuthenticationProvider.Google);
 	}
 
-	private void testLoginURL(final MobileServiceAuthenticationProvider provider)
-			throws Throwable {
+	private void testLoginURL(final MobileServiceAuthenticationProvider provider) throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 		final ResultsContainer result = new ResultsContainer();
 
@@ -55,8 +73,7 @@ public class URLTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 				}
 
@@ -64,9 +81,7 @@ public class URLTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						result.setRequestUrl(request.getUrl());
@@ -79,28 +94,24 @@ public class URLTests extends InstrumentationTestCase {
 					}
 				});
 
-				client.login(provider, "{myToken:123}",
-						new UserAuthenticationCallback() {
+				client.login(provider, "{myToken:123}", new UserAuthenticationCallback() {
 
-							@Override
-							public void onCompleted(MobileServiceUser user,
-									Exception exception,
-									ServiceFilterResponse response) {
-								if (exception != null) {
-									Assert.fail();
-								}
+					@Override
+					public void onCompleted(MobileServiceUser user, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							Assert.fail();
+						}
 
-								latch.countDown();
-							}
-						});
+						latch.countDown();
+					}
+				});
 			}
 		});
 
 		latch.await();
 
 		// Assert
-		String expectedURL = appUrl + "login/"
-				+ provider.toString().toLowerCase(Locale.getDefault());
+		String expectedURL = appUrl + "login/" + provider.toString().toLowerCase(Locale.getDefault());
 		assertEquals(expectedURL, result.getRequestUrl());
 
 	}
@@ -120,8 +131,7 @@ public class URLTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 				}
 
@@ -129,9 +139,7 @@ public class URLTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						result.setRequestUrl(request.getUrl());
@@ -144,24 +152,20 @@ public class URLTests extends InstrumentationTestCase {
 					}
 				});
 
-				client.getTable(tableName).update(person,
-						new TableOperationCallback<PersonTestObject>() {
+				client.getTable(tableName, PersonTestObject.class).update(person, new TableOperationCallback<PersonTestObject>() {
 
-							@Override
-							public void onCompleted(PersonTestObject entity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								latch.countDown();
-							}
-						});
+					@Override
+					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
 			}
 		});
 
 		latch.await();
 
 		// Assert
-		String expectedURL = appUrl + "tables/" + tableName + "/"
-				+ person.getId();
+		String expectedURL = appUrl + "tables/" + tableName + "/" + person.getId();
 		assertEquals(expectedURL, result.getRequestUrl());
 	}
 
@@ -179,8 +183,7 @@ public class URLTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 				}
 
@@ -188,9 +191,7 @@ public class URLTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						result.setRequestUrl(request.getUrl());
@@ -203,16 +204,13 @@ public class URLTests extends InstrumentationTestCase {
 					}
 				});
 
-				client.getTable(tableName).insert(person,
-						new TableOperationCallback<PersonTestObject>() {
+				client.getTable(tableName, PersonTestObject.class).insert(person, new TableOperationCallback<PersonTestObject>() {
 
-							@Override
-							public void onCompleted(PersonTestObject entity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								latch.countDown();
-							}
-						});
+					@Override
+					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -237,8 +235,7 @@ public class URLTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 				}
 
@@ -246,9 +243,7 @@ public class URLTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						result.setRequestUrl(request.getUrl());
@@ -261,16 +256,13 @@ public class URLTests extends InstrumentationTestCase {
 					}
 				});
 
-				client.getTable(tableName).lookUp(id,
-						new TableJsonOperationCallback() {
+				client.getTable(tableName).lookUp(id, new TableJsonOperationCallback() {
 
-							@Override
-							public void onCompleted(JsonObject jsonEntity,
-									Exception exception,
-									ServiceFilterResponse response) {
-								latch.countDown();
-							}
-						});
+					@Override
+					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -295,8 +287,7 @@ public class URLTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 				}
 
@@ -304,9 +295,7 @@ public class URLTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						result.setRequestUrl(request.getUrl());
@@ -319,15 +308,13 @@ public class URLTests extends InstrumentationTestCase {
 					}
 				});
 
-				client.getTable(tableName).delete(id,
-						new TableDeleteCallback() {
+				client.getTable(tableName).delete(id, new TableDeleteCallback() {
 
-							@Override
-							public void onCompleted(Exception exception,
-									ServiceFilterResponse response) {
-								latch.countDown();
-							}
-						});
+					@Override
+					public void onCompleted(Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -351,8 +338,7 @@ public class URLTests extends InstrumentationTestCase {
 				// Create client
 				MobileServiceClient client = null;
 				try {
-					client = new MobileServiceClient(appUrl, appKey,
-							getInstrumentation().getTargetContext());
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 				} catch (MalformedURLException e) {
 				}
 
@@ -360,9 +346,7 @@ public class URLTests extends InstrumentationTestCase {
 				client = client.withFilter(new ServiceFilter() {
 
 					@Override
-					public void handleRequest(
-							ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
 							ServiceFilterResponseCallback responseCallback) {
 
 						result.setRequestUrl(request.getUrl());
@@ -375,16 +359,13 @@ public class URLTests extends InstrumentationTestCase {
 					}
 				});
 
-				client.getTable(tableName).all()
-						.execute(new TableJsonQueryCallback() {
+				client.getTable(tableName).execute(new TableJsonQueryCallback() {
 
-							@Override
-							public void onCompleted(JsonElement result,
-									int count, Exception exception,
-									ServiceFilterResponse response) {
-								latch.countDown();
-							}
-						});
+					@Override
+					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
 			}
 		});
 
