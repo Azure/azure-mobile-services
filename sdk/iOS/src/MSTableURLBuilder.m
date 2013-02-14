@@ -180,7 +180,7 @@ NSString *const inlineCountNone = @"none";
 // This is for 'strict' URL encoding that will encode even reserved URL
 // characters.  It should be used only on URL pieces, not full URLs.
 NSString* encodeToPercentEscapeString(NSString *string) {
-    return (__bridge NSString *)
+    return (__bridge_transfer NSString *)
     CFURLCreateStringByAddingPercentEscapes(NULL,
                                             (CFStringRef) string,
                                             NULL,
@@ -200,14 +200,14 @@ NSString* encodeToPercentEscapeString(NSString *string) {
         NSString *name = [key description];
         
         // URL Encode the parameter name and the value
-        value = encodeToPercentEscapeString(value);
-        name = encodeToPercentEscapeString(name);
+        NSString *encodedValue = encodeToPercentEscapeString(value);
+        NSString *encodedName = encodeToPercentEscapeString(name);
 
         if (queryString.length > 0) {
             [queryString appendString:@"&"];
         }
         
-        [queryString appendFormat:@"%@=%@", name, value];
+        [queryString appendFormat:@"%@=%@", encodedName, encodedValue];
     }
     
     return queryString;
