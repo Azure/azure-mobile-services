@@ -29,6 +29,10 @@ public class ComplexType {
 
 	public Integer age;
 
+	public ComplexType() {
+		
+	}
+	
 	public ComplexType(Random r) {
 		name = Util.createSimpleRandomString(r, 10);
 		age = r.nextInt(80);
