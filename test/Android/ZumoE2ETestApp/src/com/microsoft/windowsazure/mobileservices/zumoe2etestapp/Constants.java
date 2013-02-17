@@ -25,4 +25,6 @@ public class Constants {
 	public static final String PREFERENCE_MOBILE_SERVICE_KEY = "pref_mobile_service_key";
 
 	public static final String PREFERENCE_LOG_POST_URL = "pref_log_post_url";
+	
+	public static final String PREFERENCE_GCM_SENDER_ID = "pref_GCM_sender_id";
 }

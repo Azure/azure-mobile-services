@@ -11,5 +11,7 @@
     <string name="pref_default_mobile_service_key">1a2b3c4d</string>
     <string name="pref_log_post_url">Log POST URL</string>
     <string name="pref_default_log_post_url"></string>
+    <string name="pref_GCM_sender_id">GCM Sender Id</string>
+    <string name="pref_default_GCM_sender_id">123456789012</string>
     
 </resources>

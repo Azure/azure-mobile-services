@@ -54,6 +54,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestGr
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestResult;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.LoginTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.MiscTests;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.PushTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.QueryTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.RoundTripTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.UpdateDeleteTests;
@@ -96,6 +97,8 @@ public class MainActivity extends Activity {
 			}
 		});
 
+		PushTests.mainActivity = this;
+		
 		refreshTestGroupsAndLog();
 	}
 
@@ -113,10 +116,11 @@ public class MainActivity extends Activity {
 		ArrayAdapter<TestGroup> adapter = (ArrayAdapter<TestGroup>) mTestGroupSpinner.getAdapter();
 		adapter.clear();
 		adapter.add(new RoundTripTests());
-		adapter.add(new MiscTests());
-		adapter.add(new LoginTests());
-		adapter.add(new UpdateDeleteTests());
 		adapter.add(new QueryTests());
+		adapter.add(new UpdateDeleteTests());
+		adapter.add(new LoginTests());
+		adapter.add(new MiscTests());
+		adapter.add(new PushTests());
 		mTestGroupSpinner.setSelection(0);
 		selectTestGroup(0);
 	}
@@ -276,8 +280,17 @@ public class MainActivity extends Activity {
 					exMessage = sb.toString();
 				}
 
-				TestCaseAdapter adapter = (TestCaseAdapter) mTestCaseList.getAdapter();
-				adapter.notifyDataSetChanged();
+				final TestCaseAdapter adapter = (TestCaseAdapter) mTestCaseList.getAdapter();
+				
+				runOnUiThread(new Runnable() {
+
+					@Override
+					public void run() {
+						adapter.notifyDataSetChanged();
+						
+					}
+					
+				});
 				log("TEST LOG", test.getLog());
 				log("TEST COMPLETED", test.getName() + " - " + result.getStatus().toString() + " - Ex: " + exMessage);
 				logSeparator();
@@ -315,6 +328,10 @@ public class MainActivity extends Activity {
 	
 	private String getLogPostURL() {
 		return mPrefManager.getString(Constants.PREFERENCE_LOG_POST_URL, "");
+	}
+	
+	public String getGCMSenderId() {
+		return mPrefManager.getString(Constants.PREFERENCE_GCM_SENDER_ID, "");
 	}
 
 	private MobileServiceClient createMobileServiceClient() throws MalformedURLException {

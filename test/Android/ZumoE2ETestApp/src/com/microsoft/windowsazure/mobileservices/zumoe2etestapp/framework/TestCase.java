@@ -76,6 +76,11 @@ public abstract class TestCase {
 		try {
 			executeTest(client, callback);
 		} catch (Exception e) {
+			StackTraceElement[] stackTrace = e.getStackTrace();
+			for (int i = 0; i < stackTrace.length; i++) {
+				log("  " + stackTrace[i].toString());
+			}
+			
 			TestResult result;
 			if (e.getClass() != this.getExpectedExceptionClass()) {
 				result = createResultFromException(e);
