@@ -4,7 +4,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import android.content.Intent;
-import android.os.Bundle;
 
 import com.google.android.gcm.GCMRegistrar;
 import com.google.gson.JsonElement;
@@ -25,6 +24,8 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.push.GCMMessageM
 
 public class PushTests extends TestGroup {
 
+	private static final String tableName = "droidPushTest";
+	
 	/*
 	 * Pointer to the main activity used to register with GCM
 	 */
@@ -46,19 +47,62 @@ public class PushTests extends TestGroup {
 		json = "\"A single string\"";
 		this.addTest(createPushTest("Push - Single string", json));
 		
+		this.addTest(createNegativePushTest("(Neg) Invalid payload type (array)", "[{\"name\":\"John Doe\"}]"));
+		this.addTest(createNegativePushTest("(Neg) Invalid payload type (number)", "1234"));
+		this.addTest(createNegativePushTest("(Neg) Invalid payload value (number)", "{\"name\":1234}"));
+		this.addTest(createNegativePushTest("(Neg) Invalid payload value (object)", "{'name':{'first':'John','last':'Doe'}}".replace('\'', '\"')));
+	
 		this.addTest(createGCMUnregisterTest());
 	}
 
-	private TestCase createPushTest(String testName, String jsonPayload) {
-		return createPushTest(testName, new JsonParser().parse(jsonPayload));
-	}
-	private TestCase createPushTest(String testName, final JsonElement payload) {
-		TestCase result = new TestCase() {
+	private TestCase createNegativePushTest(String testName, String jsonPayload) {
+		final JsonElement payload = new JsonParser().parse(jsonPayload);
+		return new TestCase(testName) {
 
 			@Override
 			protected void executeTest(MobileServiceClient client,
 					final TestExecutionCallback callback) {
-				MobileServiceJsonTable table = client.getTable("droidPushTest");
+				MobileServiceJsonTable table = client.getTable(tableName);
+				JsonObject item = new JsonObject();
+				item.addProperty("method", "send");
+				item.addProperty("registrationId", registrationId);
+				item.add("payload", payload);
+				final TestCase testCase = this;
+				table.insert(item, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject,
+							Exception exception, ServiceFilterResponse response) {
+						TestResult testResult = new TestResult();
+						testResult.setTestCase(testCase);
+						if (exception == null) {
+							log("Error, expected exception, but got none.");
+							log("Returned jsonObject: " + jsonObject.toString());
+							testResult.setStatus(TestStatus.Failed);
+						} else {
+							log("Received expected exception: " + exception.toString());
+							log("Response: " + response.getStatus().getStatusCode());
+							log("Response body: " + response.getContent());
+							testResult.setStatus(TestStatus.Passed);
+						}
+						
+						callback.onTestComplete(testCase, testResult);
+					}
+					
+				});
+			}
+			
+		};
+	}
+	
+	private TestCase createPushTest(String testName, String jsonPayload) {
+		final JsonElement payload = new JsonParser().parse(jsonPayload);
+		TestCase result = new TestCase(testName) {
+
+			@Override
+			protected void executeTest(MobileServiceClient client,
+					final TestExecutionCallback callback) {
+				MobileServiceJsonTable table = client.getTable(tableName);
 				JsonObject item = new JsonObject();
 				item.addProperty("method", "send");
 				item.addProperty("registrationId", registrationId);
@@ -101,7 +145,7 @@ public class PushTests extends TestGroup {
 								}
 
 								Set<Entry<String, JsonElement>> payloadEntries;
-								payloadEntries = payload.getAsJsonObject().entrySet();
+								payloadEntries = expectedPayload.getAsJsonObject().entrySet();
 								for (Entry<String, JsonElement> entry : payloadEntries) {
 									String key = entry.getKey();
 									String value = entry.getValue().getAsString();
@@ -124,12 +168,11 @@ public class PushTests extends TestGroup {
 			
 		};
 		
-		result.setName(testName);
 		return result;
 	}
 	
 	private TestCase createGCMUnregisterTest() {
-		TestCase testCase = new TestCase() {
+		TestCase testCase = new TestCase("Unregister from GCM") {
 
 			@Override
 			protected void executeTest(MobileServiceClient client,
@@ -144,12 +187,11 @@ public class PushTests extends TestGroup {
 			
 		};
 
-		testCase.setName("Unregister from GCM");
 		return testCase;
 	}
 
 	private TestCase createGCMRegisterTest() {
-		TestCase testCase = new TestCase() {
+		TestCase testCase = new TestCase("Register app with GCM") {
 
 			@Override
 			protected void executeTest(MobileServiceClient client,
@@ -195,7 +237,6 @@ public class PushTests extends TestGroup {
 			
 		};
 		
-		testCase.setName("Register app with GCM");
 		return testCase;
 	}
 }

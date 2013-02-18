@@ -34,10 +34,15 @@ public abstract class TestCase {
 
 	private StringBuilder mTestLog;
 
-	public TestCase() {
+	public TestCase(String name) {
 		mEnabled = false;
 		mStatus = TestStatus.NotRun;
 		mTestLog = new StringBuilder();
+		mName = name;
+	}
+	
+	public TestCase() {
+		this(null);
 	}
 
 	public void log(String log) {
