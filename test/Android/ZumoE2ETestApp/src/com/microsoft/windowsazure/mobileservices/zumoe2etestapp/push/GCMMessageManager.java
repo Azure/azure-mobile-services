@@ -56,4 +56,31 @@ public class GCMMessageManager {
 			timer.schedule(task, milliseconds);
 		}
 	}
+
+	public void waitForPushMessage(long milliseconds, final GCMMessageCallback callback) {
+		if (!pushMessages.isEmpty()) {
+			Intent message = pushMessages.get(0);
+			pushMessages.remove(0);
+			callback.pushMessageReceived(message);
+		} else {
+			TimerTask task = new TimerTask() {
+
+				@Override
+				public void run() {
+					if (!pushMessages.isEmpty()) {
+						Intent message = pushMessages.get(0);
+						pushMessages.remove(0);
+						callback.pushMessageReceived(message);
+					} else {
+						callback.timeoutElapsed();
+					}
+					
+				}
+				
+			};
+			
+			Timer timer = new Timer();
+			timer.schedule(task, milliseconds);
+		}
+	}
 }

@@ -17,7 +17,7 @@ public class GCMIntentService extends GCMBaseIntentService {
 
 	@Override
 	protected void onMessage(Context context, Intent intent) {
-		// TODO Auto-generated method stub
+		GCMMessageManager.instance.newPushMessage(intent);
 
 	}
 
