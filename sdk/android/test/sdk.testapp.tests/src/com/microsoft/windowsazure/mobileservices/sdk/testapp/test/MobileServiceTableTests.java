@@ -222,6 +222,64 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		Assert.assertEquals("Foo", p.getLastName());
 		Assert.assertEquals(person.getAge(), p.getAge());
 	}
+	
+	public void testInsertShouldMutateOriginalEntity() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Object to insert
+		final PersonTestObject originalPerson = new PersonTestObject("John", "Doe", 29);
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				String tableName = "MyTableName";
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(new ServiceFilter() {
+
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+
+						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+						response.setContent("{\"id\":38, \"firstName\":\"John\", \"lastName\":\"Foo\", \"Age\":29}");
+						// call onResponse with the mocked response
+						responseCallback.onResponse(response, null);
+					}
+				});
+
+				// Create get the MobileService table
+				MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
+
+				// Call the insert method
+				msTable.insert(originalPerson, new TableOperationCallback<PersonTestObject>() {
+
+					@Override
+					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Assert.assertEquals(38, originalPerson.getId());
+		Assert.assertEquals("John", originalPerson.getFirstName());
+		Assert.assertEquals("Foo", originalPerson.getLastName());
+		Assert.assertEquals(29, originalPerson.getAge());
+	}
 
 	public void testInsertShouldReturnJSONWithId() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
@@ -448,11 +506,11 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	public void testUpdateShouldReturnEntityWithDifferentNameAndAge() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
-		// Container to store the object after the insertion, we need this to do
+		// Container to store the object after the update, we need this to do
 		// the asserts outside the onSuccess method
 		final ResultsContainer container = new ResultsContainer();
 
-		// Object to insert
+		// Object to update
 		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
 		person.setId(10);
 
@@ -487,7 +545,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				// Get the MobileService table
 				MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
 
-				// Call the delete method
+				// Call the update method
 				msTable.update(person, new TableOperationCallback<PersonTestObject>() {
 
 					@Override
@@ -510,15 +568,74 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		Assert.assertEquals(person.getLastName(), p.getLastName());
 		Assert.assertEquals(50, p.getAge());
 	}
+	
+	public void testUpdateShouldMutateOriginalEntity() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Object to update
+		final PersonTestObject originalPerson = new PersonTestObject("John", "Doe", 29);
+		originalPerson.setId(10);
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				String tableName = "MyTableName";
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(new ServiceFilter() {
+
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+						response.setContent("{\"firstName\":\"Mike\", \"age\":50, \"id\":38}");
+						// call onResponse with the mocked response
+						responseCallback.onResponse(response, null);
+					}
+				});
+
+				// Get the MobileService table
+				MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
+
+				// Call the update method
+				msTable.update(originalPerson, new TableOperationCallback<PersonTestObject>() {
+					
+					@Override
+					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
+
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Assert.assertEquals(38, originalPerson.getId());
+		Assert.assertEquals("Mike", originalPerson.getFirstName());
+		Assert.assertEquals("Doe", originalPerson.getLastName());
+		Assert.assertEquals(50, originalPerson.getAge());
+	}
 
 	public void testUpdateShouldReturnJSONWithDifferentNameAndAge() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
-		// Container to store the object after the insertion, we need this to do
+		// Container to store the object after the update, we need this to do
 		// the asserts outside the onSuccess method
 		final ResultsContainer container = new ResultsContainer();
 
-		// Object to insert
+		// Object to update
 		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
 		person.setId(10);
 

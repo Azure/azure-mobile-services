@@ -23,6 +23,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
 
 package com.microsoft.windowsazure.mobileservices;
 
+import java.lang.reflect.Field;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,28 +70,36 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 
 	class ParseResultOperationCallback implements TableJsonOperationCallback {
 		private TableOperationCallback<E> mCallback;
+		private E mOriginalEntity;
 
 		public ParseResultOperationCallback(TableOperationCallback<E> callback) {
+			this(callback, null);
+		}
+		
+		public ParseResultOperationCallback(TableOperationCallback<E> callback, E originalEntity) {
 			mCallback = callback;
+			mOriginalEntity = originalEntity;
 		}
 
 		@Override
 		public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
-			if (mCallback != null) {
-				if (exception == null) {
-					E entity = null;
-					Exception ex = null;
-					try {
-						entity = parseResults(jsonEntity).get(0);
-					} catch (Exception e) {
-						ex = e;
+			if (exception == null) {
+				E entity = null;
+				Exception ex = null;
+				try {
+					entity = parseResults(jsonEntity).get(0);
+					if (entity != null && mOriginalEntity != null) {
+						copyFields(entity, mOriginalEntity);
 					}
-
-					mCallback.onCompleted(entity, ex, response);
-				} else {
-					mCallback.onCompleted(null, exception, response);
+				} catch (Exception e) {
+					ex = e;
 				}
+
+				if (mCallback != null) mCallback.onCompleted(entity, ex, response);
+			} else {
+				if (mCallback != null) mCallback.onCompleted(null, exception, response);
 			}
+		
 		}
 	}
 
@@ -111,8 +120,6 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 	/**
 	 * Executes a query to retrieve all the table rows
 	 * 
-	 * @param clazz
-	 *            The class used to deserialize the rows
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
@@ -120,6 +127,12 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 		mInternalTable.execute(new ParseResultTableQueryCallback(callback));
 	}
 
+	/**
+	 * Executes a query to retrieve all the table rows
+	 * 
+	 * @param query The MobileServiceQuery instance to execute
+	 * @param callback Callback to invoke when the operation is completed
+	 */
 	public void execute(MobileServiceQuery<?> query, final TableQueryCallback<E> callback) {
 		mInternalTable.execute(query, new ParseResultTableQueryCallback(callback));
 	}
@@ -151,7 +164,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 	public void insert(final E element, final TableOperationCallback<E> callback) throws InvalidParameterException {
 		final JsonObject json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
 
-		mInternalTable.insert(json, new ParseResultOperationCallback(callback));
+		mInternalTable.insert(json, new ParseResultOperationCallback(callback, element));
 	}
 
 	/**
@@ -165,7 +178,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 	public void update(final E element, final TableOperationCallback<E> callback) {
 		final JsonObject json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
 
-		mInternalTable.update(json, new ParseResultOperationCallback(callback));
+		mInternalTable.update(json, new ParseResultOperationCallback(callback, element));
 	}
 
 	/**
@@ -193,5 +206,21 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 			result.add(typedElement);
 		}
 		return result;
+	}
+	
+	/**
+	 * Copy object field values from source to target object
+	 * @param source The object to copy the values from
+	 * @param target The destination object
+	 * @throws IllegalAccessException 
+	 * @throws IllegalArgumentException 
+	 */
+	private void copyFields(Object source, Object target) throws IllegalArgumentException, IllegalAccessException {
+		if (source != null && target != null) {
+			for (Field field : source.getClass().getDeclaredFields()) {
+				field.setAccessible(true);
+				field.set(target, field.get(source));
+			}
+		}
 	}
 }
