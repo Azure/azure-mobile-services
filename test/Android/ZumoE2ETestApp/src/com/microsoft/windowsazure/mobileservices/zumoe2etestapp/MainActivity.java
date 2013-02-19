@@ -32,6 +32,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -67,11 +68,20 @@ public class MainActivity extends Activity {
 	private SharedPreferences mPrefManager;
 
 	private ListView mTestCaseList;
+	
 	private Spinner mTestGroupSpinner;
 
+	
+	@Override
+	public void onConfigurationChanged(Configuration newConfig) {
+		// don't restart the activity. Just process the configuration change
+		super.onConfigurationChanged(newConfig);
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
 		setContentView(R.layout.activity_main);
 
 		mPrefManager = PreferenceManager.getDefaultSharedPreferences(this);
@@ -262,6 +272,7 @@ public class MainActivity extends Activity {
 			@Override
 			public void onTestGroupComplete(TestGroup group, List<TestResult> results) {
 				log("TEST GROUP COMPLETED", group.getName() + " - " + group.getStatus().toString());
+				logSeparator();
 			}
 
 			@Override
