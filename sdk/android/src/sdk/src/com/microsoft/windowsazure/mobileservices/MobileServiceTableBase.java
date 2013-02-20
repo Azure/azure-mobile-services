@@ -26,10 +26,10 @@ import java.util.Map;
 
 import org.apache.http.client.methods.HttpDelete;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 abstract class MobileServiceTableBase<E> {
 
@@ -245,17 +245,10 @@ abstract class MobileServiceTableBase<E> {
 	 *            The entity obtained after executing the operation
 	 * @return
 	 */
-	protected JsonObject patchOriginalEntityWithResponseEntity(Object originalEntity, JsonObject newEntity) {
+	protected JsonObject patchOriginalEntityWithResponseEntity(JsonObject originalEntity, JsonObject newEntity) {
 		// Patch the object to return with the new values
-		Gson gson = mClient.getGsonBuilder().create();
-		JsonObject patchedEntityJson;
-
-		if (originalEntity instanceof JsonObject) {
-			patchedEntityJson = (JsonObject) originalEntity;
-		} else {
-			patchedEntityJson = gson.toJsonTree(originalEntity).getAsJsonObject();
-		}
-
+		JsonObject patchedEntityJson = (JsonObject) new JsonParser().parse(originalEntity.toString());
+		
 		for (Map.Entry<String, JsonElement> entry : newEntity.entrySet()) {
 			patchedEntityJson.add(entry.getKey(), entry.getValue());
 		}
