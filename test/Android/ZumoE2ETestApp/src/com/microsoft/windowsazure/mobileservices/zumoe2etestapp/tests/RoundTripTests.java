@@ -226,7 +226,7 @@ public class RoundTripTests extends TestGroup {
 		element1.id = 1;
 		this.addTest(createSimpleTypedRoundTripTestWithException(
 				"(Neg) Insert item with non-default id", element1,
-				InvalidParameterException.class));
+				InvalidParameterException.class, false));
 
 		// untyped tests
 		this.addTest(createSimpleUntypedRoundTripTest("Untyped String: Empty",
@@ -396,11 +396,8 @@ public class RoundTripTests extends TestGroup {
 	}
 
 	private TestCase createSimpleUntypedRoundTripTestWithException(
-			String testName, String jsonString,
+			String testName, final String jsonString,
 			final Class<?> expectedExceptionClass) {
-		final JsonObject json =  new JsonParser().parse(jsonString)
-				.getAsJsonObject();
-
 		TestCase testCase = new TestCase() {
 
 			@Override
@@ -411,6 +408,9 @@ public class RoundTripTests extends TestGroup {
 				result.setStatus(TestStatus.Passed);
 				final TestCase test = this;
 
+				final JsonObject json =  new JsonParser().parse(jsonString)
+						.getAsJsonObject();
+				
 				log("insert item");
 				table.insert(json, new TableJsonOperationCallback() {
 					@Override
@@ -491,12 +491,12 @@ public class RoundTripTests extends TestGroup {
 		}
 
 		return createSimpleTypedRoundTripTestWithException(testName, element,
-				expectedExceptionClass);
+				expectedExceptionClass, true);
 	}
 
 	private TestCase createSimpleTypedRoundTripTestWithException(
 			String testName, final RoundTripTableElement element,
-			final Class<?> expectedExceptionClass) {
+			final Class<?> expectedExceptionClass, final boolean removeId) {
 		TestCase testCase = new TestCase() {
 
 			@Override
@@ -508,6 +508,10 @@ public class RoundTripTests extends TestGroup {
 				result.setStatus(TestStatus.Passed);
 				final TestCase test = this;
 
+				if (removeId) {
+					element.id = null;
+				}
+				
 				log("insert item");
 				table.insert(element,
 						new TableOperationCallback<RoundTripTableElement>() {

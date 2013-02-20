@@ -53,6 +53,10 @@ public abstract class TestCase {
 	public String getLog() {
 		return mTestLog.toString();
 	}
+	
+	public void clearLog() {
+		mTestLog = new StringBuilder();
+	}
 
 	public TestStatus getStatus() {
 		return mStatus;

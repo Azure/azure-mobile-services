@@ -128,6 +128,8 @@ public class UpdateDeleteTests extends TestGroup {
 				final TestCase testCase = this;
 
 				log("insert item");
+				itemToInsert.id = null;
+				
 				table.insert(itemToInsert, new TableOperationCallback<RoundTripTableElement>() {
 
 					@Override
