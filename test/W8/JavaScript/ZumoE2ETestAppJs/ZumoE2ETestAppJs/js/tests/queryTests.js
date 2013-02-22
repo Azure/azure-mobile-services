@@ -47,8 +47,14 @@ function defineQueryTestsNamespace() {
             // Not interesting
             return;
         }
+
         if (testName.indexOf('Date: Greater') === 0 || testName.indexOf('String.length - Movie with small names') === 0) {
             // Use captured variables, cannot pass to the server
+            return;
+        }
+
+        if (testName.indexOf('String.replace, trim') === 0) {
+            // String.trim currently not supported on the server
             return;
         }
 
