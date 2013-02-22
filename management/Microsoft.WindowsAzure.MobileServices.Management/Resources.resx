@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="AsyncOperationFailed" xml:space="preserve">
+    <value>An asynchronous Windows Azure management operation {0} failed. </value>
+  </data>
+  <data name="CreateMobileServiceApplicationTemplate" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;Application xmlns="http://schemas.microsoft.com/windowsazure"&gt;
+  &lt;Name&gt;{0}&lt;/Name&gt; 
+  &lt;Label&gt;{1}&lt;/Label&gt;
+  &lt;Description&gt;{2}&lt;/Description&gt;
+  &lt;Configuration&gt;{3}&lt;/Configuration&gt;
+&lt;/Application&gt;</value>
+  </data>
+  <data name="ErrorGettingDefaultServiceLocation" xml:space="preserve">
+    <value>Unable to determine the default location for new Windows Azure Mobile Services.</value>
+  </data>
+  <data name="ExisingSqlDbRequiresExistingSqlServer" xml:space="preserve">
+    <value>To use existing SQL databse you must specify both SQL database name and SQL server name parameters as well as SQL server username and password.</value>
+  </data>
+  <data name="ManagementCertificateWithoutPrivateKey" xml:space="preserve">
+    <value>ManagementCertificate must contain private key.</value>
+  </data>
+  <data name="ManagementServiceReturnedHttpError" xml:space="preserve">
+    <value>A call to the Windows Azure Mobile Services management endpoint returned unexpected HTTP status code {0}.</value>
+  </data>
+  <data name="MissingManagementCertificate" xml:space="preserve">
+    <value>ManagementCertificate must be specified on the MobileServiceManagementClient.</value>
+  </data>
+  <data name="MissingMobileServiceManagementEndpoint" xml:space="preserve">
+    <value>MobileServiceManagementEndpoint must be specified on the MobileServiceManagementClient.</value>
+  </data>
+  <data name="MissingServiceName" xml:space="preserve">
+    <value>The required service name parameter is not provided.</value>
+  </data>
+  <data name="MissingSqlAdminPassword" xml:space="preserve">
+    <value>The required SQL administrator password parameter is not provided.</value>
+  </data>
+  <data name="MissingSqlAdminUsername" xml:space="preserve">
+    <value>The required SQL administrator username parameter is not provided. </value>
+  </data>
+  <data name="MissingSubscriptionId" xml:space="preserve">
+    <value>SubscriptionId must be specified on the MobileServiceManagementClient.</value>
+  </data>
+  <data name="NoOperationIdInResponse" xml:space="preserve">
+    <value>A call to Windows Azure Mobile Services management endpoint did not return asynchronous operation ID.</value>
+  </data>
+  <data name="NoResponse" xml:space="preserve">
+    <value>A call to Windows Azure Mobile Services management endpoint did not return a response.</value>
+  </data>
+  <data name="UnableToProcessResponse" xml:space="preserve">
+    <value>A call to Windows Azure Mobile Services management endoint returned a response that cannot be parsed as XML: {0}</value>
+  </data>
+  <data name="UnexpectedAsyncOperationStatus" xml:space="preserve">
+    <value>An asynchronous Windows Azure management operation returned an unrecognized status of {0}.</value>
+  </data>
+  <data name="UnexpectedResponse" xml:space="preserve">
+    <value>A call to Windows Azure Mobile Services management endoint returned an invalid response: {0}</value>
+  </data>
+  <data name="UnexpectedTypeOfResponse" xml:space="preserve">
+    <value>A call to the Windows Azure Mobile Services management endpoing returned unexpected response type. Expected type is {0} and actual is {1}. </value>
+  </data>
+  <data name="WeakSqlAdminPassword" xml:space="preserve">
+    <value>The specified SQL administrator password does not meet strength requirements. The password must be at least 8 characters long, cannot contain the SQL administrator username, and must contain at least three of the following types of characters: uppercase letter, lowercase letter, digit, non-alphanumeric character.</value>
+  </data>
+  <data name="WeakSqlPassword" xml:space="preserve">
+    <value>The SQL administrator password does not meet strength requirements. SQL administrator password must be at least 8 characters long, not contain the SQL administrator username, and contain characters from at least 3 of the following classes of characters: uppercase letter A-Z, lowercase letter a-z, digit 0-9, and a non-alphanumeric character.  </value>
+  </data>
+</root>
