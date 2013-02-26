@@ -284,11 +284,7 @@ function defineQueryTestsNamespace() {
         var field2 = b[this.fieldName];
         var result = 0;
         if (typeof field1 === 'string') {
-            if (field1 < field2) {
-                result = -1;
-            } else if (field1 > field2) {
-                result = 1;
-            }
+            result = field1.localeCompare(field2);
         } else if (typeof field1 === 'number') {
             result = field1 - field2;
         } else if (typeof field1 === 'object' && Object.prototype.toString.call(field1) == '[object Date]') {
