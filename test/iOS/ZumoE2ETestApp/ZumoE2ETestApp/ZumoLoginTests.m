@@ -10,6 +10,37 @@
 #import "ZumoTestGlobals.h"
 #import <WindowsAzureMobileServices/WindowsAzureMobileServices.h>
 
+@interface TimerTarget : NSObject
+{
+    ZumoTest *test;
+    ZumoTestCompletion completion;
+}
+
+- (id)initWithTest:(ZumoTest *)test completion:(ZumoTestCompletion)completion;
+- (void)completeTest:(NSTimer *)timer;
+
+@end
+
+@implementation TimerTarget
+
+- (id)initWithTest:(ZumoTest *)theTest completion:(ZumoTestCompletion)completionBlock {
+    self = [super init];
+    if (self) {
+        self->test = theTest;
+        self->completion = completionBlock;
+    }
+    
+    return self;
+}
+
+- (void)completeTest:(NSTimer *)timer {
+    [test addLog:@"Timer fired, completing the test"];
+    [test setTestStatus:TSPassed];
+    completion(YES);
+}
+
+@end
+
 @implementation ZumoLoginTests
 
 + (NSArray *)createTests {
@@ -27,6 +58,7 @@
         for (provider in providers) {
             BOOL useSimplified = useSimplifiedLogin == 1;
             [result addObject:[self createLogoutTest]];
+            [result addObject:[self createSleepTest:3]];
             [result addObject:[self createLoginTestForProvider:provider usingSimplifiedMode:useSimplified]];
             [result addObject:[self createCRUDTestForProvider:provider forTable:@"iosApplication" ofType:ZumoTableApplication andAuthenticated:YES]];
             [result addObject:[self createCRUDTestForProvider:provider forTable:@"iosAuthenticated" ofType:ZumoTableAuthenticated andAuthenticated:YES]];
@@ -38,6 +70,16 @@
 }
 
 typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenticated, ZumoTableAdminScripts } ZumoTableType;
+
++ (ZumoTest *)createSleepTest:(int)seconds {
+    NSString *testName = [NSString stringWithFormat:@"Sleep for %d seconds", seconds];
+    return [ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+        [test addLog:@"Starting the timer"];
+        TimerTarget *timerTarget = [[TimerTarget alloc] initWithTest:test completion:completion];
+        NSTimer *timer = [NSTimer scheduledTimerWithTimeInterval:seconds target:timerTarget selector:@selector(completeTest:) userInfo:nil repeats:NO];
+        [test addLog:[NSString stringWithFormat:@"Timer fire date: %@", [timer fireDate]]];
+    }];
+}
 
 + (ZumoTest *)createCRUDTestForProvider:(NSString *)providerName forTable:(NSString *)tableName ofType:(ZumoTableType)tableType andAuthenticated:(BOOL)isAuthenticated {
     NSString *tableTypeName;
