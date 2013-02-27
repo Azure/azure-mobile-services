@@ -99,6 +99,11 @@
     return [self headerView];
 }
 
+- (BOOL)textFieldShouldReturn:(UITextField *)textField {
+    [textField resignFirstResponder];
+    return YES;
+}
+
 - (IBAction)runTests:(id)sender {
     NSLog(@"Start running tests!");
     [[self tests] setDelegate:self];

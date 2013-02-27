@@ -66,6 +66,11 @@ function createZumoNamespace() {
         this.execution(this, testDone);
     }
 
+    ZumoTest.prototype.reset = function () {
+        this.status = TSNotRun;
+        this.logs = [];
+    }
+
     function ZumoTestGroup(name, tests) {
         this.name = name;
         this.tests = tests || [];
