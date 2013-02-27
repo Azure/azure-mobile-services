@@ -35,6 +35,7 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateSimpleTypedRoundTripTest("String: non-ASCII characters - Chinese", RoundTripTestType.String, "这本书在桌子上"));
             result.AddTest(CreateSimpleTypedRoundTripTest("String: non-ASCII characters - Japanese", RoundTripTestType.String, "本は机の上に"));
             result.AddTest(CreateSimpleTypedRoundTripTest("String: non-ASCII characters - Hebrew", RoundTripTestType.String, "הספר הוא על השולחן"));
+            result.AddTest(CreateSimpleTypedRoundTripTest("String: non-ASCII characters - Russian", RoundTripTestType.String, "Книга лежит на столе"));
 
             result.AddTest(CreateSimpleTypedRoundTripTest("Date: now", RoundTripTestType.Date, Util.TrimSubMilliseconds(DateTime.Now)));
             result.AddTest(CreateSimpleTypedRoundTripTest("Date: now (UTC)", RoundTripTestType.Date, Util.TrimSubMilliseconds(DateTime.UtcNow)));
@@ -114,6 +115,7 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped String: non-ASCII characters - Chinese", "string1", "这本书在桌子上"));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped String: non-ASCII characters - Japanese", "string1", "本は机の上に"));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped String: non-ASCII characters - Hebrew", "string1", "הספר הוא על השולחן"));
+            result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped String: non-ASCII characters - Russian", "string1", "Книга лежит на столе"));
 
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped Date: now", "date1", Util.TrimSubMilliseconds(DateTime.Now)));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped Date: now (UTC)", "date1", Util.TrimSubMilliseconds(DateTime.UtcNow)));
@@ -396,17 +398,31 @@ namespace ZumoE2ETestApp.Tests
                         test.AddLog("Round-tripped item is different! Expected: {0}; actual: {1}", originalItem, roundTripped);
                         return false;
                     }
-                    else
+
+                    if (type == RoundTripTestType.String && item.String1 != null && item.String1.Length < 50)
                     {
-                        if (typeof(TExpectedException) == typeof(ExceptionTypeWhichWillNeverBeThrown))
+                        test.AddLog("Now querying the table for the item (validating characters on query)");
+                        var queried = await table.Where(i => i.String1 == item.String1).ToListAsync();
+                        var lastItem = queried.Where(i => i.Id == item.Id).First();
+                        if (originalItem.Equals(lastItem))
                         {
-                            return true;
+                            test.AddLog("Query for item succeeded");
                         }
                         else
                         {
-                            test.AddLog("Error, test should have failed with {0}, but succeeded.", typeof(TExpectedException).FullName);
+                            test.AddLog("Round-tripped (queried) item is different! Expected: {0}; actual: {1}", originalItem, lastItem);
                             return false;
                         }
+                    }
+
+                    if (typeof(TExpectedException) == typeof(ExceptionTypeWhichWillNeverBeThrown))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        test.AddLog("Error, test should have failed with {0}, but succeeded.", typeof(TExpectedException).FullName);
+                        return false;
                     }
                 }
                 catch (TExpectedException ex)

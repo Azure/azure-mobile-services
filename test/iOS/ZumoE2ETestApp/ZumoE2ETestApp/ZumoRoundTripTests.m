@@ -14,13 +14,13 @@
 
 static NSString *tableName = @"iosRoundTripTable";
 
-typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTripTestColumnType;
+typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } RoundTripTestColumnType;
 
 + (NSArray *)createTests {
     ZumoTest *firstTest = [ZumoTest createTestWithName:@"Setup dynamic schema" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client getTable:tableName];
-        NSDictionary *item = @{@"string1":@"test", @"date1": [ZumoTestGlobals createDateWithYear:2011 month:11 day:11], @"bool1": [NSNumber numberWithBool:NO], @"number": [NSNumber numberWithInt:-1], @"longnum":[NSNumber numberWithLong:0], @"intnum":[NSNumber numberWithInt:0], @"setindex":@"setindex"};
+        NSDictionary *item = @{@"string1":@"test", @"date1": [ZumoTestGlobals createDateWithYear:2011 month:11 day:11], @"bool1": [NSNumber numberWithBool:NO], @"number": [NSNumber numberWithInt:-1], @"longnum":[NSNumber numberWithLongLong:0LL], @"intnum":[NSNumber numberWithInt:0], @"setindex":@"setindex"};
         [table insert:item completion:^(NSDictionary *inserted, NSError *err) {
             if (err) {
                 [test addLog:@"Error inserting data to create schema"];
@@ -71,8 +71,14 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
     [result addObject:[self createRoundTripForType:RTTInt withValue:[NSNumber numberWithInt:-rand()] andName:@"Round trip negative number"]];
     [result addObject:[self createRoundTripForType:RTTInt withValue:[NSNumber numberWithInt:0] andName:@"Round trip zero"]];
     [result addObject:[self createRoundTripForType:RTTDouble withValue:[NSNumber numberWithDouble:MAXFLOAT] andName:@"Round trip MAXFLOAT"]];
-    [result addObject:[self createRoundTripForType:RTTLong withValue:[NSNumber numberWithLong:123456789012345L] andName:@"Round trip long number"]];
-    [result addObject:[self createRoundTripForType:RTTLong withValue:[NSNumber numberWithLong:-123456789012345L] andName:@"Round trip negative long"]];
+    [result addObject:[self createRoundTripForType:RTT8ByteLong withValue:[NSNumber numberWithLongLong:123456789012345LL] andName:@"Round trip long long number"]];
+    [result addObject:[self createRoundTripForType:RTT8ByteLong withValue:[NSNumber numberWithLongLong:-123456789012345LL] andName:@"Round trip negative long long"]];
+    long long maxSupportedLong = 0x0020000000000000LL;
+    long long maxSupportedNegativeLong = 0xFFE0000000000000LL;
+    [result addObject:[self createRoundTripForType:RTT8ByteLong withValue:[NSNumber numberWithLongLong:maxSupportedLong] andName:@"Round trip maximum long long"]];
+    [result addObject:[self createRoundTripForType:RTT8ByteLong withValue:[NSNumber numberWithLongLong:(maxSupportedLong + 13)] andName:@"Round trip value beyond maximum long long"]];
+    [result addObject:[self createRoundTripForType:RTT8ByteLong withValue:[NSNumber numberWithLongLong:maxSupportedNegativeLong] andName:@"Round trip maximum negative long long"]];
+    [result addObject:[self createRoundTripForType:RTT8ByteLong withValue:[NSNumber numberWithLongLong:(maxSupportedNegativeLong - 1)] andName:@"Round trip value beyond maximum negative long long"]];
     
     // Complex object scenarios
     [result addObject:[ZumoTest createTestWithName:@"Object with complex member" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
@@ -112,7 +118,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
     }]];
     
     // Negative scenarios
-    [result addObject:[ZumoTest createTestWithName:@"New column with null value" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+    [result addObject:[ZumoTest createTestWithName:@"(Neg) New column with null value" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client getTable:tableName];
         [table insert:@{@"ColumnWhichDoesNotExist":[NSNull null]} completion:^(NSDictionary *item, NSError *err) {
@@ -135,6 +141,38 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
         }];
     }]];
     
+    NSArray *idNames = @[@"id", @"ID", @"Id", @"iD"];
+    for (NSString *name in idNames) {
+        NSString *idName = name;
+        NSString *testName = [NSString stringWithFormat:@"(Neg) Insert element with id field: '%@'", idName];
+        [result addObject:[ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+            MSClient *client = [[ZumoTestGlobals sharedInstance] client];
+            MSTable *table = [client getTable:tableName];
+            NSMutableDictionary *item = [[NSMutableDictionary alloc] init];
+            [item setValue:@"hello" forKey:@"string1"];
+            [item setValue:@1 forKey:idName];
+            [table insert:item completion:^(NSDictionary *inserted, NSError *err) {
+                BOOL passed;
+                if (!err) {
+                    [test addLog:[NSString stringWithFormat:@"Error, adding item with 'id' field should fail, but insert worked: %@", inserted]];
+                    passed = NO;
+                } else {
+                    if (err.code == MSExistingItemIdWithRequest) {
+                        [test addLog:@"Test passed, got correct error"];
+                        passed = YES;
+                    } else {
+                        [test addLog:[NSString stringWithFormat:@"Expected error code %d, got %d", MSExistingItemIdWithRequest, err.code]];
+                        passed = NO;
+                    }
+                }
+                
+                [test setTestStatus:(passed ? TSPassed : TSFailed)];
+                completion(passed);
+            }];
+
+        }]];
+    }
+    
     return result;
 }
 
@@ -143,20 +181,25 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client getTable:tableName];
         NSMutableDictionary *item = [[NSMutableDictionary alloc] init];
+        NSString *keyName = @"";
         if (type == RTTString) {
-            [item setObject:value forKey:@"string1"];
+            keyName = @"string1";
         } else if (type == RTTDouble) {
-            [item setObject:value forKey:@"number"];
+            keyName = @"number";
         } else if (type == RTTBool) {
-            [item setObject:value forKey:@"bool1"];
+            keyName = @"bool1";
         } else if (type == RTTInt) {
-            [item setObject:value forKey:@"intnum"];
-        } else if (type == RTTLong) {
-            [item setObject:value forKey:@"longnum"];
+            keyName = @"intnum";
+        } else if (type == RTT8ByteLong) {
+            keyName = @"longnum";
         } else if (type == RTTDate) {
-            [item setObject:value forKey:@"date1"];
+            keyName = @"date1";
         }
-        
+
+        [item setObject:value forKey:keyName];
+        NSString *valueString = [self toLimitedString:value upTo:100];
+        [test addLog:[NSString stringWithFormat:@"Inserting value %@, using key %@", valueString, keyName]];
+
         [table insert:item completion:^(NSDictionary *inserted, NSError *err) {
             if (err) {
                 [test addLog:[NSString stringWithFormat:@"Error inserting: %@", err]];
@@ -170,6 +213,8 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
                         [test setTestStatus:TSFailed];
                         completion(NO);
                     } else {
+                        NSString *retrievedString = [self toLimitedString:retrieved upTo:200];
+                        [test addLog:[NSString stringWithFormat:@"Retrieved item: %@", retrievedString]];
                         BOOL failed = NO;
                         if (type == RTTString) {
                             NSString *rtString = [retrieved objectForKey:@"string1"];
@@ -209,8 +254,9 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
                                 failed = YES;
                                 [test addLog:[NSString stringWithFormat:@"Value is incorrect: %@ != %@", value, rtNumber]];
                             }
-                        } else if (type == RTTLong) {
+                        } else if (type == RTT8ByteLong) {
                             NSNumber *rtNumber = [retrieved objectForKey:@"longnum"];
+                            [test addLog:[NSString stringWithFormat:@"Retrieved number: %@", rtNumber]];
                             if (![rtNumber isEqualToNumber:value]) {
                                 failed = YES;
                                 [test addLog:[NSString stringWithFormat:@"Value is incorrect: %@ != %@", value, rtNumber]];
@@ -224,9 +270,36 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
                             [test setTestStatus:TSFailed];
                             completion(NO);
                         } else {
-                            [test addLog:@"Test passed"];
-                            [test setTestStatus:TSPassed];
-                            completion(YES);
+                            if (type == RTTString && value != [NSNull null] && ((NSString *)value).length < 100) {
+                                // Additional validation: query for the inserted data
+                                NSString *rtString = value;
+                                NSPredicate *predicate = [NSPredicate predicateWithFormat:@"id == %d && string1 == %@", [itemId intValue], rtString];
+                                [table readWhere:predicate completion:^(NSArray *items, NSInteger totalCount, NSError *err3) {
+                                    BOOL passed = NO;
+                                    if (err3) {
+                                        [test addLog:[NSString stringWithFormat:@"Error retrieving data: %@", err3]];
+                                    } else {
+                                        if ([items count] != 1) {
+                                            [test addLog:[NSString stringWithFormat:@"Expected to receive 1 element; received %d: %@", [items count], items]];
+                                        } else {
+                                            NSNumber *readId = items[0][@"id"];
+                                            if ([itemId isEqualToNumber:readId]) {
+                                                [test addLog:@"Test passed"];
+                                                passed = YES;
+                                            } else {
+                                                [test addLog:[NSString stringWithFormat:@"Received invalid item: %@", items]];
+                                            }
+                                        }
+                                    }
+                                    
+                                    [test setTestStatus:(passed ? TSPassed : TSFailed)];
+                                    completion(passed);
+                                }];
+                            } else {
+                                [test addLog:@"Test passed"];
+                                [test setTestStatus:TSPassed];
+                                completion(YES);
+                            }
                         }
                     }
                 }];
@@ -235,6 +308,15 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTTLong, RTTDate } RoundTr
     }];
     
     return result;
+}
+
++ (NSString *)toLimitedString:(id)value upTo:(int)maxLength {
+    NSString *str = [NSString stringWithFormat:@"%@", value];
+    if ([str length] > maxLength) {
+        str = [NSString stringWithFormat:@"%@ ... (len = %d)", [str substringToIndex:maxLength], [str length]];
+    }
+    
+    return str;
 }
 
 + (NSString *)helpText {

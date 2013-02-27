@@ -339,12 +339,21 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
                         [test addLog:[NSString stringWithFormat:@"Error in 'totalCount'. Expected: %d, actual: %d", expectedTotalItems, totalCount]];
                     } else {
                         if (orderByClauses) {
-                            NSMutableArray *sortDescriptors = [[NSMutableArray alloc] init];
-                            for (OrderByClause *clause in orderByClauses) {
-                                [sortDescriptors addObject:[[NSSortDescriptor alloc] initWithKey:[clause fieldName] ascending:[clause isAscending]]];
-                            }
+                            if ([orderByClauses count] == 1 && [[orderByClauses[0] fieldName] isEqualToString:@"Title"] && [orderByClauses[0] isAscending]) {
+                                // Special case, need to ignore accents
+                                filteredArray = [filteredArray sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+                                    NSString *title1 = obj1[@"Title"];
+                                    NSString *title2 = obj2[@"Title"];
+                                    return [title1 compare:title2 options:NSDiacriticInsensitiveSearch];
+                                }];
+                            } else {
+                                NSMutableArray *sortDescriptors = [[NSMutableArray alloc] init];
+                                for (OrderByClause *clause in orderByClauses) {
+                                    [sortDescriptors addObject:[[NSSortDescriptor alloc] initWithKey:[clause fieldName] ascending:[clause isAscending]]];
+                                }
                             
-                            filteredArray = [filteredArray sortedArrayUsingDescriptors:sortDescriptors];
+                                filteredArray = [filteredArray sortedArrayUsingDescriptors:sortDescriptors];
+                            }
                         }
 
                         if (top || skip) {
