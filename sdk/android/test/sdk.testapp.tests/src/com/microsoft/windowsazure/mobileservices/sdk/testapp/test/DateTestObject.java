@@ -22,6 +22,7 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 import java.util.Date;
 
 public class DateTestObject {
+	private int id;
 	private Date date;
 
 	public DateTestObject(Date date) {
@@ -34,5 +35,13 @@ public class DateTestObject {
 
 	public void setDate(Date date) {
 		this.date = date;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
 	}
 }

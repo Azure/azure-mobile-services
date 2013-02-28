@@ -204,13 +204,17 @@ public class URLTests extends InstrumentationTestCase {
 					}
 				});
 
-				client.getTable(tableName, PersonTestObject.class).insert(person, new TableOperationCallback<PersonTestObject>() {
+				try {
+					client.getTable(tableName, PersonTestObject.class).insert(person, new TableOperationCallback<PersonTestObject>() {
 
-					@Override
-					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+						@Override
+						public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
 			}
 		});
 

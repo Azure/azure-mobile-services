@@ -31,6 +31,8 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceUser;
  */
 public class ResultsContainer {
 	private PersonTestObject person;
+	
+	private PersonTestObjectWithoutId personWithoutId;
 
 	private ComplexPersonTestObject complexPerson;
 
@@ -138,6 +140,14 @@ public class ResultsContainer {
 
 	public void setDateTestObject(DateTestObject dateTestObject) {
 		this.dateTestObject = dateTestObject;
+	}
+
+	public PersonTestObjectWithoutId getPersonWithoutId() {
+		return personWithoutId;
+	}
+
+	public void setPersonWithoutId(PersonTestObjectWithoutId personWithNoId) {
+		this.personWithoutId = personWithNoId;
 	}
 
 }

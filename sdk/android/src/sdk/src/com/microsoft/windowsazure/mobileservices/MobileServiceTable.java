@@ -2,19 +2,19 @@
 Copyright (c) Microsoft Open Technologies, Inc.
 All Rights Reserved
 Apache 2.0 License
- 
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
- 
+
      http://www.apache.org/licenses/LICENSE-2.0
- 
+
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- 
+
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
 /*
@@ -75,7 +75,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 		public ParseResultOperationCallback(TableOperationCallback<E> callback) {
 			this(callback, null);
 		}
-		
+
 		public ParseResultOperationCallback(TableOperationCallback<E> callback, E originalEntity) {
 			mCallback = callback;
 			mOriginalEntity = originalEntity;
@@ -99,7 +99,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 			} else {
 				if (mCallback != null) mCallback.onCompleted(null, exception, response);
 			}
-		
+
 		}
 	}
 
@@ -160,9 +160,20 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 * @throws InvalidParameterException
+	 * @throws MobileServiceException 
 	 */
-	public void insert(final E element, final TableOperationCallback<E> callback) throws InvalidParameterException {
+	public void insert(final E element, final TableOperationCallback<E> callback) throws InvalidParameterException, MobileServiceException {
 		final JsonObject json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
+		try {
+			validateJsonIdProperty(json);
+			
+		} catch (Exception e) {
+				if (callback != null) {
+					callback.onCompleted(null, e, null);
+				}
+				
+				return;
+		}
 
 		mInternalTable.insert(json, new ParseResultOperationCallback(callback, element));
 	}
@@ -178,6 +189,17 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 	public void update(final E element, final TableOperationCallback<E> callback) {
 		final JsonObject json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
 
+		try {
+			validateJsonIdProperty(json);
+			
+		} catch (Exception e) {
+				if (callback != null) {
+					callback.onCompleted(null, e, null);
+				}
+				
+				return;
+		}
+		
 		mInternalTable.update(json, new ParseResultOperationCallback(callback, element));
 	}
 
@@ -207,7 +229,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Copy object field values from source to target object
 	 * @param source The object to copy the values from
@@ -221,6 +243,37 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 				field.setAccessible(true);
 				field.set(target, field.get(source));
 			}
+		}
+	}
+
+	/**
+	 * Validates if the JSon element has only one property named as Id, otherwise throws exception
+	 * @param json the element to evaluate
+	 * @throws MobileServiceException
+	 */
+	private void validateJsonIdProperty(final JsonObject json) throws MobileServiceException {
+		// Check if id property exists
+		String[] idPropertyNames = new String[4];
+		idPropertyNames[0] = "id";
+		idPropertyNames[1] = "Id";
+		idPropertyNames[2] = "iD";
+		idPropertyNames[3] = "ID";
+
+		int ocurrence = 0;
+		for (int i = 0; i < 4; i++) {
+			String idProperty = idPropertyNames[i];
+			if (json.has(idProperty)) {
+				ocurrence++;
+			}			
+		}		
+
+		if(ocurrence == 0)
+		{
+			throw new MobileServiceException("The object must have an Id property.");			
+		}
+		else if(ocurrence > 1)
+		{
+			throw new MobileServiceException("There are multiple properties named as 'id'. Only one property can be named 'id' in an object.");
 		}
 	}
 }

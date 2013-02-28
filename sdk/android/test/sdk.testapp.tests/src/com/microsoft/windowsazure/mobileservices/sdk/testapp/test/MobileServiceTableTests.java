@@ -157,6 +157,57 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			// do nothing, it's OK
 		}
 	}
+	
+	public void testInsertShouldThrowExceptionIfObjectDoesNotHaveIdProperty() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store the object after the insertion, we need this to do
+		// the asserts outside the onSuccess method
+		final ResultsContainer container = new ResultsContainer();
+
+		// Object to insert
+		final PersonTestObjectWithoutId person = new PersonTestObjectWithoutId("John", "Doe", 29);
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				String tableName = "MyTableName";
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Create get the MobileService table
+				MobileServiceTable<PersonTestObjectWithoutId> msTable = client.getTable(tableName, PersonTestObjectWithoutId.class);
+
+				// Call the insert method
+				try {
+					msTable.insert(person, new TableOperationCallback<PersonTestObjectWithoutId>() {
+
+						@Override
+						public void onCompleted(PersonTestObjectWithoutId entity, Exception exception, ServiceFilterResponse response) {
+							container.setErrorMessage(exception.getMessage());
+							container.setPersonWithoutId(entity);
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		assertEquals("The object must have an Id property.", container.getErrorMessage());
+		assertNull(container.getPersonWithoutId());
+	}
 
 	public void testInsertShouldReturnEntityWithId() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
@@ -201,14 +252,18 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
 
 				// Call the insert method
-				msTable.insert(person, new TableOperationCallback<PersonTestObject>() {
+				try {
+					msTable.insert(person, new TableOperationCallback<PersonTestObject>() {
 
-					@Override
-					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						container.setPerson(entity);
-						latch.countDown();
-					}
-				});
+						@Override
+						public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+							container.setPerson(entity);
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
 			}
 		});
 
@@ -262,13 +317,17 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
 
 				// Call the insert method
-				msTable.insert(originalPerson, new TableOperationCallback<PersonTestObject>() {
+				try {
+					msTable.insert(originalPerson, new TableOperationCallback<PersonTestObject>() {
 
-					@Override
-					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+						@Override
+						public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
 			}
 		});
 
@@ -292,7 +351,6 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
 
 		final JsonObject jsonPerson = gsonBuilder.create().toJsonTree(person).getAsJsonObject();
-
 		runTestOnUiThread(new Runnable() {
 
 			@Override
@@ -326,14 +384,18 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				// Call the insert method
-				msTable.insert(jsonPerson, new TableJsonOperationCallback() {
+				try {
+					msTable.insert(jsonPerson, new TableJsonOperationCallback() {
 
-					@Override
-					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
-						container.setResponseValue(jsonEntity.toString());
-						latch.countDown();
-					}
-				});
+						@Override
+						public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+							container.setResponseValue(jsonEntity.toString());
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
 			}
 		});
 
@@ -404,18 +466,22 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				JsonObject json = new JsonParser().parse("{'myField': 'invalid value'}").getAsJsonObject();
 
 				// Call the insert method
-				msTable.insert(json, new TableJsonOperationCallback() {
+				try {
+					msTable.insert(json, new TableJsonOperationCallback() {
 
-					@Override
-					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
-						if (exception == null) {
-							Assert.fail();
-						} else {
-							assertTrue(exception instanceof MobileServiceException);
+						@Override
+						public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+							if (exception == null) {
+								Assert.fail();
+							} else {
+								assertTrue(exception instanceof MobileServiceException);
+							}
+							latch.countDown();
 						}
-						latch.countDown();
-					}
-				});
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
 			}
 		});
 
@@ -481,22 +547,26 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				JsonObject json = new JsonParser().parse("{'myField': 'invalid value'}").getAsJsonObject();
 
 				// Call the insert method
-				msTable.insert(json, new TableJsonOperationCallback() {
+				try {
+					msTable.insert(json, new TableJsonOperationCallback() {
 
-					@Override
-					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
-						if (exception == null) {
-							Assert.fail();
-						} else {
-							assertTrue(exception instanceof MobileServiceException);
-							Throwable cause = exception.getCause();
-							assertTrue(cause.getMessage().contains("500"));
+						@Override
+						public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+							if (exception == null) {
+								Assert.fail();
+							} else {
+								assertTrue(exception instanceof MobileServiceException);
+								Throwable cause = exception.getCause();
+								assertTrue(cause.getMessage().contains("500"));
+								latch.countDown();
+							}
+
 							latch.countDown();
 						}
-
-						latch.countDown();
-					}
-				});
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
 			}
 		});
 

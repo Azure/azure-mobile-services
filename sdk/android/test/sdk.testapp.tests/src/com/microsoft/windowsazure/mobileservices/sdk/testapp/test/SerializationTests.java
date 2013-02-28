@@ -2,19 +2,19 @@
 Copyright (c) Microsoft Open Technologies, Inc.
 All Rights Reserved
 Apache 2.0 License
- 
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
- 
+
      http://www.apache.org/licenses/LICENSE-2.0
- 
+
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- 
+
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
@@ -329,13 +329,17 @@ public class SerializationTests extends InstrumentationTestCase {
 
 				MobileServiceTable<DateTestObject> table = client.getTable(tableName, DateTestObject.class);
 
-				table.insert(dateObject, new TableOperationCallback<DateTestObject>() {
+				try {
+					table.insert(dateObject, new TableOperationCallback<DateTestObject>() {
 
-					@Override
-					public void onCompleted(DateTestObject entity, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+						@Override
+						public void onCompleted(DateTestObject entity, Exception exception, ServiceFilterResponse response) {
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
 			}
 		});
 
@@ -387,14 +391,18 @@ public class SerializationTests extends InstrumentationTestCase {
 
 				MobileServiceTable<DateTestObject> table = client.getTable(tableName, DateTestObject.class);
 
-				table.insert(dateObject, new TableOperationCallback<DateTestObject>() {
+				try {
+					table.insert(dateObject, new TableOperationCallback<DateTestObject>() {
 
-					@Override
-					public void onCompleted(DateTestObject entity, Exception exception, ServiceFilterResponse response) {
-						container.setDateTestObject(entity);
-						latch.countDown();
-					}
-				});
+						@Override
+						public void onCompleted(DateTestObject entity, Exception exception, ServiceFilterResponse response) {
+							container.setDateTestObject(entity);
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
 			}
 		});
 
@@ -467,13 +475,17 @@ public class SerializationTests extends InstrumentationTestCase {
 					}
 				});
 
-				table.insert(person, new TableOperationCallback<ComplexPersonTestObject>() {
+				try {
+					table.insert(person, new TableOperationCallback<ComplexPersonTestObject>() {
 
-					@Override
-					public void onCompleted(ComplexPersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+						@Override
+						public void onCompleted(ComplexPersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
 			}
 		});
 
@@ -535,14 +547,18 @@ public class SerializationTests extends InstrumentationTestCase {
 					}
 				});
 
-				table.insert(person, new TableOperationCallback<ComplexPersonTestObject>() {
+				try {
+					table.insert(person, new TableOperationCallback<ComplexPersonTestObject>() {
 
-					@Override
-					public void onCompleted(ComplexPersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						container.setComplexPerson(entity);
-						latch.countDown();
-					}
-				});
+						@Override
+						public void onCompleted(ComplexPersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+							container.setComplexPerson(entity);
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
 			}
 		});
 

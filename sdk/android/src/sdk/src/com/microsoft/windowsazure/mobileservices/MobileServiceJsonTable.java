@@ -156,9 +156,18 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 * @throws InvalidParameterException
+	 * @throws MobileServiceException 
 	 */
-	public void insert(final JsonObject element, final TableJsonOperationCallback callback) throws InvalidParameterException {
-
+	public void insert(final JsonObject element, final TableJsonOperationCallback callback) throws InvalidParameterException, MobileServiceException {		
+		try {
+			validateJsonIdProperty(element);
+		} catch (InvalidParameterException e) {
+			if (callback != null) {
+				callback.onCompleted(null, e, null);
+			}
+			return;
+		}
+		
 		try {
 			removeIdFromJson(element);
 		} catch (InvalidParameterException e) {
@@ -340,5 +349,32 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 				}
 			}
 		}.execute();
+	}
+	
+	/**
+	 * Validates if the JSon element has only one property named as Id, otherwise throws exception.
+	 * @param json
+	 * @throws MobileServiceException
+	 */
+	private void validateJsonIdProperty(final JsonObject json) throws MobileServiceException {
+		// Check if id property exists
+		String[] idPropertyNames = new String[4];
+		idPropertyNames[0] = "id";
+		idPropertyNames[1] = "Id";
+		idPropertyNames[2] = "iD";
+		idPropertyNames[3] = "ID";
+
+		int ocurrence = 0;
+		for (int i = 0; i < 4; i++) {
+			String idProperty = idPropertyNames[i];
+			if (json.has(idProperty)) {
+				ocurrence++;
+			}			
+		}		
+
+		if(ocurrence > 1)
+		{
+			throw new MobileServiceException("There are multiple properties named as 'id'. Only one property can be named 'id' in an object.");
+		}
 	}
 }
