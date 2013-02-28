@@ -41,6 +41,39 @@ The Windows SDK has a suite of unit tests but the process for running these test
 When you build the solution the output is written to the  ```/azure-mobile-services/sdk/windows/bin``` folder. To reference the SDK from a C# Windows Store application, use the dll located at
  ```/azure-mobile-services/sdk/windows/bin/{Flavor}/Windows 8/Managed/Microsoft.WindowsAzure.MobileServices.Managed.dll``` (where {Flavor} is Debug or Release).
 
+## Android SDK
+### Prerequisities
+
+The SDK requires Eclipse and the latest Android Development Tools.
+
+### Building and Referencing the SDK
+
+1. In the folder ```\azure-mobile-services\sdk\android\src\sdk\libs```, run either the ```getLibs.ps1``` script if you are running on Windows or the ```getLibs.sh``` script if you are running on Linux to download the required dependencies.
+2. Import the ``\azure-mobile-services\sdk\android\src\sdk``` project into your workspace
+3. Once Eclipse is done compiling, the resulting .jar file will be located in ```\azure-mobile-services\sdk\android\src\sdk\bin```.
+4. To optionally build JavaDocs, right-click the ```javadoc.xml``` file and select Run As > Ant Build.
+
+
+### Running the Tests
+
+The SDK has a suite of unit tests that you can easily run.
+1. Import the ```\azure-mobile-services\sdk\android\test\sdk.testapp.tests``` project in your Eclipse workspace
+2. Right-click the project name and select Run As > Android JUnit Test
+
+It also contains an end-to-end test application. 
+
+1. Use the [Azure portal](http://manage.windowsazure.com) to create a new mobile service. Note down the service name and application key.
+2. If you want to run the authentication tests, configure all four authentication providers on the "Identity" tab
+3. [Install node.js](http://nodejs.org/) and then run the command ```npm install azure-cli -g```. This installs the Azure command-line tool.
+4. Use the ```azure account``` command to configure the tool to work with your Azure subscription
+5. Run the ```SetupTables.sh``` script in the ```\azure-mobile-services\test\Android\SetupScripts``` folder, which uses the tool to automatically create the tables needed for the test application to work.
+6. In the folder ```\azure-mobile-services\test\Android\ZumoE2ETestApp\libs```, run either the ```getLibs.ps1``` script if you are running on Windows or the ```getLibs.sh``` script if you are running on Linux to download the required dependencies.
+7. Import the ```\azure-mobile-services\test\Android\ZumoE2ETestApp``` project in your Eclipse workspace
+8. Once the app is running, go to Settings type your mobile service URL and application key
+9. If you also want to test push support, get a Google Cloud Messaging API key from the [Google APIs Console](https://code.google.com/apis/console/) and paste the key in the text box labeled GCM Sender Id
+10. Check the tests you want to run and then select "Run selected tests"
+
+
 ## Sample Application: Doto
 
 Doto is a simple, social todo list application that demonstrates the features of Windows Azure Mobile Services. You can find doto under ```/azure-mobile-services/samples/doto```.
