@@ -161,10 +161,11 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 	public void insert(final JsonObject element, final TableJsonOperationCallback callback) throws InvalidParameterException, MobileServiceException {		
 		try {
 			validateJsonIdProperty(element);
-		} catch (InvalidParameterException e) {
+		} catch (Exception e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}
+			
 			return;
 		}
 		
@@ -363,7 +364,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 		idPropertyNames[1] = "Id";
 		idPropertyNames[2] = "iD";
 		idPropertyNames[3] = "ID";
-
+		
 		int ocurrence = 0;
 		for (int i = 0; i < 4; i++) {
 			String idProperty = idPropertyNames[i];
@@ -374,7 +375,13 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 
 		if(ocurrence > 1)
 		{
-			throw new MobileServiceException("There are multiple properties named as 'id'. Only one property can be named 'id' in an object.");
+			throw new MobileServiceException("There are multiple properties named as 'id'. Only one property can be named 'id' in an object and it must be lowercased.");
+		}
+		
+		// Only id lowercase can be used
+		if(json.has(idPropertyNames[1]) || json.has(idPropertyNames[2]) || json.has(idPropertyNames[3]))
+		{
+			throw new MobileServiceException("You must use lowercase for id property (i.e. 'id')");
 		}
 	}
 }

@@ -53,6 +53,8 @@ public class ResultsContainer {
 	private String requestContent;
 
 	private DateTestObject dateTestObject;
+	
+	private IdPropertyWithGsonAnnotation idPropertyWithGsonAnnotation;
 
 	public PersonTestObject getPerson() {
 		return person;
@@ -148,6 +150,15 @@ public class ResultsContainer {
 
 	public void setPersonWithoutId(PersonTestObjectWithoutId personWithNoId) {
 		this.personWithoutId = personWithNoId;
+	}
+
+	public IdPropertyWithGsonAnnotation getIdPropertyWithGsonAnnotation() {
+		return idPropertyWithGsonAnnotation;
+	}
+
+	public void setIdPropertyWithGsonAnnotation(
+			IdPropertyWithGsonAnnotation idPropertyWithGsonAnnotation) {
+		this.idPropertyWithGsonAnnotation = idPropertyWithGsonAnnotation;
 	}
 
 }

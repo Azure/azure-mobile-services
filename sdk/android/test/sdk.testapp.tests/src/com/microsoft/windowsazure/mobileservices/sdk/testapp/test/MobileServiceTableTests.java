@@ -209,6 +209,207 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		assertNull(container.getPersonWithoutId());
 	}
 
+	public void testInsertShouldThrowExceptionIfObjectHasUpperCasedIdProperty() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store the object after the insertion, we need this to do
+		// the asserts outside the onSuccess method
+		final ResultsContainer container = new ResultsContainer();
+
+		// Object to insert
+		final IdPropertyUpperCasedTestObject testObject = new IdPropertyUpperCasedTestObject("John");
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				String tableName = "MyTableName";
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Create get the MobileService table
+				MobileServiceTable<IdPropertyUpperCasedTestObject> msTable = client.getTable(tableName, IdPropertyUpperCasedTestObject.class);
+
+				// Call the insert method
+				try {
+					msTable.insert(testObject, new TableOperationCallback<IdPropertyUpperCasedTestObject>() {
+
+						@Override
+						public void onCompleted(IdPropertyUpperCasedTestObject entity, Exception exception, ServiceFilterResponse response) {
+							container.setErrorMessage(exception.getMessage());
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		assertEquals("You must use lowercase for id property (i.e. 'id')", container.getErrorMessage());
+		assertNull(container.getPersonWithoutId());
+	}
+
+	public void testInsertShouldThrowExceptionIfObjectHasUpperCasedIWithinIdProperty() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store the object after the insertion, we need this to do
+		// the asserts outside the onSuccess method
+		final ResultsContainer container = new ResultsContainer();
+
+		// Object to insert
+		final IdPropertyIUpperCasedTestObject testObject = new IdPropertyIUpperCasedTestObject("John");
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				String tableName = "MyTableName";
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Create get the MobileService table
+				MobileServiceTable<IdPropertyIUpperCasedTestObject> msTable = client.getTable(tableName, IdPropertyIUpperCasedTestObject.class);
+
+				// Call the insert method
+				try {
+					msTable.insert(testObject, new TableOperationCallback<IdPropertyIUpperCasedTestObject>() {
+
+						@Override
+						public void onCompleted(IdPropertyIUpperCasedTestObject entity, Exception exception, ServiceFilterResponse response) {
+							container.setErrorMessage(exception.getMessage());
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		assertEquals("You must use lowercase for id property (i.e. 'id')", container.getErrorMessage());
+		assertNull(container.getPersonWithoutId());
+	}
+
+	public void testInsertShouldThrowExceptionIfObjectHasUpperCasedDWithinIdProperty() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store the object after the insertion, we need this to do
+		// the asserts outside the onSuccess method
+		final ResultsContainer container = new ResultsContainer();
+
+		// Object to insert
+		final IdPropertyDUpperCasedTestObject testObject = new IdPropertyDUpperCasedTestObject("John");
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				String tableName = "MyTableName";
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Create get the MobileService table
+				MobileServiceTable<IdPropertyDUpperCasedTestObject> msTable = client.getTable(tableName, IdPropertyDUpperCasedTestObject.class);
+
+				// Call the insert method
+				try {
+					msTable.insert(testObject, new TableOperationCallback<IdPropertyDUpperCasedTestObject>() {
+
+						@Override
+						public void onCompleted(IdPropertyDUpperCasedTestObject entity, Exception exception, ServiceFilterResponse response) {
+							container.setErrorMessage(exception.getMessage());
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		assertEquals("You must use lowercase for id property (i.e. 'id')", container.getErrorMessage());
+		assertNull(container.getPersonWithoutId());
+	}
+	
+	public void testInsertShouldThrowExceptionIfObjectHasMultipleIdProperties() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store the object after the insertion, we need this to do
+		// the asserts outside the onSuccess method
+		final ResultsContainer container = new ResultsContainer();
+
+		// Object to insert
+		final IdPropertyMultipleIdsTestObject testObject = new IdPropertyMultipleIdsTestObject("John");
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				String tableName = "MyTableName";
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Create get the MobileService table
+				MobileServiceTable<IdPropertyMultipleIdsTestObject> msTable = client.getTable(tableName, IdPropertyMultipleIdsTestObject.class);
+
+				// Call the insert method
+				try {
+					msTable.insert(testObject, new TableOperationCallback<IdPropertyMultipleIdsTestObject>() {
+
+						@Override
+						public void onCompleted(IdPropertyMultipleIdsTestObject entity, Exception exception, ServiceFilterResponse response) {
+							container.setErrorMessage(exception.getMessage());
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		assertEquals("There are multiple properties named as 'id'. Only one property can be named 'id' in an object and it must be lowercased.", container.getErrorMessage());
+		assertNull(container.getPersonWithoutId());
+	}
+
+	
 	public void testInsertShouldReturnEntityWithId() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -277,6 +478,74 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		Assert.assertEquals("Foo", p.getLastName());
 		Assert.assertEquals(person.getAge(), p.getAge());
 	}
+
+	public void testInsertShouldReturnEntityWithIdWhenUsingAnnotationsForIdProperty() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store the object after the insertion, we need this to do
+		// the asserts outside the onSuccess method
+		final ResultsContainer container = new ResultsContainer();
+
+		// Object to insert
+		final IdPropertyWithGsonAnnotation testObject = new IdPropertyWithGsonAnnotation("John");
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				String tableName = "MyTableName";
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(new ServiceFilter() {
+
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+
+						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+						response.setContent("{\"id\":38, \"name\":\"John\"}");
+						// call onResponse with the mocked response
+						responseCallback.onResponse(response, null);
+					}
+				});
+
+				// Create get the MobileService table
+				MobileServiceTable<IdPropertyWithGsonAnnotation> msTable = client.getTable(tableName, IdPropertyWithGsonAnnotation.class);
+
+				// Call the insert method
+				try {
+					msTable.insert(testObject, new TableOperationCallback<IdPropertyWithGsonAnnotation>() {
+
+						@Override
+						public void onCompleted(IdPropertyWithGsonAnnotation entity, Exception exception, ServiceFilterResponse response) {
+							container.setIdPropertyWithGsonAnnotation(entity);
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		IdPropertyWithGsonAnnotation o = container.getIdPropertyWithGsonAnnotation();
+		Assert.assertNotNull("Entity expected", o);
+		Assert.assertEquals(38, o.getId());
+		Assert.assertEquals(testObject.getName(), o.getName());
+	}
+
 	
 	public void testInsertShouldMutateOriginalEntity() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
@@ -409,7 +678,211 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		Assert.assertEquals(person.getLastName(), p.getLastName());
 		Assert.assertEquals(person.getAge(), p.getAge());
 	}
+	
+	public void testInsertShouldThrowExceptionIfJSONObjectHasMultipleIdProperties() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
 
+		// Container to store the object after the insertion, we need this to do
+		// the asserts outside the onSuccess method
+		final ResultsContainer container = new ResultsContainer();
+
+		// Object to insert
+		final IdPropertyMultipleIdsTestObject element = new IdPropertyMultipleIdsTestObject("John");
+
+		final JsonObject jsonElement = gsonBuilder.create().toJsonTree(element).getAsJsonObject();
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				String tableName = "MyTableName";
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+
+				// Call the insert method
+				try {
+					msTable.insert(jsonElement, new TableJsonOperationCallback() {
+
+						@Override
+						public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+							container.setErrorMessage(exception.getMessage());
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		assertEquals("There are multiple properties named as 'id'. Only one property can be named 'id' in an object and it must be lowercased.", container.getErrorMessage());
+
+	}
+
+	public void testInsertShouldThrowExceptionIfJSONObjectHasUppercasedIdProperty() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store the object after the insertion, we need this to do
+		// the asserts outside the onSuccess method
+		final ResultsContainer container = new ResultsContainer();
+
+		// Object to insert
+		final IdPropertyUpperCasedTestObject element = new IdPropertyUpperCasedTestObject("John");
+
+		final JsonObject jsonElement = gsonBuilder.create().toJsonTree(element).getAsJsonObject();
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				String tableName = "MyTableName";
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+
+				// Call the insert method
+				try {
+					msTable.insert(jsonElement, new TableJsonOperationCallback() {
+
+						@Override
+						public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+							container.setErrorMessage(exception.getMessage());
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		assertEquals("You must use lowercase for id property (i.e. 'id')", container.getErrorMessage());
+
+	}
+
+	public void testInsertShouldThrowExceptionIfJSONObjectHasIUppercasedWithinIdProperty() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store the object after the insertion, we need this to do
+		// the asserts outside the onSuccess method
+		final ResultsContainer container = new ResultsContainer();
+
+		// Object to insert
+		final IdPropertyIUpperCasedTestObject element = new IdPropertyIUpperCasedTestObject("John");
+
+		final JsonObject jsonElement = gsonBuilder.create().toJsonTree(element).getAsJsonObject();
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				String tableName = "MyTableName";
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+
+				// Call the insert method
+				try {
+					msTable.insert(jsonElement, new TableJsonOperationCallback() {
+
+						@Override
+						public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+							container.setErrorMessage(exception.getMessage());
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		assertEquals("You must use lowercase for id property (i.e. 'id')", container.getErrorMessage());
+
+	}
+	
+	public void testInsertShouldThrowExceptionIfJSONObjectHasDUppercasedWithinIdProperty() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store the object after the insertion, we need this to do
+		// the asserts outside the onSuccess method
+		final ResultsContainer container = new ResultsContainer();
+
+		// Object to insert
+		final IdPropertyDUpperCasedTestObject element = new IdPropertyDUpperCasedTestObject("John");
+
+		final JsonObject jsonElement = gsonBuilder.create().toJsonTree(element).getAsJsonObject();
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				String tableName = "MyTableName";
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+
+				// Call the insert method
+				try {
+					msTable.insert(jsonElement, new TableJsonOperationCallback() {
+
+						@Override
+						public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+							container.setErrorMessage(exception.getMessage());
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		assertEquals("You must use lowercase for id property (i.e. 'id')", container.getErrorMessage());
+
+	}
+	
 	public void testOperationHandleServerErrorProperly() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 

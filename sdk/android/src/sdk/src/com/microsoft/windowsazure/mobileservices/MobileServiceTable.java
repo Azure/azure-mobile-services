@@ -267,13 +267,17 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 			}			
 		}		
 
-		if(ocurrence == 0)
+		if(ocurrence > 1)
 		{
-			throw new MobileServiceException("The object must have an Id property.");			
+			throw new MobileServiceException("There are multiple properties named as 'id'. Only one property can be named 'id' in an object and it must be lowercased.");
 		}
-		else if(ocurrence > 1)
+		
+		if(json.has(idPropertyNames[1]) || json.has(idPropertyNames[2]) || json.has(idPropertyNames[3]))
 		{
-			throw new MobileServiceException("There are multiple properties named as 'id'. Only one property can be named 'id' in an object.");
+			throw new MobileServiceException("You must use lowercase for id property (i.e. 'id')");
+		}else if(!json.has(idPropertyNames[0]))
+		{
+			throw new MobileServiceException("The object must have an Id property.");	
 		}
 	}
 }
