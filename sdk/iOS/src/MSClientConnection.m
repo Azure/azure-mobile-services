@@ -135,8 +135,8 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
         } copy];
         
         [nextFilter handleRequest:request
-                           onNext:onNext
-                       onResponse:completion];
+                           next:onNext
+                       response:completion];
     }
 }
 

@@ -26,8 +26,8 @@
 @synthesize ignoreNextFilter = ignoreNextFilter_;
 
 -(void) handleRequest:(NSURLRequest *)request
-               onNext:(MSFilterNextBlock)onNext
-           onResponse:(MSFilterResponseBlock)onResponse
+               next:(MSFilterNextBlock)onNext
+           response:(MSFilterResponseBlock)onResponse
 {
     
     // Replace the request if we have one to replace it with

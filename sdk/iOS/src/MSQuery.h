@@ -70,7 +70,7 @@
 
 // Returns a new |MSQuery| instance with the given table and the given
 // predicate is used as the filter clause of the query.
--(id) initWithTable:(MSTable *)table withPredicate:(NSPredicate *)predicate;
+-(id) initWithTable:(MSTable *)table predicate:(NSPredicate *)predicate;
 
 
 #pragma mark * Public OrderBy Methods
