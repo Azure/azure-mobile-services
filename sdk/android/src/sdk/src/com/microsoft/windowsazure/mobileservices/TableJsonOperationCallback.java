@@ -39,5 +39,6 @@ public interface TableJsonOperationCallback {
 	 * @param response
 	 *            Response object
 	 */
-	public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response);
+	public void onCompleted(JsonObject jsonObject, Exception exception,
+			ServiceFilterResponse response);
 }

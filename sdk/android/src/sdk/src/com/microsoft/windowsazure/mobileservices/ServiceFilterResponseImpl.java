@@ -55,7 +55,8 @@ public class ServiceFilterResponseImpl implements ServiceFilterResponse {
 	 * @throws IOException
 	 * @throws IllegalStateException
 	 */
-	public ServiceFilterResponseImpl(HttpResponse response) throws IllegalStateException, IOException {
+	public ServiceFilterResponseImpl(HttpResponse response)
+			throws IllegalStateException, IOException {
 		mResponse = response;
 		mResponseContent = null;
 
@@ -63,7 +64,8 @@ public class ServiceFilterResponseImpl implements ServiceFilterResponse {
 		HttpEntity entity = mResponse.getEntity();
 		if (entity != null) {
 			InputStream instream = entity.getContent();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(instream));
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					instream));
 
 			StringBuilder sb = new StringBuilder();
 			String content = reader.readLine();

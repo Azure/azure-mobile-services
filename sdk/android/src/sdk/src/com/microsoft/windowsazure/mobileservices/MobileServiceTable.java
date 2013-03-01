@@ -36,7 +36,8 @@ import com.google.gson.JsonObject;
 /**
  * Represents a Mobile Service Table
  */
-public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQueryCallback<E>> {
+public final class MobileServiceTable<E> extends
+		MobileServiceTableBase<TableQueryCallback<E>> {
 
 	private MobileServiceJsonTable mInternalTable;
 
@@ -50,7 +51,8 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 		}
 
 		@Override
-		public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
+		public void onCompleted(JsonElement result, int count,
+				Exception exception, ServiceFilterResponse response) {
 			if (mCallback != null) {
 				if (exception == null) {
 					Exception ex = null;
@@ -76,13 +78,15 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 			this(callback, null);
 		}
 
-		public ParseResultOperationCallback(TableOperationCallback<E> callback, E originalEntity) {
+		public ParseResultOperationCallback(TableOperationCallback<E> callback,
+				E originalEntity) {
 			mCallback = callback;
 			mOriginalEntity = originalEntity;
 		}
 
 		@Override
-		public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+		public void onCompleted(JsonObject jsonEntity, Exception exception,
+				ServiceFilterResponse response) {
 			if (exception == null) {
 				E entity = null;
 				Exception ex = null;
@@ -95,9 +99,11 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 					ex = e;
 				}
 
-				if (mCallback != null) mCallback.onCompleted(entity, ex, response);
+				if (mCallback != null)
+					mCallback.onCompleted(entity, ex, response);
 			} else {
-				if (mCallback != null) mCallback.onCompleted(null, exception, response);
+				if (mCallback != null)
+					mCallback.onCompleted(null, exception, response);
 			}
 
 		}
@@ -111,7 +117,8 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 	 * @param client
 	 *            The MobileServiceClient used to invoke table operations
 	 */
-	public MobileServiceTable(String name, MobileServiceClient client, Class<E> clazz) {
+	public MobileServiceTable(String name, MobileServiceClient client,
+			Class<E> clazz) {
 		initialize(name, client);
 		mInternalTable = new MobileServiceJsonTable(name, client);
 		mClazz = clazz;
@@ -130,11 +137,15 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 	/**
 	 * Executes a query to retrieve all the table rows
 	 * 
-	 * @param query The MobileServiceQuery instance to execute
-	 * @param callback Callback to invoke when the operation is completed
+	 * @param query
+	 *            The MobileServiceQuery instance to execute
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
 	 */
-	public void execute(MobileServiceQuery<?> query, final TableQueryCallback<E> callback) {
-		mInternalTable.execute(query, new ParseResultTableQueryCallback(callback));
+	public void execute(MobileServiceQuery<?> query,
+			final TableQueryCallback<E> callback) {
+		mInternalTable.execute(query, new ParseResultTableQueryCallback(
+				callback));
 	}
 
 	/**
@@ -160,22 +171,25 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 * @throws InvalidParameterException
-	 * @throws MobileServiceException 
+	 * @throws MobileServiceException
 	 */
-	public void insert(final E element, final TableOperationCallback<E> callback) throws InvalidParameterException, MobileServiceException {
-		final JsonObject json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
+	public void insert(final E element, final TableOperationCallback<E> callback)
+			throws InvalidParameterException, MobileServiceException {
+		final JsonObject json = mClient.getGsonBuilder().create()
+				.toJsonTree(element).getAsJsonObject();
 		try {
 			validateJsonIdProperty(json);
-			
+
 		} catch (Exception e) {
-				if (callback != null) {
-					callback.onCompleted(null, e, null);
-				}
-				
-				return;
+			if (callback != null) {
+				callback.onCompleted(null, e, null);
+			}
+
+			return;
 		}
 
-		mInternalTable.insert(json, new ParseResultOperationCallback(callback, element));
+		mInternalTable.insert(json, new ParseResultOperationCallback(callback,
+				element));
 	}
 
 	/**
@@ -187,20 +201,22 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 	 *            Callback to invoke when the operation is completed
 	 */
 	public void update(final E element, final TableOperationCallback<E> callback) {
-		final JsonObject json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
+		final JsonObject json = mClient.getGsonBuilder().create()
+				.toJsonTree(element).getAsJsonObject();
 
 		try {
 			validateJsonIdProperty(json);
-			
+
 		} catch (Exception e) {
-				if (callback != null) {
-					callback.onCompleted(null, e, null);
-				}
-				
-				return;
+			if (callback != null) {
+				callback.onCompleted(null, e, null);
+			}
+
+			return;
 		}
-		
-		mInternalTable.update(json, new ParseResultOperationCallback(callback, element));
+
+		mInternalTable.update(json, new ParseResultOperationCallback(callback,
+				element));
 	}
 
 	/**
@@ -232,12 +248,16 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 
 	/**
 	 * Copy object field values from source to target object
-	 * @param source The object to copy the values from
-	 * @param target The destination object
-	 * @throws IllegalAccessException 
-	 * @throws IllegalArgumentException 
+	 * 
+	 * @param source
+	 *            The object to copy the values from
+	 * @param target
+	 *            The destination object
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
 	 */
-	private void copyFields(Object source, Object target) throws IllegalArgumentException, IllegalAccessException {
+	private void copyFields(Object source, Object target)
+			throws IllegalArgumentException, IllegalAccessException {
 		if (source != null && target != null) {
 			for (Field field : source.getClass().getDeclaredFields()) {
 				field.setAccessible(true);
@@ -247,11 +267,15 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 	}
 
 	/**
-	 * Validates if the JSon element has only one property named as Id, otherwise throws exception
-	 * @param json the element to evaluate
+	 * Validates if the JSon element has only one property named as Id,
+	 * otherwise throws exception
+	 * 
+	 * @param json
+	 *            the element to evaluate
 	 * @throws MobileServiceException
 	 */
-	private void validateJsonIdProperty(final JsonObject json) throws MobileServiceException {
+	private void validateJsonIdProperty(final JsonObject json)
+			throws MobileServiceException {
 		// Check if id property exists
 		String[] idPropertyNames = new String[4];
 		idPropertyNames[0] = "id";
@@ -264,20 +288,21 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<TableQue
 			String idProperty = idPropertyNames[i];
 			if (json.has(idProperty)) {
 				ocurrence++;
-			}			
-		}		
-
-		if(ocurrence > 1)
-		{
-			throw new MobileServiceException("There are multiple properties named as 'id'. Only one property can be named 'id' in an object and it must be lowercased.");
+			}
 		}
-		
-		if(json.has(idPropertyNames[1]) || json.has(idPropertyNames[2]) || json.has(idPropertyNames[3]))
-		{
-			throw new MobileServiceException("You must use lowercase for id property (i.e. 'id')");
-		}else if(!json.has(idPropertyNames[0]))
-		{
-			throw new MobileServiceException("The object must have an Id property.");	
+
+		if (ocurrence > 1) {
+			throw new MobileServiceException(
+					"There are multiple properties named as 'id'. Only one property can be named 'id' in an object and it must be lowercased.");
+		}
+
+		if (json.has(idPropertyNames[1]) || json.has(idPropertyNames[2])
+				|| json.has(idPropertyNames[3])) {
+			throw new MobileServiceException(
+					"You must use lowercase for id property (i.e. 'id')");
+		} else if (!json.has(idPropertyNames[0])) {
+			throw new MobileServiceException(
+					"The object must have an Id property.");
 		}
 	}
 }

@@ -46,7 +46,8 @@ class DateSerializer implements JsonSerializer<Date>, JsonDeserializer<Date> {
 	 * Deserializes a JsonElement containing an ISO-8601 formatted date
 	 */
 	@Override
-	public Date deserialize(JsonElement element, Type type, JsonDeserializationContext ctx) throws JsonParseException {
+	public Date deserialize(JsonElement element, Type type,
+			JsonDeserializationContext ctx) throws JsonParseException {
 		String strVal = element.getAsString();
 
 		try {
@@ -61,7 +62,8 @@ class DateSerializer implements JsonSerializer<Date>, JsonDeserializer<Date> {
 	 * Serializes a Date to a JsonElement containing a ISO-8601 formatted date
 	 */
 	@Override
-	public JsonElement serialize(Date date, Type type, JsonSerializationContext ctx) {
+	public JsonElement serialize(Date date, Type type,
+			JsonSerializationContext ctx) {
 		JsonElement element = new JsonPrimitive(serialize(date));
 		return element;
 	}
@@ -83,7 +85,8 @@ class DateSerializer implements JsonSerializer<Date>, JsonDeserializer<Date> {
 		}
 
 		// Parse the well-formatted date string
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSSZ");
+		SimpleDateFormat dateFormat = new SimpleDateFormat(
+				"yyyy-MM-dd'T'HH:mm:ss'.'SSSZ");
 		dateFormat.setTimeZone(TimeZone.getDefault());
 		Date date = dateFormat.parse(s);
 
@@ -94,7 +97,8 @@ class DateSerializer implements JsonSerializer<Date>, JsonDeserializer<Date> {
 	 * Serializes a Date object to an ISO-8601 formatted date string
 	 */
 	public static String serialize(Date date) {
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", Locale.getDefault());
+		SimpleDateFormat dateFormat = new SimpleDateFormat(
+				"yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", Locale.getDefault());
 		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
 		String formatted = dateFormat.format(date);

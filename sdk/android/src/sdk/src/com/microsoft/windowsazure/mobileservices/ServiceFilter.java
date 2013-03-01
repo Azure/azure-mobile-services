@@ -39,5 +39,7 @@ public interface ServiceFilter {
 	 * @param responseCallback
 	 *            The callback to invoke once the request is executed
 	 */
-	public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback, ServiceFilterResponseCallback responseCallback);
+	public void handleRequest(ServiceFilterRequest request,
+			NextServiceFilterCallback nextServiceFilterCallback,
+			ServiceFilterResponseCallback responseCallback);
 }

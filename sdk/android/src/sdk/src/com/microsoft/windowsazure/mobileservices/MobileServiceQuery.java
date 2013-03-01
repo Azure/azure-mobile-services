@@ -176,7 +176,8 @@ public final class MobileServiceQuery<E> {
 		for (MobileServiceQuery<?> step : querySteps) {
 			// If the string is not empty and it doesn't end with space or
 			// if it ends with ")", then add a space
-			if ((!sb.toString().endsWith(" ") && sb.toString().length() > 0) || sb.toString().endsWith(")")) {
+			if ((!sb.toString().endsWith(" ") && sb.toString().length() > 0)
+					|| sb.toString().endsWith(")")) {
 				sb.append(" ");
 			}
 
@@ -216,11 +217,14 @@ public final class MobileServiceQuery<E> {
 				if (first) {
 					first = false;
 				} else {
-					sb.append(URLEncoder.encode(",", MobileServiceClient.UTF8_ENCODING));
+					sb.append(URLEncoder.encode(",",
+							MobileServiceClient.UTF8_ENCODING));
 				}
 
-				sb.append(URLEncoder.encode(order.first, MobileServiceClient.UTF8_ENCODING));
-				sb.append(URLEncoder.encode(" ", MobileServiceClient.UTF8_ENCODING));
+				sb.append(URLEncoder.encode(order.first,
+						MobileServiceClient.UTF8_ENCODING));
+				sb.append(URLEncoder.encode(" ",
+						MobileServiceClient.UTF8_ENCODING));
 				sb.append(order.second == QueryOrder.Ascending ? "asc" : "desc");
 
 			}
@@ -236,9 +240,11 @@ public final class MobileServiceQuery<E> {
 					if (value == null)
 						value = "null";
 
-					sb.append(URLEncoder.encode(key, MobileServiceClient.UTF8_ENCODING));
+					sb.append(URLEncoder.encode(key,
+							MobileServiceClient.UTF8_ENCODING));
 					sb.append("=");
-					sb.append(URLEncoder.encode(value, MobileServiceClient.UTF8_ENCODING));
+					sb.append(URLEncoder.encode(value,
+							MobileServiceClient.UTF8_ENCODING));
 				}
 			}
 		}
@@ -251,10 +257,12 @@ public final class MobileServiceQuery<E> {
 				if (first) {
 					first = false;
 				} else {
-					sb.append(URLEncoder.encode(",", MobileServiceClient.UTF8_ENCODING));
+					sb.append(URLEncoder.encode(",",
+							MobileServiceClient.UTF8_ENCODING));
 				}
 
-				sb.append(URLEncoder.encode(field, MobileServiceClient.UTF8_ENCODING));
+				sb.append(URLEncoder.encode(field,
+						MobileServiceClient.UTF8_ENCODING));
 			}
 		}
 
@@ -283,7 +291,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> parameter(String parameter, String value) {
-		this.mUserDefinedParameters.add(new Pair<String, String>(parameter, value));
+		this.mUserDefinedParameters.add(new Pair<String, String>(parameter,
+				value));
 		return this;
 	}
 
@@ -493,7 +502,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> not(boolean booleanValue) {
-		this.querySteps.add(MobileServiceQueryOperations.not(MobileServiceQueryOperations.val(booleanValue)));
+		this.querySteps.add(MobileServiceQueryOperations
+				.not(MobileServiceQueryOperations.val(booleanValue)));
 		return this;
 	}
 
@@ -527,7 +537,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> ge(Number numberValue) {
-		this.querySteps.add(MobileServiceQueryOperations.ge(MobileServiceQueryOperations.val(numberValue)));
+		this.querySteps.add(MobileServiceQueryOperations
+				.ge(MobileServiceQueryOperations.val(numberValue)));
 		return this;
 	}
 
@@ -538,7 +549,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> ge(Date dateValue) {
-		this.querySteps.add(MobileServiceQueryOperations.ge(MobileServiceQueryOperations.val(dateValue)));
+		this.querySteps.add(MobileServiceQueryOperations
+				.ge(MobileServiceQueryOperations.val(dateValue)));
 		return this;
 	}
 
@@ -570,7 +582,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> le(Number numberValue) {
-		this.querySteps.add(MobileServiceQueryOperations.le(MobileServiceQueryOperations.val(numberValue)));
+		this.querySteps.add(MobileServiceQueryOperations
+				.le(MobileServiceQueryOperations.val(numberValue)));
 		return this;
 	}
 
@@ -581,7 +594,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> le(Date dateValue) {
-		this.querySteps.add(MobileServiceQueryOperations.le(MobileServiceQueryOperations.val(dateValue)));
+		this.querySteps.add(MobileServiceQueryOperations
+				.le(MobileServiceQueryOperations.val(dateValue)));
 		return this;
 	}
 
@@ -613,7 +627,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> gt(Number numberValue) {
-		this.querySteps.add(MobileServiceQueryOperations.gt(MobileServiceQueryOperations.val(numberValue)));
+		this.querySteps.add(MobileServiceQueryOperations
+				.gt(MobileServiceQueryOperations.val(numberValue)));
 		return this;
 	}
 
@@ -624,7 +639,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> gt(Date dateValue) {
-		this.querySteps.add(MobileServiceQueryOperations.gt(MobileServiceQueryOperations.val(dateValue)));
+		this.querySteps.add(MobileServiceQueryOperations
+				.gt(MobileServiceQueryOperations.val(dateValue)));
 		return this;
 	}
 
@@ -656,7 +672,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> lt(Number numberValue) {
-		this.querySteps.add(MobileServiceQueryOperations.lt(MobileServiceQueryOperations.val(numberValue)));
+		this.querySteps.add(MobileServiceQueryOperations
+				.lt(MobileServiceQueryOperations.val(numberValue)));
 		return this;
 	}
 
@@ -667,7 +684,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> lt(Date dateValue) {
-		this.querySteps.add(MobileServiceQueryOperations.lt(MobileServiceQueryOperations.val(dateValue)));
+		this.querySteps.add(MobileServiceQueryOperations
+				.lt(MobileServiceQueryOperations.val(dateValue)));
 		return this;
 	}
 
@@ -699,7 +717,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> eq(Number numberValue) {
-		this.querySteps.add(MobileServiceQueryOperations.eq(MobileServiceQueryOperations.val(numberValue)));
+		this.querySteps.add(MobileServiceQueryOperations
+				.eq(MobileServiceQueryOperations.val(numberValue)));
 		return this;
 	}
 
@@ -710,7 +729,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> eq(boolean booleanValue) {
-		this.querySteps.add(MobileServiceQueryOperations.eq(MobileServiceQueryOperations.val(booleanValue)));
+		this.querySteps.add(MobileServiceQueryOperations
+				.eq(MobileServiceQueryOperations.val(booleanValue)));
 		return this;
 	}
 
@@ -721,7 +741,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> eq(String stringValue) {
-		this.querySteps.add(MobileServiceQueryOperations.eq(MobileServiceQueryOperations.val(stringValue)));
+		this.querySteps.add(MobileServiceQueryOperations
+				.eq(MobileServiceQueryOperations.val(stringValue)));
 		return this;
 	}
 
@@ -732,7 +753,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> eq(Date dateValue) {
-		this.querySteps.add(MobileServiceQueryOperations.eq(MobileServiceQueryOperations.val(dateValue)));
+		this.querySteps.add(MobileServiceQueryOperations
+				.eq(MobileServiceQueryOperations.val(dateValue)));
 		return this;
 	}
 
@@ -764,7 +786,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> ne(Number numberValue) {
-		this.querySteps.add(MobileServiceQueryOperations.ne(MobileServiceQueryOperations.val(numberValue)));
+		this.querySteps.add(MobileServiceQueryOperations
+				.ne(MobileServiceQueryOperations.val(numberValue)));
 		return this;
 	}
 
@@ -775,7 +798,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> ne(boolean booleanValue) {
-		this.querySteps.add(MobileServiceQueryOperations.ne(MobileServiceQueryOperations.val(booleanValue)));
+		this.querySteps.add(MobileServiceQueryOperations
+				.ne(MobileServiceQueryOperations.val(booleanValue)));
 		return this;
 	}
 
@@ -786,7 +810,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> ne(String stringValue) {
-		this.querySteps.add(MobileServiceQueryOperations.ne(MobileServiceQueryOperations.val(stringValue)));
+		this.querySteps.add(MobileServiceQueryOperations
+				.ne(MobileServiceQueryOperations.val(stringValue)));
 		return this;
 	}
 
@@ -797,7 +822,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> ne(Date dateValue) {
-		this.querySteps.add(MobileServiceQueryOperations.ne(MobileServiceQueryOperations.val(dateValue)));
+		this.querySteps.add(MobileServiceQueryOperations
+				.ne(MobileServiceQueryOperations.val(dateValue)));
 		return this;
 	}
 
@@ -1238,8 +1264,10 @@ public final class MobileServiceQuery<E> {
 	 *            Start value
 	 * @return MobileServiceQuery<E>
 	 */
-	public MobileServiceQuery<E> startsWith(MobileServiceQuery<?> field, MobileServiceQuery<?> start) {
-		this.querySteps.add(MobileServiceQueryOperations.startsWith(field, start));
+	public MobileServiceQuery<E> startsWith(MobileServiceQuery<?> field,
+			MobileServiceQuery<?> start) {
+		this.querySteps.add(MobileServiceQueryOperations.startsWith(field,
+				start));
 		return this;
 	}
 
@@ -1254,7 +1282,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> startsWith(String field, String start) {
-		this.querySteps.add(MobileServiceQueryOperations.startsWith(field, start));
+		this.querySteps.add(MobileServiceQueryOperations.startsWith(field,
+				start));
 		return this;
 	}
 
@@ -1268,7 +1297,8 @@ public final class MobileServiceQuery<E> {
 	 *            End value
 	 * @return MobileServiceQuery<E>
 	 */
-	public MobileServiceQuery<E> endsWith(MobileServiceQuery<?> field, MobileServiceQuery<?> end) {
+	public MobileServiceQuery<E> endsWith(MobileServiceQuery<?> field,
+			MobileServiceQuery<?> end) {
 		this.querySteps.add(MobileServiceQueryOperations.endsWith(field, end));
 		return this;
 	}
@@ -1298,8 +1328,10 @@ public final class MobileServiceQuery<E> {
 	 *            Second string
 	 * @return MobileServiceQuery<E>
 	 */
-	public MobileServiceQuery<E> subStringOf(MobileServiceQuery<?> str1, MobileServiceQuery<?> str2) {
-		this.querySteps.add(MobileServiceQueryOperations.subStringOf(str1, str2));
+	public MobileServiceQuery<E> subStringOf(MobileServiceQuery<?> str1,
+			MobileServiceQuery<?> str2) {
+		this.querySteps.add(MobileServiceQueryOperations
+				.subStringOf(str1, str2));
 		return this;
 	}
 
@@ -1313,7 +1345,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> subStringOf(String str, String field) {
-		this.querySteps.add(MobileServiceQueryOperations.subStringOf(str, field));
+		this.querySteps.add(MobileServiceQueryOperations
+				.subStringOf(str, field));
 		return this;
 	}
 
@@ -1327,7 +1360,8 @@ public final class MobileServiceQuery<E> {
 	 *            Second string
 	 * @return MobileServiceQuery<E>
 	 */
-	public MobileServiceQuery<E> concat(MobileServiceQuery<?> str1, MobileServiceQuery<?> str2) {
+	public MobileServiceQuery<E> concat(MobileServiceQuery<?> str1,
+			MobileServiceQuery<?> str2) {
 		this.querySteps.add(MobileServiceQueryOperations.concat(str1, str2));
 		return this;
 	}
@@ -1342,8 +1376,10 @@ public final class MobileServiceQuery<E> {
 	 *            Value to search for
 	 * @return MobileServiceQuery<E>
 	 */
-	public MobileServiceQuery<E> indexOf(MobileServiceQuery<?> haystack, MobileServiceQuery<?> needle) {
-		this.querySteps.add(MobileServiceQueryOperations.indexOf(haystack, needle));
+	public MobileServiceQuery<E> indexOf(MobileServiceQuery<?> haystack,
+			MobileServiceQuery<?> needle) {
+		this.querySteps.add(MobileServiceQueryOperations.indexOf(haystack,
+				needle));
 		return this;
 	}
 
@@ -1358,7 +1394,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> indexOf(String field, String needle) {
-		this.querySteps.add(MobileServiceQueryOperations.indexOf(field, needle));
+		this.querySteps
+				.add(MobileServiceQueryOperations.indexOf(field, needle));
 		return this;
 	}
 
@@ -1372,7 +1409,8 @@ public final class MobileServiceQuery<E> {
 	 *            Starting position
 	 * @return MobileServiceQuery<E>
 	 */
-	public MobileServiceQuery<E> subString(MobileServiceQuery<?> str, MobileServiceQuery<?> pos) {
+	public MobileServiceQuery<E> subString(MobileServiceQuery<?> str,
+			MobileServiceQuery<?> pos) {
 		this.querySteps.add(MobileServiceQueryOperations.subString(str, pos));
 		return this;
 	}
@@ -1404,8 +1442,10 @@ public final class MobileServiceQuery<E> {
 	 *            Length
 	 * @return MobileServiceQuery<E>
 	 */
-	public MobileServiceQuery<E> subString(MobileServiceQuery<?> str, MobileServiceQuery<?> pos, MobileServiceQuery<?> length) {
-		this.querySteps.add(MobileServiceQueryOperations.subString(str, pos, length));
+	public MobileServiceQuery<E> subString(MobileServiceQuery<?> str,
+			MobileServiceQuery<?> pos, MobileServiceQuery<?> length) {
+		this.querySteps.add(MobileServiceQueryOperations.subString(str, pos,
+				length));
 		return this;
 	}
 
@@ -1422,7 +1462,8 @@ public final class MobileServiceQuery<E> {
 	 * @return MobileServiceQuery<E>
 	 */
 	public MobileServiceQuery<E> subString(String field, int pos, int length) {
-		this.querySteps.add(MobileServiceQueryOperations.subString(field, pos, length));
+		this.querySteps.add(MobileServiceQueryOperations.subString(field, pos,
+				length));
 		return this;
 	}
 
@@ -1438,8 +1479,10 @@ public final class MobileServiceQuery<E> {
 	 *            Replace value
 	 * @return MobileServiceQuery<E>
 	 */
-	public MobileServiceQuery<E> replace(MobileServiceQuery<?> str, MobileServiceQuery<?> find, MobileServiceQuery<?> replace) {
-		this.querySteps.add(MobileServiceQueryOperations.replace(str, find, replace));
+	public MobileServiceQuery<E> replace(MobileServiceQuery<?> str,
+			MobileServiceQuery<?> find, MobileServiceQuery<?> replace) {
+		this.querySteps.add(MobileServiceQueryOperations.replace(str, find,
+				replace));
 		return this;
 	}
 
@@ -1455,8 +1498,10 @@ public final class MobileServiceQuery<E> {
 	 *            Replace value
 	 * @return MobileServiceQuery<E>
 	 */
-	public MobileServiceQuery<E> replace(String field, String find, String replace) {
-		this.querySteps.add(MobileServiceQueryOperations.replace(field, find, replace));
+	public MobileServiceQuery<E> replace(String field, String find,
+			String replace) {
+		this.querySteps.add(MobileServiceQueryOperations.replace(field, find,
+				replace));
 		return this;
 	}
 }

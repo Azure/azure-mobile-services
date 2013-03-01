@@ -36,5 +36,6 @@ public interface NextServiceFilterCallback {
 	 *            The ServiceFilterResponseCallback to invoke when the response
 	 *            is obtained
 	 */
-	public void onNext(ServiceFilterRequest request, ServiceFilterResponseCallback responseCallback);
+	public void onNext(ServiceFilterRequest request,
+			ServiceFilterResponseCallback responseCallback);
 }

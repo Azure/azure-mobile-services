@@ -215,8 +215,13 @@ abstract class MobileServiceTableBase<E> {
 		// Create delete request
 		ServiceFilterRequest delete;
 		try {
-			delete = new ServiceFilterRequestImpl(new HttpDelete(mClient.getAppUrl().toString() + TABLES_URL
-					+ URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING) + "/" + Integer.valueOf(id).toString()));
+			delete = new ServiceFilterRequestImpl(new HttpDelete(mClient
+					.getAppUrl().toString()
+					+ TABLES_URL
+					+ URLEncoder.encode(mTableName,
+							MobileServiceClient.UTF8_ENCODING)
+					+ "/"
+					+ Integer.valueOf(id).toString()));
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(e, null);
@@ -245,10 +250,12 @@ abstract class MobileServiceTableBase<E> {
 	 *            The entity obtained after executing the operation
 	 * @return
 	 */
-	protected JsonObject patchOriginalEntityWithResponseEntity(JsonObject originalEntity, JsonObject newEntity) {
+	protected JsonObject patchOriginalEntityWithResponseEntity(
+			JsonObject originalEntity, JsonObject newEntity) {
 		// Patch the object to return with the new values
-		JsonObject patchedEntityJson = (JsonObject) new JsonParser().parse(originalEntity.toString());
-		
+		JsonObject patchedEntityJson = (JsonObject) new JsonParser()
+				.parse(originalEntity.toString());
+
 		for (Map.Entry<String, JsonElement> entry : newEntity.entrySet()) {
 			patchedEntityJson.add(entry.getKey(), entry.getValue());
 		}
@@ -274,12 +281,14 @@ abstract class MobileServiceTableBase<E> {
 		if (element instanceof JsonObject) {
 			jsonElement = (JsonObject) element;
 		} else {
-			jsonElement = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
+			jsonElement = mClient.getGsonBuilder().create().toJsonTree(element)
+					.getAsJsonObject();
 		}
 
 		JsonElement idProperty = jsonElement.get("id");
 		if (idProperty instanceof JsonNull) {
-			throw new InvalidParameterException("Element must contain id property");
+			throw new InvalidParameterException(
+					"Element must contain id property");
 		}
 
 		return idProperty.getAsInt();

@@ -37,7 +37,8 @@ public class MobileServiceQueryOperations {
 	 *            The function parameters
 	 * @return The MobileServiceQuery<?> representing a function call
 	 */
-	private static MobileServiceQuery<?> function(String functionName, MobileServiceQuery<?>... parameters) {
+	private static MobileServiceQuery<?> function(String functionName,
+			MobileServiceQuery<?>... parameters) {
 
 		MobileServiceQuery<Object> query = new MobileServiceQuery<Object>();
 
@@ -59,7 +60,8 @@ public class MobileServiceQueryOperations {
 	 *            The operator
 	 * @return The MobileServiceQuery<?> representing an operation
 	 */
-	private static MobileServiceQuery<?> simpleOperator(MobileServiceQuery<?> otherQuery, String operator) {
+	private static MobileServiceQuery<?> simpleOperator(
+			MobileServiceQuery<?> otherQuery, String operator) {
 		MobileServiceQuery<Object> query = new MobileServiceQuery<Object>();
 
 		query.setQueryText(operator + " ");
@@ -111,7 +113,8 @@ public class MobileServiceQueryOperations {
 	 */
 	public static MobileServiceQuery<?> field(String fieldName) {
 		if (fieldName == null || fieldName.trim().length() == 0) {
-			throw new InvalidParameterException("fieldName cannot be null or empty");
+			throw new InvalidParameterException(
+					"fieldName cannot be null or empty");
 		}
 
 		MobileServiceQuery<Object> query = new MobileServiceQuery<Object>();
@@ -150,7 +153,8 @@ public class MobileServiceQueryOperations {
 	public static MobileServiceQuery<?> val(boolean val) {
 		MobileServiceQuery<?> query = new MobileServiceQuery<Object>();
 
-		query.setQueryText(Boolean.valueOf(val).toString().toLowerCase(Locale.getDefault()));
+		query.setQueryText(Boolean.valueOf(val).toString()
+				.toLowerCase(Locale.getDefault()));
 
 		return query;
 	}
@@ -189,7 +193,8 @@ public class MobileServiceQueryOperations {
 		if (date == null) {
 			query.setQueryText("null");
 		} else {
-			query.setQueryText("'" + sanitize(DateSerializer.serialize(date)) + "'");
+			query.setQueryText("'" + sanitize(DateSerializer.serialize(date))
+					+ "'");
 		}
 
 		return query;
@@ -951,7 +956,8 @@ public class MobileServiceQueryOperations {
 	 *            Start value.
 	 * @return MobileServiceQuery
 	 */
-	public static MobileServiceQuery<?> startsWith(MobileServiceQuery<?> field, MobileServiceQuery<?> start) {
+	public static MobileServiceQuery<?> startsWith(MobileServiceQuery<?> field,
+			MobileServiceQuery<?> start) {
 		return function("startswith", field, start);
 	}
 
@@ -979,7 +985,8 @@ public class MobileServiceQueryOperations {
 	 *            End value.
 	 * @return MobileServiceQuery
 	 */
-	public static MobileServiceQuery<?> endsWith(MobileServiceQuery<?> field, MobileServiceQuery<?> end) {
+	public static MobileServiceQuery<?> endsWith(MobileServiceQuery<?> field,
+			MobileServiceQuery<?> end) {
 		return function("endswith", field, end);
 	}
 
@@ -1007,7 +1014,8 @@ public class MobileServiceQueryOperations {
 	 *            Second string
 	 * @return MobileServiceQuery
 	 */
-	public static MobileServiceQuery<?> subStringOf(MobileServiceQuery<?> str1, MobileServiceQuery<?> str2) {
+	public static MobileServiceQuery<?> subStringOf(MobileServiceQuery<?> str1,
+			MobileServiceQuery<?> str2) {
 		return function("substringof", str1, str2);
 	}
 
@@ -1034,7 +1042,8 @@ public class MobileServiceQueryOperations {
 	 *            Second string
 	 * @return MobileServiceQuery
 	 */
-	public static MobileServiceQuery<?> concat(MobileServiceQuery<?> str1, MobileServiceQuery<?> str2) {
+	public static MobileServiceQuery<?> concat(MobileServiceQuery<?> str1,
+			MobileServiceQuery<?> str2) {
 		return function("concat", str1, str2);
 	}
 
@@ -1048,7 +1057,8 @@ public class MobileServiceQueryOperations {
 	 *            Value to search for
 	 * @return MobileServiceQuery
 	 */
-	public static MobileServiceQuery<?> indexOf(MobileServiceQuery<?> haystack, MobileServiceQuery<?> needle) {
+	public static MobileServiceQuery<?> indexOf(MobileServiceQuery<?> haystack,
+			MobileServiceQuery<?> needle) {
 		return function("indexof", haystack, needle);
 	}
 
@@ -1076,7 +1086,8 @@ public class MobileServiceQueryOperations {
 	 *            Starting position
 	 * @return MobileServiceQuery
 	 */
-	public static MobileServiceQuery<?> subString(MobileServiceQuery<?> str, MobileServiceQuery<?> pos) {
+	public static MobileServiceQuery<?> subString(MobileServiceQuery<?> str,
+			MobileServiceQuery<?> pos) {
 		return function("substring", str, pos);
 	}
 
@@ -1106,7 +1117,8 @@ public class MobileServiceQueryOperations {
 	 *            Length
 	 * @return MobileServiceQuery
 	 */
-	public static MobileServiceQuery<?> subString(MobileServiceQuery<?> str, MobileServiceQuery<?> pos, MobileServiceQuery<?> length) {
+	public static MobileServiceQuery<?> subString(MobileServiceQuery<?> str,
+			MobileServiceQuery<?> pos, MobileServiceQuery<?> length) {
 		return function("substring", str, pos, length);
 	}
 
@@ -1122,7 +1134,8 @@ public class MobileServiceQueryOperations {
 	 *            Length
 	 * @return MobileServiceQuery
 	 */
-	public static MobileServiceQuery<?> subString(String field, int pos, int length) {
+	public static MobileServiceQuery<?> subString(String field, int pos,
+			int length) {
 		return subString(field(field), val(pos), val(length));
 	}
 
@@ -1138,7 +1151,8 @@ public class MobileServiceQueryOperations {
 	 *            Replace value
 	 * @return MobileServiceQuery
 	 */
-	public static MobileServiceQuery<?> replace(MobileServiceQuery<?> str, MobileServiceQuery<?> find, MobileServiceQuery<?> replace) {
+	public static MobileServiceQuery<?> replace(MobileServiceQuery<?> str,
+			MobileServiceQuery<?> find, MobileServiceQuery<?> replace) {
 		return function("replace", str, find, replace);
 	}
 
@@ -1154,7 +1168,8 @@ public class MobileServiceQueryOperations {
 	 *            Replace value
 	 * @return MobileServiceQuery
 	 */
-	public static MobileServiceQuery<?> replace(String field, String find, String replace) {
+	public static MobileServiceQuery<?> replace(String field, String find,
+			String replace) {
 		return replace(field(field), val(find), val(replace));
 	}
 }

@@ -80,7 +80,8 @@ class MobileServiceConnection {
 	 * @param responseCallback
 	 *            Callback to invoke after the request is executed
 	 */
-	public void start(final ServiceFilterRequest request, ServiceFilterResponseCallback responseCallback) {
+	public void start(final ServiceFilterRequest request,
+			ServiceFilterResponseCallback responseCallback) {
 		if (request == null) {
 			throw new IllegalArgumentException("Request can not be null");
 		}
@@ -91,7 +92,8 @@ class MobileServiceConnection {
 		filter.handleRequest(request, new NextServiceFilterCallback() {
 
 			@Override
-			public void onNext(ServiceFilterRequest request, ServiceFilterResponseCallback responseCallback) {
+			public void onNext(ServiceFilterRequest request,
+					ServiceFilterResponseCallback responseCallback) {
 
 				ServiceFilterResponse response = null;
 
@@ -102,10 +104,12 @@ class MobileServiceConnection {
 					// If the response has error throw exception
 					if (statusCode < 200 || statusCode >= 300) {
 						String responseContent = response.getContent();
-						if (responseContent != null && responseContent.trim() != "") {
+						if (responseContent != null
+								&& responseContent.trim() != "") {
 							throw new MobileServiceException(responseContent);
 						} else {
-							throw new MobileServiceException(String.format("{'code': %d}", statusCode));
+							throw new MobileServiceException(String.format(
+									"{'code': %d}", statusCode));
 						}
 					}
 
@@ -113,7 +117,9 @@ class MobileServiceConnection {
 					// Something went wrong, call onResponse with exception
 					// method
 					if (responseCallback != null) {
-						responseCallback.onResponse(response, new MobileServiceException("Error while processing request.", e));
+						responseCallback.onResponse(response,
+								new MobileServiceException(
+										"Error while processing request.", e));
 						return;
 					}
 				}
@@ -146,7 +152,9 @@ class MobileServiceConnection {
 		request.addHeader(X_ZUMO_APPLICATION_HEADER, mClient.getAppKey());
 
 		// Set the special Installation ID header
-		request.addHeader(X_ZUMO_INSTALLATION_ID_HEADER, MobileServiceApplication.getInstallationId(mClient.getContext()));
+		request.addHeader(
+				X_ZUMO_INSTALLATION_ID_HEADER,
+				MobileServiceApplication.getInstallationId(mClient.getContext()));
 
 		// Set the content type header
 		request.addHeader(HTTP.CONTENT_TYPE, JSON_CONTENTTYPE);
@@ -158,7 +166,9 @@ class MobileServiceConnection {
 	 * Generates the User-Agent
 	 */
 	private String getUserAgent() {
-		String userAgent = String.format("ZUMO/%s (lang=%s; os=%s; os_version=%s; arch=%s)", SDK_VERSION, "Java", "Android", Build.VERSION.RELEASE,
+		String userAgent = String.format(
+				"ZUMO/%s (lang=%s; os=%s; os_version=%s; arch=%s)",
+				SDK_VERSION, "Java", "Android", Build.VERSION.RELEASE,
 				Build.CPU_ABI);
 
 		return userAgent;

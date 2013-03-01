@@ -34,7 +34,8 @@ import com.google.gson.JsonParser;
 /**
  * Represents a Mobile Service Table
  */
-public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJsonQueryCallback> {
+public final class MobileServiceJsonTable extends
+		MobileServiceTableBase<TableJsonQueryCallback> {
 
 	/**
 	 * Constructor for MobileServiceJsonTable
@@ -56,11 +57,16 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
-	public void execute(final MobileServiceQuery<?> query, final TableJsonQueryCallback callback) {
+	public void execute(final MobileServiceQuery<?> query,
+			final TableJsonQueryCallback callback) {
 		String url = null;
 		try {
-			String filtersUrl = URLEncoder.encode(query.toString().trim(), MobileServiceClient.UTF8_ENCODING);
-			url = mClient.getAppUrl().toString() + TABLES_URL + URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING);
+			String filtersUrl = URLEncoder.encode(query.toString().trim(),
+					MobileServiceClient.UTF8_ENCODING);
+			url = mClient.getAppUrl().toString()
+					+ TABLES_URL
+					+ URLEncoder.encode(mTableName,
+							MobileServiceClient.UTF8_ENCODING);
 
 			if (filtersUrl.length() > 0) {
 				url += "?$filter=" + filtersUrl + query.getRowSetModifiers();
@@ -93,8 +99,13 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 		// Create request URL
 		String url = null;
 		try {
-			url = mClient.getAppUrl().toString() + TABLES_URL + URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING) + "/"
-					+ URLEncoder.encode(id.toString(), MobileServiceClient.UTF8_ENCODING);
+			url = mClient.getAppUrl().toString()
+					+ TABLES_URL
+					+ URLEncoder.encode(mTableName,
+							MobileServiceClient.UTF8_ENCODING)
+					+ "/"
+					+ URLEncoder.encode(id.toString(),
+							MobileServiceClient.UTF8_ENCODING);
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
@@ -105,13 +116,19 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 		executeGetRecords(url, new TableJsonQueryCallback() {
 
 			@Override
-			public void onCompleted(JsonElement results, int count, Exception exception, ServiceFilterResponse response) {
+			public void onCompleted(JsonElement results, int count,
+					Exception exception, ServiceFilterResponse response) {
 				if (callback != null) {
 					if (exception == null) {
 						if (results.isJsonArray()) { // empty result
-							callback.onCompleted(null, new MobileServiceException("A record with the specified Id cannot be found"), response);
+							callback.onCompleted(
+									null,
+									new MobileServiceException(
+											"A record with the specified Id cannot be found"),
+									response);
 						} else { // Lookup result
-							callback.onCompleted(results.getAsJsonObject(), exception, response);
+							callback.onCompleted(results.getAsJsonObject(),
+									exception, response);
 						}
 					} else {
 						callback.onCompleted(null, exception, response);
@@ -140,7 +157,9 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 			if (json.has(idProperty)) {
 				JsonElement idElement = json.get(idProperty);
 				if (!idElement.isJsonNull() && idElement.getAsInt() != 0) {
-					throw new InvalidParameterException("The entity to insert should not have " + idProperty + " property defined");
+					throw new InvalidParameterException(
+							"The entity to insert should not have "
+									+ idProperty + " property defined");
 				}
 
 				json.remove(idProperty);
@@ -156,19 +175,21 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 * @throws InvalidParameterException
-	 * @throws MobileServiceException 
+	 * @throws MobileServiceException
 	 */
-	public void insert(final JsonObject element, final TableJsonOperationCallback callback) throws InvalidParameterException, MobileServiceException {		
+	public void insert(final JsonObject element,
+			final TableJsonOperationCallback callback)
+			throws InvalidParameterException, MobileServiceException {
 		try {
 			validateJsonIdProperty(element);
 		} catch (Exception e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}
-			
+
 			return;
 		}
-		
+
 		try {
 			removeIdFromJson(element);
 		} catch (InvalidParameterException e) {
@@ -182,8 +203,11 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 
 		ServiceFilterRequest post;
 		try {
-			post = new ServiceFilterRequestImpl(new HttpPost(mClient.getAppUrl().toString() + TABLES_URL
-					+ URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING)));
+			post = new ServiceFilterRequestImpl(new HttpPost(mClient
+					.getAppUrl().toString()
+					+ TABLES_URL
+					+ URLEncoder.encode(mTableName,
+							MobileServiceClient.UTF8_ENCODING)));
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
@@ -203,10 +227,12 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 		executeTableOperation(post, new TableJsonOperationCallback() {
 
 			@Override
-			public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+			public void onCompleted(JsonObject jsonEntity, Exception exception,
+					ServiceFilterResponse response) {
 				if (callback != null) {
 					if (exception == null) {
-						JsonObject patchedJson = patchOriginalEntityWithResponseEntity(element, jsonEntity);
+						JsonObject patchedJson = patchOriginalEntityWithResponseEntity(
+								element, jsonEntity);
 
 						callback.onCompleted(patchedJson, exception, response);
 					} else {
@@ -225,13 +251,19 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
-	public void update(final JsonObject element, final TableJsonOperationCallback callback) {
+	public void update(final JsonObject element,
+			final TableJsonOperationCallback callback) {
 		String content = element.toString();
 
 		ServiceFilterRequest patch;
 		try {
-			patch = new ServiceFilterRequestImpl(new HttpPatch(mClient.getAppUrl().toString() + TABLES_URL
-					+ URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING) + "/" + Integer.valueOf(getObjectId(element)).toString()));
+			patch = new ServiceFilterRequestImpl(new HttpPatch(mClient
+					.getAppUrl().toString()
+					+ TABLES_URL
+					+ URLEncoder.encode(mTableName,
+							MobileServiceClient.UTF8_ENCODING)
+					+ "/"
+					+ Integer.valueOf(getObjectId(element)).toString()));
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
@@ -251,10 +283,12 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 		executeTableOperation(patch, new TableJsonOperationCallback() {
 
 			@Override
-			public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+			public void onCompleted(JsonObject jsonEntity, Exception exception,
+					ServiceFilterResponse response) {
 				if (callback != null) {
 					if (exception == null) {
-						JsonObject patchedJson = patchOriginalEntityWithResponseEntity(element, jsonEntity);
+						JsonObject patchedJson = patchOriginalEntityWithResponseEntity(
+								element, jsonEntity);
 						callback.onCompleted(patchedJson, exception, response);
 					} else {
 						callback.onCompleted(jsonEntity, exception, response);
@@ -272,7 +306,8 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
-	private void executeTableOperation(ServiceFilterRequest request, final TableJsonOperationCallback callback) {
+	private void executeTableOperation(ServiceFilterRequest request,
+			final TableJsonOperationCallback callback) {
 		// Create AsyncTask to execute the operation
 		new RequestAsyncTask(request, mClient.createConnection()) {
 			@Override
@@ -283,7 +318,8 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 						String content = null;
 						content = result.getContent();
 
-						newEntityJson = new JsonParser().parse(content).getAsJsonObject();
+						newEntityJson = new JsonParser().parse(content)
+								.getAsJsonObject();
 
 						callback.onCompleted(newEntityJson, null, result);
 
@@ -304,8 +340,10 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
-	private void executeGetRecords(final String url, final TableJsonQueryCallback callback) {
-		ServiceFilterRequest request = new ServiceFilterRequestImpl(new HttpGet(url));
+	private void executeGetRecords(final String url,
+			final TableJsonQueryCallback callback) {
+		ServiceFilterRequest request = new ServiceFilterRequestImpl(
+				new HttpGet(url));
 
 		MobileServiceConnection conn = mClient.createConnection();
 		// Create AsyncTask to execute the request and parse the results
@@ -327,7 +365,8 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 								JsonObject jsonObject = json.getAsJsonObject();
 								// If the response has count property, store its
 								// value
-								if (jsonObject.has("results") && jsonObject.has("count")) { // inlinecount
+								if (jsonObject.has("results")
+										&& jsonObject.has("count")) { // inlinecount
 									// result
 									count = jsonObject.get("count").getAsInt();
 									results = jsonObject.get("results");
@@ -338,7 +377,12 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 								results = json;
 							}
 						} catch (Exception e) {
-							callback.onCompleted(null, 0, new MobileServiceException("Error while retrieving data from response.", e), response);
+							callback.onCompleted(
+									null,
+									0,
+									new MobileServiceException(
+											"Error while retrieving data from response.",
+											e), response);
 							return;
 						}
 
@@ -351,37 +395,41 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<TableJs
 			}
 		}.execute();
 	}
-	
+
 	/**
-	 * Validates if the JSon element has only one property named as Id, otherwise throws exception.
+	 * Validates if the JSon element has only one property named as Id,
+	 * otherwise throws exception.
+	 * 
 	 * @param json
 	 * @throws MobileServiceException
 	 */
-	private void validateJsonIdProperty(final JsonObject json) throws MobileServiceException {
+	private void validateJsonIdProperty(final JsonObject json)
+			throws MobileServiceException {
 		// Check if id property exists
 		String[] idPropertyNames = new String[4];
 		idPropertyNames[0] = "id";
 		idPropertyNames[1] = "Id";
 		idPropertyNames[2] = "iD";
 		idPropertyNames[3] = "ID";
-		
+
 		int ocurrence = 0;
 		for (int i = 0; i < 4; i++) {
 			String idProperty = idPropertyNames[i];
 			if (json.has(idProperty)) {
 				ocurrence++;
-			}			
-		}		
-
-		if(ocurrence > 1)
-		{
-			throw new MobileServiceException("There are multiple properties named as 'id'. Only one property can be named 'id' in an object and it must be lowercased.");
+			}
 		}
-		
+
+		if (ocurrence > 1) {
+			throw new MobileServiceException(
+					"There are multiple properties named as 'id'. Only one property can be named 'id' in an object and it must be lowercased.");
+		}
+
 		// Only id lowercase can be used
-		if(json.has(idPropertyNames[1]) || json.has(idPropertyNames[2]) || json.has(idPropertyNames[3]))
-		{
-			throw new MobileServiceException("You must use lowercase for id property (i.e. 'id')");
+		if (json.has(idPropertyNames[1]) || json.has(idPropertyNames[2])
+				|| json.has(idPropertyNames[3])) {
+			throw new MobileServiceException(
+					"You must use lowercase for id property (i.e. 'id')");
 		}
 	}
 }

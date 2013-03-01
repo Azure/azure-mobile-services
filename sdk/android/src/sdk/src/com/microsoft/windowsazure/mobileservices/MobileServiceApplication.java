@@ -53,7 +53,8 @@ public final class MobileServiceApplication {
 	 * @return The Installation ID
 	 */
 	public static String getInstallationId(Context context) {
-		SharedPreferences prefereneces = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+		SharedPreferences prefereneces = PreferenceManager
+				.getDefaultSharedPreferences(context.getApplicationContext());
 
 		if (mInstallationId == null) {
 			String val = prefereneces.getString(INSTALLATION_ID_KEY, null);
@@ -64,7 +65,8 @@ public final class MobileServiceApplication {
 				mInstallationId = UUID.randomUUID().toString();
 
 				Editor preferencesEditor = prefereneces.edit();
-				preferencesEditor.putString(INSTALLATION_ID_KEY, mInstallationId);
+				preferencesEditor.putString(INSTALLATION_ID_KEY,
+						mInstallationId);
 				preferencesEditor.commit();
 			}
 		}

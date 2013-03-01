@@ -28,7 +28,8 @@ import android.os.AsyncTask;
 /**
  * Default implementation for performing requests using AsyncTask
  */
-abstract class RequestAsyncTask extends AsyncTask<Void, Void, ServiceFilterResponse> {
+abstract class RequestAsyncTask extends
+		AsyncTask<Void, Void, ServiceFilterResponse> {
 	/**
 	 * Error message
 	 */
@@ -64,7 +65,8 @@ abstract class RequestAsyncTask extends AsyncTask<Void, Void, ServiceFilterRespo
 	 * @param connection
 	 *            Connection to use
 	 */
-	public RequestAsyncTask(ServiceFilterRequest request, MobileServiceConnection connection) {
+	public RequestAsyncTask(ServiceFilterRequest request,
+			MobileServiceConnection connection) {
 		mRequest = request;
 		mConnection = connection;
 	}
@@ -75,7 +77,8 @@ abstract class RequestAsyncTask extends AsyncTask<Void, Void, ServiceFilterRespo
 		mConnection.start(mRequest, new ServiceFilterResponseCallback() {
 
 			@Override
-			public void onResponse(ServiceFilterResponse response, Exception exception) {
+			public void onResponse(ServiceFilterResponse response,
+					Exception exception) {
 				mTaskResponse = response;
 				mTaskException = exception;
 			}
