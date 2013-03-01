@@ -112,7 +112,7 @@ class IdPropertyWithGsonAnnotation {
 
 //Class with Id property
 class IdPropertyMultipleIdsTestObject {
-	private int Id;
+	private int id;
 	private int ID;
 	private int iD;
 	
@@ -131,11 +131,11 @@ class IdPropertyMultipleIdsTestObject {
 	}
 
 	public int getId() {
-		return Id;
+		return id;
 	}
 
 	public void setId(int id) {
-		Id = id;
+		this.id = id;
 	}
 
 	public int getID() {

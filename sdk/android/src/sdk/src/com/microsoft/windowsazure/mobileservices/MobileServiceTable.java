@@ -119,6 +119,7 @@ public final class MobileServiceTable<E> extends
 	 */
 	public MobileServiceTable(String name, MobileServiceClient client,
 			Class<E> clazz) {
+
 		initialize(name, client);
 		mInternalTable = new MobileServiceJsonTable(name, client);
 		mClazz = clazz;
@@ -171,16 +172,15 @@ public final class MobileServiceTable<E> extends
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 * @throws InvalidParameterException
-	 * @throws MobileServiceException
 	 */
 	public void insert(final E element, final TableOperationCallback<E> callback)
-			throws InvalidParameterException, MobileServiceException {
+			throws InvalidParameterException {
 		final JsonObject json = mClient.getGsonBuilder().create()
 				.toJsonTree(element).getAsJsonObject();
 		try {
-			validateJsonIdProperty(json);
+			validateIdProperty(json);
 
-		} catch (Exception e) {
+		} catch (InvalidParameterException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}
@@ -205,9 +205,9 @@ public final class MobileServiceTable<E> extends
 				.toJsonTree(element).getAsJsonObject();
 
 		try {
-			validateJsonIdProperty(json);
+			validateIdProperty(json);
 
-		} catch (Exception e) {
+		} catch (InvalidParameterException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}
@@ -272,16 +272,12 @@ public final class MobileServiceTable<E> extends
 	 * 
 	 * @param json
 	 *            the element to evaluate
-	 * @throws MobileServiceException
+	 * @throws InvalidParameterException
 	 */
-	private void validateJsonIdProperty(final JsonObject json)
-			throws MobileServiceException {
+	private void validateIdProperty(final JsonObject json)
+			throws InvalidParameterException {
 		// Check if id property exists
-		String[] idPropertyNames = new String[4];
-		idPropertyNames[0] = "id";
-		idPropertyNames[1] = "Id";
-		idPropertyNames[2] = "iD";
-		idPropertyNames[3] = "ID";
+		String[] idPropertyNames = new String[] { "id", "Id", "iD", "ID" };
 
 		int ocurrence = 0;
 		for (int i = 0; i < 4; i++) {
@@ -292,17 +288,17 @@ public final class MobileServiceTable<E> extends
 		}
 
 		if (ocurrence > 1) {
-			throw new MobileServiceException(
-					"There are multiple properties named as 'id'. Only one property can be named 'id' in an object and it must be lowercased.");
+			throw new InvalidParameterException(
+					"There are multiple properties named as 'id'. Only one property can be named 'id' in an object, regardless of case.");
 		}
 
 		if (json.has(idPropertyNames[1]) || json.has(idPropertyNames[2])
 				|| json.has(idPropertyNames[3])) {
-			throw new MobileServiceException(
+			throw new InvalidParameterException(
 					"You must use lowercase for id property (i.e. 'id')");
 		} else if (!json.has(idPropertyNames[0])) {
-			throw new MobileServiceException(
-					"The object must have an Id property.");
+			throw new InvalidParameterException(
+					"The object must have an id property.");
 		}
 	}
 }

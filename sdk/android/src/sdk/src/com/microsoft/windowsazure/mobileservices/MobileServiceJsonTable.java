@@ -146,12 +146,7 @@ public final class MobileServiceJsonTable extends
 	 */
 	private void removeIdFromJson(final JsonObject json) {
 		// Remove id property if exists
-		String[] idPropertyNames = new String[4];
-		idPropertyNames[0] = "id";
-		idPropertyNames[1] = "Id";
-		idPropertyNames[2] = "iD";
-		idPropertyNames[3] = "ID";
-
+		String[] idPropertyNames = new String[] { "id", "Id", "iD", "ID" };
 		for (int i = 0; i < 4; i++) {
 			String idProperty = idPropertyNames[i];
 			if (json.has(idProperty)) {
@@ -175,20 +170,10 @@ public final class MobileServiceJsonTable extends
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 * @throws InvalidParameterException
-	 * @throws MobileServiceException
 	 */
 	public void insert(final JsonObject element,
 			final TableJsonOperationCallback callback)
-			throws InvalidParameterException, MobileServiceException {
-		try {
-			validateJsonIdProperty(element);
-		} catch (Exception e) {
-			if (callback != null) {
-				callback.onCompleted(null, e, null);
-			}
-
-			return;
-		}
+			throws InvalidParameterException {
 
 		try {
 			removeIdFromJson(element);
@@ -253,6 +238,17 @@ public final class MobileServiceJsonTable extends
 	 */
 	public void update(final JsonObject element,
 			final TableJsonOperationCallback callback) {
+
+		try {
+			validateJsonIdProperty(element);
+		} catch (Exception e) {
+			if (callback != null) {
+				callback.onCompleted(null, e, null);
+			}
+
+			return;
+		}
+
 		String content = element.toString();
 
 		ServiceFilterRequest patch;
@@ -397,20 +393,17 @@ public final class MobileServiceJsonTable extends
 	}
 
 	/**
-	 * Validates if the JSon element has only one property named as Id,
-	 * otherwise throws exception.
+	 * Validates if the JSon element has a valid property named as id when
+	 * updating an object, otherwise throws exception.
 	 * 
 	 * @param json
-	 * @throws MobileServiceException
+	 * @throws InvalidParameterException
 	 */
 	private void validateJsonIdProperty(final JsonObject json)
-			throws MobileServiceException {
+			throws InvalidParameterException {
+
 		// Check if id property exists
-		String[] idPropertyNames = new String[4];
-		idPropertyNames[0] = "id";
-		idPropertyNames[1] = "Id";
-		idPropertyNames[2] = "iD";
-		idPropertyNames[3] = "ID";
+		String[] idPropertyNames = new String[] { "id", "Id", "iD", "ID" };
 
 		int ocurrence = 0;
 		for (int i = 0; i < 4; i++) {
@@ -421,15 +414,21 @@ public final class MobileServiceJsonTable extends
 		}
 
 		if (ocurrence > 1) {
-			throw new MobileServiceException(
+			throw new InvalidParameterException(
 					"There are multiple properties named as 'id'. Only one property can be named 'id' in an object and it must be lowercased.");
 		}
 
 		// Only id lowercase can be used
 		if (json.has(idPropertyNames[1]) || json.has(idPropertyNames[2])
 				|| json.has(idPropertyNames[3])) {
-			throw new MobileServiceException(
+			throw new InvalidParameterException(
 					"You must use lowercase for id property (i.e. 'id')");
+		}
+
+		if (!json.has(idPropertyNames[0])
+				|| json.get(idPropertyNames[0]).getAsInt() == 0) {
+			throw new InvalidParameterException(
+					"You must specify an id property with a valid value for updating an object.");
 		}
 	}
 }

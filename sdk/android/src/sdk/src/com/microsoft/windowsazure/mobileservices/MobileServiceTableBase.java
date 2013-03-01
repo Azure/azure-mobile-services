@@ -286,7 +286,7 @@ abstract class MobileServiceTableBase<E> {
 		}
 
 		JsonElement idProperty = jsonElement.get("id");
-		if (idProperty instanceof JsonNull) {
+		if (idProperty instanceof JsonNull || idProperty == null) {
 			throw new InvalidParameterException(
 					"Element must contain id property");
 		}

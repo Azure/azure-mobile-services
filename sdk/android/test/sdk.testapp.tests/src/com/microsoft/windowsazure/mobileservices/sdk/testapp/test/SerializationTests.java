@@ -329,17 +329,13 @@ public class SerializationTests extends InstrumentationTestCase {
 
 				MobileServiceTable<DateTestObject> table = client.getTable(tableName, DateTestObject.class);
 
-				try {
-					table.insert(dateObject, new TableOperationCallback<DateTestObject>() {
+				table.insert(dateObject, new TableOperationCallback<DateTestObject>() {
 
-						@Override
-						public void onCompleted(DateTestObject entity, Exception exception, ServiceFilterResponse response) {
-							latch.countDown();
-						}
-					});
-				} catch (Exception e) {
-					latch.countDown();
-				}
+					@Override
+					public void onCompleted(DateTestObject entity, Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -391,18 +387,14 @@ public class SerializationTests extends InstrumentationTestCase {
 
 				MobileServiceTable<DateTestObject> table = client.getTable(tableName, DateTestObject.class);
 
-				try {
-					table.insert(dateObject, new TableOperationCallback<DateTestObject>() {
+				table.insert(dateObject, new TableOperationCallback<DateTestObject>() {
 
-						@Override
-						public void onCompleted(DateTestObject entity, Exception exception, ServiceFilterResponse response) {
-							container.setDateTestObject(entity);
-							latch.countDown();
-						}
-					});
-				} catch (Exception e) {
-					latch.countDown();
-				}
+					@Override
+					public void onCompleted(DateTestObject entity, Exception exception, ServiceFilterResponse response) {
+						container.setDateTestObject(entity);
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -475,17 +467,13 @@ public class SerializationTests extends InstrumentationTestCase {
 					}
 				});
 
-				try {
-					table.insert(person, new TableOperationCallback<ComplexPersonTestObject>() {
+				table.insert(person, new TableOperationCallback<ComplexPersonTestObject>() {
 
-						@Override
-						public void onCompleted(ComplexPersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-							latch.countDown();
-						}
-					});
-				} catch (Exception e) {
-					latch.countDown();
-				}
+					@Override
+					public void onCompleted(ComplexPersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
 			}
 		});
 
@@ -547,18 +535,14 @@ public class SerializationTests extends InstrumentationTestCase {
 					}
 				});
 
-				try {
-					table.insert(person, new TableOperationCallback<ComplexPersonTestObject>() {
+				table.insert(person, new TableOperationCallback<ComplexPersonTestObject>() {
 
-						@Override
-						public void onCompleted(ComplexPersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-							container.setComplexPerson(entity);
-							latch.countDown();
-						}
-					});
-				} catch (Exception e) {
-					latch.countDown();
-				}
+					@Override
+					public void onCompleted(ComplexPersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+						container.setComplexPerson(entity);
+						latch.countDown();
+					}
+				});
 			}
 		});
 
