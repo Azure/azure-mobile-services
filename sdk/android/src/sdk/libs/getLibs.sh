@@ -16,7 +16,7 @@ echo "Remove extra files"
 rm -rf ./google-gson-2.2.2
 
 echo "Downloading Apache HttpClient 4.2.3"
-curl -O http://apache.xfree.com.ar//httpcomponents/httpclient/binary/httpcomponents-client-4.2.3-bin.zip
+curl -O http://apache.mirrors.pair.com//httpcomponents/httpclient/binary/httpcomponents-client-4.2.3-bin.zip
 
 echo "Decompressing..."
 unzip httpcomponents-client-4.2.3-bin.zip
