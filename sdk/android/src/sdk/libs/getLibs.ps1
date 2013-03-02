@@ -20,7 +20,7 @@ Write-Host "Remove extra files"
 Remove-Item .\google-gson-2.2.2\ -recurse
 
 Write-Host "Downloading Apache HttpClient 4.2.3"
-$client.DownloadFile("http://apache.xfree.com.ar//httpcomponents/httpclient/binary/httpcomponents-client-4.2.3-bin.zip", "httpcomponents-client-4.2.3-bin.zip") 
+$client.DownloadFile("http://apache.mirrors.pair.com//httpcomponents/httpclient/binary/httpcomponents-client-4.2.3-bin.zip", "httpcomponents-client-4.2.3-bin.zip") 
 
 Write-Host "Decompressing..."
 $filename = "httpcomponents-client-4.2.3-bin.zip"
