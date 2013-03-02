@@ -77,7 +77,7 @@
         NSString *expectedURL = [testCase objectAtIndex:0];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
-        MSTable *table = [client getTable:tableName];
+        MSTable *table = [client tableWithName:tableName];
         
         NSURL *url = [MSTableURLBuilder URLForTable:table];
         
@@ -121,7 +121,7 @@
         NSString *expectedURL = [testCase objectAtIndex:0];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
-        MSTable *table = [client getTable:tableName];
+        MSTable *table = [client tableWithName:tableName];
         
         NSURL *url = [MSTableURLBuilder URLForTable:table withItemIdString:itemId];
         
@@ -165,7 +165,7 @@
         NSString *expectedURL = [testCase objectAtIndex:0];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
-        MSTable *table = [client getTable:tableName];
+        MSTable *table = [client tableWithName:tableName];
         
         NSURL *url = [MSTableURLBuilder URLForTable:table withQuery:query];
         

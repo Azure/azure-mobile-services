@@ -66,7 +66,7 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
 
 
 // Initializes an |MSTable| instance with the given name and client.
--(id) initWithName:(NSString *)tableName andClient:(MSClient *)client;
+-(id) initWithName:(NSString *)tableName client:(MSClient *)client;
 
 
 #pragma mark * Public Insert, Update and Delete Methods
@@ -108,7 +108,7 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
 
 // Sends a request to the Windows Azure Mobile Service to return all items
 // from the table that meet the conditions of the given predicate.
--(void) readWhere:(NSPredicate *) predicate
+-(void) readWithPredicate:(NSPredicate *) predicate
             completion:(MSReadQueryBlock)completion;
 
 
@@ -124,7 +124,7 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
 // Returns an |MSQuery| instance associated with the table that uses
 // the given predicate. An |MSQuery| instance provides more flexibilty when
 // querying a table than the table |read*| methods.
--(MSQuery *) queryWhere:(NSPredicate *)predicate;
+-(MSQuery *) queryWithPredicate:(NSPredicate *)predicate;
 
 
 @end
