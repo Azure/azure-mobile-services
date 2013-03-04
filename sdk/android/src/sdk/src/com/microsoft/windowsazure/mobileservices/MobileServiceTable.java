@@ -94,6 +94,7 @@ public final class MobileServiceTable<E> extends
 					entity = parseResults(jsonEntity).get(0);
 					if (entity != null && mOriginalEntity != null) {
 						copyFields(entity, mOriginalEntity);
+						entity = mOriginalEntity;
 					}
 				} catch (Exception e) {
 					ex = e;
