@@ -78,9 +78,9 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	}
 
 	public void testNewMobileServiceTableWithNameFromClassShouldReturnMobileServiceTable() throws MalformedURLException {
-		String tableName = "address";
+		String tableName = "PersonTestObject";
 		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-		MobileServiceTable<Address> msTable = client.getTable(Address.class);
+		MobileServiceTable<PersonTestObject> msTable = client.getTable(PersonTestObject.class);
 
 		assertEquals(tableName.toLowerCase(Locale.getDefault()), msTable.getTableName().toLowerCase(Locale.getDefault()));
 

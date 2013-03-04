@@ -73,7 +73,7 @@ public class UpdateDeleteTests extends TestGroup {
 		elem2 = new RoundTripTableElement(rndGen);
 		elem2.id = 0;
 
-		this.addTest(createTypedUpdateTest("(Neg) Update typed item, id = 0", elem1, elem2, false, MobileServiceException.class));
+		this.addTest(createTypedUpdateTest("(Neg) Update typed item, id = 0", elem1, elem2, false, InvalidParameterException.class));
 
 		// untyped update
 		JsonParser parser = new JsonParser();

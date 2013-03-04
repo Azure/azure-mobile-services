@@ -22,6 +22,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,10 +30,13 @@ import java.util.Date;
 
 import android.content.Context;
 
+import java.lang.annotation.Annotation;
+
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializer;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * Entry-point for Windows Azure Mobile Services interactions
@@ -317,6 +321,28 @@ public class MobileServiceClient {
 	 * @return MobileServiceTable with the given name
 	 */
 	public <E> MobileServiceTable<E> getTable(Class<E> clazz) {
+		boolean hasIdProperty = false;
+		for (Field field : clazz.getDeclaredFields()) {
+			if (field.getName().equals("id")) {
+				hasIdProperty = true;
+				break;
+			} else {
+				for (Annotation annotation : field.getAnnotations()) {
+					if (annotation instanceof SerializedName) {
+						SerializedName serializedName = (SerializedName)annotation;
+						if (serializedName.value().equals("id")) {
+							hasIdProperty = true;
+							break;
+						}
+					}
+				}
+			}
+		}
+		
+		if (!hasIdProperty) {
+			throw new IllegalArgumentException("The class representing the MobileServiceTable must have an id property defined");
+		}
+		
 		return new MobileServiceTable<E>(clazz.getSimpleName(), this, clazz);
 	}
 

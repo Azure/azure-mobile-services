@@ -34,6 +34,7 @@ import com.google.gson.JsonElement;
 import com.microsoft.windowsazure.mobileservices.MobileServiceAuthenticationProvider;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
+import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.MobileServiceUser;
 import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.ServiceFilter;
@@ -194,6 +195,55 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 		try {
 			client.getTable((String) null);
 			fail("Expected Exception IllegalArgumentException");
+		} catch (IllegalArgumentException e) {
+			// do nothing, it's OK
+		}
+	}
+	
+	public void testGetTableWithClassWithIdMemberShouldWork() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e1) {
+			fail("This should not happen");
+		}
+		
+		MobileServiceTable<PersonTestObject> table = client.getTable(PersonTestObject.class);
+		assertEquals("PersonTestObject", table.getTableName());
+	}
+	
+	private class ClassWithAnnotationId {
+		@SuppressWarnings("unused")
+		String field1;
+		
+		@com.google.gson.annotations.SerializedName("id")
+		int field2;
+	}
+	
+	public void testGetTableWithClassWithIdAnnotationShouldWork() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e1) {
+			fail("This should not happen");
+		}
+		
+		MobileServiceTable<ClassWithAnnotationId> table = client.getTable(ClassWithAnnotationId.class);
+		assertEquals("ClassWithAnnotationId", table.getTableName());
+	}
+	
+	public void testGetTableWithClassWithoutIdShouldFail() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e1) {
+			fail("This should not happen");
+		}
+		
+		try {
+			@SuppressWarnings("unused")
+			MobileServiceTable<PersonTestObjectWithoutId> table = client.getTable(PersonTestObjectWithoutId.class);
+			fail("This should not happen");
 		} catch (IllegalArgumentException e) {
 			// do nothing, it's OK
 		}
