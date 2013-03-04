@@ -158,51 +158,27 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		}
 	}
 
-	public void testInsertShouldThrowExceptionIfObjectDoesNotHaveIdProperty() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
+	public void testShouldThrowExceptionIfObjectDoesNotHaveIdProperty() throws Throwable {
+		
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
 
-		// Container to store the object after the insertion, we need this to do
-		// the asserts outside the onSuccess method
-		final ResultsContainer container = new ResultsContainer();
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 
-		// Object to insert
-		final PersonTestObjectWithoutId person = new PersonTestObjectWithoutId("John", "Doe", 29);
-
-		runTestOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
-
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
-
-				// Create get the MobileService table
-				MobileServiceTable<PersonTestObjectWithoutId> msTable = client.getTable(tableName, PersonTestObjectWithoutId.class);
-
-				// Call the insert method
-				msTable.insert(person, new TableOperationCallback<PersonTestObjectWithoutId>() {
-
-					@Override
-					public void onCompleted(PersonTestObjectWithoutId entity, Exception exception, ServiceFilterResponse response) {
-						container.setErrorMessage(exception.getMessage());
-						container.setPersonWithoutId(entity);
-						latch.countDown();
-					}
-				});
-			}
-		});
-
-		latch.await();
-
-		// Asserts
-		assertEquals("The object must have an id property.", container.getErrorMessage());
-		assertNull(container.getPersonWithoutId());
+		try {
+			// Create get the MobileService table
+			@SuppressWarnings("unused")
+			MobileServiceTable<PersonTestObjectWithoutId> msTable = client.getTable(tableName, PersonTestObjectWithoutId.class);
+			fail("The getTable invokation should fail");
+		}
+		catch (IllegalArgumentException e) {
+			// It's ok.
+		}
+		
 	}
 
 	public void testInsertShouldThrowExceptionIfObjectHasUpperCasedIdProperty() throws Throwable {
@@ -213,8 +189,11 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		final ResultsContainer container = new ResultsContainer();
 
 		// Object to insert
-		final IdPropertyUpperCasedTestObject testObject = new IdPropertyUpperCasedTestObject("John");
+		final JsonObject testObject = new JsonObject();
 
+		testObject.addProperty("name", "john");
+		testObject.addProperty("ID", 38);
+		
 		runTestOnUiThread(new Runnable() {
 
 			@Override
@@ -230,13 +209,13 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				}
 
 				// Create get the MobileService table
-				MobileServiceTable<IdPropertyUpperCasedTestObject> msTable = client.getTable(tableName, IdPropertyUpperCasedTestObject.class);
+				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				// Call the insert method
-				msTable.insert(testObject, new TableOperationCallback<IdPropertyUpperCasedTestObject>() {
+				msTable.insert(testObject, new TableJsonOperationCallback() {
 
 					@Override
-					public void onCompleted(IdPropertyUpperCasedTestObject entity, Exception exception, ServiceFilterResponse response) {
+					public void onCompleted(JsonObject entity, Exception exception, ServiceFilterResponse response) {
 						container.setErrorMessage(exception.getMessage());
 						latch.countDown();
 					}
@@ -247,7 +226,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		latch.await();
 
 		// Asserts
-		assertEquals("You must use lowercase for id property (i.e. 'id')", container.getErrorMessage());
+		assertEquals("The entity to insert should not have ID property defined", container.getErrorMessage());
 		assertNull(container.getPersonWithoutId());
 	}
 
@@ -259,8 +238,11 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		final ResultsContainer container = new ResultsContainer();
 
 		// Object to insert
-		final IdPropertyIUpperCasedTestObject testObject = new IdPropertyIUpperCasedTestObject("John");
+		final JsonObject testObject = new JsonObject();
 
+		testObject.addProperty("name", "john");
+		testObject.addProperty("Id", 38);
+		
 		runTestOnUiThread(new Runnable() {
 
 			@Override
@@ -276,13 +258,13 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				}
 
 				// Create get the MobileService table
-				MobileServiceTable<IdPropertyIUpperCasedTestObject> msTable = client.getTable(tableName, IdPropertyIUpperCasedTestObject.class);
+				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				// Call the insert method
-				msTable.insert(testObject, new TableOperationCallback<IdPropertyIUpperCasedTestObject>() {
+				msTable.insert(testObject, new TableJsonOperationCallback() {
 
 					@Override
-					public void onCompleted(IdPropertyIUpperCasedTestObject entity, Exception exception, ServiceFilterResponse response) {
+					public void onCompleted(JsonObject entity, Exception exception, ServiceFilterResponse response) {
 						container.setErrorMessage(exception.getMessage());
 						latch.countDown();
 					}
@@ -293,7 +275,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		latch.await();
 
 		// Asserts
-		assertEquals("You must use lowercase for id property (i.e. 'id')", container.getErrorMessage());
+		assertEquals("The entity to insert should not have Id property defined", container.getErrorMessage());
 		assertNull(container.getPersonWithoutId());
 	}
 
@@ -305,8 +287,11 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		final ResultsContainer container = new ResultsContainer();
 
 		// Object to insert
-		final IdPropertyDUpperCasedTestObject testObject = new IdPropertyDUpperCasedTestObject("John");
+		final JsonObject testObject = new JsonObject();
 
+		testObject.addProperty("name", "john");
+		testObject.addProperty("iD", 38);
+		
 		runTestOnUiThread(new Runnable() {
 
 			@Override
@@ -322,13 +307,13 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 				}
 
 				// Create get the MobileService table
-				MobileServiceTable<IdPropertyDUpperCasedTestObject> msTable = client.getTable(tableName, IdPropertyDUpperCasedTestObject.class);
+				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				// Call the insert method
-				msTable.insert(testObject, new TableOperationCallback<IdPropertyDUpperCasedTestObject>() {
+				msTable.insert(testObject, new TableJsonOperationCallback() {
 
 					@Override
-					public void onCompleted(IdPropertyDUpperCasedTestObject entity, Exception exception, ServiceFilterResponse response) {
+					public void onCompleted(JsonObject entity, Exception exception, ServiceFilterResponse response) {
 						container.setErrorMessage(exception.getMessage());
 						latch.countDown();
 					}
@@ -339,7 +324,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		latch.await();
 
 		// Asserts
-		assertEquals("You must use lowercase for id property (i.e. 'id')", container.getErrorMessage());
+		assertEquals("The entity to insert should not have iD property defined", container.getErrorMessage());
 		assertNull(container.getPersonWithoutId());
 	}
 

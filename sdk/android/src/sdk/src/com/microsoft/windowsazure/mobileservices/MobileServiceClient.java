@@ -309,6 +309,7 @@ public class MobileServiceClient {
 	 * @return MobileServiceTable with the given name
 	 */
 	public <E> MobileServiceTable<E> getTable(String name, Class<E> clazz) {
+		validateClassIdProperty(clazz);
 		return new MobileServiceTable<E>(name, this, clazz);
 	}
 
@@ -321,6 +322,16 @@ public class MobileServiceClient {
 	 * @return MobileServiceTable with the given name
 	 */
 	public <E> MobileServiceTable<E> getTable(Class<E> clazz) {
+		validateClassIdProperty(clazz);
+		
+		return new MobileServiceTable<E>(clazz.getSimpleName(), this, clazz);
+	}
+
+	/**
+	 * Validates the class has an id property defined
+	 * @param clazz
+	 */
+	private <E> void validateClassIdProperty(Class<E> clazz) {
 		boolean hasIdProperty = false;
 		for (Field field : clazz.getDeclaredFields()) {
 			if (field.getName().equals("id")) {
@@ -342,8 +353,6 @@ public class MobileServiceClient {
 		if (!hasIdProperty) {
 			throw new IllegalArgumentException("The class representing the MobileServiceTable must have an id property defined");
 		}
-		
-		return new MobileServiceTable<E>(clazz.getSimpleName(), this, clazz);
 	}
 
 	/**
