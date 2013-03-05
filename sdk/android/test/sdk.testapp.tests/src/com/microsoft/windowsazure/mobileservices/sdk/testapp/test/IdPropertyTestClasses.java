@@ -2,65 +2,14 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
 import com.google.gson.annotations.SerializedName;
 
-// Class with ID property
-class IdPropertyUpperCasedTestObject {
-	private int ID;
+// Class with an invalid Id property but using a valid gson serialized name
+class IdPropertyWithGsonAnnotation {
+	@SerializedName("id")
+	private int myId;
+
 	private String name;
 
-	public IdPropertyUpperCasedTestObject(String name) {
-		this.name = name;
-	}
-
-	public int getID() {
-		return ID;
-	}
-
-	public void setID(int iD) {
-		ID = iD;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-}
-
-// Class with iD property
-class IdPropertyDUpperCasedTestObject {
-	private int iD;
-	private String name;
-
-	public IdPropertyDUpperCasedTestObject(String name) {
-		this.name = name;
-	}
-
-	public int getiD() {
-		return iD;
-	}
-
-	public void setiD(int iD) {
-		this.iD = iD;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-}
-
-//Class with Id property
-class IdPropertyIUpperCasedTestObject {
-	private int Id;
-	private String name;
-
-	public IdPropertyIUpperCasedTestObject(String name) {
+	public IdPropertyWithGsonAnnotation(String name) {
 		this.name = name;
 	}
 
@@ -73,23 +22,21 @@ class IdPropertyIUpperCasedTestObject {
 	}
 
 	public int getId() {
-		return Id;
+		return myId;
 	}
 
 	public void setId(int id) {
-		Id = id;
+		myId = id;
 	}
-
 }
 
-// Class with an invalid Id property but using a valid gson serialized name
-class IdPropertyWithGsonAnnotation {
-	@SerializedName("id")
+// Class with a different cased id property
+class IdPropertyWithDifferentIdPropertyCasing {
 	private int ID;
 
 	private String name;
 
-	public IdPropertyWithGsonAnnotation(String name) {
+	public IdPropertyWithDifferentIdPropertyCasing(String name) {
 		this.name = name;
 	}
 
@@ -110,7 +57,7 @@ class IdPropertyWithGsonAnnotation {
 	}
 }
 
-//Class with Id property
+//Class with multiple id properties
 class IdPropertyMultipleIdsTestObject {
 	private int id;
 	private int ID;

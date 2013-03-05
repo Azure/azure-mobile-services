@@ -2,19 +2,19 @@
 Copyright (c) Microsoft Open Technologies, Inc.
 All Rights Reserved
 Apache 2.0 License
- 
+
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
- 
+
      http://www.apache.org/licenses/LICENSE-2.0
- 
+
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
- 
+
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
 package com.microsoft.windowsazure.mobileservices;
@@ -22,6 +22,7 @@ package com.microsoft.windowsazure.mobileservices;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.InvalidParameterException;
+import java.util.Map;
 
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
@@ -35,7 +36,7 @@ import com.google.gson.JsonParser;
  * Represents a Mobile Service Table
  */
 public final class MobileServiceJsonTable extends
-		MobileServiceTableBase<TableJsonQueryCallback> {
+MobileServiceTableBase<TableJsonQueryCallback> {
 
 	/**
 	 * Constructor for MobileServiceJsonTable
@@ -103,9 +104,9 @@ public final class MobileServiceJsonTable extends
 					+ TABLES_URL
 					+ URLEncoder.encode(mTableName,
 							MobileServiceClient.UTF8_ENCODING)
-					+ "/"
-					+ URLEncoder.encode(id.toString(),
-							MobileServiceClient.UTF8_ENCODING);
+							+ "/"
+							+ URLEncoder.encode(id.toString(),
+									MobileServiceClient.UTF8_ENCODING);
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
@@ -125,7 +126,7 @@ public final class MobileServiceJsonTable extends
 									null,
 									new MobileServiceException(
 											"A record with the specified Id cannot be found"),
-									response);
+											response);
 						} else { // Lookup result
 							callback.onCompleted(results.getAsJsonObject(),
 									exception, response);
@@ -151,7 +152,7 @@ public final class MobileServiceJsonTable extends
 			String idProperty = idPropertyNames[i];
 			if (json.has(idProperty)) {
 				JsonElement idElement = json.get(idProperty);
-				if (!idElement.isJsonNull() && idElement.getAsInt() != 0) {
+				if(isValidTypeId(idElement) && idElement.getAsInt() != 0) {
 					throw new InvalidParameterException(
 							"The entity to insert should not have "
 									+ idProperty + " property defined");
@@ -172,8 +173,7 @@ public final class MobileServiceJsonTable extends
 	 * @throws InvalidParameterException
 	 */
 	public void insert(final JsonObject element,
-			final TableJsonOperationCallback callback)
-			throws InvalidParameterException {
+			final TableJsonOperationCallback callback) {
 
 		try {
 			removeIdFromJson(element);
@@ -240,12 +240,15 @@ public final class MobileServiceJsonTable extends
 			final TableJsonOperationCallback callback) {
 
 		try {
-			validateJsonIdProperty(element);
+			updateIdProperty(element);
+
+			if (!element.has("id") || element.get("id").getAsInt() == 0) {
+				throw new IllegalArgumentException("You must specify an id property with a valid value for updating an object.");
+			}
 		} catch (Exception e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}
-
 			return;
 		}
 
@@ -258,8 +261,8 @@ public final class MobileServiceJsonTable extends
 					+ TABLES_URL
 					+ URLEncoder.encode(mTableName,
 							MobileServiceClient.UTF8_ENCODING)
-					+ "/"
-					+ Integer.valueOf(getObjectId(element)).toString()));
+							+ "/"
+							+ Integer.valueOf(getObjectId(element)).toString()));
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
@@ -393,42 +396,33 @@ public final class MobileServiceJsonTable extends
 	}
 
 	/**
-	 * Validates if the JSon element has a valid property named as id when
-	 * updating an object, otherwise throws exception.
-	 * 
+	 * Updates the JsonObject to have an id property
 	 * @param json
-	 * @throws InvalidParameterException
+	 *            the element to evaluate
 	 */
-	private void validateJsonIdProperty(final JsonObject json)
-			throws InvalidParameterException {
-
-		// Check if id property exists
-		String[] idPropertyNames = new String[] { "id", "Id", "iD", "ID" };
-
-		int ocurrence = 0;
-		for (int i = 0; i < 4; i++) {
-			String idProperty = idPropertyNames[i];
-			if (json.has(idProperty)) {
-				ocurrence++;
+	private void updateIdProperty(final JsonObject json) throws IllegalArgumentException {
+		for (Map.Entry<String,JsonElement> entry : json.entrySet()){
+			if (entry.getKey().equalsIgnoreCase("id")) {
+				JsonElement element = entry.getValue();
+				if (isValidTypeId(element)) {
+					//force the id name to 'id', no matter the casing 
+					json.remove(entry.getKey());
+					// Create a new id property using the given property name
+					json.addProperty("id", entry.getValue().getAsNumber());
+					return;
+				} else {
+					throw new IllegalArgumentException("The id must be numeric");
+				}
 			}
 		}
+	}
 
-		if (ocurrence > 1) {
-			throw new InvalidParameterException(
-					"There are multiple properties named as 'id'. Only one property can be named 'id' in an object and it must be lowercased.");
-		}
-
-		// Only id lowercase can be used
-		if (json.has(idPropertyNames[1]) || json.has(idPropertyNames[2])
-				|| json.has(idPropertyNames[3])) {
-			throw new InvalidParameterException(
-					"You must use lowercase for id property (i.e. 'id')");
-		}
-
-		if (!json.has(idPropertyNames[0])
-				|| json.get(idPropertyNames[0]).getAsInt() == 0) {
-			throw new InvalidParameterException(
-					"You must specify an id property with a valid value for updating an object.");
-		}
+	/**
+	 * Validates if the id property is numeric.
+	 * @param element
+	 * @return
+	 */
+	private boolean isValidTypeId(JsonElement element) {
+		return element.isJsonPrimitive() && element.getAsJsonPrimitive().isNumber();
 	}
 }
