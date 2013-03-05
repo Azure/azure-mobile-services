@@ -343,10 +343,6 @@
     </ReservedNames>
   </ProductReservedInfo>
   <AccountPackageIdentityNames>
-    <MainPackageIdentityName>36229carlosff.carlostest1024</MainPackageIdentityName>
-    <MainPackageIdentityName>36229carlosff.carlostest1029</MainPackageIdentityName>
-    <MainPackageIdentityName>36229carlosff.MicrosoftAuthTest</MainPackageIdentityName>
-    <MainPackageIdentityName>36229carlosff.zumotestblu</MainPackageIdentityName>
   </AccountPackageIdentityNames>
   <PackageInfoList LandingUrl="https://appdev.microsoft.com:443/StorePortals/Developer/Catalog/ReleaseAnchor/a8638a53-27c2-4c2e-a11c-7285a02d0ef0" />
 </StoreAssociation>

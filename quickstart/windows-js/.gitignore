@@ -1,0 +1,4 @@
+bin/
+bld/
+obj/
+*.suo

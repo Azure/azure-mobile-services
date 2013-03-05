@@ -16,6 +16,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MSTable.h"
+#import "MSQuery.h"
 
 
 #pragma  mark * MSTableURLBuilder Public Interface
@@ -28,13 +29,22 @@
 #pragma  mark * Public URL Builder Methods
 
 // Returns a URL for the table.
-+(NSURL *) URLForTable:(MSTable *)table;
++(NSURL *) URLForTable:(MSTable *)table
+        withParameters:(NSDictionary *)parameters
+               orError:(NSError **)error;
 
 // Returns a URL for a particular item in the table.
-+(NSURL *) URLForTable:(MSTable *)table withItemIdString:(NSString *)itemId;
++(NSURL *) URLForTable:(MSTable *)table
+      withItemIdString:(NSString *)itemId
+        withParameters:(NSDictionary *)parameters
+               orError:(NSError **)error;
 
-// Returns a URL for querying a table with the given query string.
-+(NSURL *) URLForTable:(MSTable *)table withQuery:(NSString *)query;
+// Returns a URL for querying a table with the given query.
++(NSURL *) URLForTable:(MSTable *)table
+             withQuery:(NSString *)query;
 
+// Returns a query string from an |MSQuery| instance
++(NSString *) queryStringFromQuery:(MSQuery *)query
+                           orError:(NSError **)error;
 
 @end

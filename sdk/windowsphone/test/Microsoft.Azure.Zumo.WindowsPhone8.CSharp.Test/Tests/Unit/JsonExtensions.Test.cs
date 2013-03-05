@@ -164,6 +164,9 @@ namespace Microsoft.Azure.Zumo.WindowsPhone8.CSharp.Test
 
             new JArray().TryConvert(out value);
             Assert.IsNull(value);
+
+            new JValue(new DateTime(2012, 1, 1, 0, 0,0, DateTimeKind.Utc)).TryConvert(out value);
+            Assert.AreEqual("2012-01-01T00:00:00.000Z", value);
         }
 
         [TestMethod]

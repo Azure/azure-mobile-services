@@ -62,6 +62,8 @@
     <Content Include="js\default.js" />
     <Content Include="css\default.css" />
     <Content Include="js\testFramework.js" />
+    <Content Include="js\platformSpecificFunctions.js" />
+    <Content Include="js\testFrameworkConnections.js" />
     <Content Include="js\tests\allTests.js" />
     <Content Include="js\tests\loginTests.js" />
     <Content Include="js\tests\miscTests.js" />
@@ -76,6 +78,7 @@
     <None Include="ZumoE2ETestAppJs_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <SDKReference Include="LiveSDKHTML, Version=5.0" />
     <SDKReference Include="Microsoft.WinJS.1.0, Version=1.0" />
     <SDKReference Include="MobileServicesJavaScriptClient, Version=0.2.0.0" />
   </ItemGroup>

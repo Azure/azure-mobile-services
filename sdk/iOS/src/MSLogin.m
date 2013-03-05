@@ -60,6 +60,23 @@
                completion:(MSClientLoginBlock)completion
 {
     __block MSLoginController *loginController = nil;
+    __block MSUser *localUser = nil;
+    __block NSError *localError = nil;
+    __block int allDoneCount = 0;
+    
+    void (^callCompletionIfAllDone)() = ^{
+        allDoneCount++;
+        if (allDoneCount == 2) {
+            [controller dismissViewControllerAnimated:animated completion:^{
+                if (completion) {
+                    completion(localUser, localError);
+                }
+                localUser = nil;
+                localError = nil;
+                loginController = nil;
+            }];
+        }
+    };
     
     // Create a completion block that will dismiss the controller, and then
     // in the controller dismissal completion, call the completion that was
@@ -67,25 +84,22 @@
     // the LoginViewController has fuly disappeared from view before the
     // final completion is called.
     MSClientLoginBlock loginCompletion = ^(MSUser *user, NSError *error){
-        [controller dismissViewControllerAnimated:animated completion:^{
-            if (completion) {
-                completion(user, error);
-            }
-            loginController = nil;
-         }];
+        localUser = user;
+        localError = error;
+        callCompletionIfAllDone();
     };
     
     loginController = [self loginViewControllerWithProvider:provider
                                                  completion:loginCompletion];
     
-    // On iPhone thiw will do nothing, but on iPad it will present a smaller
+    // On iPhone this will do nothing, but on iPad it will present a smaller
     // view that looks much better for login
     loginController.modalPresentationStyle = UIModalPresentationFormSheet;
     
     dispatch_async(dispatch_get_main_queue(),^{
         [controller presentViewController:loginController
                                  animated:animated
-                               completion:nil];
+                               completion:callCompletionIfAllDone];
     });
 }
 
