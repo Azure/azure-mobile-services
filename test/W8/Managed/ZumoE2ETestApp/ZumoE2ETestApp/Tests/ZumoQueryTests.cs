@@ -41,16 +41,24 @@ namespace ZumoE2ETestApp.Tests
                 m => ((m.Year - 1900) >= 80) && (m.Year + 10 < 2000) && (m.Duration < 120)));
 
             // String functions
-            result.AddTest(CreateQueryTest("StartsWith - Movies which starts with 'The'",
+            result.AddTest(CreateQueryTest("String: StartsWith - Movies which starts with 'The'",
                 m => m.Title.StartsWith("The"), 100));
-            result.AddTest(CreateQueryTest("StartsWith, case insensitive - Movies which start with 'the'",
+            result.AddTest(CreateQueryTest("String: StartsWith, case insensitive - Movies which start with 'the'",
                 m => m.Title.ToLower().StartsWith("the"), 100));
-            result.AddTest(CreateQueryTest("EndsWith, case insensitive - Movies which end with 'r'",
+            result.AddTest(CreateQueryTest("String: EndsWith, case insensitive - Movies which end with 'r'",
                 m => m.Title.ToLower().EndsWith("r")));
-            result.AddTest(CreateQueryTest("Contains - Movies which contain the word 'one', case insensitive",
+            result.AddTest(CreateQueryTest("String: Contains - Movies which contain the word 'one', case insensitive",
                 m => m.Title.ToUpper().Contains("ONE")));
-
-            // TODO: Add more string functions
+            result.AddTest(CreateQueryTest("String: Length - Movies with small names",
+                m => m.Title.Length < 10, 200));
+            result.AddTest(CreateQueryTest("String: Substring (1 parameter), length - Movies which end with 'r'",
+                m => m.Title.Substring(m.Title.Length - 1) == "r"));
+            result.AddTest(CreateQueryTest("String: Substring (2 parameters), length - Movies which end with 'r'",
+                m => m.Title.Substring(m.Title.Length - 1, 1) == "r"));
+            result.AddTest(CreateQueryTest("String: Replace - Movies ending with either 'Part 2' or 'Part II'",
+                m => m.Title.Replace("II", "2").EndsWith("Part 2")));
+            result.AddTest(CreateQueryTest("String: Concat - Movies rated 'PG' or 'PG-13' from the 2000s",
+                m => m.Year >= 2000 && string.Concat(m.MPAARating, "-13").StartsWith("PG-13")));
 
             // String fields
             result.AddTest(CreateQueryTest("String equals - Movies since 1980 with rating PG-13",
@@ -151,7 +159,7 @@ namespace ZumoE2ETestApp.Tests
                             orderby m.ReleaseDate descending
                             select new
                             {
-                                Date = m.ReleaseDate.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                                Date = m.ReleaseDate.ToUniversalTime().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                                 Title = m.Title
                             };
                 var newPage = new MoviesDisplayPage();

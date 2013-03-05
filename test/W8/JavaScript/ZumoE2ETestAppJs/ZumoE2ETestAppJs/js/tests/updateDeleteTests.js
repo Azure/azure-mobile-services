@@ -125,7 +125,7 @@ function defineUpdateDeleteTestsNamespace() {
     }));
 
     tests.push(createUpdateTest('(Neg) Update object with inexistent id', function (test, done, table, insertedItem) {
-        table.update({ id: 123456789 }).done(function () {
+        table.update({ id: 123456789, number: 123 }).done(function () {
             test.addLog('Error, success function was called but expected error.');
             done(false);
         }, function (err) {

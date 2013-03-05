@@ -62,10 +62,18 @@
 
 -(void) insert:(NSDictionary *)item completion:(MSItemBlock)completion
 {
+    [self insert:item parameters:nil completion:completion];
+}
+
+-(void) insert:(NSDictionary *)item
+    parameters:(NSDictionary *)parameters
+    completion:(MSItemBlock)completion
+{
     // Create the request
     MSTableItemRequest *request = [MSTableRequest
                                    requestToInsertItem:item
                                    withTable:self
+                                   withParameters:parameters
                                    withSerializer:self.serializer
                                    completion:completion];
     // Send the request
@@ -79,10 +87,18 @@
 
 -(void) update:(NSDictionary *)item completion:(MSItemBlock)completion
 {
+    [self update:item parameters:nil completion:completion];
+}
+
+-(void) update:(NSDictionary *)item
+    parameters:(NSDictionary *)parameters
+    completion:(MSItemBlock)completion
+{
     // Create the request
     MSTableItemRequest *request = [MSTableRequest
                                    requestToUpdateItem:item
                                    withTable:self
+                                   withParameters:parameters
                                    withSerializer:self.serializer
                                    completion:completion];
     // Send the request
@@ -96,10 +112,18 @@
 
 -(void) delete:(NSDictionary *)item completion:(MSDeleteBlock)completion
 {
+    [self delete:item parameters:nil completion:completion];
+}
+
+-(void) delete:(NSDictionary *)item
+    parameters:(NSDictionary *)parameters
+    completion:(MSDeleteBlock)completion
+{
     // Create the request
     MSTableDeleteRequest *request = [MSTableRequest
                                      requestToDeleteItem:item
                                      withTable:self
+                                     withParameters:parameters
                                      withSerializer:self.serializer
                                      completion:completion];
     // Send the request
@@ -113,10 +137,18 @@
 
 -(void) deleteWithId:(NSNumber *)itemId completion:(MSDeleteBlock)completion
 {
+    [self deleteWithId:itemId parameters:nil completion:completion];
+}
+
+-(void) deleteWithId:(NSNumber *)itemId
+          parameters:(NSDictionary *)parameters
+          completion:(MSDeleteBlock)completion
+{
     // Create the request
     MSTableDeleteRequest *request = [MSTableRequest
                                      requestToDeleteItemWithId:itemId
                                      withTable:self
+                                     withParameters:parameters
                                      withSerializer:self.serializer
                                      completion:completion];
     // Send the request
@@ -134,10 +166,18 @@
 
 -(void) readWithId:(NSNumber *)itemId completion:(MSItemBlock)completion
 {
+    [self readWithId:itemId parameters:nil completion:completion];
+}
+
+-(void) readWithId:(NSNumber *)itemId
+        parameters:(NSDictionary *)parameters
+        completion:(MSItemBlock)completion
+{
     // Create the request
     MSTableItemRequest *request = [MSTableRequest
                                    requestToReadWithId:itemId
                                    withTable:self
+                                   withParameters:parameters
                                    withSerializer:self.serializer
                                    completion:completion];
     // Send the request

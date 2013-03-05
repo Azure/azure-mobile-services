@@ -53,7 +53,7 @@ namespace ZumoE2ETestApp.Tests
                 ""complexType2"":{""Name"":""Jane Roe"",""Age"":23,""Friends"":[""John""]}
             }";
 
-            result.AddTest(CreateUntypedUpdateTest("Update typed item", JsonObject.Parse(toInsertJsonString), JsonObject.Parse(toUpdateJsonString)));
+            result.AddTest(CreateUntypedUpdateTest("Update untyped item", toInsertJsonString, toUpdateJsonString));
 
             JsonValue nullValue = JsonValue.Parse("null");
             JsonObject toUpdate = JsonObject.Parse(toUpdateJsonString);
@@ -62,15 +62,15 @@ namespace ZumoE2ETestApp.Tests
             toUpdate["complexType2"] = nullValue;
             toUpdate["complexType1"] = nullValue;
             toUpdate["int1"] = nullValue;
-            result.AddTest(CreateUntypedUpdateTest("Update typed item, setting values to null", JsonObject.Parse(toInsertJsonString), toUpdate));
+            result.AddTest(CreateUntypedUpdateTest("Update untyped item, setting values to null", toInsertJsonString, toUpdate.Stringify()));
 
             toUpdate["id"] = JsonValue.CreateNumberValue(1000000000);
-            result.AddTest(CreateUntypedUpdateTest<ArgumentException>("(Neg) Update typed item, non-existing item id",
-                JsonObject.Parse(toInsertJsonString), JsonObject.Parse(toUpdateJsonString), false));
+            result.AddTest(CreateUntypedUpdateTest<MobileServiceInvalidOperationException>("(Neg) Update untyped item, non-existing item id",
+                toInsertJsonString, toUpdate.Stringify(), false));
 
             toUpdate["id"] = JsonValue.CreateNumberValue(0);
             result.AddTest(CreateUntypedUpdateTest<ArgumentException>("(Neg) Update typed item, id = 0",
-                JsonObject.Parse(toInsertJsonString), JsonObject.Parse(toUpdateJsonString), false));
+                toInsertJsonString, toUpdateJsonString, false));
 
             // Delete tests
             result.AddTest(CreateDeleteTest("Delete typed item", true, DeleteTestType.ValidDelete));
@@ -300,17 +300,19 @@ namespace ZumoE2ETestApp.Tests
         }
 
         private static ZumoTest CreateUntypedUpdateTest(
-            string testName, JsonObject itemToInsert, JsonObject itemToUpdate)
+            string testName, string itemToInsert, string itemToUpdate)
         {
             return CreateUntypedUpdateTest<ExceptionTypeWhichWillNeverBeThrown>(testName, itemToInsert, itemToUpdate);
         }
 
         private static ZumoTest CreateUntypedUpdateTest<TExpectedException>(
-            string testName, JsonObject itemToInsert, JsonObject itemToUpdate, bool setUpdatedId = true)
+            string testName, string itemToInsertJson, string itemToUpdateJson, bool setUpdatedId = true)
             where TExpectedException : Exception
         {
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
+                var itemToInsert = JsonObject.Parse(itemToInsertJson);
+                var itemToUpdate = JsonObject.Parse(itemToUpdateJson);
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable(ZumoTestGlobals.RoundTripTableName);
                 try

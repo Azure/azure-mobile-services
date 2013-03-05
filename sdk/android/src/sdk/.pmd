@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pmd>
+    <useProjectRuleSet>false</useProjectRuleSet>
+    <ruleSetFile>.ruleset</ruleSetFile>
+    <rules>
+        <rule>
+            <name>ConstructorCallsOverridableMethod</name>
+            <ruleset>Design Rules</ruleset>
+        </rule>
+        <rule>
+            <name>EqualsNull</name>
+            <ruleset>Design Rules</ruleset>
+        </rule>
+        <rule>
+            <name>ClassWithOnlyPrivateConstructorsShouldBeFinal</name>
+            <ruleset>Design Rules</ruleset>
+        </rule>
+        <rule>
+            <name>EmptyMethodInAbstractClassShouldBeAbstract</name>
+            <ruleset>Design Rules</ruleset>
+        </rule>
+        <rule>
+            <name>ReturnEmptyArrayRatherThanNull</name>
+            <ruleset>Design Rules</ruleset>
+        </rule>
+        <rule>
+            <name>AbstractClassWithoutAnyMethod</name>
+            <ruleset>Design Rules</ruleset>
+        </rule>
+        <rule>
+            <name>TooFewBranchesForASwitchStatement</name>
+            <ruleset>Design Rules</ruleset>
+        </rule>
+        <rule>
+            <name>AvoidThrowingRawExceptionTypes</name>
+            <ruleset>Strict Exception Rules</ruleset>
+        </rule>
+        <rule>
+            <name>AvoidThrowingNullPointerException</name>
+            <ruleset>Strict Exception Rules</ruleset>
+        </rule>
+        <rule>
+            <name>DoubleCheckedLocking</name>
+            <ruleset>Basic Rules</ruleset>
+        </rule>
+        <rule>
+            <name>AvoidUsingShortType</name>
+            <ruleset>Controversial Rules</ruleset>
+        </rule>
+        <rule>
+            <name>VariableNamingConventions</name>
+            <ruleset>Naming Rules</ruleset>
+        </rule>
+        <rule>
+            <name>MethodNamingConventions</name>
+            <ruleset>Naming Rules</ruleset>
+        </rule>
+        <rule>
+            <name>ClassNamingConventions</name>
+            <ruleset>Naming Rules</ruleset>
+        </rule>
+        <rule>
+            <name>AvoidReassigningParameters</name>
+            <ruleset>Design Rules</ruleset>
+        </rule>
+        <rule>
+            <name>MoreThanOneLogger</name>
+            <ruleset>Java Logging Rules</ruleset>
+        </rule>
+        <rule>
+            <name>LoggerIsNotStaticFinal</name>
+            <ruleset>Java Logging Rules</ruleset>
+        </rule>
+        <rule>
+            <name>SystemPrintln</name>
+            <ruleset>Java Logging Rules</ruleset>
+        </rule>
+        <rule>
+            <name>StringInstantiation</name>
+            <ruleset>String and StringBuffer Rules</ruleset>
+        </rule>
+        <rule>
+            <name>AvoidEnumAsIdentifier</name>
+            <ruleset>Migration Rules</ruleset>
+        </rule>
+        <rule>
+            <name>AvoidAssertAsIdentifier</name>
+            <ruleset>Migration Rules</ruleset>
+        </rule>
+        <rule>
+            <name>IntegerInstantiation</name>
+            <ruleset>Migration Rules</ruleset>
+        </rule>
+        <rule>
+            <name>ByteInstantiation</name>
+            <ruleset>Migration Rules</ruleset>
+        </rule>
+        <rule>
+            <name>ShortInstantiation</name>
+            <ruleset>Migration Rules</ruleset>
+        </rule>
+        <rule>
+            <name>LongInstantiation</name>
+            <ruleset>Migration Rules</ruleset>
+        </rule>
+        <rule>
+            <name>BooleanInstantiation</name>
+            <ruleset>Basic Rules</ruleset>
+        </rule>
+        <rule>
+            <name>BrokenNullCheck</name>
+            <ruleset>Basic Rules</ruleset>
+        </rule>
+        <rule>
+            <name>AvoidMultipleUnaryOperators</name>
+            <ruleset>Basic Rules</ruleset>
+        </rule>
+        <rule>
+            <name>AvoidUsingVolatile</name>
+            <ruleset>Controversial Rules</ruleset>
+        </rule>
+        <rule>
+            <name>AvoidUsingNativeCode</name>
+            <ruleset>Controversial Rules</ruleset>
+        </rule>
+        <rule>
+            <name>DoNotCallGarbageCollectionExplicitly</name>
+            <ruleset>Controversial Rules</ruleset>
+        </rule>
+        <rule>
+            <name>SuspiciousEqualsMethodName</name>
+            <ruleset>Naming Rules</ruleset>
+        </rule>
+        <rule>
+            <name>ProperCloneImplementation</name>
+            <ruleset>Clone Implementation Rules</ruleset>
+        </rule>
+    </rules>
+    <includeDerivedFiles>false</includeDerivedFiles>
+    <violationsAsErrors>true</violationsAsErrors>
+</pmd>

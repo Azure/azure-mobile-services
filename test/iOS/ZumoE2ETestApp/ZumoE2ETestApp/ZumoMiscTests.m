@@ -16,7 +16,7 @@
 @interface FilterToCaptureHttpTraffic : NSObject <MSFilter>
 
 @property (nonatomic, copy) NSString *userAgent;
-@property (nonatomic, copy) NSString *responseContent;
+@property (nonatomic, copy) NSData *responseContent;
 @property (nonatomic, strong) NSDictionary *requestHeaders;
 @property (nonatomic, strong) NSDictionary *responseHeaders;
 
@@ -24,9 +24,10 @@
 
 @implementation FilterToCaptureHttpTraffic
 
-@synthesize userAgent, responseContent;
+@synthesize userAgent;
 @synthesize requestHeaders = _requestHeaders;
 @synthesize responseHeaders = _responseHeaders;
+@synthesize responseContent = _responseContent;
 
 - (id)init {
     self = [super init];
@@ -47,6 +48,7 @@
         NSDictionary *respHeaders = [response allHeaderFields];
         _responseHeaders = [NSMutableDictionary new];
         [_responseHeaders setValuesForKeysWithDictionary:respHeaders];
+        _responseContent = [NSData dataWithData:data];
         onResponse(response, data, error);
     });
 }
@@ -158,6 +160,7 @@
 @implementation ZumoMiscTests
 
 static NSString *tableName = @"iOSRoundTripTable";
+static NSString *parameterTestTableName = @"ParamsTestTable";
 
 + (NSArray *)createTests {
     NSMutableArray *result = [[NSMutableArray alloc] init];
@@ -165,6 +168,7 @@ static NSString *tableName = @"iOSRoundTripTable";
     [result addObject:[self createFilterWithMultipleRequestsTest]];
     [result addObject:[self createFilterTestWhichBypassesService]];
     [result addObject:[self createFilterTestToEnsureWithFilterDoesNotChangeClient]];
+    [result addObject:[self createParameterPassingTest]];
     return result;
 }
 
@@ -176,6 +180,135 @@ static NSString *tableName = @"iOSRoundTripTable";
                       @"4. Make sure all the tests pass.",
                       nil];
     return [lines componentsJoinedByString:@"\n"];
+}
+
++ (ZumoTest *)createParameterPassingTest {
+    return [ZumoTest createTestWithName:@"Parameter passing tests" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+        MSClient *client = [[ZumoTestGlobals sharedInstance] client];
+        MSTable *table = [client getTable:parameterTestTableName];
+        NSDictionary *baseDict = @{
+                               @"item": @"simple",
+                               @"item": @"simple" ,
+                               @"empty": @"" ,
+                               @"spaces": @"with spaces",
+                               @"specialChars": @"`!@#$%^&*()-=[]\\;',./~_+{}|:\"<>?",
+                               @"latin": @"ãéìôü ÇñÑ",
+                               @"arabic": @"الكتاب على الطاولة",
+                               @"chinese": @"这本书在桌子上",
+                               @"japanese": @"本は机の上に",
+                               @"hebrew": @"הספר הוא על השולחן",
+                               @"name+with special&chars": @"should just work"
+                               };
+        NSMutableDictionary *dict = [[NSMutableDictionary alloc] initWithDictionary:baseDict];
+        [dict setValue:@"insert" forKey:@"operation"];
+        NSMutableDictionary *item = [[NSMutableDictionary alloc] initWithDictionary:@{@"name":@"John Doe"}];
+        [table insert:item parameters:dict completion:^(NSDictionary *inserted, NSError *error) {
+            if ([self handleIfError:error operation:@"insert" test:test completion:completion]) {
+                return;
+            }
+            if (![self validateParameters:test operation:@"insert" expected:dict actual:[self parseJson:inserted[@"parameters"]]]) {
+                completion(NO);
+                return;
+            }
+            
+            dict[@"operation"] = @"update";
+            [item setValue:@1 forKey:@"id"];
+            [table update:item parameters:dict completion:^(NSDictionary *updated, NSError *error) {
+                if ([self handleIfError:error operation:@"update" test:test completion:completion]) {
+                    return;
+                }
+                if (![self validateParameters:test operation:@"update" expected:dict actual:[self parseJson:updated[@"parameters"]]]) {
+                    completion(NO);
+                    return;
+                }
+                
+                dict[@"operation"] = @"lookup";
+                [table readWithId:@1 parameters:dict completion:^(NSDictionary *lookedUp, NSError *error) {
+                    if ([self handleIfError:error operation:@"lookup" test:test completion:completion]) {
+                        return;
+                    }
+                    if (![self validateParameters:test operation:@"lookup" expected:dict actual:[self parseJson:lookedUp[@"parameters"]]]) {
+                        completion(NO);
+                        return;
+                    }
+                    
+                    dict[@"operation"] = @"read";
+                    MSQuery *query = [table query];
+                    [query setParameters:dict];
+                    [query readWithCompletion:^(NSArray *readItems, NSInteger totalCount, NSError *error) {
+                        if ([self handleIfError:error operation:@"read" test:test completion:completion]) {
+                            return;
+                        }
+                        if (![self validateParameters:test operation:@"read" expected:dict actual:[self parseJson:readItems[0][@"parameters"]]]) {
+                            completion(NO);
+                            return;
+                        }
+                        
+                        dict[@"operation"] = @"delete";
+                        FilterToCaptureHttpTraffic *capturingFilter = [[FilterToCaptureHttpTraffic alloc] init];
+                        MSClient *filteredClient = [client clientwithFilter:capturingFilter];
+                        MSTable *filteredTable = [filteredClient getTable:parameterTestTableName];
+                        [filteredTable deleteWithId:@1 parameters:dict completion:^(NSNumber *itemId, NSError *error) {
+                            if ([self handleIfError:error operation:@"delete" test:test completion:completion]) {
+                                return;
+                            }
+
+                            NSString *responseContent = [[NSString alloc] initWithData:[capturingFilter responseContent] encoding:NSUTF8StringEncoding];
+                            NSDictionary *deleteBody = [self parseJson:responseContent];
+                            if (![self validateParameters:test operation:@"delete" expected:dict actual:[self parseJson:deleteBody[@"parameters"]]]) {
+                                completion(NO);
+                                return;
+                            }
+                            
+                            [test addLog:@"All validations passed"];
+                            completion(YES);
+                        }];
+                    }];
+                }];
+            }];
+        }];
+    }];
+}
+
++ (NSDictionary *)parseJson:(NSString *)json {
+    NSData *data = [json dataUsingEncoding:NSUTF8StringEncoding];
+    NSError *error;
+    NSDictionary *result = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+    return result;
+}
++ (BOOL)validateParameters:(ZumoTest *)test operation:(NSString *)operation expected:(NSDictionary *)expected actual:(NSDictionary *)actual {
+    BOOL same = YES;
+    NSString *paramaterName;
+    [test addLog:[NSString stringWithFormat:@"Validating parameters for operation %@", operation]];
+    for (paramaterName in [expected keyEnumerator]) {
+        NSString *expectedValue = expected[paramaterName];
+        NSString *actualValue = actual[paramaterName];
+        if (!actualValue) {
+            [test addLog:[NSString stringWithFormat:@"Parameter %@ not found in the response", paramaterName]];
+            same = NO;
+        } else {
+            if (![expectedValue isEqualToString:actualValue]) {
+                [test addLog:[NSString stringWithFormat:@"Value of parameter %@ is incorrect. Expected: %@; actual: %@", paramaterName, expectedValue, actualValue]];
+                same = NO;
+            }
+        }
+    }
+    
+    if (same) {
+        [test addLog:@"All parameter validated correctly"];
+    }
+    
+    return same;
+}
+
++ (BOOL)handleIfError:(NSError *)error operation:(NSString *)operation test:(ZumoTest *)test completion:(ZumoTestCompletion) completion {
+    if (error) {
+        [test addLog:[[NSString alloc] initWithFormat:@"Error during %@: %@", operation, error]];
+        completion(NO);
+        return YES;
+    } else {
+        return NO;
+    }
 }
 
 + (ZumoTest *)createUserAgentTest {

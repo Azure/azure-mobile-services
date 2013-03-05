@@ -40,12 +40,18 @@
 #pragma mark * Public ReadWrite Properties
 
 
+// The predicate used as the filter clause of the query.
+@property (nonatomic) NSPredicate *predicate;
+
 // The maximum number of items to return from the query.
 @property (nonatomic) NSUInteger fetchLimit;
 
 // The offset from the initial item to use when returning items from a query.
 // Can be used with |fetchLimit| to implement paging.
 @property (nonatomic) NSUInteger fetchOffset;
+
+// The array of NSSortDescriptors used to order the query results
+@property (nonatomic, copy) NSArray *orderBy;
 
 // Indicates if the Windows Azure Mobile Service should also include the total
 // count of items on the server (not just the count of items returned) with

@@ -23,10 +23,10 @@
 
 
 NSString *const idKey = @"id";
-NSString *const resultsKey =@"results";
-NSString *const countKey =@"count";
-NSString *const errorKey =@"error";
-NSString *const descriptionKey =@"description";
+NSString *const resultsKey = @"results";
+NSString *const countKey = @"count";
+NSString *const errorKey = @"error";
+NSString *const descriptionKey = @"description";
 
 
 #pragma mark * MSJSONSerializer Implementation
@@ -35,7 +35,7 @@ NSString *const descriptionKey =@"description";
 @implementation MSJSONSerializer
 
 static MSJSONSerializer *staticJSONSerializerSingleton;
-
+static NSArray *allIdKeys;
 
 #pragma mark * Public Static Singleton Constructor
 
@@ -49,11 +49,21 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
     return  staticJSONSerializerSingleton;
 }
 
++(NSArray *) AllIdKeys
+{
+    if (allIdKeys == nil) {
+        allIdKeys = [NSArray arrayWithObjects:idKey, @"Id", @"ID", @"iD", nil];
+    }
+    
+    return  allIdKeys;
+}
 
 # pragma mark * MSSerializer Protocol Implementation
 
 
--(NSData *) dataFromItem:(id)item orError:(NSError **)error
+-(NSData *) dataFromItem:(id)item
+               idAllowed:(BOOL)idAllowed
+                 orError:(NSError **)error
 {
     NSData *data = nil;
     NSError *localError = nil;
@@ -64,6 +74,31 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
     }
     else {
         
+        // Ensure that the item doesn't already have an id if
+        // an id is not allowed
+        if (!idAllowed) {
+            
+            // Make sure this is a dictionary before trying to get the id
+            if (![item isKindOfClass:[NSDictionary class]]) {
+                localError = [self errorForInvalidItem];
+            }
+            else {
+                
+                // Then get the value of the id key; if it exists,
+                // this is an error; look for all id's regardless of case
+                for (id key in MSJSONSerializer.AllIdKeys) {
+                    id itemId = [item objectForKey:key];
+                    if (itemId) {
+                        localError = [self errorForExistingItemId];
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    if (!localError)
+    {
         // Convert any NSDate instances into strings formatted with the date.
         item = [self preSerializeItem:item];
 
@@ -424,6 +459,12 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
 {
     return [self errorWithDescriptionKey:@"The item provided did not have an id."
                             andErrorCode:MSMissingItemIdWithRequest];
+}
+
+-(NSError *) errorForExistingItemId
+{
+    return [self errorWithDescriptionKey:@"The item provided must not have an id."
+                            andErrorCode:MSExistingItemIdWithRequest];
 }
 
 -(NSError *) errorForExpectedItemId

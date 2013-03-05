@@ -207,7 +207,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                         propertyValue = value.AsString();
                         break;
                     case JTokenType.Date:
-                        propertyValue = value.ToObject<DateTime>(); // AsDateTime() doesn't make sense since DateTime is a reference not object type.  (Can't use 'as' operator)
+                        propertyValue = value.ToObject<DateTime>().ToRoundtripDateString(); //win8 store json data serialization doesn't have Date type, and is always returning string type, we should do the same
                         break;
                     case JTokenType.Null:
                         break;

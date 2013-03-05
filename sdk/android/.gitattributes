@@ -1,0 +1,2 @@
+# Temporarily suppress line ending normalization of the SDK source code
+.java -text
