@@ -1,1 +1,14 @@
 .DS_Store
+bin
+gen
+target
+*.keystore
+*.swp
+*.orig
+*.log
+seed.txt
+map.txt
+.metadata
+sdk/android/src/sdk/libs/gson-2.2.2.jar
+
+sdk/android/src/sdk/libs/httpclient-4.2.3.jar
