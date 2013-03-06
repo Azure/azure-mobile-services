@@ -260,6 +260,51 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 		}
 		
 	}
+	
+	public void testGetTableWithInterfaceShouldThrowException() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e1) {
+			fail("This should not fail");
+		}
+
+		try {
+
+			client.getTable(MyInterface.class);
+			fail("Expected Exception IllegalArgumentException");
+		} catch (IllegalArgumentException e) {
+			// do nothing, it's OK
+		}
+	}
+	
+	public void testGetTableWithAbstractClassShouldThrowException() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e1) {
+			fail("This should not fail");
+		}
+
+		try {
+
+			client.getTable(MyAbstractClass.class);
+			fail("Expected Exception IllegalArgumentException");
+		} catch (IllegalArgumentException e) {
+			// do nothing, it's OK
+		}
+	}
+	
+	interface MyInterface 
+	{
+
+	}
+	
+	abstract class MyAbstractClass
+	{
+		int id;
+		String name;
+	}
 
 	public void testLoginShouldParseJsonUserCorreclty() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
