@@ -402,13 +402,16 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	 */
 	private void updateIdProperty(final JsonObject json) throws IllegalArgumentException {
 		for (Map.Entry<String,JsonElement> entry : json.entrySet()){
-			if (entry.getKey().equalsIgnoreCase("id")) {
+			String key = entry.getKey();
+			if (key.equalsIgnoreCase("id")) {
 				JsonElement element = entry.getValue();
 				if (isValidTypeId(element)) {
-					//force the id name to 'id', no matter the casing 
-					json.remove(entry.getKey());
-					// Create a new id property using the given property name
-					json.addProperty("id", entry.getValue().getAsNumber());
+					if (!key.equals("id")) {
+						//force the id name to 'id', no matter the casing 
+						json.remove(key);
+						// Create a new id property using the given property name
+						json.addProperty("id", entry.getValue().getAsNumber());
+					}
 					return;
 				} else {
 					throw new IllegalArgumentException("The id must be numeric");
