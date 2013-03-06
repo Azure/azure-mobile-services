@@ -23,6 +23,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -307,7 +308,7 @@ public class MobileServiceClient {
 	 * @return MobileServiceTable with the given name
 	 */
 	public <E> MobileServiceTable<E> getTable(String name, Class<E> clazz) {
-		validateClassIdProperty(clazz);
+		validateClass(clazz);
 		return new MobileServiceTable<E>(name, this, clazz);
 	}
 
@@ -320,7 +321,7 @@ public class MobileServiceClient {
 	 * @return MobileServiceTable with the given name
 	 */
 	public <E> MobileServiceTable<E> getTable(Class<E> clazz) {
-		validateClassIdProperty(clazz);
+		validateClass(clazz);
 		
 		return new MobileServiceTable<E>(clazz.getSimpleName(), this, clazz);
 	}
@@ -329,7 +330,12 @@ public class MobileServiceClient {
 	 * Validates the class has an id property defined
 	 * @param clazz
 	 */
-	private <E> void validateClassIdProperty(Class<E> clazz) {
+	private <E> void validateClass(Class<E> clazz) {
+		if(clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers()))
+		{
+			throw new IllegalArgumentException("The class type used for creating a MobileServiceTable must be a concrete class");
+		}
+		
 		int idPropertyCount = 0;
 		for (Field field : clazz.getDeclaredFields()) {
 			SerializedName serializedName = field.getAnnotation(SerializedName.class);
