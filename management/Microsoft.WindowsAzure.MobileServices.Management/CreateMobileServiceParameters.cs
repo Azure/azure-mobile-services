@@ -18,6 +18,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             new Regex(@"[_\~\`\!\@\#\$\%\^\&\*\(\)\-\+\=\[\{\]\}\|\\\:\;\""\'\<\,\>\.\?\/]")
         };
 
+        static readonly Regex restrictedUsername = new Regex(
+                "^(admin|administrator|sa|root|dbmanager|loginmanager|dbo|guest|information_schema"
+                + "|sys|db_accessadmin|db_backupoperator|db_datareader|db_datawriter|db_ddladmin|db_denydatareader|"
+                + "db_denydatawriter|db_owner|db_securityadmin|public)$", RegexOptions.IgnoreCase);
+
+        static readonly Regex validUsername = new Regex(
+                @"^[^\s\t\r#@\u0000-\u001F\""<>\|\:\*\?\\\/\;\,\%\=\&\$\+\d][^\s\t\r\u0000-\u001F\""\<\>\|\:\*\?\\\/\#\&\;\,\%\=]+$");
+
         /// <summary>
         /// Required. The name of the Mobile Service
         /// </summary>
@@ -89,11 +97,44 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             return sqlPassword.Length >= 8 && !unsecuredPassword.Contains(sqlUsername) && matches >= 3;
         }
 
+        static bool IsSqlUsernameValid(string sqlUsername)
+        {
+            if (sqlUsername == null)
+            {
+                throw new ArgumentNullException("sqlUsername");
+            }
+
+            if (sqlUsername.Length > 117)
+            {
+                return false;
+            }
+
+            if (restrictedUsername.IsMatch(sqlUsername))
+            {
+                return false;
+            }
+
+            if (!validUsername.IsMatch(sqlUsername))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public static void EnsureSqlCredentialStrength(SecureString sqlPassword, string sqlUsername)
         {
             if (!IsSqlPasswordValid(sqlPassword, sqlUsername))
             {
                 throw new ArgumentOutOfRangeException(Resources.WeakSqlPassword);
+            }
+        }
+
+        public static void EnsureSqlUsernameValid(string sqlUsername)
+        {
+            if (!IsSqlUsernameValid(sqlUsername))
+            {
+                throw new ArgumentOutOfRangeException(Resources.InvalidSqlUsername);
             }
         }
 
@@ -117,6 +158,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             if (this.SqlAdminPassword == null || this.SqlAdminPassword.Length == 0)
             {
                 throw new InvalidOperationException(Resources.MissingSqlAdminPassword);
+            }
+
+            if (!IsSqlUsernameValid(this.SqlAdminUsername))
+            {
+                throw new InvalidOperationException(Resources.InvalidSqlUsername);
             }
 
             if (!IsSqlPasswordValid(this.SqlAdminPassword, this.SqlAdminUsername))

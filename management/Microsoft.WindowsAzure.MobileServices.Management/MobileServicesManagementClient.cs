@@ -12,6 +12,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using System.Xml.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Management
@@ -24,6 +25,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
         static readonly string WindowsAzureNs = "http://schemas.microsoft.com/windowsazure";
         static readonly string SqlAzureNs = "http://schemas.microsoft.com/sqlazure/2010/12/";
         static readonly string DefaultSqlDatabaseHostSuffix = ".database.windows.net";
+        static readonly string DefaultMobileServiceHostSuffix = ".azure-mobile.net";
 
         public string SubscriptionId { get; set; }
         public X509Certificate2 ManagementCertificate { get; set; }
@@ -31,6 +33,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
         public string SqlManagementEndpoint { get; set; }
         public string SqlManagementEndpoint2 { get; set; }
         public string SqlDatabaseHostSuffix { get; set; }
+        public string MobileServiceHostSuffix { get; set; }
 
         public MobileServicesManagementClient()
             : this(null, null)
@@ -46,6 +49,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             this.SqlManagementEndpoint = DefaultSqlManagementEndpoint;
             this.SqlManagementEndpoint2 = DefaultSqlManagementEndpoint2;
             this.SqlDatabaseHostSuffix = DefaultSqlDatabaseHostSuffix;
+            this.MobileServiceHostSuffix = DefaultMobileServiceHostSuffix;
         }
 
         public async Task TestDatabaseConnectionAsync(string sqlServerName, string username, SecureString password)
@@ -208,7 +212,39 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
                 ProcessApplicationResources(result, response.Element(XName.Get("InternalResources", WindowsAzureNs))
                     .Elements(XName.Get("InternalResource", WindowsAzureNs)));
                 ProcessApplicationResources(result, response.Element(XName.Get("ExternalResources", WindowsAzureNs))
-                    .Elements(XName.Get("ExternalResource", WindowsAzureNs))); 
+                    .Elements(XName.Get("ExternalResource", WindowsAzureNs)));
+                foreach (XElement faultCode in response.Descendants(XName.Get("FailureCode", WindowsAzureNs)))
+                {
+                    if (string.IsNullOrEmpty(faultCode.Value))
+                    {
+                        continue;
+                    }
+
+                    try
+                    {
+                        string faultXml = HttpUtility.HtmlDecode(faultCode.Value);
+                        XElement fault = XElement.Parse(faultXml);
+                        bool foundMessage = false;
+                        foreach (XElement descendent in fault.Descendants())
+                        {
+                            if (descendent.Name.LocalName == "Message")
+                            {
+                                foundMessage = true;
+                                result.FaultMessages.Add(descendent.Value);
+                                break;
+                            }
+                        }
+
+                        if (!foundMessage)
+                        {
+                            result.FaultMessages.Add(faultCode.Value);
+                        }
+                    }
+                    catch
+                    {
+                        result.FaultMessages.Add(faultCode.Value);
+                    }
+                }
                 
                 return result;
             }

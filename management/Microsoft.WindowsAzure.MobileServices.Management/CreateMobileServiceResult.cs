@@ -9,6 +9,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
 {
     public class CreateMobileServiceResult
     {
+        List<string> faultMessages;
+
         /// <summary>
         /// The overall state of the mobile service application. Anything other than "Healthy" indicates failure.
         /// </summary>
@@ -44,9 +46,20 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
         /// </summary>
         public XElement Details { get; set; }
 
+        /// <summary>
+        /// In case of a failure, FaultMessage will contain human readable error details.
+        /// </summary>
+        public List<string> FaultMessages 
+        { 
+            get 
+            { 
+                return this.faultMessages; 
+            } 
+        }
+
         public CreateMobileServiceResult() 
         {
-            // empty
+            this.faultMessages = new List<string>();
         }
 
         /// <summary>

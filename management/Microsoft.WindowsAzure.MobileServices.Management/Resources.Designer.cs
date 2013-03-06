@@ -103,6 +103,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Management {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The login name must meet the following requirements: 1. It must be a SQL Identifier. 2. It cannot be a system name, for example: admin, administrator, sa, root, dbmanager, loginmanager, etc. 3. It cannot be a built-in database user or role like dbo, guest, public, etc. 4. It cannot contain: spaces, tabs, or returns, unicode characters, nonalphabetic characters (&quot;&lt;&gt;|:*?\/#&amp;;,%=). 5. It cannot begin with digits (0 through 9), @, $, +..
+        /// </summary>
+        internal static string InvalidSqlUsername {
+            get {
+                return ResourceManager.GetString("InvalidSqlUsername", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ManagementCertificate must contain private key..
         /// </summary>
         internal static string ManagementCertificateWithoutPrivateKey {
