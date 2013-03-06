@@ -212,14 +212,6 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 		assertEquals("PersonTestObject", table.getTableName());
 	}
 	
-	private class ClassWithAnnotationId {
-		@SuppressWarnings("unused")
-		String field1;
-		
-		@com.google.gson.annotations.SerializedName("id")
-		int field2;
-	}
-	
 	public void testGetTableWithClassWithIdAnnotationShouldWork() {
 		MobileServiceClient client = null;
 		try {
@@ -228,8 +220,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 			fail("This should not happen");
 		}
 		
-		MobileServiceTable<ClassWithAnnotationId> table = client.getTable(ClassWithAnnotationId.class);
-		assertEquals("ClassWithAnnotationId", table.getTableName());
+		MobileServiceTable<IdPropertyWithGsonAnnotation> table = client.getTable(IdPropertyWithGsonAnnotation.class);
+		assertEquals("IdPropertyWithGsonAnnotation", table.getTableName());
 	}
 	
 	public void testGetTableWithClassWithoutIdShouldFail() {
@@ -247,6 +239,26 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 		} catch (IllegalArgumentException e) {
 			// do nothing, it's OK
 		}
+	}
+	
+	public void testGetTableWithClassWithMultipleIdPropertiesShouldFail() throws Throwable {
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			fail("This should not happen");
+		}
+
+		try {
+			// Get the MobileService table
+			client.getTable(tableName, IdPropertyMultipleIdsTestObject.class);
+			fail("This should fail");
+		} catch (IllegalArgumentException e) {
+			// It's ok
+		}
+		
 	}
 
 	public void testLoginShouldParseJsonUserCorreclty() throws Throwable {

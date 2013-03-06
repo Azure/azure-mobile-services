@@ -73,7 +73,7 @@ public class UpdateDeleteTests extends TestGroup {
 		elem2 = new RoundTripTableElement(rndGen);
 		elem2.id = 0;
 
-		this.addTest(createTypedUpdateTest("(Neg) Update typed item, id = 0", elem1, elem2, false, InvalidParameterException.class));
+		this.addTest(createTypedUpdateTest("(Neg) Update typed item, id = 0", elem1, elem2, false, IllegalArgumentException.class));
 
 		// untyped update
 		JsonParser parser = new JsonParser();
@@ -96,16 +96,17 @@ public class UpdateDeleteTests extends TestGroup {
 		toUpdate.add("complexType1", null);
 		toUpdate.add("int1", null);
 
-		this.addTest(createUntypedUpdateTest("Update typed item, setting values to null", parser.parse(toInsertJsonString).getAsJsonObject(), toUpdate, true,
+		
+		this.addTest(createUntypedUpdateTest("Update untyped item, setting values to null", parser.parse(toInsertJsonString).getAsJsonObject(), cloneJson(toUpdate), true,
 				null));
 
 		toUpdate.addProperty("id", 1000000000);
-		this.addTest(createUntypedUpdateTest("(Neg) Update typed item, non-existing item id", parser.parse(toInsertJsonString).getAsJsonObject(), toUpdate,
+		this.addTest(createUntypedUpdateTest("(Neg) Update untyped item, non-existing item id", parser.parse(toInsertJsonString).getAsJsonObject(), cloneJson(toUpdate),
 				false, MobileServiceException.class));
 
 		toUpdate.addProperty("id", 0);
-		this.addTest(createUntypedUpdateTest("(Neg) Update typed item, id = 0", parser.parse(toInsertJsonString).getAsJsonObject(), toUpdate, false,
-				MobileServiceException.class));
+		this.addTest(createUntypedUpdateTest("(Neg) Update untyped item, id = 0", parser.parse(toInsertJsonString).getAsJsonObject(), cloneJson(toUpdate), false,
+				IllegalArgumentException.class));
 
 		// delete tests
 		this.addTest(createDeleteTest("Delete typed item", true, false, true, null));
@@ -114,6 +115,10 @@ public class UpdateDeleteTests extends TestGroup {
 		this.addTest(createDeleteTest("(Neg) Delete untyped item with non-existing id", false, true, true, MobileServiceException.class));
 		this.addTest(createDeleteTest("(Neg) Delete untyped item without id field", false, false, false, InvalidParameterException.class));
 
+	}
+
+	private JsonObject cloneJson(JsonObject json) {
+		return new JsonParser().parse(json.toString()).getAsJsonObject();
 	}
 
 	private TestCase createTypedUpdateTest(String name, final RoundTripTableElement itemToInsert, final RoundTripTableElement itemToUpdate,

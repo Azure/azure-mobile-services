@@ -30,8 +30,6 @@ import java.util.Date;
 
 import android.content.Context;
 
-import java.lang.annotation.Annotation;
-
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonObject;
@@ -332,26 +330,22 @@ public class MobileServiceClient {
 	 * @param clazz
 	 */
 	private <E> void validateClassIdProperty(Class<E> clazz) {
-		boolean hasIdProperty = false;
+		int idPropertyCount = 0;
 		for (Field field : clazz.getDeclaredFields()) {
-			if (field.getName().equals("id")) {
-				hasIdProperty = true;
-				break;
+			SerializedName serializedName = field.getAnnotation(SerializedName.class);
+			if (serializedName != null) {
+				if (serializedName.value().equalsIgnoreCase("id")) {
+					idPropertyCount++;
+				}
 			} else {
-				for (Annotation annotation : field.getAnnotations()) {
-					if (annotation instanceof SerializedName) {
-						SerializedName serializedName = (SerializedName)annotation;
-						if (serializedName.value().equals("id")) {
-							hasIdProperty = true;
-							break;
-						}
-					}
+				if (field.getName().equalsIgnoreCase("id")) {
+					idPropertyCount++;
 				}
 			}
 		}
 		
-		if (!hasIdProperty) {
-			throw new IllegalArgumentException("The class representing the MobileServiceTable must have an id property defined");
+		if (idPropertyCount != 1) {
+			throw new IllegalArgumentException("The class representing the MobileServiceTable must have a single id property defined");
 		}
 	}
 
