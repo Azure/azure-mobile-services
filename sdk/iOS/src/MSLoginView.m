@@ -178,6 +178,12 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
     if (error.code == 102 && [error.domain isEqual:@"WebKitErrorDomain"]) {
         return;
     }
+    
+    // Ignore the NSURLErrorCancelled error which occurs if a user navigates
+    // before the current request completes
+    if ([error code] == NSURLErrorCancelled) {
+        return;
+    }
 
     [self callCompletion:nil orError:error];
 }
@@ -355,7 +361,7 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
 -(NSError *) errorForLoginViewCanceled
 {
     return [self errorWithDescriptionKey:@"The login operation was canceled."
-                            andErrorCode:MSLoginViewFailed
+                            andErrorCode:MSLoginViewCanceled
                              andUserInfo:nil];
 }
 
@@ -374,7 +380,7 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
     
     [userInfo setValue:description forKey:NSLocalizedDescriptionKey];
     
-    return [NSError errorWithDomain:MSErrorDomain
+    return [NSError errorWithDomain:MSLoginViewErrorDomain
                                code:errorCode
                            userInfo:userInfo];
 }

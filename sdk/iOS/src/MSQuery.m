@@ -16,33 +16,7 @@
 
 #import "MSQuery.h"
 #import "MSPredicateTranslator.h"
-
-
-#pragma mark * Query String Constants
-
-
-NSString *const topParameter = @"$top";
-NSString *const skipParameter = @"$skip";
-NSString *const selectParameter = @"$select";
-NSString *const orderByParameter = @"$orderby";
-NSString *const orderByAscendingFormat = @"%@ asc";
-NSString *const orderByDescendingFormat = @"%@ desc";
-NSString *const filterParameter = @"$filter";
-NSString *const inlineCountParameter = @"$inlinecount";
-NSString *const inlineCountAllPage = @"allpages";
-NSString *const inlineCountNone = @"none";
-
-
-#pragma mark * MSQuery Private Interface
-
-
-@interface MSQuery ()
-
-// Private instance properties
-@property (nonatomic, strong, readwrite)            NSPredicate *predicate;
-@property (nonatomic, strong, readwrite)            NSMutableArray *orderBy;
-
-@end
+#import "MSTableURLBuilder.h"
 
 
 #pragma mark * MSQuery Implementation
@@ -124,103 +98,22 @@ NSString *const inlineCountNone = @"none";
 {
     NSAssert(field != nil, @"'field' can not be nil.");
     
-    // If this is the first field being ordered, we'll need to create the array
-    if (self.orderBy == nil) {
-        self.orderBy = [NSMutableArray array];
+    NSMutableArray *currentOrderBy = [self.orderBy mutableCopy];
+    if (currentOrderBy == nil) {
+        currentOrderBy = [NSMutableArray array];
     }
     
-    NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:field ascending:isAscending];
+    NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:field
+                                                           ascending:isAscending];
 
-    [self.orderBy addObject:sort];
+    [currentOrderBy addObject:sort];
+    self.orderBy = currentOrderBy;
 }
 
 
 -(NSString *) queryStringOrError:(NSError **)error
 {
-    NSMutableString *queryString = nil;
-    NSString *filterValue = nil;
-
-    if (self.predicate) {
-        // Translate the predicate into the filter first since it might error
-        filterValue = [MSPredicateTranslator
-                       queryFilterFromPredicate:self.predicate
-                       orError:error];
-    }
-    
-    if (filterValue || !self.predicate) {
-        
-        // Create a dictionary to hold all of the query parameters
-        NSMutableDictionary *queryParameters = [NSMutableDictionary dictionary];
-        
-        // Add the $filter parameter
-        if (self.predicate) {
-            [queryParameters setValue:filterValue forKey:filterParameter];
-        }
-
-        // Add the $top parameter
-        if (self.fetchLimit > 0) {
-            NSString *topValue = [NSString stringWithFormat:@"%u",
-                                  self.fetchLimit];
-            [queryParameters setValue:topValue forKey:topParameter];
-        }
-        
-        // Add the $skip parameter
-        if (self.fetchOffset > 0) {
-            NSString *skipValue = [NSString stringWithFormat:@"%u",
-                                   self.fetchOffset];
-            [queryParameters setValue:skipValue forKey:skipParameter];
-        }
-        
-        // Add the $select parameter
-        if (self.selectFields) {
-            NSString *selectFieldsValue = [self.selectFields
-                                           componentsJoinedByString:@","];
-            [queryParameters setValue:selectFieldsValue forKey:selectParameter];
-        }
-        
-        // Add the $orderBy parameter
-        if (self.orderBy) {
-            NSMutableString *orderByString = [NSMutableString string];
-            for (NSSortDescriptor* sort in self.orderBy){
-                if (orderByString.length > 0) {
-                    [orderByString appendString:@","];
-                }
-                NSString *format = (sort.ascending) ?
-                    orderByAscendingFormat :
-                    orderByDescendingFormat;
-                [orderByString appendFormat:format, sort.key];
-            }
-            [queryParameters setValue:orderByString forKey:orderByParameter];
-        }
-
-        
-        // Add the $inlineCount parameter
-        NSString *includeTotalCountValue = self.includeTotalCount ?
-            inlineCountAllPage :
-            inlineCountNone;
-        [queryParameters setValue:includeTotalCountValue
-                           forKey:inlineCountParameter];
-        
-        // Add the user parameters
-        if (self.parameters) {
-            [queryParameters addEntriesFromDictionary:self.parameters];
-        }
-        
-        // Iterate through the parameters to build the query string as key=value
-        // pairs seperated by '&'. Don't bother to precent escape the string here
-        // as that will be done by when the full URI is generated
-        queryString = [NSMutableString string];
-        for (NSString* key in [queryParameters allKeys]){
-            if (queryString.length > 0) {
-                [queryString appendString:@"&"];
-            }
-            
-            [queryString appendFormat:@"%@=%@", key,
-             [queryParameters objectForKey:key]];
-        }
-    }
-    
-    return queryString;
+    return [MSTableURLBuilder queryStringFromQuery:self orError:error];
 }
 
 

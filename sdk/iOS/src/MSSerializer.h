@@ -32,8 +32,10 @@
 
 
 // Called for updates and inserts so that the item can be serialized into
-// an |NSData| instance.
+// an |NSData| instance.  Inserts are not allows to have items that already have
+// an id.
 -(NSData *) dataFromItem:(id)item
+               idAllowed:(BOOL)idAllowed
                  orError:(NSError **)error;
 
 // Called to obtain the id of an item.

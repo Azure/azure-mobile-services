@@ -72,7 +72,7 @@
     
     query = [[MSQuery alloc] initWithTable:table withPredicate:predicate];
     STAssertTrue([query.description
-                  isEqualToString:@"$filter=(name eq 'bob')&$inlinecount=none"],
+                  isEqualToString:@"$filter=(name%20eq%20'bob')&$inlinecount=none"],
                  @"OData query string was: %@",
                  query.description);
 }
@@ -131,11 +131,11 @@
     query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
     query.parameters = @{
         @"key1": @"someValue",
-        @"$top": @"14",
+        @"key2": @"14",
     };
     
     STAssertTrue([query.description isEqualToString:
-                 @"$top=14&key1=someValue&$inlinecount=none"],
+                 @"key2=14&key1=someValue&$inlinecount=none"],
                  @"Query string was: %@",
                  query.description);
 }
@@ -161,7 +161,7 @@
     [query orderByDescending:@"zipcode"];
     [query orderByAscending:@"birthdate"];
     STAssertTrue([query.description isEqualToString:
-                @"$orderby=name asc,zipcode desc,birthdate asc&$inlinecount=none"],
+                @"$orderby=name%20asc,zipcode%20desc,birthdate%20asc&$inlinecount=none"],
                  @"Query string was: %@",
                  query.description);
 }

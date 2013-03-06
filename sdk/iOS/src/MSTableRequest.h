@@ -57,6 +57,9 @@ typedef enum MSTableRequestTypeEnum {
 // The table for which this request was created.
 @property (nonatomic, strong, readonly)     MSTable *table;
 
+// The user-defined parameters to be included in the request query string.
+@property (nonatomic, strong, readonly)     NSDictionary *parameters;
+
 // The serializer used to serialize the data for the request and/or deserialize
 // the data in the respective response.
 @property (nonatomic, strong, readonly)     id<MSSerializer> serializer;
@@ -67,39 +70,44 @@ typedef enum MSTableRequestTypeEnum {
 
 // Creates a request to insert the item into the given table.
 +(MSTableItemRequest *) requestToInsertItem:(id)item
-                                withTable:(MSTable *)table
-                                withSerializer:(id<MSSerializer>)serializer
-                                completion:(MSItemBlock)completion;
+                                  withTable:(MSTable *)table
+                             withParameters:(NSDictionary *)parameters
+                             withSerializer:(id<MSSerializer>)serializer
+                                 completion:(MSItemBlock)completion;
 
 // Creates a request to update the item in the given table.
 +(MSTableItemRequest *) requestToUpdateItem:(id)item
-                                withTable:(MSTable *)table
-                                withSerializer:(id<MSSerializer>)serializer
-                                completion:(MSItemBlock)completion;
+                                  withTable:(MSTable *)table
+                             withParameters:(NSDictionary *)parameters
+                             withSerializer:(id<MSSerializer>)serializer
+                                 completion:(MSItemBlock)completion;
 
 // Creates a request to delete the item from the given table.
 +(MSTableDeleteRequest *) requestToDeleteItem:(id)item
-                                withTable:(MSTable *)table
-                                withSerializer:(id<MSSerializer>)serializer
-                                completion:(MSDeleteBlock)completion;
+                                    withTable:(MSTable *)table
+                               withParameters:(NSDictionary *)parameters
+                               withSerializer:(id<MSSerializer>)serializer
+                                   completion:(MSDeleteBlock)completion;
 
 // Creates a request to delete the item with the given id from the given table.
 +(MSTableDeleteRequest *) requestToDeleteItemWithId:(id)itemId
-                                withTable:(MSTable *)table
-                                withSerializer:(id<MSSerializer>)serializer
-                                completion:(MSDeleteBlock)completion;
+                                          withTable:(MSTable *)table
+                                     withParameters:(NSDictionary *)parameters
+                                     withSerializer:(id<MSSerializer>)serializer
+                                         completion:(MSDeleteBlock)completion;
 
 // Creates a request to read the item with the given ide from the given table.
 +(MSTableItemRequest *) requestToReadWithId:(id)itemId
-                                withTable:(MSTable *)table
-                                withSerializer:(id<MSSerializer>)serializer
-                                completion:(MSItemBlock)completion;
+                                  withTable:(MSTable *)table
+                             withParameters:(NSDictionary *)parameters
+                             withSerializer:(id<MSSerializer>)serializer
+                                 completion:(MSItemBlock)completion;
 
 // Creates a request to the read the given table with the given query.
-+(MSTableReadQueryRequest*) requestToReadItemsWithQuery:(NSString *)queryString
-                                withTable:(MSTable *)table
-                                withSerializer:(id<MSSerializer>)serializer
-                                completion:(MSReadQueryBlock)completion;
++(MSTableReadQueryRequest *) requestToReadItemsWithQuery:(NSString *)queryString
+                                               withTable:(MSTable *)table
+                                          withSerializer:(id<MSSerializer>)serializer
+                                              completion:(MSReadQueryBlock)completion;
 
 @end
 
