@@ -1,6 +1,5 @@
 $(function() {
-    var MobileServiceClient = Microsoft.WindowsAzure.MobileServices.MobileServiceClient,
-        client = new MobileServiceClient('ZUMOAPPURL', 'ZUMOAPPKEY'),
+    var client = new WindowsAzure.MobileServiceClient('ZUMOAPPURL', 'ZUMOAPPKEY'),
         todoItemTable = client.getTable('todoitem');
 
     // Read current data and rebuild UI.
