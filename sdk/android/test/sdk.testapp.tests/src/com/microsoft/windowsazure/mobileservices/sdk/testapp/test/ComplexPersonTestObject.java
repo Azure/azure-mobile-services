@@ -19,8 +19,9 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
+
 public class ComplexPersonTestObject {
-	private Integer id;
+	private int id;
 	private String firstName;
 	private String lastName;
 	private Address address;

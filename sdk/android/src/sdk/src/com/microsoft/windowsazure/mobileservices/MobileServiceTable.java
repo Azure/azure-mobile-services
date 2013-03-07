@@ -32,12 +32,13 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.annotations.SerializedName;
 
 /**
  * Represents a Mobile Service Table
  */
 public final class MobileServiceTable<E> extends
-		MobileServiceTableBase<TableQueryCallback<E>> {
+MobileServiceTableBase<TableQueryCallback<E>> {
 
 	private MobileServiceJsonTable mInternalTable;
 
@@ -172,15 +173,11 @@ public final class MobileServiceTable<E> extends
 	 *            The entity to insert
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
-	 * @throws InvalidParameterException
 	 */
-	public void insert(final E element, final TableOperationCallback<E> callback)
-			throws InvalidParameterException {
-		final JsonObject json = mClient.getGsonBuilder().create()
-				.toJsonTree(element).getAsJsonObject();
+	public void insert(final E element, final TableOperationCallback<E> callback) {
+		JsonObject json = null;
 		try {
-			validateIdProperty(json);
-
+			json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
 		} catch (InvalidParameterException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
@@ -202,12 +199,10 @@ public final class MobileServiceTable<E> extends
 	 *            Callback to invoke when the operation is completed
 	 */
 	public void update(final E element, final TableOperationCallback<E> callback) {
-		final JsonObject json = mClient.getGsonBuilder().create()
-				.toJsonTree(element).getAsJsonObject();
-
+		JsonObject json = null;
+		
 		try {
-			validateIdProperty(json);
-
+			json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
 		} catch (InvalidParameterException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
@@ -215,7 +210,7 @@ public final class MobileServiceTable<E> extends
 
 			return;
 		}
-
+		
 		mInternalTable.update(json, new ParseResultOperationCallback(callback,
 				element));
 	}
@@ -230,6 +225,7 @@ public final class MobileServiceTable<E> extends
 	private List<E> parseResults(JsonElement results) {
 		Gson gson = mClient.getGsonBuilder().create();
 		List<E> result = new ArrayList<E>();
+		String idPropertyName = getIdPropertyName(mClazz);
 
 		// Parse results
 		if (results.isJsonArray()) // Query result
@@ -237,11 +233,13 @@ public final class MobileServiceTable<E> extends
 			JsonArray elements = results.getAsJsonArray();
 
 			for (JsonElement element : elements) {
-				E typedElement = ((E) gson.fromJson(element, mClazz));
+				changeIdPropertyName(element.getAsJsonObject(), idPropertyName);
+				E typedElement = gson.fromJson(element, mClazz);
 				result.add(typedElement);
 			}
 		} else { // Lookup result
-			E typedElement = ((E) gson.fromJson(results, mClazz));
+			changeIdPropertyName(results.getAsJsonObject(), idPropertyName);
+			E typedElement = gson.fromJson(results, mClazz);
 			result.add(typedElement);
 		}
 		return result;
@@ -268,38 +266,44 @@ public final class MobileServiceTable<E> extends
 	}
 
 	/**
-	 * Validates if the JSon element has only one property named as Id,
-	 * otherwise throws exception
-	 * 
-	 * @param json
-	 *            the element to evaluate
-	 * @throws InvalidParameterException
+	 * Get's the class' id property name
+	 * @param clazz
+	 * @return Id Property name
 	 */
-	private void validateIdProperty(final JsonObject json)
-			throws InvalidParameterException {
-		// Check if id property exists
-		String[] idPropertyNames = new String[] { "id", "Id", "iD", "ID" };
+	@SuppressWarnings("rawtypes")
+	private String getIdPropertyName(Class clazz)
+	{
+		// Search for annotation called id, regardless case
+		for (Field field : clazz.getDeclaredFields()) {
 
-		int ocurrence = 0;
-		for (int i = 0; i < 4; i++) {
-			String idProperty = idPropertyNames[i];
-			if (json.has(idProperty)) {
-				ocurrence++;
+			SerializedName serializedName = field.getAnnotation(SerializedName.class);
+			if(serializedName != null && serializedName.value().equalsIgnoreCase("id")) {
+				return serializedName.value();
+			} else if(field.getName().equalsIgnoreCase("id")) {
+				return field.getName();
 			}
 		}
 
-		if (ocurrence > 1) {
-			throw new InvalidParameterException(
-					"There are multiple properties named as 'id'. Only one property can be named 'id' in an object, regardless of case.");
-		}
-
-		if (json.has(idPropertyNames[1]) || json.has(idPropertyNames[2])
-				|| json.has(idPropertyNames[3])) {
-			throw new InvalidParameterException(
-					"You must use lowercase for id property (i.e. 'id')");
-		} else if (!json.has(idPropertyNames[0])) {
-			throw new InvalidParameterException(
-					"The object must have an id property.");
-		}
+		// Otherwise, return empty
+		return "";
 	}
+
+	/**
+	 * Changes returned JSon object's id property name to match with type's id property name.
+	 * @param element
+	 * @param propertyName
+	 */
+	private void changeIdPropertyName(JsonObject element, String propertyName)
+	{		
+		// If the property name is id or if there's no id defined, then return without performing changes
+		if (propertyName.equals("id") || propertyName.length() == 0) return;
+		
+		// Get the current id value and remove the JSon property
+		String value = element.get("id").getAsString();		
+		element.remove("id");
+		
+		// Create a new id property using the given property name
+		element.addProperty(propertyName, value);
+	}
+
 }

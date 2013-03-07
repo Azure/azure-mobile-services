@@ -245,7 +245,7 @@ public class SerializationTests extends InstrumentationTestCase {
 
 		// Asserts
 		assertEquals(
-				"{\"address\":{\"zipcode\":1313,\"country\":\"US\",\"streetaddress\":\"1345 Washington St\"},\"firstName\":\"John\",\"lastName\":\"Doe\"}",
+				"{\"address\":{\"zipcode\":1313,\"country\":\"US\",\"streetaddress\":\"1345 Washington St\"},\"firstName\":\"John\",\"lastName\":\"Doe\",\"id\":0}",
 				serializedObject);
 	}
 
@@ -415,7 +415,7 @@ public class SerializationTests extends InstrumentationTestCase {
 		assertEquals(expctedDate.getSeconds(), d.getSeconds());
 	}
 
-	public void testSerializationWithComplexObjectsShouldReturnExpectedJsonUsingUsingMobileServiceTable() throws Throwable {
+	public void testSerializationWithComplexObjectsShouldReturnExpectedJsonUsingMobileServiceTable() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.

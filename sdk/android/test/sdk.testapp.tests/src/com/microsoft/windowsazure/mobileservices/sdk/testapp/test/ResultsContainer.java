@@ -55,6 +55,8 @@ public class ResultsContainer {
 	private DateTestObject dateTestObject;
 	
 	private IdPropertyWithGsonAnnotation idPropertyWithGsonAnnotation;
+	
+	private IdPropertyWithDifferentIdPropertyCasing idPropertyWithDifferentIdPropertyCasing;
 
 	public PersonTestObject getPerson() {
 		return person;
@@ -159,6 +161,15 @@ public class ResultsContainer {
 	public void setIdPropertyWithGsonAnnotation(
 			IdPropertyWithGsonAnnotation idPropertyWithGsonAnnotation) {
 		this.idPropertyWithGsonAnnotation = idPropertyWithGsonAnnotation;
+	}
+
+	public IdPropertyWithDifferentIdPropertyCasing getIdPropertyWithDifferentIdPropertyCasing() {
+		return idPropertyWithDifferentIdPropertyCasing;
+	}
+
+	public void setIdPropertyWithDifferentIdPropertyCasing(
+			IdPropertyWithDifferentIdPropertyCasing idPropertyWithDifferentIdPropertyCasing) {
+		this.idPropertyWithDifferentIdPropertyCasing = idPropertyWithDifferentIdPropertyCasing;
 	}
 
 }

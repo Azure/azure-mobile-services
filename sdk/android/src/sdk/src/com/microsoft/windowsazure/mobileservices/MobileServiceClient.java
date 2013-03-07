@@ -23,14 +23,13 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Date;
 
 import android.content.Context;
-
-import java.lang.annotation.Annotation;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
@@ -309,7 +308,7 @@ public class MobileServiceClient {
 	 * @return MobileServiceTable with the given name
 	 */
 	public <E> MobileServiceTable<E> getTable(String name, Class<E> clazz) {
-		validateClassIdProperty(clazz);
+		validateClass(clazz);
 		return new MobileServiceTable<E>(name, this, clazz);
 	}
 
@@ -322,7 +321,7 @@ public class MobileServiceClient {
 	 * @return MobileServiceTable with the given name
 	 */
 	public <E> MobileServiceTable<E> getTable(Class<E> clazz) {
-		validateClassIdProperty(clazz);
+		validateClass(clazz);
 		
 		return new MobileServiceTable<E>(clazz.getSimpleName(), this, clazz);
 	}
@@ -331,27 +330,28 @@ public class MobileServiceClient {
 	 * Validates the class has an id property defined
 	 * @param clazz
 	 */
-	private <E> void validateClassIdProperty(Class<E> clazz) {
-		boolean hasIdProperty = false;
+	private <E> void validateClass(Class<E> clazz) {
+		if(clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers()))
+		{
+			throw new IllegalArgumentException("The class type used for creating a MobileServiceTable must be a concrete class");
+		}
+		
+		int idPropertyCount = 0;
 		for (Field field : clazz.getDeclaredFields()) {
-			if (field.getName().equals("id")) {
-				hasIdProperty = true;
-				break;
+			SerializedName serializedName = field.getAnnotation(SerializedName.class);
+			if (serializedName != null) {
+				if (serializedName.value().equalsIgnoreCase("id")) {
+					idPropertyCount++;
+				}
 			} else {
-				for (Annotation annotation : field.getAnnotations()) {
-					if (annotation instanceof SerializedName) {
-						SerializedName serializedName = (SerializedName)annotation;
-						if (serializedName.value().equals("id")) {
-							hasIdProperty = true;
-							break;
-						}
-					}
+				if (field.getName().equalsIgnoreCase("id")) {
+					idPropertyCount++;
 				}
 			}
 		}
 		
-		if (!hasIdProperty) {
-			throw new IllegalArgumentException("The class representing the MobileServiceTable must have an id property defined");
+		if (idPropertyCount != 1) {
+			throw new IllegalArgumentException("The class representing the MobileServiceTable must have a single id property defined");
 		}
 	}
 
