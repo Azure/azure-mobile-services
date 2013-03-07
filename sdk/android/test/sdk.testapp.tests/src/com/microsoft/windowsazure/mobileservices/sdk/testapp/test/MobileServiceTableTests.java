@@ -181,7 +181,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		
 	}
 
-	public void testInsertShouldThrowExceptionIfObjectHasUpperCasedIdProperty() throws Throwable {
+	public void testInsertShouldThrowExceptionIfObjectHasIdPropertyDifferentThanZero() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store the object after the insertion, we need this to do
@@ -229,151 +229,6 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		assertEquals("The entity to insert should not have ID property defined", container.getErrorMessage());
 		assertNull(container.getPersonWithoutId());
 	}
-
-	public void testInsertShouldThrowExceptionIfObjectHasUpperCasedIWithinIdProperty() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store the object after the insertion, we need this to do
-		// the asserts outside the onSuccess method
-		final ResultsContainer container = new ResultsContainer();
-
-		// Object to insert
-		final JsonObject testObject = new JsonObject();
-
-		testObject.addProperty("name", "john");
-		testObject.addProperty("Id", 38);
-		
-		runTestOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
-
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
-
-				// Create get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
-
-				// Call the insert method
-				msTable.insert(testObject, new TableJsonOperationCallback() {
-
-					@Override
-					public void onCompleted(JsonObject entity, Exception exception, ServiceFilterResponse response) {
-						container.setErrorMessage(exception.getMessage());
-						latch.countDown();
-					}
-				});
-			}
-		});
-
-		latch.await();
-
-		// Asserts
-		assertEquals("The entity to insert should not have Id property defined", container.getErrorMessage());
-		assertNull(container.getPersonWithoutId());
-	}
-
-	public void testInsertShouldThrowExceptionIfObjectHasUpperCasedDWithinIdProperty() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store the object after the insertion, we need this to do
-		// the asserts outside the onSuccess method
-		final ResultsContainer container = new ResultsContainer();
-
-		// Object to insert
-		final JsonObject testObject = new JsonObject();
-
-		testObject.addProperty("name", "john");
-		testObject.addProperty("iD", 38);
-		
-		runTestOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
-
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
-
-				// Create get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
-
-				// Call the insert method
-				msTable.insert(testObject, new TableJsonOperationCallback() {
-
-					@Override
-					public void onCompleted(JsonObject entity, Exception exception, ServiceFilterResponse response) {
-						container.setErrorMessage(exception.getMessage());
-						latch.countDown();
-					}
-				});
-			}
-		});
-
-		latch.await();
-
-		// Asserts
-		assertEquals("The entity to insert should not have iD property defined", container.getErrorMessage());
-		assertNull(container.getPersonWithoutId());
-	}
-
-	public void testInsertShouldThrowExceptionIfObjectHasMultipleIdProperties() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store the object after the insertion, we need this to do
-		// the asserts outside the onSuccess method
-		final ResultsContainer container = new ResultsContainer();
-
-		// Object to insert
-		final IdPropertyMultipleIdsTestObject testObject = new IdPropertyMultipleIdsTestObject("John");
-
-		runTestOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
-
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
-
-				// Create get the MobileService table
-				MobileServiceTable<IdPropertyMultipleIdsTestObject> msTable = client.getTable(tableName, IdPropertyMultipleIdsTestObject.class);
-
-				// Call the insert method
-				msTable.insert(testObject, new TableOperationCallback<IdPropertyMultipleIdsTestObject>() {
-
-					@Override
-					public void onCompleted(IdPropertyMultipleIdsTestObject entity, Exception exception, ServiceFilterResponse response) {
-						container.setErrorMessage(exception.getMessage());
-						latch.countDown();
-					}
-				});
-			}
-		});
-
-		latch.await();
-
-		// Asserts
-		assertEquals("There are multiple properties named as 'id'. Only one property can be named 'id' in an object, regardless of case.", container.getErrorMessage());
-		assertNull(container.getPersonWithoutId());
-	}
-
 
 	public void testInsertShouldReturnEntityWithId() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
@@ -636,7 +491,70 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		Assert.assertEquals(testObject.getName(), o.getName());
 	}
 
+	public void testInsertShouldReturnEntityWithIdWhenUsingDifferentCasingForIdProperty() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
 
+		// Container to store the object after the insertion, we need this to do
+		// the asserts outside the onSuccess method
+		final ResultsContainer container = new ResultsContainer();
+
+		// Object to insert
+		final IdPropertyWithDifferentIdPropertyCasing testObject = new IdPropertyWithDifferentIdPropertyCasing("John");
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				String tableName = "MyTableName";
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(new ServiceFilter() {
+
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+
+						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+						response.setContent("{\"id\":38, \"name\":\"John\"}");
+						// call onResponse with the mocked response
+						responseCallback.onResponse(response, null);
+					}
+				});
+
+				// Create get the MobileService table
+				MobileServiceTable<IdPropertyWithDifferentIdPropertyCasing> msTable = client.getTable(tableName, IdPropertyWithDifferentIdPropertyCasing.class);
+
+				// Call the insert method
+				msTable.insert(testObject, new TableOperationCallback<IdPropertyWithDifferentIdPropertyCasing>() {
+
+					@Override
+					public void onCompleted(IdPropertyWithDifferentIdPropertyCasing entity, Exception exception, ServiceFilterResponse response) {
+						container.setIdPropertyWithDifferentIdPropertyCasing(entity);
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		IdPropertyWithDifferentIdPropertyCasing o = container.getIdPropertyWithDifferentIdPropertyCasing();
+		Assert.assertNotNull("Entity expected", o);
+		Assert.assertEquals(38, o.getId());
+		Assert.assertEquals(testObject.getName(), o.getName());
+	}
+
+	
 	public void testInsertShouldMutateOriginalEntity() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -1183,6 +1101,71 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		Assert.assertEquals(50, p.getAge());
 	}
 
+	public void testUpdateShouldReturnJSONWithDifferentNameWhenUsingIdWithDifferentCasing() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store the object after the update, we need this to do
+		// the asserts outside the onSuccess method
+		final ResultsContainer container = new ResultsContainer();
+
+		// Object to update
+		final IdPropertyWithDifferentIdPropertyCasing objectToUpdate = new IdPropertyWithDifferentIdPropertyCasing("John");
+		objectToUpdate.setId(10);
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(new ServiceFilter() {
+
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+
+						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+						response.setContent("{\"id\":10,\"name\":\"Mike\"}");
+						// call onResponse with the mocked response
+						responseCallback.onResponse(response, null);
+					}
+				});
+
+				// Get the MobileService table
+				MobileServiceTable<IdPropertyWithDifferentIdPropertyCasing> msTable = client.getTable(IdPropertyWithDifferentIdPropertyCasing.class);
+
+				// Call the delete method
+				msTable.update(objectToUpdate, new TableOperationCallback<IdPropertyWithDifferentIdPropertyCasing>() {
+					
+					@Override
+					public void onCompleted(IdPropertyWithDifferentIdPropertyCasing entity,
+							Exception exception, ServiceFilterResponse response) {
+						container.setIdPropertyWithDifferentIdPropertyCasing(entity);
+						latch.countDown();						
+					}
+				});
+
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		IdPropertyWithDifferentIdPropertyCasing o = container.getIdPropertyWithDifferentIdPropertyCasing();
+		Assert.assertNotNull("Object expected", o);
+		Assert.assertEquals(objectToUpdate.getId(), o.getId());
+		Assert.assertEquals("Mike", o.getName());
+	}
+
 	public void testUpdateShouldThrowExceptionIfEntityHasNoValidId() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -1231,53 +1214,6 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		PersonTestObject p = container.getPerson();
 		Assert.assertNull("Null person expected", p);
 		Assert.assertEquals("You must specify an id property with a valid value for updating an object.", container.getErrorMessage());
-	}
-
-	public void testUpdateShouldThrowExceptionIfEntityHasMultipleIds() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store the object after the update, we need this to do
-		// the asserts outside the onSuccess method
-		final ResultsContainer container = new ResultsContainer();
-
-		// Object to update
-		final IdPropertyMultipleIdsTestObject testObject = new IdPropertyMultipleIdsTestObject("John");
-		testObject.setId(10);
-
-		runTestOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
-
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
-
-				// Get the MobileService table
-				MobileServiceTable<IdPropertyMultipleIdsTestObject> msTable = client.getTable(tableName, IdPropertyMultipleIdsTestObject.class);
-
-				// Call the update method
-				msTable.update(testObject, new TableOperationCallback<IdPropertyMultipleIdsTestObject>() {
-
-					@Override
-					public void onCompleted(IdPropertyMultipleIdsTestObject entity, Exception exception, ServiceFilterResponse response) {
-						container.setErrorMessage(exception.getMessage());
-						latch.countDown();
-					}
-				});
-
-			}
-		});
-
-		latch.await();
-
-		// Asserts
-		Assert.assertEquals("There are multiple properties named as 'id'. Only one property can be named 'id' in an object, regardless of case.", container.getErrorMessage());
 	}
 
 	public void testDeleteUsingEntityShouldReturnTheExpectedRequestUrl() throws Throwable {
