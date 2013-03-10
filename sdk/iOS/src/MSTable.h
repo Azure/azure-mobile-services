@@ -66,7 +66,7 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
 
 
 // Initializes an |MSTable| instance with the given name and client.
--(id) initWithName:(NSString *)tableName client:(MSClient *)client;
+-(id)initWithName:(NSString *)tableName client:(MSClient *)client;
 
 
 #pragma mark * Public Insert, Update and Delete Methods
@@ -74,19 +74,19 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
 
 // Sends a request to the Windows Azure Mobile Service to insert the given
 // item into the table. The item does not need to have an id.
--(void) insert:(NSDictionary *)item completion:(MSItemBlock)completion;
+-(void)insert:(NSDictionary *)item completion:(MSItemBlock)completion;
 
 // Sends a request to the Windows Azure Mobile Service to update the given
 // item in the table. The item must have an id.
--(void) update:(NSDictionary *)item completion:(MSItemBlock)completion;
+-(void)update:(NSDictionary *)item completion:(MSItemBlock)completion;
 
 // Sends a request to the Windows Azure Mobile Service to delete the given
 // item from the table. The item must have an id.
--(void) delete:(NSDictionary *)item completion:(MSDeleteBlock)completion;
+-(void)delete:(NSDictionary *)item completion:(MSDeleteBlock)completion;
 
 // Sends a request to the Windows Azure Mobile Service to delete the item
 // with the given id in from table.
--(void) deleteWithId:(NSNumber *)itemId completion:(MSDeleteBlock)completion;
+-(void)deleteWithId:(NSNumber *)itemId completion:(MSDeleteBlock)completion;
 
 
 #pragma mark * Public Read Methods
@@ -94,21 +94,21 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
 
 // Sends a request to the Windows Azure Mobile Service to return the item
 // with the given id from the table.
--(void) readWithId:(NSNumber *)itemId completion:(MSItemBlock)completion;;
+-(void)readWithId:(NSNumber *)itemId completion:(MSItemBlock)completion;;
 
 // Sends a request to the Windows Azure Mobile Service to return all items
 // fromm the table that meet the conditions of the given query.
--(void) readWithQueryString:(NSString *)queryString
+-(void)readWithQueryString:(NSString *)queryString
                  completion:(MSReadQueryBlock)completion;
 
 // Sends a request to the Windows Azure Mobile Service to return all items
 // from the table. The Windows Azure Mobile Service will apply a default
 // limit to the number of items returned.
--(void) readWithCompletion:(MSReadQueryBlock)completion;
+-(void)readWithCompletion:(MSReadQueryBlock)completion;
 
 // Sends a request to the Windows Azure Mobile Service to return all items
 // from the table that meet the conditions of the given predicate.
--(void) readWithPredicate:(NSPredicate *) predicate
+-(void)readWithPredicate:(NSPredicate *) predicate
             completion:(MSReadQueryBlock)completion;
 
 
@@ -119,12 +119,12 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
 // configured and then executed to retrieve items from the table. An |MSQuery|
 // instance provides more flexibilty when querying a table than the table
 // |read*| methods.
--(MSQuery *) query;
+-(MSQuery *)query;
 
 // Returns an |MSQuery| instance associated with the table that uses
 // the given predicate. An |MSQuery| instance provides more flexibilty when
 // querying a table than the table |read*| methods.
--(MSQuery *) queryWithPredicate:(NSPredicate *)predicate;
+-(MSQuery *)queryWithPredicate:(NSPredicate *)predicate;
 
 
 @end
