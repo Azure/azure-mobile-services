@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 //
@@ -14,15 +14,10 @@
 // limitations under the License.
 //
 
-#ifndef WindowsAzureMobileServices_WindowsAzureMobileServices_h
-#define WindowsAzureMobileServices_WindowsAzureMobileServices_h
+#import <UIKit/UIKit.h>
 
-#import "MSClient.h"
-#import "MSTable.h"
-#import "MSQuery.h"
-#import "MSUser.h"
-#import "MSFilter.h"
-#import "MSError.h"
-#import "MSLoginController.h"
+@interface QSAppDelegate : UIResponder <UIApplicationDelegate>
 
-#endif
+@property (strong, nonatomic) UIWindow *window;
+
+@end

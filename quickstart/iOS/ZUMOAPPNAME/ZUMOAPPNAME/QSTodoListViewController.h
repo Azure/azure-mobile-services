@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 //
@@ -14,15 +14,13 @@
 // limitations under the License.
 //
 
-#ifndef WindowsAzureMobileServices_WindowsAzureMobileServices_h
-#define WindowsAzureMobileServices_WindowsAzureMobileServices_h
+#import <UIKit/UIKit.h>
 
-#import "MSClient.h"
-#import "MSTable.h"
-#import "MSQuery.h"
-#import "MSUser.h"
-#import "MSFilter.h"
-#import "MSError.h"
-#import "MSLoginController.h"
+@interface QSTodoListViewController : UITableViewController
 
-#endif
+@property (weak, nonatomic) IBOutlet UITextField                *itemText;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView    *activityIndicator;
+
+- (IBAction)onAdd:(id)sender;
+
+@end
