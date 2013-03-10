@@ -203,7 +203,13 @@
     {
         // the refresh control is available, let's add it
         self.refreshControl = [[UIRefreshControl alloc] init];
+        [self.refreshControl addTarget:self action:@selector(onRefresh:) forControlEvents:UIControlEventValueChanged];
     }
+}
+
+- (void)onRefresh:(id) sender
+{
+    [self refresh];
 }
 
 

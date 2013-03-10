@@ -21,6 +21,10 @@
 		03D1004A16EC58490005A1A9 /* QSTodoService.m in Sources */ = {isa = PBXBuildFile; fileRef = 03D1004916EC58490005A1A9 /* QSTodoService.m */; };
 		03D1004D16EC5A680005A1A9 /* MainStoryboard_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 03D1004B16EC5A680005A1A9 /* MainStoryboard_iPhone.storyboard */; };
 		03D1004E16EC5A680005A1A9 /* MainStoryboard_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 03D1004C16EC5A680005A1A9 /* MainStoryboard_iPad.storyboard */; };
+		03D1005816EC5F8E0005A1A9 /* connected57.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1005716EC5F8E0005A1A9 /* connected57.png */; };
+		03D1005A16EC5F920005A1A9 /* connected114.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1005916EC5F920005A1A9 /* connected114.png */; };
+		03D1005C16EC5F960005A1A9 /* connected72.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1005B16EC5F960005A1A9 /* connected72.png */; };
+		03D1005E16EC5F990005A1A9 /* connected144.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1005D16EC5F990005A1A9 /* connected144.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +48,10 @@
 		03D1004916EC58490005A1A9 /* QSTodoService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QSTodoService.m; sourceTree = "<group>"; };
 		03D1004B16EC5A680005A1A9 /* MainStoryboard_iPhone.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard_iPhone.storyboard; sourceTree = "<group>"; };
 		03D1004C16EC5A680005A1A9 /* MainStoryboard_iPad.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard_iPad.storyboard; sourceTree = "<group>"; };
+		03D1005716EC5F8E0005A1A9 /* connected57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = connected57.png; path = ../connected57.png; sourceTree = "<group>"; };
+		03D1005916EC5F920005A1A9 /* connected114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = connected114.png; path = ../connected114.png; sourceTree = "<group>"; };
+		03D1005B16EC5F960005A1A9 /* connected72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = connected72.png; path = ../connected72.png; sourceTree = "<group>"; };
+		03D1005D16EC5F990005A1A9 /* connected144.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = connected144.png; path = ../connected144.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,6 +116,10 @@
 		03D1002416EC579A0005A1A9 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				03D1005D16EC5F990005A1A9 /* connected144.png */,
+				03D1005B16EC5F960005A1A9 /* connected72.png */,
+				03D1005916EC5F920005A1A9 /* connected114.png */,
+				03D1005716EC5F8E0005A1A9 /* connected57.png */,
 				03D1002516EC579A0005A1A9 /* ZUMOAPPNAME-Info.plist */,
 				03D1002616EC579A0005A1A9 /* InfoPlist.strings */,
 				03D1002916EC579A0005A1A9 /* main.m */,
@@ -177,6 +189,10 @@
 				03D1003416EC579A0005A1A9 /* Default-568h@2x.png in Resources */,
 				03D1004D16EC5A680005A1A9 /* MainStoryboard_iPhone.storyboard in Resources */,
 				03D1004E16EC5A680005A1A9 /* MainStoryboard_iPad.storyboard in Resources */,
+				03D1005816EC5F8E0005A1A9 /* connected57.png in Resources */,
+				03D1005A16EC5F920005A1A9 /* connected114.png in Resources */,
+				03D1005C16EC5F960005A1A9 /* connected72.png in Resources */,
+				03D1005E16EC5F990005A1A9 /* connected144.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

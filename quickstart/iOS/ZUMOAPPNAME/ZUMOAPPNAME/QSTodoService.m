@@ -39,8 +39,14 @@
 
 + (QSTodoService *)defaultService
 {
-    // TODO implement singleton
-    return [[QSTodoService alloc] init];
+    // Create a singleton instance of QSTodoService
+    static QSTodoService* service;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        service = [[QSTodoService alloc] init];
+    });
+    
+    return service;
 }
 
 -(QSTodoService *)init
