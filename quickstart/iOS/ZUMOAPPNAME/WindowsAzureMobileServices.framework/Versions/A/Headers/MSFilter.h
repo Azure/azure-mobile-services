@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 //
@@ -40,6 +40,6 @@ typedef void (^MSFilterNextBlock)(NSURLRequest *request,
 @protocol MSFilter <NSObject>
 
 -(void) handleRequest:(NSURLRequest *)request
-               onNext:(MSFilterNextBlock)onNext
-           onResponse:(MSFilterResponseBlock)onResponse;
+               next:(MSFilterNextBlock)next
+           response:(MSFilterResponseBlock)response;
 @end

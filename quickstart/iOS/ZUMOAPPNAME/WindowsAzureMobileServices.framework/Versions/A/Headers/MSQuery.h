@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 //
@@ -40,18 +40,12 @@
 #pragma mark * Public ReadWrite Properties
 
 
-// The predicate used as the filter clause of the query.
-@property (nonatomic) NSPredicate *predicate;
-
 // The maximum number of items to return from the query.
 @property (nonatomic) NSUInteger fetchLimit;
 
 // The offset from the initial item to use when returning items from a query.
 // Can be used with |fetchLimit| to implement paging.
 @property (nonatomic) NSUInteger fetchOffset;
-
-// The array of NSSortDescriptors used to order the query results
-@property (nonatomic, copy) NSArray *orderBy;
 
 // Indicates if the Windows Azure Mobile Service should also include the total
 // count of items on the server (not just the count of items returned) with
@@ -72,11 +66,11 @@
 
 
 // Initializes a |MSQuery| instance with the given table.
--(id) initWithTable:(MSTable *)table;
+-(id)initWithTable:(MSTable *)table;
 
 // Returns a new |MSQuery| instance with the given table and the given
 // predicate is used as the filter clause of the query.
--(id) initWithTable:(MSTable *)table withPredicate:(NSPredicate *)predicate;
+-(id)initWithTable:(MSTable *)table predicate:(NSPredicate *)predicate;
 
 
 #pragma mark * Public OrderBy Methods
@@ -86,13 +80,13 @@
 // based on the given field. |orderByAscending:| and |orderByDescending:| can
 // each be called multiple times to further specify how the query results
 // should be ordered.
--(void) orderByAscending:(NSString *)field;
+-(void)orderByAscending:(NSString *)field;
 
 // Indicates that the query results should be returned in descending order
 // based on the given field. |orderByAscending:| and |orderByDescending:| can
 // each be called multiple times to further specify how the query results
 // should be ordered.
--(void) orderByDescending:(NSString *)field;
+-(void)orderByDescending:(NSString *)field;
 
 
 #pragma mark * Public Read Methods
@@ -107,6 +101,6 @@
 
 // Generates a query string for current state of the |MSQuery| instance or an
 // error if the query string could not be generated.
--(NSString *) queryStringOrError:(NSError **)error;
+-(NSString *)queryStringOrError:(NSError **)error;
 
 @end

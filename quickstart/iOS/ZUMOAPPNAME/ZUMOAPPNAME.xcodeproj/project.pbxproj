@@ -16,7 +16,6 @@
 		03D1003016EC579A0005A1A9 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1002F16EC579A0005A1A9 /* Default.png */; };
 		03D1003216EC579A0005A1A9 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1003116EC579A0005A1A9 /* Default@2x.png */; };
 		03D1003416EC579A0005A1A9 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1003316EC579A0005A1A9 /* Default-568h@2x.png */; };
-		03D1004416EC57BF0005A1A9 /* WindowsAzureMobileServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03D1004316EC57BF0005A1A9 /* WindowsAzureMobileServices.framework */; };
 		03D1004716EC58300005A1A9 /* QSTodoListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03D1004616EC58300005A1A9 /* QSTodoListViewController.m */; };
 		03D1004A16EC58490005A1A9 /* QSTodoService.m in Sources */ = {isa = PBXBuildFile; fileRef = 03D1004916EC58490005A1A9 /* QSTodoService.m */; };
 		03D1004D16EC5A680005A1A9 /* MainStoryboard_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 03D1004B16EC5A680005A1A9 /* MainStoryboard_iPhone.storyboard */; };
@@ -25,6 +24,7 @@
 		03D1005A16EC5F920005A1A9 /* connected114.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1005916EC5F920005A1A9 /* connected114.png */; };
 		03D1005C16EC5F960005A1A9 /* connected72.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1005B16EC5F960005A1A9 /* connected72.png */; };
 		03D1005E16EC5F990005A1A9 /* connected144.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1005D16EC5F990005A1A9 /* connected144.png */; };
+		03D1006016EC63620005A1A9 /* WindowsAzureMobileServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03D1005F16EC63620005A1A9 /* WindowsAzureMobileServices.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,7 +41,6 @@
 		03D1002F16EC579A0005A1A9 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		03D1003116EC579A0005A1A9 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		03D1003316EC579A0005A1A9 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
-		03D1004316EC57BF0005A1A9 /* WindowsAzureMobileServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = WindowsAzureMobileServices.framework; sourceTree = "<group>"; };
 		03D1004516EC58300005A1A9 /* QSTodoListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QSTodoListViewController.h; sourceTree = "<group>"; };
 		03D1004616EC58300005A1A9 /* QSTodoListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QSTodoListViewController.m; sourceTree = "<group>"; };
 		03D1004816EC58490005A1A9 /* QSTodoService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QSTodoService.h; sourceTree = "<group>"; };
@@ -52,6 +51,7 @@
 		03D1005916EC5F920005A1A9 /* connected114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = connected114.png; path = ../connected114.png; sourceTree = "<group>"; };
 		03D1005B16EC5F960005A1A9 /* connected72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = connected72.png; path = ../connected72.png; sourceTree = "<group>"; };
 		03D1005D16EC5F990005A1A9 /* connected144.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = connected144.png; path = ../connected144.png; sourceTree = "<group>"; };
+		03D1005F16EC63620005A1A9 /* WindowsAzureMobileServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = WindowsAzureMobileServices.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,7 +62,7 @@
 				03D1001E16EC579A0005A1A9 /* UIKit.framework in Frameworks */,
 				03D1002016EC579A0005A1A9 /* Foundation.framework in Frameworks */,
 				03D1002216EC579A0005A1A9 /* CoreGraphics.framework in Frameworks */,
-				03D1004416EC57BF0005A1A9 /* WindowsAzureMobileServices.framework in Frameworks */,
+				03D1006016EC63620005A1A9 /* WindowsAzureMobileServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -89,7 +89,7 @@
 		03D1001C16EC579A0005A1A9 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				03D1004316EC57BF0005A1A9 /* WindowsAzureMobileServices.framework */,
+				03D1005F16EC63620005A1A9 /* WindowsAzureMobileServices.framework */,
 				03D1001D16EC579A0005A1A9 /* UIKit.framework */,
 				03D1001F16EC579A0005A1A9 /* Foundation.framework */,
 				03D1002116EC579A0005A1A9 /* CoreGraphics.framework */,

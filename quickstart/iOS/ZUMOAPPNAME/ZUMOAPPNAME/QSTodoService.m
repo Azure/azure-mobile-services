@@ -57,13 +57,13 @@
     {
         // Initialize the Mobile Service client with your URL and key
         MSClient *newClient = [MSClient clientWithApplicationURLString:@"https://scottkulas.azure-mobile.net/"
-                                                    withApplicationKey:@"zsuSfdmVHealwowQmajlLrQYRJZpSB42"];
+                                                    applicationKey:@"zsuSfdmVHealwowQmajlLrQYRJZpSB42"];
         
         // Add a Mobile Service filter to enable the busy indicator
-        self.client = [newClient clientwithFilter:self];
+        self.client = [newClient clientWithFilter:self];
         
         // Create an MSTable instance to allow us to work with the TodoItem table
-        self.table = [_client getTable:@"TodoItem"];
+        self.table = [_client tableWithName:@"TodoItem"];
         
         self.items = [[NSMutableArray alloc] init];
         self.busyCount = 0;
@@ -78,7 +78,7 @@
     NSPredicate * predicate = [NSPredicate predicateWithFormat:@"complete == NO"];
     
     // Query the TodoItem table and update the items property with the results from the service
-    [self.table readWhere:predicate completion:^(NSArray *results, NSInteger totalCount, NSError *error)
+    [self.table readWithPredicate:predicate completion:^(NSArray *results, NSInteger totalCount, NSError *error)
     {
         [self logErrorIfNotNil:error];
         
@@ -165,19 +165,19 @@
 
 
 - (void)handleRequest:(NSURLRequest *)request
-               onNext:(MSFilterNextBlock)onNext
-           onResponse:(MSFilterResponseBlock)onResponse
+               next:(MSFilterNextBlock)next
+           response:(MSFilterResponseBlock)response
 {
     // A wrapped response block that decrements the busy counter
-    MSFilterResponseBlock wrappedResponse = ^(NSHTTPURLResponse *response, NSData *data, NSError *error)
+    MSFilterResponseBlock wrappedResponse = ^(NSHTTPURLResponse *innerResponse, NSData *data, NSError *error)
     {
         [self busy:NO];
-        onResponse(response, data, error);
+        response(innerResponse, data, error);
     };
     
     // Increment the busy counter before sending the request
     [self busy:YES];
-    onNext(request, wrappedResponse);
+    next(request, wrappedResponse);
 }
 
 @end
