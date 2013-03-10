@@ -269,7 +269,7 @@
         
         NSString *URLString = URL.absoluteString;
         NSInteger tokenMatch = [URLString rangeOfString:@"#token="].location;
-        if (tokenMatch > 0) {
+        if (tokenMatch != NSNotFound) {
             tokenString = [URLString substringFromIndex:(tokenMatch + 7)];
         }
         else {
