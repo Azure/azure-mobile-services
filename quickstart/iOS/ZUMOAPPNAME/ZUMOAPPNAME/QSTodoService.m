@@ -56,11 +56,11 @@
     if (self)
     {
         // Initialize the Mobile Service client with your URL and key
-        MSClient *newClient = [MSClient clientWithApplicationURLString:@"ZUMOAPPURL"
-                                                        applicationKey:@"ZUMOAPPKEY"];
+        MSClient *client = [MSClient clientWithApplicationURLString:@"https://scottkulas.azure-mobile.net/"
+                                                     applicationKey:@"zsuSfdmVHealwowQmajlLrQYRJZpSB42"];
         
         // Add a Mobile Service filter to enable the busy indicator
-        self.client = [newClient clientWithFilter:self];
+        self.client = [client clientWithFilter:self];
         
         // Create an MSTable instance to allow us to work with the TodoItem table
         self.table = [_client tableWithName:@"TodoItem"];
@@ -124,7 +124,10 @@
         [self logErrorIfNotNil:error];
         
         NSUInteger index = [items indexOfObjectIdenticalTo:mutable];
-        [mutableItems removeObjectAtIndex:index];
+        if (index != NSNotFound)
+        {
+            [mutableItems removeObjectAtIndex:index];
+        }
         
         // Let the caller know that we have finished
         completion(index);

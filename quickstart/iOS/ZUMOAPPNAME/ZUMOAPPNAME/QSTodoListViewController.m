@@ -25,7 +25,8 @@
 @interface QSTodoListViewController ()
 
 // Private properties
-@property (strong, nonatomic) QSTodoService *todoService;
+@property (strong, nonatomic)   QSTodoService   *todoService;
+@property (nonatomic)           BOOL            useRefreshControl;
 
 @end
 
@@ -72,10 +73,15 @@
 
 - (void) refresh
 {
-    [self.refreshControl beginRefreshing];
+    // only activate the refresh control if the feature is available
+    if (self.useRefreshControl == YES) {
+        [self.refreshControl beginRefreshing];
+    }
     [self.todoService refreshDataOnSuccess:^
     {
-        [self.refreshControl endRefreshing];
+        if (self.useRefreshControl == YES) {
+            [self.refreshControl endRefreshing];
+        }
         [self.tableView reloadData];
     }];
 }
@@ -204,6 +210,7 @@
         // the refresh control is available, let's add it
         self.refreshControl = [[UIRefreshControl alloc] init];
         [self.refreshControl addTarget:self action:@selector(onRefresh:) forControlEvents:UIControlEventValueChanged];
+        self.useRefreshControl = YES;
     }
 }
 
