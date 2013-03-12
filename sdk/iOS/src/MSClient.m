@@ -67,6 +67,11 @@
     return [MSClient clientWithApplicationURL:url applicationKey:key];
 }
 
++ (MSClient *)clientWithApplicationURLString:(NSString *)urlString withApplicationKey:(NSString *)key
+{
+    return [MSClient clientWithApplicationURLString:urlString applicationKey:key];
+}
+
 +(MSClient *) clientWithApplicationURL:(NSURL *)url
 {
     return [MSClient clientWithApplicationURL:url applicationKey:nil];
@@ -166,6 +171,11 @@
 -(MSTable *) tableWithName:(NSString *)tableName
 {
     return [[MSTable alloc] initWithName:tableName client:self];
+}
+
+- (MSTable *)getTable:(NSString *)tableName
+{
+    return [self tableWithName:tableName];
 }
 
 

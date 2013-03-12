@@ -76,6 +76,11 @@
 +(MSClient *)clientWithApplicationURLString:(NSString *)urlString
                            applicationKey:(NSString *)key;
 
+// Old method to create a client with the given URL and application key for the Windows Azure
+// Mobile Service. This has been deprecated and clientWithApplicationURLString:withApplicationKey
++(MSClient *)clientWithApplicationURLString:(NSString *)urlString
+                         withApplicationKey:(NSString *)key __deprecated;
+
 // Creates a client with the given URL for the Windows Azure Mobile Service.
 +(MSClient *)clientWithApplicationURL:(NSURL *)url;
 
@@ -132,5 +137,9 @@
 
 // Returns an |MSTable| instance for a table with the given name.
 -(MSTable *)tableWithName:(NSString *)tableName;
+
+// Old method Returns an |MSTable| instance for a table with the given name.
+// This has been deprecated and tableWithName should be used instead
+-(MSTable *)getTable:(NSString *)tableName __deprecated;
 
 @end
