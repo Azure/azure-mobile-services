@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D8BBC92A-B213-463B-911D-3A106F91D5F9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.WindowsAzure.MobileServices.Test</RootNamespace>
+    <AssemblyName>Microsoft.WindowsAzure.Mobile.Test</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile104</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- A reference to the entire .NET Framework is automatically included -->
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Mocks\MobileServiceTableQueryMock.cs" />
+    <Compile Include="SerializationTypes\ComplexType.cs" />
+    <Compile Include="SerializationTypes\InterfacePropertyType.cs" />
+    <Compile Include="UnitTests\Collections\MobileServiceCollection.Test.cs" />
+    <Compile Include="UnitTests\HttpHandlers\TestHttpHandler.cs" />
+    <Compile Include="FunctionalTests\BloggingTest.cs" />
+    <Compile Include="FunctionalTests\Book.cs" />
+    <Compile Include="FunctionalTests\DataTypesTest.cs" />
+    <Compile Include="FunctionalTests\DateTests.cs" />
+    <Compile Include="FunctionalTests\FunctionalTestBase.cs" />
+    <Compile Include="FunctionalTests\QueryingTest.cs" />
+    <Compile Include="FunctionalTests\ToDoTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SerializationTypes\BaseTypes.cs" />
+    <Compile Include="SerializationTypes\DataContractDerivedDataContractType.cs" />
+    <Compile Include="SerializationTypes\DataContractDerivedJsonPropertyType.cs" />
+    <Compile Include="SerializationTypes\DataContractDerivedPocoType.cs" />
+    <Compile Include="SerializationTypes\DataContractType.cs" />
+    <Compile Include="SerializationTypes\DataMemberType.cs" />
+    <Compile Include="SerializationTypes\DataTableType.cs" />
+    <Compile Include="SerializationTypes\DerivedDuplicateKeyType.cs" />
+    <Compile Include="SerializationTypes\DuplicateKeyType.cs" />
+    <Compile Include="SerializationTypes\IdTypes.cs" />
+    <Compile Include="SerializationTypes\JsonContainerType.cs" />
+    <Compile Include="SerializationTypes\JsonPropertyDerivedDataContractType.cs" />
+    <Compile Include="SerializationTypes\JsonPropertyDerivedJsonPropertyType.cs" />
+    <Compile Include="SerializationTypes\JsonPropertyType.cs" />
+    <Compile Include="SerializationTypes\PocoDerivedDataContractType.cs" />
+    <Compile Include="SerializationTypes\PocoDerivedJsonPropertyType.cs" />
+    <Compile Include="SerializationTypes\PocoDerivedPocoType.cs" />
+    <Compile Include="SerializationTypes\PocoType.cs" />
+    <Compile Include="SerializationTypes\SerializationTypeUtility.cs" />
+    <Compile Include="SerializationTypes\SimpleTreeType.cs" />
+    <Compile Include="UnitTests\HttpHandlers\ComplexDelegatingHandler.cs" />
+    <Compile Include="UnitTests\MobileServiceUser.Test.cs" />
+    <Compile Include="UnitTests\Table\MobileServiceTableUrlBuilder.Test.cs" />
+    <Compile Include="UnitTests\Table\Query\ZumoQuery.Test.cs" />
+    <Compile Include="UnitTests\Table\Serialization\MobileServiceIsoDateTimeConverter.Test.cs" />
+    <Compile Include="UnitTests\Table\Serialization\MobileServiceContractResolver.Test.cs" />
+    <Compile Include="UnitTests\Table\Serialization\MobileServiceSerializer.Test.cs" />
+    <Compile Include="UnitTests\Table\Serialization\MobileServicePrecisionCheckConverter.Test.cs" />
+    <Compile Include="UnitTests\Table\ZumoService.Test.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.Mobile.csproj">
+      <Project>{75557793-e36e-4190-8714-5bd2665859fb}</Project>
+      <Name>Microsoft.WindowsAzure.Mobile</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices.TestFramework\Microsoft.WindowsAzure.Mobile.TestFramework.csproj">
+      <Project>{a2500bd2-a9a2-4085-9978-dee3675b02dd}</Project>
+      <Name>Microsoft.WindowsAzure.Mobile.TestFramework</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Threading.Tasks">
+      <HintPath>..\..\packages\Microsoft.Bcl.Async.1.0.14-rc\lib\portable-net40+sl4+win8+wp71\Microsoft.Threading.Tasks.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions">
+      <HintPath>..\..\packages\Microsoft.Bcl.Async.1.0.14-rc\lib\portable-net40+sl4+win8+wp71\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\packages\Newtonsoft.Json.4.5.11\lib\portable-net40+sl4+wp7+win8\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http">
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.1.3-beta\lib\portable-net40+sl4+win8+wp71\System.Net.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Extensions">
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.1.3-beta\lib\portable-net40+sl4+win8+wp71\System.Net.Http.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Primitives">
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.1.3-beta\lib\portable-net40+sl4+win8+wp71\System.Net.Http.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime">
+      <HintPath>..\..\packages\Microsoft.Bcl.1.0.16-rc\lib\portable-net40+sl4+win8+wp71\System.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks">
+      <HintPath>..\..\packages\Microsoft.Bcl.1.0.16-rc\lib\portable-net40+sl4+win8+wp71\System.Threading.Tasks.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.0-rc\tools\Microsoft.Bcl.Build.targets" />
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
