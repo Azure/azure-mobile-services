@@ -37,12 +37,18 @@ namespace ZumoE2ETestApp.Tests
                 { MobileServiceAuthenticationProvider.Twitter, false },
             };
 
+#if !WINDOWS_PHONE
             result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("In the next few tests you will be prompted for username / password four times."));
+#endif
 
             foreach (MobileServiceAuthenticationProvider provider in Enum.GetValues(typeof(MobileServiceAuthenticationProvider)))
             {
                 result.AddTest(CreateLogoutTest());
+#if !WINDOWS_PHONE
                 result.AddTest(CreateLoginTest(provider, false));
+#else
+                result.AddTest(CreateLoginTest(provider));
+#endif
                 result.AddTest(CreateCRUDTest(TableApplicationPermission, provider.ToString(), TablePermission.Application, true));
                 result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, true));
                 result.AddTest(CreateCRUDTest(TableAdminPermission, provider.ToString(), TablePermission.Admin, true));
@@ -56,12 +62,15 @@ namespace ZumoE2ETestApp.Tests
                 }
             }
 
+#if !WINDOWS_PHONE
             result.AddTest(ZumoTestCommon.CreateYesNoTest("Were you prompted for username / password four times?", true));
+#endif
 
             result.AddTest(CreateLogoutTest());
             result.AddTest(CreateLiveSDKLoginTest());
             result.AddTest(CreateCRUDTest(TableUserPermission, "Microsoft via Live SDK", TablePermission.User, true));
 
+#if !WINDOWS_PHONE
             result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("We'll log in again; you may or may not be asked for password in the next few moments."));
             foreach (MobileServiceAuthenticationProvider provider in Enum.GetValues(typeof(MobileServiceAuthenticationProvider)))
             {
@@ -91,10 +100,12 @@ namespace ZumoE2ETestApp.Tests
             }
 
             result.AddTest(ZumoTestCommon.CreateYesNoTest("Were you prompted for the username in any of the providers?", false));
+#endif
 
             return result;
         }
 
+#if !WINDOWS_PHONE
         private static ZumoTest CreateLoginTest(MobileServiceAuthenticationProvider provider, bool useSingleSignOn)
         {
             string testName = string.Format("Login with {0}{1}", provider, useSingleSignOn ? " (using single sign-on)" : "");
@@ -106,6 +117,19 @@ namespace ZumoE2ETestApp.Tests
                 return true;
             });
         }
+#else
+        private static ZumoTest CreateLoginTest(MobileServiceAuthenticationProvider provider)
+        {
+            string testName = string.Format("Login with {0}", provider);
+            return new ZumoTest(testName, async delegate(ZumoTest test)
+            {
+                var client = ZumoTestGlobals.Instance.Client;
+                var user = await client.LoginAsync(provider);
+                test.AddLog("Logged in as {0}", user.UserId);
+                return true;
+            });
+        }
+#endif
 
         private static ZumoTest CreateLogoutTest()
         {

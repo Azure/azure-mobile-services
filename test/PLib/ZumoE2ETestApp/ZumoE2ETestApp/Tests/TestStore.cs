@@ -12,9 +12,7 @@ namespace ZumoE2ETestApp.Tests
                 ZumoRoundTripTests.CreateTests(),
                 ZumoQueryTests.CreateTests(),
                 ZumoCUDTests.CreateTests(),
-#if !WINDOWS_PHONE
                 ZumoLoginTests.CreateTests(),
-#endif
                 ZumoMiscTests.CreateTests(),
 #if !WINDOWS_PHONE
                 ZumoPushTests.CreateTests(),
