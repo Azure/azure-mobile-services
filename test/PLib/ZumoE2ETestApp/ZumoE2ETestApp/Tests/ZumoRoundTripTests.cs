@@ -262,8 +262,8 @@ namespace ZumoE2ETestApp.Tests
                 {
                     string originalItem = item == null ? "null" : item.ToString();
 
-                    await table.InsertAsync(item);
-                    int id = item["id"].Value<int>();
+                    var inserted = await table.InsertAsync(item);
+                    int id = inserted["id"].Value<int>();
                     test.AddLog("Inserted item, id = {0}", id);
                     if (id <= 0)
                     {

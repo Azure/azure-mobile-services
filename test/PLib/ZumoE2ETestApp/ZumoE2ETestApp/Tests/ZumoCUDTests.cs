@@ -318,8 +318,8 @@ namespace ZumoE2ETestApp.Tests
                 var table = client.GetTable(ZumoTestGlobals.RoundTripTableName);
                 try
                 {
-                    await table.InsertAsync(itemToInsert);
-                    int id = (int)itemToInsert["id"].Value<int>();
+                    var inserted = await table.InsertAsync(itemToInsert);
+                    int id = (int)inserted["id"].Value<int>();
                     test.AddLog("Inserted item with id {0}", id);
 
                     if (setUpdatedId)
@@ -329,7 +329,7 @@ namespace ZumoE2ETestApp.Tests
 
                     var expectedItem = JObject.Parse(itemToUpdate.ToString());
 
-                    await table.UpdateAsync(itemToUpdate);
+                    var updated = await table.UpdateAsync(itemToUpdate);
                     test.AddLog("Updated item; now retrieving it to compare with the expected value");
 
                     var retrievedItem = await table.LookupAsync(id);

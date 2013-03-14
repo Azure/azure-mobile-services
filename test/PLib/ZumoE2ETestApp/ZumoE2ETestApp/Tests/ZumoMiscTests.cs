@@ -31,9 +31,9 @@ namespace ZumoE2ETestApp.Tests
                     new HandlerToBypassService(201, "application/json", json));
                 var table = client.GetTable("TableWhichDoesNotExist");
                 var item = new JObject();
-                await table.InsertAsync(item);
+                var inserted = await table.InsertAsync(item);
                 List<string> errors = new List<string>();
-                if (!Util.CompareJson(JObject.Parse(json), item, errors))
+                if (!Util.CompareJson(JObject.Parse(json), inserted, errors))
                 {
                     foreach (var error in errors)
                     {
@@ -97,7 +97,8 @@ namespace ZumoE2ETestApp.Tests
                 }
                 else
                 {
-                    await untyped.InsertAsync(untypedItem, dict);
+                    var inserted = await untyped.InsertAsync(untypedItem, dict);
+                    untypedItem = inserted as JObject;
                     actualParameters = JObject.Parse(untypedItem["parameters"].Value<string>());
                 }
 
@@ -112,8 +113,8 @@ namespace ZumoE2ETestApp.Tests
                 }
                 else
                 {
-                    await untyped.UpdateAsync(untypedItem, dict);
-                    actualParameters = JObject.Parse(untypedItem["parameters"].Value<string>());
+                    var updated = await untyped.UpdateAsync(untypedItem, dict);
+                    actualParameters = JObject.Parse(updated["parameters"].Value<string>());
                 }
 
                 testPassed = testPassed && ValidateParameters(test, "update", expectedParameters, actualParameters);

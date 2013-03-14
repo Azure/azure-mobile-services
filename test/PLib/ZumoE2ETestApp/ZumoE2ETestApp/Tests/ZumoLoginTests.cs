@@ -207,7 +207,8 @@ namespace ZumoE2ETestApp.Tests
                 MobileServiceInvalidOperationException ex = null;
                 try
                 {
-                    await table.InsertAsync(item);
+                    var inserted = await table.InsertAsync(item);
+                    item = (JObject)inserted;
                     test.AddLog("Inserted item: {0}", item);
                     id = item["id"].Value<int>();
                     if (tableType == TablePermission.User)
@@ -247,8 +248,8 @@ namespace ZumoE2ETestApp.Tests
                 try
                 {
                     item["Name"] = "Jane Roe";
-                    await table.UpdateAsync(item);
-                    test.AddLog("Updated item: {0}", item);
+                    var updated = await table.UpdateAsync(item);
+                    test.AddLog("Updated item: {0}", updated);
                 }
                 catch (MobileServiceInvalidOperationException e)
                 {
