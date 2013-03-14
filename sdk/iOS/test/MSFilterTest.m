@@ -120,7 +120,7 @@
         STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error was nil after deserializing item.");
-        STAssertTrue([error domain] == @"SomeDomain",
+        STAssertTrue([error.domain isEqualToString:@"SomeDomain"],
                      @"error domain was: %@", [error domain]);
         STAssertTrue([error code] == -102,
                      @"error code was: %d",[error code]);
@@ -181,7 +181,7 @@
         STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == @"TestErrorDomain",
+        STAssertTrue([error.domain isEqualToString: @"TestErrorDomain"],
                      @"error domain should have been TestErrorDomain.");
         STAssertTrue(error.code == -998,
                      @"error code should have been -998.");

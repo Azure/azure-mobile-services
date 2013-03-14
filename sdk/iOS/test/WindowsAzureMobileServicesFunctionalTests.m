@@ -36,7 +36,7 @@
 {
     NSLog(@"%@ setUp", self.name);
 
-    testsEnabled = NO;
+    testsEnabled = YES;
     STAssertTrue(testsEnabled, @"The functiontional tests are currently disabled.");
     
     // These functional tests requires a working Windows Mobile Azure Service
@@ -44,9 +44,8 @@
     // application key for the Windows Mobile Azure Service below and set the
     // 'testsEnabled' BOOL above to YES.
     
-    client = [MSClient
-              clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
-              applicationKey:@"<Application Key>"];
+    client = [MSClient clientWithApplicationURLString:@"https://scottkulas.azure-mobile.net/"
+                                             applicationKey:@"zsuSfdmVHealwowQmajlLrQYRJZpSB42"];
     
     done = NO;
     
@@ -366,7 +365,7 @@
         STAssertNil(item, @"item should have been nil.");
 
         STAssertNotNil(error, @"error was nil after deserializing item.");
-        STAssertTrue([error domain] == @"SomeDomain",
+        STAssertTrue([error.domain isEqualToString:@"SomeDomain"],
                      @"error domain was: %@", [error domain]);
         STAssertTrue([error code] == -102,
                      @"error code was: %d",[error code]);

@@ -56,8 +56,8 @@
     if (self)
     {
         // Initialize the Mobile Service client with your URL and key
-        MSClient *client = [MSClient clientWithApplicationURLString:@"https://scottkulas.azure-mobile.net/"
-                                                     applicationKey:@"zsuSfdmVHealwowQmajlLrQYRJZpSB42"];
+        MSClient *client = [MSClient clientWithApplicationURLString:@"ZUMOAPPURL"
+                                                     applicationKey:@"ZUMOAPPKEY"];
         
         // Add a Mobile Service filter to enable the busy indicator
         self.client = [client clientWithFilter:self];
