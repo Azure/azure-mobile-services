@@ -1,0 +1,10 @@
+# Visual Studio files #
+#######################
+*.suo
+obj/
+bin/
+*.csproj.user
+
+# Nuget packages #
+##################
+packages/
