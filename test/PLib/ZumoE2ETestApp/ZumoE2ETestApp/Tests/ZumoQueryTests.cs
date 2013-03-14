@@ -152,7 +152,7 @@ namespace ZumoE2ETestApp.Tests
 
 #if !WINDOWS_PHONE
             result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("The next test will show a dialog with certain movies. Please validate that movie titles and release years are shown correctly in the list."));
-            result.AddTest(new ZumoTest("ToCollectionView - displaying movies on a ListBox", async delegate(ZumoTest test)
+            result.AddTest(new ZumoTest("ToCollection - displaying movies on a ListBox", async delegate(ZumoTest test)
             {
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable<Movie>();
@@ -165,7 +165,9 @@ namespace ZumoE2ETestApp.Tests
                                 Title = m.Title
                             };
                 var newPage = new MoviesDisplayPage();
-                newPage.SetMoviesSource(query.ToCollection());
+                var collection = query.ToCollection();
+                newPage.SetMoviesSource(collection);
+                await collection.LoadMoreItemsAsync();
                 await newPage.Display();
                 return true;
             }));

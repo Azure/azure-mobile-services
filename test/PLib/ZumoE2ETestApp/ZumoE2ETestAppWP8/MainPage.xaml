@@ -63,6 +63,24 @@
                 </ListBox.ItemTemplate>
             </ListBox>
         </StackPanel>
+        
+        <Grid Grid.Row="1" Name="grdTests">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Name="lblTestGroupTitle" Margin="10"
+                       FontSize="24" Text="Test Group"
+                       HorizontalAlignment="Center"/>
+            <ListBox Name="lstTests">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Foreground="{Binding Path=ColorFromStatus}"
+                                       Text="{Binding Path=TestName}" Margin="5" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
     </Grid>
 
     <phone:PhoneApplicationPage.ApplicationBar>
@@ -71,6 +89,12 @@
                                             x:Name="appBtnBack"
                                             Text="Test Groups"
                                             Click="appBtnBack_Click_1"
+                                            IsEnabled="False"
+                                            />
+            <shell:ApplicationBarIconButton IconUri="/Assets/AppBar/reset.png"
+                                            x:Name="appBtnReset"
+                                            Text="Reset"
+                                            Click="appBtnReset_Click_1"
                                             IsEnabled="False"
                                             />
             <shell:ApplicationBarIconButton IconUri="/Assets/AppBar/upload.png"
