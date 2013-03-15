@@ -5,6 +5,9 @@ using System.Linq;
 using System.Runtime.Serialization.Json;
 using System.Text;
 using System.Threading.Tasks;
+#if WINDOWS_PHONE
+using System.Windows;
+#endif
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.UI.Popups;
@@ -63,9 +66,12 @@ namespace ZumoE2ETestApp.UIElements
 
             if (ex != null)
             {
-                await new MessageDialog(
-                    string.Format("{0}: {1}", ex.GetType().FullName, ex.Message),
-                    "Error saving app info").ShowAsync();
+                string errorText = string.Format("{0}: {1}", ex.GetType().FullName, ex.Message);
+#if !WINDOWS_PHONE
+                await new MessageDialog(errorText, "Error saving app info").ShowAsync();
+#else
+                MessageBox.Show(errorText, "Error saving app info", MessageBoxButton.OK);
+#endif
             }
         }
     }

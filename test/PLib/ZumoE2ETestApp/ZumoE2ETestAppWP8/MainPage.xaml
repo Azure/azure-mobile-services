@@ -64,7 +64,7 @@
             </ListBox>
         </StackPanel>
         
-        <Grid Grid.Row="1" Name="grdTests">
+        <Grid Grid.Row="1" Name="grdTests" Visibility="Collapsed">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -72,7 +72,7 @@
             <TextBlock Name="lblTestGroupTitle" Margin="10"
                        FontSize="24" Text="Test Group"
                        HorizontalAlignment="Center"/>
-            <ListBox Name="lstTests">
+            <ListBox Name="lstTests" Grid.Row="1">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Foreground="{Binding Path=ColorFromStatus}"

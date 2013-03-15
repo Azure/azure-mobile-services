@@ -143,6 +143,9 @@
     <Compile Include="..\ZumoE2ETestApp\Tests\ZumoRoundTripTests.cs">
       <Link>Tests\ZumoRoundTripTests.cs</Link>
     </Compile>
+    <Compile Include="..\ZumoE2ETestApp\UIElements\AppInfoRepository.cs">
+      <Link>UIElements\AppInfoRepository.cs</Link>
+    </Compile>
     <Compile Include="..\ZumoE2ETestApp\UIElements\ListViewForTest.cs">
       <Link>UIElements\ListViewForTest.cs</Link>
     </Compile>

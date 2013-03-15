@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
+using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -28,14 +30,46 @@ namespace ZumoE2ETestAppWP8
         {
             InitializeComponent();
             this.allTests = TestStore.CreateTests();
+            if (this.appBtnBack == null)
+            {
+                var appBar = this.ApplicationBar;
+                foreach (ApplicationBarIconButton button in appBar.Buttons)
+                {
+                    switch (button.Text.ToLowerInvariant())
+                    {
+                        case "test groups":
+                            this.appBtnBack = button;
+                            break;
+                        case "reset":
+                            this.appBtnReset = button;
+                            break;
+                        case "upload logs":
+                            this.appBtnUploadLogs = button;
+                            break;
+                        case "run tests":
+                            this.appBtnRunTests = button;
+                            break;
+                    }
+                }
+            }
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
+            if (this.lstTestGroups.ItemsSource == null)
+            {
+                List<ListViewForTestGroup> sources = allTests.Select((tg, i) => new ListViewForTestGroup(i + 1, tg)).ToList();
+                this.lstTestGroups.ItemsSource = sources;
 
-            List<ListViewForTestGroup> sources = allTests.Select((tg, i) => new ListViewForTestGroup(i + 1, tg)).ToList();
-            this.lstTestGroups.ItemsSource = sources;
+                SavedAppInfo savedAppInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
+                this.txtUploadUrl.Text = savedAppInfo.LastUploadUrl ?? "";
+                if (savedAppInfo.LastService != null && !string.IsNullOrEmpty(savedAppInfo.LastService.AppUrl) && !string.IsNullOrEmpty(savedAppInfo.LastService.AppKey))
+                {
+                    this.txtAppUrl.Text = savedAppInfo.LastService.AppUrl;
+                    this.txtAppKey.Text = savedAppInfo.LastService.AppKey;
+                }
+            }
         }
 
         private void lstTestGroups_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
@@ -67,6 +101,21 @@ namespace ZumoE2ETestAppWP8
             if (showTestGroups)
             {
                 this.currentGroup = null;
+            }
+        }
+
+        private async Task SaveAppInfo()
+        {
+            SavedAppInfo appInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
+            string uploadUrl = this.txtUploadUrl.Text;
+            string appUrl = this.txtAppUrl.Text;
+            string appKey = this.txtAppKey.Text;
+            if (appInfo.LastUploadUrl != uploadUrl || appInfo.LastService.AppUrl != appUrl || appInfo.LastService.AppKey != appKey)
+            {
+                appInfo.LastUploadUrl = uploadUrl;
+                appInfo.LastService.AppUrl = appUrl;
+                appInfo.LastService.AppKey = appKey;
+                await AppInfoRepository.Instance.SaveAppInfo(appInfo);
             }
         }
 
@@ -119,6 +168,8 @@ namespace ZumoE2ETestAppWP8
             var appUrl = this.txtAppUrl.Text;
             var appKey = this.txtAppKey.Text;
 
+            await SaveAppInfo();
+
             string error = null;
             try
             {
@@ -150,6 +201,9 @@ namespace ZumoE2ETestAppWP8
                 }
                 else
                 {
+                    int passed = this.currentGroup.AllTests.Count(t => t.Status == TestStatus.Passed);
+                    string message = string.Format(CultureInfo.InvariantCulture, "Passed {0} of {1} tests", passed, this.currentGroup.AllTests.Count());
+                    MessageBox.Show(message, "Test group finished", MessageBoxButton.OK);
                     // Saving app info for future runs
                     // TODO: implement saving
                 }

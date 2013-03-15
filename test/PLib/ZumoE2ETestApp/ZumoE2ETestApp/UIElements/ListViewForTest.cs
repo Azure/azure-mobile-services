@@ -52,7 +52,11 @@ namespace ZumoE2ETestApp.UIElements
                         color = Colors.Red;
                         break;
                     case TestStatus.NotRun:
+#if !WINDOWS_PHONE
                         color = Colors.Black;
+#else
+                        color = Colors.Gray;
+#endif
                         break;
                     case TestStatus.Passed:
                         color = Colors.Green;
