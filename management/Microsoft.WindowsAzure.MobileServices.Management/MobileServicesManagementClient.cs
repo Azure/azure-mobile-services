@@ -52,6 +52,30 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             this.MobileServiceHostSuffix = DefaultMobileServiceHostSuffix;
         }
 
+        public async Task SetMobileServiceManagementEndpointAsync(string endpoint)
+        {
+            if (string.IsNullOrEmpty(endpoint))
+            {
+                throw new ArgumentNullException("endpoint");
+            }
+
+            if (endpoint != DefaultMobileServiceManagementEndpoint)
+            {
+                throw new InvalidOperationException(string.Format(
+                    CultureInfo.InvariantCulture,
+                    Resources.InvalidManagementEndpoint,
+                    endpoint));
+            }
+
+            this.MobileServiceManagementEndpoint = DefaultMobileServiceManagementEndpoint;
+            this.SqlManagementEndpoint = DefaultSqlManagementEndpoint;
+            this.SqlManagementEndpoint2 = DefaultSqlManagementEndpoint2;
+            this.SqlDatabaseHostSuffix = DefaultSqlDatabaseHostSuffix;
+            this.MobileServiceHostSuffix = DefaultMobileServiceHostSuffix;
+
+            return;
+        }
+
         public async Task TestDatabaseConnectionAsync(string sqlServerName, string username, SecureString password)
         {
             if (string.IsNullOrEmpty(sqlServerName))
