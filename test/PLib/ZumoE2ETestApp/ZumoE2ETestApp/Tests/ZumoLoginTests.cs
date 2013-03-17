@@ -19,6 +19,9 @@ namespace ZumoE2ETestApp.Tests
 
         private static JObject lastUserIdentityObject = null;
 
+        private static Dictionary<string, string> testPropertyBag = new Dictionary<string, string>();
+        private const string ClientIdKeyName = "clientId";
+
         public static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Login tests");
@@ -67,6 +70,9 @@ namespace ZumoE2ETestApp.Tests
 #endif
 
             result.AddTest(CreateLogoutTest());
+#if WINDOWS_PHONE
+            result.AddTest(ZumoTestCommon.CreateInputTest("Enter Live App Client ID", testPropertyBag, ClientIdKeyName));
+#endif
             result.AddTest(CreateLiveSDKLoginTest());
             result.AddTest(CreateCRUDTest(TableUserPermission, "Microsoft via Live SDK", TablePermission.User, true));
 
@@ -151,8 +157,20 @@ namespace ZumoE2ETestApp.Tests
             return new ZumoTest("Login via token with Live SDK", async delegate(ZumoTest test)
             {
                 var client = ZumoTestGlobals.Instance.Client;
+#if !WINDOWS_PHONE
                 var uri = client.ApplicationUri.ToString();
                 var liveIdClient = new LiveAuthClient(uri);
+#else
+                string clientId;
+                testPropertyBag.TryGetValue(ClientIdKeyName, out clientId);
+                if (clientId == null)
+                {
+                    test.AddLog("ClientId of Microsoft application not entered correctly.");
+                    return false;
+                }
+
+                var liveIdClient = new LiveAuthClient(clientId);
+#endif
                 var liveLoginResult = await liveIdClient.LoginAsync(new string[] { "wl.basic" });
                 if (liveLoginResult.Status == LiveConnectSessionStatus.Connected)
                 {

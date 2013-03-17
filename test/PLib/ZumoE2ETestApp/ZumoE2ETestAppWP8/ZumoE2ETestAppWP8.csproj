@@ -143,6 +143,9 @@
     <Compile Include="..\ZumoE2ETestApp\Tests\ZumoRoundTripTests.cs">
       <Link>Tests\ZumoRoundTripTests.cs</Link>
     </Compile>
+    <Compile Include="..\ZumoE2ETestApp\Tests\ZumoTestCommon.cs">
+      <Link>Tests\ZumoTestCommon.cs</Link>
+    </Compile>
     <Compile Include="..\ZumoE2ETestApp\UIElements\AppInfoRepository.cs">
       <Link>UIElements\AppInfoRepository.cs</Link>
     </Compile>
@@ -165,6 +168,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>AppResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="UIElements\InputDialog.xaml.cs">
+      <DependentUpon>InputDialog.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -172,6 +178,10 @@
       <Generator>MSBuild:Compile</Generator>
     </ApplicationDefinition>
     <Page Include="MainPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UIElements\InputDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

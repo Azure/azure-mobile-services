@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Collections.Generic;
+using System.Globalization;
 using ZumoE2ETestApp.Framework;
 using ZumoE2ETestApp.UIElements;
 
@@ -6,6 +7,7 @@ namespace ZumoE2ETestApp.Tests
 {
     internal static class ZumoTestCommon
     {
+#if !WINDOWS_PHONE
         public static ZumoTest CreateTestWithSingleAlert(string alert)
         {
             return new ZumoTest("Simple alert", async delegate(ZumoTest test)
@@ -36,5 +38,23 @@ namespace ZumoE2ETestApp.Tests
                 }
             });
         }
+#else
+        public static ZumoTest CreateInputTest(string title, Dictionary<string, string> propertyBag, string key)
+        {
+            return new ZumoTest("Input: " + title, async delegate(ZumoTest test)
+            {
+                string initialText;
+                propertyBag.TryGetValue(key, out initialText);
+                var result = await ZumoE2ETestAppWP8.UIElements.InputDialog.Display(title, initialText);
+                if (result != null)
+                {
+                    propertyBag[key] = result;
+                }
+
+                return true;
+            });
+        }
+
+#endif
     }
 }
