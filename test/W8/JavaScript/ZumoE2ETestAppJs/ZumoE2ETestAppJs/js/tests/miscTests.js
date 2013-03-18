@@ -41,10 +41,11 @@ function defineMiscTestsNamespace() {
     tests.push(new zumo.Test('Filter can bypass service', function (test, done) {
         var client = zumo.getClient();
         var filter = function (request, next, callback) {
-            request.id = 1;
+            var data = JSON.parse(request.data);
+            data.id = 1;
             callback(null, {
                 status: 201,
-                responseText: JSON.stringify(request)
+                responseText: JSON.stringify(data)
             });
         };
         var filtered = client.withFilter(filter);
