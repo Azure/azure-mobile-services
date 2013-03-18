@@ -110,6 +110,7 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped String: non-ASCII characters - Latin", "string1", "ãéìôü ÇñÑ"));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped String: non-ASCII characters - Arabic", "string1", "الكتاب على الطاولة"));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped String: non-ASCII characters - Chinese", "string1", "这本书在桌子上"));
+            result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped String: non-ASCII characters - Chinese 2", "string1", "⒈①Ⅻㄨㄩ 啊阿鼾齄 丂丄狚狛 狜狝﨨﨩 ˊˋ˙–〇 㐀㐁䶴䶵"));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped String: non-ASCII characters - Japanese", "string1", "本は机の上に"));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped String: non-ASCII characters - Hebrew", "string1", "הספר הוא על השולחן"));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped String: non-ASCII characters - Russian", "string1", "Книга лежит на столе"));

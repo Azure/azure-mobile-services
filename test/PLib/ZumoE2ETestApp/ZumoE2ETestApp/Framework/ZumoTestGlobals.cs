@@ -7,7 +7,11 @@ namespace ZumoE2ETestApp.Framework
     {
         public const string RoundTripTableName = "w8RoundTripTable";
         public const string MoviesTableName = "w8Movies";
+#if !WINDOWS_PHONE
         public const string PushTestTableName = "w8PushTest";
+#else
+        public const string PushTestTableName = "wp8PushTest";
+#endif
         public const string ParamsTestTableName = "ParamsTestTable";
 
         private static ZumoTestGlobals instance = new ZumoTestGlobals();

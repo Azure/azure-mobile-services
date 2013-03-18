@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
 using ZumoE2ETestApp.Framework;
+#if WINDOWS_PHONE
+using ZumoE2ETestAppWP8.Tests;
+#endif
 
 namespace ZumoE2ETestApp.Tests
 {
@@ -14,9 +17,7 @@ namespace ZumoE2ETestApp.Tests
                 ZumoCUDTests.CreateTests(),
                 ZumoLoginTests.CreateTests(),
                 ZumoMiscTests.CreateTests(),
-#if !WINDOWS_PHONE
                 ZumoPushTests.CreateTests(),
-#endif
             };
 
             return result;
