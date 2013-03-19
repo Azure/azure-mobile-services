@@ -17,7 +17,7 @@ namespace ZumoE2ETestApp.Tests
                 ZumoCUDTests.CreateTests(),
                 ZumoLoginTests.CreateTests(),
                 ZumoMiscTests.CreateTests(),
-                ZumoPushTests.CreateTests(),
+                ZumoWP8PushTests.CreateTests(),
             };
 
             return result;

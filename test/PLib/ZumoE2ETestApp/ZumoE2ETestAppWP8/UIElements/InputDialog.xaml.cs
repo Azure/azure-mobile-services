@@ -19,6 +19,36 @@ namespace ZumoE2ETestAppWP8.UIElements
             InitializeComponent();
         }
 
+        public static Task<bool> DisplayYesNo(string text)
+        {
+            Popup popup = new Popup();
+            popup.Height = 240;
+            popup.Width = 480;
+            popup.VerticalOffset = 100;
+            popup.VerticalAlignment = VerticalAlignment.Center;
+            InputDialog dialog = new InputDialog();
+            dialog.lblTitle.Text = "Question";
+            dialog.txtContent.Text = text;
+            dialog.btnCancel.Content = "No";
+            dialog.btnOk.Content = "Yes";
+            popup.Child = dialog;
+            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+            dialog.btnCancel.Click += (s, ea) =>
+            {
+                tcs.SetResult(false);
+                popup.IsOpen = false;
+            };
+
+            dialog.btnOk.Click += (s, ea) =>
+            {
+                tcs.SetResult(true);
+                popup.IsOpen = false;
+            };
+
+            popup.IsOpen = true;
+            return tcs.Task;
+        }
+
         public static Task<string> Display(string title, string text = null)
         {
             Popup popup = new Popup();

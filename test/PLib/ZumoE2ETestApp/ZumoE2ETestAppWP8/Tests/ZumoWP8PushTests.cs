@@ -7,14 +7,18 @@ using System.Threading.Tasks;
 using Microsoft.Phone.Notification;
 using Newtonsoft.Json.Linq;
 using ZumoE2ETestApp.Framework;
+#if WINDOWS_PHONE
+using ZumoE2ETestApp.Tests;
+#endif
 
 namespace ZumoE2ETestAppWP8.Tests
 {
-    internal static class ZumoPushTests
+    internal static class ZumoWP8PushTests
     {
         private static HttpNotificationChannel pushChannel;
         private static Queue<HttpNotificationEventArgs> rawPushesReceived = new Queue<HttpNotificationEventArgs>();
-        private static Queue<NotificationEventArgs> toastTilePushesReceived = new Queue<NotificationEventArgs>();
+        private static Queue<NotificationEventArgs> toastPushesReceived = new Queue<NotificationEventArgs>();
+        const string ImageUrlDomain = "http://zumotestserver.azurewebsites.net";
 
         public static ZumoTestGroup CreateTests()
         {
@@ -26,28 +30,87 @@ namespace ZumoE2ETestAppWP8.Tests
             result.AddTest(CreateToastPushTest("ãéìôü ÇñÑ", "الكتاب على الطاولة"));
             result.AddTest(CreateToastPushTest("这本书在桌子上", "本は机の上に"));
             result.AddTest(CreateToastPushTest("הספר הוא על השולחן", "Книга лежит на столе"));
-            result.AddTest(CreateToastPushTest("with param", "a value", "NewPage"));
-            //result.AddTest(CreateToastPushTest("sendToastImageAndText03", "ts-iat3-1", "ts-iat3-2", null, imageUrl, "zumo"));
-            //result.AddTest(CreateToastPushTest("sendToastImageAndText04", "ts-iat4-1", "ts-iat4-2", "ts-iat4-3", imageUrl, "zumo"));
+            result.AddTest(CreateToastPushTest("with param", "a value", "/UIElements/InputDialog"));
             result.AddTest(CreateRawPushTest("hello world"));
             result.AddTest(CreateRawPushTest("foobaráéíóú"));
-            //result.AddTest(CreateTilePushTest("TileWideImageAndText02", new[] { "tl-wiat2-1", "tl-wiat2-2" }, new[] { wideImageUrl }, new[] { "zumowide" }));
-            //result.AddTest(CreateTilePushTest("TileWideImageCollection",
-            //    new string[0],
-            //    new[] { wideImageUrl, imageUrl, imageUrl, imageUrl, imageUrl },
-            //    new[] { "zumowide", "zumo", "zumo", "zumo", "zumo" }));
-            //result.AddTest(CreateTilePushTest("TileWideText02",
-            //    new[] { "large caption", "tl-wt2-1", "tl-wt2-2", "tl-wt2-3", "tl-wt2-4", "tl-wt2-5", "tl-wt2-6", "tl-wt2-7", "tl-wt2-8" },
-            //    new string[0], new string[0]));
-            //result.AddTest(CreateTilePushTest("TileSquarePeekImageAndText01",
-            //    new[] { "tl-spiat1-1", "tl-spiat1-2", "tl-spiat1-3", "tl-spiat1-4" },
-            //    new[] { imageUrl }, new[] { "zumo img" }));
-            //result.AddTest(CreateTilePushTest("TileSquareBlock",
-            //    new[] { "24", "aliquam" },
-            //    new string[0], new string[0]));
+            result.AddTest(CreateTilePushTest(
+                "Simple tile", new Uri("/Assets/Tiles/IconicTileMediumLarge.png", UriKind.Relative), 0,
+                "Simple tile", 
+                new Uri("/Assets/Tiles/IconicTileMediumLarge.png", UriKind.Relative), "Back title", "Back content"));
+            result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("After clicking OK, make sure the application is pinned to the start menu"));
+            result.AddTest(ZumoTestCommon.CreateYesNoTest("Is the app in the start menu?", true));
+            result.AddTest(CreateTilePushTest("Tile with image", new Uri(imageUrl), 3, "Test title", new Uri(wideImageUrl), "Back title", "Back content"));
+            result.AddTest(ZumoTestCommon.CreateYesNoTest("Did the tile change?", true));
+            result.AddTest(CreateFlipTilePushTest("Flip tile",
+                new Uri("/Assets/Tiles/FlipCycleTileMedium.png", UriKind.Relative), 5, "Flip title",
+                new Uri("/Assets/Tiles/IconicTileSmall.png", UriKind.Relative), "Flip back title", "Flip back content",
+                new Uri("/Assets/Tiles/FlipCycleTileSmall.png", UriKind.Relative), new Uri("/Assets/Tiles/FlipCycleTileLarge.png", UriKind.Relative),
+                "Flip wide back content", new Uri("/Assets/Tiles/FlipCycleTileLarge.png", UriKind.Relative)));
+            result.AddTest(ZumoTestCommon.CreateYesNoTest("Did the tile change?", true));
 
             result.AddTest(CreateUnregisterChannelTest());
             return result;
+        }
+
+        private static ZumoTest CreateTilePushTest(string testName,
+            Uri backgroundImage, int? count, string title,
+            Uri backBackgroundImage, string backTitle, string backContent)
+        {
+            return CreateTilePushTest(testName, "sendTile",
+                backgroundImage, count, title,
+                backBackgroundImage, backTitle, backContent);
+        }
+
+        private static ZumoTest CreateFlipTilePushTest(
+            string testName,
+            Uri backgroundImage, int? count, string title,
+            Uri backBackgroundImage, string backTitle, string backContent,
+            Uri smallBackgroundImage, Uri wideBackgroundImage,
+            string wideBackContent, Uri wideBackBackgroundImage)
+        {
+            return CreateTilePushTest(testName, "sendFlipTile",
+                backgroundImage, count, title,
+                backBackgroundImage, backTitle, backContent,
+                smallBackgroundImage, wideBackgroundImage,
+                wideBackContent, wideBackBackgroundImage);
+        }
+
+        private static ZumoTest CreateTilePushTest(
+            string testName, string methodName,
+            Uri backgroundImage, int? count, string title,
+            Uri backBackgroundImage, string backTitle, string backContent,
+            Uri smallBackgroundImage = null, Uri wideBackgroundImage = null,
+            string wideBackContent = null, Uri wideBackBackgroundImage = null)
+        {
+            return new ZumoTest("SendTile - " + testName, async delegate(ZumoTest test)
+            {
+                var client = ZumoTestGlobals.Instance.Client;
+                var table = client.GetTable(ZumoTestGlobals.PushTestTableName);
+                var item = new JObject();
+                item.Add("method", methodName);
+                item.Add("channelUri", ZumoWP8PushTests.pushChannel.ChannelUri.AbsoluteUri);
+                var payload = new JObject();
+                payload.Add("backgroundImage", backgroundImage);
+                if (count.HasValue)
+                {
+                    payload.Add("count", count);
+                }
+
+                payload.Add("title", title);
+                payload.Add("backBackgroundImage", backBackgroundImage);
+                payload.Add("backTitle", backTitle);
+                payload.Add("backContent", backContent);
+
+                if (smallBackgroundImage != null) payload.Add("smallBackgroundImage", smallBackgroundImage);
+                if (wideBackgroundImage != null) payload.Add("wideBackgroundImage", wideBackgroundImage);
+                if (wideBackContent != null) payload.Add("wideBackContent", wideBackContent);
+                if (wideBackBackgroundImage != null) payload.Add("wideBackBackgroundImage", wideBackBackgroundImage);
+
+                item.Add("payload", payload);
+                var response = await table.InsertAsync(item);
+                test.AddLog("Response to (virtual) insert for push: {0}", response);
+                return true;
+            });
         }
 
         private static ZumoTest CreateToastPushTest(string text1, string text2, string param = null)
@@ -59,7 +122,7 @@ namespace ZumoE2ETestAppWP8.Tests
                 var table = client.GetTable(ZumoTestGlobals.PushTestTableName);
                 var item = new JObject();
                 item.Add("method", "sendToast");
-                item.Add("channelUri", ZumoPushTests.pushChannel.ChannelUri.AbsoluteUri);
+                item.Add("channelUri", ZumoWP8PushTests.pushChannel.ChannelUri.AbsoluteUri);
                 var payload = new JObject();
                 payload.Add("text1", text1);
                 payload.Add("text2", text2);
@@ -72,16 +135,31 @@ namespace ZumoE2ETestAppWP8.Tests
                 var response = await table.InsertAsync(item);
                 test.AddLog("Response to (virtual) insert for push: {0}", response);
                 test.AddLog("Waiting for push...");
-                var notification = await WaitForToastTileNotification(TimeSpan.FromSeconds(10));
+                var notification = await WaitForToastNotification(TimeSpan.FromSeconds(10));
                 if (notification != null)
                 {
                     test.AddLog("Received notification:");
+                    JObject actual = new JObject();
                     foreach (var key in notification.Keys)
                     {
+                        actual.Add(key, notification[key]);
                         test.AddLog("  {0}: {1}", key, notification[key]);
                     }
 
-                    return true;
+                    List<string> errors = new List<string>();
+                    if (Util.CompareJson(payload, actual, errors))
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        test.AddLog("Error, push received isn't the expected value");
+                        foreach (var error in errors)
+                        {
+                            test.AddLog(error);
+                        }
+                        return false;
+                    }
                 }
                 else
                 {
@@ -91,16 +169,16 @@ namespace ZumoE2ETestAppWP8.Tests
             });
         }
 
-        private async static Task<IDictionary<string, string>> WaitForToastTileNotification(TimeSpan maximumWait)
+        private async static Task<IDictionary<string, string>> WaitForToastNotification(TimeSpan maximumWait)
         {
             IDictionary<string, string> result = null;
             var tcs = new TaskCompletionSource<IDictionary<string, string>>();
             DateTime start = DateTime.UtcNow;
             while (DateTime.UtcNow.Subtract(start) < maximumWait)
             {
-                if (toastTilePushesReceived.Count > 0)
+                if (toastPushesReceived.Count > 0)
                 {
-                    result = toastTilePushesReceived.Dequeue().Collection;
+                    result = toastPushesReceived.Dequeue().Collection;
                     break;
                 }
 
@@ -118,7 +196,7 @@ namespace ZumoE2ETestAppWP8.Tests
                 var table = client.GetTable(ZumoTestGlobals.PushTestTableName);
                 var item = new JObject();
                 item.Add("method", "sendRaw");
-                item.Add("channelUri", ZumoPushTests.pushChannel.ChannelUri.AbsoluteUri);
+                item.Add("channelUri", ZumoWP8PushTests.pushChannel.ChannelUri.AbsoluteUri);
                 item.Add("payload", rawText);
                 var response = await table.InsertAsync(item);
                 test.AddLog("Response to (virtual) insert for push: {0}", response);
@@ -176,16 +254,16 @@ namespace ZumoE2ETestAppWP8.Tests
         {
             return new ZumoTest("Unregister push channel", delegate(ZumoTest test)
             {
-                if (ZumoPushTests.pushChannel != null)
+                if (ZumoWP8PushTests.pushChannel != null)
                 {
-                    ZumoPushTests.pushChannel.HttpNotificationReceived -= pushChannel_HttpNotificationReceived;
-                    ZumoPushTests.pushChannel.ShellToastNotificationReceived -= pushChannel_ShellToastNotificationReceived;
-                    ZumoPushTests.pushChannel.UnbindToShellTile();
-                    ZumoPushTests.pushChannel.UnbindToShellToast();
+                    ZumoWP8PushTests.pushChannel.HttpNotificationReceived -= pushChannel_HttpNotificationReceived;
+                    ZumoWP8PushTests.pushChannel.ShellToastNotificationReceived -= pushChannel_ShellToastNotificationReceived;
+                    ZumoWP8PushTests.pushChannel.UnbindToShellTile();
+                    ZumoWP8PushTests.pushChannel.UnbindToShellToast();
                     test.AddLog("Unbound from shell tile/toast");
-                    ZumoPushTests.pushChannel.Close();
+                    ZumoWP8PushTests.pushChannel.Close();
                     test.AddLog("Closed the push channel");
-                    ZumoPushTests.pushChannel = null;
+                    ZumoWP8PushTests.pushChannel = null;
                 }
 
                 TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
@@ -224,7 +302,9 @@ namespace ZumoE2ETestAppWP8.Tests
                 }
                 else
                 {
-                    pushChannel.BindToShellTile();
+                    var uris = new System.Collections.ObjectModel.Collection<Uri>();
+                    uris.Add(new Uri(ImageUrlDomain));
+                    pushChannel.BindToShellTile(uris);
                     pushChannel.BindToShellToast();
                     test.AddLog("Bound the push channel to shell toast / tile");
                 }
@@ -233,10 +313,10 @@ namespace ZumoE2ETestAppWP8.Tests
                 pushChannel.ShellToastNotificationReceived += pushChannel_ShellToastNotificationReceived;
                 test.AddLog("Registered to raw / shell toast events");
 
-                ZumoPushTests.pushChannel = pushChannel;
+                ZumoWP8PushTests.pushChannel = pushChannel;
 
                 DateTime start = DateTime.UtcNow;
-                TimeSpan maxWait = TimeSpan.FromSeconds(10);
+                TimeSpan maxWait = TimeSpan.FromSeconds(20);
                 while (DateTime.UtcNow.Subtract(start) < maxWait)
                 {
                     if (pushChannel.ConnectionStatus == ChannelConnectionStatus.Connected && pushChannel.ChannelUri != null)
@@ -266,12 +346,12 @@ namespace ZumoE2ETestAppWP8.Tests
 
         static void pushChannel_ShellToastNotificationReceived(object sender, NotificationEventArgs e)
         {
-            ZumoPushTests.toastTilePushesReceived.Enqueue(e);
+            ZumoWP8PushTests.toastPushesReceived.Enqueue(e);
         }
 
         static void pushChannel_HttpNotificationReceived(object sender, HttpNotificationEventArgs e)
         {
-            ZumoPushTests.rawPushesReceived.Enqueue(e);
+            ZumoWP8PushTests.rawPushesReceived.Enqueue(e);
         }
     }
 }
