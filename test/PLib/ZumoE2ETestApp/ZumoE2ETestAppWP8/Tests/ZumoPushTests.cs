@@ -22,7 +22,11 @@ namespace ZumoE2ETestAppWP8.Tests
             const string imageUrl = "http://zumotestserver.azurewebsites.net/content/zumo2.png";
             const string wideImageUrl = "http://zumotestserver.azurewebsites.net/content/zumo1.png";
             result.AddTest(CreateRegisterChannelTest());
-            //result.AddTest(CreateToastPushTest("sendToastText01", "hello world"));
+            result.AddTest(CreateToastPushTest("first text", "second text"));
+            result.AddTest(CreateToastPushTest("ãéìôü ÇñÑ", "الكتاب على الطاولة"));
+            result.AddTest(CreateToastPushTest("这本书在桌子上", "本は机の上に"));
+            result.AddTest(CreateToastPushTest("הספר הוא על השולחן", "Книга лежит на столе"));
+            result.AddTest(CreateToastPushTest("with param", "a value", "NewPage"));
             //result.AddTest(CreateToastPushTest("sendToastImageAndText03", "ts-iat3-1", "ts-iat3-2", null, imageUrl, "zumo"));
             //result.AddTest(CreateToastPushTest("sendToastImageAndText04", "ts-iat4-1", "ts-iat4-2", "ts-iat4-3", imageUrl, "zumo"));
             result.AddTest(CreateRawPushTest("hello world"));
@@ -46,6 +50,66 @@ namespace ZumoE2ETestAppWP8.Tests
             return result;
         }
 
+        private static ZumoTest CreateToastPushTest(string text1, string text2, string param = null)
+        {
+            var testName = "SendToast - [" + text1 + ", " + text2 + ", " + (param ?? "<<null>>") + "]";
+            return new ZumoTest(testName, async delegate(ZumoTest test)
+            {
+                var client = ZumoTestGlobals.Instance.Client;
+                var table = client.GetTable(ZumoTestGlobals.PushTestTableName);
+                var item = new JObject();
+                item.Add("method", "sendToast");
+                item.Add("channelUri", ZumoPushTests.pushChannel.ChannelUri.AbsoluteUri);
+                var payload = new JObject();
+                payload.Add("text1", text1);
+                payload.Add("text2", text2);
+                if (param != null)
+                {
+                    payload.Add("param", param);
+                }
+
+                item.Add("payload", payload);
+                var response = await table.InsertAsync(item);
+                test.AddLog("Response to (virtual) insert for push: {0}", response);
+                test.AddLog("Waiting for push...");
+                var notification = await WaitForToastTileNotification(TimeSpan.FromSeconds(10));
+                if (notification != null)
+                {
+                    test.AddLog("Received notification:");
+                    foreach (var key in notification.Keys)
+                    {
+                        test.AddLog("  {0}: {1}", key, notification[key]);
+                    }
+
+                    return true;
+                }
+                else
+                {
+                    test.AddLog("Did not receive notification on time");
+                    return false;
+                }
+            });
+        }
+
+        private async static Task<IDictionary<string, string>> WaitForToastTileNotification(TimeSpan maximumWait)
+        {
+            IDictionary<string, string> result = null;
+            var tcs = new TaskCompletionSource<IDictionary<string, string>>();
+            DateTime start = DateTime.UtcNow;
+            while (DateTime.UtcNow.Subtract(start) < maximumWait)
+            {
+                if (toastTilePushesReceived.Count > 0)
+                {
+                    result = toastTilePushesReceived.Dequeue().Collection;
+                    break;
+                }
+
+                await Task.Delay(500);
+            }
+
+            return result;
+        }
+
         private static ZumoTest CreateRawPushTest(string rawText)
         {
             return new ZumoTest("SendRaw - " + rawText, async delegate(ZumoTest test)
@@ -60,22 +124,30 @@ namespace ZumoE2ETestAppWP8.Tests
                 test.AddLog("Response to (virtual) insert for push: {0}", response);
                 test.AddLog("Waiting for push...");
                 var notification = await WaitForHttpNotification(TimeSpan.FromSeconds(10));
-                test.AddLog("Received notification... headers:");
-                foreach (var header in notification.Headers.AllKeys)
+                if (notification != null)
                 {
-                    test.AddLog("  {0}: {1}", header, notification.Headers[header]);
-                }
+                    test.AddLog("Received notification... headers:");
+                    foreach (var header in notification.Headers.AllKeys)
+                    {
+                        test.AddLog("  {0}: {1}", header, notification.Headers[header]);
+                    }
 
-                string notificationBody = new StreamReader(notification.Body).ReadToEnd();
-                test.AddLog("Received raw notification: {0}", notificationBody);
-                if (notificationBody == rawText)
-                {
-                    test.AddLog("Received expected notification");
-                    return true;
+                    string notificationBody = new StreamReader(notification.Body).ReadToEnd();
+                    test.AddLog("Received raw notification: {0}", notificationBody);
+                    if (notificationBody == rawText)
+                    {
+                        test.AddLog("Received expected notification");
+                        return true;
+                    }
+                    else
+                    {
+                        test.AddLog("Notification received is incorrect!");
+                        return false;
+                    }
                 }
                 else
                 {
-                    test.AddLog("Notification received is incorrect!");
+                    test.AddLog("Did not receive the notification on time");
                     return false;
                 }
             });
@@ -131,14 +203,35 @@ namespace ZumoE2ETestAppWP8.Tests
                 if (pushChannel == null)
                 {
                     pushChannel = new HttpNotificationChannel(channelName);
+                    test.AddLog("Created new channel");
+                }
+                else
+                {
+                    test.AddLog("Reusing existing channel");
+                }
+
+                if (pushChannel.ConnectionStatus == ChannelConnectionStatus.Disconnected)
+                {
                     pushChannel.Open();
                     test.AddLog("Opened the push channel");
+                } else {
+                    test.AddLog("Channel already opened");
+                }
+
+                if (pushChannel.IsShellToastBound)
+                {
+                    test.AddLog("Channel is already bound to shell toast");
+                }
+                else
+                {
                     pushChannel.BindToShellTile();
                     pushChannel.BindToShellToast();
                     test.AddLog("Bound the push channel to shell toast / tile");
-                    pushChannel.HttpNotificationReceived += pushChannel_HttpNotificationReceived;
-                    pushChannel.ShellToastNotificationReceived += pushChannel_ShellToastNotificationReceived;
                 }
+
+                pushChannel.HttpNotificationReceived += pushChannel_HttpNotificationReceived;
+                pushChannel.ShellToastNotificationReceived += pushChannel_ShellToastNotificationReceived;
+                test.AddLog("Registered to raw / shell toast events");
 
                 ZumoPushTests.pushChannel = pushChannel;
 
