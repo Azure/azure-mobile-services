@@ -52,7 +52,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// Task that will complete with the response string when the user has finished authentication.
         /// </returns>
-        protected override Task<string> LoginInternalAsync()
+        protected override Task<string> LoginAsyncOverride()
         {
             string providerName = Provider.ToString().ToLower();
 

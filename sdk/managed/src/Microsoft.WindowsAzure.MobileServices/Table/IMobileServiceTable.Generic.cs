@@ -188,6 +188,29 @@ namespace Microsoft.WindowsAzure.MobileServices
         IMobileServiceTableQuery<T> CreateQuery(); 
 
         /// <summary>
+        /// Creates a query that will ensure it gets the total count for all
+        /// the records that would have been returned ignoring any take paging/
+        /// limit clause specified by client or server.
+        /// </summary>
+        /// <returns>
+        /// A query against the table.
+        /// </returns>
+        IMobileServiceTableQuery<T> IncludeTotalCount();
+
+        /// <summary>
+        /// Applies to the source query the specified string key-value 
+        /// pairs to be used as user-defined parameters with the request URI 
+        /// query string.
+        /// </summary>
+        /// <param name="parameters">
+        /// The parameters to apply.
+        /// </param>
+        /// <returns>
+        /// The composed query.
+        /// </returns>
+        IMobileServiceTableQuery<T> WithParameters(IDictionary<string, string> parameters);
+
+        /// <summary>
         /// Creates a query by applying the specified filter predicate.
         /// </summary>
         /// <param name="predicate">

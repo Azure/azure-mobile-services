@@ -43,6 +43,7 @@
     <!-- A reference to the entire .NET Framework is automatically included -->
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FunctionalTests\DataSourceTest.cs" />
     <Compile Include="Mocks\MobileServiceTableQueryMock.cs" />
     <Compile Include="SerializationTypes\ComplexType.cs" />
     <Compile Include="SerializationTypes\InterfacePropertyType.cs" />

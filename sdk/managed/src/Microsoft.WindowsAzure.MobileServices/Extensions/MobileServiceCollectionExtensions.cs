@@ -26,9 +26,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Optional page size.
         /// </param>
         /// <returns>The collection.</returns>
-        public static MobileServiceCollection<TTable, TTable> ToCollection<TTable>(this IMobileServiceTableQuery<TTable> query, int pageSize = 0)
+        public async static Task<MobileServiceCollection<TTable, TTable>> ToCollectionAsync<TTable>(this IMobileServiceTableQuery<TTable> query, int pageSize = 0)
         {
-            return new MobileServiceCollection<TTable, TTable>(query, pageSize);
+            var collection = new MobileServiceCollection<TTable, TTable>(query, pageSize);
+            await collection.LoadMoreItemsAsync();
+            return collection;
         }
 
         /// <summary>
@@ -41,9 +43,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Optional page size.
         /// </param>
         /// <returns>The collection.</returns>
-        public static MobileServiceCollection<TTable, TTable> ToCollection<TTable>(this IMobileServiceTable<TTable> table, int pageSize = 0)
+        public static Task<MobileServiceCollection<TTable, TTable>> ToCollectionAsync<TTable>(this IMobileServiceTable<TTable> table, int pageSize = 0)
         {
-            return new MobileServiceTableQuery<TTable>(table).ToCollection(pageSize);
+            return new MobileServiceTableQuery<TTable>(table).ToCollectionAsync(pageSize);
         }
     }
 }
