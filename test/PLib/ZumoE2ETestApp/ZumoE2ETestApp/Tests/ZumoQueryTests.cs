@@ -164,7 +164,7 @@ namespace ZumoE2ETestApp.Tests
                                 Date = m.ReleaseDate.ToUniversalTime().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                                 Title = m.Title
                             };
-                var newPage = new MoviesDisplayPage();
+                var newPage = new MoviesDisplayControl();
                 var collection = query.ToCollection();
                 newPage.SetMoviesSource(collection);
                 await collection.LoadMoreItemsAsync();
