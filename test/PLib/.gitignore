@@ -4,7 +4,3 @@
 obj/
 bin/
 *.csproj.user
-
-# Nuget packages #
-##################
-packages/

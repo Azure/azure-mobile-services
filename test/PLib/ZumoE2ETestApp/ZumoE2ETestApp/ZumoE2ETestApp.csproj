@@ -141,14 +141,14 @@
     </Compile>
     <Compile Include="UIElements\ListViewForTestGroup.cs" />
     <Compile Include="UIElements\ListViewForTest.cs" />
-    <Compile Include="UIElements\MoviesDisplayPage.xaml.cs">
-      <DependentUpon>MoviesDisplayPage.xaml</DependentUpon>
+    <Compile Include="UIElements\MoviesDisplayControl.xaml.cs">
+      <DependentUpon>MoviesDisplayControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UIElements\SaveAppsPage.xaml.cs">
-      <DependentUpon>SaveAppsPage.xaml</DependentUpon>
+    <Compile Include="UIElements\SaveAppsControl.xaml.cs">
+      <DependentUpon>SaveAppsControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="UIElements\UploadLogsPage.xaml.cs">
-      <DependentUpon>UploadLogsPage.xaml</DependentUpon>
+    <Compile Include="UIElements\UploadLogsControl.xaml.cs">
+      <DependentUpon>UploadLogsControl.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -165,7 +165,7 @@
     <Content Include="Assets\SplashScreen.png" />
     <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\WideLogo.png" />
-    <Page Include="UIElements\MoviesDisplayPage.xaml">
+    <Page Include="UIElements\MoviesDisplayControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -174,11 +174,11 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <None Include="Package.StoreAssociation.xml" />
-    <Page Include="UIElements\SaveAppsPage.xaml">
+    <Page Include="UIElements\SaveAppsControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="UIElements\UploadLogsPage.xaml">
+    <Page Include="UIElements\UploadLogsControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -204,11 +204,11 @@
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Mobile, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\WindowsAzure.MobileServices.0.3.0-alpha\lib\netcore45\Microsoft.WindowsAzure.Mobile.dll</HintPath>
+      <HintPath>..\packages\WindowsAzure.MobileServices.0.3.1-alpha\lib\netcore45\Microsoft.WindowsAzure.Mobile.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Mobile.Ext, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\WindowsAzure.MobileServices.0.3.0-alpha\lib\netcore45\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
+      <HintPath>..\packages\WindowsAzure.MobileServices.0.3.1-alpha\lib\netcore45\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -228,6 +228,7 @@
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
+  <Import Project="..\packages\Microsoft.Bcl.Build.1.0.0-rc\tools\Microsoft.Bcl.Build.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

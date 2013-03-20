@@ -15,9 +15,16 @@ namespace ZumoE2ETestApp.Tests
                 ZumoRoundTripTests.CreateTests(),
                 ZumoQueryTests.CreateTests(),
                 ZumoCUDTests.CreateTests(),
-                ZumoLoginTests.CreateTests(),
                 ZumoMiscTests.CreateTests(),
+#if WINDOWS_PHONE
                 ZumoWP8PushTests.CreateTests(),
+#endif
+#if NETFX_CORE                
+                ZumoPushTests.CreateTests(),
+#endif
+#if !NET45
+                ZumoLoginTests.CreateTests(),
+#endif
             };
 
             return result;
