@@ -97,6 +97,9 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.authenticationHttpClient = new HttpClient();
 
             this.userAgentHeaderValue = GetUserAgentHeader();
+
+            this.httpClient.DefaultRequestHeaders.Add(UserAgentHeader, userAgentHeaderValue);
+            this.authenticationHttpClient.DefaultRequestHeaders.Add(UserAgentHeader, userAgentHeaderValue);
         }
 
         /// <summary>
@@ -317,7 +320,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             IPlatformInformation platformInformation = Platform.Instance.PlatformInformation;
             return string.Format(
                 CultureInfo.InvariantCulture,
-                "{0}/{1}; (lang={2}; os={3}; os_version={4}; arch={5})",
+                "{0}/{1} (lang={2}; os={3}; os_version={4}; arch={5})",
                 "ZUMO",
                 "1.0",  // TODO: Determine a way to get the SDK version
                 "Managed",

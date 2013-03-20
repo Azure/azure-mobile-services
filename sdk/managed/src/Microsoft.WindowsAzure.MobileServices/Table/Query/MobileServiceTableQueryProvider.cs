@@ -137,6 +137,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </param>
         /// <param name="totalCount">
         /// The total count as requested via the IncludeTotalCount method.
+        /// If the response does not include totalcount, it is set to -1.
         /// </param>
         /// <returns>
         /// The response as a JSON array.

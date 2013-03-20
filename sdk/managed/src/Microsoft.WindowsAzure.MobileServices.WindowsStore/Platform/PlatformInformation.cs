@@ -46,7 +46,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             get
             {
-                return "Windows 8";
+                return "Windows Store";
             }
         }
 

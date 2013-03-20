@@ -39,16 +39,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// Task that will complete with the response string when the user has finished authentication.
         /// </returns>
-        protected override Task<string> LoginInternalAsync()
+        protected override Task<string> LoginAsyncOverride()
         {
-            string providerName = this.Provider.ToString().ToLower();
-
-            Uri startUri = new Uri(this.Client.ApplicationUri, MobileServiceAuthentication.LoginAsyncUriFragment + "/" + providerName);
-            Uri endUri = new Uri(this.Client.ApplicationUri, MobileServiceAuthentication.LoginAsyncDoneUriFragment);
-
             AuthenticationBroker broker = new AuthenticationBroker();
 
-            return broker.AuthenticateAsync(startUri, endUri, true);
+            return broker.AuthenticateAsync(this.StartUri, this.EndUri, true);
         }
     }
 }

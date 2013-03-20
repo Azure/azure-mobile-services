@@ -108,8 +108,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public bool IsDefaultId(object id)
         {
-            Debug.Assert(id != null);
-
             return id == null ||
                    object.Equals(id, 0) ||
                    object.Equals(id, 0L) ||

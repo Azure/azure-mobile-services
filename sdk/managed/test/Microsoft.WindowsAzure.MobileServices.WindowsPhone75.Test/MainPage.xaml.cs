@@ -36,9 +36,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             _groups = new ObservableCollection<GroupDescription>();
             unitTests.ItemsSource = _groups;
 
-            txtRuntimeUri.Text = "";
-            txtRuntimeKey.Text = ""; 
-            txtTags.Text = "";
+            txtRuntimeUri.Text = ""; // Set the default URI here
+            txtRuntimeKey.Text = ""; // Set the default Key here
+            txtTags.Text = ""; // Set the default tags here
         }
 
         private void ExecuteLoginTests(object sender, RoutedEventArgs e)

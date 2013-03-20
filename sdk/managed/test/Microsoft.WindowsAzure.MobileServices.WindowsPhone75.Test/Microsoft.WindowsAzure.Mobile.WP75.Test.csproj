@@ -22,7 +22,7 @@
     <GenerateSilverlightManifest>true</GenerateSilverlightManifest>
     <XapFilename>Microsoft.WindowsAzure.MobileServices.WindowsPhone75.Test.xap</XapFilename>
     <SilverlightManifestTemplate>Properties\AppManifest.xml</SilverlightManifestTemplate>
-    <SilverlightAppEntry>Microsoft.WindowsAzure.MobileServices.WindowsPhone75.Test.App</SilverlightAppEntry>
+    <SilverlightAppEntry>Microsoft.WindowsAzure.MobileServices.Test.App</SilverlightAppEntry>
     <ValidateXaml>true</ValidateXaml>
     <ThrowErrorsInValidation>true</ThrowErrorsInValidation>
     <WarningLevel>0</WarningLevel>

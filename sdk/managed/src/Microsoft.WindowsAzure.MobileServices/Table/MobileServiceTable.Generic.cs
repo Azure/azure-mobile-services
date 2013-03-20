@@ -471,9 +471,25 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A query against the table.
         /// </returns>
-        public MobileServiceTableQuery<T> IncludeTotalCount()
+        public IMobileServiceTableQuery<T> IncludeTotalCount()
         {
-            return new MobileServiceTableQuery<T>(this, null, null, true, null);
+            return this.CreateQuery().IncludeTotalCount();
+        }
+
+        /// <summary>
+        /// Applies to the source query the specified string key-value 
+        /// pairs to be used as user-defined parameters with the request URI 
+        /// query string.
+        /// </summary>
+        /// <param name="parameters">
+        /// The parameters to apply.
+        /// </param>
+        /// <returns>
+        /// The composed query.
+        /// </returns>
+        public IMobileServiceTableQuery<T> WithParameters(IDictionary<string, string> parameters)
+        {
+            return this.CreateQuery().WithParameters(parameters);
         }
 
         /// <summary>
