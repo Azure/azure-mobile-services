@@ -21,7 +21,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
     {
         static readonly string DefaultMobileServiceManagementEndpoint = "https://management.core.windows.net";
         static readonly string DefaultSqlManagementEndpoint = "https://management.core.windows.net:8443";
-        static readonly string DefaultSqlManagementEndpoint2 = "https://management.database.windows.net:8443";
         static readonly string WindowsAzureNs = "http://schemas.microsoft.com/windowsazure";
         static readonly string SqlAzureNs = "http://schemas.microsoft.com/sqlazure/2010/12/";
         static readonly string DefaultSqlDatabaseHostSuffix = ".database.windows.net";
@@ -31,7 +30,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
         public X509Certificate2 ManagementCertificate { get; set; }
         public string MobileServiceManagementEndpoint { get; set; }
         public string SqlManagementEndpoint { get; set; }
-        public string SqlManagementEndpoint2 { get; set; }
         public string SqlDatabaseHostSuffix { get; set; }
         public string MobileServiceHostSuffix { get; set; }
 
@@ -47,7 +45,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             this.ManagementCertificate = managementCertificate;
             this.MobileServiceManagementEndpoint = DefaultMobileServiceManagementEndpoint;
             this.SqlManagementEndpoint = DefaultSqlManagementEndpoint;
-            this.SqlManagementEndpoint2 = DefaultSqlManagementEndpoint2;
             this.SqlDatabaseHostSuffix = DefaultSqlDatabaseHostSuffix;
             this.MobileServiceHostSuffix = DefaultMobileServiceHostSuffix;
         }
@@ -69,7 +66,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
 
             this.MobileServiceManagementEndpoint = DefaultMobileServiceManagementEndpoint;
             this.SqlManagementEndpoint = DefaultSqlManagementEndpoint;
-            this.SqlManagementEndpoint2 = DefaultSqlManagementEndpoint2;
             this.SqlDatabaseHostSuffix = DefaultSqlDatabaseHostSuffix;
             this.MobileServiceHostSuffix = DefaultMobileServiceHostSuffix;
 
@@ -123,10 +119,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             HttpRequestMessage request = new HttpRequestMessage();
             request.Method = HttpMethod.Get;
             request.RequestUri = new Uri(
-                this.SqlManagementEndpoint2 +
+                this.SqlManagementEndpoint +
                 "/" + this.SubscriptionId +
-                "/servers");
-            request.Headers.Add("x-ms-version", "1.0");
+                "/services/sqlservers/servers");
+            request.Headers.Add("x-ms-version", "2012-03-01");
             HttpResponseMessage response = await this.MakeManagementRequestAsync(request);
             XElement body = await this.ProcessXmlResponseAsync(response);
 
