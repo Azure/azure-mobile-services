@@ -4,8 +4,3 @@
 obj/
 bin/
 *.csproj.user
-
-# Nuget packages #
-##################
-packages/
-!packages/Microsoft.Bcl.Build.1.0.0.rc/
