@@ -48,6 +48,7 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Net45.Test", "test\Microsoft.WindowsAzure.Mobile.Net45.Test\Microsoft.WindowsAzure.Mobile.Net45.Test.csproj", "{7C1A9BC1-3E60-4673-AC08-AC8399032D49}"
 EndProject
 Global
+Global	
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|ARM = Debug|ARM
