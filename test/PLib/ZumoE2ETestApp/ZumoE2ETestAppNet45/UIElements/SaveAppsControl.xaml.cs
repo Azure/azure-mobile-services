@@ -30,7 +30,7 @@ namespace ZumoE2ETestApp.UIElements
             this.lstApps.ItemsSource = savedServices;
         }
 
-        private async void btnSelect_Click_1(object sender, RoutedEventArgs e)
+        private void btnSelect_Click_1(object sender, RoutedEventArgs e)
         {
             int selectedIndex = this.lstApps.SelectedIndex;
             if (selectedIndex >= 0)

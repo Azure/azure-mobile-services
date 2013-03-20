@@ -38,7 +38,7 @@ namespace ZumoE2ETestApp
         /// </summary>
         /// <param name="e">Event data that describes how this page was reached.  The Parameter
         /// property is typically used to configure the page.</param>
-        protected async void OnNavigatedTo(NavigationEventArgs e)
+        private async void OnNavigatedTo(NavigationEventArgs e)
         {
             List<ListViewForTestGroup> sources = allTests.Select((tg, i) => new ListViewForTestGroup(i + 1, tg)).ToList();
             this.lstTestGroups.ItemsSource = sources;

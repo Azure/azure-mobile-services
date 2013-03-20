@@ -32,7 +32,7 @@ namespace ZumoE2ETestApp.UIElements
                 try
                 {
 #if NET45
-                    using (var stream = File.OpenRead(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SavedAppsFileName")))
+                    using (var stream = await Task.FromResult(File.OpenRead(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SavedAppsFileName"))))
                     {
                         DataContractJsonSerializer dcjs = new DataContractJsonSerializer(typeof(SavedAppInfo));
                         savedAppInfo = (SavedAppInfo)dcjs.ReadObject(stream);
@@ -63,7 +63,7 @@ namespace ZumoE2ETestApp.UIElements
             try
             {
 #if NET45
-                using (var stream = File.OpenWrite(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SavedAppsFileName")))
+                using (var stream = await Task.FromResult(File.OpenWrite(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SavedAppsFileName"))))
                 {
                     DataContractJsonSerializer dcjs = new DataContractJsonSerializer(typeof(SavedAppInfo));
                     dcjs.WriteObject(stream, appInfo);

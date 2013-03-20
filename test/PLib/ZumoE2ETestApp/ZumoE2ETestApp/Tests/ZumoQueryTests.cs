@@ -165,9 +165,8 @@ namespace ZumoE2ETestApp.Tests
                                 Title = m.Title
                             };
                 var newPage = new MoviesDisplayControl();
-                var collection = query.ToCollection();
+                var collection = await query.ToCollectionAsync();
                 newPage.SetMoviesSource(collection);
-                await collection.LoadMoreItemsAsync();
                 await newPage.Display();
                 return true;
             }));
