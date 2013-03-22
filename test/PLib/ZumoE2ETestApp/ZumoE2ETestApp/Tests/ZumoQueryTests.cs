@@ -106,7 +106,6 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateQueryTest("Skip all using large skip - 500", null, null, 500));
             result.AddTest(CreateQueryTest("Get first ($top) - 10", null, 10));
             result.AddTest(CreateQueryTest("Get last ($skip) - 10", null, null, ZumoQueryTestData.AllMovies.Length - 10));
-            result.AddTest(CreateQueryTest("Skip all using large skip - 500", null, null, 500));
             result.AddTest(CreateQueryTest("Skip, take, includeTotalCount - movies 11-20, ordered by title",
                 null, 10, 10, new[] { new OrderByClause("Title", true) }, null, true));
             result.AddTest(CreateQueryTest("Skip, take, filter includeTotalCount - movies 11-20 which won a best picture award, ordered by year",
