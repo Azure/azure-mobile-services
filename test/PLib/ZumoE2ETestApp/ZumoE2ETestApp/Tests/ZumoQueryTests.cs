@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using Microsoft.WindowsAzure.MobileServices;
+using Newtonsoft.Json.Linq;
 using ZumoE2ETestApp.Framework;
 using ZumoE2ETestApp.Tests.Types;
 using ZumoE2ETestApp.UIElements;
@@ -124,6 +125,13 @@ namespace ZumoE2ETestApp.Tests
                 m => m.Year >= 2000, 200, null, new[] { new OrderByClause("ReleaseDate", false), new OrderByClause("Title", true) },
                 m => string.Format("{0} {1} - {2} minutes", m.Title.PadRight(30), m.BestPictureWinner ? "(best picture)" : "", m.Duration)));
 
+            // Tests passing the OData query directly to the Read operation
+            result.AddTest(CreateQueryTest("Passing OData query directly - movies from the 80's, ordered by Title, items 3, 4 and 5",
+                whereClause: m => m.Year >= 1980 && m.Year <= 1989,
+                top: 3, skip: 2,
+                orderBy: new OrderByClause[] { new OrderByClause("Title", true) },
+                odataQueryExpression: "$filter=((Year ge 1980) and (Year le 1989))&$top=3&$skip=2&$orderby=Title asc"));
+
             // Negative tests
             result.AddTest(CreateQueryTest<MobileServiceInvalidOperationException>("(Neg) Very large top value", m => m.Year > 2000, 1001));
             result.AddTest(CreateQueryTest<NotSupportedException>("(Neg) Unsupported predicate: unsupported arithmetic",
@@ -190,15 +198,17 @@ namespace ZumoE2ETestApp.Tests
         private static ZumoTest CreateQueryTest(
             string name, Expression<Func<Movie, bool>> whereClause,
             int? top = null, int? skip = null, OrderByClause[] orderBy = null,
-            Expression<Func<Movie, string>> selectExpression = null, bool? includeTotalCount = null)
+            Expression<Func<Movie, string>> selectExpression = null, bool? includeTotalCount = null,
+            string odataQueryExpression = null)
         {
-            return CreateQueryTest<ExceptionTypeWhichWillNeverBeThrown>(name, whereClause, top, skip, orderBy, selectExpression, includeTotalCount);
+            return CreateQueryTest<ExceptionTypeWhichWillNeverBeThrown>(name, whereClause, top, skip, orderBy, selectExpression, includeTotalCount, odataQueryExpression);
         }
 
         private static ZumoTest CreateQueryTest<TExpectedException>(
             string name, Expression<Func<Movie, bool>> whereClause, 
             int? top = null, int? skip = null, OrderByClause[] orderBy = null,
-            Expression<Func<Movie, string>> selectExpression = null, bool? includeTotalCount = null)
+            Expression<Func<Movie, string>> selectExpression = null, bool? includeTotalCount = null,
+            string odataExpression = null)
             where TExpectedException : Exception
         {
             return new ZumoTest(name, async delegate(ZumoTest test)
@@ -206,64 +216,74 @@ namespace ZumoE2ETestApp.Tests
                 try
                 {
                     var table = ZumoTestGlobals.Instance.Client.GetTable<Movie>();
-                    IMobileServiceTableQuery<Movie> query = null;
-                    IMobileServiceTableQuery<string> selectedQuery = null;
-
-                    if (whereClause != null)
-                    {
-                        query = table.Where(whereClause);
-                    }
-
-                    if (orderBy != null)
-                    {
-                        if (query == null)
-                        {
-                            query = table.Where(m => m.Duration == m.Duration);
-                        }
-
-                        query = ApplyOrdering(query, orderBy);
-                    }
-
-                    if (top.HasValue)
-                    {
-                        query = query == null ? table.Take(top.Value) : query.Take(top.Value);
-                    }
-
-                    if (skip.HasValue)
-                    {
-                        query = query == null ? table.Skip(skip.Value) : query.Skip(skip.Value);
-                    }
-
-                    if (selectExpression != null)
-                    {
-                        selectedQuery = query == null ? table.Select(selectExpression) : query.Select(selectExpression);
-                    }
-
-                    if (includeTotalCount.HasValue)
-                    {
-                        query = query.IncludeTotalCount();
-                    }
-
                     IEnumerable<Movie> readMovies = null;
                     IEnumerable<string> readProjectedMovies = null;
-                    if (selectedQuery == null)
+
+                    if (odataExpression == null)
                     {
-                        // Both ways of querying should be equivalent, so using both with equal probability here.
-                        var tickCount = Environment.TickCount;
-                        if ((tickCount % 2) == 0)
+                        IMobileServiceTableQuery<Movie> query = null;
+                        IMobileServiceTableQuery<string> selectedQuery = null;
+
+                        if (whereClause != null)
                         {
-                            test.AddLog("Querying using MobileServiceTableQuery<T>.ToEnumerableAsync");
-                            readMovies = await query.ToEnumerableAsync();
+                            query = table.Where(whereClause);
+                        }
+
+                        if (orderBy != null)
+                        {
+                            if (query == null)
+                            {
+                                query = table.Where(m => m.Duration == m.Duration);
+                            }
+
+                            query = ApplyOrdering(query, orderBy);
+                        }
+
+                        if (top.HasValue)
+                        {
+                            query = query == null ? table.Take(top.Value) : query.Take(top.Value);
+                        }
+
+                        if (skip.HasValue)
+                        {
+                            query = query == null ? table.Skip(skip.Value) : query.Skip(skip.Value);
+                        }
+
+                        if (selectExpression != null)
+                        {
+                            selectedQuery = query == null ? table.Select(selectExpression) : query.Select(selectExpression);
+                        }
+
+                        if (includeTotalCount.HasValue)
+                        {
+                            query = query.IncludeTotalCount();
+                        }
+
+                        if (selectedQuery == null)
+                        {
+                            // Both ways of querying should be equivalent, so using both with equal probability here.
+                            var tickCount = Environment.TickCount;
+                            if ((tickCount % 2) == 0)
+                            {
+                                test.AddLog("Querying using MobileServiceTableQuery<T>.ToEnumerableAsync");
+                                readMovies = await query.ToEnumerableAsync();
+                            }
+                            else
+                            {
+                                test.AddLog("Querying using IMobileServiceTable<T>.ReadAsync(MobileServiceTableQuery<U>)");
+                                readMovies = await table.ReadAsync(query);
+                            }
                         }
                         else
                         {
-                            test.AddLog("Querying using IMobileServiceTable<T>.ReadAsync(MobileServiceTableQuery<U>)");
-                            readMovies = await table.ReadAsync(query);
+                            readProjectedMovies = await selectedQuery.ToEnumerableAsync();
                         }
                     }
                     else
                     {
-                        readProjectedMovies = await selectedQuery.ToEnumerableAsync();
+                        test.AddLog("Using the OData query directly");
+                        JToken result = await table.ReadAsync(odataExpression);
+                        readMovies = result.ToObject<IEnumerable<Movie>>();
                     }
 
                     long actualTotalCount = -1;
