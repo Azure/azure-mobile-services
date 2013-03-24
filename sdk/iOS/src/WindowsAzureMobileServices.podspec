@@ -1,9 +1,9 @@
 Pod::Spec.new do |s|
-  s.name         = "MSAzureMobileServices"
-  s.version      = "0.0.1"
+  s.name         = "WindowsAzureMobileServices"
+  s.version      = "0.0.2"
   s.summary      = "Client SDKs and Samples for Windows Azure Mobile Services"
   s.homepage     = "https://www.windowsazure.com/en-us/develop/mobile/"
-  s.license      = 'MIT'
+  s.license      = 'Apache 2'
 
   s.author       = 'Windows Azure Team'
 
@@ -12,5 +12,4 @@ Pod::Spec.new do |s|
   s.source_files = 'sdk/iOS/src/**/*.{h,m}'
 
   s.requires_arc = true
-
 end
