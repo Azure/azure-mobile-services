@@ -233,6 +233,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
                     .Elements(XName.Get("InternalResource", WindowsAzureNs)));
                 ProcessApplicationResources(result, response.Element(XName.Get("ExternalResources", WindowsAzureNs))
                     .Elements(XName.Get("ExternalResource", WindowsAzureNs)));
+
+                if (string.Equals("unhealthy", result.State, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    result.FaultMessages.Add(string.Format(
+                        CultureInfo.CurrentCulture,
+                        Resources.ServiceUnhealthy,
+                        result.State,
+                        result.SqlServerState,
+                        result.SqlDbState,
+                        result.MobileServiceState));
+                }
+
                 foreach (XElement faultCode in response.Descendants(XName.Get("FailureCode", WindowsAzureNs)))
                 {
                     if (string.IsNullOrEmpty(faultCode.Value))

@@ -211,6 +211,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Management {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Creation of a mobile service failed, but some of the artifacts had been provisioned. Please refer to the Windows Azure Mobile Services management portal to inspect the status of the mobile service and remove unwanted artifacts. Overall status: {0}. SQL server provisioning status: {1}. SQL database provisioning status: {2}. Mobile service provisioning status: {3}..
+        /// </summary>
+        internal static string ServiceUnhealthy {
+            get {
+                return ResourceManager.GetString("ServiceUnhealthy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A call to Windows Azure Mobile Services management endoint returned a response that cannot be parsed as XML: {0}.
         /// </summary>
         internal static string UnableToProcessResponse {
