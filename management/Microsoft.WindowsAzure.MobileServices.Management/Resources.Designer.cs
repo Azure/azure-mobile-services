@@ -220,6 +220,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Management {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unable to obtain configuration information for Windows Azure Mobile Services management endpoints from {0}..
+        /// </summary>
+        internal static string UnableToAccessConfiguration {
+            get {
+                return ResourceManager.GetString("UnableToAccessConfiguration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A call to Windows Azure Mobile Services management endoint returned a response that cannot be parsed as XML: {0}.
         /// </summary>
         internal static string UnableToProcessResponse {

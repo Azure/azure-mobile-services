@@ -67,6 +67,7 @@
   <ItemGroup>
     <None Include="272MSSharedLibSN2048.snk" />
     <None Include="packages.config" />
+    <None Include="WamsEndpoints.json" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources.resx">

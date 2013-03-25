@@ -19,6 +19,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
 {
     public class MobileServicesManagementClient
     {
+        static readonly string WamsConfigurationEndpoint = "http://nodertncu.blob.core.windows.net/wams/WamsEndpoints.json";
         static readonly string DefaultMobileServiceManagementEndpoint = "https://management.core.windows.net";
         static readonly string DefaultSqlManagementEndpoint = "https://management.core.windows.net:8443";
         static readonly string WindowsAzureNs = "http://schemas.microsoft.com/windowsazure";
@@ -51,12 +52,27 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
 
         public async Task SetMobileServiceManagementEndpointAsync(string endpoint)
         {
-            if (string.IsNullOrEmpty(endpoint))
+            Uri uri = new Uri(endpoint, UriKind.Absolute);
+            string lookupKey = uri.AbsoluteUri.ToLowerInvariant();
+            JObject configuration;
+
+            try
             {
-                throw new ArgumentNullException("endpoint");
+                HttpClient client = new HttpClient();
+                string response = await client.GetStringAsync(WamsConfigurationEndpoint);
+                configuration = JObject.Parse(response);
+            }
+            catch (Exception e)
+            {
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, 
+                    Resources.UnableToAccessConfiguration,
+                    WamsConfigurationEndpoint),
+                    e);
             }
 
-            if (endpoint != DefaultMobileServiceManagementEndpoint)
+            JObject endpoints = configuration[lookupKey] as JObject;
+
+            if (endpoints == null)
             {
                 throw new InvalidOperationException(string.Format(
                     CultureInfo.InvariantCulture,
@@ -64,10 +80,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
                     endpoint));
             }
 
-            this.MobileServiceManagementEndpoint = DefaultMobileServiceManagementEndpoint;
-            this.SqlManagementEndpoint = DefaultSqlManagementEndpoint;
-            this.SqlDatabaseHostSuffix = DefaultSqlDatabaseHostSuffix;
-            this.MobileServiceHostSuffix = DefaultMobileServiceHostSuffix;
+            this.MobileServiceManagementEndpoint = (string)endpoints["mobileServiceManagementEndpoint"];
+            this.SqlManagementEndpoint = (string)endpoints["sqlManagementEndpoint"];
+            this.SqlDatabaseHostSuffix = (string)endpoints["sqlDatabaseHostSuffix"];
+            this.MobileServiceHostSuffix = (string)endpoints["mobileServiceHostSuffix"];
 
             return;
         }

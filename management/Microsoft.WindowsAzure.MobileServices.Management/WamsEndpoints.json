@@ -1,0 +1,8 @@
+﻿{ 
+	"https://management.core.windows.net/": {
+		"mobileServiceManagementEndpoint": "https://management.core.windows.net",
+		"sqlManagementEndpoint": "https://management.core.windows.net:8443",
+		"sqlDatabaseHostSuffix": ".database.windows.net",
+		"mobileServiceHostSuffix": ".azure-mobile.net"
+	}
+}
