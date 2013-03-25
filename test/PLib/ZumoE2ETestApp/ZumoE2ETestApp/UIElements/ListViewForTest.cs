@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel;
-#if !WINDOWS_PHONE
+#if NETFX_CORE
 using Windows.UI;
 using Windows.UI.Xaml.Media;
 #else

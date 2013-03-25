@@ -30,6 +30,7 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateSimpleTypedRoundTripTest("String: non-ASCII characters - Latin", RoundTripTestType.String, "ãéìôü ÇñÑ"));
             result.AddTest(CreateSimpleTypedRoundTripTest("String: non-ASCII characters - Arabic", RoundTripTestType.String, "الكتاب على الطاولة"));
             result.AddTest(CreateSimpleTypedRoundTripTest("String: non-ASCII characters - Chinese", RoundTripTestType.String, "这本书在桌子上"));
+            result.AddTest(CreateSimpleTypedRoundTripTest("String: non-ASCII characters - Chinese 2", RoundTripTestType.String, "⒈①Ⅻㄨㄩ 啊阿鼾齄 丂丄狚狛 狜狝﨨﨩 ˊˋ˙–〇 㐀㐁䶴䶵"));
             result.AddTest(CreateSimpleTypedRoundTripTest("String: non-ASCII characters - Japanese", RoundTripTestType.String, "本は机の上に"));
             result.AddTest(CreateSimpleTypedRoundTripTest("String: non-ASCII characters - Hebrew", RoundTripTestType.String, "הספר הוא על השולחן"));
             result.AddTest(CreateSimpleTypedRoundTripTest("String: non-ASCII characters - Russian", RoundTripTestType.String, "Книга лежит на столе"));

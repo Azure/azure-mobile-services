@@ -32,6 +32,7 @@ function defineRoundTripTestsNamespace() {
     tests.push(createRoundTripTest('String: non-ASCII characters - Latin', 'string1', 'ãéìôü ÇñÑ'));
     tests.push(createRoundTripTest('String: non-ASCII characters - Arabic', 'string1', 'الكتاب على الطاولة'));
     tests.push(createRoundTripTest('String: non-ASCII characters - Chinese', 'string1', '这本书在桌子上'));
+    tests.push(createRoundTripTest('String: non-ASCII characters - Chinese 2', 'string1', '⒈①Ⅻㄨㄩ 啊阿鼾齄 丂丄狚狛 狜狝﨨﨩 ˊˋ˙–〇 㐀㐁䶴䶵'));
     tests.push(createRoundTripTest('String: non-ASCII characters - Japanese', 'string1', '本は机の上に'));
     tests.push(createRoundTripTest('String: non-ASCII characters - Hebrew', 'string1', 'הספר הוא על השולחן'));
 
