@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices;
@@ -222,7 +223,7 @@ namespace ZumoE2ETestApp.Tests
                 var table = client.GetTable<RoundTripTableItem>();
                 var item = new RoundTripTableItem { String1 = "hello" };
                 await table.InsertAsync(item);
-                Action<string> dumpHeaders = delegate(string operation)
+                Action<string> dumpAndValidateHeaders = delegate(string operation)
                 {
                     test.AddLog("Headers for {0}:", operation);
                     test.AddLog("  Request:");
@@ -236,19 +237,39 @@ namespace ZumoE2ETestApp.Tests
                     {
                         test.AddLog("    {0}: {1}", header, handler.ResponseHeaders[header]);
                     }
+
+                    string userAgent;
+                    if (!handler.RequestHeaders.TryGetValue("User-Agent", out userAgent))
+                    {
+                        test.AddLog("No user-agent header in the request");
+                        throw new InvalidOperationException("This will fail the test");
+                    }
+                    else
+                    {
+                        Regex expected = new Regex(@"^ZUMO\/\d.\d");
+                        if (expected.IsMatch(userAgent))
+                        {
+                            test.AddLog("User-Agent validated correclty");
+                        }
+                        else
+                        {
+                            test.AddLog("User-Agent didn't validate properly.");
+                            throw new InvalidOperationException("This will fail the test");
+                        }
+                    }
                 };
 
-                dumpHeaders("Insert");
+                dumpAndValidateHeaders("Insert");
 
                 item.Double1 = 123;
                 await table.UpdateAsync(item);
-                dumpHeaders("Update");
+                dumpAndValidateHeaders("Update");
 
                 var item2 = await table.LookupAsync(item.Id);
-                dumpHeaders("Read");
+                dumpAndValidateHeaders("Read");
 
                 await table.DeleteAsync(item);
-                dumpHeaders("Delete");
+                dumpAndValidateHeaders("Delete");
 
                 return true;
             });
