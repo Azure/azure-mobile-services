@@ -9,6 +9,7 @@ namespace ZumoE2ETestApp.Tests.Types
     [DataTable(ZumoTestGlobals.MoviesTableName)]
     public class Movie
     {
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int Id { get; set; }
         public string Title { get; set; }
         public int Duration { get; set; }
