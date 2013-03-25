@@ -5,16 +5,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.UI.Popups;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -23,16 +16,16 @@ namespace ZumoE2ETestApp.UIElements
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class UploadLogsPage : Page
+    public sealed partial class UploadLogsControl : UserControl
     {
         private string uploadUrl;
         public string logs;
 
-        public UploadLogsPage(string testGroupName, string logs, string uploadUrl)
+        public UploadLogsControl(string testGroupName, string logs, string uploadUrl)
         {
             this.InitializeComponent();
             this.lblTitle.Text = "Logs for " + testGroupName;
-            var bounds = Window.Current.Bounds;
+            var bounds = Application.Current.MainWindow.RenderSize;
             this.grdRootPanel.Width = bounds.Width;
             this.grdRootPanel.Height = bounds.Height;
 
@@ -52,6 +45,8 @@ namespace ZumoE2ETestApp.UIElements
         {
             Popup popup = new Popup();
             popup.Child = this;
+            popup.PlacementTarget = Application.Current.MainWindow;
+            popup.Placement = PlacementMode.Center;
             TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
             popup.IsOpen = true;
             popup.Closed += (snd, ea) =>
@@ -75,8 +70,7 @@ namespace ZumoE2ETestApp.UIElements
                         {
                             var body = await response.Content.ReadAsStringAsync();
                             var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
-                            var dialog = new MessageDialog(body, title);
-                            await dialog.ShowAsync();
+                            MessageBox.Show(body, title);
                         }
                     }
                 }

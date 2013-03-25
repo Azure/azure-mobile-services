@@ -5,16 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.UI.Popups;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
+using System.Windows.Navigation;
 using ZumoE2ETestApp.Framework;
 using ZumoE2ETestApp.Tests;
 using ZumoE2ETestApp.UIElements;
@@ -34,6 +29,8 @@ namespace ZumoE2ETestApp
         {
             this.InitializeComponent();
             this.allTests = TestStore.CreateTests();
+
+            OnNavigatedTo(null);
         }
 
         /// <summary>
@@ -41,7 +38,7 @@ namespace ZumoE2ETestApp
         /// </summary>
         /// <param name="e">Event data that describes how this page was reached.  The Parameter
         /// property is typically used to configure the page.</param>
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        private async void OnNavigatedTo(NavigationEventArgs e)
         {
             List<ListViewForTestGroup> sources = allTests.Select((tg, i) => new ListViewForTestGroup(i + 1, tg)).ToList();
             this.lstTestGroups.ItemsSource = sources;
@@ -106,6 +103,8 @@ namespace ZumoE2ETestApp
                 };
 
                 popup.Child = page;
+                popup.PlacementTarget = Application.Current.MainWindow;
+                popup.Placement = PlacementMode.Center;
                 popup.IsOpen = true;
             }
         }
@@ -250,10 +249,11 @@ namespace ZumoE2ETestApp
 
         private Task Alert(string title, string text)
         {
-            return new MessageDialog(text, title).ShowAsync().AsTask();
+            MessageBox.Show(text, title);
+            return Task.FromResult(true);
         }
 
-        private void lstTests_DoubleTapped_1(object sender, DoubleTappedRoutedEventArgs e)
+        private void lstTests_DoubleTapped_1(object sender, MouseEventArgs e)
         {
             int selectedGroup = this.lstTestGroups.SelectedIndex;
             if (selectedGroup >= 0)
@@ -299,11 +299,11 @@ namespace ZumoE2ETestApp
             var selectedItems = this.lstTests.SelectedItems;
             if (selectedItems.Count > 0)
             {
-                this.btnRunSelected.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                this.btnRunSelected.Visibility = Visibility.Visible;
             }
             else
             {
-                this.btnRunSelected.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                this.btnRunSelected.Visibility = Visibility.Collapsed;
             }
         }
     }

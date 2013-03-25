@@ -38,7 +38,7 @@ function defineQueryTestsNamespace() {
         tests.push(createQueryTest(testName, getQueryFunction, filter, options));
         options = options || {};
 
-        if (!getQueryFunction || !filter) {
+        if (!getQueryFunction || !filter || typeof getQueryFunction === 'string') {
             // Not interesting
             return;
         }
@@ -189,6 +189,8 @@ function defineQueryTestsNamespace() {
     // Top and skip
     addQueryTest('Get all using large $top: take(500)', null, null, { top: 500 });
     addQueryTest('Skip all using large skip: skip(500)', null, null, { skip: 500 });
+    addQueryTest('Get first ($top) - 10', null, null, { top: 10 });
+    addQueryTest('Get last ($skip) - 10', null, null, { skip: zumo.tests.getQueryTestData().length - 10 });
     addQueryTest('Skip, take and includeTotalCount: movies 11-20, ordered by title', null, null,
         { top: 10, skip: 10, includeTotalCount: true, sortFields: [new OrderByClause('Title', true)] });
     addQueryTest('Skip, take and includeTotalCount with filter: movies 11-20, which won the best picture, ordered by release date',
@@ -218,10 +220,16 @@ function defineQueryTestsNamespace() {
             sortFields: [new OrderByClause('ReleaseDate', true), new OrderByClause('Title', true)]
         });
 
+    // Read passing OData query directly
+    addQueryTest('Passing OData query directly - movies from the 80s, ordered by Title, items 3, 4 and 5',
+        '$filter=((Year ge 1980) and (Year le 1989))&$top=3&$skip=2&$orderby=Title asc',
+        function (item) { return item.Year >= 1980 && item.Year <= 1989; },
+        { top: 3, skip: 2, sortFields: [new OrderByClause('Title', true)] });
+
     // Negative tests
     addQueryTest('(Neg) Unsupported predicate: lastIndexOf',
         function (table) { return table.where(function () { return this.Title.lastIndexOf('r') >= 0; }); },
-        function (item) { item.lastIndexOf('r') == item.length - 1 }, { isNegativeClientValidation: true });
+        function (item) { return item.lastIndexOf('r') == item.length - 1 }, { isNegativeClientValidation: true });
     addQueryTest('(Neg) Unsupported predicate: regular expression',
         function (table) { return table.where(function () { return /Godfather/.test(this.Title); }); },
         function (item) { return /Godfather/.test(item.Title); }, { isNegativeClientValidation: true });
@@ -394,10 +402,26 @@ function defineQueryTestsNamespace() {
     //   isNegativeServerValidation (boolean): if the error callback should be returned by the server
     // }
     function createQueryTest(testName, getQueryFunction, filter, options) {
+        /// <param name="testName" type="String">Name of the test to be created.</param>
+        /// <param name="getQueryFunction" optional="true" type="function or String">Either a function which takes a
+        ///    table object and returns a query, or a String with the OData query to be sent to the server.</param>
+        /// <param name="filter" optional="true" type="function">Function which takes a movie object and returns a boolean</param>
+        /// <param name="options" type="Object" optional="true">Optional object with additional parameters for query.
+        ///   Supported fields:
+        ///    top (number): number of elements to 'take'
+        ///    skip (number): number of elements to 'skip'
+        ///    includeTotalCount (boolean): whether to request a total could (wrapped response)
+        ///    sortFields (array of OrderByClause): fields to sort the data by
+        ///    selectFields (array of string): fields to retrieve
+        ///    debug (boolean): whether to log more information than normal
+        ///    isNegativeClientValidation (boolean): if an exception should be thrown before the request is sent the server
+        ///    isNegativeServerValidation (boolean): if the error callback should be returned by the server
+        /// </param>
         return new zumo.Test(testName, function (test, done) {
             var i;
             var filteredMovies;
             var query;
+            var readODataQuery = null;
             var exception = null;
             options = options || {};
             var top = options.top;
@@ -415,7 +439,11 @@ function defineQueryTestsNamespace() {
                 var table = client.getTable(tableName);
 
                 if (getQueryFunction) {
-                    query = getQueryFunction(table);
+                    if (typeof getQueryFunction === 'string') {
+                        readODataQuery = getQueryFunction;
+                    } else {
+                        query = getQueryFunction(table);
+                    }
                 } else {
                     query = table;
                 }
@@ -428,32 +456,34 @@ function defineQueryTestsNamespace() {
 
                 var expectedTotalCount = filteredMovies.length;
 
-                if (includeTotalCount) {
+                if (includeTotalCount && query) {
                     query = query.includeTotalCount();
                 }
 
                 filteredMovies = applyOptions(filteredMovies, options);
 
-                if (sortFields && sortFields.length) {
-                    for (i = 0; i < sortFields.length; i++) {
-                        if (sortFields[i].isAscending) {
-                            query = query.orderBy(sortFields[i].fieldName);
-                        } else {
-                            query = query.orderByDescending(sortFields[i].fieldName);
+                if (!readODataQuery) {
+                    if (sortFields && sortFields.length) {
+                        for (i = 0; i < sortFields.length; i++) {
+                            if (sortFields[i].isAscending) {
+                                query = query.orderBy(sortFields[i].fieldName);
+                            } else {
+                                query = query.orderByDescending(sortFields[i].fieldName);
+                            }
                         }
                     }
-                }
 
-                if (skip) {
-                    query = query.skip(skip);
-                }
+                    if (skip) {
+                        query = query.skip(skip);
+                    }
 
-                if (top) {
-                    query = query.take(top);
-                }
+                    if (top) {
+                        query = query.take(top);
+                    }
 
-                if (selectFields && selectFields.length) {
-                    query.select(selectFields.join(','));
+                    if (selectFields && selectFields.length) {
+                        query.select(selectFields.join(','));
+                    }
                 }
             } catch (ex) {
                 exception = ex;
@@ -476,7 +506,18 @@ function defineQueryTestsNamespace() {
                 }
             }
 
-            query.read().done(function (results) {
+            var errorFunction = function (err) {
+                test.addLog('Read called the error callback: ' + JSON.stringify(err));
+                zumo.util.traceResponse(test, err.request);
+                if (isNegativeServerValidation) {
+                    test.addLog('Error was expected');
+                    done(true);
+                } else {
+                    done(false);
+                }
+            };
+
+            var successFunction = function (results) {
                 test.addLog('Received results from the server');
                 if (isNegativeServerValidation) {
                     test.addLog('Error, expected an error response from the server, but received results: ' + JSON.stringify(results));
@@ -522,16 +563,13 @@ function defineQueryTestsNamespace() {
                 } else {
                     done(true);
                 }
-            }, function (err) {
-                test.addLog('Read called the error callback: ' + JSON.stringify(err));
-                zumo.util.traceResponse(test, err.request);
-                if (isNegativeServerValidation) {
-                    test.addLog('Error was expected');
-                    done(true);
-                } else {
-                    done(false);
-                }
-            });
+            };
+
+            if (readODataQuery) {
+                table.read(readODataQuery).done(successFunction, errorFunction);
+            } else {
+                query.read().done(successFunction, errorFunction);
+            }
         });
     }
 
