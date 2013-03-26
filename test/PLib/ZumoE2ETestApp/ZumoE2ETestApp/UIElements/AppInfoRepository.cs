@@ -1,18 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Runtime.Serialization.Json;
-using System.Text;
 using System.Threading.Tasks;
-#if !NET45
-using Windows.Storage;
-using Windows.Storage.Streams;
-using Windows.UI.Popups;
-#endif
-#if !NETFX_CORE
-using System.Windows;
-#endif
+using ZumoE2ETestApp.Framework;
 
 namespace ZumoE2ETestApp.UIElements
 {
@@ -31,20 +21,11 @@ namespace ZumoE2ETestApp.UIElements
             {
                 try
                 {
-#if NET45
-                    using (var stream = await Task.FromResult(File.OpenRead(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SavedAppsFileName"))))
+                    using (var stream = await Util.OpenAppSettingsForRead(SavedAppsFileName))
                     {
                         DataContractJsonSerializer dcjs = new DataContractJsonSerializer(typeof(SavedAppInfo));
                         savedAppInfo = (SavedAppInfo)dcjs.ReadObject(stream);
                     }
-#else
-                    var file = await ApplicationData.Current.LocalFolder.GetFileAsync(SavedAppsFileName);
-                    using (var stream = await file.OpenStreamForReadAsync())
-                    {
-                        DataContractJsonSerializer dcjs = new DataContractJsonSerializer(typeof(SavedAppInfo));
-                        savedAppInfo = (SavedAppInfo)dcjs.ReadObject(stream);
-                    }
-#endif
                 }
                 catch (Exception)
                 {
@@ -62,20 +43,11 @@ namespace ZumoE2ETestApp.UIElements
             this.savedAppInfo = appInfo;
             try
             {
-#if NET45
-                using (var stream = await Task.FromResult(File.OpenWrite(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "SavedAppsFileName"))))
+                using (var stream = await Util.OpenAppSettingsForWrite(SavedAppsFileName))
                 {
                     DataContractJsonSerializer dcjs = new DataContractJsonSerializer(typeof(SavedAppInfo));
                     dcjs.WriteObject(stream, appInfo);
                 }
-#else
-                var file = await ApplicationData.Current.LocalFolder.CreateFileAsync(SavedAppsFileName, CreationCollisionOption.ReplaceExisting);
-                using (var stream = await file.OpenStreamForWriteAsync())
-                {
-                    DataContractJsonSerializer dcjs = new DataContractJsonSerializer(typeof(SavedAppInfo));
-                    dcjs.WriteObject(stream, appInfo);
-                }
-#endif
             }
             catch (Exception e)
             {
@@ -85,11 +57,7 @@ namespace ZumoE2ETestApp.UIElements
             if (ex != null)
             {
                 string errorText = string.Format("{0}: {1}", ex.GetType().FullName, ex.Message);
-#if NETFX_CORE
-                await new MessageDialog(errorText, "Error saving app info").ShowAsync();
-#else
-                MessageBox.Show(errorText, "Error saving app info", MessageBoxButton.OK);
-#endif
+                await Util.MessageBox(errorText, "Error saving app info");
             }
         }
     }

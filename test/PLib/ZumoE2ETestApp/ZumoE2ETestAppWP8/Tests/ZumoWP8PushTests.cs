@@ -185,7 +185,7 @@ namespace ZumoE2ETestAppWP8.Tests
                     break;
                 }
 
-                await Task.Delay(500);
+                await Util.TaskDelay(500);
             }
 
             return result;
@@ -247,7 +247,7 @@ namespace ZumoE2ETestAppWP8.Tests
                     break;
                 }
 
-                await Task.Delay(500);
+                await Util.TaskDelay(500);
             }
 
             return result;
@@ -332,7 +332,7 @@ namespace ZumoE2ETestAppWP8.Tests
                         test.AddLog("Waiting for the push channel URI to be assigned");
                     }
 
-                    await Task.Delay(500);
+                    await Util.TaskDelay(500);
                 }
 
                 if (pushChannel.ConnectionStatus != ChannelConnectionStatus.Connected || pushChannel.ChannelUri == null)
