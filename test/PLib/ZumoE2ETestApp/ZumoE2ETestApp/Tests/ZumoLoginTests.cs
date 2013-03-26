@@ -70,7 +70,8 @@ namespace ZumoE2ETestApp.Tests
 #endif
 
             result.AddTest(CreateLogoutTest());
-#if WINDOWS_PHONE
+
+#if WINDOWS_PHONE && !WP75
             result.AddTest(ZumoTestCommon.CreateInputTest("Enter Live App Client ID", testPropertyBag, ClientIdKeyName));
 #endif
 

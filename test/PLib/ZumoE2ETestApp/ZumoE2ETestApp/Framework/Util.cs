@@ -94,18 +94,17 @@ namespace ZumoE2ETestApp.Framework
 #if !NET45 && !WP75
         private static async Task<Stream> NetfxCoreOpenAppSettings(string appSettingsFileName, bool forWrite)
         {
-            var file = await Windows.Storage.ApplicationData.Current.LocalFolder.GetFileAsync(appSettingsFileName);
-            Stream result = null;
             if (forWrite)
             {
-                result = await file.OpenStreamForWriteAsync();
+                var file = await Windows.Storage.ApplicationData.Current.LocalFolder.CreateFileAsync(
+                    appSettingsFileName, Windows.Storage.CreationCollisionOption.ReplaceExisting);
+                return await file.OpenStreamForWriteAsync();
             }
             else
             {
-                result = await file.OpenStreamForReadAsync();
+                var file = await Windows.Storage.ApplicationData.Current.LocalFolder.GetFileAsync(appSettingsFileName);
+                return await file.OpenStreamForReadAsync();
             }
-
-            return result;
         }
 #endif
 
