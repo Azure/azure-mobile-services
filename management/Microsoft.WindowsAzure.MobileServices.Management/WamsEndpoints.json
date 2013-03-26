@@ -4,5 +4,11 @@
 		"sqlManagementEndpoint": "https://management.core.windows.net:8443",
 		"sqlDatabaseHostSuffix": ".database.windows.net",
 		"mobileServiceHostSuffix": ".azure-mobile.net"
+	},
+	"https://management-preview.core.windows-int.net/": {
+		"mobileServiceManagementEndpoint": "https://management-preview.core.windows-int.net",
+		"sqlManagementEndpoint": "https://management-preview.core.windows-int.net:8443",
+		"sqlDatabaseHostSuffix": ".sqldogfood.sqlazurelabs.com",
+		"mobileServiceHostSuffix": ".zumotcant.antares-test.windows-int.net"
 	}
 }

@@ -19,7 +19,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
 {
     public class MobileServicesManagementClient
     {
-        static readonly string WamsConfigurationEndpoint = "http://nodertncu.blob.core.windows.net/wams/WamsEndpoints.json";
+        static readonly string WamsConfigurationEndpoint = "http://go.microsoft.com/fwlink/?LinkId=290890&clcid=0x409";
         static readonly string DefaultMobileServiceManagementEndpoint = "https://management.core.windows.net";
         static readonly string DefaultSqlManagementEndpoint = "https://management.core.windows.net:8443";
         static readonly string WindowsAzureNs = "http://schemas.microsoft.com/windowsazure";
