@@ -271,7 +271,7 @@ public final class MobileServiceQuery<E> {
 
 	/**
 	 * Executes the query
-	 * 
+	 *  
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
