@@ -18,7 +18,12 @@ $(function() {
 
             $('#todo-items').empty().append(listItems).toggle(listItems.length > 0);
             $('#summary').html('<strong>' + todoItems.length + '</strong> item(s)');
-        });
+        }, handleError);
+    }
+
+    function handleError(error) {
+        var text = error + (error.request ? ' - ' + error.request.status : '');
+        $('#errorlog').append($('<li>').text(text));
     }
 
     function getTodoItemId(formElement) {
@@ -30,7 +35,7 @@ $(function() {
         var textbox = $('#new-item-text'),
             itemText = textbox.val();
         if (itemText !== '') {
-            todoItemTable.insert({ text: itemText, complete: false }).then(refreshTodoItems);
+            todoItemTable.insert({ text: itemText, complete: false }).then(refreshTodoItems, handleError);
         }
         textbox.val('').focus();
         evt.preventDefault();
@@ -39,17 +44,17 @@ $(function() {
     // Handle update
     $(document.body).on('change', '.item-text', function() {
         var newText = $(this).val();
-        todoItemTable.update({ id: getTodoItemId(this), text: newText });
+        todoItemTable.update({ id: getTodoItemId(this), text: newText }).then(null, handleError);
     });
 
     $(document.body).on('change', '.item-complete', function() {
         var isComplete = $(this).prop('checked');
-        todoItemTable.update({ id: getTodoItemId(this), complete: isComplete }).then(refreshTodoItems);
+        todoItemTable.update({ id: getTodoItemId(this), complete: isComplete }).then(refreshTodoItems, handleError);
     });
 
     // Handle delete
     $(document.body).on('click', '.item-delete', function () {
-        todoItemTable.del({ id: getTodoItemId(this) }).then(refreshTodoItems);
+        todoItemTable.del({ id: getTodoItemId(this) }).then(refreshTodoItems, handleError);
     });
 
     // On initial load, start by fetching the current data

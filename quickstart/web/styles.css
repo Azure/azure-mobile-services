@@ -31,4 +31,5 @@ header h2 { text-transform: uppercase; font-weight: normal; color: white; font-s
 
 /* Footer */
 footer { text-align: center; font-size: 0.8em; margin-top: 20px; }
-footer a { color: #666; }
+footer a { color: #666; display: block; }
+#errorlog { color: red; font-weight: bold; padding: 8px; display: inline-block; text-align: left; }
