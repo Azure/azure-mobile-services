@@ -46,7 +46,8 @@
     
     client = [MSClient
               clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
-              withApplicationKey:@"<Application Key>"];
+              applicationKey:@"<Application Key>"];
+
     
     done = NO;
     
@@ -64,7 +65,7 @@
 
 -(void) testCreateUpdateAndDeleteTodoItem
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Create the item
     NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
@@ -127,7 +128,7 @@
 
 -(void) testCreateAndQueryTodoItem
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Create the items
     NSDictionary *item1 = @{ @"text":@"ItemA", @"complete": @(NO) };
@@ -221,7 +222,7 @@
         STAssertTrue(totalCount == -1, @"totalCount was: %d", totalCount);
         
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"text ENDSWITH 'B' AND complete == TRUE"];
-        [todoTable readWhere:predicate completion:query3AfterQuery2];
+        [todoTable readWithPredicate:predicate completion:query3AfterQuery2];
     };
     
     id query1AfterInsert = ^(NSError *error) {
@@ -233,7 +234,7 @@
         }
         
         NSPredicate *predicate = [NSPredicate predicateWithFormat:@"text ENDSWITH 'B'"];
-        [todoTable readWhere:predicate completion:query2AfterQuery1];
+        [todoTable readWithPredicate:predicate completion:query2AfterQuery1];
     };
     
     id insertAfterDeleteAll = ^(NSError *error){
@@ -269,9 +270,9 @@
     testFilter.requestToUse = badRequest;
     
     // Create the client and the table
-    MSClient *filterClient = [client clientwithFilter:testFilter];
+    MSClient *filterClient = [client clientWithFilter:testFilter];
     
-    MSTable *todoTable = [filterClient getTable:@"todoItem"];
+    MSTable *todoTable = [filterClient tableWithName:@"todoItem"];
     
     // Create the item
     NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
@@ -315,9 +316,9 @@
     testFilter.dataToUse = data;
     
     // Create the client and the table
-    MSClient *filterClient = [client clientwithFilter:testFilter];
+    MSClient *filterClient = [client clientWithFilter:testFilter];
     
-    MSTable *todoTable = [filterClient getTable:@"todoItem"];
+    MSTable *todoTable = [filterClient tableWithName:@"todoItem"];
     
     // Create the item
     NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
@@ -353,9 +354,9 @@
     testFilter.errorToUse = error;
     
     // Create the client and the table
-    MSClient *filterClient = [client clientwithFilter:testFilter];
+    MSClient *filterClient = [client clientWithFilter:testFilter];
     
-    MSTable *todoTable = [filterClient getTable:@"todoItem"];
+    MSTable *todoTable = [filterClient tableWithName:@"todoItem"];
     
     // Create the item
     NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
@@ -382,7 +383,7 @@
 
 -(void) testFilterConstantsAreURLEncoded
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     NSString *predicateString = @"text == '#?&$ encode me!'";
     NSPredicate *predicate = [NSPredicate predicateWithFormat:predicateString];
@@ -397,7 +398,7 @@
         STAssertNil(error, @"error from insert should have been null.");
         
         // Now try to query the item and make sure we don't error
-        [todoTable readWhere:predicate completion:^(NSArray *items,
+        [todoTable readWithPredicate:predicate completion:^(NSArray *items,
                                                     NSInteger totalCount,
                                                     NSError *error) {
             
@@ -420,7 +421,7 @@
 
 -(void) testUserParametersAreURLEncodedWithQuery
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     MSQuery *query = [todoTable query];
     query.parameters = @{@"encodeMe$?": @"No really $#%& encode me!"};
@@ -438,7 +439,7 @@
 
 -(void) testUserParametersAreURLEncodedWithInsertUpdateAndDelete
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
 
     // Create the item
     NSDictionary *item = @{ @"text":@"some text", @"complete": @(NO) };
@@ -481,7 +482,7 @@
 
 -(void) testInsertItemForNonExistentTable
 {
-    MSTable *todoTable = [client getTable:@"NoSuchTable"];
+    MSTable *todoTable = [client tableWithName:@"NoSuchTable"];
     
     // Create the item
     NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
@@ -513,7 +514,7 @@
 
 -(void) testUpdateItemForNonExistentTable
 {
-    MSTable *todoTable = [client getTable:@"NoSuchTable"];
+    MSTable *todoTable = [client tableWithName:@"NoSuchTable"];
     
     // Update the item
     NSDictionary *item = @{
@@ -545,7 +546,7 @@
 
 -(void) testUpdateItemForNonExistentItemId
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Create the item
     NSDictionary *item = @{
@@ -581,7 +582,7 @@
 
 -(void) testDeleteItemForNonExistentTable
 {
-    MSTable *todoTable = [client getTable:@"NoSuchTable"];
+    MSTable *todoTable = [client tableWithName:@"NoSuchTable"];
     
     // Create the item
     NSDictionary *item = @{
@@ -613,7 +614,7 @@
 
 -(void) testDeleteItemForNonExistentItemId
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Create the item
     NSDictionary *item = @{
@@ -645,7 +646,7 @@
 
 -(void) testDeleteItemWithIdForNonExistentItemId
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Delete the item
     [todoTable deleteWithId:@-5 completion:^(NSNumber *itemId, NSError *error) {
@@ -674,7 +675,7 @@
 
 -(void) testReadWithIdForNonExistentTable
 {
-    MSTable *todoTable = [client getTable:@"NoSuchTable"];
+    MSTable *todoTable = [client tableWithName:@"NoSuchTable"];
 
     // Insert the item
     [todoTable readWithId:@100 completion:^(NSDictionary *item, NSError *error) {
@@ -699,7 +700,7 @@
 
 -(void) testReadWithIdForNonExistentItemId
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Insert the item
     [todoTable readWithId:@-5 completion:^(NSDictionary *item, NSError *error) {

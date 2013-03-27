@@ -39,7 +39,7 @@
 
 
 // Initializes a new instance of the |MSLogin|.
--(id) initWithClient:(MSClient *)client;
+-(id)initWithClient:(MSClient *)client;
 
 
 #pragma  mark * Public Login Methods
@@ -47,20 +47,20 @@
 
 // Logs in the current end user with the given provider by presenting the
 // MSLoginController with the given |controller|.
--(void) loginWithProvider:(NSString *)provider
-             onController:(UIViewController *)controller
-                 animated:(BOOL)animated
-               completion:(MSClientLoginBlock)completion;
+-(void)loginWithProvider:(NSString *)provider
+              controller:(UIViewController *)controller
+                animated:(BOOL)animated
+              completion:(MSClientLoginBlock)completion;
 
 // Returns an |MSLoginController| that can be used to log in the current
 // end user with the given provider.
--(MSLoginController *) loginViewControllerWithProvider:(NSString *)provider
+-(MSLoginController *)loginViewControllerWithProvider:(NSString *)provider
                                       completion:(MSClientLoginBlock)completion;
 
 // Logs in the current end user with the given provider and the given token for
 // the provider.
--(void) loginWithProvider:(NSString *)provider
-                withToken:(NSDictionary *)token
-               completion:(MSClientLoginBlock)completion;
+-(void)loginWithProvider:(NSString *)provider
+                   token:(NSDictionary *)token
+              completion:(MSClientLoginBlock)completion;
 
 @end

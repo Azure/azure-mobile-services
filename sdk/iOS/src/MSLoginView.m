@@ -159,7 +159,7 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
         // can inspect the response
         NSString *appURLString = self.client.applicationURL.absoluteString;
         if ([self.currentURL isEqual:requestURL] ||
-            [requestURLString rangeOfString:appURLString].location != 0)
+            [requestURLString rangeOfString:appURLString].location != NSNotFound)
         {
             shouldLoad = YES;
         }
@@ -323,7 +323,7 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
     // Make the connection and start it
     MSClientConnection  *connection = [[MSClientConnection alloc]
                                        initWithRequest:request
-                                       withClient:self.client
+                                       client:self.client
                                        completion:responseCompletion];
     
     [self.activityIndicator startAnimating];

@@ -25,6 +25,6 @@
 @interface MSNaiveISODateFormatter : NSDateFormatter
 
 // A singleton instance of the MSNaiveISODateFormatter.
-+(MSNaiveISODateFormatter *) naiveISODateFormatter;
++(MSNaiveISODateFormatter *)naiveISODateFormatter;
 
 @end

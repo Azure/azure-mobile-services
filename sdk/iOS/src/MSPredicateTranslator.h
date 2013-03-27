@@ -27,7 +27,7 @@
 // Returns the filter portion of a query string translated from the
 // given |NSPRedicate|. Will return a nil value and a non-nil error if the
 // predicate is not supported.
-+(NSString *) queryFilterFromPredicate:(NSPredicate *)predicate
-                               orError:(NSError **)error;
++(NSString *)queryFilterFromPredicate:(NSPredicate *)predicate
+                              orError:(NSError **)error;
 
 @end
