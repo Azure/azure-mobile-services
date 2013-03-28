@@ -241,7 +241,7 @@ namespace ZumoE2ETestApp.Tests.Types
 
     public enum EnumType { First, Second, Third }
 
-    internal class EnumTypeConverter<TEnum> : JsonConverter
+    public class EnumTypeConverter<TEnum> : JsonConverter
     {
         public override bool CanConvert(Type objectType)
         {
