@@ -352,6 +352,33 @@ public class QueryTests extends TestGroup {
 			}
 		}, null, 500, null, null, false, null));
 
+		this.addTest(createQueryTest("Get first ($top) - 10", null, new SimpleMovieFilter() {
+
+			@Override
+			boolean criteria(Movie movie) {
+				return true;
+			}
+
+			@Override
+			public FilterResult<Movie> filter(List<Movie> list) {
+				return applyTopSkip(super.filter(list), 10, 0);
+			}
+		}, 10));
+
+		final int movieCountMinus10 = QueryTestData.getAllMovies().size() - 10;
+		this.addTest(createQueryTest("Get last ($skip) - 10", null, new SimpleMovieFilter() {
+
+			@Override
+			boolean criteria(Movie movie) {
+				return true;
+			}
+
+			@Override
+			public FilterResult<Movie> filter(List<Movie> list) {
+				return applyTopSkip(super.filter(list), Integer.MAX_VALUE, movieCountMinus10);
+			}
+		}, null, movieCountMinus10, null, null, false, null));
+
 		this.addTest(createQueryTest("Skip, take, includeTotalCount - movies 21-30, ordered by title", null, new SimpleMovieFilter() {
 
 			@Override

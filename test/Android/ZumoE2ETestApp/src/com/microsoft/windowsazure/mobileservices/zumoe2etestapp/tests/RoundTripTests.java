@@ -112,6 +112,9 @@ public class RoundTripTests extends TestGroup {
 				"String: non-ASCII characters - Chinese", "这本书在桌子上",
 				String.class));
 		this.addTest(createSimpleTypedRoundTripTest(
+				"String: non-ASCII characters - Chinese 2", "⒈①Ⅻㄨㄩ 啊阿鼾齄 丂丄狚狛 狜狝﨨﨩 ˊˋ˙–〇 㐀㐁䶴䶵",
+				String.class));
+		this.addTest(createSimpleTypedRoundTripTest(
 				"String: non-ASCII characters - Japanese", "本は机の上に",
 				String.class));
 		this.addTest(createSimpleTypedRoundTripTest(
@@ -251,6 +254,9 @@ public class RoundTripTests extends TestGroup {
 				"الكتاب على الطاولة", String.class));
 		this.addTest(createSimpleUntypedRoundTripTest(
 				"Untyped String: non-ASCII characters - Chinese", "这本书在桌子上",
+				String.class));
+		this.addTest(createSimpleUntypedRoundTripTest(
+				"Untyped String: non-ASCII characters - Chinese 2", "⒈①Ⅻㄨㄩ 啊阿鼾齄 丂丄狚狛 狜狝﨨﨩 ˊˋ˙–〇 㐀㐁䶴䶵",
 				String.class));
 		this.addTest(createSimpleUntypedRoundTripTest(
 				"Untyped String: non-ASCII characters - Japanese", "本は机の上に",

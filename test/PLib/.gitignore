@@ -1,0 +1,6 @@
+# Visual Studio files #
+#######################
+*.suo
+obj/
+bin/
+*.csproj.user
