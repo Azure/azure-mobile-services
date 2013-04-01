@@ -47,7 +47,6 @@
     client = [MSClient
               clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
               applicationKey:@"<Application Key>"];
-
     
     done = NO;
     
