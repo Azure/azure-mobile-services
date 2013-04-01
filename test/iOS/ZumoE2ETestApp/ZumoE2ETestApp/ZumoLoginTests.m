@@ -109,7 +109,7 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
     BOOL crudShouldWork = tableType == ZumoTableUnauthenticated || tableType == ZumoTableApplication || (tableType == ZumoTableAuthenticated && isAuthenticated);
     ZumoTest *result = [ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        MSTable *table = [client getTable:tableName];
+        MSTable *table = [client tableWithName:tableName];
         [table insert:@{@"foo":@"bar"} completion:^(NSDictionary *inserted, NSError *insertError) {
             if (![self validateCRUDResultForTest:test andOperation:@"Insert" andError:insertError andExpected:crudShouldWork]) {
                 completion(NO);
@@ -188,7 +188,7 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
         };
         
         if (useSimplified) {
-            [client loginWithProvider:provider onController:viewController animated:YES completion:loginBlock];
+            [client loginWithProvider:provider controller:viewController animated:YES completion:loginBlock];
         } else {
             UIViewController *loginController = [client loginViewControllerWithProvider:provider completion:loginBlock];
             [viewController presentViewController:loginController animated:YES completion:nil];

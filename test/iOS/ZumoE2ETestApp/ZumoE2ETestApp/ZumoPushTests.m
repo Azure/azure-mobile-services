@@ -203,7 +203,7 @@ static NSString *pushClientKey = @"PushClientKey";
             completion(NO);
         } else {
             MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-            MSTable *table = [client getTable:tableName];
+            MSTable *table = [client tableWithName:tableName];
             NSDictionary *item = @{@"method" : @"send", @"payload" : payload, @"token": deviceToken, @"delay": @(seconds)};
             [table insert:item completion:^(NSDictionary *insertedItem, NSError *error) {
                 if (error) {
@@ -233,7 +233,7 @@ static NSString *pushClientKey = @"PushClientKey";
             completion(NO);
         } else {
             MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-            MSTable *table = [client getTable:tableName];
+            MSTable *table = [client tableWithName:tableName];
             NSDictionary *item = @{@"method" : @"getFeedback"};
             [table insert:item completion:^(NSDictionary *item, NSError *error) {
                 BOOL passed = NO;

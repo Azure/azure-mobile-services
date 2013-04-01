@@ -39,7 +39,7 @@ typedef void (^MSFilterNextBlock)(NSURLRequest *request,
 // and received by an |MSClient| instance.
 @protocol MSFilter <NSObject>
 
--(void) handleRequest:(NSURLRequest *)request
-               onNext:(MSFilterNextBlock)onNext
-           onResponse:(MSFilterResponseBlock)onResponse;
+-(void)handleRequest:(NSURLRequest *)request
+                next:(MSFilterNextBlock)next
+            response:(MSFilterResponseBlock)response;
 @end
