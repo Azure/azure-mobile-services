@@ -159,7 +159,7 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
         // can inspect the response
         NSString *appURLString = self.client.applicationURL.absoluteString;
         if ([self.currentURL isEqual:requestURL] ||
-            [requestURLString rangeOfString:appURLString].location == NSNotFound)
+            [requestURLString rangeOfString:appURLString].location != 0)
         {
             shouldLoad = YES;
         }
