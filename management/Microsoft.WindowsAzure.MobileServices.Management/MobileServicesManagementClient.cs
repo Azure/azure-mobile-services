@@ -117,6 +117,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             request.Headers.Add("sqlauthorization", "Basic " +
                 Convert.ToBase64String(Encoding.UTF8.GetBytes(username + ":" + CreateMobileServiceParameters.ConvertToUnsecureString(password))));
             HttpResponseMessage response = await client.SendAsync(request);
+            if (response.StatusCode == HttpStatusCode.Gone)
+            {
+                throw new ManagementEndpointDeprecatedException(request.RequestUri.ToString());
+            }
+
             XElement body = await this.ProcessXmlResponseAsync(response);
             string accessToken = body.Value;
 
@@ -686,7 +691,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             handler.ClientCertificateOptions = ClientCertificateOption.Manual;
             handler.ClientCertificates.Add(this.ManagementCertificate);
             HttpClient client = new HttpClient(handler);
-            return await client.SendAsync(request);
+            HttpResponseMessage response = await client.SendAsync(request);
+            if (response.StatusCode == HttpStatusCode.Gone)
+            {
+                throw new ManagementEndpointDeprecatedException(request.RequestUri.ToString());
+            }
+
+            return response;
         }
 
         void Validate()

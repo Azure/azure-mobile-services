@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="CreateMobileServiceParameters.cs" />
     <Compile Include="CreateMobileServiceResult.cs" />
+    <Compile Include="ManagementEndpointDeprecatedException.cs" />
     <Compile Include="MobileServicesManagementClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">

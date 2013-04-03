@@ -121,6 +121,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Management {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot complete operation. Windows Azure management endpoint {0} was deprecated..
+        /// </summary>
+        internal static string ManagemendEndpointDeprecated {
+            get {
+                return ResourceManager.GetString("ManagemendEndpointDeprecated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to ManagementCertificate must contain private key..
         /// </summary>
         internal static string ManagementCertificateWithoutPrivateKey {
