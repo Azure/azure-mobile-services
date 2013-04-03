@@ -54,6 +54,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
     [result addObject:[self createRoundTripForType:RTTString withValue:@"ãéìôü ÇñÑ" andName:@"String with non-ASCII characters - Latin"]];
     [result addObject:[self createRoundTripForType:RTTString withValue:@"الكتاب على الطاولة" andName:@"String with non-ASCII characters - Arabic"]];
     [result addObject:[self createRoundTripForType:RTTString withValue:@"这本书在桌子上" andName:@"String with non-ASCII characters - Chinese"]];
+    [result addObject:[self createRoundTripForType:RTTString withValue:@"⒈①Ⅻㄨㄩ 啊阿鼾齄 丂丄狚狛 狜狝﨨﨩 ˊˋ˙–〇 㐀㐁䶴䶵" andName:@"String with non-ASCII characters - Chinese 2"]];
     [result addObject:[self createRoundTripForType:RTTString withValue:@"本は机の上に" andName:@"String with non-ASCII characters - Japanese"]];
     [result addObject:[self createRoundTripForType:RTTString withValue:@"הספר הוא על השולחן" andName:@"String with non-ASCII characters - Hebrew"]];
 
