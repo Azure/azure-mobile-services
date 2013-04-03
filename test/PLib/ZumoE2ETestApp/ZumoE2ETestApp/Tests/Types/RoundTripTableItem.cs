@@ -241,7 +241,7 @@ namespace ZumoE2ETestApp.Tests.Types
 
     public enum EnumType { First, Second, Third }
 
-    internal class EnumTypeConverter<TEnum> : JsonConverter
+    public class EnumTypeConverter<TEnum> : JsonConverter
     {
         public override bool CanConvert(Type objectType)
         {
@@ -250,7 +250,7 @@ namespace ZumoE2ETestApp.Tests.Types
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            return Enum.Parse(typeof(TEnum), reader.ReadAsString());
+            return Enum.Parse(typeof(TEnum), reader.ReadAsString(), true);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

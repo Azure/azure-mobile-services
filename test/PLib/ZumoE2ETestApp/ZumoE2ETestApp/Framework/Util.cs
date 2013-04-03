@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace ZumoE2ETestApp.Framework
@@ -23,6 +26,119 @@ namespace ZumoE2ETestApp.Framework
             return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day,
                 dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.Millisecond, dateTime.Kind);
         }
+
+        #region Methods which are different based on platforms
+
+        /// <summary>
+        /// Returns a task which completes after the specified delay.
+        /// </summary>
+        /// <param name="milliseconds">The number of milliseconds before the task completes.</param>
+        /// <returns>A task which completes after the specified delay.</returns>
+        public static Task TaskDelay(int milliseconds)
+        {
+#if !WP75
+            return Task.Delay(milliseconds);
+#else
+            return Task.Factory.StartNew(() => Thread.Sleep(1000));
+#endif
+        }
+
+        /// <summary>
+        /// Retrieves an array of the values of the constants in a specified enumeration.
+        /// </summary>
+        /// <param name="enumType">An enumeration type.</param>
+        /// <returns>An array that contains the values of the constants in <paramref name="enumType"/>.</returns>
+        public static Array EnumGetValues(Type enumType)
+        {
+#if !WP75
+            return Enum.GetValues(enumType);
+#else
+            if (enumType == null) throw new ArgumentNullException("enumType");
+            if (!enumType.IsEnum) throw new ArgumentException("Argument must be an enum type");
+
+            var fields = enumType.GetFields(System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+            Array result = Array.CreateInstance(enumType, fields.Length);
+            for (int i = 0; i < fields.Length; i++)
+            {
+                result.SetValue(fields[i].GetValue(null), i);
+            }
+
+            return result;
+#endif
+        }
+
+        /// <summary>
+        /// Returns a task with a stream to be used to read app settings.
+        /// </summary>
+        /// <param name="appSettingsFileName">The name of the file used to store the application settings.</param>
+        /// <returns>A task with a stream to be used to read app settings.</returns>
+        public static Task<Stream> OpenAppSettingsForRead(string appSettingsFileName)
+        {
+#if NET45
+            return Task.FromResult(
+                (Stream)File.OpenRead(
+                    Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        appSettingsFileName)));
+#else
+#if !WP75
+            return NetfxCoreOpenAppSettings(appSettingsFileName, false);
+#else
+            var isolatedStorage = System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication();
+                    return Task.Factory.StartNew<Stream>(
+                        () => isolatedStorage.OpenFile(appSettingsFileName, FileMode.Open));
+#endif
+#endif
+        }
+
+#if !NET45 && !WP75
+        private static async Task<Stream> NetfxCoreOpenAppSettings(string appSettingsFileName, bool forWrite)
+        {
+            if (forWrite)
+            {
+                var file = await Windows.Storage.ApplicationData.Current.LocalFolder.CreateFileAsync(
+                    appSettingsFileName, Windows.Storage.CreationCollisionOption.ReplaceExisting);
+                return await file.OpenStreamForWriteAsync();
+            }
+            else
+            {
+                var file = await Windows.Storage.ApplicationData.Current.LocalFolder.GetFileAsync(appSettingsFileName);
+                return await file.OpenStreamForReadAsync();
+            }
+        }
+#endif
+
+        public static Task<Stream> OpenAppSettingsForWrite(string appSettingsFileName)
+        {
+#if NET45
+            return Task.FromResult(
+                (Stream)File.OpenWrite(
+                    Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                        appSettingsFileName)));
+#else
+#if !WP75
+            return NetfxCoreOpenAppSettings(appSettingsFileName, true);
+#else
+            var isolatedStorage = System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication();
+            return Task.Factory.StartNew<Stream>(
+                () => isolatedStorage.OpenFile(appSettingsFileName, FileMode.Create));
+#endif
+#endif
+        }
+
+        public static Task MessageBox(string text, string title = null)
+        {
+#if NETFX_CORE
+            return new Windows.UI.Popups.MessageDialog(text, title).ShowAsync().AsTask();
+#else
+            System.Windows.MessageBox.Show(text, title, System.Windows.MessageBoxButton.OK);
+            TaskCompletionSource<int> tcs = new TaskCompletionSource<int>();
+            tcs.SetResult(1);
+            return tcs.Task;
+#endif
+        }
+        #endregion
 
         public static string CreateSimpleRandomString(Random rndGen, int size)
         {
