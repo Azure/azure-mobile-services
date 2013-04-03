@@ -39,7 +39,7 @@
     return self;
 }
 
-- (void)handleRequest:(NSURLRequest *)request onNext:(MSFilterNextBlock)onNext onResponse:(MSFilterResponseBlock)onResponse {
+- (void)handleRequest:(NSURLRequest *)request next:(MSFilterNextBlock)onNext response:(MSFilterResponseBlock)onResponse {
     NSDictionary *headers = [request allHTTPHeaderFields];
     _requestHeaders = [NSMutableDictionary new];
     [_requestHeaders setValuesForKeysWithDictionary:headers];
@@ -69,7 +69,7 @@
 
 @synthesize statusCode, contentType, body, errorToReturn;
 
-- (void)handleRequest:(NSURLRequest *)request onNext:(MSFilterNextBlock)onNext onResponse:(MSFilterResponseBlock)onResponse {
+- (void)handleRequest:(NSURLRequest *)request next:(MSFilterNextBlock)onNext response:(MSFilterResponseBlock)onResponse {
     NSHTTPURLResponse *resp = nil;
     NSData *data = nil;
     NSError *error = nil;
@@ -122,7 +122,7 @@
     }
 }
 
-- (void)handleRequest:(NSURLRequest *)request onNext:(MSFilterNextBlock)onNext onResponse:(MSFilterResponseBlock)onResponse {
+- (void)handleRequest:(NSURLRequest *)request next:(MSFilterNextBlock)onNext response:(MSFilterResponseBlock)onResponse {
     onNext(request, ^(NSHTTPURLResponse *response, NSData *data, NSError *error) {
         [self addResponseToLog:response forRequest:request];
         if (_numberOfRequests == 1) {
@@ -185,7 +185,7 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
 + (ZumoTest *)createParameterPassingTest {
     return [ZumoTest createTestWithName:@"Parameter passing tests" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        MSTable *table = [client getTable:parameterTestTableName];
+        MSTable *table = [client tableWithName:parameterTestTableName];
         NSDictionary *baseDict = @{
                                @"item": @"simple",
                                @"item": @"simple" ,
@@ -246,8 +246,8 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
                         
                         dict[@"operation"] = @"delete";
                         FilterToCaptureHttpTraffic *capturingFilter = [[FilterToCaptureHttpTraffic alloc] init];
-                        MSClient *filteredClient = [client clientwithFilter:capturingFilter];
-                        MSTable *filteredTable = [filteredClient getTable:parameterTestTableName];
+                        MSClient *filteredClient = [client clientWithFilter:capturingFilter];
+                        MSTable *filteredTable = [filteredClient tableWithName:parameterTestTableName];
                         [filteredTable deleteWithId:@1 parameters:dict completion:^(NSNumber *itemId, NSError *error) {
                             if ([self handleIfError:error operation:@"delete" test:test completion:completion]) {
                                 return;
@@ -315,8 +315,8 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
     ZumoTest *result = [ZumoTest createTestWithName:@"User-Agent test" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         FilterToCaptureHttpTraffic *filter = [[FilterToCaptureHttpTraffic alloc] init];
-        MSClient *filteredClient = [client clientwithFilter:filter];
-        MSTable *table = [filteredClient getTable:tableName];
+        MSClient *filteredClient = [client clientWithFilter:filter];
+        MSTable *table = [filteredClient tableWithName:tableName];
         NSDictionary *item = @{@"name":@"john doe"};
         [table insert:item completion:^(NSDictionary *inserted, NSError *error) {
             BOOL passed = NO;
@@ -324,7 +324,7 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
                 [test addLog:[NSString stringWithFormat:@"Error: %@", error]];
             } else {
                 NSNumber *itemId = inserted[@"id"];
-                MSTable *unfilteredTable = [client getTable:tableName];
+                MSTable *unfilteredTable = [client tableWithName:tableName];
                 [unfilteredTable deleteWithId:itemId completion:nil]; // clean-up after this test
                 NSString *userAgent = [filter userAgent];
                 if ([userAgent rangeOfString:@"objective-c"].location == NSNotFound) {
@@ -352,8 +352,8 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
         [filter setContentType:@"application/json"];
         [filter setStatusCode:201];
         [filter setErrorToReturn:nil];
-        MSClient *mockedClient = [client clientwithFilter:filter];
-        MSTable *table = [mockedClient getTable:@"TableWhichDoesNotExist"];
+        MSClient *mockedClient = [client clientWithFilter:filter];
+        MSTable *table = [mockedClient tableWithName:@"TableWhichDoesNotExist"];
         [table insert:@{@"does":@"not matter"} completion:^(NSDictionary *item, NSError *error) {
             BOOL passed = NO;
             if (error) {
@@ -382,9 +382,9 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
         FilterToBypassService *filter = [[FilterToBypassService alloc] init];
         NSError *errorToReturn = [NSError errorWithDomain:@"MyDomain" code:-1234 userInfo:@{@"one":@"two"}];
         [filter setErrorToReturn:errorToReturn];
-        MSClient *mockedClient = [client clientwithFilter:filter];
+        MSClient *mockedClient = [client clientWithFilter:filter];
         [test addLog:[NSString stringWithFormat:@"Created a client with filter: %@", mockedClient.filters]];
-        MSTable *table = [client getTable:tableName];
+        MSTable *table = [client tableWithName:tableName];
         [table insert:@{@"string1":@"does not matter"} completion:^(NSDictionary *item, NSError *error) {
             BOOL passed = NO;
             if (error) {
@@ -407,8 +407,8 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
         int numberOfRequests = rand() % 3 + 2; // between 2 and 4 requests sent
         [test addLog:[NSString stringWithFormat:@"Using a filter to send %d requests", numberOfRequests]];
         [filter setNumberOfRequests:numberOfRequests];
-        client = [client clientwithFilter:filter];
-        MSTable *table = [client getTable:tableName];
+        client = [client clientWithFilter:filter];
+        MSTable *table = [client tableWithName:tableName];
         NSString *uuid = [[NSUUID UUID] UUIDString];
         NSDictionary *item = @{@"name":uuid};
         [table insert:item completion:^(NSDictionary *inserted, NSError *error) {
@@ -425,7 +425,7 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
                     }
                 } else {
                     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name = %@", uuid];
-                    MSQuery *query = [table queryWhere:predicate];
+                    MSQuery *query = [table queryWithPredicate:predicate];
                     [filter setNumberOfRequests:1];
                     [query setSelectFields:@[@"name"]];
                     [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {

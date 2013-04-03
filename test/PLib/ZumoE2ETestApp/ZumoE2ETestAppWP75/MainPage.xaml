@@ -1,0 +1,112 @@
+﻿<phone:PhoneApplicationPage 
+    x:Class="ZumoE2ETestAppWP75.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:phone="clr-namespace:Microsoft.Phone.Controls;assembly=Microsoft.Phone"
+    xmlns:shell="clr-namespace:Microsoft.Phone.Shell;assembly=Microsoft.Phone"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" d:DesignWidth="480" d:DesignHeight="768"
+    FontFamily="{StaticResource PhoneFontFamilyNormal}"
+    FontSize="{StaticResource PhoneFontSizeNormal}"
+    Foreground="{StaticResource PhoneForegroundBrush}"
+    SupportedOrientations="Portrait" Orientation="Portrait"
+    shell:SystemTray.IsVisible="True">
+
+    <!--LayoutRoot is the root grid where all page content is placed-->
+    <Grid x:Name="LayoutRoot" Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="10,17,5,10">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Zumo E2E Test App - WP 7.5" Style="{StaticResource PhoneTextNormalStyle}" 
+                       FontWeight="Bold" Margin="0" Grid.ColumnSpan="2"/>
+            <Grid Grid.Row="1" Name="grdSettings"
+                  Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="App URL:" Grid.Row="0" VerticalAlignment="Center" />
+                <TextBox Name="txtAppUrl" Grid.Row="0" Grid.Column="1" 
+                     HorizontalAlignment="Stretch" FontSize="18" Margin="-5" />
+                <TextBlock Text="App Key:" Grid.Row="1" VerticalAlignment="Center" />
+                <TextBox Name="txtAppKey" Grid.Row="1" Grid.Column="1" 
+                     HorizontalAlignment="Stretch" FontSize="18" Margin="-5" />
+                <TextBlock Text="Upload URL:" Grid.Row="2" VerticalAlignment="Center" />
+                <TextBox Name="txtUploadUrl" Grid.Row="2" Grid.Column="1" 
+                     HorizontalAlignment="Stretch" FontSize="18" Margin="-5" />
+            </Grid>
+        </Grid>
+
+        <StackPanel Grid.Row="1"
+            Orientation="Vertical" Name="pnlGroups">
+            <TextBlock Text="Test Groups" Margin="10"
+                       FontSize="26" FontWeight="Bold"/>
+            <ListBox x:Name="lstTestGroups"
+                     SelectionChanged="lstTestGroups_SelectionChanged_1">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Path=Name}" Margin="5" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </StackPanel>
+
+        <Grid Grid.Row="1" Name="grdTests" Visibility="Collapsed">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock Name="lblTestGroupTitle" Margin="10"
+                       FontSize="24" Text="Test Group"
+                       HorizontalAlignment="Center"/>
+            <ListBox Name="lstTests" Grid.Row="1">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Foreground="{Binding Path=ColorFromStatus}"
+                                       Text="{Binding Path=TestName}" Margin="5" />
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+    </Grid>
+
+    <phone:PhoneApplicationPage.ApplicationBar>
+        <shell:ApplicationBar>
+            <shell:ApplicationBarIconButton IconUri="/Assets/AppBar/back.png"
+                                            x:Name="appBtnBack"
+                                            Text="Test Groups"
+                                            Click="appBtnBack_Click_1"
+                                            IsEnabled="False"
+                                            />
+            <shell:ApplicationBarIconButton IconUri="/Assets/AppBar/reset.png"
+                                            x:Name="appBtnReset"
+                                            Text="Reset"
+                                            Click="appBtnReset_Click_1"
+                                            IsEnabled="False"
+                                            />
+            <shell:ApplicationBarIconButton IconUri="/Assets/AppBar/upload.png"
+                                            x:Name="appBtnUploadLogs"
+                                            Text="Upload Logs" 
+                                            Click="appBtnUploadLogs_Click_1"/>
+            <shell:ApplicationBarIconButton IconUri="/Assets/AppBar/run.png"
+                                            x:Name="appBtnRunTests"
+                                            Text="Run Tests"
+                                            Click="appBtnRunTests_Click_1"
+                                            />
+        </shell:ApplicationBar>
+    </phone:PhoneApplicationPage.ApplicationBar>
+
+</phone:PhoneApplicationPage>

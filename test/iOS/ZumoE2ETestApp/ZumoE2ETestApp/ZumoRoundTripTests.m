@@ -19,7 +19,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
 + (NSArray *)createTests {
     ZumoTest *firstTest = [ZumoTest createTestWithName:@"Setup dynamic schema" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        MSTable *table = [client getTable:tableName];
+        MSTable *table = [client tableWithName:tableName];
         NSDictionary *item = @{@"string1":@"test", @"date1": [ZumoTestGlobals createDateWithYear:2011 month:11 day:11], @"bool1": [NSNumber numberWithBool:NO], @"number": [NSNumber numberWithInt:-1], @"longnum":[NSNumber numberWithLongLong:0LL], @"intnum":[NSNumber numberWithInt:0], @"setindex":@"setindex"};
         [table insert:item completion:^(NSDictionary *inserted, NSError *err) {
             if (err) {
@@ -54,6 +54,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
     [result addObject:[self createRoundTripForType:RTTString withValue:@"ãéìôü ÇñÑ" andName:@"String with non-ASCII characters - Latin"]];
     [result addObject:[self createRoundTripForType:RTTString withValue:@"الكتاب على الطاولة" andName:@"String with non-ASCII characters - Arabic"]];
     [result addObject:[self createRoundTripForType:RTTString withValue:@"这本书在桌子上" andName:@"String with non-ASCII characters - Chinese"]];
+    [result addObject:[self createRoundTripForType:RTTString withValue:@"⒈①Ⅻㄨㄩ 啊阿鼾齄 丂丄狚狛 狜狝﨨﨩 ˊˋ˙–〇 㐀㐁䶴䶵" andName:@"String with non-ASCII characters - Chinese 2"]];
     [result addObject:[self createRoundTripForType:RTTString withValue:@"本は机の上に" andName:@"String with non-ASCII characters - Japanese"]];
     [result addObject:[self createRoundTripForType:RTTString withValue:@"הספר הוא על השולחן" andName:@"String with non-ASCII characters - Hebrew"]];
 
@@ -91,7 +92,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
                 @{@"name":@"Egg",@"price":@3.29},
             ]};
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        MSTable *table = [client getTable:tableName];
+        MSTable *table = [client tableWithName:tableName];
         [table insert:order completion:^(NSDictionary *item, NSError *error) {
             BOOL passed = NO;
             if (error) {
@@ -120,7 +121,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
     // Negative scenarios
     [result addObject:[ZumoTest createTestWithName:@"(Neg) New column with null value" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        MSTable *table = [client getTable:tableName];
+        MSTable *table = [client tableWithName:tableName];
         [table insert:@{@"ColumnWhichDoesNotExist":[NSNull null]} completion:^(NSDictionary *item, NSError *err) {
             BOOL passed;
             if (!err) {
@@ -147,7 +148,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
         NSString *testName = [NSString stringWithFormat:@"(Neg) Insert element with id field: '%@'", idName];
         [result addObject:[ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
             MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-            MSTable *table = [client getTable:tableName];
+            MSTable *table = [client tableWithName:tableName];
             NSMutableDictionary *item = [[NSMutableDictionary alloc] init];
             [item setValue:@"hello" forKey:@"string1"];
             [item setValue:@1 forKey:idName];
@@ -179,7 +180,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
 + (ZumoTest *)createRoundTripForType:(RoundTripTestColumnType)type withValue:(id)value andName:(NSString *)testName {
     ZumoTest *result = [ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        MSTable *table = [client getTable:tableName];
+        MSTable *table = [client tableWithName:tableName];
         NSMutableDictionary *item = [[NSMutableDictionary alloc] init];
         NSString *keyName = @"";
         if (type == RTTString) {
@@ -274,7 +275,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
                                 // Additional validation: query for the inserted data
                                 NSString *rtString = value;
                                 NSPredicate *predicate = [NSPredicate predicateWithFormat:@"id == %d && string1 == %@", [itemId intValue], rtString];
-                                [table readWhere:predicate completion:^(NSArray *items, NSInteger totalCount, NSError *err3) {
+                                [table readWithPredicate:predicate completion:^(NSArray *items, NSInteger totalCount, NSError *err3) {
                                     BOOL passed = NO;
                                     if (err3) {
                                         [test addLog:[NSString stringWithFormat:@"Error retrieving data: %@", err3]];

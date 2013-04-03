@@ -44,7 +44,7 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("In the next few tests you will be prompted for username / password four times."));
 #endif
 
-            foreach (MobileServiceAuthenticationProvider provider in Enum.GetValues(typeof(MobileServiceAuthenticationProvider)))
+            foreach (MobileServiceAuthenticationProvider provider in Util.EnumGetValues(typeof(MobileServiceAuthenticationProvider)))
             {
                 result.AddTest(CreateLogoutTest());
 #if !WINDOWS_PHONE
@@ -70,11 +70,15 @@ namespace ZumoE2ETestApp.Tests
 #endif
 
             result.AddTest(CreateLogoutTest());
-#if WINDOWS_PHONE
+
+#if WINDOWS_PHONE && !WP75
             result.AddTest(ZumoTestCommon.CreateInputTest("Enter Live App Client ID", testPropertyBag, ClientIdKeyName));
 #endif
+
+#if !WP75
             result.AddTest(CreateLiveSDKLoginTest());
             result.AddTest(CreateCRUDTest(TableUserPermission, "Microsoft via Live SDK", TablePermission.User, true));
+#endif
 
 #if !WINDOWS_PHONE
             result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("We'll log in again; you may or may not be asked for password in the next few moments."));
@@ -152,6 +156,7 @@ namespace ZumoE2ETestApp.Tests
 
         enum TablePermission { Public, Application, User, Admin }
 
+#if !WP75
         private static ZumoTest CreateLiveSDKLoginTest()
         {
             return new ZumoTest("Login via token with Live SDK", async delegate(ZumoTest test)
@@ -197,6 +202,7 @@ namespace ZumoE2ETestApp.Tests
                 }
             });
         }
+#endif
 
         private static ZumoTest CreateClientSideLoginTest(MobileServiceAuthenticationProvider provider)
         {

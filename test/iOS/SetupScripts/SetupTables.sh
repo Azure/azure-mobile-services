@@ -22,6 +22,7 @@ else
   azure mobile script upload $1 table/iosMovies.insert -f iosMovies.insert.js
   azure mobile script upload $1 table/iosRoundTripTable.insert -f iosRoundTripTable.insert.js
   azure mobile script upload $1 table/iosPushTest.insert -f iosPushTest.insert.js
+  azure mobile script upload $1 table/iosAuthenticated.read -f iosAuthenticated.read.js
   azure mobile script upload $1 table/ParamsTestTable.insert -f ParamsTestTable.insert.js
   azure mobile script upload $1 table/ParamsTestTable.read -f ParamsTestTable.read.js
   azure mobile script upload $1 table/ParamsTestTable.delete -f ParamsTestTable.delete.js

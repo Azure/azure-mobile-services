@@ -123,9 +123,12 @@ namespace ZumoE2ETestAppWP8.Tests
                 var item = new JObject();
                 item.Add("method", "sendToast");
                 item.Add("channelUri", ZumoWP8PushTests.pushChannel.ChannelUri.AbsoluteUri);
-                var payload = new JObject();
-                payload.Add("text1", text1);
-                payload.Add("text2", text2);
+                var payload = new JObject(
+                    new JProperty("text1", text1),
+                    new JProperty("text2", text2));
+                var expectedPushPayload = new JObject(
+                    new JProperty("wp:Text1", text1),
+                    new JProperty("wp:Text2", text2));
                 if (param != null)
                 {
                     payload.Add("param", param);
@@ -147,7 +150,7 @@ namespace ZumoE2ETestAppWP8.Tests
                     }
 
                     List<string> errors = new List<string>();
-                    if (Util.CompareJson(payload, actual, errors))
+                    if (Util.CompareJson(expectedPushPayload, actual, errors))
                     {
                         return true;
                     }
@@ -182,7 +185,7 @@ namespace ZumoE2ETestAppWP8.Tests
                     break;
                 }
 
-                await Task.Delay(500);
+                await Util.TaskDelay(500);
             }
 
             return result;
@@ -244,7 +247,7 @@ namespace ZumoE2ETestAppWP8.Tests
                     break;
                 }
 
-                await Task.Delay(500);
+                await Util.TaskDelay(500);
             }
 
             return result;
@@ -329,7 +332,7 @@ namespace ZumoE2ETestAppWP8.Tests
                         test.AddLog("Waiting for the push channel URI to be assigned");
                     }
 
-                    await Task.Delay(500);
+                    await Util.TaskDelay(500);
                 }
 
                 if (pushChannel.ConnectionStatus != ChannelConnectionStatus.Connected || pushChannel.ChannelUri == null)
