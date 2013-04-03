@@ -34,7 +34,7 @@ typedef enum { UpdateUsingObject, NegUpdateObjectInvalidId, NegUpdateObjectNoId 
 + (ZumoTest *)createUpdateTestWithName:(NSString *)name andType:(UpdateTestType)type {
     ZumoTest *result = [ZumoTest createTestWithName:name andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        MSTable *table = [client getTable:tableName];
+        MSTable *table = [client tableWithName:tableName];
         [table insert:@{@"name":@"John Doe",@"age":[NSNumber numberWithInt:33]} completion:^(NSDictionary *inserted, NSError *insertError) {
             if (insertError) {
                 [test addLog:[NSString stringWithFormat:@"Error inserting data: %@", insertError]];
@@ -134,7 +134,7 @@ typedef enum { DeleteUsingId, DeleteUsingObject, NegDeleteUsingInvalidId, NegDel
 + (ZumoTest *)createDeleteTestWithName:(NSString *)name andType:(DeleteTestType)type {
     ZumoTest *result = [ZumoTest createTestWithName:name andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        MSTable *table = [client getTable:tableName];
+        MSTable *table = [client tableWithName:tableName];
         [table insert:@{@"name":@"John Doe",@"age":[NSNumber numberWithInt:33]} completion:^(NSDictionary *inserted, NSError *insertError) {
             if (insertError) {
                 [test addLog:[NSString stringWithFormat:@"Error inserting data: %@", insertError]];
