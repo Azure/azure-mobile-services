@@ -173,7 +173,7 @@
 -(id) initWithTableRequest:(MSTableRequest *)request
                  completion:(MSResponseBlock)completion{
     self = [super initWithRequest:request
-                       withClient:request.table.client
+                       client:request.table.client
                         completion:completion];
     
     if (self) {

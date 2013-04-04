@@ -1,0 +1,341 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		03D1001E16EC579A0005A1A9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03D1001D16EC579A0005A1A9 /* UIKit.framework */; };
+		03D1002016EC579A0005A1A9 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03D1001F16EC579A0005A1A9 /* Foundation.framework */; };
+		03D1002216EC579A0005A1A9 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03D1002116EC579A0005A1A9 /* CoreGraphics.framework */; };
+		03D1002816EC579A0005A1A9 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 03D1002616EC579A0005A1A9 /* InfoPlist.strings */; };
+		03D1002A16EC579A0005A1A9 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 03D1002916EC579A0005A1A9 /* main.m */; };
+		03D1002E16EC579A0005A1A9 /* QSAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 03D1002D16EC579A0005A1A9 /* QSAppDelegate.m */; };
+		03D1003016EC579A0005A1A9 /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1002F16EC579A0005A1A9 /* Default.png */; };
+		03D1003216EC579A0005A1A9 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1003116EC579A0005A1A9 /* Default@2x.png */; };
+		03D1003416EC579A0005A1A9 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1003316EC579A0005A1A9 /* Default-568h@2x.png */; };
+		03D1004716EC58300005A1A9 /* QSTodoListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 03D1004616EC58300005A1A9 /* QSTodoListViewController.m */; };
+		03D1004A16EC58490005A1A9 /* QSTodoService.m in Sources */ = {isa = PBXBuildFile; fileRef = 03D1004916EC58490005A1A9 /* QSTodoService.m */; };
+		03D1004D16EC5A680005A1A9 /* MainStoryboard_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 03D1004B16EC5A680005A1A9 /* MainStoryboard_iPhone.storyboard */; };
+		03D1004E16EC5A680005A1A9 /* MainStoryboard_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 03D1004C16EC5A680005A1A9 /* MainStoryboard_iPad.storyboard */; };
+		03D1006016EC63620005A1A9 /* WindowsAzureMobileServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03D1005F16EC63620005A1A9 /* WindowsAzureMobileServices.framework */; };
+		03D1006516ED41D20005A1A9 /* connected57.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1006116ED41D20005A1A9 /* connected57.png */; };
+		03D1006616ED41D20005A1A9 /* connected72.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1006216ED41D20005A1A9 /* connected72.png */; };
+		03D1006716ED41D20005A1A9 /* connected114.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1006316ED41D20005A1A9 /* connected114.png */; };
+		03D1006816ED41D20005A1A9 /* connected144.png in Resources */ = {isa = PBXBuildFile; fileRef = 03D1006416ED41D20005A1A9 /* connected144.png */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		03D1001A16EC579A0005A1A9 /* ZUMOAPPNAME.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ZUMOAPPNAME.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		03D1001D16EC579A0005A1A9 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		03D1001F16EC579A0005A1A9 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		03D1002116EC579A0005A1A9 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
+		03D1002516EC579A0005A1A9 /* ZUMOAPPNAME-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ZUMOAPPNAME-Info.plist"; sourceTree = "<group>"; };
+		03D1002716EC579A0005A1A9 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		03D1002916EC579A0005A1A9 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		03D1002B16EC579A0005A1A9 /* ZUMOAPPNAME-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ZUMOAPPNAME-Prefix.pch"; sourceTree = "<group>"; };
+		03D1002C16EC579A0005A1A9 /* QSAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = QSAppDelegate.h; sourceTree = "<group>"; };
+		03D1002D16EC579A0005A1A9 /* QSAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = QSAppDelegate.m; sourceTree = "<group>"; };
+		03D1002F16EC579A0005A1A9 /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
+		03D1003116EC579A0005A1A9 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
+		03D1003316EC579A0005A1A9 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
+		03D1004516EC58300005A1A9 /* QSTodoListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QSTodoListViewController.h; sourceTree = "<group>"; };
+		03D1004616EC58300005A1A9 /* QSTodoListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QSTodoListViewController.m; sourceTree = "<group>"; };
+		03D1004816EC58490005A1A9 /* QSTodoService.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = QSTodoService.h; sourceTree = "<group>"; };
+		03D1004916EC58490005A1A9 /* QSTodoService.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = QSTodoService.m; sourceTree = "<group>"; };
+		03D1004B16EC5A680005A1A9 /* MainStoryboard_iPhone.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard_iPhone.storyboard; sourceTree = "<group>"; };
+		03D1004C16EC5A680005A1A9 /* MainStoryboard_iPad.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = MainStoryboard_iPad.storyboard; sourceTree = "<group>"; };
+		03D1005F16EC63620005A1A9 /* WindowsAzureMobileServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = WindowsAzureMobileServices.framework; sourceTree = "<group>"; };
+		03D1006116ED41D20005A1A9 /* connected57.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = connected57.png; sourceTree = "<group>"; };
+		03D1006216ED41D20005A1A9 /* connected72.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = connected72.png; sourceTree = "<group>"; };
+		03D1006316ED41D20005A1A9 /* connected114.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = connected114.png; sourceTree = "<group>"; };
+		03D1006416ED41D20005A1A9 /* connected144.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = connected144.png; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		03D1001716EC579A0005A1A9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				03D1001E16EC579A0005A1A9 /* UIKit.framework in Frameworks */,
+				03D1002016EC579A0005A1A9 /* Foundation.framework in Frameworks */,
+				03D1002216EC579A0005A1A9 /* CoreGraphics.framework in Frameworks */,
+				03D1006016EC63620005A1A9 /* WindowsAzureMobileServices.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		03D1001116EC579A0005A1A9 = {
+			isa = PBXGroup;
+			children = (
+				03D1002316EC579A0005A1A9 /* ZUMOAPPNAME */,
+				03D1001C16EC579A0005A1A9 /* Frameworks */,
+				03D1001B16EC579A0005A1A9 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		03D1001B16EC579A0005A1A9 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				03D1001A16EC579A0005A1A9 /* ZUMOAPPNAME.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		03D1001C16EC579A0005A1A9 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				03D1005F16EC63620005A1A9 /* WindowsAzureMobileServices.framework */,
+				03D1001D16EC579A0005A1A9 /* UIKit.framework */,
+				03D1001F16EC579A0005A1A9 /* Foundation.framework */,
+				03D1002116EC579A0005A1A9 /* CoreGraphics.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		03D1002316EC579A0005A1A9 /* ZUMOAPPNAME */ = {
+			isa = PBXGroup;
+			children = (
+				03D1004816EC58490005A1A9 /* QSTodoService.h */,
+				03D1004916EC58490005A1A9 /* QSTodoService.m */,
+				03D1004516EC58300005A1A9 /* QSTodoListViewController.h */,
+				03D1004616EC58300005A1A9 /* QSTodoListViewController.m */,
+				03D1004B16EC5A680005A1A9 /* MainStoryboard_iPhone.storyboard */,
+				03D1004C16EC5A680005A1A9 /* MainStoryboard_iPad.storyboard */,
+				03D1002C16EC579A0005A1A9 /* QSAppDelegate.h */,
+				03D1002D16EC579A0005A1A9 /* QSAppDelegate.m */,
+				03D1002416EC579A0005A1A9 /* Supporting Files */,
+			);
+			path = ZUMOAPPNAME;
+			sourceTree = "<group>";
+		};
+		03D1002416EC579A0005A1A9 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				03D1006116ED41D20005A1A9 /* connected57.png */,
+				03D1006216ED41D20005A1A9 /* connected72.png */,
+				03D1006316ED41D20005A1A9 /* connected114.png */,
+				03D1006416ED41D20005A1A9 /* connected144.png */,
+				03D1002516EC579A0005A1A9 /* ZUMOAPPNAME-Info.plist */,
+				03D1002616EC579A0005A1A9 /* InfoPlist.strings */,
+				03D1002916EC579A0005A1A9 /* main.m */,
+				03D1002B16EC579A0005A1A9 /* ZUMOAPPNAME-Prefix.pch */,
+				03D1002F16EC579A0005A1A9 /* Default.png */,
+				03D1003116EC579A0005A1A9 /* Default@2x.png */,
+				03D1003316EC579A0005A1A9 /* Default-568h@2x.png */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		03D1001916EC579A0005A1A9 /* ZUMOAPPNAME */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 03D1004016EC579A0005A1A9 /* Build configuration list for PBXNativeTarget "ZUMOAPPNAME" */;
+			buildPhases = (
+				03D1001616EC579A0005A1A9 /* Sources */,
+				03D1001716EC579A0005A1A9 /* Frameworks */,
+				03D1001816EC579A0005A1A9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ZUMOAPPNAME;
+			productName = ZUMOAPPNAME;
+			productReference = 03D1001A16EC579A0005A1A9 /* ZUMOAPPNAME.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		03D1001216EC579A0005A1A9 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				CLASSPREFIX = QS;
+				LastUpgradeCheck = 0460;
+				ORGANIZATIONNAME = MobileServices;
+			};
+			buildConfigurationList = 03D1001516EC579A0005A1A9 /* Build configuration list for PBXProject "ZUMOAPPNAME" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 03D1001116EC579A0005A1A9;
+			productRefGroup = 03D1001B16EC579A0005A1A9 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				03D1001916EC579A0005A1A9 /* ZUMOAPPNAME */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		03D1001816EC579A0005A1A9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				03D1002816EC579A0005A1A9 /* InfoPlist.strings in Resources */,
+				03D1003016EC579A0005A1A9 /* Default.png in Resources */,
+				03D1003216EC579A0005A1A9 /* Default@2x.png in Resources */,
+				03D1003416EC579A0005A1A9 /* Default-568h@2x.png in Resources */,
+				03D1004D16EC5A680005A1A9 /* MainStoryboard_iPhone.storyboard in Resources */,
+				03D1004E16EC5A680005A1A9 /* MainStoryboard_iPad.storyboard in Resources */,
+				03D1006516ED41D20005A1A9 /* connected57.png in Resources */,
+				03D1006616ED41D20005A1A9 /* connected72.png in Resources */,
+				03D1006716ED41D20005A1A9 /* connected114.png in Resources */,
+				03D1006816ED41D20005A1A9 /* connected144.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		03D1001616EC579A0005A1A9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				03D1002A16EC579A0005A1A9 /* main.m in Sources */,
+				03D1002E16EC579A0005A1A9 /* QSAppDelegate.m in Sources */,
+				03D1004716EC58300005A1A9 /* QSTodoListViewController.m in Sources */,
+				03D1004A16EC58490005A1A9 /* QSTodoService.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		03D1002616EC579A0005A1A9 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				03D1002716EC579A0005A1A9 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		03D1003E16EC579A0005A1A9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		03D1003F16EC579A0005A1A9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		03D1004116EC579A0005A1A9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "ZUMOAPPNAME/ZUMOAPPNAME-Prefix.pch";
+				INFOPLIST_FILE = "ZUMOAPPNAME/ZUMOAPPNAME-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		03D1004216EC579A0005A1A9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)\"",
+				);
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "ZUMOAPPNAME/ZUMOAPPNAME-Prefix.pch";
+				INFOPLIST_FILE = "ZUMOAPPNAME/ZUMOAPPNAME-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		03D1001516EC579A0005A1A9 /* Build configuration list for PBXProject "ZUMOAPPNAME" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				03D1003E16EC579A0005A1A9 /* Debug */,
+				03D1003F16EC579A0005A1A9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		03D1004016EC579A0005A1A9 /* Build configuration list for PBXNativeTarget "ZUMOAPPNAME" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				03D1004116EC579A0005A1A9 /* Debug */,
+				03D1004216EC579A0005A1A9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 03D1001216EC579A0005A1A9 /* Project object */;
+}

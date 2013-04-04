@@ -52,11 +52,11 @@
 +(MSClient *) clientWithApplicationURLString:(NSString *)urlString
 {
     return [MSClient clientWithApplicationURLString:urlString
-                                 withApplicationKey:nil];
+                                 applicationKey:nil];
 }
 
 +(MSClient *) clientWithApplicationURLString:(NSString *)urlString
-                           withApplicationKey:(NSString *)key
+                           applicationKey:(NSString *)key
 {
     // NSURL will be nil for non-percent escaped url strings so we have to
     // percent escape here
@@ -64,18 +64,25 @@
     [urlString stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     
     NSURL *url = [NSURL URLWithString:urlStringEncoded];
-    return [MSClient clientWithApplicationURL:url withApplicationKey:key];
+    return [MSClient clientWithApplicationURL:url applicationKey:key];
+}
+
++(MSClient *) clientWithApplicationURLString:(NSString *)urlString
+                          withApplicationKey:(NSString *)key
+{
+    return [MSClient clientWithApplicationURLString:urlString
+                                     applicationKey:key];
 }
 
 +(MSClient *) clientWithApplicationURL:(NSURL *)url
 {
-    return [MSClient clientWithApplicationURL:url withApplicationKey:nil];
+    return [MSClient clientWithApplicationURL:url applicationKey:nil];
 }
 
 +(MSClient *) clientWithApplicationURL:(NSURL *)url
-                    withApplicationKey:(NSString *)key
+                    applicationKey:(NSString *)key
 {
-    return [[MSClient alloc] initWithApplicationURL:url withApplicationKey:key];    
+    return [[MSClient alloc] initWithApplicationURL:url applicationKey:key];    
 }
 
 
@@ -84,10 +91,10 @@
 
 -(id) initWithApplicationURL:(NSURL *)url
 {
-    return [self initWithApplicationURL:url withApplicationKey:nil];
+    return [self initWithApplicationURL:url applicationKey:nil];
 }
 
--(id) initWithApplicationURL:(NSURL *)url withApplicationKey:(NSString *)key
+-(id) initWithApplicationURL:(NSURL *)url applicationKey:(NSString *)key
 {
     self = [super init];
     if(self)
@@ -103,7 +110,7 @@
 #pragma mark * Public Filter Methods
 
 
--(MSClient *) clientwithFilter:(id<MSFilter>)filter
+-(MSClient *) clientWithFilter:(id<MSFilter>)filter
 {
     // Create a deep copy of the client (except for the filters)
     MSClient *newClient = [self copy];
@@ -128,12 +135,12 @@
 
 
 -(void) loginWithProvider:(NSString *)provider
-             onController:(UIViewController *)controller
+             controller:(UIViewController *)controller
                  animated:(BOOL)animated
                completion:(MSClientLoginBlock)completion
 {
     return [self.login loginWithProvider:provider
-                            onController:controller
+                            controller:controller
                                 animated:animated
                               completion:completion];
 }
@@ -146,11 +153,11 @@
 }
 
 -(void) loginWithProvider:(NSString *)provider
-                withToken:(NSDictionary *)token
+                token:(NSDictionary *)token
                completion:(MSClientLoginBlock)completion;
 {
    return [self.login loginWithProvider:provider
-                              withToken:token
+                              token:token
                              completion:completion];
 }
 
@@ -163,9 +170,14 @@
 #pragma mark * Public Table Constructor Methods
 
 
+-(MSTable *) tableWithName:(NSString *)tableName
+{
+    return [[MSTable alloc] initWithName:tableName client:self];
+}
+
 -(MSTable *) getTable:(NSString *)tableName
 {
-    return [[MSTable alloc] initWithName:tableName andClient:self];
+    return [self tableWithName:tableName];
 }
 
 
@@ -176,7 +188,7 @@
 {
     MSClient *client = [[MSClient allocWithZone:zone]
                             initWithApplicationURL:self.applicationURL
-                                withApplicationKey:self.applicationKey];
+                                applicationKey:self.applicationKey];
                                                                             
     client.currentUser = [self.currentUser copyWithZone:zone];
     client.filters = [self.filters copyWithZone:zone];

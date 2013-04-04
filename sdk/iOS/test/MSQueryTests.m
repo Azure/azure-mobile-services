@@ -41,7 +41,7 @@
     client = [MSClient clientWithApplicationURLString:@"http://someAppUrl"];
     STAssertNotNil(client, @"Could not create test client.");
     
-    table = [[MSTable alloc] initWithName:@"someTable" andClient:client];
+    table = [[MSTable alloc] initWithName:@"someTable" client:client];
     STAssertNotNil(table, @"Could not create test table.");
 }
 
@@ -58,7 +58,7 @@
 {
     NSLog(@"%@ start", self.name);
     
-    query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
+    query = [[MSQuery alloc] initWithTable:table predicate:nil];
     STAssertTrue([query.description isEqualToString:@"$inlinecount=none"],
                  @"OData query string was: %@",
                  query.description);
@@ -70,7 +70,7 @@
 {    
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name == 'bob'"];
     
-    query = [[MSQuery alloc] initWithTable:table withPredicate:predicate];
+    query = [[MSQuery alloc] initWithTable:table predicate:predicate];
     STAssertTrue([query.description
                   isEqualToString:@"$filter=(name%20eq%20'bob')&$inlinecount=none"],
                  @"OData query string was: %@",
@@ -83,7 +83,7 @@
 
 -(void)testMSQueryTableProperty
 {
-    query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
+    query = [[MSQuery alloc] initWithTable:table predicate:nil];
     STAssertEqualObjects(query.table,
                          table,
                          @"'table' property didn't return the table from init.");
@@ -91,7 +91,7 @@
 
 -(void)testMSQueryFetchLimitPropertyCanBeSet
 {
-    query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
+    query = [[MSQuery alloc] initWithTable:table predicate:nil];
     query.fetchLimit = 22;
     STAssertTrue([query.description isEqualToString:
                   @"$top=22&$inlinecount=none"],
@@ -101,7 +101,7 @@
 
 -(void)testMSQueryFetchOffsetPropertyCanBeSet
 {
-    query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
+    query = [[MSQuery alloc] initWithTable:table predicate:nil];
     query.fetchOffset = 542;
     STAssertTrue([query.description isEqualToString:@"$inlinecount=none&$skip=542"],
                  @"OData query string was: %@",
@@ -110,7 +110,7 @@
 
 -(void)testMSQueryIncludeTotalCountPropertySetToTrue
 {
-    query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
+    query = [[MSQuery alloc] initWithTable:table predicate:nil];
     query.includeTotalCount = YES;
     STAssertTrue([query.description isEqualToString:@"$inlinecount=allpages"],
                  @"Query string was: %@",
@@ -119,7 +119,7 @@
 
 -(void)testMSQueryIncludeTotalCountPropertySetToFalse
 {
-    query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
+    query = [[MSQuery alloc] initWithTable:table predicate:nil];
     query.includeTotalCount = NO;
     STAssertTrue([query.description isEqualToString:@"$inlinecount=none"],
                  @"Query string was: %@",
@@ -128,7 +128,7 @@
 
 -(void)testMSQueryParametersPropertyCanBeSet
 {    
-    query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
+    query = [[MSQuery alloc] initWithTable:table predicate:nil];
     query.parameters = @{
         @"key1": @"someValue",
         @"key2": @"14",
@@ -142,7 +142,7 @@
 
 -(void)testMSQuerySelectFieldsPropertyCanBeSet
 {
-    query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
+    query = [[MSQuery alloc] initWithTable:table predicate:nil];
     query.selectFields = @[ @"address", @"birthdate" ];
     STAssertTrue([query.description isEqualToString:
                  @"$select=address,birthdate&$inlinecount=none"],
@@ -156,7 +156,7 @@
 
 -(void)testMSQueryOrderByCapturesMethodCallOrder
 {
-    query = [[MSQuery alloc] initWithTable:table withPredicate:nil];
+    query = [[MSQuery alloc] initWithTable:table predicate:nil];
     [query orderByAscending:@"name"];
     [query orderByDescending:@"zipcode"];
     [query orderByAscending:@"birthdate"];
