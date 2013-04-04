@@ -30,7 +30,7 @@
 
 
 // A singleton instance of the MSLoginSerializer.
-+(MSLoginSerializer *) loginSerializer;
++(MSLoginSerializer *)loginSerializer;
 
 
 #pragma mark * Serialization Methods
@@ -38,7 +38,7 @@
 
 // Called to serialize an authentication token. May return nil if there was an
 // error, in which case |error| will be set to a non-nil value.
--(NSData *) dataFromToken:(id)token orError:(NSError **)error;
+-(NSData *)dataFromToken:(id)token orError:(NSError **)error;
 
 
 #pragma mark * Deserialization Methods
@@ -46,6 +46,6 @@
 
 // Called to deserialize an |MSUser| instance. May return nil if there was an
 // error, in which case |error| will be set to a non-nil value.
--(MSUser *) userFromData:(NSData *)data orError:(NSError **)error;
+-(MSUser *)userFromData:(NSData *)data orError:(NSError **)error;
 
 @end

@@ -52,7 +52,7 @@
 
 -(void) testInitWithNameAndClient
 {
-    MSTable *table = [[MSTable alloc] initWithName:@"SomeName" andClient:client];
+    MSTable *table = [[MSTable alloc] initWithName:@"SomeName" client:client];
     
     STAssertNotNil(table, @"table should not be nil.");
     
@@ -63,7 +63,7 @@
 
 -(void) testInitWithNameAndClientAllowsNil
 {
-    MSTable *table = [[MSTable alloc] initWithName:nil andClient:nil];
+    MSTable *table = [[MSTable alloc] initWithName:nil client:nil];
     
     STAssertNotNil(table, @"table should not be nil.");
     
@@ -80,7 +80,7 @@
 
 -(void) testInsertItemWithNilItem
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Insert the item
     [todoTable insert:nil completion:^(NSDictionary *item, NSError *error) {
@@ -105,7 +105,7 @@
 
 -(void) testInsertItemWithInvalidItem
 {
-    MSTable *todoTable = [client getTable:@"NoSuchTable"];
+    MSTable *todoTable = [client tableWithName:@"NoSuchTable"];
     
     // Create the item
     id item = [[NSDate alloc] initWithTimeIntervalSinceReferenceDate:0.0];
@@ -140,7 +140,7 @@
 
 -(void) testUpdateItemWithNilItem
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Update the item
     [todoTable update:nil completion:^(NSDictionary *item, NSError *error) {
@@ -165,7 +165,7 @@
 
 -(void) testUpdateItemWithInvalidItem
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Create the item
     id item = [[NSDate alloc] initWithTimeIntervalSinceReferenceDate:0.0];
@@ -193,7 +193,7 @@
 
 -(void) testUpdateItemWithNoItemId
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Create the item
     NSDictionary *item = @{ @"text":@"Write unit tests!", @"complete": @(NO) };
@@ -221,7 +221,7 @@
 
 -(void) testUpdateItemWithInvalidItemId
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Create the item
     NSDictionary *item = @{ @"text":@"Write unit tests!", @"id":@"I'm not valid." };
@@ -256,7 +256,7 @@
 
 -(void) testDeleteItemWithNilItem
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Update the item
     [todoTable delete:nil completion:^(NSNumber *itemId, NSError *error) {
@@ -281,7 +281,7 @@
 
 -(void) testDeleteItemWithInvalidItem
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Create the item
     id item = [[NSDate alloc] initWithTimeIntervalSinceReferenceDate:0.0];
@@ -309,7 +309,7 @@
 
 -(void) testDeleteItemWithNoItemId
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Create the item
     NSDictionary *item = @{ @"text":@"Write unit tests!", @"complete": @(NO) };
@@ -337,7 +337,7 @@
 
 -(void) testDeleteItemWithInvalidItemId
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Create the item
     NSDictionary *item = @{ @"text":@"Write unit tests!", @"id":@"I'm not valid." };
@@ -365,7 +365,7 @@
 
 -(void) testDeleteItemWithIdWithNoItemId
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
 
     // Update the item
     [todoTable deleteWithId:nil completion:^(NSNumber *itemId, NSError *error) {
@@ -390,7 +390,7 @@
 
 -(void) testDeleteItemWithIdWithInvalidItemId
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Create the item
     id itemId = [[NSDate alloc] initWithTimeIntervalSince1970:0.0];
@@ -426,7 +426,7 @@
 
 -(void) testReadItemWithIdWithNoItemId
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Update the item
     [todoTable readWithId:nil completion:^(NSDictionary *item, NSError *error) {
@@ -451,7 +451,7 @@
 
 -(void) testReadItemWithIdWithInvalidItemId
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     
     // Create the item
     id itemId = [[NSDate alloc] initWithTimeIntervalSince1970:0.0];
@@ -483,7 +483,7 @@
 
 -(void) testQueryReturnsNonNil
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
     MSQuery *query = [todoTable query];
     
     STAssertNotNil(query, @"query should not have been nil.");    
@@ -491,8 +491,8 @@
 
 -(void) testQueryWithPredicateReturnsNonNil
 {
-    MSTable *todoTable = [client getTable:@"todoItem"];
-    MSQuery *query = [todoTable queryWhere:nil];
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
+    MSQuery *query = [todoTable queryWithPredicate:nil];
     
     STAssertNotNil(query, @"query should not have been nil.");
 }

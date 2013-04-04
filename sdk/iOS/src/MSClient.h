@@ -69,68 +69,78 @@
 
 
 // Creates a client with the given URL for the Windows Azure Mobile Service.
-+(MSClient *) clientWithApplicationURLString:(NSString *)urlString;
++(MSClient *)clientWithApplicationURLString:(NSString *)urlString;
 
 // Creates a client with the given URL and application key for the Windows Azure
 // Mobile Service.
-+(MSClient *) clientWithApplicationURLString:(NSString *)urlString
-                           withApplicationKey:(NSString *)key;
++(MSClient *)clientWithApplicationURLString:(NSString *)urlString
+                         applicationKey:(NSString *)key;
+
+// Old method to create a client with the given URL and application key for the
+// Windows Azure Mobile Service. This has been deprecated. Use
+// clientWithApplicationURLString:applicationKey:
++(MSClient *)clientWithApplicationURLString:(NSString *)urlString
+                         withApplicationKey:(NSString *)key __deprecated;
 
 // Creates a client with the given URL for the Windows Azure Mobile Service.
-+(MSClient *) clientWithApplicationURL:(NSURL *)url;
++(MSClient *)clientWithApplicationURL:(NSURL *)url;
 
 // Creates a client with the given URL and application key for the Windows Azure
 // Mobile Service.
-+(MSClient *) clientWithApplicationURL:(NSURL *)url
-                     withApplicationKey:(NSString *)key;
++(MSClient *)clientWithApplicationURL:(NSURL *)url
+                       applicationKey:(NSString *)key;
 
 
 #pragma  mark * Public Initializer Methods
 
 
 // Intiliazes a client with the given URL for the Windows Azure Mobile Service.
--(id) initWithApplicationURL:(NSURL *)url;
+-(id)initWithApplicationURL:(NSURL *)url;
 
 // Intiliazes a client with the given URL and application key for the Windows
 // Azure Mobile Service.
--(id) initWithApplicationURL:(NSURL *)url withApplicationKey:(NSString *)key;
+-(id)initWithApplicationURL:(NSURL *)url applicationKey:(NSString *)key;
 
 
 #pragma mark * Public Filter Methods
 
 
 // Creates a clone of the client with the given filter applied to the new client.
--(MSClient *) clientwithFilter:(id<MSFilter>)filter;
+-(MSClient *)clientWithFilter:(id<MSFilter>)filter;
 
 
 #pragma  mark * Public Login and Logout Methods
 
 // Logs in the current end user with the given provider by presenting the
 // MSLoginController with the given |controller|.
--(void) loginWithProvider:(NSString *)provider
-             onController:(UIViewController *)controller
-                 animated:(BOOL)animated
-               completion:(MSClientLoginBlock)completion;
+-(void)loginWithProvider:(NSString *)provider
+              controller:(UIViewController *)controller
+                animated:(BOOL)animated
+              completion:(MSClientLoginBlock)completion;
 
 // Returns an |MSLoginController| that can be used to log in the current
 // end user with the given provider.
--(MSLoginController *) loginViewControllerWithProvider:(NSString *)provider
-                                completion:(MSClientLoginBlock)completion;
+-(MSLoginController *)loginViewControllerWithProvider:(NSString *)provider
+                                 completion:(MSClientLoginBlock)completion;
 
 // Logs in the current end user with the given provider and the given token for
 // the provider.
--(void) loginWithProvider:(NSString *)provider
-                withToken:(NSDictionary *)token
-                completion:(MSClientLoginBlock)completion;
+-(void)loginWithProvider:(NSString *)provider
+                   token:(NSDictionary *)token
+              completion:(MSClientLoginBlock)completion;
 
 // Logs out the current end user.
--(void) logout;
+-(void)logout;
 
 
 #pragma  mark * Public GetTable Methods
 
 
 // Returns an |MSTable| instance for a table with the given name.
--(MSTable *) getTable:(NSString *)tableName;
+-(MSTable *)tableWithName:(NSString *)tableName;
+
+// Old method to return an |MSTable| instance for a table with the given name.
+// This has been deprecated. Use tableWithName:
+-(MSTable *)getTable:(NSString *)tableName __deprecated;
 
 @end

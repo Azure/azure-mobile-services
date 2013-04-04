@@ -27,6 +27,6 @@
 @interface MSJSONSerializer : NSObject <MSSerializer>
 
 // A singleton instance of the MSJSONSerializer.
-+(id<MSSerializer>) JSONSerializer;
++(id<MSSerializer>)JSONSerializer;
 
 @end
