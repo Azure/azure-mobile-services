@@ -86,7 +86,7 @@ namespace ZumoE2ETestApp.Framework
 #else
             var isolatedStorage = System.IO.IsolatedStorage.IsolatedStorageFile.GetUserStoreForApplication();
                     return Task.Factory.StartNew<Stream>(
-                        () => isolatedStorage.OpenFile(appSettingsFileName, FileMode.Open));
+                        () => isolatedStorage.OpenFile(appSettingsFileName, FileMode.OpenOrCreate));
 #endif
 #endif
         }
