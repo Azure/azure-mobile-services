@@ -67,11 +67,14 @@ namespace ZumoE2ETestAppWP75
                 this.lstTestGroups.ItemsSource = sources;
 
                 SavedAppInfo savedAppInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
-                this.txtUploadUrl.Text = savedAppInfo.LastUploadUrl ?? "";
-                if (savedAppInfo.LastService != null && !string.IsNullOrEmpty(savedAppInfo.LastService.AppUrl) && !string.IsNullOrEmpty(savedAppInfo.LastService.AppKey))
+                if (savedAppInfo != null)
                 {
-                    this.txtAppUrl.Text = savedAppInfo.LastService.AppUrl;
-                    this.txtAppKey.Text = savedAppInfo.LastService.AppKey;
+                    this.txtUploadUrl.Text = savedAppInfo.LastUploadUrl ?? string.Empty;
+                    if (savedAppInfo.LastService != null && !string.IsNullOrEmpty(savedAppInfo.LastService.AppUrl) && !string.IsNullOrEmpty(savedAppInfo.LastService.AppKey))
+                    {
+                        this.txtAppUrl.Text = savedAppInfo.LastService.AppUrl;
+                        this.txtAppKey.Text = savedAppInfo.LastService.AppKey;
+                    }
                 }
             }
         }
@@ -110,7 +113,7 @@ namespace ZumoE2ETestAppWP75
 
         private async Task SaveAppInfo()
         {
-            SavedAppInfo appInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
+            SavedAppInfo appInfo = await AppInfoRepository.Instance.GetSavedAppInfo() ?? new SavedAppInfo();
             string uploadUrl = this.txtUploadUrl.Text;
             string appUrl = this.txtAppUrl.Text;
             string appKey = this.txtAppKey.Text;
