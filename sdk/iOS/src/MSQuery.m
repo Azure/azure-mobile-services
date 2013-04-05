@@ -39,10 +39,10 @@
 
 -(id) initWithTable:(MSTable *)table;
 {
-    return [self initWithTable:table withPredicate:nil];
+    return [self initWithTable:table predicate:nil];
 }
 
--(id) initWithTable:(MSTable *)table withPredicate:(NSPredicate *)predicate
+-(id) initWithTable:(MSTable *)table predicate:(NSPredicate *)predicate
 {
     self = [super init];
     if(self)

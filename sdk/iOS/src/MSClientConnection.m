@@ -64,7 +64,7 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 
 
 -(id) initWithRequest:(NSURLRequest *)request
-           withClient:(MSClient *)client
+           client:(MSClient *)client
             completion:(MSResponseBlock)completion
 {
     self = [super init];
@@ -135,8 +135,8 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
         } copy];
         
         [nextFilter handleRequest:request
-                           onNext:onNext
-                       onResponse:completion];
+                           next:onNext
+                       response:completion];
     }
 }
 

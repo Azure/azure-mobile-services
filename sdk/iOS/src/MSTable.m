@@ -45,7 +45,7 @@
 #pragma mark * Public Initializer Methods
 
 
--(id) initWithName:(NSString *)tableName andClient:(MSClient *)client;
+-(id) initWithName:(NSString *)tableName client:(MSClient *)client;
 {    
     self = [super init];
     if (self)
@@ -213,11 +213,11 @@
     [self readWithQueryString:nil completion:completion];
 }
 
--(void) readWhere:(NSPredicate *) predicate
+-(void) readWithPredicate:(NSPredicate *) predicate
             completion:(MSReadQueryBlock)completion
 {
     // Create the query from the predicate
-    MSQuery *query = [self queryWhere:predicate];
+    MSQuery *query = [self queryWithPredicate:predicate];
     
     // Call read on the query
     [query readWithCompletion:completion];
@@ -232,9 +232,9 @@
     return [[MSQuery alloc] initWithTable:self];
 }
 
--(MSQuery *) queryWhere:(NSPredicate *)predicate
+-(MSQuery *) queryWithPredicate:(NSPredicate *)predicate
 {
-    return [[MSQuery alloc] initWithTable:self withPredicate:predicate];
+    return [[MSQuery alloc] initWithTable:self predicate:predicate];
 }
 
 

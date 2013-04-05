@@ -77,7 +77,7 @@
         NSString *tableName = [testCase objectAtIndex:2];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
-        MSTable *table = [client getTable:tableName];
+        MSTable *table = [client tableWithName:tableName];
         
         NSURL *url = [MSTableURLBuilder URLForTable:table
                                      withParameters:nil
@@ -129,7 +129,7 @@
         NSDictionary *parameters = [testCase objectAtIndex:3];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
-        MSTable *table = [client getTable:tableName];
+        MSTable *table = [client tableWithName:tableName];
         
         NSURL *url = [MSTableURLBuilder URLForTable:table
                                      withParameters:parameters
@@ -149,7 +149,7 @@
     NSDictionary *parameters = @{ @"$notAllowed" : @5 };
     
     MSClient *client = [MSClient clientWithApplicationURLString:appURL];
-    MSTable *table = [client getTable:tableName];
+    MSTable *table = [client tableWithName:tableName];
     
     
     NSURL *url = [MSTableURLBuilder URLForTable:table
@@ -202,7 +202,7 @@
         NSString *expectedURL = [testCase objectAtIndex:0];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
-        MSTable *table = [client getTable:tableName];
+        MSTable *table = [client tableWithName:tableName];
         
         NSURL *url = [MSTableURLBuilder URLForTable:table
                                    withItemIdString:itemId
@@ -254,7 +254,7 @@
         NSDictionary *parameters = [testCase objectAtIndex:4];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
-        MSTable *table = [client getTable:tableName];
+        MSTable *table = [client tableWithName:tableName];
         
         NSURL *url = [MSTableURLBuilder URLForTable:table
                                    withItemIdString:itemId
@@ -276,7 +276,7 @@
     NSDictionary *parameters = @{ @"$" : @5 };
     
     MSClient *client = [MSClient clientWithApplicationURLString:appURL];
-    MSTable *table = [client getTable:tableName];
+    MSTable *table = [client tableWithName:tableName];
     
     
     NSURL *url = [MSTableURLBuilder URLForTable:table
@@ -330,7 +330,7 @@
         NSString *expectedURL = [testCase objectAtIndex:0];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
-        MSTable *table = [client getTable:tableName];
+        MSTable *table = [client tableWithName:tableName];
         
         NSURL *url = [MSTableURLBuilder URLForTable:table
                                           withQuery:query];
@@ -349,11 +349,11 @@
     NSString *predicateString = @"title == '#?&$ encode me!'";
     
     MSClient *client = [MSClient clientWithApplicationURLString:appURL];
-    MSTable *table = [client getTable:tableName];
+    MSTable *table = [client tableWithName:tableName];
     
     NSPredicate *predicate = [NSPredicate predicateWithFormat:predicateString];
     
-    MSQuery *query = [[MSQuery alloc] initWithTable:table withPredicate:predicate];
+    MSQuery *query = [[MSQuery alloc] initWithTable:table predicate:predicate];
     
     NSString *queryString = [MSTableURLBuilder queryStringFromQuery:query
                                                             orError:nil];
@@ -372,11 +372,11 @@
     NSString *predicateString = @"title == '#?&$ encode me!'";
     
     MSClient *client = [MSClient clientWithApplicationURLString:appURL];
-    MSTable *table = [client getTable:tableName];
+    MSTable *table = [client tableWithName:tableName];
     
     NSPredicate *predicate = [NSPredicate predicateWithFormat:predicateString];
     
-    MSQuery *query = [[MSQuery alloc] initWithTable:table withPredicate:predicate];
+    MSQuery *query = [[MSQuery alloc] initWithTable:table predicate:predicate];
     query.parameters = @{
         @"key1": @"someValue",
         @"$key2": @"14",
