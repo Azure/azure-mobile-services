@@ -21,7 +21,7 @@
 }
 
 - (void)initializeClientWithAppUrl:(NSString *)url andKey:(NSString *)appKey {
-    [self setClient:[MSClient clientWithApplicationURLString:url withApplicationKey:appKey]];
+    [self setClient:[MSClient clientWithApplicationURLString:url applicationKey:appKey]];
 }
 
 +(NSDate *)createDateWithYear:(NSInteger)year month:(NSInteger)month day:(NSInteger)day {

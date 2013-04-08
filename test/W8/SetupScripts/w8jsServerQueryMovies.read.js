@@ -70,8 +70,8 @@ function getWhereClauseCreator(testName) {
             return function (table) { return table.where(function () { return this.Title.toLowerCase().indexOf('the') === 0; }); };
         case 'String.indexOf, String.toUpperCase - Movie which start with "THE"':
             return function (table) { return table.where(function () { return this.Title.toUpperCase().indexOf('THE') === 0; }); };
-        case 'String.indexOf (non-ASCII) - movies containing the "é" character':
-            return function (table) { return table.where(function () { return this.Title.indexOf('é') >= 0; }); };
+        case 'String.indexOf (non-ASCII) - movies containing the "Ã©" character':
+            return function (table) { return table.where(function () { return this.Title.indexOf('Ã©') >= 0; }); };
         case 'String.substring, length - movies which end with "r"':
             return function (table) { return table.where(function () { return this.Title.substring(this.Title.length - 1, 1) === 'r'; }); };
         case 'String.substring (2 parameters) - movies with "father" starting at position 7':

@@ -269,12 +269,12 @@
         
         NSString *URLString = URL.absoluteString;
         NSInteger tokenMatch = [URLString rangeOfString:@"#token="].location;
-        if (tokenMatch > 0) {
+        if (tokenMatch != NSNotFound) {
             tokenString = [URLString substringFromIndex:(tokenMatch + 7)];
         }
         else {
             NSInteger errorMatch = [URLString rangeOfString:@"#error="].location;
-            if (errorMatch > 0) {
+            if (errorMatch != NSNotFound) {
                 errorString = [URLString substringFromIndex:(errorMatch + 7)];
             }
         }

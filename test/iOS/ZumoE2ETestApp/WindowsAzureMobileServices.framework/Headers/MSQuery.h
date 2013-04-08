@@ -72,11 +72,11 @@
 
 
 // Initializes a |MSQuery| instance with the given table.
--(id) initWithTable:(MSTable *)table;
+-(id)initWithTable:(MSTable *)table;
 
 // Returns a new |MSQuery| instance with the given table and the given
 // predicate is used as the filter clause of the query.
--(id) initWithTable:(MSTable *)table withPredicate:(NSPredicate *)predicate;
+-(id)initWithTable:(MSTable *)table predicate:(NSPredicate *)predicate;
 
 
 #pragma mark * Public OrderBy Methods
@@ -86,20 +86,20 @@
 // based on the given field. |orderByAscending:| and |orderByDescending:| can
 // each be called multiple times to further specify how the query results
 // should be ordered.
--(void) orderByAscending:(NSString *)field;
+-(void)orderByAscending:(NSString *)field;
 
 // Indicates that the query results should be returned in descending order
 // based on the given field. |orderByAscending:| and |orderByDescending:| can
 // each be called multiple times to further specify how the query results
 // should be ordered.
--(void) orderByDescending:(NSString *)field;
+-(void)orderByDescending:(NSString *)field;
 
 
 #pragma mark * Public Read Methods
 
 
 // Executes the query by sending a request to the Windows Azure Mobile Service.
--(void) readWithCompletion:(MSReadQueryBlock)completion;
+-(void)readWithCompletion:(MSReadQueryBlock)completion;
 
 
 #pragma mark * Public QueryString Methods
@@ -107,6 +107,6 @@
 
 // Generates a query string for current state of the |MSQuery| instance or an
 // error if the query string could not be generated.
--(NSString *) queryStringOrError:(NSError **)error;
+-(NSString *)queryStringOrError:(NSError **)error;
 
 @end

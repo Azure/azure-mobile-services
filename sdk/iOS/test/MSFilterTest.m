@@ -68,9 +68,9 @@
     testFilter.ignoreNextFilter = YES;
     
     // Create the client and the table
-    MSClient *filterClient = [client clientwithFilter:testFilter];
+    MSClient *filterClient = [client clientWithFilter:testFilter];
     
-    MSTable *todoTable = [filterClient getTable:@"todoItem"];
+    MSTable *todoTable = [filterClient tableWithName:@"todoItem"];
     
     // Create the item
     NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
@@ -107,9 +107,9 @@
     testFilter.ignoreNextFilter = YES;
     
     // Create the client and the table
-    MSClient *filterClient = [client clientwithFilter:testFilter];
+    MSClient *filterClient = [client clientWithFilter:testFilter];
     
-    MSTable *todoTable = [filterClient getTable:@"todoItem"];
+    MSTable *todoTable = [filterClient tableWithName:@"todoItem"];
     
     // Create the item
     NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
@@ -166,11 +166,11 @@
     
     
     // Create the client and the table
-    MSClient *filterClient = [[[client clientwithFilter:testFilterA]
-                                       clientwithFilter:testFilterB]
-                                       clientwithFilter:testFilterC];
+    MSClient *filterClient = [[[client clientWithFilter:testFilterA]
+                                       clientWithFilter:testFilterB]
+                                       clientWithFilter:testFilterC];
     
-    MSTable *todoTable = [filterClient getTable:@"todoItem"];
+    MSTable *todoTable = [filterClient tableWithName:@"todoItem"];
     
     // Create the item
     NSDictionary *item = @{ @"text":@"Write E2E test!", @"complete": @(NO) };
