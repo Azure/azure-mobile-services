@@ -1,0 +1,40 @@
+﻿<UserControl
+    x:Class="ZumoE2ETestApp.UIElements.MoviesDisplayControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:ZumoE2ETestApp.UIElements"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Name="grdRootPanel"
+          HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Opacity="0.75">
+        <Border Background="White" Margin="20">
+            <Grid Background="Blue" Margin="10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="80"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock FontSize="50" FontWeight="Bold"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"
+                           Text="List of Movies" />
+                <Button Name="btnClose" Content="Close" Margin="10" FontSize="30"
+                        HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Click="btnClose_Click_1" />
+                <ListBox Grid.Row="1" Name="lstMovies">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Foreground="Blue" FontSize="25" Margin="10"
+                                           Text="{Binding Path=Date}" />
+                                <TextBlock Foreground="Blue" FontSize="22" Margin="10"
+                                           Text="{Binding Path=Title}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

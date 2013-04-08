@@ -100,10 +100,10 @@ typedef void (^MSLoginViewBlock)(NSURL *endURL, NSError *error);
 
 
 // Initializes a new instance of the |MSLoginView|
--(id) initWithFrame:(CGRect)frame
-             client:(MSClient *)client
-           startURL:(NSURL *)startURL
-             endURL:(NSURL *)endURL
-         completion:(MSLoginViewBlock)completion;
+-(id)initWithFrame:(CGRect)frame
+            client:(MSClient *)client
+          startURL:(NSURL *)startURL
+            endURL:(NSURL *)endURL
+        completion:(MSLoginViewBlock)completion;
 
 @end

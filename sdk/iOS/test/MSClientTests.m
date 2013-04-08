@@ -61,7 +61,7 @@
 {
     MSClient *client =
     [MSClient clientWithApplicationURLString:@"http://someURL.com"
-                          withApplicationKey:@"here is some key"];
+                          applicationKey:@"here is some key"];
     
     STAssertNotNil(client, @"client should not be nil.");
     
@@ -98,7 +98,7 @@
     
     MSClient *client =
     [MSClient clientWithApplicationURL:appURL
-                    withApplicationKey:@"here is some key"];
+                    applicationKey:@"here is some key"];
     
     STAssertNotNil(client, @"client should not be nil.");
     
@@ -157,7 +157,7 @@
     
     MSClient *client =
     [[MSClient alloc] initWithApplicationURL:appURL
-                    withApplicationKey:@"here is some key"];
+                    applicationKey:@"here is some key"];
     
     STAssertNotNil(client, @"client should not be nil.");
     
@@ -180,7 +180,7 @@
     MSClient *client =
     [MSClient clientWithApplicationURLString:@"http://someURL.com"];
 
-    MSTable *table = [client getTable:@"Some Table Name"];
+    MSTable *table = [client tableWithName:@"Some Table Name"];
     
     STAssertNotNil(table, @"table should not be nil.");
 }
@@ -190,7 +190,7 @@
     MSClient *client =
     [MSClient clientWithApplicationURLString:@"http://someURL.com"];
     
-    MSTable *table = [client getTable:nil];
+    MSTable *table = [client tableWithName:nil];
     
     STAssertNotNil(table, @"table should not be nil.");
 }
