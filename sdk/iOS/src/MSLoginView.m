@@ -323,7 +323,7 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
     // Make the connection and start it
     MSClientConnection  *connection = [[MSClientConnection alloc]
                                        initWithRequest:request
-                                       withClient:self.client
+                                       client:self.client
                                        completion:responseCompletion];
     
     [self.activityIndicator startAnimating];

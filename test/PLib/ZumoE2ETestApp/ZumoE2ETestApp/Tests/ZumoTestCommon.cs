@@ -35,11 +35,16 @@ namespace ZumoE2ETestApp.Tests
 #endif
         }
 
-        public static ZumoTest CreateYesNoTest(string question, bool expectedAnswer)
+        public static ZumoTest CreateYesNoTest(string question, bool expectedAnswer, int delayBeforeDialogMilliseconds = 0)
         {
             string testName = string.Format(CultureInfo.InvariantCulture, "Validation: {0} (expected {1})", question, expectedAnswer ? "Yes" : "No");
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
+                if (delayBeforeDialogMilliseconds > 0)
+                {
+                    await Util.TaskDelay(delayBeforeDialogMilliseconds);
+                }
+
 #if !WINDOWS_PHONE
                 InputDialog dialog = new InputDialog("Question", question, "No", "Yes");
                 await dialog.Display();

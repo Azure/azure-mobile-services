@@ -33,6 +33,6 @@
 
 
 // The HTTP 'User-Agent' value to use with all |MSClient| requests
-+(NSString *) userAgent;
++(NSString *)userAgent;
 
 @end

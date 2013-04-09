@@ -40,13 +40,13 @@ namespace ZumoE2ETestAppWP8.Tests
             result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("After clicking OK, make sure the application is pinned to the start menu"));
             result.AddTest(ZumoTestCommon.CreateYesNoTest("Is the app in the start menu?", true));
             result.AddTest(CreateTilePushTest("Tile with image", new Uri(imageUrl), 3, "Test title", new Uri(wideImageUrl), "Back title", "Back content"));
-            result.AddTest(ZumoTestCommon.CreateYesNoTest("Did the tile change?", true));
+            result.AddTest(ZumoTestCommon.CreateYesNoTest("Did the tile change?", true, 3000));
             result.AddTest(CreateFlipTilePushTest("Flip tile",
                 new Uri("/Assets/Tiles/FlipCycleTileMedium.png", UriKind.Relative), 5, "Flip title",
                 new Uri("/Assets/Tiles/IconicTileSmall.png", UriKind.Relative), "Flip back title", "Flip back content",
                 new Uri("/Assets/Tiles/FlipCycleTileSmall.png", UriKind.Relative), new Uri("/Assets/Tiles/FlipCycleTileLarge.png", UriKind.Relative),
                 "Flip wide back content", new Uri("/Assets/Tiles/FlipCycleTileLarge.png", UriKind.Relative)));
-            result.AddTest(ZumoTestCommon.CreateYesNoTest("Did the tile change?", true));
+            result.AddTest(ZumoTestCommon.CreateYesNoTest("Did the tile change?", true, 3000));
 
             result.AddTest(CreateUnregisterChannelTest());
             return result;
@@ -291,6 +291,8 @@ namespace ZumoE2ETestAppWP8.Tests
                     test.AddLog("Reusing existing channel");
                 }
 
+                ZumoWP8PushTests.pushChannel = pushChannel;
+
                 if (pushChannel.ConnectionStatus == ChannelConnectionStatus.Disconnected)
                 {
                     pushChannel.Open();
@@ -316,24 +318,8 @@ namespace ZumoE2ETestAppWP8.Tests
                 pushChannel.ShellToastNotificationReceived += pushChannel_ShellToastNotificationReceived;
                 test.AddLog("Registered to raw / shell toast events");
 
-                ZumoWP8PushTests.pushChannel = pushChannel;
-
-                DateTime start = DateTime.UtcNow;
-                TimeSpan maxWait = TimeSpan.FromSeconds(20);
-                while (DateTime.UtcNow.Subtract(start) < maxWait)
-                {
-                    if (pushChannel.ConnectionStatus == ChannelConnectionStatus.Connected && pushChannel.ChannelUri != null)
-                    {
-                        test.AddLog("Channel URI: {0}", pushChannel.ChannelUri);
-                        break;
-                    }
-                    else
-                    {
-                        test.AddLog("Waiting for the push channel URI to be assigned");
-                    }
-
-                    await Util.TaskDelay(500);
-                }
+                TimeSpan maxWait = TimeSpan.FromSeconds(30);
+                await WaitForChannelUriAssignment(test, pushChannel, maxWait);
 
                 if (pushChannel.ConnectionStatus != ChannelConnectionStatus.Connected || pushChannel.ChannelUri == null)
                 {
@@ -345,6 +331,25 @@ namespace ZumoE2ETestAppWP8.Tests
                     return true;
                 }
             });
+        }
+
+        static async Task WaitForChannelUriAssignment(ZumoTest test, HttpNotificationChannel pushChannel, TimeSpan maxWait)
+        {
+            DateTime start = DateTime.UtcNow;
+            while (DateTime.UtcNow.Subtract(start) < maxWait)
+            {
+                if (pushChannel.ConnectionStatus == ChannelConnectionStatus.Connected && pushChannel.ChannelUri != null)
+                {
+                    test.AddLog("Channel URI: {0}", pushChannel.ChannelUri);
+                    break;
+                }
+                else
+                {
+                    test.AddLog("Waiting for the push channel URI to be assigned");
+                }
+
+                await Util.TaskDelay(500);
+            }
         }
 
         static void pushChannel_ShellToastNotificationReceived(object sender, NotificationEventArgs e)

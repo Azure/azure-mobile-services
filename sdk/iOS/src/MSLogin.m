@@ -55,7 +55,7 @@
 
 
 -(void) loginWithProvider:(NSString *)provider
-             onController:(UIViewController *)controller
+             controller:(UIViewController *)controller
                  animated:(BOOL)animated
                completion:(MSClientLoginBlock)completion
 {
@@ -112,7 +112,7 @@
 }
 
 -(void) loginWithProvider:(NSString *)provider
-                withToken:(NSDictionary *)token
+                token:(NSDictionary *)token
                completion:(MSClientLoginBlock)completion
 {
     // Create the request
@@ -161,7 +161,7 @@
         // Create the connection and start it
         MSClientConnection *connection = [[MSClientConnection alloc]
                                                 initWithRequest:request
-                                                withClient:self.client
+                                                client:self.client
                                                 completion:responseCompletion];
         [connection startWithoutFilters];
     }

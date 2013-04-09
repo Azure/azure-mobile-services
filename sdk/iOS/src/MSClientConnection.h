@@ -43,7 +43,11 @@ typedef void (^MSResponseBlock)(NSHTTPURLResponse *response,
 
 // The client that created the connection
 @property (nonatomic, strong, readonly)     MSClient *client;
+
+// The request used with the connection
 @property (nonatomic, strong, readonly)     NSURLRequest *request;
+
+// The callback to use with the response
 @property (nonatomic, copy, readonly)       MSResponseBlock completion;
 
 
@@ -52,9 +56,9 @@ typedef void (^MSResponseBlock)(NSHTTPURLResponse *response,
 
 // Initializes an |MSClientConnection| with the given client sends the given
 // request. NOTE: The request is not sent until |start| is called.
--(id) initWithRequest:(NSURLRequest *)request
-           withClient:(MSClient *)client
-            completion:(MSResponseBlock)completion;
+-(id)initWithRequest:(NSURLRequest *)request
+              client:(MSClient *)client
+          completion:(MSResponseBlock)completion;
 
 
 #pragma mark * Public Start Methods
