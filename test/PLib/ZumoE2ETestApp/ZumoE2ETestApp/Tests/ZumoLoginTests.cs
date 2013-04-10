@@ -216,6 +216,8 @@ namespace ZumoE2ETestApp.Tests
                     return false;
                 }
 
+                lastUserIdentityObject = null;
+
                 test.AddLog("Last user identity object: {0}", lastIdentity);
                 var token = new JObject();
                 switch (provider)
@@ -252,10 +254,14 @@ namespace ZumoE2ETestApp.Tests
                 var item = new JObject();
                 item.Add("Name", "John Doe");
                 int id = 1;
+                Dictionary<string, string> queryParameters = new Dictionary<string, string>
+                {
+                    { "userIsAuthenticated", userIsAuthenticated.ToString().ToLowerInvariant() },
+                };
                 MobileServiceInvalidOperationException ex = null;
                 try
                 {
-                    var inserted = await table.InsertAsync(item);
+                    var inserted = await table.InsertAsync(item, queryParameters);
                     item = (JObject)inserted;
                     test.AddLog("Inserted item: {0}", item);
                     id = item["id"].Value<int>();
@@ -288,7 +294,14 @@ namespace ZumoE2ETestApp.Tests
                 if (tableType == TablePermission.Public)
                 {
                     // Update, Read and Delete are public; we don't need the app key anymore
-                    client = new MobileServiceClient(client.ApplicationUri);
+                    var oldClient = client;
+                    client = new MobileServiceClient(oldClient.ApplicationUri);
+                    if (oldClient.CurrentUser != null)
+                    {
+                        client.CurrentUser = new MobileServiceUser(oldClient.CurrentUser.UserId);
+                        client.CurrentUser.MobileServiceAuthenticationToken = oldClient.CurrentUser.MobileServiceAuthenticationToken;
+                    }
+
                     table = client.GetTable(tableName);
                 }
 
@@ -296,7 +309,7 @@ namespace ZumoE2ETestApp.Tests
                 try
                 {
                     item["Name"] = "Jane Roe";
-                    var updated = await table.UpdateAsync(item);
+                    var updated = await table.UpdateAsync(item, queryParameters);
                     test.AddLog("Updated item: {0}", updated);
                 }
                 catch (MobileServiceInvalidOperationException e)
@@ -312,7 +325,7 @@ namespace ZumoE2ETestApp.Tests
                 ex = null;
                 try
                 {
-                    var item2 = await table.LookupAsync(id);
+                    var item2 = await table.LookupAsync(id, queryParameters);
                     test.AddLog("Retrieved item via Lookup: {0}", item2);
                     var obj = item2 as JObject;
                     if (obj["Identities"] != null)
@@ -344,7 +357,7 @@ namespace ZumoE2ETestApp.Tests
                 ex = null;
                 try
                 {
-                    var items = await table.ReadAsync("$filter=id eq " + id);
+                    var items = await table.ReadAsync("$filter=id eq " + id, queryParameters);
                     test.AddLog("Retrieved items via Read: {0}", items);
                     if (((JArray)items).Count != 1)
                     {
@@ -365,7 +378,7 @@ namespace ZumoE2ETestApp.Tests
                 ex = null;
                 try
                 {
-                    await table.DeleteAsync(item);
+                    await table.DeleteAsync(item, queryParameters);
                     test.AddLog("Deleted item: {0}", item);
                 }
                 catch (MobileServiceInvalidOperationException e)

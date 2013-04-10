@@ -400,7 +400,7 @@ namespace ZumoE2ETestApp.Tests
                     if (type == RoundTripTestType.String && item.String1 != null && item.String1.Length < 50)
                     {
                         test.AddLog("Now querying the table for the item (validating characters on query)");
-                        var queried = await table.Where(i => i.String1 == item.String1).ToListAsync();
+                        var queried = await table.Where(i => i.Id > (item.Id - 40) && i.String1 == item.String1).ToListAsync();
                         var lastItem = queried.Where(i => i.Id == item.Id).First();
                         if (originalItem.Equals(lastItem))
                         {
