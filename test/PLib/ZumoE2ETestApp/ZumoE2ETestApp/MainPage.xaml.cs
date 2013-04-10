@@ -233,6 +233,8 @@ namespace ZumoE2ETestApp
                     await AppInfoRepository.Instance.SaveAppInfo(appInfo);
                 }
 
+                uploadUrl = uploadUrl + "?platform=winstorecs";
+
                 ZumoTestGroup testGroup = allTests[selectedIndex];
                 List<string> lines = new List<string>();
                 foreach (var test in testGroup.AllTests)
