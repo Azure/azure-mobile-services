@@ -41,5 +41,6 @@ azure mobile script upload %1 table/w8Authenticated.read -f w8Authenticated.read
 azure mobile script upload %1 table/w8Authenticated.update -f w8Authenticated.update.js
 azure mobile script upload %1 table/w8Authenticated.delete -f w8Authenticated.delete.js
 azure mobile script upload %1 table/w8Public.update -f w8Public.update.js
+azure mobile script upload %1 table/w8Application.read -f w8Application.read.js
 
 :TheEnd

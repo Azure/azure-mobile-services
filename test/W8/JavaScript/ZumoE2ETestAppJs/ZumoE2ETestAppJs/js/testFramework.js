@@ -30,6 +30,8 @@ function createZumoNamespace() {
             }
         }
 
+        var now = new Date();
+        text = '[' + now.toISOString() + '] ' + text;
         this.logs.push(text);
     }
 

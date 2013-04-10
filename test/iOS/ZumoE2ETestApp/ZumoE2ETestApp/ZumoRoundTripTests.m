@@ -77,9 +77,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
     long long maxSupportedLong = 0x0020000000000000LL;
     long long maxSupportedNegativeLong = 0xFFE0000000000000LL;
     [result addObject:[self createRoundTripForType:RTT8ByteLong withValue:[NSNumber numberWithLongLong:maxSupportedLong] andName:@"Round trip maximum long long"]];
-    [result addObject:[self createRoundTripForType:RTT8ByteLong withValue:[NSNumber numberWithLongLong:(maxSupportedLong + 13)] andName:@"Round trip value beyond maximum long long"]];
     [result addObject:[self createRoundTripForType:RTT8ByteLong withValue:[NSNumber numberWithLongLong:maxSupportedNegativeLong] andName:@"Round trip maximum negative long long"]];
-    [result addObject:[self createRoundTripForType:RTT8ByteLong withValue:[NSNumber numberWithLongLong:(maxSupportedNegativeLong - 1)] andName:@"Round trip value beyond maximum negative long long"]];
     
     // Complex object scenarios
     [result addObject:[ZumoTest createTestWithName:@"Object with complex member" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
