@@ -19,6 +19,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
+import java.util.ArrayList;
 import java.util.Locale;
 
 import com.google.gson.JsonObject;
@@ -43,6 +44,8 @@ public class LoginTests extends TestGroup {
 	protected static final String USER_PERMISSION_TABLE_NAME = "droidAuthenticated";
 	protected static final String ADMIN_PERMISSION_TABLE_NAME = "droidAdmin";
 
+	private static JsonObject lastUserIdentityObject;
+
 	public LoginTests() {
 		super("Login tests");
 
@@ -51,13 +54,80 @@ public class LoginTests extends TestGroup {
 		this.addTest(createCRUDTest(USER_PERMISSION_TABLE_NAME, null, TablePermission.User, false));
 		this.addTest(createCRUDTest(ADMIN_PERMISSION_TABLE_NAME, null, TablePermission.Admin, false));
 
+		ArrayList<MobileServiceAuthenticationProvider> providersWithRecycledTokenSupport = new ArrayList<MobileServiceAuthenticationProvider>();
+		providersWithRecycledTokenSupport.add(MobileServiceAuthenticationProvider.Facebook);
+		providersWithRecycledTokenSupport.add(MobileServiceAuthenticationProvider.Google);
+
 		for (MobileServiceAuthenticationProvider provider : MobileServiceAuthenticationProvider.values()) {
 			this.addTest(createLogoutTest());
 			this.addTest(createLoginTest(provider));
 			this.addTest(createCRUDTest(APPLICATION_PERMISSION_TABLE_NAME, provider, TablePermission.Application, true));
 			this.addTest(createCRUDTest(USER_PERMISSION_TABLE_NAME, provider, TablePermission.User, true));
 			this.addTest(createCRUDTest(ADMIN_PERMISSION_TABLE_NAME, provider, TablePermission.Admin, true));
+
+			if (providersWithRecycledTokenSupport.contains(provider)) {
+				this.addTest(createLogoutTest());
+				this.addTest(createClientSideLoginTest(provider));
+				this.addTest(createCRUDTest(USER_PERMISSION_TABLE_NAME, provider, TablePermission.User, true));
+			}
 		}
+	}
+
+	private TestCase createClientSideLoginTest(final MobileServiceAuthenticationProvider provider) {
+		TestCase test = new TestCase("Login via token for " + provider.toString()) {
+
+			@Override
+			protected void executeTest(MobileServiceClient client,
+					final TestExecutionCallback callback) {
+
+				final TestCase testCase = this;
+
+				if (lastUserIdentityObject == null) {
+					log("Last identity is null. Cannot run this test.");
+					TestResult testResult = new TestResult();
+					testResult.setTestCase(testCase);
+					testResult.setStatus(TestStatus.Failed);
+					callback.onTestComplete(testCase, testResult);
+					return;
+				}
+
+				JsonObject lastIdentity = lastUserIdentityObject;
+				lastUserIdentityObject = null;
+				JsonObject providerIdentity = lastIdentity.getAsJsonObject(provider.toString().toLowerCase(Locale.US));
+				if (providerIdentity == null) {
+					log("Cannot find identity for specified provider. Cannot run this test.");
+					TestResult testResult = new TestResult();
+					testResult.setTestCase(testCase);
+					testResult.setStatus(TestStatus.Failed);
+					callback.onTestComplete(testCase, testResult);
+					return;
+				}
+
+				JsonObject token = new JsonObject();
+				token.addProperty("access_token", providerIdentity.get("accessToken").getAsString());
+				client.login(provider, token, new UserAuthenticationCallback() {
+
+					@Override
+					public void onCompleted(MobileServiceUser user,
+							Exception exception, ServiceFilterResponse response) {
+						TestResult testResult = new TestResult();
+						testResult.setTestCase(testCase);
+						if (exception != null) {
+							log("Exception during login: " + exception.toString());
+							testResult.setStatus(TestStatus.Failed);
+						} else {
+							log("Logged in as " + user.getUserId());
+							testResult.setStatus(TestStatus.Passed);
+						}
+
+						callback.onTestComplete(testCase, testResult);
+					}
+
+				});
+			}
+		};
+
+		return test;
 	}
 
 	private TestCase createLoginTest(final MobileServiceAuthenticationProvider provider) {
@@ -74,6 +144,11 @@ public class LoginTests extends TestGroup {
 						String userName;
 						if(user == null)
 						{
+							log("Error during login, user == null");
+							if (exception != null) {
+								log("Exception: " + exception.toString());
+							}
+
 							userName = "NULL";
 						}
 						else
@@ -176,6 +251,10 @@ public class LoginTests extends TestGroup {
 										if (!validateExecution(crudShouldWork, exception, result)) {
 											callback.onTestComplete(testCase, result);
 											return;
+										}
+
+										if (userIsAuthenticated && tableType == TablePermission.User) {
+											lastUserIdentityObject = jsonEntity.getAsJsonObject("Identities");
 										}
 
 										log("delete item");
