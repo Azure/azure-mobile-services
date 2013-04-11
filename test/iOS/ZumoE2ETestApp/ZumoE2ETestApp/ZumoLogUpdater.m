@@ -18,7 +18,8 @@
 @implementation ZumoLogUpdater
 
 -(void)uploadLogs:(NSString *)logText toUrl:(NSString *)url {
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
+    NSString *urlWithPlatform = [NSString stringWithFormat:@"%@?platform=iOS", url];
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:urlWithPlatform]];
     [request setHTTPMethod:@"POST"];
     [request setHTTPBody:[logText dataUsingEncoding:NSUTF8StringEncoding]];
     [request setValue:@"text/plain" forHTTPHeaderField:@"Content-Type"];

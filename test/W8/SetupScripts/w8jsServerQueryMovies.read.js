@@ -1,4 +1,4 @@
-function read(query, user, request) {
+﻿function read(query, user, request) {
     var table = tables.getTable('w8jsMovies');
     var testName = request.parameters.testName;
     if (testName === 'getWhereClauseCreator') {

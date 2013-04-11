@@ -116,23 +116,6 @@ function defineMiscTestsNamespace() {
         });
     }));
 
-    tests.push(new zumo.Test('User-Agent validation test', function (test, done) {
-        var client = zumo.getClient();
-        var filter = createLoggingFilter();
-        var filtered = client.withFilter(filter);
-        var table = filtered.getTable(roundTripTableName);
-        var item = { string1: 'hello world' };
-        table.insert(item).done(function () {
-            var userAgent = filter.request.headers['User-Agent'];
-            test.addLog('User-Agent: ' + userAgent);
-            var re = /ZUMO\/[\d\.]+ \(lang=WinJS/;
-            done(re.test(userAgent));
-        }, function (err) {
-            test.addLog('Error on insert: ', err);
-            done(false);
-        });
-    }));
-
     tests.push(new zumo.Test('Passing additional parameters in CRUD operations', function (test, done) {
         var client = zumo.getClient();
         var table = client.getTable(paramsTableName);

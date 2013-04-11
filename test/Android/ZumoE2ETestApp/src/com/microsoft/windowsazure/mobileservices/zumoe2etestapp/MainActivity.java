@@ -201,6 +201,7 @@ public class MainActivity extends Activity {
 							try {
 								String url = getLogPostURL();
 								if (url != null && url.trim() != "") {
+									url = url + "?platform=android";
 									HttpPost post = new HttpPost();
 									post.setEntity(new StringEntity(postContent, MobileServiceClient.UTF8_ENCODING));
 									

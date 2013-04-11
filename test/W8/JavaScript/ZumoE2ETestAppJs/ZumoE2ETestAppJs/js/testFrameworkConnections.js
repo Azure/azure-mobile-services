@@ -118,6 +118,8 @@ document.getElementById('btnSendLogs').onclick = function (evt) {
             testPlatform.alert(xhr.responseText);
         }
     }
+
+    uploadUrl = uploadUrl + "?platform=winstorejs";
     xhr.open('POST', uploadUrl, true);
     xhr.setRequestHeader('content-type', 'text/plain');
     xhr.send(logs);

@@ -36,6 +36,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>4864ea0b-c8a1-4af3-88a2-d2daf96c3421</ProjectGuid>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition="'$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '11.0'">
     <VisualStudioVersion>11.0</VisualStudioVersion>
@@ -61,6 +63,8 @@
     <Content Include="images\storelogo.png" />
     <Content Include="js\default.js" />
     <Content Include="css\default.css" />
+    <Content Include="js\MobileServices.js" />
+    <Content Include="js\MobileServices.pri" />
     <Content Include="js\testFramework.js" />
     <Content Include="js\platformSpecificFunctions.js" />
     <Content Include="js\testFrameworkConnections.js" />
@@ -73,6 +77,7 @@
     <Content Include="js\tests\roundTripTests.js" />
     <Content Include="js\tests\updateDeleteTests.js" />
     <Content Include="lib\jquery.js" />
+    <Content Include="packages.config" />
     <None Include="ZumoE2ETestAppJs_StoreKey.pfx" />
     <None Include="Package.StoreAssociation.xml" />
     <None Include="ZumoE2ETestAppJs_TemporaryKey.pfx" />
@@ -80,9 +85,9 @@
   <ItemGroup>
     <SDKReference Include="LiveSDKHTML, Version=5.0" />
     <SDKReference Include="Microsoft.WinJS.1.0, Version=1.0" />
-    <SDKReference Include="MobileServicesJavaScriptClient, Version=0.2.0.0" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below then uncomment
        that target and the DisableFastUpToDateCheck PropertyGroup. 
        Other similar extension points exist, see Microsoft.Common.targets.
