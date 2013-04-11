@@ -446,7 +446,11 @@ namespace ZumoE2ETestApp.Tests
                     {
                         HttpRequestMessage clonedRequest = await CloneRequest(request);
                         response = await base.SendAsync(clonedRequest, cancellationToken);
-                        await Util.TaskDelay(1000);
+                        if (i < this.NumberOfRequests - 1)
+                        {
+                            response.Dispose();
+                            response = null;
+                        }
                     }
                 }
                 catch (Exception ex)
