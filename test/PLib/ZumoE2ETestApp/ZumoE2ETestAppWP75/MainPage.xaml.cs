@@ -143,6 +143,7 @@ namespace ZumoE2ETestAppWP75
             }
 
             var logs = string.Join(Environment.NewLine, this.currentGroup.GetLogs());
+            uploadUrl = uploadUrl + "?platform=wp75";
             using (var client = new HttpClient())
             {
                 using (var request = new HttpRequestMessage(HttpMethod.Post, uploadUrl))
