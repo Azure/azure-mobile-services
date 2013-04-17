@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Microsoft.WindowsAzure.MobileServices;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
-using Microsoft.WindowsAzure.MobileServices;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -13,18 +14,17 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using System.Collections.ObjectModel;
 
 namespace ZUMOAPPNAME
-{    
+{
     public class TodoItem
     {
         public int Id { get; set; }
 
-        [DataMember(Name = "text")]
+        [JsonProperty(PropertyName = "text")]
         public string Text { get; set; }
 
-        [DataMember(Name = "complete")]
+        [JsonProperty(PropertyName = "complete")]
         public bool Complete { get; set; }
     }
 
