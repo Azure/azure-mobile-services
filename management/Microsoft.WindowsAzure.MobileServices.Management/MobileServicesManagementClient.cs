@@ -33,6 +33,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
         public string SqlManagementEndpoint { get; set; }
         public string SqlDatabaseHostSuffix { get; set; }
         public string MobileServiceHostSuffix { get; set; }
+        public string UserAgent { get; set; }
 
         public MobileServicesManagementClient()
             : this(null, null)
@@ -59,6 +60,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             try
             {
                 HttpClient client = new HttpClient();
+                if (!string.IsNullOrEmpty(this.UserAgent))
+                {
+                    client.DefaultRequestHeaders.UserAgent.ParseAdd(this.UserAgent);
+                }
+
                 string response = await client.GetStringAsync(WamsConfigurationEndpoint);
                 configuration = JObject.Parse(response);
             }
@@ -108,6 +114,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             WebRequestHandler handler = new WebRequestHandler();
             handler.CookieContainer = new CookieContainer();
             HttpClient client = new HttpClient(handler);
+            if (!string.IsNullOrEmpty(this.UserAgent))
+            {
+                client.DefaultRequestHeaders.UserAgent.ParseAdd(this.UserAgent);
+            }
 
             HttpRequestMessage request = new HttpRequestMessage();
             request.Method = HttpMethod.Get;
@@ -691,6 +701,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             handler.ClientCertificateOptions = ClientCertificateOption.Manual;
             handler.ClientCertificates.Add(this.ManagementCertificate);
             HttpClient client = new HttpClient(handler);
+            if (!string.IsNullOrEmpty(this.UserAgent))
+            {
+                client.DefaultRequestHeaders.UserAgent.ParseAdd(this.UserAgent);
+            }
+
             HttpResponseMessage response = await client.SendAsync(request);
             if (response.StatusCode == HttpStatusCode.Gone)
             {
