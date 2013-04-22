@@ -33,6 +33,7 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
+import com.microsoft.windowsazure.mobileservices.TableOperationCallback;
 
 public class ServiceFilterTests extends InstrumentationTestCase {
 	String appUrl = "";
@@ -348,5 +349,54 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 
 		// Assert
 		assertTrue(container.getErrorMessage().startsWith("Error in filter 2"));
+	}
+	
+	public void testRequestShouldntFailWith401ResponseAndWithoutOnResponseCallbackInvokation() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		runTestOnUiThread(new Runnable() {
+			@Override
+			public void run() {
+				// Create client
+				MobileServiceClient client = null;
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+				}
+
+				// Create ServiceFilterResponseMock
+				final ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{'error': 'Unauthorized'}");
+				response.setStatus(new StatusLineMock(401));
+
+				// Create ServiceFilterRequestMock that returns the given
+				// response
+				ServiceFilterRequestMock request = new ServiceFilterRequestMock(response);
+				request.setHasErrorOnExecute(true);
+				// Add a new filter to the client
+				client = client.withFilter(new ServiceFilter() {
+
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+					}
+				});
+
+				// Execute any action in order to generate a request
+				client.getTable(PersonTestObject.class).lookUp(1, new TableOperationCallback<PersonTestObject>() {
+
+					@Override
+					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null || entity != null) {
+							fail("Since no onResponse wasn't invoked from the filter, there shouldn't be any kind of result (exception or entity)");
+						}
+						
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
 	}
 }
