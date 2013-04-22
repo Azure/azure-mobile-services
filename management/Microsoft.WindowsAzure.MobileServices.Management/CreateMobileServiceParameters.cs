@@ -160,14 +160,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
                 throw new InvalidOperationException(Resources.MissingSqlAdminPassword);
             }
 
-            if (!IsSqlUsernameValid(this.SqlAdminUsername))
+            if (string.IsNullOrEmpty(this.ExistingSqlDatabase))
             {
-                throw new InvalidOperationException(Resources.InvalidSqlUsername);
-            }
+                // Validate SQL username and password strength only when a new SQL database is created
 
-            if (!IsSqlPasswordValid(this.SqlAdminPassword, this.SqlAdminUsername))
-            {
-                throw new InvalidOperationException(Resources.WeakSqlAdminPassword);
+                if (!IsSqlUsernameValid(this.SqlAdminUsername))
+                {
+                    throw new InvalidOperationException(Resources.InvalidSqlUsername);
+                }
+
+                if (!IsSqlPasswordValid(this.SqlAdminPassword, this.SqlAdminUsername))
+                {
+                    throw new InvalidOperationException(Resources.WeakSqlAdminPassword);
+                }
             }
         }
 
