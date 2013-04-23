@@ -250,7 +250,7 @@ namespace ZumoE2ETestApp.Tests.Types
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            return Enum.Parse(typeof(TEnum), reader.ReadAsString(), true);
+            return Enum.Parse(typeof(TEnum), reader.Value.ToString(), true);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

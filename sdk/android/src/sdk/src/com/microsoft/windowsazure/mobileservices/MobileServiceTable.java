@@ -55,7 +55,7 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 		public void onCompleted(JsonElement result, int count,
 				Exception exception, ServiceFilterResponse response) {
 			if (mCallback != null) {
-				if (exception == null) {
+				if (exception == null && result != null) {
 					Exception ex = null;
 					List<E> list = null;
 					try {
@@ -88,7 +88,7 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 		@Override
 		public void onCompleted(JsonObject jsonEntity, Exception exception,
 				ServiceFilterResponse response) {
-			if (exception == null) {
+			if (exception == null && jsonEntity != null) {
 				E entity = null;
 				Exception ex = null;
 				try {
