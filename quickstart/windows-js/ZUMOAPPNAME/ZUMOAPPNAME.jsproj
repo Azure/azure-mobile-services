@@ -58,7 +58,9 @@
     <Content Include="images\storelogo.png" />
     <Content Include="js\default.js" />
     <Content Include="css\default.css" />
+    <Content Include="js\MobileServices.intellisense.js" />
     <Content Include="js\MobileServices.js" />
+    <Content Include="js\MobileServices.min.js" />
     <Content Include="js\MobileServices.pri" />
   </ItemGroup>
   <ItemGroup>
