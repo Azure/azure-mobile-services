@@ -158,7 +158,7 @@ function createZumoNamespace() {
 
         if (mustInitialize) {
             if (appUrl && appKey) {
-                client = new Microsoft.WindowsAzure.MobileServices.MobileServiceClient(appUrl, appKey);
+                client = new WindowsAzure.MobileServiceClient(appUrl, appKey);
                 return true;
             } else {
                 new Windows.UI.Popups.MessageDialog('Please enter valid application URL and key', 'Error').showAsync();

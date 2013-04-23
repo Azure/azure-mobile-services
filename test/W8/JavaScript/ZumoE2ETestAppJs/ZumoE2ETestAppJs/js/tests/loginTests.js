@@ -229,7 +229,7 @@ function defineLoginTestsNamespace() {
                 if (validateCRUDResult('insert', error)) {
                     if (tablePermission === TABLE_PERMISSION_PUBLIC) {
                         // No need for app key anymore
-                        client = new Microsoft.WindowsAzure.MobileServices.MobileServiceClient(client.applicationUrl);
+                        client = new WindowsAzure.MobileServiceClient(client.applicationUrl);
                         table = client.getTable(tableName);
                     }
                     item.id = item.id || 1;
