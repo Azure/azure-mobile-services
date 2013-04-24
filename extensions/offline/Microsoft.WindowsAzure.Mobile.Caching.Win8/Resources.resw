@@ -1,0 +1,222 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="BadRequest" xml:space="preserve">
+    <value>Bad Request.</value>
+  </data>
+  <data name="CannotInsertReservedProperty" xml:space="preserve">
+    <value>A value cannot be specified for reserved property name '{0}'.</value>
+  </data>
+  <data name="CloseParenOrCommaExpected" xml:space="preserve">
+    <value>')' or ',' expected</value>
+  </data>
+  <data name="CloseParenOrOperatorExpected" xml:space="preserve">
+    <value>')' or operator expected</value>
+  </data>
+  <data name="CollectionDoesNotExist" xml:space="preserve">
+    <value>Collection '{0}' does not exist.</value>
+  </data>
+  <data name="DeleteOperationFailed" xml:space="preserve">
+    <value>The delete operation failed.</value>
+  </data>
+  <data name="DigitExpected" xml:space="preserve">
+    <value>Digit expected</value>
+  </data>
+  <data name="ExpressionExpected" xml:space="preserve">
+    <value>Expression expected</value>
+  </data>
+  <data name="IdentifierExpected" xml:space="preserve">
+    <value>Identifier expected</value>
+  </data>
+  <data name="InvalidCharacter" xml:space="preserve">
+    <value>Syntax error '{0}'</value>
+  </data>
+  <data name="InvalidHexLiteral" xml:space="preserve">
+    <value>Invalid hexadecimal literal</value>
+  </data>
+  <data name="InvalidIntegerLiteral" xml:space="preserve">
+    <value>Invalid integer literal '{0}'</value>
+  </data>
+  <data name="InvalidQuerySpecified" xml:space="preserve">
+    <value>Invalid query specified. {0}</value>
+  </data>
+  <data name="InvalidRealLiteral" xml:space="preserve">
+    <value>Invalid real literal '{0}'</value>
+  </data>
+  <data name="InvalidTypeCreationExpression" xml:space="preserve">
+    <value>Invalid '{0}' type creation expression</value>
+  </data>
+  <data name="InvalidUpdateIdSpecified" xml:space="preserve">
+    <value>When specified in the body, 'id' must be a number and must match the id specified in the url.</value>
+  </data>
+  <data name="NewColumnNullValueNotAllowed" xml:space="preserve">
+    <value>Unable to insert a null value for new property '{0}'</value>
+  </data>
+  <data name="NoApplicableMethod" xml:space="preserve">
+    <value>No applicable method '{0}' exists in type '{1}'</value>
+  </data>
+  <data name="OpenParenExpected" xml:space="preserve">
+    <value>'(' expected</value>
+  </data>
+  <data name="PagingQueryTemplate" xml:space="preserve">
+    <value>SELECT {0}</value>
+  </data>
+  <data name="ParseExceptionFormat" xml:space="preserve">
+    <value>{0} (at index {1})</value>
+  </data>
+  <data name="SkipTopMustBeInteger" xml:space="preserve">
+    <value>The value specified for '{0}' must be an integer.</value>
+  </data>
+  <data name="String" xml:space="preserve">
+    <value>FROM (</value>
+  </data>
+  <data name="String2" xml:space="preserve">
+    <value>SELECT ROW_NUMBER() OVER (ORDER BY {1}) AS [ROW_NUMBER], {2}</value>
+  </data>
+  <data name="String3" xml:space="preserve">
+    <value>FROM {3}</value>
+  </data>
+  <data name="String4" xml:space="preserve">
+    <value>WHERE {4}</value>
+  </data>
+  <data name="String5" xml:space="preserve">
+    <value>) AS [t1]</value>
+  </data>
+  <data name="String6" xml:space="preserve">
+    <value>WHERE [t1].[ROW_NUMBER] BETWEEN {5} + 1 AND {5} + {6}</value>
+  </data>
+  <data name="String7" xml:space="preserve">
+    <value>ORDER BY [t1].[ROW_NUMBER]</value>
+  </data>
+  <data name="SyntaxError" xml:space="preserve">
+    <value>Syntax error</value>
+  </data>
+  <data name="UnableToMapToSqlType" xml:space="preserve">
+    <value>Unable to map type '{0}' to a SQL type.</value>
+  </data>
+  <data name="UnknownIdentifier" xml:space="preserve">
+    <value>Unknown identifier '{0}'</value>
+  </data>
+  <data name="UnterminatedStringLiteral" xml:space="preserve">
+    <value>Unterminated string literal</value>
+  </data>
+  <data name="UpdateOperationFailed" xml:space="preserve">
+    <value>The update operation failed.</value>
+  </data>
+</root>

@@ -1,0 +1,21 @@
+# User-specific files
+*.suo
+*.user
+*.sln.docstates
+
+
+# Build results
+
+
+[Dd]ebug/
+[Rr]elease/
+x64/
+build/
+[Bb]in/
+[Oo]bj/
+
+packages/*
+!packages/Microsoft.Bcl.Build.1.0.0-rc/
+!packages/Microsoft.Bcl.Build.1.0.4/
+
+
