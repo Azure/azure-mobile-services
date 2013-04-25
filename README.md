@@ -23,6 +23,22 @@ To use Offline Data and Sync in your Mobile Service there are a couple things yo
 - Choos a `CacheProvider`.
 - Think about your business logic if all your assumptions are still valid in offline scenario's and make changes if necessary.
 
+## Work in progress
+
+- Ability to find out if a request came from the server or from the local data store.
+- Improve local querying.
+- Remove sqlite-net dependency.
+- Override error handlers in the server scripts.
+- Conflict resolution for clients.
+- Documentation.
+- More Cache Providers (without local queries).
+- Windows Phone 7.5 support with SQL CE.
+- End to end testing.
+
+
+
+ 
+
 
 
 
