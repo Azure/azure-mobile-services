@@ -158,9 +158,9 @@ namespace ZumoE2ETestApp.Tests
 
             result.AddTest(CreateSimpleUntypedRoundTripTest<ArgumentException>("(Neg) Insert item with non-default 'id' property",
                 JObject.Parse("{\"id\":1,\"value\":2}")));
-            result.AddTest(CreateSimpleUntypedRoundTripTest<MobileServiceInvalidOperationException>("(Neg) Insert item with non-default 'ID' property",
+            result.AddTest(CreateSimpleUntypedRoundTripTest<ArgumentException>("(Neg) Insert item with non-default 'ID' property",
                 JObject.Parse("{\"ID\":1,\"value\":2}")));
-            result.AddTest(CreateSimpleUntypedRoundTripTest<MobileServiceInvalidOperationException>("(Neg) Insert item with non-default 'Id' property",
+            result.AddTest(CreateSimpleUntypedRoundTripTest<ArgumentException>("(Neg) Insert item with non-default 'Id' property",
                 JObject.Parse("{\"Id\":1,\"value\":2}")));
 
             return result;
