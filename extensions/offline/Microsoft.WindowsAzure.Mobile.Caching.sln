@@ -28,8 +28,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobi
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{845585A9-B19C-4BB7-B0D5-5462DBFD07B8}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sqlite", "..\sqlite-net-wp8\Sqlite.vcxproj", "{59B35F6C-E062-4F0E-88D8-13F3F82A24F3}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{ED5E1222-B855-4BAE-BC01-7C659E526C87}"
 	ProjectSection(SolutionItems) = preProject
 		packages\Microsoft.Bcl.Build.1.0.4\tools\Install.ps1 = packages\Microsoft.Bcl.Build.1.0.4\tools\Install.ps1
@@ -37,6 +35,28 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{ED5E1222
 		packages\Microsoft.Bcl.Build.1.0.0-rc\tools\Microsoft.Bcl.Build.targets = packages\Microsoft.Bcl.Build.1.0.0-rc\tools\Microsoft.Bcl.Build.targets
 		packages\Microsoft.Bcl.Build.1.0.4\tools\Microsoft.Bcl.Build.Tasks.dll = packages\Microsoft.Bcl.Build.1.0.4\tools\Microsoft.Bcl.Build.Tasks.dll
 		packages\Microsoft.Bcl.Build.1.0.4\tools\Uninstall.ps1 = packages\Microsoft.Bcl.Build.1.0.4\tools\Uninstall.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sql", "sql", "{B594EEB2-A4BF-4C9C-81F3-0A09E6B8DD71}"
+	ProjectSection(SolutionItems) = preProject
+		altertable.sql = altertable.sql
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "scripts", "scripts", "{17984F1B-4BB0-4B34-9062-AD8E961BBB50}"
+	ProjectSection(SolutionItems) = preProject
+		scripts\delete.js = scripts\delete.js
+		scripts\insert.js = scripts\insert.js
+		scripts\read.js = scripts\read.js
+		scripts\update.js = scripts\update.js
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ext", "ext", "{17147E40-D926-483B-B99F-8C89EC6AEBD5}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "wp8", "wp8", "{16D95CF4-60FC-4AD6-8BD6-5D13D69146A6}"
+	ProjectSection(SolutionItems) = preProject
+		ext\wp8\Sqlite.dll = ext\wp8\Sqlite.dll
+		ext\wp8\Sqlite.pdb = ext\wp8\Sqlite.pdb
+		ext\wp8\Sqlite.winmd = ext\wp8\Sqlite.winmd
 	EndProjectSection
 EndProject
 Global
@@ -155,16 +175,6 @@ Global
 		{77105497-068B-4A01-B9D2-ABD33F2D2B79}.Release|ARM.ActiveCfg = Release|Any CPU
 		{77105497-068B-4A01-B9D2-ABD33F2D2B79}.Release|x64.ActiveCfg = Release|Any CPU
 		{77105497-068B-4A01-B9D2-ABD33F2D2B79}.Release|x86.ActiveCfg = Release|Any CPU
-		{59B35F6C-E062-4F0E-88D8-13F3F82A24F3}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{59B35F6C-E062-4F0E-88D8-13F3F82A24F3}.Debug|ARM.ActiveCfg = Debug|ARM
-		{59B35F6C-E062-4F0E-88D8-13F3F82A24F3}.Debug|ARM.Build.0 = Debug|ARM
-		{59B35F6C-E062-4F0E-88D8-13F3F82A24F3}.Debug|x64.ActiveCfg = Debug|ARM
-		{59B35F6C-E062-4F0E-88D8-13F3F82A24F3}.Debug|x86.ActiveCfg = Debug|ARM
-		{59B35F6C-E062-4F0E-88D8-13F3F82A24F3}.Release|Any CPU.ActiveCfg = Release|ARM
-		{59B35F6C-E062-4F0E-88D8-13F3F82A24F3}.Release|ARM.ActiveCfg = Release|ARM
-		{59B35F6C-E062-4F0E-88D8-13F3F82A24F3}.Release|ARM.Build.0 = Release|ARM
-		{59B35F6C-E062-4F0E-88D8-13F3F82A24F3}.Release|x64.ActiveCfg = Release|ARM
-		{59B35F6C-E062-4F0E-88D8-13F3F82A24F3}.Release|x86.ActiveCfg = Release|ARM
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -176,7 +186,7 @@ Global
 		{71B505A0-05E9-459C-8A82-51A12999A28F} = {EE1DFC29-06B6-4F91-B614-A9C52C0A9DFF}
 		{71C383F2-91A5-4EC6-8788-AD3B5324F144} = {EE1DFC29-06B6-4F91-B614-A9C52C0A9DFF}
 		{77105497-068B-4A01-B9D2-ABD33F2D2B79} = {EE1DFC29-06B6-4F91-B614-A9C52C0A9DFF}
-		{59B35F6C-E062-4F0E-88D8-13F3F82A24F3} = {EE1DFC29-06B6-4F91-B614-A9C52C0A9DFF}
 		{27196731-D463-4ECC-B0CE-570C3D5385B5} = {845585A9-B19C-4BB7-B0D5-5462DBFD07B8}
+		{16D95CF4-60FC-4AD6-8BD6-5D13D69146A6} = {17147E40-D926-483B-B99F-8C89EC6AEBD5}
 	EndGlobalSection
 EndGlobal

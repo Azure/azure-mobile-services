@@ -1,0 +1,19 @@
+﻿USE [<DATABASE-NAME>]
+GO
+
+ALTER TABLE [<SCHEMA-NAME>].[<TABLE-NAME>]
+ADD
+    [guid]      UNIQUEIDENTIFIER NOT NULL,
+    [timestamp] ROWVERSION       NOT NULL,
+    [isDeleted] BIT              NOT NULL,
+    CONSTRAINT CK_guid UNIQUE NONCLUSTERED ([guid] ASC)
+
+
+GO
+CREATE NONCLUSTERED INDEX [IX_guid]
+    ON [<SCHEMA-NAME>].[Test]([guid] ASC);
+
+
+GO
+CREATE NONCLUSTERED INDEX [IX_timestamp]
+    ON [<SCHEMA-NAME>].[Test]([timestamp] ASC);

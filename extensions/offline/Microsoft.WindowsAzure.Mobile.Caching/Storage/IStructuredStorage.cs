@@ -13,6 +13,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Caching
 
         Task StoreData(string tableName, IEnumerable<IDictionary<string, JToken>> data);
 
+        Task UpdateData(string tableName, string guid, IDictionary<string, JToken> data);
+
         Task RemoveStoredData(string tableName, IEnumerable<string> guids);
     }
 }

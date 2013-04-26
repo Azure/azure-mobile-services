@@ -114,6 +114,52 @@ namespace Microsoft.WindowsAzure.MobileServices.Caching
             await Task.Run(() => command.ExecuteNonQuery());
         }
 
+        public async Task UpdateData(string tableName, string guid, IDictionary<string, JToken> data)
+        {
+            Debug.WriteLine("Update data {0} for table {1}", guid, tableName);
+
+            if (data == null)
+            {
+                return;
+            }
+
+            // there will always be one item, since otherwise we would already have returned
+            TableMapping mapping = this.DeriveSchema(tableName, data);
+
+            await Task.Run(() => db.CreateTable(mapping));
+
+            Debug.WriteLine("Table {0}, using mapping: {1}", tableName, string.Join<TableMapping.Column>(",", mapping.Columns));
+
+            StringBuilder sql = new StringBuilder();
+            sql.Append("UPDATE ");
+            sql.Append(tableName);
+            sql.Append(" SET ");
+            foreach (var col in mapping.Columns)
+            {
+                sql.Append(col.Name);
+                sql.Append(" = '");
+                JValue val = data[col.Name] as JValue;
+                if (val == null)
+                {
+                    sql.Append("NULL");
+                }
+                else
+                {
+                    sql.Append(col.IsPK ? val.Value.ToString().ToLowerInvariant() : val.Value);
+                }
+                sql.Append("',");
+            }
+            sql.Remove(sql.Length - 1, 1);
+            sql.Append(" WHERE guid = '");
+            sql.Append(guid);
+            sql.Append("'");
+
+            Debug.WriteLine("Executing sql: {0}", sql.ToString());
+
+            SQLiteCommand command = db.CreateCommand(sql.ToString(), tableName);
+            await Task.Run(() => command.ExecuteNonQuery());
+        }
+
         public async Task RemoveStoredData(string tableName, IEnumerable<string> guids)
         {
             Debug.WriteLine(string.Format("Removing data for table {0}, guids: {1}", tableName, string.Join(",", guids)));
@@ -166,7 +212,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Caching
                 case JTokenType.Integer:
                     return typeof(double);
                 case JTokenType.Boolean:
-                    return typeof(bool);
+                    return typeof(string);
                 default:
                     Debug.WriteLine("Encountered token type {0}.", val.Type);
                     return typeof(string);

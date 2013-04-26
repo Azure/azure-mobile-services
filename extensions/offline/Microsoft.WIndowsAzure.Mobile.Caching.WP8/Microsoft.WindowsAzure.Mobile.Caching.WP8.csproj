@@ -85,20 +85,20 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\Microsoft.WindowsAzure.Mobile.Caching.Win8\DB\SQLite.cs">
+      <Link>DB\SQLite.cs</Link>
+    </Compile>
     <Compile Include="..\Microsoft.WindowsAzure.Mobile.Caching.Win8\DB\SQLite.Extensions.cs">
       <Link>DB\SQLite.Extensions.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.Mobile.Caching.Win8\DB\SQLiteAsync.cs">
+      <Link>DB\SQLiteAsync.cs</Link>
     </Compile>
     <Compile Include="..\Microsoft.WindowsAzure.Mobile.Caching.Win8\Expressions\SQLiteExpressionVisitor.cs">
       <Link>Expressions\SQLiteExpressionVisitor.cs</Link>
     </Compile>
     <Compile Include="..\Microsoft.WindowsAzure.Mobile.Caching.Win8\Storage\SQLiteStructuredStorage.cs">
       <Link>Storage\SQLiteStructuredStorage.cs</Link>
-    </Compile>
-    <Compile Include="..\sqlite-net\src\SQLite.cs">
-      <Link>DB\SQLite.cs</Link>
-    </Compile>
-    <Compile Include="..\sqlite-net\src\SQLiteAsync.cs">
-      <Link>DB\SQLiteAsync.cs</Link>
     </Compile>
     <Compile Include="NetworkInformation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -120,6 +120,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.5.0.3\lib\portable-net45+wp80+win8\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Sqlite, Version=255.255.255.255, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\ext\wp8\Sqlite.winmd</HintPath>
+    </Reference>
     <Reference Include="System.Net.Http">
       <HintPath>..\packages\Microsoft.Net.Http.2.1.3-beta\lib\sl4-windowsphone71\System.Net.Http.dll</HintPath>
     </Reference>
@@ -131,10 +135,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\sqlite-net-wp8\Sqlite.vcxproj">
-      <Project>{59B35F6C-E062-4F0E-88D8-13F3F82A24F3}</Project>
-      <Name>Sqlite</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Microsoft.WindowsAzure.Mobile.Caching\Microsoft.WindowsAzure.Mobile.Caching.csproj">
       <Project>{77105497-068B-4A01-B9D2-ABD33F2D2B79}</Project>
       <Name>Microsoft.WindowsAzure.Mobile.Caching</Name>

@@ -101,13 +101,9 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\sqlite-net\src\SQLite.cs">
-      <Link>DB\SQLite.cs</Link>
-    </Compile>
-    <Compile Include="..\sqlite-net\src\SQLiteAsync.cs">
-      <Link>DB\SQLiteAsync.cs</Link>
-    </Compile>
+    <Compile Include="DB\SQLite.cs" />
     <Compile Include="DB\SQLite.Extensions.cs" />
+    <Compile Include="DB\SQLiteAsync.cs" />
     <Compile Include="Expressions\SQLiteExpressionVisitor.cs" />
     <Compile Include="NetworkInformation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
