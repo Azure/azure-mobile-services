@@ -4,7 +4,7 @@ goto :Start
 
 :Error
 echo usage: %0 ^<application name^>
-echo   where application name is an call azure mobile Service app.
+echo   where application name is a azure mobile Service app.
 echo   To run the login tests, the application needs to be configured
 echo   with all four providers.
 goto :TheEnd
