@@ -220,11 +220,20 @@ namespace Microsoft.WindowsAzure.MobileServices.Caching
                 }
             }
 
-            await this.storage.StoreData(
-                tableName, 
+            string guidString = requestUri.GetQueryNameValuePairs().Where(kvp => kvp.Key.Equals("guid"))
+                    .Select(kvp => kvp.Value)
+                    .FirstOrDefault();
+            if (string.IsNullOrEmpty(guidString))
+            {
+                throw new InvalidOperationException("In offline scenarios a guid is required for update operations.");
+            }
+
+            await this.storage.UpdateData(
+                tableName,
+                guidString,
                 (dataForInsertion is IDictionary<string, JToken>) ?
-                    new[] { (IDictionary<string, JToken>)dataForInsertion } : 
-                    dataForInsertion.Cast<IDictionary<string, JToken>>().Foreach(d => d["status"] = (int)ItemStatus.Unchanged));
+                    (IDictionary<string, JToken>)dataForInsertion : 
+                    dataForInsertion.Cast<IDictionary<string, JToken>>().Foreach(d => d["status"] = (int)ItemStatus.Unchanged).FirstOrDefault());
 
             return response;
         }
@@ -260,6 +269,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Caching
                 string guidString = requestUri.GetQueryNameValuePairs().Where(kvp => kvp.Key.Equals("guid"))
                     .Select(kvp => kvp.Value)
                     .FirstOrDefault();
+                if (string.IsNullOrEmpty(guidString))
+                {
+                    throw new InvalidOperationException("In offline scenarios a guid is required for delete operations.");
+                }
                 //if local item (-1) not known by server
                 if (requestUri.AbsolutePath.Contains("/-1"))
                 {

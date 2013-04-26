@@ -109,7 +109,7 @@ namespace Todo.ViewModels
                 // This code takes a freshly completed TodoItem and updates the database. When the MobileService 
                 // responds, the item is removed from the list 
                 item.Complete = true;
-                await todoTable.UpdateAsync(item);
+                await todoTable.UpdateAsync(item, new Dictionary<string, string>() { { "guid", item.RealId.ToString() } });
                 items.Remove(item);
             }
             catch
