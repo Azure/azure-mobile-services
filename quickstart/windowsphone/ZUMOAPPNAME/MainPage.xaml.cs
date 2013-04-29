@@ -1,16 +1,15 @@
-﻿using System;
+﻿using Microsoft.Phone.Controls;
+using Microsoft.Phone.Shell;
+using Microsoft.WindowsAzure.MobileServices;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Runtime.Serialization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
-using Microsoft.Phone.Controls;
-using Microsoft.Phone.Shell;
 using ZUMOAPPNAME.Resources;
-
-using Microsoft.WindowsAzure.MobileServices;
 
 namespace ZUMOAPPNAME
 {
@@ -18,10 +17,10 @@ namespace ZUMOAPPNAME
     {
         public int Id { get; set; }
 
-        [DataMember(Name = "text")]
+        [JsonProperty(PropertyName = "text")]
         public string Text { get; set; }
 
-        [DataMember(Name = "complete")]
+        [JsonProperty(PropertyName = "complete")]
         public bool Complete { get; set; }
     }
 
@@ -29,7 +28,7 @@ namespace ZUMOAPPNAME
     {
         // MobileServiceCollectionView implements ICollectionView (useful for databinding to lists) and 
         // is integrated with your Mobile Service to make it easy to bind your data to the ListView
-        private MobileServiceCollectionView<TodoItem> items;
+        private MobileServiceCollection<TodoItem, TodoItem> items;
 
         private IMobileServiceTable<TodoItem> todoTable = App.MobileService.GetTable<TodoItem>();
 
@@ -47,13 +46,21 @@ namespace ZUMOAPPNAME
             items.Add(todoItem);
         }
 
-        private void RefreshTodoItems()
+        private async void RefreshTodoItems()
         {
             // This code refreshes the entries in the list view be querying the TodoItems table.
             // The query excludes completed TodoItems
-            items = todoTable
-                .Where(todoItem => todoItem.Complete == false)
-                .ToCollectionView();
+            try
+            {
+                items = await todoTable
+                    .Where(todoItem => todoItem.Complete == false)
+                    .ToCollectionAsync();
+            }
+            catch (MobileServiceInvalidOperationException e)
+            {
+                MessageBox.Show(e.Message, "Error loading items", MessageBoxButton.OK);
+            }
+
             ListItems.ItemsSource = items;
         }
 

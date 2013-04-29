@@ -1,11 +1,13 @@
-﻿using System;
+﻿using Microsoft.WindowsAzure.MobileServices;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
-using Microsoft.WindowsAzure.MobileServices;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI.Popups;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -13,24 +15,23 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using System.Collections.ObjectModel;
 
 namespace ZUMOAPPNAME
-{    
+{
     public class TodoItem
     {
         public int Id { get; set; }
 
-        [DataMember(Name = "text")]
+        [JsonProperty(PropertyName = "text")]
         public string Text { get; set; }
 
-        [DataMember(Name = "complete")]
+        [JsonProperty(PropertyName = "complete")]
         public bool Complete { get; set; }
     }
 
     public sealed partial class MainPage : Page
     {
-        private ObservableCollection<TodoItem> items;
+        private MobileServiceCollection<TodoItem, TodoItem> items;
         private IMobileServiceTable<TodoItem> todoTable = App.MobileService.GetTable<TodoItem>();
 
         public MainPage()
@@ -48,14 +49,28 @@ namespace ZUMOAPPNAME
 
         private async void RefreshTodoItems()
         {
-            // This code refreshes the entries in the list view by querying the TodoItems table.
-            // The query excludes completed TodoItems
-            var results = await todoTable
-                .Where(todoItem => todoItem.Complete == false)
-                .ToListAsync();
+            MobileServiceInvalidOperationException exception = null;
+            try
+            {
+                // This code refreshes the entries in the list view by querying the TodoItems table.
+                // The query excludes completed TodoItems
+                items = await todoTable
+                    .Where(todoItem => todoItem.Complete == false)
+                    .ToCollectionAsync();
+            }
+            catch (MobileServiceInvalidOperationException e)
+            {
+                exception = e;
+            }
 
-            items = new ObservableCollection<TodoItem>(results);
-            ListItems.ItemsSource = items;
+            if (exception != null)
+            {
+                await new MessageDialog(exception.Message, "Error loading items").ShowAsync();
+            }
+            else
+            {
+                ListItems.ItemsSource = items;
+            }
         }
 
         private async void UpdateCheckedTodoItem(TodoItem item)
