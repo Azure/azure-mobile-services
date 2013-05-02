@@ -182,7 +182,7 @@ function addTestGroups() {
         td.appendChild(a);
         addAttribute(a, 'href', '#');
         addAttribute(a, 'class', 'testGroupItem');
-        a.attachEvent('onclick', function () {
+        a.addEventListener('click', function () {
             testGroupSelected(index);
         });
         a.innerText = toStaticHTML(name);
