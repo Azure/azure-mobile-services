@@ -384,6 +384,60 @@ public class URLTests extends InstrumentationTestCase {
 		String expectedURL = appUrl + "tables/" + tableName + "/" + id;
 		assertEquals(expectedURL, result.getRequestUrl());
 	}
+	
+	public void testLookupURLWithParameters() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+		final ResultsContainer result = new ResultsContainer();
+
+		final String tableName = "dummy";
+		final int id = 10;
+		final List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("a key", "my <>&=?@ value"));
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				// Create client
+				MobileServiceClient client = null;
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+				}
+
+				// Add a new filter to the client
+				client = client.withFilter(new ServiceFilter() {
+
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+
+						result.setRequestUrl(request.getUrl());
+						assertEquals("GET", request.getMethod());
+
+						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+						response.setContent("{}");
+
+						responseCallback.onResponse(response, null);
+					}
+				});
+
+				client.getTable(tableName).lookUp(id, parameters, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Assert
+		String expectedURL = appUrl + "tables/" + tableName + "/" + id + "?a%20key=my%20%3C%3E%26%3D%3F%40%20value";
+		assertEquals(expectedURL, result.getRequestUrl());
+	}
 
 	public void testDeleteURL() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);

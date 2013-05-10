@@ -165,7 +165,24 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 	 */
 	public void lookUp(Object id, final TableOperationCallback<E> callback) {
 
-		mInternalTable.lookUp(id, new ParseResultOperationCallback(callback));
+		mInternalTable.lookUp(id, null, new ParseResultOperationCallback(callback));
+	}
+	
+	/**
+	 * Looks up a row in the table. Deserializes the row using the given class.
+	 * 
+	 * @param id
+	 *            The id of the row
+	 * @param clazz
+	 *            The class used to deserialize the row
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the request URI query string
+	 * @param callback
+	 *            Callback to invoke after the operation is completed
+	 */
+	public void lookUp(Object id, List<Pair<String, String>> parameters, final TableOperationCallback<E> callback) {
+
+		mInternalTable.lookUp(id, parameters, new ParseResultOperationCallback(callback));
 	}
 
 	/**

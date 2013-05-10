@@ -92,7 +92,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 
 		executeGetRecords(url, callback);
 	}
-
+	
 	/**
 	 * Looks up a row in the table and retrieves its JSON value.
 	 * 
@@ -102,16 +102,34 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	 *            Callback to invoke after the operation is completed
 	 */
 	public void lookUp(Object id, final TableJsonOperationCallback callback) {
-		// Create request URL
-		String url = null;
+		this.lookUp(id, null, callback);
+	}
+
+	/**
+	 * Looks up a row in the table and retrieves its JSON value.
+	 * 
+	 * @param id
+	 *            The id of the row
+	 * @param parameters           
+	 *            A list of user-defined parameters and values to include in the request URI query string
+	 * @param callback
+	 *            Callback to invoke after the operation is completed
+	 */
+	public void lookUp(Object id, List<Pair<String, String>> parameters, final TableJsonOperationCallback callback) {
+		// Create request URL	
+		String url;
 		try {
-			url = mClient.getAppUrl().toString()
-					+ TABLES_URL
-					+ URLEncoder.encode(mTableName,
-							MobileServiceClient.UTF8_ENCODING)
-							+ "/"
-							+ URLEncoder.encode(id.toString(),
-									MobileServiceClient.UTF8_ENCODING);
+			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
+			uriBuilder.path(TABLES_URL);
+			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
+			uriBuilder.appendPath(URLEncoder.encode(id.toString(), MobileServiceClient.UTF8_ENCODING));
+			
+			if (parameters != null && parameters.size() > 0) {
+				for (Pair<String, String> parameter : parameters) {
+					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
+				}
+			}
+			url = uriBuilder.build().toString();
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
