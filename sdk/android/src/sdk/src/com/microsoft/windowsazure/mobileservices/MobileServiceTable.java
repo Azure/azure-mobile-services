@@ -186,7 +186,7 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 	 * @param element
 	 *            The entity to insert
 	 * @param parameters
-	 * 			  A list of user-defined parameters and values to include in the request URI query string
+	 *            A list of user-defined parameters and values to include in the request URI query string
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
@@ -225,7 +225,7 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 	 * @param element
 	 *            The entity to update
 	 * @param parameters
-	 * 			  A list of user-defined parameters and values to include in the request URI query string
+	 *            A list of user-defined parameters and values to include in the request URI query string
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
