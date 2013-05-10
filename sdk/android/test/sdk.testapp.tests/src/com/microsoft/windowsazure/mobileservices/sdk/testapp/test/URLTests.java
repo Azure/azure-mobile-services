@@ -180,7 +180,7 @@ public class URLTests extends InstrumentationTestCase {
 		final PersonTestObject person = new PersonTestObject("john", "doe", 10);
 		person.setId(10);
 		final List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
-		parameters.add(new Pair<String, String>("dummykey", "dummyvalue"));
+		parameters.add(new Pair<String, String>("a key", "my <>&=?@ value"));
 
 		runTestOnUiThread(new Runnable() {
 
@@ -223,7 +223,7 @@ public class URLTests extends InstrumentationTestCase {
 		latch.await();
 
 		// Assert
-		String expectedURL = appUrl + "tables/" + tableName + "/" + person.getId() + "?dummykey=dummyvalue";
+		String expectedURL = appUrl + "tables/" + tableName + "/" + person.getId() + "?a%20key=my%20%3C%3E%26%3D%3F%40%20value";
 		assertEquals(expectedURL, result.getRequestUrl());
 	}
 
@@ -286,7 +286,7 @@ public class URLTests extends InstrumentationTestCase {
 		final String tableName = "dummy";
 		final PersonTestObject person = new PersonTestObject("john", "doe", 10);
 		final List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
-		parameters.add(new Pair<String, String>("dummykey", "dummyvalue"));
+		parameters.add(new Pair<String, String>("a key", "my <>&=?@ value"));
 
 		runTestOnUiThread(new Runnable() {
 
@@ -329,7 +329,7 @@ public class URLTests extends InstrumentationTestCase {
 		latch.await();
 
 		// Assert
-		String expectedURL = appUrl + "tables/" + tableName + "?dummykey=dummyvalue";
+		String expectedURL = appUrl + "tables/" + tableName + "?a%20key=my%20%3C%3E%26%3D%3F%40%20value";
 		assertEquals(expectedURL, result.getRequestUrl());
 	}
 
@@ -444,7 +444,7 @@ public class URLTests extends InstrumentationTestCase {
 		final String tableName = "dummy";
 		final int id = 10;
 		final List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
-		parameters.add(new Pair<String, String>("dummykey", "dummyvalue"));
+		parameters.add(new Pair<String, String>("a key", "my <>&=?@ value"));
 
 		runTestOnUiThread(new Runnable() {
 
@@ -487,7 +487,7 @@ public class URLTests extends InstrumentationTestCase {
 		latch.await();
 
 		// Assert
-		String expectedURL = appUrl + "tables/" + tableName + "/" + id + "?dummykey=dummyvalue";
+		String expectedURL = appUrl + "tables/" + tableName + "/" + id + "?a%20key=my%20%3C%3E%26%3D%3F%40%20value";
 		assertEquals(expectedURL, result.getRequestUrl());
 	}
 
