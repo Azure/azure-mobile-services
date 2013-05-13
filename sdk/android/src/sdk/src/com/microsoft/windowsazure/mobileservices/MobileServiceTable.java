@@ -28,6 +28,8 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
+import android.util.Pair;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -163,7 +165,24 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 	 */
 	public void lookUp(Object id, final TableOperationCallback<E> callback) {
 
-		mInternalTable.lookUp(id, new ParseResultOperationCallback(callback));
+		mInternalTable.lookUp(id, null, new ParseResultOperationCallback(callback));
+	}
+	
+	/**
+	 * Looks up a row in the table. Deserializes the row using the given class.
+	 * 
+	 * @param id
+	 *            The id of the row
+	 * @param clazz
+	 *            The class used to deserialize the row
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the request URI query string
+	 * @param callback
+	 *            Callback to invoke after the operation is completed
+	 */
+	public void lookUp(Object id, List<Pair<String, String>> parameters, final TableOperationCallback<E> callback) {
+
+		mInternalTable.lookUp(id, parameters, new ParseResultOperationCallback(callback));
 	}
 
 	/**
@@ -175,6 +194,20 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 	 *            Callback to invoke when the operation is completed
 	 */
 	public void insert(final E element, final TableOperationCallback<E> callback) {
+		this.insert(element, null, callback);
+	}
+	
+	/**
+	 * Inserts an entity into a Mobile Service Table
+	 * 
+	 * @param element
+	 *            The entity to insert
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the request URI query string
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void insert(final E element, List<Pair<String, String>> parameters, final TableOperationCallback<E> callback) {
 		JsonObject json = null;
 		try {
 			json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
@@ -186,7 +219,7 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 			return;
 		}
 
-		mInternalTable.insert(json, new ParseResultOperationCallback(callback,
+		mInternalTable.insert(json, parameters, new ParseResultOperationCallback(callback,
 				element));
 	}
 
@@ -198,7 +231,24 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
-	public void update(final E element, final TableOperationCallback<E> callback) {
+	public void update(final E element, 
+			final TableOperationCallback<E> callback) {
+		this.update(element, null, callback);
+	}
+	
+	/**
+	 * Updates an entity from a Mobile Service Table
+	 * 
+	 * @param element
+	 *            The entity to update
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the request URI query string
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void update(final E element, 
+			final List<Pair<String, String>> parameters,
+			final TableOperationCallback<E> callback) {
 		JsonObject json = null;
 		
 		try {
@@ -211,7 +261,7 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 			return;
 		}
 		
-		mInternalTable.update(json, new ParseResultOperationCallback(callback,
+		mInternalTable.update(json, parameters, new ParseResultOperationCallback(callback,
 				element));
 	}
 

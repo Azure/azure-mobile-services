@@ -22,9 +22,13 @@ package com.microsoft.windowsazure.mobileservices;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.InvalidParameterException;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.http.client.methods.HttpDelete;
+
+import android.net.Uri;
+import android.util.Pair;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -60,9 +64,9 @@ abstract class MobileServiceTableBase<E> {
 		mClient = client;
 		mTableName = name;
 	}
-
+	
 	public abstract void execute(MobileServiceQuery<?> query, E callback);
-
+	
 	/**
 	 * Executes a query to retrieve all the table rows
 	 * 
@@ -192,6 +196,20 @@ abstract class MobileServiceTableBase<E> {
 	 *            Callback to invoke when the operation is completed
 	 */
 	public void delete(Object element, TableDeleteCallback callback) {
+		this.delete(element, null, callback);
+	}
+	
+	/**
+	 * Deletes an entity from a Mobile Service Table
+	 * 
+	 * @param element
+	 *            The entity to delete
+	 * @param parameters
+	 * 			  A list of user-defined parameters and values to include in the request URI query string
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void delete(Object element, List<Pair<String, String>> parameters, TableDeleteCallback callback) {
 		int id = -1;
 		try {
 			id = getObjectId(element);
@@ -200,7 +218,7 @@ abstract class MobileServiceTableBase<E> {
 			return;
 		}
 
-		this.delete(id, callback);
+		this.delete(id, parameters, callback);
 	}
 
 	/**
@@ -212,16 +230,34 @@ abstract class MobileServiceTableBase<E> {
 	 *            Callback to invoke when the operation is completed
 	 */
 	public void delete(int id, final TableDeleteCallback callback) {
+		this.delete(id, null, callback);
+	}
+	
+	/**
+	 * Deletes an entity from a Mobile Service Table using a given id
+	 * 
+	 * @param id
+	 *            The id of the entity to delete
+	 * @param parameters
+	 * 			  A list of user-defined parameters and values to include in the request URI query string            
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void delete(int id, List<Pair<String, String>> parameters, final TableDeleteCallback callback) {
 		// Create delete request
 		ServiceFilterRequest delete;
 		try {
-			delete = new ServiceFilterRequestImpl(new HttpDelete(mClient
-					.getAppUrl().toString()
-					+ TABLES_URL
-					+ URLEncoder.encode(mTableName,
-							MobileServiceClient.UTF8_ENCODING)
-					+ "/"
-					+ Integer.valueOf(id).toString()));
+			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
+			uriBuilder.path(TABLES_URL);
+			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
+			uriBuilder.appendPath(Integer.valueOf(id).toString());
+
+			if (parameters != null && parameters.size() > 0) {
+				for (Pair<String, String> parameter : parameters) {
+					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
+				}
+			}
+			delete = new ServiceFilterRequestImpl(new HttpDelete(uriBuilder.build().toString()));			
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(e, null);

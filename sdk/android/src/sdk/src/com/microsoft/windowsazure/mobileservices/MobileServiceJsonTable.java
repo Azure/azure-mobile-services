@@ -22,11 +22,16 @@ package com.microsoft.windowsazure.mobileservices;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.InvalidParameterException;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
+
+import android.net.Uri;
+import android.util.Pair;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -54,7 +59,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	 * Retrieves a set of rows from the table using a query
 	 * 
 	 * @param query
-	 *            The query used to retrieve the rows
+	 *            The query used to retrieve the rows       
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
@@ -87,7 +92,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 
 		executeGetRecords(url, callback);
 	}
-
+	
 	/**
 	 * Looks up a row in the table and retrieves its JSON value.
 	 * 
@@ -97,16 +102,34 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	 *            Callback to invoke after the operation is completed
 	 */
 	public void lookUp(Object id, final TableJsonOperationCallback callback) {
-		// Create request URL
-		String url = null;
+		this.lookUp(id, null, callback);
+	}
+
+	/**
+	 * Looks up a row in the table and retrieves its JSON value.
+	 * 
+	 * @param id
+	 *            The id of the row
+	 * @param parameters           
+	 *            A list of user-defined parameters and values to include in the request URI query string
+	 * @param callback
+	 *            Callback to invoke after the operation is completed
+	 */
+	public void lookUp(Object id, List<Pair<String, String>> parameters, final TableJsonOperationCallback callback) {
+		// Create request URL	
+		String url;
 		try {
-			url = mClient.getAppUrl().toString()
-					+ TABLES_URL
-					+ URLEncoder.encode(mTableName,
-							MobileServiceClient.UTF8_ENCODING)
-							+ "/"
-							+ URLEncoder.encode(id.toString(),
-									MobileServiceClient.UTF8_ENCODING);
+			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
+			uriBuilder.path(TABLES_URL);
+			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
+			uriBuilder.appendPath(URLEncoder.encode(id.toString(), MobileServiceClient.UTF8_ENCODING));
+			
+			if (parameters != null && parameters.size() > 0) {
+				for (Pair<String, String> parameter : parameters) {
+					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
+				}
+			}
+			url = uriBuilder.build().toString();
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
@@ -164,15 +187,30 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	}
 
 	/**
-	 * Inserts a JsonObject into a Mobile Service Table
+	 * Inserts a JsonObject into a Mobile Service table
 	 * 
 	 * @param element
 	 *            The JsonObject to insert
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
+	 * @throws InvalidParameterException   
+	 */
+	public void insert(final JsonObject element, TableJsonOperationCallback callback) {
+		this.insert(element, null, callback);
+	}
+	
+	/**
+	 * Inserts a JsonObject into a Mobile Service Table
+	 * 
+	 * @param element
+	 *            The JsonObject to insert
+	 * @param parameters
+	 * 			  A list of user-defined parameters and values to include in the request URI query string
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
 	 * @throws InvalidParameterException
 	 */
-	public void insert(final JsonObject element,
+	public void insert(final JsonObject element, List<Pair<String, String>> parameters,
 			final TableJsonOperationCallback callback) {
 
 		try {
@@ -188,11 +226,16 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 
 		ServiceFilterRequest post;
 		try {
-			post = new ServiceFilterRequestImpl(new HttpPost(mClient
-					.getAppUrl().toString()
-					+ TABLES_URL
-					+ URLEncoder.encode(mTableName,
-							MobileServiceClient.UTF8_ENCODING)));
+			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
+			uriBuilder.path(TABLES_URL);
+			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
+
+			if (parameters != null && parameters.size() > 0) {
+				for (Pair<String, String> parameter : parameters) {
+					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
+				}
+			}
+			post = new ServiceFilterRequestImpl(new HttpPost(uriBuilder.build().toString()));
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
@@ -227,7 +270,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 			}
 		});
 	}
-
+	
 	/**
 	 * Updates an element from a Mobile Service Table
 	 * 
@@ -237,6 +280,22 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	 *            Callback to invoke when the operation is completed
 	 */
 	public void update(final JsonObject element,
+			final TableJsonOperationCallback callback) {
+		this.update(element, null, callback);
+	}
+
+	/**
+	 * Updates an element from a Mobile Service Table
+	 * 
+	 * @param element
+	 *            The JsonObject to update
+	 * @param parameters
+	 * 			  A list of user-defined parameters and values to include in the request URI query string
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void update(final JsonObject element,
+			final List<Pair<String, String>> parameters,
 			final TableJsonOperationCallback callback) {
 
 		try {
@@ -256,13 +315,17 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 
 		ServiceFilterRequest patch;
 		try {
-			patch = new ServiceFilterRequestImpl(new HttpPatch(mClient
-					.getAppUrl().toString()
-					+ TABLES_URL
-					+ URLEncoder.encode(mTableName,
-							MobileServiceClient.UTF8_ENCODING)
-							+ "/"
-							+ Integer.valueOf(getObjectId(element)).toString()));
+			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
+			uriBuilder.path(TABLES_URL);
+			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
+			uriBuilder.appendPath(Integer.valueOf(getObjectId(element)).toString());
+
+			if (parameters != null && parameters.size() > 0) {
+				for (Pair<String, String> parameter : parameters) {
+					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
+				}
+			}
+			patch = new ServiceFilterRequestImpl(new HttpPatch(uriBuilder.build().toString()));
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
