@@ -47,8 +47,9 @@
 }
 
 - (void)addLog:(NSString *)text {
-    [logs addObject:text];
-    NSLog(@"%@", text);
+    NSString *timestamped = [NSString stringWithFormat:@"[%@] %@", [[NSDate date] description], text];
+    [logs addObject:timestamped];
+    NSLog(@"%@", timestamped);
 }
 
 - (NSArray *)getLogs {

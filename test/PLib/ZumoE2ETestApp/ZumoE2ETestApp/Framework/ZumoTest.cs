@@ -47,6 +47,9 @@ namespace ZumoE2ETestApp.Framework
                 text = string.Format(CultureInfo.InvariantCulture, text, args);
             }
 
+            text = string.Format(CultureInfo.InvariantCulture, "[{0}] {1}",
+                DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture),
+                text);
             this.logs.Add(text);
         }
 

@@ -1,4 +1,5 @@
 ﻿/// <reference path="../testFramework.js" />
+/// <reference path="../MobileServices.intellisense.js" />
 
 function defineQueryTestsNamespace() {
     var tests = [];
@@ -110,8 +111,8 @@ function defineQueryTestsNamespace() {
         function (table) { return table.where(function () { return this.Title.indexOf('é') >= 0; }); },
         function (item) { return item.Title.indexOf('é') >= 0; });
     addQueryTest('String.replace, trim - movies starting with "godfather", after removing starting "the"',
-        function (table) { return table.where(function () { return this.Title.replace('The', '').trim().indexOf('Godfather') === 0; }); },
-        function (item) { return item.Title.replace('The', '').trim().indexOf('Godfather') === 0; });
+        function (table) { return table.where(function () { return this.Title.replace('The ', '').trim().indexOf('Godfather') === 0; }); },
+        function (item) { return item.Title.replace('The ', '').trim().indexOf('Godfather') === 0; });
     addQueryTest('String.substring, length - movies which end with "r"',
         function (table) { return table.where(function () { return this.Title.substring(this.Title.length - 1, 1) === 'r'; }); },
         function (item) { return /r$/.test(item.Title); });
