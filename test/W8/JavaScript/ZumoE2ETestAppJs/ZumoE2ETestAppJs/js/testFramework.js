@@ -1,5 +1,5 @@
-﻿/// <reference path="/MobileServicesJavaScriptClient/MobileServices.js" />
-/// <reference path="//Microsoft.WinJS.1.0/js/base.js" />
+﻿/// <reference path="//Microsoft.WinJS.1.0/js/base.js" />
+/// <reference path="MobileServices.intellisense.js" />
 
 function createZumoNamespace() {
     var TSPassed = 0;
@@ -30,6 +30,8 @@ function createZumoNamespace() {
             }
         }
 
+        var now = new Date();
+        text = '[' + now.toISOString() + '] ' + text;
         this.logs.push(text);
     }
 
@@ -156,7 +158,7 @@ function createZumoNamespace() {
 
         if (mustInitialize) {
             if (appUrl && appKey) {
-                client = new Microsoft.WindowsAzure.MobileServices.MobileServiceClient(appUrl, appKey);
+                client = new WindowsAzure.MobileServiceClient(appUrl, appKey);
                 return true;
             } else {
                 new Windows.UI.Popups.MessageDialog('Please enter valid application URL and key', 'Error').showAsync();
@@ -171,7 +173,7 @@ function createZumoNamespace() {
         /// <summary>
         /// Returns the shared MobileServiceClient instance.
         /// </summary>
-        /// <returns type="Microsoft.WindowsAzure.MobileServices.MobileServiceClient">
+        /// <returns type="WindowsAzure.MobileServiceClient">
         /// The shared cliens instance.
         /// </returns>
         return client;

@@ -118,6 +118,8 @@ document.getElementById('btnSendLogs').onclick = function (evt) {
             testPlatform.alert(xhr.responseText);
         }
     }
+
+    uploadUrl = uploadUrl + "?platform=winstorejs";
     xhr.open('POST', uploadUrl, true);
     xhr.setRequestHeader('content-type', 'text/plain');
     xhr.send(logs);
@@ -180,7 +182,7 @@ function addTestGroups() {
         td.appendChild(a);
         addAttribute(a, 'href', '#');
         addAttribute(a, 'class', 'testGroupItem');
-        a.attachEvent('onclick', function () {
+        a.addEventListener('click', function () {
             testGroupSelected(index);
         });
         a.innerText = toStaticHTML(name);

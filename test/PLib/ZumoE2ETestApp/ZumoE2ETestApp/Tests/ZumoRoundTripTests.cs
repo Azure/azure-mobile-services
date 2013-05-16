@@ -158,9 +158,9 @@ namespace ZumoE2ETestApp.Tests
 
             result.AddTest(CreateSimpleUntypedRoundTripTest<ArgumentException>("(Neg) Insert item with non-default 'id' property",
                 JObject.Parse("{\"id\":1,\"value\":2}")));
-            result.AddTest(CreateSimpleUntypedRoundTripTest<MobileServiceInvalidOperationException>("(Neg) Insert item with non-default 'ID' property",
+            result.AddTest(CreateSimpleUntypedRoundTripTest<ArgumentException>("(Neg) Insert item with non-default 'ID' property",
                 JObject.Parse("{\"ID\":1,\"value\":2}")));
-            result.AddTest(CreateSimpleUntypedRoundTripTest<MobileServiceInvalidOperationException>("(Neg) Insert item with non-default 'Id' property",
+            result.AddTest(CreateSimpleUntypedRoundTripTest<ArgumentException>("(Neg) Insert item with non-default 'Id' property",
                 JObject.Parse("{\"Id\":1,\"value\":2}")));
 
             return result;
@@ -400,7 +400,7 @@ namespace ZumoE2ETestApp.Tests
                     if (type == RoundTripTestType.String && item.String1 != null && item.String1.Length < 50)
                     {
                         test.AddLog("Now querying the table for the item (validating characters on query)");
-                        var queried = await table.Where(i => i.String1 == item.String1).ToListAsync();
+                        var queried = await table.Where(i => i.Id > (item.Id - 40) && i.String1 == item.String1).ToListAsync();
                         var lastItem = queried.Where(i => i.Id == item.Id).First();
                         if (originalItem.Equals(lastItem))
                         {
