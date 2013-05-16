@@ -1,5 +1,5 @@
-﻿/// <reference path="/MobileServicesJavaScriptClient/MobileServices.js" />
-/// <reference path="//Microsoft.WinJS.1.0/js/base.js" />
+﻿/// <reference path="//Microsoft.WinJS.1.0/js/base.js" />
+/// <reference path="MobileServices.intellisense.js" />
 
 function createZumoNamespace() {
     var TSPassed = 0;
@@ -173,7 +173,7 @@ function createZumoNamespace() {
         /// <summary>
         /// Returns the shared MobileServiceClient instance.
         /// </summary>
-        /// <returns type="Microsoft.WindowsAzure.MobileServices.MobileServiceClient">
+        /// <returns type="WindowsAzure.MobileServiceClient">
         /// The shared cliens instance.
         /// </returns>
         return client;
