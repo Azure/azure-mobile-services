@@ -230,8 +230,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
                 parameters.SqlServerLocation = parameters.ServiceLocation;
             }
 
-            // create the service specification
+            // attempt to register MobileService with RDFE
+            await this.MakeMobileServiceRegistrationRequestAsync();
 
+            // create the service specification
             JObject spec = this.CreateMobileServiceSpecification(parameters);
             string applicationSpec = this.CreateMobileApplicationSpecification(spec, parameters);
             
@@ -735,6 +737,52 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             if (string.IsNullOrEmpty(this.MobileServiceManagementEndpoint))
             {
                 throw new InvalidOperationException(Resources.MissingMobileServiceManagementEndpoint);
+            }
+        }
+        
+        /// <summary>
+        /// This function creates a request pointing towards the service registration endpoint
+        /// </summary>
+        /// <param name="serviceName">The service name to register, MobileService for us, newer
+        /// providers may use the format ProviderName.ResourceType
+        /// </param>
+        /// <param name="action">Either register or unregister</param>
+        /// <returns>A configured HTTPRequest</returns>
+        HttpRequestMessage CreateServiceRegistrationRequest(string serviceName, string action)
+        {
+            HttpRequestMessage result = new HttpRequestMessage();
+            result.Method = HttpMethod.Put;
+            result.RequestUri = new Uri(
+                this.MobileServiceManagementEndpoint +
+                "/" + this.SubscriptionId +
+                "/services?service=" + serviceName + "&action=" + action);
+
+            result.Headers.Add("x-ms-version", "2012-03-01");
+            result.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/xml"));
+
+            return result;
+        }
+
+        async Task<bool> MakeMobileServiceRegistrationRequestAsync()
+        {
+            HttpRequestMessage httpRequest = this.CreateServiceRegistrationRequest("MobileService", "register");
+            HttpResponseMessage httpResponse = await this.MakeManagementRequestAsync(httpRequest);
+
+            // The API will return 409 if the subscription is already registered
+            // and a success code if all’s well and it was registered
+            if (httpResponse.StatusCode == HttpStatusCode.Conflict || httpResponse.IsSuccessStatusCode)
+            {
+                return true;
+            } 
+            else 
+            {
+                //just return the response error
+                throw new InvalidOperationException(string.Format(
+                    CultureInfo.CurrentCulture,
+                    Resources.ManagementServiceReturnedHttpError,
+                    httpResponse.StatusCode));
+
+                return false;
             }
         }
     }
