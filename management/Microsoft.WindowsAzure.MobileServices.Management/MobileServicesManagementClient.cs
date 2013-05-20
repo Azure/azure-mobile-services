@@ -743,14 +743,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
         /// <summary>
         /// This function creates a request pointing towards the service registration endpoint
         /// </summary>
-        /// <param name="serviceName">The service name to register, typically MobileService for us, newer
-        /// provider may use the format ProviderName.ResourceType
+        /// <param name="serviceName">The service name to register, MobileService for us, newer
+        /// providers may use the format ProviderName.ResourceType
         /// </param>
         /// <param name="action">Either register or unregister</param>
         /// <returns>A configured HTTPRequest</returns>
         HttpRequestMessage CreateServiceRegistrationRequest(string serviceName, string action)
         {
-            //[WebInvoke(Method="PUT", UriTemplate = @"{subscriptionId}/services?service={resourceType}&action={action}")]
             HttpRequestMessage result = new HttpRequestMessage();
             result.Method = HttpMethod.Put;
             result.RequestUri = new Uri(
@@ -764,10 +763,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             return result;
         }
 
-        /// <summary>
-        /// Attempts to register the MobileService resource. If it fails, an error will be thrown
-        /// </summary>
-        /// <returns>True if registration succeeded</returns>
         async Task<bool> MakeMobileServiceRegistrationRequestAsync()
         {
             HttpRequestMessage httpRequest = this.CreateServiceRegistrationRequest("MobileService", "register");
@@ -778,7 +773,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             if (httpResponse.StatusCode == HttpStatusCode.Conflict || httpResponse.IsSuccessStatusCode)
             {
                 return true;
-            } else {
+            } 
+            else 
+            {
                 //just return the response error
                 throw new InvalidOperationException(string.Format(
                     CultureInfo.CurrentCulture,
