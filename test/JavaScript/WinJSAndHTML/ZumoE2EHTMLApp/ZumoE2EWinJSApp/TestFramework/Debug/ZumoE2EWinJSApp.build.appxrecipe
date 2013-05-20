@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Machine>ZUMOTEST2</Machine>
+    <WindowsUser>v-narenp</WindowsUser>
+    <SolutionConfiguration>Debug|AnyCPU</SolutionConfiguration>
+    <PackageArchitecture>neutral</PackageArchitecture>
+  </PropertyGroup>
+  <ItemGroup>
+    <AppXManifest Include="D:\MergeWinJSAndHTML\ZumoE2EHTMLApp\ZumoE2EWinJSApp\TestFramework\Debug\AppxManifest.xml">
+      <PackagePath>AppxManifest.xml</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppXManifest>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Live\v5.0\Metro HTML\Redist\CommonConfiguration\neutral\LiveSDKHTML\Images\SignInControl\Hotmail_Black.png">
+      <PackagePath>LiveSDKHTML\Images\SignInControl\Hotmail_Black.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Live\v5.0\Metro HTML\Redist\CommonConfiguration\neutral\LiveSDKHTML\Images\SignInControl\Hotmail_White.png">
+      <PackagePath>LiveSDKHTML\Images\SignInControl\Hotmail_White.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Live\v5.0\Metro HTML\Redist\CommonConfiguration\neutral\LiveSDKHTML\Images\SignInControl\Messenger_Black.png">
+      <PackagePath>LiveSDKHTML\Images\SignInControl\Messenger_Black.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Live\v5.0\Metro HTML\Redist\CommonConfiguration\neutral\LiveSDKHTML\Images\SignInControl\Messenger_White.png">
+      <PackagePath>LiveSDKHTML\Images\SignInControl\Messenger_White.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Live\v5.0\Metro HTML\Redist\CommonConfiguration\neutral\LiveSDKHTML\Images\SignInControl\SkyDrive_Black.png">
+      <PackagePath>LiveSDKHTML\Images\SignInControl\SkyDrive_Black.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Live\v5.0\Metro HTML\Redist\CommonConfiguration\neutral\LiveSDKHTML\Images\SignInControl\SkyDrive_White.png">
+      <PackagePath>LiveSDKHTML\Images\SignInControl\SkyDrive_White.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Live\v5.0\Metro HTML\Redist\CommonConfiguration\neutral\LiveSDKHTML\Images\SignInControl\Windows_Black.png">
+      <PackagePath>LiveSDKHTML\Images\SignInControl\Windows_Black.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Live\v5.0\Metro HTML\Redist\CommonConfiguration\neutral\LiveSDKHTML\Images\SignInControl\Windows_White.png">
+      <PackagePath>LiveSDKHTML\Images\SignInControl\Windows_White.png</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Live\v5.0\Metro HTML\Redist\Debug\neutral\LiveSDKHTML\js\wl.js">
+      <PackagePath>LiveSDKHTML\js\wl.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\TestFramework\js\platformSpecificFunctions.js">
+      <PackagePath>js\platformSpecificFunctions.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\TestFramework\js\testFramework.js">
+      <PackagePath>js\testFramework.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\TestFramework\js\testFrameworkConnections.js">
+      <PackagePath>js\testFrameworkConnections.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\TestFramework\js\tests\allTests.js">
+      <PackagePath>js\tests\allTests.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\TestFramework\js\tests\loginTests.js">
+      <PackagePath>js\tests\loginTests.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\TestFramework\js\tests\miscTests.js">
+      <PackagePath>js\tests\miscTests.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\TestFramework\js\tests\pushTests.js">
+      <PackagePath>js\tests\pushTests.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\TestFramework\js\tests\queryTestData.js">
+      <PackagePath>js\tests\queryTestData.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\TestFramework\js\tests\queryTests.js">
+      <PackagePath>js\tests\queryTests.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\TestFramework\js\tests\roundTripTests.js">
+      <PackagePath>js\tests\roundTripTests.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\TestFramework\js\tests\updateDeleteTests.js">
+      <PackagePath>js\tests\updateDeleteTests.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\ZumoE2EHTMLApp\ZumoE2EWinJSApp\js\default.js">
+      <PackagePath>js\default.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\ZumoE2EHTMLApp\ZumoE2EWinJSApp\js\IdentifiedRunningApplication.js">
+      <PackagePath>js\IdentifiedRunningApplication.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\ZumoE2EHTMLApp\ZumoE2EWinJSApp\js\MobileServices.intellisense.js">
+      <PackagePath>js\MobileServices.intellisense.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\ZumoE2EHTMLApp\ZumoE2EWinJSApp\js\MobileServices.js">
+      <PackagePath>js\MobileServices.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\ZumoE2EHTMLApp\ZumoE2EWinJSApp\js\MobileServices.min.js">
+      <PackagePath>js\MobileServices.min.js</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\ZumoE2EHTMLApp\ZumoE2EWinJSApp\default.html">
+      <PackagePath>default.html</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\ZumoE2EHTMLApp\ZumoE2EWinJSApp\images\logo.png">
+      <PackagePath>images\logo.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\ZumoE2EHTMLApp\ZumoE2EWinJSApp\images\smalllogo.png">
+      <PackagePath>images\smalllogo.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\ZumoE2EHTMLApp\ZumoE2EWinJSApp\images\splashscreen.png">
+      <PackagePath>images\splashscreen.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\ZumoE2EHTMLApp\ZumoE2EWinJSApp\images\storelogo.png">
+      <PackagePath>images\storelogo.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\ZumoE2EHTMLApp\ZumoE2EWinJSApp\css\default.css">
+      <PackagePath>css\default.css</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\ZumoE2EHTMLApp\ZumoE2EWinJSApp\packages.config">
+      <PackagePath>packages.config</PackagePath>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="D:\MergeWinJSAndHTML\ZumoE2EHTMLApp\ZumoE2EWinJSApp\TestFramework\Debug\resources.pri">
+      <PackagePath>resources.pri</PackagePath>
+    </AppxPackagedFile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResolvedSDKReference Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\">
+      <Name>Microsoft.WinJS.1.0</Name>
+      <Version>1.0.9200.20602</Version>
+      <Architecture>Neutral</Architecture>
+      <FrameworkIdentity>Name=Microsoft.WinJS.1.0, MinVersion=1.0.9200.20602</FrameworkIdentity>
+      <AppxLocation>C:\Program Files %28x86%29\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\Microsoft.WinJS.1.0.appx</AppxLocation>
+    </ResolvedSDKReference>
+  </ItemGroup>
+</Project>
