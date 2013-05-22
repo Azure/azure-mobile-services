@@ -50,12 +50,59 @@
     <TargetPlatformVersion>8.0</TargetPlatformVersion>
     <DefaultLanguage>en-US</DefaultLanguage>
     <PackageCertificateKeyFile>ZumoE2ETestAppJs_StoreKey.pfx</PackageCertificateKeyFile>
-    <PackageCertificateThumbprint>78F12570D4DE2DF0B25E3DBC7C1BBF95AD8325C6</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>160A2C9222BD8CEEB16407105B1A8C8448107DE3</PackageCertificateThumbprint>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <OutputPath>TestFramework\$(Configuration)</OutputPath>
   </PropertyGroup>
   <ItemGroup>
     <AppxManifest Include="package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
+    <Content Include="..\..\TestFramework\js\platformSpecificFunctions.js">
+      <Link>js\platformSpecificFunctions.js</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\TestFramework\js\testFramework.js">
+      <Link>js\testFramework.js</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\TestFramework\js\testFrameworkConnections.js">
+      <Link>js\testFrameworkConnections.js</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\TestFramework\js\tests\allTests.js">
+      <Link>js\tests\allTests.js</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\TestFramework\js\tests\loginTests.js">
+      <Link>js\tests\loginTests.js</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\TestFramework\js\tests\miscTests.js">
+      <Link>js\tests\miscTests.js</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\TestFramework\js\tests\pushTests.js">
+      <Link>js\tests\pushTests.js</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\TestFramework\js\tests\queryTestData.js">
+      <Link>js\tests\queryTestData.js</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\TestFramework\js\tests\queryTests.js">
+      <Link>js\tests\queryTests.js</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\TestFramework\js\tests\roundTripTests.js">
+      <Link>js\tests\roundTripTests.js</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\..\TestFramework\js\tests\updateDeleteTests.js">
+      <Link>js\tests\updateDeleteTests.js</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="default.html" />
     <Content Include="images\logo.png" />
     <Content Include="images\smalllogo.png" />
@@ -67,17 +114,6 @@
     <Content Include="js\MobileServices.js" />
     <Content Include="js\MobileServices.min.js" />
     <Content Include="js\MobileServices.pri" />
-    <Content Include="js\testFramework.js" />
-    <Content Include="js\platformSpecificFunctions.js" />
-    <Content Include="js\testFrameworkConnections.js" />
-    <Content Include="js\tests\allTests.js" />
-    <Content Include="js\tests\loginTests.js" />
-    <Content Include="js\tests\miscTests.js" />
-    <Content Include="js\tests\pushTests.js" />
-    <Content Include="js\tests\queryTestData.js" />
-    <Content Include="js\tests\queryTests.js" />
-    <Content Include="js\tests\roundTripTests.js" />
-    <Content Include="js\tests\updateDeleteTests.js" />
     <Content Include="lib\jquery.js" />
     <Content Include="packages.config" />
     <None Include="ZumoE2ETestAppJs_StoreKey.pfx" />
@@ -87,6 +123,9 @@
   <ItemGroup>
     <SDKReference Include="LiveSDKHTML, Version=5.0" />
     <SDKReference Include="Microsoft.WinJS.1.0, Version=1.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="js\tests\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />

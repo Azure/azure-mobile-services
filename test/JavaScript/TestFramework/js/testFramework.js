@@ -1,5 +1,7 @@
 ﻿/// <reference path="/MobileServicesJavaScriptClient/MobileServices.js" />
 /// <reference path="//Microsoft.WinJS.1.0/js/base.js" />
+/// <reference path="../../ZumoE2EHTMLApp/ZumoE2EHTMLApp/../../TestFramework/js/platformSpecificFunctions.js" />
+
 
 function createZumoNamespace() {
     var TSPassed = 0;
@@ -161,7 +163,9 @@ function createZumoNamespace() {
                 client = new WindowsAzure.MobileServiceClient(appUrl, appKey);
                 return true;
             } else {
-                new Windows.UI.Popups.MessageDialog('Please enter valid application URL and key', 'Error').showAsync();
+                testPlatform.alert('Please enter valid application URL and key', 'Error');
+                // Use userdefine alert() method to deal with validation information
+                //new Windows.UI.Popups.MessageDialog('Please enter valid application URL and key', 'Error').showAsync();
                 return false;
             }
         } else {

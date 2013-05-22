@@ -1,6 +1,8 @@
 ﻿/// <reference path="platformSpecificFunctions.js" />
 /// <reference path="testFramework.js" />
 
+var isBrowserIe = false; // use Flag variable in addTestGroups
+
 function updateTestListHeight() {
     var tableScroll = document.getElementById('table-scroll');
     var tableHead = document.getElementById('tblTestsHead');
@@ -11,7 +13,9 @@ function updateTestListHeight() {
     tableScroll.style.height = bodyHeight + "px";
 }
 
-updateTestListHeight();
+if (!IsHTMLApplicationRunning) { // Call UpdateTestListHeight() if user run application in WinJS
+    updateTestListHeight();
+}
 
 function setDefaultButtonEventHandler() {
     var buttons = document.getElementsByTagName('button');
@@ -32,6 +36,7 @@ function saveLastUsedAppInfo() {
     var lastUploadUrl = document.getElementById('txtSendLogsUrl').value;
 
     testPlatform.saveAppInfo(lastAppUrl, lastAppKey, lastUploadUrl);
+
 }
 
 function getTestDisplayColor(test) {
@@ -173,21 +178,50 @@ function addAttribute(element, name, value) {
 
 function addTestGroups() {
     var tblTestsGroup = document.getElementById('tblTestsGroupBody');
-    testGroups.forEach(function (item, index) {
-        var name = "" + (index + 1) + ". " + item.name + " tests";
-        var tr = document.createElement('tr');
-        var td = document.createElement('td');
-        tr.appendChild(td);
-        var a = document.createElement('a');
-        td.appendChild(a);
-        addAttribute(a, 'href', '#');
-        addAttribute(a, 'class', 'testGroupItem');
-        a.addEventListener('click', function () {
-            testGroupSelected(index);
+    if (IsHTMLApplicationRunning) {
+        jQuery.each(testGroups, function (index, item) {
+            var name = "" + (index + 1) + ". " + item.name + " tests";
+            var tr = document.createElement('tr');
+            var td = document.createElement('td');
+            tr.appendChild(td);
+            var a = document.createElement('a');
+            td.appendChild(a);
+            addAttribute(a, 'href', '#');
+            addAttribute(a, 'class', 'testGroupItem');
+
+            if (a.attachEvent) {
+                isBrowserIe = true;
+                a.attachEvent('onclick', function () {
+                    testGroupSelected(index);
+                });
+                a.innerText = toStaticHTML(name);
+            }
+            else {
+                a.addEventListener('click', function () {
+                    testGroupSelected(index);
+                }, false);
+                a.textContent = name;
+            }
+
+            tblTestsGroup.appendChild(tr);
         });
-        a.innerText = toStaticHTML(name);
-        tblTestsGroup.appendChild(tr);
-    });
+    } else {
+        testGroups.forEach(function (item, index) {
+            var name = "" + (index + 1) + ". " + item.name + " tests";
+            var tr = document.createElement('tr');
+            var td = document.createElement('td');
+            tr.appendChild(td);
+            var a = document.createElement('a');
+            td.appendChild(a);
+            addAttribute(a, 'href', '#');
+            addAttribute(a, 'class', 'testGroupItem');
+            a.attachEvent('onclick', function () {
+                testGroupSelected(index);
+            });
+            a.innerText = toStaticHTML(name);
+            tblTestsGroup.appendChild(tr);
+        });
+    }
 }
 
 addTestGroups();
