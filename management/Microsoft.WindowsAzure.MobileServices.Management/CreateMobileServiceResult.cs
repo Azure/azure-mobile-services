@@ -68,7 +68,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
         /// <returns></returns>
         public bool IsSuccess() 
         {
-            return this.State == "Healthy";
+            return string.Equals("Healthy", this.State, StringComparison.InvariantCultureIgnoreCase);
         }
     }
 }

@@ -12,6 +12,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
         public string DatabaseName { get; set; }
         public string Location { get; set; }
         public string AdministratorLogin { get; set; }
+        public bool IsFreeDB { get; set; }
 
         public SqlDatabaseParameters()
         { 

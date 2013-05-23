@@ -56,6 +56,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
         /// </summary>
         public string ExistingSqlDatabase { get; set; }
 
+        public enum DataBaseTypes
+        {
+            Standard = 1,
+            FreeDB = 2
+        }
+
+        /// <summary>
+        /// Optional. Indicates the type of SQL database to create. ExistingSqlServer must be null or this parameter is ignored.
+        /// Standard - (default) 1 GB database
+        /// FreeDB - 20MB free database (only one is allowed/subscription)
+        /// </summary>
+        public DataBaseTypes SQLDatabaseType { get; set; }
+
         /// <summary>
         /// Optional. Location of the SQL server to create. If not specified, defaults to ServiceLocation.
         /// </summary>
@@ -94,7 +107,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
                 }
             }
 
-            return sqlPassword.Length >= 8 && !unsecuredPassword.Contains(sqlUsername) && matches >= 3;
+            //this logic matches portal check found in auxportal\src\UX\ExtensionCore\Requires.cs
+            bool containsUserName = Regex.Split(sqlUsername, @"[\s\t\r,.\-_#]").Any(part =>
+                    !string.IsNullOrEmpty(part) && part.Length >= 3 && Regex.IsMatch(unsecuredPassword, @"\w*" + Regex.Escape(part) + @"\w*", RegexOptions.IgnoreCase))
+                    || Regex.IsMatch(unsecuredPassword, @"\w*" + Regex.Escape(sqlUsername) + @"\w*", RegexOptions.IgnoreCase);
+
+            return sqlPassword.Length >= 8 && !containsUserName && matches >= 3;
         }
 
         static bool IsSqlUsernameValid(string sqlUsername)
