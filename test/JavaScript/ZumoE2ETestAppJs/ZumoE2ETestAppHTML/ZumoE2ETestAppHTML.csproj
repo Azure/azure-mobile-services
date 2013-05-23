@@ -57,8 +57,8 @@
     <Reference Include="System.EnterpriseServices" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\..\TestFramework\js\platformSpecificFunctions.js">
-      <Link>js\platformSpecificFunctions.js</Link>
+    <Content Include="..\..\TestFramework\css\default.css">
+      <Link>css\default.css</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="..\..\TestFramework\js\testFramework.js">
@@ -105,8 +105,8 @@
       <Link>lib\MobileServices.Web-1.0.0.min.js</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="css\default.css" />
     <Content Include="default.html" />
+    <Content Include="js\platformSpecificFunctions.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

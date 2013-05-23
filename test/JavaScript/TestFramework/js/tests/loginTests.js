@@ -30,15 +30,12 @@ function defineLoginTestsNamespace() {
     };
 
     tests.push(createLogoutTest());
-    if (IsHTMLApplicationRunning) {
-        jQuery.each(tables, function (index, table) {
-            tests.push(createCRUDTest(table.name, null, table.permission, false));
-        });
-    } else {
-        tables.forEach(function (table) {
-            tests.push(createCRUDTest(table.name, null, table.permission, false));
-        });
-    }
+
+    jQuery.each(tables, function (index, table) {
+        tests.push(createCRUDTest(table.name, null, table.permission, false));
+    });
+
+
 
 
     var lastUserIdentityObject = null;
@@ -48,20 +45,13 @@ function defineLoginTestsNamespace() {
         var provider = providers[i];
         tests.push(createLogoutTest());
         tests.push(createLoginTest(provider));
-        if (IsHTMLApplicationRunning) {
-            jQuery.each(tables, function (index, table) {
-                if (table.permission !== TABLE_PERMISSION_PUBLIC) {
-                    tests.push(createCRUDTest(table.name, provider, table.permission, true));
-                }
-            });
-        } else {
-            tables.forEach(function (table) {
-                if (table.permission !== TABLE_PERMISSION_PUBLIC) {
-                    tests.push(createCRUDTest(table.name, provider, table.permission, true));
-                }
-            });
 
-        }
+        jQuery.each(tables, function (index, table) {
+            if (table.permission !== TABLE_PERMISSION_PUBLIC) {
+                tests.push(createCRUDTest(table.name, provider, table.permission, true));
+            }
+        });
+
         if (supportRecycledToken[provider]) {
             tests.push(createLogoutTest());
             tests.push(createClientSideLoginTest(provider));
@@ -69,21 +59,8 @@ function defineLoginTestsNamespace() {
         }
     }
 
-    if (IsHTMLApplicationRunning) {
+    if (!testPlatform.IsHTMLApplication) {
         //In Browser, default is single signon and LIVE SDK is not supported
-        /*  tests.push(createLogoutTest());
-          //tests.push(createLiveSDKLoginTest());
-          tests.push(createCRUDTest(TABLE_NAME_AUTHENTICATED, 'microsoftaccount', TABLE_PERMISSION_USER, true));
-          jQuery.each(providers, function (index,provider) {
-              if (provider === 'microsoftaccount') {
-                  // Known issue - SSO for MS account does not work in application which also uses the Live SDK
-              } else {
-                  tests.push(createLogoutTest());
-                  tests.push(createLoginTest(provider, true));
-                  tests.push(createCRUDTest(TABLE_NAME_AUTHENTICATED, provider, TABLE_PERMISSION_USER, true));
-              }
-          });*/
-    } else {
         tests.push(createLogoutTest());
         tests.push(createLiveSDKLoginTest());
         tests.push(createCRUDTest(TABLE_NAME_AUTHENTICATED, 'microsoftaccount', TABLE_PERMISSION_USER, true));
@@ -232,7 +209,7 @@ function defineLoginTestsNamespace() {
             function readCallback(error) {
                 if (validateCRUDResult('read', error)) {
                     //table.del({ id: insertedItem.id || 1 }).done(function () { deleteCallback(); }, function (err) { deleteCallback(err); });
-                    table.del({ id: insertedItem.id}).done(function () { deleteCallback(); }, function (err) { deleteCallback(err); });
+                    table.del({ id: insertedItem.id }).done(function () { deleteCallback(); }, function (err) { deleteCallback(err); });
                 }
             }
 

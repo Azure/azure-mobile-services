@@ -59,8 +59,8 @@
     <AppxManifest Include="package.appxmanifest">
       <SubType>Designer</SubType>
     </AppxManifest>
-    <Content Include="..\..\TestFramework\js\platformSpecificFunctions.js">
-      <Link>js\platformSpecificFunctions.js</Link>
+    <Content Include="..\..\TestFramework\css\default.css">
+      <Link>css\default.css</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="..\..\TestFramework\js\testFramework.js">
@@ -109,13 +109,15 @@
     <Content Include="images\splashscreen.png" />
     <Content Include="images\storelogo.png" />
     <Content Include="js\default.js" />
-    <Content Include="css\default.css" />
     <Content Include="js\MobileServices.intellisense.js" />
     <Content Include="js\MobileServices.js" />
     <Content Include="js\MobileServices.min.js" />
     <Content Include="js\MobileServices.pri" />
+    <Content Include="js\platformSpecificFunctions.js" />
     <Content Include="lib\jquery.js" />
-    <Content Include="packages.config" />
+    <Content Include="packages.config">
+      <SubType>Designer</SubType>
+    </Content>
     <None Include="ZumoE2ETestAppJs_StoreKey.pfx" />
     <None Include="Package.StoreAssociation.xml" />
     <None Include="ZumoE2ETestAppJs_TemporaryKey.pfx" />
@@ -125,6 +127,7 @@
     <SDKReference Include="Microsoft.WinJS.1.0, Version=1.0" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="css\" />
     <Folder Include="js\tests\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
