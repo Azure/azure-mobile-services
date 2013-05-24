@@ -9,9 +9,15 @@
 (function () {
     zumo.testGroups.push(new zumo.Group(zumo.tests.roundTrip.name, zumo.tests.roundTrip.tests));
     zumo.testGroups.push(new zumo.Group(zumo.tests.query.name, zumo.tests.query.tests));
-    zumo.testGroups.push(new zumo.Group(zumo.tests.query.name + '(server side)', zumo.tests.query.serverSideTests));
+    //Add addistional Win JS scenario if user run WinJS application
+    if (!testPlatform.IsHTMLApplication) {
+        zumo.testGroups.push(new zumo.Group(zumo.tests.query.name + '(server side)', zumo.tests.query.serverSideTests));
+    }
     zumo.testGroups.push(new zumo.Group(zumo.tests.updateDelete.name, zumo.tests.updateDelete.tests));
     zumo.testGroups.push(new zumo.Group(zumo.tests.login.name, zumo.tests.login.tests));
     zumo.testGroups.push(new zumo.Group(zumo.tests.misc.name, zumo.tests.misc.tests));
-    zumo.testGroups.push(new zumo.Group(zumo.tests.push.name, zumo.tests.push.tests));
+    if (!testPlatform.IsHTMLApplication) {
+        zumo.testGroups.push(new zumo.Group(zumo.tests.push.name, zumo.tests.push.tests));
+    }
+
 })();

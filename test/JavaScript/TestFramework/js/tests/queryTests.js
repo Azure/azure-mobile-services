@@ -1,5 +1,4 @@
 ﻿/// <reference path="../testFramework.js" />
-/// <reference path="../MobileServices.intellisense.js" />
 
 function defineQueryTestsNamespace() {
     var tests = [];

@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{262852C6-CD72-467D-83FE-5EEB1973A190}") = "ZumoE2ETestAppJs", "ZumoE2ETestAppJs\ZumoE2ETestAppJs.jsproj", "{4864EA0B-C8A1-4AF3-88A2-D2DAF96C3421}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{D328DBE9-A23E-4CB9-8034-B5ACC50FE506}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZumoE2ETestAppHTML", "ZumoE2ETestAppHTML\ZumoE2ETestAppHTML.csproj", "{31DC90AB-38E6-496B-A74F-1123FB6E00A8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{A68C2458-CE17-4347-B970-73AE214874F3}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
 		.nuget\NuGet.exe = .nuget\NuGet.exe
@@ -46,6 +48,16 @@ Global
 		{4864EA0B-C8A1-4AF3-88A2-D2DAF96C3421}.Release|x86.ActiveCfg = Release|x86
 		{4864EA0B-C8A1-4AF3-88A2-D2DAF96C3421}.Release|x86.Build.0 = Release|x86
 		{4864EA0B-C8A1-4AF3-88A2-D2DAF96C3421}.Release|x86.Deploy.0 = Release|x86
+		{31DC90AB-38E6-496B-A74F-1123FB6E00A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31DC90AB-38E6-496B-A74F-1123FB6E00A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31DC90AB-38E6-496B-A74F-1123FB6E00A8}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{31DC90AB-38E6-496B-A74F-1123FB6E00A8}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{31DC90AB-38E6-496B-A74F-1123FB6E00A8}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{31DC90AB-38E6-496B-A74F-1123FB6E00A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31DC90AB-38E6-496B-A74F-1123FB6E00A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31DC90AB-38E6-496B-A74F-1123FB6E00A8}.Release|ARM.ActiveCfg = Release|Any CPU
+		{31DC90AB-38E6-496B-A74F-1123FB6E00A8}.Release|x64.ActiveCfg = Release|Any CPU
+		{31DC90AB-38E6-496B-A74F-1123FB6E00A8}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
