@@ -91,24 +91,41 @@ function defineRoundTripTestsNamespace() {
     }
 
     function createRoundTripTest(testName, propertyName, value) {
-        return new zumo.Test(testName, function(test, done) {
+        return new zumo.Test(testName, function (test, done) {
             var item = {};
             item[propertyName] = value;
             var table = zumo.getClient().getTable(tableName);
+            var currentIEVersion = zumo.getIEBrowserVersion(); // get IE8 version ...
             var dateReviver = function (key, value) {
                 var re = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})\.(\d{3})Z$/;
                 if (typeof value === 'string') {
+                    if (currentIEVersion === 8.0) {
+                        // UTC date(yyyy-mm-ddTtt:hh:mm:milZ) format isn't supported in IE8
+                        re = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z$/;
+                        if (value === '--T::Z') { // '--T::Z this format is not supported by IE8 so we use defult date
+                            value = '1970-01-01T00:00:00Z'; //Default Date and time
+                            item[propertyName] = value;
+                        }
+                    }
+
                     var a = re.exec(value);
                     if (a) {
-                        return new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4], +a[5], +a[6], +a[7]));
+                        if (currentIEVersion === 8.0) {
+                            var d = new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4], +a[5], +a[6]));
+                            return d;
+                        }
+
+                        var d = new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4], +a[5], +a[6], +a[7]));
+                        return d;
+
                     }
                 }
                 return value;
             }
             var originalItem = JSON.parse(JSON.stringify(item), dateReviver);
-            table.insert(item).done(function () {
-                test.addLog('Inserted item: ', JSON.stringify(item));
-                var id = item.id;
+            table.insert(item).done(function (itemInserted) {
+                test.addLog('Inserted item: ', JSON.stringify(itemInserted));
+                var id = itemInserted.id;
                 if (id <= 0) {
                     test.addLog('Error, insert did not succeed: id=' + id);
                     done(false);
@@ -120,7 +137,7 @@ function defineRoundTripTestsNamespace() {
                             test.addLog('Object round tripped successfully.');
                             done(true);
                         } else {
-                            errors.forEach(function (error) {
+                            jQuery.each(errors, function (error) {
                                 test.addLog(error);
                             });
                             test.addLog('Round-tripped item is different!');

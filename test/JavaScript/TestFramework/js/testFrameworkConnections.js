@@ -1,17 +1,18 @@
 ﻿/// <reference path="platformSpecificFunctions.js" />
 /// <reference path="testFramework.js" />
 
-function updateTestListHeight() {
-    var tableScroll = document.getElementById('table-scroll');
-    var tableHead = document.getElementById('tblTestsHead');
-    var tableHeight = document.getElementById('testGroupsTableCell').getBoundingClientRect().height;
-    var padding = 30;
-    var headerHeight = tableHead.getBoundingClientRect().height;
-    var bodyHeight = tableHeight - headerHeight - padding;
-    tableScroll.style.height = bodyHeight + "px";
+if (!testPlatform.IsHTMLApplication) { // Call UpdateTestListHeight() if WinJS application is running
+    function updateTestListHeight() {
+        var tableScroll = document.getElementById('table-scroll');
+        var tableHead = document.getElementById('tblTestsHead');
+        var tableHeight = document.getElementById('testGroupsTableCell').getBoundingClientRect().height;
+        var padding = 30;
+        var headerHeight = tableHead.getBoundingClientRect().height;
+        var bodyHeight = tableHeight - headerHeight - padding;
+        tableScroll.style.height = bodyHeight + "px";
+    }
+    updateTestListHeight();
 }
-
-updateTestListHeight();
 
 function setDefaultButtonEventHandler() {
     var buttons = document.getElementsByTagName('button');
@@ -32,6 +33,7 @@ function saveLastUsedAppInfo() {
     var lastUploadUrl = document.getElementById('txtSendLogsUrl').value;
 
     testPlatform.saveAppInfo(lastAppUrl, lastAppKey, lastUploadUrl);
+
 }
 
 function getTestDisplayColor(test) {
@@ -173,7 +175,8 @@ function addAttribute(element, name, value) {
 
 function addTestGroups() {
     var tblTestsGroup = document.getElementById('tblTestsGroupBody');
-    testGroups.forEach(function (item, index) {
+
+    jQuery.each(testGroups, function (index, item) {
         var name = "" + (index + 1) + ". " + item.name + " tests";
         var tr = document.createElement('tr');
         var td = document.createElement('td');
@@ -182,12 +185,24 @@ function addTestGroups() {
         td.appendChild(a);
         addAttribute(a, 'href', '#');
         addAttribute(a, 'class', 'testGroupItem');
-        a.addEventListener('click', function () {
-            testGroupSelected(index);
-        });
-        a.innerText = toStaticHTML(name);
+
+        if (a.attachEvent) {
+
+            a.attachEvent('onclick', function () {
+                testGroupSelected(index);
+            });
+            a.innerText = toStaticHTML(name);
+        }
+        else {
+            a.addEventListener('click', function () {
+                testGroupSelected(index);
+            }, false);
+            a.textContent = name;
+        }
+
         tblTestsGroup.appendChild(tr);
     });
+
 }
 
 addTestGroups();

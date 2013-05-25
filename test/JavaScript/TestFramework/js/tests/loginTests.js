@@ -1,6 +1,8 @@
 ﻿/// <reference path="/MobileServicesJavaScriptClient/MobileServices.js" />
 /// <reference path="/LiveSDKHTML/js/wl.js" />
 /// <reference path="../testFramework.js" />
+/// <reference path="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" />
+
 
 function defineLoginTestsNamespace() {
     var tests = [];
@@ -28,9 +30,13 @@ function defineLoginTestsNamespace() {
     };
 
     tests.push(createLogoutTest());
-    tables.forEach(function (table) {
+
+    jQuery.each(tables, function (index, table) {
         tests.push(createCRUDTest(table.name, null, table.permission, false));
     });
+
+
+
 
     var lastUserIdentityObject = null;
 
@@ -39,7 +45,8 @@ function defineLoginTestsNamespace() {
         var provider = providers[i];
         tests.push(createLogoutTest());
         tests.push(createLoginTest(provider));
-        tables.forEach(function (table) {
+
+        jQuery.each(tables, function (index, table) {
             if (table.permission !== TABLE_PERMISSION_PUBLIC) {
                 tests.push(createCRUDTest(table.name, provider, table.permission, true));
             }
@@ -52,20 +59,22 @@ function defineLoginTestsNamespace() {
         }
     }
 
-    tests.push(createLogoutTest());
-    tests.push(createLiveSDKLoginTest());
-    tests.push(createCRUDTest(TABLE_NAME_AUTHENTICATED, 'microsoftaccount', TABLE_PERMISSION_USER, true));
+    if (!testPlatform.IsHTMLApplication) {
+        //In Browser, default is single signon and LIVE SDK is not supported
+        tests.push(createLogoutTest());
+        tests.push(createLiveSDKLoginTest());
+        tests.push(createCRUDTest(TABLE_NAME_AUTHENTICATED, 'microsoftaccount', TABLE_PERMISSION_USER, true));
 
-    providers.forEach(function (provider) {
-        if (provider === 'microsoftaccount') {
-            // Known issue - SSO for MS account does not work in application which also uses the Live SDK
-        } else {
-            tests.push(createLogoutTest());
-            tests.push(createLoginTest(provider, true));
-            tests.push(createCRUDTest(TABLE_NAME_AUTHENTICATED, provider, TABLE_PERMISSION_USER, true));
-        }
-    });
-
+        providers.forEach(function (provider) {
+            if (provider === 'microsoftaccount') {
+                // Known issue - SSO for MS account does not work in application which also uses the Live SDK
+            } else {
+                tests.push(createLogoutTest());
+                tests.push(createLoginTest(provider, true));
+                tests.push(createCRUDTest(TABLE_NAME_AUTHENTICATED, provider, TABLE_PERMISSION_USER, true));
+            }
+        });
+    }
     function createLiveSDKLoginTest() {
         var liveSDKInitialized = false;
         return new zumo.Test('Login via token with the Live SDK', function (test, done) {
@@ -150,6 +159,7 @@ function defineLoginTestsNamespace() {
             var table = client.getTable(tableName);
             var currentUser = client.currentUser;
             var item = { text: 'hello' };
+            var insertedItem;
 
             var validateCRUDResult = function (operation, error) {
                 var result = false;
@@ -198,14 +208,15 @@ function defineLoginTestsNamespace() {
             // called by updateCallback
             function readCallback(error) {
                 if (validateCRUDResult('read', error)) {
-                    table.del({ id: item.id || 1 }).done(function () { deleteCallback(); }, function (err) { deleteCallback(err); });
+                    //table.del({ id: insertedItem.id || 1 }).done(function () { deleteCallback(); }, function (err) { deleteCallback(err); });
+                    table.del({ id: insertedItem.id }).done(function () { deleteCallback(); }, function (err) { deleteCallback(err); });
                 }
             }
 
             // called by insertCallback
             function updateCallback(error) {
                 if (validateCRUDResult('update', error)) {
-                    item.id = item.id || 1;
+                    item.id = insertedItem.id || 1;
                     table.where({ id: item.id }).read().done(function (items) {
                         test.addLog('Read items: ', items);
                         if (items.length !== 1) {
@@ -232,7 +243,7 @@ function defineLoginTestsNamespace() {
                         client = new WindowsAzure.MobileServiceClient(client.applicationUrl);
                         table = client.getTable(tableName);
                     }
-                    item.id = item.id || 1;
+                    item.id = insertedItem.id || 1;
                     item.text = 'world';
                     table.update(item).done(function (newItem) {
                         test.addLog('Updated item: ', newItem);
@@ -244,6 +255,7 @@ function defineLoginTestsNamespace() {
             }
 
             table.insert(item).done(function (newItem) {
+                insertedItem = newItem;
                 test.addLog('Inserted item: ', newItem);
                 if (tablePermission === TABLE_PERMISSION_USER) {
                     var currentUser = client.currentUser.userId;
@@ -257,6 +269,8 @@ function defineLoginTestsNamespace() {
                 }
                 insertCallback();
             }, function (err) {
+                insertedItem = item;
+                insertedItem.id = item.id || 1;
                 insertCallback(err);
             });
         });

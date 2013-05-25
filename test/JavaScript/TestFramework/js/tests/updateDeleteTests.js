@@ -142,41 +142,6 @@ function defineUpdateDeleteTestsNamespace() {
         });
     }));
 
-    tests.push(new zumo.Test('Refresh - updating item with server modifications', function (test, done) {
-        var client = zumo.getClient();
-        var table = client.getTable(tableName);
-        var originalItem = { string1: 'original', number: 1 };
-        var item = { string1: 'original', number: 1 };
-        table.insert(item).done(function (inserted) {
-            test.addLog('Inserted item: ', inserted);
-            item.string1 = 'modified';
-            item.number = 123;
-            test.addLog('Modified the item: ', inserted);
-            table.refresh(inserted).done(function () {
-                test.addLog('Refreshed: ', inserted);
-                var errors = [];
-                if (zumo.util.compare(originalItem, inserted, errors)) {
-                    test.addLog('Object was refreshed successfully.');
-                    done(true);
-                } else {
-                    errors.forEach(function (error) {
-                        test.addLog(error);
-                    });
-                    test.addLog('Refreshed item is different!');
-                    done(false);
-                }
-            }, function (refreshError) {
-                test.addLog('Error refreshing item: ' + JSON.stringify(refreshError));
-                zumo.util.traceResponse(test, refreshError.request);
-                done(false);
-            });
-        }, function (insertError) {
-            test.addLog('Error inserting item: ' + JSON.stringify(insertError));
-            zumo.util.traceResponse(test, insertError.request);
-            done(false);
-        });
-    }));
-
     function createDeleteTest(testName, actionAfterInsert) {
         // actionAfterInsert: function(test, done, table, insertedItemId)
         return new zumo.Test(testName, function (test, done) {

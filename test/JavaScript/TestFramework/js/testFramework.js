@@ -1,5 +1,7 @@
-﻿/// <reference path="//Microsoft.WinJS.1.0/js/base.js" />
-/// <reference path="MobileServices.intellisense.js" />
+﻿/// <reference path="/MobileServicesJavaScriptClient/MobileServices.js" />
+/// <reference path="//Microsoft.WinJS.1.0/js/base.js" />
+/// <reference path="../../ZumoE2EHTMLApp/ZumoE2EHTMLApp/../../TestFramework/js/platformSpecificFunctions.js" />
+
 
 function createZumoNamespace() {
     var TSPassed = 0;
@@ -155,13 +157,15 @@ function createZumoNamespace() {
         if (client && client.applicationUrl === appUrl && client.applicationKey === appKey) {
             mustInitialize = false;
         }
-
+        
         if (mustInitialize) {
-            if (appUrl && appKey) {
+            if (appUrl && appKey) { 
                 client = new WindowsAzure.MobileServiceClient(appUrl, appKey);
                 return true;
             } else {
-                new Windows.UI.Popups.MessageDialog('Please enter valid application URL and key', 'Error').showAsync();
+                testPlatform.alert('Please enter valid application URL and key', 'Error');
+                // Use userdefine alert() method to deal with validation information
+                //new Windows.UI.Popups.MessageDialog('Please enter valid application URL and key', 'Error').showAsync();
                 return false;
             }
         } else {
@@ -173,10 +177,21 @@ function createZumoNamespace() {
         /// <summary>
         /// Returns the shared MobileServiceClient instance.
         /// </summary>
-        /// <returns type="WindowsAzure.MobileServiceClient">
+        /// <returns type="Microsoft.WindowsAzure.MobileServices.MobileServiceClient">
         /// The shared cliens instance.
         /// </returns>
         return client;
+    }
+    function getIEBrowserVersion() {
+        // Get Version of IE browser
+        var rv = -1;
+        if (navigator.appName == 'Microsoft Internet Explorer') {
+            var ua = navigator.userAgent;
+            var re = new RegExp("MSIE ([0-9]{1,}[\.0-9]{0,})");
+            if (re.exec(ua) != null)
+                rv = parseFloat(RegExp.$1);
+        }
+        return rv;
     }
 
     function compareValues(expected, actual, errors) {
@@ -310,6 +325,7 @@ function createZumoNamespace() {
         testGroups: testGroups,
         currentGroup: currentGroup,
         getClient: getClient,
+        getIEBrowserVersion: getIEBrowserVersion,
         initializeClient: initializeClient,
         TSPassed: TSPassed,
         TSFailed: TSFailed,
