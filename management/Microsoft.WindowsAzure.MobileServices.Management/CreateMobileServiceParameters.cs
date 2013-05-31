@@ -9,6 +9,11 @@ using System.Threading.Tasks;
 
 namespace Microsoft.WindowsAzure.MobileServices.Management
 {
+    public enum DatabaseTypes
+    {
+        Standard = 1,
+        FreeDB = 2
+    }
     public class CreateMobileServiceParameters
     {
         static readonly Regex[] passwordVerifiers = {
@@ -56,18 +61,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
         /// </summary>
         public string ExistingSqlDatabase { get; set; }
 
-        public enum DataBaseTypes
-        {
-            Standard = 1,
-            FreeDB = 2
-        }
-
         /// <summary>
         /// Optional. Indicates the type of SQL database to create. ExistingSqlServer must be null or this parameter is ignored.
         /// Standard - (default) 1 GB database
         /// FreeDB - 20MB free database (only one is allowed/subscription)
         /// </summary>
-        public DataBaseTypes SQLDatabaseType { get; set; }
+        public DatabaseTypes SQLDatabaseType { get; set; }
 
         /// <summary>
         /// Optional. Location of the SQL server to create. If not specified, defaults to ServiceLocation.

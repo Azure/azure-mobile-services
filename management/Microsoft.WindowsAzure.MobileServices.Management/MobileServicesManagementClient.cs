@@ -149,6 +149,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
 
         public async Task<List<SqlDatabaseParameters>> GetSqlDatabasesAsync()
         {
+            bool hasFreeDB = false;
+
             HttpRequestMessage request = new HttpRequestMessage();
             request.Method = HttpMethod.Get;
             request.RequestUri = new Uri(
@@ -179,11 +181,36 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
                         parameters.AdministratorLogin = login;
 
                         string dbSize = db.Element(XName.Get("MaxSizeBytes", WindowsAzureNs)).Value;
-                        parameters.IsFreeDB = string.Equals(dbSize, FreeDBSizeInBytes, StringComparison.InvariantCultureIgnoreCase);
+                        parameters.IsExistingDatabase = true;
+                        if (string.Equals(dbSize, FreeDBSizeInBytes, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            hasFreeDB = true;
+                            parameters.DatabaseType = DatabaseTypes.FreeDB;
+                        }
+                        else 
+                        {
+                            parameters.DatabaseType = DatabaseTypes.Standard;
+                        }
 
                         result.Add(parameters);
                     }
                 }
+            }
+
+            //append on the "creation" options
+            SqlDatabaseParameters newDatabaseParameters = new SqlDatabaseParameters();
+            newDatabaseParameters.DatabaseName = "Create New";
+            newDatabaseParameters.IsExistingDatabase = false;
+            newDatabaseParameters.DatabaseType = DatabaseTypes.Standard;
+            result.Add(newDatabaseParameters);
+
+            if (!hasFreeDB)
+            {
+                newDatabaseParameters = new SqlDatabaseParameters();
+                newDatabaseParameters.DatabaseName = "Create New Free Database";
+                newDatabaseParameters.IsExistingDatabase = false;
+                newDatabaseParameters.DatabaseType = DatabaseTypes.FreeDB;
+                result.Add(newDatabaseParameters);
             }
 
             return result;
@@ -492,7 +519,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             else {
                 string sizeKey;
                 string sizeValue;
-                if (parameters.SQLDatabaseType == CreateMobileServiceParameters.DataBaseTypes.FreeDB)
+                if (parameters.SQLDatabaseType == DataBaseTypes.FreeDB)
                 {
                     sizeKey = "MaxSizeInBytes";
                     sizeValue = FreeDBSizeInBytes;
