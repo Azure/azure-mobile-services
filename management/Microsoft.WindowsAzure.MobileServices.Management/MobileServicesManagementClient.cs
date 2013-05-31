@@ -519,7 +519,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             else {
                 string sizeKey;
                 string sizeValue;
-                if (parameters.SQLDatabaseType == DataBaseTypes.FreeDB)
+                if (parameters.SQLDatabaseType == DatabaseTypes.FreeDB)
                 {
                     sizeKey = "MaxSizeInBytes";
                     sizeValue = FreeDBSizeInBytes;
