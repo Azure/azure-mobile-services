@@ -185,7 +185,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
                         if (string.Equals(dbSize, FreeDBSizeInBytes, StringComparison.InvariantCultureIgnoreCase))
                         {
                             hasFreeDB = true;
-                            parameters.DatabaseType = DatabaseTypes.FreeDB;
+                            parameters.DatabaseType = DatabaseTypes.Free;
                         }
                         else 
                         {
@@ -197,19 +197,23 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
                 }
             }
 
-            //append on the "creation" options
+            //In addition to the list of existing databases, we want to return the list of 
+            //creatable database types to the caller
+
+            //Add Standard Option: Users should always have the option to create this type
             SqlDatabaseParameters newDatabaseParameters = new SqlDatabaseParameters();
             newDatabaseParameters.DatabaseName = "Create New";
             newDatabaseParameters.IsExistingDatabase = false;
             newDatabaseParameters.DatabaseType = DatabaseTypes.Standard;
             result.Add(newDatabaseParameters);
 
+            //Add Free Option: Users are limited to only 1 Free Database/subscription
             if (!hasFreeDB)
             {
                 newDatabaseParameters = new SqlDatabaseParameters();
                 newDatabaseParameters.DatabaseName = "Create New Free Database";
                 newDatabaseParameters.IsExistingDatabase = false;
-                newDatabaseParameters.DatabaseType = DatabaseTypes.FreeDB;
+                newDatabaseParameters.DatabaseType = DatabaseTypes.Free;
                 result.Add(newDatabaseParameters);
             }
 
@@ -519,7 +523,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             else {
                 string sizeKey;
                 string sizeValue;
-                if (parameters.SQLDatabaseType == DatabaseTypes.FreeDB)
+                if (parameters.SQLDatabaseType == DatabaseTypes.Free)
                 {
                     sizeKey = "MaxSizeInBytes";
                     sizeValue = FreeDBSizeInBytes;

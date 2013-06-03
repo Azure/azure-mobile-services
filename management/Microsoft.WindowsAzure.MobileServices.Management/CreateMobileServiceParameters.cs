@@ -12,7 +12,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
     public enum DatabaseTypes
     {
         Standard = 1,
-        FreeDB = 2
+        Free = 2
     }
     public class CreateMobileServiceParameters
     {
