@@ -27,6 +27,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
         static readonly string DefaultSqlDatabaseHostSuffix = ".database.windows.net";
         static readonly string DefaultMobileServiceHostSuffix = ".azure-mobile.net";
 
+        static readonly string FreeDBSizeInBytes = "20971520";
+
         public string SubscriptionId { get; set; }
         public X509Certificate2 ManagementCertificate { get; set; }
         public string MobileServiceManagementEndpoint { get; set; }
@@ -147,6 +149,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
 
         public async Task<List<SqlDatabaseParameters>> GetSqlDatabasesAsync()
         {
+            bool hasFreeDB = false;
+
             HttpRequestMessage request = new HttpRequestMessage();
             request.Method = HttpMethod.Get;
             request.RequestUri = new Uri(
@@ -163,21 +167,60 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
                 string name = server.Element(XName.Get("Name", SqlAzureNs)).Value;
                 string login = server.Element(XName.Get("AdministratorLogin", SqlAzureNs)).Value;
                 string location = server.Element(XName.Get("Location", SqlAzureNs)).Value;
-                List<string> dbs = await this.GetSqlDatabasesAsync(name);
-                result.AddRange(dbs.FindAll((db) => { return db != "master"; }).Select((db) => {
-                    SqlDatabaseParameters parameters = new SqlDatabaseParameters();
-                    parameters.Location = location;
-                    parameters.ServerName = name;
-                    parameters.DatabaseName = db;
-                    parameters.AdministratorLogin = login;
-                    return parameters;
-                }));
+
+                XElement dbs = await this.GetRawSqlDatabasesAsync(name);
+                foreach (XElement db in dbs.Elements())
+                {
+                    string dbName = db.Element(XName.Get("Name", WindowsAzureNs)).Value;
+                    if (!string.Equals(dbName, "master", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        SqlDatabaseParameters parameters = new SqlDatabaseParameters();
+                        parameters.Location = location;
+                        parameters.ServerName = name;
+                        parameters.DatabaseName = dbName;
+                        parameters.AdministratorLogin = login;
+
+                        string dbSize = db.Element(XName.Get("MaxSizeBytes", WindowsAzureNs)).Value;
+                        parameters.IsExistingDatabase = true;
+                        if (string.Equals(dbSize, FreeDBSizeInBytes, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            hasFreeDB = true;
+                            parameters.DatabaseType = DatabaseTypes.Free;
+                        }
+                        else 
+                        {
+                            parameters.DatabaseType = DatabaseTypes.Standard;
+                        }
+
+                        result.Add(parameters);
+                    }
+                }
+            }
+
+            //In addition to the list of existing databases, we want to return the list of 
+            //creatable database types to the caller
+
+            //Add Standard Option: Users should always have the option to create this type
+            SqlDatabaseParameters newDatabaseParameters = new SqlDatabaseParameters();
+            newDatabaseParameters.DatabaseName = "Create New";
+            newDatabaseParameters.IsExistingDatabase = false;
+            newDatabaseParameters.DatabaseType = DatabaseTypes.Standard;
+            result.Add(newDatabaseParameters);
+
+            //Add Free Option: Users are limited to only 1 Free Database/subscription
+            if (!hasFreeDB)
+            {
+                newDatabaseParameters = new SqlDatabaseParameters();
+                newDatabaseParameters.DatabaseName = "Create New Free Database";
+                newDatabaseParameters.IsExistingDatabase = false;
+                newDatabaseParameters.DatabaseType = DatabaseTypes.Free;
+                result.Add(newDatabaseParameters);
             }
 
             return result;
         }
 
-        public async Task<List<string>> GetSqlDatabasesAsync(string sqlServerName)
+        async Task<XElement> GetRawSqlDatabasesAsync(string sqlServerName)
         {
             if (string.IsNullOrEmpty(sqlServerName))
             {
@@ -193,9 +236,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
                 "/" + sqlServerName +
                 "/databases?contentview=generic");
             request.Headers.Add("x-ms-version", "2012-03-01");
+
             HttpResponseMessage response = await this.MakeManagementRequestAsync(request);
             XElement body = await this.ProcessXmlResponseAsync(response);
 
+            return body;
+        }
+
+        public async Task<List<string>> GetSqlDatabasesAsync(string sqlServerName)
+        {
+            if (string.IsNullOrEmpty(sqlServerName))
+            {
+                throw new ArgumentNullException("sqlServerName");
+            }
+
+            XElement body = await this.GetRawSqlDatabasesAsync(sqlServerName);
             try
             {
                 List<string> result = body.Elements().Select((element) => element.Element(XName.Get("Name", WindowsAzureNs)).Value).ToList();
@@ -238,7 +293,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             string applicationSpec = this.CreateMobileApplicationSpecification(spec, parameters);
             
             // create the service with a call to management APIs
-
             await this.MakeMobileApplicationManagementRequestAsync(HttpMethod.Post, null, applicationSpec, true);
 
             // get the details of the created service to confirm creation status and extract information about created resources
@@ -247,7 +301,57 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
                 HttpMethod.Get, parameters.ServiceName + "mobileservice", null, false);
             CreateMobileServiceResult result = ProcessMobileApplicationManagementResponse(createdApplication);
             
+            //Delete the service if it comes back as unhealthy
+            //We will not reach this point if the service already existed (a conflict http response code would have come back
+            //and been thrown as an error.)
+            if (!result.IsSuccess()) 
+            {
+                try
+                {
+                    await this.DeleteMobileServiceAsync(parameters.ServiceName, true, true);
+                }
+                catch(Exception e)
+                {
+                    //Do nothing, we are just trying to clean up an error state.                    
+                }
+            }
+
             return result;
+        }
+
+        public async Task<bool> DeleteMobileServiceAsync(string serviceName, bool deleteData = false)
+        {
+            return await DeleteMobileServiceAsync(serviceName, deleteData, false);
+        }
+
+        async Task<bool> DeleteMobileServiceAsync(string serviceName, bool deleteData = false, bool forceDelete = false)
+        {
+            if (string.IsNullOrEmpty(serviceName))
+            {
+                throw new ArgumentNullException("serviceName");
+            }
+
+            string query = "";
+            if (deleteData) 
+            {
+                query="?deletedata=true";
+            }
+
+            //delete the mobile service, success or not found are valid answers
+            HttpRequestMessage httpRequest = this.CreateMobileServiceManagementRequest(HttpMethod.Delete, "mobileservices/" + serviceName + query, null);
+            HttpResponseMessage httpResponse = await this.MakeManagementRequestAsync(httpRequest);
+            
+            if (!httpResponse.IsSuccessStatusCode && httpResponse.StatusCode != HttpStatusCode.NotFound && !forceDelete)
+            {
+                throw new InvalidOperationException(string.Format(
+                    CultureInfo.CurrentCulture,
+                    Resources.ManagementServiceReturnedHttpError,
+                    httpResponse.StatusCode));
+            }
+
+            await this.MakeMobileApplicationManagementRequestAsync(HttpMethod.Delete, serviceName + "mobileservice", null, true);
+
+            return true;
         }
 
         static CreateMobileServiceResult ProcessMobileApplicationManagementResponse(XElement response)
@@ -269,12 +373,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
 
                 if (string.Equals("unhealthy", result.State, StringComparison.InvariantCultureIgnoreCase))
                 {
+                    string mobileServiceState = result.MobileServiceState;
                     result.FaultMessages.Add(string.Format(
                         CultureInfo.CurrentCulture,
                         Resources.ServiceUnhealthy,
-                        result.State,
-                        result.SqlServerState,
-                        result.SqlDbState,
                         result.MobileServiceState));
                 }
 
@@ -383,7 +485,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
             else
             {
                 // create a new SQL server
-
                 serverSpec = new JObject(
                     new JProperty("ProvisioningParameters", new JObject(
                         new JProperty("AdministratorLogin", parameters.SqlAdminUsername),
@@ -420,13 +521,25 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
                 );            
             }
             else {
-                // create a new SQL database
+                string sizeKey;
+                string sizeValue;
+                if (parameters.SQLDatabaseType == DatabaseTypes.Free)
+                {
+                    sizeKey = "MaxSizeInBytes";
+                    sizeValue = FreeDBSizeInBytes;
+                }
+                else
+                {
+                    sizeKey = "MaxSizeInGB";
+                    sizeValue = "1";
+                }
 
+                // create a new SQL database
                 dbSpec = new JObject(
                     new JProperty("ProvisioningParameters", new JObject(
                         new JProperty("Name", parameters.ServiceName + "_db"),
                         new JProperty("Edition", "WEB"),
-                        new JProperty("MaxSizeInGB", "1"),
+                        new JProperty(sizeKey, sizeValue),
                         new JProperty("DBServer", new JObject(
                             new JProperty("ResourceReference", serverRefName + ".Name")
                         )),
@@ -626,6 +739,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
         {
             HttpRequestMessage httpRequest = this.CreateMobileApplicationManagementRequest(method, path, request);
             HttpResponseMessage httpResponse = await this.MakeManagementRequestAsync(httpRequest);
+
             XElement result = await this.ProcessXmlResponseAsync(httpResponse);
             if (!async)
             {
@@ -781,8 +895,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Management
                     CultureInfo.CurrentCulture,
                     Resources.ManagementServiceReturnedHttpError,
                     httpResponse.StatusCode));
-
-                return false;
             }
         }
     }
