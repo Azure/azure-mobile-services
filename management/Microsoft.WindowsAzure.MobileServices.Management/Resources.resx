@@ -133,7 +133,7 @@
     <value>Unable to determine the default location for new Windows Azure Mobile Services.</value>
   </data>
   <data name="ExisingSqlDbRequiresExistingSqlServer" xml:space="preserve">
-    <value>To use existing SQL databse you must specify both SQL database name and SQL server name parameters as well as SQL server username and password.</value>
+    <value>To use an existing SQL database you must specify both SQL database name and SQL server name parameters as well as SQL server username and password.</value>
   </data>
   <data name="InvalidManagementEndpoint" xml:space="preserve">
     <value>The mobile service management endpoint {0} is not recognized.</value>

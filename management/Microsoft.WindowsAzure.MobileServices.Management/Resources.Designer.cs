@@ -94,7 +94,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Management {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to To use existing SQL databse you must specify both SQL database name and SQL server name parameters as well as SQL server username and password..
+        ///   Looks up a localized string similar to To use an existing SQL database you must specify both SQL database name and SQL server name parameters as well as SQL server username and password..
         /// </summary>
         internal static string ExisingSqlDbRequiresExistingSqlServer {
             get {
