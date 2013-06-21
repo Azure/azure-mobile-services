@@ -1,0 +1,9 @@
+﻿<Library
+  Path="generated\Tests.js"
+  Copyright="Copyright (c) Microsoft Corporation. All rights reserved.">
+
+  <Module Path="tests\TestFramework.js" EntryPoint="true" />
+  <Module Path="tests\TestInterface.js" />
+  <Module Path="tests\unit\*.js" EntryPoint="true" />
+  <Module Path="tests\functional\*.js" EntryPoint="true" />
+</Library>

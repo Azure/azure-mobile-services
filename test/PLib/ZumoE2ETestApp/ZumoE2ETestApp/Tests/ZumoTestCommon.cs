@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using System.Collections.Generic;
 using System.Globalization;
 #if WINDOWS_PHONE
 using System.Threading.Tasks;

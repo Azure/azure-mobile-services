@@ -1,4 +1,4 @@
-# Windows Azure Mobile Services
+﻿# Windows Azure Mobile Services
 
 With Windows Azure Mobile Services you can add a scalable backend to your connected client applications in minutes. To learn more, visit our [Developer Center](http://www.windowsazure.com/en-us/develop/mobile).
 
@@ -13,36 +13,57 @@ To get the source code of our SDKs and samples via **git** just type:
     git clone https://github.com/WindowsAzure/azure-mobile-services.git
     cd ./azure-mobile-services/
 
-## Windows 8 and Windows Phone 8 Client SDK
+## Managed Windows 8 and Windows Phone 8 Client SDK
 
-Our Windows SDK makes it incredibly easy to use Mobile Services from your Windows Store and Windows Phone 8 applications. You can [download the SDK](http://go.microsoft.com/fwlink/?LinkId=257545&clcid=0x409) directly or you can download the source code using the instructions above. The Windows Client SDK can be found under ```/azure-mobile-services/sdk/windows``` and the Windows Phone 8 Client SDK is under ```/azure-mobile-services/sdk/windowsphone```.
+Our managed portable library for Windows 8 and Windows Phone 8 Client SDK makes it incredibly easy to use Mobile Services from your Windows Store and Windows Phone 8 applications. The [Windows Azure Mobile Services SDK](http://nuget.org/packages/WindowsAzure.MobileServices/) is available as a Nuget package or you can download the source using the instructions above. The managed portable library also supports the Windows Phone 7.5 and .NET 4.5 platforms.
 
-## iOS Client SDK
-Note: This iOS client is released as a preview. It is currently under development.
+### Prerequisites
 
-Add a cloud backend to your iOS application in minutes with our iOS client SDK. You can [download the iOS SDK](https://go.microsoft.com/fwLink/?LinkID=266533&clcid=0x409) directly or you can download the source code using the instructions above and then you will find the SDK under ```azure-mobile-services/sdk/iOS```. As always we’re excited to get your feedback on this early version of the library on [our issues page](https://github.com/WindowsAzure/azure-mobile-services/issues), and welcome your [contributions](http://windowsazure.github.com/guidelines.html). 
+The SDK requires Visual Studio 2012 RTM.
 
-### Prerequisities
+###Building and Referencing the SDK
 
-The SDK requires Windows 8 RTM and Visual Studio 2012 RTM.
+The managed portable library solution includes a core portable assembly and platform-specific assemblies for each of the supported platforms: Windows 8, Windows Phone 8, Windows Phone 7.5 and .NET 4.5. The core portable platform project is ```Microsoft.WindowsAzure.Mobile```. The platform-specific assembly projects are named using a ```Microsoft.WindowsAzure.Mobile.Ext.<Platform>``` convention. The Windows Phone 8 and Windows Phone 7.5 platforms also include ```Microsoft.WindowsAzure.Mobile.UI.<Platform>``` projects that contain UI components. To build the Managed Portable Libray:
+
+1. Open the ```sdk\Managed\Microsoft.WindowsAzure.Mobile.Managed.sln``` solution file in Visual Studio 2012.
+2. Press F6 to build the solution.
 
 ### Running the Tests
 
-The Windows SDK has a suite of unit tests but the process for running these tests might be unfamiliar. 
+The managed portable library ```Microsoft.WindowsAzure.Mobile.Managed.sln``` has a test application for each of the supported platforms: Windows 8, Windows Phone 8, Windows Phone 7.5 and .NET 4.5.
 
-1. Open the ```/azure-mobile-services/sdk/windows/win8sdk.sln``` solution file in Visual Studio 2012.
-2. Right click on the ```Microsoft.Azure.Zumo.Windows.CSharp.Test``` project in the solution explorer and select ```Set as StartUp Project```.
-3. Press F5
-4. A Windows Store application will appear with a prompt for a Runtime Uri and Tags. You can safely ignore this prompt and just click the Start button.
+1. Open the ```sdk\Managed\Microsoft.WindowsAzure.Mobile.Managed.sln``` solution file in Visual Studio 2012.
+2. Right-click on the test project for a given platform in the Solution Explorer and select ```Set as StartUp Project```.
+3. Press F5 to run the application in debug mode.
+4. An application will appear with a prompt for a runtime Uri and Tags. You can safely ignore this prompt and just click the Start button.
 5. The test suite will run and display the results.
 
-### Building and Referencing the SDK
+## iOS Client SDK
+Add a cloud backend to your iOS application in minutes with our iOS client SDK. You can [download the iOS SDK](https://go.microsoft.com/fwLink/?LinkID=266533&clcid=0x409) directly or you can download the source code using the instructions above.  
 
-When you build the solution the output is written to the  ```/azure-mobile-services/sdk/windows/bin``` folder. To reference the SDK from a C# Windows Store application, use the dll located at
- ```/azure-mobile-services/sdk/windows/bin/{Flavor}/Windows 8/Managed/Microsoft.WindowsAzure.MobileServices.Managed.dll``` (where {Flavor} is Debug or Release).
+### Prerequisites
+
+The SDK requires XCode 4.6.3 or greater.
+
+###Building and Referencing the SDK
+
+1. Open the ```sdk\iOS\WindowsAzureMobileServices.xcodeproj``` file in XCode.
+2. Set the active scheme option to ```Framework\iOS Device```.
+3. Build the project using Command-B. The ```WindowsAzureMobileServices.framework``` folder should be found in the build output folder under ```Products\<build configuration>-iphoneos```.
+4. Drag and drop the ```WindowsAzureMobileServices.framework``` from a Finder window into the Frameworks folder of the Project Navigator panel of your iOS application XCode project.
+
+### Running the Tests
+
+1. Open the ```sdk\iOS\WindowsAzureMobileServices.xcodeproj``` file in XCode.
+2. Set the active scheme option to ```WindowsAzureMobileServices\* Simulator```.
+3. Open the ```Test\WindowsAzureMobileServicesFunctionalTests.m``` file in the Project Navigator panel of XCode.
+4. In the ```setUp``` code, replace the ```<Windows Azure Mobile Service App URL>``` and ```<Application Key>``` with the valid URL and Application Key for a working Mobile Service.
+5. Run the tests using Command-U.
 
 ## Android SDK
-### Prerequisities
+Windows Azure Mobile Services can be used with an Android-based device using our Android SDK. You can [download the Android SDK](https://go.microsoft.com/fwLink/?LinkID=280126&clcid=0x409) directly or you can download the source code using the instructions above.  
+
+### Prerequisites
 
 The SDK requires Eclipse and the latest [Android Development Tools](http://developer.android.com/tools/sdk/eclipse-adt.html).
 
@@ -52,7 +73,6 @@ The SDK requires Eclipse and the latest [Android Development Tools](http://devel
 2. Import the `\azure-mobile-services\sdk\android\src\sdk` project into your workspace
 3. Once Eclipse is done compiling, the resulting .jar file will be located in `\azure-mobile-services\sdk\android\src\sdk\bin`.
 4. To optionally build JavaDocs, right-click the `javadoc.xml` file and select Run As > Ant Build.
-
 
 ### Running the Tests
 
@@ -74,10 +94,36 @@ It also contains an end-to-end test application.
 9. If you also want to test push support, get a Google Cloud Messaging API key from the [Google APIs Console](https://code.google.com/apis/console/) and paste the key in the text box labeled GCM Sender Id
 10. Check the tests you want to run and then select "Run selected tests"
 
+## JavaScript SDK
 
-## Sample Application: Doto
+Our JavaScript SDK makes it easy to use our Windows Azure Mobile Services in a Windows 8 application or an HTML client. The [Windows Azure Mobile Services for WinJS SDK](http://nuget.org/packages/WindowsAzure.MobileServices.WinJS/) is available as a Nuget package or you can download the source for both WinJS and HTML using the instructions above. 
 
-Doto is a simple, social todo list application that demonstrates the features of Windows Azure Mobile Services. You can find doto under ```/azure-mobile-services/samples/doto```.
+### Prerequisites
+
+The Windows Azure Mobile Services for WinJS SDK requires Windows 8 RTM and Visual Studio 2012 RTM. 
+
+### Building and Referencing the SDK
+
+1. Open the ```sdk\JavaScript\Microsoft.WindowsAzure.Mobile.JS.sln``` file in Visual Studio.
+2. Press F6 to build the solution. This will generate a single merged JavaScript file that will be used by your application.
+
+For WinJS Windows Store apps, copy the ```Generated/MobileServices[.min].js```, ```Generated/MobileServices.DevIntellisense.js``` and ```Generated/MobileService.pri``` files into your WinJS project. For HTML applications, copy the ```Generated/MobileServices.Web[.min].js``` and the ```Generated/MobileServices.DevIntellisense.js``` files into your HTML\JavaScript project.
+
+### Running the Tests
+
+To run the WinJS Windows Store test app:
+
+1. Open the ```sdk\JavaScript\Microsoft.WindowsAzure.Mobile.JS.sln``` file in Visual Studio.
+2. In the Solution Explorer, right-click on the ```Microsoft.WindowsAzure.Mobile.WinJS.Test``` project in the Solution Explorer and select ```Set as StartUp Project```.
+3. Press F5 to run the application in debug mode.
+4. A Windows Store application will appear with a prompt for a Runtime Uri and Tags. You can safely ignore this prompt and just click the Start button.
+5. The test suite will run and display the results.
+
+To run the HTML tests:
+
+1. Open the ```sdk\JavaScript\Microsoft.WindowsAzure.Mobile.JS.sln``` file in Visual Studio.
+2. In the Solution Explorer, select the Microsoft.WindowsAzure.Mobile.WinJS.Test project and right-click to select 'View in Browser'.
+3. The default browser will launch and run the test HTML application. Some tests may fail because due to an 'Unexpected connection failure'. This is because the test is configured to connect to a Mobile Service that does not exist. These failures can be ignored.
 
 ## Need Help?
 

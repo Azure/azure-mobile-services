@@ -1,18 +1,6 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
 
 #import <SenTestingKit/SenTestingKit.h>
 #import "MSClient.h"
@@ -60,7 +48,7 @@
                                    initWithURL:nil
                                    statusCode:400
                                    HTTPVersion:nil headerFields:nil];
-    NSString* stringData = @"\"This is an Error Message!\"";
+    NSString* stringData = @"This is an Error Message!";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
     testFilter.responseToUse = response;
@@ -120,7 +108,7 @@
         STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error was nil after deserializing item.");
-        STAssertTrue([error domain] == @"SomeDomain",
+        STAssertTrue([[error domain] isEqualToString:@"SomeDomain"],
                      @"error domain was: %@", [error domain]);
         STAssertTrue([error code] == -102,
                      @"error code was: %d",[error code]);
@@ -181,7 +169,7 @@
         STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == @"TestErrorDomain",
+        STAssertTrue([error.domain isEqualToString:@"TestErrorDomain"],
                      @"error domain should have been TestErrorDomain.");
         STAssertTrue(error.code == -998,
                      @"error code should have been -998.");

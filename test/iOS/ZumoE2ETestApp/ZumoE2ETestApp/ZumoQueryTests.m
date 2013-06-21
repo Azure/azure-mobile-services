@@ -1,9 +1,6 @@
-//
-//  ZumoQueryTests.m
-//  ZumoE2ETestApp
-//
-//  Copyright (c) 2012 Microsoft. All rights reserved.
-//
+// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
 
 #import "ZumoQueryTests.h"
 #import <WindowsAzureMobileServices/WindowsAzureMobileServices.h>
@@ -73,6 +70,10 @@ static NSString *queryTestsTableName = @"iosMovies";
     [result addObject:[self createQueryTestWithName:@"Floor - Movies which last more than 3 hours" andPredicate:[NSPredicate predicateWithFormat:@"floor(Duration / 60.0) >= 3"]]];
     [result addObject:[self createQueryTestWithName:@"Ceiling - Best picture winners which last at most 2 hours" andPredicate:[NSPredicate predicateWithFormat:@"BestPictureWinner = TRUE and ceiling(Duration / 60.0) = 2"]]];
     
+    // Constant predicates
+    [result addObject:[self createQueryTestWithName:@"TRUEPREDICATE - First 10 movies" andPredicate:[NSPredicate predicateWithFormat:@"TRUEPREDICATE"] andTop:@10 andSkip:nil]];
+    [result addObject:[self createQueryTestWithName:@"FALSEPREDICATE - No movies" andPredicate:[NSPredicate predicateWithFormat:@"FALSEPREDICATE"]]];
+
     // Date fields
     [result addObject:[self createQueryTestWithName:@"Date: Greater than, less than - Movies with release date in the 70s" andPredicate:[NSPredicate predicateWithFormat:@"ReleaseDate > %@ and ReleaseDate < %@", [ZumoTestGlobals createDateWithYear:1969 month:12 day:31], [ZumoTestGlobals createDateWithYear:1980 month:1 day:1]]]];
     [result addObject:[self createQueryTestWithName:@"Date: Greater or equal, less or equal - Movies with release date in the 80s" andPredicate:[NSPredicate predicateWithFormat:@"ReleaseDate >= %@ and ReleaseDate <= %@", [ZumoTestGlobals createDateWithYear:1980 month:1 day:1], [ZumoTestGlobals createDateWithYear:1989 month:12 day:31]]]];
@@ -85,6 +86,7 @@ static NSString *queryTestsTableName = @"iosMovies";
     
     // Predicate with substitution variables
     [result addObject:[self createQueryTestWithName:@"IN - Movies from the even years in the 2000s with rating PG, PG-13 or R" andPredicate:[NSPredicate predicateWithFormat:@"Year IN %@ and MPAARating IN %@", @[@2000, @2002, @2004, @2006, @2008], @[@"R", @"PG", @"PG-13"]] andTop:@100 andSkip:nil]];
+    [result addObject:[self createQueryTestWithName:@"BETWEEN - Movies from the 1960s" andPredicate:[NSPredicate predicateWithFormat:@"Year BETWEEN %@", @[@1960, @1970]]]];
     [result addObject:[self createQueryTestWithName:@"%K, %d substitution - Movies from 2000 rated PG-13" andPredicate:[NSPredicate predicateWithFormat:@"%K >= %d and %K = %@", @"Year", @2000, @"MPAARating", @"PG-13"]]];
 
     // Top and skip
@@ -108,6 +110,18 @@ static NSString *queryTestsTableName = @"iosMovies";
             [table readWithId:[NSNumber numberWithInt:i] completion:^(NSDictionary *item, NSError *err) {
                 BOOL passed = NO;
                 if (err) {
+                    if (i == 0) {
+                        if (err.code != MSInvalidItemIdWithRequest) {
+                            [test addLog:[NSString stringWithFormat:@"Invalid error code: %d", err.code]];
+                        } else {
+                            [test addLog:@"Got expected error"];
+                            NSHTTPURLResponse *response = [[err userInfo] objectForKey:MSErrorResponseKey];
+                            if (response) {
+                                [test addLog:[NSString stringWithFormat:@"Error, response should be nil (request not sent), but its status code is %d", [response statusCode]]];
+                                passed = NO;
+                            }
+                        }
+                    }
                     if (err.code != MSErrorMessageErrorCode) {
                         [test addLog:[NSString stringWithFormat:@"Invalid error code: %d", err.code]];
                     } else {
@@ -438,59 +452,8 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
     return result;
 }
 
-+ (NSString *)helpText {
-    NSArray *lines = [NSArray arrayWithObjects:
-                      @"1. Create an application on Windows azure portal.",
-                      @"2. Create a table called 'iOSMovies'",
-                      @"3. Set the following code to be the 'insert' script for the table:",
-                      @"   function insert(item, user, request) {",
-                      @"       item.id = 1;",
-                      @"       var table = tables.getTable('iosmovies');",
-                      @"       table.take(1).read({",
-                      @"       success: function(items) {",
-                      @"           if (items.length > 0) {",
-                      @"               // table already populated",
-                      @"               request.respond(201, {id: 1, status: 'Already populated'});",
-                      @"           } else {",
-                      @"               // Need to populate the table",
-                      @"               populateTable(table, request, item.movies);",
-                      @"           }",
-                      @"       }",
-                      @"       });",
-                      @"   }",
-                      @"   ",
-                      @"   function populateTable(table, request, films) {",
-                      @"       var index = 0;",
-                      @"       films.forEach(fixReleaseDate);"
-                      @"       var insertNext = function() {",
-                      @"           if (index >= films.length) {",
-                      @"               request.respond(201, {id : 1, status : 'Table populated successfully'});",
-                      @"           } else {",
-                      @"               var toInsert = films[index];",
-                      @"               table.insert(toInsert, {",
-                      @"               success: function() {",
-                      @"                   index++;",
-                      @"                   if ((index % 20) === 0) {",
-                      @"                       console.log('Inserted %d items', index);",
-                      @"                   }",
-                      @"                   insertNext();",
-                      @"               }",
-                      @"               });",
-                      @"           }",
-                      @"       };",
-                      @"       ",
-                      @"       insertNext();",
-                      @"   }",
-                      @"   ",
-                      @"   function fixReleaseDate(movie) {",
-                      @"       var releaseDate = movie.ReleaseDate;",
-                      @"       if (typeof releaseDate === 'string') {",
-                      @"           movie.ReleaseDate = new Date(releaseDate);",
-                      @"       }",
-                      @"   }",
-                      @"4. Click the 'Query Tests' button.",
-                      @"5. Make sure all the scenarios pass.", nil];
-    return [lines componentsJoinedByString:@"\n"];
++ (NSString *)groupDescription {
+    return @"Tests for validating different query capabilities of the client SDK.";
 }
 
 @end

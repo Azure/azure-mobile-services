@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/2010/manifest">
+  <Identity Name="44263a2d-8087-40af-8163-307a43f420ba" Publisher="CN=randallt" Version="1.0.0.0" />
+  <Properties>
+    <DisplayName>Microsoft.WindowsAzure.MobileServices.WindowsStore.Test</DisplayName>
+    <PublisherDisplayName>randallt</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+  <Prerequisites>
+    <OSMinVersion>6.2.1</OSMinVersion>
+    <OSMaxVersionTested>6.2.1</OSMaxVersionTested>
+  </Prerequisites>
+  <Resources>
+    <Resource Language="x-generate" />
+  </Resources>
+  <Applications>
+    <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="Microsoft.WindowsAzure.MobileServices.WindowsStore.Test.App">
+      <VisualElements DisplayName="Windows Azure Mobile Services Test App" Logo="Assets\Logo.png" SmallLogo="Assets\SmallLogo.png" Description="Windows Azure Mobile Services Test App" ForegroundText="light" BackgroundColor="#464646">
+        <DefaultTile ShowName="allLogos" />
+        <SplashScreen Image="Assets\SplashScreen.png" />
+      </VisualElements>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <Capability Name="internetClient" />
+  </Capabilities>
+</Package>

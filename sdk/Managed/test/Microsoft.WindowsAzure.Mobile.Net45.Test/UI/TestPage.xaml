@@ -1,0 +1,86 @@
+﻿<Page x:Class="Microsoft.WindowsAzure.MobileServices.Test.TestPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      mc:Ignorable="d" 
+      d:DesignHeight="300" d:DesignWidth="300"
+	Title="TestPage">
+
+    <Page.Resources>
+        <Style x:Key="SubheaderStyle" TargetType="TextBlock" BasedOn="{StaticResource SubheaderTextStyle}">
+            <Setter Property="Margin" Value="0 0 0 10" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="LineHeight" Value="20" />
+        </Style>
+        <Style x:Key="HeaderStyle" TargetType="TextBlock" BasedOn="{StaticResource HeaderTextStyle}">
+            <Setter Property="Foreground" Value="#0094ff" />
+            <Setter Property="Margin" Value="0 0 0 10" />
+        </Style>
+        <Style x:Key="TestStyle" TargetType="ListView">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="VerticalAlignment" Value="Stretch" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style x:Key="StatusStyle" TargetType="TextBlock" BasedOn="{StaticResource BasicTextStyle}">
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="Margin" Value="0 0 0 10" />
+        </Style>
+        <Style x:Key="ProgressStyle" TargetType="TextBlock" BasedOn="{StaticResource SubheaderTextStyle}">
+            <Setter Property="Foreground" Value="#ffd800" />
+        </Style>
+        <CollectionViewSource x:Key="cvsTests" />
+    </Page.Resources>
+    <Border>
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Style="{StaticResource SubheaderStyle}">Windows Azure Mobile Services</TextBlock>
+            <TextBlock Grid.Row="1"  Style="{StaticResource HeaderStyle}">C# Client Library Tests</TextBlock>
+            <TextBlock x:Name="lblStatus" Grid.Row="2" Style="{StaticResource StatusStyle}">Unit Test Run</TextBlock>
+            <ListView
+              x:Name="lstTests"
+              Grid.Row="3"
+              Style="{StaticResource TestStyle}"
+              ItemsSource="{Binding Source={StaticResource cvsTests}}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Margin="8 0">
+                            <TextBlock Text="{Binding Name}" Foreground="{Binding Brush}" FontSize="16" FontWeight="ExtraLight" />
+                            <ItemsControl ItemsSource="{Binding Details}" Margin="15 0 0 0" FontSize="12" Foreground="LightGray" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListView.ItemTemplate>                            
+            </ListView>
+            <Grid  x:Name="pnlFooter" Grid.Row="4">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <ProgressBar x:Name="progress" />
+                <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock x:Name="lblCurrentTestNumber" Text="0" Style="{StaticResource ProgressStyle}" />
+                    <TextBlock Text=" / "  Style="{StaticResource ProgressStyle}" />
+                    <TextBlock x:Name="lblTotalTestNumber" Text="0"  Style="{StaticResource ProgressStyle}" />
+                    <TextBlock Text="  (with  "  Style="{StaticResource ProgressStyle}" />
+                    <TextBlock x:Name="lblFailureNumber" Text="0"  Style="{StaticResource ProgressStyle}" />
+                    <TextBlock Text=" failures)"  Style="{StaticResource ProgressStyle}" />
+                </StackPanel>
+            </Grid>
+            <TextBlock
+              x:Name="lblResults"
+              Grid.Row="5"
+              Visibility="Collapsed"
+              Style="{StaticResource ProgressStyle}"
+              HorizontalAlignment="Center" />
+        </Grid>
+    </Border>
+</Page>

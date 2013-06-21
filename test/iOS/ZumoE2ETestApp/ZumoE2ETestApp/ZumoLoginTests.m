@@ -1,9 +1,6 @@
-//
-//  ZumoLoginTests.m
-//  ZumoE2ETestApp
-//
-//  Copyright (c) 2012 Microsoft. All rights reserved.
-//
+// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
 
 #import "ZumoLoginTests.h"
 #import "ZumoTest.h"
@@ -286,18 +283,8 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
     return result;
 }
 
-+ (NSString *)helpText {
-    NSArray *lines = [NSArray arrayWithObjects:
-                      @"1. Create an application on Windows azure portal.",
-                      @"2. Create three tables in the application:",
-                      @"2.1. iosApplication (set permissions to 'Application Key'):",
-                      @"2.2. iosAuthenticated (set permissions to 'Authenticated Users'):",
-                      @"2.3. iosAdmin (set permissions to 'Admin and Scripts'):",
-                      @"3. Create applications in all supported identity providers",
-                      @"4. Configure the identity tab of the Zumo app to point to the providers",
-                      @"5. Run the 'Login' tests, entering valid credentials when prompted.",
-                      @"6. Make sure all the scenarios pass.", nil];
-    return [lines componentsJoinedByString:@"\n"];
++ (NSString *)groupDescription {
+    return @"Tests to validate all forms of the login operation in the client SDK.";
 }
 
 @end

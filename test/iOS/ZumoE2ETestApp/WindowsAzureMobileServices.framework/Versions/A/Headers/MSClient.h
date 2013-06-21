@@ -24,6 +24,17 @@
 @class MSUser;
 
 
+#pragma mark * Block Type Definitions
+
+// Callback for invokeAPI method that expects a JSON result.
+typedef void (^MSAPIBlock)(id result, NSHTTPURLResponse *response, NSError *error);
+
+// Callback for the invokeAPI method that can return any media type.
+typedef void (^MSAPIDataBlock)(NSData *result,
+                               NSHTTPURLResponse *response,
+                               NSError *error);
+
+
 #pragma  mark * MSClient Public Interface
 
 
@@ -109,7 +120,7 @@
 -(MSClient *)clientWithFilter:(id<MSFilter>)filter;
 
 
-#pragma  mark * Public Login and Logout Methods
+#pragma mark * Public Login and Logout Methods
 
 // Logs in the current end user with the given provider by presenting the
 // MSLoginController with the given |controller|.
@@ -133,7 +144,7 @@
 -(void)logout;
 
 
-#pragma  mark * Public GetTable Methods
+#pragma mark * Public Table Methods
 
 
 // Returns an |MSTable| instance for a table with the given name.
@@ -142,5 +153,26 @@
 // Old method to return an |MSTable| instance for a table with the given name.
 // This has been deprecated. Use tableWithName:
 -(MSTable *)getTable:(NSString *)tableName __deprecated;
+
+
+#pragma mark * Public invokeAPI Methods
+
+// Invokes a user-defined API of the Mobile Service.  The HTTP request and
+// response content will be treated as JSON.
+-(void)invokeAPI:(NSString *)APIName
+            body:(id)body
+      HTTPMethod:(NSString *)method
+      parameters:(NSDictionary *)parameters
+         headers:(NSDictionary *)headers
+      completion:(MSAPIBlock)completion;
+
+// Invokes a user-defined API of the Mobile Service.  The HTTP request and
+// response content can be of any media type.
+-(void)invokeAPI:(NSString *)APIName
+            data:(NSData *)data
+      HTTPMethod:(NSString *)method
+      parameters:(NSDictionary *)parameters
+         headers:(NSDictionary *)headers
+      completion:(MSAPIDataBlock)completion;
 
 @end

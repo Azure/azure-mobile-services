@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>sdk.testapp.tests</name>
+	<name>mobile-services-sdk-testapp-tests</name>
 	<comment></comment>
 	<projects>
 		<project>sdk.testapp</project>

@@ -23,12 +23,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.InvalidParameterException;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPatch;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.protocol.HTTP;
 
 import android.net.Uri;
 import android.util.Pair;
@@ -236,6 +234,8 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 				}
 			}
 			post = new ServiceFilterRequestImpl(new HttpPost(uriBuilder.build().toString()));
+			post.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
+			
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
@@ -326,6 +326,8 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 				}
 			}
 			patch = new ServiceFilterRequestImpl(new HttpPatch(uriBuilder.build().toString()));
+			patch.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
+			
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
@@ -455,39 +457,5 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 				}
 			}
 		}.execute();
-	}
-
-	/**
-	 * Updates the JsonObject to have an id property
-	 * @param json
-	 *            the element to evaluate
-	 */
-	private void updateIdProperty(final JsonObject json) throws IllegalArgumentException {
-		for (Map.Entry<String,JsonElement> entry : json.entrySet()){
-			String key = entry.getKey();
-			if (key.equalsIgnoreCase("id")) {
-				JsonElement element = entry.getValue();
-				if (isValidTypeId(element)) {
-					if (!key.equals("id")) {
-						//force the id name to 'id', no matter the casing 
-						json.remove(key);
-						// Create a new id property using the given property name
-						json.addProperty("id", entry.getValue().getAsNumber());
-					}
-					return;
-				} else {
-					throw new IllegalArgumentException("The id must be numeric");
-				}
-			}
-		}
-	}
-
-	/**
-	 * Validates if the id property is numeric.
-	 * @param element
-	 * @return
-	 */
-	private boolean isValidTypeId(JsonElement element) {
-		return element.isJsonPrimitive() && element.getAsJsonPrimitive().isNumber();
 	}
 }

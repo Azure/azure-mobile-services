@@ -1,18 +1,6 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
 
 #import "MSClientConnection.h"
 #import "MSUserAgentBuilder.h"
@@ -26,10 +14,10 @@
 NSString *const xApplicationHeader = @"X-ZUMO-APPLICATION";
 NSString *const contentTypeHeader = @"Content-Type";
 NSString *const userAgentHeader = @"User-Agent";
+NSString *const zumoVersionHeader = @"X-ZUMO-VERSION";
 NSString *const jsonContentType = @"application/json";
 NSString *const xZumoAuth = @"X-ZUMO-AUTH";
-
-
+NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
 
 #pragma mark * MSConnectionDelegate Private Interface
 
@@ -38,7 +26,7 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 // |NSURLConnectionDataDelegate| and surfaces success and error blocks. It
 // is used only by the |MSClientConnection|.
 @interface MSConnectionDelegate : NSObject <NSURLConnectionDataDelegate>
-
+		
 @property (nonatomic, strong)               MSClient *client;
 @property (nonatomic, strong)               NSData *data;
 @property (nonatomic, strong)               NSHTTPURLResponse *response;
@@ -64,8 +52,8 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 
 
 -(id) initWithRequest:(NSURLRequest *)request
-           client:(MSClient *)client
-            completion:(MSResponseBlock)completion
+               client:(MSClient *)client
+           completion:(MSResponseBlock)completion
 {
     self = [super init];
     if (self) {
@@ -96,6 +84,66 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
                               withClient:self.client
                              withRequest:self.request
                               completion:self.completion];
+}
+
+
+#pragma mark * Public Response Handling Methods
+
+
+-(BOOL) isSuccessfulResponse:(NSHTTPURLResponse *)response
+                        data:(NSData *)data
+                     orError:(NSError **)error
+{
+    // Success is determined just by the HTTP status code
+    BOOL isSuccessful = response.statusCode < 400;
+    
+    if (!isSuccessful && self.completion && error) {
+        
+        // Read the error message from the response body
+        *error =[self.client.serializer errorFromData:data
+                                             MIMEType:response.MIMEType];
+        [self addRequestAndResponse:response toError:error];
+    }
+    
+    return isSuccessful;
+}
+
+-(id) itemFromData:(NSData *)data
+          response:(NSHTTPURLResponse *)response
+          ensureDictionary:(BOOL)ensureDictionary
+          orError:(NSError **)error
+{
+    // Try to deserialize the data
+    id item = [self.client.serializer itemFromData:data
+                                  withOriginalItem:nil
+                                  ensureDictionary:ensureDictionary
+                                           orError:error];
+    
+    // If there was an error, add the request and response
+    if (error && *error) {
+        [self addRequestAndResponse:response toError:error];
+    }
+    
+    return item;
+}
+
+
+-(void) addRequestAndResponse:(NSHTTPURLResponse *)response
+                      toError:(NSError **)error
+{
+    if (error && *error) {
+        // Create a new error with request and the response in the userInfo...
+        NSMutableDictionary *userInfo = [(*error).userInfo mutableCopy];
+        [userInfo setObject:self.request forKey:MSErrorRequestKey];
+        
+        if (response) {
+            [userInfo setObject:response forKey:MSErrorResponseKey];
+        }
+        
+        *error = [NSError errorWithDomain:(*error).domain
+                                     code:(*error).code
+                                 userInfo:userInfo];
+    }
 }
 
 
@@ -162,20 +210,32 @@ NSString *const xZumoAuth = @"X-ZUMO-AUTH";
         [mutableRequest setValue:userAgentValue
               forHTTPHeaderField:userAgentHeader];
         
+        //Set the Zumo Version Header
+        [mutableRequest setValue:userAgentValue
+              forHTTPHeaderField:zumoVersionHeader];
+        
         // Set the special Application key header
         NSString *appKey = client.applicationKey;
         if (appKey != nil) {
             [mutableRequest setValue:appKey
                   forHTTPHeaderField:xApplicationHeader];
         }
-
-        // Set the content type header
-        [mutableRequest setValue:jsonContentType
-              forHTTPHeaderField:contentTypeHeader];
+        
+        // Set the installation id header
+        [mutableRequest setValue:client.installId forHTTPHeaderField:xZumoInstallId];
+        
+        if ([request HTTPBody] &&
+             ![request valueForHTTPHeaderField:contentTypeHeader]) {
+            // Set the content type header
+            [mutableRequest setValue:jsonContentType
+                  forHTTPHeaderField:contentTypeHeader];
+        }
     }
     
     return mutableRequest;
 }
+
+
 
 
 @end

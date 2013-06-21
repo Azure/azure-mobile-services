@@ -1,13 +1,11 @@
-//
-//  ZumoTestGroupTableViewController.m
-//  ZumoE2ETestApp
-//
-//  Copyright (c) 2012 Microsoft. All rights reserved.
-//
+// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
 
 #import "ZumoTestGroupTableViewController.h"
 #import "ZumoTestHelpViewController.h"
 #import "ZumoLogUpdater.h"
+#import "ZumoTestGlobals.h"
 
 @interface ZumoTestGroupTableViewController ()
 
@@ -15,7 +13,7 @@
 
 @implementation ZumoTestGroupTableViewController
 
-@synthesize tests;
+@synthesize tests, logUploadUrl;
 
 - (id)init
 {
@@ -125,28 +123,7 @@
     NSMutableArray *arr = [[NSMutableArray alloc] init];
     ZumoTest *test;
     for (test in [[self tests] tests]) {
-        NSString *testStatus;
-        switch ([test testStatus]) {
-            case TSFailed:
-                testStatus = @"Failed";
-                break;
-                
-            case TSPassed:
-                testStatus = @"Passed";
-                break;
-                
-            case TSNotRun:
-                testStatus = @"NotRun";
-                break;
-                
-            case TSRunning:
-                testStatus = @"Running";
-                break;
-                
-            default:
-                testStatus = @"Unkonwn";
-                break;
-        }
+        NSString *testStatus = [ZumoTestGlobals testStatusToString:[test testStatus]];
         [arr addObject:[NSString stringWithFormat:@"Logs for test %@ (status = %@)", [test testName], testStatus]];
         NSString *logLine;
         for (logLine in [test getLogs]) {
@@ -158,20 +135,14 @@
     NSString *allLogs = [arr componentsJoinedByString:@"\n"];
     [helpController setTitle:@"Test logs" andHelpText:allLogs];
     [helpController setModalPresentationStyle:UIModalPresentationFullScreen];
-    NSString *urlToUpload = [uploadUrl text];
+    NSString *urlToUpload = [self logUploadUrl];
+
     [self presentViewController:helpController animated:YES completion:^(void) {
         if (urlToUpload && [urlToUpload length]) {
             ZumoLogUpdater *updater = [[ZumoLogUpdater alloc] init];
             [updater uploadLogs:allLogs toUrl:urlToUpload];
         }
     }];
-}
-
-- (IBAction)showHelp:(id)sender {
-    ZumoTestHelpViewController *helpController = [[ZumoTestHelpViewController alloc] init];
-    [helpController setTitle:[[self tests] name] andHelpText:[[self tests] helpText]];
-    [helpController setModalPresentationStyle:UIModalPresentationFullScreen];
-    [self presentViewController:helpController animated:YES completion:nil];
 }
 
 - (void)zumoTestGroupFinished:(NSString *)groupName withPassed:(int)passedTests andFailed:(int)failedTests {

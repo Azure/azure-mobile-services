@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using System.Collections.Generic;
 using ZumoE2ETestApp.Framework;
 #if WINDOWS_PHONE
 using ZumoE2ETestAppWP8.Tests;
@@ -25,6 +29,7 @@ namespace ZumoE2ETestApp.Tests
 #if !NET45
                 ZumoLoginTests.CreateTests(),
 #endif
+                ZumoCustomApiTests.CreateTests(),
             };
 
             return result;

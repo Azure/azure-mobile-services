@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
@@ -116,7 +120,7 @@ namespace ZumoE2ETestApp.Tests
         }
 
 #if !WINDOWS_PHONE
-        private static ZumoTest CreateLoginTest(MobileServiceAuthenticationProvider provider, bool useSingleSignOn)
+        internal static ZumoTest CreateLoginTest(MobileServiceAuthenticationProvider provider, bool useSingleSignOn = false)
         {
             string testName = string.Format("Login with {0}{1}", provider, useSingleSignOn ? " (using single sign-on)" : "");
             return new ZumoTest(testName, async delegate(ZumoTest test)
@@ -128,7 +132,7 @@ namespace ZumoE2ETestApp.Tests
             });
         }
 #else
-        private static ZumoTest CreateLoginTest(MobileServiceAuthenticationProvider provider)
+        internal static ZumoTest CreateLoginTest(MobileServiceAuthenticationProvider provider)
         {
             string testName = string.Format("Login with {0}", provider);
             return new ZumoTest(testName, async delegate(ZumoTest test)
@@ -141,7 +145,7 @@ namespace ZumoE2ETestApp.Tests
         }
 #endif
 
-        private static ZumoTest CreateLogoutTest()
+        internal static ZumoTest CreateLogoutTest()
         {
             return new ZumoTest("Logout", delegate(ZumoTest test)
             {

@@ -1,18 +1,6 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
 
 #import <Foundation/Foundation.h>
 
@@ -36,6 +24,7 @@
 // an id.
 -(NSData *)dataFromItem:(id)item
               idAllowed:(BOOL)idAllowed
+       ensureDictionary:(BOOL)ensureDictionary
                 orError:(NSError **)error;
 
 // Called to obtain the id of an item.
@@ -53,6 +42,7 @@
 // the values from the item deserialized from the data.
 -(id)itemFromData:(NSData *)data
         withOriginalItem:(id)originalItem
+        ensureDictionary:(BOOL)ensureDictionary
                  orError:(NSError **)error;
 
 // Called for reads when the data will either by an array of items or
@@ -66,6 +56,6 @@
 // Called when the data is expected to have an error message instead of
 // an item; for example, if the HTTP response status code was >= 400. May
 // return nil if no error message could be obtained from the data.
--(NSError *)errorFromData:(NSData *)data;
+-(NSError *)errorFromData:(NSData *)data MIMEType:(NSString *)MIMEType;
 
 @end

@@ -1,18 +1,6 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
 
 #import "MSPredicateTranslator.h"
 #import "MSNaiveISODateFormatter.h"
@@ -31,6 +19,8 @@ NSString *const ceilingFunction = @"ceiling:";
 NSString *const floorFunction = @"floor:";
 NSString *const toUpperFunction =@"uppercase:";
 NSString *const toLowerFunction = @"lowercase:";
+NSString *const truePredicate = @"TRUEPREDICATE";
+NSString *const falsePredicate = @"FALSEPREDICATE";
 
 
 #pragma mark * Filter Query String Constants
@@ -76,6 +66,8 @@ NSString *const intConstant = @"%d";
 NSString *const longConstant = @"%ld";
 NSString *const longLongConstant = @"%lldl";
 NSString *const dateTimeConstant = @"datetime'%@'";
+NSString *const alwaysTrueConstant = @"(1 eq 1)";
+NSString *const alwaysFalseConstant = @"(1 eq 0)";
 
 
 #pragma mark * MSPredicateTranslator Implementation
@@ -121,6 +113,16 @@ static NSDictionary *staticFunctionInfoLookup;
         result = [MSPredicateTranslator visitCompoundPredicate:
                   (NSCompoundPredicate *)predicate];
     }
+    else {
+        NSString *predicteFormat = predicate.predicateFormat;
+        if ([predicteFormat isEqualToString:truePredicate]){
+            result = alwaysTrueConstant;
+        }
+        else if ([predicteFormat isEqualToString:falsePredicate]) {
+            result = alwaysFalseConstant;
+        }
+    }
+    
     
     return result;
 }
@@ -226,10 +228,13 @@ static NSDictionary *staticFunctionInfoLookup;
             replacementPredicate =
             [MSPredicateTranslator replacementPredicateForInPredicate:predicate];
             break;
+        case NSBetweenPredicateOperatorType:
+            replacementPredicate =
+            [MSPredicateTranslator replacementPredicateForBetweenPredicate:predicate];
+            break;
         case NSMatchesPredicateOperatorType:
         case NSLikePredicateOperatorType:
         case NSCustomSelectorPredicateOperatorType:
-        case NSBetweenPredicateOperatorType:
         default:
             // Not supported, so operator remains nil
             break;
@@ -334,16 +339,7 @@ static NSDictionary *staticFunctionInfoLookup;
     for (id item in rightExpression.constantValue) {
         
         // The new right-side expression we are going to build
-        NSExpression *newRightExpression = nil;
-        
-        // If variable substitution was used, we'll need to create epressions
-        // out of the array items, otherwise they should already be expressions
-        if ([item isKindOfClass:[NSExpression class]]) {
-            newRightExpression = item;
-        }
-        else {
-            newRightExpression = [NSExpression expressionForConstantValue:item];
-        }
+        NSExpression *newRightExpression = [MSPredicateTranslator ensureExpression:item];
         
         // Build the equals-to predicate and add it to the array of subPredicates
         NSPredicate *subPredicate =
@@ -358,6 +354,66 @@ static NSDictionary *staticFunctionInfoLookup;
     
     // Return the or'd compound of all of the sub predicates.
     return [NSCompoundPredicate orPredicateWithSubpredicates:subPredicates];
+}
+
++(NSPredicate *) replacementPredicateForBetweenPredicate:(NSComparisonPredicate *)predicate
+{
+    NSMutableArray *subPredicates = [NSMutableArray array];
+    
+    // The rightExpression will be an array of 2 expressions/items. For the
+    // first we will build a greater than or equals predicate and for the second
+    // we will build a less than or equals predicate. Lastly, we will 'and'
+    // together these two subpredicates in order to replace this
+    // 'BETWEEN' predicate
+    NSExpression *rightExpression = predicate.rightExpression;
+    NSExpression *leftExpression = predicate.leftExpression;
+    
+    // First, we'll get the lower and upper bounds
+    NSArray *bounds = rightExpression.constantValue;
+    id lowerBound = [bounds objectAtIndex:0];
+    id upperBound = [bounds objectAtIndex:1];
+    
+    // If variable subsitution was used, the items might be actual values instead
+    // of Expressions, so we need to ensure they are expressions
+    NSExpression *lowerBoundExpression = [MSPredicateTranslator ensureExpression:lowerBound];
+    NSExpression *upperBoundExpression = [MSPredicateTranslator ensureExpression:upperBound];
+    
+    // We'll create the lower bound predicate (greater or equal)
+    NSPredicate *lowerSubPredicate =
+        [NSComparisonPredicate predicateWithLeftExpression:leftExpression
+                                           rightExpression:lowerBoundExpression
+                                                  modifier:predicate.comparisonPredicateModifier
+                                                      type:NSGreaterThanOrEqualToPredicateOperatorType
+                                                   options:predicate.options];
+    [subPredicates addObject:lowerSubPredicate];
+    
+    // We'll create the upper bound predicate (less or equal)
+    NSPredicate *upperSubPredicate =
+        [NSComparisonPredicate predicateWithLeftExpression:leftExpression
+                                       rightExpression:upperBoundExpression
+                                              modifier:predicate.comparisonPredicateModifier
+                                                  type:NSLessThanOrEqualToPredicateOperatorType
+                                               options:predicate.options];
+    [subPredicates addObject:upperSubPredicate];
+    
+    // Return the and'd compound of all of the sub predicates.
+    return [NSCompoundPredicate andPredicateWithSubpredicates:subPredicates];
+}
+
++(NSExpression *) ensureExpression:(id) item
+{
+    NSExpression *expression;
+    
+    // If variable substitution was used, we can get items that are
+    // not expressions but need to be for predicate re-writing purposes.
+    if ([item isKindOfClass:[NSExpression class]]) {
+        expression = item;
+    }
+    else {
+        expression = [NSExpression expressionForConstantValue:item];
+    }
+    
+    return expression;
 }
 
 

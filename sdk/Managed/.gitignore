@@ -1,0 +1,6 @@
+*.suo
+*.csproj.user
+#ignore build files
+bin
+obj
+packages/*

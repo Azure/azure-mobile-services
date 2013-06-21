@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using System;
 using System.Globalization;
 using System.Linq;
 using Microsoft.WindowsAzure.MobileServices;
@@ -250,7 +254,7 @@ namespace ZumoE2ETestApp.Tests.Types
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
-            return Enum.Parse(typeof(TEnum), reader.Value.ToString(), true);
+            return Enum.Parse(typeof(TEnum), (reader.Value ?? default(TEnum)).ToString(), true);
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

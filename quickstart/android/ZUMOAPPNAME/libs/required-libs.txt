@@ -1,4 +1,0 @@
-This directory should contain the following JARs:
-	- gson-2.2.2.jar
-	- httpclient-4.2.3.jar
-        - android-support-v4.jar R11

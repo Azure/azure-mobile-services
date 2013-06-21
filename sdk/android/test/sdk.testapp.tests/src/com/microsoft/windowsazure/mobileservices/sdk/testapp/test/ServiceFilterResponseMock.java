@@ -19,17 +19,25 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
+import java.io.UnsupportedEncodingException;
+
 import org.apache.http.Header;
 import org.apache.http.StatusLine;
 
+import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 
 public class ServiceFilterResponseMock implements ServiceFilterResponse {
 	private Header[] headers;
-	private String content = "{}";
+	private byte[] content;
 	private StatusLine status;
 
 	public ServiceFilterResponseMock() {
+		 try {
+			content = "{}".getBytes(MobileServiceClient.UTF8_ENCODING);
+		} catch (UnsupportedEncodingException e) {
+			//this should never happen
+		}
 	}
 
 	@Override
@@ -39,7 +47,16 @@ public class ServiceFilterResponseMock implements ServiceFilterResponse {
 
 	@Override
 	public String getContent() {
-		return this.content;
+		if (this.content != null) {
+			String content = null;
+			try {
+				content = new String(this.content, MobileServiceClient.UTF8_ENCODING);
+			} catch (UnsupportedEncodingException e) {
+			}
+			return content;
+		} else {
+			return null;
+		}
 	}
 
 	@Override
@@ -52,11 +69,24 @@ public class ServiceFilterResponseMock implements ServiceFilterResponse {
 	}
 
 	public void setContent(String content) {
+		if (content != null) {
+			this.content = content.getBytes();
+		} else {
+			this.content = null;
+		}
+	}
+	
+	public void setContent(byte[] content) {
 		this.content = content;
 	}
 
 	public void setStatus(StatusLine status) {
 		this.status = status;
+	}
+
+	@Override
+	public byte[] getRawContent() {
+		return content;
 	}
 
 }

@@ -1,0 +1,8 @@
+{
+    "name": "windowsazuremobileservices-promise-tests",
+    "description": "Runs promise-tests against the Mobile Services JavaScript client",
+    "version": "0.0.1",
+    "dependencies": {
+        "promises-aplus-tests": ">= 1.1.0"
+    }
+}

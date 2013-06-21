@@ -19,18 +19,26 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
+import java.io.UnsupportedEncodingException;
+
 import org.apache.http.Header;
 import org.apache.http.ProtocolVersion;
 import org.apache.http.StatusLine;
 
+import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 
 public class MockResponse implements ServiceFilterResponse {
 
 	private int mStatus;
-	private String mContent;
+	private byte[] mContent;
 
 	public MockResponse(String content, int status) {
+		mStatus = status;
+		mContent = content.getBytes();
+	}
+	
+	public MockResponse(byte[] content, int status) {
 		mStatus = status;
 		mContent = content;
 	}
@@ -42,7 +50,16 @@ public class MockResponse implements ServiceFilterResponse {
 
 	@Override
 	public String getContent() {
-		return mContent;
+		if (mContent != null) {
+			String content = null;
+			try {
+				content = new String(mContent, MobileServiceClient.UTF8_ENCODING);
+			} catch (UnsupportedEncodingException e) {
+			}
+			return content;
+		} else {
+			return null;
+		}
 	}
 
 	@Override
@@ -64,6 +81,11 @@ public class MockResponse implements ServiceFilterResponse {
 				return new ProtocolVersion("HTTP", 1, 1);
 			}
 		};
+	}
+
+	@Override
+	public byte[] getRawContent() {
+		return mContent;
 	}
 
 }

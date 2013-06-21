@@ -1,4 +1,8 @@
-﻿using ZumoE2ETestApp.Framework;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using ZumoE2ETestApp.Framework;
 
 namespace ZumoE2ETestApp.UIElements
 {

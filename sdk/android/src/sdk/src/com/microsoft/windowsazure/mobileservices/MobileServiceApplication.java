@@ -53,6 +53,12 @@ public final class MobileServiceApplication {
 	 * @return The Installation ID
 	 */
 	public static String getInstallationId(Context context) {
+		
+		//if the device is an emulator, return a fixed installation id
+		if (isEmulator()) {
+			return "00000000-0000-0000-0000-000000000000";
+		}
+		
 		SharedPreferences prefereneces = PreferenceManager
 				.getDefaultSharedPreferences(context.getApplicationContext());
 
@@ -73,5 +79,9 @@ public final class MobileServiceApplication {
 
 		return mInstallationId;
 
+	}
+
+	private static boolean isEmulator() {
+		return "google_sdk".equals(android.os.Build.PRODUCT) || "sdk".equals(android.os.Build.PRODUCT);
 	}
 }

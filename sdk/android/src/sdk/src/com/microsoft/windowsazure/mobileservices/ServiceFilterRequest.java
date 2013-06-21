@@ -65,10 +65,24 @@ public interface ServiceFilterRequest {
 	public void setContent(String content) throws Exception;
 
 	/**
+	 * Sets request content
+	 * 
+	 * @param content
+	 *            byte array that will be used in the setEntity method
+	 * @throws Exception
+	 */
+	public void setContent(byte[] content) throws Exception;
+	
+	/**
 	 * Gets the request's content
 	 */
 	public String getContent();
 
+	/**
+	 * Gets the request's content
+	 */
+	public byte[] getRawContent();
+	
 	/**
 	 * Gets request's URL
 	 */

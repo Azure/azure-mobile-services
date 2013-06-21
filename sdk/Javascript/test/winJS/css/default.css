@@ -1,0 +1,108 @@
+﻿body {
+    overflow-y: scroll
+}
+
+#subHeader {
+    margin: 16px 24px 0px 24px;
+}
+
+#header {
+    margin: -8px 24px 8px 24px;
+    color: #0094ff;
+}
+
+#testStatus {
+    margin: 0px 24px;
+    color: #808080;
+}
+
+#testResults {
+    margin: 3px;
+}
+
+#footer {
+    display: none;
+    margin: 10px auto;
+    width: 80%;
+}
+
+#progress {
+    width: 100%;
+}
+
+#footerContent {
+    text-align: center
+}
+
+.testRunEndFailure {
+    color: #ff006e;
+    margin: 25px;
+    text-align: center;
+}
+
+.testRunEndSuccess {
+    color: #2a9e39;
+    margin: 25px;
+    text-align: center;
+}
+
+.testGroup {
+    margin-left: 20px;
+    margin-right: 20px;
+    padding-top: 10px;
+    border-bottom: 1px solid #F0F0F0;
+}
+
+.testMethod {
+    margin-left: 40px;
+    margin-right: 20px;
+    font-weight: normal;
+}
+
+.testMethodName {
+    display: inline-block;
+    min-width: 200px;
+}
+
+.testMethodNamePassed {
+    display: inline-block;
+    min-width: 200px;
+    color: #2a9e39;
+}
+
+.testMethodNameFailed {
+    display: inline-block;
+    min-width: 200px;
+    color: #ff006e;
+}
+
+.testMethodNameIgnored {
+    display: inline-block;
+    min-width: 200px;
+    color:  gray;
+    text-decoration: line-through;
+}
+
+.testMethodDescription {
+    color: gray;
+    margin-left: 5px;
+}
+
+.testMethodLog {
+    margin-left: 60px;
+    margin-right: 20px;
+    font-size: 80%;
+}
+
+.testMethodError {
+    margin-left: 60px;
+    margin-right: 20px;
+    color: #ff006e;
+}
+
+.testMethodIgnore {
+    margin-left: 60px;
+    margin-right: 20px;
+    color: gray;
+    font-size: 80%;
+}

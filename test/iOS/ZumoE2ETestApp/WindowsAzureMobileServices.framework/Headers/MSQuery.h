@@ -44,11 +44,11 @@
 @property (nonatomic) NSPredicate *predicate;
 
 // The maximum number of items to return from the query.
-@property (nonatomic) NSUInteger fetchLimit;
+@property (nonatomic) NSInteger fetchLimit;
 
 // The offset from the initial item to use when returning items from a query.
 // Can be used with |fetchLimit| to implement paging.
-@property (nonatomic) NSUInteger fetchOffset;
+@property (nonatomic) NSInteger fetchOffset;
 
 // The array of NSSortDescriptors used to order the query results
 @property (nonatomic, copy) NSArray *orderBy;

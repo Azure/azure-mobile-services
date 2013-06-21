@@ -1,18 +1,6 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
 
 #import <SenTestingKit/SenTestingKit.h>
 #import "WindowsAzureMobileServices.h"
@@ -46,7 +34,7 @@
 }
 
 
-# pragma mark * dataFromItem:idAllowed:orError: Tests
+# pragma mark * dataFromItem:idAllowed:ensureDictionary:orError: Tests
 
 
 -(void)testDataFromItemReturnsData
@@ -54,7 +42,10 @@
     NSDictionary *item = @{ @"id" : @5, @"name" : @"bob" };
     
     NSError *error = nil;
-    NSData *data = [serializer dataFromItem:item idAllowed:YES orError:&error];
+    NSData *data = [serializer dataFromItem:item
+                                  idAllowed:YES
+                           ensureDictionary:YES
+                                    orError:&error];
     
     STAssertNotNil(data, @"data was nil after serializing item.");
     STAssertNil(error, @"error was not nil after serializing item.");
@@ -69,7 +60,10 @@
 -(void)testDataFromItemErrorForNilItem
 {
     NSError *error = nil;
-    NSData *data = [serializer dataFromItem:nil idAllowed:YES orError:&error];
+    NSData *data = [serializer dataFromItem:nil
+                                  idAllowed:YES
+                           ensureDictionary:YES
+                                    orError:&error];
     
     STAssertNil(data, @"data was not nil after serializing item.");
     STAssertNotNil(error, @"error was nil after serializing item.");
@@ -111,7 +105,10 @@
     };
     
     NSError *error = nil;
-    NSData *data = [serializer dataFromItem:item idAllowed:YES orError:&error];
+    NSData *data = [serializer dataFromItem:item
+                                  idAllowed:YES
+                           ensureDictionary:YES
+                                    orError:&error];
     
     STAssertNotNil(data, @"data was nil after serializing item.");
     STAssertNil(error, @"error was not nil after serializing item.");
@@ -127,7 +124,10 @@
 {
     NSError *error = nil;
     NSDictionary *item = @{ @"id" : @5, @"name" : @"bob" };
-    NSData *data = [serializer dataFromItem:item idAllowed:NO orError:&error];
+    NSData *data = [serializer dataFromItem:item
+                                  idAllowed:NO
+                           ensureDictionary:YES
+                                    orError:&error];
     
     STAssertNil(data, @"data was not nil after serializing item.");
     STAssertNotNil(error, @"error was nil after serializing item.");
@@ -145,7 +145,10 @@
 {
     NSError *error = nil;
     NSDictionary *item = @{ @"Id" : @5, @"name" : @"bob" };
-    NSData *data = [serializer dataFromItem:item idAllowed:NO orError:&error];
+    NSData *data = [serializer dataFromItem:item
+                                  idAllowed:NO
+                           ensureDictionary:YES
+                                    orError:&error];
     
     STAssertNil(data, @"data was not nil after serializing item.");
     STAssertNotNil(error, @"error was nil after serializing item.");
@@ -163,7 +166,10 @@
 {
     NSError *error = nil;
     NSDictionary *item = @{ @"name" : @"bob" };
-    NSData *data = [serializer dataFromItem:item idAllowed:NO orError:&error];
+    NSData *data = [serializer dataFromItem:item
+                                  idAllowed:NO
+                           ensureDictionary:YES
+                                    orError:&error];
     
     STAssertNotNil(data, @"data was nil after serializing item.");
     STAssertNil(error, @"error was not nil after serializing item.");
@@ -173,6 +179,27 @@
                                              encoding:NSUTF8StringEncoding];
     
     STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+}
+
+-(void)testDataFromItemWithNonDictionaryItem
+{
+    NSArray *item = @[ @{ @"id" : @5, @"name" : @"bob" } ];
+    
+    NSError *error = nil;
+    NSData *data = [serializer dataFromItem:item
+                                  idAllowed:YES
+                           ensureDictionary:NO
+                                    orError:&error];
+    
+    STAssertNotNil(data, @"data was nil after serializing item.");
+    STAssertNil(error, @"error was not nil after serializing item.");
+    
+    NSString *expected = @"[{\"id\":5,\"name\":\"bob\"}]";
+    NSString *actual = [[NSString alloc] initWithData:data
+                                             encoding:NSUTF8StringEncoding];
+    
+    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+    
 }
 
 # pragma mark * itemIdFromItem: Tests
@@ -238,6 +265,7 @@
     NSError *error = nil;
     id newItem = [serializer itemFromData:data
                          withOriginalItem:mutableOriginalItem
+                         ensureDictionary:YES
                                   orError:&error];
     
     STAssertNotNil(newItem, @"item was nil after deserializing item.");
@@ -254,6 +282,7 @@
     NSError *error = nil;
     id newItem = [serializer itemFromData:data
                          withOriginalItem:nil
+                         ensureDictionary:YES
                                   orError:&error];
     
     STAssertNotNil(newItem, @"item was nil after deserializing item.");
@@ -270,6 +299,7 @@
     NSError *error = nil;
     id newItem = [serializer itemFromData:data
                          withOriginalItem:nil
+                         ensureDictionary:YES
                                   orError:&error];
     
     STAssertNotNil(newItem, @"item was nil after deserializing item.");
@@ -301,6 +331,7 @@
     NSError *error = nil;
     id newItem = [serializer itemFromData:data
                          withOriginalItem:nil
+                         ensureDictionary:YES
                                   orError:&error];
     
     STAssertNotNil(error, @"error was nil after deserializing item.");
@@ -311,7 +342,7 @@
                  @"error code was: %d",[error code]);
 }
 
--(void)testItemFromDataReturnsErrorIfItemIsNotObject
+-(void)testItemFromDataReturnsErrorIfItemIsNotDictionary
 {
     NSString* stringData = @"[ 5, \"This is not an object!\"  ]";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
@@ -319,14 +350,34 @@
     NSError *error = nil;
     id newItem = [serializer itemFromData:data
                          withOriginalItem:nil
+                         ensureDictionary:YES
                                   orError:&error];
     
     STAssertNotNil(error, @"error was nil after deserializing item.");
-    STAssertNil(newItem, @"error was not nil after deserializing item.");
+    STAssertNil(newItem, @"newItem was not nil after deserializing item.");
     STAssertTrue([error domain] == MSErrorDomain,
                  @"error domain was: %@", [error domain]);
     STAssertTrue([error code] == MSExpectedItemWithResponse,
                  @"error code was: %d",[error code]);
+}
+
+-(void)testItemFromDataReturnsNonDictionary
+{
+    NSString* stringData = @"[ 5, \"This is not an object!\"  ]";
+    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    
+    NSError *error = nil;
+    id newItem = [serializer itemFromData:data
+                         withOriginalItem:nil
+                         ensureDictionary:NO
+                                  orError:&error];
+    
+    STAssertNil(error, @"error was not nil after deserializing item.");
+    STAssertNotNil(newItem, @"newItem was nil after deserializing item.");
+    STAssertTrue([[newItem objectAtIndex:0] isEqual:@5],
+                 @"The first element should have been a 5.");
+    STAssertTrue([[newItem objectAtIndex:1] isEqualToString:@"This is not an object!"],
+                 @"The second element should have been 'This is not an object!'.");
 }
 
 
@@ -509,7 +560,7 @@
     NSString* stringData = @"\"This is an Error Message!\"";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
-    NSError *error = [serializer errorFromData:data];
+    NSError *error = [serializer errorFromData:data MIMEType:@"text/json"];
     
     STAssertNotNil(error, @"error was nil after deserializing item.");
     STAssertTrue([error domain] == MSErrorDomain,
@@ -526,7 +577,7 @@
     NSString* stringData = @"{\"error\":\"This is another Error Message!\"}";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
-    NSError *error = [serializer errorFromData:data];
+    NSError *error = [serializer errorFromData:data MIMEType:@"text/JSON"];
     
     STAssertNotNil(error, @"error was nil after deserializing item.");
     STAssertTrue([error domain] == MSErrorDomain,
@@ -543,7 +594,7 @@
     NSString* stringData = @"{\"description\":\"This is another Error Message!\"}";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
-    NSError *error = [serializer errorFromData:data];
+    NSError *error = [serializer errorFromData:data MIMEType:@"application/json"];
     
     STAssertNotNil(error, @"error was nil after deserializing item.");
     STAssertTrue([error domain] == MSErrorDomain,
@@ -560,7 +611,7 @@
     NSString* stringData = @"invalid JSON!";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
-    NSError *error = [serializer errorFromData:data];
+    NSError *error = [serializer errorFromData:data MIMEType:@"application/JSON"];
     
     STAssertNotNil(error, @"error was nil after deserializing item.");
     STAssertTrue([[error domain] isEqualToString:@"NSCocoaErrorDomain"],
@@ -569,18 +620,38 @@
                  @"error code was: %d",[error code]);
 }
 
--(void)testErrorFromDataReturnsNilIfNoError
+-(void)testErrorFromDataReturnsJsonEvenIfNotExpectedJsonForm
 {
     NSString* stringData = @"{}";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
-    NSError *error = [serializer errorFromData:data];
+    NSError *error = [serializer errorFromData:data MIMEType:@"text/json"];
     
     STAssertNotNil(error, @"error was nil after deserializing item.");
     STAssertTrue([[error domain] isEqualToString:MSErrorDomain],
                  @"error domain was: %@", [error domain]);
-    STAssertTrue([error code] == MSErrorNoMessageErrorCode,
+    STAssertTrue([error code] == MSErrorMessageErrorCode,
                  @"error code was: %d",[error code]);
+    STAssertTrue([[error localizedDescription] isEqualToString:
+                  @"{}"],
+                  @"error description was: %@", [error localizedDescription]);
+}
+
+-(void)testErrorFromDataReturnsNonJson
+{
+    NSString* stringData = @"<Hey>This sure is some poor xml</Hey>";
+    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    
+    NSError *error = [serializer errorFromData:data MIMEType:@"application/xml"];
+    
+    STAssertNotNil(error, @"error was nil after deserializing item.");
+    STAssertTrue([[error domain] isEqualToString:MSErrorDomain],
+                 @"error domain was: %@", [error domain]);
+    STAssertTrue([error code] == MSErrorMessageErrorCode,
+                 @"error code was: %d",[error code]);
+    STAssertTrue([[error localizedDescription] isEqualToString:
+                  @"<Hey>This sure is some poor xml</Hey>"],
+                  @"error description was: %@", [error localizedDescription]);
 }
 
 @end

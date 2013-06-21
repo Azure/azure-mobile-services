@@ -1,0 +1,10 @@
+*.suo
+obj/
+bin/
+bld/
+build/
+debug/
+*.jsproj.user
+*.csproj.user
+packages/
+ZumoE2ETestAppJs/ZumoE2ETestAppHTML/TestFramework/

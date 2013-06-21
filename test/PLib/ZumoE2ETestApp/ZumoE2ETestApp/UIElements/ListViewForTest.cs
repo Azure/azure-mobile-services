@@ -1,4 +1,8 @@
-﻿using System.ComponentModel;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using System.ComponentModel;
 #if NETFX_CORE
 using Windows.UI;
 using Windows.UI.Xaml.Media;

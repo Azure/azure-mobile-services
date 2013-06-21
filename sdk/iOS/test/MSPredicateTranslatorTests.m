@@ -1,18 +1,6 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
 
 #import <SenTestingKit/SenTestingKit.h>
 #import "MSPredicateTranslator.h"
@@ -43,6 +31,20 @@
     // the second element is the predicate format string; and all
     // additional elements are the arguments to the format string
     NSArray *testCases = @[
+    
+    
+    // Test cases for TRUEPREDICATE, FALSEPREDICATE
+    @[ @"(1 eq 1)",
+    @"TRUEPREDICATE"],
+    
+    @[ @"((1 eq 1) and startswith(name,'b'))",
+    @"TRUEPREDICATE && name BEGINSWITH 'b'"],
+    
+    @[ @"(1 eq 0)",
+    @"FALSEPREDICATE"],
+    
+    @[ @"((1 eq 0) or (Price le 5.99d))",
+    @"FALSEPREDICATE OR Price <= 5.99"],
     
         // Test cases for comparison opperators and number formating.
         @[ @"(Price gt 50f)",
@@ -134,12 +136,13 @@
         @[ @"(Created eq datetime'2012-05-21T00:00:29.300Z')",
            @"Created == %@", date3],
     
-        // Test case for IN
+        // Test cases for IN
         @[ @"((Zipcode eq 98008) or (Zipcode eq 98006) or (Zipcode eq 98007))",
              @"Zipcode IN { 98008, 98006, 98007}"],
     
         @[ @"((Zipcode eq (98007 add 1)) or (Zipcode eq (98007 sub 1)) or (Zipcode eq 98007))",
-           @"Zipcode IN { %@ + 1, %@ - 1, %@ }", @98007, @98007, @98007]
+           @"Zipcode IN { %@ + 1, %@ - 1, %@ }", @98007, @98007, @98007],
+
     ];
 
     
@@ -237,6 +240,9 @@
         @[ @"((Zipcode eq 98008) or (Zipcode eq 98006) or (Zipcode eq 98007))",
         @"Zipcode IN $zipcodes", @{ @"zipcodes":@[ @98008, @98006, @98007 ] }],
     
+        // Test cases for BETWEEN
+        @[ @"((Zipcode ge 98006) and (Zipcode le 98008))",
+        @"Zipcode BETWEEN $zipcodes", @{ @"zipcodes":@[ @98006, @98008] }],
     ];
     
     for (NSArray *testCase in testCases) {

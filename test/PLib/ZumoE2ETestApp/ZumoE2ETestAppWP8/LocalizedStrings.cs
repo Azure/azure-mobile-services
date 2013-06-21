@@ -1,4 +1,8 @@
-﻿using ZumoE2ETestAppWP8.Resources;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using ZumoE2ETestAppWP8.Resources;
 
 namespace ZumoE2ETestAppWP8
 {
