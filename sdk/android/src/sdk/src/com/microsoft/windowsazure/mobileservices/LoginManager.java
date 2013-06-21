@@ -27,6 +27,7 @@ import java.net.URLDecoder;
 import java.util.Locale;
 
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.protocol.HTTP;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
@@ -423,7 +424,8 @@ class LoginManager {
 		// Create a request
 		final ServiceFilterRequest request = new ServiceFilterRequestImpl(
 				new HttpPost(url));
-
+		request.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
+		
 		try {
 			// Set request's content with the token
 			request.setContent(token);
