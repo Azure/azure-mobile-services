@@ -130,7 +130,7 @@ public class LoginTests extends TestGroup {
 		return test;
 	}
 
-	private TestCase createLoginTest(final MobileServiceAuthenticationProvider provider) {
+	public static TestCase createLoginTest(final MobileServiceAuthenticationProvider provider) {
 		TestCase test = new TestCase() {
 
 			@Override
@@ -174,7 +174,7 @@ public class LoginTests extends TestGroup {
 		Public, Application, User, Admin
 	}
 
-	private TestCase createLogoutTest() {
+	public static TestCase createLogoutTest() {
 
 		TestCase test = new TestCase() {
 

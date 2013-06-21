@@ -31,6 +31,7 @@ import android.os.Build;
 import android.test.InstrumentationTestCase;
 
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceAuthenticationProvider;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
@@ -41,6 +42,8 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
+import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
+import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonQueryCallback;
 import com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback;
 
@@ -394,13 +397,11 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 						int zumoInstallationHeaderIndex = -1;
 						int zumoAppHeaderIndex = -1;
 						int userAgentHeaderIndex = -1;
-						int contentTypeHeaderIndex = -1;
 						int acceptHeaderIndex = -1;
 
 						String installationHeader = "X-ZUMO-INSTALLATION-ID";
 						String appHeader = "X-ZUMO-APPLICATION";
 						String userAgentHeader = HTTP.USER_AGENT;
-						String contentTypeHeader = HTTP.CONTENT_TYPE;
 						String acceptHeader = "Accept";
 
 						Header[] headers = request.getHeaders();
@@ -411,8 +412,6 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 								zumoAppHeaderIndex = i;
 							} else if (headers[i].getName() == userAgentHeader) {
 								userAgentHeaderIndex = i;
-							} else if (headers[i].getName() == contentTypeHeader) {
-								contentTypeHeaderIndex = i;
 							} else if (headers[i].getName() == acceptHeader) {
 								acceptHeaderIndex = i;
 							}
@@ -427,9 +426,6 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 						if (userAgentHeaderIndex == -1) {
 							Assert.fail();
 						}
-						if (contentTypeHeaderIndex == -1) {
-							Assert.fail();
-						}
 						if (acceptHeaderIndex == -1) {
 							Assert.fail();
 						}
@@ -440,7 +436,6 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 						assertNotNull(headers[zumoInstallationHeaderIndex].getValue());
 						assertEquals(expectedAppKey, headers[zumoAppHeaderIndex].getValue());
 						assertEquals(expectedUserAgent, headers[userAgentHeaderIndex].getValue());
-						assertEquals("application/json", headers[contentTypeHeaderIndex].getValue());
 						assertEquals("application/json", headers[acceptHeaderIndex].getValue());
 
 						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
@@ -454,6 +449,135 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 
 					@Override
 					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+	}
+	
+	public void testInsertUpdateShouldAddContentTypeJson() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(2);
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				// Create client
+				MobileServiceClient client = null;
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a new filter to the client
+				client = client.withFilter(new ServiceFilter() {
+
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+
+						Header[] headers = request.getHeaders();
+						
+						boolean headerPresent = false;
+						for (int i = 0; i < headers.length; i++) {
+							if (headers[i].getName().equals(HTTP.CONTENT_TYPE) && headers[i].getValue().equals("application/json")) {
+								headerPresent = true;
+							}
+						}
+
+						assertTrue("Header not present", headerPresent);
+
+						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+						response.setContent("{}");
+
+						responseCallback.onResponse(response, null);
+					}
+				});
+
+				JsonObject jsonObject = new JsonObject();
+				jsonObject.addProperty("id", 42);
+				
+				client.getTable("dummy").insert(jsonObject, new TableJsonOperationCallback() {
+					
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception,
+							ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
+				
+				client.getTable("dummy").update(jsonObject, new TableJsonOperationCallback() {
+					
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception,
+							ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+	}
+	
+
+	public void testDeleteQueryShouldNotAddContentTypeJson() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(2);
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				// Create client
+				MobileServiceClient client = null;
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a new filter to the client
+				client = client.withFilter(new ServiceFilter() {
+
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+
+						Header[] headers = request.getHeaders();
+						
+						boolean headerPresent = false;
+						for (int i = 0; i < headers.length; i++) {
+							if (headers[i].getName().equals(HTTP.CONTENT_TYPE) && headers[i].getValue().equals("application/json")) {
+								headerPresent = true;
+							}
+						}
+
+						assertFalse("Header is present", headerPresent);
+
+						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+						response.setContent("{}");
+
+						responseCallback.onResponse(response, null);
+					}
+				});
+
+				client.getTable("dummy").delete(42, new TableDeleteCallback() {
+					
+					@Override
+					public void onCompleted(Exception exception, ServiceFilterResponse response) {
+						latch.countDown();
+					}
+				});
+				
+				client.getTable("dummy").execute(new TableJsonQueryCallback() {
+					
+					@Override
+					public void onCompleted(JsonElement result, int count, Exception exception,
+							ServiceFilterResponse response) {
 						latch.countDown();
 					}
 				});

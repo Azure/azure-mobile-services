@@ -1,9 +1,6 @@
-//
-//  ZumoMiscTests.m
-//  ZumoE2ETestApp
-//
-//  Copyright (c) 2012 Microsoft. All rights reserved.
-//
+// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
 
 #import "ZumoMiscTests.h"
 #import "ZumoTest.h"
@@ -170,16 +167,6 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
     [result addObject:[self createFilterTestToEnsureWithFilterDoesNotChangeClient]];
     [result addObject:[self createParameterPassingTest]];
     return result;
-}
-
-+ (NSString *)helpText {
-    NSArray *lines = [NSArray arrayWithObjects:
-                      @"1. Create an application on Windows azure portal.",
-                      @"2. Create a table called 'iOSRoundTripTable'.",
-                      @"3. Click on the 'Misc Tests' button.",
-                      @"4. Make sure all the tests pass.",
-                      nil];
-    return [lines componentsJoinedByString:@"\n"];
 }
 
 + (ZumoTest *)createParameterPassingTest {
@@ -455,6 +442,10 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
     }];
     
     return result;
+}
+
++ (NSString *)groupDescription {
+    return @"Tests to validate features which don't fit in other groups. Those include filters, correct user-agent header, and some replaying scenarios.";
 }
 
 @end

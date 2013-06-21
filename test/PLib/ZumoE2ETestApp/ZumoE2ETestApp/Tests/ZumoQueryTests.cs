@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -16,18 +20,7 @@ namespace ZumoE2ETestApp.Tests
         internal static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Query tests");
-            result.AddTest(new ZumoTest("Populate table, if necessary", new TestExecution(async delegate(ZumoTest test)
-            {
-                var client = ZumoTestGlobals.Instance.Client;
-                var table = client.GetTable<AllMovies>();
-                AllMovies allMovies = new AllMovies
-                {
-                    Movies = ZumoQueryTestData.AllMovies
-                };
-                await table.InsertAsync(allMovies);
-                test.AddLog("Result of populating table: {0}", allMovies.Status);
-                return true;
-            })));
+            result.AddTest(CreatePopulateTableTest());
 
             // Numeric fields
             result.AddTest(CreateQueryTest("GreaterThan and LessThan - Movies from the 90s", m => m.Year > 1989 && m.Year < 2000));
@@ -154,6 +147,11 @@ namespace ZumoE2ETestApp.Tests
                         test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                         return true;
                     }
+                    catch (ArgumentOutOfRangeException ex)
+                    {
+                        test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
+                        return true;
+                    }
                 }));
             }
 
@@ -180,6 +178,22 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(ZumoTestCommon.CreateYesNoTest("Were the movies displayed correctly?", true));
 #endif
             return result;
+        }
+
+        internal static ZumoTest CreatePopulateTableTest()
+        {
+            return new ZumoTest("Populate movies table, if necessary", new TestExecution(async delegate(ZumoTest test)
+            {
+                var client = ZumoTestGlobals.Instance.Client;
+                var table = client.GetTable<AllMovies>();
+                AllMovies allMovies = new AllMovies
+                {
+                    Movies = ZumoQueryTestData.AllMovies
+                };
+                await table.InsertAsync(allMovies);
+                test.AddLog("Result of populating table: {0}", allMovies.Status);
+                return true;
+            }));
         }
 
         class OrderByClause

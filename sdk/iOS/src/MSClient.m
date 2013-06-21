@@ -1,24 +1,15 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
 
-#import "MSClient.h"
+#import "MSClientInternal.h"
 #import "MSTable.h"
 #import "MSClientConnection.h"
 #import "MSLogin.h"
 #import "MSUser.h"
+#import "MSAPIRequest.h"
+#import "MSAPIConnection.h"
+#import "MSJSONSerializer.h"
 
 
 #pragma mark * MSClient Private Interface
@@ -44,7 +35,27 @@
 @synthesize applicationKey = applicationKey_;
 @synthesize currentUser = currentUser_;
 @synthesize login = login_;
+@synthesize serializer = serializer_;
 
+@synthesize installId = installId_;
+-(NSString *) installId
+{
+    if(!installId_) {
+        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        installId_ = [defaults stringForKey:@"WindowsAzureMobileServicesInstallationId"];
+        if(!installId_) {
+            CFUUIDRef newUUID = CFUUIDCreate(kCFAllocatorDefault);
+            installId_ = (__bridge_transfer NSString *)CFUUIDCreateString(kCFAllocatorDefault, newUUID);
+            CFRelease(newUUID);
+        
+            //store the install ID so we don't generate a new one next time
+            [defaults setObject:installId_ forKey:@"WindowsAzureMobileServicesInstallationId"];
+            [defaults synchronize];
+        }
+    }
+    
+    return installId_;
+}
 
 #pragma mark * Public Static Constructor Methods
 
@@ -181,6 +192,60 @@
 }
 
 
+#pragma mark * Public invokeAPI Methods
+
+
+-(void)invokeAPI:(NSString *)APIName
+            body:(id)body
+      HTTPMethod:(NSString *)method
+      parameters:(NSDictionary *)parameters
+         headers:(NSDictionary *)headers
+      completion:(MSAPIBlock)completion
+{
+    // Create the request
+    MSAPIRequest *request = [MSAPIRequest requestToinvokeAPI:APIName
+                                                      client:self
+                                                        body:body
+                                                  HTTPMethod:method
+                                                  parameters:parameters
+                                                     headers:headers
+                                                  completion:completion];
+    // Send the request
+    if (request) {
+        MSAPIConnection *connection =
+            [MSAPIConnection connectionWithApiRequest:request
+                                               client:self
+                                               completion:completion];
+        [connection start];
+    }
+}
+
+-(void)invokeAPI:(NSString *)APIName
+            data:(NSData *)data
+      HTTPMethod:(NSString *)method
+      parameters:(NSDictionary *)parameters
+         headers:(NSDictionary *)headers
+      completion:(MSAPIDataBlock)completion
+{
+    // Create the request
+    MSAPIRequest *request = [MSAPIRequest requestToinvokeAPI:APIName
+                                                      client:self
+                                                        data:data
+                                                  HTTPMethod:method
+                                                  parameters:parameters
+                                                     headers:headers
+                                                  completion:completion];
+    // Send the request
+    if (request) {
+        MSAPIConnection *connection =
+        [MSAPIConnection connectionWithApiDataRequest:request
+                                               client:self
+                                       completion:completion];
+        [connection start];
+    }
+}
+
+
 #pragma mark * NSCopying Methods
 
 
@@ -194,6 +259,16 @@
     client.filters = [self.filters copyWithZone:zone];
 
     return client;
+}
+
+
+#pragma mark * Private Methods
+
+
+-(id<MSSerializer>) serializer
+{
+    // Just use a hard coded reference to MSJSONSerializer
+    return [MSJSONSerializer JSONSerializer];
 }
 
 @end

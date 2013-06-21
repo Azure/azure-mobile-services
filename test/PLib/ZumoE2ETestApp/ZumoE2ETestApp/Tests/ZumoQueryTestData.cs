@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using System;
 using ZumoE2ETestApp.Tests.Types;
 
 namespace ZumoE2ETestApp.Tests

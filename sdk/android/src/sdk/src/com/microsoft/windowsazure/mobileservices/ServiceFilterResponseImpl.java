@@ -23,10 +23,10 @@ See the Apache Version 2.0 License for specific language governing permissions a
 
 package com.microsoft.windowsazure.mobileservices;
 
-import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -45,7 +45,7 @@ public class ServiceFilterResponseImpl implements ServiceFilterResponse {
 	/**
 	 * The response content
 	 */
-	private String mResponseContent;
+	private byte[] mResponseContent;
 
 	/**
 	 * Constructor
@@ -64,18 +64,15 @@ public class ServiceFilterResponseImpl implements ServiceFilterResponse {
 		HttpEntity entity = mResponse.getEntity();
 		if (entity != null) {
 			InputStream instream = entity.getContent();
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					instream));
+			
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			byte[] buffer = new byte[1024];
+			int length;
 
-			StringBuilder sb = new StringBuilder();
-			String content = reader.readLine();
-			while (content != null) {
-				sb.append(content);
-				sb.append('\n');
-				content = reader.readLine();
-			}
+			while ((length = instream.read(buffer)) != -1) out.write(buffer, 0, length);
+			instream.close();
 
-			mResponseContent = sb.toString();
+			mResponseContent = out.toByteArray();;
 		} else {
 			mResponseContent = null;
 		}
@@ -88,6 +85,20 @@ public class ServiceFilterResponseImpl implements ServiceFilterResponse {
 
 	@Override
 	public String getContent() {
+		if (mResponseContent != null) {
+			String responseContent = null;
+			try {
+				responseContent = new String(mResponseContent, MobileServiceClient.UTF8_ENCODING);
+			} catch (UnsupportedEncodingException e) {
+			}
+			return responseContent;
+		} else {
+			return null;
+		}
+	}
+	
+	@Override
+	public byte[] getRawContent() {
 		return mResponseContent;
 	}
 

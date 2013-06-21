@@ -36,9 +36,13 @@
 		E8653C0C16559C15002CB440 /* MSLoginView.h in Headers */ = {isa = PBXBuildFile; fileRef = E8653C0A16559C15002CB440 /* MSLoginView.h */; settings = {ATTRIBUTES = (); }; };
 		E8653C0D16559C15002CB440 /* MSLoginView.m in Sources */ = {isa = PBXBuildFile; fileRef = E8653C0B16559C15002CB440 /* MSLoginView.m */; };
 		E87BB01C161A28FC008053F9 /* MSClientTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB01B161A28FC008053F9 /* MSClientTests.m */; };
-		E87BB01F161A446C008053F9 /* MSTableURLBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB01E161A446C008053F9 /* MSTableURLBuilder.m */; };
+		E87BB01F161A446C008053F9 /* MSURLBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB01E161A446C008053F9 /* MSURLBuilder.m */; };
 		E87BB022161B57C8008053F9 /* MSUserTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB021161B57C8008053F9 /* MSUserTests.m */; };
 		E87BB025161B5A4D008053F9 /* MSTableTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E87BB024161B5A4D008053F9 /* MSTableTests.m */; };
+		E8C44042170BAD49002FC997 /* MSAPIConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = E8C44040170BAD49002FC997 /* MSAPIConnection.h */; };
+		E8C44043170BAD49002FC997 /* MSAPIConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = E8C44041170BAD49002FC997 /* MSAPIConnection.m */; };
+		E8C44047170BAD93002FC997 /* MSAPIRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = E8C44045170BAD93002FC997 /* MSAPIRequest.h */; };
+		E8C44048170BAD93002FC997 /* MSAPIRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = E8C44046170BAD93002FC997 /* MSAPIRequest.m */; };
 		E8E37904161E2FC500C13F00 /* MSTestFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = E8E37903161E2FC500C13F00 /* MSTestFilter.m */; };
 		E8E37907161F4D0D00C13F00 /* MSFilterTest.m in Sources */ = {isa = PBXBuildFile; fileRef = E8E37906161F4D0D00C13F00 /* MSFilterTest.m */; };
 		E8E3790D161F769D00C13F00 /* WindowsAzureMobileServices.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B14161667CE002DD7C6 /* WindowsAzureMobileServices.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -51,13 +55,14 @@
 		E8E37914161F769D00C13F00 /* MSClientConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B1E16166822002DD7C6 /* MSClientConnection.h */; };
 		E8E37915161F769D00C13F00 /* MSTableConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B2016166822002DD7C6 /* MSTableConnection.h */; };
 		E8E37916161F769D00C13F00 /* MSTableRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B2216166822002DD7C6 /* MSTableRequest.h */; };
-		E8E37917161F769D00C13F00 /* MSTableURLBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = E87BB01D161A446C008053F9 /* MSTableURLBuilder.h */; };
+		E8E37917161F769D00C13F00 /* MSURLBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = E87BB01D161A446C008053F9 /* MSURLBuilder.h */; };
 		E8E37918161F769D00C13F00 /* MSNaiveISODateFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = E8EA24BB161CFC5300BE055D /* MSNaiveISODateFormatter.h */; };
 		E8E37919161F769D00C13F00 /* MSSerializer.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B2916166837002DD7C6 /* MSSerializer.h */; };
 		E8E3791A161F769D00C13F00 /* MSJSONSerializer.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B2716166837002DD7C6 /* MSJSONSerializer.h */; };
 		E8E3791B161F769D00C13F00 /* MSPredicateTranslator.h in Headers */ = {isa = PBXBuildFile; fileRef = E8F33B2B1616684F002DD7C6 /* MSPredicateTranslator.h */; };
 		E8EA24BD161CFC5300BE055D /* MSNaiveISODateFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = E8EA24BC161CFC5300BE055D /* MSNaiveISODateFormatter.m */; };
-		E8EA24C0161CFCF400BE055D /* MSTableURLbuilderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8EA24BE161CFC6400BE055D /* MSTableURLbuilderTests.m */; };
+		E8EA24C0161CFCF400BE055D /* MSURLbuilderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8EA24BE161CFC6400BE055D /* MSURLbuilderTests.m */; };
+		E8EE7842170CAEDC00C2848F /* MSClientInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = E8EE7841170CAEDC00C2848F /* MSClientInternal.h */; };
 		E8F33ADF1616659C002DD7C6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F33ADE1616659C002DD7C6 /* Foundation.framework */; };
 		E8F33AEE1616659C002DD7C6 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F33AED1616659C002DD7C6 /* SenTestingKit.framework */; };
 		E8F33AF11616659C002DD7C6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F33ADE1616659C002DD7C6 /* Foundation.framework */; };
@@ -123,17 +128,22 @@
 		E8653C0A16559C15002CB440 /* MSLoginView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSLoginView.h; sourceTree = "<group>"; };
 		E8653C0B16559C15002CB440 /* MSLoginView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSLoginView.m; sourceTree = "<group>"; };
 		E87BB01B161A28FC008053F9 /* MSClientTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSClientTests.m; sourceTree = "<group>"; };
-		E87BB01D161A446C008053F9 /* MSTableURLBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSTableURLBuilder.h; sourceTree = "<group>"; };
-		E87BB01E161A446C008053F9 /* MSTableURLBuilder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableURLBuilder.m; sourceTree = "<group>"; };
+		E87BB01D161A446C008053F9 /* MSURLBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSURLBuilder.h; sourceTree = "<group>"; };
+		E87BB01E161A446C008053F9 /* MSURLBuilder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSURLBuilder.m; sourceTree = "<group>"; };
 		E87BB021161B57C8008053F9 /* MSUserTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSUserTests.m; sourceTree = "<group>"; };
 		E87BB024161B5A4D008053F9 /* MSTableTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableTests.m; sourceTree = "<group>"; };
+		E8C44040170BAD49002FC997 /* MSAPIConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAPIConnection.h; sourceTree = "<group>"; };
+		E8C44041170BAD49002FC997 /* MSAPIConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSAPIConnection.m; sourceTree = "<group>"; };
+		E8C44045170BAD93002FC997 /* MSAPIRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSAPIRequest.h; sourceTree = "<group>"; };
+		E8C44046170BAD93002FC997 /* MSAPIRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSAPIRequest.m; sourceTree = "<group>"; };
 		E8E378FF161E14E800C13F00 /* MSFilter.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSFilter.h; sourceTree = "<group>"; };
 		E8E37902161E2FC500C13F00 /* MSTestFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSTestFilter.h; sourceTree = "<group>"; };
 		E8E37903161E2FC500C13F00 /* MSTestFilter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTestFilter.m; sourceTree = "<group>"; };
 		E8E37906161F4D0D00C13F00 /* MSFilterTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSFilterTest.m; sourceTree = "<group>"; };
 		E8EA24BB161CFC5300BE055D /* MSNaiveISODateFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSNaiveISODateFormatter.h; sourceTree = "<group>"; };
 		E8EA24BC161CFC5300BE055D /* MSNaiveISODateFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSNaiveISODateFormatter.m; sourceTree = "<group>"; };
-		E8EA24BE161CFC6400BE055D /* MSTableURLbuilderTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableURLbuilderTests.m; sourceTree = "<group>"; };
+		E8EA24BE161CFC6400BE055D /* MSURLbuilderTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSURLbuilderTests.m; sourceTree = "<group>"; };
+		E8EE7841170CAEDC00C2848F /* MSClientInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSClientInternal.h; sourceTree = "<group>"; };
 		E8F33ADB1616659C002DD7C6 /* libWindowsAzureMobileServices.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWindowsAzureMobileServices.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8F33ADE1616659C002DD7C6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E8F33AE21616659C002DD7C6 /* WindowsAzureMobileServices-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WindowsAzureMobileServices-Prefix.pch"; sourceTree = "<group>"; };
@@ -251,6 +261,7 @@
 			children = (
 				E8F33B14161667CE002DD7C6 /* WindowsAzureMobileServices.h */,
 				E8F33B0A161667CE002DD7C6 /* MSClient.h */,
+				E8EE7841170CAEDC00C2848F /* MSClientInternal.h */,
 				E8F33B0B161667CE002DD7C6 /* MSClient.m */,
 				E8F33B0C161667CE002DD7C6 /* MSError.h */,
 				E8F33B0D161667CE002DD7C6 /* MSError.m */,
@@ -314,10 +325,14 @@
 				E8F33B1F16166822002DD7C6 /* MSClientConnection.m */,
 				E8F33B2016166822002DD7C6 /* MSTableConnection.h */,
 				E8F33B2116166822002DD7C6 /* MSTableConnection.m */,
+				E8C44040170BAD49002FC997 /* MSAPIConnection.h */,
+				E8C44041170BAD49002FC997 /* MSAPIConnection.m */,
 				E8F33B2216166822002DD7C6 /* MSTableRequest.h */,
 				E8F33B2316166822002DD7C6 /* MSTableRequest.m */,
-				E87BB01D161A446C008053F9 /* MSTableURLBuilder.h */,
-				E87BB01E161A446C008053F9 /* MSTableURLBuilder.m */,
+				E8C44045170BAD93002FC997 /* MSAPIRequest.h */,
+				E8C44046170BAD93002FC997 /* MSAPIRequest.m */,
+				E87BB01D161A446C008053F9 /* MSURLBuilder.h */,
+				E87BB01E161A446C008053F9 /* MSURLBuilder.m */,
 				E84CA4CD162369BD009B2588 /* MSUserAgentBuilder.h */,
 				E84CA4CE162369BD009B2588 /* MSUserAgentBuilder.m */,
 			);
@@ -348,7 +363,7 @@
 		E8F33B3116166889002DD7C6 /* Connection */ = {
 			isa = PBXGroup;
 			children = (
-				E8EA24BE161CFC6400BE055D /* MSTableURLbuilderTests.m */,
+				E8EA24BE161CFC6400BE055D /* MSURLbuilderTests.m */,
 				E84CA4D5162373E2009B2588 /* MSUserAgentBuilderTests.m */,
 			);
 			name = Connection;
@@ -388,7 +403,7 @@
 				E8E37914161F769D00C13F00 /* MSClientConnection.h in Headers */,
 				E8E37915161F769D00C13F00 /* MSTableConnection.h in Headers */,
 				E8E37916161F769D00C13F00 /* MSTableRequest.h in Headers */,
-				E8E37917161F769D00C13F00 /* MSTableURLBuilder.h in Headers */,
+				E8E37917161F769D00C13F00 /* MSURLBuilder.h in Headers */,
 				E8E37918161F769D00C13F00 /* MSNaiveISODateFormatter.h in Headers */,
 				E8E37919161F769D00C13F00 /* MSSerializer.h in Headers */,
 				E8E3791A161F769D00C13F00 /* MSJSONSerializer.h in Headers */,
@@ -397,6 +412,9 @@
 				E8146642165BE0150038EBE5 /* MSLogin.h in Headers */,
 				E8653C0C16559C15002CB440 /* MSLoginView.h in Headers */,
 				E8146646165BE2440038EBE5 /* MSLoginSerializer.h in Headers */,
+				E8C44042170BAD49002FC997 /* MSAPIConnection.h in Headers */,
+				E8C44047170BAD93002FC997 /* MSAPIRequest.h in Headers */,
+				E8EE7842170CAEDC00C2848F /* MSClientInternal.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -505,7 +523,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Exit immediately on any errors\nset -e\n\n# Set some variables\nOUTPUT=${BUILT_PRODUCTS_DIR}\nWAMS=\"WindowsAzureMobileServices\"\nWAMS_FRAMEWORK=\"${WAMS}.framework\"\nWAMS_LIB=\"lib${WAMS}.a\"\nHEADERS=\"Headers\"\n\n# Create the needed directories for the framework\nmkdir -p \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/A\"\nmkdir -p \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/A/Headers\"\n\n# Add the headers and lib to the framework\ncp -a \"${OUTPUT}/${HEADERS}/\" \"${BUILT_PRODUCTS_DIR}/${WAMS_FRAMEWORK}/Versions/A/Headers\"\nlipo -create \"${OUTPUT}/${WAMS_LIB}\" -output \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/A/${WAMS}\"\n\n# Set up the links to complete the framework\nln -sf Versions/Current/Headers \"${OUTPUT}/${WAMS_FRAMEWORK}/Headers\"\nln -sf \"Versions/Current/${WAMS}\" \"${OUTPUT}/${WAMS_FRAMEWORK}/${WAMS}\"\nln -sf A \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/Current\"";
+			shellScript = "# Exit immediately on any errors\nset -e\n\n# Set some variables\nOUTPUT=${BUILT_PRODUCTS_DIR}\nWAMS=\"WindowsAzureMobileServices\"\nWAMS_FRAMEWORK=\"${WAMS}.framework\"\nWAMS_LIB=\"lib${WAMS}.a\"\nHEADERS=\"Headers\"\n\n# Create the needed directories for the framework\nmkdir -p \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/A\"\nmkdir -p \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/A/Headers\"\n\n# Add the headers and lib to the framework\ncp -a \"${OUTPUT}/${HEADERS}/\" \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/A/Headers\"\nlipo -create \"${OUTPUT}/${WAMS_LIB}\" -output \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/A/${WAMS}\"\n\n# Set up the links to complete the framework\nln -sf Versions/Current/Headers \"${OUTPUT}/${WAMS_FRAMEWORK}/Headers\"\nln -sf \"Versions/Current/${WAMS}\" \"${OUTPUT}/${WAMS_FRAMEWORK}/${WAMS}\"\nln -sf A \"${OUTPUT}/${WAMS_FRAMEWORK}/Versions/Current\"";
 		};
 		E8F33AEA1616659C002DD7C6 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -537,13 +555,15 @@
 				E8F33B2616166822002DD7C6 /* MSTableRequest.m in Sources */,
 				E8F33B2A16166837002DD7C6 /* MSJSONSerializer.m in Sources */,
 				E8F33B2F1616684F002DD7C6 /* MSPredicateTranslator.m in Sources */,
-				E87BB01F161A446C008053F9 /* MSTableURLBuilder.m in Sources */,
+				E87BB01F161A446C008053F9 /* MSURLBuilder.m in Sources */,
 				E8EA24BD161CFC5300BE055D /* MSNaiveISODateFormatter.m in Sources */,
 				E84CA4D0162369BD009B2588 /* MSUserAgentBuilder.m in Sources */,
 				E8653C0D16559C15002CB440 /* MSLoginView.m in Sources */,
 				E8146643165BE0150038EBE5 /* MSLogin.m in Sources */,
 				E8146647165BE2440038EBE5 /* MSLoginSerializer.m in Sources */,
 				E814664B165C07EB0038EBE5 /* MSLoginController.m in Sources */,
+				E8C44043170BAD49002FC997 /* MSAPIConnection.m in Sources */,
+				E8C44048170BAD93002FC997 /* MSAPIRequest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -558,7 +578,7 @@
 				E87BB01C161A28FC008053F9 /* MSClientTests.m in Sources */,
 				E87BB022161B57C8008053F9 /* MSUserTests.m in Sources */,
 				E87BB025161B5A4D008053F9 /* MSTableTests.m in Sources */,
-				E8EA24C0161CFCF400BE055D /* MSTableURLbuilderTests.m in Sources */,
+				E8EA24C0161CFCF400BE055D /* MSURLbuilderTests.m in Sources */,
 				E8E37904161E2FC500C13F00 /* MSTestFilter.m in Sources */,
 				E8E37907161F4D0D00C13F00 /* MSFilterTest.m in Sources */,
 				E84CA4D6162373E2009B2588 /* MSUserAgentBuilderTests.m in Sources */,
@@ -595,6 +615,8 @@
 		E8E37979161F8E6B00C13F00 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -602,6 +624,8 @@
 		E8E3797A161F8E6B00C13F00 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -615,6 +639,7 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -629,6 +654,8 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
 				SDKROOT = iphoneos;
+				VERSIONING_SYSTEM = "";
+				VERSION_INFO_PREFIX = "";
 			};
 			name = Debug;
 		};
@@ -641,6 +668,7 @@
 				CLANG_ENABLE_OBJC_ARC = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = YES;
+				CURRENT_PROJECT_VERSION = 1;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -649,6 +677,8 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 5.1;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
+				VERSIONING_SYSTEM = "";
+				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
 		};
@@ -656,6 +686,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
 				DSTROOT = /tmp/WindowsAzureMobileServices.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -665,6 +696,8 @@
 				PUBLIC_HEADERS_FOLDER_PATH = headers;
 				SKIP_INSTALL = YES;
 				STRIP_STYLE = "non-global";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
 			};
 			name = Debug;
 		};
@@ -672,6 +705,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = NO;
 				DSTROOT = /tmp/WindowsAzureMobileServices.dst;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -681,6 +715,8 @@
 				PUBLIC_HEADERS_FOLDER_PATH = headers;
 				SKIP_INSTALL = YES;
 				STRIP_STYLE = "non-global";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
 		};

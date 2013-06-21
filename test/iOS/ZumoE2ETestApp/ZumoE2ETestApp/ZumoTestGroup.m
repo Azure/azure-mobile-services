@@ -1,22 +1,20 @@
-//
-//  ZumoTestGroup.m
-//  ZumoE2ETestApp
-//
-//  Copyright (c) 2012 Microsoft. All rights reserved.
-//
+// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
 
 #import "ZumoTestGroup.h"
 
 @implementation ZumoTestGroup
 
-@synthesize name, delegate, tests, helpText;
+@synthesize name, delegate, tests, groupDescription;
+@synthesize testsFailed = _testsFailed, testsPassed = _testsPassed;
 
 - (id)init {
     self = [super init];
     if (self) {
         [self setTests:[[NSMutableArray alloc] init]];
         runningTests = NO;
-        testsFailed = testsPassed = -1;
+        _testsFailed = _testsPassed = -1;
     }
     
     return self;
@@ -28,7 +26,7 @@
 }
 
 - (void)startExecutingFrom:(UIViewController *)viewController {
-    testsPassed = testsFailed = 0;
+    _testsPassed = _testsFailed = 0;
     runningTests = YES;
     associatedViewController = viewController;
     [[self delegate] zumoTestGroupStarted:[self name]];
@@ -36,29 +34,29 @@
 }
 
 - (void)executeNextTest {
-    int testIndex = testsFailed + testsPassed;
+    int testIndex = _testsFailed + _testsPassed;
     if (testIndex >= [tests count]) {
         runningTests = NO;
         associatedViewController = nil;
-        [[self delegate] zumoTestGroupFinished:[self name] withPassed:testsPassed andFailed:testsFailed];
+        [[self delegate] zumoTestGroupFinished:[self name] withPassed:_testsPassed andFailed:_testsFailed];
     } else {
-        [[self delegate] zumoTestGroupSingleTestStarted:testIndex];
         ZumoTest *nextTest = [[self tests] objectAtIndex:testIndex];
         [nextTest startExecutingFrom:associatedViewController];
     }
 }
 
 - (void)zumoTestStarted:(NSString *)testName {
+    [[self delegate] zumoTestGroupSingleTestStarted:(_testsFailed + _testsPassed)];
     NSLog(@"Starting test %@", testName);
 }
 
 - (void)zumoTestFinished:(NSString *)testName withResult:(BOOL)testResult {
-    [[self delegate] zumoTestGroupSingleTestFinished:(testsPassed + testsFailed) withResult:testResult];
+    [[self delegate] zumoTestGroupSingleTestFinished:(_testsPassed + _testsFailed) withResult:testResult];
     NSLog(@"Finished test %@: %@", testName, testResult ? @"PASS" : @"FAIL");
     if (testResult) {
-        testsPassed++;
+        _testsPassed++;
     } else {
-        testsFailed++;
+        _testsFailed++;
     }
     
     [self executeNextTest];

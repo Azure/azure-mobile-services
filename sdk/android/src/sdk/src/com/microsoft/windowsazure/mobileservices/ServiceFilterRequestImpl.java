@@ -31,8 +31,10 @@ import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
+
+import android.net.http.AndroidHttpClient;
 
 /**
  * 
@@ -42,11 +44,6 @@ import org.apache.http.impl.client.DefaultHttpClient;
 class ServiceFilterRequestImpl implements ServiceFilterRequest {
 
 	/**
-	 * The HttpClient to use
-	 */
-	private DefaultHttpClient mHttpClient;
-
-	/**
 	 * The request to execute
 	 */
 	private HttpRequestBase mRequest;
@@ -54,7 +51,7 @@ class ServiceFilterRequestImpl implements ServiceFilterRequest {
 	/**
 	 * The request content
 	 */
-	private String mContent;
+	private byte[] mContent;
 
 	/**
 	 * Constructor
@@ -64,15 +61,19 @@ class ServiceFilterRequestImpl implements ServiceFilterRequest {
 	 */
 	public ServiceFilterRequestImpl(HttpRequestBase request) {
 		mRequest = request;
-		mHttpClient = new DefaultHttpClient();
 	}
 
 	@Override
 	public ServiceFilterResponse execute() throws Exception {
 		// Execute request
-		final HttpResponse response = mHttpClient.execute(mRequest);
-
-		return new ServiceFilterResponseImpl(response);
+		AndroidHttpClient client = AndroidHttpClient.newInstance(MobileServiceConnection.getUserAgent());
+		try {
+			final HttpResponse response = client.execute(mRequest);
+			ServiceFilterResponse serviceFilterResponse = new ServiceFilterResponseImpl(response);
+			return serviceFilterResponse;
+		} finally {
+			client.close();
+		}
 	}
 
 	@Override
@@ -90,15 +91,36 @@ class ServiceFilterRequestImpl implements ServiceFilterRequest {
 		mRequest.removeHeaders(name);
 	}
 
+
+	@Override
+	public void setContent(byte[] content) throws Exception {
+		((HttpEntityEnclosingRequestBase) mRequest).setEntity(new ByteArrayEntity(content));
+		mContent = content;
+	}
+	
 	@Override
 	public void setContent(String content) throws UnsupportedEncodingException {
 		((HttpEntityEnclosingRequestBase) mRequest).setEntity(new StringEntity(
 				content, MobileServiceClient.UTF8_ENCODING));
-		mContent = content;
+		mContent = content.getBytes(MobileServiceClient.UTF8_ENCODING);
 	}
 
 	@Override
 	public String getContent() {
+		if (mContent != null) {
+			String content = null;
+			try {
+				content = new String(mContent, MobileServiceClient.UTF8_ENCODING);
+			} catch (UnsupportedEncodingException e) {
+			}
+			return content;
+		} else {
+			return null;
+		}
+	}
+	
+	@Override
+	public byte[] getRawContent() {
 		return mContent;
 	}
 
@@ -117,4 +139,5 @@ class ServiceFilterRequestImpl implements ServiceFilterRequest {
 	public String getMethod() {
 		return mRequest.getMethod();
 	}
+
 }

@@ -1,18 +1,6 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
 
 #import <Foundation/Foundation.h>
 #import "MSTable.h"
@@ -60,53 +48,43 @@ typedef enum MSTableRequestTypeEnum {
 // The user-defined parameters to be included in the request query string.
 @property (nonatomic, strong, readonly)     NSDictionary *parameters;
 
-// The serializer used to serialize the data for the request and/or deserialize
-// the data in the respective response.
-@property (nonatomic, strong, readonly)     id<MSSerializer> serializer;
-
 
 #pragma  mark * Public Static Constructor Methods
 
 
 // Creates a request to insert the item into the given table.
 +(MSTableItemRequest *) requestToInsertItem:(id)item
-                                  withTable:(MSTable *)table
-                             withParameters:(NSDictionary *)parameters
-                             withSerializer:(id<MSSerializer>)serializer
+                                      table:(MSTable *)table
+                                 parameters:(NSDictionary *)parameters
                                  completion:(MSItemBlock)completion;
 
 // Creates a request to update the item in the given table.
 +(MSTableItemRequest *) requestToUpdateItem:(id)item
-                                  withTable:(MSTable *)table
-                             withParameters:(NSDictionary *)parameters
-                             withSerializer:(id<MSSerializer>)serializer
+                                      table:(MSTable *)table
+                                 parameters:(NSDictionary *)parameters
                                  completion:(MSItemBlock)completion;
 
 // Creates a request to delete the item from the given table.
 +(MSTableDeleteRequest *) requestToDeleteItem:(id)item
-                                    withTable:(MSTable *)table
-                               withParameters:(NSDictionary *)parameters
-                               withSerializer:(id<MSSerializer>)serializer
+                                        table:(MSTable *)table
+                                   parameters:(NSDictionary *)parameters
                                    completion:(MSDeleteBlock)completion;
 
 // Creates a request to delete the item with the given id from the given table.
 +(MSTableDeleteRequest *) requestToDeleteItemWithId:(id)itemId
-                                          withTable:(MSTable *)table
-                                     withParameters:(NSDictionary *)parameters
-                                     withSerializer:(id<MSSerializer>)serializer
+                                              table:(MSTable *)table
+                                         parameters:(NSDictionary *)parameters
                                          completion:(MSDeleteBlock)completion;
 
 // Creates a request to read the item with the given ide from the given table.
 +(MSTableItemRequest *) requestToReadWithId:(id)itemId
-                                  withTable:(MSTable *)table
-                             withParameters:(NSDictionary *)parameters
-                             withSerializer:(id<MSSerializer>)serializer
+                                      table:(MSTable *)table
+                                 parameters:(NSDictionary *)parameters
                                  completion:(MSItemBlock)completion;
 
 // Creates a request to the read the given table with the given query.
 +(MSTableReadQueryRequest *) requestToReadItemsWithQuery:(NSString *)queryString
-                                               withTable:(MSTable *)table
-                                          withSerializer:(id<MSSerializer>)serializer
+                                                   table:(MSTable *)table
                                               completion:(MSReadQueryBlock)completion;
 
 @end

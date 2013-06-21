@@ -22,7 +22,7 @@
 
 
 // The error domain for the Windows Azure Mobile Service client framework
-NSString *const MSErrorDomain;
+extern NSString *const MSErrorDomain;
 
 
 #pragma mark * UserInfo Request and Response Keys
@@ -32,13 +32,13 @@ NSString *const MSErrorDomain;
 // that was sent to the Windows Azure Mobile Service related to the error. Not
 // all errors will include the request so the userInfo dicitionary may return
 // nil.
-NSString *const MSErrorRequestKey;
+extern NSString *const MSErrorRequestKey;
 
 // The key to use with the |NSError| userInfo dictionary to retrieve the
 // response that was returned from the Windows Azure Mobile Service related to
 // the error. Not all errors will include the response so the userInfo
 // dicitionary may return nil.
-NSString *const MSErrorResponseKey;
+extern NSString *const MSErrorResponseKey;
 
 
 #pragma mark * MSErrorCodes

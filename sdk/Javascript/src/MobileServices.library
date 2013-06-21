@@ -1,0 +1,51 @@
+<!--
+Define the mdoules that merge together to form the MobileServices.js client
+library.  The modules are written using a subset of the Common JS Module
+Specification with a few small alterations that make it easier to share modules
+between Windows 8 and node.js applications.
+
+Please see the Microsoft.Azure.Zumo.Build project and the MergeJsModules build
+task for more details on the .library format and all of its options.
+-->
+<Library DefaultPath="Generated\MobileServices.js" 
+         WebPath="Generated\MobileServices.Web.js" 
+         InternalsPath="Generated\MobileServices.Internals.js" 
+         WebInternalsPath="Generated\MobileServices.Web.Internals.js" 
+         IntellisensePath="Generated\MobileServices.DevIntellisense.js" 
+         NodePath="Generated\Zumo.Node.js" 
+         Copyright="Copyright (c) Microsoft Corporation. All rights reserved." 
+         FileVersion="1.0.0.0">
+  
+  <!-- Add Resources  -->
+  <Resource Path="Strings\en-US\Resources.resjson" LanguageTag="en-US" Condition="Web|WebInternals" />
+  <!--
+  Note: InternalsVisible to has to be included before all of the other modules
+  because it will cache the export generating functions - which will only work
+  if nothing else has been require-d before it runs.
+  -->
+  <Module Path="Internals\InternalsVisible.js" Condition="Internals|WebInternals" EntryPoint="true" />
+  <!--
+  We don't want MobileServiceClient.js to be considered an EntryPoint if the
+  library is going to be used as a Node.js module.  To workaround the issue,
+  we've removed the condition-less Path="...".
+  -->
+  <Module Path="MobileServiceClient.js" Condition="Default|Web|Intellisense|Internals|WebInternals" EntryPoint="true" />
+  <Module Path="MobileServiceClient.js" Condition="Node" />
+  <Module Path="MobileServiceTable.js" />
+  <Module Path="MobileServiceLogin.js" />
+  <Module Path="Platforms\Platform.WinJS.js" Name="Platform" Condition="Default|Intellisense|Internals|Node" />
+  <Module Path="Platforms\Platform.Web.js" Name="Platform" Condition="Web|WebInternals" />
+  <Module Path="Transports\DirectAjaxTransport.js" Condition="Web|WebInternals" />
+  <Module Path="Transports\IframeTransport.js" Condition="Web|WebInternals" />
+  <Module Path="LoginUis\BrowserPopup.js" Condition="Web|WebInternals" />
+  <Module Path="LoginUis\CordovaPopup.js" Condition="Web|WebInternals" />
+  <Module Path="Utilities\Extensions.js" />
+  <Module Path="Utilities\PostMessageExchange.js" Condition="Web|WebInternals" />
+  <Module Path="Utilities\Promises.js" Condition="Web|WebInternals" />
+  <Module Path="Utilities\Validate.js" />
+  <Module Path="Internals\DevIntellisense.js" Condition="Intellisense" EntryPoint="true" />
+  <Module Path="Internals\NodeExports.js" Condition="Node" EntryPoint="true" />
+  <!--  Add external modules -->
+  <Module Path="External\queryjs\lib\*.js" />
+  <Module Path="External\esprima\esprima.js" />
+</Library>

@@ -15,6 +15,7 @@
     /// will define the module's exports when invoked.
     /// </field>
     var $__modules__ = { };
+    var $__fileVersion__ = "1.0.10605.0";
     
     function require(name) {
         /// <summary>
@@ -70,11 +71,18 @@
         
             this.applicationUrl = applicationUrl;
             this.applicationKey = applicationKey || null;
-            
+        
+            var sdkInfo = Platform.getSdkInfo();
+            var osInfo = Platform.getOperatingSystemInfo();
+            var sdkVersion = sdkInfo.fileVersion.split(".").slice(0, 2).join(".");
+            this.version = "ZUMO/" + sdkVersion + " (lang=" + sdkInfo.language + "; " +
+                                                    "os=" + osInfo.name + "; " +
+                                                    "os_version=" + osInfo.version + "; " +
+                                                    "arch=" + osInfo.architecture + "; " +
+                                                    "version=" + sdkInfo.fileVersion + ")";
             this.currentUser = null;
             this._serviceFilter = null;
             this._login = new MobileServiceLogin(this);
-        
             this.getTable = function (tableName) {
                 /// <summary>
                 /// Gets a reference to a table and its data operations.
@@ -162,7 +170,7 @@
             return client;
         };
         
-        MobileServiceClient.prototype._request = function (method, uriFragment, content, ignoreFilters, callback) {
+        MobileServiceClient.prototype._request = function (method, uriFragment, content, ignoreFilters, headers, callback) {
             /// <summary>
             /// Perform a web request and include the standard Mobile Services headers.
             /// </summary>
@@ -180,11 +188,19 @@
             /// Optional parameter to indicate if the client filters should be ignored
             /// and the request should be sent directly. Is false by default.
             /// </param>
+            /// <param name="headers" type="Object">
+            /// Optional request headers
+            /// </param>
             /// <param name="callback" type="function(error, response)">
             /// Handler that will be called on the response.
             /// </param>
         
             // Account for absent optional arguments
+            if (_.isNull(callback) && (typeof headers === 'function')) {
+                callback = headers;
+                headers = null;
+            }
+        
             if (_.isNull(callback) && (typeof ignoreFilters === 'function')) {
                 callback = ignoreFilters;
                 ignoreFilters = false;
@@ -201,7 +217,11 @@
             options.url = _.url.combinePathSegments(this.applicationUrl, uriFragment);
         
             // Set MobileServices authentication, application, User-Agent and telemetry headers
-            options.headers = {};
+            if (!_.isNull(headers)) {
+                options.headers = headers;
+            } else {
+                options.headers = {};
+            }
             options.headers["X-ZUMO-INSTALLATION-ID"] = MobileServiceClient._applicationInstallationId;
             if (!_.isNullOrEmpty(this.applicationKey)) {
                 options.headers["X-ZUMO-APPLICATION"] = this.applicationKey;
@@ -212,11 +232,18 @@
             if (!_.isNull(MobileServiceClient._userAgent)) {
                 options.headers["User-Agent"] = MobileServiceClient._userAgent;
             }
+            if (!_.isNullOrEmpty["X-ZUMO-VERSION"]) {
+                options.headers["X-ZUMO-VERSION"] = this.version;
+            }
         
             // Add any content as JSON
             if (!_.isNull(content)) {
-                options.headers['Content-Type'] = 'application/json';
-                options.data = _.toJson(content);
+                if(!_.hasProperty(options.headers, ['Content-Type','content-type','CONTENT-TYPE','Content-type'])) {
+                    options.headers['Content-Type'] = 'application/json';
+                    options.data = _.toJson(content);
+                } else {
+                    options.data = content;
+                }
             } else {
                 // options.data must be set to null if there is no content or the xhr object
                 // will set the content-type to "application/text" for non-GET requests.
@@ -277,6 +304,80 @@
             /// </summary>
             this.currentUser = null;
         };
+        
+        MobileServiceClient.prototype.invokeApi = Platform.async(
+            function (apiName, options, callback) {   
+                /// <summary>
+                /// Invokes the specified custom api and returns a response object.
+                /// </summary>
+                /// <param name="apiName">
+                /// The custom api to invoke.
+                /// </param>
+                /// <param name="options" mayBeNull="true">
+                /// Contains additional parameter information, valid values are:
+                /// body: The body of the HTTP request.
+                /// method: The HTTP method to use in the request, with the default being POST,
+                /// parameters: Any additional query string parameters, 
+                /// headers: HTTP request headers, specified as an object.
+                /// </param>
+                /// <param name="callback" type="Function" mayBeNull="true">
+                /// Optional callback accepting (error, results) parameters.
+                /// </param>
+        
+                Validate.isString(apiName, 'apiName');
+        
+                // Account for absent optional arguments
+                if (_.isNull(callback)) {
+                    if (typeof options === 'function') {
+                        callback = options;
+                        options = null;
+                    }
+                }
+                Validate.notNull(callback, 'callback');
+        
+                var parameters, method, body, headers;
+                if (!_.isNull(options)) {
+                    // Validate the arguments
+                    parameters = options.parameters;
+                    if (!_.isNull(parameters)) {
+                        Validate.isValidParametersObject(options.parameters);
+                    }
+        
+                    method = options.method;
+                    body = options.body;
+                    headers = options.headers;
+                }
+                if (_.isNull(method)) {
+                    method = "POST";
+                }
+        
+                // Construct the URL
+                var urlFragment = _.url.combinePathSegments("api", apiName);
+                if (!_.isNull(parameters)) {
+                    var queryString = _.url.getQueryString(parameters);
+                    urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
+                }
+        
+                // Make the request
+                this._request(
+                    method,
+                    urlFragment,
+                    body,
+                    null,
+                    headers,
+                    function (error, response) {
+                        if (!_.isNull(error)) {
+                            callback(error, null);
+                        } else {
+                            if (response.getResponseHeader('Content-Type').toLowerCase().indexOf('json') != -1) {
+                                response.result = _.fromJson(response.responseText);
+                            }
+        
+                            callback(null, response);
+                        }
+                    });
+        
+            });
         
         function getApplicationInstallationId() {
             /// <summary>
@@ -541,8 +642,8 @@
                 }
                 Validate.notNull(callback, 'callback');
         
-                for (var i in idNames){
-                    if (instance[idNames[i]]) {
+                for (var i in idNames) {            
+                    if (!_.isNullOrZero(instance[idNames[i]])) {
                         throw _.format(
                             Platform.getResourceString("MobileServiceTable_InsertIdAlreadySet"),
                             idPropertyName);
@@ -596,7 +697,7 @@
         
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
-                Validate.notNull(instance[idPropertyName], 'instance.' + idPropertyName);
+                Validate.notNullOrZero(instance[idPropertyName], 'instance.' + idPropertyName);
                 if (!_.isNull(parameters)) {
                     Validate.isValidParametersObject(parameters, 'parameters');
                 }
@@ -652,7 +753,12 @@
         
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
-                Validate.notNull(instance[idPropertyName], 'instance.' + idPropertyName);
+                if (_.isNullOrZero(instance[idPropertyName]))
+                {
+                    callback(null, instance);
+                    return;
+                }
+        
                 if (!_.isNull(parameters)) {
                     Validate.isValidParametersObject(parameters, 'parameters');
                 }
@@ -718,7 +824,7 @@
                 }
         
                 // Validate the arguments
-                Validate.notNull(id, idPropertyName);
+                Validate.notNullOrZero(id, idPropertyName);
                 if (!_.isNull(parameters)) {
                     Validate.isValidParametersObject(parameters);
                 }
@@ -772,7 +878,7 @@
         
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
-                Validate.notNull(instance[idPropertyName], 'instance.' + idPropertyName);
+                Validate.notNullOrZero(instance[idPropertyName], 'instance.' + idPropertyName);
                 if (!_.isNull(parameters)) {
                     Validate.isValidParametersObject(parameters);
                 }
@@ -1259,7 +1365,7 @@
 
     $__modules__.Platform = function (exports) {
         // Declare JSHint globals
-        /*global WinJS:false, Windows:false */
+        /*global WinJS:false, Windows:false, $__fileVersion__:false, $__version__:false */
         
         var _ = require('Extensions');
         var Validate = require('Validate');
@@ -1499,26 +1605,9 @@
         };
         
         exports.getSdkInfo = function () {
-        
-            // Find the MobileServices package
-            var mobileServicePackage = null;
-            var dependencies = Windows.ApplicationModel.Package.current.dependencies;
-            dependencies.some(function (dependency) {
-                if (dependency.id.name.indexOf('Microsoft.WinJS.') === 0) {
-                    mobileServicePackage = dependency;
-                }
-            });
-        
-            // Get the package version
-            var version = null;
-            if (mobileServicePackage) {
-                version = mobileServicePackage.id.version;
-            }
-        
             return {
-                name: "ZUMO",
-                version: getVersionString(version),
-                language: "WinJS"
+                language: "WinJS",
+                fileVersion: $__fileVersion__        
             };
         };
         
@@ -1598,17 +1687,6 @@
         
             return original;
         };
-        
-        function getVersionString(version) {
-            var versionStr = '--';
-        
-            if (version) {
-                versionStr = version.major + "." + version.minor + "." +
-                             version.build + "." + version.revision;
-            }
-        
-            return versionStr;
-        }
     };
 
     $__modules__.Extensions = function (exports) {
@@ -1632,6 +1710,21 @@
             /// </returns>
             
             return value === null || value === undefined;
+        };
+        
+        exports.isNullOrZero = function (value) {
+            /// <summary>
+            /// Gets a value indicating whether the provided value is null (or
+            /// undefined) or zero.
+            /// </summary>
+            /// <param name="value" type="Object" mayBeNull="true">
+            /// The value to check.
+            /// </param>
+            /// <returns type="Boolean">
+            /// A value indicating whether the provided value is null (or undefined) or zero.
+            /// </returns>
+        
+            return value === null || value === undefined || value === 0;
         };
         
         exports.isNullOrEmpty = function (value) {
@@ -1702,6 +1795,20 @@
             return !_.isNull(value) && value.hasOwnProperty(key);
         };
         
+        exports.hasProperty = function (object, properties) {
+            /// <summary>
+            /// Determines if an object has any of the passed in properties
+            /// </summary>
+            /// <returns type="boolean">True if it contains any one of the properties
+            /// </returns>
+            for (var i = 0; i < properties.length; i++) {
+                if (_.has(object, properties[i])) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
         exports.isObject = function (value) {
             /// <summary>
             /// Determine if a value is an object.
@@ -1746,9 +1853,12 @@
             /// <returns type="boolean">
             /// True if the value is a boolean, false othwerise.
             /// </returns>
-        
             return !_.isNull(value) && (typeof value == 'boolean');
         };
+        
+        function classOf(value) {
+            return Object.prototype.toString.call(value).slice(8, -1).toLowerCase();
+        }
         
         exports.isDate = function (value) {
             /// <summary>
@@ -1758,8 +1868,7 @@
             /// <returns type="boolean">
             /// True if the value is a date, false othwerise.
             /// </returns>
-        
-            return !_.isNull(value) && value.constructor == Date;
+            return !_.isNull(value) && (classOf(value) == 'date');
         };
         
         exports.toJson = function (value) {
@@ -2117,6 +2226,20 @@
             /// </param>
         
             if (_.isNullOrEmpty(value)) {
+                throw _.format(Platform.getResourceString("Validate_NotNullOrEmptyError"), name || 'Value');
+            }
+        };
+        
+        exports.notNullOrZero = function (value, name) {
+            /// <summary>
+            /// Ensure the value is not null, undefined, or empty.
+            /// </summary>
+            /// <param name="value" mayBeNull="true">The value to check.</param>
+            /// <param name="name" mayBeNull="true" optional="true" type="String">
+            /// Optional name of the value to throw.
+            /// </param>
+        
+            if (_.isNullOrZero(value)) {
                 throw _.format(Platform.getResourceString("Validate_NotNullOrEmptyError"), name || 'Value');
             }
         };
@@ -3959,307 +4082,307 @@
         */
         
         
-        (function () {
-            var JS, JavaScriptToQueryVisitor, Q, _,
-              __hasProp = {}.hasOwnProperty,
-              __extends = function (child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+        (function() {
+          var JS, JavaScriptToQueryVisitor, Q, _,
+            __hasProp = {}.hasOwnProperty,
+            __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
         
-            _ = require('./Utilities');
+          _ = require('./Utilities');
         
-            JS = require('./JavaScriptNodes');
+          JS = require('./JavaScriptNodes');
         
-            Q = require('./QueryNodes');
+          Q = require('./QueryNodes');
         
-            /*
-            # Walk the JavaScriptExpression tree and convert its nodes into QueryExpression
-            # trees
+          /*
+          # Walk the JavaScriptExpression tree and convert its nodes into QueryExpression
+          # trees
+          */
+        
+        
+          exports.JavaScriptToQueryVisitor = JavaScriptToQueryVisitor = (function(_super) {
+        
+            __extends(JavaScriptToQueryVisitor, _super);
+        
+            function JavaScriptToQueryVisitor(context) {
+              this.context = context;
+            }
+        
+            /* Get the source code for a given node
             */
         
         
-            exports.JavaScriptToQueryVisitor = JavaScriptToQueryVisitor = (function (_super) {
+            JavaScriptToQueryVisitor.prototype.getSource = function(node) {
+              var _ref, _ref1;
+              return this.context.source.slice(node != null ? (_ref = node.range) != null ? _ref[0] : void 0 : void 0, +((node != null ? (_ref1 = node.range) != null ? _ref1[1] : void 0 : void 0) - 1) + 1 || 9e9);
+            };
         
-                __extends(JavaScriptToQueryVisitor, _super);
+            /* Throw an exception for an invalid node.
+            */
         
-                function JavaScriptToQueryVisitor(context) {
-                    this.context = context;
+        
+            JavaScriptToQueryVisitor.prototype.invalid = function(node) {
+              throw "The expression '" + (this.getSource(node)) + "'' is not supported.";
+            };
+        
+            /* Unary expressions just map operators
+            */
+        
+        
+            JavaScriptToQueryVisitor.prototype.translateUnary = function(node, mapping) {
+              var op, value;
+              op = mapping[node.operator];
+              if (op) {
+                value = this.visit(node.argument);
+                return new Q.UnaryExpression(op, value);
+              } else {
+                return null;
+              }
+            };
+        
+            /* Binary expressions just map operators
+            */
+        
+        
+            JavaScriptToQueryVisitor.prototype.translateBinary = function(node, mapping) {
+              var left, op, right;
+              op = mapping[node.operator];
+              if (op) {
+                left = this.visit(node.left);
+                right = this.visit(node.right);
+                return new Q.BinaryExpression(op, left, right);
+              } else {
+                return null;
+              }
+            };
+        
+            /*
+                    # The base visit method will throw exceptions for any nodes that remain
+                    # untransformed (which allows us to only bother defining meaningful
+                    # translations)
+            */
+        
+        
+            JavaScriptToQueryVisitor.prototype.visit = function(node) {
+              var visited;
+              visited = JavaScriptToQueryVisitor.__super__.visit.call(this, node);
+              if (node === visited) {
+                this.invalid(node);
+              }
+              return visited;
+            };
+        
+            JavaScriptToQueryVisitor.prototype.MemberExpression = function(node) {
+              var expr;
+              expr = (function() {
+                var _ref, _ref1, _ref2, _ref3;
+                if ((node != null ? (_ref = node.object) != null ? _ref.type : void 0 : void 0) === 'ThisExpression' && (node != null ? (_ref1 = node.property) != null ? _ref1.type : void 0 : void 0) === 'Identifier') {
+                  /* Simple member access
+                  */
+        
+                  return new Q.MemberExpression(node.property.name);
+                } else if ((node != null ? (_ref2 = node.object) != null ? _ref2.type : void 0 : void 0) === 'MemberExpression' && ((_ref3 = node.object.object) != null ? _ref3.type : void 0) === 'ThisExpression' && node.property.type === 'Identifier') {
+                  /* Methods that look like properties
+                  */
+        
+                  if (node.property.name === 'length') {
+                    return new Q.InvocationExpression(Q.Methods.Length, new Q.MemberExpression(node.object.property.name));
+                  }
                 }
+              })();
+              return expr != null ? expr : JavaScriptToQueryVisitor.__super__.MemberExpression.call(this, node);
+            };
         
-                /* Get the source code for a given node
+            JavaScriptToQueryVisitor.prototype.Literal = function(node) {
+              return new Q.ConstantExpression(node.value);
+            };
+        
+            JavaScriptToQueryVisitor.prototype.UnaryExpression = function(node) {
+              var mapping, _ref;
+              if (node.operator === '+') {
+                /* Ignore the + in '+52'
                 */
         
-        
-                JavaScriptToQueryVisitor.prototype.getSource = function (node) {
-                    var _ref, _ref1;
-                    return this.context.source.slice(node != null ? (_ref = node.range) != null ? _ref[0] : void 0 : void 0, +((node != null ? (_ref1 = node.range) != null ? _ref1[1] : void 0 : void 0) - 1) + 1 || 9e9);
+                return this.visit(node.argument);
+              } else {
+                mapping = {
+                  '!': Q.UnaryOperators.Not,
+                  '-': Q.UnaryOperators.Negate
                 };
+                return (_ref = this.translateUnary(node, mapping)) != null ? _ref : JavaScriptToQueryVisitor.__super__.UnaryExpression.call(this, node);
+              }
+            };
         
-                /* Throw an exception for an invalid node.
-                */
+            JavaScriptToQueryVisitor.prototype.UpdateExpression = function(node) {
+              var mapping, _ref;
+              mapping = {
+                '++': Q.UnaryOperators.Increment,
+                '--': Q.UnaryOperators.Decrement
+              };
+              return (_ref = this.translateUnary(node, mapping)) != null ? _ref : JavaScriptToQueryVisitor.__super__.UpdateExpression.call(this, node);
+            };
         
+            JavaScriptToQueryVisitor.prototype.LogicalExpression = function(node) {
+              var mapping, _ref;
+              mapping = {
+                '&&': Q.BinaryOperators.And,
+                '||': Q.BinaryOperators.Or
+              };
+              return (_ref = this.translateBinary(node, mapping)) != null ? _ref : JavaScriptToQueryVisitor.__super__.LogicalExpression.call(this, node);
+            };
         
-                JavaScriptToQueryVisitor.prototype.invalid = function (node) {
-                    throw "The expression '" + (this.getSource(node)) + "'' is not supported.";
-                };
+            JavaScriptToQueryVisitor.prototype.BinaryExpression = function(node) {
+              var k, left, mapping, properties, v, value, _ref;
+              mapping = {
+                '+': Q.BinaryOperators.Add,
+                '-': Q.BinaryOperators.Subtract,
+                '*': Q.BinaryOperators.Multiply,
+                '/': Q.BinaryOperators.Divide,
+                '%': Q.BinaryOperators.Modulo,
+                '>': Q.BinaryOperators.GreaterThan,
+                '>=': Q.BinaryOperators.GreaterThanOrEqual,
+                '<': Q.BinaryOperators.LessThan,
+                '<=': Q.BinaryOperators.LessThanOrEqual,
+                '!=': Q.BinaryOperators.NotEqual,
+                '!==': Q.BinaryOperators.NotEqual,
+                '==': Q.BinaryOperators.Equal,
+                '===': Q.BinaryOperators.Equal
+              };
+              return (function() {
+                var _ref1, _ref2;
+                if ((_ref = this.translateBinary(node, mapping)) != null) {
+                  return _ref;
+                } else if (node.operator === 'in' && ((_ref1 = node.right) != null ? _ref1.type : void 0) === 'Literal' && _.isArray((_ref2 = node.right) != null ? _ref2.value : void 0)) {
+                  /*
+                                      # Transform the 'foo in [x, y, z]' operator into a series of
+                                      # comparisons like foo == x || foo == y || foo == z.
+                  */
         
-                /* Unary expressions just map operators
-                */
-        
-        
-                JavaScriptToQueryVisitor.prototype.translateUnary = function (node, mapping) {
-                    var op, value;
-                    op = mapping[node.operator];
-                    if (op) {
-                        value = this.visit(node.argument);
-                        return new Q.UnaryExpression(op, value);
-                    } else {
-                        return null;
-                    }
-                };
-        
-                /* Binary expressions just map operators
-                */
-        
-        
-                JavaScriptToQueryVisitor.prototype.translateBinary = function (node, mapping) {
-                    var left, op, right;
-                    op = mapping[node.operator];
-                    if (op) {
-                        left = this.visit(node.left);
-                        right = this.visit(node.right);
-                        return new Q.BinaryExpression(op, left, right);
-                    } else {
-                        return null;
-                    }
-                };
-        
-                /*
-                        # The base visit method will throw exceptions for any nodes that remain
-                        # untransformed (which allows us to only bother defining meaningful
-                        # translations)
-                */
-        
-        
-                JavaScriptToQueryVisitor.prototype.visit = function (node) {
-                    var visited;
-                    visited = JavaScriptToQueryVisitor.__super__.visit.call(this, node);
-                    if (node === visited) {
-                        this.invalid(node);
-                    }
-                    return visited;
-                };
-        
-                JavaScriptToQueryVisitor.prototype.MemberExpression = function (node) {
-                    var expr;
-                    expr = (function () {
-                        var _ref, _ref1, _ref2, _ref3;
-                        if ((node != null ? (_ref = node.object) != null ? _ref.type : void 0 : void 0) === 'ThisExpression' && (node != null ? (_ref1 = node.property) != null ? _ref1.type : void 0 : void 0) === 'Identifier') {
-                            /* Simple member access
-                            */
-        
-                            return new Q.MemberExpression(node.property.name);
-                        } else if ((node != null ? (_ref2 = node.object) != null ? _ref2.type : void 0 : void 0) === 'MemberExpression' && ((_ref3 = node.object.object) != null ? _ref3.type : void 0) === 'ThisExpression' && node.property.type === 'Identifier') {
-                            /* Methods that look like properties
-                            */
-        
-                            if (node.property.name === 'length') {
-                                return new Q.InvocationExpression(Q.Methods.Length, new Q.MemberExpression(node.object.property.name));
-                            }
-                        }
-                    })();
-                    return expr != null ? expr : JavaScriptToQueryVisitor.__super__.MemberExpression.call(this, node);
-                };
-        
-                JavaScriptToQueryVisitor.prototype.Literal = function (node) {
-                    return new Q.ConstantExpression(node.value);
-                };
-        
-                JavaScriptToQueryVisitor.prototype.UnaryExpression = function (node) {
-                    var mapping, _ref;
-                    if (node.operator === '+') {
-                        /* Ignore the + in '+52'
+                  if (node.right.value.length > 0) {
+                    left = this.visit(node.left);
+                    return Q.QueryExpression.groupClauses(Q.BinaryOperators.Or, (function() {
+                      var _i, _len, _ref3, _results;
+                      _ref3 = node.right.value;
+                      _results = [];
+                      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+                        value = _ref3[_i];
+                        /*
+                                                        # If we've got an array of objects who each have
+                                                        # a single property, we'll use the value of that
+                                                        # property.  Otherwise we'll throw an exception.
                         */
         
-                        return this.visit(node.argument);
-                    } else {
-                        mapping = {
-                            '!': Q.UnaryOperators.Not,
-                            '-': Q.UnaryOperators.Negate
-                        };
-                        return (_ref = this.translateUnary(node, mapping)) != null ? _ref : JavaScriptToQueryVisitor.__super__.UnaryExpression.call(this, node);
-                    }
-                };
-        
-                JavaScriptToQueryVisitor.prototype.UpdateExpression = function (node) {
-                    var mapping, _ref;
-                    mapping = {
-                        '++': Q.UnaryOperators.Increment,
-                        '--': Q.UnaryOperators.Decrement
-                    };
-                    return (_ref = this.translateUnary(node, mapping)) != null ? _ref : JavaScriptToQueryVisitor.__super__.UpdateExpression.call(this, node);
-                };
-        
-                JavaScriptToQueryVisitor.prototype.LogicalExpression = function (node) {
-                    var mapping, _ref;
-                    mapping = {
-                        '&&': Q.BinaryOperators.And,
-                        '||': Q.BinaryOperators.Or
-                    };
-                    return (_ref = this.translateBinary(node, mapping)) != null ? _ref : JavaScriptToQueryVisitor.__super__.LogicalExpression.call(this, node);
-                };
-        
-                JavaScriptToQueryVisitor.prototype.BinaryExpression = function (node) {
-                    var k, left, mapping, properties, v, value, _ref;
-                    mapping = {
-                        '+': Q.BinaryOperators.Add,
-                        '-': Q.BinaryOperators.Subtract,
-                        '*': Q.BinaryOperators.Multiply,
-                        '/': Q.BinaryOperators.Divide,
-                        '%': Q.BinaryOperators.Modulo,
-                        '>': Q.BinaryOperators.GreaterThan,
-                        '>=': Q.BinaryOperators.GreaterThanOrEqual,
-                        '<': Q.BinaryOperators.LessThan,
-                        '<=': Q.BinaryOperators.LessThanOrEqual,
-                        '!=': Q.BinaryOperators.NotEqual,
-                        '!==': Q.BinaryOperators.NotEqual,
-                        '==': Q.BinaryOperators.Equal,
-                        '===': Q.BinaryOperators.Equal
-                    };
-                    return (function () {
-                        var _ref1, _ref2;
-                        if ((_ref = this.translateBinary(node, mapping)) != null) {
-                            return _ref;
-                        } else if (node.operator === 'in' && ((_ref1 = node.right) != null ? _ref1.type : void 0) === 'Literal' && _.isArray((_ref2 = node.right) != null ? _ref2.value : void 0)) {
-                            /*
-                                                # Transform the 'foo in [x, y, z]' operator into a series of
-                                                # comparisons like foo == x || foo == y || foo == z.
-                            */
-        
-                            if (node.right.value.length > 0) {
-                                left = this.visit(node.left);
-                                return Q.QueryExpression.groupClauses(Q.BinaryOperators.Or, (function () {
-                                    var _i, _len, _ref3, _results;
-                                    _ref3 = node.right.value;
-                                    _results = [];
-                                    for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-                                        value = _ref3[_i];
-                                        /*
-                                                                        # If we've got an array of objects who each have
-                                                                        # a single property, we'll use the value of that
-                                                                        # property.  Otherwise we'll throw an exception.
-                                        */
-        
-                                        if (_.isObject(value)) {
-                                            properties = (function () {
-                                                var _results1;
-                                                _results1 = [];
-                                                for (k in value) {
-                                                    v = value[k];
-                                                    _results1.push(v);
-                                                }
-                                                return _results1;
-                                            })();
-                                            if ((properties != null ? properties.length : void 0) !== 1) {
-                                                throw "in operator requires comparison objects with a single field, not " + value + " (" + (JSON.stringify(value)) + "), for expression '" + (this.getSource(node)) + "'";
-                                            }
-                                            value = properties[0];
-                                        }
-                                        _results.push(new Q.BinaryExpression(Q.BinaryOperators.Equal, left, new Q.ConstantExpression(value)));
-                                    }
-                                    return _results;
-                                }).call(this));
-                            } else {
-                                /*
-                                                        # If the array of values is empty, change the query to
-                                                        # true == false since it can't be satisfied.
-                                */
-        
-                                return new Q.BinaryExpression(Q.BinaryOperators.Equal, new Q.ConstantExpression(true), new Q.ConstantExpression(false));
+                        if (_.isObject(value)) {
+                          properties = (function() {
+                            var _results1;
+                            _results1 = [];
+                            for (k in value) {
+                              v = value[k];
+                              _results1.push(v);
                             }
-                        } else {
-                            return JavaScriptToQueryVisitor.__super__.BinaryExpression.call(this, node);
+                            return _results1;
+                          })();
+                          if ((properties != null ? properties.length : void 0) !== 1) {
+                            throw "in operator requires comparison objects with a single field, not " + value + " (" + (JSON.stringify(value)) + "), for expression '" + (this.getSource(node)) + "'";
+                          }
+                          value = properties[0];
                         }
-                    }).call(this);
-                };
-        
-                JavaScriptToQueryVisitor.prototype.CallExpression = function (node) {
-                    var expr, func, getSingleArg, getTwoArgs, member, method, _ref,
-                      _this = this;
-                    getSingleArg = function (name) {
-                        var _ref;
-                        if (((_ref = node["arguments"]) != null ? _ref.length : void 0) !== 1) {
-                            throw "Function " + name + " expects one argument in expression '" + (_this.getSource(node)) + "'";
-                        }
-                        return _this.visit(node["arguments"][0]);
-                    };
-                    getTwoArgs = function (member, name) {
-                        var _ref;
-                        if (((_ref = node["arguments"]) != null ? _ref.length : void 0) !== 2) {
-                            throw "Function " + name + " expects two arguments in expression '" + (_this.getSource(node)) + "'";
-                        }
-                        return [member, _this.visit(node["arguments"][0]), _this.visit(node["arguments"][1])];
-                    };
+                        _results.push(new Q.BinaryExpression(Q.BinaryOperators.Equal, left, new Q.ConstantExpression(value)));
+                      }
+                      return _results;
+                    }).call(this));
+                  } else {
                     /*
-                                # Translate known method calls that aren't attached to an instance.
-                                # Note that we can compare against the actual method because the
-                                # partial evaluator will have converted it into a literal for us.
+                                            # If the array of values is empty, change the query to
+                                            # true == false since it can't be satisfied.
                     */
         
-                    func = node != null ? (_ref = node.callee) != null ? _ref.value : void 0 : void 0;
-                    expr = (function () {
-                        var _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
-                        if (func === Math.floor) {
-                            return new Q.InvocationExpression(Q.Methods.Floor, [getSingleArg('floor')]);
-                        } else if (func === Math.ceil) {
-                            return new Q.InvocationExpression(Q.Methods.Ceiling, [getSingleArg('ceil')]);
-                        } else if (func === Math.round) {
-                            return new Q.InvocationExpression(Q.Methods.Round, [getSingleArg('round')]);
-                        } else {
-                            /*
-                                                # Translate methods dangling off an instance
-                            */
+                    return new Q.BinaryExpression(Q.BinaryOperators.Equal, new Q.ConstantExpression(true), new Q.ConstantExpression(false));
+                  }
+                } else {
+                  return JavaScriptToQueryVisitor.__super__.BinaryExpression.call(this, node);
+                }
+              }).call(this);
+            };
         
-                            if (node.callee.type === 'MemberExpression' && ((_ref1 = node.callee.object) != null ? _ref1.__hasThisExp : void 0) === true) {
-                                if ((node != null ? (_ref2 = node.callee) != null ? (_ref3 = _ref2.object) != null ? _ref3.type : void 0 : void 0 : void 0) === 'CallExpression') {
-                                    member = this.visit(node.callee.object);
-                                } else {
-                                    member = new Q.MemberExpression((_ref4 = node.callee.object) != null ? (_ref5 = _ref4.property) != null ? _ref5.name : void 0 : void 0);
-                                }
-                                method = (_ref6 = node.callee) != null ? (_ref7 = _ref6.property) != null ? _ref7.name : void 0 : void 0;
-                                if (method === 'toUpperCase') {
-                                    return new Q.InvocationExpression(Q.Methods.ToUpperCase, [member]);
-                                } else if (method === 'toLowerCase') {
-                                    return new Q.InvocationExpression(Q.Methods.ToLowerCase, [member]);
-                                } else if (method === 'trim') {
-                                    return new Q.InvocationExpression(Q.Methods.Trim, [member]);
-                                } else if (method === 'indexOf') {
-                                    return new Q.InvocationExpression(Q.Methods.IndexOf, [member, getSingleArg('indexOf')]);
-                                } else if (method === 'concat') {
-                                    return new Q.InvocationExpression(Q.Methods.Concat, [member, getSingleArg('concat')]);
-                                } else if (method === 'substring') {
-                                    return new Q.InvocationExpression(Q.Methods.Substring, getTwoArgs(member, 'substring'));
-                                } else if (method === 'replace') {
-                                    return new Q.InvocationExpression(Q.Methods.Replace, getTwoArgs(member, 'replace'));
-                                } else if (method === 'getFullYear' || method === 'getUTCFullYear') {
-                                    return new Q.InvocationExpression(Q.Methods.Year, [member]);
-                                } else if (method === 'getYear') {
-                                    return new Q.BinaryExpression(Q.BinaryOperators.Subtract, new Q.InvocationExpression(Q.Methods.Year, [member]), new Q.ConstantExpression(1900));
-                                } else if (method === 'getMonth' || method === 'getUTCMonth') {
-                                    /* getMonth is 0 indexed in JavaScript
-                                    */
+            JavaScriptToQueryVisitor.prototype.CallExpression = function(node) {
+              var expr, func, getSingleArg, getTwoArgs, member, method, _ref,
+                _this = this;
+              getSingleArg = function(name) {
+                var _ref;
+                if (((_ref = node["arguments"]) != null ? _ref.length : void 0) !== 1) {
+                  throw "Function " + name + " expects one argument in expression '" + (_this.getSource(node)) + "'";
+                }
+                return _this.visit(node["arguments"][0]);
+              };
+              getTwoArgs = function(member, name) {
+                var _ref;
+                if (((_ref = node["arguments"]) != null ? _ref.length : void 0) !== 2) {
+                  throw "Function " + name + " expects two arguments in expression '" + (_this.getSource(node)) + "'";
+                }
+                return [member, _this.visit(node["arguments"][0]), _this.visit(node["arguments"][1])];
+              };
+              /*
+                          # Translate known method calls that aren't attached to an instance.
+                          # Note that we can compare against the actual method because the
+                          # partial evaluator will have converted it into a literal for us.
+              */
         
-                                    return new Q.BinaryExpression(Q.BinaryOperators.Subtract, new Q.InvocationExpression(Q.Methods.Month, [member]), new Q.ConstantExpression(1));
-                                } else if (method === 'getDate' || method === 'getUTCDate') {
-                                    return new Q.InvocationExpression(Q.Methods.Day, [member]);
-                                }
-                            }
-                        }
-                    }).call(this);
-                    return expr != null ? expr : JavaScriptToQueryVisitor.__super__.CallExpression.call(this, node);
-                };
+              func = node != null ? (_ref = node.callee) != null ? _ref.value : void 0 : void 0;
+              expr = (function() {
+                var _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+                if (func === Math.floor) {
+                  return new Q.InvocationExpression(Q.Methods.Floor, [getSingleArg('floor')]);
+                } else if (func === Math.ceil) {
+                  return new Q.InvocationExpression(Q.Methods.Ceiling, [getSingleArg('ceil')]);
+                } else if (func === Math.round) {
+                  return new Q.InvocationExpression(Q.Methods.Round, [getSingleArg('round')]);
+                } else {
+                  /*
+                                      # Translate methods dangling off an instance
+                  */
         
-                return JavaScriptToQueryVisitor;
+                  if (node.callee.type === 'MemberExpression' && ((_ref1 = node.callee.object) != null ? _ref1.__hasThisExp : void 0) === true) {
+                    if ((node != null ? (_ref2 = node.callee) != null ? (_ref3 = _ref2.object) != null ? _ref3.type : void 0 : void 0 : void 0) === 'CallExpression') {
+                      member = this.visit(node.callee.object);
+                    } else {
+                      member = new Q.MemberExpression((_ref4 = node.callee.object) != null ? (_ref5 = _ref4.property) != null ? _ref5.name : void 0 : void 0);
+                    }
+                    method = (_ref6 = node.callee) != null ? (_ref7 = _ref6.property) != null ? _ref7.name : void 0 : void 0;
+                    if (method === 'toUpperCase') {
+                      return new Q.InvocationExpression(Q.Methods.ToUpperCase, [member]);
+                    } else if (method === 'toLowerCase') {
+                      return new Q.InvocationExpression(Q.Methods.ToLowerCase, [member]);
+                    } else if (method === 'trim') {
+                      return new Q.InvocationExpression(Q.Methods.Trim, [member]);
+                    } else if (method === 'indexOf') {
+                      return new Q.InvocationExpression(Q.Methods.IndexOf, [member, getSingleArg('indexOf')]);
+                    } else if (method === 'concat') {
+                      return new Q.InvocationExpression(Q.Methods.Concat, [member, getSingleArg('concat')]);
+                    } else if (method === 'substring') {
+                      return new Q.InvocationExpression(Q.Methods.Substring, getTwoArgs(member, 'substring'));
+                    } else if (method === 'replace') {
+                      return new Q.InvocationExpression(Q.Methods.Replace, getTwoArgs(member, 'replace'));
+                    } else if (method === 'getFullYear' || method === 'getUTCFullYear') {
+                      return new Q.InvocationExpression(Q.Methods.Year, [member]);
+                    } else if (method === 'getYear') {
+                      return new Q.BinaryExpression(Q.BinaryOperators.Subtract, new Q.InvocationExpression(Q.Methods.Year, [member]), new Q.ConstantExpression(1900));
+                    } else if (method === 'getMonth' || method === 'getUTCMonth') {
+                      /* getMonth is 0 indexed in JavaScript
+                      */
         
-            })(JS.JavaScriptVisitor);
+                      return new Q.BinaryExpression(Q.BinaryOperators.Subtract, new Q.InvocationExpression(Q.Methods.Month, [member]), new Q.ConstantExpression(1));
+                    } else if (method === 'getDate' || method === 'getUTCDate') {
+                      return new Q.InvocationExpression(Q.Methods.Day, [member]);
+                    }
+                  }
+                }
+              }).call(this);
+              return expr != null ? expr : JavaScriptToQueryVisitor.__super__.CallExpression.call(this, node);
+            };
+        
+            return JavaScriptToQueryVisitor;
+        
+          })(JS.JavaScriptVisitor);
         
         }).call(this);
     };
@@ -4427,7 +4550,7 @@
                 url += "" + s + "$skip=" + odata.skip;
                 s = '&';
               }
-              if (odata.take) {
+              if (odata.take || odata.take === 0) {
                 url += "" + s + "$top=" + odata.take;
                 s = '&';
               }
@@ -5577,7 +5700,12 @@
         
         
         (function() {
-          var __slice = [].slice;
+          var classOf,
+            __slice = [].slice;
+        
+          classOf = function(obj) {
+            return Object.prototype.toString.call(obj).slice(8, -1).toLowerCase();
+          };
         
           if (!(Array.prototype.reduce != null)) {
             Array.prototype.reduce = function() {
@@ -5665,7 +5793,7 @@
           };
         
           exports.isDate = function(obj) {
-            return (obj != null ? obj.constructor : void 0) === Date;
+            return classOf(obj) === 'date';
           };
         
           exports.functionName = function(fn) {
@@ -8986,6 +9114,15 @@
                                     node.loc.start = node.object.loc.start;
                                 }
                             }
+        
+                            if (node.type === Syntax.CallExpression) {
+                                if (typeof node.callee.range !== 'undefined') {
+                                    node.range[0] = node.callee.range[0];
+                                }
+                                if (typeof node.callee.loc !== 'undefined') {
+                                    node.loc.start = node.callee.loc.start;
+                                }
+                            }
                             return node;
                         }
                     };
@@ -9270,11 +9407,11 @@
 })(this || exports);
 
 // SIG // Begin signature block
-// SIG // MIIj0AYJKoZIhvcNAQcCoIIjwTCCI70CAQExDzANBglg
+// SIG // MIIjzQYJKoZIhvcNAQcCoIIjvjCCI7oCAQExDzANBglg
 // SIG // hkgBZQMEAgEFADB3BgorBgEEAYI3AgEEoGkwZzAyBgor
 // SIG // BgEEAYI3AgEeMCQCAQEEEBDgyQbOONQRoqMAEEvTUJAC
 // SIG // AQACAQACAQACAQACAQAwMTANBglghkgBZQMEAgEFAAQg
-// SIG // eY5GjtSToEpCmFwEw+d1Cvhq67yArb3kKRlqbWk9Orig
+// SIG // y3B0U6ZLo7LFpvh+bCs15KFfwT8GabY76KaAbbnfcUug
 // SIG // gg0/MIIFvTCCA6WgAwIBAgITMwAAAAjiefoNJVhF6gAA
 // SIG // AAAACDANBgkqhkiG9w0BAQsFADB+MQswCQYDVQQGEwJV
 // SIG // UzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMH
@@ -9377,39 +9514,39 @@
 // SIG // oqKfenoi+kiVH6v7RyOA9Z74v2u3S5fi63V4GuzqN5l5
 // SIG // GEv/1rMjaHXmr/r8i+sLgOppO6/8MO0ETI7f33VtY5E9
 // SIG // 0Z1WTk+/gFcioXgRMiF670EKsT/7qMykXcGhiJtXcVZO
-// SIG // SEXAQsmbdlsKgEhr/Xmfwb1tbWrJUnMTDXpQzTGCFekw
-// SIG // ghXlAgEBMIGVMH4xCzAJBgNVBAYTAlVTMRMwEQYDVQQI
+// SIG // SEXAQsmbdlsKgEhr/Xmfwb1tbWrJUnMTDXpQzTGCFeYw
+// SIG // ghXiAgEBMIGVMH4xCzAJBgNVBAYTAlVTMRMwEQYDVQQI
 // SIG // EwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRtb25kMR4w
 // SIG // HAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xKDAm
 // SIG // BgNVBAMTH01pY3Jvc29mdCBDb2RlIFNpZ25pbmcgUENB
 // SIG // IDIwMTECEzMAAAAI4nn6DSVYReoAAAAAAAgwDQYJYIZI
 // SIG // AWUDBAIBBQCggdQwGQYJKoZIhvcNAQkDMQwGCisGAQQB
 // SIG // gjcCAQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcC
-// SIG // ARUwLwYJKoZIhvcNAQkEMSIEIOli13NLLOozK+ES4fyW
-// SIG // rPdVnxuHk7HqGOM9NN9d9XdUMGgGCisGAQQBgjcCAQwx
+// SIG // ARUwLwYJKoZIhvcNAQkEMSIEIFj2MzxfAmDzMym8ASNd
+// SIG // 1aifN8D6aHjLc9f2u/DkuDepMGgGCisGAQQBgjcCAQwx
 // SIG // WjBYoD6APABNAGkAYwByAG8AcwBvAGYAdAAgAFcAaQBu
 // SIG // AGQAbwB3AHMAIABBAHoAdQByAGUAIABNAG8AYgBpAGwA
 // SIG // ZaEWgBRodHRwOi8vd3d3LmFzcC5uZXQvIDANBgkqhkiG
-// SIG // 9w0BAQEFAASCAQBvH2LjLSFmhCTR1E7VdBNHc0GMK/aS
-// SIG // XFPSQxSzSP1xphPiqH1D4R6yk+k/6Lf3CPL1+zcp3+QQ
-// SIG // ST/VkfXbPj1A2DTXSvekT77CHsETMDKpjkYvGlRl/w9V
-// SIG // WWhMmdn9gbfDiRjzCfnhVaBtbn4W5EcvMyQrHWlRuC9d
-// SIG // x46Qb6TjRsouCuBazWWOuGLr9MTQpku9wjp44w366onB
-// SIG // Ej/77FdLUSp+be9hY0LfUUX/DvPBieQBl1sAvuxEzVde
-// SIG // dqekrGi7yM48rUkBaTVa50fs68hM6aav4pe3AMknwJ6r
-// SIG // jOGWTAaDgBiOQiujOac6IMVPXvxNy5ycshzZJTZBJVft
-// SIG // Vhp7oYITTTCCE0kGCisGAQQBgjcDAwExghM5MIITNQYJ
-// SIG // KoZIhvcNAQcCoIITJjCCEyICAQMxDzANBglghkgBZQME
+// SIG // 9w0BAQEFAASCAQA4QHVDDJdUsLjHEjZHFC4I3XnaHFi5
+// SIG // qAYjCVFWcwgZdOYr3RicghbunFfVFm7uIpb2iOMxzX+f
+// SIG // xZtXcgqp0TpXSwKVz4KOLWl+snTlqAAGiBR/ryFSZtoQ
+// SIG // qAgIp4J80w7Jsoq+O6KJfY93GMiaNqXyYbN+frOmhKjA
+// SIG // 8N/xy2Q/7nb2eSFHXPz8HDfgh3/9YNPizBlJuCOYQzQP
+// SIG // nsQkCbIC2cAJPrXs3dO1oIZuT9+pR0ENxu4SYw5qlpTI
+// SIG // zztehw6qopTQarpbZcW8bTdgbaeeC47Sjur5vKhhtsy8
+// SIG // zmpDutUy9OeihyGRqsEJppBTXRtyx9uxnyercmKZFG78
+// SIG // XZMBoYITSjCCE0YGCisGAQQBgjcDAwExghM2MIITMgYJ
+// SIG // KoZIhvcNAQcCoIITIzCCEx8CAQMxDzANBglghkgBZQME
 // SIG // AgEFADCCAT0GCyqGSIb3DQEJEAEEoIIBLASCASgwggEk
 // SIG // AgEBBgorBgEEAYRZCgMBMDEwDQYJYIZIAWUDBAIBBQAE
-// SIG // ILFeLTNvgpgbgyV2qE/1Br61pEl+FdtYLTRvThBoexQe
-// SIG // AgZRY0lGS/QYEzIwMTMwNDE4MDIyMzAyLjE2N1owBwIB
+// SIG // IDB5trOtsp5TIUSZerTOKLbblSrn8Bv93QpWCsSTbJRl
+// SIG // AgZReT/lH3AYEzIwMTMwNjA2MDAxNzI2LjMzN1owBwIB
 // SIG // AYACAfSggbmkgbYwgbMxCzAJBgNVBAYTAlVTMRMwEQYD
 // SIG // VQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRtb25k
 // SIG // MR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRpb24x
 // SIG // DTALBgNVBAsTBE1PUFIxJzAlBgNVBAsTHm5DaXBoZXIg
-// SIG // RFNFIEVTTjpGNTI4LTM3NzctOEE3NjElMCMGA1UEAxMc
-// SIG // TWljcm9zb2Z0IFRpbWUtU3RhbXAgU2VydmljZaCCDtAw
+// SIG // RFNFIEVTTjpCQkVDLTMwQ0EtMkRCRTElMCMGA1UEAxMc
+// SIG // TWljcm9zb2Z0IFRpbWUtU3RhbXAgU2VydmljZaCCDs0w
 // SIG // ggZxMIIEWaADAgECAgphCYEqAAAAAAACMA0GCSqGSIb3
 // SIG // DQEBCwUAMIGIMQswCQYDVQQGEwJVUzETMBEGA1UECBMK
 // SIG // V2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwG
@@ -9460,28 +9597,28 @@
 // SIG // yc8ZQU3ghvkqmqMRZjDTu3QyS99je/WZii8bxyGvWbWu
 // SIG // 3EQ8l1Bx16HSxVXjad5XwdHeMMD9zOZN+w2/XU/pnR4Z
 // SIG // OC+8z1gFLu8NoFA12u8JJxzVs341Hgi62jbb01+P3nSI
-// SIG // SRIwggTaMIIDwqADAgECAhMzAAAAKZdOfILLIBZBAAAA
-// SIG // AAApMA0GCSqGSIb3DQEBCwUAMHwxCzAJBgNVBAYTAlVT
+// SIG // SRIwggTaMIIDwqADAgECAhMzAAAALNcpdztnzBvGAAAA
+// SIG // AAAsMA0GCSqGSIb3DQEBCwUAMHwxCzAJBgNVBAYTAlVT
 // SIG // MRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdS
 // SIG // ZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9y
 // SIG // YXRpb24xJjAkBgNVBAMTHU1pY3Jvc29mdCBUaW1lLVN0
-// SIG // YW1wIFBDQSAyMDEwMB4XDTEzMDMyNzIwMTMxNFoXDTE0
-// SIG // MDYyNzIwMTMxNFowgbMxCzAJBgNVBAYTAlVTMRMwEQYD
+// SIG // YW1wIFBDQSAyMDEwMB4XDTEzMDMyNzIwMTMxNVoXDTE0
+// SIG // MDYyNzIwMTMxNVowgbMxCzAJBgNVBAYTAlVTMRMwEQYD
 // SIG // VQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRtb25k
 // SIG // MR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRpb24x
 // SIG // DTALBgNVBAsTBE1PUFIxJzAlBgNVBAsTHm5DaXBoZXIg
-// SIG // RFNFIEVTTjpGNTI4LTM3NzctOEE3NjElMCMGA1UEAxMc
+// SIG // RFNFIEVTTjpCQkVDLTMwQ0EtMkRCRTElMCMGA1UEAxMc
 // SIG // TWljcm9zb2Z0IFRpbWUtU3RhbXAgU2VydmljZTCCASIw
-// SIG // DQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAOg/5bMK
-// SIG // XzGcVoxB/ZfsFxqxVuL48i30GBHOkMynX6XruLhnOybm
-// SIG // 0ckZzX8K28esI7WikG+JLcdbC4DzMVXoY9vPtC3fvW3d
-// SIG // uN3n+lPji7daI5D93g61oju7NXneR/Rb63EhBGhWnqo4
-// SIG // AYDX+KzxVyguHmeMUwe9bumVmIP1Moz5mHAJYPyMcJlH
-// SIG // LOkVcnWHqXkgsUkcvHVsZ7pPQVsoHTx4Ioj1m87K05gM
-// SIG // B/A/KRFPlDu2jLk/HEhnXH9eW4OeluEalNCgHQjg+Fyo
-// SIG // O0Ihr+tvIDWu1jpkBiIPXf+shA3PcVDS9qnsHZtwRkfB
-// SIG // LGGwz12gHDLB6FTIZTc1pEGxznECAwEAAaOCARswggEX
-// SIG // MB0GA1UdDgQWBBQvo4KE3TJkEoj1BVF2T4uKPV5oBDAf
+// SIG // DQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBALYDd8NQ
+// SIG // VOO7ECmJBxZk2iLXljMzPYx7o3swVig4h01o4+99CfVF
+// SIG // fGoBdEA8dhfClNpFnnyLKRuY1iAXLrSUoBJoxW5rcys8
+// SIG // LBwcfp/iCoUHMmPhl5dygMvmPcGlgfj/IEIlXssM5cBb
+// SIG // 9iHHNaxToGTeOiLHUv6LdQC5T1vm8fEN/cwJoBpmzAav
+// SIG // HLnPZiBLUHuYb906qp7vTyyvalmbcqYXfNz3nGAy/6G6
+// SIG // 8wgN/zoz2PhwzrvBgNs9vtkf266DEWumonCvcVJxRnzZ
+// SIG // uIuHzE36icajuWPoW8mjIHE6vNMPtj4JamXcZ8cyjX0o
+// SIG // Cr9Gex6n4KKv2aAvad4kAWF8Y/kCAwEAAaOCARswggEX
+// SIG // MB0GA1UdDgQWBBR8zYLfQwW1ylpAxquCQg/bl6i5GDAf
 // SIG // BgNVHSMEGDAWgBTVYzpcijGQ80N7fEYbxTNoWoVtVTBW
 // SIG // BgNVHR8ETzBNMEugSaBHhkVodHRwOi8vY3JsLm1pY3Jv
 // SIG // c29mdC5jb20vcGtpL2NybC9wcm9kdWN0cy9NaWNUaW1T
@@ -9490,62 +9627,62 @@
 // SIG // c29mdC5jb20vcGtpL2NlcnRzL01pY1RpbVN0YVBDQV8y
 // SIG // MDEwLTA3LTAxLmNydDAMBgNVHRMBAf8EAjAAMBMGA1Ud
 // SIG // JQQMMAoGCCsGAQUFBwMIMA0GCSqGSIb3DQEBCwUAA4IB
-// SIG // AQByng+yKubtrjSydW+QwLwrqHeGtmmsNyHU2QiI+kaD
-// SIG // Sby+77tofW4ZQQS4/reZjGCBll45DYR5mqnlshxeguyS
-// SIG // clJJPn7zbeJA+ZY7d2z8oyo+qMys85TtjRGEy6odWVUf
-// SIG // hfttDj32HRFnofSSVYOuj3YWCitfRjLzqrz2ajeHm2WG
-// SIG // sVUISAsH+FmZzg6MpoWYLiTlCDwFlEA5pnANPx/rCblh
-// SIG // Nslv/rz/MxCcQYTyvGP224ZRtMS2PHTXpxmzK/iPrJUO
-// SIG // PnupFSYufRKj3lt0xAydM6p+oj6EFGmvkHG1dwuThEFS
-// SIG // II6sZbO9WBR7rXapVfxuO6/qxQgoQglBjfxtoYIDeTCC
-// SIG // AmECAQEwgeOhgbmkgbYwgbMxCzAJBgNVBAYTAlVTMRMw
+// SIG // AQAXRWCdh6aVt9df2q8R7x0ghpL36fW475RTdDonA6IP
+// SIG // OinMWhsMh9D7XS3Z3iJZMFPkh2SPGVSrh6vDLouUGCNg
+// SIG // 5sb680xUezD6xOkEQX0IFYL13KRMw4o/KyXaIZKLcO1m
+// SIG // DHnPwQ3wB4IQiHhCRG+oVG8TwfKUWryeVgQPfqc8GWyR
+// SIG // aGBhuY3BL+wjv3wYAwGPEK/YU7vxuMqa4jGNRwtJnGOu
+// SIG // Ktopqt26aJqB+uWoQ9Kf+6h8E1E0OjJto23OFpDLYedJ
+// SIG // veMn3Ke84Bz9dNmCEyZqNTHbdG1bht6dpict8+2sfHF0
+// SIG // z7igbgKxEADHQNMkJePD5DJhCH9D02Xq5fwuoYIDdjCC
+// SIG // Al4CAQEwgeOhgbmkgbYwgbMxCzAJBgNVBAYTAlVTMRMw
 // SIG // EQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRt
 // SIG // b25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRp
 // SIG // b24xDTALBgNVBAsTBE1PUFIxJzAlBgNVBAsTHm5DaXBo
-// SIG // ZXIgRFNFIEVTTjpGNTI4LTM3NzctOEE3NjElMCMGA1UE
+// SIG // ZXIgRFNFIEVTTjpCQkVDLTMwQ0EtMkRCRTElMCMGA1UE
 // SIG // AxMcTWljcm9zb2Z0IFRpbWUtU3RhbXAgU2VydmljZaIl
-// SIG // CgEBMAkGBSsOAwIaBQADFQB0wthsu1T1LGtpvAoSf0J+
-// SIG // 9gqLiqCBwjCBv6SBvDCBuTELMAkGA1UEBhMCVVMxEzAR
+// SIG // CgEBMAkGBSsOAwIaBQADFQCyN1n/5ik5bP5zOatDhOw2
+// SIG // hGo6WqCBwjCBv6SBvDCBuTELMAkGA1UEBhMCVVMxEzAR
 // SIG // BgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1v
 // SIG // bmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlv
 // SIG // bjENMAsGA1UECxMETU9QUjEnMCUGA1UECxMebkNpcGhl
 // SIG // ciBOVFMgRVNOOkIwMjctQzZGOC0xRDg4MSswKQYDVQQD
 // SIG // EyJNaWNyb3NvZnQgVGltZSBTb3VyY2UgTWFzdGVyIENs
-// SIG // b2NrMA0GCSqGSIb3DQEBBQUAAgUA1Rm7CDAiGA8yMDEz
-// SIG // MDQxODAwMjEyOFoYDzIwMTMwNDE5MDAyMTI4WjB3MD0G
-// SIG // CisGAQQBhFkKBAExLzAtMAoCBQDVGbsIAgEAMAoCAQAC
-// SIG // AiFfAgH/MAcCAQACAhgCMAoCBQDVGwyIAgEAMDYGCisG
-// SIG // AQQBhFkKBAIxKDAmMAwGCisGAQQBhFkKAwGgCjAIAgEA
-// SIG // AgMW42ChCjAIAgEAAgMHoSAwDQYJKoZIhvcNAQEFBQAD
-// SIG // ggEBAFKW9sN4Knh7CWYpSZJYOsJcohf7IbVeCkZixNNh
-// SIG // bR++++5vce4ciIV3fYIvxHVngux98CcXsETnUgry56s1
-// SIG // 1tR4Ye2jNhp7i+cpqn4aWfL0lNU5WRQYhNzY4s/zbe/E
-// SIG // JLCZr5eT3CbCdBosEXkZiO/kKMo/1YCbxPpvCAINdinp
-// SIG // VIBqaa7rWkPV1PT1OakMatatTHs1SLhVGwoAfwZf7+YD
-// SIG // gg9tu2yd0z1NKmkFe3VUygeuASVCsWf+Jh8zq+7jKf+o
-// SIG // uJZ3qCkLzsom+PWi1WM159rqa5kDxOwL95OTFC3Wg2qo
-// SIG // jOhszUO33T4jC2sz0yOgMEQWGG6+qSqaP8/A8ZoxggL1
-// SIG // MIIC8QIBATCBkzB8MQswCQYDVQQGEwJVUzETMBEGA1UE
-// SIG // CBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEe
-// SIG // MBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSYw
-// SIG // JAYDVQQDEx1NaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0Eg
-// SIG // MjAxMAITMwAAACmXTnyCyyAWQQAAAAAAKTANBglghkgB
-// SIG // ZQMEAgEFAKCCATIwGgYJKoZIhvcNAQkDMQ0GCyqGSIb3
-// SIG // DQEJEAEEMC8GCSqGSIb3DQEJBDEiBCD5hNd0mvBNQCju
-// SIG // AIP1XyuPQvlRGncP+fSPmh1vA/TQcDCB4gYLKoZIhvcN
-// SIG // AQkQAgwxgdIwgc8wgcwwgbEEFHTC2Gy7VPUsa2m8ChJ/
-// SIG // Qn72CouKMIGYMIGApH4wfDELMAkGA1UEBhMCVVMxEzAR
-// SIG // BgNVBAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1v
-// SIG // bmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlv
-// SIG // bjEmMCQGA1UEAxMdTWljcm9zb2Z0IFRpbWUtU3RhbXAg
-// SIG // UENBIDIwMTACEzMAAAApl058gssgFkEAAAAAACkwFgQU
-// SIG // zR9zPYlJg15dmvh7i8F0bfxmn/EwDQYJKoZIhvcNAQEL
-// SIG // BQAEggEAOyuiHxv90lY1TqiIV/CZVX+anb5wiHafjD+j
-// SIG // 7jh+yEexz0422dyQ/tGndcgkDlytRucvUwmoQZBEVOSn
-// SIG // ZkLLrpDMT6quzhfTEocXK1nlX8KB/tTpBKZJLOhSYHMH
-// SIG // 7/Txe22oEe66jJCld0cKsgNEVjI7kNNxlIqZoCeh7ehR
-// SIG // fMZYeA5zoFIfrSRgQXweJfKVdAw4LRKM7iad82p6V+ta
-// SIG // 5GAfYspDaljdA5jwafYZLL665NBiZh/GJ8wRQfPONqgB
-// SIG // V2L97nn9pLQRTUSyfAnEjVmKH8wt6LBQZv/RDSp6AlWn
-// SIG // N+grs6jFgnCZRoCpWOuTV88m1cAVgDYh5PFayxnI5A==
+// SIG // b2NrMA0GCSqGSIb3DQEBBQUAAgUA1Vms/jAiGA8yMDEz
+// SIG // MDYwNTEyMjYzOFoYDzIwMTMwNjA2MTIyNjM4WjB0MDoG
+// SIG // CisGAQQBhFkKBAExLDAqMAoCBQDVWaz+AgEAMAcCAQAC
+// SIG // Ag9mMAcCAQACAhiGMAoCBQDVWv5+AgEAMDYGCisGAQQB
+// SIG // hFkKBAIxKDAmMAwGCisGAQQBhFkKAwGgCjAIAgEAAgMW
+// SIG // 42ChCjAIAgEAAgMHoSAwDQYJKoZIhvcNAQEFBQADggEB
+// SIG // AFZCQeqHX/XsIzu/yxsi6BDtmEYh1R9D3LolHanfseux
+// SIG // 9bA2YzzroUwHYTAZV0FIGVLUbXTjoMavWCvCvCGxxcmS
+// SIG // AiOGmIYGOssV9vMEXAzgXg+OSXF8hynIewj+gehDHA3S
+// SIG // uPDS9+717LQkqYYO9h4MLOoINt+zUncSoR1NM0tOM9r+
+// SIG // gA7gN/LHoHw36JfLgldobRdyW3WKY4/Wt51OUiO0ctnq
+// SIG // mii74089d/8WTokFsq4ZBUMqTTG+5UKASiLmavq9tW3l
+// SIG // tcmMC70rdnsxBM+IQsMDypNUnX+HNgO2OOPV+rnKEmBl
+// SIG // xmLFCSW6PxaxGgIgXyWacV+x4HuWNwu4nmoxggL1MIIC
+// SIG // 8QIBATCBkzB8MQswCQYDVQQGEwJVUzETMBEGA1UECBMK
+// SIG // V2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwG
+// SIG // A1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSYwJAYD
+// SIG // VQQDEx1NaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EgMjAx
+// SIG // MAITMwAAACzXKXc7Z8wbxgAAAAAALDANBglghkgBZQME
+// SIG // AgEFAKCCATIwGgYJKoZIhvcNAQkDMQ0GCyqGSIb3DQEJ
+// SIG // EAEEMC8GCSqGSIb3DQEJBDEiBCDBe7+a6Im9uWSE7Sfs
+// SIG // U4bzS8kAPsFgMlqnDSxDNsXFkDCB4gYLKoZIhvcNAQkQ
+// SIG // AgwxgdIwgc8wgcwwgbEEFLI3Wf/mKTls/nM5q0OE7DaE
+// SIG // ajpaMIGYMIGApH4wfDELMAkGA1UEBhMCVVMxEzARBgNV
+// SIG // BAgTCldhc2hpbmd0b24xEDAOBgNVBAcTB1JlZG1vbmQx
+// SIG // HjAcBgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEm
+// SIG // MCQGA1UEAxMdTWljcm9zb2Z0IFRpbWUtU3RhbXAgUENB
+// SIG // IDIwMTACEzMAAAAs1yl3O2fMG8YAAAAAACwwFgQUIVSK
+// SIG // BAywWmQEEYZVUVmrCX/zzu4wDQYJKoZIhvcNAQELBQAE
+// SIG // ggEAYj4xhszJNa7xSasagfDEw8ZmJc+YD0gBW1itRzVl
+// SIG // JgJ/yi22CNcbBpqGFO+cDJ+FvA0dNNKJmiDDP6MsYsWE
+// SIG // w5H8Kxxvqv+5BQpDFw9js2t10Epz/mo4hAsA8MtozHrX
+// SIG // tbH0A9F+QHe0AjCsyRCkw7p1fGwRqKn2oX//H6t8JUhO
+// SIG // tVg2ErqJBZaC+qVwjQNA3r8yxdHp72zJC+kOcGGaNWNr
+// SIG // smGJJGwqsktasV/b7NiyAgQj8HnFYGAFhKOBi3I4njXk
+// SIG // hEJQToLYbgTg4eqc78s0PIDxSdgXpUdEwuaqtmxm1PEq
+// SIG // eaOiZypB8jDVYgbpWEDlVAa68Etx9xj+s7slFg==
 // SIG // End signature block

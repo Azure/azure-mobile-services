@@ -213,6 +213,10 @@ abstract class MobileServiceTableBase<E> {
 		int id = -1;
 		try {
 			id = getObjectId(element);
+			
+			if (id == 0) {
+				throw new IllegalArgumentException("You must specify an id property with a valid value for deleting an object.");
+			}
 		} catch (Exception e) {
 			callback.onCompleted(e, null);
 			return;
@@ -313,21 +317,57 @@ abstract class MobileServiceTableBase<E> {
 			return ((Integer) element).intValue();
 		}
 
-		JsonObject jsonElement;
+		JsonObject jsonObject;
 		if (element instanceof JsonObject) {
-			jsonElement = (JsonObject) element;
+			jsonObject = (JsonObject) element;
 		} else {
-			jsonElement = mClient.getGsonBuilder().create().toJsonTree(element)
+			jsonObject = mClient.getGsonBuilder().create().toJsonTree(element)
 					.getAsJsonObject();
 		}
+		
+		updateIdProperty(jsonObject);
 
-		JsonElement idProperty = jsonElement.get("id");
+		JsonElement idProperty = jsonObject.get("id");
 		if (idProperty instanceof JsonNull || idProperty == null) {
 			throw new InvalidParameterException(
 					"Element must contain id property");
 		}
 
 		return idProperty.getAsInt();
+	}
+	
+	/**
+	 * Updates the JsonObject to have an id property
+	 * @param json
+	 *            the element to evaluate
+	 */
+	protected void updateIdProperty(final JsonObject json) throws IllegalArgumentException {
+		for (Map.Entry<String,JsonElement> entry : json.entrySet()){
+			String key = entry.getKey();
+			if (key.equalsIgnoreCase("id")) {
+				JsonElement element = entry.getValue();
+				if (isValidTypeId(element)) {
+					if (!key.equals("id")) {
+						//force the id name to 'id', no matter the casing 
+						json.remove(key);
+						// Create a new id property using the given property name
+						json.addProperty("id", entry.getValue().getAsNumber());
+					}
+					return;
+				} else {
+					throw new IllegalArgumentException("The id must be numeric");
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Validates if the id property is numeric.
+	 * @param element
+	 * @return
+	 */
+	protected boolean isValidTypeId(JsonElement element) {
+		return element.isJsonPrimitive() && element.getAsJsonPrimitive().isNumber();
 	}
 
 }

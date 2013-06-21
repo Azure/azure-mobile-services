@@ -35,7 +35,6 @@ import static com.microsoft.windowsazure.mobileservices.MobileServiceQueryOperat
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -62,7 +61,11 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestRe
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestStatus;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.AllMovies;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.FilterResult;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.ListFilter;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.Movie;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.MovieComparator;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.SimpleMovieFilter;
 
 public class QueryTests extends TestGroup {
 
@@ -79,7 +82,7 @@ public class QueryTests extends TestGroup {
 				new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return movie.getYear() > 1989 && movie.getYear() < 2000;
 					}
 				}));
@@ -88,7 +91,7 @@ public class QueryTests extends TestGroup {
 				new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return movie.getYear() >= 1990 && movie.getYear() <= 1999;
 					}
 				}));
@@ -97,7 +100,7 @@ public class QueryTests extends TestGroup {
 				field("year").ge(1930).and().field("year").lt(1940).or(field("year").ge(1950).and().field("year").lt(1960)), new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return (movie.getYear() >= 1930 && movie.getYear() < 1940) || (movie.getYear() >= 1950 && movie.getYear() < 1960);
 					}
 				}));
@@ -106,7 +109,7 @@ public class QueryTests extends TestGroup {
 				.and().field("mpaarating").ne("R"), new SimpleMovieFilter() {
 
 			@Override
-			boolean criteria(Movie movie) {
+			protected boolean criteria(Movie movie) {
 				return (movie.getYear() / 1000d == 2) && movie.getMPAARating() != "R";
 			}
 		}));
@@ -115,7 +118,7 @@ public class QueryTests extends TestGroup {
 				field("year").sub(1900).ge(80).and().field("year").add(10).lt(2000).and().field("duration").lt(120), new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return (movie.getYear() - 1900 >= 80) && (movie.getYear() + 10 < 2000) && (movie.getDuration() < 120);
 					}
 				}));
@@ -125,7 +128,7 @@ public class QueryTests extends TestGroup {
 		this.addTest(createQueryTest("StartsWith - Movies which starts with 'The'", startsWith("title", "The"), new SimpleMovieFilter() {
 
 			@Override
-			boolean criteria(Movie movie) {
+			protected boolean criteria(Movie movie) {
 				return movie.getTitle().startsWith("The");
 			}
 
@@ -139,7 +142,7 @@ public class QueryTests extends TestGroup {
 				new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return movie.getTitle().toLowerCase(Locale.getDefault()).startsWith("the");
 					}
 
@@ -153,7 +156,7 @@ public class QueryTests extends TestGroup {
 				new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return movie.getTitle().toLowerCase(Locale.getDefault()).endsWith("r");
 					}
 				}));
@@ -162,7 +165,7 @@ public class QueryTests extends TestGroup {
 				new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return movie.getTitle().toUpperCase(Locale.getDefault()).contains("ONE");
 					}
 				}));
@@ -171,7 +174,7 @@ public class QueryTests extends TestGroup {
 				new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return movie.getYear() >= 1980 && movie.getMPAARating() == "PG-13";
 					}
 
@@ -185,7 +188,7 @@ public class QueryTests extends TestGroup {
 				field("year").ge(1980).and().field("mpaarating").eq((String) null), new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return movie.getYear() >= 1980 && movie.getMPAARating() == null;
 					}
 
@@ -199,7 +202,7 @@ public class QueryTests extends TestGroup {
 				.field("mpaarating").ne((String) null), new SimpleMovieFilter() {
 
 			@Override
-			boolean criteria(Movie movie) {
+			protected boolean criteria(Movie movie) {
 				return movie.getYear() < 1970 && movie.getMPAARating() != null;
 			}
 
@@ -213,7 +216,7 @@ public class QueryTests extends TestGroup {
 		this.addTest(createQueryTest("Floor - Movies which last more than 3 hours", floor(field("duration").div(60)).ge(3), new SimpleMovieFilter() {
 
 			@Override
-			boolean criteria(Movie movie) {
+			protected boolean criteria(Movie movie) {
 				return Math.floor(movie.getDuration() / 60d) >= 3;
 			}
 		}));
@@ -222,7 +225,7 @@ public class QueryTests extends TestGroup {
 				field("bestPictureWinner").eq(true).and().ceiling(field("duration").div(60)).eq(2), new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return movie.isBestPictureWinner() && Math.ceil(movie.getDuration() / 60d) == 2;
 					}
 				}));
@@ -231,7 +234,7 @@ public class QueryTests extends TestGroup {
 				field("bestPictureWinner").eq(true).and().round(field("duration").div(60)).gt(2), new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return movie.isBestPictureWinner() && Math.round(movie.getDuration() / 60d) > 2;
 					}
 				}));
@@ -240,7 +243,7 @@ public class QueryTests extends TestGroup {
 				field("releaseDate").gt(Util.getUTCDate(1969, 12, 31)).and().field("releaseDate").lt(Util.getUTCDate(1971, 1, 1)), new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return movie.getReleaseDate().compareTo(Util.getUTCDate(1969, 12, 31)) > 0
 								&& movie.getReleaseDate().compareTo(Util.getUTCDate(1971, 1, 1)) < 0;
 					}
@@ -250,7 +253,7 @@ public class QueryTests extends TestGroup {
 				.ge(Util.getUTCDate(1980, 1, 1)).and().field("releaseDate").le(Util.getUTCDate(1989, 1, 1, 23, 59, 59)), new SimpleMovieFilter() {
 
 			@Override
-			boolean criteria(Movie movie) {
+			protected boolean criteria(Movie movie) {
 				return movie.getReleaseDate().compareTo(Util.getUTCDate(1980, 1, 1)) >= 0
 						&& movie.getReleaseDate().compareTo(Util.getUTCDate(1989, 1, 1, 23, 59, 59)) <= 0;
 			}
@@ -260,7 +263,7 @@ public class QueryTests extends TestGroup {
 				field("releaseDate").eq(Util.getUTCDate(1994, 10, 14)), new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return movie.getReleaseDate().compareTo(Util.getUTCDate(1994, 10, 14)) == 0;
 					}
 				}));
@@ -269,7 +272,7 @@ public class QueryTests extends TestGroup {
 		this.addTest(createQueryTest("Date (month): Movies released in November", month("releaseDate").eq(11), new SimpleMovieFilter() {
 
 			@Override
-			boolean criteria(Movie movie) {
+			protected boolean criteria(Movie movie) {
 				return Util.getUTCCalendar(movie.getReleaseDate()).get(Calendar.MONTH) == Calendar.NOVEMBER;
 			}
 		}));
@@ -277,7 +280,7 @@ public class QueryTests extends TestGroup {
 		this.addTest(createQueryTest("Date (day): Movies released in the first day of the month", day("releaseDate").eq(1), new SimpleMovieFilter() {
 
 			@Override
-			boolean criteria(Movie movie) {
+			protected boolean criteria(Movie movie) {
 				return Util.getUTCCalendar(movie.getReleaseDate()).get(Calendar.DAY_OF_MONTH) == 1;
 			}
 		}));
@@ -286,7 +289,7 @@ public class QueryTests extends TestGroup {
 				new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return Util.getUTCCalendar(movie.getReleaseDate()).get(Calendar.YEAR) != movie.getYear();
 					}
 
@@ -301,7 +304,7 @@ public class QueryTests extends TestGroup {
 				field("year").lt(1950).and().field("bestPictureWinner").eq(true), new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return movie.getYear() < 1950 && movie.isBestPictureWinner();
 					}
 				}));
@@ -310,7 +313,7 @@ public class QueryTests extends TestGroup {
 				field("year").ge(2000).and().not(field("bestPictureWinner").eq(false)), new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return movie.getYear() >= 2000 && !(movie.isBestPictureWinner() == false);
 					}
 				}));
@@ -319,7 +322,7 @@ public class QueryTests extends TestGroup {
 				field("bestPictureWinner").ne(false).and().field("year").ge(2000), new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return movie.isBestPictureWinner() != false && movie.getYear() >= 2000;
 					}
 				}));
@@ -329,7 +332,7 @@ public class QueryTests extends TestGroup {
 		this.addTest(createQueryTest("Get all using large $top - 500", null, new SimpleMovieFilter() {
 
 			@Override
-			boolean criteria(Movie movie) {
+			protected boolean criteria(Movie movie) {
 				return true;
 			}
 
@@ -342,7 +345,7 @@ public class QueryTests extends TestGroup {
 		this.addTest(createQueryTest("Skip all using large skip - 500", null, new SimpleMovieFilter() {
 
 			@Override
-			boolean criteria(Movie movie) {
+			protected boolean criteria(Movie movie) {
 				return true;
 			}
 
@@ -355,7 +358,7 @@ public class QueryTests extends TestGroup {
 		this.addTest(createQueryTest("Get first ($top) - 10", null, new SimpleMovieFilter() {
 
 			@Override
-			boolean criteria(Movie movie) {
+			protected boolean criteria(Movie movie) {
 				return true;
 			}
 
@@ -369,7 +372,7 @@ public class QueryTests extends TestGroup {
 		this.addTest(createQueryTest("Get last ($skip) - 10", null, new SimpleMovieFilter() {
 
 			@Override
-			boolean criteria(Movie movie) {
+			protected boolean criteria(Movie movie) {
 				return true;
 			}
 
@@ -382,7 +385,7 @@ public class QueryTests extends TestGroup {
 		this.addTest(createQueryTest("Skip, take, includeTotalCount - movies 21-30, ordered by title", null, new SimpleMovieFilter() {
 
 			@Override
-			boolean criteria(Movie movie) {
+			protected boolean criteria(Movie movie) {
 				return true;
 			}
 
@@ -403,7 +406,7 @@ public class QueryTests extends TestGroup {
 				field("bestPictureWinner").eq(true), new SimpleMovieFilter() {
 
 					@Override
-					boolean criteria(Movie movie) {
+					protected boolean criteria(Movie movie) {
 						return movie.isBestPictureWinner();
 					}
 
@@ -440,7 +443,7 @@ public class QueryTests extends TestGroup {
 			}
 
 			@Override
-			boolean criteria(Movie movie) {
+			protected boolean criteria(Movie movie) {
 				return movie.getYear() == 2008;
 			}
 
@@ -475,7 +478,7 @@ public class QueryTests extends TestGroup {
 			}
 
 			@Override
-			boolean criteria(Movie movie) {
+			protected boolean criteria(Movie movie) {
 				return movie.getYear() >= 2000;
 			}
 
@@ -701,108 +704,4 @@ public class QueryTests extends TestGroup {
 
 		return test;
 	}
-
-	interface ListFilter<E> {
-		public FilterResult<E> filter(List<E> list);
-	}
-
-	abstract class SimpleMovieFilter implements ListFilter<Movie> {
-
-		@Override
-		public FilterResult<Movie> filter(List<Movie> list) {
-			return getElements(list);
-		}
-
-		abstract boolean criteria(Movie movie);
-
-		protected FilterResult<Movie> getElements(List<Movie> list) {
-			List<Movie> newList = new ArrayList<Movie>();
-			FilterResult<Movie> result = new FilterResult<Movie>();
-
-			for (Movie movie : list) {
-				if (criteria(movie)) {
-					newList.add(movie);
-				}
-			}
-			result.totalCount = newList.size();
-
-			result.elements = applyOrder(newList);
-			return result;
-		}
-
-		protected List<Movie> applyOrder(List<Movie> movies) {
-			return movies;
-		}
-
-		protected FilterResult<Movie> applyTopSkip(FilterResult<Movie> result, int top, int skip) {
-			if (result.elements.size() <= skip) {
-				result.elements = new ArrayList<Movie>();
-				return result;
-			} else {
-				result.elements = result.elements.subList(skip, result.elements.size());
-			}
-
-			if (result.elements.size() > top) {
-				result.elements = result.elements.subList(0, top);
-			}
-
-			return result;
-		}
-	}
-
-	class MovieComparator implements Comparator<Movie> {
-		protected Pair<String, QueryOrder>[] mFields;
-
-		// default ascending
-		@SuppressWarnings("unchecked")
-		public MovieComparator(String... fields) {
-			List<Pair<String, QueryOrder>> newFields = new ArrayList<Pair<String, QueryOrder>>();
-
-			for (String field : fields) {
-				newFields.add(new Pair<String, QueryOrder>(field, QueryOrder.Ascending));
-			}
-
-			mFields = new Pair[0];
-			mFields = newFields.toArray(mFields);
-		}
-
-		public MovieComparator(Pair<String, QueryOrder>... fields) {
-			mFields = fields;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public int compare(Movie m1, Movie m2) {
-			try {
-				for (Pair<String, QueryOrder> field : mFields) {
-
-					Object fieldM1 = Movie.class.getMethod(field.first, (Class<?>[]) null).invoke(m1, (Object[]) null);
-					;
-					Object fieldM2 = Movie.class.getMethod(field.first, (Class<?>[]) null).invoke(m2, (Object[]) null);
-					;
-
-					if (fieldM1 instanceof Comparable) {
-						int res = ((Comparable<Object>) fieldM1).compareTo((Comparable<Object>) fieldM2);
-						if (res != 0) {
-							if (field.second == QueryOrder.Ascending)
-								return res;
-							else
-								return res * -1;
-						}
-					}
-				}
-
-				return 0;
-			} catch (Exception e) {
-				return 0;
-			}
-		}
-
-	}
-
-	class FilterResult<E> {
-		public List<E> elements;
-		public int totalCount;
-	}
-
 }

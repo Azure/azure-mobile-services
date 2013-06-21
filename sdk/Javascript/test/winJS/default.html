@@ -1,0 +1,56 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Microsoft.Azure.Zumo.Windows.WinJS.Test</title>
+
+    <!-- WinJS references -->
+    <link href="//Microsoft.WinJS.1.0/css/ui-light.css" rel="stylesheet" />
+    <script src="//Microsoft.WinJS.1.0/js/base.js"></script>
+    <script src="//Microsoft.WinJS.1.0/js/ui.js"></script>
+
+    <!-- Microsoft.Azure.Zumo.Windows.WinJS.Test references -->
+    <link href="/css/default.css" rel="stylesheet">
+    <script src="/js/default.js"></script>
+    
+    <!-- Unit test references (note that any *.js files in the tests folder
+         will be included in Tests.js) -->
+    <script src="/js/MobileServices.Internals.js"></script>
+    <script src="/generated/Tests.js"></script>
+</head>
+<body>
+    <h3 id="subHeader">PROJECT ZUMO</h3>
+    <h1 id="header">winjs client library unit tests</h1>
+    <h4 id="testStatus"></h4>
+
+    <div id="setupFlyout" data-win-control="WinJS.UI.Flyout">
+        <table>
+            <tr>
+                <td>Runtime Uri:</td>
+                <td><input type="text" id="txtRuntimeUri" /></td>
+            </tr>
+            <tr>
+                <td>Tag Expression:</td>
+                <td><input type="text" id="txtTags" /></td>
+            </tr>
+            <tr>
+                <td colspan="2" style="text-align: right">
+                    <button id="btnStartTests">Start</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Display the test results here -->
+    <div id="testResults"></div>
+
+    <!-- Progress bar displayed during the test run -->
+    <div id="footer" style="">
+        <progress id="progress" value="1" max="100"></progress>
+        <h2 id="footerContent">
+            <span id="currentTestNumber"></span> / <span id="totalTestNumber"></span>
+            (with <span id="failureNumber"></span> failures)
+        </h2>
+    </div>
+</body>
+</html>

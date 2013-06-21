@@ -25,16 +25,13 @@ package com.microsoft.windowsazure.mobileservices;
 
 import java.lang.reflect.Field;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
 import java.util.List;
 
 import android.util.Pair;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.annotations.SerializedName;
 
 /**
  * Represents a Mobile Service Table
@@ -274,25 +271,7 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 	 */
 	private List<E> parseResults(JsonElement results) {
 		Gson gson = mClient.getGsonBuilder().create();
-		List<E> result = new ArrayList<E>();
-		String idPropertyName = getIdPropertyName(mClazz);
-
-		// Parse results
-		if (results.isJsonArray()) // Query result
-		{
-			JsonArray elements = results.getAsJsonArray();
-
-			for (JsonElement element : elements) {
-				changeIdPropertyName(element.getAsJsonObject(), idPropertyName);
-				E typedElement = gson.fromJson(element, mClazz);
-				result.add(typedElement);
-			}
-		} else { // Lookup result
-			changeIdPropertyName(results.getAsJsonObject(), idPropertyName);
-			E typedElement = gson.fromJson(results, mClazz);
-			result.add(typedElement);
-		}
-		return result;
+		return JsonEntityParser.parseResults(results, gson, mClazz);
 	}
 
 	/**
@@ -313,47 +292,6 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 				field.set(target, field.get(source));
 			}
 		}
-	}
-
-	/**
-	 * Get's the class' id property name
-	 * @param clazz
-	 * @return Id Property name
-	 */
-	@SuppressWarnings("rawtypes")
-	private String getIdPropertyName(Class clazz)
-	{
-		// Search for annotation called id, regardless case
-		for (Field field : clazz.getDeclaredFields()) {
-
-			SerializedName serializedName = field.getAnnotation(SerializedName.class);
-			if(serializedName != null && serializedName.value().equalsIgnoreCase("id")) {
-				return serializedName.value();
-			} else if(field.getName().equalsIgnoreCase("id")) {
-				return field.getName();
-			}
-		}
-
-		// Otherwise, return empty
-		return "";
-	}
-
-	/**
-	 * Changes returned JSon object's id property name to match with type's id property name.
-	 * @param element
-	 * @param propertyName
-	 */
-	private void changeIdPropertyName(JsonObject element, String propertyName)
-	{		
-		// If the property name is id or if there's no id defined, then return without performing changes
-		if (propertyName.equals("id") || propertyName.length() == 0) return;
-		
-		// Get the current id value and remove the JSon property
-		String value = element.get("id").getAsString();		
-		element.remove("id");
-		
-		// Create a new id property using the given property name
-		element.addProperty(propertyName, value);
 	}
 
 }

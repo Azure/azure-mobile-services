@@ -1,23 +1,14 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
 
 #import <SenTestingKit/SenTestingKit.h>
 #import "MSClient.h"
+#import "MSTestFilter.h"
 
-@interface MSClientTests : SenTestCase
+@interface MSClientTests : SenTestCase {
+    BOOL done;
+}
 
 @end
 
@@ -31,6 +22,8 @@
 -(void) setUp
 {
     NSLog(@"%@ setUp", self.name);
+    
+    done = NO;
 }
 
 -(void) tearDown
@@ -172,10 +165,10 @@
 }
 
 
-#pragma mark * GetTable Method Tests
+#pragma mark * Table Method Tests
 
 
--(void) testGetTableReturnsTable
+-(void) testTableWithNameReturnsTable
 {
     MSClient *client =
     [MSClient clientWithApplicationURLString:@"http://someURL.com"];
@@ -185,7 +178,7 @@
     STAssertNotNil(table, @"table should not be nil.");
 }
 
--(void) testGetTableAllowsNilTableName
+-(void) testTableWithNameAllowsNilTableName
 {
     MSClient *client =
     [MSClient clientWithApplicationURLString:@"http://someURL.com"];
@@ -193,6 +186,411 @@
     MSTable *table = [client tableWithName:nil];
     
     STAssertNotNil(table, @"table should not be nil.");
+}
+
+
+#pragma mark * Invoke Api Method Tests
+
+
+-(void) testInvokeAPISetsCorrectUrlMethodAndHeaders
+{
+    MSClient *client = [MSClient clientWithApplicationURLString:@"http://someURL.com"];
+    
+    __block NSURLRequest *actualRequest = nil;
+    
+    // Use the filter to capture the request being sent
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    testFilter.ignoreNextFilter = YES;
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+                                                           statusCode:200
+                                                          HTTPVersion:nil
+                                                         headerFields:nil];
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    // Create a client that uses the filter
+    MSClient *filterClient = [client clientWithFilter:testFilter];
+    
+    // Invoke the API
+    [filterClient invokeAPI:@"someAPI"
+                       body:nil
+                 HTTPMethod:@"Get"
+                 parameters:@{ @"x" : @24 }
+                    headers:@{ @"someHeader" : @"someValue" }
+                 completion:
+     ^(id result, NSURLResponse *response, NSError *error) {
+         
+         STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+         STAssertNil(error, @"error should have been nil.");
+               
+         NSString *actualUrl = actualRequest.URL.absoluteString;
+         STAssertTrue([actualUrl isEqualToString:@"http://someURL.com/api/someAPI?x=24"],
+                      @"URL was not as expected.");
+         
+         NSString *actualHeader = [actualRequest.allHTTPHeaderFields valueForKey:@"someHeader"];
+         STAssertNotNil(actualHeader, @"actualHeader should not have been nil.");
+         STAssertTrue([actualHeader isEqualToString:@"someValue"],
+                      @"Header value was not as expected.");
+         
+         NSString *actualMethod = actualRequest.HTTPMethod;
+         STAssertNotNil(actualMethod, @"actualMethod should not have been nil.");
+         STAssertTrue([actualMethod isEqualToString:@"GET"],
+                      @"HTTP Method was not as expected.");
+         
+         done = YES;
+     }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+-(void) testInvokeAPISerializesAsJson
+{
+    MSClient *client = [MSClient clientWithApplicationURLString:@"http://someURL.com"];
+    
+    __block NSURLRequest *actualRequest = nil;
+    
+    // Use the filter to capture the request being sent
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    testFilter.ignoreNextFilter = YES;
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+                                                           statusCode:200
+                                                          HTTPVersion:nil
+                                                         headerFields:nil];
+    
+    testFilter.dataToUse = [@"{\"id\":5,\"name\":\"bob\"}"
+                            dataUsingEncoding:NSUTF8StringEncoding];
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    // Create a client that uses the filter
+    MSClient *filterClient = [client clientWithFilter:testFilter];
+    
+    // Invoke the API
+    [filterClient invokeAPI:@"someAPI"
+                       body:@{@"id":@1, @"name":@"jim" }
+                 HTTPMethod:@"Get"
+                 parameters:nil
+                    headers:nil
+                 completion:
+     ^(id result, NSURLResponse *response, NSError *error) {
+         
+         STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+         STAssertNil(error, @"error should have been nil.");
+         
+         NSData *actualBody = actualRequest.HTTPBody;
+         NSString *bodyString = [[NSString alloc] initWithData:actualBody
+                                                      encoding:NSUTF8StringEncoding];
+         STAssertTrue([bodyString isEqualToString:@"{\"id\":1,\"name\":\"jim\"}"],
+                      @"The body was not serialized as expected.");
+         
+         STAssertNotNil(result, @"result should not have been nil.");
+         STAssertTrue([[result valueForKey:@"id"] isEqual:@5], @"The id should have been 5");
+         STAssertTrue([[result valueForKey:@"name"] isEqualToString:@"bob"], @"The name should have been 'bob'");
+         
+         done = YES;
+     }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+-(void) testInvokeAPIPassesAlongData
+{
+    MSClient *client = [MSClient clientWithApplicationURLString:@"http://someURL.com"];
+    
+    __block NSURLRequest *actualRequest = nil;
+    
+    NSData *testData = [@"{\"id\":5,\"name\":\"bob\"}"
+                        dataUsingEncoding:NSUTF8StringEncoding];
+    
+    // Use the filter to capture the request being sent
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    testFilter.ignoreNextFilter = YES;
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+                                                           statusCode:200
+                                                          HTTPVersion:nil
+                                                         headerFields:nil];
+    testFilter.dataToUse = testData;
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    // Create a client that uses the filter
+    MSClient *filterClient = [client clientWithFilter:testFilter];
+    
+    // Invoke the API
+    [filterClient invokeAPI:@"someAPI"
+                       data:testData
+                 HTTPMethod:@"Get"
+                 parameters:nil
+                    headers:nil
+                 completion:
+     ^(NSData *result, NSURLResponse *response, NSError *error) {
+         
+         STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+         STAssertNil(error, @"error should have been nil.");
+         
+         NSData *actualBody = actualRequest.HTTPBody;
+         STAssertNotNil(actualBody, @"actualBody should not have been nil.");
+         STAssertEqualObjects(actualBody, testData, @"Should be the same data instance.");
+         
+         STAssertNotNil(result, @"result should not have been nil.");
+         STAssertEqualObjects(result, testData, @"Should be the same data instance.");
+
+         NSString *contentType = [actualRequest.allHTTPHeaderFields valueForKey:@"Content-Type"];
+         STAssertNotNil(contentType, @"contentType should not have been nil.");
+         STAssertTrue([contentType isEqualToString:@"application/json"],
+                                                   @"Content-Type was not as expected.");
+         done = YES;
+     }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+-(void) testInvokeAPIHonorsContentTypeIfSet
+{
+    MSClient *client = [MSClient clientWithApplicationURLString:@"http://someURL.com"];
+    
+    __block NSURLRequest *actualRequest = nil;
+    
+    NSData *testData = [@"{\"id\":5,\"name\":\"bob\"}"
+                        dataUsingEncoding:NSUTF8StringEncoding];
+    
+    // Use the filter to capture the request being sent
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    testFilter.ignoreNextFilter = YES;
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+                                                           statusCode:200
+                                                          HTTPVersion:nil
+                                                         headerFields:nil];
+    testFilter.dataToUse = testData;
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    // Create a client that uses the filter
+    MSClient *filterClient = [client clientWithFilter:testFilter];
+    
+    // Invoke the API
+    [filterClient invokeAPI:@"someAPI"
+                       data:testData
+                 HTTPMethod:@"Get"
+                 parameters:nil
+                    headers:@{@"Content-Type":@"text/json"}
+                 completion:
+     ^(NSData *result, NSURLResponse *response, NSError *error) {
+         
+         STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+         STAssertNil(error, @"error should have been nil.");
+         
+         NSData *actualBody = actualRequest.HTTPBody;
+         STAssertNotNil(actualBody, @"actualBody should not have been nil.");
+         STAssertEqualObjects(actualBody, testData, @"Should be the same data instance.");
+         
+         STAssertNotNil(result, @"result should not have been nil.");
+         STAssertEqualObjects(result, testData, @"Should be the same data instance.");
+         
+         NSString *contentType = [actualRequest.allHTTPHeaderFields valueForKey:@"Content-Type"];
+         STAssertNotNil(contentType, @"contentType should not have been nil.");
+         STAssertTrue([contentType isEqualToString:@"text/json"],
+                                                   @"Content-Type was not as expected.");
+         
+         done = YES;
+     }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+-(void) testInvokeAPIAllowsNilAPIName
+{
+    MSClient *client = [MSClient clientWithApplicationURLString:@"http://someURL.com"];
+    
+    __block NSURLRequest *actualRequest = nil;
+    
+    // Use the filter to capture the request being sent
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    testFilter.ignoreNextFilter = YES;
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+                                                           statusCode:200
+                                                          HTTPVersion:nil
+                                                         headerFields:nil];
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    // Create a client that uses the filter
+    MSClient *filterClient = [client clientWithFilter:testFilter];
+    
+    // Invoke the API
+    [filterClient invokeAPI:nil
+                       body:nil
+                 HTTPMethod:@"Get"
+                 parameters:nil
+                    headers:nil
+                 completion:
+     ^(id result, NSURLResponse *response, NSError *error) {
+         
+         STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+         STAssertNil(error, @"error should have been nil.");
+         
+         NSString *actualUrl = actualRequest.URL.absoluteString;
+         STAssertTrue([actualUrl isEqualToString:@"http://someURL.com/api/"],
+                      @"URL was not as expected.");
+         
+         done = YES;
+     }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+-(void) testInvokeAPIAllowsNilData
+{
+    MSClient *client = [MSClient clientWithApplicationURLString:@"http://someURL.com"];
+    
+    __block NSURLRequest *actualRequest = nil;
+    
+    // Use the filter to capture the request being sent
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    testFilter.ignoreNextFilter = YES;
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+                                                           statusCode:200
+                                                          HTTPVersion:nil
+                                                         headerFields:nil];
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    // Create a client that uses the filter
+    MSClient *filterClient = [client clientWithFilter:testFilter];
+    
+    // Invoke the API
+    [filterClient invokeAPI:@"someApi"
+                       data:nil
+                 HTTPMethod:@"Get"
+                 parameters:nil
+                    headers:nil
+                 completion:
+     ^(NSData *result, NSURLResponse *response, NSError *error) {
+         
+         STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+         STAssertNil(error, @"error should have been nil.");
+         
+         STAssertNil(actualRequest.HTTPBody, @"body should have been nil.");
+         
+         done = YES;
+     }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+-(void) testInvokeAPIAllowsNilMethod
+{
+    MSClient *client = [MSClient clientWithApplicationURLString:@"http://someURL.com"];
+    
+    __block NSURLRequest *actualRequest = nil;
+    
+    // Use the filter to capture the request being sent
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    testFilter.ignoreNextFilter = YES;
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+                                                           statusCode:200
+                                                          HTTPVersion:nil
+                                                         headerFields:nil];
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    // Create a client that uses the filter
+    MSClient *filterClient = [client clientWithFilter:testFilter];
+    
+    // Invoke the API
+    [filterClient invokeAPI:@"someApi"
+                       body:nil
+                 HTTPMethod:nil
+                 parameters:nil
+                    headers:nil
+                 completion:
+     ^(id result, NSURLResponse *response, NSError *error) {
+         
+         STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+         STAssertNil(error, @"error should have been nil.");
+         
+         NSString *actualUrl = actualRequest.URL.absoluteString;
+         STAssertTrue([actualUrl isEqualToString:@"http://someURL.com/api/someApi"],
+                      @"URL was not as expected.");
+         
+         STAssertTrue([actualRequest.HTTPMethod isEqualToString:@"POST"], @"The default HTTP method should have been 'POST'");
+         
+         done = YES;
+     }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+-(void) testInvokeReturnsErrorFor400OrGreater
+{
+    MSClient *client = [MSClient clientWithApplicationURLString:@"http://someURL.com"];
+
+    // Use the filter to capture the request being sent
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    testFilter.ignoreNextFilter = YES;
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+                                                           statusCode:500
+                                                          HTTPVersion:nil
+                                                         headerFields:nil];
+    NSString* stringData = @"This is the error msg.";
+    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    
+    testFilter.dataToUse = data;
+    
+    // Create a client that uses the filter
+    MSClient *filterClient = [client clientWithFilter:testFilter];
+    
+    // Invoke the API
+    [filterClient invokeAPI:@"someApi"
+                       data:nil
+                 HTTPMethod:@"GET"
+                 parameters:nil
+                    headers:nil
+                 completion:
+     ^(NSData *data, NSURLResponse *response, NSError *error) {
+         
+         STAssertNil(response, @"response should have been nil.");
+         STAssertNotNil(error, @"error should not have been nil.");
+         STAssertTrue([[error localizedDescription] isEqualToString:
+                        @"This is the error msg."],
+                        @"error description was: %@", [error localizedDescription]);
+         done = YES;
+     }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+
+#pragma mark * Async Test Helper Method
+
+
+-(BOOL) waitForTest:(NSTimeInterval)testDuration {
+    
+    NSDate *timeoutAt = [NSDate dateWithTimeIntervalSinceNow:testDuration];
+    
+    while (!done) {
+        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
+                                 beforeDate:timeoutAt];
+        if([timeoutAt timeIntervalSinceNow] <= 0.0) {
+            break;
+        }
+    };
+    
+    return done;
 }
 
 @end

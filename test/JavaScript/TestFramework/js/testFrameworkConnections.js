@@ -1,4 +1,8 @@
-﻿/// <reference path="platformSpecificFunctions.js" />
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+/// <reference path="platformSpecificFunctions.js" />
 /// <reference path="testFramework.js" />
 
 if (!testPlatform.IsHTMLApplication) { // Call UpdateTestListHeight() if WinJS application is running

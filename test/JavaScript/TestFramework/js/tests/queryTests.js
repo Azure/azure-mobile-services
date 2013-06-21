@@ -1,4 +1,8 @@
-﻿/// <reference path="../testFramework.js" />
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+/// <reference path="../testFramework.js" />
 
 function defineQueryTestsNamespace() {
     var tests = [];
@@ -161,14 +165,14 @@ function defineQueryTestsNamespace() {
 
     // Date functions
     addQueryTest('Date (month): Movies released in November',
-        function (table) { return table.where(function () { return this.ReleaseDate.getMonth() == (11 - 1); }); },
-        function (item) { return item.ReleaseDate.getMonth() == (11 - 1); });
+        function (table) { return table.where(function () { return this.ReleaseDate.getUTCMonth() == (11 - 1); }); },
+        function (item) { return item.ReleaseDate.getUTCMonth() == (11 - 1); });
     addQueryTest('Date (day): Movies released in the first day of the month',
-        function (table) { return table.where(function () { return this.ReleaseDate.getDate() == 1; }); },
-        function (item) { return item.ReleaseDate.getDate() == 1; });
+        function (table) { return table.where(function () { return this.ReleaseDate.getUTCDate() == 1; }); },
+        function (item) { return item.ReleaseDate.getUTCDate() == 1; });
     addQueryTest('Date (year): Movies whose year is different than its release year',
-        function (table) { return table.where(function () { return this.ReleaseDate.getFullYear() !== this.Year; }); },
-        function (item) { return item.ReleaseDate.getFullYear() !== item.Year; }, { debug: true, top: 100 });
+        function (table) { return table.where(function () { return this.ReleaseDate.getUTCFullYear() !== this.Year; }); },
+        function (item) { return item.ReleaseDate.getUTCFullYear() !== item.Year; }, { debug: true, top: 100 });
 
     // Boolean fields
     addQueryTest('Boolean: equal to true - Best picture winners before 1950',

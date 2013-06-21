@@ -1,21 +1,10 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
 
 #import <Foundation/Foundation.h>
-#import "MSClient.h"
+#import "MSClientInternal.h"
+#import "MSSerializer.h"
 
 
 #pragma mark * Block Type Definitions
@@ -69,5 +58,27 @@ typedef void (^MSResponseBlock)(NSHTTPURLResponse *response,
 
 // Sends the request without using the client's filters
 -(void) startWithoutFilters;
+
+
+#pragma mark * Public Response Handling Methods
+
+
+// Determines is a response was successful or not based on the HTTP
+// status code.  If not successful, an error is provided.
+-(BOOL) isSuccessfulResponse:(NSHTTPURLResponse *)response
+                        data:(NSData *)data
+                     orError:(NSError **)error;
+
+// Reads the content of the response using the client's serializer. Returns
+// and error if there is a failure during deserialization of the content.
+-(id) itemFromData:(NSData *)data
+            response:(NSHTTPURLResponse *)response
+            ensureDictionary:(BOOL)ensureDictionary
+            orError:(NSError **)error;
+
+// Given an error, adds the connection's request and the optional response
+// to the error.
+-(void) addRequestAndResponse:(NSHTTPURLResponse *)response
+                      toError:(NSError **)error;
 
 @end

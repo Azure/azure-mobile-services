@@ -40,7 +40,6 @@ public class ServiceFilterRequestMock implements ServiceFilterRequest {
 
 	@Override
 	public Header[] getHeaders() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -60,37 +59,28 @@ public class ServiceFilterRequestMock implements ServiceFilterRequest {
 
 	@Override
 	public void removeHeader(String name) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void setContent(String content) throws InvalidClassException {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public String getContent() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public String getUrl() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public void setUrl(String url) throws URISyntaxException {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public String getMethod() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -109,6 +99,15 @@ public class ServiceFilterRequestMock implements ServiceFilterRequest {
 
 	public void setHasErrorOnExecute(Boolean hasErrorOnExecute) {
 		this.hasErrorOnExecute = hasErrorOnExecute;
+	}
+
+	@Override
+	public void setContent(byte[] content) throws Exception {
+	}
+
+	@Override
+	public byte[] getRawContent() {
+		return null;
 	}
 
 }

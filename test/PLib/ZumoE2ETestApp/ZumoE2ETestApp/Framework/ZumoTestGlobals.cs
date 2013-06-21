@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using System;
 using Microsoft.WindowsAzure.MobileServices;
 
 namespace ZumoE2ETestApp.Framework

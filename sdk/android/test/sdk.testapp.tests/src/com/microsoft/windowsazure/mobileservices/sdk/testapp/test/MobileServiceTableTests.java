@@ -866,7 +866,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 							}
 						});
 
-						response.setContent(null);
+						response.setContent((String)null);
 						// call onResponse with the mocked response
 						responseCallback.onResponse(
 								response,

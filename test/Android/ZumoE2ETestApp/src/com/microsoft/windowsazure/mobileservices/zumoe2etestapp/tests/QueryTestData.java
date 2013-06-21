@@ -23,10 +23,17 @@ import static com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.Movie;
 
 public class QueryTestData {
+	
+	public static Movie getRandomMovie(Random rndGen) {
+		List<Movie> movies = getAllMovies();
+		return movies.get(rndGen.nextInt(movies.size()));
+	}
+	
 	public static List<Movie> getAllMovies() {
 		List<Movie> allMovies = new ArrayList<Movie>();
 

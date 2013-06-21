@@ -1,4 +1,8 @@
-﻿/// <reference path="../testFramework.js" />
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+/// <reference path="../testFramework.js" />
 
 function createQueryTestData() {
     var movies = [];

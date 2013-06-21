@@ -1,35 +1,13 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
 
+#import "MSClientInternal.h"
 #import "MSTable.h"
 #import "MSQuery.h"
 #import "MSJSONSerializer.h"
 #import "MSTableRequest.h"
 #import "MSTableConnection.h"
-
-
-#pragma mark * MSTable Private Interface
-
-
-@interface MSTable ()
-
-// Private properties
-@property (nonatomic, strong, readonly)         id<MSSerializer> serializer;
-
-@end
 
 
 #pragma mark * MSTable Implementation
@@ -39,7 +17,6 @@
 
 @synthesize client = client_;
 @synthesize name = name_;
-@synthesize serializer = serializer_;
 
 
 #pragma mark * Public Initializer Methods
@@ -72,9 +49,8 @@
     // Create the request
     MSTableItemRequest *request = [MSTableRequest
                                    requestToInsertItem:item
-                                   withTable:self
-                                   withParameters:parameters
-                                   withSerializer:self.serializer
+                                   table:self
+                                   parameters:parameters
                                    completion:completion];
     // Send the request
     if (request) {
@@ -97,9 +73,8 @@
     // Create the request
     MSTableItemRequest *request = [MSTableRequest
                                    requestToUpdateItem:item
-                                   withTable:self
-                                   withParameters:parameters
-                                   withSerializer:self.serializer
+                                   table:self
+                                   parameters:parameters
                                    completion:completion];
     // Send the request
     if (request) {
@@ -122,9 +97,8 @@
     // Create the request
     MSTableDeleteRequest *request = [MSTableRequest
                                      requestToDeleteItem:item
-                                     withTable:self
-                                     withParameters:parameters
-                                     withSerializer:self.serializer
+                                     table:self
+                                     parameters:parameters
                                      completion:completion];
     // Send the request
     if (request) {
@@ -147,9 +121,8 @@
     // Create the request
     MSTableDeleteRequest *request = [MSTableRequest
                                      requestToDeleteItemWithId:itemId
-                                     withTable:self
-                                     withParameters:parameters
-                                     withSerializer:self.serializer
+                                     table:self
+                                     parameters:parameters
                                      completion:completion];
     // Send the request
     if (request) {
@@ -176,9 +149,8 @@
     // Create the request
     MSTableItemRequest *request = [MSTableRequest
                                    requestToReadWithId:itemId
-                                   withTable:self
-                                   withParameters:parameters
-                                   withSerializer:self.serializer
+                                   table:self
+                                   parameters:parameters
                                    completion:completion];
     // Send the request
     if (request) {
@@ -195,8 +167,7 @@
     // Create the request
     MSTableReadQueryRequest *request = [MSTableRequest
                                         requestToReadItemsWithQuery:queryString
-                                        withTable:self
-                                        withSerializer:self.serializer
+                                        table:self
                                         completion:completion];
     // Send the request
     if (request) {
@@ -235,16 +206,6 @@
 -(MSQuery *) queryWithPredicate:(NSPredicate *)predicate
 {
     return [[MSQuery alloc] initWithTable:self predicate:predicate];
-}
-
-
-#pragma mark * Private Methods
-
-
--(id<MSSerializer>) serializer
-{
-    // Just use a hard coded reference to MSJSONSerializer
-    return [MSJSONSerializer JSONSerializer];
 }
 
 @end

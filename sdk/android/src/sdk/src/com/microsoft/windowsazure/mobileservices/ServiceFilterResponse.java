@@ -46,6 +46,14 @@ public interface ServiceFilterResponse {
 	 * @throws Exception
 	 */
 	public String getContent();
+	
+	/***
+	 * Gets the response's content.
+	 * 
+	 * @return byte array with the response's content
+	 * @throws Exception
+	 */
+	public byte[] getRawContent();
 
 	/**
 	 * Gets the response's status.

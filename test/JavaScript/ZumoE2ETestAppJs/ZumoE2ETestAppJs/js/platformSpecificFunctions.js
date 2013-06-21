@@ -1,4 +1,8 @@
-﻿function createPlatformSpecificFunctions() {
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+function createPlatformSpecificFunctions() {
 
     var alertFunction;
     if (typeof alert === 'undefined') {
@@ -7,7 +11,6 @@
             dialog.showAsync();
         }
     }
-
 
     var saveAppInfo = function (lastAppUrl, lastAppKey, lastUploadLogUrl) {
         /// <param name="lastAppUrl" type="String">The last value used in the application URL text box</param>
@@ -20,8 +23,6 @@
         };
 
         WinJS.Application.local.writeText('savedAppInfo.txt', JSON.stringify(state));
-
-
     }
 
     return {
@@ -30,6 +31,5 @@
         IsHTMLApplication: false,
     };
 }
-
 
 var testPlatform = createPlatformSpecificFunctions();

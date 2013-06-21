@@ -1,18 +1,6 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
 
 #import "MSJSONSerializer.h"
 #import "MSClient.h"
@@ -63,6 +51,7 @@ static NSArray *allIdKeys;
 
 -(NSData *) dataFromItem:(id)item
                idAllowed:(BOOL)idAllowed
+        ensureDictionary:(BOOL)ensureDictionary
                  orError:(NSError **)error
 {
     NSData *data = nil;
@@ -79,7 +68,8 @@ static NSArray *allIdKeys;
         if (!idAllowed) {
             
             // Make sure this is a dictionary before trying to get the id
-            if (![item isKindOfClass:[NSDictionary class]]) {
+            if (ensureDictionary &&
+                ![item isKindOfClass:[NSDictionary class]]) {
                 localError = [self errorForInvalidItem];
             }
             else {
@@ -88,7 +78,7 @@ static NSArray *allIdKeys;
                 // this is an error; look for all id's regardless of case
                 for (id key in MSJSONSerializer.AllIdKeys) {
                     id itemId = [item objectForKey:key];
-                    if (itemId) {
+                    if (itemId && [itemId longLongValue] != 0) {
                         localError = [self errorForExistingItemId];
                         break;
                     }
@@ -153,6 +143,11 @@ static NSArray *allIdKeys;
                 localError = [self errorForInvalidItemId];
                 itemId = nil;
             }
+            else if([itemId longLongValue] == 0)
+            {
+                localError = [self errorForInvalidItemId];
+                itemId = nil;
+            }
         }
     }
     
@@ -180,8 +175,16 @@ static NSArray *allIdKeys;
         localError = [self errorForInvalidItemId];
     }
     else {
-        // Convert the id into a string
-        idAsString = [NSString stringWithFormat:@"%lld",[itemId longLongValue]];
+        long long itemIdValue = [itemId longLongValue];
+        if(itemIdValue == 0)
+        {
+            localError = [self errorForInvalidItemId];
+        }
+        else
+        {
+            // Convert the id into a string
+            idAsString = [NSString stringWithFormat:@"%lld",itemIdValue];
+        }
     }
     
     if (localError && error) {
@@ -193,6 +196,7 @@ static NSArray *allIdKeys;
 
 -(id) itemFromData:(NSData *)data
             withOriginalItem:(id)originalItem
+            ensureDictionary:(BOOL)ensureDictionary
             orError:(NSError **)error
 {
     id item = nil;
@@ -214,7 +218,8 @@ static NSArray *allIdKeys;
             
             // The data should have been only a single item--that is, a
             // dictionary and not an array or string, etc.
-            if (![item isKindOfClass:[NSDictionary class]]) {
+            if (ensureDictionary &&
+                ![item isKindOfClass:[NSDictionary class]]) {
                 item = nil;
                 localError = [self errorForExpectedItem];
             }
@@ -315,45 +320,61 @@ static NSArray *allIdKeys;
     return totalCount;
 }
 
--(NSError *) errorFromData:(NSData *)data
+-(NSError *) errorFromData:(NSData *)data MIMEType:(NSString *)MIMEType
 {
     NSError *error = nil;
-    
+
     // If there is data, deserialize it
     if (data) {
-        id JSONObject = [NSJSONSerialization JSONObjectWithData:data
-                         options: NSJSONReadingMutableContainers |
-                                  NSJSONReadingAllowFragments
-                         error:&error];
-
-        if (JSONObject) {
+        
+        // We'll see if we can find an error message in the data
+        NSString *errorMessage = nil;
+        
+        BOOL isJson = MIMEType &&
+                      NSNotFound != [MIMEType rangeOfString:@"JSON"
+                                                    options:NSCaseInsensitiveSearch].location;
+        if (isJson) {
+        
+            id JSONObject = [NSJSONSerialization JSONObjectWithData:data
+                                    options: NSJSONReadingMutableContainers |
+                                             NSJSONReadingAllowFragments
+                                      error:&error];
             
-            // We'll see if we can find an error message in the data
-            NSString *errorMessage = nil;
+            if (JSONObject) {
             
-            if ([JSONObject isKindOfClass:[NSString class]]) {
+                if ([JSONObject isKindOfClass:[NSString class]]) {
                 
-                // Since the JSONObject was just a string, we'll assume it
-                // is the error message.
-                errorMessage = JSONObject;
-            }
-            else if ([JSONObject isKindOfClass:[NSDictionary class]]) {
-                
-                // Since we have a dictionary, we'll look for the 'error' or
-                // 'description' keys.
-                errorMessage = [JSONObject objectForKey:errorKey];
-                if (![errorMessage isKindOfClass:[NSString class]]) {
+                    // Since the JSONObject was just a string, we'll assume it
+                    // is the error message.
+                    errorMessage = JSONObject;
+                }
+                else if ([JSONObject isKindOfClass:[NSDictionary class]]) {
                     
-                    // The 'error' key didn't work, so we'll try 'description'
-                    errorMessage = [JSONObject objectForKey:descriptionKey];
+                    // Since we have a dictionary, we'll look for the 'error' or
+                    // 'description' keys.
+                    errorMessage = [JSONObject objectForKey:errorKey];
                     if (![errorMessage isKindOfClass:[NSString class]]) {
                         
-                        // 'description' didn't work either
-                        errorMessage = nil;
+                        // The 'error' key didn't work, so we'll try 'description'
+                        errorMessage = [JSONObject objectForKey:descriptionKey];
+                        if (![errorMessage isKindOfClass:[NSString class]]) {
+                            
+                            // 'description' didn't work either
+                            errorMessage = nil;
+                        }
                     }
                 }
+
             }
-            
+        }
+    
+        if (!error) {
+            if (!errorMessage) {
+                // Since the data wasn't Json in the form we assumed, assume it is UTF8 text
+                errorMessage = [[NSString alloc] initWithData:data
+                                                 encoding:NSUTF8StringEncoding];
+            }
+        
             // If we found an error message, make an error from it
             if (errorMessage) {
                 error = [self errorWithMessage:errorMessage];
@@ -362,7 +383,6 @@ static NSArray *allIdKeys;
     }
     
     if (!error) {
-        
         // If we couldn't find an error message, return a generic error
         error = [self errorWithoutMessage];
     }

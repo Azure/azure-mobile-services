@@ -53,6 +53,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCa
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestGroup;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestResult;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.CustomApiTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.LoginTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.MiscTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.PushTests;
@@ -131,6 +132,7 @@ public class MainActivity extends Activity {
 		adapter.add(new LoginTests());
 		adapter.add(new MiscTests());
 		adapter.add(new PushTests());
+		adapter.add(new CustomApiTests());
 		mTestGroupSpinner.setSelection(0);
 		selectTestGroup(0);
 	}

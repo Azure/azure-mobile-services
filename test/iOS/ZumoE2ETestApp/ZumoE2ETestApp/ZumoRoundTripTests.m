@@ -1,9 +1,6 @@
-//
-//  ZumoRoundTripTests.m
-//  ZumoE2ETestApp
-//
-//  Copyright (c) 2012 Microsoft. All rights reserved.
-//
+// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
 
 #import "ZumoRoundTripTests.h"
 #import "ZumoTest.h"
@@ -318,15 +315,8 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
     return str;
 }
 
-+ (NSString *)helpText {
-    NSArray *lines = [NSArray arrayWithObjects:
-                      @"1. Create an application on Windows azure portal.",
-                      @"2. Create a table called 'iOSRoundTripTable'.",
-                      @"3. Add Valid Application URL and Application Key.",
-                      @"4. Click on the '1 RoundTripDataType' button.",
-                      @"5. Make sure all the tests pass.",
-                      nil];
-    return [lines componentsJoinedByString:@"\n"];
++ (NSString *)groupDescription {
+    return @"Tests for validating the insertion and retrieval of different types of data";
 }
 
 @end

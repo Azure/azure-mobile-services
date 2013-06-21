@@ -23,6 +23,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
 
 package com.microsoft.windowsazure.mobileservices;
 
+import org.apache.http.Header;
 import org.apache.http.protocol.HTTP;
 
 import android.os.Build;
@@ -55,7 +56,7 @@ class MobileServiceConnection {
 	/**
 	 * Header value to represent JSON content-type
 	 */
-	private static final String JSON_CONTENTTYPE = "application/json";
+	static final String JSON_CONTENTTYPE = "application/json";
 
 	/**
 	 * Current SDK version
@@ -146,7 +147,7 @@ class MobileServiceConnection {
 		}
 
 		// Set the User Agent header
-		request.addHeader(HTTP.USER_AGENT, this.getUserAgent());
+		request.addHeader(HTTP.USER_AGENT, getUserAgent());
 
 		// Set the special Application key header
 		request.addHeader(X_ZUMO_APPLICATION_HEADER, mClient.getAppKey());
@@ -156,16 +157,31 @@ class MobileServiceConnection {
 				X_ZUMO_INSTALLATION_ID_HEADER,
 				MobileServiceApplication.getInstallationId(mClient.getContext()));
 
-		// Set the content type header
-		request.addHeader(HTTP.CONTENT_TYPE, JSON_CONTENTTYPE);
-
-		request.addHeader("Accept", JSON_CONTENTTYPE);
+		if (!requestContainsHeader(request, "Accept")) {
+			request.addHeader("Accept", JSON_CONTENTTYPE);
+		}
+	}
+	
+	/**
+	 * Verifies if the request contains the specified header
+	 * @param request	The request to verify
+	 * @param headerName	The header name to find
+	 * @return	True if the header is present, false otherwise
+	 */
+	private boolean requestContainsHeader(ServiceFilterRequest request, String headerName) {
+		for (Header header : request.getHeaders()) {
+			if (header.getName().equals(headerName)) {
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	/**
 	 * Generates the User-Agent
 	 */
-	private String getUserAgent() {
+	static String getUserAgent() {
 		String userAgent = String.format(
 				"ZUMO/%s (lang=%s; os=%s; os_version=%s; arch=%s)",
 				SDK_VERSION, "Java", "Android", Build.VERSION.RELEASE,

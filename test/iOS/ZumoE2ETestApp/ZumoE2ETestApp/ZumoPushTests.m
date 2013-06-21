@@ -1,10 +1,6 @@
-//
-//  ZumoPushTests.m
-//  ZumoE2ETestApp
-//
-//  Created by Carlos Figueira on 12/23/12.
-//  Copyright (c) 2012 Microsoft. All rights reserved.
-//
+// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
 
 #import "ZumoPushTests.h"
 #import "ZumoTest.h"
@@ -161,16 +157,6 @@ static NSString *pushClientKey = @"PushClientKey";
     return result;
 }
 
-+ (NSString *)helpText {
-    NSArray *lines = [NSArray arrayWithObjects:
-                      @"1. Create an application on Windows azure portal.",
-                      @"2. Create a table called 'iOSPushTest'.",
-                      @"3. Set the appropriate script on the table",
-                      @"4. Make sure all the tests pass.",
-                      nil];
-    return [lines componentsJoinedByString:@"\n"];
-}
-
 + (ZumoTest *)createValidatePushRegistrationTest {
     ZumoTest *result = [ZumoTest createTestWithName:@"Validate push registration" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         ZumoTestGlobals *globals = [ZumoTestGlobals sharedInstance];
@@ -256,6 +242,10 @@ static NSString *pushClientKey = @"PushClientKey";
     }];
     
     return result;
+}
+
++ (NSString *)groupDescription {
+    return @"Tests to validate that the server-side push module can correctly deliver messages to the iOS client.";
 }
 
 @end

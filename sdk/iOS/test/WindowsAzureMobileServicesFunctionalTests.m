@@ -1,18 +1,6 @@
 // ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-//
 
 #import <SenTestingKit/SenTestingKit.h>
 #import "WindowsAzureMobileServices.h"
@@ -37,7 +25,7 @@
     NSLog(@"%@ setUp", self.name);
 
     testsEnabled = NO;
-    STAssertTrue(testsEnabled, @"The functiontional tests are currently disabled.");
+    STAssertTrue(testsEnabled, @"The functional tests are currently disabled.");
     
     // These functional tests requires a working Windows Mobile Azure Service
     // with a table named "todoItem". Simply enter the application URL and
@@ -45,8 +33,8 @@
     // 'testsEnabled' BOOL above to YES.
     
     client = [MSClient
-              clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
-              applicationKey:@"<Application Key>"];
+                clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
+                applicationKey:@"<Application Key>"];
     
     done = NO;
     
@@ -308,7 +296,7 @@
                                    initWithURL:nil
                                    statusCode:400
                                    HTTPVersion:nil headerFields:nil];
-    NSString* stringData = @"\"This is an Error Message for the testFilterThatModifiesResponse test!\"";
+    NSString* stringData = @"This is an Error Message for the testFilterThatModifiesResponse test!";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
     testFilter.responseToUse = response;
@@ -366,7 +354,7 @@
         STAssertNil(item, @"item should have been nil.");
 
         STAssertNotNil(error, @"error was nil after deserializing item.");
-        STAssertTrue([error domain] == @"SomeDomain",
+        STAssertTrue([error.domain isEqualToString:@"SomeDomain"],
                      @"error domain was: %@", [error domain]);
         STAssertTrue([error code] == -102,
                      @"error code was: %d",[error code]);
@@ -394,7 +382,7 @@
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         
         STAssertNotNil(item, @"item should not have been nil.");
-        STAssertNil(error, @"error from insert should have been null.");
+        STAssertNil(error, @"error from insert should have been nil.");
         
         // Now try to query the item and make sure we don't error
         [todoTable readWithPredicate:predicate completion:^(NSArray *items,
@@ -403,13 +391,13 @@
             
             STAssertNotNil(items, @"items should not have been nil.");
             STAssertTrue([items count] > 0, @"items should have matched something.");
-            STAssertNil(error, @"error from query should have been null.");
+            STAssertNil(error, @"error from query should have been nil.");
             
             // Now delete the inserted item so as not to corrupt future tests
             NSNumber *itemIdToDelete = [item objectForKey:@"id"];
             [todoTable deleteWithId:itemIdToDelete completion:^(NSNumber *itemId,
                                                                 NSError *error) {
-                STAssertNil(error, @"error from delete should have been null.");
+                STAssertNil(error, @"error from delete should have been nil.");
                 done = YES;
             }];
         }];
@@ -450,7 +438,7 @@
            completion:^(NSDictionary *item, NSError *error) {
         
         STAssertNotNil(item, @"item should not have been nil.");
-        STAssertNil(error, @"error from insert should have been null.");
+        STAssertNil(error, @"error from insert should have been nil.");
         
         // Now update the inserted item
         [todoTable update:item
@@ -458,14 +446,14 @@
                completion:^(NSDictionary *updatedItem, NSError *error) {
                           
             STAssertNotNil(updatedItem, @"updatedItem should not have been nil.");
-            STAssertNil(error, @"error from update should have been null.");
+            STAssertNil(error, @"error from update should have been nil.");
 
             // Now delete the inserted item so as not to corrupt future tests
             NSNumber *itemIdToDelete = [updatedItem objectForKey:@"id"];
             [todoTable deleteWithId:itemIdToDelete
                         parameters:parameters
                          completion:^(NSNumber *itemId, NSError *error) {
-                STAssertNil(error, @"error from delete should have been null.");
+                STAssertNil(error, @"error from delete should have been nil.");
                 done = YES;
             }];
         }];
@@ -732,8 +720,9 @@
 {
     __block NSInteger lastItemIndex = -1;
     
-    __block void (^nextInsertBlock)(id, NSError *error);
-    nextInsertBlock = [^(id newItem, NSError *error) {
+    void (^ nextInsertBlock)(id, NSError *error);
+    void (^__block __weak weakNextInsertBlock)(id, NSError *error);
+    weakNextInsertBlock = nextInsertBlock = ^(id newItem, NSError *error) {
         if (error) {
             completion(error);
         }
@@ -741,13 +730,13 @@
             if (lastItemIndex + 1  < items.count) {
                 lastItemIndex++;
                 id itemToInsert = [items objectAtIndex:lastItemIndex];
-                [table insert:itemToInsert completion:nextInsertBlock];
+                [table insert:itemToInsert completion:weakNextInsertBlock];
             }
             else {
                 completion(nil);
             }
         }
-    } copy];
+    };
     
     nextInsertBlock(nil, nil);
 }
@@ -775,8 +764,9 @@
 {
     __block NSInteger lastItemIndex = -1;
     
-    __block void (^nextDeleteBlock)(NSNumber *, NSError *error);
-    nextDeleteBlock = [^(NSNumber *itemId, NSError *error) {
+    void (^nextDeleteBlock)(NSNumber *, NSError *error);
+    void (^__block __weak weakNextDeleteBlock)(NSNumber *, NSError *error);
+    weakNextDeleteBlock = nextDeleteBlock = ^(NSNumber *itemId, NSError *error) {
         if (error) {
             completion(error);
         }
@@ -784,13 +774,13 @@
             if (lastItemIndex + 1  < items.count) {
                 lastItemIndex++;
                 id itemToDelete = [items objectAtIndex:lastItemIndex];
-                [table delete:itemToDelete completion:nextDeleteBlock];
+                [table delete:itemToDelete completion:weakNextDeleteBlock];
             }
             else {
                 completion(nil);
             }
         }
-    } copy];
+    };
     
     nextDeleteBlock(0, nil);
 }

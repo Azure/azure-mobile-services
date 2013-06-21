@@ -1,4 +1,8 @@
-﻿function createPlatformSpecificFunctions() {
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+function createPlatformSpecificFunctions() {
 
     var alertFunction;
 
@@ -15,11 +19,6 @@
             lastAppKey: lastAppKey,
             lastUploadUrl: lastUploadLogUrl
         };
-
-        //[To do]: write file code is pending to implement, I think it is not very imporatent to write this code for HTML application
-        // Need to confirm with Carlos
-
-
     }
 
     return {
@@ -28,6 +27,5 @@
         IsHTMLApplication: true,
     };
 }
-
 
 var testPlatform = createPlatformSpecificFunctions();

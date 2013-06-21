@@ -19,11 +19,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map.Entry;
 import java.util.Random;
 
 import com.google.gson.JsonObject;
@@ -32,7 +27,6 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
-import com.microsoft.windowsazure.mobileservices.QueryOrder;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
@@ -44,7 +38,6 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestGr
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestResult;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestStatus;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
-import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.Movie;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.RoundTripTableElement;
 
 public class UpdateDeleteTests extends TestGroup {
@@ -113,7 +106,7 @@ public class UpdateDeleteTests extends TestGroup {
 		this.addTest(createDeleteTest("(Neg) Delete typed item with non-existing id", true, true, true, MobileServiceException.class));
 		this.addTest(createDeleteTest("Delete untyped item", false, false, true, null));
 		this.addTest(createDeleteTest("(Neg) Delete untyped item with non-existing id", false, true, true, MobileServiceException.class));
-		this.addTest(createDeleteTest("(Neg) Delete untyped item without id field", false, false, false, InvalidParameterException.class));
+		this.addTest(createDeleteTest("(Neg) Delete untyped item without id field", false, false, false, IllegalArgumentException.class));
 
 	}
 
@@ -412,135 +405,4 @@ public class UpdateDeleteTests extends TestGroup {
 
 		return testCase;
 	}
-
-	interface ListFilter<E> {
-		public FilterResult<E> filter(List<E> list);
-	}
-
-	abstract class SimpleMovieFilter implements ListFilter<Movie> {
-
-		@Override
-		public FilterResult<Movie> filter(List<Movie> list) {
-			return getElements(list);
-		}
-
-		abstract boolean criteria(Movie movie);
-
-		protected FilterResult<Movie> getElements(List<Movie> list) {
-			List<Movie> newList = new ArrayList<Movie>();
-			FilterResult<Movie> result = new FilterResult<Movie>();
-
-			for (Movie movie : list) {
-				if (criteria(movie)) {
-					newList.add(movie);
-				}
-			}
-			result.totalCount = newList.size();
-
-			result.elements = applyOrder(newList);
-			return result;
-		}
-
-		protected List<Movie> applyOrder(List<Movie> movies) {
-			return movies;
-		}
-
-		protected FilterResult<Movie> applyTopSkip(FilterResult<Movie> result, int top, int skip) {
-			if (result.elements.size() <= skip) {
-				result.elements = new ArrayList<Movie>();
-				return result;
-			} else {
-				result.elements = result.elements.subList(skip, result.elements.size());
-			}
-
-			if (result.elements.size() > top) {
-				result.elements = result.elements.subList(0, top);
-			}
-
-			return result;
-		}
-	}
-
-	class MovieComparator implements Comparator<Movie> {
-		protected SimpleEntry<String, QueryOrder>[] mFields;
-
-		// default ascending
-		@SuppressWarnings("unchecked")
-		public MovieComparator(String... fields) {
-			List<SimpleEntry<String, QueryOrder>> newFields = new ArrayList<SimpleEntry<String, QueryOrder>>();
-
-			for (String field : fields) {
-				newFields.add(new SimpleEntry<String, QueryOrder>(field, QueryOrder.Ascending));
-			}
-
-			mFields = new SimpleEntry[0];
-			mFields = newFields.toArray(mFields);
-		}
-
-		public MovieComparator(SimpleEntry<String, QueryOrder>... fields) {
-			mFields = fields;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public int compare(Movie m1, Movie m2) {
-			try {
-				for (Entry<String, QueryOrder> field : mFields) {
-
-					Object fieldM1 = Movie.class.getMethod(field.getKey(), (Class<?>[]) null).invoke(m1, (Object[]) null);
-					;
-					Object fieldM2 = Movie.class.getMethod(field.getKey(), (Class<?>[]) null).invoke(m2, (Object[]) null);
-					;
-
-					if (fieldM1 instanceof Comparable) {
-						int res = ((Comparable<Object>) fieldM1).compareTo((Comparable<Object>) fieldM2);
-						if (res != 0) {
-							if (field.getValue() == QueryOrder.Ascending)
-								return res;
-							else
-								return res * -1;
-						}
-					}
-				}
-
-				return 0;
-			} catch (Exception e) {
-				return 0;
-			}
-		}
-
-	}
-
-	class SimpleEntry<K, V> implements Entry<K, V> {
-		K mKey;
-		V mValue;
-
-		public SimpleEntry(K key, V value) {
-			mKey = key;
-			mValue = value;
-		}
-
-		@Override
-		public K getKey() {
-			return mKey;
-		}
-
-		@Override
-		public V getValue() {
-			return mValue;
-		}
-
-		@Override
-		public V setValue(V object) {
-			mValue = object;
-			return mValue;
-		}
-
-	}
-
-	class FilterResult<E> {
-		public List<E> elements;
-		public int totalCount;
-	}
-
 }

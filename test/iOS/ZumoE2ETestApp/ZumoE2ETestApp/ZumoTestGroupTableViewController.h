@@ -1,9 +1,6 @@
-//
-//  ZumoTestGroupTableViewController.h
-//  ZumoE2ETestApp
-//
-//  Copyright (c) 2012 Microsoft. All rights reserved.
-//
+// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
 
 #import <UIKit/UIKit.h>
 #import "ZumoTestGroup.h"
@@ -11,16 +8,15 @@
 
 @interface ZumoTestGroupTableViewController : UITableViewController <UITextFieldDelegate, ZumoTestGroupCallbacks>
 {
-    IBOutlet UITextField *uploadUrl;
     IBOutlet UIView *headerView;
 }
 
 @property (nonatomic, strong) ZumoTestGroup *tests;
+@property (nonatomic, strong) NSString *logUploadUrl;
 
 - (IBAction)runTests:(id)sender;
 - (IBAction)resetTests:(id)sender;
 - (IBAction)uploadLogs:(id)sender;
-- (IBAction)showHelp:(id)sender;
 
 - (UIView *)headerView;
 

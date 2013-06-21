@@ -22,18 +22,32 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices;
 
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
+import org.apache.http.protocol.HTTP;
 
 import android.content.Context;
+import android.net.Uri;
+import android.util.Pair;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.SerializedName;
 
@@ -85,6 +99,11 @@ public class MobileServiceClient {
 	 * UTF-8 encoding
 	 */
 	public static final String UTF8_ENCODING = "UTF-8";
+	
+	/**
+	 * Custom API Url
+	 */
+	private static final String CUSTOM_API_URL = "api/";
 
 	/**
 	 * Creates a GsonBuilder with custom serializers to use with Windows Azure
@@ -324,6 +343,286 @@ public class MobileServiceClient {
 		validateClass(clazz);
 		
 		return new MobileServiceTable<E>(clazz.getSimpleName(), this, clazz);
+	}
+	
+	/**
+	 * Invokes a custom API using POST HTTP method
+	 * @param apiName The API name
+	 * @param clazz The API result class
+	 * @param callback The callback to invoke after the API execution
+	 */
+	public <E> void invokeApi(
+			String apiName, 
+			Class<E> clazz,
+			ApiOperationCallback<E> callback) {
+		invokeApi(apiName, null, HttpPost.METHOD_NAME, null, clazz, callback);
+	}
+	
+	/**
+	 * Invokes a custom API using POST HTTP method
+	 * @param apiName The API name
+	 * @param body The object to send as the request body
+	 * @param clazz The API result class
+	 * @param callback The callback to invoke after the API execution
+	 */
+	public <E> void invokeApi(
+			String apiName, 
+			Object body,
+			Class<E> clazz,
+			ApiOperationCallback<E> callback) {
+		invokeApi(apiName, body, HttpPost.METHOD_NAME, null, clazz, callback);
+	}
+
+	/**
+	 * Invokes a custom API
+	 * @param apiName The API name
+	 * @param httpMethod The HTTP Method used to invoke the API
+	 * @param parameters The query string parameters sent in the request
+	 * @param clazz The API result class
+	 * @param callback The callback to invoke after the API execution
+	 */
+	public <E> void invokeApi(
+			String apiName, 
+			String httpMethod, 
+			List<Pair<String, String>> parameters,
+			Class<E> clazz,
+			ApiOperationCallback<E> callback) {
+		invokeApi(apiName, null, httpMethod, parameters, clazz, callback);
+	}
+
+	/**
+	 * Invokes a custom API
+	 * @param apiName The API name
+	 * @param body The object to send as the request body
+	 * @param httpMethod The HTTP Method used to invoke the API
+	 * @param parameters The query string parameters sent in the request
+	 * @param clazz The API result class
+	 * @param callback The callback to invoke after the API execution
+	 */
+	public <E> void invokeApi(
+			String apiName, 
+			Object body, 
+			String httpMethod, 
+			List<Pair<String, String>> parameters,
+			final Class<E> clazz,
+			final ApiOperationCallback<E> callback) {
+		if (clazz == null) {
+			if (callback != null) {
+				callback.onCompleted(null, new IllegalArgumentException("clazz cannot be null"), null);
+			}
+			return;
+		}
+				
+		JsonElement json = null;
+		if (body != null) {
+			json = getGsonBuilder().create().toJsonTree(body);
+		}
+		
+		invokeApi(apiName, json, httpMethod, parameters, new ApiJsonOperationCallback() {
+			
+			@SuppressWarnings("unchecked")
+			@Override
+			public void onCompleted(JsonElement jsonElement, Exception exception,
+					ServiceFilterResponse response) {
+				if (callback != null) {
+					if (exception == null) {
+						Class<?> concreteClass = clazz;
+						if (clazz.isArray()) {
+							concreteClass = clazz.getComponentType();
+						}
+
+						List<?> entities = JsonEntityParser.parseResults(jsonElement, getGsonBuilder().create(), concreteClass);
+
+						if (clazz.isArray()) {
+							E array = (E) Array.newInstance(concreteClass, entities.size());
+							for (int i = 0; i < entities.size(); i++) {
+								Array.set(array, i, entities.get(i));
+							}
+							callback.onCompleted(array, null, response);
+						} else {
+							callback.onCompleted((E)entities.get(0), exception, response);
+						}
+					} else {
+						callback.onCompleted(null, exception, response);
+					}
+				}
+			}
+		});
+	}
+
+
+	/**
+	 * Invokes a custom API using POST HTTP method
+	 * @param apiName The API name
+	 * @param callback The callback to invoke after the API execution
+	 */
+	public void invokeApi(String apiName, ApiJsonOperationCallback callback) {
+		invokeApi(apiName, null, callback);
+	}
+	
+	/**
+	 * Invokes a custom API using POST HTTP method
+	 * @param apiName The API name
+	 * @param body The json element to send as the request body
+	 * @param callback The callback to invoke after the API execution
+	 */
+	public void invokeApi(String apiName, JsonElement body, ApiJsonOperationCallback callback) {
+		invokeApi(apiName, body, HttpPost.METHOD_NAME, null, callback);
+	}
+	
+	/**
+	 * Invokes a custom API
+	 * @param apiName The API name
+	 * @param httpMethod The HTTP Method used to invoke the API
+	 * @param parameters The query string parameters sent in the request
+	 * @param callback The callback to invoke after the API execution
+	 */
+	public void invokeApi(
+			String apiName, 
+			String httpMethod, 
+			List<Pair<String, String>> parameters, 
+			ApiJsonOperationCallback callback) {
+		invokeApi(apiName, null, httpMethod, parameters, callback);
+	}
+	
+	/**
+	 * Invokes a custom API
+	 * @param apiName The API name
+	 * @param body The json element to send as the request body
+	 * @param httpMethod The HTTP Method used to invoke the API
+	 * @param parameters The query string parameters sent in the request
+	 * @param callback The callback to invoke after the API execution
+	 */
+	public void invokeApi(
+			String apiName, 
+			JsonElement body, 
+			String httpMethod, 
+			List<Pair<String, String>> parameters,
+			final ApiJsonOperationCallback callback) {
+		
+		byte[] content = null;
+		if (body != null) {
+			try {
+				content = body.toString().getBytes(UTF8_ENCODING);
+			} catch (UnsupportedEncodingException e) {
+				if (callback != null) {
+					callback.onCompleted(null, e, null);
+				}
+				return;
+			}
+		}
+		
+		List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String,String>>();
+		if (body != null) {
+			requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));			
+		}
+		
+		invokeApi(apiName, content, httpMethod, requestHeaders, parameters, new ServiceFilterResponseCallback() {
+			
+			@Override
+			public void onResponse(ServiceFilterResponse response, Exception exception) {
+				if (callback != null) {
+					if (exception == null) {
+						String content = response.getContent();
+						JsonElement json = new JsonParser().parse(content);
+						
+						callback.onCompleted(json, null, response);
+					} else {
+						callback.onCompleted(null, exception, response);
+					}
+				}
+			}
+		});
+	}
+	
+	/**
+	 * 
+	 * @param apiName The API name
+	 * @param content The byte array to send as the request body
+	 * @param httpMethod The HTTP Method used to invoke the API
+	 * @param requestHeaders The extra headers to send in the request
+	 * @param parameters The query string parameters sent in the request
+	 * @param callback The callback to invoke after the API execution
+	 */
+	public void invokeApi(
+			String apiName, 
+			byte[] content, 
+			String httpMethod, 
+			List<Pair<String, String>> requestHeaders, 
+			List<Pair<String, String>> parameters, 
+			final ServiceFilterResponseCallback callback) {
+		
+		if (apiName == null || apiName.trim().equals("")) {
+			if (callback != null) {
+				callback.onResponse(null, new IllegalArgumentException("apiName cannot be null"));
+			}
+			return;
+		}
+		
+		if (httpMethod == null || httpMethod.trim().equals("")) {
+			if (callback != null) {
+				callback.onResponse(null, new IllegalArgumentException("httpMethod cannot be null"));
+			}
+			return;
+		}
+		
+		Uri.Builder uriBuilder = Uri.parse(getAppUrl().toString()).buildUpon();
+		uriBuilder.path(CUSTOM_API_URL + apiName);
+		
+		if (parameters != null && parameters.size() > 0) {
+			for (Pair<String, String> parameter : parameters) {
+				uriBuilder.appendQueryParameter(parameter.first, parameter.second);
+			}
+		}
+		
+		ServiceFilterRequest request;
+		String url = uriBuilder.build().toString();
+		
+		if (httpMethod.equalsIgnoreCase(HttpGet.METHOD_NAME)) {
+			request = new ServiceFilterRequestImpl(new HttpGet(url));
+		} else if (httpMethod.equalsIgnoreCase(HttpPost.METHOD_NAME)) {
+			request = new ServiceFilterRequestImpl(new HttpPost(url));
+		} else if (httpMethod.equalsIgnoreCase(HttpPut.METHOD_NAME)) {
+			request = new ServiceFilterRequestImpl(new HttpPut(url));
+		} else if (httpMethod.equalsIgnoreCase(HttpPatch.METHOD_NAME)) {
+			request = new ServiceFilterRequestImpl(new HttpPatch(url));
+		} else if (httpMethod.equalsIgnoreCase(HttpDelete.METHOD_NAME)) {
+			request = new ServiceFilterRequestImpl(new HttpDelete(url));
+		} else {
+			if (callback != null) {
+				callback.onResponse(null, new IllegalArgumentException("httpMethod not supported"));
+			}
+			return;
+		}
+		
+		if (requestHeaders != null && requestHeaders.size() > 0) {
+			for (Pair<String, String> header: requestHeaders) {
+				request.addHeader(header.first, header.second);
+			}
+		}
+		
+		if (content != null) {
+			try {
+				request.setContent(content);
+			} catch (Exception e) {
+				if (callback != null) {
+					callback.onResponse(null, e);
+				}
+				return;
+			}
+		}
+		
+		MobileServiceConnection conn = createConnection();
+		
+		// Create AsyncTask to execute the request and parse the results
+		new RequestAsyncTask(request, conn) {
+			@Override
+			protected void onPostExecute(ServiceFilterResponse response) {
+				if (callback != null) {
+					callback.onResponse(response, mTaskException);
+				}
+			}
+		}.execute();	
 	}
 
 	/**

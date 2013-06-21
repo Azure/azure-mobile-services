@@ -75,6 +75,9 @@
       <Link>js\tests\allTests.js</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\..\TestFramework\js\tests\apiTests.js">
+      <Link>js\tests\apiTests.js</Link>
+    </Content>
     <Content Include="..\..\TestFramework\js\tests\loginTests.js">
       <Link>js\tests\loginTests.js</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -115,9 +118,7 @@
     <Content Include="js\MobileServices.pri" />
     <Content Include="js\platformSpecificFunctions.js" />
     <Content Include="lib\jquery.js" />
-    <Content Include="packages.config">
-      <SubType>Designer</SubType>
-    </Content>
+    <Content Include="packages.config" />
     <None Include="ZumoE2ETestAppJs_StoreKey.pfx" />
     <None Include="Package.StoreAssociation.xml" />
     <None Include="ZumoE2ETestAppJs_TemporaryKey.pfx" />

@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Zumo Web Client Tests</title>
+        <link href="http://code.jquery.com/qunit/qunit-1.11.0.css" rel="stylesheet" />
+        <link href="css/styles.css" rel="stylesheet" />
+    </head>
+    <body>
+        <button id="edit-test-config">Configure</button>
+        <form id="test-config">
+            <fieldset>
+                <legend>Configuration</legend>
+                <p>
+                    <label>Runtime URI:</label>
+                    <input id="runtime-uri" name="runtime-uri" />
+                </p>
+                <button type="submit">Update</button>
+            </fieldset>
+        </form>
+
+        <div id="qunit"></div>
+
+        <script src="js/MobileServices.Web.Internals.js"></script>
+        <script src="http://code.jquery.com/qunit/qunit-1.11.0.js"></script>
+        <script src="js/TestFrameworkAdapter.js"></script>
+        <script src="js/TestClientHelper.js"></script>
+        <script src="generated/Tests.js"></script>
+    </body>
+</html>

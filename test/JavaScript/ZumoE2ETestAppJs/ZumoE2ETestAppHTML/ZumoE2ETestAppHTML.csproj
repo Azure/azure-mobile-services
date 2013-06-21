@@ -81,6 +81,10 @@
       <Link>js\tests\miscTests.js</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="..\..\TestFramework\js\tests\apiTests.js">
+      <Link>js\tests\apiTests.js</Link>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="..\..\TestFramework\js\tests\pushTests.js">
       <Link>js\tests\pushTests.js</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -101,12 +105,11 @@
       <Link>js\tests\updateDeleteTests.js</Link>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="..\..\TestFramework\lib\MobileServices.Web-1.0.0.min.js">
-      <Link>lib\MobileServices.Web-1.0.0.min.js</Link>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="default.html" />
     <Content Include="js\platformSpecificFunctions.js" />
+    <None Include="lib\MobileServices.intellisense.js" />
+    <Content Include="lib\MobileServices.Web.js" />
+    <Content Include="lib\MobileServices.Web.min.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>

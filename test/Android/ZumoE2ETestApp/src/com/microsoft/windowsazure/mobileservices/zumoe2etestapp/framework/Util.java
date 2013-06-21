@@ -30,20 +30,42 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.apache.http.Header;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 
 public class Util {
+
+	public static String createComplexRandomString(Random rndGen, int size) {
+		if (rndGen.nextInt(3) > 0) {
+			return createSimpleRandomString(rndGen, size);
+		} else {
+			return createSimpleRandomString(rndGen, size, ' ', 0xfffe);
+		}
+	}
 	public static String createSimpleRandomString(Random rndGen, int size) {
 		int minChar = ' ';
 		int maxChar = '~';
 
+		return createSimpleRandomString(rndGen, size, minChar, maxChar);
+	}
+	
+	public static String createSimpleRandomString(Random rndGen, int size, int minChar, int maxChar) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < size; i++) {
-			int charRand = rndGen.nextInt(maxChar - minChar);
-			sb.append((char) (minChar + charRand));
+			
+			int charRand;
+			char c;
+			do {
+				charRand = rndGen.nextInt(maxChar - minChar);
+				c = (char) (minChar + charRand);
+			} while (Character.isLowSurrogate(c) || Character.isHighSurrogate(c));
+			
+			sb.append(c);
 		}
 
 		return sb.toString();
@@ -193,7 +215,11 @@ public class Util {
 
 		return true;
 	}
-
+	
+	public static Date getUTCNow() {
+		return new GregorianCalendar(TimeZone.getTimeZone("utc")).getTime();
+	}
+	
 	public static Date getUTCDate(int year, int month, int day) {
 
 		return getUTCDate(year, month, day, 0, 0, 0);
@@ -213,5 +239,26 @@ public class Util {
 		cal.setTime(date);
 
 		return cal;
+	}
+	
+	public static boolean responseContainsHeader(ServiceFilterResponse response, String headerName) {
+		for (Header header : response.getHeaders()) {
+			if (header.getName().equals(headerName)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+
+	public static String getHeaderValue(ServiceFilterResponse response, String headerName) {
+		for (Header header : response.getHeaders()) {
+			if (header.getName().equals(headerName)) {
+				return header.getValue();
+			}
+		}
+		
+		return null;
 	}
 }

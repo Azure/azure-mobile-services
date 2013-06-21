@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory),Microsoft.WindowsAzure.Mobile.Build.msbuild))\tools\Microsoft.WindowsAzure.Mobile.Build.settings.targets" Condition="$(CmdLine) != ''" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <OutputPath Condition=" '$(OutputPath)' == '' ">bin\$(Configuration)</OutputPath>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{75557793-E36E-4190-8714-5BD2665859FB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.WindowsAzure.MobileServices</RootNamespace>
+    <AssemblyName>Microsoft.WindowsAzure.Mobile</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile104</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>
+    </DocumentationFile>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>$(OutputPath)\Microsoft.WindowsAzure.Mobile.xml</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Authentication\MobileServiceTokenAuthentication.cs" />
+    <Compile Include="Collections\MobileServiceCollection.cs" />
+    <Compile Include="Extensions\HttpMessageHandlerExtensions.cs" />
+    <Compile Include="Extensions\IDictionaryExtensions.cs" />
+    <Compile Include="Extensions\MobileServiceClientExtensions.cs" />
+    <Compile Include="Extensions\MobileServiceCollectionExtensions.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="IMobileServiceClient.cs" />
+    <Compile Include="Authentication\MobileServiceAuthentication.cs" />
+    <Compile Include="Authentication\MobileServiceAuthenticationProvider.cs" />
+    <Compile Include="MobileServiceClient.cs" />
+    <Compile Include="MobileServiceInvalidOperationException.cs" />
+    <Compile Include="MobileServiceUser.cs" />
+    <Compile Include="Platform\IApplicationStorage.cs" />
+    <Compile Include="Platform\IExpressionUtility.cs" />
+    <Compile Include="Platform\IPlatform.cs" />
+    <Compile Include="Platform\IPlatformInformation.cs" />
+    <Compile Include="Http\MobileServiceHttpClient.cs" />
+    <Compile Include="Platform\Platform.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Table\IMobileServiceTable.cs" />
+    <Compile Include="Table\IMobileServiceTable.Generic.cs" />
+    <Compile Include="Table\MobileServiceTable.cs" />
+    <Compile Include="Table\MobileServiceTable.Generic.cs" />
+    <Compile Include="MobileServiceUrlBuilder.cs" />
+    <Compile Include="Table\Query\FilterBuildingExpressionVisitor.cs" />
+    <Compile Include="Table\Query\IMobileServiceTableQuery.cs" />
+    <Compile Include="Table\Query\ITotalCountProvider.cs" />
+    <Compile Include="Table\Query\MobileServiceTableQuery.cs" />
+    <Compile Include="Table\Query\MobileServiceTableQueryDescription.cs" />
+    <Compile Include="Table\Query\MobileServiceTableQueryProvider.cs" />
+    <Compile Include="Table\Query\MobileServiceTableQueryTranslator.cs" />
+    <Compile Include="Table\Query\TotalCountEnumerable.cs" />
+    <Compile Include="Table\Query\TotalCountList.cs" />
+    <Compile Include="Table\Serialization\DataTableAttribute.cs" />
+    <Compile Include="Table\Serialization\MobileServiceContractResolver.cs" />
+    <Compile Include="Table\Serialization\MobileServiceSerializer.cs" />
+    <Compile Include="Table\Serialization\MobileServiceJsonSerializerSettings.cs" />
+    <Compile Include="Table\Serialization\MobileServicePrecisionCheckConverter.cs" />
+    <Compile Include="Table\Serialization\MobileServiceIsoDateTimeConverter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.Threading.Tasks">
+      <HintPath>..\..\packages\Microsoft.Bcl.Async.1.0.16\lib\portable-net40+sl4+win8+wp71\Microsoft.Threading.Tasks.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Threading.Tasks.Extensions">
+      <HintPath>..\..\packages\Microsoft.Bcl.Async.1.0.16\lib\portable-net40+sl4+win8+wp71\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\packages\Newtonsoft.Json.5.0.5\lib\portable-net40+sl4+wp7+win8\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http">
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.1.10\lib\portable-net40+sl4+win8+wp71\System.Net.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Extensions">
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.1.10\lib\portable-net40+sl4+win8+wp71\System.Net.Http.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Primitives">
+      <HintPath>..\..\packages\Microsoft.Net.Http.2.1.10\lib\portable-net40+sl4+win8+wp71\System.Net.Http.Primitives.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime">
+      <HintPath>..\..\packages\Microsoft.Bcl.1.0.19\lib\portable-net40+sl4+win8+wp71\System.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks">
+      <HintPath>..\..\packages\Microsoft.Bcl.1.0.19\lib\portable-net40+sl4+win8+wp71\System.Threading.Tasks.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
+  <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.5\tools\Microsoft.Bcl.Build.targets" />
+</Project>

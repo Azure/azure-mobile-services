@@ -32,11 +32,14 @@
 		872B031F1675A128003613A1 /* ZumoTestStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 872B031E1675A127003613A1 /* ZumoTestStore.m */; };
 		872B0324167660C2003613A1 /* ZumoSavedAppsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 872B0323167660C2003613A1 /* ZumoSavedAppsTableViewController.m */; };
 		872B032A16768EF0003613A1 /* ZumoSavedAppsHeader.xib in Resources */ = {isa = PBXBuildFile; fileRef = 872B032916768EF0003613A1 /* ZumoSavedAppsHeader.xib */; };
+		874337D417667289006B7268 /* ZumoAllTestsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 874337D317667289006B7268 /* ZumoAllTestsTableViewController.m */; };
 		87B36928167AE7D300F42BCE /* ZumoQueryTestData.m in Sources */ = {isa = PBXBuildFile; fileRef = 87B36927167AE7D300F42BCE /* ZumoQueryTestData.m */; };
 		87B36932168050D700F42BCE /* ZumoLogUpdater.m in Sources */ = {isa = PBXBuildFile; fileRef = 87B36931168050D700F42BCE /* ZumoLogUpdater.m */; };
 		87B3693516875B1100F42BCE /* ZumoPushTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 87B3693416875B1100F42BCE /* ZumoPushTests.m */; };
-		87D46F5F170B402700A188CA /* WindowsAzureMobileServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87D46F5E170B402700A188CA /* WindowsAzureMobileServices.framework */; };
 		87D8D9451678443D00CDE19A /* ZumoMiscTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 87D8D9441678443D00CDE19A /* ZumoMiscTests.m */; };
+		87FA8406174FE58A0089EDEA /* ZumoCustomApiTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 87FA8405174FE58A0089EDEA /* ZumoCustomApiTests.m */; };
+		87FA840B17569AB90089EDEA /* TestLoggingFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = 87FA840A17569AB90089EDEA /* TestLoggingFilter.m */; };
+		87FA840D1757BA190089EDEA /* WindowsAzureMobileServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 87FA840C1757BA190089EDEA /* WindowsAzureMobileServices.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -83,15 +86,21 @@
 		872B0322167660C2003613A1 /* ZumoSavedAppsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZumoSavedAppsTableViewController.h; sourceTree = "<group>"; };
 		872B0323167660C2003613A1 /* ZumoSavedAppsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZumoSavedAppsTableViewController.m; sourceTree = "<group>"; };
 		872B032916768EF0003613A1 /* ZumoSavedAppsHeader.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ZumoSavedAppsHeader.xib; sourceTree = "<group>"; };
+		874337D217667289006B7268 /* ZumoAllTestsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZumoAllTestsTableViewController.h; sourceTree = "<group>"; };
+		874337D317667289006B7268 /* ZumoAllTestsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZumoAllTestsTableViewController.m; sourceTree = "<group>"; };
 		87B36926167AE7D300F42BCE /* ZumoQueryTestData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZumoQueryTestData.h; sourceTree = "<group>"; };
 		87B36927167AE7D300F42BCE /* ZumoQueryTestData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZumoQueryTestData.m; sourceTree = "<group>"; };
 		87B36930168050D700F42BCE /* ZumoLogUpdater.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZumoLogUpdater.h; sourceTree = "<group>"; };
 		87B36931168050D700F42BCE /* ZumoLogUpdater.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZumoLogUpdater.m; sourceTree = "<group>"; };
 		87B3693316875B1100F42BCE /* ZumoPushTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZumoPushTests.h; sourceTree = "<group>"; };
 		87B3693416875B1100F42BCE /* ZumoPushTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZumoPushTests.m; sourceTree = "<group>"; };
-		87D46F5E170B402700A188CA /* WindowsAzureMobileServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = WindowsAzureMobileServices.framework; sourceTree = "<group>"; };
 		87D8D9431678443D00CDE19A /* ZumoMiscTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZumoMiscTests.h; sourceTree = "<group>"; };
 		87D8D9441678443D00CDE19A /* ZumoMiscTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZumoMiscTests.m; sourceTree = "<group>"; };
+		87FA8404174FE58A0089EDEA /* ZumoCustomApiTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZumoCustomApiTests.h; sourceTree = "<group>"; };
+		87FA8405174FE58A0089EDEA /* ZumoCustomApiTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZumoCustomApiTests.m; sourceTree = "<group>"; };
+		87FA840917569AB90089EDEA /* TestLoggingFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestLoggingFilter.h; sourceTree = "<group>"; };
+		87FA840A17569AB90089EDEA /* TestLoggingFilter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestLoggingFilter.m; sourceTree = "<group>"; };
+		87FA840C1757BA190089EDEA /* WindowsAzureMobileServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = WindowsAzureMobileServices.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -102,7 +111,7 @@
 				872B02BF1672A73B003613A1 /* UIKit.framework in Frameworks */,
 				872B02C11672A73B003613A1 /* Foundation.framework in Frameworks */,
 				872B02C31672A73B003613A1 /* CoreGraphics.framework in Frameworks */,
-				87D46F5F170B402700A188CA /* WindowsAzureMobileServices.framework in Frameworks */,
+				87FA840D1757BA190089EDEA /* WindowsAzureMobileServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -129,7 +138,7 @@
 		872B02BD1672A73B003613A1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				87D46F5E170B402700A188CA /* WindowsAzureMobileServices.framework */,
+				87FA840C1757BA190089EDEA /* WindowsAzureMobileServices.framework */,
 				872B02BE1672A73B003613A1 /* UIKit.framework */,
 				872B02C01672A73B003613A1 /* Foundation.framework */,
 				872B02C21672A73B003613A1 /* CoreGraphics.framework */,
@@ -202,6 +211,8 @@
 				872B030E167580A4003613A1 /* ZumoTestGroupTableHeader.xib */,
 				87B36930168050D700F42BCE /* ZumoLogUpdater.h */,
 				87B36931168050D700F42BCE /* ZumoLogUpdater.m */,
+				874337D217667289006B7268 /* ZumoAllTestsTableViewController.h */,
+				874337D317667289006B7268 /* ZumoAllTestsTableViewController.m */,
 			);
 			name = TestTableViewControllers;
 			sourceTree = "<group>";
@@ -225,6 +236,10 @@
 				872B031E1675A127003613A1 /* ZumoTestStore.m */,
 				87B3693316875B1100F42BCE /* ZumoPushTests.h */,
 				87B3693416875B1100F42BCE /* ZumoPushTests.m */,
+				87FA8404174FE58A0089EDEA /* ZumoCustomApiTests.h */,
+				87FA8405174FE58A0089EDEA /* ZumoCustomApiTests.m */,
+				87FA840917569AB90089EDEA /* TestLoggingFilter.h */,
+				87FA840A17569AB90089EDEA /* TestLoggingFilter.m */,
 			);
 			name = Tests;
 			sourceTree = "<group>";
@@ -327,6 +342,9 @@
 				87B36928167AE7D300F42BCE /* ZumoQueryTestData.m in Sources */,
 				87B36932168050D700F42BCE /* ZumoLogUpdater.m in Sources */,
 				87B3693516875B1100F42BCE /* ZumoPushTests.m in Sources */,
+				87FA8406174FE58A0089EDEA /* ZumoCustomApiTests.m in Sources */,
+				87FA840B17569AB90089EDEA /* TestLoggingFilter.m in Sources */,
+				874337D417667289006B7268 /* ZumoAllTestsTableViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

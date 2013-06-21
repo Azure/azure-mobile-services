@@ -1,0 +1,16 @@
+﻿body {
+    font-family: Arial;
+}
+
+#test-config {
+    margin-bottom: 1em;
+    display: none;
+}
+
+#edit-test-config {
+    position: absolute;
+    right: 20px;
+    top: 16px;
+    font-size: 16px;
+    padding: 3px 16px;
+}

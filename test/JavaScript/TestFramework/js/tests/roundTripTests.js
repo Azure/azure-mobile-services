@@ -1,4 +1,8 @@
-﻿/// <reference path="/MobileServicesJavaScriptClient/MobileServices.js" />
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+/// <reference path="../../../ZumoE2ETestAppJs/ZumoE2ETestAppJs/js/MobileServices.js" />
 /// <reference path="../testFramework.js" />
 
 function defineRoundTripTestsNamespace() {

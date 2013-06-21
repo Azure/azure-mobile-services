@@ -1,0 +1,16 @@
+﻿{
+    "Validate_NotNullError"                                 : "{0} cannot be null.",
+    "Validate_NotNullOrEmptyError"                          : "{0} cannot be null or empty.",
+    "Validate_TypeCheckError"                               : "{0} is expected to be a value of type {1}, not {2}.",
+    "Validate_LengthUnexpected"                             : "{0} is expected to have length {1}, not {2}.",
+    "Validate_InvalidUserParameter"                         : "{0} contains an invalid user-defined query string parameter: {1}. User-defined query string parameters must not begin with a '$'.",
+    "Extensions_DefaultErrorMessage"                        : "Unexpected failure.",
+    "Extensions_ConnectionFailureMessage"                   : "Unexpected connection failure.",
+    "MobileServiceTable_ReadMismatchedQueryTables"          : "Cannot get the results of a query for table '{1}' via table '{0}'.",
+    "MobileServiceTable_InsertIdAlreadySet"                 : "Cannot insert if the {0} member is already set.",
+    "MobileServiceLogin_AuthenticationProviderNotSupported" : "Unsupported authentication provider name. Please specify one of {0}.",
+    "MobileServiceLogin_LoginErrorResponse"                 : "Cannot start a login operation because login is already in progress.",
+    "MobileServiceLogin_InvalidResponseFormat"              : "Invalid format of the authentication response.",
+    "MobileServiceLogin_InvalidProvider"                    : "The first parameter must be the name of the autentication provider or a Microsoft Account authentication token.",
+    "MobileServiceTable_NotSingleObject"                    : "Could not get object from response {0}."
+}

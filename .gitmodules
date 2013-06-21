@@ -1,0 +1,6 @@
+[submodule "sdk/Javascript/src/External/esprima"]
+	path = sdk/Javascript/src/External/esprima
+	url = https://github.com/ariya/esprima.git
+[submodule "sdk/Javascript/src/External/queryjs"]
+	path = sdk/Javascript/src/External/queryjs
+	url = https://github.com/WindowsAzure/queryjs.git

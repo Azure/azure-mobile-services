@@ -25,4 +25,8 @@
 #import "MSError.h"
 #import "MSLoginController.h"
 
+#define WindowsAzureMobileServicesSdkMajorVersion 1
+#define WindowsAzureMobileServicesSdkMinorVersion 0
+#define WindowsAzureMobileServicesSdkBuildVersion 10529
+
 #endif

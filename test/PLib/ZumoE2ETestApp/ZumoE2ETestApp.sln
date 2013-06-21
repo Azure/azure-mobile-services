@@ -12,11 +12,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F1DF32
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microsoft.Bcl.Build", "Microsoft.Bcl.Build", "{968E5896-C4B5-45CA-AA79-A14FB21783E0}"
 	ProjectSection(SolutionItems) = preProject
-		packages\Microsoft.Bcl.Build.1.0.0-rc\tools\Install.ps1 = packages\Microsoft.Bcl.Build.1.0.0-rc\tools\Install.ps1
-		packages\Microsoft.Bcl.Build.1.0.0-rc\License.rtf = packages\Microsoft.Bcl.Build.1.0.0-rc\License.rtf
-		packages\Microsoft.Bcl.Build.1.0.0-rc\Microsoft.Bcl.Build.1.0.0-rc.nuspec = packages\Microsoft.Bcl.Build.1.0.0-rc\Microsoft.Bcl.Build.1.0.0-rc.nuspec
-		packages\Microsoft.Bcl.Build.1.0.0-rc\tools\Microsoft.Bcl.Build.targets = packages\Microsoft.Bcl.Build.1.0.0-rc\tools\Microsoft.Bcl.Build.targets
-		packages\Microsoft.Bcl.Build.1.0.0-rc\tools\Uninstall.ps1 = packages\Microsoft.Bcl.Build.1.0.0-rc\tools\Uninstall.ps1
+		packages\Microsoft.Bcl.Build.1.0.7\tools\Install.ps1 = packages\Microsoft.Bcl.Build.1.0.7\tools\Install.ps1
+		packages\Microsoft.Bcl.Build.1.0.7\License.rtf = packages\Microsoft.Bcl.Build.1.0.7\License.rtf
+		packages\Microsoft.Bcl.Build.1.0.7\Microsoft.Bcl.Build.1.0.7.nuspec = packages\Microsoft.Bcl.Build.1.0.7\Microsoft.Bcl.Build.1.0.7.nuspec
+		packages\Microsoft.Bcl.Build.1.0.7\tools\Microsoft.Bcl.Build.targets = packages\Microsoft.Bcl.Build.1.0.7\tools\Microsoft.Bcl.Build.targets
+		packages\Microsoft.Bcl.Build.1.0.7\tools\Uninstall.ps1 = packages\Microsoft.Bcl.Build.1.0.7\tools\Uninstall.ps1
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZumoE2ETestAppWP8", "ZumoE2ETestAppWP8\ZumoE2ETestAppWP8.csproj", "{520D957A-0B0E-4E85-A54F-DC5CE97C4A67}"

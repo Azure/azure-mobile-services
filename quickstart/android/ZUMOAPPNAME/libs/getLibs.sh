@@ -44,4 +44,3 @@ mv ./support/v4/android-support-v4.jar ./
 
 echo "Remove extra files"
 rm -rf ./support
-
