@@ -63,9 +63,6 @@
     <Content Include="js\MobileServices.min.js" />
     <Content Include="js\MobileServices.pri" />
   </ItemGroup>
-  <ItemGroup>
-    <SDKReference Include="Microsoft.WinJS.1.0, Version=1.0" />
-  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\$(WMSJSProjectDirectory)\Microsoft.VisualStudio.$(WMSJSProject).targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
