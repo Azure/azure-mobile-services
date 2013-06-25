@@ -2,7 +2,7 @@
 
 # First, we'll remove all previous artifacts created by this script
 rm iOS_ObjC.zip
-rm ZUMOAPPNAME/WindowsAzureMobileServices.framework
+rm -rf ZUMOAPPNAME/WindowsAzureMobileServices.framework
 
 # Second, build the Windows Azure Mobile Services iOS Framework
 bash ../../sdk/iOS/build.command
