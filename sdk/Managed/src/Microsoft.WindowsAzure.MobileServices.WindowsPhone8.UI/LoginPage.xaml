@@ -22,7 +22,13 @@ Copyright (c) Microsoft Corporation. All rights reserved.
 
     <!--LayoutRoot is the root grid where all page content is placed-->
     <Grid x:Name="LayoutRoot" Background="Transparent">
-        <phone:WebBrowser x:Name="browserControl" IsScriptEnabled="True"/>
+        <ProgressBar 
+            x:Name="progress"  
+            IsIndeterminate="True" />
+        <phone:WebBrowser 
+            x:Name="browserControl" 
+            IsScriptEnabled="True" 
+            Visibility="Collapsed" />
     </Grid>
 
 </phone:PhoneApplicationPage>

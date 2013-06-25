@@ -15,7 +15,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 {
     [Tag("unit")]
     [Tag("client")]
-    class MobileServiceClientTests : TestBase
+    public class MobileServiceClientTests : TestBase
     {
         /// <summary>
         /// Verify we have an installation ID created whenever we use a ZUMO
