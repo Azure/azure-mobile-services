@@ -7,6 +7,7 @@
     <string name="menu_run_tests">Run Selected Tests</string>
     <string name="menu_check_all">Check all tests</string>
     <string name="menu_uncheck_all">Uncheck all tests</string>
+    <string name="menu_run_all_test_groups">Run all test groups</string>
     <string name="test_case_name">Test Case Name</string>
     <string name="menu_reset">Reset</string>
     <string name="menu_view_log">View Log</string>

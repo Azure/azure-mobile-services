@@ -21,6 +21,7 @@ package com.microsoft.windowsazure.mobileservices.zumoe2etestapp;
 
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.http.client.methods.HttpPost;
@@ -158,6 +159,10 @@ public class MainActivity extends Activity {
 				runTests();
 			}
 			return true;
+			
+		case R.id.menu_run_all_test_groups:
+			runAllTestGroups();
+			return true;
 
 		case R.id.menu_check_all:
 			changeCheckAllTests(true);
@@ -251,6 +256,30 @@ public class MainActivity extends Activity {
 		}
 	}
 
+	private void runAllTestGroups() {
+		MobileServiceClient client;
+
+		try {
+			client = createMobileServiceClient();
+		} catch (MalformedURLException e) {
+			createAndShowDialog(e, "Error");
+			return;
+		}
+
+		ArrayList<TestGroup> groups = new ArrayList<TestGroup>();
+		
+		for (int i = 0; i < mTestGroupSpinner.getAdapter().getCount(); i++) {
+			TestGroup group = (TestGroup)mTestGroupSpinner.getItemAtPosition(i);
+			for (TestCase test : group.getTestCases()) {
+				test.setEnabled(true);
+			}
+			
+			groups.add(group);
+		}
+				
+		executeTestGroups(groups, client);
+	}
+	
 	private void runTests() {
 		MobileServiceClient client;
 
@@ -263,54 +292,68 @@ public class MainActivity extends Activity {
 
 		TestGroup group = (TestGroup) mTestGroupSpinner.getSelectedItem();
 
-		group.runTests(client, new TestExecutionCallback() {
-
-			@Override
-			public void onTestStart(TestCase test) {
-				TestCaseAdapter adapter = (TestCaseAdapter) mTestCaseList.getAdapter();
-				adapter.notifyDataSetChanged();
-				log("TEST START", test.getName());
-			}
-
-			@Override
-			public void onTestGroupComplete(TestGroup group, List<TestResult> results) {
-				log("TEST GROUP COMPLETED", group.getName() + " - " + group.getStatus().toString());
-				logSeparator();
-			}
-
-			@Override
-			public void onTestComplete(TestCase test, TestResult result) {
-				Throwable e = result.getException();
-				String exMessage = "-";
-				if (e != null) {
-					StringBuilder sb = new StringBuilder();
-					while (e != null) {
-						sb.append(e.getClass().getSimpleName() + ": ");
-						sb.append(e.getMessage());
-						sb.append(" // ");
-						e = e.getCause();
-					}
-
-					exMessage = sb.toString();
+		ArrayList<TestGroup> groups = new ArrayList<TestGroup>();
+		groups.add(group);
+		
+		executeTestGroups(groups, client);
+	}
+	
+	private void executeTestGroups(final List<TestGroup> testGroups, final MobileServiceClient client) {
+		if (testGroups.size() > 0) {
+		
+			TestGroup group = testGroups.get(0);
+			
+			group.runTests(client, new TestExecutionCallback() {
+	
+				@Override
+				public void onTestStart(TestCase test) {
+					TestCaseAdapter adapter = (TestCaseAdapter) mTestCaseList.getAdapter();
+					adapter.notifyDataSetChanged();
+					log("TEST START", test.getName());
 				}
-
-				final TestCaseAdapter adapter = (TestCaseAdapter) mTestCaseList.getAdapter();
-				
-				runOnUiThread(new Runnable() {
-
-					@Override
-					public void run() {
-						adapter.notifyDataSetChanged();
-						
-					}
+	
+				@Override
+				public void onTestGroupComplete(TestGroup group, List<TestResult> results) {
+					log("TEST GROUP COMPLETED", group.getName() + " - " + group.getStatus().toString());
+					logSeparator();
 					
-				});
-				log("TEST LOG", test.getLog());
-				log("TEST COMPLETED", test.getName() + " - " + result.getStatus().toString() + " - Ex: " + exMessage);
-				logSeparator();
-			}
-		});
-
+					// Execute the next test group
+					executeTestGroups(testGroups.subList(1, testGroups.size()), client);
+				}
+	
+				@Override
+				public void onTestComplete(TestCase test, TestResult result) {
+					Throwable e = result.getException();
+					String exMessage = "-";
+					if (e != null) {
+						StringBuilder sb = new StringBuilder();
+						while (e != null) {
+							sb.append(e.getClass().getSimpleName() + ": ");
+							sb.append(e.getMessage());
+							sb.append(" // ");
+							e = e.getCause();
+						}
+	
+						exMessage = sb.toString();
+					}
+	
+					final TestCaseAdapter adapter = (TestCaseAdapter) mTestCaseList.getAdapter();
+					
+					runOnUiThread(new Runnable() {
+	
+						@Override
+						public void run() {
+							adapter.notifyDataSetChanged();
+							
+						}
+						
+					});
+					log("TEST LOG", test.getLog());
+					log("TEST COMPLETED", test.getName() + " - " + result.getStatus().toString() + " - Ex: " + exMessage);
+					logSeparator();
+				}
+			});
+		}
 	}
 
 	private void logSeparator() {
