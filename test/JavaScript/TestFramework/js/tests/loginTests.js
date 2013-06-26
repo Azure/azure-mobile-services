@@ -5,8 +5,6 @@
 /// <reference path="../../../ZumoE2ETestAppJs/ZumoE2ETestAppJs/js/MobileServices.js" />
 /// <reference path="/LiveSDKHTML/js/wl.js" />
 /// <reference path="../testFramework.js" />
-/// <reference path="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" />
-
 
 function defineLoginTestsNamespace() {
     var tests = [];
@@ -35,12 +33,11 @@ function defineLoginTestsNamespace() {
 
     tests.push(createLogoutTest());
 
-    jQuery.each(tables, function (index, table) {
+    var index, table;
+    for (index = 0; index < tables.length; index++) {
+        table = tables[index];
         tests.push(createCRUDTest(table.name, null, table.permission, false));
-    });
-
-
-
+    }
 
     var lastUserIdentityObject = null;
 
@@ -50,11 +47,12 @@ function defineLoginTestsNamespace() {
         tests.push(createLogoutTest());
         tests.push(createLoginTest(provider));
 
-        jQuery.each(tables, function (index, table) {
+        for (index = 0; index < tables.length; index++) {
+            table = tables[index];
             if (table.permission !== TABLE_PERMISSION_PUBLIC) {
                 tests.push(createCRUDTest(table.name, provider, table.permission, true));
             }
-        });
+        }
 
         if (supportRecycledToken[provider]) {
             tests.push(createLogoutTest());
