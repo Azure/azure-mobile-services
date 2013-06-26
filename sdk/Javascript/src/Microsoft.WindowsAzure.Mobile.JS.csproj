@@ -178,7 +178,6 @@
     <Content Include="Generated\MobileServices.js" />
     <Content Include="Generated\MobileServices.Web.Internals.js" />
     <Content Include="Generated\MobileServices.Web.js" />
-    <Content Include="Generated\Zumo.Node.js" />
     <Content Include="Internals\DevIntellisense.js" />
     <Content Include="Internals\InternalsVisible.js" />
     <Content Include="Internals\NodeExports.js" />
@@ -208,7 +207,7 @@
     <!-- get the submodule code -->
     <Message Importance="high" Text="Getting Git Submodules" />
     <Exec Command="git submodule init" WorkingDirectory="$(MSBuildProjectDirectory)\..\..\.." />
-    <Exec Command="git submodule update" WorkingDirectory="$(MSBuildProjectDirectory)\..\..\.."/>
+    <Exec Command="git submodule update" WorkingDirectory="$(MSBuildProjectDirectory)\..\..\.." />
     <!-- Merge the modules into a library -->
     <Message Importance="high" Text="Generating MobileServices Library" />
     <MergeJSModules LibraryDefinitions="MobileServices.library" />
