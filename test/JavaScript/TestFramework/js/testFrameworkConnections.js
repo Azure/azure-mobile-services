@@ -180,7 +180,8 @@ function addAttribute(element, name, value) {
 function addTestGroups() {
     var tblTestsGroup = document.getElementById('tblTestsGroupBody');
 
-    jQuery.each(testGroups, function (index, item) {
+    for (var index = 0; index < testGroups.length; index++) {
+        var item = testGroups[index];
         var name = "" + (index + 1) + ". " + item.name + " tests";
         var tr = document.createElement('tr');
         var td = document.createElement('td');
@@ -190,22 +191,26 @@ function addTestGroups() {
         addAttribute(a, 'href', '#');
         addAttribute(a, 'class', 'testGroupItem');
 
-        if (a.attachEvent) {
+        var attachEvent = function (a, index) {
+            if (a.attachEvent) {
 
-            a.attachEvent('onclick', function () {
-                testGroupSelected(index);
-            });
-            a.innerText = toStaticHTML(name);
+                a.attachEvent('onclick', function () {
+                    testGroupSelected(index);
+                });
+                a.innerText = toStaticHTML(name);
+            }
+            else {
+                a.addEventListener('click', function () {
+                    testGroupSelected(index);
+                }, false);
+                a.textContent = name;
+            }
         }
-        else {
-            a.addEventListener('click', function () {
-                testGroupSelected(index);
-            }, false);
-            a.textContent = name;
-        }
+
+        attachEvent(a, index);
 
         tblTestsGroup.appendChild(tr);
-    });
+    }
 
 }
 

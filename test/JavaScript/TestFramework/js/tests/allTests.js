@@ -9,6 +9,7 @@
 /// <reference path="loginTests.js" />
 /// <reference path="miscTests.js" />
 /// <reference path="pushTests.js" />
+/// <reference path="apiTests.js" />
 
 (function () {
     zumo.testGroups.push(new zumo.Group(zumo.tests.roundTrip.name, zumo.tests.roundTrip.tests));
@@ -23,5 +24,7 @@
     if (!testPlatform.IsHTMLApplication) {
         zumo.testGroups.push(new zumo.Group(zumo.tests.push.name, zumo.tests.push.tests));
     }
+
+    zumo.testGroups.push(new zumo.Group(zumo.tests.api.name, zumo.tests.api.tests));
 
 })();
