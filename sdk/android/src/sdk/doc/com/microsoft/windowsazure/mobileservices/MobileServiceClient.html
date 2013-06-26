@@ -344,43 +344,51 @@ extends java.lang.Object</pre>
 </tr>
 <tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#loginWithDeviceAccount(Activity, com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback)">loginWithDeviceAccount</a></strong>(Activity&nbsp;activity,
+                      <a href="../../../../com/microsoft/windowsazure/mobileservices/UserAuthenticationCallback.html" title="interface in com.microsoft.windowsazure.mobileservices">UserAuthenticationCallback</a>&nbsp;callback)</code>
+<div class="block">Invokes Windows Azure Mobile Service authentication using a
+ the Google account registered in the device</div>
+</td>
+</tr>
+<tr class="altColor">
+<td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#logout()">logout</a></strong>()</code>
 <div class="block">Log the user out of the Mobile Service</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#registerDeserializer(java.lang.reflect.Type, com.google.gson.JsonDeserializer)">registerDeserializer</a></strong>(java.lang.reflect.Type&nbsp;type,
                     com.google.gson.JsonDeserializer&lt;T&gt;&nbsp;deserializer)</code>
 <div class="block">Registers a JsonDeserializer for the specified type</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#registerSerializer(java.lang.reflect.Type, com.google.gson.JsonSerializer)">registerSerializer</a></strong>(java.lang.reflect.Type&nbsp;type,
                   com.google.gson.JsonSerializer&lt;T&gt;&nbsp;serializer)</code>
 <div class="block">Registers a JsonSerializer for the specified type</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#setContext(Context)">setContext</a></strong>(Context&nbsp;mContext)</code>
 <div class="block">Sets the Context object for the MobileServiceClient</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#setCurrentUser(com.microsoft.windowsazure.mobileservices.MobileServiceUser)">setCurrentUser</a></strong>(<a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceUser.html" title="class in com.microsoft.windowsazure.mobileservices">MobileServiceUser</a>&nbsp;user)</code>
 <div class="block">Sets a user to authenticate the Mobile Service operations</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#setGsonBuilder(com.google.gson.GsonBuilder)">setGsonBuilder</a></strong>(com.google.gson.GsonBuilder&nbsp;gsonBuilder)</code>
 <div class="block">Sets the GsonBuilder used to in JSON Serialization/Deserialization</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html" title="class in com.microsoft.windowsazure.mobileservices">MobileServiceClient</a></code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#withFilter(com.microsoft.windowsazure.mobileservices.ServiceFilter)">withFilter</a></strong>(<a href="../../../../com/microsoft/windowsazure/mobileservices/ServiceFilter.html" title="interface in com.microsoft.windowsazure.mobileservices">ServiceFilter</a>&nbsp;serviceFilter)</code>
 <div class="block">Adds a new filter to the MobileServiceClient</div>
@@ -763,6 +771,19 @@ extends java.lang.Object</pre>
 <div class="block">Invokes an interactive authentication process using the specified
  Authentication Provider</div>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>provider</code> - The provider used for the authentication process</dd><dd><code>callback</code> - Callback to invoke when the authentication process finishes</dd></dl>
+</li>
+</ul>
+<a name="loginWithDeviceAccount(Activity, com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>loginWithDeviceAccount</h4>
+<pre>public&nbsp;void&nbsp;loginWithDeviceAccount(Activity&nbsp;activity,
+                          <a href="../../../../com/microsoft/windowsazure/mobileservices/UserAuthenticationCallback.html" title="interface in com.microsoft.windowsazure.mobileservices">UserAuthenticationCallback</a>&nbsp;callback)</pre>
+<div class="block">Invokes Windows Azure Mobile Service authentication using a
+ the Google account registered in the device</div>
+<dl><dt><span class="strong">Parameters:</span></dt><dd><code>Activity</code> - The activity that triggered the authentication</dd><dd><code>callback</code> - Callback to invoke when the authentication process finishes</dd></dl>
 </li>
 </ul>
 <a name="logout()">

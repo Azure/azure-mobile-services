@@ -39,8 +39,14 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.protocol.HTTP;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Bundle;
 import android.util.Pair;
 
 import com.google.gson.GsonBuilder;
@@ -104,6 +110,16 @@ public class MobileServiceClient {
 	 * Custom API Url
 	 */
 	private static final String CUSTOM_API_URL = "api/";
+	
+	/**
+	 * Google account type
+	 */
+	private static final String GOOGLE_ACCOUNT_TYPE = "com.google";
+
+	/**
+	 * Authentication token type required for client login
+	 */
+	private static final String GOOGLE_USER_INFO_AUTH_TOKEN_TYPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
 
 	/**
 	 * Creates a GsonBuilder with custom serializers to use with Windows Azure
@@ -258,6 +274,59 @@ public class MobileServiceClient {
 						}
 					}
 				});
+	}
+	
+	/**
+	 * Invokes Windows Azure Mobile Service authentication using a
+	 * the Google account registered in the device
+	 * 
+	 * @param Activity
+	 *            The activity that triggered the authentication
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void loginWithDeviceAccount(Activity activity, final UserAuthenticationCallback callback) {
+		try {
+			AccountManager acMgr = AccountManager.get(activity.getApplicationContext());
+			Account[] accounts = acMgr.getAccountsByType(GOOGLE_ACCOUNT_TYPE);
+			
+			if (accounts.length == 0) {
+				callback.onCompleted(null, new MobileServiceException("Couldn't find any Google account"), null);
+				return;
+			}
+			
+			Account account = accounts[0]; 
+					
+			final MobileServiceClient client = this;
+			
+			AccountManagerCallback<Bundle> authCallback = new AccountManagerCallback<Bundle>() {
+				
+				@Override
+				public void run(AccountManagerFuture<Bundle> futureBundle) {
+					try {
+						if (futureBundle.isCancelled()) {
+							callback.onCompleted(null, new MobileServiceException("User cancelled"), null);
+						} else {
+							Bundle bundle = futureBundle.getResult();
+							
+							String token = (String)(bundle.get(AccountManager.KEY_AUTHTOKEN));
+							
+							JsonObject json = new JsonObject();
+							json.addProperty("access_token", token);
+							
+							client.login(MobileServiceAuthenticationProvider.Google, json, callback);	
+						}
+					} catch (Exception e) {
+						callback.onCompleted(null, e, null);
+					}
+				}
+			};
+			
+			acMgr.getAuthToken(account, GOOGLE_USER_INFO_AUTH_TOKEN_TYPE, null, activity, authCallback, null);
+			
+		} catch (Exception e) {
+			callback.onCompleted(null, e, null);
+		}
 	}
 
 	/**
