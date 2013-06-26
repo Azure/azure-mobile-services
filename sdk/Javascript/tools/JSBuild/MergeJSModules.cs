@@ -184,6 +184,8 @@ namespace Microsoft.WindowsAzure.Mobile.JSBuild
                 "Library definition expects Library as the root element, not {0}.",              
                 library.Name);
 
+            string rootPath = Path.GetDirectoryName(definitionPath);
+
             // We support generating multiple library files from a single
             // library definition via conditional inclusion.  To generate a new
             // file, simply add a {Condition}Path="..." to your library with
@@ -224,7 +226,7 @@ namespace Microsoft.WindowsAzure.Mobile.JSBuild
                     string resourceCondition = GetAttribute(child, "Condition");
                     if (ScriptConditionSatisifesModuleCondition(scriptCondition, resourceCondition))
                     {
-                        WriteResource(script, child, definedResources);
+                        WriteResource(script, rootPath, child, definedResources);
                     }
                 }
 
@@ -233,7 +235,7 @@ namespace Microsoft.WindowsAzure.Mobile.JSBuild
                     string moduleCondition = GetAttribute(child, "Condition");
                     if (ScriptConditionSatisifesModuleCondition(scriptCondition, moduleCondition))
                     {
-                        WriteModule(script, child, definedModules, entrypoints);
+                        WriteModule(script, rootPath, child, definedModules, entrypoints);
                     }
                 }
 
@@ -241,7 +243,7 @@ namespace Microsoft.WindowsAzure.Mobile.JSBuild
 
                 // Save the generated library code
                 string outputPath = Path.Combine(
-                    Path.GetDirectoryName(definitionPath),
+                    rootPath,
                     GetAttribute(library, scriptCondition + "Path"));
                 File.WriteAllText(outputPath, script.ToString(), Encoding.UTF8);
             }
@@ -401,7 +403,7 @@ namespace Microsoft.WindowsAzure.Mobile.JSBuild
         /// Collection of modules that should be automatically required as
         /// entry points for the merged library script.
         /// </param>
-        private static void WriteModule(StringBuilder script, XElement module, List<string> definedModules, List<string> entrypoints)
+        private static void WriteModule(StringBuilder script, string rootPath, XElement module, List<string> definedModules, List<string> entrypoints)
         {
             Debug.Assert(script != null, "script should not be null.");
             Debug.Assert(module != null, "module should not be null.");
@@ -415,12 +417,15 @@ namespace Microsoft.WindowsAzure.Mobile.JSBuild
             Ensure(
                 !string.IsNullOrEmpty(path),
                 "Module element should specify a Path attribute.");
+            
+            string fullPath = Path.Combine(rootPath, path);
 
             // Expand any wildcards in the path name (which lets us include all
             // the *.js modules in a given directory, etc., which makes it easy
             // to do things like pull all the unit tests into a module).
-            foreach (string modulePath in ExpandPath(path))
+            foreach (string modulePath in ExpandPath(fullPath))
             {
+                
                 Ensure(
                     File.Exists(modulePath),
                     "Module Path {0} does not exist.",
@@ -517,7 +522,7 @@ namespace Microsoft.WindowsAzure.Mobile.JSBuild
         /// <param name="definedModules">
         /// List of defined resources used to ensure no duplication.
         /// </param>
-        private static void WriteResource(StringBuilder script, XElement resource, List<string> definedResources)
+        private static void WriteResource(StringBuilder script, string rootPath, XElement resource, List<string> definedResources)
         {
             Debug.Assert(script != null, "script should not be null.");
             Debug.Assert(resource != null, "resource should not be null.");
@@ -531,10 +536,11 @@ namespace Microsoft.WindowsAzure.Mobile.JSBuild
             Ensure(
                 !string.IsNullOrEmpty(path),
                 "Resource element should specify a Path attribute.");
+            string fullPath = Path.Combine(rootPath, path);
             Ensure(
-                File.Exists(path),
+                File.Exists(fullPath),
                 "Resource Path {0} does not exist.",
-                path);
+                fullPath);
 
             string languageTag = GetAttribute(resource, "LanguageTag");
             Ensure(
@@ -557,7 +563,7 @@ namespace Microsoft.WindowsAzure.Mobile.JSBuild
             // Add the language resjson to the Resources object as a Javascript object
             script.AppendFormat("    $__modules__.Resources['{0}'] =", languageTag);
 
-            IEnumerable<string> lines = File.ReadLines(path)
+            IEnumerable<string> lines = File.ReadLines(fullPath)
                                             .SkipWhile(line => string.IsNullOrEmpty(line.Trim()));
             foreach (string line in lines)
             {
