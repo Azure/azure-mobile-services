@@ -117,7 +117,6 @@
     <Content Include="js\MobileServices.min.js" />
     <Content Include="js\MobileServices.pri" />
     <Content Include="js\platformSpecificFunctions.js" />
-    <Content Include="lib\jquery.js" />
     <Content Include="packages.config" />
     <None Include="ZumoE2ETestAppJs_StoreKey.pfx" />
     <None Include="Package.StoreAssociation.xml" />
