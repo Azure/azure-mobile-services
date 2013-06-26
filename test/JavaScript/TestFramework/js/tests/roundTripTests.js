@@ -141,9 +141,10 @@ function defineRoundTripTestsNamespace() {
                             test.addLog('Object round tripped successfully.');
                             done(true);
                         } else {
-                            jQuery.each(errors, function (error) {
+                            for (var index = 0; index < errors.length; index++) {
+                                var error = errors[index];
                                 test.addLog(error);
-                            });
+                            }
                             test.addLog('Round-tripped item is different!');
                             done(false);
                         }
