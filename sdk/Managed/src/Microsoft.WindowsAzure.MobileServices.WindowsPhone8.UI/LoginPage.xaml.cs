@@ -36,7 +36,17 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             BackKeyPress += LoginPage_BackKeyPress;
             browserControl.Navigating += BrowserControl_Navigating;
+            browserControl.LoadCompleted += BrowserControl_LoadCompleted;
             browserControl.NavigationFailed += BrowserControl_NavigationFailed;
+        }
+
+        /// <summary>
+        /// Handler for the browser control's load completed event.  We use this to detect when
+        /// to hide the progress bar and show the browser control.
+        /// </summary>
+        void BrowserControl_LoadCompleted(object sender, NavigationEventArgs e)
+        {
+            HideProgressBar();
         }
 
         /// <summary>
@@ -95,6 +105,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         void LoginPage_BackKeyPress(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            ShowProgressBar();
+
             responseData = "";
             responseStatus = PhoneAuthenticationStatus.UserCancel;
 
@@ -115,7 +127,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 authenticationFinished = true;
 
                 // Navigate back now.
-                browserControl.Source = new Uri("about:blank");
+                ShowProgressBar();
                 NavigationService.GoBack();
             }
         }
@@ -143,8 +155,26 @@ namespace Microsoft.WindowsAzure.MobileServices
             e.Handled = true;
 
             // Navigate back now.
-            browserControl.Source = new Uri("about:blank");
+            ShowProgressBar();
             NavigationService.GoBack();
+        }
+
+        /// <summary>
+        /// Shows the progress bar and hides the browser control.
+        /// </summary>
+        private void ShowProgressBar()
+        {
+            browserControl.Visibility = System.Windows.Visibility.Collapsed;
+            progress.Visibility = System.Windows.Visibility.Visible;
+        }
+
+        /// <summary>
+        /// Hides the progress bar and shows the browser control.
+        /// </summary>
+        private void HideProgressBar()
+        {
+            browserControl.Visibility = System.Windows.Visibility.Visible;
+            progress.Visibility = System.Windows.Visibility.Collapsed;
         }
     }
 }

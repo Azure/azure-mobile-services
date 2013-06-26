@@ -18,7 +18,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     [Tag("service")]
     [Tag("unit")]
     [Tag("table")]
-    class MobileServiceTableTests : TestBase
+    public class MobileServiceTableTests : TestBase
     {
         [AsyncTestMethod]
         public async Task ReadAsync()
