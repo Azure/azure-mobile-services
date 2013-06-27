@@ -41,7 +41,6 @@
   <ItemGroup>
     <Compile Include="Authentication\MobileServiceTokenAuthentication.cs" />
     <Compile Include="Collections\MobileServiceCollection.cs" />
-    <Compile Include="Extensions\HttpMessageHandlerExtensions.cs" />
     <Compile Include="Extensions\IDictionaryExtensions.cs" />
     <Compile Include="Extensions\MobileServiceClientExtensions.cs" />
     <Compile Include="Extensions\MobileServiceCollectionExtensions.cs" />
