@@ -38,40 +38,43 @@ namespace Microsoft.WindowsAzure.MobileServices
         private const string concatFilterMethod = "concat";
 
         // Static dictionaries to look up OData method names from .NET memberInfo and types
-        private static Dictionary<MethodInfo, string> instanceMethods;
-        private static Dictionary<MethodInfo, string> staticMethods;
-        private static Dictionary<MemberInfo, string> instanceProperties;
+        private static Dictionary<MemberInfoKey, string> instanceMethods;
+        private static Dictionary<MemberInfoKey, string> staticMethods;
+        private static Dictionary<MemberInfoKey, string> instanceProperties;
         private static Dictionary<Type, Type[]> implicitConversions;
 
-        private static readonly MethodInfo toStringMethod = FindInstanceMethod(typeof(object), "ToString");
+        // To ensure that these reflection calls succeed, we need to have actual code that
+        // calls these methods. We do this in the static private constructor.
+        private static readonly MethodInfo toStringMethod = typeof(object).GetMethod("ToString");
+        private static readonly MethodInfo concatMethod = typeof(string).GetMethod("Concat", new Type[] { typeof(string), typeof(string) });
         
         /// <summary>
         /// Defines the instance methods that are translated into OData filter
         /// expressions.
         /// </summary>
-        private static Dictionary<MethodInfo, string> InstanceMethods
+        private static Dictionary<MemberInfoKey, string> InstanceMethods
         {
             get
             {
                 if (instanceMethods == null)
                 {
                     instanceMethods =
-                        new Dictionary<MethodInfo, string>
+                        new Dictionary<MemberInfoKey, string>
                         {
-                            { FindInstanceMethod(typeof(string), "ToLower"), toLowerFilterMethod },
-                            { FindInstanceMethod(typeof(string), "ToLowerInvariant"), toLowerFilterMethod },
-                            { FindInstanceMethod(typeof(string), "ToUpper"), toUpperFilterMethod },
-                            { FindInstanceMethod(typeof(string), "ToUpperInvariant"), toUpperFilterMethod },
-                            { FindInstanceMethod(typeof(string), "Trim"), trimFilterMethod },
-                            { FindInstanceMethod(typeof(string), "StartsWith", typeof(string)), startsWithFilterMethod },
-                            { FindInstanceMethod(typeof(string), "EndsWith", typeof(string)), endsWithFilterMethod },
-                            { FindInstanceMethod(typeof(string), "IndexOf", typeof(string)), indexOfFilterMethod },
-                            { FindInstanceMethod(typeof(string), "IndexOf", typeof(char)), indexOfFilterMethod },
-                            { FindInstanceMethod(typeof(string), "Contains", typeof(string)), subStringOfFilterMethod },
-                            { FindInstanceMethod(typeof(string), "Replace", typeof(string), typeof(string)), replaceFilterMethod },
-                            { FindInstanceMethod(typeof(string), "Replace", typeof(char), typeof(char)), replaceFilterMethod },
-                            { FindInstanceMethod(typeof(string), "Substring", typeof(int)), substringFilterMethod },
-                            { FindInstanceMethod(typeof(string), "Substring", typeof(int), typeof(int)), substringFilterMethod },
+                            { new MemberInfoKey(typeof(string), "ToLower", true, true), toLowerFilterMethod },
+                            { new MemberInfoKey(typeof(string), "ToLowerInvariant", true, true), toLowerFilterMethod },
+                            { new MemberInfoKey(typeof(string), "ToUpper", true, true), toUpperFilterMethod },
+                            { new MemberInfoKey(typeof(string), "ToUpperInvariant", true, true), toUpperFilterMethod },
+                            { new MemberInfoKey(typeof(string), "Trim", true, true), trimFilterMethod },
+                            { new MemberInfoKey(typeof(string), "StartsWith", true, true, typeof(string)), startsWithFilterMethod },
+                            { new MemberInfoKey(typeof(string), "EndsWith", true, true, typeof(string)), endsWithFilterMethod },
+                            { new MemberInfoKey(typeof(string), "IndexOf", true, true, typeof(string)), indexOfFilterMethod },
+                            { new MemberInfoKey(typeof(string), "IndexOf", true, true, typeof(char)), indexOfFilterMethod },
+                            { new MemberInfoKey(typeof(string), "Contains", true, true, typeof(string)), subStringOfFilterMethod },
+                            { new MemberInfoKey(typeof(string), "Replace", true, true, typeof(string), typeof(string)), replaceFilterMethod },
+                            { new MemberInfoKey(typeof(string), "Replace", true, true, typeof(char), typeof(char)), replaceFilterMethod },
+                            { new MemberInfoKey(typeof(string), "Substring", true, true, typeof(int)), substringFilterMethod },
+                            { new MemberInfoKey(typeof(string), "Substring", true, true, typeof(int), typeof(int)), substringFilterMethod },
                         };
                 }
 
@@ -83,59 +86,26 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Defines the static methods that are translated into OData filter
         /// expressions.
         /// </summary>
-        private static Dictionary<MethodInfo, string> StaticMethods
+        private static Dictionary<MemberInfoKey, string> StaticMethods
         {
             get
             {
                 if (staticMethods == null)
                 {
                     staticMethods =
-                        new Dictionary<MethodInfo, string>
+                        new Dictionary<MemberInfoKey, string>
                         {
-                            { FindStaticMethod(typeof(Math), "Floor", typeof(double)), floorFilterMethod },                 
-                            { FindStaticMethod(typeof(Math), "Ceiling", typeof(double)), ceilingFilterMethod },  
-                            { FindStaticMethod(typeof(Math), "Round", typeof(double)), roundFilterMethod },
-                            { FindStaticMethod(typeof(string), "Concat", typeof(string), typeof(string)), concatFilterMethod }
+                            { new MemberInfoKey(typeof(Math), "Floor", true, false, typeof(double)), floorFilterMethod },
+                            { new MemberInfoKey(typeof(Math), "Ceiling", true, false, typeof(double)), ceilingFilterMethod },
+                            { new MemberInfoKey(typeof(Math), "Round", true, false, typeof(double)), roundFilterMethod },
+                            { new MemberInfoKey(typeof(string), "Concat", true, false, typeof(string), typeof(string)), concatFilterMethod },
+                            { new MemberInfoKey(typeof(Decimal), "Floor", true, false, typeof(decimal)), floorFilterMethod },
+                            { new MemberInfoKey(typeof(Decimal), "Ceiling", true, false, typeof(decimal)), ceilingFilterMethod },
+                            { new MemberInfoKey(typeof(Decimal), "Round", true, false, typeof(decimal)), roundFilterMethod },
+                            { new MemberInfoKey(typeof(Math), "Ceiling", true, false, typeof(decimal)), ceilingFilterMethod },
+                            { new MemberInfoKey(typeof(Math), "Floor", true, false, typeof(decimal)), floorFilterMethod },
+                            { new MemberInfoKey(typeof(Math), "Round", true, false, typeof(decimal)), roundFilterMethod}
                         };
-
-                    // Windows 8 supports decimal.Floor(), decimal.Ceiling() and decimal.Round(), but Windows Phone does not, 
-                    // so we have to ensure these method infos exist before we add them.
-                    MethodInfo possibleFloorMethod = FindStaticMethod(typeof(Decimal), "Floor", typeof(decimal));
-                    if (possibleFloorMethod != null)
-                    {
-                        staticMethods.Add(possibleFloorMethod, floorFilterMethod);
-                    }
-                    
-                    MethodInfo possibleCeilingMethod = FindStaticMethod(typeof(Decimal), "Ceiling", typeof(decimal));
-                    if (possibleCeilingMethod != null)
-                    {
-                        staticMethods.Add(possibleCeilingMethod, ceilingFilterMethod);
-                    }
-
-                    MethodInfo possibleRoundMethod = FindStaticMethod(typeof(Decimal), "Round", typeof(decimal));
-                    if (possibleRoundMethod != null)
-                    {
-                        staticMethods.Add(possibleRoundMethod, roundFilterMethod);
-                    }
-
-                    // Windows Phone 7.5 does not support Math.Floor(), Math.Round() and Math.Ceiling() for decimals 
-                    MethodInfo possibleCeilingMethodMath = FindStaticMethod(typeof(Math), "Ceiling", typeof(decimal));
-                    if (possibleCeilingMethodMath != null)
-                    {
-                        staticMethods.Add(possibleCeilingMethodMath, ceilingFilterMethod);
-                    }
-
-                    MethodInfo possibleFloorMethodMath = FindStaticMethod(typeof(Math), "Floor", typeof(decimal));
-                    if (possibleFloorMethodMath != null)
-                    {
-                        staticMethods.Add(possibleFloorMethodMath, floorFilterMethod);
-                    }
-
-                    MethodInfo possibleRoundMethodMath = FindStaticMethod(typeof(Math), "Round", typeof(decimal));
-                    if (possibleRoundMethodMath != null)
-                    {
-                        staticMethods.Add(possibleRoundMethodMath, roundFilterMethod);
-                    }
                 }
 
                 return staticMethods;
@@ -146,22 +116,22 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Defines the instance properties that are translated into OData
         /// filter expressions.
         /// </summary>
-        private static Dictionary<MemberInfo, string> InstanceProperties
+        private static Dictionary<MemberInfoKey, string> InstanceProperties
         {
             get
             {
                 if (instanceProperties == null)
                 {
                     instanceProperties =
-                        new Dictionary<MemberInfo, string>
+                        new Dictionary<MemberInfoKey, string>
                         {
-                            { FindInstanceProperty(typeof(string), "Length"), "length" },
-                            { FindInstanceProperty(typeof(DateTime), "Day"), "day" },
-                            { FindInstanceProperty(typeof(DateTime), "Month"), "month" },
-                            { FindInstanceProperty(typeof(DateTime), "Year"), "year" },
-                            { FindInstanceProperty(typeof(DateTime), "Hour"), "hour" },
-                            { FindInstanceProperty(typeof(DateTime), "Minute"), "minute" },
-                            { FindInstanceProperty(typeof(DateTime), "Second"), "second" },
+                            { new MemberInfoKey(typeof(string), "Length", false, true), "length" },
+                            { new MemberInfoKey(typeof(DateTime), "Day", false, true), "day" },
+                            { new MemberInfoKey(typeof(DateTime), "Month", false, true), "month" },
+                            { new MemberInfoKey(typeof(DateTime), "Year", false, true), "year" },
+                            { new MemberInfoKey(typeof(DateTime), "Hour", false, true), "hour" },
+                            { new MemberInfoKey(typeof(DateTime), "Minute", false, true), "minute" },
+                            { new MemberInfoKey(typeof(DateTime), "Second", false, true), "second" },
                         };
                 }
 
@@ -209,6 +179,21 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// members used within expressions.
         /// </summary>
         private MobileServiceContractResolver contractResolver;
+
+        /// <summary>
+        /// The static constructor for the FilterBuildingExpressionVisitor
+        /// </summary>
+        static FilterBuildingExpressionVisitor()
+        {
+            // ! Do not remove this code. ! 
+            // Some compilers will remove method infos that are never called by an aplication.
+            // This will break reflection scenarios when the methodInfos searched for via reflection
+            // were not used in the application code and so were removed by the compiler. We search
+            // for the methodInfos for Object.ToString() and String.Concat(string, string) via
+            // reflection, so we need this code here to ensure that don't get removed by the compiler.
+            string aString = new Object().ToString();
+            aString = String.Concat(aString, "a string");
+        }
 
         /// <summary>
         /// Initializes a new instance of the FilterBuildingExpressionVisitor
@@ -694,10 +679,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>The rewritten expression.</returns>
         private Expression RewriteStringAddition(BinaryExpression expression)
         {
-            return Expression.Call(
-                        FindStaticMethod(typeof(string), "Concat", typeof(string), typeof(string)),
-                        expression.Left,
-                        expression.Right);
+            return Expression.Call(concatMethod, expression.Left, expression.Right);
         }
 
         /// <summary>
@@ -741,7 +723,8 @@ namespace Microsoft.WindowsAzure.MobileServices
             // Check if this member is actually a function that looks like a
             // property (like string.Length, etc.)
             string methodName = null;
-            if (InstanceProperties.TryGetValue(expression.Member, out methodName))
+            MemberInfoKey memberInfoKey = new MemberInfoKey(expression.Member);
+            if (InstanceProperties.TryGetValue(memberInfoKey, out methodName))
             {
                 this.filter.Append(methodName);
                 this.filter.Append("(");
@@ -772,11 +755,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             // Look for either an instance or static method
             string methodName = null;
-            if (InstanceMethods.TryGetValue(expression.Method, out methodName))
+            MemberInfoKey methodInfoKey = new MemberInfoKey(expression.Method);
+            if (InstanceMethods.TryGetValue(methodInfoKey, out methodName))
             {
                 this.VisitODataMethodCall(expression, methodName, false);
             }
-            else if (StaticMethods.TryGetValue(expression.Method, out methodName))
+            else if (StaticMethods.TryGetValue(methodInfoKey, out methodName))
             {
                 this.VisitODataMethodCall(expression, methodName, true);
             }
@@ -959,120 +943,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return arguments;
         }
-
-        /// <summary>
-        /// Get a sequence of types from the given type up through the base
-        /// type.  This is helpful given that all of the new reflection APIs
-        /// only provide DeclaredFoos, but you can use SelectMany with this
-        /// sequence to get all of the inherited Foos.
-        /// </summary>
-        /// <param name="type">
-        /// The type to get the hierarchy for.
-        /// </param>
-        /// <returns>
-        /// Sequence describing the type hierarchy.
-        /// </returns>
-        private static IEnumerable<Type> GetBaseTypesAndSelf(Type type)
-        {
-            Debug.Assert(type != null, "type cannot be null!");
-
-            while (type != null)
-            {
-                yield return type;
-                type = type.BaseType;
-            }
-        }
-
-        /// <summary>
-        /// Find a method by type and name.
-        /// </summary>
-        /// <param name="type">
-        /// The type with the method.
-        /// </param>
-        /// <param name="name">
-        /// The name of the method.
-        /// </param>
-        /// <param name="parameterTypes">
-        /// The parameters to the method.
-        /// </param>
-        /// <returns>
-        /// A sequence of MethodInfos.
-        /// </returns>
-        private static IEnumerable<MethodInfo> GetMethods(Type type, string name, Type[] parameterTypes)
-        {
-            return GetBaseTypesAndSelf(type)
-                .SelectMany(t => t.GetMethods().Where(m => m.Name == name))
-                .Where(m => m.GetParameters().Select(p => p.ParameterType).SequenceEqual(parameterTypes));
-        }
-
-        /// <summary>
-        /// Find an instance method info by type and name.
-        /// </summary>
-        /// <param name="type">
-        /// The type declaring the method.
-        /// </param>
-        /// <param name="name">
-        /// The name of the method.
-        /// </param>
-        /// <param name="parameterTypes">
-        /// Types of the method parameters.
-        /// </param>
-        /// <returns>
-        /// The desired MethodInfo or null.
-        /// </returns>
-        private static MethodInfo FindInstanceMethod(Type type, string name, params Type[] parameterTypes)
-        {
-            return
-                GetMethods(type, name, parameterTypes)
-                .Where(m => !m.IsStatic)
-                .SingleOrDefault();
-        }
-
-        /// <summary>
-        /// Find an instance property info by type and name.
-        /// </summary>
-        /// <param name="type">
-        /// The type declaring the property.
-        /// </param>
-        /// <param name="name">
-        /// The name of the property.
-        /// </param>
-        /// <returns>
-        /// The desired property's getter's MethodInfo or null.
-        /// </returns>
-        private static MemberInfo FindInstanceProperty(Type type, string name)
-        {
-            return
-                GetBaseTypesAndSelf(type)
-                .SelectMany(t => t.GetProperties().Where(
-                    p => p.Name == name && p.CanRead && !p.GetGetMethod().IsStatic))
-                .Cast<MemberInfo>()
-                .SingleOrDefault();
-        }
-
-        /// <summary>
-        /// Find a static method info by type and name.
-        /// </summary>
-        /// <param name="type">
-        /// The type declaring the method.
-        /// </param>
-        /// <param name="name">
-        /// The name of the method.
-        /// </param>
-        /// <param name="parameterTypes">
-        /// Types of the method parameters.
-        /// </param>
-        /// <returns>
-        /// The desired MethodInfo or null.
-        /// </returns>
-        private static MethodInfo FindStaticMethod(Type type, string name, params Type[] parameterTypes)
-        {
-            return
-                GetMethods(type, name, parameterTypes)
-                .Where(m => m.IsStatic)
-                .SingleOrDefault();
-        }
-
+        
         /// <summary>
         /// Convert a date to the ISO 8601 roundtrip format supported by the
         /// server.
