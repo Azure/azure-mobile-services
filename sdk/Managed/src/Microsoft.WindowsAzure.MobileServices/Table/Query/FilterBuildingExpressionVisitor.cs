@@ -186,7 +186,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         static FilterBuildingExpressionVisitor()
         {
             // ! Do not remove this code. ! 
-            // Some compilers will remove method infos that are never called by an aplication.
+            // Some compilers will remove method infos that are never called by an application.
             // This will break reflection scenarios when the methodInfos searched for via reflection
             // were not used in the application code and so were removed by the compiler. We search
             // for the methodInfos for Object.ToString() and String.Concat(string, string) via
