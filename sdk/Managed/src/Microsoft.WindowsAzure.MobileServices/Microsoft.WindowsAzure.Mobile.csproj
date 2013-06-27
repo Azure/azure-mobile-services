@@ -72,6 +72,7 @@
     <Compile Include="Table\Query\FilterBuildingExpressionVisitor.cs" />
     <Compile Include="Table\Query\IMobileServiceTableQuery.cs" />
     <Compile Include="Table\Query\ITotalCountProvider.cs" />
+    <Compile Include="Table\Query\MemberInfoKey.cs" />
     <Compile Include="Table\Query\MobileServiceTableQuery.cs" />
     <Compile Include="Table\Query\MobileServiceTableQueryDescription.cs" />
     <Compile Include="Table\Query\MobileServiceTableQueryProvider.cs" />
