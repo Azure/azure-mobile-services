@@ -76,7 +76,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public int? Top { get; set; }
 
         /// <summary>
-        /// Gets or sets a projection that should be applied to each element of
+        /// Gets a collection of projections that should be applied to each element of
         /// the query.
         /// </summary>
         public List<Delegate> Projection { get; private set; }
