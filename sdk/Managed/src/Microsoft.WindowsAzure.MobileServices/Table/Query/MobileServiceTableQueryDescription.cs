@@ -37,6 +37,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.IncludeTotalCount = includeTotalCount;
 
             this.Selection = new List<string>();
+            this.Projection = new List<Delegate>();
             this.Ordering = new List<KeyValuePair<string, bool>>();
         }
 
@@ -78,7 +79,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Gets or sets a projection that should be applied to each element of
         /// the query.
         /// </summary>
-        public Delegate Projection { get; set; }
+        public List<Delegate> Projection { get; private set; }
 
         /// <summary>
         /// Gets or sets the type of the argument to the projection (i.e., the

@@ -135,7 +135,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(typeof(Product), query.ProjectionArgumentType);
             Assert.AreEqual(
                 "ZUMO",
-                query.Projection.DynamicInvoke(
+                query.Projection.First().DynamicInvoke(
                     new Product { Name = "ZUMO", Price = 0, InStock = true }));
 
             // Chaining
@@ -145,7 +145,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(typeof(Product), query.ProjectionArgumentType);
             Assert.AreEqual(
                 "ZUMO",
-                query.Projection.DynamicInvoke(
+                query.Projection.First().DynamicInvoke(
                     new Product { Name = "ZUMO", Price = 0, InStock = true }));
 
             // Verify that we don't blow up by trying to include the Foo
@@ -153,6 +153,30 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Compile((IMobileServiceTable<Product> table) =>
                 from p in table
                 select new { Foo = p.Name });
+        }
+
+        [Tag("now")]
+        [TestMethod]
+        public void MutlipleProjection()
+        {
+            // Chaining
+            MobileServiceTableQueryDescription query = Compile<Product, string>(table =>
+                table.Select(p => new { Foo = p.Name })
+                     .Select(f => f.Foo.ToLower()));
+            Assert.AreEqual(1, query.Selection.Count);
+            Assert.AreEqual("Name", query.Selection[0]);
+            Assert.AreEqual(typeof(Product), query.ProjectionArgumentType);
+            Assert.AreEqual(
+                "zumo",
+                query.Projection[1].DynamicInvoke(
+                    query.Projection[0].DynamicInvoke(
+                    new Product { Name = "ZUMO", Price = 0, InStock = true })));
+
+            // Verify that we don't blow up by trying to include the Foo
+            // property in the compiled query
+            Compile((IMobileServiceTable<Product> table) =>
+                table.Select( p => new { Foo = p.Name})
+                     .Select( f => new { LowerFoo = f.Foo.ToLower() }));
         }
 
         [TestMethod]
