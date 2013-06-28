@@ -21,11 +21,16 @@ package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
 import static com.microsoft.windowsazure.mobileservices.MobileServiceQueryOperations.field;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.UUID;
+
+import org.apache.http.client.methods.HttpGet;
+
+import android.util.Pair;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -59,6 +64,8 @@ public class MiscTests extends TestGroup {
 
 	protected static final String ROUND_TRIP_TABLE_NAME = "droidRoundTripTable";
 	protected static final String PARAM_TEST_TABLE_NAME = "ParamsTestTable";
+	protected static final String MOVIES_TABLE_NAME = "droidMovies";
+	private static final String APP_API_NAME = "application";
 	
 	
 	public MiscTests() {
@@ -152,6 +159,8 @@ public class MiscTests extends TestGroup {
 		
 		this.addTest(createParameterPassingTest(true));
 		this.addTest(createParameterPassingTest(false));
+		
+		this.addTest(createHttpContentApiTest());
 		
 	}
 
@@ -412,4 +421,104 @@ public class MiscTests extends TestGroup {
 		return test;
 	}
 
+	private TestCase createHttpContentApiTest() {
+		String name = "Use \"text/plain\" Content and \"identity\" Encoding Headers";
+		
+		TestCase test = new TestCase(name) {
+			MobileServiceClient mClient;
+			List<Pair<String, String>> mQuery;
+			List<Pair<String, String>> mHeaders;
+			TestExecutionCallback mCallback;
+			JsonObject mExpectedResult;
+			int mExpectedStatusCode;
+			String mHttpMethod;
+			byte[] mContent;
+			
+			TestResult mResult;
+			
+			@Override
+			protected void executeTest(MobileServiceClient client,
+					TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mClient = client;
+				mCallback = callback;
+				
+				createHttpContentTestInput();
+				
+				mClient.invokeApi(APP_API_NAME, mContent, mHttpMethod, mHeaders, mQuery, new ServiceFilterResponseCallback() {
+					
+					@Override
+					public void onResponse(ServiceFilterResponse response, Exception exception) {
+						if (response == null) {
+							createResultFromException(exception);
+							mCallback.onTestComplete(mResult.getTestCase(), mResult);
+							return;
+						}
+						
+						Exception ex = validateResponse(response);
+						if (ex != null) {
+							createResultFromException(mResult, ex);
+						} else {
+							mResult.getTestCase().log("Header validated successfully");
+							
+							String responseContent = response.getContent();
+							
+							mResult.getTestCase().log("Response content: " + responseContent);
+							
+							JsonElement jsonResponse = null;
+							String decodedContent = responseContent
+									.replace("__{__", "{")
+									.replace("__}__", "}")
+									.replace("__[__", "[")
+									.replace("__]__", "]");
+							jsonResponse = new JsonParser().parse(decodedContent);
+														
+							if (!Util.compareJson(mExpectedResult, jsonResponse)) {
+								createResultFromException(mResult, new ExpectedValueException(mExpectedResult, jsonResponse));
+							}
+						}
+						
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+
+					private Exception validateResponse(ServiceFilterResponse response) {
+						if (mExpectedStatusCode != response.getStatus().getStatusCode()) {
+							mResult.getTestCase().log("Invalid status code");
+							String content = response.getContent();
+							if (content != null) {
+								mResult.getTestCase().log("Response: " + content);
+							}
+							return new ExpectedValueException(mExpectedStatusCode, response.getStatus().getStatusCode());
+						} else {
+							return null;							
+						}						
+					}
+				});
+			}
+			
+			private void createHttpContentTestInput() {
+				mHttpMethod = HttpGet.METHOD_NAME;
+				log("Method = " + mHttpMethod);
+				
+				mExpectedResult = new JsonObject();
+				mExpectedResult.addProperty("method", mHttpMethod);
+				JsonObject user = new JsonObject();
+				user.addProperty("level", "anonymous");
+				mExpectedResult.add("user", user);
+				
+				mHeaders = new ArrayList<Pair<String,String>>();
+				mHeaders.add(new Pair<String, String>("Accept", "text/plain"));
+				mHeaders.add(new Pair<String, String>("Accept-Encoding", "identity"));
+				
+				mQuery = new ArrayList<Pair<String,String>>();
+				mQuery.add(new Pair<String, String>("format", "other"));
+				
+				mExpectedStatusCode = 200;				
+			}
+		};
+		
+		return test;
+	}
 }
