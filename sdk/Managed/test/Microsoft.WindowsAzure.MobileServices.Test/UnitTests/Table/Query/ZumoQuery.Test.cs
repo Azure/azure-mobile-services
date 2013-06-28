@@ -155,7 +155,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 select new { Foo = p.Name });
         }
 
-        [Tag("now")]
         [TestMethod]
         public void MutlipleProjection()
         {

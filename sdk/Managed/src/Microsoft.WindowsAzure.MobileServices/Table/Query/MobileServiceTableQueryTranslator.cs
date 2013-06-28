@@ -231,7 +231,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     // to the deserialized value to transform it accordingly.
                     this.queryDescription.Projection.Add(projection.Compile());
 
-                    // We only need to capture the projection arugment type and memebers for the
+                    // We only need to capture the projection arugment type and members for the
                     // very first projection.
                     if (this.queryDescription.ProjectionArgumentType == null)
                     {
