@@ -227,42 +227,47 @@ namespace Microsoft.WindowsAzure.MobileServices
                 LambdaExpression projection = StripQuote(expression.Arguments[1]) as LambdaExpression;
                 if (projection != null && projection.Parameters.Count == 1)
                 {
-                    // Store the type of the input to the projection as we'll
-                    // need that for deserialization of values (since the
-                    // projection will change the expected type of the data
-                    // source)
-                    this.queryDescription.ProjectionArgumentType = projection.Parameters[0].Type;
-
                     // Compile the projection into a function that we can apply
                     // to the deserialized value to transform it accordingly.
-                    this.queryDescription.Projection = projection.Compile();
+                    this.queryDescription.Projection.Add(projection.Compile());
 
-                    // Filter the selection down to just the values used by
-                    // the projection
-                    IExpressionUtility expressionUtility = Platform.Instance.ExpressionUtility;
-                    foreach (MemberExpression memberExpression in expressionUtility.GetMemberExpressions(projection.Body))
+                    // We only need to capture the projection arugment type and memebers for the
+                    // very first projection.
+                    if (this.queryDescription.ProjectionArgumentType == null)
                     {
-                        // Ensure we only process members of the parameter
-                        string memberName = FilterBuildingExpressionVisitor.GetTableMemberName(memberExpression, this.ContractResolver);
-                        if (memberName != null)
+                        // Store the type of the very first input to the projection as we'll
+                        // need that for deserialization of values (since the
+                        // projection will change the expected type of the data
+                        // source)
+                        this.queryDescription.ProjectionArgumentType = projection.Parameters[0].Type;
+
+                        // Filter the selection down to just the values used by
+                        // the projection
+                        IExpressionUtility expressionUtility = Platform.Instance.ExpressionUtility;
+                        foreach (MemberExpression memberExpression in expressionUtility.GetMemberExpressions(projection.Body))
                         {
-                            queryDescription.Selection.Add(memberName);
-                        }
-                    }
-                    
-                    //Make sure we also include all the members that would be
-                    //required for deserialization
-                    JsonContract contract = this.ContractResolver.ResolveContract(this.queryDescription.ProjectionArgumentType);
-                    JsonObjectContract objectContract = contract as JsonObjectContract;
-                    if (objectContract != null)
-                    {
-                        foreach (string propertyName in objectContract.Properties
-                                                                      .Where(p => p.Required == Required.AllowNull)
-                                                                      .Select(p => p.PropertyName))
-                        {
-                            if (!this.queryDescription.Selection.Contains(propertyName))
+                            // Ensure we only process members of the parameter
+                            string memberName = FilterBuildingExpressionVisitor.GetTableMemberName(memberExpression, this.ContractResolver);
+                            if (memberName != null)
                             {
-                                this.queryDescription.Selection.Add(propertyName);
+                                queryDescription.Selection.Add(memberName);
+                            }
+                        }
+
+                        //Make sure we also include all the members that would be
+                        //required for deserialization
+                        JsonContract contract = this.ContractResolver.ResolveContract(this.queryDescription.ProjectionArgumentType);
+                        JsonObjectContract objectContract = contract as JsonObjectContract;
+                        if (objectContract != null)
+                        {
+                            foreach (string propertyName in objectContract.Properties
+                                                                          .Where(p => p.Required == Required.AllowNull)
+                                                                          .Select(p => p.PropertyName))
+                            {
+                                if (!this.queryDescription.Selection.Contains(propertyName))
+                                {
+                                    this.queryDescription.Selection.Add(propertyName);
+                                }
                             }
                         }
                     }
