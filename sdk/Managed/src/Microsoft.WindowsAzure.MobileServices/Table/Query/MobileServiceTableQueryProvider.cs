@@ -103,9 +103,9 @@ namespace Microsoft.WindowsAzure.MobileServices
                     {
                         // Apply the projection to the instance transforming it
                         // as desired
-                        if (compiledQuery.Projection != null)
+                        foreach (Delegate projection in compiledQuery.Projections)
                         {
-                            value = compiledQuery.Projection.DynamicInvoke(value);
+                            value = projection.DynamicInvoke(value);
                         }
 
                         return (T)value;
