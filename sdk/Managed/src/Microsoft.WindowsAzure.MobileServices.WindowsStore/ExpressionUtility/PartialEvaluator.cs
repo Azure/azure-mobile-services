@@ -90,16 +90,26 @@ namespace Microsoft.WindowsAzure.MobileServices
                         // If nothing in my subtree is dependent
                         if (!dependent)
                         {
+                            // A NewExpression itself will appear to be independent,
+                            // but if there are MemberInitExpressions, the NewExpression
+                            // can't be evaluated by itself. The MemberInitExpressions will
+                            // determine if the full expression is dependent or not, so 
+                            // the NewExpression should simply not be checked for dependency.
+                            NewExpression newExpression = expr as NewExpression;
+                            if (newExpression != null)
+                            {
+                                return expr;
+                            }
+
                             // Then the current node is independent if it's not
                             // related to the parameter or if it's not the
                             // constant query root (to handle degenerate cases 
                             // where we don't actually use any parameters in
                             // the query - like table.skip(2).take(3)).
                             ConstantExpression constant = expr as ConstantExpression;
-                            NewExpression newExpression = expr as NewExpression;
+                            
                             if (expr.NodeType == ExpressionType.Parameter ||
-                                (constant != null && constant.Value is IQueryable) ||
-                                (newExpression != null))
+                                (constant != null && constant.Value is IQueryable))
                             {
                                 dependent = true;
                             }

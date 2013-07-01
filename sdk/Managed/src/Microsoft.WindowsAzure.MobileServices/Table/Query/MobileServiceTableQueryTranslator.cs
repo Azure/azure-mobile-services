@@ -261,7 +261,8 @@ namespace Microsoft.WindowsAzure.MobileServices
                         if (objectContract != null)
                         {
                             foreach (string propertyName in objectContract.Properties
-                                                                          .Where(p => p.Required == Required.Always)
+                                                                          .Where(p => p.Required == Required.Always || 
+                                                                                      p.Required == Required.AllowNull)
                                                                           .Select(p => p.PropertyName))
                             {
                                 if (!this.queryDescription.Selection.Contains(propertyName))

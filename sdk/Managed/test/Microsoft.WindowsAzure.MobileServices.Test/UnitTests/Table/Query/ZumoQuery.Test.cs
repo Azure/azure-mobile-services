@@ -20,12 +20,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public ulong UnsignedId { get; set; }
         public uint UnsignedSmallId { get; set; }
         public string Name { get; set; }
-        public Decimal Price { get; set; }
 
-        [JsonProperty(Required= Required.Always)]
+        [JsonProperty(Required = Required.Always)]
         public float Weight { get; set; }
 
+        [JsonProperty(Required = Required.AllowNull)]
         public float? WeightInKG { get; set; }
+
+        public Decimal Price { get; set; }
         public bool InStock { get; set; }
         public short DisplayAisle { get; set; }
         public ushort UnsignedDisplayAisle { get; set; }
@@ -67,7 +69,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 select p);
             Assert.AreEqual("Product", query.TableName);
             Assert.IsNull(query.Filter);
-            Assert.AreEqual(1, query.Selection.Count);
+            Assert.AreEqual(2, query.Selection.Count);
             Assert.AreEqual(0, query.Ordering.Count);            
         }
 
@@ -134,9 +136,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             MobileServiceTableQueryDescription query = Compile<Product, string>(table =>
                 from p in table
                 select p.Name);
-            Assert.AreEqual(2, query.Selection.Count);
+            Assert.AreEqual(3, query.Selection.Count);
             Assert.AreEqual("Name", query.Selection[0]);
             Assert.AreEqual("Weight", query.Selection[1]);
+            Assert.AreEqual("WeightInKG", query.Selection[2]);
             Assert.AreEqual(typeof(Product), query.ProjectionArgumentType);
             Assert.AreEqual(
                 "ZUMO",
@@ -145,9 +148,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             // Chaining
             query = Compile<Product, string>(table => table.Select(p => p.Name));
-            Assert.AreEqual(2, query.Selection.Count);
+            Assert.AreEqual(3, query.Selection.Count);
             Assert.AreEqual("Name", query.Selection[0]);
             Assert.AreEqual("Weight", query.Selection[1]);
+            Assert.AreEqual("WeightInKG", query.Selection[2]);
             Assert.AreEqual(typeof(Product), query.ProjectionArgumentType);
             Assert.AreEqual(
                 "ZUMO",
@@ -168,9 +172,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             MobileServiceTableQueryDescription query = Compile<Product, string>(table =>
                 table.Select(p => new { Foo = p.Name })
                      .Select(f => f.Foo.ToLower()));
-            Assert.AreEqual(2, query.Selection.Count);
+            Assert.AreEqual(3, query.Selection.Count);
             Assert.AreEqual("Name", query.Selection[0]);
             Assert.AreEqual("Weight", query.Selection[1]);
+            Assert.AreEqual("WeightInKG", query.Selection[2]);
             Assert.AreEqual(typeof(Product), query.ProjectionArgumentType);
             Assert.AreEqual(
                 "zumo",
@@ -272,6 +277,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             query = Compile<Product, Product>(table => table.Where(p => !p.InStock));
             Assert.AreEqual("not(InStock)", query.Filter);
+
+            // Allow New Operations
+            float foo = 10;
+            query = Compile<Product, Product>(table => table.Where(p => p.Weight <= new Product() { Weight = foo }.Weight || p.InStock == true));
+            Assert.AreEqual("((Weight le 10f) or (InStock eq true))", query.Filter);
+
         }
 
         [TestMethod]
@@ -286,7 +297,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 .Skip(20)
                 .Take(10));
             Assert.AreEqual(
-                "$filter=((Price le 10M) and (Weight gt 10f)) and not(InStock)&$orderby=Price desc,Name&$skip=20&$top=10&$select=Name,Price,Weight",
+                "$filter=((Price le 10M) and (Weight gt 10f)) and not(InStock)&$orderby=Price desc,Name&$skip=20&$top=10&$select=Name,Price,Weight,WeightInKG",
                 query.ToQueryString());
         }
 
@@ -888,7 +899,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 select p);
             Assert.AreEqual("Product", query.TableName);
             Assert.IsNull(query.Filter);
-            Assert.AreEqual(1, query.Selection.Count);
+            Assert.AreEqual(2, query.Selection.Count);
             Assert.AreEqual(0, query.Ordering.Count);
 
             query = Compile<Product, string>(table =>
@@ -896,7 +907,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 select p.Name);
             Assert.AreEqual("Product", query.TableName);
             Assert.IsNull(query.Filter);
-            Assert.AreEqual(2, query.Selection.Count);
+            Assert.AreEqual(3, query.Selection.Count);
             Assert.AreEqual(0, query.Ordering.Count);
         }
 
