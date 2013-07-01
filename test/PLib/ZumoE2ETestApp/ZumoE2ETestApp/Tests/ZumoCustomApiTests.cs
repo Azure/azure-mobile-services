@@ -18,7 +18,7 @@ using ZumoE2ETestApp.Tests.Types;
 
 namespace ZumoE2ETestApp.Tests
 {
-    internal static class ZumoCustomApiTests
+    public static class ZumoCustomApiTests
     {
         private const string PublicApiName = "public";
         private const string AppApiName = "application";
@@ -28,9 +28,9 @@ namespace ZumoE2ETestApp.Tests
 
         private const string Letters = "abcdefghijklmnopqrstuvwxyz";
 
-        enum ApiPermissions { Public, Application, User, Admin }
-        enum DataFormat { Json, Xml, Other }
-        enum TypedTestType { GetByTitle, GetByDate, PostByDuration, PostByYear }
+        public enum ApiPermissions { Public, Application, User, Admin }
+        public enum DataFormat { Json, Xml, Other }
+        public enum TypedTestType { GetByTitle, GetByDate, PostByDuration, PostByYear }
 
         private static readonly Dictionary<ApiPermissions, string> apiNames = new Dictionary<ApiPermissions, string>
         {
