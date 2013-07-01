@@ -229,9 +229,9 @@ namespace Microsoft.WindowsAzure.MobileServices
                 {
                     // Compile the projection into a function that we can apply
                     // to the deserialized value to transform it accordingly.
-                    this.queryDescription.Projection.Add(projection.Compile());
+                    this.queryDescription.Projections.Add(projection.Compile());
 
-                    // We only need to capture the projection arugment type and members for the
+                    // We only need to capture the projection argument type and members for the
                     // very first projection.
                     if (this.queryDescription.ProjectionArgumentType == null)
                     {
@@ -261,7 +261,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                         if (objectContract != null)
                         {
                             foreach (string propertyName in objectContract.Properties
-                                                                          .Where(p => p.Required == Required.AllowNull)
+                                                                          .Where(p => p.Required == Required.Always)
                                                                           .Select(p => p.PropertyName))
                             {
                                 if (!this.queryDescription.Selection.Contains(propertyName))
