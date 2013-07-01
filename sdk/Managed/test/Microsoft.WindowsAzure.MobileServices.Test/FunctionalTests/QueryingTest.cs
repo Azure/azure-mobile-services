@@ -80,7 +80,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             // Chaining
             await Query<Book, Book>(table => table.Select(p => new { x = p.Title })
-                                                  .Select( p => new Book() { Title = p.x }));
+                                                  .Select(p => new Book() { Title = p.x }));
 
             // Verify that we don't blow up by trying to include the Foo
             // property in the compiled query
