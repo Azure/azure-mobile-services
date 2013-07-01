@@ -123,7 +123,7 @@
     <None Include="ZumoE2ETestAppJs_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
-    <SDKReference Include="LiveSDKHTML, Version=5.0" />
+    <SDKReference Include="LiveSDKHTML, Version=5.4" />
     <SDKReference Include="Microsoft.WinJS.1.0, Version=1.0" />
   </ItemGroup>
   <ItemGroup>
