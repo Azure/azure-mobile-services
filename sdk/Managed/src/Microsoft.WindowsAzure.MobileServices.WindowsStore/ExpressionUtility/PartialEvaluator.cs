@@ -96,8 +96,10 @@ namespace Microsoft.WindowsAzure.MobileServices
                             // where we don't actually use any parameters in
                             // the query - like table.skip(2).take(3)).
                             ConstantExpression constant = expr as ConstantExpression;
+                            NewExpression newExpression = expr as NewExpression;
                             if (expr.NodeType == ExpressionType.Parameter ||
-                                (constant != null && constant.Value is IQueryable))
+                                (constant != null && constant.Value is IQueryable) ||
+                                (newExpression != null))
                             {
                                 dependent = true;
                             }
