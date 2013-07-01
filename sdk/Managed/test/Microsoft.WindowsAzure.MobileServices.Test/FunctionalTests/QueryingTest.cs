@@ -67,7 +67,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 .OrderByDescending(p => p.Title));
         }
 
-        [Tag("now")]
         [AsyncTestMethod]
         public async Task LiveProjection()
         {
