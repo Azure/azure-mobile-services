@@ -2011,7 +2011,7 @@ namespace ZumoE2ETestApp.Tests
             },
             new Movie {
                 BestPictureWinner = false,
-                Duration = 109,
+                Duration = 117,
                 MPAARating = "PG",
                 ReleaseDate = new DateTime(1984, 3, 11, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Nauticaä of the Valley of the Wind",
