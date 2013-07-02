@@ -27,8 +27,6 @@ function defineApiTestsNamespace() {
     tests.push(createCustomApiTest('POST - array body', applicationApiName, 'POST', [1, false, 2], null, null, 200));
     tests.push(createCustomApiTest('POST - empty array body', applicationApiName, 'POST', [], null, null, 200));
     tests.push(createCustomApiTest('POST - empty object body', applicationApiName, 'POST', {}, null, null, 200));
-    tests.push(createCustomApiTest('POST - number body', applicationApiName, 'POST', 123));
-    tests.push(createCustomApiTest('POST - boolean body', applicationApiName, 'POST', true));
 
     tests.push(createCustomApiTest('GET - custom headers', applicationApiName, 'GET', null, { 'x-test-zumo-first': 'header value' }));
     tests.push(createCustomApiTest('PATCH - query parameters', applicationApiName, 'PATCH', [1, 2, 3], null, { x: '6', y: '7' }));

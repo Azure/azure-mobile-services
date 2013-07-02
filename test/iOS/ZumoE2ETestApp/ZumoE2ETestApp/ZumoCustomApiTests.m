@@ -27,8 +27,6 @@ typedef enum { DataFormatJson, DataFormatXml, DataFormatOther } ApiDataFormat;
     [result addObject:[self createJsonBasedTestWithName:@"POST - array body" apiName:apiApplicationName httpMethod:@"POST" body:@[@1,@NO,@2] headers:nil query:nil statusCode:200]];
     [result addObject:[self createJsonBasedTestWithName:@"POST - empty array body" apiName:apiApplicationName httpMethod:@"POST" body:@[] headers:nil query:nil statusCode:200]];
     [result addObject:[self createJsonBasedTestWithName:@"POST - empty object body" apiName:apiApplicationName httpMethod:@"POST" body:@{} headers:nil query:nil statusCode:200]];
-    [result addObject:[self createJsonBasedTestWithName:@"PUT - number body" apiName:apiApplicationName httpMethod:@"PUT" body:@123 headers:nil query:nil statusCode:200]];
-    [result addObject:[self createJsonBasedTestWithName:@"POST - boolean body" apiName:apiApplicationName httpMethod:@"POST" body:@YES headers:nil query:nil statusCode:200]];
     
     [result addObject:[self createJsonBasedTestWithName:@"GET - custom headers" apiName:apiApplicationName httpMethod:@"GET" body:nil headers:@{@"x-test-zumo-1": @"header value"} query:nil statusCode:200]];
     
