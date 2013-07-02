@@ -178,6 +178,8 @@ namespace ZumoE2ETestApp.Tests
                             test.AddLog("  - {0}", error);
                         }
 
+                        test.AddLog("Expected: {0}", string.Join(", ", expectedResult.Select(m => m.Title)));
+                        test.AddLog("Actual: {0}", string.Join(", ", actualResult.Movies.Select(m => m.Title)));
                         testResult = false;
                         break;
                     }
