@@ -37,6 +37,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public TimeSpan AvailableTime { get; set; }
         public List<string> Tags { get; set; }
         public ProductType Type { get; set; }
+
+        public Product()
+        {
+        }
+
+        public Product(long id)
+        {
+            this.Id = id;
+        }
     }
 
     public enum ProductType
@@ -283,6 +292,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             query = Compile<Product, Product>(table => table.Where(p => p.Weight <= new Product() { Weight = foo }.Weight || p.InStock == true));
             Assert.AreEqual("((Weight le 10f) or (InStock eq true))", query.Filter);
 
+            query = Compile<Product, Product>(table => table.Where(p => p.Weight <= new Product(15) { Weight = foo }.Weight || p.InStock == true));
+            Assert.AreEqual("((Weight le 10f) or (InStock eq true))", query.Filter);
+
+            query = Compile<Product, Product>(table => table.Where(p => p.Weight <= new Product(15) { Weight = 10 }.Weight || p.InStock == true));
+            Assert.AreEqual("((Weight le 10f) or (InStock eq true))", query.Filter);
+
+            long id = 15;
+            query = Compile<Product, Product>(table => table.Where(p => p.Weight <= new Product(id) { Weight = 10 }.Weight || p.InStock == true));
+            Assert.AreEqual("((Weight le 10f) or (InStock eq true))", query.Filter);
+
+            query = Compile<Product, Product>(table => table.Where(p => p.Created == new DateTime(1994, 10, 14, 0, 0, 0, DateTimeKind.Utc)));
+            Assert.AreEqual("(Created eq datetime'1994-10-14T00:00:00.000Z')", query.Filter);
         }
 
         [TestMethod]
