@@ -119,20 +119,24 @@ static NSString *queryTestsTableName = @"iosMovies";
                             if (response) {
                                 [test addLog:[NSString stringWithFormat:@"Error, response should be nil (request not sent), but its status code is %d", [response statusCode]]];
                                 passed = NO;
+                            } else {
+                                [test addLog:@"Success, request was not sent to the server"];
+                                passed = YES;
                             }
                         }
-                    }
-                    if (err.code != MSErrorMessageErrorCode) {
-                        [test addLog:[NSString stringWithFormat:@"Invalid error code: %d", err.code]];
                     } else {
-                        NSHTTPURLResponse *httpResponse = [[err userInfo] objectForKey:MSErrorResponseKey];
-                        int statusCode = [httpResponse statusCode];
-                        if (statusCode == 404) {
-                            [test addLog:@"Got expected error"];
-                            passed = YES;
+                        if (err.code != MSErrorMessageErrorCode) {
+                            [test addLog:[NSString stringWithFormat:@"Invalid error code: %d", err.code]];
                         } else {
-                            [test addLog:[NSString stringWithFormat:@"Invalid response status code: %d", statusCode]];
-                            passed = NO;
+                            NSHTTPURLResponse *httpResponse = [[err userInfo] objectForKey:MSErrorResponseKey];
+                            int statusCode = [httpResponse statusCode];
+                            if (statusCode == 404) {
+                                [test addLog:@"Got expected error"];
+                                passed = YES;
+                            } else {
+                                [test addLog:[NSString stringWithFormat:@"Invalid response status code: %d", statusCode]];
+                                passed = NO;
+                            }
                         }
                     }
                 } else {

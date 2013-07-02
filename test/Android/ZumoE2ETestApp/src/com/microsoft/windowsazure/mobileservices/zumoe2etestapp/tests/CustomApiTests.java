@@ -21,6 +21,7 @@ package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,6 +31,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.Set;
+import java.util.TimeZone;
 
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -405,7 +407,6 @@ public class CustomApiTests extends TestGroup {
 			
 			TestResult mResult;
 			
-			@SuppressWarnings("deprecation")
 			@Override
 			protected void executeTest(MobileServiceClient client,
 					TestExecutionCallback callback) {
@@ -430,7 +431,10 @@ public class CustomApiTests extends TestGroup {
 					
 				case GetByDate:
 					final Date releaseDate = inputTemplate.getReleaseDate();
-					apiUrl = apiName + "/date/" + (releaseDate.getYear() + 1900) + "/" + (releaseDate.getMonth() + 1) + "/" + (releaseDate.getDate() + 1);
+					TimeZone tz = TimeZone.getTimeZone("UTC");
+					Calendar c = Calendar.getInstance(tz);
+					c.setTime(releaseDate);
+					apiUrl = apiName + "/date/" + c.get(Calendar.YEAR) + "/" + (c.get(Calendar.MONTH) + 1) + "/" + c.get(Calendar.DATE);
 					log("API: " + apiUrl);
 					SimpleMovieFilter dateFilter = new SimpleMovieFilter() {
 						
