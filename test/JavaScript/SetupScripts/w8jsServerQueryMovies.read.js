@@ -93,11 +93,11 @@ function getWhereClauseCreator(testName) {
         case 'Date: Equals - Movies released on 1994-10-14 (Shawshank Redemption / Pulp Fiction)':
             return function (table) { return table.where({ ReleaseDate: new Date(Date.UTC(1994, 10 - 1, 14)) }); };
         case 'Date (month): Movies released in November':
-            return function (table) { return table.where(function () { return this.ReleaseDate.getMonth() == (11 - 1); }); };
+            return function (table) { return table.where(function () { return this.ReleaseDate.getUTCMonth() == (11 - 1); }); };
         case 'Date (day): Movies released in the first day of the month':
-            return function (table) { return table.where(function () { return this.ReleaseDate.getDate() == 1; }); };
+            return function (table) { return table.where(function () { return this.ReleaseDate.getUTCDate() == 1; }); };
         case 'Date (year): Movies whose year is different than its release year':
-            return function (table) { return table.where(function () { return this.ReleaseDate.getFullYear() !== this.Year; }); };
+            return function (table) { return table.where(function () { return this.ReleaseDate.getUTCFullYear() !== this.Year; }); };
         case 'Boolean: equal to true - Best picture winners before 1950':
             return function (table) { return table.where(function () { return this.BestPictureWinner === true && this.Year < 1950; }); };
         case 'Boolean: not and equal to false - Best picture winners since 2000':
