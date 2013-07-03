@@ -657,6 +657,7 @@ namespace ZumoE2ETestApp.Tests
             {
                 var name = CreateString(rndGen, 1, 10, Letters);
                 var value = CreateString(rndGen);
+                result.Add(name, value);
             }
 
             return result;
