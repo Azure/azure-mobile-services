@@ -1789,6 +1789,14 @@
     @"Year": @(1950)
     },
     @{
+        @"BestPictureWinner": @NO,
+        @"Duration": @(117),
+        @"MPAARating": @"PG",
+        @"ReleaseDate": [ZumoTestGlobals createDateWithYear:1984 month:3 day:11],
+        @"Title": @"Nauticaä of the Valley of the Wind",
+        @"Year": @(1984)
+    },
+    @{
     @"BestPictureWinner": @NO,
     @"Duration": @(109),
     @"MPAARating": @"R",
