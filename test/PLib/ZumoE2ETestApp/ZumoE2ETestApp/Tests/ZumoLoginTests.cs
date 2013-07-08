@@ -116,6 +116,9 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(ZumoTestCommon.CreateYesNoTest("Were you prompted for the username in any of the providers?", false));
 #endif
 
+            // Clean-up any logged in user
+            result.AddTest(CreateLogoutTest());
+
             return result;
         }
 
