@@ -48,11 +48,13 @@ namespace ZumoE2ETestApp.Tests
             int seed = now.Year * 10000 + now.Month * 100 + now.Day;
             Random rndGen = new Random(seed);
 
+#if !NET45
+            result.AddTest(ZumoLoginTests.CreateLogoutTest());
+#endif
+
             result.AddTest(CreateHttpContentApiTest(DataFormat.Xml, DataFormat.Json, rndGen));
 
 #if !NET45
-            result.AddTest(ZumoLoginTests.CreateLogoutTest());
-
             foreach (ApiPermissions apiPermission in Util.EnumGetValues(typeof(ApiPermissions)))
             {
                 result.AddTest(CreateJTokenApiTest(apiPermission, false, rndGen));
