@@ -55,14 +55,22 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateHttpContentApiTest(DataFormat.Xml, DataFormat.Json, rndGen));
 
 #if !NET45
+            List<ZumoTest> testsWhichNeedAuth = new List<ZumoTest>();
+
             foreach (ApiPermissions apiPermission in Util.EnumGetValues(typeof(ApiPermissions)))
             {
-                result.AddTest(CreateJTokenApiTest(apiPermission, false, rndGen));
+                testsWhichNeedAuth.Add(CreateJTokenApiTest(apiPermission, false, rndGen));
             }
 
-            result.AddTest(ZumoLoginTests.CreateLoginTest(MobileServiceAuthenticationProvider.Facebook));
-            result.AddTest(CreateJTokenApiTest(ApiPermissions.User, true, rndGen));
-            result.AddTest(ZumoLoginTests.CreateLogoutTest());
+            testsWhichNeedAuth.Add(ZumoLoginTests.CreateLoginTest(MobileServiceAuthenticationProvider.Facebook));
+            testsWhichNeedAuth.Add(CreateJTokenApiTest(ApiPermissions.User, true, rndGen));
+            testsWhichNeedAuth.Add(ZumoLoginTests.CreateLogoutTest());
+
+            foreach (var test in testsWhichNeedAuth)
+            {
+                test.CanRunUnattended = false;
+                result.AddTest(test);
+            }
 #endif
 
             foreach (DataFormat inputFormat in Util.EnumGetValues(typeof(DataFormat)))

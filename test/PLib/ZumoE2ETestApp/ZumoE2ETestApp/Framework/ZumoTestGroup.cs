@@ -74,7 +74,7 @@ namespace ZumoE2ETestApp.Framework
             return result;
         }
 
-        public async Task Run()
+        public async Task Run(bool unattendedOnly = false)
         {
             if (this.runningTests)
             {
@@ -90,6 +90,11 @@ namespace ZumoE2ETestApp.Framework
 
             foreach (ZumoTest test in this.tests)
             {
+                if (!test.CanRunUnattended && unattendedOnly)
+                {
+                    continue;
+                }
+
                 if (this.TestStarted != null)
                 {
                     this.TestStarted(test, new EventArgs());
