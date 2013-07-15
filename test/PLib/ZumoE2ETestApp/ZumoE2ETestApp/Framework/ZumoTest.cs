@@ -29,9 +29,12 @@ namespace ZumoE2ETestApp.Framework
         public string Name { get; private set; }
         public Dictionary<string, object> Data { get; private set; }
         public TestStatus Status { get; private set; }
+        
+        public bool CanRunUnattended { get; set; }
 
         private TestExecution execution;
         private List<string> logs;
+
 
         public event EventHandler<TestStatusChangedEventArgs> TestStatusChanged;
 
@@ -39,6 +42,7 @@ namespace ZumoE2ETestApp.Framework
         {
             this.Name = name;
             this.Data = new Dictionary<string, object>();
+            this.CanRunUnattended = true;
             this.logs = new List<string>();
             this.execution = execution;
             this.Status = TestStatus.NotRun;

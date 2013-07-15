@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Live;
 using Microsoft.WindowsAzure.MobileServices;
@@ -34,6 +35,8 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateCRUDTest(TableApplicationPermission, null, TablePermission.Application, false));
             result.AddTest(CreateCRUDTest(TableUserPermission, null, TablePermission.User, false));
             result.AddTest(CreateCRUDTest(TableAdminPermission, null, TablePermission.Admin, false));
+
+            int indexOfTestsWithAuthentication = result.AllTests.Count();
 
             Dictionary<MobileServiceAuthenticationProvider, bool> providersWithRecycledTokenSupport;
             providersWithRecycledTokenSupport = new Dictionary<MobileServiceAuthenticationProvider, bool>
@@ -115,6 +118,11 @@ namespace ZumoE2ETestApp.Tests
 
             result.AddTest(ZumoTestCommon.CreateYesNoTest("Were you prompted for the username in any of the providers?", false));
 #endif
+
+            foreach (var test in result.AllTests.Skip(indexOfTestsWithAuthentication))
+            {
+                test.CanRunUnattended = false;
+            }
 
             // Clean-up any logged in user
             result.AddTest(CreateLogoutTest());
