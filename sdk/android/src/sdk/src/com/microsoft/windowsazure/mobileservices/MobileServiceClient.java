@@ -120,11 +120,6 @@ public class MobileServiceClient {
 	 * Authentication token type required for client login
 	 */
 	private static final String GOOGLE_USER_INFO_AUTH_TOKEN_TYPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
-	
-	/**
-	 * Resources reference
-	 */
-	static android.content.res.Resources resources = null;
 
 	/**
 	 * Creates a GsonBuilder with custom serializers to use with Windows Azure
@@ -863,8 +858,6 @@ public class MobileServiceClient {
 		mCurrentUser = currentUser;
 		mContext = context;
 		mGsonBuilder = gsonBuiler;
-		
-		resources = context.getResources();
 	}
 
 	/**

@@ -35,7 +35,6 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
 
 import android.net.http.AndroidHttpClient;
-import android.os.Build;
 
 /**
  * 
@@ -67,7 +66,7 @@ class ServiceFilterRequestImpl implements ServiceFilterRequest {
 	@Override
 	public ServiceFilterResponse execute() throws Exception {
 		// Execute request
-		AndroidHttpClient client = createAndroidHttpClient();
+		AndroidHttpClient client = AndroidHttpClient.newInstance(MobileServiceConnection.getUserAgent());
 		try {
 			final HttpResponse response = client.execute(mRequest);
 			ServiceFilterResponse serviceFilterResponse = new ServiceFilterResponseImpl(response);
@@ -75,21 +74,6 @@ class ServiceFilterRequestImpl implements ServiceFilterRequest {
 		} finally {
 			client.close();
 		}
-	}
-	
-	/**
-	 * Creates an AndroidHttpClient and with specific certificate validation
-	 * if needed
-	 * @return The AndroidHttpClient
-	 */
-	private AndroidHttpClient createAndroidHttpClient() {
-		AndroidHttpClient client = AndroidHttpClient.newInstance(MobileServiceConnection.getUserAgent());
-		
-		if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.FROYO) {
-			FroyoSupport.fixAndroidHttpClientForCertificateValidation(client);
-		}
-		
-		return client;
 	}
 
 	@Override
