@@ -33,7 +33,7 @@ namespace ZumoE2ETestApp
         public MainPage()
         {
             this.InitializeComponent();
-            this.allTests = TestStore.CreateTests();
+            this.allTests = TestStore.CreateTestGroups();
 
             OnNavigatedTo(null);
         }
@@ -137,9 +137,29 @@ namespace ZumoE2ETestApp
             {
                 ZumoTestGroup testGroup = allTests[selectedIndex];
                 await this.RunTestGroup(testGroup);
-                int passed = testGroup.AllTests.Count(t => t.Status == TestStatus.Passed);
-                string message = string.Format(CultureInfo.InvariantCulture, "Passed {0} of {1} tests", passed, testGroup.AllTests.Count());
-                await Util.MessageBox(message, "Test group finished");
+                if (testGroup.Name != TestStore.AllTestsGroupName || string.IsNullOrEmpty(this.txtUploadLogsUrl.Text))
+                {
+                    int passed = testGroup.AllTests.Count(t => t.Status == TestStatus.Passed);
+                    string message = string.Format(CultureInfo.InvariantCulture, "Passed {0} of {1} tests", passed, testGroup.AllTests.Count());
+                    await Util.MessageBox(message, "Test group finished");
+                }
+                else
+                {
+                    // Upload logs automatically if running all tests
+                    using (var client = new HttpClient())
+                    {
+                        using (var request = new HttpRequestMessage(HttpMethod.Post, this.txtUploadLogsUrl.Text + "?platform=net45"))
+                        {
+                            request.Content = new StringContent(string.Join("\n", testGroup.GetLogs()), Encoding.UTF8, "text/plain");
+                            using (var response = await client.SendAsync(request))
+                            {
+                                var body = await response.Content.ReadAsStringAsync();
+                                var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
+                                await Alert(title, body);
+                            }
+                        }
+                    }
+                }
             }
             else
             {
@@ -323,60 +343,6 @@ namespace ZumoE2ETestApp
             else
             {
                 this.btnRunSelected.Visibility = Visibility.Collapsed;
-            }
-        }
-
-        private async void btnRunAllGroups_Click(object sender, RoutedEventArgs e)
-        {
-            var clientInitialized = await InitializeClient();
-            if (!clientInitialized)
-            {
-                return;
-            }
-
-            string error = null;
-
-            if (string.IsNullOrEmpty(this.txtUploadLogsUrl.Text))
-            {
-                await Alert("Error", "To run all tests the upload logs URL must be set.");
-                return;
-            }
-
-            try
-            {
-                foreach (var testGroup in this.allTests)
-                {
-                    await testGroup.Run(true);
-                }
-            }
-            catch (Exception ex)
-            {
-                error = string.Format(CultureInfo.InvariantCulture, "Unhandled exception: {0}", ex);
-            }
-
-            if (error != null)
-            {
-                await Alert("Error", error);
-            }
-
-            List<string> lines = new List<string>();
-            foreach (var testGroup in this.allTests)
-            {
-                lines.AddRange(testGroup.GetLogs());
-            }
-
-            using (var client = new HttpClient())
-            {
-                using (var request = new HttpRequestMessage(HttpMethod.Post, this.txtUploadLogsUrl.Text + "?platform=net45"))
-                {
-                    request.Content = new StringContent(string.Join("\n", lines), Encoding.UTF8, "text/plain");
-                    using (var response = await client.SendAsync(request))
-                    {
-                        var body = await response.Content.ReadAsStringAsync();
-                        var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
-                        await Alert(title, body);
-                    }
-                }
             }
         }
     }

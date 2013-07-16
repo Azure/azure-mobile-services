@@ -12,7 +12,9 @@ namespace ZumoE2ETestApp.Tests
 {
     public static class TestStore
     {
-        public static List<ZumoTestGroup> CreateTests()
+        public const string AllTestsGroupName = "All tests";
+
+        public static List<ZumoTestGroup> CreateTestGroups()
         {
             List<ZumoTestGroup> result = new List<ZumoTestGroup>
             {
@@ -31,6 +33,28 @@ namespace ZumoE2ETestApp.Tests
 #endif
                 ZumoCustomApiTests.CreateTests(),
             };
+
+            result.Add(CreateGroupWithAllTests(result));
+
+            return result;
+        }
+
+        private static ZumoTestGroup CreateGroupWithAllTests(List<ZumoTestGroup> testGroups)
+        {
+            ZumoTestGroup result = new ZumoTestGroup(AllTestsGroupName);
+            foreach (var group in testGroups)
+            {
+                result.AddTest(ZumoTestCommon.CreateSeparator("Start of group: " + group.Name));
+                foreach (var test in group.AllTests)
+                {
+                    if (test.CanRunUnattended)
+                    {
+                        result.AddTest(test);
+                    }
+                }
+
+                result.AddTest(ZumoTestCommon.CreateSeparator("------------------"));
+            }
 
             return result;
         }
