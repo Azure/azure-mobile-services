@@ -37,7 +37,6 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
-import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.protocol.HTTP;
 
 import android.accounts.Account;
@@ -50,7 +49,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Pair;
 
-import com.google.android.gms.common.AccountPicker;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -116,12 +114,12 @@ public class MobileServiceClient {
 	/**
 	 * Google account type
 	 */
-	private static final String GOOGLE_ACCOUNT_TYPE = "com.google";
+	public static final String GOOGLE_ACCOUNT_TYPE = "com.google";
 
 	/**
 	 * Authentication token type required for client login
 	 */
-	private static final String GOOGLE_USER_INFO_AUTH_TOKEN_TYPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
+	public static final String GOOGLE_USER_INFO_SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
 
 	/**
 	 * Creates a GsonBuilder with custom serializers to use with Windows Azure
@@ -288,7 +286,7 @@ public class MobileServiceClient {
 	 *            Callback to invoke when the authentication process finishes
 	 */
 	public void loginWithGoogleAccount(Activity activity, final UserAuthenticationCallback callback) {
-		loginWithGoogleAccount(activity, GOOGLE_USER_INFO_AUTH_TOKEN_TYPE, callback);
+		loginWithGoogleAccount(activity, GOOGLE_USER_INFO_SCOPE, callback);
 	}
 	
 	/**
@@ -303,16 +301,53 @@ public class MobileServiceClient {
 	 *            Callback to invoke when the authentication process finishes
 	 */
 	public void loginWithGoogleAccount(Activity activity, String scopes, final UserAuthenticationCallback callback) {
+		AccountManager acMgr = AccountManager.get(activity.getApplicationContext());
+		Account[] accounts = acMgr.getAccountsByType(GOOGLE_ACCOUNT_TYPE);
+		
+		Account account;
+		if (accounts.length == 0) {
+			account = null;
+		} else {
+			account = accounts[0];
+		}
+		
+		loginWithGoogleAccount(activity, account, scopes, callback);
+	}
+	
+	/**
+	 * Invokes Windows Azure Mobile Service authentication using a
+	 * the Google account registered in the device
+	 * 
+	 * @param activity
+	 *            The activity that triggered the authentication
+	 * @param account
+	 *            The account used for the login operation
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void loginWithGoogleAccount(Activity activity, Account account, final UserAuthenticationCallback callback) {
+		loginWithGoogleAccount(activity, account, GOOGLE_USER_INFO_SCOPE, callback);
+	}
+	
+
+	/**
+	 * Invokes Windows Azure Mobile Service authentication using a
+	 * the Google account registered in the device
+	 * 
+	 * @param activity
+	 *            The activity that triggered the authentication
+	 * @param account
+	 *            The account used for the login operation
+	 * @param scopes
+	 *            The scopes used as authentication token type for login
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void loginWithGoogleAccount(Activity activity, Account account, String scopes, final UserAuthenticationCallback callback) {
 		try {
-			AccountManager acMgr = AccountManager.get(activity.getApplicationContext());
-			Account[] accounts = acMgr.getAccountsByType(GOOGLE_ACCOUNT_TYPE);
-			
-			if (accounts.length == 0) {
-				callback.onCompleted(null, new MobileServiceException("Couldn't find any Google account"), null);
-				return;
+			if (account == null) {
+				callback.onCompleted(null, new IllegalArgumentException("account"), null);
 			}
-			
-			Account account = accounts[0]; 
 					
 			final MobileServiceClient client = this;
 			
@@ -339,6 +374,7 @@ public class MobileServiceClient {
 				}
 			};
 			
+			AccountManager acMgr = AccountManager.get(activity.getApplicationContext());
 			acMgr.getAuthToken(account, scopes, null, activity, authCallback, null);
 			
 		} catch (Exception e) {
