@@ -234,8 +234,6 @@ class LoginManager {
 		final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		// Create the Web View to show the login page
 		final WebView wv = new WebView(context);
-		builder.setTitle("Connecting to a service");
-		builder.setCancelable(true);
 		builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
 
 			@Override
@@ -246,23 +244,6 @@ class LoginManager {
 				}
 			}
 		});
-
-		// Set cancel button's action
-		builder.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						if (externalCallback != null) {
-							externalCallback
-									.onCompleted(null,
-											new MobileServiceException(
-													"User Canceled"));
-						}
-						wv.destroy();
-					}
-				});
-
 		wv.getSettings().setJavaScriptEnabled(true);
 
 		wv.requestFocus(View.FOCUS_DOWN);
