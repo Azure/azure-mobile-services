@@ -4,8 +4,8 @@
 
 using System.Collections.Generic;
 using System.Globalization;
-#if WINDOWS_PHONE
 using System.Threading.Tasks;
+#if WINDOWS_PHONE
 using System.Windows;
 #endif
 using ZumoE2ETestApp.Framework;
@@ -27,7 +27,10 @@ namespace ZumoE2ETestApp.Tests
                 InputDialog dialog = new InputDialog("Information", alert, "OK");
                 await dialog.Display();
                 return true;
-            });
+            })
+            {
+                CanRunUnattended = false
+            };
 #else
             return new ZumoTest("Alert: " + alert, delegate(ZumoTest test)
             {
@@ -35,7 +38,10 @@ namespace ZumoE2ETestApp.Tests
                 TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
                 tcs.SetResult(true);
                 return tcs.Task;
-            });
+            })
+            {
+                CanRunUnattended = false
+            };
 #endif
         }
 
@@ -66,7 +72,10 @@ namespace ZumoE2ETestApp.Tests
                 {
                     return true;
                 }
-            });
+            })
+            {
+                CanRunUnattended = false
+            };
         }
 
 #if WINDOWS_PHONE
@@ -83,9 +92,27 @@ namespace ZumoE2ETestApp.Tests
                 }
 
                 return true;
-            });
+            })
+            {
+                CanRunUnattended = false
+            };
         }
 
 #endif
+
+        /// <summary>
+        /// Creates a test which doesn't do anything, used only to separate groups of tests
+        /// </summary>
+        /// <param name="name">The test name.</param>
+        /// <returns>A test which always passes without doing anything.</returns>
+        public static ZumoTest CreateSeparator(string name)
+        {
+            return new ZumoTest(name, delegate(ZumoTest test)
+            {
+                TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+                tcs.SetResult(true);
+                return tcs.Task;
+            });
+        }
     }
 }

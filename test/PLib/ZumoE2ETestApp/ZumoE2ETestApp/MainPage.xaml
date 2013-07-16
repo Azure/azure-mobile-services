@@ -51,8 +51,6 @@
             <StackPanel Orientation="Vertical" Grid.Column="0">
                 <TextBlock HorizontalAlignment="Center" Margin="10" FontSize="30"
                            Text="Test Groups" />
-                <Button Margin="10" Content="Run All Groups" Name="btnRunAllGroups" Click="btnRunAllGroups_Click"
-                        HorizontalAlignment="Center"/>
                 <ListBox Margin="10" Name="lstTestGroups" SelectionChanged="lstTestGroups_SelectionChanged_1">
                     <ListBox.ItemTemplate>
                         <DataTemplate>

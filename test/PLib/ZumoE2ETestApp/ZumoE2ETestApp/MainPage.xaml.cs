@@ -38,7 +38,7 @@ namespace ZumoE2ETestApp
         public MainPage()
         {
             this.InitializeComponent();
-            this.allTests = TestStore.CreateTests();
+            this.allTests = TestStore.CreateTestGroups();
         }
 
         /// <summary>
@@ -210,6 +210,27 @@ namespace ZumoE2ETestApp
             {
                 await Alert("Error", error);
             }
+
+            if (testGroup.Name == TestStore.AllTestsGroupName)
+            {
+                // Upload logs automatically if running all tests
+                if (!string.IsNullOrEmpty(this.txtUploadLogsUrl.Text))
+                {
+                    using (var client = new HttpClient())
+                    {
+                        using (var request = new HttpRequestMessage(HttpMethod.Post, this.txtUploadLogsUrl.Text + "?platform=winstorecs"))
+                        {
+                            request.Content = new StringContent(string.Join("\n", testGroup.GetLogs()), Encoding.UTF8, "text/plain");
+                            using (var response = await client.SendAsync(request))
+                            {
+                                var body = await response.Content.ReadAsStringAsync();
+                                var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
+                                await Alert(title, body);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private void btnResetTests_Click_1(object sender, RoutedEventArgs e)
@@ -317,59 +338,6 @@ namespace ZumoE2ETestApp
         {
             var selectedItems = this.lstTests.SelectedItems;
             this.btnRunSelected.IsEnabled = selectedItems.Count > 0;
-        }
-
-        private async void btnRunAllGroups_Click(object sender, RoutedEventArgs e)
-        {
-            var clientInitialized = await InitializeClient();
-            if (!clientInitialized)
-            {
-                return;
-            }
-
-            if (string.IsNullOrEmpty(this.txtUploadLogsUrl.Text))
-            {
-                await Alert("Error", "To run all tests the upload logs URL must be set.");
-                return;
-            }
-
-            string error = null;
-            try
-            {
-                foreach (var testGroup in this.allTests)
-                {
-                    await testGroup.Run(true);
-                }
-            }
-            catch (Exception ex)
-            {
-                error = string.Format(CultureInfo.InvariantCulture, "Unhandled exception: {0}", ex);
-            }
-
-            if (error != null)
-            {
-                await Alert("Error", error);
-            }
-
-            List<string> lines = new List<string>();
-            foreach (var testGroup in this.allTests)
-            {
-                lines.AddRange(testGroup.GetLogs());
-            }
-
-            using (var client = new HttpClient())
-            {
-                using (var request = new HttpRequestMessage(HttpMethod.Post, this.txtUploadLogsUrl.Text + "?platform=winstorecs"))
-                {
-                    request.Content = new StringContent(string.Join("\n", lines), Encoding.UTF8, "text/plain");
-                    using (var response = await client.SendAsync(request))
-                    {
-                        var body = await response.Content.ReadAsStringAsync();
-                        var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
-                        await Alert(title, body);
-                    }
-                }
-            }
         }
     }
 }

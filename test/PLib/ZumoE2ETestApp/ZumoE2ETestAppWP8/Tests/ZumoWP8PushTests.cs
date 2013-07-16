@@ -114,7 +114,10 @@ namespace ZumoE2ETestAppWP8.Tests
                 var response = await table.InsertAsync(item);
                 test.AddLog("Response to (virtual) insert for push: {0}", response);
                 return true;
-            });
+            })
+            {
+                CanRunUnattended = false
+            };
         }
 
         private static ZumoTest CreateToastPushTest(string text1, string text2, string param = null)
