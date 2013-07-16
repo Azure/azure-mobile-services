@@ -278,6 +278,15 @@ public class MobileServiceClient {
 				});
 	}
 	
+	/**
+	 * Invokes Windows Azure Mobile Service authentication using a
+	 * the Google account registered in the device
+	 * 
+	 * @param activity
+	 *            The activity that triggered the authentication
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
 	public void loginWithGoogleAccount(Activity activity, final UserAuthenticationCallback callback) {
 		loginWithGoogleAccount(activity, GOOGLE_USER_INFO_AUTH_TOKEN_TYPE, callback);
 	}
@@ -286,8 +295,10 @@ public class MobileServiceClient {
 	 * Invokes Windows Azure Mobile Service authentication using a
 	 * the Google account registered in the device
 	 * 
-	 * @param Activity
+	 * @param activity
 	 *            The activity that triggered the authentication
+	 * @param scopes
+	 *            The scopes used as authentication token type for login
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
