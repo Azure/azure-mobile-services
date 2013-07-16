@@ -37,6 +37,7 @@ import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.conn.ssl.AllowAllHostnameVerifier;
 import org.apache.http.protocol.HTTP;
 
 import android.accounts.Account;
@@ -49,6 +50,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Pair;
 
+import com.google.android.gms.common.AccountPicker;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -276,6 +278,10 @@ public class MobileServiceClient {
 				});
 	}
 	
+	public void loginWithGoogleAccount(Activity activity, final UserAuthenticationCallback callback) {
+		loginWithGoogleAccount(activity, GOOGLE_USER_INFO_AUTH_TOKEN_TYPE, callback);
+	}
+	
 	/**
 	 * Invokes Windows Azure Mobile Service authentication using a
 	 * the Google account registered in the device
@@ -285,7 +291,7 @@ public class MobileServiceClient {
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
-	public void loginWithDeviceAccount(Activity activity, final UserAuthenticationCallback callback) {
+	public void loginWithGoogleAccount(Activity activity, String scopes, final UserAuthenticationCallback callback) {
 		try {
 			AccountManager acMgr = AccountManager.get(activity.getApplicationContext());
 			Account[] accounts = acMgr.getAccountsByType(GOOGLE_ACCOUNT_TYPE);
@@ -322,7 +328,7 @@ public class MobileServiceClient {
 				}
 			};
 			
-			acMgr.getAuthToken(account, GOOGLE_USER_INFO_AUTH_TOKEN_TYPE, null, activity, authCallback, null);
+			acMgr.getAuthToken(account, scopes, null, activity, authCallback, null);
 			
 		} catch (Exception e) {
 			callback.onCompleted(null, e, null);
