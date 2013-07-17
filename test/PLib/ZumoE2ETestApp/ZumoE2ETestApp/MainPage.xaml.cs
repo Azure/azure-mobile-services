@@ -211,22 +211,19 @@ namespace ZumoE2ETestApp
                 await Alert("Error", error);
             }
 
-            if (testGroup.Name == TestStore.AllTestsGroupName)
+            if (testGroup.Name.StartsWith(TestStore.AllTestsGroupName) && !string.IsNullOrEmpty(this.txtUploadLogsUrl.Text))
             {
                 // Upload logs automatically if running all tests
-                if (!string.IsNullOrEmpty(this.txtUploadLogsUrl.Text))
+                using (var client = new HttpClient())
                 {
-                    using (var client = new HttpClient())
+                    using (var request = new HttpRequestMessage(HttpMethod.Post, this.txtUploadLogsUrl.Text + "?platform=winstorecs"))
                     {
-                        using (var request = new HttpRequestMessage(HttpMethod.Post, this.txtUploadLogsUrl.Text + "?platform=winstorecs"))
+                        request.Content = new StringContent(string.Join("\n", testGroup.GetLogs()), Encoding.UTF8, "text/plain");
+                        using (var response = await client.SendAsync(request))
                         {
-                            request.Content = new StringContent(string.Join("\n", testGroup.GetLogs()), Encoding.UTF8, "text/plain");
-                            using (var response = await client.SendAsync(request))
-                            {
-                                var body = await response.Content.ReadAsStringAsync();
-                                var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
-                                await Alert(title, body);
-                            }
+                            var body = await response.Content.ReadAsStringAsync();
+                            var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
+                            await Alert(title, body);
                         }
                     }
                 }

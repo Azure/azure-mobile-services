@@ -137,7 +137,7 @@ namespace ZumoE2ETestApp
             {
                 ZumoTestGroup testGroup = allTests[selectedIndex];
                 await this.RunTestGroup(testGroup);
-                if (testGroup.Name != TestStore.AllTestsGroupName || string.IsNullOrEmpty(this.txtUploadLogsUrl.Text))
+                if (!testGroup.Name.StartsWith(TestStore.AllTestsGroupName) || string.IsNullOrEmpty(this.txtUploadLogsUrl.Text))
                 {
                     int passed = testGroup.AllTests.Count(t => t.Status == TestStatus.Passed);
                     string message = string.Format(CultureInfo.InvariantCulture, "Passed {0} of {1} tests", passed, testGroup.AllTests.Count());
