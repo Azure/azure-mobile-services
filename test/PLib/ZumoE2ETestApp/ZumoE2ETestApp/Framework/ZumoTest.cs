@@ -29,12 +29,15 @@ namespace ZumoE2ETestApp.Framework
         public string Name { get; private set; }
         public Dictionary<string, object> Data { get; private set; }
         public TestStatus Status { get; private set; }
-        
+
+        public DateTime StartTime { get; private set; }
+        public DateTime EndTime { get; private set; }
+
         public bool CanRunUnattended { get; set; }
 
+        internal const string TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff";
         private TestExecution execution;
         private List<string> logs;
-
 
         public event EventHandler<TestStatusChangedEventArgs> TestStatusChanged;
 
@@ -56,7 +59,7 @@ namespace ZumoE2ETestApp.Framework
             }
 
             text = string.Format(CultureInfo.InvariantCulture, "[{0}] {1}",
-                DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff", CultureInfo.InvariantCulture),
+                DateTime.UtcNow.ToString(TimestampFormat, CultureInfo.InvariantCulture),
                 text);
             this.logs.Add(text);
         }
@@ -87,6 +90,7 @@ namespace ZumoE2ETestApp.Framework
             bool passed;
             try
             {
+                this.StartTime = DateTime.UtcNow;
                 passed = await this.execution(this);
                 this.Status = passed ? TestStatus.Passed : TestStatus.Failed;
                 this.AddLog("Test {0}", this.Status);
@@ -97,6 +101,8 @@ namespace ZumoE2ETestApp.Framework
                 passed = false;
                 this.Status = TestStatus.Failed;
             }
+
+            this.EndTime = DateTime.UtcNow;
 
             if (this.TestStatusChanged != null)
             {

@@ -208,7 +208,7 @@ namespace ZumoE2ETestAppWP8
                 }
                 else
                 {
-                    if (testGroup.Name == TestStore.AllTestsGroupName && !string.IsNullOrEmpty(this.txtUploadUrl.Text))
+                    if (testGroup.Name.StartsWith(TestStore.AllTestsGroupName) && !string.IsNullOrEmpty(this.txtUploadUrl.Text))
                     {
                         // Upload logs automatically if running all tests
                         using (var client = new HttpClient())
