@@ -27,4 +27,25 @@
 
     zumo.testGroups.push(new zumo.Group(zumo.tests.api.name, zumo.tests.api.tests));
 
+    var allTests = [];
+    var allUnattendedTests = [];
+    for (var i = 0; i < zumo.testGroups.length; i++) {
+        var group = zumo.testGroups[i];
+        var startGroupTest = zumo.util.createSeparatorTest('Start of group: ' + group.name);
+        allTests.push(startGroupTest);
+        allUnattendedTests.push(startGroupTest);
+        for (var j = 0; j < group.tests.length; j++) {
+            var test = group.tests[j];
+            allTests.push(test);
+            if (test.canRunUnattended) {
+                allUnattendedTests.push(test);
+            }
+        }
+        var endGroupTest = zumo.util.createSeparatorTest('------------------');
+        allTests.push(endGroupTest);
+        allUnattendedTests.push(endGroupTest);
+    }
+
+    zumo.testGroups.push(new zumo.Group(zumo.AllTestsUnattendedGroupName, allUnattendedTests));
+    zumo.testGroups.push(new zumo.Group(zumo.AllTestsGroupName, allTests));
 })();

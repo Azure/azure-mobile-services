@@ -39,6 +39,8 @@ function defineLoginTestsNamespace() {
         tests.push(createCRUDTest(table.name, null, table.permission, false));
     }
 
+    var indexOfTestsWithAuthentication = tests.length;
+
     var lastUserIdentityObject = null;
 
     var providers = ['facebook', 'google', 'twitter', 'microsoftaccount'];
@@ -77,6 +79,11 @@ function defineLoginTestsNamespace() {
             }
         });
     }
+
+    for (var i = indexOfTestsWithAuthentication; i < tests.length; i++) {
+        tests[i].canRunUnattended = false;
+    }
+
     function createLiveSDKLoginTest() {
         var liveSDKInitialized = false;
         return new zumo.Test('Login via token with the Live SDK', function (test, done) {
