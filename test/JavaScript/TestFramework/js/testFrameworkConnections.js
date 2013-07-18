@@ -61,16 +61,24 @@ document.getElementById('btnRunTests').onclick = function (evt) {
     var currentGroup = zumo.testGroups[zumo.currentGroup];
     var appUrl = document.getElementById('txtAppUrl').value;
     var appKey = document.getElementById('txtAppKey').value;
+    var uploadUrl = document.getElementById('txtSendLogsUrl').value.trim();
+
     if (zumo.initializeClient(appUrl, appKey)) {
 
         saveLastUsedAppInfo();
 
         var groupDone = function (testsPassed, testsFailed) {
-            var logs = 'Test group finished';
-            logs = logs + '\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n';
-            logs = logs + 'Tests passed: ' + testsPassed + '\n';
-            logs = logs + 'Tests failed: ' + testsFailed;
-            testPlatform.alert(logs);
+            if (currentGroup.name.indexOf(zumo.AllTestsGroupName) === 0 && uploadUrl !== '') {
+                // For all tests, upload logs automatically if URL is set
+                var testLogs = currentGroup.getLogs();
+                uploadLogs(uploadUrl, testLogs);
+            } else {
+                var logs = 'Test group finished';
+                logs = logs + '\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n';
+                logs = logs + 'Tests passed: ' + testsPassed + '\n';
+                logs = logs + 'Tests failed: ' + testsFailed;
+                testPlatform.alert(logs);
+            }
         }
         var updateTest = function (test, index) {
             var tblTests = document.getElementById('tblTestsBody');
@@ -117,15 +125,23 @@ document.getElementById('btnSendLogs').onclick = function (evt) {
 
     var currentGroup = zumo.testGroups[zumo.currentGroup];
     var logs = currentGroup.getLogs();
+    uploadLogs(uploadUrl, logs, function () {
+        saveLastUsedAppInfo();
+    });
+}
+
+function uploadLogs(url, logs, done) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
-            saveLastUsedAppInfo();
             testPlatform.alert(xhr.responseText);
+            if (done) {
+                done();
+            }
         }
     }
 
-    uploadUrl = uploadUrl + "?platform=winstorejs";
+    var uploadUrl = url + "?platform=winstorejs";
     xhr.open('POST', uploadUrl, true);
     xhr.setRequestHeader('content-type', 'text/plain');
     xhr.send(logs);

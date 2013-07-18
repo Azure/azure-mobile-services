@@ -78,7 +78,7 @@
                             Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center">
                     <Button Margin="10" Content="Reset" Name="btnResetTests" Click="btnResetTests_Click_1" />
                     <Button Margin="10" Content="Run Selected Tests" Name="btnRunSelected" Click="btnRunSelected_Click_1"
-                            Visibility="Collapsed" />
+                            IsEnabled="False" />
                 </StackPanel>
                 <Button Margin="10" Content="Send logs to: " HorizontalAlignment="Stretch"
                         Grid.Column="0" Grid.Row="2" Name="btnSendLogs" Click="btnSendLogs_Click_1" />

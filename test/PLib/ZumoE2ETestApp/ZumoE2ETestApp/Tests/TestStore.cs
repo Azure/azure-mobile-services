@@ -12,7 +12,10 @@ namespace ZumoE2ETestApp.Tests
 {
     public static class TestStore
     {
-        public static List<ZumoTestGroup> CreateTests()
+        public const string AllTestsGroupName = "All tests";
+        public const string AllTestsUnattendedGroupName = AllTestsGroupName + " (unattended)";
+
+        public static List<ZumoTestGroup> CreateTestGroups()
         {
             List<ZumoTestGroup> result = new List<ZumoTestGroup>
             {
@@ -31,6 +34,31 @@ namespace ZumoE2ETestApp.Tests
 #endif
                 ZumoCustomApiTests.CreateTests(),
             };
+
+            ZumoTestGroup allTestsUnattendedGroup = CreateGroupWithAllTests(result, true);
+            ZumoTestGroup allTestsGroup = CreateGroupWithAllTests(result, false);
+            result.Add(allTestsUnattendedGroup);
+            result.Add(allTestsGroup);
+
+            return result;
+        }
+
+        private static ZumoTestGroup CreateGroupWithAllTests(List<ZumoTestGroup> testGroups, bool unattendedOnly)
+        {
+            ZumoTestGroup result = new ZumoTestGroup(unattendedOnly ? AllTestsUnattendedGroupName : AllTestsGroupName);
+            foreach (var group in testGroups)
+            {
+                result.AddTest(ZumoTestCommon.CreateSeparator("Start of group: " + group.Name));
+                foreach (var test in group.AllTests)
+                {
+                    if (test.CanRunUnattended || !unattendedOnly)
+                    {
+                        result.AddTest(test);
+                    }
+                }
+
+                result.AddTest(ZumoTestCommon.CreateSeparator("------------------"));
+            }
 
             return result;
         }

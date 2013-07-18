@@ -156,7 +156,9 @@ namespace ZumoE2ETestApp.Tests
             }
 
 #if !WINDOWS_PHONE
-            result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("The next test will show a dialog with certain movies. Please validate that movie titles and release years are shown correctly in the list."));
+            var statusTest = ZumoTestCommon.CreateTestWithSingleAlert("The next test will show a dialog with certain movies. Please validate that movie titles and release years are shown correctly in the list.");
+            statusTest.CanRunUnattended = false;
+            result.AddTest(statusTest);
             result.AddTest(new ZumoTest("ToCollection - displaying movies on a ListBox", async delegate(ZumoTest test)
             {
                 var client = ZumoTestGlobals.Instance.Client;
@@ -174,8 +176,13 @@ namespace ZumoE2ETestApp.Tests
                 newPage.SetMoviesSource(collection);
                 await newPage.Display();
                 return true;
-            }));
-            result.AddTest(ZumoTestCommon.CreateYesNoTest("Were the movies displayed correctly?", true));
+            })
+            {
+                CanRunUnattended = false
+            });
+            var validationTest = ZumoTestCommon.CreateYesNoTest("Were the movies displayed correctly?", true);
+            validationTest.CanRunUnattended = false;
+            result.AddTest(validationTest);
 #endif
             return result;
         }

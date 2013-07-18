@@ -26,14 +26,16 @@ namespace ZumoE2ETestAppWP8
 {
     public partial class MainPage : PhoneApplicationPage
     {
-        List<ZumoTestGroup> allTests;
+        List<ZumoTestGroup> allTestGroups;
         ZumoTestGroup currentGroup;
+
+        const string AllTestsGroupName = "All tests";
 
         // Constructor
         public MainPage()
         {
             InitializeComponent();
-            this.allTests = TestStore.CreateTests();
+            this.allTestGroups = TestStore.CreateTestGroups();
             if (this.appBtnBack == null)
             {
                 var appBar = this.ApplicationBar;
@@ -63,7 +65,7 @@ namespace ZumoE2ETestAppWP8
             base.OnNavigatedTo(e);
             if (this.lstTestGroups.ItemsSource == null)
             {
-                List<ListViewForTestGroup> sources = allTests.Select((tg, i) => new ListViewForTestGroup(i + 1, tg)).ToList();
+                List<ListViewForTestGroup> sources = allTestGroups.Select((tg, i) => new ListViewForTestGroup(i + 1, tg)).ToList();
                 this.lstTestGroups.ItemsSource = sources;
 
                 SavedAppInfo savedAppInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
@@ -81,7 +83,7 @@ namespace ZumoE2ETestAppWP8
             int selectedIndex = this.lstTestGroups.SelectedIndex;
             if (selectedIndex >= 0)
             {
-                ZumoTestGroup testGroup = allTests[selectedIndex];
+                ZumoTestGroup testGroup = allTestGroups[selectedIndex];
                 this.currentGroup = testGroup;
                 List<ListViewForTest> sources = testGroup.GetTests().Select((t, i) => new ListViewForTest(i + 1, t)).ToList();
                 this.lstTests.ItemsSource = sources;
@@ -206,11 +208,29 @@ namespace ZumoE2ETestAppWP8
                 }
                 else
                 {
-                    int passed = this.currentGroup.AllTests.Count(t => t.Status == TestStatus.Passed);
-                    string message = string.Format(CultureInfo.InvariantCulture, "Passed {0} of {1} tests", passed, this.currentGroup.AllTests.Count());
-                    MessageBox.Show(message, "Test group finished", MessageBoxButton.OK);
-                    // Saving app info for future runs
-                    // TODO: implement saving
+                    if (testGroup.Name.StartsWith(TestStore.AllTestsGroupName) && !string.IsNullOrEmpty(this.txtUploadUrl.Text))
+                    {
+                        // Upload logs automatically if running all tests
+                        using (var client = new HttpClient())
+                        {
+                            using (var request = new HttpRequestMessage(HttpMethod.Post, this.txtUploadUrl.Text + "?platform=wp8"))
+                            {
+                                request.Content = new StringContent(string.Join("\n", testGroup.GetLogs()), Encoding.UTF8, "text/plain");
+                                using (var response = await client.SendAsync(request))
+                                {
+                                    var body = await response.Content.ReadAsStringAsync();
+                                    var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
+                                    MessageBox.Show(body, title, MessageBoxButton.OK);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        int passed = this.currentGroup.AllTests.Count(t => t.Status == TestStatus.Passed);
+                        string message = string.Format(CultureInfo.InvariantCulture, "Passed {0} of {1} tests", passed, this.currentGroup.AllTests.Count());
+                        MessageBox.Show(message, "Test group finished", MessageBoxButton.OK);
+                    }
                 }
             }
         }
