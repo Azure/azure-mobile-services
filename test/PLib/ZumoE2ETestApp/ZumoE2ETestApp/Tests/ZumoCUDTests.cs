@@ -259,22 +259,24 @@ namespace ZumoE2ETestApp.Tests
             {
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable<RoundTripTableItem>();
+                var toInsert = itemToInsert.Clone();
+                var toUpdate = itemToUpdate.Clone();
                 try
                 {
-                    await table.InsertAsync(itemToInsert);
-                    test.AddLog("Inserted item with id {0}", itemToInsert.Id);
+                    await table.InsertAsync(toInsert);
+                    test.AddLog("Inserted item with id {0}", toInsert.Id);
 
                     if (setUpdatedId)
                     {
-                        itemToUpdate.Id = itemToInsert.Id;
+                        toUpdate.Id = toInsert.Id;
                     }
 
-                    var expectedItem = itemToUpdate.Clone();
+                    var expectedItem = toUpdate.Clone();
 
-                    await table.UpdateAsync(itemToUpdate);
+                    await table.UpdateAsync(toUpdate);
                     test.AddLog("Updated item; now retrieving it to compare with the expected value");
 
-                    var retrievedItem = await table.LookupAsync(itemToInsert.Id);
+                    var retrievedItem = await table.LookupAsync(toInsert.Id);
                     test.AddLog("Retrieved item");
 
                     if (!expectedItem.Equals(retrievedItem))
