@@ -16,6 +16,9 @@ namespace ZumoE2ETestApp.Framework
         public string Name { get; private set; }
         public string HelpText { get; set; }
 
+        public DateTime StartTime { get; private set; }
+        public DateTime EndTime { get; private set; }
+
         public event EventHandler TestGroupStarted;
         public event EventHandler<ZumoTestGroupEventArgs> TestGroupFinished;
         public event EventHandler TestStarted;
@@ -61,20 +64,29 @@ namespace ZumoE2ETestApp.Framework
         public List<string> GetLogs()
         {
             List<string> result = new List<string>();
-            result.Add("Tests for group '" + this.Name + "'");
+            result.Add(string.Format("[{0}] Tests for group '{1}'", 
+                this.StartTime.ToString(ZumoTest.TimestampFormat, CultureInfo.InvariantCulture), 
+                this.Name));
             result.Add(string.Format(CultureInfo.InvariantCulture, "Passed: {0}; Failed: {1}", this.testsPassed, this.testsFailed));
             result.Add("----------------------------");
             foreach (var test in this.tests)
             {
-                result.Add(string.Format(CultureInfo.InvariantCulture, "Logs for test {0} ({1})", test.Name, test.Status));
+                result.Add(string.Format(CultureInfo.InvariantCulture, "[{0}] Logs for test {1} ({2})",
+                    test.StartTime.ToString(ZumoTest.TimestampFormat, CultureInfo.InvariantCulture),
+                    test.Name, 
+                    test.Status));
                 result.AddRange(test.GetLogs());
-                result.Add("-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-");
+                result.Add(string.Format("[{0}] -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-",
+                    test.EndTime.ToString(ZumoTest.TimestampFormat, CultureInfo.InvariantCulture)));
             }
+
+            result.Add(string.Format("[{0}] ----------------------------",
+                this.EndTime.ToString(ZumoTest.TimestampFormat, CultureInfo.InvariantCulture)));
 
             return result;
         }
 
-        public async Task Run()
+        public async Task Run(bool unattendedOnly = false)
         {
             if (this.runningTests)
             {
@@ -88,8 +100,15 @@ namespace ZumoE2ETestApp.Framework
                 this.TestGroupStarted(this, new EventArgs());
             }
 
+            this.StartTime = DateTime.UtcNow;
+
             foreach (ZumoTest test in this.tests)
             {
+                if (!test.CanRunUnattended && unattendedOnly)
+                {
+                    continue;
+                }
+
                 if (this.TestStarted != null)
                 {
                     this.TestStarted(test, new EventArgs());
@@ -111,6 +130,8 @@ namespace ZumoE2ETestApp.Framework
                     testsFailed++;
                 }
             }
+
+            this.EndTime = DateTime.UtcNow;
 
             if (this.TestGroupFinished != null)
             {
