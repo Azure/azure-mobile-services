@@ -36,9 +36,12 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 
 public class Util {
+
+	public final static String LogTimeFormat = "yyyy-MM-dd HH:mm:ss'.'SSS";
 
 	public static String createComplexRandomString(Random rndGen, int size) {
 		if (rndGen.nextInt(3) > 0) {
@@ -126,17 +129,21 @@ public class Util {
 	}
 
 	public static String dateToString(Date date) {
+		return dateToString(date, "yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'");
+	}
+	
+	public static String dateToString(Date date, String dateFormatStr) {
 		if (date == null) {
 			return "NULL";
 		}
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'", Locale.getDefault());
+		SimpleDateFormat dateFormat = new SimpleDateFormat(dateFormatStr, Locale.getDefault());
 		dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
 
 		String formatted = dateFormat.format(date);
 
 		return formatted;
 	}
-
+	
 	public static boolean compare(Object o1, Object o2) {
 		if (o1 == null && o2 == null) {
 			return true;
@@ -147,6 +154,21 @@ public class Util {
 		}
 
 		return o1.equals(o2);
+	}
+	
+	public static TestCase createSeparatorTest(String testName) {
+		return new TestCase(testName) {
+
+			@Override
+			protected void executeTest(MobileServiceClient client,
+					TestExecutionCallback callback) {
+				TestResult testResult = new TestResult();
+				testResult.setTestCase(this);
+				testResult.setStatus(TestStatus.Passed);
+				callback.onTestComplete(this, testResult);
+			}
+			
+		}; 
 	}
 
 	public static boolean compareJson(JsonElement e1, JsonElement e2) {
