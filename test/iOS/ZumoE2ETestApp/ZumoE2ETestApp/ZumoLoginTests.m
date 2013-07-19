@@ -72,7 +72,9 @@ NSDictionary *lastUserIdentityObject;
             }
         }
     }
-    
+
+    [result addObject:[self createLogoutTest]];
+
     return result;
 }
 
