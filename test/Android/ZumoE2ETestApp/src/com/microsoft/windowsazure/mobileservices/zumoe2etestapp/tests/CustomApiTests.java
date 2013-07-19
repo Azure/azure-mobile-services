@@ -98,9 +98,13 @@ public class CustomApiTests extends TestGroup {
 				this.addTest(createJsonApiTest(permission, false, rndGen, i));
 			}
 		}
-		
-		this.addTest(LoginTests.createLoginTest(MobileServiceAuthenticationProvider.Facebook));
-		this.addTest(createJsonApiTest(ApiPermissions.User, true, rndGen, 0));
+
+		TestCase loginTest = LoginTests.createLoginTest(MobileServiceAuthenticationProvider.Facebook);
+		loginTest.setCanRunUnattended(false);
+		this.addTest(loginTest);
+		TestCase apiAuthenticatedTest = createJsonApiTest(ApiPermissions.User, true, rndGen, 0);
+		apiAuthenticatedTest.setCanRunUnattended(false);
+		this.addTest(apiAuthenticatedTest);
 		this.addTest(LoginTests.createLogoutTest());
 		
 		for (TypedTestType testType : TypedTestType.values()) {
