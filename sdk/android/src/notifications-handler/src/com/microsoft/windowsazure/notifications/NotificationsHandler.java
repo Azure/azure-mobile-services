@@ -1,4 +1,4 @@
-package com.microsoft.windowsazure.mobileservices.push;
+package com.microsoft.windowsazure.notifications;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -6,7 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.widget.Toast;
 
-public class MobileServiceNotificationHandler {
+public class NotificationsHandler {
 	public void onRegistered(Context context, String gcmRegistrationId) {
 	}
 

@@ -1,4 +1,4 @@
-package com.microsoft.windowsazure.mobileservices.push;
+package com.microsoft.windowsazure.notifications;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
@@ -9,14 +9,14 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 
-public class MobileServiceNotificationManager {
+public class NotificationsManager {
 	
-	private static final String NOTIFICATION_HANDLER_CLASS = "WAMS_MobileServiceNotificationHandlerClass";
+	private static final String NOTIFICATIONS_HANDLER_CLASS = "WAMS_NotificationsHandlerClass";
 	private static final String GOOGLE_CLOUD_MESSAGING_REGISTRATION_ID = "WAMS_GoogleCloudMessagingRegistrationId";
 
-	private static MobileServiceNotificationHandler mHandler;
+	private static NotificationsHandler mHandler;
 		
-	public static <T extends MobileServiceNotificationHandler> void handleNotifications(final Context context, final String gcmAppId, final Class<T> notificationHandlerClass) {
+	public static <T extends NotificationsHandler> void handleNotifications(final Context context, final String gcmAppId, final Class<T> notificationHandlerClass) {
 		
 		new AsyncTask<Void, Void, Void>() {
 			@Override
@@ -30,13 +30,13 @@ public class MobileServiceNotificationManager {
 					
 					setRegistrationId(registrationId, context);					
 
-					MobileServiceNotificationHandler handler = getHandler(context);
+					NotificationsHandler handler = getHandler(context);
 					
 					if (handler != null && registrationId != null) {
 						getHandler(context).onRegistered(context, registrationId);
 					}
 				} catch (Exception e) {
-					Log.e("MobileServiceNotificationManager", e.toString());
+					Log.e("NotificationsManager", e.toString());
 				}
 				
 				return null;
@@ -57,13 +57,13 @@ public class MobileServiceNotificationManager {
 					
 					setRegistrationId(null, context);
 					
-					MobileServiceNotificationHandler handler = getHandler(context);
+					NotificationsHandler handler = getHandler(context);
 					
 					if (handler != null && registrationId != null) {
 						handler.onUnregistered(context, registrationId);
 					}
 				} catch (Exception e) {
-					Log.e("MobileServiceNotificationManager", e.toString());
+					Log.e("NotificationsManager", e.toString());
 				}
 				
 				return null;
@@ -71,15 +71,15 @@ public class MobileServiceNotificationManager {
 		}.execute();
 	}
 
-	static MobileServiceNotificationHandler getHandler(Context context) {
+	static NotificationsHandler getHandler(Context context) {
 		if (mHandler == null) {
 			SharedPreferences prefereneces = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
 
-			String className = prefereneces.getString(NOTIFICATION_HANDLER_CLASS, null);
+			String className = prefereneces.getString(NOTIFICATIONS_HANDLER_CLASS, null);
 			if (className != null) {
 				try {
 					Class<?> notificationHandlerClass = Class.forName(className);
-					mHandler = (MobileServiceNotificationHandler) notificationHandlerClass.newInstance();
+					mHandler = (NotificationsHandler) notificationHandlerClass.newInstance();
 				} catch (Exception e) {
 					return null;
 				}
@@ -96,11 +96,11 @@ public class MobileServiceNotificationManager {
 		return registrationId;
 	}
 	
-	private static <T extends MobileServiceNotificationHandler> void setHandler(Class<T> notificationHandlerClass, Context context) {
+	private static <T extends NotificationsHandler> void setHandler(Class<T> notificationHandlerClass, Context context) {
 		SharedPreferences prefereneces = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
 
 		Editor editor = prefereneces.edit();
-		editor.putString(NOTIFICATION_HANDLER_CLASS, notificationHandlerClass.getName());
+		editor.putString(NOTIFICATIONS_HANDLER_CLASS, notificationHandlerClass.getName());
 		editor.commit();
 	}
 	

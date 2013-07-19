@@ -1,14 +1,14 @@
-package com.microsoft.windowsazure.mobileservices.push;
+package com.microsoft.windowsazure.notifications;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-public class MobileServiceBroadcastReceiver extends BroadcastReceiver {
+public class NotificationsBroadcastReceiver extends BroadcastReceiver {
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
-		MobileServiceNotificationHandler handler = MobileServiceNotificationManager.getHandler(context);
+		NotificationsHandler handler = NotificationsManager.getHandler(context);
 		
 		if (handler != null) {
 			handler.onReceive(context, intent.getExtras());
