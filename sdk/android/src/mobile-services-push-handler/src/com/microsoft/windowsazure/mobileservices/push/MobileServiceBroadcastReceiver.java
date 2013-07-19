@@ -1,13 +1,17 @@
 package com.microsoft.windowsazure.mobileservices.push;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 
-import com.google.android.gcm.GCMBroadcastReceiver;
-
-public class MobileServiceBroadcastReceiver extends GCMBroadcastReceiver {
+public class MobileServiceBroadcastReceiver extends BroadcastReceiver {
 
 	@Override
-	protected String getGCMIntentServiceClassName(Context context) {
-		return MobileServiceGCMIntentService.class.getName();
+	public void onReceive(Context context, Intent intent) {
+		MobileServiceNotificationHandler handler = MobileServiceNotificationManager.getHandler(context);
+		
+		if (handler != null) {
+			handler.onReceive(context, intent.getExtras());
+		}
 	}
 }

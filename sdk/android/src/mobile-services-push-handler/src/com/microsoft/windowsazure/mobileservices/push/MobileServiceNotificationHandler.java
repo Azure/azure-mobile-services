@@ -13,7 +13,7 @@ public class MobileServiceNotificationHandler {
 	public void onUnregistered(Context context, String gcmRegistrationId) {	
 	}
 
-	public void onMessage(final Context context, final Bundle bundle) {
+	public void onReceive(final Context context, final Bundle bundle) {
 		Handler h = new Handler(Looper.getMainLooper());
 		h.post(new Runnable() {
 

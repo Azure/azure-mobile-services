@@ -1,3 +1,6 @@
+To build the Mobile Services Push Handler project:
+	- After setting up the Google Play Services SDK, copy the file google-play-services from <android-sdk>/extras/google/google_play_services/libproject/google-play-services_lib/libs into the libs folder in the project
+
 To use the Mobile Services Push Handler inside an Android app:
 
 	- Make sure the app manifest has the required permissions to accept GCM messages
