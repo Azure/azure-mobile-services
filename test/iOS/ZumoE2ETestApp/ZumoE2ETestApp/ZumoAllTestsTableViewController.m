@@ -120,7 +120,7 @@
         totalFail += failed;
         for (ZumoTest *test in tests) {
             NSString *testStatus = [ZumoTestGlobals testStatusToString:[test testStatus]];
-            [logs appendFormat:@"Logs for test %@ (status = %@)", [test testName], testStatus];
+            [logs appendFormat:@"Logs for test %@ (status = %@)\n", [test testName], testStatus];
             for (NSString *logLine in [test getLogs]) {
                 [logs appendFormat:@"%@\n", logLine];
             }
