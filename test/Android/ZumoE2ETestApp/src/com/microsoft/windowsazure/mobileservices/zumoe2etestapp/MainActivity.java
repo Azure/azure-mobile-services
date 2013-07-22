@@ -21,6 +21,8 @@ package com.microsoft.windowsazure.mobileservices.zumoe2etestapp;
 
 import java.net.MalformedURLException;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.http.client.methods.HttpPost;
@@ -49,10 +51,12 @@ import android.widget.ListView;
 import android.widget.Spinner;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.CompositeTestGroup;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestGroup;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestResult;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.CustomApiTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.LoginTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.MiscTests;
@@ -133,6 +137,28 @@ public class MainActivity extends Activity {
 		adapter.add(new MiscTests());
 		adapter.add(new PushTests());
 		adapter.add(new CustomApiTests());
+
+		ArrayList<TestCase> allTests = new ArrayList<TestCase>();
+		ArrayList<TestCase> allUnattendedTests = new ArrayList<TestCase>();
+		for (int i = 0; i < adapter.getCount(); i++) {
+			TestGroup group = adapter.getItem(i);
+			allTests.add(Util.createSeparatorTest("Start of group: " + group.getName()));
+			allUnattendedTests.add(Util.createSeparatorTest("Start of group: " + group.getName()));
+			
+			List<TestCase> testsForGroup = group.getTestCases();
+			for (TestCase test : testsForGroup) {
+				allTests.add(test);
+				if (test.canRunUnattended()) {
+					allUnattendedTests.add(test);
+				}
+			}
+			allTests.add(Util.createSeparatorTest("------------------"));
+			allUnattendedTests.add(Util.createSeparatorTest("------------------"));
+		}
+		
+		adapter.add(new CompositeTestGroup(TestGroup.AllUnattendedTestsGroupName, allUnattendedTests));
+		adapter.add(new CompositeTestGroup(TestGroup.AllTestsGroupName, allTests));
+		
 		mTestGroupSpinner.setSelection(0);
 		selectTestGroup(0);
 	}
@@ -262,14 +288,15 @@ public class MainActivity extends Activity {
 		}
 
 		TestGroup group = (TestGroup) mTestGroupSpinner.getSelectedItem();
-
+		logWithTimestamp(new Date(), "Tests for group \'" + group.getName() + "\'");
+		logSeparator();
 		group.runTests(client, new TestExecutionCallback() {
 
 			@Override
 			public void onTestStart(TestCase test) {
 				TestCaseAdapter adapter = (TestCaseAdapter) mTestCaseList.getAdapter();
 				adapter.notifyDataSetChanged();
-				log("TEST START", test.getName());
+				// log("TEST START", test.getName());
 			}
 
 			@Override
@@ -281,7 +308,6 @@ public class MainActivity extends Activity {
 			@Override
 			public void onTestComplete(TestCase test, TestResult result) {
 				Throwable e = result.getException();
-				String exMessage = "-";
 				if (e != null) {
 					StringBuilder sb = new StringBuilder();
 					while (e != null) {
@@ -291,7 +317,7 @@ public class MainActivity extends Activity {
 						e = e.getCause();
 					}
 
-					exMessage = sb.toString();
+					test.log("Exception: " + sb.toString());
 				}
 
 				final TestCaseAdapter adapter = (TestCaseAdapter) mTestCaseList.getAdapter();
@@ -305,8 +331,17 @@ public class MainActivity extends Activity {
 					}
 					
 				});
-				log("TEST LOG", test.getLog());
-				log("TEST COMPLETED", test.getName() + " - " + result.getStatus().toString() + " - Ex: " + exMessage);
+				logWithTimestamp(test.getStartTime(), "Logs for test " + test.getName() + " (" + result.getStatus().toString() + ")");
+				String testLogs = test.getLog();
+				if (testLogs.length() > 0) {
+					if (testLogs.endsWith("\n")) {
+						testLogs = testLogs.substring(0, testLogs.length() - 1);
+					}
+					log(testLogs);
+				}
+				
+				logWithTimestamp(test.getEndTime(), "Test " + result.getStatus().toString());
+				logWithTimestamp(test.getEndTime(), "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-");
 				logSeparator();
 			}
 		});
@@ -319,16 +354,19 @@ public class MainActivity extends Activity {
 		mLog.append("\n");
 	}
 	
-	@SuppressWarnings("unused")
 	private void log(String content) {
 		log("Info", content);
+	}
+
+	private void logWithTimestamp(Date time, String content) {
+		log("Info", "[" + Util.dateToString(time, Util.LogTimeFormat) + "] " + content);
 	}
 
 	private void log(String title, String content) {
 		String message = title + " - " + content;
 		Log.d("ZUMO-E2ETESTAPP", message);
 
-		mLog.append(message);
+		mLog.append(content);
 		mLog.append('\n');
 	}
 

@@ -20,6 +20,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import com.google.gson.JsonObject;
@@ -54,6 +55,8 @@ public class LoginTests extends TestGroup {
 		this.addTest(createCRUDTest(USER_PERMISSION_TABLE_NAME, null, TablePermission.User, false));
 		this.addTest(createCRUDTest(ADMIN_PERMISSION_TABLE_NAME, null, TablePermission.Admin, false));
 
+		int indexOfStartAuthenticationTests = this.getTestCases().size();
+		
 		ArrayList<MobileServiceAuthenticationProvider> providersWithRecycledTokenSupport = new ArrayList<MobileServiceAuthenticationProvider>();
 		providersWithRecycledTokenSupport.add(MobileServiceAuthenticationProvider.Facebook);
 		providersWithRecycledTokenSupport.add(MobileServiceAuthenticationProvider.Google);
@@ -70,6 +73,11 @@ public class LoginTests extends TestGroup {
 				this.addTest(createClientSideLoginTest(provider));
 				this.addTest(createCRUDTest(USER_PERMISSION_TABLE_NAME, provider, TablePermission.User, true));
 			}
+		}
+
+		List<TestCase> testCases = this.getTestCases();
+		for (int i = indexOfStartAuthenticationTests; i < testCases.size(); i++) {
+			testCases.get(i).setCanRunUnattended(false);
 		}
 	}
 
