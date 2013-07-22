@@ -64,6 +64,7 @@ namespace ZumoE2ETestApp.Tests.Types
         {
             RoundTripTableItem result = new RoundTripTableItem
             {
+                Id = this.Id,
                 Bool1 = this.Bool1,
                 Date1 = this.Date1,
                 Double1 = this.Double1,

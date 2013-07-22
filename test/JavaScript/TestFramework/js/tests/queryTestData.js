@@ -1784,6 +1784,14 @@ function createQueryTestData() {
         BestPictureWinner: false
     });
     movies.push({
+        Title: "Nauticaä of the Valley of the Wind",
+        Year: 1984,
+        Duration: 117,
+        MPAARating: "PG",
+        ReleaseDate: new Date(Date.UTC(1984, 3, 11)),
+        BestPictureWinner: false
+    });
+    movies.push({
         Title: "The Wrestler",
         Year: 2008,
         Duration: 109,

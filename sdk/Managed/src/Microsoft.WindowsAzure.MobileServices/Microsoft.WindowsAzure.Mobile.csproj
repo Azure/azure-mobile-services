@@ -41,7 +41,6 @@
   <ItemGroup>
     <Compile Include="Authentication\MobileServiceTokenAuthentication.cs" />
     <Compile Include="Collections\MobileServiceCollection.cs" />
-    <Compile Include="Extensions\HttpMessageHandlerExtensions.cs" />
     <Compile Include="Extensions\IDictionaryExtensions.cs" />
     <Compile Include="Extensions\MobileServiceClientExtensions.cs" />
     <Compile Include="Extensions\MobileServiceCollectionExtensions.cs" />
@@ -73,6 +72,7 @@
     <Compile Include="Table\Query\FilterBuildingExpressionVisitor.cs" />
     <Compile Include="Table\Query\IMobileServiceTableQuery.cs" />
     <Compile Include="Table\Query\ITotalCountProvider.cs" />
+    <Compile Include="Table\Query\MemberInfoKey.cs" />
     <Compile Include="Table\Query\MobileServiceTableQuery.cs" />
     <Compile Include="Table\Query\MobileServiceTableQueryDescription.cs" />
     <Compile Include="Table\Query\MobileServiceTableQueryProvider.cs" />

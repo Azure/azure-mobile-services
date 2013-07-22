@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Reflection;
@@ -91,16 +92,18 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="client">
         /// The client associated with this <see cref="MobileServiceHttpClient"/>.
         /// </param>
-        /// <param name="handler">
-        /// An http handler.
+        /// <param name="handlers">
+        /// Chain of <see cref="HttpMessageHandler" /> instances. 
+        /// All but the last should be <see cref="DelegatingHandler"/>s. 
         /// </param>
-        public MobileServiceHttpClient(MobileServiceClient client, HttpMessageHandler handler)
+        public MobileServiceHttpClient(MobileServiceClient client, IEnumerable<HttpMessageHandler> handlers)
         {
-            this.client = client;
+            Debug.Assert(handlers != null);
 
-            this.httpHandler = handler ?? new HttpClientHandler();
+            this.client = client;
+            this.httpHandler = CreatePipeline(handlers);
             this.httpClient = new HttpClient(httpHandler);
-            this.httpClientSansHandlers = new HttpClient();
+            this.httpClientSansHandlers = new HttpClient(GetDefaultHttpClientHandler());
 
             this.userAgentHeaderValue = GetUserAgentHeader();
 
@@ -517,6 +520,62 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             return response;
+        }
+
+        /// <summary>
+        /// Transform an IEnumerable of <see cref="HttpMessageHandler"/>s into
+        /// a chain of <see cref="HttpMessageHandler"/>s.
+        /// </summary>
+        /// <param name="handlers">
+        /// Chain of <see cref="HttpMessageHandler" /> instances. 
+        /// All but the last should be <see cref="DelegatingHandler"/>s. 
+        /// </param>
+        /// <returns>A chain of <see cref="HttpMessageHandler"/>s</returns>
+        private static HttpMessageHandler CreatePipeline(IEnumerable<HttpMessageHandler> handlers)
+        {
+            HttpMessageHandler pipeline = handlers.LastOrDefault() ?? GetDefaultHttpClientHandler();
+            DelegatingHandler dHandler = pipeline as DelegatingHandler;
+            if (dHandler != null)
+            {
+                dHandler.InnerHandler = GetDefaultHttpClientHandler();
+                pipeline = dHandler;
+            }
+
+            // Wire handlers up in reverse order
+            IEnumerable<HttpMessageHandler> reversedHandlers = handlers.Reverse().Skip(1);
+            foreach (HttpMessageHandler handler in reversedHandlers)
+            {
+                dHandler = handler as DelegatingHandler;
+                if (dHandler == null)
+                {
+                    throw new ArgumentException(
+                        string.Format(
+                        Resources.HttpMessageHandlerExtensions_WrongHandlerType,
+                        typeof(DelegatingHandler).Name));
+                }
+
+                dHandler.InnerHandler = pipeline;
+                pipeline = dHandler;
+            }
+
+            return pipeline;
+        }
+
+        /// <summary>
+        /// Returns a default HttpClientHandler that supports automatic decompression.
+        /// </summary>
+        /// <returns>
+        /// A default HttpClientHandler that supports automatic decompression
+        /// </returns>
+        private static HttpClientHandler GetDefaultHttpClientHandler()
+        {
+            HttpClientHandler handler = new HttpClientHandler();
+            if (handler.SupportsAutomaticDecompression)
+            {
+                handler.AutomaticDecompression = DecompressionMethods.GZip;
+            }
+
+            return handler;
         }
 
         /// <summary>

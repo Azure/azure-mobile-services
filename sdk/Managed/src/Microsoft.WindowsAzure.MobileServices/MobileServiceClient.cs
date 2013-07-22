@@ -190,7 +190,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.applicationInstallationId = GetApplicationInstallationId();
 
             handlers = handlers ?? EmptyHttpMessageHandlers;
-            this.HttpClient = new MobileServiceHttpClient(this, handlers.CreatePipeline());
+            this.HttpClient = new MobileServiceHttpClient(this, handlers);
             this.Serializer = new MobileServiceSerializer();
         }
 

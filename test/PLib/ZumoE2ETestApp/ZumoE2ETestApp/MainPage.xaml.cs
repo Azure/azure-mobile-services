@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -37,7 +38,7 @@ namespace ZumoE2ETestApp
         public MainPage()
         {
             this.InitializeComponent();
-            this.allTests = TestStore.CreateTests();
+            this.allTests = TestStore.CreateTestGroups();
         }
 
         /// <summary>
@@ -147,7 +148,7 @@ namespace ZumoE2ETestApp
             }
         }
 
-        private async Task RunTestGroup(ZumoTestGroup testGroup)
+        private async Task<bool> InitializeClient()
         {
             var appUrl = this.txtAppUrl.Text;
             var appKey = this.txtAppKey.Text;
@@ -165,36 +166,65 @@ namespace ZumoE2ETestApp
             if (error != null)
             {
                 await Alert("Error initializing client", error);
+                return false;
             }
             else
             {
-                try
+                // Saving app info for future runs
+                var savedAppInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
+                if (savedAppInfo.LastService == null || savedAppInfo.LastService.AppUrl != appUrl || savedAppInfo.LastService.AppKey != appKey)
                 {
-                    await testGroup.Run();
-                }
-                catch (Exception ex)
-                {
-                    error = string.Format(CultureInfo.InvariantCulture, "Unhandled exception: {0}", ex);
-                }
-
-                if (error != null)
-                {
-                    await Alert("Error", error);
-                }
-                else
-                {
-                    // Saving app info for future runs
-                    var savedAppInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
-                    if (savedAppInfo.LastService == null || savedAppInfo.LastService.AppUrl != appUrl || savedAppInfo.LastService.AppKey != appKey)
+                    if (savedAppInfo.LastService == null)
                     {
-                        if (savedAppInfo.LastService == null)
-                        {
-                            savedAppInfo.LastService = new MobileServiceInfo();
-                        }
+                        savedAppInfo.LastService = new MobileServiceInfo();
+                    }
 
-                        savedAppInfo.LastService.AppKey = appKey;
-                        savedAppInfo.LastService.AppUrl = appUrl;
-                        await AppInfoRepository.Instance.SaveAppInfo(savedAppInfo);
+                    savedAppInfo.LastService.AppKey = appKey;
+                    savedAppInfo.LastService.AppUrl = appUrl;
+                    await AppInfoRepository.Instance.SaveAppInfo(savedAppInfo);
+                }
+
+                return true;
+            }
+        }
+
+        private async Task RunTestGroup(ZumoTestGroup testGroup)
+        {
+            var clientInitialized = await InitializeClient();
+            if (!clientInitialized)
+            {
+                return;
+            }
+
+            string error = null;
+            try
+            {
+                await testGroup.Run();
+            }
+            catch (Exception ex)
+            {
+                error = string.Format(CultureInfo.InvariantCulture, "Unhandled exception: {0}", ex);
+            }
+
+            if (error != null)
+            {
+                await Alert("Error", error);
+            }
+
+            if (testGroup.Name.StartsWith(TestStore.AllTestsGroupName) && !string.IsNullOrEmpty(this.txtUploadLogsUrl.Text))
+            {
+                // Upload logs automatically if running all tests
+                using (var client = new HttpClient())
+                {
+                    using (var request = new HttpRequestMessage(HttpMethod.Post, this.txtUploadLogsUrl.Text + "?platform=winstorecs"))
+                    {
+                        request.Content = new StringContent(string.Join("\n", testGroup.GetLogs()), Encoding.UTF8, "text/plain");
+                        using (var response = await client.SendAsync(request))
+                        {
+                            var body = await response.Content.ReadAsStringAsync();
+                            var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
+                            await Alert(title, body);
+                        }
                     }
                 }
             }
@@ -304,14 +334,7 @@ namespace ZumoE2ETestApp
         private void lstTests_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
         {
             var selectedItems = this.lstTests.SelectedItems;
-            if (selectedItems.Count > 0)
-            {
-                this.btnRunSelected.Visibility = Windows.UI.Xaml.Visibility.Visible;
-            }
-            else
-            {
-                this.btnRunSelected.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
-            }
+            this.btnRunSelected.IsEnabled = selectedItems.Count > 0;
         }
     }
 }

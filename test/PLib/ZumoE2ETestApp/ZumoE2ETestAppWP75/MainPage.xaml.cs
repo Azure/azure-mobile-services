@@ -36,7 +36,7 @@ namespace ZumoE2ETestAppWP75
         {
             InitializeComponent();
 
-            this.allTests = TestStore.CreateTests();
+            this.allTests = TestStore.CreateTestGroups();
             if (this.appBtnBack == null)
             {
                 var appBar = this.ApplicationBar;
@@ -213,11 +213,29 @@ namespace ZumoE2ETestAppWP75
                 }
                 else
                 {
-                    int passed = this.currentGroup.AllTests.Count(t => t.Status == TestStatus.Passed);
-                    string message = string.Format(CultureInfo.InvariantCulture, "Passed {0} of {1} tests", passed, this.currentGroup.AllTests.Count());
-                    MessageBox.Show(message, "Test group finished", MessageBoxButton.OK);
-                    // Saving app info for future runs
-                    // TODO: implement saving
+                    if (testGroup.Name.StartsWith(TestStore.AllTestsGroupName) && !string.IsNullOrEmpty(this.txtUploadUrl.Text))
+                    {
+                        // Upload logs automatically if running all tests
+                        using (var client = new HttpClient())
+                        {
+                            using (var request = new HttpRequestMessage(HttpMethod.Post, this.txtUploadUrl.Text + "?platform=wp75"))
+                            {
+                                request.Content = new StringContent(string.Join("\n", testGroup.GetLogs()), Encoding.UTF8, "text/plain");
+                                using (var response = await client.SendAsync(request))
+                                {
+                                    var body = await response.Content.ReadAsStringAsync();
+                                    var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
+                                    MessageBox.Show(body, title, MessageBoxButton.OK);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        int passed = this.currentGroup.AllTests.Count(t => t.Status == TestStatus.Passed);
+                        string message = string.Format(CultureInfo.InvariantCulture, "Passed {0} of {1} tests", passed, this.currentGroup.AllTests.Count());
+                        MessageBox.Show(message, "Test group finished", MessageBoxButton.OK);
+                    }
                 }
             }
         }

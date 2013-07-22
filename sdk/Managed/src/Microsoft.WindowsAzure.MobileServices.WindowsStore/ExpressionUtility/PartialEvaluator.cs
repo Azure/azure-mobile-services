@@ -65,9 +65,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             List<Expression> subtrees = new List<Expression>();
 
-            // The dependent flag is closed over and used to communicate
+            // The dependent and isMemberInit flags are closed over and used to communicate
             // between different layers of the recursive call
             bool dependent = false;
+            bool isMemberInit = false;
 
             // Walk the tree finding every 
             VisitorHelper.VisitAll(
@@ -77,25 +78,40 @@ namespace Microsoft.WindowsAzure.MobileServices
                     if (expr != null)
                     {
                         // Cache whether or not our parent is already dependent
-                        // because we're going to reset the flag while we
-                        // evalute our descendents to see if all of our
-                        // subtrees are independent.
+                        // or a MemberInitExpression because we're going to reset 
+                        // the flags while we evalute our descendents to see if all
+                        // of our subtrees are independent.
                         bool parentIsDependent = dependent;
+                        bool parentIsMemberInit = isMemberInit;
 
-                        // Set dependent to false and visit my entire subtree
+                        // Set flags to false and visit my entire subtree
                         // to see if anything sets it to true
                         dependent = false;
+                        isMemberInit = expr is MemberInitExpression;
+
                         recur(expr);
 
                         // If nothing in my subtree is dependent
                         if (!dependent)
                         {
+                            // A NewExpression itself will appear to be independent,
+                            // but if the parent is a MemberInitExpression, the NewExpression
+                            // can't be evaluated by itself. The MemberInitExpression will
+                            // determine if the full expression is dependent or not, so 
+                            // the NewExpression should simply not be checked for dependency.
+                            NewExpression newExpression = expr as NewExpression;
+                            if (newExpression != null && parentIsMemberInit)
+                            {
+                                return expr;
+                            }
+
                             // Then the current node is independent if it's not
                             // related to the parameter or if it's not the
                             // constant query root (to handle degenerate cases 
                             // where we don't actually use any parameters in
                             // the query - like table.skip(2).take(3)).
                             ConstantExpression constant = expr as ConstantExpression;
+                            
                             if (expr.NodeType == ExpressionType.Parameter ||
                                 (constant != null && constant.Value is IQueryable))
                             {

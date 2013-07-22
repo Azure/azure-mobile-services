@@ -287,7 +287,7 @@ namespace ZumoE2ETestApp.Tests
                 Duration = 110,
                 MPAARating = "R",
                 ReleaseDate = new DateTime(1994, 11, 18, 0, 0, 0, DateTimeKind.Utc),
-                Title = "L?on: The Professional",
+                Title = "Léon: The Professional",
                 Year = 1994
             },
             new Movie
@@ -539,7 +539,7 @@ namespace ZumoE2ETestApp.Tests
                 Duration = 98,
                 MPAARating = "G",
                 ReleaseDate = new DateTime(2008, 06, 27, 0, 0, 0, DateTimeKind.Utc),
-                Title = "WALL?E",
+                Title = "WALL-E",
                 Year = 2008
             },
             new Movie
@@ -566,7 +566,7 @@ namespace ZumoE2ETestApp.Tests
                 Duration = 122,
                 MPAARating = "R",
                 ReleaseDate = new DateTime(2001, 04, 24, 0, 0, 0, DateTimeKind.Utc),
-                Title = "AmÃ©lie",
+                Title = "Amélie",
                 Year = 2001
             },
             new Movie
@@ -2008,6 +2008,14 @@ namespace ZumoE2ETestApp.Tests
                 ReleaseDate = new DateTime(1950, 10, 12, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Harvey",
                 Year = 1950
+            },
+            new Movie {
+                BestPictureWinner = false,
+                Duration = 117,
+                MPAARating = "PG",
+                ReleaseDate = new DateTime(1984, 3, 11, 0, 0, 0, DateTimeKind.Utc),
+                Title = "Nauticaä of the Valley of the Wind",
+                Year = 1984
             },
             new Movie
             {

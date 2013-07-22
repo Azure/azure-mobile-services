@@ -18,7 +18,7 @@ using ZumoE2ETestApp.Tests.Types;
 
 namespace ZumoE2ETestApp.Tests
 {
-    internal static class ZumoCustomApiTests
+    public static class ZumoCustomApiTests
     {
         private const string PublicApiName = "public";
         private const string AppApiName = "application";
@@ -28,9 +28,9 @@ namespace ZumoE2ETestApp.Tests
 
         private const string Letters = "abcdefghijklmnopqrstuvwxyz";
 
-        enum ApiPermissions { Public, Application, User, Admin }
-        enum DataFormat { Json, Xml, Other }
-        enum TypedTestType { GetByTitle, GetByDate, PostByDuration, PostByYear }
+        public enum ApiPermissions { Public, Application, User, Admin }
+        public enum DataFormat { Json, Xml, Other }
+        public enum TypedTestType { GetByTitle, GetByDate, PostByDuration, PostByYear }
 
         private static readonly Dictionary<ApiPermissions, string> apiNames = new Dictionary<ApiPermissions, string>
         {
@@ -48,19 +48,29 @@ namespace ZumoE2ETestApp.Tests
             int seed = now.Year * 10000 + now.Month * 100 + now.Day;
             Random rndGen = new Random(seed);
 
+#if !NET45
+            result.AddTest(ZumoLoginTests.CreateLogoutTest());
+#endif
+
             result.AddTest(CreateHttpContentApiTest(DataFormat.Xml, DataFormat.Json, rndGen));
 
 #if !NET45
-            result.AddTest(ZumoLoginTests.CreateLogoutTest());
+            List<ZumoTest> testsWhichNeedAuth = new List<ZumoTest>();
 
             foreach (ApiPermissions apiPermission in Util.EnumGetValues(typeof(ApiPermissions)))
             {
-                result.AddTest(CreateJTokenApiTest(apiPermission, false, rndGen));
+                testsWhichNeedAuth.Add(CreateJTokenApiTest(apiPermission, false, rndGen));
             }
 
-            result.AddTest(ZumoLoginTests.CreateLoginTest(MobileServiceAuthenticationProvider.Facebook));
-            result.AddTest(CreateJTokenApiTest(ApiPermissions.User, true, rndGen));
-            result.AddTest(ZumoLoginTests.CreateLogoutTest());
+            testsWhichNeedAuth.Add(ZumoLoginTests.CreateLoginTest(MobileServiceAuthenticationProvider.Facebook));
+            testsWhichNeedAuth.Add(CreateJTokenApiTest(ApiPermissions.User, true, rndGen));
+            testsWhichNeedAuth.Add(ZumoLoginTests.CreateLogoutTest());
+
+            foreach (var test in testsWhichNeedAuth)
+            {
+                test.CanRunUnattended = false;
+                result.AddTest(test);
+            }
 #endif
 
             foreach (DataFormat inputFormat in Util.EnumGetValues(typeof(DataFormat)))
@@ -178,6 +188,8 @@ namespace ZumoE2ETestApp.Tests
                             test.AddLog("  - {0}", error);
                         }
 
+                        test.AddLog("Expected: {0}", string.Join(", ", expectedResult.Select(m => m.Title)));
+                        test.AddLog("Actual: {0}", string.Join(", ", actualResult.Movies.Select(m => m.Title)));
                         testResult = false;
                         break;
                     }
@@ -657,6 +669,10 @@ namespace ZumoE2ETestApp.Tests
             {
                 var name = CreateString(rndGen, 1, 10, Letters);
                 var value = CreateString(rndGen);
+                if (!result.ContainsKey(name))
+                {
+                    result.Add(name, value);
+                }
             }
 
             return result;

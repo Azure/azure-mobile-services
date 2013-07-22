@@ -61,16 +61,24 @@ document.getElementById('btnRunTests').onclick = function (evt) {
     var currentGroup = zumo.testGroups[zumo.currentGroup];
     var appUrl = document.getElementById('txtAppUrl').value;
     var appKey = document.getElementById('txtAppKey').value;
+    var uploadUrl = document.getElementById('txtSendLogsUrl').value.trim();
+
     if (zumo.initializeClient(appUrl, appKey)) {
 
         saveLastUsedAppInfo();
 
         var groupDone = function (testsPassed, testsFailed) {
-            var logs = 'Test group finished';
-            logs = logs + '\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n';
-            logs = logs + 'Tests passed: ' + testsPassed + '\n';
-            logs = logs + 'Tests failed: ' + testsFailed;
-            testPlatform.alert(logs);
+            if (currentGroup.name.indexOf(zumo.AllTestsGroupName) === 0 && uploadUrl !== '') {
+                // For all tests, upload logs automatically if URL is set
+                var testLogs = currentGroup.getLogs();
+                uploadLogs(uploadUrl, testLogs);
+            } else {
+                var logs = 'Test group finished';
+                logs = logs + '\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n';
+                logs = logs + 'Tests passed: ' + testsPassed + '\n';
+                logs = logs + 'Tests failed: ' + testsFailed;
+                testPlatform.alert(logs);
+            }
         }
         var updateTest = function (test, index) {
             var tblTests = document.getElementById('tblTestsBody');
@@ -117,15 +125,23 @@ document.getElementById('btnSendLogs').onclick = function (evt) {
 
     var currentGroup = zumo.testGroups[zumo.currentGroup];
     var logs = currentGroup.getLogs();
+    uploadLogs(uploadUrl, logs, function () {
+        saveLastUsedAppInfo();
+    });
+}
+
+function uploadLogs(url, logs, done) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
-            saveLastUsedAppInfo();
             testPlatform.alert(xhr.responseText);
+            if (done) {
+                done();
+            }
         }
     }
 
-    uploadUrl = uploadUrl + "?platform=winstorejs";
+    var uploadUrl = url + "?platform=winstorejs";
     xhr.open('POST', uploadUrl, true);
     xhr.setRequestHeader('content-type', 'text/plain');
     xhr.send(logs);
@@ -180,7 +196,8 @@ function addAttribute(element, name, value) {
 function addTestGroups() {
     var tblTestsGroup = document.getElementById('tblTestsGroupBody');
 
-    jQuery.each(testGroups, function (index, item) {
+    for (var index = 0; index < testGroups.length; index++) {
+        var item = testGroups[index];
         var name = "" + (index + 1) + ". " + item.name + " tests";
         var tr = document.createElement('tr');
         var td = document.createElement('td');
@@ -190,22 +207,26 @@ function addTestGroups() {
         addAttribute(a, 'href', '#');
         addAttribute(a, 'class', 'testGroupItem');
 
-        if (a.attachEvent) {
+        var attachEvent = function (a, index) {
+            if (a.attachEvent) {
 
-            a.attachEvent('onclick', function () {
-                testGroupSelected(index);
-            });
-            a.innerText = toStaticHTML(name);
+                a.attachEvent('onclick', function () {
+                    testGroupSelected(index);
+                });
+                a.innerText = toStaticHTML(name);
+            }
+            else {
+                a.addEventListener('click', function () {
+                    testGroupSelected(index);
+                }, false);
+                a.textContent = name;
+            }
         }
-        else {
-            a.addEventListener('click', function () {
-                testGroupSelected(index);
-            }, false);
-            a.textContent = name;
-        }
+
+        attachEvent(a, index);
 
         tblTestsGroup.appendChild(tr);
-    });
+    }
 
 }
 

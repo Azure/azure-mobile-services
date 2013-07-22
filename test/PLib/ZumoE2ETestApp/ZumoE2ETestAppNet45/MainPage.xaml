@@ -48,7 +48,7 @@
                 <ColumnDefinition Width="3*" />
             </Grid.ColumnDefinitions>
             <Canvas Grid.Column="1" Background="Olive" />
-            <StackPanel Orientation="Vertical" Grid.Column="0">
+            <StackPanel Orientation="Vertical" Grid.Column="0" Margin="0,3,0,-3">
                 <TextBlock HorizontalAlignment="Center" Margin="10" FontSize="30"
                            Text="Test Groups" />
                 <ListBox Margin="10" Name="lstTestGroups" SelectionChanged="lstTestGroups_SelectionChanged_1">

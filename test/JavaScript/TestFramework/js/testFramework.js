@@ -11,11 +11,15 @@ function createZumoNamespace() {
     var TSFailed = 1;
     var TSNotRun = 2;
     var TSRunning = 3;
+    var AllTestsGroupName = "All tests";
+    var AllTestsUnattendedGroupName = AllTestsGroupName + ' (unattended)';
+
 
     function ZumoTest(name, execution) {
         this.name = name;
         this.execution = execution;
         this.status = TSNotRun;
+        this.canRunUnattended = true;
         this.logs = [];
     }
 
@@ -36,31 +40,33 @@ function createZumoNamespace() {
         }
 
         var now = new Date();
-        text = '[' + now.toISOString() + '] ' + text;
+        text = '[' + dateToString(now) + '] ' + text;
+        if (text.length > 200) {
+            text = text.substring(0, 200) + '... (truncated)';
+        }
+
         this.logs.push(text);
     }
 
     ZumoTest.prototype.displayText = function () {
         var result = 'Test: ' + this.name + ' (';
+        result = result + this.statusText() + ')';
+        return result;
+    }
+
+    ZumoTest.prototype.statusText = function () {
         switch (this.status) {
             case TSFailed:
-                result = result + 'failed';
-                break;
+                return 'failed';
             case TSPassed:
-                result = result + 'passed';
-                break;
+                return 'passed';
             case TSNotRun:
-                result = result + 'not run';
-                break;
+                return 'not run';
             case TSRunning:
-                result = result + 'running';
-                break;
+                return 'running';
             default:
-                result = result + 'unknown';
-                break;
+                return 'unknown';
         }
-
-        return result + ')';
     }
 
     ZumoTest.prototype.getLogs = function () {
@@ -70,16 +76,25 @@ function createZumoNamespace() {
     // testDone is a function which will be called (with a bool indicating
     //    pass or fail) when the test is done
     ZumoTest.prototype.runTest = function (testDone) {
-        this.execution(this, testDone);
+        var that = this;
+        that.startTime = new Date();
+        this.execution(this, function (passed) {
+            that.endTime = new Date();
+            testDone(passed)
+        });
     }
 
     ZumoTest.prototype.reset = function () {
         this.status = TSNotRun;
+        this.startTime = null;
+        this.endTime = null;
         this.logs = [];
     }
 
     function ZumoTestGroup(name, tests) {
         this.name = name;
+        this.startTime = null;
+        this.endTime = null;
         this.tests = tests || [];
     }
 
@@ -94,8 +109,11 @@ function createZumoNamespace() {
         var group = this;
         var passed = 0;
         var failed = 0;
+        this.startTime = new Date();
+        var that = this;
         var runNextTest = function (index) {
             if (index === group.tests.length) {
+                that.endTime = new Date();
                 if (groupDone) {
                     groupDone(passed, failed);
                 }
@@ -140,14 +158,16 @@ function createZumoNamespace() {
     }
 
     ZumoTestGroup.prototype.getLogs = function () {
-        var result = 'Logs for test group: ' + this.name + '\n';
-        result = result + '=================================\n';
+        var lines = [];
+        lines.push('[' + dateToString(this.startTime) + '] Tests for group \'' + this.name + '\'');
+        lines.push('----------------------------');
         this.tests.forEach(function (test) {
-            result = result + test.getLogs() + '\n';
-            result = result + '--------------------------\n';
+            lines.push('[' + dateToString(test.startTime) + '] Logs for test ' + test.name + ' (' + test.statusText() + ')');
+            lines.push(test.getLogs());
+            lines.push('[' + dateToString(test.endTime) + '] -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-');
         });
 
-        return result;
+        return lines.join('\n');
     }
 
     var client = null;
@@ -324,6 +344,40 @@ function createZumoNamespace() {
         }
     }
 
+    function createSeparatorTest(testName) {
+        /// <summary>
+        /// Creates a test which doesn't do anything, used only to separate groups of tests
+        /// </summary>
+        /// <param name="name">The test name.</param>
+        /// <returns>A test which always passes without doing anything.</returns>
+        return new zumo.Test(testName, function (test, done) {
+            done(true);
+        });
+    }
+
+    function dateToString(date) {
+        /// <param name="date" type="Date">The date to convert to string</param>
+
+        function padLeft0(number, size) {
+            number = number.toString();
+            while (number.length < size) number = '0' + number;
+            return number;
+        }
+
+        date = date || new Date(Date.UTC(1900, 0, 1, 0, 0, 0, 0));
+
+        var result =
+            padLeft0(date.getUTCFullYear(), 4) + '-' +
+            padLeft0(date.getUTCMonth() + 1, 2) + '-' +
+            padLeft0(date.getUTCDate(), 2) + ' ' +
+            padLeft0(date.getUTCHours(), 2) + ':' +
+            padLeft0(date.getUTCMinutes(), 2) + ':' +
+            padLeft0(date.getUTCSeconds(), 2) + '.' +
+            padLeft0(date.getUTCMilliseconds(), 3);
+
+        return result;
+    }
+
     return {
         testGroups: testGroups,
         currentGroup: currentGroup,
@@ -334,12 +388,16 @@ function createZumoNamespace() {
         TSFailed: TSFailed,
         TSNotRun: TSNotRun,
         TSRunning: TSRunning,
+        AllTestsGroupName: AllTestsGroupName,
+        AllTestsUnattendedGroupName: AllTestsUnattendedGroupName,
         Test: ZumoTest,
         Group: ZumoTestGroup,
         tests: {},
         util: {
+            createSeparatorTest: createSeparatorTest,
             compare: compareValues,
-            traceResponse: traceResponse
+            traceResponse: traceResponse,
+            dateToString: dateToString
         }
     };
 }
