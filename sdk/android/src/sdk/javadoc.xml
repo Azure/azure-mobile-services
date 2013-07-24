@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project default="javadoc">
     <target name="javadoc">
-        <javadoc access="public" author="false" classpath="libs/httpclient-4.2.3.jar:libs/gson-2.2.2.jar:/Users/PabloZaiden/android-sdks/tools/support/annotations.jar" destdir="doc" nodeprecated="true" nodeprecatedlist="true" noindex="false" nonavbar="false" notree="false" packagenames="com.microsoft.windowsazure.mobileservices" source="1.6" sourcepath="src:gen" splitindex="true" use="true" version="false">
+        <javadoc access="public" author="false" classpath="libs/gson-2.2.2.jar" destdir="doc" nodeprecated="true" nodeprecatedlist="true" noindex="false" nonavbar="false" notree="false" packagenames="com.microsoft.windowsazure.mobileservices" source="1.6" sourcepath="src:gen" splitindex="true" use="true" version="false">
         	<arg value="-notimestamp" />    
         </javadoc>
         <jar basedir="src" destfile="bin/mobileservices-0.2.3-sources.jar"/>
