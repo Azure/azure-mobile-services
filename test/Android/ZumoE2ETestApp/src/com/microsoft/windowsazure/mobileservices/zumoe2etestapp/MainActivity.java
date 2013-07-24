@@ -76,6 +76,11 @@ public class MainActivity extends Activity {
 	
 	private Spinner mTestGroupSpinner;
 
+	private static Activity mInstance;
+	
+	public static Activity getInstance() {
+		return mInstance;
+	}
 	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
@@ -89,6 +94,8 @@ public class MainActivity extends Activity {
 		
 		setContentView(R.layout.activity_main);
 
+		mInstance = this;
+		
 		mPrefManager = PreferenceManager.getDefaultSharedPreferences(this);
 
 		mTestCaseList = (ListView) findViewById(R.id.testCaseList);
