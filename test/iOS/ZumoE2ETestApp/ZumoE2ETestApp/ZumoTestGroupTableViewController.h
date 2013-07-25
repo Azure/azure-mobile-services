@@ -11,7 +11,7 @@
     IBOutlet UIView *headerView;
 }
 
-@property (nonatomic, strong) ZumoTestGroup *tests;
+@property (nonatomic, strong) ZumoTestGroup *testGroup;
 @property (nonatomic, strong) NSString *logUploadUrl;
 
 - (IBAction)runTests:(id)sender;

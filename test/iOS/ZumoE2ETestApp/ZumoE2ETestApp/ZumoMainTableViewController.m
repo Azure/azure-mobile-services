@@ -8,7 +8,6 @@
 #import "ZumoTestGroupTableViewController.h"
 #import "ZumoSavedAppsTableViewController.h"
 #import "ZumoTestHelpViewController.h"
-#import "ZumoAllTestsTableViewController.h"
 
 @interface ZumoMainTableViewController ()
 
@@ -131,22 +130,6 @@
     return YES;
 }
 
-- (IBAction)runAllTestGroups:(id)sender {
-    if (![self validateAndRefreshClient]) {
-        return;
-    }
-
-    NSString *uploadLogsUrl = [uploadUrlField text];
-
-    if (uploadLogsUrl && [uploadLogsUrl length]) {
-        ZumoAllTestsTableViewController *subview = [[ZumoAllTestsTableViewController alloc] initWithTests:[self testGroups] uploadLogsTo:uploadLogsUrl];
-        [[self navigationController] pushViewController:subview animated:YES];
-    } else {
-        UIAlertView *av = [[UIAlertView alloc] initWithTitle:@"Error" message:@"Running all tests requires the upload logs URL to be set." delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
-        [av show];
-    }
-}
-
 #pragma mark - Table view data source
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -225,7 +208,7 @@
 
     ZumoTestGroup *subgroup = [[self testGroups] objectAtIndex:[indexPath row]];
     ZumoTestGroupTableViewController *subview = [[ZumoTestGroupTableViewController alloc] init];
-    [subview setTests:subgroup];
+    [subview setTestGroup:subgroup];
     if (uploadLogsUrl && [uploadLogsUrl length]) {
         [subview setLogUploadUrl:uploadLogsUrl];
     }

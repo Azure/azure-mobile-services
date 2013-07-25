@@ -32,7 +32,6 @@
 		872B031F1675A128003613A1 /* ZumoTestStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 872B031E1675A127003613A1 /* ZumoTestStore.m */; };
 		872B0324167660C2003613A1 /* ZumoSavedAppsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 872B0323167660C2003613A1 /* ZumoSavedAppsTableViewController.m */; };
 		872B032A16768EF0003613A1 /* ZumoSavedAppsHeader.xib in Resources */ = {isa = PBXBuildFile; fileRef = 872B032916768EF0003613A1 /* ZumoSavedAppsHeader.xib */; };
-		874337D417667289006B7268 /* ZumoAllTestsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 874337D317667289006B7268 /* ZumoAllTestsTableViewController.m */; };
 		87B36928167AE7D300F42BCE /* ZumoQueryTestData.m in Sources */ = {isa = PBXBuildFile; fileRef = 87B36927167AE7D300F42BCE /* ZumoQueryTestData.m */; };
 		87B36932168050D700F42BCE /* ZumoLogUpdater.m in Sources */ = {isa = PBXBuildFile; fileRef = 87B36931168050D700F42BCE /* ZumoLogUpdater.m */; };
 		87B3693516875B1100F42BCE /* ZumoPushTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 87B3693416875B1100F42BCE /* ZumoPushTests.m */; };
@@ -86,8 +85,6 @@
 		872B0322167660C2003613A1 /* ZumoSavedAppsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZumoSavedAppsTableViewController.h; sourceTree = "<group>"; };
 		872B0323167660C2003613A1 /* ZumoSavedAppsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZumoSavedAppsTableViewController.m; sourceTree = "<group>"; };
 		872B032916768EF0003613A1 /* ZumoSavedAppsHeader.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ZumoSavedAppsHeader.xib; sourceTree = "<group>"; };
-		874337D217667289006B7268 /* ZumoAllTestsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZumoAllTestsTableViewController.h; sourceTree = "<group>"; };
-		874337D317667289006B7268 /* ZumoAllTestsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZumoAllTestsTableViewController.m; sourceTree = "<group>"; };
 		87B36926167AE7D300F42BCE /* ZumoQueryTestData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZumoQueryTestData.h; sourceTree = "<group>"; };
 		87B36927167AE7D300F42BCE /* ZumoQueryTestData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZumoQueryTestData.m; sourceTree = "<group>"; };
 		87B36930168050D700F42BCE /* ZumoLogUpdater.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZumoLogUpdater.h; sourceTree = "<group>"; };
@@ -211,8 +208,6 @@
 				872B030E167580A4003613A1 /* ZumoTestGroupTableHeader.xib */,
 				87B36930168050D700F42BCE /* ZumoLogUpdater.h */,
 				87B36931168050D700F42BCE /* ZumoLogUpdater.m */,
-				874337D217667289006B7268 /* ZumoAllTestsTableViewController.h */,
-				874337D317667289006B7268 /* ZumoAllTestsTableViewController.m */,
 			);
 			name = TestTableViewControllers;
 			sourceTree = "<group>";
@@ -344,7 +339,6 @@
 				87B3693516875B1100F42BCE /* ZumoPushTests.m in Sources */,
 				87FA8406174FE58A0089EDEA /* ZumoCustomApiTests.m in Sources */,
 				87FA840B17569AB90089EDEA /* TestLoggingFilter.m in Sources */,
-				874337D417667289006B7268 /* ZumoAllTestsTableViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

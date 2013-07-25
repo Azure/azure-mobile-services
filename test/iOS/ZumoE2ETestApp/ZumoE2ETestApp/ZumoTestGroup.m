@@ -8,6 +8,7 @@
 
 @synthesize name, delegate, tests, groupDescription;
 @synthesize testsFailed = _testsFailed, testsPassed = _testsPassed;
+@synthesize startTime, endTime;
 
 - (id)init {
     self = [super init];
@@ -27,6 +28,7 @@
 
 - (void)startExecutingFrom:(UIViewController *)viewController {
     _testsPassed = _testsFailed = 0;
+    [self setStartTime:[NSDate date]];
     runningTests = YES;
     associatedViewController = viewController;
     [[self delegate] zumoTestGroupStarted:[self name]];
@@ -37,6 +39,7 @@
     int testIndex = _testsFailed + _testsPassed;
     if (testIndex >= [tests count]) {
         runningTests = NO;
+        [self setEndTime:[NSDate date]];
         associatedViewController = nil;
         [[self delegate] zumoTestGroupFinished:[self name] withPassed:_testsPassed andFailed:_testsFailed];
     } else {

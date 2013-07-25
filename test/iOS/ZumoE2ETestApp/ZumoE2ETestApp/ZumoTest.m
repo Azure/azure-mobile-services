@@ -3,11 +3,13 @@
 // ----------------------------------------------------------------------------
 
 #import "ZumoTest.h"
+#import "ZumoTestGlobals.h"
 
 @implementation ZumoTest
 
-@synthesize testName, execution, delegate, testStatus;
+@synthesize testName, execution, delegate, testStatus, startTime, endTime;
 @synthesize propertyBag = _propertyBag;
+@synthesize canRunUnattended = _canRunUnattended;
 
 - (id)init {
     self = [super init];
@@ -15,6 +17,7 @@
         [self setTestStatus:TSNotRun];
         logs = [[NSMutableArray alloc] init];
         _propertyBag = [[NSMutableDictionary alloc] init];
+        _canRunUnattended = YES;
     }
     
     return self;
@@ -32,7 +35,9 @@
     testStatus = TSRunning;
     ZumoTestExecution steps = [self execution];
     __weak ZumoTest *weakSelf = self;
+    [self setStartTime:[NSDate date]];
     steps(self, currentViewController, ^(BOOL testPassed) {
+        [weakSelf setEndTime:[NSDate date]];
         [weakSelf setTestStatus: (testPassed ? TSPassed : TSFailed)];
         [[weakSelf delegate] zumoTestFinished:[weakSelf testName] withResult:testPassed];
     });
@@ -44,7 +49,7 @@
 }
 
 - (void)addLog:(NSString *)text {
-    NSString *timestamped = [NSString stringWithFormat:@"[%@] %@", [[NSDate date] description], text];
+    NSString *timestamped = [NSString stringWithFormat:@"[%@] %@", [ZumoTestGlobals dateToString:[NSDate date]], text];
     [logs addObject:timestamped];
     NSLog(@"%@", timestamped);
 }
@@ -54,26 +59,35 @@
 }
 
 - (NSString *)description {
-    NSString *statusName = nil;
-    switch ([self testStatus]) {
+    NSString *statusName = [ZumoTest testStatusToString:[self testStatus]];
+    return [NSString stringWithFormat:@"%@ - %@", [self testName], statusName];
+}
+
++ (NSString *)testStatusToString:(TestStatus)status {
+    NSString *testStatus;
+    switch (status) {
         case TSFailed:
-            statusName = @"Failed";
+            testStatus = @"Failed";
             break;
             
         case TSPassed:
-            statusName = @"Passed";
+            testStatus = @"Passed";
+            break;
+            
+        case TSNotRun:
+            testStatus = @"NotRun";
             break;
             
         case TSRunning:
-            statusName = @"Running";
+            testStatus = @"Running";
             break;
             
         default:
-            statusName = @"NotRun";
+            testStatus = @"Unkonwn";
             break;
     }
     
-    return [NSString stringWithFormat:@"%@ - %@", [self testName], statusName];
+    return testStatus;
 }
 
 @end

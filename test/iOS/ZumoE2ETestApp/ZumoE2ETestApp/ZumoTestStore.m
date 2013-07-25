@@ -13,10 +13,13 @@
 #import "ZumoPushTests.h"
 #import "ZumoCustomApiTests.h"
 
+NSString * const ALL_TESTS_GROUP_NAME = @"All tests";
+NSString * const ALL_UNATTENDED_TESTS_GROUP_NAME = @"All tests (unattended)";
+
 @implementation ZumoTestStore
 
 + (NSArray *)createTests {
-    return [NSArray arrayWithObjects:
+    NSMutableArray *result = [NSMutableArray arrayWithObjects:
             [self createInsertAndVerifyTests],
             [self createQueryTests],
             [self createCUDTests],
@@ -25,6 +28,40 @@
             [self createMiscTests],
             [self createCustomApiTests],
             nil];
+    
+    ZumoTestGroup *allTests = [self createGroupWithAllTestsFromIndividualGroups:result onlyIncludeUnattended:NO];
+    ZumoTestGroup *allUnattendedTests = [self createGroupWithAllTestsFromIndividualGroups:result onlyIncludeUnattended:YES];
+    [result addObject:allUnattendedTests];
+    [result addObject:allTests];
+    
+    return result;
+}
+
++ (ZumoTestGroup *)createGroupWithAllTestsFromIndividualGroups:(NSArray *)groups onlyIncludeUnattended:(BOOL)unattendedOnly {
+    ZumoTestGroup *result = [[ZumoTestGroup alloc] init];
+    [result setName:(unattendedOnly ? ALL_UNATTENDED_TESTS_GROUP_NAME : ALL_TESTS_GROUP_NAME)];
+    for (ZumoTestGroup *group in groups) {
+        NSString *groupHeaderName = [NSString stringWithFormat:@"Start of group: %@", [group name]];
+        [result addTest:[self createSeparatorTestWithName:groupHeaderName]];
+        
+        for (ZumoTest *test in [group tests]) {
+            if ([test canRunUnattended] || !unattendedOnly) {
+                ZumoTest *newTest = [[ZumoTest alloc] init];
+                [newTest setTestName:[test testName]];
+                [newTest setExecution:[test execution]];
+                [result addTest:newTest];
+            }
+        }
+        
+        [result addTest:[self createSeparatorTestWithName:@"------------------"]];
+    }
+    return result;
+}
+
++ (ZumoTest *)createSeparatorTestWithName:(NSString *)testName {
+    return [ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+        completion(YES);
+    }];
 }
 
 + (ZumoTestGroup *)createCustomApiTests {

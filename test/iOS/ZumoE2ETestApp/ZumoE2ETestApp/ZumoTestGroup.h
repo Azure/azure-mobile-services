@@ -18,6 +18,8 @@
 @property (nonatomic, copy) NSString *name;
 @property (nonatomic, copy) NSString *groupDescription;
 @property (nonatomic, weak) id<ZumoTestGroupCallbacks> delegate;
+@property (nonatomic, copy) NSDate *startTime;
+@property (nonatomic, copy) NSDate *endTime;
 
 - (void)addTest:(ZumoTest *)test;
 - (void)startExecutingFrom:(UIViewController *)viewController;
