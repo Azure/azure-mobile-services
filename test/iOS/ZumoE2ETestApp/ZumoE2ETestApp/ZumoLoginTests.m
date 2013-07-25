@@ -50,6 +50,8 @@ NSDictionary *lastUserIdentityObject;
     [result addObject:[self createCRUDTestForProvider:nil forTable:@"iosAuthenticated" ofType:ZumoTableAuthenticated andAuthenticated:NO]];
     [result addObject:[self createCRUDTestForProvider:nil forTable:@"iosAdmin" ofType:ZumoTableAdminScripts andAuthenticated:NO]];
     
+    int indexOfLastUnattendedTest = [result count];
+    
     NSArray *providers = @[@"facebook", @"google", @"twitter", @"microsoftaccount"];
     NSArray *providersWithRecycledTokenSupport = @[@"facebook", @"google"];
     NSString *provider;
@@ -72,7 +74,14 @@ NSDictionary *lastUserIdentityObject;
             }
         }
     }
+
+    for (int i = indexOfLastUnattendedTest; i < [result count]; i++) {
+        ZumoTest *test = result[i];
+        [test setCanRunUnattended:NO];
+    }
     
+    [result addObject:[self createLogoutTest]];
+
     return result;
 }
 

@@ -190,6 +190,8 @@ static NSString *pushClientKey = @"PushClientKey";
         } else {
             MSClient *client = [[ZumoTestGlobals sharedInstance] client];
             MSTable *table = [client tableWithName:tableName];
+            NSURL *appUrl = [client applicationURL];
+            [test addLog:[NSString stringWithFormat:@"Sending a request to %@ / table %@", [appUrl description], tableName]];
             NSDictionary *item = @{@"method" : @"send", @"payload" : payload, @"token": deviceToken, @"delay": @(seconds)};
             [table insert:item completion:^(NSDictionary *insertedItem, NSError *error) {
                 if (error) {
@@ -197,7 +199,7 @@ static NSString *pushClientKey = @"PushClientKey";
                     [test setTestStatus:TSFailed];
                     completion(NO);
                 } else {
-                    NSTimeInterval timeToWait = 5;
+                    NSTimeInterval timeToWait = 15;
                     NSDictionary *expectedPayload = isNegative ? nil : payload;
                     ZumoPushClient *pushClient = [[ZumoPushClient alloc] initForTest:test withPayload:expectedPayload waitFor:timeToWait withTestCompletion:completion];
                     [[test propertyBag] setValue:pushClient forKey:pushClientKey];

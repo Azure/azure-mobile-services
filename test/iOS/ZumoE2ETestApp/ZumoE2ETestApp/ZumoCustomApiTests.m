@@ -55,11 +55,18 @@ typedef enum { DataFormatJson, DataFormatXml, DataFormatOther } ApiDataFormat;
     [result addObject:[self createApiPermissionsTestWithName:@"Authenticated API - logged out" apiName:apiUserName shouldSucceed:NO]];
     [result addObject:[self createApiPermissionsTestWithName:@"Admin API - logged out" apiName:apiAdminName shouldSucceed:NO]];
 
+    int indexOfLastUnattendedTest = [result count];
+    
     [result addObject:[ZumoLoginTests createLoginTestForProvider:@"facebook" usingSimplifiedMode:YES]];
     [result addObject:[self createApiPermissionsTestWithName:@"Application API - logged in" apiName:apiApplicationName shouldSucceed:YES]];
     [result addObject:[self createApiPermissionsTestWithName:@"Authenticated API - logged in" apiName:apiUserName shouldSucceed:YES]];
     [result addObject:[self createApiPermissionsTestWithName:@"Admin API - logged in" apiName:apiAdminName shouldSucceed:NO]];
 
+    for (int i = indexOfLastUnattendedTest; i < [result count]; i++) {
+        ZumoTest *test = result[i];
+        [test setCanRunUnattended:NO];
+    }
+    
     [result addObject:[ZumoLoginTests createLogoutTest]];
 
     return result;
