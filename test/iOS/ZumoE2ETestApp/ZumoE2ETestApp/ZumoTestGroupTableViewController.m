@@ -6,6 +6,7 @@
 #import "ZumoTestHelpViewController.h"
 #import "ZumoLogUpdater.h"
 #import "ZumoTestGlobals.h"
+#import "ZumoTestStore.h"
 
 @interface ZumoTestGroupTableViewController ()
 
@@ -13,7 +14,7 @@
 
 @implementation ZumoTestGroupTableViewController
 
-@synthesize tests, logUploadUrl;
+@synthesize testGroup, logUploadUrl;
 
 - (id)init
 {
@@ -33,8 +34,12 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-
-    [[self navigationItem] setTitle:[[self tests] name]];
+    NSString *groupName = [[self testGroup] name];
+    [[self navigationItem] setTitle:groupName];
+    if ([groupName hasPrefix:ALL_TESTS_GROUP_NAME]) {
+        // Start running the tests
+        [self runTests:nil];
+    }
 }
 
 - (void)didReceiveMemoryWarning
@@ -52,7 +57,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    return [[[self tests] tests] count];
+    return [[[self testGroup] tests] count];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -64,7 +69,7 @@
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentifier];
     }
     
-    ZumoTest *test = [[[self tests] tests] objectAtIndex:[indexPath row]];
+    ZumoTest *test = [[[self testGroup] tests] objectAtIndex:[indexPath row]];
     UIColor *textColor;
     if ([test testStatus] == TSFailed) {
         textColor = [UIColor redColor];
@@ -104,14 +109,14 @@
 
 - (IBAction)runTests:(id)sender {
     NSLog(@"Start running tests!");
-    [[self tests] setDelegate:self];
+    [[self testGroup] setDelegate:self];
     __weak UIViewController *weakSelf = self;
-    [[self tests] startExecutingFrom:weakSelf];
+    [[self testGroup] startExecutingFrom:weakSelf];
 }
 
 - (IBAction)resetTests:(id)sender {
     ZumoTest *test;
-    for (test in [[self tests] tests]) {
+    for (test in [[self testGroup] tests]) {
         [test resetStatus];
     }
     
@@ -122,20 +127,24 @@
     ZumoTestHelpViewController *helpController = [[ZumoTestHelpViewController alloc] init];
     NSMutableArray *arr = [[NSMutableArray alloc] init];
     ZumoTest *test;
-    for (test in [[self tests] tests]) {
-        NSString *testStatus = [ZumoTestGlobals testStatusToString:[test testStatus]];
-        [arr addObject:[NSString stringWithFormat:@"Logs for test %@ (status = %@)", [test testName], testStatus]];
+    for (test in [[self testGroup] tests]) {
+        NSString *testStatus = [ZumoTest testStatusToString:[test testStatus]];
+        NSString *testStartTime = [ZumoTestGlobals dateToString:[test startTime]];
+        [arr addObject:[NSString stringWithFormat:@"[%@] Logs for test %@ (%@)", testStartTime, [test testName], testStatus]];
         NSString *logLine;
         for (logLine in [test getLogs]) {
             [arr addObject:logLine];
         }
-        [arr addObject:@"---------------------"];
+        [arr addObject:[NSString stringWithFormat:@"[%@] -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-", [ZumoTestGlobals dateToString:[test endTime]]]];
     }
     
     NSString *allLogs = [arr componentsJoinedByString:@"\n"];
     [helpController setTitle:@"Test logs" andHelpText:allLogs];
     [helpController setModalPresentationStyle:UIModalPresentationFullScreen];
     NSString *urlToUpload = [self logUploadUrl];
+    if (urlToUpload && [urlToUpload length] && [[[self testGroup] name] hasPrefix:ALL_TESTS_GROUP_NAME]) {
+        urlToUpload = [urlToUpload stringByAppendingString:@"?allTests=true"];
+    }
 
     [self presentViewController:helpController animated:YES completion:^(void) {
         if (urlToUpload && [urlToUpload length]) {
@@ -146,16 +155,18 @@
 }
 
 - (void)zumoTestGroupFinished:(NSString *)groupName withPassed:(int)passedTests andFailed:(int)failedTests {
-    
+    if ([groupName hasPrefix:ALL_TESTS_GROUP_NAME] && [[self logUploadUrl] length] > 0) {
+        [self uploadLogs:nil];
+    }
 }
 
 - (void)zumoTestGroupSingleTestFinished:(int)testIndex withResult:(BOOL)testPassed {
-    [[[[self tests] tests] objectAtIndex:testIndex] setTestStatus:(testPassed ? TSPassed : TSFailed)];
+    [[[[self testGroup] tests] objectAtIndex:testIndex] setTestStatus:(testPassed ? TSPassed : TSFailed)];
     [[self tableView] reloadData];
 }
 
 - (void)zumoTestGroupSingleTestStarted:(int)testIndex {
-    [[[[self tests] tests] objectAtIndex:testIndex] setTestStatus:TSRunning];
+    [[[[self testGroup] tests] objectAtIndex:testIndex] setTestStatus:TSRunning];
 }
 
 - (void)zumoTestGroupStarted:(NSString *)groupName {
