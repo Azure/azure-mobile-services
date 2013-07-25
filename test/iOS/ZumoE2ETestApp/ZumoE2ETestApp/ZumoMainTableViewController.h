@@ -19,6 +19,5 @@
 - (UIView *)headerView;
 - (IBAction)loadSavedApp:(id)sender;
 - (IBAction)saveAppInfo:(id)sender;
-- (IBAction)runAllTestGroups:(id)sender;
 
 @end

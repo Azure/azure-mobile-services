@@ -4,10 +4,8 @@
 
 #import <Foundation/Foundation.h>
 #import <WindowsAzureMobileServices/WindowsAzureMobileServices.h>
-#import "ZumoTest.h"
 
 typedef void (^ZumoHttpRequestCompletion)(NSHTTPURLResponse *response, NSData *responseBody, NSError *error);
-
 
 @protocol PushNotificationReceiver <NSObject>
 
@@ -34,9 +32,9 @@ typedef void (^ZumoHttpRequestCompletion)(NSHTTPURLResponse *response, NSData *r
 - (NSString *)loadUploadLogsUrl;
 
 // Helper methods
-+ (NSString *)testStatusToString:(TestStatus)status;
 + (NSDate *)createDateWithYear:(NSInteger)year month:(NSInteger)month day:(NSInteger)day;
 + (BOOL)compareDate:(NSDate *)date1 withDate:(NSDate *)date2;
 + (BOOL)compareJson:(id)json1 with:(id)json2 log:(NSMutableArray *)errors;
++ (NSString *)dateToString:(NSDate *)date;
 
 @end

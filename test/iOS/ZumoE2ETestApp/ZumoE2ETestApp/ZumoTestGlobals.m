@@ -55,33 +55,6 @@ NSString *const UserDefaultUploadLogsUrl = @"ZumoE2ETest_UploadLogUrl";
     return uploadLogsUrl;
 }
 
-+ (NSString *)testStatusToString:(TestStatus)status {
-    NSString *testStatus;
-    switch (status) {
-        case TSFailed:
-            testStatus = @"Failed";
-            break;
-            
-        case TSPassed:
-            testStatus = @"Passed";
-            break;
-            
-        case TSNotRun:
-            testStatus = @"NotRun";
-            break;
-            
-        case TSRunning:
-            testStatus = @"Running";
-            break;
-            
-        default:
-            testStatus = @"Unkonwn";
-            break;
-    }
-    
-    return testStatus;
-}
-
 +(NSDate *)createDateWithYear:(NSInteger)year month:(NSInteger)month day:(NSInteger)day {
     NSCalendar *calendar = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
     NSDateComponents *components = [[NSDateComponents alloc] init];
@@ -102,6 +75,17 @@ NSString *const UserDefaultUploadLogsUrl = @"ZumoE2ETest_UploadLogUrl";
     NSString *str1 = [formatter stringFromDate:date1];
     NSString *str2 = [formatter stringFromDate:date2];
     return [str1 isEqualToString:str2];
+}
+
++(NSString *)dateToString:(NSDate *)date{
+    static NSDateFormatter *formatter;
+    if (!formatter) {
+        formatter = [[NSDateFormatter alloc] init];
+        [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+        [formatter setDateFormat:@"yyyy-MM-dd HH:mm:ss.SSS"];
+    }
+    
+    return [formatter stringFromDate:date];
 }
 
 +(NSMutableDictionary *)propertyBag {
