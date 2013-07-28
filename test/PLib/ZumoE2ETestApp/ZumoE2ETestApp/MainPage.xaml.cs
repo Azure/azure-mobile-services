@@ -216,7 +216,7 @@ namespace ZumoE2ETestApp
                 // Upload logs automatically if running all tests
                 using (var client = new HttpClient())
                 {
-                    using (var request = new HttpRequestMessage(HttpMethod.Post, this.txtUploadLogsUrl.Text + "?platform=winstorecs"))
+                    using (var request = new HttpRequestMessage(HttpMethod.Post, this.txtUploadLogsUrl.Text + "?platform=winstorecs&allTests=true"))
                     {
                         request.Content = new StringContent(string.Join("\n", testGroup.GetLogs()), Encoding.UTF8, "text/plain");
                         using (var response = await client.SendAsync(request))

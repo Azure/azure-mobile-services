@@ -213,7 +213,7 @@ namespace ZumoE2ETestAppWP8
                         // Upload logs automatically if running all tests
                         using (var client = new HttpClient())
                         {
-                            using (var request = new HttpRequestMessage(HttpMethod.Post, this.txtUploadUrl.Text + "?platform=wp8"))
+                            using (var request = new HttpRequestMessage(HttpMethod.Post, this.txtUploadUrl.Text + "?platform=wp8&allTests=true"))
                             {
                                 request.Content = new StringContent(string.Join("\n", testGroup.GetLogs()), Encoding.UTF8, "text/plain");
                                 using (var response = await client.SendAsync(request))
