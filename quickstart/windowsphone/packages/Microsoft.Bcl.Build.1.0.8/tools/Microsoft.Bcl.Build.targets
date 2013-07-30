@@ -130,7 +130,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <ItemGroup>
       <ProjectReference>
-        <Properties>%(ProjectReference.Properties);$(_BclBuildProjectReferenceProperties)</Properties>
+        <AdditionalProperties>$(_BclBuildProjectReferenceProperties);%(ProjectReference.AdditionalProperties)</AdditionalProperties>
       </ProjectReference>
     </ItemGroup>
   </Target>
