@@ -404,7 +404,7 @@ class LoginManager {
 
 		// Create a request
 		final ServiceFilterRequest request = new ServiceFilterRequestImpl(
-				new HttpPost(url));
+				new HttpPost(url), mClient);
 		request.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
 		
 		try {

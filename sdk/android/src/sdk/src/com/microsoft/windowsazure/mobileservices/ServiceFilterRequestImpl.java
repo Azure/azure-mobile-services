@@ -53,20 +53,23 @@ class ServiceFilterRequestImpl implements ServiceFilterRequest {
 	 */
 	private byte[] mContent;
 
+	private MobileServiceClient mClient;
+
 	/**
 	 * Constructor
 	 * 
 	 * @param request
 	 *            The request to use
 	 */
-	public ServiceFilterRequestImpl(HttpRequestBase request) {
+	public ServiceFilterRequestImpl(HttpRequestBase request, MobileServiceClient client) {
 		mRequest = request;
+		mClient = client;
 	}
 
 	@Override
 	public ServiceFilterResponse execute() throws Exception {
 		// Execute request
-		AndroidHttpClient client = AndroidHttpClient.newInstance(MobileServiceConnection.getUserAgent());
+		AndroidHttpClient client = mClient.createAndroidHttpClient();
 		try {
 			final HttpResponse response = client.execute(mRequest);
 			ServiceFilterResponse serviceFilterResponse = new ServiceFilterResponseImpl(response);
