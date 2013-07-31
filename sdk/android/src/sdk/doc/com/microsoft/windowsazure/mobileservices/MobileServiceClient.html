@@ -187,68 +187,74 @@ extends java.lang.Object</pre>
 </td>
 </tr>
 <tr class="rowColor">
+<td class="colFirst"><code><a href="../../../../com/microsoft/windowsazure/mobileservices/AndroidHttpClientFactory.html" title="interface in com.microsoft.windowsazure.mobileservices">AndroidHttpClientFactory</a></code></td>
+<td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#getAndroidHttpClientFactory()">getAndroidHttpClientFactory</a></strong>()</code>
+<div class="block">Gets the AndroidHttpClientFactory</div>
+</td>
+</tr>
+<tr class="altColor">
 <td class="colFirst"><code>java.lang.String</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#getAppKey()">getAppKey</a></strong>()</code>
 <div class="block">Returns the Mobile Service application key</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>java.net.URL</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#getAppUrl()">getAppUrl</a></strong>()</code>
 <div class="block">Returns The Mobile Service URL</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>Context</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#getContext()">getContext</a></strong>()</code>
 <div class="block">Gets the Context object used to create the MobileServiceClient</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceUser.html" title="class in com.microsoft.windowsazure.mobileservices">MobileServiceUser</a></code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#getCurrentUser()">getCurrentUser</a></strong>()</code>
 <div class="block">Returns the current authenticated user</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>com.google.gson.GsonBuilder</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#getGsonBuilder()">getGsonBuilder</a></strong>()</code>
 <div class="block">Gets the GsonBuilder used to in JSON Serialization/Deserialization</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../com/microsoft/windowsazure/mobileservices/ServiceFilter.html" title="interface in com.microsoft.windowsazure.mobileservices">ServiceFilter</a></code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#getServiceFilter()">getServiceFilter</a></strong>()</code>
 <div class="block">Gets the ServiceFilter.</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>&lt;E&gt;&nbsp;<a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceTable.html" title="class in com.microsoft.windowsazure.mobileservices">MobileServiceTable</a>&lt;E&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#getTable(java.lang.Class)">getTable</a></strong>(java.lang.Class&lt;E&gt;&nbsp;clazz)</code>
 <div class="block">Creates a MobileServiceTable</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceJsonTable.html" title="class in com.microsoft.windowsazure.mobileservices">MobileServiceJsonTable</a></code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#getTable(java.lang.String)">getTable</a></strong>(java.lang.String&nbsp;name)</code>
 <div class="block">Creates a MobileServiceJsonTable</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>&lt;E&gt;&nbsp;<a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceTable.html" title="class in com.microsoft.windowsazure.mobileservices">MobileServiceTable</a>&lt;E&gt;</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#getTable(java.lang.String, java.lang.Class)">getTable</a></strong>(java.lang.String&nbsp;name,
         java.lang.Class&lt;E&gt;&nbsp;clazz)</code>
 <div class="block">Creates a MobileServiceTable</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#invokeApi(java.lang.String, com.microsoft.windowsazure.mobileservices.ApiJsonOperationCallback)">invokeApi</a></strong>(java.lang.String&nbsp;apiName,
          <a href="../../../../com/microsoft/windowsazure/mobileservices/ApiJsonOperationCallback.html" title="interface in com.microsoft.windowsazure.mobileservices">ApiJsonOperationCallback</a>&nbsp;callback)</code>
 <div class="block">Invokes a custom API using POST HTTP method</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#invokeApi(java.lang.String, byte[], java.lang.String, java.util.List, java.util.List, com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback)">invokeApi</a></strong>(java.lang.String&nbsp;apiName,
          byte[]&nbsp;content,
@@ -257,7 +263,7 @@ extends java.lang.Object</pre>
          java.util.List&lt;<any>&gt;&nbsp;parameters,
          <a href="../../../../com/microsoft/windowsazure/mobileservices/ServiceFilterResponseCallback.html" title="interface in com.microsoft.windowsazure.mobileservices">ServiceFilterResponseCallback</a>&nbsp;callback)</code>&nbsp;</td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>&lt;E&gt;&nbsp;void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#invokeApi(java.lang.String, java.lang.Class, com.microsoft.windowsazure.mobileservices.ApiOperationCallback)">invokeApi</a></strong>(java.lang.String&nbsp;apiName,
          java.lang.Class&lt;E&gt;&nbsp;clazz,
@@ -265,7 +271,7 @@ extends java.lang.Object</pre>
 <div class="block">Invokes a custom API using POST HTTP method</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#invokeApi(java.lang.String, com.google.gson.JsonElement, com.microsoft.windowsazure.mobileservices.ApiJsonOperationCallback)">invokeApi</a></strong>(java.lang.String&nbsp;apiName,
          com.google.gson.JsonElement&nbsp;body,
@@ -273,7 +279,7 @@ extends java.lang.Object</pre>
 <div class="block">Invokes a custom API using POST HTTP method</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#invokeApi(java.lang.String, com.google.gson.JsonElement, java.lang.String, java.util.List, com.microsoft.windowsazure.mobileservices.ApiJsonOperationCallback)">invokeApi</a></strong>(java.lang.String&nbsp;apiName,
          com.google.gson.JsonElement&nbsp;body,
@@ -283,7 +289,7 @@ extends java.lang.Object</pre>
 <div class="block">Invokes a custom API</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>&lt;E&gt;&nbsp;void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#invokeApi(java.lang.String, java.lang.Object, java.lang.Class, com.microsoft.windowsazure.mobileservices.ApiOperationCallback)">invokeApi</a></strong>(java.lang.String&nbsp;apiName,
          java.lang.Object&nbsp;body,
@@ -292,7 +298,7 @@ extends java.lang.Object</pre>
 <div class="block">Invokes a custom API using POST HTTP method</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>&lt;E&gt;&nbsp;void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#invokeApi(java.lang.String, java.lang.Object, java.lang.String, java.util.List, java.lang.Class, com.microsoft.windowsazure.mobileservices.ApiOperationCallback)">invokeApi</a></strong>(java.lang.String&nbsp;apiName,
          java.lang.Object&nbsp;body,
@@ -303,7 +309,7 @@ extends java.lang.Object</pre>
 <div class="block">Invokes a custom API</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#invokeApi(java.lang.String, java.lang.String, java.util.List, com.microsoft.windowsazure.mobileservices.ApiJsonOperationCallback)">invokeApi</a></strong>(java.lang.String&nbsp;apiName,
          java.lang.String&nbsp;httpMethod,
@@ -312,7 +318,7 @@ extends java.lang.Object</pre>
 <div class="block">Invokes a custom API</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>&lt;E&gt;&nbsp;void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#invokeApi(java.lang.String, java.lang.String, java.util.List, java.lang.Class, com.microsoft.windowsazure.mobileservices.ApiOperationCallback)">invokeApi</a></strong>(java.lang.String&nbsp;apiName,
          java.lang.String&nbsp;httpMethod,
@@ -322,13 +328,13 @@ extends java.lang.Object</pre>
 <div class="block">Invokes a custom API</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>boolean</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#isLoginInProgress()">isLoginInProgress</a></strong>()</code>
 <div class="block">Indicates if a login operation is in progress</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#login(com.microsoft.windowsazure.mobileservices.MobileServiceAuthenticationProvider, com.google.gson.JsonObject, com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback)">login</a></strong>(<a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceAuthenticationProvider.html" title="enum in com.microsoft.windowsazure.mobileservices">MobileServiceAuthenticationProvider</a>&nbsp;provider,
      com.google.gson.JsonObject&nbsp;oAuthToken,
@@ -337,7 +343,7 @@ extends java.lang.Object</pre>
  provider-specific oAuth token</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#login(com.microsoft.windowsazure.mobileservices.MobileServiceAuthenticationProvider, java.lang.String, com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback)">login</a></strong>(<a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceAuthenticationProvider.html" title="enum in com.microsoft.windowsazure.mobileservices">MobileServiceAuthenticationProvider</a>&nbsp;provider,
      java.lang.String&nbsp;oAuthToken,
@@ -346,7 +352,7 @@ extends java.lang.Object</pre>
  provider-specific oAuth token</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#login(com.microsoft.windowsazure.mobileservices.MobileServiceAuthenticationProvider, com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback)">login</a></strong>(<a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceAuthenticationProvider.html" title="enum in com.microsoft.windowsazure.mobileservices">MobileServiceAuthenticationProvider</a>&nbsp;provider,
      <a href="../../../../com/microsoft/windowsazure/mobileservices/UserAuthenticationCallback.html" title="interface in com.microsoft.windowsazure.mobileservices">UserAuthenticationCallback</a>&nbsp;callback)</code>
@@ -354,7 +360,7 @@ extends java.lang.Object</pre>
  Authentication Provider</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#loginWithGoogleAccount(Activity, Account, java.lang.String, com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback)">loginWithGoogleAccount</a></strong>(Activity&nbsp;activity,
                       Account&nbsp;account,
@@ -364,7 +370,7 @@ extends java.lang.Object</pre>
  the Google account registered in the device</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#loginWithGoogleAccount(Activity, Account, com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback)">loginWithGoogleAccount</a></strong>(Activity&nbsp;activity,
                       Account&nbsp;account,
@@ -373,7 +379,7 @@ extends java.lang.Object</pre>
  the Google account registered in the device</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#loginWithGoogleAccount(Activity, java.lang.String, com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback)">loginWithGoogleAccount</a></strong>(Activity&nbsp;activity,
                       java.lang.String&nbsp;scopes,
@@ -382,7 +388,7 @@ extends java.lang.Object</pre>
  the Google account registered in the device</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#loginWithGoogleAccount(Activity, com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback)">loginWithGoogleAccount</a></strong>(Activity&nbsp;activity,
                       <a href="../../../../com/microsoft/windowsazure/mobileservices/UserAuthenticationCallback.html" title="interface in com.microsoft.windowsazure.mobileservices">UserAuthenticationCallback</a>&nbsp;callback)</code>
@@ -390,24 +396,30 @@ extends java.lang.Object</pre>
  the Google account registered in the device</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#logout()">logout</a></strong>()</code>
 <div class="block">Log the user out of the Mobile Service</div>
 </td>
 </tr>
-<tr class="altColor">
+<tr class="rowColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#registerDeserializer(java.lang.reflect.Type, com.google.gson.JsonDeserializer)">registerDeserializer</a></strong>(java.lang.reflect.Type&nbsp;type,
                     com.google.gson.JsonDeserializer&lt;T&gt;&nbsp;deserializer)</code>
 <div class="block">Registers a JsonDeserializer for the specified type</div>
 </td>
 </tr>
-<tr class="rowColor">
+<tr class="altColor">
 <td class="colFirst"><code>&lt;T&gt;&nbsp;void</code></td>
 <td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#registerSerializer(java.lang.reflect.Type, com.google.gson.JsonSerializer)">registerSerializer</a></strong>(java.lang.reflect.Type&nbsp;type,
                   com.google.gson.JsonSerializer&lt;T&gt;&nbsp;serializer)</code>
 <div class="block">Registers a JsonSerializer for the specified type</div>
+</td>
+</tr>
+<tr class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/MobileServiceClient.html#setAndroidHttpClientFactory(com.microsoft.windowsazure.mobileservices.AndroidHttpClientFactory)">setAndroidHttpClientFactory</a></strong>(<a href="../../../../com/microsoft/windowsazure/mobileservices/AndroidHttpClientFactory.html" title="interface in com.microsoft.windowsazure.mobileservices">AndroidHttpClientFactory</a>&nbsp;mAndroidHttpClientFactory)</code>
+<div class="block">Sets the AndroidHttpClientFactory</div>
 </td>
 </tr>
 <tr class="altColor">
@@ -555,6 +567,16 @@ extends java.lang.Object</pre>
 <div class="block">Creates a GsonBuilder with custom serializers to use with Windows Azure
  Mobile Services</div>
 <dl><dt><span class="strong">Returns:</span></dt><dd></dd></dl>
+</li>
+</ul>
+<a name="getAndroidHttpClientFactory()">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>getAndroidHttpClientFactory</h4>
+<pre>public&nbsp;<a href="../../../../com/microsoft/windowsazure/mobileservices/AndroidHttpClientFactory.html" title="interface in com.microsoft.windowsazure.mobileservices">AndroidHttpClientFactory</a>&nbsp;getAndroidHttpClientFactory()</pre>
+<div class="block">Gets the AndroidHttpClientFactory</div>
 </li>
 </ul>
 <a name="getAppKey()">
@@ -923,6 +945,16 @@ extends java.lang.Object</pre>
                           com.google.gson.JsonSerializer&lt;T&gt;&nbsp;serializer)</pre>
 <div class="block">Registers a JsonSerializer for the specified type</div>
 <dl><dt><span class="strong">Parameters:</span></dt><dd><code>type</code> - The type to use in the registration</dd><dd><code>serializer</code> - The serializer to use in the registration</dd></dl>
+</li>
+</ul>
+<a name="setAndroidHttpClientFactory(com.microsoft.windowsazure.mobileservices.AndroidHttpClientFactory)">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>setAndroidHttpClientFactory</h4>
+<pre>public&nbsp;void&nbsp;setAndroidHttpClientFactory(<a href="../../../../com/microsoft/windowsazure/mobileservices/AndroidHttpClientFactory.html" title="interface in com.microsoft.windowsazure.mobileservices">AndroidHttpClientFactory</a>&nbsp;mAndroidHttpClientFactory)</pre>
+<div class="block">Sets the AndroidHttpClientFactory</div>
 </li>
 </ul>
 <a name="setContext(Context)">

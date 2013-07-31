@@ -57,10 +57,14 @@ class ServiceFilterRequestImpl implements ServiceFilterRequest {
 	private AndroidHttpClientFactory mAndroidHttpClientFactory;
 
 	/**
-	 * Constructor
-	 * 
 	 * @param request
 	 *            The request to use
+	 */
+	
+	/**
+	 * Constructor
+	 * @param request The request to use
+	 * @param factory The AndroidHttpClientFactory instance used to create AndroidHttpClient objects
 	 */
 	public ServiceFilterRequestImpl(HttpRequestBase request, AndroidHttpClientFactory factory) {
 		mRequest = request;

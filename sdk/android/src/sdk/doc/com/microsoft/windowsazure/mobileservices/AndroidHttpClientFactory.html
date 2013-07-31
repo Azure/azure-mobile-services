@@ -2,13 +2,13 @@
 <!-- NewPage -->
 <html lang="en">
 <head>
-<title>ApiJsonOperationCallback</title>
+<title>AndroidHttpClientFactory</title>
 <link rel="stylesheet" type="text/css" href="../../../../stylesheet.css" title="Style">
 </head>
 <body>
 <script type="text/javascript"><!--
     if (location.href.indexOf('is-external=true') == -1) {
-        parent.document.title="ApiJsonOperationCallback";
+        parent.document.title="AndroidHttpClientFactory";
     }
 //-->
 </script>
@@ -24,7 +24,7 @@
 <ul class="navList" title="Navigation">
 <li><a href="../../../../com/microsoft/windowsazure/mobileservices/package-summary.html">Package</a></li>
 <li class="navBarCell1Rev">Class</li>
-<li><a href="class-use/ApiJsonOperationCallback.html">Use</a></li>
+<li><a href="class-use/AndroidHttpClientFactory.html">Use</a></li>
 <li><a href="package-tree.html">Tree</a></li>
 <li><a href="../../../../index-files/index-1.html">Index</a></li>
 <li><a href="../../../../help-doc.html">Help</a></li>
@@ -32,12 +32,12 @@
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../../com/microsoft/windowsazure/mobileservices/AndroidHttpClientFactoryImpl.html" title="class in com.microsoft.windowsazure.mobileservices"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../../com/microsoft/windowsazure/mobileservices/ApiOperationCallback.html" title="interface in com.microsoft.windowsazure.mobileservices"><span class="strong">Next Class</span></a></li>
+<li>Prev Class</li>
+<li><a href="../../../../com/microsoft/windowsazure/mobileservices/AndroidHttpClientFactoryImpl.html" title="class in com.microsoft.windowsazure.mobileservices"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
-<li><a href="../../../../index.html?com/microsoft/windowsazure/mobileservices/ApiJsonOperationCallback.html" target="_top">Frames</a></li>
-<li><a href="ApiJsonOperationCallback.html" target="_top">No Frames</a></li>
+<li><a href="../../../../index.html?com/microsoft/windowsazure/mobileservices/AndroidHttpClientFactory.html" target="_top">Frames</a></li>
+<li><a href="AndroidHttpClientFactory.html" target="_top">No Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_top">
 <li><a href="../../../../allclasses-noframe.html">All Classes</a></li>
@@ -76,16 +76,20 @@
 <!-- ======== START OF CLASS DATA ======== -->
 <div class="header">
 <div class="subTitle">com.microsoft.windowsazure.mobileservices</div>
-<h2 title="Interface ApiJsonOperationCallback" class="title">Interface ApiJsonOperationCallback</h2>
+<h2 title="Interface AndroidHttpClientFactory" class="title">Interface AndroidHttpClientFactory</h2>
 </div>
 <div class="contentContainer">
 <div class="description">
 <ul class="blockList">
 <li class="blockList">
+<dl>
+<dt>All Known Implementing Classes:</dt>
+<dd><a href="../../../../com/microsoft/windowsazure/mobileservices/AndroidHttpClientFactoryImpl.html" title="class in com.microsoft.windowsazure.mobileservices">AndroidHttpClientFactoryImpl</a></dd>
+</dl>
 <hr>
 <br>
-<pre>public interface <span class="strong">ApiJsonOperationCallback</span></pre>
-<div class="block">Callback used after a custom Api invocation is executed using JSON</div>
+<pre>public interface <span class="strong">AndroidHttpClientFactory</span></pre>
+<div class="block">Factory for AndroidHttpClient instances</div>
 </li>
 </ul>
 </div>
@@ -105,11 +109,9 @@
 <th class="colLast" scope="col">Method and Description</th>
 </tr>
 <tr class="altColor">
-<td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/ApiJsonOperationCallback.html#onCompleted(com.google.gson.JsonElement, java.lang.Exception, com.microsoft.windowsazure.mobileservices.ServiceFilterResponse)">onCompleted</a></strong>(com.google.gson.JsonElement&nbsp;jsonObject,
-           java.lang.Exception&nbsp;exception,
-           <a href="../../../../com/microsoft/windowsazure/mobileservices/ServiceFilterResponse.html" title="interface in com.microsoft.windowsazure.mobileservices">ServiceFilterResponse</a>&nbsp;response)</code>
-<div class="block">Method to call when the operation is completed</div>
+<td class="colFirst"><code>AndroidHttpClient</code></td>
+<td class="colLast"><code><strong><a href="../../../../com/microsoft/windowsazure/mobileservices/AndroidHttpClientFactory.html#createAndroidHttpClient()">createAndroidHttpClient</a></strong>()</code>
+<div class="block">Creates a new AndroidHttpClient</div>
 </td>
 </tr>
 </table>
@@ -127,17 +129,15 @@
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="onCompleted(com.google.gson.JsonElement, java.lang.Exception, com.microsoft.windowsazure.mobileservices.ServiceFilterResponse)">
+<a name="createAndroidHttpClient()">
 <!--   -->
 </a>
 <ul class="blockListLast">
 <li class="blockList">
-<h4>onCompleted</h4>
-<pre>void&nbsp;onCompleted(com.google.gson.JsonElement&nbsp;jsonObject,
-               java.lang.Exception&nbsp;exception,
-               <a href="../../../../com/microsoft/windowsazure/mobileservices/ServiceFilterResponse.html" title="interface in com.microsoft.windowsazure.mobileservices">ServiceFilterResponse</a>&nbsp;response)</pre>
-<div class="block">Method to call when the operation is completed</div>
-<dl><dt><span class="strong">Parameters:</span></dt><dd><code>jsonElement</code> - The obtained jsonElement</dd><dd><code>exception</code> - An exception representing the error, in case there was one</dd><dd><code>response</code> - Response object</dd></dl>
+<h4>createAndroidHttpClient</h4>
+<pre>AndroidHttpClient&nbsp;createAndroidHttpClient()</pre>
+<div class="block">Creates a new AndroidHttpClient</div>
+<dl><dt><span class="strong">Returns:</span></dt><dd>A new AndroidHttpClient</dd></dl>
 </li>
 </ul>
 </li>
@@ -156,7 +156,7 @@
 <ul class="navList" title="Navigation">
 <li><a href="../../../../com/microsoft/windowsazure/mobileservices/package-summary.html">Package</a></li>
 <li class="navBarCell1Rev">Class</li>
-<li><a href="class-use/ApiJsonOperationCallback.html">Use</a></li>
+<li><a href="class-use/AndroidHttpClientFactory.html">Use</a></li>
 <li><a href="package-tree.html">Tree</a></li>
 <li><a href="../../../../index-files/index-1.html">Index</a></li>
 <li><a href="../../../../help-doc.html">Help</a></li>
@@ -164,12 +164,12 @@
 </div>
 <div class="subNav">
 <ul class="navList">
-<li><a href="../../../../com/microsoft/windowsazure/mobileservices/AndroidHttpClientFactoryImpl.html" title="class in com.microsoft.windowsazure.mobileservices"><span class="strong">Prev Class</span></a></li>
-<li><a href="../../../../com/microsoft/windowsazure/mobileservices/ApiOperationCallback.html" title="interface in com.microsoft.windowsazure.mobileservices"><span class="strong">Next Class</span></a></li>
+<li>Prev Class</li>
+<li><a href="../../../../com/microsoft/windowsazure/mobileservices/AndroidHttpClientFactoryImpl.html" title="class in com.microsoft.windowsazure.mobileservices"><span class="strong">Next Class</span></a></li>
 </ul>
 <ul class="navList">
-<li><a href="../../../../index.html?com/microsoft/windowsazure/mobileservices/ApiJsonOperationCallback.html" target="_top">Frames</a></li>
-<li><a href="ApiJsonOperationCallback.html" target="_top">No Frames</a></li>
+<li><a href="../../../../index.html?com/microsoft/windowsazure/mobileservices/AndroidHttpClientFactory.html" target="_top">Frames</a></li>
+<li><a href="AndroidHttpClientFactory.html" target="_top">No Frames</a></li>
 </ul>
 <ul class="navList" id="allclasses_navbar_bottom">
 <li><a href="../../../../allclasses-noframe.html">All Classes</a></li>

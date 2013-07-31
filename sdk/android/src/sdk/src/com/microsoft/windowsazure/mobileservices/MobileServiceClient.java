@@ -100,7 +100,12 @@ public class MobileServiceClient {
 	 * Context where the MobileServiceClient is created
 	 */
 	private Context mContext;
-
+	
+	/**
+	 * AndroidHttpClientFactory used for request execution
+	 */
+	private AndroidHttpClientFactory mAndroidHttpClientFactory;
+	
 	/**
 	 * UTF-8 encoding
 	 */
@@ -165,7 +170,7 @@ public class MobileServiceClient {
 	public MobileServiceClient(MobileServiceClient client) {
 		initialize(client.getAppUrl(), client.getAppKey(),
 				client.getCurrentUser(), client.getGsonBuilder(),
-				client.getContext());
+				client.getContext(), client.getAndroidHttpClientFactory());
 	}
 
 	/**
@@ -182,7 +187,7 @@ public class MobileServiceClient {
 		GsonBuilder gsonBuilder = createMobileServiceGsonBuilder();
 		gsonBuilder.serializeNulls(); // by default, add null serialization
 
-		initialize(appUrl, appKey, null, gsonBuilder, context);
+		initialize(appUrl, appKey, null, gsonBuilder, context, new AndroidHttpClientFactoryImpl());
 	}
 
 	/**
@@ -880,7 +885,7 @@ public class MobileServiceClient {
 	 */
 	private void initialize(URL appUrl, String appKey,
 			MobileServiceUser currentUser, GsonBuilder gsonBuiler,
-			Context context) {
+			Context context, AndroidHttpClientFactory androidHttpClientFactory) {
 		if (appUrl == null || appUrl.toString().trim().length() == 0) {
 			throw new IllegalArgumentException("Invalid Application URL");
 		}
@@ -911,7 +916,7 @@ public class MobileServiceClient {
 		mCurrentUser = currentUser;
 		mContext = context;
 		mGsonBuilder = gsonBuiler;
-		mAndroidHttpClientFactory = new AndroidHttpClientFactoryImpl();
+		mAndroidHttpClientFactory = androidHttpClientFactory;
 	}
 
 	/**
@@ -970,12 +975,16 @@ public class MobileServiceClient {
 		this.mContext = mContext;
 	}
 	
-	private AndroidHttpClientFactory mAndroidHttpClientFactory;
-	
+	/**
+	 * Gets the AndroidHttpClientFactory
+	 */
 	public AndroidHttpClientFactory getAndroidHttpClientFactory() {
 		return mAndroidHttpClientFactory;
 	}
 
+	/**
+	 * Sets the AndroidHttpClientFactory
+	 */
 	public void setAndroidHttpClientFactory(AndroidHttpClientFactory mAndroidHttpClientFactory) {
 		this.mAndroidHttpClientFactory = mAndroidHttpClientFactory;
 	}
