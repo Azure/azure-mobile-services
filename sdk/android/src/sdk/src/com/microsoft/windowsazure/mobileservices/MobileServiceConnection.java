@@ -57,11 +57,16 @@ class MobileServiceConnection {
 	 * Header value to represent JSON content-type
 	 */
 	static final String JSON_CONTENTTYPE = "application/json";
+	
+	/**
+	 * Header value to represent GZIP content-encoding
+	 */
+	private static final String GZIP_CONTENTENCODING = "gzip";
 
 	/**
 	 * Current SDK version
 	 */
-	private static final String SDK_VERSION = "1.0";
+	private static final String SDK_VERSION = "1.0.1";
 
 	/**
 	 * Constructor for the MobileServiceConnection
@@ -159,6 +164,10 @@ class MobileServiceConnection {
 
 		if (!requestContainsHeader(request, "Accept")) {
 			request.addHeader("Accept", JSON_CONTENTTYPE);
+		}
+		
+		if (!requestContainsHeader(request, "Accept-Encoding")) {
+			request.addHeader("Accept-Encoding", GZIP_CONTENTENCODING);
 		}
 	}
 	

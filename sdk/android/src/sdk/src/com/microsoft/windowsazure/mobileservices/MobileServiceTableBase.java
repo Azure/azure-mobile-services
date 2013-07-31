@@ -261,7 +261,7 @@ abstract class MobileServiceTableBase<E> {
 					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
 				}
 			}
-			delete = new ServiceFilterRequestImpl(new HttpDelete(uriBuilder.build().toString()));			
+			delete = new ServiceFilterRequestImpl(new HttpDelete(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());			
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(e, null);

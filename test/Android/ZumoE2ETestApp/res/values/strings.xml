@@ -2,7 +2,6 @@
 <resources>
 
     <string name="app_name">ZumoE2ETestApp</string>
-    <string name="hello_world">Hello world!</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_run_tests">Run Selected Tests</string>
     <string name="menu_check_all">Check all tests</string>

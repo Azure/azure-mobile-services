@@ -1,0 +1,20 @@
+To build the Notifications Handler project:
+	- After setting up the Google Play Services SDK, copy the file google-play-services from <android-sdk>/extras/google/google_play_services/libproject/google-play-services_lib/libs into the libs folder in the project
+
+To use the Notifications Handler inside an Android app:
+
+	- Make sure the app manifest has the required permissions to accept GCM messages
+	- Create a class that extends NotificationsHandler
+	- Add the following line in the main activity:
+		NotificationsManager.handleNotifications(context, "YOUR_GCM_SENDER_ID", MyNotificationsHandler.class);
+	
+	- Declare the following receiver and service:
+	
+	<receiver android:name="com.microsoft.windowsazure.notifications.NotificationsBroadcastReceiver"
+	    android:permission="com.google.android.c2dm.permission.SEND">
+	    <intent-filter>
+	        <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+	        <category android:name="[YOUR_APP_PACKAGE_NAME]" />
+	    </intent-filter>
+	</receiver>
+	
