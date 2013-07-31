@@ -179,16 +179,8 @@ public class MiscTests extends TestGroup {
 				final TestCase testCase = this;
 				
 				
-				// duplicate the client with a pass-through filter
-				MobileServiceClient froyoClient = client.withFilter(new ServiceFilter() {
-					
-					@Override
-					public void handleRequest(ServiceFilterRequest request,
-							NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-						nextServiceFilterCallback.onNext(request, responseCallback);
-					}
-				});
+				// duplicate the client
+				MobileServiceClient froyoClient = new MobileServiceClient(client);
 				
 				log("add custom AndroidHttpClientFactory with Froyo support");
 				froyoClient.setAndroidHttpClientFactory(new FroyoAndroidHttpClientFactory());
