@@ -66,7 +66,7 @@ class MobileServiceConnection {
 	/**
 	 * Current SDK version
 	 */
-	private static final String SDK_VERSION = "1.0";
+	private static final String SDK_VERSION = "1.0.1";
 
 	/**
 	 * Constructor for the MobileServiceConnection
