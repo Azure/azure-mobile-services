@@ -46,7 +46,6 @@ import android.accounts.AccountManagerFuture;
 import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
-import android.net.http.AndroidHttpClient;
 import android.os.Bundle;
 import android.util.Pair;
 
@@ -702,15 +701,15 @@ public class MobileServiceClient {
 		String url = uriBuilder.build().toString();
 		
 		if (httpMethod.equalsIgnoreCase(HttpGet.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpGet(url), this);
+			request = new ServiceFilterRequestImpl(new HttpGet(url), getAndroidHttpClientFactory());
 		} else if (httpMethod.equalsIgnoreCase(HttpPost.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpPost(url), this);
+			request = new ServiceFilterRequestImpl(new HttpPost(url), getAndroidHttpClientFactory());
 		} else if (httpMethod.equalsIgnoreCase(HttpPut.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpPut(url), this);
+			request = new ServiceFilterRequestImpl(new HttpPut(url), getAndroidHttpClientFactory());
 		} else if (httpMethod.equalsIgnoreCase(HttpPatch.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpPatch(url), this);
+			request = new ServiceFilterRequestImpl(new HttpPatch(url), getAndroidHttpClientFactory());
 		} else if (httpMethod.equalsIgnoreCase(HttpDelete.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpDelete(url), this);
+			request = new ServiceFilterRequestImpl(new HttpDelete(url), getAndroidHttpClientFactory());
 		} else {
 			if (callback != null) {
 				callback.onResponse(null, new IllegalArgumentException("httpMethod not supported"));
@@ -912,6 +911,7 @@ public class MobileServiceClient {
 		mCurrentUser = currentUser;
 		mContext = context;
 		mGsonBuilder = gsonBuiler;
+		mAndroidHttpClientFactory = new AndroidHttpClientFactoryImpl();
 	}
 
 	/**
@@ -972,10 +972,6 @@ public class MobileServiceClient {
 	
 	private AndroidHttpClientFactory mAndroidHttpClientFactory;
 	
-	AndroidHttpClient createAndroidHttpClient() {
-		return mAndroidHttpClientFactory.createAndroidHttpClient();
-	}
-
 	public AndroidHttpClientFactory getAndroidHttpClientFactory() {
 		return mAndroidHttpClientFactory;
 	}

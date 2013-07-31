@@ -233,7 +233,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
 				}
 			}
-			post = new ServiceFilterRequestImpl(new HttpPost(uriBuilder.build().toString()), mClient);
+			post = new ServiceFilterRequestImpl(new HttpPost(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());
 			post.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
 			
 		} catch (UnsupportedEncodingException e) {
@@ -325,7 +325,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
 				}
 			}
-			patch = new ServiceFilterRequestImpl(new HttpPatch(uriBuilder.build().toString()), mClient);
+			patch = new ServiceFilterRequestImpl(new HttpPatch(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());
 			patch.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
 			
 		} catch (UnsupportedEncodingException e) {
@@ -406,7 +406,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	private void executeGetRecords(final String url,
 			final TableJsonQueryCallback callback) {
 		ServiceFilterRequest request = new ServiceFilterRequestImpl(
-				new HttpGet(url), mClient);
+				new HttpGet(url), mClient.getAndroidHttpClientFactory());
 
 		MobileServiceConnection conn = mClient.createConnection();
 		// Create AsyncTask to execute the request and parse the results
