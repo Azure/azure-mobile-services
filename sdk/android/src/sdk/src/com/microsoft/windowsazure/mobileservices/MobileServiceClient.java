@@ -100,7 +100,12 @@ public class MobileServiceClient {
 	 * Context where the MobileServiceClient is created
 	 */
 	private Context mContext;
-
+	
+	/**
+	 * AndroidHttpClientFactory used for request execution
+	 */
+	private AndroidHttpClientFactory mAndroidHttpClientFactory;
+	
 	/**
 	 * UTF-8 encoding
 	 */
@@ -165,7 +170,7 @@ public class MobileServiceClient {
 	public MobileServiceClient(MobileServiceClient client) {
 		initialize(client.getAppUrl(), client.getAppKey(),
 				client.getCurrentUser(), client.getGsonBuilder(),
-				client.getContext());
+				client.getContext(), client.getAndroidHttpClientFactory());
 	}
 
 	/**
@@ -182,7 +187,7 @@ public class MobileServiceClient {
 		GsonBuilder gsonBuilder = createMobileServiceGsonBuilder();
 		gsonBuilder.serializeNulls(); // by default, add null serialization
 
-		initialize(appUrl, appKey, null, gsonBuilder, context);
+		initialize(appUrl, appKey, null, gsonBuilder, context, new AndroidHttpClientFactoryImpl());
 	}
 
 	/**
@@ -701,15 +706,15 @@ public class MobileServiceClient {
 		String url = uriBuilder.build().toString();
 		
 		if (httpMethod.equalsIgnoreCase(HttpGet.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpGet(url));
+			request = new ServiceFilterRequestImpl(new HttpGet(url), getAndroidHttpClientFactory());
 		} else if (httpMethod.equalsIgnoreCase(HttpPost.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpPost(url));
+			request = new ServiceFilterRequestImpl(new HttpPost(url), getAndroidHttpClientFactory());
 		} else if (httpMethod.equalsIgnoreCase(HttpPut.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpPut(url));
+			request = new ServiceFilterRequestImpl(new HttpPut(url), getAndroidHttpClientFactory());
 		} else if (httpMethod.equalsIgnoreCase(HttpPatch.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpPatch(url));
+			request = new ServiceFilterRequestImpl(new HttpPatch(url), getAndroidHttpClientFactory());
 		} else if (httpMethod.equalsIgnoreCase(HttpDelete.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpDelete(url));
+			request = new ServiceFilterRequestImpl(new HttpDelete(url), getAndroidHttpClientFactory());
 		} else {
 			if (callback != null) {
 				callback.onResponse(null, new IllegalArgumentException("httpMethod not supported"));
@@ -880,7 +885,7 @@ public class MobileServiceClient {
 	 */
 	private void initialize(URL appUrl, String appKey,
 			MobileServiceUser currentUser, GsonBuilder gsonBuiler,
-			Context context) {
+			Context context, AndroidHttpClientFactory androidHttpClientFactory) {
 		if (appUrl == null || appUrl.toString().trim().length() == 0) {
 			throw new IllegalArgumentException("Invalid Application URL");
 		}
@@ -911,6 +916,7 @@ public class MobileServiceClient {
 		mCurrentUser = currentUser;
 		mContext = context;
 		mGsonBuilder = gsonBuiler;
+		mAndroidHttpClientFactory = androidHttpClientFactory;
 	}
 
 	/**
@@ -967,5 +973,19 @@ public class MobileServiceClient {
 	 */
 	public void setContext(Context mContext) {
 		this.mContext = mContext;
+	}
+	
+	/**
+	 * Gets the AndroidHttpClientFactory
+	 */
+	public AndroidHttpClientFactory getAndroidHttpClientFactory() {
+		return mAndroidHttpClientFactory;
+	}
+
+	/**
+	 * Sets the AndroidHttpClientFactory
+	 */
+	public void setAndroidHttpClientFactory(AndroidHttpClientFactory mAndroidHttpClientFactory) {
+		this.mAndroidHttpClientFactory = mAndroidHttpClientFactory;
 	}
 }

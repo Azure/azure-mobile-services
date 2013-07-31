@@ -33,6 +33,7 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.protocol.HTTP;
 
 import android.net.http.AndroidHttpClient;
 
@@ -53,20 +54,29 @@ class ServiceFilterRequestImpl implements ServiceFilterRequest {
 	 */
 	private byte[] mContent;
 
+	private AndroidHttpClientFactory mAndroidHttpClientFactory;
+
 	/**
-	 * Constructor
-	 * 
 	 * @param request
 	 *            The request to use
 	 */
-	public ServiceFilterRequestImpl(HttpRequestBase request) {
+	
+	/**
+	 * Constructor
+	 * @param request The request to use
+	 * @param factory The AndroidHttpClientFactory instance used to create AndroidHttpClient objects
+	 */
+	public ServiceFilterRequestImpl(HttpRequestBase request, AndroidHttpClientFactory factory) {
 		mRequest = request;
+		mAndroidHttpClientFactory = factory;
 	}
 
 	@Override
 	public ServiceFilterResponse execute() throws Exception {
 		// Execute request
-		AndroidHttpClient client = AndroidHttpClient.newInstance(MobileServiceConnection.getUserAgent());
+		AndroidHttpClient client = mAndroidHttpClientFactory.createAndroidHttpClient();
+		client.getParams().setParameter(HTTP.USER_AGENT, MobileServiceConnection.getUserAgent());
+		
 		try {
 			final HttpResponse response = client.execute(mRequest);
 			ServiceFilterResponse serviceFilterResponse = new ServiceFilterResponseImpl(response);

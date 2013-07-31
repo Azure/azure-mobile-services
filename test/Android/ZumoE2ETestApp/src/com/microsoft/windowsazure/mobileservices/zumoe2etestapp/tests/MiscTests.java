@@ -51,6 +51,7 @@ import com.microsoft.windowsazure.mobileservices.TableJsonQueryCallback;
 import com.microsoft.windowsazure.mobileservices.TableOperationCallback;
 import com.microsoft.windowsazure.mobileservices.TableQueryCallback;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.ExpectedValueException;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.FroyoAndroidHttpClientFactory;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestGroup;
@@ -162,9 +163,50 @@ public class MiscTests extends TestGroup {
 		
 		this.addTest(createHttpContentApiTest());
 		
+		this.addTest(createFroyoFixedRequestTest());
+		
 	}
 
-	
+	private TestCase createFroyoFixedRequestTest() {
+			final TestCase test = new TestCase() {
+			
+			@Override
+			protected void executeTest(MobileServiceClient client,
+					final TestExecutionCallback callback) {
+				final TestResult result = new TestResult();
+				result.setTestCase(this);
+				result.setStatus(TestStatus.Passed);
+				final TestCase testCase = this;
+				
+				
+				// duplicate the client
+				MobileServiceClient froyoClient = new MobileServiceClient(client);
+				
+				log("add custom AndroidHttpClientFactory with Froyo support");
+				froyoClient.setAndroidHttpClientFactory(new FroyoAndroidHttpClientFactory());
+				
+				MobileServiceTable<RoundTripTableElement> table = 
+						froyoClient.getTable(ROUND_TRIP_TABLE_NAME, RoundTripTableElement.class);
+				
+				table.where().field("id").eq(1).execute(new TableQueryCallback<RoundTripTableElement>() {
+					
+					@Override
+					public void onCompleted(List<RoundTripTableElement> r, int count,
+							Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							createResultFromException(result, exception);
+						}
+						callback.onTestComplete(testCase, result);
+					}
+				});
+			}
+		};
+		
+		test.setName("Simple request on Froyo");
+		return test;
+	}
+
+
 
 	private TestCase createParameterPassingTest(final boolean typed) {
 		TestCase test = new TestCase() {
