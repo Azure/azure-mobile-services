@@ -19,24 +19,6 @@ Move-Item .\google-gson-2.2.2\gson-2.2.2.jar .\
 Write-Host "Remove extra files"
 Remove-Item .\google-gson-2.2.2\ -recurse
 
-Write-Host "Downloading Apache HttpClient 4.2.3"
-$client.DownloadFile("http://apache.mirrors.pair.com//httpcomponents/httpclient/binary/httpcomponents-client-4.2.3-bin.zip", "httpcomponents-client-4.2.3-bin.zip") 
-
-Write-Host "Decompressing..."
-$filename = "httpcomponents-client-4.2.3-bin.zip"
-$zip_file = $shell_app.namespace((Get-Location).Path + "\$filename")
-$destination = $shell_app.namespace((Get-Location).Path)
-$destination.Copyhere($zip_file.items())
-
-Write-Host "Removing zip"
-Remove-Item httpcomponents-client-4.2.3-bin.zip
-
-Write-Host "Move library to destination"
-Move-Item .\httpcomponents-client-4.2.3\lib\httpclient-4.2.3.jar .\
-
-Write-Host "Remove extra files"
-Remove-Item .\httpcomponents-client-4.2.3\ -recurse
-
 Write-Host "Downloading Android Support V4 R11"
 $client.DownloadFile("https://dl-ssl.google.com/android/repository/support_r11.zip", "support_r11.zip") 
 

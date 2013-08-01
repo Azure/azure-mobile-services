@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceAuthenticationProvider;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
@@ -32,6 +33,7 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.MainActivity;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.LogServiceFilter;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
@@ -75,10 +77,78 @@ public class LoginTests extends TestGroup {
 			}
 		}
 
+		this.addTest(createLogoutTest());
+		this.addTest(createLoginWithGoogleAccountTest(true, null));
+
+		this.addTest(createLogoutTest());
+		this.addTest(createLoginWithGoogleAccountTest(true, MobileServiceClient.GOOGLE_USER_INFO_SCOPE + " https://www.googleapis.com/auth/userinfo.email"));
+
+		this.addTest(createLogoutTest());
+		this.addTest(createLoginWithGoogleAccountTest(false, null));
+		
 		List<TestCase> testCases = this.getTestCases();
 		for (int i = indexOfStartAuthenticationTests; i < testCases.size(); i++) {
 			testCases.get(i).setCanRunUnattended(false);
 		}
+	}
+
+	private TestCase createLoginWithGoogleAccountTest(final boolean useDefaultAccount, final String customScope) {
+		StringBuilder name = new StringBuilder();
+		
+		name.append("Login with Google Account - ");
+		if (useDefaultAccount) {
+			name.append("Using default account - ");
+		} else {
+			name.append("Using null account - ");
+		}
+		
+		if (customScope == null) {
+			name.append("Using default scope");
+		} else {
+			name.append("Using custom scope");
+		}
+		
+		TestCase test = new TestCase(name.toString()) {
+			
+			@Override
+			protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
+				final TestCase testCase = this;
+				
+				final TestResult testResult = new TestResult();
+				testResult.setTestCase(testCase);
+				testResult.setStatus(TestStatus.Passed);
+				
+				UserAuthenticationCallback userAuthCallback = new UserAuthenticationCallback() {
+					
+					@Override
+					public void onCompleted(MobileServiceUser user, Exception exception,
+							ServiceFilterResponse response) {
+						if (user != null) {
+							log("User successfully authenticated. UserId: " + user.getUserId());
+							callback.onTestComplete(testCase, testResult);
+						} else {
+							log("User was not authenticated");
+							callback.onTestComplete(testCase, createResultFromException(testResult, exception));
+						}
+					}
+				};
+				
+				String scope = customScope;
+				
+				if (scope == null) {
+					scope = MobileServiceClient.GOOGLE_USER_INFO_SCOPE;
+				}
+				
+				if (useDefaultAccount) {
+					client.loginWithGoogleAccount(MainActivity.getInstance(), scope, userAuthCallback);
+				} else {
+					testCase.setExpectedExceptionClass(IllegalArgumentException.class);
+					client.loginWithGoogleAccount(MainActivity.getInstance(), null, scope, userAuthCallback);
+				}
+			}
+		};
+		
+		return test;
 	}
 
 	private TestCase createClientSideLoginTest(final MobileServiceAuthenticationProvider provider) {
