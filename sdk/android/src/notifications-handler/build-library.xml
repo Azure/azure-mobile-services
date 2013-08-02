@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="library">
+    <target name="library">
+        <javadoc access="public" author="false" classpath="libs/google-play-services.jar" destdir="doc" nodeprecated="true" nodeprecatedlist="true" noindex="false" nonavbar="false" notree="false" packagenames="com.microsoft.windowsazure.notifications" source="1.6" sourcepath="src:gen" splitindex="true" use="true" version="false">
+        	<arg value="-notimestamp" />    
+        </javadoc>
+        <jar destfile="bin/notifications-handler-1.0.0.jar">
+            <fileset dir="doc" />
+            <fileset dir="src"/>
+            <fileset dir="bin/classes" includes="**/*.class" />
+        </jar>
+    </target>
+</project>
