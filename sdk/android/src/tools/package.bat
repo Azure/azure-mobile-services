@@ -16,19 +16,24 @@ IF NOT EXIST "%1" (
 
 echo Creating the jar with the binaries...
 jar cf "%1\mobileservices-%2.jar" -C ..\sdk\bin\classes .
+jar cf "%1\notifications-%2.jar" -C ..\notifications-handler\bin\classes .
 echo ... done
 
 echo Creating the jar with the docs...
 jar cf "%1\mobileservices-%2-javadoc.jar" -C ..\sdk\doc .
+jar cf "%1\notifications-%2-javadoc.jar" -C ..\notifications-handler\doc .
 echo ... done
 
 echo Creating the jar with the sources...
 jar cf "%1\mobileservices-%2-sources.jar" -C ..\sdk\src .
+jar cf "%1\notifications-%2-sources.jar" -C ..\notifications-handler\src .
 echo ... done
 
 echo Creating the properties file...
 echo src=mobileservices-%2-sources.jar > "%1\mobileservices-%2.jar.properties"
 echo doc=mobileservices-%2-javadoc.jar >> "%1\mobileservices-%2.jar.properties"
+echo src=notifications-%2-sources.jar > "%1\notifications-%2.jar.properties"
+echo doc=notifications-%2-javadoc.jar >> "%1\notifications-%2.jar.properties"
 echo ... done.
 
 echo Copying the license files...
