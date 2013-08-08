@@ -71,7 +71,7 @@ document.getElementById('btnRunTests').onclick = function (evt) {
             if (currentGroup.name.indexOf(zumo.AllTestsGroupName) === 0 && uploadUrl !== '') {
                 // For all tests, upload logs automatically if URL is set
                 var testLogs = currentGroup.getLogs();
-                uploadLogs(uploadUrl, testLogs);
+                uploadLogs(uploadUrl, testLogs, true);
             } else {
                 var logs = 'Test group finished';
                 logs = logs + '\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n';
@@ -125,12 +125,12 @@ document.getElementById('btnSendLogs').onclick = function (evt) {
 
     var currentGroup = zumo.testGroups[zumo.currentGroup];
     var logs = currentGroup.getLogs();
-    uploadLogs(uploadUrl, logs, function () {
+    uploadLogs(uploadUrl, logs, false, function () {
         saveLastUsedAppInfo();
     });
 }
 
-function uploadLogs(url, logs, done) {
+function uploadLogs(url, logs, allTests, done) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
@@ -141,7 +141,22 @@ function uploadLogs(url, logs, done) {
         }
     }
 
-    var uploadUrl = url + "?platform=winstorejs";
+    var platform = testPlatform.IsHTMLApplication ? 'htmljs' : 'winstorejs';
+    var uploadUrl = url + '?platform=' + platform;
+    if (allTests) {
+        uploadUrl = uploadUrl + '&allTests=true';
+    }
+
+    var runtimeVersion = zumo.util.globalTestParams[zumo.constants.SERVER_VERSION_KEY];
+    var clientVersion = zumo.util.globalTestParams[zumo.constants.CLIENT_VERSION_KEY];
+    if (runtimeVersion) {
+        uploadUrl = uploadUrl + '&runtimeVersion=' + runtimeVersion;
+    }
+
+    if (clientVersion) {
+        uploadUrl = uploadUrl + '&clientVersion=' + clientVersion;
+    }
+
     xhr.open('POST', uploadUrl, true);
     xhr.setRequestHeader('content-type', 'text/plain');
     xhr.send(logs);
