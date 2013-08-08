@@ -29,9 +29,29 @@ function defineMiscTestsNamespace() {
     var createLoggingFilter = function () {
         var filter = function (request, next, callback) {
             filter.request = request;
+            var clientVersion = request.headers['X-ZUMO-VERSION'];
+            if (clientVersion && clientVersion.length) {
+                if (clientVersion[clientVersion.length - 1] == ')') {
+                    clientVersion = clientVersion.substring(0, clientVersion.length - 1);
+                }
+
+                var equalsIndex = clientVersion.lastIndexOf('=');
+                if (equalsIndex >= 0) {
+                    clientVersion = clientVersion.substring(equalsIndex + 1);
+                    zumo.util.globalTestParams[zumo.constants.CLIENT_VERSION_KEY] = clientVersion;
+                }
+            }
+
             next(request, function (error, response) {
                 filter.error = error;
                 filter.response = response;
+                if (!error && response) {
+                    var serverVersion = response.getResponseHeader('x-zumo-version');
+                    if (serverVersion) {
+                        zumo.util.globalTestParams[zumo.constants.SERVER_VERSION_KEY] = serverVersion;
+                    }
+                }
+
                 callback(error, response);
             });
         };
