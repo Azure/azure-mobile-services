@@ -60,7 +60,7 @@ namespace ZumoE2ETestApp.Framework
                     {
                         var body = await response.Content.ReadAsStringAsync();
                         var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
-                        await MessageBox(title, body);
+                        await MessageBox(body, title);
                     }
                 }
             }

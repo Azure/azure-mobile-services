@@ -146,7 +146,7 @@ namespace ZumoE2ETestApp
                 else
                 {
                     // Upload logs automatically if running all tests
-                    await Util.UploadLogs(this.txtUploadLogsUrl.Text, string.Join("\n", testGroup.GetLogs()), "wp8", true);
+                    await Util.UploadLogs(this.txtUploadLogsUrl.Text, string.Join("\n", testGroup.GetLogs()), "net45", true);
                 }
             }
             else
