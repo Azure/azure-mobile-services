@@ -146,19 +146,7 @@ namespace ZumoE2ETestApp
                 else
                 {
                     // Upload logs automatically if running all tests
-                    using (var client = new HttpClient())
-                    {
-                        using (var request = new HttpRequestMessage(HttpMethod.Post, this.txtUploadLogsUrl.Text + "?platform=net45&allTests=true"))
-                        {
-                            request.Content = new StringContent(string.Join("\n", testGroup.GetLogs()), Encoding.UTF8, "text/plain");
-                            using (var response = await client.SendAsync(request))
-                            {
-                                var body = await response.Content.ReadAsStringAsync();
-                                var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
-                                await Alert(title, body);
-                            }
-                        }
-                    }
+                    await Util.UploadLogs(this.txtUploadLogsUrl.Text, string.Join("\n", testGroup.GetLogs()), "wp8", true);
                 }
             }
             else

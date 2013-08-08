@@ -147,20 +147,7 @@ namespace ZumoE2ETestAppWP75
             }
 
             var logs = string.Join(Environment.NewLine, this.currentGroup.GetLogs());
-            uploadUrl = uploadUrl + "?platform=wp75";
-            using (var client = new HttpClient())
-            {
-                using (var request = new HttpRequestMessage(HttpMethod.Post, uploadUrl))
-                {
-                    request.Content = new StringContent(logs, Encoding.UTF8, "text/plain");
-                    using (var response = await client.SendAsync(request))
-                    {
-                        var body = await response.Content.ReadAsStringAsync();
-                        var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
-                        MessageBox.Show(body, title, MessageBoxButton.OK);
-                    }
-                }
-            }
+            await Util.UploadLogs(uploadUrl, logs, "wp75", false);
         }
 
         private async void appBtnRunTests_Click_1(object sender, EventArgs e)
@@ -216,19 +203,7 @@ namespace ZumoE2ETestAppWP75
                     if (testGroup.Name.StartsWith(TestStore.AllTestsGroupName) && !string.IsNullOrEmpty(this.txtUploadUrl.Text))
                     {
                         // Upload logs automatically if running all tests
-                        using (var client = new HttpClient())
-                        {
-                            using (var request = new HttpRequestMessage(HttpMethod.Post, this.txtUploadUrl.Text + "?platform=wp75&allTests=true"))
-                            {
-                                request.Content = new StringContent(string.Join("\n", testGroup.GetLogs()), Encoding.UTF8, "text/plain");
-                                using (var response = await client.SendAsync(request))
-                                {
-                                    var body = await response.Content.ReadAsStringAsync();
-                                    var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
-                                    MessageBox.Show(body, title, MessageBoxButton.OK);
-                                }
-                            }
-                        }
+                        await Util.UploadLogs(this.txtUploadUrl.Text, string.Join("\n", testGroup.GetLogs()), "wp75", true);
                     }
                     else
                     {

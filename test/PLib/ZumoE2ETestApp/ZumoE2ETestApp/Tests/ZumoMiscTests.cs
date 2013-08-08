@@ -387,6 +387,17 @@ namespace ZumoE2ETestApp.Tests
                 foreach (var header in request.Headers)
                 {
                     this.RequestHeaders.Add(header.Key, string.Join(", ", header.Value));
+                    if (header.Key.Equals("user-agent", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string userAgent = this.RequestHeaders[header.Key];
+                        userAgent.TrimEnd(')');
+                        int equalsIndex = userAgent.LastIndexOf('=');
+                        if (equalsIndex >= 0)
+                        {
+                            var clientVersion = userAgent.Substring(equalsIndex + 1);
+                            ZumoTestGlobals.Instance.GlobalTestParams[ZumoTestGlobals.ClientVersionKeyName] = clientVersion;
+                        }
+                    }
                 }
 
                 var response = await base.SendAsync(request, cancellationToken);
@@ -394,6 +405,10 @@ namespace ZumoE2ETestApp.Tests
                 foreach (var header in response.Headers)
                 {
                     this.ResponseHeaders.Add(header.Key, string.Join(", ", header.Value));
+                    if (header.Key.Equals("x-zumo-version", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ZumoTestGlobals.Instance.GlobalTestParams[ZumoTestGlobals.RuntimeVersionKeyName] = this.ResponseHeaders[header.Key];
+                    }
                 }
 
                 this.ResponseBody = await response.Content.ReadAsStringAsync();
