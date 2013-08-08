@@ -19,6 +19,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using ZumoE2ETestApp.Framework;
 
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -71,21 +72,7 @@ namespace ZumoE2ETestApp.UIElements
             string uploadUrl = this.uploadUrl;
             if (!string.IsNullOrEmpty(uploadUrl))
             {
-                uploadUrl = uploadUrl + "?platform=winstorecs";
-                using (var client = new HttpClient())
-                {
-                    using (var request = new HttpRequestMessage(HttpMethod.Post, uploadUrl))
-                    {
-                        request.Content = new StringContent(this.logs, Encoding.UTF8, "text/plain");
-                        using (var response = await client.SendAsync(request))
-                        {
-                            var body = await response.Content.ReadAsStringAsync();
-                            var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
-                            var dialog = new MessageDialog(body, title);
-                            await dialog.ShowAsync();
-                        }
-                    }
-                }
+                await Util.UploadLogs(uploadUrl, this.logs, "winstorecs", false);
             }
         }
 
