@@ -143,15 +143,16 @@
     [helpController setModalPresentationStyle:UIModalPresentationFullScreen];
     NSString *urlToUpload = [self logUploadUrl];
     if (urlToUpload && [urlToUpload length] && [[[self testGroup] name] hasPrefix:ALL_TESTS_GROUP_NAME]) {
-        urlToUpload = [urlToUpload stringByAppendingString:@"?allTests=true"];
+        ZumoLogUpdater *updater = [[ZumoLogUpdater alloc] init];
+        [updater uploadLogs:allLogs toUrl:urlToUpload allTests:YES];
+    } else {
+        [self presentViewController:helpController animated:YES completion:^(void) {
+            if (urlToUpload && [urlToUpload length]) {
+                ZumoLogUpdater *updater = [[ZumoLogUpdater alloc] init];
+                [updater uploadLogs:allLogs toUrl:urlToUpload allTests:NO];
+            }
+        }];
     }
-
-    [self presentViewController:helpController animated:YES completion:^(void) {
-        if (urlToUpload && [urlToUpload length]) {
-            ZumoLogUpdater *updater = [[ZumoLogUpdater alloc] init];
-            [updater uploadLogs:allLogs toUrl:urlToUpload];
-        }
-    }];
 }
 
 - (void)zumoTestGroupFinished:(NSString *)groupName withPassed:(int)passedTests andFailed:(int)failedTests {

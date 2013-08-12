@@ -7,6 +7,8 @@
 NSString *const UserDefaultApplicationUrl = @"ZumoE2ETest_AppUrl";
 NSString *const UserDefaultApplicationKey = @"ZumoE2ETest_AppKey";
 NSString *const UserDefaultUploadLogsUrl = @"ZumoE2ETest_UploadLogUrl";
+NSString *const RUNTIME_VERSION_KEY = @"client-version";
+NSString *const CLIENT_VERSION_KEY = @"server-version";
 
 @implementation ZumoTestGlobals
 
@@ -21,8 +23,20 @@ NSString *const UserDefaultUploadLogsUrl = @"ZumoE2ETest_UploadLogUrl";
     return instance;
 }
 
+- (id)init {
+    self = [super init];
+    if (self) {
+        self->globalTestParameters = [[NSMutableDictionary alloc] init];
+    }
+    return self;
+}
+
 - (void)initializeClientWithAppUrl:(NSString *)url andKey:(NSString *)appKey {
     [self setClient:[MSClient clientWithApplicationURLString:url applicationKey:appKey]];
+}
+
+- (NSMutableDictionary *)globalTestParameters {
+    return self->globalTestParameters;
 }
 
 - (void)saveAppInfo:(NSString *)appUrl key:(NSString *)appKey {
