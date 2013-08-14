@@ -164,6 +164,27 @@ function uploadLogs(url, logs, allTests, done) {
 
 var testGroups = zumo.testGroups;
 
+var btnRunAllTests = document.getElementById('btnRunAllTests');
+var btnRunAllUnattendedTests = document.getElementById('btnRunAllUnattendedTests');
+
+if (btnRunAllTests) btnRunAllTests.onclick = handlerForAllTestsButtons(false);
+if (btnRunAllUnattendedTests) btnRunAllUnattendedTests.onclick = handlerForAllTestsButtons(true);
+
+function handlerForAllTestsButtons(unattendedOnly) {
+    return function (evt) {
+        for (var i = 0; i < testGroups.length; i++) {
+            var groupName = testGroups[i].name;
+            if (!unattendedOnly && groupName === zumo.AllTestsGroupName) {
+                testGroupSelected(i);
+                break;
+            } else if (unattendedOnly && groupName == zumo.AllTestsUnattendedGroupName) {
+                testGroupSelected(i);
+                break;
+            }
+        }
+    }
+}
+
 function highlightSelectedGroup(groupIndex) {
     var testsGroupBody = document.getElementById('tblTestsGroupBody');
     for (var i = 0; i < testsGroupBody.children.length; i++) {
@@ -200,6 +221,10 @@ function testGroupSelected(index) {
         }
         tblTests.appendChild(tr);
     });
+
+    if (group.name === zumo.AllTestsGroupName || group.name === zumo.AllTestsUnattendedGroupName) {
+        document.getElementById('btnRunTests').click();
+    }
 }
 
 function addAttribute(element, name, value) {

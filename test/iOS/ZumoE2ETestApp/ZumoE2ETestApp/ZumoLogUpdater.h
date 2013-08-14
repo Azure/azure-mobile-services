@@ -6,6 +6,6 @@
 
 @interface ZumoLogUpdater : NSObject
 
--(void)uploadLogs:(NSString *)logText toUrl:(NSString *)url;
+-(void)uploadLogs:(NSString *)logText toUrl:(NSString *)url allTests:(BOOL) allTests;
 
 @end
