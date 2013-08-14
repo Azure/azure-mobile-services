@@ -211,6 +211,7 @@ public class MainActivity extends Activity {
 			final WebView webView = new WebView(this);
 			
 			String logContent = TextUtils.htmlEncode(mLog.toString()).replace("\n", "<br />");
+			final boolean isLogForAllGroups = logContent.contains("Tests for group \'" + TestGroup.AllTestsGroupName);
 			String logHtml = "<html><body><pre>" + logContent + "</pre></body></html>";
 			webView.loadData(logHtml, "text/html", "utf-8");
 			
@@ -237,6 +238,17 @@ public class MainActivity extends Activity {
 								String url = getLogPostURL();
 								if (url != null && url.trim() != "") {
 									url = url + "?platform=android";
+									if (isLogForAllGroups) {
+										url = url + "&allTests=true";
+									}
+									String clientVersion = Util.getGlobalTestParameters().get(TestGroup.ClientVersionKey);
+									String runtimeVersion = Util.getGlobalTestParameters().get(TestGroup.ServerVersionKey);
+									if (clientVersion != null) {
+										url = url + "&clientVersion=" + clientVersion;
+									}
+									if (runtimeVersion != null) {
+										url = url + "&runtimeVersion=" + runtimeVersion;
+									}
 									HttpPost post = new HttpPost();
 									post.setEntity(new StringEntity(postContent, MobileServiceClient.UTF8_ENCODING));
 									
