@@ -7,6 +7,9 @@
 
 typedef void (^ZumoHttpRequestCompletion)(NSHTTPURLResponse *response, NSData *responseBody, NSError *error);
 
+extern NSString *const RUNTIME_VERSION_KEY;
+extern NSString *const CLIENT_VERSION_KEY;
+
 @protocol PushNotificationReceiver <NSObject>
 
 @required
@@ -16,7 +19,7 @@ typedef void (^ZumoHttpRequestCompletion)(NSHTTPURLResponse *response, NSData *r
 
 @interface ZumoTestGlobals : NSObject
 {
-    
+    NSMutableDictionary *globalTestParameters;
 }
 
 @property (nonatomic, strong) MSClient *client;
@@ -30,6 +33,7 @@ typedef void (^ZumoHttpRequestCompletion)(NSHTTPURLResponse *response, NSData *r
 - (NSArray *)loadAppInfo;
 - (void)saveUploadLogsUrl:(NSString *)url;
 - (NSString *)loadUploadLogsUrl;
+- (NSMutableDictionary *)globalTestParameters;
 
 // Helper methods
 + (NSDate *)createDateWithYear:(NSInteger)year month:(NSInteger)month day:(NSInteger)day;

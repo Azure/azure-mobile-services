@@ -59,11 +59,6 @@ namespace ZumoE2ETestApp
             }
         }
 
-        private void btnMainHelp_Click_1(object sender, RoutedEventArgs e)
-        {
-            Util.MessageBox("Not implemented yet", "Error");
-        }
-
         private async void btnSaveAppInfo_Click_1(object sender, RoutedEventArgs e)
         {
             SavedAppInfo appInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
@@ -115,7 +110,7 @@ namespace ZumoE2ETestApp
             }
         }
 
-        private void lstTestGroups_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
+        private async void lstTestGroups_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
         {
             int selectedIndex = this.lstTestGroups.SelectedIndex;
             if (selectedIndex >= 0)
@@ -124,6 +119,10 @@ namespace ZumoE2ETestApp
                 List<ListViewForTest> sources = testGroup.GetTests().Select((t, i) => new ListViewForTest(i + 1, t)).ToList();
                 this.lstTests.ItemsSource = sources;
                 this.lblTestGroupTitle.Text = string.Format("{0}. {1}", selectedIndex + 1, testGroup.Name);
+                if (testGroup.Name.StartsWith(TestStore.AllTestsGroupName) && !string.IsNullOrEmpty(this.txtUploadLogsUrl.Text))
+                {
+                    await this.RunTestGroup(testGroup);
+                }
             }
             else
             {
@@ -181,6 +180,7 @@ namespace ZumoE2ETestApp
 
                     savedAppInfo.LastService.AppKey = appKey;
                     savedAppInfo.LastService.AppUrl = appUrl;
+                    savedAppInfo.LastUploadUrl = this.txtUploadLogsUrl.Text;
                     await AppInfoRepository.Instance.SaveAppInfo(savedAppInfo);
                 }
 
@@ -318,6 +318,30 @@ namespace ZumoE2ETestApp
         {
             var selectedItems = this.lstTests.SelectedItems;
             this.btnRunSelected.IsEnabled = selectedItems.Count > 0;
+        }
+
+        private void btnRunAllTests_Click(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i < this.allTests.Count; i++)
+            {
+                if (allTests[i].Name == TestStore.AllTestsGroupName)
+                {
+                    this.lstTestGroups.SelectedIndex = i;
+                    break;
+                }
+            }
+        }
+
+        private void btnRunAllUnattendedTests_Click(object sender, RoutedEventArgs e)
+        {
+            for (int i = 0; i < this.allTests.Count; i++)
+            {
+                if (allTests[i].Name == TestStore.AllTestsUnattendedGroupName)
+                {
+                    this.lstTestGroups.SelectedIndex = i;
+                    break;
+                }
+            }
         }
     }
 }
