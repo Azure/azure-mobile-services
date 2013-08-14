@@ -157,8 +157,24 @@ static NSString *pushClientKey = @"PushClientKey";
     return result;
 }
 
++ (BOOL)isRunningOnSimulator {
+    NSString *deviceModel = [[UIDevice currentDevice] model];
+    if ([deviceModel rangeOfString:@"Simulator" options:NSCaseInsensitiveSearch].location == NSNotFound) {
+        return NO;
+    } else {
+        return YES;
+    }
+}
+
 + (ZumoTest *)createValidatePushRegistrationTest {
     ZumoTest *result = [ZumoTest createTestWithName:@"Validate push registration" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+        if ([self isRunningOnSimulator]) {
+            [test addLog:@"Test running on a simulator, skipping test."];
+            [test setTestStatus:TSSkipped];
+            completion(YES);
+            return;
+        }
+        
         ZumoTestGlobals *globals = [ZumoTestGlobals sharedInstance];
         [test addLog:[globals remoteNotificationRegistrationStatus]];
         if ([globals deviceToken]) {
@@ -182,6 +198,13 @@ static NSString *pushClientKey = @"PushClientKey";
 
 + (ZumoTest *)createPushTestWithName:(NSString *)name forPayload:(NSDictionary *)payload withDelay:(int)seconds isNegativeTest:(BOOL)isNegative {
     ZumoTest *result = [ZumoTest createTestWithName:name andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+        if ([self isRunningOnSimulator]) {
+            [test addLog:@"Test running on a simulator, skipping test."];
+            [test setTestStatus:TSSkipped];
+            completion(YES);
+            return;
+        }
+
         NSString *deviceToken = [[ZumoTestGlobals sharedInstance] deviceToken];
         if (!deviceToken) {
             [test addLog:@"Device not correctly registered for push"];
@@ -215,6 +238,13 @@ static NSString *pushClientKey = @"PushClientKey";
 
 + (ZumoTest *)createFeedbackTest {
     ZumoTest *result = [ZumoTest createTestWithName:@"Simple feedback test" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+        if ([self isRunningOnSimulator]) {
+            [test addLog:@"Test running on a simulator, skipping test."];
+            [test setTestStatus:TSSkipped];
+            completion(YES);
+            return;
+        }
+
         if (![[ZumoTestGlobals sharedInstance] deviceToken]) {
             [test addLog:@"Device not correctly registered for push"];
             [test setTestStatus:TSFailed];
