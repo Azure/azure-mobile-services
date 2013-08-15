@@ -70,6 +70,8 @@ public class MainActivity extends Activity {
 
 	private StringBuilder mLog;
 
+	private boolean mRunningAllTests;
+
 	private SharedPreferences mPrefManager;
 
 	private ListView mTestCaseList;
@@ -134,6 +136,7 @@ public class MainActivity extends Activity {
 	@SuppressWarnings("unchecked")
 	private void refreshTestGroupsAndLog() {
 		mLog = new StringBuilder();
+		mRunningAllTests = false;
 
 		ArrayAdapter<TestGroup> adapter = (ArrayAdapter<TestGroup>) mTestGroupSpinner.getAdapter();
 		adapter.clear();
@@ -211,7 +214,7 @@ public class MainActivity extends Activity {
 			final WebView webView = new WebView(this);
 			
 			String logContent = TextUtils.htmlEncode(mLog.toString()).replace("\n", "<br />");
-			final boolean isLogForAllGroups = logContent.contains("Tests for group \'" + TestGroup.AllTestsGroupName);
+			final boolean isLogForAllGroups = mRunningAllTests;
 			String logHtml = "<html><body><pre>" + logContent + "</pre></body></html>";
 			webView.loadData(logHtml, "text/html", "utf-8");
 			
@@ -308,6 +311,9 @@ public class MainActivity extends Activity {
 
 		TestGroup group = (TestGroup) mTestGroupSpinner.getSelectedItem();
 		logWithTimestamp(new Date(), "Tests for group \'" + group.getName() + "\'");
+		if (group.getName().startsWith(TestGroup.AllTestsGroupName)) {
+			mRunningAllTests = true;
+		}
 		logSeparator();
 		group.runTests(client, new TestExecutionCallback() {
 
