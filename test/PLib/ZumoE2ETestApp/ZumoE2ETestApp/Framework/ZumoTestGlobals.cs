@@ -3,6 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using Microsoft.WindowsAzure.MobileServices;
 
 namespace ZumoE2ETestApp.Framework
@@ -18,11 +19,18 @@ namespace ZumoE2ETestApp.Framework
 #endif
         public const string ParamsTestTableName = "ParamsTestTable";
 
+        public const string ClientVersionKeyName = "clientVersion";
+        public const string RuntimeVersionKeyName = "x-zumo-version";
+
         private static ZumoTestGlobals instance = new ZumoTestGlobals();
 
         public MobileServiceClient Client { get; private set; }
+        public Dictionary<string, object> GlobalTestParams { get; private set; }
 
-        private ZumoTestGlobals() { }
+        private ZumoTestGlobals()
+        {
+            this.GlobalTestParams = new Dictionary<string, object>();
+        }
 
         public static ZumoTestGlobals Instance
         {

@@ -38,8 +38,13 @@
     [self setStartTime:[NSDate date]];
     steps(self, currentViewController, ^(BOOL testPassed) {
         [weakSelf setEndTime:[NSDate date]];
-        [weakSelf setTestStatus: (testPassed ? TSPassed : TSFailed)];
-        [[weakSelf delegate] zumoTestFinished:[weakSelf testName] withResult:testPassed];
+        TestStatus currentStatus = [weakSelf testStatus];
+        if (currentStatus != TSSkipped) {
+            // if test marked itself as 'skipped', don't set its status.
+            currentStatus = testPassed ? TSPassed : TSFailed;
+        }
+        [weakSelf setTestStatus:currentStatus];
+        [[weakSelf delegate] zumoTestFinished:[weakSelf testName] withResult:currentStatus];
     });
 }
 
@@ -80,6 +85,10 @@
             
         case TSRunning:
             testStatus = @"Running";
+            break;
+            
+        case TSSkipped:
+            testStatus = @"Skipped";
             break;
             
         default:

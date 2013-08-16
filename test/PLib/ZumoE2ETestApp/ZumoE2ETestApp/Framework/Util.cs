@@ -7,7 +7,11 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Text;
+#if WP75
 using System.Threading;
+#endif
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
@@ -29,6 +33,40 @@ namespace ZumoE2ETestApp.Framework
         {
             return new DateTime(dateTime.Year, dateTime.Month, dateTime.Day,
                 dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.Millisecond, dateTime.Kind);
+        }
+
+        public static async Task UploadLogs(string uploadLogsUrl, string testLogs, string platform, bool allTests)
+        {
+            using (var client = new HttpClient())
+            {
+                string url = uploadLogsUrl + "?platform=" + platform;
+                if (allTests)
+                {
+                    url = url + "&allTests=true";
+                }
+
+                object clientVersion, runtimeVersion;
+                if (ZumoTestGlobals.Instance.GlobalTestParams.TryGetValue(ZumoTestGlobals.ClientVersionKeyName, out clientVersion))
+                {
+                    url = url + "&clientVersion=" + clientVersion;
+                }
+
+                if (ZumoTestGlobals.Instance.GlobalTestParams.TryGetValue(ZumoTestGlobals.RuntimeVersionKeyName, out runtimeVersion))
+                {
+                    url = url + "&runtimeVersion=" + runtimeVersion;
+                }
+
+                using (var request = new HttpRequestMessage(HttpMethod.Post, url))
+                {
+                    request.Content = new StringContent(testLogs, Encoding.UTF8, "text/plain");
+                    using (var response = await client.SendAsync(request))
+                    {
+                        var body = await response.Content.ReadAsStringAsync();
+                        var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
+                        await MessageBox(body, title);
+                    }
+                }
+            }
         }
 
         #region Methods which are different based on platforms

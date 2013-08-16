@@ -13,6 +13,8 @@ function createZumoNamespace() {
     var TSRunning = 3;
     var AllTestsGroupName = "All tests";
     var AllTestsUnattendedGroupName = AllTestsGroupName + ' (unattended)';
+    var ClientVersionKey = 'client-version';
+    var ServerVersionKey = 'server-version';
 
 
     function ZumoTest(name, execution) {
@@ -390,6 +392,10 @@ function createZumoNamespace() {
         TSRunning: TSRunning,
         AllTestsGroupName: AllTestsGroupName,
         AllTestsUnattendedGroupName: AllTestsUnattendedGroupName,
+        constants: {
+            CLIENT_VERSION_KEY: ClientVersionKey,
+            SERVER_VERSION_KEY: ServerVersionKey
+        },
         Test: ZumoTest,
         Group: ZumoTestGroup,
         tests: {},
@@ -397,7 +403,8 @@ function createZumoNamespace() {
             createSeparatorTest: createSeparatorTest,
             compare: compareValues,
             traceResponse: traceResponse,
-            dateToString: dateToString
+            dateToString: dateToString,
+            globalTestParams: {}
         }
     };
 }

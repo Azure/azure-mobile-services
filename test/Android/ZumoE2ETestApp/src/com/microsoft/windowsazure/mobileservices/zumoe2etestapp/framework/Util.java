@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
@@ -42,6 +43,11 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 public class Util {
 
 	public final static String LogTimeFormat = "yyyy-MM-dd HH:mm:ss'.'SSS";
+	private final static Hashtable<String, String> globalTestParameters = new Hashtable<String, String>();
+
+	public static Hashtable<String, String> getGlobalTestParameters() {
+		return globalTestParameters;
+	}
 
 	public static String createComplexRandomString(Random rndGen, int size) {
 		if (rndGen.nextInt(3) > 0) {

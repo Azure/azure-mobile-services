@@ -41,10 +41,16 @@
     _requestHeaders = [NSMutableDictionary new];
     [_requestHeaders setValuesForKeysWithDictionary:headers];
     userAgent = request.allHTTPHeaderFields[@"User-Agent"];
+    NSString *clientVersion = [NSString stringWithFormat:@"%d.%d.%d.0", WindowsAzureMobileServicesSdkMajorVersion, WindowsAzureMobileServicesSdkMinorVersion, WindowsAzureMobileServicesSdkBuildVersion];
+    [[[ZumoTestGlobals sharedInstance] globalTestParameters] setObject:clientVersion forKey:CLIENT_VERSION_KEY];
     onNext(request, ^(NSHTTPURLResponse *response, NSData *data, NSError *error) {
         NSDictionary *respHeaders = [response allHeaderFields];
         _responseHeaders = [NSMutableDictionary new];
         [_responseHeaders setValuesForKeysWithDictionary:respHeaders];
+        NSString *runtimeVersion = [_responseHeaders objectForKey:@"x-zumo-version"];
+        if (runtimeVersion) {
+            [[[ZumoTestGlobals sharedInstance] globalTestParameters] setObject:runtimeVersion forKey:RUNTIME_VERSION_KEY];
+        }
         _responseContent = [NSData dataWithData:data];
         onResponse(response, data, error);
     });

@@ -14,6 +14,7 @@
 
 @property (nonatomic) int testsPassed;
 @property (nonatomic) int testsFailed;
+@property (nonatomic) int testsSkipped;
 @property (nonatomic, strong) NSMutableArray *tests;
 @property (nonatomic, copy) NSString *name;
 @property (nonatomic, copy) NSString *groupDescription;

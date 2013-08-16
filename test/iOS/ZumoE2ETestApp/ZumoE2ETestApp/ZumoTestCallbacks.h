@@ -4,10 +4,12 @@
 
 #import <Foundation/Foundation.h>
 
+typedef enum { TSNotRun, TSRunning, TSSkipped, TSFailed, TSPassed } TestStatus;
+
 @protocol ZumoTestCallbacks <NSObject>
 
 @required
 - (void)zumoTestStarted:(NSString *)testName;
-- (void)zumoTestFinished:(NSString *)testName withResult:(BOOL)testResult;
+- (void)zumoTestFinished:(NSString *)testName withResult:(TestStatus)testResult;
 
 @end

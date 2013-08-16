@@ -226,15 +226,15 @@
     NSLog(@"Tests for %@ started.", groupName);
 }
 
-- (void)zumoTestGroupFinished:(NSString *)groupName withPassed:(int)passedTests andFailed:(int)failedTests {
-    NSLog(@"Tests for group %@ finished: pass: %d, fail: %d", groupName, passedTests, failedTests);
+- (void)zumoTestGroupFinished:(NSString *)groupName withPassed:(int)passedTests andFailed:(int)failedTests andSkipped:(int)skippedTests {
+    NSLog(@"Tests for group %@ finished: pass: %d, fail: %d, skip: %d", groupName, passedTests, failedTests, skippedTests);
 }
 
 - (void)zumoTestGroupSingleTestStarted:(int)testIndex {
     
 }
 
-- (void)zumoTestGroupSingleTestFinished:(int)testIndex withResult:(BOOL)testPassed {
+- (void)zumoTestGroupSingleTestFinished:(int)testIndex withResult:(TestStatus)testStatus {
     
 }
 

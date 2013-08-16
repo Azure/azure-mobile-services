@@ -77,6 +77,8 @@
         textColor = [UIColor greenColor];
     } else if ([test testStatus] == TSRunning) {
         textColor = [UIColor grayColor];
+    } else if ([test testStatus] == TSSkipped) {
+        textColor = [UIColor magentaColor];
     } else {
         textColor = [UIColor blackColor];
     }
@@ -143,25 +145,26 @@
     [helpController setModalPresentationStyle:UIModalPresentationFullScreen];
     NSString *urlToUpload = [self logUploadUrl];
     if (urlToUpload && [urlToUpload length] && [[[self testGroup] name] hasPrefix:ALL_TESTS_GROUP_NAME]) {
-        urlToUpload = [urlToUpload stringByAppendingString:@"?allTests=true"];
+        ZumoLogUpdater *updater = [[ZumoLogUpdater alloc] init];
+        [updater uploadLogs:allLogs toUrl:urlToUpload allTests:YES];
+    } else {
+        [self presentViewController:helpController animated:YES completion:^(void) {
+            if (urlToUpload && [urlToUpload length]) {
+                ZumoLogUpdater *updater = [[ZumoLogUpdater alloc] init];
+                [updater uploadLogs:allLogs toUrl:urlToUpload allTests:NO];
+            }
+        }];
     }
-
-    [self presentViewController:helpController animated:YES completion:^(void) {
-        if (urlToUpload && [urlToUpload length]) {
-            ZumoLogUpdater *updater = [[ZumoLogUpdater alloc] init];
-            [updater uploadLogs:allLogs toUrl:urlToUpload];
-        }
-    }];
 }
 
-- (void)zumoTestGroupFinished:(NSString *)groupName withPassed:(int)passedTests andFailed:(int)failedTests {
+- (void)zumoTestGroupFinished:(NSString *)groupName withPassed:(int)passedTests andFailed:(int)failedTests andSkipped:(int)skippedTests {
     if ([groupName hasPrefix:ALL_TESTS_GROUP_NAME] && [[self logUploadUrl] length] > 0) {
         [self uploadLogs:nil];
     }
 }
 
-- (void)zumoTestGroupSingleTestFinished:(int)testIndex withResult:(BOOL)testPassed {
-    [[[[self testGroup] tests] objectAtIndex:testIndex] setTestStatus:(testPassed ? TSPassed : TSFailed)];
+- (void)zumoTestGroupSingleTestFinished:(int)testIndex withResult:(TestStatus)testStatus {
+    [[[[self testGroup] tests] objectAtIndex:testIndex] setTestStatus:testStatus];
     [[self tableView] reloadData];
 }
 

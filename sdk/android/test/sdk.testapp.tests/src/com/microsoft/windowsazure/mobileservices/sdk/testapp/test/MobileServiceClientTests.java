@@ -441,8 +441,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 							Assert.fail();
 						}
 
-						String expectedUserAgent = String.format("ZUMO/%s (lang=%s; os=%s; os_version=%s; arch=%s)", "1.0", "Java", "Android",
-								Build.VERSION.RELEASE, Build.CPU_ABI);
+						String expectedUserAgent = String.format("ZUMO/%s (lang=%s; os=%s; os_version=%s; arch=%s; version=%s)", "1.0", "Java", "Android",
+								Build.VERSION.RELEASE, Build.CPU_ABI, "1.0.10814.0");
 
 						assertNotNull(headers[zumoInstallationHeaderIndex].getValue());
 						assertEquals(expectedAppKey, headers[zumoAppHeaderIndex].getValue());

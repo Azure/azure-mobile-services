@@ -11,8 +11,6 @@
 typedef void (^ZumoTestCompletion)(BOOL testPassed);
 typedef void (^ZumoTestExecution)(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion);
 
-typedef enum { TSNotRun, TSRunning, TSFailed, TSPassed } TestStatus;
-
 @interface ZumoTest : NSObject
 {
     NSMutableArray *logs;

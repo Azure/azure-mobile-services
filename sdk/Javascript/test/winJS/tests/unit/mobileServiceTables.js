@@ -108,6 +108,21 @@ $testGroup('MobileServiceTables.js',
         });
     }),
 
+    $test('query via table.read() with no response content')
+    .description('Verify MobileServiceTable table operations allow responses without content')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.url, 'http://www.test.com/tables/books');
+            callback(null, { status: 200, responseText: "" });
+        });
+
+        var table = client.getTable('books');
+        return table.read().then(function (results) {
+            $assert.areEqual(results, null);
+        });
+    }),
+
     $test('query via table.read() with user-defined parameters')
     .description('Verify MobileServiceTable.read implies a default query even when used with user-defined query string parmeters')
     .checkAsync(function () {

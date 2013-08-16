@@ -66,7 +66,7 @@ class MobileServiceConnection {
 	/**
 	 * Current SDK version
 	 */
-	private static final String SDK_VERSION = "1.0.1";
+	private static final String SDK_VERSION = "1.0.10814.0";
 
 	/**
 	 * Constructor for the MobileServiceConnection
@@ -192,9 +192,9 @@ class MobileServiceConnection {
 	 */
 	static String getUserAgent() {
 		String userAgent = String.format(
-				"ZUMO/%s (lang=%s; os=%s; os_version=%s; arch=%s)",
-				SDK_VERSION, "Java", "Android", Build.VERSION.RELEASE,
-				Build.CPU_ABI);
+				"ZUMO/1.0 (lang=%s; os=%s; os_version=%s; arch=%s; version=%s)",
+				"Java", "Android", Build.VERSION.RELEASE,
+				Build.CPU_ABI, SDK_VERSION);
 
 		return userAgent;
 	}
