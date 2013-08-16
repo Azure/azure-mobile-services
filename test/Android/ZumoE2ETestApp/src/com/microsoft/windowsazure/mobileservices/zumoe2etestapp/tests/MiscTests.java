@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.UUID;
 
+import org.apache.http.Header;
 import org.apache.http.client.methods.HttpGet;
 
 import android.util.Pair;
@@ -164,7 +165,74 @@ public class MiscTests extends TestGroup {
 		this.addTest(createHttpContentApiTest());
 		
 		this.addTest(createFroyoFixedRequestTest());
-		
+
+		this.addTest(new TestCase("User-Agent validation") {
+
+			@Override
+			protected void executeTest(MobileServiceClient client,
+					final TestExecutionCallback callback) {
+				final TestCase testCase = this;
+				final TestResult testResult = new TestResult();
+				testResult.setTestCase(testCase);
+				testResult.setStatus(TestStatus.Failed);
+				client = client.withFilter(new ServiceFilter() {
+
+					@Override
+					public void handleRequest(ServiceFilterRequest request,
+							NextServiceFilterCallback nextServiceFilterCallback,
+							final ServiceFilterResponseCallback responseCallback) {
+						Header[] headers = request.getHeaders();
+						for (Header reqHeader : headers) {
+							if (reqHeader.getName() == "User-Agent") {
+								String userAgent = reqHeader.getValue();
+								log("User-Agent: " + userAgent);
+								testResult.setStatus(TestStatus.Passed);
+								String clientVersion = userAgent;
+								if (clientVersion.endsWith(")")) {
+									clientVersion = clientVersion.substring(0, clientVersion.length() - 1);
+								}
+								int indexOfEquals = clientVersion.lastIndexOf('=');
+								if (indexOfEquals >= 0) {
+									clientVersion = clientVersion.substring(indexOfEquals + 1);
+									Util.getGlobalTestParameters().put(ClientVersionKey, clientVersion);
+								}
+							}
+						}
+
+						nextServiceFilterCallback.onNext(request, new ServiceFilterResponseCallback() {
+
+							@Override
+							public void onResponse(ServiceFilterResponse response, Exception exception) {
+								if (response != null) {
+									Header[] respHeaders = response.getHeaders();
+									for (Header header : respHeaders) {
+										if (header.getName().equalsIgnoreCase("x-zumo-version")) {
+											String runtimeVersion = header.getValue();
+											Util.getGlobalTestParameters().put(ServerVersionKey, runtimeVersion);
+										}
+									}
+								}
+								responseCallback.onResponse(response, exception);
+							}
+						});
+					}
+				});
+
+				log("execute query to activate filter");
+				client.getTable(ROUND_TRIP_TABLE_NAME).top(5).execute(new TableJsonQueryCallback() {
+
+					@Override
+					public void onCompleted(JsonElement result, int count, Exception exception,
+							ServiceFilterResponse response) {
+						if (exception != null) {
+							createResultFromException(testResult, exception);
+						}
+
+						if (callback != null) callback.onTestComplete(testCase, testResult);
+					}
+				});
+			}
+		});
 	}
 
 	private TestCase createFroyoFixedRequestTest() {
@@ -177,8 +245,7 @@ public class MiscTests extends TestGroup {
 				result.setTestCase(this);
 				result.setStatus(TestStatus.Passed);
 				final TestCase testCase = this;
-				
-				
+
 				// duplicate the client
 				MobileServiceClient froyoClient = new MobileServiceClient(client);
 				
