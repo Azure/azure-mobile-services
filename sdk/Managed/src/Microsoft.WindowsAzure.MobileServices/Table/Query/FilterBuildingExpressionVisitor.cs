@@ -47,7 +47,15 @@ namespace Microsoft.WindowsAzure.MobileServices
         // calls these methods. We do this in the static private constructor.
         private static readonly MethodInfo toStringMethod = typeof(object).GetMethod("ToString");
         private static readonly MethodInfo concatMethod = typeof(string).GetMethod("Concat", new Type[] { typeof(string), typeof(string) });
-        
+
+        // The Visual Basic compiler emits a call to CompareString(left, right, False) from the class
+        // Microsoft.VisualBasic.CompilerServices.Operators for lambda expressions with string
+        // comparisons. Since the class isn't part of the portable libraries, we can do a type
+        // validation based on the type name when visiting the expression.
+        private const string VBOperatorClass = "Microsoft.VisualBasic.CompilerServices.Operators";
+        private const string VBCompareStringMethod = "CompareString";
+        private const int VBCompareStringArguments = 3;
+
         /// <summary>
         /// Defines the instance methods that are translated into OData filter
         /// expressions.
@@ -547,6 +555,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 // special case for enums, because we send them as strings
                 UnaryExpression enumExpression = null;
                 ConstantExpression constantExpression = null;
+                BinaryExpression stringCompareExpression = null;
                 if (this.CheckEnumExpression(expression, out enumExpression, out constantExpression))
                 {
                     this.Visit(this.RewriteEnumExpression(enumExpression, (ConstantExpression)expression.Right, expression.NodeType));            
@@ -558,6 +567,11 @@ namespace Microsoft.WindowsAzure.MobileServices
                 {
                     //rewrite addition into a call to concat, instead of duplicating generation code.
                     this.Visit(this.RewriteStringAddition(expression));
+                }
+                // special case for string comparisons emitted by the VB compiler
+                else if (this.CheckVBStringCompareExpression(expression, out stringCompareExpression))
+                {
+                    this.Visit(stringCompareExpression);
                 }
                 else
                 {
@@ -619,7 +633,67 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return expression;
         }
-        
+
+        /// <summary>
+        /// Checks if the binary expression is a string comparison emitted by the Visual Basic compiler.
+        /// </summary>
+        /// <remarks>The VB compiler translates string comparisons such as
+        /// <code>(Function(x) x.Name = "a string value")</code> not as a binary expression with the field
+        /// on the left side and the string value on the right side. Instead, it converts it into a call
+        /// to <see cref="Microsoft.VisualBasic.CompilerServices.Operators.CompareString"/> for the string value,
+        /// and compares the expression to zero.</remarks>
+        /// <param name="expression">The binary expression to check.</param>
+        /// <param name="stringComparison">A normalized string comparison expression.</param>
+        /// <returns>True if the expression is a string comparison expression emitted by the VB compiler,
+        /// otherwise false</returns>
+        private bool CheckVBStringCompareExpression(BinaryExpression expression, out BinaryExpression stringComparison)
+        {
+            stringComparison = null;
+            if (expression.Left.Type == typeof(int) && 
+                expression.Left.NodeType == ExpressionType.Call &&
+                expression.Right.Type == typeof(int) &&
+                expression.Right.NodeType == ExpressionType.Constant &&
+                ((ConstantExpression)expression.Right).Value.Equals(0)) {
+                    MethodCallExpression methodCall = (MethodCallExpression)expression.Left;
+                    if (methodCall.Method.DeclaringType.FullName == VBOperatorClass &&
+                        methodCall.Method.Name == VBCompareStringMethod &&
+                        methodCall.Arguments.Count == VBCompareStringArguments &&
+                        methodCall.Arguments[2].Type == typeof(bool) &&
+                        methodCall.Arguments[2].NodeType == ExpressionType.Constant &&
+                        ((ConstantExpression)methodCall.Arguments[2]).Value.Equals(false))
+                    {
+                        switch (expression.NodeType)
+                        {
+                            case ExpressionType.Equal:
+                                stringComparison = BinaryExpression.Equal(methodCall.Arguments[0], methodCall.Arguments[1]);
+                                break;
+                            case ExpressionType.NotEqual:
+                                stringComparison = BinaryExpression.NotEqual(methodCall.Arguments[0], methodCall.Arguments[1]);
+                                break;
+                            case ExpressionType.LessThan:
+                                stringComparison = BinaryExpression.LessThan(methodCall.Arguments[0], methodCall.Arguments[1]);
+                                break;
+                            case ExpressionType.LessThanOrEqual:
+                                stringComparison = BinaryExpression.LessThanOrEqual(methodCall.Arguments[0], methodCall.Arguments[1]);
+                                break;
+                            case ExpressionType.GreaterThan:
+                                stringComparison = BinaryExpression.GreaterThan(methodCall.Arguments[0], methodCall.Arguments[1]);
+                                break;
+                            case ExpressionType.GreaterThanOrEqual:
+                                stringComparison = BinaryExpression.GreaterThanOrEqual(methodCall.Arguments[0], methodCall.Arguments[1]);
+                                break;
+                        }
+
+                        if (stringComparison != null)
+                        {
+                            return true;
+                        }
+                    }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Checks if the binary expression is an enum expression.
         /// </summary>
