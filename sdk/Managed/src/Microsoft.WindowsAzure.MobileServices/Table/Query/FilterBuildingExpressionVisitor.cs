@@ -49,10 +49,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         private static readonly MethodInfo concatMethod = typeof(string).GetMethod("Concat", new Type[] { typeof(string), typeof(string) });
 
         // The Visual Basic compiler emits a call to CompareString(left, right, False) from the class
-        // Microsoft.VisualBasic.CompilerServices.Operators for lambda expressions with string
+        // Microsoft.VisualBasic.CompilerServices.[Embedded]Operators for lambda expressions with string
         // comparisons. Since the class isn't part of the portable libraries, we can do a type
         // validation based on the type name when visiting the expression.
         private const string VBOperatorClass = "Microsoft.VisualBasic.CompilerServices.Operators";
+        private const string VBOperatorClassAlt = "Microsoft.VisualBasic.CompilerServices.EmbeddedOperators";
         private const string VBCompareStringMethod = "CompareString";
         private const int VBCompareStringArguments = 3;
 
@@ -655,7 +656,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 expression.Right.NodeType == ExpressionType.Constant &&
                 ((ConstantExpression)expression.Right).Value.Equals(0)) {
                     MethodCallExpression methodCall = (MethodCallExpression)expression.Left;
-                    if (methodCall.Method.DeclaringType.FullName == VBOperatorClass &&
+                    if ((methodCall.Method.DeclaringType.FullName == VBOperatorClass || methodCall.Method.DeclaringType.FullName == VBOperatorClassAlt) &&
                         methodCall.Method.Name == VBCompareStringMethod &&
                         methodCall.Arguments.Count == VBCompareStringArguments &&
                         methodCall.Arguments[2].Type == typeof(bool) &&
