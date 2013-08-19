@@ -56,6 +56,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         private const string VBOperatorClassAlt = "Microsoft.VisualBasic.CompilerServices.EmbeddedOperators";
         private const string VBCompareStringMethod = "CompareString";
         private const int VBCompareStringArguments = 3;
+        private const int VBCaseSensitiveCompareArgumentIndex = 2;
+        private static readonly MethodInfo stringToLowerMethod = typeof(string).GetMethod("ToLower");
 
         /// <summary>
         /// Defines the instance methods that are translated into OData filter
@@ -659,10 +661,19 @@ namespace Microsoft.WindowsAzure.MobileServices
                     if ((methodCall.Method.DeclaringType.FullName == VBOperatorClass || methodCall.Method.DeclaringType.FullName == VBOperatorClassAlt) &&
                         methodCall.Method.Name == VBCompareStringMethod &&
                         methodCall.Arguments.Count == VBCompareStringArguments &&
-                        methodCall.Arguments[2].Type == typeof(bool) &&
-                        methodCall.Arguments[2].NodeType == ExpressionType.Constant &&
-                        ((ConstantExpression)methodCall.Arguments[2]).Value.Equals(false))
+                        methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex].Type == typeof(bool) &&
+                        methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex].NodeType == ExpressionType.Constant &&
+                        ((ConstantExpression)methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex]).Value.Equals(false))
                     {
+                        bool doCaseInsensitiveComparison = ((ConstantExpression)methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex]).Value.Equals(true);
+                        Expression leftExpression = methodCall.Arguments[0];
+                        Expression rightExpression = methodCall.Arguments[1];
+                        if (doCaseInsensitiveComparison)
+                        {
+                            leftExpression = MethodCallExpression.Call(leftExpression, stringToLowerMethod);
+                            rightExpression = MethodCallExpression.Call(rightExpression, stringToLowerMethod);
+                        }
+
                         switch (expression.NodeType)
                         {
                             case ExpressionType.Equal:
