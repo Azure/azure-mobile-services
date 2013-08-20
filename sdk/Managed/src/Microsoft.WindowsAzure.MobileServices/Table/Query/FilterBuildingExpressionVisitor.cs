@@ -583,8 +583,10 @@ namespace Microsoft.WindowsAzure.MobileServices
                     switch (expression.NodeType)
                     {
                         case ExpressionType.AndAlso:
+                        case ExpressionType.And:
                             this.filter.Append(" and ");
                             break;
+                        case ExpressionType.Or:
                         case ExpressionType.OrElse:
                             this.filter.Append(" or ");
                             break;
