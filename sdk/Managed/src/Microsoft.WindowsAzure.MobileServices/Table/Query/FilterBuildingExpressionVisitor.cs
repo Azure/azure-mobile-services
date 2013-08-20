@@ -58,6 +58,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         private const int VBCompareStringArguments = 3;
         private const int VBCaseSensitiveCompareArgumentIndex = 2;
         private static readonly MethodInfo stringToLowerMethod = typeof(string).GetMethod("ToLower", new Type[0]);
+        private static readonly Type typeofInt = typeof(int);
 
         /// <summary>
         /// Defines the instance methods that are translated into OData filter
@@ -84,8 +85,8 @@ namespace Microsoft.WindowsAzure.MobileServices
                             { new MemberInfoKey(typeof(string), "Contains", true, true, typeof(string)), subStringOfFilterMethod },
                             { new MemberInfoKey(typeof(string), "Replace", true, true, typeof(string), typeof(string)), replaceFilterMethod },
                             { new MemberInfoKey(typeof(string), "Replace", true, true, typeof(char), typeof(char)), replaceFilterMethod },
-                            { new MemberInfoKey(typeof(string), "Substring", true, true, typeof(int)), substringFilterMethod },
-                            { new MemberInfoKey(typeof(string), "Substring", true, true, typeof(int), typeof(int)), substringFilterMethod },
+                            { new MemberInfoKey(typeof(string), "Substring", true, true, typeofInt), substringFilterMethod },
+                            { new MemberInfoKey(typeof(string), "Substring", true, true, typeofInt, typeofInt), substringFilterMethod },
                         };
                 }
 
@@ -163,14 +164,14 @@ namespace Microsoft.WindowsAzure.MobileServices
                     implicitConversions =
                         new Dictionary<Type, Type[]>
                         {
-                            { typeof(sbyte),  new[] { typeof(short), typeof(int), typeof(long), typeof(float), typeof(double), typeof(decimal) } },
-                            { typeof(byte),   new[] { typeof(short), typeof(ushort), typeof(int), typeof(uint), typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal) } },
-                            { typeof(short),  new[] { typeof(int), typeof(long), typeof(float), typeof(double), typeof(decimal) } },
-                            { typeof(ushort), new[] { typeof(int), typeof(uint), typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal) } },
-                            { typeof(int),    new[] { typeof(long), typeof(float), typeof(double), typeof(decimal) } },
+                            { typeof(sbyte),  new[] { typeof(short), typeofInt, typeof(long), typeof(float), typeof(double), typeof(decimal) } },
+                            { typeof(byte),   new[] { typeof(short), typeof(ushort), typeofInt, typeof(uint), typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal) } },
+                            { typeof(short),  new[] { typeofInt, typeof(long), typeof(float), typeof(double), typeof(decimal) } },
+                            { typeof(ushort), new[] { typeofInt, typeof(uint), typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal) } },
+                            { typeofInt,    new[] { typeof(long), typeof(float), typeof(double), typeof(decimal) } },
                             { typeof(uint),   new[] { typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal) } },
                             { typeof(long),   new[] { typeof(float), typeof(double), typeof(decimal) } },
-                            { typeof(char),   new[] { typeof(ushort), typeof(int), typeof(uint), typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal) } },
+                            { typeof(char),   new[] { typeof(ushort), typeofInt, typeof(uint), typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal) } },
                             { typeof(float),  new[] { typeof(double) } },
                             { typeof(ulong),  new[] { typeof(float), typeof(double), typeof(decimal) } }
                         };
@@ -288,7 +289,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return string.Format(CultureInfo.InvariantCulture, "{0}M", value);
             }
-            else if (handle.Equals(typeof(int).TypeHandle) || handle.Equals(typeof(short).TypeHandle) 
+            else if (handle.Equals(typeofInt.TypeHandle) || handle.Equals(typeof(short).TypeHandle) 
                 || handle.Equals(typeof(ushort).TypeHandle) || handle.Equals(typeof(sbyte).TypeHandle))
             {
                 return string.Format(CultureInfo.InvariantCulture, "{0}", value);
@@ -654,9 +655,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         private bool CheckVBStringCompareExpression(BinaryExpression expression, out BinaryExpression stringComparison)
         {
             stringComparison = null;
-            if (expression.Left.Type == typeof(int) && 
+            if (expression.Left.Type == typeofInt && 
                 expression.Left.NodeType == ExpressionType.Call &&
-                expression.Right.Type == typeof(int) &&
+                expression.Right.Type == typeofInt &&
                 expression.Right.NodeType == ExpressionType.Constant &&
                 ((ConstantExpression)expression.Right).Value.Equals(0)) {
                     MethodCallExpression methodCall = (MethodCallExpression)expression.Left;
