@@ -57,7 +57,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         private const string VBCompareStringMethod = "CompareString";
         private const int VBCompareStringArguments = 3;
         private const int VBCaseSensitiveCompareArgumentIndex = 2;
-        private static readonly MethodInfo stringToLowerMethod = typeof(string).GetMethod("ToLower");
+        private static readonly MethodInfo stringToLowerMethod = typeof(string).GetMethod("ToLower", new Type[0]);
 
         /// <summary>
         /// Defines the instance methods that are translated into OData filter
