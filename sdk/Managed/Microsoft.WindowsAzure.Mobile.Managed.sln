@@ -37,6 +37,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Net45.Test", "test\Microsoft.WindowsAzure.Mobile.Net45.Test\Microsoft.WindowsAzure.Mobile.Net45.Test.csproj", "{7C1A9BC1-3E60-4673-AC08-AC8399032D49}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Microsoft.WindowsAzure.Mobile.Net45.Vb.Test", "test\Microsoft.WindowsAzure.Mobile.Net45.Vb.Test\Microsoft.WindowsAzure.Mobile.Net45.Vb.Test.vbproj", "{D3C7CD26-984A-46D1-8618-8363199F1573}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -299,6 +301,21 @@ Global
 		{7C1A9BC1-3E60-4673-AC08-AC8399032D49}.Signed|ARM.ActiveCfg = Release|Any CPU
 		{7C1A9BC1-3E60-4673-AC08-AC8399032D49}.Signed|x64.ActiveCfg = Release|Any CPU
 		{7C1A9BC1-3E60-4673-AC08-AC8399032D49}.Signed|x86.ActiveCfg = Release|Any CPU
+		{D3C7CD26-984A-46D1-8618-8363199F1573}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3C7CD26-984A-46D1-8618-8363199F1573}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3C7CD26-984A-46D1-8618-8363199F1573}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{D3C7CD26-984A-46D1-8618-8363199F1573}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D3C7CD26-984A-46D1-8618-8363199F1573}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D3C7CD26-984A-46D1-8618-8363199F1573}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3C7CD26-984A-46D1-8618-8363199F1573}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3C7CD26-984A-46D1-8618-8363199F1573}.Release|ARM.ActiveCfg = Release|Any CPU
+		{D3C7CD26-984A-46D1-8618-8363199F1573}.Release|x64.ActiveCfg = Release|Any CPU
+		{D3C7CD26-984A-46D1-8618-8363199F1573}.Release|x86.ActiveCfg = Release|Any CPU
+		{D3C7CD26-984A-46D1-8618-8363199F1573}.Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{D3C7CD26-984A-46D1-8618-8363199F1573}.Signed|Any CPU.Build.0 = Release|Any CPU
+		{D3C7CD26-984A-46D1-8618-8363199F1573}.Signed|ARM.ActiveCfg = Release|Any CPU
+		{D3C7CD26-984A-46D1-8618-8363199F1573}.Signed|x64.ActiveCfg = Release|Any CPU
+		{D3C7CD26-984A-46D1-8618-8363199F1573}.Signed|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -317,5 +334,6 @@ Global
 		{46AE537A-1143-48A4-B9A4-4B2C7BD9AB1D} = {45E57CDC-7178-4915-8D0B-CF80F5E44AF6}
 		{5F7732D2-A3BE-4059-A549-31998EDF5351} = {45E57CDC-7178-4915-8D0B-CF80F5E44AF6}
 		{7C1A9BC1-3E60-4673-AC08-AC8399032D49} = {45E57CDC-7178-4915-8D0B-CF80F5E44AF6}
+		{D3C7CD26-984A-46D1-8618-8363199F1573} = {45E57CDC-7178-4915-8D0B-CF80F5E44AF6}
 	EndGlobalSection
 EndGlobal
