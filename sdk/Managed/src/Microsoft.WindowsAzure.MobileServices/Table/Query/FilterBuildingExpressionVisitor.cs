@@ -665,8 +665,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                         methodCall.Method.Name == VBCompareStringMethod &&
                         methodCall.Arguments.Count == VBCompareStringArguments &&
                         methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex].Type == typeof(bool) &&
-                        methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex].NodeType == ExpressionType.Constant &&
-                        ((ConstantExpression)methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex]).Value.Equals(false))
+                        methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex].NodeType == ExpressionType.Constant)
                     {
                         bool doCaseInsensitiveComparison = ((ConstantExpression)methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex]).Value.Equals(true);
                         Expression leftExpression = methodCall.Arguments[0];
@@ -680,22 +679,22 @@ namespace Microsoft.WindowsAzure.MobileServices
                         switch (expression.NodeType)
                         {
                             case ExpressionType.Equal:
-                                stringComparison = BinaryExpression.Equal(methodCall.Arguments[0], methodCall.Arguments[1]);
+                                stringComparison = BinaryExpression.Equal(leftExpression, rightExpression);
                                 break;
                             case ExpressionType.NotEqual:
-                                stringComparison = BinaryExpression.NotEqual(methodCall.Arguments[0], methodCall.Arguments[1]);
+                                stringComparison = BinaryExpression.NotEqual(leftExpression, rightExpression);
                                 break;
                             case ExpressionType.LessThan:
-                                stringComparison = BinaryExpression.LessThan(methodCall.Arguments[0], methodCall.Arguments[1]);
+                                stringComparison = BinaryExpression.LessThan(leftExpression, rightExpression);
                                 break;
                             case ExpressionType.LessThanOrEqual:
-                                stringComparison = BinaryExpression.LessThanOrEqual(methodCall.Arguments[0], methodCall.Arguments[1]);
+                                stringComparison = BinaryExpression.LessThanOrEqual(leftExpression, rightExpression);
                                 break;
                             case ExpressionType.GreaterThan:
-                                stringComparison = BinaryExpression.GreaterThan(methodCall.Arguments[0], methodCall.Arguments[1]);
+                                stringComparison = BinaryExpression.GreaterThan(leftExpression, rightExpression);
                                 break;
                             case ExpressionType.GreaterThanOrEqual:
-                                stringComparison = BinaryExpression.GreaterThanOrEqual(methodCall.Arguments[0], methodCall.Arguments[1]);
+                                stringComparison = BinaryExpression.GreaterThanOrEqual(leftExpression, rightExpression);
                                 break;
                         }
 

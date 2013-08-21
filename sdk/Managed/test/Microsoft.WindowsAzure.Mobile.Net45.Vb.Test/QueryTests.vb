@@ -5,7 +5,7 @@ Imports Newtonsoft.Json
 
 <TestClass()> Public Class QueryTests
 
-    Private Function Compile(Of T, U)(ByVal getQuery As Func(Of IMobileServiceTable(Of T), IMobileServiceTableQuery(Of U))) As MobileServiceTableQueryDescription
+    Friend Shared Function Compile(Of T, U)(ByVal getQuery As Func(Of IMobileServiceTable(Of T), IMobileServiceTableQuery(Of U))) As MobileServiceTableQueryDescription
         Dim client = New MobileServiceClient("http://www.test.com")
         Dim table As IMobileServiceTable(Of T) = client.GetTable(Of T)()
         Dim query As IMobileServiceTableQuery(Of U) = getQuery(table)
