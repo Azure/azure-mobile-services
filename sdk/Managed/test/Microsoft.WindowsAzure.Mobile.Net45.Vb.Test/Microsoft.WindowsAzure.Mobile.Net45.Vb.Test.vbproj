@@ -101,12 +101,14 @@
     <Import Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="TestsForOptionCompareBinary.vb" />
     <Compile Include="QueryTests.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
       <DependentUpon>Application.myapp</DependentUpon>
     </Compile>
+    <Compile Include="TestsForOptionCompareText.vb" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
