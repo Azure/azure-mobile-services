@@ -35,7 +35,7 @@ namespace ZumoE2ETestApp.Framework
                 dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.Millisecond, dateTime.Kind);
         }
 
-        public static async Task UploadLogs(string uploadLogsUrl, string testLogs, string platform, bool allTests,bool showAlerts=true)
+        public static async Task UploadLogs(string uploadLogsUrl, string testLogs, string platform, bool allTests, bool showAlerts = true)
         {
             using (var client = new HttpClient())
             {
@@ -69,7 +69,7 @@ namespace ZumoE2ETestApp.Framework
                             //Do not show dialog if running unattended tests
                             await MessageBox(body, title);
                         }
-                        
+
                     }
                 }
             }

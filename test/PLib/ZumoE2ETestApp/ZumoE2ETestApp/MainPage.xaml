@@ -20,28 +20,27 @@
         <TextBlock FontSize="50" FontWeight="Bold"
                    HorizontalAlignment="Center" VerticalAlignment="Center"
                    Margin="10" Text="Azure Mobile Services E2E Tests" />
-        <Button Name="btnRunAllTests" Content="Run All Tests" HorizontalAlignment="Right" 
-                VerticalAlignment="Top" Margin="10" Click="btnRunAllTests_Click" Visibility="Collapsed" />
-        <Button Name="btnRunAllUnattendedTests" Content="Run All Tests (unattended)" HorizontalAlignment="Right" 
-                VerticalAlignment="Bottom" Margin="10" Click="btnRunAllUnattendedTests_Click" Visibility="Collapsed" />
+
         <Grid Grid.Row="2" Margin="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="Auto" MinWidth="237" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <TextBlock Text="App URL:" HorizontalAlignment="Center" VerticalAlignment="Center"
-                       Grid.Row="0" FontSize="20"/>
+                       Grid.Row="0" FontSize="20" Height="24" Margin="1,8,0,8" Width="81"/>
             <TextBlock Text="App Key:" HorizontalAlignment="Center" VerticalAlignment="Center"
-                       Grid.Row="1" FontSize="20"/>
-            <Button Grid.Column="2" Grid.Row="0" Content="Save App Info" Name="btnSaveAppInfo" Click="btnSaveAppInfo_Click_1" />
-            <Button Grid.Column="2" Grid.Row="1" Content="Load App Info" Name="btnLoadAppInfo" Click="btnLoadAppInfo_Click_1" />
-            <TextBox Name="txtAppUrl" Grid.Row="0" Grid.Column="1" Margin="5" Text="https://SERVICENAMEHERE.azure-mobile.net/" />
-            <TextBox Name="txtAppKey" Grid.Row="1" Grid.Column="1" Margin="5" Text="" />
+                       Grid.Row="1" FontSize="20" Height="24" Margin="2,8" Width="78"/>
+            <Button Grid.Column="2" Grid.Row="0" Content="Save" Name="btnSaveAppInfo" Click="btnSaveAppInfo_Click_1" Height="38" Margin="0,1" Width="93" />
+            <Button Grid.Column="2" Grid.Row="0" Name="btnRunAllTests" Content="RunAllTests" Click="btnRunAllTests_Click" Height="38" Margin="92,2,0,0" Width="119" />
+            <Button Grid.Column="2" Grid.Row="1" Content="Load" Name="btnLoadAppInfo" Click="btnLoadAppInfo_Click_1" Height="38" Margin="0,1" Width="93" />
+            <Button  Grid.Column="2" Grid.Row="1" Name="btnRunAllUnattendedTests" Content="RunUnattendedTests" Click="btnRunAllUnattendedTests_Click" Margin="92,1,-8,1" />
+            <TextBox Name="txtAppUrl" Grid.Row="0" Grid.Column="1" Margin="5,5,5,3" Text="https://SERVICENAMEHERE.azure-mobile.net/" />
+            <TextBox Name="txtAppKey" Grid.Row="1" Grid.Column="1" Margin="5,5,5,3" Text="" />
         </Grid>
         <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>

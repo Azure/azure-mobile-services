@@ -179,18 +179,13 @@ var btnRunAllTests = document.getElementById('btnRunAllTests');
 var btnRunAllUnattendedTests = document.getElementById('btnRunAllUnattendedTests');
 var showAlerts = true;
 
-if (btnRunAllTests) btnRunAllTests.onclick = function (evt) {
-    showAlerts = false;
-    handlerForAllTestsButtons(false);
-}
+if (btnRunAllTests) btnRunAllTests.onclick = handlerForAllTestsButtons(false);
 
-if (btnRunAllUnattendedTests) btnRunAllUnattendedTests.onclick = function (evt) {
-    showAlerts = false;
-    handlerForAllTestsButtons(true);
-}
+if (btnRunAllUnattendedTests) btnRunAllUnattendedTests.onclick = handlerForAllTestsButtons(true);
 
 function handlerForAllTestsButtons(unattendedOnly) {
     return function (evt) {
+        showAlerts = false;
         for (var i = 0; i < testGroups.length; i++) {
             var groupName = testGroups[i].name;
             if (!unattendedOnly && groupName === zumo.AllTestsGroupName) {

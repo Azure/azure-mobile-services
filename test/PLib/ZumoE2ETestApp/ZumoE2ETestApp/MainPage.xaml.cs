@@ -125,15 +125,15 @@ namespace ZumoE2ETestApp
                     await this.RunTestGroup(testGroup);
                     int passed = testGroup.AllTests.Count(t => t.Status == TestStatus.Passed);
                     string message = string.Format(CultureInfo.InvariantCulture, "Passed {0} of {1} tests", passed, testGroup.AllTests.Count());
-                    if(passed==testGroup.AllTests.Count())
+                    if (passed == testGroup.AllTests.Count())
                     {
-                        btnRunAllUnattendedTests.Content = "Passed";                   
+                        btnRunAllUnattendedTests.Content = "Passed";
                     }
                     else
                     {
-                        btnRunAllUnattendedTests.Content = "Failed";                   
+                        btnRunAllUnattendedTests.Content = "Failed";
                     }
-                    if(showAlerts)
+                    if (showAlerts)
                     {
                         await Util.MessageBox(message, "Test group finished");
                     }
@@ -229,7 +229,7 @@ namespace ZumoE2ETestApp
             if (testGroup.Name.StartsWith(TestStore.AllTestsGroupName) && !string.IsNullOrEmpty(this.txtUploadLogsUrl.Text))
             {
                 // Upload logs automatically if running all tests
-                await Util.UploadLogs(this.txtUploadLogsUrl.Text, string.Join("\n", testGroup.GetLogs()), "winstorecs", true,showAlerts);
+                await Util.UploadLogs(this.txtUploadLogsUrl.Text, string.Join("\n", testGroup.GetLogs()), "winstorecs", true, showAlerts);
             }
         }
 
