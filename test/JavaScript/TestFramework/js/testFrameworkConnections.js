@@ -68,17 +68,26 @@ document.getElementById('btnRunTests').onclick = function (evt) {
         saveLastUsedAppInfo();
 
         var groupDone = function (testsPassed, testsFailed) {
+            var logs = 'Test group finished';
+            logs = logs + '\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n';
+            logs = logs + 'Tests passed: ' + testsPassed + '\n';
+            logs = logs + 'Tests failed: ' + testsFailed;
             if (currentGroup.name.indexOf(zumo.AllTestsGroupName) === 0 && uploadUrl !== '') {
                 // For all tests, upload logs automatically if URL is set
                 var testLogs = currentGroup.getLogs();
                 uploadLogs(uploadUrl, testLogs, true);
-            } else {
-                var logs = 'Test group finished';
-                logs = logs + '\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n';
-                logs = logs + 'Tests passed: ' + testsPassed + '\n';
-                logs = logs + 'Tests failed: ' + testsFailed;
+                if (testsFailed == 0) {
+                    btnRunAllUnattendedTests.textContent = "Passed";
+                }
+                else {
+                    btnRunAllUnattendedTests.textContent = "Failed";
+                }
+            }
+
+            if (showAlerts) {
                 testPlatform.alert(logs);
             }
+
         }
         var updateTest = function (test, index) {
             var tblTests = document.getElementById('tblTestsBody');
@@ -134,7 +143,9 @@ function uploadLogs(url, logs, allTests, done) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
-            testPlatform.alert(xhr.responseText);
+            if (showAlerts) {
+                testPlatform.alert(xhr.responseText);
+            }
             if (done) {
                 done();
             }
@@ -166,9 +177,17 @@ var testGroups = zumo.testGroups;
 
 var btnRunAllTests = document.getElementById('btnRunAllTests');
 var btnRunAllUnattendedTests = document.getElementById('btnRunAllUnattendedTests');
+var showAlerts = true;
 
-if (btnRunAllTests) btnRunAllTests.onclick = handlerForAllTestsButtons(false);
-if (btnRunAllUnattendedTests) btnRunAllUnattendedTests.onclick = handlerForAllTestsButtons(true);
+if (btnRunAllTests) btnRunAllTests.onclick = function (evt) {
+    showAlerts = false;
+    handlerForAllTestsButtons(false);
+}
+
+if (btnRunAllUnattendedTests) btnRunAllUnattendedTests.onclick = function (evt) {
+    showAlerts = false;
+    handlerForAllTestsButtons(true);
+}
 
 function handlerForAllTestsButtons(unattendedOnly) {
     return function (evt) {
