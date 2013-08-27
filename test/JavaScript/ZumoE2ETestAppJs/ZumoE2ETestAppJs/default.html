@@ -8,7 +8,7 @@
     <link href="//Microsoft.WinJS.1.0/css/ui-dark.css" rel="stylesheet" />
     <script src="//Microsoft.WinJS.1.0/js/base.js"></script>
     <script src="//Microsoft.WinJS.1.0/js/ui.js"></script>
-    
+
     <!-- ZumoE2ETestAppJs references -->
     <script type="text/javascript" src="/lib/jquery.js"></script>
     <link href="css/default.css" rel="stylesheet" />
@@ -17,7 +17,7 @@
     <script src="js/MobileServices.js"></script>
 
     <!-- Zumo tests; the order of the references is important -->
-     
+
     <script src="js/platformSpecificFunctions.js"></script>
     <script src="js/testFramework.js"></script>
     <script src="js/tests/roundTripTests.js"></script>
@@ -35,26 +35,28 @@
         <tr style="height: 100px;">
             <th colspan='2' class='borderedCell mainTitle'>Zumo E2E Test App - JS</th>
         </tr>
-        <tr style="height: 0px; visibility: collapse">
-            <td style="height: 0px; visibility: hidden">
-                <button id="btnRunAllTests" style="visibility:hidden; height:0px; font-size:xx-small">Run all tests</button>
-            </td>
-            <td style="height: 0px; visibility: hidden">
-                <button id="btnRunAllUnattendedTests" style="visibility:hidden; height:0px; font-size:xx-small">Run all (unattended) tests</button>
-            </td>
-        </tr>
         <tr style="height: 150px;">
             <td class='borderedCell' colspan='2'>
                 <table style='width: 100%'>
                     <tr>
                         <th id='appUrlLabelCell'>App URL:</th>
-                        <th id='appUrlTextCell'><input id='txtAppUrl' /></th>
-                        <th id='saveAppInfoCell'><button id='btnSaveAppInfo'>Save App Info</button></th>
+                        <th id='appUrlTextCell'>
+                            <input id='txtAppUrl' /></th>
+                        <th id='saveAppInfoCell'>
+                            <button id='btnSaveAppInfo'>Save App Info</button></th>
+                        <td>
+                            <button id="btnRunAllTests">Run All Tests</button>
+                        </td>
                     </tr>
                     <tr>
                         <th id='appKeyLabelCell'>App Key:</th>
-                        <th id='appKeyTextCell'><input id='txtAppKey' /></th>
-                        <th id='loadAppInfoCell'><button id='btnLoadAppInfo'>Load App Info</button></th>
+                        <th id='appKeyTextCell'>
+                            <input id='txtAppKey' /></th>
+                        <th id='loadAppInfoCell'>
+                            <button id='btnLoadAppInfo'>Load App Info</button></th>
+                        <td>
+                            <button id="btnRunAllUnattendedTests">Run All Tests (unattended)</button>
+                        </td>
                     </tr>
                 </table>
             </td>
@@ -94,7 +96,7 @@
                             <td style="height: 100%;">
                                 <div id='table-scroll' style="overflow: auto;">
                                     <table>
-                                        <tbody id="tblTestsBody" style="overflow:auto;"></tbody>
+                                        <tbody id="tblTestsBody" style="overflow: auto;"></tbody>
                                     </table>
                                 </div>
                             </td>
