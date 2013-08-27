@@ -66,7 +66,7 @@ namespace ZumoE2ETestApp.Framework
 
                         if (showAlerts)
                         {
-                            //Do not show dialog if running unattended tests
+                            // do not show dialog if test run was started by the run all buttons; used in test automation scenarios
                             await MessageBox(body, title);
                         }
 
