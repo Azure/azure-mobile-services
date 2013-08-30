@@ -95,8 +95,27 @@
     </table>
     
     <script src="../../TestFramework/js/testFrameworkConnections.js"></script>
-    
+    <script type="text/javascript">
+        if (window.navigator.userAgent.toLowerCase().indexOf("firefox") > 0) { //Firefox innerText define
+            HTMLElement.prototype.__defineGetter__("innerText", function () {
+                var anyString = "";
+                var childS = this.childNodes;
+                for (var i = 0; i < childS.length; i++) {
+                    if (childs[i].nodetype == 1) {
+                        anystring += childs[i].tagname == "br" ? '\n' : childs[i].innertext;
+                    }
+                    else if (childS[i].nodeType == 3) {
+                        anyString += childS[i].nodeValue;
+                    }
+                }
+                return anyString;
+            });
 
+            HTMLElement.prototype.__defineSetter__("innerText", function (sText) {
+                this.textContent = sText;
+            });
+        }
+    </script>
 
 </body>
 </html>
