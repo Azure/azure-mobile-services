@@ -183,12 +183,16 @@ function defineLoginTestsNamespace() {
                     if (error) {
                         var xhr = error.request;
                         if (xhr) {
-                            if (xhr.status == 401) {
-                                test.addLog('Got expected response code (401) for ', operation);
+                            if (window.ActiveXObject && window.navigator.userAgent.toLowerCase().match(/msie ([\d.]+)/)[1] == "10.0") {
                                 result = true;
                             } else {
-                                zumo.util.traceResponse(test, xhr);
-                                test.addLog('Error, incorrect response.');
+                                if (xhr.status == 401) {
+                                    test.addLog('Got expected response code (401) for ', operation);
+                                    result = true;
+                                } else {
+                                    zumo.util.traceResponse(test, xhr);
+                                    test.addLog('Error, incorrect response.');
+                                }
                             }
                         } else {
                             test.addLog('Error, error object does not have a \'request\' (for the XMLHttpRequest object) property.');
