@@ -183,7 +183,7 @@ function defineLoginTestsNamespace() {
                     if (error) {
                         var xhr = error.request;
                         if (xhr) {
-                            if (window.ActiveXObject && window.navigator.userAgent.toLowerCase().match(/msie ([\d.]+)/)[1] == "10.0") {
+                            if (testPlatform.IsHTMLApplication && window.ActiveXObject && window.navigator.userAgent.toLowerCase().match(/msie ([\d.]+)/)[1] == "10.0") {
                                 result = true;
                             } else {
                                 if (xhr.status == 401) {

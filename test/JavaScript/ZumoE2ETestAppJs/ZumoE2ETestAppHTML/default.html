@@ -101,10 +101,10 @@
                 var anyString = "";
                 var childS = this.childNodes;
                 for (var i = 0; i < childS.length; i++) {
-                    if (childs[i].nodetype == 1) {
-                        anystring += childs[i].tagname == "br" ? '\n' : childs[i].innertext;
+                    if (childS[i].nodetype == Node.ELEMENT_NODE) {
+                        anyString += childS[i].tagname == "br" ? '\n' : childS[i].innertext;
                     }
-                    else if (childS[i].nodeType == 3) {
+                    else if (childS[i].nodeType == Node.TEXT_NODE) {
                         anyString += childS[i].nodeValue;
                     }
                 }
