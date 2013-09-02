@@ -184,7 +184,7 @@ function defineLoginTestsNamespace() {
                         var xhr = error.request;
                         if (xhr) {
                             if (testPlatform.IsHTMLApplication && window.ActiveXObject && window.navigator.userAgent.toLowerCase().match(/msie ([\d.]+)/)[1] == "10.0") {
-                                result = true;
+                                result = true;  //Make HTML project ignore 401 response when using IE10 because of the won't fix Bug#704176: IE10 unable catch 401 response.
                             } else {
                                 if (xhr.status == 401) {
                                     test.addLog('Got expected response code (401) for ', operation);
