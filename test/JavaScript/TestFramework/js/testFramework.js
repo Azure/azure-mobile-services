@@ -339,7 +339,14 @@ function createZumoNamespace() {
         if (xhr) {
             test.addLog('Response info:');
             test.addLog('  Status code: ' + xhr.status);
-            test.addLog('  Headers: ' + xhr.getAllResponseHeaders());
+
+            var isInternetExplorer9 = testPlatform.IsHTMLApplication && window.ActiveXObject && window.navigator.userAgent.toLowerCase().match(/msie ([\d.]+)/)[1] == "9.0";
+            // On IE9 XMLHttpRequest doesn't support method "getAllResponseHeaders()"
+            // so we cannot use this function to add its log.
+            if (!isInternetExplorer9) {
+                test.addLog('  Headers: ' + xhr.getAllResponseHeaders());
+            }
+
             test.addLog('  Body: ' + xhr.responseText);
         } else {
             test.addLog('No XMLHttpRequest information');
