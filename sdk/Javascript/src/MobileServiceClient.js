@@ -328,7 +328,13 @@ MobileServiceClient.prototype.invokeApi = Platform.async(
                 if (!_.isNull(error)) {
                     callback(error, null);
                 } else {
-                    if (response.getResponseHeader('Content-Type').toLowerCase().indexOf('json') != -1) {
+                    if (typeof response.getResponseHeader === 'undefined') { // (when using IframeTransport, IE9)
+                        try {
+                            response.result = _.fromJson(response.responseText);
+                        } catch(e) {
+                            // Do nothing, since we don't know the content-type, failing may be ok
+                        }
+                    } else if (response.getResponseHeader('Content-Type').toLowerCase().indexOf('json') !== -1) {
                         response.result = _.fromJson(response.responseText);
                     }
 
