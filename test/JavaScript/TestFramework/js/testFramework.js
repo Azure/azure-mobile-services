@@ -339,7 +339,11 @@ function createZumoNamespace() {
         if (xhr) {
             test.addLog('Response info:');
             test.addLog('  Status code: ' + xhr.status);
-            test.addLog('  Headers: ' + xhr.getAllResponseHeaders());
+
+            if (xhr.getAllResponseHeaders) {
+                test.addLog('  Headers: ' + xhr.getAllResponseHeaders());
+            }
+
             test.addLog('  Body: ' + xhr.responseText);
         } else {
             test.addLog('No XMLHttpRequest information');
