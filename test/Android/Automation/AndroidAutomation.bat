@@ -6,6 +6,9 @@ set _APP_KEY=%2
 set _UPLOAD_LOG_URL=%3
 set _GCM_SENDER_ID=%4
 
+where adb > NUL 2>&1
+IF ERRORLEVEL 1 goto :MissingAdb
+
 REM Creates the preferences file to be sent to the app
 echo { > tempAutoPrefs.txt
 echo "pref_mobile_service_url":"%_APP_URL%", >> tempAutoPrefs.txt
@@ -56,5 +59,11 @@ EXIT /B 0
 
 :Usage
 echo Usage: %0 ^<app url^> ^<app key^> ^<log server url^> ^<GCM sender id^>
+goto :TheEnd
+
+:MissingAdb
+echo Error: Cannot find adb.exe
+echo Make sure that the adb.exe (from ADT's sdk\platform-tools folder) is in the path
+goto :TheEnd
 
 :TheEnd
