@@ -10,12 +10,28 @@ using Windows.UI.Xaml.Data;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
 {
+    public class ExceptionHandlingdMobileServiceIncrementalLoadingCollection : MobileServiceIncrementalLoadingCollection<Book>
+    {
+        public Exception HandledException { get; private set; }
+
+        public ExceptionHandlingdMobileServiceIncrementalLoadingCollection(IMobileServiceTableQuery<Book> query)
+            : base(query)
+        {
+        }
+
+        protected override bool OnExceptionOccurred(Exception e)
+        {
+            this.HandledException = e;
+            return true;
+        }
+    }
+
     [Tag("collection")]
     [Tag("unit")]
     public class MobileServiceCollectionTest : TestBase
     {
         [AsyncTestMethod]
-        public async Task MobileServiceCollectionLoadMoreItemsAsyncExceptionsCanBeHandled()
+        public async Task MobileServiceCollectionLoadMoreItemsAsyncExceptionsNotHandledByDefault()
         {
             // Get the Books table
             MobileServiceTableQueryMock<Book> query = new MobileServiceTableQueryMock<Book>();
@@ -36,6 +52,32 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             }
 
             Assert.IsNotNull(ex);
-        }        
+        }
+
+        [AsyncTestMethod]
+        public async Task MobileServiceCollectionLoadMoreItemsAsyncExceptionsCanBeHandled()
+        {
+            // Get the Books table
+            MobileServiceTableQueryMock<Book> query = new MobileServiceTableQueryMock<Book>();
+            query.EnumerableAsyncThrowsException = true;
+
+            ExceptionHandlingdMobileServiceIncrementalLoadingCollection collection = 
+                new ExceptionHandlingdMobileServiceIncrementalLoadingCollection(query);
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+
+            Exception ex = null;
+
+            try
+            {
+                await ((ISupportIncrementalLoading)collection).LoadMoreItemsAsync(10);
+            }
+            catch (Exception e)
+            {
+                ex = e;
+            }
+
+            Assert.IsNull(ex);
+            Assert.IsNotNull(collection.HandledException);
+        }      
     }
 }

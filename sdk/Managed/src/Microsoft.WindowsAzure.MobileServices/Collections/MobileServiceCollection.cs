@@ -24,13 +24,13 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// controls like ListView, GridView or ListBox.
     /// </summary>
     /// <typeparam name="TTable">Data source element type.</typeparam>
-    /// <typeparam name="TCol">Type of elements ending up in the collection.</typeparam>
+    /// <typeparam name="TCollection">Type of elements ending up in the collection.</typeparam>
     /// <remarks>
     /// This currently handles asynchronously loading the data,
     /// notifying the controls and paging.
     /// </remarks>
-    public class MobileServiceCollection<TTable, TCol> : 
-        ObservableCollection<TCol>,
+    public class MobileServiceCollection<TTable, TCollection> : 
+        ObservableCollection<TCollection>,
         ITotalCountProvider
     {
         private bool busy = false;
@@ -45,7 +45,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// A selector function which will be appied to the data when it comes back from the server.
         /// </summary>
-        protected Func<IEnumerable<TTable>, IEnumerable<TCol>> selectorFunction;
+        protected Func<IEnumerable<TTable>, IEnumerable<TCollection>> selectorFunction;
 
         /// <summary>
         /// Numbers of items that will be retrieved per page. 0 means no paging.
@@ -58,7 +58,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         private int itemsReceived;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection'2{TTable,TCol}"/>
+        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection<TTable, TCollection>"/>
         /// class.
         /// </summary>
         /// <param name="query">
@@ -71,7 +71,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The number of items requested per request.
         /// </param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification="Overridable method is only used for change notifications")]
-        public MobileServiceCollection(IMobileServiceTableQuery<TTable> query, Func<IEnumerable<TTable>, IEnumerable<TCol>> selector, int pageSize = 0)
+        public MobileServiceCollection(IMobileServiceTableQuery<TTable> query, Func<IEnumerable<TTable>, IEnumerable<TCollection>> selector, int pageSize = 0)
         {
             if (query == null)
             {
@@ -95,7 +95,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection'2{TTable,TCol}"/>
+        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection<TTable, TCollection>"/>
         /// class.
         /// </summary>
         /// <param name="query">
@@ -107,12 +107,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="pageSize">
         /// The number of items requested per request.
         /// </param>
-        public MobileServiceCollection(IMobileServiceTableQuery<TTable> query, Func<TTable, TCol> selector, int pageSize = 0)
+        public MobileServiceCollection(IMobileServiceTableQuery<TTable> query, Func<TTable, TCollection> selector, int pageSize = 0)
             : this(query, ie => ie.Select(selector), pageSize) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection'2{TTable,TCol}"/>
-        /// class. This constructior should be used in cases where TTable and TCol are the same type.
+        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection<TTable, TCollection>"/>
+        /// class. This constructior should be used in cases where TTable and TCollection are the same type.
         /// </summary>
         /// <param name="query">
         /// The data source's query which provides the data.
@@ -121,7 +121,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The number of items requested per request.
         /// </param>
         public MobileServiceCollection(IMobileServiceTableQuery<TTable> query, int pageSize = 0)
-            : this(query, ie => ie.Cast<TCol>(), pageSize) { }
+            : this(query, ie => ie.Cast<TCollection>(), pageSize) { }
 
         /// <summary>
         /// The page size specified in the constructor.
@@ -195,7 +195,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="items">The items.</param>
         /// <returns>The transformed data.</returns>
-        public virtual IEnumerable<TCol> PrepareDataForCollection(IEnumerable<TTable> items)
+        public virtual IEnumerable<TCollection> PrepareDataForCollection(IEnumerable<TTable> items)
         {
             return selectorFunction(items);
         }
@@ -206,7 +206,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="item">The item.</param>
         /// <returns>The transformed item.</returns>
-        public TCol PrepareDataForCollection(TTable item)
+        public TCollection PrepareDataForCollection(TTable item)
         {
             return selectorFunction(new TTable[] { item }).FirstOrDefault();
         }
@@ -348,5 +348,32 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         #endregion
+    }
+
+    /// <summary>
+    /// An asynchronous data source that can wrap the results of a Mobile
+    /// Services query in a way that's easily consumed by Xaml collection
+    /// controls like ListView, GridView or ListBox.
+    /// </summary>
+    /// <typeparam name="T">Data source and collection element type.</typeparam>
+    /// <remarks>
+    /// This currently handles asynchronously loading the data, notifying the 
+    /// controls and paging.
+    /// </remarks>
+    public class MobileServiceCollection<T> : MobileServiceCollection<T, T>
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection<T>"/> class.
+        /// </summary>
+        /// <param name="query">
+        /// The data source's query which provides the data.
+        /// </param>
+        /// <param name="pageSize">
+        /// The number of items requested per request.
+        /// </param>
+        public MobileServiceCollection(IMobileServiceTableQuery<T> query, int pageSize = 0)
+            : base(query, pageSize)
+        {
+        }
     }
 }
