@@ -28,8 +28,9 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// <typeparam name="TTable">Data source element type.</typeparam>
     /// <typeparam name="TCollection">Type of elements ending up in the collection.</typeparam>
     /// <remarks>S
-    /// This currently handles asynchronously loading the data,
-    /// notifying the controls and paging.
+    /// Currently handles asynchronously loading the data, notifying the controls and paging.
+    /// Use the <see cref="MobileServiceIncrementalLoadingCollection<T>"/> class if the table and 
+    /// collection items are of the same type.
     /// </remarks>
     public class MobileServiceIncrementalLoadingCollection<TTable, TCollection> : 
         MobileServiceCollection<TTable, TCollection>,
@@ -97,14 +98,11 @@ namespace Microsoft.WindowsAzure.MobileServices
                 int results = 0;
                 try
                 {
-                    results = await base.LoadMoreItemsAsync(c, (int)count);
+                    results = await base.LoadMoreItemsAsync(c, (int)count);   
                 }
                 catch (Exception e)
                 {
-                    if (!OnExceptionOccurred(e))
-                    {
-                        throw;
-                    }
+                    OnExceptionOccurred(e, isHandled:false);
                 }
 
                 return new LoadMoreItemsResult() { Count = (uint)results };
@@ -115,13 +113,16 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Provided to allow users to handle exceptions resulting from calls to 
         /// LoadMoreItemsAsync performed by controls.
         /// </summary>
-        /// <param name="e">The exception.</param>
-        /// <returns>
-        /// Should return 'true' if the exception has been handled; 'false' otherwise.
-        /// </returns>
-        protected virtual bool OnExceptionOccurred(Exception e)
+        /// <param name="exception">The exception.</param>
+        /// <param name="isHandled">Indicates whether the exception has already been handled or not.</param>
+        protected virtual void OnExceptionOccurred(Exception exception, bool isHandled = false)
         {
-            return false;
+            if (!isHandled)
+            {
+                throw new InvalidOperationException(
+                    string.Format(Resources.MobileServiceCollection_IncrementalLoadingFailed, typeof(TCollection).FullName), 
+                    exception);
+            }
         }
     }
 
@@ -143,7 +144,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The data source's query, which provides the data.
         /// </param>
         public MobileServiceIncrementalLoadingCollection(IMobileServiceTableQuery<T> query)
-            : base(query)
+            : base(query, (Func<IEnumerable<T>, IEnumerable<T>>)(t => t))
         {
         }
     }

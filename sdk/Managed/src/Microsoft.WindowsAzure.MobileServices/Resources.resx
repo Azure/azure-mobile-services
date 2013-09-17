@@ -237,4 +237,7 @@
   <data name="HttpMessageHandlerExtensions_WrongHandlerType" xml:space="preserve">
     <value>All message handlers except the last must be of the type '{0}'</value>
   </data>
+  <data name="MobileServiceCollection_IncrementalLoadingFailed" xml:space="preserve">
+    <value>Failed to incrementally load more items of type '{0}'. See the inner exception for details.</value>
+  </data>
 </root>

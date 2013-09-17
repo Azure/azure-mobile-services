@@ -19,10 +19,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
         }
 
-        protected override bool OnExceptionOccurred(Exception e)
+        protected override void OnExceptionOccurred(Exception exception, bool isHandled = false)
         {
-            this.HandledException = e;
-            return true;
+            this.HandledException = exception;
+            base.OnExceptionOccurred(exception, true);
         }
     }
 

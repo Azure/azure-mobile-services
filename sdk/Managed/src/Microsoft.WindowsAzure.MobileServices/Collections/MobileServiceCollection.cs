@@ -26,8 +26,9 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// <typeparam name="TTable">Data source element type.</typeparam>
     /// <typeparam name="TCollection">Type of elements ending up in the collection.</typeparam>
     /// <remarks>
-    /// This currently handles asynchronously loading the data,
-    /// notifying the controls and paging.
+    /// Currently handles asynchronously loading the data, notifying the controls and paging. 
+    /// Use the <see cref="MobileServiceCollection<T>"/> class if the table and collection items
+    /// are of the same type.
     /// </remarks>
     public class MobileServiceCollection<TTable, TCollection> : 
         ObservableCollection<TCollection>,
@@ -372,7 +373,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The number of items requested per request.
         /// </param>
         public MobileServiceCollection(IMobileServiceTableQuery<T> query, int pageSize = 0)
-            : base(query, pageSize)
+            : base(query, (Func<IEnumerable<T>,IEnumerable<T>>)(t => t), pageSize)
         {
         }
     }
