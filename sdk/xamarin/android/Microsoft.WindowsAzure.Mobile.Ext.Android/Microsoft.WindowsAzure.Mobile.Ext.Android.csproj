@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>10.0.0</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{0F77566D-014F-4D09-B783-D4E701627D15}</ProjectGuid>
+    <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Microsoft.WindowsAzure.MobileServices</RootNamespace>
+    <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
+    <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
+    <AndroidResgenFile>Resources\Resource.designer.cs</AndroidResgenFile>
+    <AndroidResgenClass>Resource</AndroidResgenClass>
+    <AssemblyName>Microsoft.WindowsAzure.Mobile.Ext</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG;</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AndroidLinkMode>None</AndroidLinkMode>
+    <ConsolePause>false</ConsolePause>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>full</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="Mono.Android" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\managed\src\Microsoft.WindowsAzure.MobileServices.WindowsPhone75\ExpressionUtility\ExpressionVisitor.cs">
+      <Link>ExpressionUtility\ExpressionVisitor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\src\Microsoft.WindowsAzure.MobileServices.WindowsStore\ExpressionUtility\PartialEvaluator.cs">
+      <Link>ExpressionUtility\PartialEvaluator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\src\Microsoft.WindowsAzure.MobileServices.WindowsStore\ExpressionUtility\VisitorHelper.cs">
+      <Link>ExpressionUtility\VisitorHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\src\Microsoft.WindowsAzure.MobileServices.WindowsStore\Platform\ExpressionUtility.cs">
+      <Link>Platform\ExpressionUtility.cs</Link>
+    </Compile>
+    <Compile Include="Authentication\MobileServiceUIAuthentication.cs" />
+    <Compile Include="Extensions\MobileServiceClientExtensions.cs" />
+    <Compile Include="Platform\ApplicationStorage.cs" />
+    <Compile Include="Platform\CurrentPlatform.cs" />
+    <Compile Include="Platform\PlatformInformation.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\libs\Xamarin.Auth\src\Xamarin.Auth.Android\Xamarin.Auth.Android.csproj">
+      <Project>{fcf02c8c-6dd3-4c59-a8a2-58bc01a4bb21}</Project>
+      <Name>Xamarin.Auth.Android</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.MobileServices.csproj">
+      <Project>{726846D2-9CA8-4F41-82C9-4D1AA78D0A18}</Project>
+      <Name>Microsoft.WindowsAzure.MobileServices</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
+</Project>
