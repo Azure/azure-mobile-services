@@ -13,6 +13,10 @@ using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Test;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 
+#if XAMARIN
+using TaskEx=System.Threading.Tasks.Task;
+#endif
+
 namespace Microsoft.WindowsAzure.MobileServices.Test
 {
     [Tag("collection")]

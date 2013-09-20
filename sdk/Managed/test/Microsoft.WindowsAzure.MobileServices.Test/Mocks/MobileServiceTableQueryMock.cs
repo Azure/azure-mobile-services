@@ -10,6 +10,10 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
+#if XAMARIN
+using TaskEx=System.Threading.Tasks.Task;
+#endif
+
 namespace Microsoft.WindowsAzure.MobileServices.Test
 {
     public class MobileServiceTableQueryMock<T> : IMobileServiceTableQuery<T>
