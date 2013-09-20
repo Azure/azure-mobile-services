@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">iPhoneSimulator</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A871B137-83A8-4E9B-913D-30EE0288E161}</ProjectGuid>
+    <ProjectTypeGuids>{6BC8ED88-2882-458C-8E55-DFD12B67127B};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Microsoft.WindowsAzure.MobileServices</RootNamespace>
+    <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
+    <AssemblyName>Microsoft.WindowsAzure.Mobile.Ext</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\iPhone\Debug</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <MtouchDebug>true</MtouchDebug>
+    <CodesignKey>iPhone Developer</CodesignKey>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\iPhone\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <ConsolePause>false</ConsolePause>
+    <CodesignKey>iPhone Developer</CodesignKey>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\managed\src\Microsoft.WindowsAzure.MobileServices.WindowsPhone75\ExpressionUtility\ExpressionVisitor.cs">
+      <Link>ExpressionUtility\ExpressionVisitor.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\src\Microsoft.WindowsAzure.MobileServices.WindowsStore\ExpressionUtility\PartialEvaluator.cs">
+      <Link>ExpressionUtility\PartialEvaluator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\src\Microsoft.WindowsAzure.MobileServices.WindowsStore\ExpressionUtility\VisitorHelper.cs">
+      <Link>ExpressionUtility\VisitorHelper.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\src\Microsoft.WindowsAzure.MobileServices.WindowsStore\Platform\ExpressionUtility.cs">
+      <Link>Platform\ExpressionUtility.cs</Link>
+    </Compile>
+    <Compile Include="Authentication\MobileServiceUIAuthentication.cs" />
+    <Compile Include="Extensions\MobileServiceClientExtensions.cs" />
+    <Compile Include="Platform\ApplicationStorage.cs" />
+    <Compile Include="Platform\CurrentPlatform.cs" />
+    <Compile Include="Platform\PlatformInformation.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\libs\Xamarin.Auth\src\Xamarin.Auth.iOS\Xamarin.Auth.iOS.csproj">
+      <Project>{9309bccc-aa7b-4195-a130-d4572fa9488d}</Project>
+      <Name>Xamarin.Auth.iOS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.MobileServices.csproj">
+      <Project>{9fd883da-a709-4306-a48a-86fd8595697a}</Project>
+      <Name>Microsoft.WindowsAzure.MobileServices</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Core" />
+    <Reference Include="monotouch" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.MonoTouch.CSharp.targets" />
+</Project>
