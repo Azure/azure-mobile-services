@@ -229,6 +229,55 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		assertEquals("The entity to insert should not have ID property defined", container.getErrorMessage());
 		assertNull(container.getPersonWithoutId());
 	}
+	
+	public void testInsertShouldThrowExceptionIfObjectHasIdPropertyDifferentThanEmptyString() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store the object after the insertion, we need this to do
+		// the asserts outside the onSuccess method
+		final ResultsContainer container = new ResultsContainer();
+
+		// Object to insert
+		final JsonObject testObject = new JsonObject();
+
+		testObject.addProperty("name", "john");
+		testObject.addProperty("ID", "Fake-Id");
+		
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+
+				String tableName = "MyTableName";
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+
+				// Call the insert method
+				msTable.insert(testObject, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject entity, Exception exception, ServiceFilterResponse response) {
+						container.setErrorMessage(exception.getMessage());
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		assertEquals("The entity to insert should not have ID property defined", container.getErrorMessage());
+		assertNull(container.getPersonWithoutId());
+	}
 
 	public void testInsertShouldReturnEntityWithId() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);

@@ -173,7 +173,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 			String idProperty = idPropertyNames[i];
 			if (json.has(idProperty)) {
 				JsonElement idElement = json.get(idProperty);
-				if(isValidTypeId(idElement) && idElement.getAsInt() != 0) {
+				if(isValidTypeId(idElement) && isValidId(idElement)) {
 					throw new InvalidParameterException(
 							"The entity to insert should not have "
 									+ idProperty + " property defined");
@@ -301,7 +301,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 		try {
 			updateIdProperty(element);
 
-			if (!element.has("id") || element.get("id").getAsInt() == 0) {
+			if (!element.has("id") || !isValidId(element.get("id"))) {
 				throw new IllegalArgumentException("You must specify an id property with a valid value for updating an object.");
 			}
 		} catch (Exception e) {
@@ -318,7 +318,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
 			uriBuilder.path(TABLES_URL);
 			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
-			uriBuilder.appendPath(Integer.valueOf(getObjectId(element)).toString());
+			uriBuilder.appendPath(getObjectId(element).toString());
 
 			if (parameters != null && parameters.size() > 0) {
 				for (Pair<String, String> parameter : parameters) {

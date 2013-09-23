@@ -34,6 +34,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 
 abstract class MobileServiceTableBase<E> {
 
@@ -200,44 +201,6 @@ abstract class MobileServiceTableBase<E> {
 	}
 	
 	/**
-	 * Deletes an entity from a Mobile Service Table
-	 * 
-	 * @param element
-	 *            The entity to delete
-	 * @param parameters
-	 * 			  A list of user-defined parameters and values to include in the request URI query string
-	 * @param callback
-	 *            Callback to invoke when the operation is completed
-	 */
-	public void delete(Object element, List<Pair<String, String>> parameters, TableDeleteCallback callback) {
-		int id = -1;
-		try {
-			id = getObjectId(element);
-			
-			if (id == 0) {
-				throw new IllegalArgumentException("You must specify an id property with a valid value for deleting an object.");
-			}
-		} catch (Exception e) {
-			callback.onCompleted(e, null);
-			return;
-		}
-
-		this.delete(id, parameters, callback);
-	}
-
-	/**
-	 * Deletes an entity from a Mobile Service Table using a given id
-	 * 
-	 * @param id
-	 *            The id of the entity to delete
-	 * @param callback
-	 *            Callback to invoke when the operation is completed
-	 */
-	public void delete(int id, final TableDeleteCallback callback) {
-		this.delete(id, null, callback);
-	}
-	
-	/**
 	 * Deletes an entity from a Mobile Service Table using a given id
 	 * 
 	 * @param id
@@ -247,14 +210,36 @@ abstract class MobileServiceTableBase<E> {
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
-	public void delete(int id, List<Pair<String, String>> parameters, final TableDeleteCallback callback) {
+	public void delete(Object elementOrId, List<Pair<String, String>> parameters, final TableDeleteCallback callback) {
+		
+		if (elementOrId == null) {
+			callback.onCompleted(new IllegalArgumentException("Element or id to delete cannot be null"), null);
+			return;
+		}
+		
+		Object id = null;
+		try {	
+			if (elementOrId instanceof String || elementOrId instanceof Integer) {
+				id = elementOrId;
+			} else {
+				id = getObjectId(elementOrId);
+			}
+				
+			if (!isValidId(id)) {
+				throw new IllegalArgumentException("You must specify an id property with a valid value for deleting an object.");
+			}
+		} catch (Exception e) {
+			callback.onCompleted(e, null);
+			return;
+		}
+		
 		// Create delete request
 		ServiceFilterRequest delete;
 		try {
 			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
 			uriBuilder.path(TABLES_URL);
 			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
-			uriBuilder.appendPath(Integer.valueOf(id).toString());
+			uriBuilder.appendPath(id.toString());
 
 			if (parameters != null && parameters.size() > 0) {
 				for (Pair<String, String> parameter : parameters) {
@@ -310,11 +295,13 @@ abstract class MobileServiceTableBase<E> {
 	 *            The element to use
 	 * @return The id of the element
 	 */
-	protected int getObjectId(Object element) {
+	protected Object getObjectId(Object element) {
 		if (element == null) {
 			throw new InvalidParameterException("Element cannot be null");
 		} else if (element instanceof Integer) {
 			return ((Integer) element).intValue();
+		} else if (element instanceof String) {
+			return element;
 		}
 
 		JsonObject jsonObject;
@@ -333,7 +320,17 @@ abstract class MobileServiceTableBase<E> {
 					"Element must contain id property");
 		}
 
-		return idProperty.getAsInt();
+		if (idProperty.isJsonPrimitive()) {
+			if (idProperty.getAsJsonPrimitive().isNumber()) {
+				return idProperty.getAsInt();
+			} else if(idProperty.getAsJsonPrimitive().isString()) {
+				return idProperty.getAsString();
+			} else {
+				throw new InvalidParameterException("Invalid id type");
+			}
+		} else {
+			throw new InvalidParameterException("Invalid id type");
+		}
 	}
 	
 	/**
@@ -351,13 +348,54 @@ abstract class MobileServiceTableBase<E> {
 						//force the id name to 'id', no matter the casing 
 						json.remove(key);
 						// Create a new id property using the given property name
-						json.addProperty("id", entry.getValue().getAsNumber());
+						
+						JsonPrimitive value = entry.getValue().getAsJsonPrimitive();
+						if (value.isNumber()) {
+							json.addProperty("id", value.getAsInt());
+						} else {
+							json.addProperty("id", value.getAsString());
+						}
 					}
 					return;
 				} else {
-					throw new IllegalArgumentException("The id must be numeric");
+					throw new IllegalArgumentException("The id must be numeric or string");
 				}
 			}
+		}
+	}
+	
+	protected boolean isValidId(Object id) {
+		if (id == null) {
+			return false;
+		}
+		
+		if (id instanceof JsonElement) {
+			JsonElement jsonId = (JsonElement)id;
+			
+			if (jsonId.isJsonPrimitive()) {
+				JsonPrimitive primitiveId = jsonId.getAsJsonPrimitive();
+				if (primitiveId.isNumber()) {
+					id = primitiveId.getAsInt();
+				} else if (primitiveId.isString()){
+					id = primitiveId.getAsString();
+				} else {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
+		
+		if (id instanceof String) {
+			String strId = (String)id;
+			
+			return !strId.trim().equals("");
+		} else if (id instanceof Integer) {
+			Integer intId = (Integer)id;
+			
+			return intId > 0;
+		} else  {
+			return false;
 		}
 	}
 	
@@ -367,7 +405,11 @@ abstract class MobileServiceTableBase<E> {
 	 * @return
 	 */
 	protected boolean isValidTypeId(JsonElement element) {
-		return element.isJsonPrimitive() && element.getAsJsonPrimitive().isNumber();
+		if (element.isJsonPrimitive()) {
+			return element.getAsJsonPrimitive().isNumber() || element.getAsJsonPrimitive().isString();
+		} else {
+			return false;
+		}
 	}
 
 }
