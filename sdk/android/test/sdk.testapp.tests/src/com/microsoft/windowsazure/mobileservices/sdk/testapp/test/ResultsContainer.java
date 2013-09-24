@@ -35,6 +35,8 @@ public class ResultsContainer {
 	private PersonTestObject person;
 	
 	private PersonTestObjectWithoutId personWithoutId;
+	
+	private PersonTestObjectWithStringId personWithStringId;
 
 	private ComplexPersonTestObject complexPerson;
 
@@ -169,6 +171,14 @@ public class ResultsContainer {
 
 	public void setPersonWithoutId(PersonTestObjectWithoutId personWithNoId) {
 		this.personWithoutId = personWithNoId;
+	}
+
+	public PersonTestObjectWithStringId getPersonWithStringId() {
+		return personWithStringId;
+	}
+
+	public void setPersonWithStringId(PersonTestObjectWithStringId personWithStringId) {
+		this.personWithStringId = personWithStringId;
 	}
 
 	public IdPropertyWithGsonAnnotation getIdPropertyWithGsonAnnotation() {

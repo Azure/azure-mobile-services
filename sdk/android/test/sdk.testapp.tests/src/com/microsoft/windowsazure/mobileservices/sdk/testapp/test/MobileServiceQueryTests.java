@@ -731,6 +731,33 @@ public class MobileServiceQueryTests extends InstrumentationTestCase {
 		assertEquals("id gt 1 and (age eq 13 or complete eq true)", query4.toString());
 	}
 
+	public void testComplexQueriesWithStringId() throws Throwable {
+
+		// Create query
+		MobileServiceQuery<?> query = table.where().field("firstName").eq().val("John").and().field("age").gt().val(20).select("Id", "Name")
+				.orderBy("Name", QueryOrder.Ascending).skip(5).top(3);
+		// Asserts
+		String expectedFilters = "firstName eq 'John' and age gt 20";
+		assertEquals(expectedFilters, query.toString());
+		String expectedModifiers = "&$top=3&$skip=5&$orderby=Name+asc&$select=Id%2CName";
+		assertEquals(expectedModifiers, query.getRowSetModifiers());
+
+		// Create query
+		MobileServiceQuery<?> query2 = table.where(field("id").gt().val("1")).and(field("complete").eq().val(true));
+		// Asserts
+		assertEquals("(id gt '1') and (complete eq true)", query2.toString());
+
+		// Create query
+		MobileServiceQuery<?> query3 = table.where(field("id").gt().val("1")).and(field("age").eq().val(13).or().field("complete").eq().val(true));
+		// Asserts
+		assertEquals("(id gt '1') and (age eq 13 or complete eq true)", query3.toString());
+
+		// Create query
+		MobileServiceQuery<?> query4 = table.where().field("id").eq().val("1").and(field("age").eq().val(13).or().field("complete").eq().val(true));
+		// Asserts
+		assertEquals("id eq '1' and (age eq 13 or complete eq true)", query4.toString());
+	}
+
 	private String encodeString(String s) {
 		try {
 			return URLEncoder.encode(s, "UTF-8");

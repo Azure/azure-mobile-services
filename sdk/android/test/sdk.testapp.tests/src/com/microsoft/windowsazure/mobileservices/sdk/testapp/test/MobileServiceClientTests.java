@@ -215,6 +215,18 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 		assertEquals("PersonTestObject", table.getTableName());
 	}
 	
+	public void testGetTableWithClassWithStringIdMemberShouldWork() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e1) {
+			fail("This should not happen");
+		}
+		
+		MobileServiceTable<PersonTestObjectWithStringId> table = client.getTable(PersonTestObjectWithStringId.class);
+		assertEquals("PersonTestObjectWithStringId", table.getTableName());
+	}
+	
 	public void testGetTableWithClassWithIdAnnotationShouldWork() {
 		MobileServiceClient client = null;
 		try {
