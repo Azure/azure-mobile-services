@@ -42,7 +42,7 @@ namespace ZumoE2ETestApp.Tests
             providersWithRecycledTokenSupport = new Dictionary<MobileServiceAuthenticationProvider, bool>
             {
                 { MobileServiceAuthenticationProvider.Facebook, true },
-                { MobileServiceAuthenticationProvider.Google, true },
+                { MobileServiceAuthenticationProvider.Google, false },   // Known bug - Drop login via Google token until Google client flow is reintroduced
                 { MobileServiceAuthenticationProvider.MicrosoftAccount, false },
                 { MobileServiceAuthenticationProvider.Twitter, false },
             };
