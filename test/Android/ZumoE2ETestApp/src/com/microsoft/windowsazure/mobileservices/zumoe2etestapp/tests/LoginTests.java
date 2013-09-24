@@ -61,7 +61,8 @@ public class LoginTests extends TestGroup {
 		
 		ArrayList<MobileServiceAuthenticationProvider> providersWithRecycledTokenSupport = new ArrayList<MobileServiceAuthenticationProvider>();
 		providersWithRecycledTokenSupport.add(MobileServiceAuthenticationProvider.Facebook);
-		providersWithRecycledTokenSupport.add(MobileServiceAuthenticationProvider.Google);
+		// Known bug - Drop login via Google token until Google client flow is reintroduced
+		//providersWithRecycledTokenSupport.add(MobileServiceAuthenticationProvider.Google);
 
 		for (MobileServiceAuthenticationProvider provider : MobileServiceAuthenticationProvider.values()) {
 			this.addTest(createLogoutTest());

@@ -26,7 +26,7 @@ function defineLoginTestsNamespace() {
 
     var supportRecycledToken = {
         facebook: true,
-        google: true,
+        google: false, // Known bug - Drop login via Google token until Google client flow is reintroduced
         twitter: false,
         microsoftaccount: false
     };

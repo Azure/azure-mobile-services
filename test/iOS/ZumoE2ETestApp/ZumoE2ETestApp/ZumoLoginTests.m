@@ -53,7 +53,7 @@ NSDictionary *lastUserIdentityObject;
     int indexOfLastUnattendedTest = [result count];
     
     NSArray *providers = @[@"facebook", @"google", @"twitter", @"microsoftaccount"];
-    NSArray *providersWithRecycledTokenSupport = @[@"facebook", @"google"];
+    NSArray *providersWithRecycledTokenSupport = @[@"facebook"]; //, @"google"]; Known bug - Drop login via Google token until Google client flow is reintroduced
     NSString *provider;
     
     for (int useSimplifiedLogin = 0; useSimplifiedLogin <= 1; useSimplifiedLogin++) {
