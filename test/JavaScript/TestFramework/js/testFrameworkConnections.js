@@ -77,10 +77,21 @@ document.getElementById('btnRunTests').onclick = function (evt) {
                 var testLogs = currentGroup.getLogs();
                 uploadLogs(uploadUrl, testLogs, true);
                 if (testsFailed == 0) {
-                    btnRunAllUnattendedTests.textContent = "Passed";
+                    if (currentGroup.name == zumo.AllTestsGroupName) {
+                        btnRunAllTests.textContent = "Passed";
+                    }
+                    else {
+                        btnRunAllUnattendedTests.textContent = "Passed";
+                    }
+
                 }
                 else {
-                    btnRunAllUnattendedTests.textContent = "Failed";
+                    if (currentGroup.name == zumo.AllTestsGroupName) {
+                        btnRunAllTests.textContent = "Failed";
+                    }
+                    else {
+                        btnRunAllUnattendedTests.textContent = "Failed";
+                    }
                 }
             }
 
@@ -149,6 +160,7 @@ function uploadLogs(url, logs, allTests, done) {
             if (done) {
                 done();
             }
+            document.getElementById('btnSendLogs').textContent="LogsUploaded";
         }
     }
 
