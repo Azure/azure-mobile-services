@@ -511,7 +511,7 @@ public class MainActivity extends Activity {
 	}
 
 	private String getPreference(String key) {
-		if (mAutomationPreferences.has(key)) {
+		if (mAutomationPreferences != null && mAutomationPreferences.has(key)) {
 			return mAutomationPreferences.get(key).getAsString();
 		} else {
 			return mPrefManager.getString(key, "");
