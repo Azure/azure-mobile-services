@@ -35,6 +35,7 @@ namespace ZumoE2ETestAppWP8
         public MainPage()
         {
             InitializeComponent();
+
             this.allTestGroups = TestStore.CreateTestGroups();
             if (this.appBtnBack == null)
             {
@@ -76,6 +77,21 @@ namespace ZumoE2ETestAppWP8
                     this.txtAppKey.Text = savedAppInfo.LastService.AppKey;
                 }
             }
+
+            // Check if any of the text box values can be found in app settings
+            // This is used for test automation, and takes precedence over saved app info.
+            Action<TextBox, string> overrideFromAppSettings = (control, settingName) =>
+            {
+                string value;
+                if (System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings.TryGetValue<string>(settingName, out value))
+                {
+                    control.Text = value;
+                }
+            };
+
+            overrideFromAppSettings(this.txtAppUrl, "appUrl");
+            overrideFromAppSettings(this.txtAppKey, "appKey");
+            overrideFromAppSettings(this.txtUploadUrl, "uploadUrl");
         }
 
         private void lstTestGroups_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
