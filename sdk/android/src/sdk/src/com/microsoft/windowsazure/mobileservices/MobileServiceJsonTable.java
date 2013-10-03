@@ -114,7 +114,17 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	 *            Callback to invoke after the operation is completed
 	 */
 	public void lookUp(Object id, List<Pair<String, String>> parameters, final TableJsonOperationCallback callback) {
-		// Create request URL	
+		// Create request URL
+		try {	
+			validateIdDelete(id);
+		} catch (Exception e) {
+			if (callback != null) {
+				callback.onCompleted(null, e, null);
+			}
+				
+			return;
+		}
+		
 		String url;
 		try {
 			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
@@ -161,30 +171,6 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	}
 
 	/**
-	 * Removes the Id property from a JsonObject
-	 * 
-	 * @param json
-	 *            The JsonObject to modify
-	 */
-	private void removeIdFromJson(final JsonObject json) {
-		// Remove id property if exists
-		String[] idPropertyNames = new String[] { "id", "Id", "iD", "ID" };
-		for (int i = 0; i < 4; i++) {
-			String idProperty = idPropertyNames[i];
-			if (json.has(idProperty)) {
-				JsonElement idElement = json.get(idProperty);
-				if(isValidTypeId(idElement) && isValidId(idElement)) {
-					throw new InvalidParameterException(
-							"The entity to insert should not have "
-									+ idProperty + " property defined");
-				}
-
-				json.remove(idProperty);
-			}
-		}
-	}
-
-	/**
 	 * Inserts a JsonObject into a Mobile Service table
 	 * 
 	 * @param element
@@ -212,8 +198,8 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 			final TableJsonOperationCallback callback) {
 
 		try {
-			removeIdFromJson(element);
-		} catch (InvalidParameterException e) {
+			validateIdOnInsert(element);
+		} catch (Exception e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}
@@ -294,26 +280,21 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
-	public void update(final JsonObject element,
-			final List<Pair<String, String>> parameters,
-			final TableJsonOperationCallback callback) {
-
-		try {
-			updateIdProperty(element);
-
-			if (!element.has("id") || !isValidId(element.get("id"))) {
-				throw new IllegalArgumentException("You must specify an id property with a valid value for updating an object.");
-			}
+	public void update(final JsonObject element, final List<Pair<String, String>> parameters, final TableJsonOperationCallback callback) {
+		try {			
+			validateIdUpdateDelete(element);
 		} catch (Exception e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}
+			
 			return;
 		}
 
 		String content = element.toString();
 
 		ServiceFilterRequest patch;
+		
 		try {
 			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
 			uriBuilder.path(TABLES_URL);
@@ -326,12 +307,12 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 				}
 			}
 			patch = new ServiceFilterRequestImpl(new HttpPatch(uriBuilder.build().toString()));
-			patch.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
-			
+			patch.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);	
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}
+			
 			return;
 		}
 
@@ -341,6 +322,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}
+			
 			return;
 		}
 
@@ -457,5 +439,42 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 				}
 			}
 		}.execute();
+	}
+	
+	/**
+	 * Validates the Id property from a JsonObject on an Insert Action
+	 * 
+	 * @param json
+	 *            The JsonObject to modify
+	 */
+	private void validateIdOnInsert(final JsonObject json) {
+		// Remove id property if exists
+		String[] idPropertyNames = new String[] { "id", "Id", "iD", "ID" };
+		
+		for (int i = 0; i < 4; i++) {
+			String idProperty = idPropertyNames[i];
+			
+			if (json.has(idProperty)) {
+				JsonElement idElement = json.get(idProperty);
+				
+				if(isStringType(idElement)) {
+					String id = getStringValue(idElement);
+					
+					if (!isValidStringId(id)) {
+						throw new IllegalArgumentException("The entity to insert has an invalid string value on " + idProperty + " property.");
+					}
+				} else if (isNumericType(idElement)) {
+					int id = getNumericValue(idElement);
+					
+					if (isValidNumericId(id) && !isDefaultNumericId(id)) {
+						throw new IllegalArgumentException("The entity to insert should not have a numeric " + idProperty + " property defined.");
+					}
+					
+					json.remove(idProperty);
+				} else {
+					json.remove(idProperty);
+				}
+			}
+		}
 	}
 }

@@ -511,7 +511,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 				});
 
 				JsonObject jsonObject = new JsonObject();
-				jsonObject.addProperty("id", 42);
+				jsonObject.addProperty("someValue", 42);
 				
 				client.getTable("dummy").insert(jsonObject, new TableJsonOperationCallback() {
 					

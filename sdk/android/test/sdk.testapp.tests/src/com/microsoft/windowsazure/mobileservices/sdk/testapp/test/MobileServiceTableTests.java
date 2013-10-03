@@ -226,59 +226,10 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		latch.await();
 
 		// Asserts
-		assertEquals("The entity to insert should not have ID property defined", container.getErrorMessage());
+		assertEquals("The entity to insert should not have a numeric ID property defined.", container.getErrorMessage());
 		assertNull(container.getPersonWithoutId());
 	}
 	
-	public void testInsertShouldThrowExceptionIfObjectHasIdPropertyDifferentThanEmptyString() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store the object after the insertion, we need this to do
-		// the asserts outside the onSuccess method
-		final ResultsContainer container = new ResultsContainer();
-
-		// Object to insert
-		final JsonObject testObject = new JsonObject();
-
-		testObject.addProperty("name", "john");
-		testObject.addProperty("ID", "Fake-Id");
-		
-		runTestOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
-
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
-
-				// Create get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
-
-				// Call the insert method
-				msTable.insert(testObject, new TableJsonOperationCallback() {
-
-					@Override
-					public void onCompleted(JsonObject entity, Exception exception, ServiceFilterResponse response) {
-						container.setErrorMessage(exception.getMessage());
-						latch.countDown();
-					}
-				});
-			}
-		});
-
-		latch.await();
-
-		// Asserts
-		assertEquals("The entity to insert should not have ID property defined", container.getErrorMessage());
-		assertNull(container.getPersonWithoutId());
-	}
-
 	public void testInsertShouldReturnEntityWithId() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -1386,7 +1337,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		// Asserts
 		PersonTestObject p = container.getPerson();
 		Assert.assertNull("Null person expected", p);
-		Assert.assertEquals("You must specify an id property with a valid value for updating an object.", container.getErrorMessage());
+		Assert.assertEquals("The entity to update or delete has an invalid numeric value on id property.", container.getErrorMessage());
 	}
 
 	public void testDeleteUsingEntityShouldReturnTheExpectedRequestUrl() throws Throwable {
