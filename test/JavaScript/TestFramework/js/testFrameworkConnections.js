@@ -160,7 +160,7 @@ function uploadLogs(url, logs, allTests, done) {
             if (done) {
                 done();
             }
-            document.getElementById('btnSendLogs').textContent="Logs Uploaded";
+            document.getElementById('btnSendLogs').textContent = xhr.responseText;
         }
     }
 
