@@ -116,7 +116,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	public void lookUp(Object id, List<Pair<String, String>> parameters, final TableJsonOperationCallback callback) {
 		// Create request URL
 		try {	
-			validateIdDelete(id);
+			validateId(id);
 		} catch (Exception e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
@@ -464,7 +464,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 						throw new IllegalArgumentException("The entity to insert has an invalid string value on " + idProperty + " property.");
 					}
 				} else if (isNumericType(idElement)) {
-					int id = getNumericValue(idElement);
+					long id = getNumericValue(idElement);
 					
 					if (isValidNumericId(id) && !isDefaultNumericId(id)) {
 						throw new IllegalArgumentException("The entity to insert should not have a numeric " + idProperty + " property defined.");

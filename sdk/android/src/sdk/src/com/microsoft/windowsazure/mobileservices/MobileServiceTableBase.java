@@ -212,7 +212,7 @@ abstract class MobileServiceTableBase<E> {
 	 */
 	public void delete(Object elementOrId, List<Pair<String, String>> parameters, final TableDeleteCallback callback) {
 		try {	
-			validateIdDelete(elementOrId);
+			validateId(elementOrId);
 		} catch (Exception e) {
 			if (callback != null) {
 				callback.onCompleted(e, null);
@@ -419,20 +419,20 @@ abstract class MobileServiceTableBase<E> {
 	 * 
 	 * @param elementOrId The Object to validate
 	 */
-	protected void validateIdDelete(final Object elementOrId) {
+	protected void validateId(final Object elementOrId) {
 		if (elementOrId == null || (elementOrId instanceof JsonNull)) {
-			throw new IllegalArgumentException("Element or id to delete cannot be null.");
+			throw new IllegalArgumentException("Element or id cannot be null.");
 		} else if (isStringType(elementOrId)) {				
 			String id = getStringValue(elementOrId);
 			
 			if (!isValidStringId(id) || isDefaultStringId(id)) {
-				throw new IllegalArgumentException("The string id to delete is invalid.");
+				throw new IllegalArgumentException("The string id is invalid.");
 			}
 		} else if (isNumericType(elementOrId)) {				
-			int id = getNumericValue(elementOrId);
+			long id = getNumericValue(elementOrId);
 			
 			if (!isValidNumericId(id) || isDefaultNumericId(id)) {
-				throw new IllegalArgumentException("The numeric id to delete is invalid.");
+				throw new IllegalArgumentException("The numeric id is invalid.");
 			}
 		} else if (elementOrId instanceof JsonObject) {
 			validateIdUpdateDelete((JsonObject)elementOrId);
@@ -462,7 +462,7 @@ abstract class MobileServiceTableBase<E> {
 						throw new IllegalArgumentException("The entity to update or delete has an invalid string value on id property.");
 					}
 				} else if (isNumericType(idElement)) {
-					int id = getNumericValue(idElement);
+					long id = getNumericValue(idElement);
 					
 					if (!isValidNumericId(id) || isDefaultNumericId(id)) {
 						throw new IllegalArgumentException("The entity to update or delete has an invalid numeric value on id property.");
@@ -621,7 +621,7 @@ abstract class MobileServiceTableBase<E> {
 	 * @return
 	 */
 	protected boolean isNumericType(Object o) {
-		boolean result = (o instanceof Integer);
+		boolean result = (o instanceof Integer) || (o instanceof Long);
 		
 		if (o instanceof JsonElement) {
 			JsonElement json = (JsonElement)o;
@@ -640,11 +640,13 @@ abstract class MobileServiceTableBase<E> {
 	 * @param o
 	 * @return
 	 */
-	protected int getNumericValue(Object o) {		
-		int result;
+	protected long getNumericValue(Object o) {		
+		long result;
 		
 		if (o instanceof Integer) {
 			result = (Integer)o;		
+		} else if (o instanceof Long) {
+			result = (Long)o;		
 		} else if (o instanceof JsonElement) {
 			JsonElement json = (JsonElement)o;
 			
@@ -652,7 +654,7 @@ abstract class MobileServiceTableBase<E> {
 				JsonPrimitive primitive = json.getAsJsonPrimitive();
 				
 				if (primitive.isNumber()) {
-					result = primitive.getAsInt();
+					result = primitive.getAsLong();
 				} else {
 					throw new IllegalArgumentException("Object does not represent a string value.");
 				}
@@ -671,7 +673,7 @@ abstract class MobileServiceTableBase<E> {
 	 * @param id
 	 * @return
 	 */
-	protected boolean isValidNumericId(int id) {
+	protected boolean isValidNumericId(long id) {
 		return isDefaultNumericId(id) || id > 0;
 	}
 
@@ -680,7 +682,7 @@ abstract class MobileServiceTableBase<E> {
 	 * @param id
 	 * @return
 	 */
-	protected boolean isDefaultNumericId(int id) {
+	protected boolean isDefaultNumericId(long id) {
 		return (id == 0);
 	}
 }
