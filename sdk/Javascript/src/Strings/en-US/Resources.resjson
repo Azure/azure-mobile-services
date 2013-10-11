@@ -1,6 +1,7 @@
 ﻿{
     "Validate_NotNullError"                                 : "{0} cannot be null.",
     "Validate_NotNullOrEmptyError"                          : "{0} cannot be null or empty.",
+    "Validate_InvalidId"                                    : "{0} is not valid.",
     "Validate_TypeCheckError"                               : "{0} is expected to be a value of type {1}, not {2}.",
     "Validate_LengthUnexpected"                             : "{0} is expected to have length {1}, not {2}.",
     "Validate_InvalidUserParameter"                         : "{0} contains an invalid user-defined query string parameter: {1}. User-defined query string parameters must not begin with a '$'.",

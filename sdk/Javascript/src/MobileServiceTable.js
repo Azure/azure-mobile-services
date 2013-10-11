@@ -211,11 +211,25 @@ MobileServiceTable.prototype.insert = Platform.async(
         }
         Validate.notNull(callback, 'callback');
 
-        for (var i in idNames) {            
-            if (!_.isNullOrZero(instance[idNames[i]])) {
-                throw _.format(
-                    Platform.getResourceString("MobileServiceTable_InsertIdAlreadySet"),
-                    idPropertyName);
+        // Integer Ids can not have any Id set
+        for (var i in idNames) {
+            var id = instance[idNames[i]];
+
+            if (!_.isNullOrZero(id)) {
+                if (_.isString(id)) {
+                    // String Id's are allowed iif using id
+                    if (idNames[i] !== idPropertyName) {
+                        throw _.format(
+                            Platform.getResourceString("MobileServiceTable_InsertIdAlreadySet"),
+                            idPropertyName);
+                    } else {
+                        Validate.isValidId(id, idPropertyName);
+                    }
+                } else {
+                    throw _.format(
+                        Platform.getResourceString("MobileServiceTable_InsertIdAlreadySet"),
+                        idPropertyName);
+                }
             }
         }
 
@@ -266,7 +280,7 @@ MobileServiceTable.prototype.update = Platform.async(
 
         // Validate the arguments
         Validate.notNull(instance, 'instance');
-        Validate.notNullOrZero(instance[idPropertyName], 'instance.' + idPropertyName);
+        Validate.isValidId(instance[idPropertyName], 'instance.' + idPropertyName);
         if (!_.isNull(parameters)) {
             Validate.isValidParametersObject(parameters, 'parameters');
         }
@@ -276,7 +290,7 @@ MobileServiceTable.prototype.update = Platform.async(
         var urlFragment =  _.url.combinePathSegments(
                 tableRouteSeperatorName,
                 this.getTableName(),
-                instance[idPropertyName].toString());
+                encodeURIComponent(instance[idPropertyName].toString()));
         if (!_.isNull(parameters)) {
             var queryString = _.url.getQueryString(parameters);
             urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
@@ -322,9 +336,13 @@ MobileServiceTable.prototype.refresh = Platform.async(
 
         // Validate the arguments
         Validate.notNull(instance, 'instance');
-        if (_.isNullOrZero(instance[idPropertyName]))
+        if (!_.isValidId(instance[idPropertyName], idPropertyName))
         {
-            callback(null, instance);
+            if (typeof instance[idPropertyName] === 'string' && instance[idPropertyName] !== '') {
+                throw _.format(Platform.getResourceString("Validate_InvalidId"), idPropertyName);
+            } else {
+                callback(null, instance);
+            }
             return;
         }
 
@@ -334,11 +352,16 @@ MobileServiceTable.prototype.refresh = Platform.async(
         Validate.notNull(callback, 'callback');
 
         // Construct the URL
-
         var urlFragment = _.url.combinePathSegments(
                 tableRouteSeperatorName,
                 this.getTableName());
-        urlFragment = _.url.combinePathAndQuery(urlFragment, "?$filter=id eq " + instance[idPropertyName].toString());
+
+        if (typeof instance[idPropertyName] === 'string') {
+            var id = instance[idPropertyName].replace(/\'/g, '%27');
+            urlFragment = _.url.combinePathAndQuery(urlFragment, "?$filter=id eq '" + encodeURIComponent(id) + "'");
+        } else {
+            urlFragment = _.url.combinePathAndQuery(urlFragment, "?$filter=id eq " + encodeURIComponent(instance[idPropertyName].toString()));
+        }
 
         if (!_.isNull(parameters)) {
             var queryString = _.url.getQueryString(parameters);
@@ -360,9 +383,10 @@ MobileServiceTable.prototype.refresh = Platform.async(
                     }
 
                     if (!result) {
-                        throw _.format(
+                        var message =_.format(
                             Platform.getResourceString("MobileServiceTable_NotSingleObject"),
                             idPropertyName);
+                        callback(_.createError(message), null);
                     }
 
                     result = Platform.allowPlatformToMutateOriginal(instance, result);
@@ -393,7 +417,7 @@ MobileServiceTable.prototype.lookup = Platform.async(
         }
 
         // Validate the arguments
-        Validate.notNullOrZero(id, idPropertyName);
+        Validate.isValidId(id, idPropertyName);
         if (!_.isNull(parameters)) {
             Validate.isValidParametersObject(parameters);
         }
@@ -403,7 +427,7 @@ MobileServiceTable.prototype.lookup = Platform.async(
         var urlFragment = _.url.combinePathSegments(
                 tableRouteSeperatorName,
                 this.getTableName(),
-                id.toString());
+                encodeURIComponent(id.toString()));
         if (!_.isNull(parameters)) {
             var queryString = _.url.getQueryString(parameters);
             urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
@@ -447,7 +471,7 @@ MobileServiceTable.prototype.del = Platform.async(
 
         // Validate the arguments
         Validate.notNull(instance, 'instance');
-        Validate.notNullOrZero(instance[idPropertyName], 'instance.' + idPropertyName);
+        Validate.isValidId(instance[idPropertyName], 'instance.' + idPropertyName);
         if (!_.isNull(parameters)) {
             Validate.isValidParametersObject(parameters);
         }
@@ -457,7 +481,7 @@ MobileServiceTable.prototype.del = Platform.async(
         var urlFragment =  _.url.combinePathSegments(
                 tableRouteSeperatorName,
                 this.getTableName(),
-                instance[idPropertyName].toString());
+                encodeURIComponent(instance[idPropertyName].toString()));
         if (!_.isNull(parameters)) {
             var queryString = _.url.getQueryString(parameters);
             urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
