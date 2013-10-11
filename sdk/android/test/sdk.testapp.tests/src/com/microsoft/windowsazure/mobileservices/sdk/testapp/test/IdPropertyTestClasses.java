@@ -19,6 +19,8 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import com.google.gson.annotations.SerializedName;
@@ -190,7 +192,7 @@ class IdTestData
         "/",
         "`",
         "+",
-    },getInvalidASCII());
+    }, getInvalidASCII());
 
     public static long[] ValidIntIds = new long[] {
         1,
@@ -265,12 +267,25 @@ class IdTestData
     	return array;
     }
     
-    public static String[] concat(Object[] array1, String[] array2) {
+    public static String[] concat(String[] array1, String[] array2) {
     	int length1 = array1.length;
     	int length2 = array2.length;
     	int length = length1 + length2;
     	
     	String[] array = new String[length];
+    	
+    	System.arraycopy(array1, 0, array, 0, length1);
+    	System.arraycopy(array2, 0, array, length1, length2);
+    	
+    	return array;
+    }
+    
+    public static Object[] concat(Object[] array1, Object[] array2) {
+    	int length1 = array1.length;
+    	int length2 = array2.length;
+    	int length = length1 + length2;
+    	
+    	Object[] array = new Object[length];
     	
     	System.arraycopy(array1, 0, array, 0, length1);
     	System.arraycopy(array2, 0, array, length1, length2);
@@ -290,7 +305,22 @@ class IdTestData
     	
     	return array;
     }
+    
+	public static Object[] convert(long[] array) {
+    	List<Object> resultList = new ArrayList<Object>();
+    	
+    	for (long elem :array)
+    	{
+    		resultList.add((Object)elem);
+    	}
+    	
+		return resultList.toArray();
+    }
 }
 
+class StringIdType {
+    public String Id;
 
+    public String String;
+}
 

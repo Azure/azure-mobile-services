@@ -19,7 +19,10 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
+import static com.microsoft.windowsazure.mobileservices.MobileServiceQueryOperations.field;
+
 import java.net.MalformedURLException;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
@@ -31,6 +34,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
+import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
@@ -39,6 +43,7 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonQueryCallback;
+import com.microsoft.windowsazure.mobileservices.TableQueryCallback;
 
 public class IdPropertyTests extends InstrumentationTestCase {
 	String appUrl = "";
@@ -55,6 +60,8 @@ public class IdPropertyTests extends InstrumentationTestCase {
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
+
+	// Non Generic JSON
 
 	// Read Tests
 
@@ -315,7 +322,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			assertEquals("Hey", container.getJsonResult().getAsJsonArray().get(0).getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
 		}
 	}
-	
+
 	public void testReadWithNullIdResponseContent() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -456,7 +463,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			assertTrue(!container.getJsonResult().getAsJsonArray().get(0).getAsJsonObject().has("Id"));
 			assertTrue(!container.getJsonResult().getAsJsonArray().get(0).getAsJsonObject().has("iD"));
 			assertTrue(!container.getJsonResult().getAsJsonArray().get(0).getAsJsonObject().has("ID"));
-			
+
 			assertTrue(container.getJsonResult().getAsJsonArray().get(0).getAsJsonObject().has("String"));
 
 			assertTrue(container.getJsonResult().getAsJsonArray().get(0).getAsJsonObject().get("String").isJsonPrimitive());
@@ -466,7 +473,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			assertEquals("Hey", container.getJsonResult().getAsJsonArray().get(0).getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
 		}
 	}
-	
+
 	// Lookup Tests
 
 	public void testLookupWithStringIdResponseContent() throws Throwable {
@@ -718,7 +725,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
 		}
 	}
-	
+
 	public void testLookupWithNullIdResponseContent() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -851,7 +858,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			assertTrue(!container.getJsonResult().getAsJsonObject().has("Id"));
 			assertTrue(!container.getJsonResult().getAsJsonObject().has("iD"));
 			assertTrue(!container.getJsonResult().getAsJsonObject().has("ID"));
-			
+
 			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
 
 			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
@@ -861,7 +868,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
 		}
 	}
-	
+
 	public void testLookupWithStringIdParameter() throws Throwable {
 		String[] testIdData = IdTestData.ValidStringIds;
 
@@ -880,7 +887,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 		String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
 		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
-		
+
 		runTestOnUiThread(new Runnable() {
 
 			@Override
@@ -1151,7 +1158,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			fail("Expected Exception IllegalArgumentException");
 		}
 	}
-	
+
 	public void testLookupWithNullIdParameter() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -1267,9 +1274,9 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			fail("Expected Exception IllegalArgumentException");
 		}
 	}
-	
+
 	// Insert Tests
-	
+
 	public void testInsertWithStringIdResponseContent() throws Throwable {
 		String[] testIdData = IdTestData.concat(IdTestData.concat(IdTestData.ValidStringIds, IdTestData.EmptyStringIds), IdTestData.InvalidStringIds);
 
@@ -1307,7 +1314,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"value\":\"new\"}").getAsJsonObject();
 
 				// Call the insert method
@@ -1387,7 +1394,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"value\":\"new\"}").getAsJsonObject();
 
 				// Call the insert method
@@ -1467,7 +1474,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"value\":\"new\"}").getAsJsonObject();
 
 				// Call the insert method
@@ -1525,7 +1532,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
 		}
 	}
-	
+
 	public void testInsertWithNullIdResponseContent() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -1554,7 +1561,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"value\":\"new\"}").getAsJsonObject();
 
 				// Call the insert method
@@ -1626,7 +1633,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"value\":\"new\"}").getAsJsonObject();
 
 				// Call the insert method
@@ -1662,7 +1669,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			assertTrue(!container.getJsonResult().getAsJsonObject().has("Id"));
 			assertTrue(!container.getJsonResult().getAsJsonObject().has("iD"));
 			assertTrue(!container.getJsonResult().getAsJsonObject().has("ID"));
-			
+
 			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
 
 			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
@@ -1672,7 +1679,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
 		}
 	}
-	
+
 	public void testInsertWithStringIdItem() throws Throwable {
 		String[] testIdData = IdTestData.ValidStringIds;
 
@@ -1691,7 +1698,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 		String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
 		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
-		
+
 		runTestOnUiThread(new Runnable() {
 
 			@Override
@@ -1710,7 +1717,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"" + testId + "\",\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the insert method
@@ -1769,7 +1776,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 		final String tableName = "MyTableName";
 
 		final String responseContent = "{\"id\":\"an id\",\"String\":\"Hey\"}";
-		
+
 		runTestOnUiThread(new Runnable() {
 
 			@Override
@@ -1788,7 +1795,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"" + testId + "\",\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the insert method
@@ -1867,7 +1874,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"" + jsonTestId + "\",\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the insert method
@@ -1937,7 +1944,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":" + jsonTestId + ",\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the insert method
@@ -1968,7 +1975,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			fail("Expected Exception IllegalArgumentException");
 		}
 	}
-	
+
 	public void testInsertWithNullIdItem() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -1997,7 +2004,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":null,\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the insert method
@@ -2038,7 +2045,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
 		}
 	}
-	
+
 	public void testInsertWithNoIdItem() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -2067,7 +2074,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the insert method
@@ -2137,7 +2144,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":0,\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the insert method
@@ -2218,7 +2225,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
 
 				// Call the update method
@@ -2298,7 +2305,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
 
 				// Call the update method
@@ -2378,7 +2385,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
 
 				// Call the update method
@@ -2436,7 +2443,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
 		}
 	}
-	
+
 	public void testUpdateWithNullIdResponseContent() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -2465,7 +2472,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
 
 				// Call the update method
@@ -2537,7 +2544,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
 
 				// Call the update method
@@ -2597,7 +2604,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 		final String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
 		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
-		
+
 		runTestOnUiThread(new Runnable() {
 
 			@Override
@@ -2616,7 +2623,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"" + jsonTestId + "\",\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the update method
@@ -2675,7 +2682,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 		final String tableName = "MyTableName";
 
 		final String responseContent = "{\"id\":\"an id\",\"String\":\"Hey\"}";
-		
+
 		runTestOnUiThread(new Runnable() {
 
 			@Override
@@ -2694,7 +2701,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"" + testId + "\",\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the update method
@@ -2763,7 +2770,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"" + jsonTestId + "\",\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the update method
@@ -2833,7 +2840,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":" + jsonTestId + ",\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the update method
@@ -2874,7 +2881,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
 		}
 	}
-	
+
 	public void testUpdateWithNullIdItem() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -2903,7 +2910,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":null,\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the update method
@@ -2934,7 +2941,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			fail("Expected Exception IllegalArgumentException");
 		}
 	}
-	
+
 	public void testUpdateWithNoIdItem() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -2963,7 +2970,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the update method
@@ -3023,7 +3030,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":0,\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the update method
@@ -3056,7 +3063,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 	}
 
 	// Delete Tests
-	
+
 	public void testDeleteWithStringIdResponseContent() throws Throwable {
 		String[] testIdData = IdTestData.concat(IdTestData.concat(IdTestData.ValidStringIds, IdTestData.EmptyStringIds), IdTestData.InvalidStringIds);
 
@@ -3094,12 +3101,12 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
 
 				// Call the delete method
 				msTable.delete(obj, new TableDeleteCallback() {
-					
+
 					@Override
 					public void onCompleted(Exception exception, ServiceFilterResponse response) {
 						if (exception != null) {
@@ -3108,20 +3115,20 @@ public class IdPropertyTests extends InstrumentationTestCase {
 							container.setException(new Exception("Expected response"));
 						} else {
 							String content = response.getContent();
-							
+
 							if (content == null) {
 								container.setException(new Exception("Expected result"));
 							} else {
 								try {
 									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
 									container.setJsonResult(jsonObject);
-								} catch (Exception ex){
+								} catch (Exception ex) {
 									container.setException(ex);
 								}
 							}
 						}
 
-						latch.countDown();	
+						latch.countDown();
 					}
 				});
 			}
@@ -3185,12 +3192,12 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
 
 				// Call the delete method
 				msTable.delete(obj, new TableDeleteCallback() {
-					
+
 					@Override
 					public void onCompleted(Exception exception, ServiceFilterResponse response) {
 						if (exception != null) {
@@ -3199,20 +3206,20 @@ public class IdPropertyTests extends InstrumentationTestCase {
 							container.setException(new Exception("Expected response"));
 						} else {
 							String content = response.getContent();
-							
+
 							if (content == null) {
 								container.setException(new Exception("Expected result"));
 							} else {
 								try {
 									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
 									container.setJsonResult(jsonObject);
-								} catch (Exception ex){
+								} catch (Exception ex) {
 									container.setException(ex);
 								}
 							}
 						}
 
-						latch.countDown();	
+						latch.countDown();
 					}
 				});
 			}
@@ -3276,12 +3283,12 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
 
 				// Call the delete method
 				msTable.delete(obj, new TableDeleteCallback() {
-					
+
 					@Override
 					public void onCompleted(Exception exception, ServiceFilterResponse response) {
 						if (exception != null) {
@@ -3290,20 +3297,20 @@ public class IdPropertyTests extends InstrumentationTestCase {
 							container.setException(new Exception("Expected response"));
 						} else {
 							String content = response.getContent();
-							
+
 							if (content == null) {
 								container.setException(new Exception("Expected result"));
 							} else {
 								try {
 									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
 									container.setJsonResult(jsonObject);
-								} catch (Exception ex){
+								} catch (Exception ex) {
 									container.setException(ex);
 								}
 							}
 						}
 
-						latch.countDown();	
+						latch.countDown();
 					}
 				});
 			}
@@ -3345,7 +3352,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
 		}
 	}
-	
+
 	public void testDeleteWithNullIdResponseContent() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -3374,12 +3381,12 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
 
 				// Call the delete method
 				msTable.delete(obj, new TableDeleteCallback() {
-					
+
 					@Override
 					public void onCompleted(Exception exception, ServiceFilterResponse response) {
 						if (exception != null) {
@@ -3388,20 +3395,20 @@ public class IdPropertyTests extends InstrumentationTestCase {
 							container.setException(new Exception("Expected response"));
 						} else {
 							String content = response.getContent();
-							
+
 							if (content == null) {
 								container.setException(new Exception("Expected result"));
 							} else {
 								try {
 									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
 									container.setJsonResult(jsonObject);
-								} catch (Exception ex){
+								} catch (Exception ex) {
 									container.setException(ex);
 								}
 							}
 						}
 
-						latch.countDown();	
+						latch.countDown();
 					}
 				});
 			}
@@ -3457,12 +3464,12 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
 
 				// Call the delete method
 				msTable.delete(obj, new TableDeleteCallback() {
-					
+
 					@Override
 					public void onCompleted(Exception exception, ServiceFilterResponse response) {
 						if (exception != null) {
@@ -3471,20 +3478,20 @@ public class IdPropertyTests extends InstrumentationTestCase {
 							container.setException(new Exception("Expected response"));
 						} else {
 							String content = response.getContent();
-							
+
 							if (content == null) {
 								container.setException(new Exception("Expected result"));
 							} else {
 								try {
 									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
 									container.setJsonResult(jsonObject);
-								} catch (Exception ex){
+								} catch (Exception ex) {
 									container.setException(ex);
 								}
 							}
 						}
 
-						latch.countDown();	
+						latch.countDown();
 					}
 				});
 			}
@@ -3504,7 +3511,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			assertTrue(!container.getJsonResult().getAsJsonObject().has("Id"));
 			assertTrue(!container.getJsonResult().getAsJsonObject().has("iD"));
 			assertTrue(!container.getJsonResult().getAsJsonObject().has("ID"));
-			
+
 			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
 
 			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
@@ -3533,7 +3540,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 		final String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
 		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
-		
+
 		runTestOnUiThread(new Runnable() {
 
 			@Override
@@ -3552,12 +3559,12 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"" + jsonTestId + "\",\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the delete method
 				msTable.delete(obj, new TableDeleteCallback() {
-					
+
 					@Override
 					public void onCompleted(Exception exception, ServiceFilterResponse response) {
 						if (exception != null) {
@@ -3566,20 +3573,20 @@ public class IdPropertyTests extends InstrumentationTestCase {
 							container.setException(new Exception("Expected response"));
 						} else {
 							String content = response.getContent();
-							
+
 							if (content == null) {
 								container.setException(new Exception("Expected result"));
 							} else {
 								try {
 									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
 									container.setJsonResult(jsonObject);
-								} catch (Exception ex){
+								} catch (Exception ex) {
 									container.setException(ex);
 								}
 							}
 						}
 
-						latch.countDown();	
+						latch.countDown();
 					}
 				});
 			}
@@ -3622,7 +3629,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 		final String tableName = "MyTableName";
 
 		final String responseContent = "{\"id\":\"an id\",\"String\":\"Hey\"}";
-		
+
 		runTestOnUiThread(new Runnable() {
 
 			@Override
@@ -3641,12 +3648,12 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"" + testId + "\",\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the delete method
 				msTable.delete(obj, new TableDeleteCallback() {
-					
+
 					@Override
 					public void onCompleted(Exception exception, ServiceFilterResponse response) {
 						if (exception != null) {
@@ -3655,20 +3662,20 @@ public class IdPropertyTests extends InstrumentationTestCase {
 							container.setException(new Exception("Expected response"));
 						} else {
 							String content = response.getContent();
-							
+
 							if (content == null) {
 								container.setException(new Exception("Expected result"));
 							} else {
 								try {
 									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
 									container.setJsonResult(jsonObject);
-								} catch (Exception ex){
+								} catch (Exception ex) {
 									container.setException(ex);
 								}
 							}
 						}
 
-						latch.countDown();	
+						latch.countDown();
 					}
 				});
 			}
@@ -3721,12 +3728,12 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":\"" + jsonTestId + "\",\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the delete method
 				msTable.delete(obj, new TableDeleteCallback() {
-					
+
 					@Override
 					public void onCompleted(Exception exception, ServiceFilterResponse response) {
 						if (exception != null) {
@@ -3735,20 +3742,20 @@ public class IdPropertyTests extends InstrumentationTestCase {
 							container.setException(new Exception("Expected response"));
 						} else {
 							String content = response.getContent();
-							
+
 							if (content == null) {
 								container.setException(new Exception("Expected result"));
 							} else {
 								try {
 									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
 									container.setJsonResult(jsonObject);
-								} catch (Exception ex){
+								} catch (Exception ex) {
 									container.setException(ex);
 								}
 							}
 						}
 
-						latch.countDown();	
+						latch.countDown();
 					}
 				});
 			}
@@ -3802,12 +3809,12 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":" + jsonTestId + ",\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the delete method
 				msTable.delete(obj, new TableDeleteCallback() {
-					
+
 					@Override
 					public void onCompleted(Exception exception, ServiceFilterResponse response) {
 						if (exception != null) {
@@ -3816,20 +3823,20 @@ public class IdPropertyTests extends InstrumentationTestCase {
 							container.setException(new Exception("Expected response"));
 						} else {
 							String content = response.getContent();
-							
+
 							if (content == null) {
 								container.setException(new Exception("Expected result"));
 							} else {
 								try {
 									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
 									container.setJsonResult(jsonObject);
-								} catch (Exception ex){
+								} catch (Exception ex) {
 									container.setException(ex);
 								}
 							}
 						}
 
-						latch.countDown();	
+						latch.countDown();
 					}
 				});
 			}
@@ -3854,7 +3861,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
 		}
 	}
-	
+
 	public void testDeleteWithNullIdItem() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -3883,12 +3890,12 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":null,\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the delete method
 				msTable.delete(obj, new TableDeleteCallback() {
-					
+
 					@Override
 					public void onCompleted(Exception exception, ServiceFilterResponse response) {
 						if (exception != null) {
@@ -3897,20 +3904,20 @@ public class IdPropertyTests extends InstrumentationTestCase {
 							container.setException(new Exception("Expected response"));
 						} else {
 							String content = response.getContent();
-							
+
 							if (content == null) {
 								container.setException(new Exception("Expected result"));
 							} else {
 								try {
 									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
 									container.setJsonResult(jsonObject);
-								} catch (Exception ex){
+								} catch (Exception ex) {
 									container.setException(ex);
 								}
 							}
 						}
 
-						latch.countDown();	
+						latch.countDown();
 					}
 				});
 			}
@@ -3925,7 +3932,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			fail("Expected Exception IllegalArgumentException");
 		}
 	}
-	
+
 	public void testDeleteWithNoIdItem() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
@@ -3954,12 +3961,12 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the delete method
 				msTable.delete(obj, new TableDeleteCallback() {
-					
+
 					@Override
 					public void onCompleted(Exception exception, ServiceFilterResponse response) {
 						if (exception != null) {
@@ -3968,20 +3975,20 @@ public class IdPropertyTests extends InstrumentationTestCase {
 							container.setException(new Exception("Expected response"));
 						} else {
 							String content = response.getContent();
-							
+
 							if (content == null) {
 								container.setException(new Exception("Expected result"));
 							} else {
 								try {
 									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
 									container.setJsonResult(jsonObject);
-								} catch (Exception ex){
+								} catch (Exception ex) {
 									container.setException(ex);
 								}
 							}
 						}
 
-						latch.countDown();	
+						latch.countDown();
 					}
 				});
 			}
@@ -4025,12 +4032,12 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
-				
+
 				JsonObject obj = new JsonParser().parse("{\"id\":0,\"String\":\"what?\"}").getAsJsonObject();
 
 				// Call the delete method
 				msTable.delete(obj, new TableDeleteCallback() {
-					
+
 					@Override
 					public void onCompleted(Exception exception, ServiceFilterResponse response) {
 						if (exception != null) {
@@ -4039,20 +4046,20 @@ public class IdPropertyTests extends InstrumentationTestCase {
 							container.setException(new Exception("Expected response"));
 						} else {
 							String content = response.getContent();
-							
+
 							if (content == null) {
 								container.setException(new Exception("Expected result"));
 							} else {
 								try {
 									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
 									container.setJsonResult(jsonObject);
-								} catch (Exception ex){
+								} catch (Exception ex) {
 									container.setException(ex);
 								}
 							}
 						}
 
-						latch.countDown();	
+						latch.countDown();
 					}
 				});
 			}
@@ -4067,11 +4074,705 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			fail("Expected Exception IllegalArgumentException");
 		}
 	}
+
+	// Generic
+
+	// Read Tests
+
+	public void testReadWithStringIdTypeAndStringIdResponseContent() throws Throwable {
+		String[] testIdData = IdTestData.concat(IdTestData.concat(IdTestData.ValidStringIds, IdTestData.EmptyStringIds), IdTestData.InvalidStringIds);
+
+		for (String testId : testIdData) {
+			readWithStringIdTypeAndStringIdResponseContent(testId);
+		}
+	}
+
+	private void readWithStringIdTypeAndStringIdResponseContent(String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
+		final String responseContent = "[{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}]";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the select method
+				msTable.execute(new TableQueryCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(List<StringIdType> result, int count, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (result == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(result);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof List<?>);
+			
+			List<?> resultList = (List<?>)result;
+			assertTrue(resultList.size() == 1);
+			
+			Object obj = resultList.get(0);			
+			assertTrue(obj instanceof StringIdType);
+			
+			StringIdType elem = (StringIdType)obj;
+			
+			assertEquals(testId, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
 	
+	public void testReadWithStringIdTypeAndNonStringIdResponseContent() throws Throwable {
+		Object[] testIdData = IdTestData.concat(IdTestData.convert(IdTestData.concat(IdTestData.ValidIntIds, IdTestData.InvalidIntIds)), IdTestData.NonStringNonIntIds);
+
+		for (Object testId : testIdData) {
+			readWithStringIdTypeAndNonStringIdResponseContent(testId);
+		}
+	}
+
+	private void readWithStringIdTypeAndNonStringIdResponseContent(Object testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String stringTestId = testId.toString().toLowerCase(Locale.getDefault());
+		final String responseContent = "[{\"id\":" + stringTestId + ",\"String\":\"Hey\"}]";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the select method
+				msTable.execute(new TableQueryCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(List<StringIdType> result, int count, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (result == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(result);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof List<?>);
+			
+			List<?> resultList = (List<?>)result;
+			assertTrue(resultList.size() == 1);
+			
+			Object obj = resultList.get(0);			
+			assertTrue(obj instanceof StringIdType);
+			
+			StringIdType elem = (StringIdType)obj;
+			
+			assertEquals(stringTestId, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
+
+	public void testReadWithStringIdTypeAndNullIdResponseContent() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+		
+		final String responseContent = "[{\"id\":null,\"String\":\"Hey\"}]";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the select method
+				msTable.execute(new TableQueryCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(List<StringIdType> result, int count, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (result == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(result);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof List<?>);
+			
+			List<?> resultList = (List<?>)result;
+			assertTrue(resultList.size() == 1);
+			
+			Object obj = resultList.get(0);			
+			assertTrue(obj instanceof StringIdType);
+			
+			StringIdType elem = (StringIdType)obj;
+			
+			assertEquals(null, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
+	
+	public void testReadWithStringIdTypeAndNoIdResponseContent() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+		
+		final String responseContent = "[{\"String\":\"Hey\"}]";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the select method
+				msTable.execute(new TableQueryCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(List<StringIdType> result, int count, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (result == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(result);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof List<?>);
+			
+			List<?> resultList = (List<?>)result;
+			assertTrue(resultList.size() == 1);
+			
+			Object obj = resultList.get(0);			
+			assertTrue(obj instanceof StringIdType);
+			
+			StringIdType elem = (StringIdType)obj;
+			
+			assertEquals(null, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
+	
+	public void testReadWithStringIdTypeAndStringIdFilter() throws Throwable {
+		String[] testIdData = IdTestData.concat(IdTestData.concat(IdTestData.ValidStringIds, IdTestData.EmptyStringIds), IdTestData.InvalidStringIds);
+
+		for (String testId : testIdData) {
+			readWithStringIdTypeAndStringIdFilter(testId);
+		}
+	}
+
+	private void readWithStringIdTypeAndStringIdFilter(final String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
+		final String responseContent = "[{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}]";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the select method
+				msTable.where(field("Id").eq().val(testId)).execute(new TableQueryCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(List<StringIdType> result, int count, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (result == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(result);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof List<?>);
+			
+			List<?> resultList = (List<?>)result;
+			assertTrue(resultList.size() == 1);
+			
+			Object obj = resultList.get(0);			
+			assertTrue(obj instanceof StringIdType);
+			
+			StringIdType elem = (StringIdType)obj;
+			
+			assertEquals(testId, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
+	
+	public void testReadWithStringIdTypeAndNullIdFilter() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "[{\"id\":null,\"String\":\"Hey\"}]";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the select method
+				msTable.where(field("Id").eq().val((String)null)).execute(new TableQueryCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(List<StringIdType> result, int count, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (result == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(result);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof List<?>);
+			
+			List<?> resultList = (List<?>)result;
+			assertTrue(resultList.size() == 1);
+			
+			Object obj = resultList.get(0);			
+			assertTrue(obj instanceof StringIdType);
+			
+			StringIdType elem = (StringIdType)obj;
+			
+			assertEquals(null, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
+
+	public void testReadWithStringIdTypeAndStringIdProjection() throws Throwable {
+		String[] testIdData = IdTestData.concat(IdTestData.concat(IdTestData.ValidStringIds, IdTestData.EmptyStringIds), IdTestData.InvalidStringIds);
+
+		for (String testId : testIdData) {
+			readWithStringIdTypeAndStringIdProjection(testId);
+		}
+	}
+
+	private void readWithStringIdTypeAndStringIdProjection(final String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
+		final String responseContent = "[{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}]";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the select method
+				msTable.select("Id,String").execute(new TableQueryCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(List<StringIdType> result, int count, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (result == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(result);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof List<?>);
+			
+			List<?> resultList = (List<?>)result;
+			assertTrue(resultList.size() == 1);
+			
+			Object obj = resultList.get(0);			
+			assertTrue(obj instanceof StringIdType);
+			
+			StringIdType elem = (StringIdType)obj;
+			
+			assertEquals(testId, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
+	
+	public void testReadWithStringIdTypeAndNullIdProjection() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+		
+		final String responseContent = "[{\"id\":null,\"String\":\"Hey\"}]";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the select method
+				msTable.select("Id,String").execute(new TableQueryCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(List<StringIdType> result, int count, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (result == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(result);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof List<?>);
+			
+			List<?> resultList = (List<?>)result;
+			assertTrue(resultList.size() == 1);
+			
+			Object obj = resultList.get(0);			
+			assertTrue(obj instanceof StringIdType);
+			
+			StringIdType elem = (StringIdType)obj;
+			
+			assertEquals(null, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
+	
+	public void testReadWithStringIdTypeAndNoIdProjection() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+		
+		final String responseContent = "[{\"String\":\"Hey\"}]";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the select method
+				msTable.select("Id,String").execute(new TableQueryCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(List<StringIdType> result, int count, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (result == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(result);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof List<?>);
+			
+			List<?> resultList = (List<?>)result;
+			assertTrue(resultList.size() == 1);
+			
+			Object obj = resultList.get(0);			
+			assertTrue(obj instanceof StringIdType);
+			
+			StringIdType elem = (StringIdType)obj;
+			
+			assertEquals(null, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
+	
+	// Test Filter
+	
+
+	// Test Filter
+
 	private ServiceFilter getTestFilter(String content) {
 		return getTestFilter(200, content);
 	}
 
+	
 	private ServiceFilter getTestFilter(final int statusCode, final String content) {
 		return new ServiceFilter() {
 
