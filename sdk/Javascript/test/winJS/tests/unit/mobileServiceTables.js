@@ -52,9 +52,9 @@ var invalidStringIds = [
             "\\",
             "\/",
             "`",
-            "+"
-            //0-32 characters
-            //127-160 chatacters
+            "+",
+            "control character between 0 and 32 " + String.fromCharCode(16),
+            "control character between 127 and 160" + String.fromCharCode(130)
     ];
 
 var validIntIds = [1, 925000];
@@ -907,7 +907,7 @@ $testGroup('MobileServiceTables.js',
             testCases = [];
 
         testIdData.forEach(function (testId) {
-            testCases.push(function (prevResults) {
+            testCases.push(function () {
                 client = client.withFilter(function (req, next, callback) {
                     $assert.areEqual(req.type, 'DELETE');
                     $assert.areEqual(req.url, 'http://www.test.com/tables/books/' + encodeURIComponent(testId));
@@ -929,7 +929,7 @@ $testGroup('MobileServiceTables.js',
             testCases = [];
 
         testIdData.forEach(function (testId) {
-            testCases.push(function (prevResults) {
+            testCases.push(function () {
                 client = client.withFilter(function (req, next, callback) {
                     $assert.areEqual(req.type, 'DELETE');
                     $assert.areEqual(req.url, 'http://www.test.com/tables/books/' + encodeURIComponent(testId));
@@ -1015,14 +1015,14 @@ $testGroup('MobileServiceTables.js',
             testCases = [];
 
         testIdData.forEach(function (testId) {
-            testCases.push(function (prevResults) {
+            testCases.push(function () {
                 var originalModelObject = { id: testId, price: 100, custom: 5 };
 
                 client = client.withFilter(function (req, next, callback) {
                     $assert.areEqual(req.type, 'GET');
                     if (typeof testId === 'string') {
-                        var uriId = testId.replace(/\'/g, '%27');
-                        $assert.areEqual(req.url, "http://www.test.com/tables/books?$filter=id eq '" + encodeURIComponent(uriId) + "'");
+                        var uriId = encodeURIComponent(testId).replace(/\'/g, '%27%27');
+                        $assert.areEqual(req.url, "http://www.test.com/tables/books?$filter=id eq '" + uriId + "'");
                     } else {
                         $assert.areEqual(req.url, "http://www.test.com/tables/books?$filter=id eq " + encodeURIComponent(testId));
                     }

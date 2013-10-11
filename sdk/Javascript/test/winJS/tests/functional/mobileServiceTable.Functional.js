@@ -52,26 +52,9 @@ var invalidStringIds = [
             "\\",
             "\/",
             "`",
-            "+"
-            //0-32 characters
-            //127-160 chatacters
-];
-
-var validIntIds = [1, 925000];
-var invalidIntIds = [-1];
-var nonStringNonIntValidJsonIds = [
-    true,
-    false,
-    1.0,
-    -1.0,
-    0.0,
-];
-
-var nonStringNonIntIds = [
-    new Date(2010, 1, 8),
-    {},
-    1.0,
-    "aa4da0b5-308c-4877-a5d2-03f274632636"
+            "+",
+            "control character between 0 and 32 " + String.fromCharCode(16),
+            "control character between 127 and 160" + String.fromCharCode(130)
 ];
 
 function emptyTable(table) {
@@ -88,7 +71,7 @@ function emptyTable(table) {
 $testGroup('Mobile Service Table Tests')
     .functional()
     .tests(
-        $test('table operations')
+        $test('AsyncTableOperationsWithValidStringIdAgainstStringIdTable')
         .tag('stringId')
         .description('Verify the overall flow of a string Id table')
         .checkAsync(function () {
@@ -101,57 +84,58 @@ $testGroup('Mobile Service Table Tests')
                 },
                 function() {
                     var singleIdTests = [];
-                    validStringIds.forEach(function (id) {
+                    validStringIds.forEach(function (testId) {
                         singleIdTests.push(function () {
                             return $chain(
                                 function () {
-                                    return table.insert({ id: 'apple', string: 'Hey' });
+                                    $log('testing id: ' + testId);
+                                    return table.insert({ id: testId, string: 'Hey' });
                                 },
                                 function (item) {
-                                    $assert.areEqual('apple', item.id);
+                                    $assert.areEqual(testId, item.id);
 
                                     return table.read();
                                 },
                                 function (items) {
                                     $assert.areEqual(1, items.length);
-                                    $assert.areEqual('apple', items[0].id);
+                                    $assert.areEqual(testId, items[0].id);
                                     $assert.areEqual('Hey', items[0].string);
 
-                                    return table.where({ id: 'apple' }).read();
+                                    return table.where({ id: testId }).read();
                                 },
                                 function (items) {
                                     $assert.areEqual(1, items.length);
-                                    $assert.areEqual('apple', items[0].id);
+                                    $assert.areEqual(testId, items[0].id);
                                     $assert.areEqual('Hey', items[0].string);
 
                                     return table.select('id', 'string').read();
                                 }, function (items) {
                                     $assert.areEqual(1, items.length);
-                                    $assert.areEqual('apple', items[0].id);
+                                    $assert.areEqual(testId, items[0].id);
                                     $assert.areEqual('Hey', items[0].string);
 
-                                    return table.lookup('apple');
+                                    return table.lookup(testId);
                                 }, function (item) {
-                                    $assert.areEqual('apple', item.id);
+                                    $assert.areEqual(testId, item.id);
                                     $assert.areEqual('Hey', item.string);
 
                                     item.string = "What?";
                                     return table.update(item);
                                 }, function (item) {
-                                    $assert.areEqual('apple', item.id);
+                                    $assert.areEqual(testId, item.id);
                                     $assert.areEqual('What?', item.string);
 
-                                    item = { id: 'apple', string: 'hey' };
+                                    item = { id: testId, string: 'hey' };
 
                                     return table.refresh(item);
                                 }, function (item) {
-                                    $assert.areEqual('apple', item.id);
+                                    $assert.areEqual(testId, item.id);
                                     $assert.areEqual('What?', item.string);
 
                                     return table.read();
                                 }, function (items) {
                                     $assert.areEqual(1, items.length);
-                                    $assert.areEqual('apple', items[0].id);
+                                    $assert.areEqual(testId, items[0].id);
                                     $assert.areEqual('What?', items[0].string);
 
                                     return table.del(items[0]);

@@ -357,8 +357,8 @@ MobileServiceTable.prototype.refresh = Platform.async(
                 this.getTableName());
 
         if (typeof instance[idPropertyName] === 'string') {
-            var id = instance[idPropertyName].replace(/\'/g, '%27');
-            urlFragment = _.url.combinePathAndQuery(urlFragment, "?$filter=id eq '" + encodeURIComponent(id) + "'");
+            var id = encodeURIComponent(instance[idPropertyName]).replace(/\'/g, '%27%27');
+            urlFragment = _.url.combinePathAndQuery(urlFragment, "?$filter=id eq '" + id + "'");
         } else {
             urlFragment = _.url.combinePathAndQuery(urlFragment, "?$filter=id eq " + encodeURIComponent(instance[idPropertyName].toString()));
         }
