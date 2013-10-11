@@ -1337,7 +1337,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		// Asserts
 		PersonTestObject p = container.getPerson();
 		Assert.assertNull("Null person expected", p);
-		Assert.assertEquals("The entity to update or delete has an invalid numeric value on id property.", container.getErrorMessage());
+		Assert.assertEquals("The entity has an invalid numeric value on id property.", container.getErrorMessage());
 	}
 
 	public void testDeleteUsingEntityShouldReturnTheExpectedRequestUrl() throws Throwable {

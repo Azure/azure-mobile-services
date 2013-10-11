@@ -282,7 +282,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	 */
 	public void update(final JsonObject element, final List<Pair<String, String>> parameters, final TableJsonOperationCallback callback) {
 		try {			
-			validateIdUpdateDelete(element);
+			validateId(element);
 		} catch (Exception e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);

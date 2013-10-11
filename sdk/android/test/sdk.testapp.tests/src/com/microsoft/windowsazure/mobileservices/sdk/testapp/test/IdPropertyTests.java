@@ -28,6 +28,7 @@ import android.test.InstrumentationTestCase;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
@@ -35,6 +36,7 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
+import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonQueryCallback;
 
@@ -1266,7 +1268,2805 @@ public class IdPropertyTests extends InstrumentationTestCase {
 		}
 	}
 	
+	// Insert Tests
 	
+	public void testInsertWithStringIdResponseContent() throws Throwable {
+		String[] testIdData = IdTestData.concat(IdTestData.concat(IdTestData.ValidStringIds, IdTestData.EmptyStringIds), IdTestData.InvalidStringIds);
+
+		for (String testId : testIdData) {
+			insertWithStringIdResponseContent(testId);
+		}
+	}
+
+	private void insertWithStringIdResponseContent(final String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
+		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"value\":\"new\"}").getAsJsonObject();
+
+				// Call the insert method
+				msTable.insert(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isString());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+			assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsString());
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+
+	public void testInsertWithIntIdResponseContent() throws Throwable {
+		long[] testIdData = IdTestData.concat(IdTestData.ValidIntIds, IdTestData.InvalidIntIds);
+
+		for (long testId : testIdData) {
+			insertWithIntIdResponseContent(testId);
+		}
+	}
+
+	private void insertWithIntIdResponseContent(long testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = String.valueOf(testId);
+
+		final String responseContent = "{\"id\":" + jsonTestId + ",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"value\":\"new\"}").getAsJsonObject();
+
+				// Call the insert method
+				msTable.insert(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isNumber());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+			assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsLong());
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+
+	public void testInsertWithNonStringAndNonIntIdResponseContent() throws Throwable {
+		Object[] testIdData = IdTestData.NonStringNonIntValidJsonIds;
+
+		for (Object testId : testIdData) {
+			insertWithNonStringAndNonIntIdResponseContent(testId);
+		}
+	}
+
+	private void insertWithNonStringAndNonIntIdResponseContent(Object testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = testId.toString().toLowerCase(Locale.getDefault());
+
+		final String responseContent = "{\"id\":" + jsonTestId + ",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"value\":\"new\"}").getAsJsonObject();
+
+				// Call the insert method
+				msTable.insert(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+
+			if (container.getJsonResult().getAsJsonObject().get("id").isJsonNull()) {
+				assertTrue(testId == null);
+			} else if (container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive()) {
+				if (container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isBoolean()) {
+					assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsBoolean());
+				} else if (container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isNumber()) {
+					assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsDouble());
+				} else if (container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isString()) {
+					assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsString());
+				}
+			} else if (container.getJsonResult().getAsJsonObject().get("id").isJsonObject()) {
+				assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonObject().equals(testId));
+			} else if (container.getJsonResult().getAsJsonObject().get("id").isJsonArray()) {
+				assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonArray().equals(testId));
+			}
+
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+	
+	public void testInsertWithNullIdResponseContent() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"id\":null,\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"value\":\"new\"}").getAsJsonObject();
+
+				// Call the insert method
+				msTable.insert(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonNull());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+
+	public void testInsertWithNoIdResponseContent() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"value\":\"new\"}").getAsJsonObject();
+
+				// Call the insert method
+				msTable.insert(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+
+			assertTrue(!container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(!container.getJsonResult().getAsJsonObject().has("Id"));
+			assertTrue(!container.getJsonResult().getAsJsonObject().has("iD"));
+			assertTrue(!container.getJsonResult().getAsJsonObject().has("ID"));
+			
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+	
+	public void testInsertWithStringIdItem() throws Throwable {
+		String[] testIdData = IdTestData.ValidStringIds;
+
+		for (String testId : testIdData) {
+			insertWithStringIdItem(testId);
+		}
+	}
+
+	private void insertWithStringIdItem(final String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
+		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
+		
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"" + testId + "\",\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the insert method
+				msTable.insert(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isString());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+			assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsString());
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+
+	public void testInsertWithEmptyStringIdItem() throws Throwable {
+		String[] testIdData = IdTestData.EmptyStringIds;
+
+		for (String testId : testIdData) {
+			insertWithEmptyStringIdItem(testId);
+		}
+	}
+
+	private void insertWithEmptyStringIdItem(final String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"id\":\"an id\",\"String\":\"Hey\"}";
+		
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"" + testId + "\",\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the insert method
+				msTable.insert(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isString());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+			assertEquals("an id", container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsString());
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+
+	public void testInsertWithInvalidStringIdItem() throws Throwable {
+		String[] testIdData = IdTestData.InvalidStringIds;
+
+		for (String testId : testIdData) {
+			insertWithInvalidStringIdItem(testId);
+		}
+	}
+
+	private void insertWithInvalidStringIdItem(final String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
+		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"" + jsonTestId + "\",\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the insert method
+				msTable.insert(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof IllegalArgumentException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+
+	public void testInsertWithIntIdItem() throws Throwable {
+		long[] testIdData = IdTestData.ValidIntIds;
+
+		for (long testId : testIdData) {
+			insertWithIntIdItem(testId);
+		}
+	}
+
+	private void insertWithIntIdItem(final long testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String jsonTestId = String.valueOf(testId);
+
+		final String responseContent = "{\"id\":" + jsonTestId + ",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":" + jsonTestId + ",\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the insert method
+				msTable.insert(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof IllegalArgumentException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+	
+	public void testInsertWithNullIdItem() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"id\":5,\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":null,\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the insert method
+				msTable.insert(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isNumber());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+			assertEquals(5L, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsLong());
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+	
+	public void testInsertWithNoIdItem() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"id\":5,\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the insert method
+				msTable.insert(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isNumber());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+			assertEquals(5L, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsLong());
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+
+	public void testInsertWithZeroIdItem() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"id\":5,\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":0,\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the insert method
+				msTable.insert(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isNumber());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+			assertEquals(5L, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsLong());
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+
+	// Update Tests
+
+	public void testUpdateWithStringIdResponseContent() throws Throwable {
+		String[] testIdData = IdTestData.concat(IdTestData.concat(IdTestData.ValidStringIds, IdTestData.EmptyStringIds), IdTestData.InvalidStringIds);
+
+		for (String testId : testIdData) {
+			updateWithStringIdResponseContent(testId);
+		}
+	}
+
+	private void updateWithStringIdResponseContent(final String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
+		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
+
+				// Call the update method
+				msTable.update(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isString());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+			assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsString());
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+
+	public void testUpdateWithIntIdResponseContent() throws Throwable {
+		long[] testIdData = IdTestData.concat(IdTestData.ValidIntIds, IdTestData.InvalidIntIds);
+
+		for (long testId : testIdData) {
+			updateWithIntIdResponseContent(testId);
+		}
+	}
+
+	private void updateWithIntIdResponseContent(long testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = String.valueOf(testId);
+
+		final String responseContent = "{\"id\":" + jsonTestId + ",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
+
+				// Call the update method
+				msTable.update(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isNumber());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+			assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsLong());
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+
+	public void testUpdateWithNonStringAndNonIntIdResponseContent() throws Throwable {
+		Object[] testIdData = IdTestData.NonStringNonIntValidJsonIds;
+
+		for (Object testId : testIdData) {
+			updateWithNonStringAndNonIntIdResponseContent(testId);
+		}
+	}
+
+	private void updateWithNonStringAndNonIntIdResponseContent(Object testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = testId.toString().toLowerCase(Locale.getDefault());
+
+		final String responseContent = "{\"id\":" + jsonTestId + ",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
+
+				// Call the update method
+				msTable.update(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+
+			if (container.getJsonResult().getAsJsonObject().get("id").isJsonNull()) {
+				assertTrue(testId == null);
+			} else if (container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive()) {
+				if (container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isBoolean()) {
+					assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsBoolean());
+				} else if (container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isNumber()) {
+					assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsDouble());
+				} else if (container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isString()) {
+					assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsString());
+				}
+			} else if (container.getJsonResult().getAsJsonObject().get("id").isJsonObject()) {
+				assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonObject().equals(testId));
+			} else if (container.getJsonResult().getAsJsonObject().get("id").isJsonArray()) {
+				assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonArray().equals(testId));
+			}
+
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+	
+	public void testUpdateWithNullIdResponseContent() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"id\":null,\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
+
+				// Call the update method
+				msTable.update(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonNull());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+
+	public void testUpdateWithNoIdResponseContent() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
+
+				// Call the update method
+				msTable.update(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isString());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+			assertEquals("id", container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsString());
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+
+	public void testUpdateWithStringIdItem() throws Throwable {
+		String[] testIdData = IdTestData.ValidStringIds;
+
+		for (String testId : testIdData) {
+			updateWithStringIdItem(testId);
+		}
+	}
+
+	private void updateWithStringIdItem(final String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
+		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
+		
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"" + jsonTestId + "\",\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the update method
+				msTable.update(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isString());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+			assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsString());
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+
+	public void testUpdateWithEmptyStringIdItem() throws Throwable {
+		String[] testIdData = IdTestData.EmptyStringIds;
+
+		for (String testId : testIdData) {
+			updateWithEmptyStringIdItem(testId);
+		}
+	}
+
+	private void updateWithEmptyStringIdItem(final String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"id\":\"an id\",\"String\":\"Hey\"}";
+		
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"" + testId + "\",\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the update method
+				msTable.update(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof IllegalArgumentException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+
+	public void testUpdatetWithInvalidStringIdItem() throws Throwable {
+		String[] testIdData = IdTestData.InvalidStringIds;
+
+		for (String testId : testIdData) {
+			updateWithInvalidStringIdItem(testId);
+		}
+	}
+
+	private void updateWithInvalidStringIdItem(final String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
+		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"" + jsonTestId + "\",\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the update method
+				msTable.update(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof IllegalArgumentException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+
+	public void testUpdateWithIntIdItem() throws Throwable {
+		long[] testIdData = IdTestData.ValidIntIds;
+
+		for (long testId : testIdData) {
+			updateWithIntIdItem(testId);
+		}
+	}
+
+	private void updateWithIntIdItem(final long testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String jsonTestId = String.valueOf(testId);
+
+		final String responseContent = "{\"id\":" + jsonTestId + ",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":" + jsonTestId + ",\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the update method
+				msTable.update(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isNumber());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+			assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsLong());
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+	
+	public void testUpdateWithNullIdItem() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"id\":5,\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":null,\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the update method
+				msTable.update(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof IllegalArgumentException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+	
+	public void testUpdateWithNoIdItem() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"id\":5,\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the update method
+				msTable.update(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof IllegalArgumentException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+
+	public void testUpdateWithZeroIdItem() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"id\":5,\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":0,\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the update method
+				msTable.update(obj, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (jsonObject == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setJsonResult(jsonObject);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof IllegalArgumentException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+
+	// Delete Tests
+	
+	public void testDeleteWithStringIdResponseContent() throws Throwable {
+		String[] testIdData = IdTestData.concat(IdTestData.concat(IdTestData.ValidStringIds, IdTestData.EmptyStringIds), IdTestData.InvalidStringIds);
+
+		for (String testId : testIdData) {
+			deleteWithStringIdResponseContent(testId);
+		}
+	}
+
+	private void deleteWithStringIdResponseContent(final String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
+		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
+
+				// Call the delete method
+				msTable.delete(obj, new TableDeleteCallback() {
+					
+					@Override
+					public void onCompleted(Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (response == null) {
+							container.setException(new Exception("Expected response"));
+						} else {
+							String content = response.getContent();
+							
+							if (content == null) {
+								container.setException(new Exception("Expected result"));
+							} else {
+								try {
+									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
+									container.setJsonResult(jsonObject);
+								} catch (Exception ex){
+									container.setException(ex);
+								}
+							}
+						}
+
+						latch.countDown();	
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isString());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+			assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsString());
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+
+	public void testDeleteWithIntIdResponseContent() throws Throwable {
+		long[] testIdData = IdTestData.concat(IdTestData.ValidIntIds, IdTestData.InvalidIntIds);
+
+		for (long testId : testIdData) {
+			deleteWithIntIdResponseContent(testId);
+		}
+	}
+
+	private void deleteWithIntIdResponseContent(long testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = String.valueOf(testId);
+
+		final String responseContent = "{\"id\":" + jsonTestId + ",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
+
+				// Call the delete method
+				msTable.delete(obj, new TableDeleteCallback() {
+					
+					@Override
+					public void onCompleted(Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (response == null) {
+							container.setException(new Exception("Expected response"));
+						} else {
+							String content = response.getContent();
+							
+							if (content == null) {
+								container.setException(new Exception("Expected result"));
+							} else {
+								try {
+									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
+									container.setJsonResult(jsonObject);
+								} catch (Exception ex){
+									container.setException(ex);
+								}
+							}
+						}
+
+						latch.countDown();	
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isNumber());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+			assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsLong());
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+
+	public void testDeleteWithNonStringAndNonIntIdResponseContent() throws Throwable {
+		Object[] testIdData = IdTestData.NonStringNonIntValidJsonIds;
+
+		for (Object testId : testIdData) {
+			deleteWithNonStringAndNonIntIdResponseContent(testId);
+		}
+	}
+
+	private void deleteWithNonStringAndNonIntIdResponseContent(Object testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = testId.toString().toLowerCase(Locale.getDefault());
+
+		final String responseContent = "{\"id\":" + jsonTestId + ",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
+
+				// Call the delete method
+				msTable.delete(obj, new TableDeleteCallback() {
+					
+					@Override
+					public void onCompleted(Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (response == null) {
+							container.setException(new Exception("Expected response"));
+						} else {
+							String content = response.getContent();
+							
+							if (content == null) {
+								container.setException(new Exception("Expected result"));
+							} else {
+								try {
+									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
+									container.setJsonResult(jsonObject);
+								} catch (Exception ex){
+									container.setException(ex);
+								}
+							}
+						}
+
+						latch.countDown();	
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+
+			if (container.getJsonResult().getAsJsonObject().get("id").isJsonNull()) {
+				assertTrue(testId == null);
+			} else if (container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive()) {
+				if (container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isBoolean()) {
+					assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsBoolean());
+				} else if (container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isNumber()) {
+					assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsDouble());
+				} else if (container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isString()) {
+					assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsString());
+				}
+			} else if (container.getJsonResult().getAsJsonObject().get("id").isJsonObject()) {
+				assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonObject().equals(testId));
+			} else if (container.getJsonResult().getAsJsonObject().get("id").isJsonArray()) {
+				assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonArray().equals(testId));
+			}
+
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+	
+	public void testDeleteWithNullIdResponseContent() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"id\":null,\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
+
+				// Call the delete method
+				msTable.delete(obj, new TableDeleteCallback() {
+					
+					@Override
+					public void onCompleted(Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (response == null) {
+							container.setException(new Exception("Expected response"));
+						} else {
+							String content = response.getContent();
+							
+							if (content == null) {
+								container.setException(new Exception("Expected result"));
+							} else {
+								try {
+									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
+									container.setJsonResult(jsonObject);
+								} catch (Exception ex){
+									container.setException(ex);
+								}
+							}
+						}
+
+						latch.countDown();	
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonNull());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+
+	public void testDeleteWithNoIdResponseContent() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"id\",\"value\":\"new\"}").getAsJsonObject();
+
+				// Call the delete method
+				msTable.delete(obj, new TableDeleteCallback() {
+					
+					@Override
+					public void onCompleted(Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (response == null) {
+							container.setException(new Exception("Expected response"));
+						} else {
+							String content = response.getContent();
+							
+							if (content == null) {
+								container.setException(new Exception("Expected result"));
+							} else {
+								try {
+									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
+									container.setJsonResult(jsonObject);
+								} catch (Exception ex){
+									container.setException(ex);
+								}
+							}
+						}
+
+						latch.countDown();	
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+
+			assertTrue(!container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(!container.getJsonResult().getAsJsonObject().has("Id"));
+			assertTrue(!container.getJsonResult().getAsJsonObject().has("iD"));
+			assertTrue(!container.getJsonResult().getAsJsonObject().has("ID"));
+			
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+
+	public void testDeleteWithStringIdItem() throws Throwable {
+		String[] testIdData = IdTestData.ValidStringIds;
+
+		for (String testId : testIdData) {
+			deleteWithStringIdItem(testId);
+		}
+	}
+
+	private void deleteWithStringIdItem(final String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
+		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
+		
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"" + jsonTestId + "\",\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the delete method
+				msTable.delete(obj, new TableDeleteCallback() {
+					
+					@Override
+					public void onCompleted(Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (response == null) {
+							container.setException(new Exception("Expected response"));
+						} else {
+							String content = response.getContent();
+							
+							if (content == null) {
+								container.setException(new Exception("Expected result"));
+							} else {
+								try {
+									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
+									container.setJsonResult(jsonObject);
+								} catch (Exception ex){
+									container.setException(ex);
+								}
+							}
+						}
+
+						latch.countDown();	
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isString());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+			assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsString());
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+
+	public void testDeleteWithEmptyStringIdItem() throws Throwable {
+		String[] testIdData = IdTestData.EmptyStringIds;
+
+		for (String testId : testIdData) {
+			deleteWithEmptyStringIdItem(testId);
+		}
+	}
+
+	private void deleteWithEmptyStringIdItem(final String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"id\":\"an id\",\"String\":\"Hey\"}";
+		
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"" + testId + "\",\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the delete method
+				msTable.delete(obj, new TableDeleteCallback() {
+					
+					@Override
+					public void onCompleted(Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (response == null) {
+							container.setException(new Exception("Expected response"));
+						} else {
+							String content = response.getContent();
+							
+							if (content == null) {
+								container.setException(new Exception("Expected result"));
+							} else {
+								try {
+									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
+									container.setJsonResult(jsonObject);
+								} catch (Exception ex){
+									container.setException(ex);
+								}
+							}
+						}
+
+						latch.countDown();	
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof IllegalArgumentException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+
+	public void testDeleteWithInvalidStringIdItem() throws Throwable {
+		String[] testIdData = IdTestData.InvalidStringIds;
+
+		for (String testId : testIdData) {
+			deleteWithInvalidStringIdItem(testId);
+		}
+	}
+
+	private void deleteWithInvalidStringIdItem(final String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
+		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":\"" + jsonTestId + "\",\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the delete method
+				msTable.delete(obj, new TableDeleteCallback() {
+					
+					@Override
+					public void onCompleted(Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (response == null) {
+							container.setException(new Exception("Expected response"));
+						} else {
+							String content = response.getContent();
+							
+							if (content == null) {
+								container.setException(new Exception("Expected result"));
+							} else {
+								try {
+									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
+									container.setJsonResult(jsonObject);
+								} catch (Exception ex){
+									container.setException(ex);
+								}
+							}
+						}
+
+						latch.countDown();	
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof IllegalArgumentException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+
+	public void testDeleteWithIntIdItem() throws Throwable {
+		long[] testIdData = IdTestData.ValidIntIds;
+
+		for (long testId : testIdData) {
+			deleteWithIntIdItem(testId);
+		}
+	}
+
+	private void deleteWithIntIdItem(final long testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String jsonTestId = String.valueOf(testId);
+
+		final String responseContent = "{\"id\":" + jsonTestId + ",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":" + jsonTestId + ",\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the delete method
+				msTable.delete(obj, new TableDeleteCallback() {
+					
+					@Override
+					public void onCompleted(Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (response == null) {
+							container.setException(new Exception("Expected response"));
+						} else {
+							String content = response.getContent();
+							
+							if (content == null) {
+								container.setException(new Exception("Expected result"));
+							} else {
+								try {
+									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
+									container.setJsonResult(jsonObject);
+								} catch (Exception ex){
+									container.setException(ex);
+								}
+							}
+						}
+
+						latch.countDown();	
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertTrue(container.getJsonResult().isJsonObject());
+			assertTrue(container.getJsonResult().getAsJsonObject().has("id"));
+			assertTrue(container.getJsonResult().getAsJsonObject().has("String"));
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").isJsonPrimitive());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().isNumber());
+			assertTrue(container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().isString());
+			assertEquals(testId, container.getJsonResult().getAsJsonObject().get("id").getAsJsonPrimitive().getAsLong());
+			assertEquals("Hey", container.getJsonResult().getAsJsonObject().get("String").getAsJsonPrimitive().getAsString());
+		}
+	}
+	
+	public void testDeleteWithNullIdItem() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"id\":5,\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":null,\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the delete method
+				msTable.delete(obj, new TableDeleteCallback() {
+					
+					@Override
+					public void onCompleted(Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (response == null) {
+							container.setException(new Exception("Expected response"));
+						} else {
+							String content = response.getContent();
+							
+							if (content == null) {
+								container.setException(new Exception("Expected result"));
+							} else {
+								try {
+									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
+									container.setJsonResult(jsonObject);
+								} catch (Exception ex){
+									container.setException(ex);
+								}
+							}
+						}
+
+						latch.countDown();	
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof IllegalArgumentException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+	
+	public void testDeleteWithNoIdItem() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"id\":5,\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the delete method
+				msTable.delete(obj, new TableDeleteCallback() {
+					
+					@Override
+					public void onCompleted(Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (response == null) {
+							container.setException(new Exception("Expected response"));
+						} else {
+							String content = response.getContent();
+							
+							if (content == null) {
+								container.setException(new Exception("Expected result"));
+							} else {
+								try {
+									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
+									container.setJsonResult(jsonObject);
+								} catch (Exception ex){
+									container.setException(ex);
+								}
+							}
+						}
+
+						latch.countDown();	
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof IllegalArgumentException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+
+	public void testDeleteWithZeroIdItem() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"id\":5,\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceJsonTable msTable = client.getTable(tableName);
+				
+				JsonObject obj = new JsonParser().parse("{\"id\":0,\"String\":\"what?\"}").getAsJsonObject();
+
+				// Call the delete method
+				msTable.delete(obj, new TableDeleteCallback() {
+					
+					@Override
+					public void onCompleted(Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (response == null) {
+							container.setException(new Exception("Expected response"));
+						} else {
+							String content = response.getContent();
+							
+							if (content == null) {
+								container.setException(new Exception("Expected result"));
+							} else {
+								try {
+									JsonObject jsonObject = new JsonParser().parse(content).getAsJsonObject();
+									container.setJsonResult(jsonObject);
+								} catch (Exception ex){
+									container.setException(ex);
+								}
+							}
+						}
+
+						latch.countDown();	
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof IllegalArgumentException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
 	
 	private ServiceFilter getTestFilter(String content) {
 		return getTestFilter(200, content);

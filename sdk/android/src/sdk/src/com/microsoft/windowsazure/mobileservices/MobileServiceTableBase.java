@@ -312,9 +312,9 @@ abstract class MobileServiceTableBase<E> {
 	
 			if (idProperty.isJsonPrimitive()) {
 				if (idProperty.getAsJsonPrimitive().isNumber()) {
-					return idProperty.getAsInt();
+					return idProperty.getAsJsonPrimitive().getAsLong();
 				} else if(idProperty.getAsJsonPrimitive().isString()) {
-					return idProperty.getAsString();
+					return idProperty.getAsJsonPrimitive().getAsString();
 				} else {
 					throw new InvalidParameterException("Invalid id type");
 				}
@@ -344,7 +344,7 @@ abstract class MobileServiceTableBase<E> {
 						
 						JsonPrimitive value = entry.getValue().getAsJsonPrimitive();
 						if (value.isNumber()) {
-							json.addProperty("id", value.getAsInt());
+							json.addProperty("id", value.getAsLong());
 						} else {
 							json.addProperty("id", value.getAsString());
 						}
@@ -358,64 +358,17 @@ abstract class MobileServiceTableBase<E> {
 		}
 	}
 	
-	protected boolean isValidId(Object id) {
-		if (id == null) {
-			return false;
-		}
-		
-		if (id instanceof JsonElement) {
-			JsonElement jsonId = (JsonElement)id;
-			
-			if (jsonId.isJsonPrimitive()) {
-				JsonPrimitive primitiveId = jsonId.getAsJsonPrimitive();
-				if (primitiveId.isNumber()) {
-					id = primitiveId.getAsInt();
-				} else if (primitiveId.isString()){
-					id = primitiveId.getAsString();
-				} else {
-					return false;
-				}
-			} else {
-				return false;
-			}
-		}
-		
-		if (id instanceof String) {
-			String strId = (String)id;
-			
-			return !strId.trim().equals("");
-		} else if (id instanceof Integer) {
-			Integer intId = (Integer)id;
-			
-			return intId > 0;
-		} else  {
-			return false;
-		}
-	}	
-	
-	protected boolean isValidId(String id) {
-			return !id.trim().equals("");
-	}
-	
-	protected boolean isValidId(int id) {
-		return id > 0;
-	}
-	
 	/**
 	 * Validates if the id property is numeric or string.
 	 * @param element
 	 * @return
 	 */
 	protected boolean isValidTypeId(JsonElement element) {
-		if (element.isJsonPrimitive()) {
-			return element.getAsJsonPrimitive().isNumber() || element.getAsJsonPrimitive().isString();
-		} else {
-			return false;
-		}
+		return isStringType(element) || isNumericType(element);
 	}
 
 	/**
-	 * Validates the id value from an Object on a Delete Action
+	 * Validates the id value from an Object on Lookup/Update/Delete action
 	 * 
 	 * @param elementOrId The Object to validate
 	 */
@@ -435,20 +388,20 @@ abstract class MobileServiceTableBase<E> {
 				throw new IllegalArgumentException("The numeric id is invalid.");
 			}
 		} else if (elementOrId instanceof JsonObject) {
-			validateIdUpdateDelete((JsonObject)elementOrId);
+			validateId((JsonObject)elementOrId);
 		} else {
-			validateIdUpdateDelete(mClient.getGsonBuilder().create().toJsonTree(elementOrId).getAsJsonObject());
+			validateId(mClient.getGsonBuilder().create().toJsonTree(elementOrId).getAsJsonObject());
 		}
 	}
 	
 	/**
-	 * Validates the id property from a JsonObject on an Update or Delete Action
+	 * Validates the id property from a JsonObject on Lookup/Update/Delete action
 	 * 
 	 * @param element The JsonObject to validate
 	 */
-	protected void validateIdUpdateDelete(final JsonObject element) {
+	protected void validateId(final JsonObject element) {
 		if (element == null) {
-			throw new IllegalArgumentException("The entity to update or delete cannot be null.");			
+			throw new IllegalArgumentException("The entity cannot be null.");			
 		} else {
 			updateIdProperty(element);
 			
@@ -459,19 +412,19 @@ abstract class MobileServiceTableBase<E> {
 					String id = getStringValue(idElement);
 					
 					if (!isValidStringId(id) || isDefaultStringId(id)) {
-						throw new IllegalArgumentException("The entity to update or delete has an invalid string value on id property.");
+						throw new IllegalArgumentException("The entity has an invalid string value on id property.");
 					}
 				} else if (isNumericType(idElement)) {
 					long id = getNumericValue(idElement);
 					
 					if (!isValidNumericId(id) || isDefaultNumericId(id)) {
-						throw new IllegalArgumentException("The entity to update or delete has an invalid numeric value on id property.");
+						throw new IllegalArgumentException("The entity has an invalid numeric value on id property.");
 					}
 				} else {
-					throw new IllegalArgumentException("The entity to update or delete must have a valid numeric or string id property.");
+					throw new IllegalArgumentException("The entity must have a valid numeric or string id property.");
 				}
 			} else {
-				throw new IllegalArgumentException("You must specify an id property with a valid numeric or string value for updating or deleting an object.");
+				throw new IllegalArgumentException("You must specify an id property with a valid numeric or string value.");
 			}
 		}
 	}
