@@ -40,7 +40,7 @@ exports.isNullOrZero = function (value) {
     /// A value indicating whether the provided value is null (or undefined) or zero or empty string.
     /// </returns>
 
-    return value === null || value === undefined || value === 0 || value.length === 0;
+    return value === null || value === undefined || value === 0 || value === '';
 };
 
 exports.isNullOrEmpty = function (value) {
