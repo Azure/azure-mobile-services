@@ -144,7 +144,7 @@ $testGroup('ToDo')
 
         $test('TotalCountBasics')
         .description('Verify the standard includeTotalCount behavior')
-
+        .tag('TotalCount')
         .checkAsync(function () {
             var table = $getClient().getTable('test_table');
             var context = { };
