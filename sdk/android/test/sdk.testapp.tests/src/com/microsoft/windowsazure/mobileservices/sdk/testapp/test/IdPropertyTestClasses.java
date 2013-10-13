@@ -324,3 +324,9 @@ class StringIdType {
     public String String;
 }
 
+class LongIdType {
+    public long Id;
+
+    public String String;
+}
+
