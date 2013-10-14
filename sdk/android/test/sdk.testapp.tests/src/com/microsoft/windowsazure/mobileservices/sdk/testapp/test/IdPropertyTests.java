@@ -44,6 +44,7 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonQueryCallback;
+import com.microsoft.windowsazure.mobileservices.TableOperationCallback;
 import com.microsoft.windowsazure.mobileservices.TableQueryCallback;
 
 public class IdPropertyTests extends InstrumentationTestCase {
@@ -4850,7 +4851,6 @@ public class IdPropertyTests extends InstrumentationTestCase {
 	}
 	
 	/*
-	
 	public void testReadWithIntIdTypeAndIntParseableIdResponseContent() throws Throwable {
 		Object[] testIdData = IdTestData.NonStringNonIntValidJsonIds;
 
@@ -4866,7 +4866,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 		final ResultsContainer container = new ResultsContainer();
 
 		final String tableName = "MyTableName";
-
+		
 		String stringTestId = testId.toString().toLowerCase(Locale.getDefault());
 		final String responseContent = "[{\"id\":" + stringTestId + ",\"String\":\"Hey\"}]";
 
@@ -4931,7 +4931,6 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			assertEquals("Hey", elem.String);
 		}
 	}
-	
 	*/
 
 	public void testReadWithIntIdTypeAndNullIdResponseContent() throws Throwable {
@@ -5524,6 +5523,1318 @@ public class IdPropertyTests extends InstrumentationTestCase {
 		}
 	}
 
+	// Lookup Tests
+	
+	// String Id Type
+	
+	public void testLookupWithStringIdTypeAndStringIdResponseContent() throws Throwable {
+		String[] testIdData = IdTestData.concat(IdTestData.concat(IdTestData.ValidStringIds, IdTestData.EmptyStringIds), IdTestData.InvalidStringIds);
+
+		for (String testId : testIdData) {
+			lookupWithStringIdTypeAndStringIdResponseContent(testId);
+		}
+	}
+
+	private void lookupWithStringIdTypeAndStringIdResponseContent(String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
+		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp("an id", new TableOperationCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(StringIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof StringIdType);
+			
+			StringIdType elem = (StringIdType)result;
+			
+			assertEquals(testId, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
+	
+	public void testLookupWithStringIdTypeAndNonStringIdResponseContent() throws Throwable {
+		Object[] testIdData = IdTestData.concat(IdTestData.convert(IdTestData.concat(IdTestData.ValidIntIds, IdTestData.InvalidIntIds)), IdTestData.NonStringNonIntIds);
+
+		for (Object testId : testIdData) {
+			lookupWithStringIdTypeAndNonStringIdResponseContent(testId);
+		}
+	}
+
+	private void lookupWithStringIdTypeAndNonStringIdResponseContent(Object testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String stringTestId = testId.toString().toLowerCase(Locale.getDefault());
+		final String responseContent = "{\"id\":" + stringTestId + ",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp("an id", new TableOperationCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(StringIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof StringIdType);
+			
+			StringIdType elem = (StringIdType)result;
+			
+			assertEquals(stringTestId, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
+
+	public void testLookupWithStringIdTypeAndNullIdResponseContent() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+		
+		final String responseContent = "{\"id\":null,\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp("an id", new TableOperationCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(StringIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof StringIdType);
+			
+			StringIdType elem = (StringIdType)result;
+			
+			assertEquals(null, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
+	
+	public void testLookupWithStringIdTypeAndNoIdResponseContent() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+		
+		final String responseContent = "{\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp("an id", new TableOperationCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(StringIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof StringIdType);
+			
+			StringIdType elem = (StringIdType)result;
+			
+			assertEquals(null, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
+	
+	public void testLookupWithStringIdTypeAndStringIdParameter() throws Throwable {
+		String[] testIdData = IdTestData.ValidStringIds;
+
+		for (String testId : testIdData) {
+			lookupWithStringIdTypeAndStringIdParameter(testId);
+		}
+	}
+
+	private void lookupWithStringIdTypeAndStringIdParameter(final String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
+		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp(testId, new TableOperationCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(StringIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof StringIdType);
+			
+			StringIdType elem = (StringIdType)result;
+			
+			assertEquals(testId, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
+	
+	public void testLookupWithStringIdTypeAndInvalidStringIdParameter() throws Throwable {
+		String[] testIdData = IdTestData.concat(IdTestData.EmptyStringIds, IdTestData.InvalidStringIds);
+
+		for (String testId : testIdData) {
+			lookupWithStringIdTypeAndInvalidStringIdParameter(testId);
+		}
+	}
+
+	private void lookupWithStringIdTypeAndInvalidStringIdParameter(final String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
+		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp(testId, new TableOperationCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(StringIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof IllegalArgumentException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+	
+	/*
+	public void testLookupWithStringIdTypeAndIntIdParameter() throws Throwable {
+		long[] testIdData = IdTestData.concat(IdTestData.ValidIntIds, IdTestData.InvalidIntIds);
+
+		for (long testId : testIdData) {
+			lookupWithStringIdTypeAndIntIdParameter(testId);
+		}
+	}
+
+	private void lookupWithStringIdTypeAndIntIdParameter(final long testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String stringTestId = String.valueOf(testId);
+		final String responseContent = "{\"id\":" + stringTestId + ",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp(testId, new TableOperationCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(StringIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof IllegalArgumentException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+	*/
+	
+	public void testLookupWithStringIdTypeAndNonStringNonIntIdParameter() throws Throwable {
+		Object[] testIdData = IdTestData.NonStringNonIntValidJsonIds;
+
+		for (Object testId : testIdData) {
+			lookupWithStringIdTypeAndNonStringNonIntIdParameter(testId);
+		}
+	}
+
+	private void lookupWithStringIdTypeAndNonStringNonIntIdParameter(final Object testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String stringTestId = testId.toString().toLowerCase(Locale.getDefault());
+		final String responseContent = "{\"id\":" + stringTestId + ",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp(testId, new TableOperationCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(StringIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+	
+	public void testLookupWithStringIdTypeAndNullIdParameter() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"id\":null,\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringIdType> msTable = client.getTable(tableName, StringIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp(null, new TableOperationCallback<StringIdType>() {
+					
+					@Override
+					public void onCompleted(StringIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof IllegalArgumentException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+	
+	// Integer Id Type
+
+	public void testLookupWithIntIdTypeAndIntIdResponseContent() throws Throwable {
+		long[] testIdData = IdTestData.concat(IdTestData.ValidIntIds, IdTestData.InvalidIntIds);
+
+		for (long testId : testIdData) {
+			lookupWithIntIdTypeAndIntIdResponseContent(testId);
+		}
+	}
+
+	private void lookupWithIntIdTypeAndIntIdResponseContent(long testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String stringTestId = String.valueOf(testId);
+		final String responseContent = "{\"id\":" + stringTestId + ",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<LongIdType> msTable = client.getTable(tableName, LongIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp(10, new TableOperationCallback<LongIdType>() {
+					
+					@Override
+					public void onCompleted(LongIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof LongIdType);
+			
+			LongIdType elem = (LongIdType)result;
+			
+			assertEquals(testId, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
+	
+	/*
+	public void testLookupWithIntIdTypeAndIntParseableIdResponseContent() throws Throwable {
+		Object[] testIdData = IdTestData.NonStringNonIntValidJsonIds;
+
+		for (Object testId : testIdData) {
+			lookupWithIntIdTypeAndIntParseableIdResponseContent(testId);
+		}
+	}
+
+	private void lookupWithIntIdTypeAndIntParseableIdResponseContent(Object testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+		
+		String stringTestId = testId.toString().toLowerCase(Locale.getDefault());
+		final String responseContent = "{\"id\":" + stringTestId + ",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<LongIdType> msTable = client.getTable(tableName, LongIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp(10, new TableOperationCallback<LongIdType>() {
+					
+					@Override
+					public void onCompleted(LongIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof LongIdType);
+			
+			LongIdType elem = (LongIdType)result;
+			
+			assertEquals(Long.valueOf(stringTestId), Long.valueOf(elem.Id));
+			assertEquals("Hey", elem.String);
+		}
+	}
+	*/
+
+	public void testLookupWithIntIdTypeAndNullIdResponseContent() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+		
+		final String responseContent = "{\"id\":null,\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<LongIdType> msTable = client.getTable(tableName, LongIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp(10, new TableOperationCallback<LongIdType>() {
+					
+					@Override
+					public void onCompleted(LongIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof LongIdType);
+			
+			LongIdType elem = (LongIdType)result;
+			
+			assertEquals(0L, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
+	
+	public void testLookupWithIntIdTypeAndNoIdResponseContent() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+		
+		final String responseContent = "{\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<LongIdType> msTable = client.getTable(tableName, LongIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp(10, new TableOperationCallback<LongIdType>() {
+					
+					@Override
+					public void onCompleted(LongIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof LongIdType);
+			
+			LongIdType elem = (LongIdType)result;
+			
+			assertEquals(0L, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
+	
+	public void testLookupWithIntIdTypeAndStringIdResponseContent() throws Throwable {
+		String[] testIdData = IdTestData.concat(IdTestData.concat(IdTestData.ValidStringIds, IdTestData.EmptyStringIds), IdTestData.InvalidStringIds);
+
+		for (String testId : testIdData) {
+			lookupWithIntIdTypeAndStringIdResponseContent(testId);
+		}
+	}
+
+	private void lookupWithIntIdTypeAndStringIdResponseContent(String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
+		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<LongIdType> msTable = client.getTable(tableName, LongIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp(10, new TableOperationCallback<LongIdType>() {
+					
+					@Override
+					public void onCompleted(LongIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof JsonSyntaxException) || !(exception.getCause() instanceof NumberFormatException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+
+	public void testLookupWithIntIdTypeAndIntIdParameter() throws Throwable {
+		long[] testIdData = IdTestData.ValidIntIds;
+
+		for (long testId : testIdData) {
+			lookupWithIntIdTypeAndIntIdParameter(testId);
+		}
+	}
+
+	private void lookupWithIntIdTypeAndIntIdParameter(final long testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String stringTestId = String.valueOf(testId);
+		final String responseContent = "{\"id\":" + stringTestId + ",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<LongIdType> msTable = client.getTable(tableName, LongIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp(testId, new TableOperationCallback<LongIdType>() {
+					
+					@Override
+					public void onCompleted(LongIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result =  container.getCustomResult();			
+			assertTrue(result instanceof LongIdType);
+			
+			LongIdType elem = (LongIdType)result;
+			
+			assertEquals(testId, elem.Id);
+			assertEquals("Hey", elem.String);
+		}
+	}
+
+	public void testLookupWithIntIdTypeAndInvalidIntIdParameter() throws Throwable {
+		long[] testIdData = IdTestData.InvalidIntIds;
+
+		for (long testId : testIdData) {
+			lookupWithIntIdTypeAndInvalidIntIdParameter(testId);
+		}
+	}
+
+	private void lookupWithIntIdTypeAndInvalidIntIdParameter(final long testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String stringTestId = String.valueOf(testId);
+		final String responseContent = "{\"id\":" + stringTestId + ",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<LongIdType> msTable = client.getTable(tableName, LongIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp(testId, new TableOperationCallback<LongIdType>() {
+					
+					@Override
+					public void onCompleted(LongIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof IllegalArgumentException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+
+	public void testLookupWithIntIdTypeAndStringIdParameter() throws Throwable {
+		String[] testIdData = IdTestData.concat(IdTestData.ValidStringIds, IdTestData.concat(IdTestData.EmptyStringIds, IdTestData.InvalidStringIds));
+
+		for (String testId : testIdData) {
+			lookupWithIntIdTypeAndStringIdParameter(testId);
+		}
+	}
+
+	private void lookupWithIntIdTypeAndStringIdParameter(final String testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
+		final String responseContent = "{\"id\":\"" + jsonTestId + "\",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<LongIdType> msTable = client.getTable(tableName, LongIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp(testId, new TableOperationCallback<LongIdType>() {
+					
+					@Override
+					public void onCompleted(LongIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+	
+	public void testLookupWithIntIdTypeAndNonStringNonIntIdParameter() throws Throwable {
+		Object[] testIdData = IdTestData.NonStringNonIntValidJsonIds;
+
+		for (Object testId : testIdData) {
+			lookupWithIntIdTypeAndNonStringNonIntIdParameter(testId);
+		}
+	}
+
+	private void lookupWithIntIdTypeAndNonStringNonIntIdParameter(final Object testId) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		String stringTestId = testId.toString().toLowerCase(Locale.getDefault());
+		final String responseContent = "{\"id\":" + stringTestId + ",\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<LongIdType> msTable = client.getTable(tableName, LongIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp(testId, new TableOperationCallback<LongIdType>() {
+					
+					@Override
+					public void onCompleted(LongIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+	
+	public void testLookupWithIntIdTypeAndNullParameter() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String tableName = "MyTableName";
+
+		final String responseContent = "{\"id\":null,\"String\":\"Hey\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<LongIdType> msTable = client.getTable(tableName, LongIdType.class);
+
+				// Call the lookup method
+				msTable.lookUp(null, new TableOperationCallback<LongIdType>() {
+					
+					@Override
+					public void onCompleted(LongIdType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();						
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception == null || !(exception instanceof IllegalArgumentException)) {
+			fail("Expected Exception IllegalArgumentException");
+		}
+	}
+
+
+	// Test Filter
 	
 	// Test Filter
 
