@@ -90,18 +90,6 @@ $testGroup('MobileServiceClient.js',
         });
     }),
 
-    $test('invalid authentication provider parameter')
-    .description('Login with invalid provider parameter fails')
-    .checkAsync(function () {
-        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
-
-        return client.login('this is neither a valid provider name or a JWT token').then(function (token) {
-            $assert.fail('unexpected success');
-        }, function (error) {
-            $assert.contains(error.toString(), 'The first parameter must be the name of the autentication provider or a Microsoft Account authentication token.');
-        });
-    }),
-
     $test('logout')
     .description('Verify Authentication.logout undoes the effects of logging in')
     .check(function () {
