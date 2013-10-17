@@ -2,9 +2,9 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Popups;
@@ -44,7 +44,7 @@ namespace ZUMOAPPNAME
             // This code inserts a new TodoItem into the database. When the operation completes
             // and Mobile Services has assigned an Id, the item is added to the CollectionView
             await todoTable.InsertAsync(todoItem);
-            items.Add(todoItem);                        
+            items.Add(todoItem);
         }
 
         private async void RefreshTodoItems()
