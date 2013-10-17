@@ -5,7 +5,6 @@
 
     var app = WinJS.Application;
     var activation = Windows.ApplicationModel.Activation;
-    WinJS.strictProcessing();
 
     app.onactivated = function (args) {
         if (args.detail.kind === activation.ActivationKind.launch) {
@@ -24,7 +23,7 @@
                 "ZUMOAPPURL",
                 "ZUMOAPPKEY"
             );
-            
+
             var todoTable = client.getTable('TodoItem');
             var todoItems = new WinJS.Binding.List();
 
@@ -70,11 +69,10 @@
                 var todoItem = eventArgs.target.dataContext.backingData;
                 todoItem.complete = eventArgs.target.checked;
                 updateCheckedTodoItem(todoItem);
-                
+
             });
 
             refreshTodoItems();
-
         }
     };
 
