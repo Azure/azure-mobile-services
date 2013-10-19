@@ -19,6 +19,10 @@ namespace ZumoE2ETestApp.Tests
         {
             List<ZumoTestGroup> result = new List<ZumoTestGroup>
             {
+                #if !NET45
+                ZumoLoginTests.CreateTests(),
+#endif
+                ZumoCustomApiTests.CreateTests(),
                 ZumoRoundTripTests.CreateTests(),
                 ZumoQueryTests.CreateTests(),
                 ZumoCUDTests.CreateTests(),
@@ -27,12 +31,8 @@ namespace ZumoE2ETestApp.Tests
                 ZumoWP8PushTests.CreateTests(),
 #endif
 #if NETFX_CORE                
-                ZumoPushTests.CreateTests(),
+                ZumoPushTests.CreateTests()
 #endif
-#if !NET45
-                ZumoLoginTests.CreateTests(),
-#endif
-                ZumoCustomApiTests.CreateTests(),
             };
 
             ZumoTestGroup allTestsUnattendedGroup = CreateGroupWithAllTests(result, true);

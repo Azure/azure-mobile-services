@@ -24,6 +24,7 @@ namespace ZumoE2ETestApp.Framework
 
         private static ZumoTestGlobals instance = new ZumoTestGlobals();
 
+        public static bool ShowAlerts = true;
         public MobileServiceClient Client { get; private set; }
         public Dictionary<string, object> GlobalTestParams { get; private set; }
 

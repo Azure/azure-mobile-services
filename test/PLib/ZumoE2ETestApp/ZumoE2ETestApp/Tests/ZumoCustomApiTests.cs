@@ -62,7 +62,7 @@ namespace ZumoE2ETestApp.Tests
                 testsWhichNeedAuth.Add(CreateJTokenApiTest(apiPermission, false, rndGen));
             }
 
-            testsWhichNeedAuth.Add(ZumoLoginTests.CreateLoginTest(MobileServiceAuthenticationProvider.Facebook));
+            testsWhichNeedAuth.Add(ZumoLoginTests.CreateLoginTest(MobileServiceAuthenticationProvider.Google));
             testsWhichNeedAuth.Add(CreateJTokenApiTest(ApiPermissions.User, true, rndGen));
             testsWhichNeedAuth.Add(ZumoLoginTests.CreateLogoutTest());
 
@@ -202,7 +202,8 @@ namespace ZumoE2ETestApp.Tests
         private static ZumoTest CreateHttpContentApiTest(DataFormat inputFormat, DataFormat outputFormat, Random seedGenerator)
         {
             string testName = string.Format("HttpContent overload - input {0} / output {1}", inputFormat, outputFormat);
-            return new ZumoTest(testName, async delegate(ZumoTest test) {
+            return new ZumoTest(testName, async delegate(ZumoTest test)
+            {
                 var client = ZumoTestGlobals.Instance.Client;
                 var apiName = AppApiName;
                 var testResult = true;
@@ -442,7 +443,7 @@ namespace ZumoE2ETestApp.Tests
                             new JProperty("member" + i, SanitizeJsonXml(jp.Value))));
                 default:
                     throw new ArgumentException("Invalid type: " + body.Type);
-                   
+
             }
         }
 
@@ -791,9 +792,14 @@ namespace ZumoE2ETestApp.Tests
         {
             switch (rndGen.Next(10))
             {
-                case 0: case 1: case 2:
+                case 0:
+                case 1:
+                case 2:
                     return HttpMethod.Post;
-                case 3: case 4: case 5: case 6:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
                     return HttpMethod.Get;
                 case 7:
                     return HttpMethod.Put;
