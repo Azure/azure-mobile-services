@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.20617.1 PREVIEW
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZumoE2ETestApp", "ZumoE2ETestApp\ZumoE2ETestApp.csproj", "{B39A075E-B376-4413-9ABE-FF948F0D1F05}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F1DF3205-49D4-412A-892C-9A8A41F387DA}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
@@ -14,8 +14,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microsoft.Bcl.Build", "Micr
 	ProjectSection(SolutionItems) = preProject
 		packages\Microsoft.Bcl.Build.1.0.8\tools\Microsoft.Bcl.Build.targets = packages\Microsoft.Bcl.Build.1.0.8\tools\Microsoft.Bcl.Build.targets
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZumoE2ETestApp", "ZumoE2ETestApp\ZumoE2ETestApp.csproj", "{B39A075E-B376-4413-9ABE-FF948F0D1F05}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZumoE2ETestAppWP8", "ZumoE2ETestAppWP8\ZumoE2ETestAppWP8.csproj", "{520D957A-0B0E-4E85-A54F-DC5CE97C4A67}"
 EndProject
