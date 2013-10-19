@@ -19,7 +19,7 @@ namespace ZumoE2ETestApp.Tests
 {
     internal static class ZumoTestCommon
     {
-        public static ZumoTest CreateTestWithSingleAlert(string alert, bool showAlert = true)
+        public static ZumoTest CreateTestWithSingleAlert(string alert)
         {
 #if !WINDOWS_PHONE
             return new ZumoTest("Simple alert", async delegate(ZumoTest test)
