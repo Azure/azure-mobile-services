@@ -19,7 +19,7 @@ namespace ZumoE2ETestApp.Tests
         {
             List<ZumoTestGroup> result = new List<ZumoTestGroup>
             {
-                #if !NET45
+#if !NET45
                 ZumoLoginTests.CreateTests(),
 #endif
                 ZumoCustomApiTests.CreateTests(),

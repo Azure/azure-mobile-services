@@ -140,6 +140,7 @@ namespace ZumoE2ETestApp
                     {
                         await Util.MessageBox(message, "Test group finished");
                     }
+
                     ZumoTestGlobals.ShowAlerts = true;
                 }
             }
