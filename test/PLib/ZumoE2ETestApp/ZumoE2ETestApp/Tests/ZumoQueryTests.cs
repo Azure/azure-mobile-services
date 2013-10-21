@@ -70,14 +70,14 @@ namespace ZumoE2ETestApp.Tests
 
             // Date fields
             result.AddTest(CreateQueryTest("Date: Greater than, less than - Movies with release date in the 70s",
-                m => m.ReleaseDate > new DateTime(1969,12,31,0,0,0,DateTimeKind.Utc) && 
+                m => m.ReleaseDate > new DateTime(1969, 12, 31, 0, 0, 0, DateTimeKind.Utc) &&
                     m.ReleaseDate < new DateTime(1971, 1, 1, 0, 0, 0, DateTimeKind.Utc)));
             result.AddTest(CreateQueryTest("Date: Greater than, less than - Movies with release date in the 80s",
-                m => m.ReleaseDate >= new DateTime(1980,1,1,0,0,0,DateTimeKind.Utc) && 
+                m => m.ReleaseDate >= new DateTime(1980, 1, 1, 0, 0, 0, DateTimeKind.Utc) &&
                     m.ReleaseDate < new DateTime(1989, 12, 31, 23, 59, 59, DateTimeKind.Utc)));
             result.AddTest(CreateQueryTest("Date: Equal - Movies released on 1994-10-14 (Shawshank Redemption / Pulp Fiction)",
                 m => m.ReleaseDate == new DateTime(1994, 10, 14, 0, 0, 0, DateTimeKind.Utc)));
-            
+
             // Date functions
             result.AddTest(CreateQueryTest("Date (month): Movies released in November",
                 m => m.ReleaseDate.Month == 11));
@@ -93,7 +93,7 @@ namespace ZumoE2ETestApp.Tests
                 m => m.Year >= 2000 && !(m.BestPictureWinner == false)));
             result.AddTest(CreateQueryTest("Bool: not equal to false - Best picture winners after 2000",
                 m => m.BestPictureWinner != false && m.Year >= 2000));
-    
+
             // Top and skip
             result.AddTest(CreateQueryTest("Get all using large $top - 500", null, 500));
             result.AddTest(CreateQueryTest("Skip all using large skip - 500", null, null, 500));
@@ -128,7 +128,7 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateQueryTest<MobileServiceInvalidOperationException>("(Neg) Very large top value", m => m.Year > 2000, 1001));
             result.AddTest(CreateQueryTest<NotSupportedException>("(Neg) Unsupported predicate: unsupported arithmetic",
                 m => Math.Sqrt(m.Year) > 43));
-            
+
             // Invalid lookup
             for (int i = -1; i <= 0; i++)
             {
@@ -174,7 +174,10 @@ namespace ZumoE2ETestApp.Tests
                 var newPage = new MoviesDisplayControl();
                 var collection = await query.ToCollectionAsync();
                 newPage.SetMoviesSource(collection);
-                await newPage.Display();
+                if (ZumoTestGlobals.ShowAlerts)
+                {
+                    await newPage.Display();
+                }
                 return true;
             })
             {
@@ -225,7 +228,7 @@ namespace ZumoE2ETestApp.Tests
         }
 
         private static ZumoTest CreateQueryTest<TExpectedException>(
-            string name, Expression<Func<Movie, bool>> whereClause, 
+            string name, Expression<Func<Movie, bool>> whereClause,
             int? top = null, int? skip = null, OrderByClause[] orderBy = null,
             Expression<Func<Movie, string>> selectExpression = null, bool? includeTotalCount = null,
             string odataExpression = null)

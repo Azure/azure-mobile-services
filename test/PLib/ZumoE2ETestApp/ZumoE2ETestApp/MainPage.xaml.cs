@@ -34,7 +34,6 @@ namespace ZumoE2ETestApp
     public sealed partial class MainPage : Page
     {
         List<ZumoTestGroup> allTests;
-        bool showAlerts = true;
 
         public MainPage()
         {
@@ -127,16 +126,22 @@ namespace ZumoE2ETestApp
                     string message = string.Format(CultureInfo.InvariantCulture, "Passed {0} of {1} tests", passed, testGroup.AllTests.Count());
                     if (passed == testGroup.AllTests.Count())
                     {
-                        btnRunAllUnattendedTests.Content = "Passed";
+                        if (testGroup.Name == TestStore.AllTestsGroupName)
+                        {
+                            btnRunAllTests.Content = "Passed";
+                        }
+                        else
+                        {
+                            btnRunAllUnattendedTests.Content = "Passed";
+                        }
                     }
-                    else
-                    {
-                        btnRunAllUnattendedTests.Content = "Failed";
-                    }
-                    if (showAlerts)
+
+                    if (ZumoTestGlobals.ShowAlerts)
                     {
                         await Util.MessageBox(message, "Test group finished");
                     }
+
+                    ZumoTestGlobals.ShowAlerts = true;
                 }
             }
             else
@@ -229,7 +234,7 @@ namespace ZumoE2ETestApp
             if (testGroup.Name.StartsWith(TestStore.AllTestsGroupName) && !string.IsNullOrEmpty(this.txtUploadLogsUrl.Text))
             {
                 // Upload logs automatically if running all tests
-                await Util.UploadLogs(this.txtUploadLogsUrl.Text, string.Join("\n", testGroup.GetLogs()), "winstorecs", true, showAlerts);
+                await Util.UploadLogs(this.txtUploadLogsUrl.Text, string.Join("\n", testGroup.GetLogs()), "winstorecs", true);
             }
         }
 
@@ -337,6 +342,7 @@ namespace ZumoE2ETestApp
 
         private void btnRunAllTests_Click(object sender, RoutedEventArgs e)
         {
+            ZumoTestGlobals.ShowAlerts = false;
             for (int i = 0; i < this.allTests.Count; i++)
             {
                 if (allTests[i].Name == TestStore.AllTestsGroupName)
@@ -349,7 +355,7 @@ namespace ZumoE2ETestApp
 
         private void btnRunAllUnattendedTests_Click(object sender, RoutedEventArgs e)
         {
-            showAlerts = false;
+            ZumoTestGlobals.ShowAlerts = false;
             for (int i = 0; i < this.allTests.Count; i++)
             {
                 if (allTests[i].Name == TestStore.AllTestsUnattendedGroupName)

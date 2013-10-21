@@ -35,7 +35,7 @@ namespace ZumoE2ETestApp.Framework
                 dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.Millisecond, dateTime.Kind);
         }
 
-        public static async Task UploadLogs(string uploadLogsUrl, string testLogs, string platform, bool allTests, bool showAlerts = true)
+        public static async Task UploadLogs(string uploadLogsUrl, string testLogs, string platform, bool allTests)
         {
             using (var client = new HttpClient())
             {
@@ -64,7 +64,7 @@ namespace ZumoE2ETestApp.Framework
                         var body = await response.Content.ReadAsStringAsync();
                         var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
 
-                        if (showAlerts)
+                        if (ZumoTestGlobals.ShowAlerts)
                         {
                             // do not show dialog if test run was started by the run all buttons; used in test automation scenarios
                             await MessageBox(body, title);
