@@ -227,7 +227,7 @@ namespace ZumoE2ETestApp
             if (testGroup.Name.StartsWith(TestStore.AllTestsGroupName) && !string.IsNullOrEmpty(this.txtUploadLogsUrl.Text))
             {
                 // Upload logs automatically if running all tests and write the the logs location to done.txt
-                var logsUploadedURL= await Util.UploadLogs(this.txtUploadLogsUrl.Text, string.Join("\n", testGroup.GetLogs()), "winstorecs", true);
+                var logsUploadedURL = await Util.UploadLogs(this.txtUploadLogsUrl.Text, string.Join("\n", testGroup.GetLogs()), "winstorecs", true);
                 StorageFolder storageFolder = KnownFolders.PicturesLibrary;
                 StorageFile logsUploadedFile = await storageFolder.CreateFileAsync(ZumoTestGlobals.LogsLocationFile, CreationCollisionOption.ReplaceExisting);
                 await FileIO.WriteTextAsync(logsUploadedFile, logsUploadedURL);
