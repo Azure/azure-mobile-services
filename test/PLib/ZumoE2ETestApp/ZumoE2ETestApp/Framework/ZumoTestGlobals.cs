@@ -22,7 +22,6 @@ namespace ZumoE2ETestApp.Framework
         public const string ClientVersionKeyName = "clientVersion";
         public const string RuntimeVersionKeyName = "x-zumo-version";
         
-
         private static ZumoTestGlobals instance = new ZumoTestGlobals();
 
         public static bool ShowAlerts = true;
