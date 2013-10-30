@@ -28,23 +28,34 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public HttpRequestMessage Request { get; set; }
         public HttpResponseMessage Response { get; set; }
 
-        public Action<HttpRequestMessage> OnSendingRequest { get; set; }
+        public Func<HttpRequestMessage, Task<HttpRequestMessage>> OnSendingRequest { get; set; }
 
         public void SetResponseContent(string content)
         {
-            this.Response.Content = new StringContent(content, Encoding.UTF8, "application/json");
+            this.Response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent(content, Encoding.UTF8, "application/json")
+            }; 
         }
 
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            this.Request = request;
+            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
+
             if (this.OnSendingRequest != null)
             {
-                this.OnSendingRequest(request);
+                this.OnSendingRequest(request).ContinueWith(t =>
+                {
+                    this.Request = t.Result;
+                    tcs.SetResult(this.Response);
+                });
             }
-
-            TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-            tcs.SetResult(this.Response);
+            else
+            {
+                this.Request = request;
+                tcs.SetResult(this.Response);
+            }
+            
             return tcs.Task;
         }
 

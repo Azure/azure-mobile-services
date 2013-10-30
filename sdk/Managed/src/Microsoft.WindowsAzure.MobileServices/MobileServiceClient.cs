@@ -46,6 +46,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal string applicationInstallationId;
 
         /// <summary>
+        /// Gets the <see cref="ITableStorage"/> instance for the remote Mobile Service.
+        /// </summary>
+        internal RemoteTableStorage RemoteStorage { get; private set; }
+
+        /// <summary>
         /// Gets the Uri to the Mobile Services application that is provided by
         /// the call to MobileServiceClient(...).
         /// </summary>
@@ -191,6 +196,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             handlers = handlers ?? EmptyHttpMessageHandlers;
             this.HttpClient = new MobileServiceHttpClient(this, handlers);
+            this.RemoteStorage = new RemoteTableStorage(this.HttpClient);
             this.Serializer = new MobileServiceSerializer();
         }
 
@@ -220,7 +226,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                         "tableName"));
             }
 
-            return new MobileServiceTable(tableName, this);
+            return new MobileServiceTable(tableName, this, this.RemoteStorage);
         }
 
         /// <summary>
@@ -236,7 +242,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public IMobileServiceTable<T> GetTable<T>()
         {
             string tableName = this.SerializerSettings.ContractResolver.ResolveTableName(typeof(T));
-            return new MobileServiceTable<T>(tableName, this);
+            return new MobileServiceTable<T>(tableName, this, this.RemoteStorage);
         }
 
         /// <summary>
@@ -355,11 +361,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             string content = null;
             if (body != null)
             {
-                content = serializer.Serialize(body);
+                content = serializer.Serialize(body).ToString();
             }
 
             string response = await this.InternalInvokeApiAsync(apiName, content, method, parameters);
-            return serializer.Deserialize<U>(response);
+            return serializer.Deserialize<U>(JToken.Parse(response));
         }
 
         /// <summary>
@@ -447,10 +453,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// A dictionary of user-defined parameters and values to include in the request URI query string.
         /// </param>
         /// <returns>The response content from the custom api invocation.</returns>
-        private Task<string> InternalInvokeApiAsync(string apiName, string content, HttpMethod method, IDictionary<string, string> parameters = null)
+        private async Task<string> InternalInvokeApiAsync(string apiName, string content, HttpMethod method, IDictionary<string, string> parameters = null)
         {
             method = method ?? defaultHttpMethod;
-            return this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), content);
+            MobileServiceHttpResponse response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), content);
+            return response.Content;
         }
 
         /// <summary>

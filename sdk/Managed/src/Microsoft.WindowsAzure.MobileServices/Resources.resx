@@ -201,7 +201,7 @@
   <data name="MobileServiceContractResolver_TypeWithDataMemberButNoDataContract" xml:space="preserve">
     <value>The type '{0}' has one or members with a DataMemberAttribute, but the type itself does not have a DataContractAttribute. Use the Newtonsoft.Json.JsonPropertyAttribute in place of the DataMemberAttribute and set the PropertyName to the desired name.</value>
   </data>
-  <data name="MobileServiceTable_IdNotFound" xml:space="preserve">
+  <data name="MobileServiceSerializer_IdNotFound" xml:space="preserve">
     <value>Expected {0} member not found.</value>
   </data>
   <data name="MobileServiceContractResolver_NumberOutOfRange" xml:space="preserve">
@@ -236,5 +236,32 @@
   </data>
   <data name="HttpMessageHandlerExtensions_WrongHandlerType" xml:space="preserve">
     <value>All message handlers except the last must be of the type '{0}'</value>
+  </data>
+  <data name="MobileServiceContractResolver_MultipleSystemPropertyAttributes" xml:space="preserve">
+    <value>A member can only have one system property attribute. The member '{0}' on type '{1}' has system property attributes '{2}' and '{3}'. </value>
+  </data>
+  <data name="MobileServiceCollection_LoadInProcess" xml:space="preserve">
+    <value>Loading of more items already in process.</value>
+  </data>
+  <data name="MobileServiceSerializer_InvalidIntegerId" xml:space="preserve">
+    <value>The integer id '{0}' is not a positive integer value.</value>
+  </data>
+  <data name="MobileServiceSerializer_StringIdTooLong" xml:space="preserve">
+    <value>The string id '{0}' is longer than the max string id length of {1} characters.</value>
+  </data>
+  <data name="MobileServiceSerializer_LookupInvalidIdType" xml:space="preserve">
+    <value>The id parameter type '{0}' is invalid for looking up items of type '{1}'.</value>
+  </data>
+  <data name="MobileServiceSerializer_IdCasingIncorrect" xml:space="preserve">
+    <value>The casing of the '{0}' property is invalid.</value>
+  </data>
+  <data name="MobileServiceContractResolver_IntegerIdTypeWithSystemPropertyAttributes" xml:space="preserve">
+    <value>The type '{0}' has an integer id member and therefore can not have any members with the system property attribute '{1}'.</value>
+  </data>
+  <data name="MobileServiceSerializer_InvalidStringId" xml:space="preserve">
+    <value>The string id '{0}' is invalid. An id must not contain any control characters or the characters ",+,?,\,/`.</value>
+  </data>
+  <data name="MobileServiceSerializer_NullOrEmptyStringId" xml:space="preserve">
+    <value>The id can not be null or an empty string.</value>
   </data>
 </root>

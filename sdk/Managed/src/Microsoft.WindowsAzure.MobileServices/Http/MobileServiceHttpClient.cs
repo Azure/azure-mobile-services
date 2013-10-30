@@ -130,9 +130,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// The content of the response as a string.
         /// </returns>
-        public Task<string> RequestWithoutHandlersAsync(HttpMethod method, string uriPathAndQuery, string content = null)
+        public async Task<string> RequestWithoutHandlersAsync(HttpMethod method, string uriPathAndQuery, string content = null)
         {
-            return this.RequestAsync(false, method, uriPathAndQuery, content, false);
+            MobileServiceHttpResponse response = await this.RequestAsync(false, method, uriPathAndQuery, content, false);
+            return response.Content;
         }
 
         /// <summary>
@@ -152,12 +153,19 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="ensureResponseContent">
         /// Optional parameter to indicate if the response should include content.
         /// </param>
+        /// <param name="requestHeaders">
+        /// Additional request headers to include with the request.
+        /// </param>
         /// <returns>
-        /// The content of the response as a string.
+        /// The response.
         /// </returns>
-        public Task<string> RequestAsync(HttpMethod method, string uriPathAndQuery, string content = null, bool ensureResponseContent = true)
+        public Task<MobileServiceHttpResponse> RequestAsync(HttpMethod method,
+                                                             string uriPathAndQuery, 
+                                                             string content = null,
+                                                             bool ensureResponseContent = true,
+                                                             IDictionary<string, string> requestHeaders = null)
         {
-            return this.RequestAsync(true, method, uriPathAndQuery, content, ensureResponseContent);
+            return this.RequestAsync(true, method, uriPathAndQuery, content, ensureResponseContent, requestHeaders);
         }
 
         /// <summary>
@@ -179,17 +187,25 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="ensureResponseContent">
         /// Optional parameter to indicate if the response should include content.
         /// </param>
+        /// <param name="requestHeaders">
+        /// Additional request headers to include with the request.
+        /// </param>
         /// <returns>
         /// The content of the response as a string.
         /// </returns>
-        private async Task<string> RequestAsync(bool UseHandlers, HttpMethod method, string uriPathAndQuery, string content = null, bool ensureResponseContent = true)
+        private async Task<MobileServiceHttpResponse> RequestAsync(bool UseHandlers, 
+                                                        HttpMethod method, 
+                                                        string uriPathAndQuery, 
+                                                        string content = null, 
+                                                        bool ensureResponseContent = true,
+                                                        IDictionary<string, string> requestHeaders = null)
         {
             Debug.Assert(method != null);
             Debug.Assert(!string.IsNullOrEmpty(uriPathAndQuery));
 
             // Create the request
             HttpContent httpContent = CreateHttpContent(content);
-            HttpRequestMessage request = this.CreateHttpRequestMessage(method, uriPathAndQuery, null, httpContent);
+            HttpRequestMessage request = this.CreateHttpRequestMessage(method, uriPathAndQuery, requestHeaders, httpContent);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(RequestJsonContentType));
 
             // Get the response
@@ -202,14 +218,19 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 client = this.httpClientSansHandlers;
             }
-            HttpResponseMessage response = await this.SendRequestAsync(client, request, ensureResponseContent);            
+            HttpResponseMessage response = await this.SendRequestAsync(client, request, ensureResponseContent);
             string responseContent = await GetResponseContent(response);
+            string etag = null;
+            if (response.Headers.ETag != null)
+            {
+                etag = response.Headers.ETag.Tag;
+            }
 
             // Dispose of the request and response
             request.Dispose();
             response.Dispose();
 
-            return responseContent;
+            return new MobileServiceHttpResponse(responseContent, etag);
         }
 
         /// <summary>

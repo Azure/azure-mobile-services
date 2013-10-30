@@ -52,7 +52,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     {
         Food,
         Furniture,
-    }    
+    }
 
     [Tag("query")]
     [Tag("unit")]
@@ -79,7 +79,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual("Product", query.TableName);
             Assert.IsNull(query.Filter);
             Assert.AreEqual(2, query.Selection.Count);
-            Assert.AreEqual(0, query.Ordering.Count);            
+            Assert.AreEqual(0, query.Ordering.Count);
         }
 
         [TestMethod]
@@ -93,7 +93,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(1, query.Ordering.Count);
             Assert.AreEqual("Price", query.Ordering[0].Key);
             Assert.IsTrue(query.Ordering[0].Value);
-            
+
             // Chaining
             query = Compile<Product, Product>(table => table.OrderBy(p => p.Price));
             Assert.AreEqual(1, query.Ordering.Count);
@@ -118,7 +118,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             // Query syntax with multiple
             query = Compile<Product, Product>(table =>
                 from p in table
-                orderby p.Price ascending, p.Name descending                
+                orderby p.Price ascending, p.Name descending
                 select p);
             Assert.AreEqual(2, query.Ordering.Count);
             Assert.AreEqual("Price", query.Ordering[0].Key);
@@ -195,8 +195,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             // Verify that we don't blow up by trying to include the Foo
             // property in the compiled query
             Compile((IMobileServiceTable<Product> table) =>
-                table.Select( p => new { Foo = p.Name})
-                     .Select( f => new { LowerFoo = f.Foo.ToLower() }));
+                table.Select(p => new { Foo = p.Name })
+                     .Select(f => new { LowerFoo = f.Foo.ToLower() }));
         }
 
         [TestMethod]
@@ -229,12 +229,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com");
             IMobileServiceTable<Product> t = service.GetTable<Product>();
 
-            Func<IMobileServiceTable<Product>, IMobileServiceTableQuery<Product>> getQuery = (table =>
-                (from p in table
-                 select p).WithParameters(userParmeters1).Skip(2).WithParameters(userParmeters2));
+            IMobileServiceTableQuery<Product> originalQuery = from p in t select p;
+            IMobileServiceTableQuery<Product> query = originalQuery.WithParameters(userParmeters1)
+                                                                   .Skip(2)
+                                                                   .WithParameters(userParmeters2);
 
-            IMobileServiceTableQuery<Product> query = getQuery(t);
-
+            Assert.AreEqual("PA", originalQuery.Parameters["state"], "original query should also have parameters");
+            Assert.AreEqual("USA", originalQuery.Parameters["country"], "original query should also have parameters");
             Assert.AreEqual("PA", query.Parameters["state"]);
             Assert.AreEqual("USA", query.Parameters["country"]);
         }
@@ -363,7 +364,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.IsFalse(query.Top.HasValue);
 
             query = Compile<Product, Product>(table => table.Take(5));
-            Assert.AreEqual(query.Top, 5); 
+            Assert.AreEqual(query.Top, 5);
             Assert.IsFalse(query.Skip.HasValue);
 
             query = Compile<Product, Product>(table => table.Skip(7).Take(9));
@@ -465,9 +466,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 from p in table
                 where p.Created.Second == 7
                 select p);
-            Assert.AreEqual(query.Filter, "(second(Created) eq 7)"); 
+            Assert.AreEqual(query.Filter, "(second(Created) eq 7)");
 
-            
+
             // Static methods
             query = Compile<Product, Product>(table =>
                 from p in table
@@ -648,7 +649,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 where namesList.Contains(p.Name)
                 select p);
             Assert.AreEqual(query.Filter, "((Name eq 'name1') or (Name eq 'name2'))");
-                      
+
 
             //test Contains on Collection<T>
             Collection<string> coll = new Collection<string>() { "name1", "name2" };
@@ -709,7 +710,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 from p in table
                 where doubles.Contains(p.Weight)
                 select p);
-            Assert.AreEqual(query.Filter, "((Weight eq 4.6) or (Weight eq 3.9089))");           
+            Assert.AreEqual(query.Filter, "((Weight eq 4.6) or (Weight eq 3.9089))");
         }
 
         [TestMethod]
@@ -940,7 +941,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 where p.InStock
                 select p);
             Assert.AreEqual("Product", query.TableName);
-            Assert.AreEqual("InStock",query.Filter);
+            Assert.AreEqual("InStock", query.Filter);
             Assert.AreEqual(0, query.Selection.Count);
             Assert.AreEqual(0, query.Ordering.Count);
         }
@@ -954,7 +955,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 select p);
             Assert.AreEqual("Product", query.TableName);
             Assert.AreEqual("(UnsignedId eq 12L)", query.Filter);
-                     
+
             //unsigned ints should be sent as long
             query = Compile<Product, Product>(table =>
                 from p in table
@@ -1006,8 +1007,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
         [TestMethod]
         public void DoublesSerializedUsingInvariantCulture()
-        {            
-            MobileServiceTableQueryDescription query = Compile<Product, Product>(table => 
+        {
+            MobileServiceTableQueryDescription query = Compile<Product, Product>(table =>
                 from p in table
                 where p.Weight > 1.3f
                 select p);
