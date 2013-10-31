@@ -103,7 +103,7 @@ NSString *const httpDelete = @"DELETE";
     // Create the URL
     NSURL *url = [MSURLBuilder URLForTable:table
                                  parameters:parameters
-                                        orError:&error];
+                                    orError:&error];
     if (!error) {
         // Create the request
         request = [[MSTableItemRequest alloc] initWithURL:url

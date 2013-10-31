@@ -109,12 +109,12 @@
     }
 }
 
--(void) deleteWithId:(NSNumber *)itemId completion:(MSDeleteBlock)completion
+-(void) deleteWithId:(id)itemId completion:(MSDeleteBlock)completion
 {
     [self deleteWithId:itemId parameters:nil completion:completion];
 }
 
--(void) deleteWithId:(NSNumber *)itemId
+-(void) deleteWithId:(id)itemId
           parameters:(NSDictionary *)parameters
           completion:(MSDeleteBlock)completion
 {
@@ -137,12 +137,12 @@
 #pragma mark * Public Read Methods
 
 
--(void) readWithId:(NSNumber *)itemId completion:(MSItemBlock)completion
+-(void) readWithId:(id)itemId completion:(MSItemBlock)completion
 {
     [self readWithId:itemId parameters:nil completion:completion];
 }
 
--(void) readWithId:(NSNumber *)itemId
+-(void) readWithId:(id)itemId
         parameters:(NSDictionary *)parameters
         completion:(MSItemBlock)completion
 {
