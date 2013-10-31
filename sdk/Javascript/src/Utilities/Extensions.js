@@ -167,7 +167,7 @@ exports.isValidId = function (value) {
 
     if (_.isString(value)) {
         // Strings must contain at least one non whitespace character
-        if (value.length === 0 || value.length > 255) {
+        if (value.length === 0 || value.length > 255 || value.trim().length === 0) {
             return false;
         }
 

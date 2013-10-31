@@ -53,6 +53,7 @@ var invalidStringIds = [
             "\/",
             "`",
             "+",
+            " ",
             "control character between 0 and 32 " + String.fromCharCode(16),
             "control character between 127 and 160" + String.fromCharCode(130)
     ];
