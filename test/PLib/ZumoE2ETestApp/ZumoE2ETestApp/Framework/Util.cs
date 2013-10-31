@@ -35,7 +35,7 @@ namespace ZumoE2ETestApp.Framework
                 dateTime.Hour, dateTime.Minute, dateTime.Second, dateTime.Millisecond, dateTime.Kind);
         }
 
-        public static async Task UploadLogs(string uploadLogsUrl, string testLogs, string platform, bool allTests)
+        public static async Task<string> UploadLogs(string uploadLogsUrl, string testLogs, string platform, bool allTests)
         {
             using (var client = new HttpClient())
             {
@@ -69,7 +69,7 @@ namespace ZumoE2ETestApp.Framework
                             // do not show dialog if test run was started by the run all buttons; used in test automation scenarios
                             await MessageBox(body, title);
                         }
-
+                        return body;
                     }
                 }
             }
