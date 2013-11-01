@@ -19,10 +19,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         /// </summary>
         /// <param name="provider">The provider with which to login.
         /// </param>
+        /// <param name="useProviderStringOverload">Indicates if the call to <see cref="MobileServiceClient.LoginAsync"/>
+        /// should be made with the overload where the provider is passed as a string.
+        /// </param>
         /// <returns>The UserId and MobileServiceAuthentication token obtained from logging in.</returns>
-        public static async Task<string> TestLoginAsync(MobileServiceAuthenticationProvider provider)
+        public static async Task<string> TestLoginAsync(MobileServiceAuthenticationProvider provider, bool useProviderStringOverload)
         {
-            MobileServiceUser user = await client.LoginAsync(provider);
+            MobileServiceUser user;
+            if (useProviderStringOverload)
+            {
+                user = await client.LoginAsync(provider.ToString());
+            }
+            else
+            {
+                user = await client.LoginAsync(provider);
+            }
+
             return string.Format("UserId: {0} Token: {1}", user.UserId, user.MobileServiceAuthenticationToken);
         }
 

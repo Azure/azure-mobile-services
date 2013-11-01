@@ -272,9 +272,54 @@ namespace Microsoft.WindowsAzure.MobileServices
         [SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Login", Justification = "Login is more appropriate than LogOn for our usage.")]
         public Task<MobileServiceUser> LoginAsync(MobileServiceAuthenticationProvider provider, JObject token)
         {
+            if (!Enum.IsDefined(typeof(MobileServiceAuthenticationProvider), provider))
+            {
+                throw new ArgumentOutOfRangeException("provider");
+            }
+
+            return this.LoginAsync(provider.ToString(), token);
+        }
+
+        /// <summary>
+        /// Logs a user into a Windows Azure Mobile Service with the provider and optional token object.
+        /// </summary>
+        /// <param name="provider">
+        /// Authentication provider to use.
+        /// </param>
+        /// <param name="token">
+        /// Provider specific object with existing OAuth token to log in with.
+        /// </param>
+        /// <remarks>
+        /// The token object needs to be formatted depending on the specific provider. These are some
+        /// examples of formats based on the providers:
+        /// <list type="bullet">
+        ///   <item>
+        ///     <term>MicrosoftAccount</term>
+        ///     <description><code>{"authenticationToken":"&lt;the_authentication_token&gt;"}</code></description>
+        ///   </item>
+        ///   <item>
+        ///     <term>Facebook</term>
+        ///     <description><code>{"access_token":"&lt;the_access_token&gt;"}</code></description>
+        ///   </item>
+        ///   <item>
+        ///     <term>Google</term>
+        ///     <description><code>{"access_token":"&lt;the_access_token&gt;"}</code></description>
+        ///   </item>
+        /// </list>
+        /// </remarks>
+        /// <returns>
+        /// Task that will complete when the user has finished authentication.
+        /// </returns>
+        public Task<MobileServiceUser> LoginAsync(string provider, JObject token)
+        {
             if (token == null)
             {
                 throw new ArgumentNullException("token");
+            }
+
+            if (!Enum.IsDefined(typeof(MobileServiceAuthenticationProvider), provider))
+            {
+                throw new ArgumentOutOfRangeException("provider");
             }
 
             MobileServiceTokenAuthentication auth = new MobileServiceTokenAuthentication(this, provider, token);

@@ -21,10 +21,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         /// </param>
         /// <param name="useSingleSignOn">Indicates if single sign-on should be used when logging in.
         /// </param>
+        /// <param name="useProviderStringOverload">Indicates if the call to <see cref="MobileServiceClient.LoginAsync"/>
+        /// should be made with the overload where the provider is passed as a string.
+        /// </param>
         /// <returns>The UserId and MobileServiceAuthentication token obtained from logging in.</returns>
-        public static async Task<string> TestLoginAsync(MobileServiceAuthenticationProvider provider, bool useSingleSignOn)
+        public static async Task<string> TestLoginAsync(MobileServiceAuthenticationProvider provider, bool useSingleSignOn, bool useProviderStringOverload)
         {
-            MobileServiceUser user = await client.LoginAsync(provider, useSingleSignOn);
+            MobileServiceUser user;
+            if (useProviderStringOverload)
+            {
+                user = await client.LoginAsync(provider.ToString(), useSingleSignOn);
+            }
+            else
+            {
+                user = await client.LoginAsync(provider, useSingleSignOn);
+            }
+            
             return string.Format("UserId: {0} Token: {1}", user.UserId, user.MobileServiceAuthenticationToken);
         }
 

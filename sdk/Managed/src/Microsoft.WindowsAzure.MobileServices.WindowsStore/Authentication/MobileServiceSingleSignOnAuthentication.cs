@@ -28,7 +28,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="provider">
         /// The authentication provider.
         /// </param>
-        public MobileServiceSingleSignOnAuthentication(IMobileServiceClient client, MobileServiceAuthenticationProvider provider)
+        public MobileServiceSingleSignOnAuthentication(IMobileServiceClient client, string provider)
             : base(client, provider)
         {
         }

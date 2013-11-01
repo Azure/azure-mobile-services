@@ -59,7 +59,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         IMobileServiceTable<T> GetTable<T>();
 
         /// <summary>
-        /// Logs a user into a Windows Azure Mobile Service with the provider and optional token object.
+        /// Logs a user into a Windows Azure Mobile Service with the provider a token object.
         /// </summary>
         /// <param name="provider">
         /// Authentication provider to use.
@@ -89,6 +89,38 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Task that will complete when the user has finished authentication.
         /// </returns>
         Task<MobileServiceUser> LoginAsync(MobileServiceAuthenticationProvider provider, JObject token);
+
+        /// <summary>
+        /// Logs a user into a Windows Azure Mobile Service with the provider and a token object.
+        /// </summary>
+        /// <param name="provider">
+        /// Authentication provider to use.
+        /// </param>
+        /// <param name="token">
+        /// Provider specific object with existing OAuth token to log in with.
+        /// </param>
+        /// <remarks>
+        /// The token object needs to be formatted depending on the specific provider. These are some
+        /// examples of formats based on the providers:
+        /// <list type="bullet">
+        ///   <item>
+        ///     <term>MicrosoftAccount</term>
+        ///     <description><code>{"authenticationToken":"&lt;the_authentication_token&gt;"}</code></description>
+        ///   </item>
+        ///   <item>
+        ///     <term>Facebook</term>
+        ///     <description><code>{"access_token":"&lt;the_access_token&gt;"}</code></description>
+        ///   </item>
+        ///   <item>
+        ///     <term>Google</term>
+        ///     <description><code>{"access_token":"&lt;the_access_token&gt;"}</code></description>
+        ///   </item>
+        /// </list>
+        /// </remarks>
+        /// <returns>
+        /// Task that will complete when the user has finished authentication.
+        /// </returns>
+        Task<MobileServiceUser> LoginAsync(string provider, JObject token);
 
         /// <summary>
         /// Log a user out.

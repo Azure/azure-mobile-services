@@ -21,7 +21,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="provider">
         /// The authentication provider.
         /// </param>
-        public MobileServiceUIAuthentication(IMobileServiceClient client, MobileServiceAuthenticationProvider provider)
+        public MobileServiceUIAuthentication(IMobileServiceClient client, string provider)
             :base(client, provider)
         {
         }

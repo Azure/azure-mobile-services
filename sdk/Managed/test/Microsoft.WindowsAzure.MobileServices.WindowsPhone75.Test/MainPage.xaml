@@ -81,6 +81,9 @@
                 <Button x:Name="GoogleButton"
                         Content="Google" 
                         Click="LoginButtonClicked"/>
+                <CheckBox x:Name="UseProviderStringOverloadCheckBox"
+                          Content="Use overload with string provider"
+                          IsChecked="false"/>
                 <TextBlock HorizontalAlignment="Left" 
             	        TextWrapping="Wrap" 
             	        Height="20" 
