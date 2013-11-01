@@ -59,7 +59,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         IMobileServiceTable<T> GetTable<T>();
 
         /// <summary>
-        /// Logs a user into a Windows Azure Mobile Service with the provider a token object.
+        /// Logs a user into a Windows Azure Mobile Service with the provider and a token object.
         /// </summary>
         /// <param name="provider">
         /// Authentication provider to use.
