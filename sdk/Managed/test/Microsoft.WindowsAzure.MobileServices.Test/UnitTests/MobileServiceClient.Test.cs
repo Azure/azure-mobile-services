@@ -150,7 +150,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual("application/json", hijack.Request.Headers.Accept.First().MediaType);
             Assert.AreEqual("Not rhubarb", hijack.Request.Headers.GetValues("X-ZUMO-AUTH").First());
 
-            string userAgent = hijack.Request.Headers.UserAgent.ToString();
+            // Workaround mono bug https://bugzilla.xamarin.com/show_bug.cgi?id=15128
+            // use commented line below once the bug fix has hit stable channel for xamarin.iOS
+            // string userAgent = hijack.Request.Headers.UserAgent.ToString();
+
+            string userAgent = string.Join(" ", hijack.Request.Headers.GetValues("user-agent"));
             Assert.IsTrue(userAgent.Contains("ZUMO/1.0"));
             Assert.IsTrue(userAgent.Contains("version=1.0.0.0"));
         }
