@@ -100,6 +100,9 @@
     <Reference Include="mscorlib.extensions" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsPhone8.Test\PlatformTests\LoginTests.cs">
+      <Link>PlatformTests\LoginTests.cs</Link>
+    </Compile>
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore.Test\UI\GroupDescription.cs">
       <Link>UI\GroupDescription.cs</Link>
     </Compile>
@@ -112,7 +115,6 @@
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="PlatformTests\LoginTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnitTests\MobileServiceSerializer.Test.cs" />
   </ItemGroup>

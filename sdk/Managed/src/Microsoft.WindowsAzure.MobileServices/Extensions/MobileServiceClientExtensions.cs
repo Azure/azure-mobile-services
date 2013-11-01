@@ -39,7 +39,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             JObject token = new JObject();
             token[MicrosoftAccountLoginAsyncAuthenticationTokenKey] = authenticationToken;
             MobileServiceTokenAuthentication tokenAuth = new MobileServiceTokenAuthentication(thisClient,
-                MobileServiceAuthenticationProvider.MicrosoftAccount,
+                MobileServiceAuthenticationProvider.MicrosoftAccount.ToString(),
                 token);
 
             return tokenAuth.LoginAsync();

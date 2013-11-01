@@ -37,7 +37,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="token">
         /// The token.
         /// </param>
-        public MobileServiceTokenAuthentication(MobileServiceClient client, MobileServiceAuthenticationProvider provider, JObject token)
+        public MobileServiceTokenAuthentication(MobileServiceClient client, string provider, JObject token)
             :base(client, provider)
         {
             Debug.Assert(client != null, "client should not be null.");
@@ -55,9 +55,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         protected override Task<string> LoginAsyncOverride()
         {
-            string providerName = Provider.ToString().ToLower();
-
-            return client.HttpClient.RequestWithoutHandlersAsync(HttpMethod.Post, MobileServiceAuthentication.LoginAsyncUriFragment + "/" + providerName, token.ToString());
+            return client.HttpClient.RequestWithoutHandlersAsync(HttpMethod.Post, MobileServiceAuthentication.LoginAsyncUriFragment + "/" + this.ProviderName, token.ToString());
         }
     }
 }
