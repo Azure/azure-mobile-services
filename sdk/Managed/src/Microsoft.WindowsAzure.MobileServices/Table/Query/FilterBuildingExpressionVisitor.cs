@@ -646,8 +646,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <remarks>The VB compiler translates string comparisons such as
         /// <code>(Function(x) x.Name = "a string value")</code> not as a binary expression with the field
         /// on the left side and the string value on the right side. Instead, it converts it into a call
-        /// to <see cref="Microsoft.VisualBasic.CompilerServices.Operators.CompareString"/> for the string value,
-        /// and compares the expression to zero.</remarks>
+        /// to <code>Microsoft.VisualBasic.CompilerServices.Operators.CompareString</code> (or
+        /// <code>Microsoft.VisualBasic.CompilerServices.EmbeddedOperators</code> for phone platforms)
+        /// for the string value, and compares the expression to zero.</remarks>
         /// <param name="expression">The binary expression to check.</param>
         /// <param name="stringComparison">A normalized string comparison expression.</param>
         /// <returns>True if the expression is a string comparison expression emitted by the VB compiler,

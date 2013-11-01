@@ -37,7 +37,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The <see cref="MobileServiceClient"/> associated with this 
         /// MobileServiceLogin instance.
         /// </param>
-        /// <param name="provider">
+        /// <param name="providerName">
         /// The <see cref="MobileServiceAuthenticationProvider"/> used to authenticate.
         /// </param>
         public MobileServiceAuthentication(IMobileServiceClient client, string providerName)
