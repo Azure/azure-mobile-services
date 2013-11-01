@@ -229,26 +229,6 @@ MobileServiceLogin.prototype.loginWithProvider = function(provider, token, useSi
     }
 };
 
-function isValidProvider(provider) {
-    /// <summary>
-    /// Determines that the given string is one of the known providers.
-    /// </summary>
-    /// <param name="provider" type="String">
-    /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google', or 'microsoftaccount'.
-    /// </param>
-    /// <returns>
-    /// True if the given provider is valid, and false otherwise.
-    /// </returns>
-
-    for (var i = 0, j = authenticationProviders.length; i < j; i++) {
-        if (authenticationProviders[i] === provider) {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 function onLoginComplete(error, token, client, callback) {
     /// <summary>
     /// Handles the completion of the login and calls the user's callback with
