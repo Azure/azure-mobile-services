@@ -61,9 +61,14 @@ public class LoginTests extends InstrumentationTestCase {
 		testLoginOperation(MobileServiceAuthenticationProvider.Twitter);
 		testLoginOperation(MobileServiceAuthenticationProvider.MicrosoftAccount);
 		testLoginOperation(MobileServiceAuthenticationProvider.Google);
-	}
 
-	private void testLoginOperation(final MobileServiceAuthenticationProvider provider) throws Throwable {
+		testLoginOperation("FaCeBoOk");
+		testLoginOperation("twitter");
+		testLoginOperation("MicrosoftAccount");
+		testLoginOperation("GOOGLE");
+}
+
+	private void testLoginOperation(final Object provider) throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 		final ResultsContainer result = new ResultsContainer();
 
@@ -94,7 +99,7 @@ public class LoginTests extends InstrumentationTestCase {
 					}
 				});
 
-				client.login(provider, "{myToken:123}", new UserAuthenticationCallback() {
+				UserAuthenticationCallback callback = new UserAuthenticationCallback() {
 
 					@Override
 					public void onCompleted(MobileServiceUser user, Exception exception, ServiceFilterResponse response) {
@@ -106,9 +111,13 @@ public class LoginTests extends InstrumentationTestCase {
 						}
 
 						latch.countDown();
-
 					}
-				});
+				};
+				if (provider.getClass().equals(MobileServiceAuthenticationProvider.class)) {
+					client.login((MobileServiceAuthenticationProvider)provider, "{myToken:123}", callback);
+				} else {
+					client.login((String)provider, "{myToken:123}", callback);
+				}
 			}
 		});
 
@@ -275,6 +284,31 @@ public class LoginTests extends InstrumentationTestCase {
 
 		try {
 			client.login(MobileServiceAuthenticationProvider.Facebook, "", null);
+			Assert.fail();
+		} catch (IllegalArgumentException e) {
+			// It should throw an exception
+		}
+	}
+
+	public void testLoginWithEmptyProviderShouldFail() throws Throwable {
+
+		// Create client
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+		}
+
+		String provider = null;
+		try {
+			client.login(provider, "{myToken:123}", null);
+			Assert.fail();
+		} catch (IllegalArgumentException e) {
+			// It should throw an exception
+		}
+
+		try {
+			client.login("", "{myToken:123}", null);
 			Assert.fail();
 		} catch (IllegalArgumentException e) {
 			// It should throw an exception
