@@ -1,12 +1,12 @@
 using System;
+using System.Net.Http;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.WindowsAzure.MobileServices;
-using MonoTouch.Foundation;
-using System.Threading.Tasks;
 
 namespace ZUMOAPPNAME
 {
-	public class QSTodoService : IServiceFilter
+	public class QSTodoService : DelegatingHandler
 	{
 		static QSTodoService instance = new QSTodoService ();
 		const string applicationURL = @"ZUMOAPPURL";
@@ -19,8 +19,10 @@ namespace ZUMOAPPNAME
 
 		QSTodoService ()
 		{
+			CurrentPlatform.Init ();
+
 			// Initialize the Mobile Service client with your URL and key
-			client = new MobileServiceClient (applicationURL, applicationKey).WithFilter (this);
+			client = new MobileServiceClient (applicationURL, applicationKey, this);
 
 			// Create an MSTable instance to allow us to work with the TodoItem table
 			todoTable = client.GetTable <ToDoItem> ();
@@ -91,15 +93,14 @@ namespace ZUMOAPPNAME
 			}
 		}
 
-		#region IServiceFilter implementation
+		#region implemented abstract members of HttpMessageHandler
 
-		public async Task<IServiceFilterResponse> Handle (IServiceFilterRequest request, IServiceFilterContinuation continuation)
+		protected override async Task<System.Net.Http.HttpResponseMessage> SendAsync (System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
 		{
 			Busy (true);
-			var response = await continuation.Handle (request);
+			var response = await base.SendAsync (request, cancellationToken);
 
 			Busy (false);
-
 			return response;
 		}
 

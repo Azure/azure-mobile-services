@@ -1,5 +1,5 @@
 using System;
-using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
 namespace ZUMOAPPNAME
 {
@@ -7,10 +7,10 @@ namespace ZUMOAPPNAME
 	{
 		public int Id { get; set; }
 
-		[DataMember (Name = "text")]
+		[JsonProperty(PropertyName = "text")]
 		public string Text { get; set; }
 
-		[DataMember (Name = "complete")]
+		[JsonProperty(PropertyName = "complete")]
 		public bool Complete { get; set; }
 	}
 }
