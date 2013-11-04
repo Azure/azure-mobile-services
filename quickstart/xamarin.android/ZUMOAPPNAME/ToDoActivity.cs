@@ -3,8 +3,9 @@ using Android.OS;
 using Android.App;
 using Android.Views;
 using Android.Widget;
-using Microsoft.WindowsAzure.MobileServices;
+using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices;
 
 
 namespace ZUMOAPPNAME
@@ -45,18 +46,20 @@ namespace ZUMOAPPNAME
 			progressBar.Visibility = ViewStates.Gone;
 
 			// Create ProgressFilter to handle busy state
-			var filter = new ProgressFilter ();
-			filter.BusyStateChange += (busy) => {
+			var progressHandler = new ProgressHandler ();
+			progressHandler.BusyStateChange += (busy) => {
 				if (progressBar != null) 
 					progressBar.Visibility = busy ? ViewStates.Visible : ViewStates.Gone;
 			};
 
 			try {
+				CurrentPlatform.Init ();
+
 				// Create the Mobile Service Client instance, using the provided
 				// Mobile Service URL and key
 				client = new MobileServiceClient (
 					applicationURL,
-					applicationKey).WithFilter (filter);
+					applicationKey, progressHandler);
 
 				// Get the Mobile Service Table instance to use
 				toDoTable = client.GetTable <ToDoItem> ();
@@ -177,20 +180,21 @@ namespace ZUMOAPPNAME
 			builder.Create ().Show ();
 		}
 
-		class ProgressFilter : IServiceFilter
+		class ProgressHandler : DelegatingHandler
 		{
 			int busyCount = 0;
 
 			public event Action<bool> BusyStateChange;
-			
-			#region IServiceFilter implementation
-			public async System.Threading.Tasks.Task<IServiceFilterResponse> Handle (IServiceFilterRequest request, IServiceFilterContinuation continuation)
+
+			#region implemented abstract members of HttpMessageHandler
+
+			protected override async Task<HttpResponseMessage> SendAsync (HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
 			{
-				// assumes always executes on UI thread
+				 //assumes always executes on UI thread
 				if (busyCount++ == 0 && BusyStateChange != null)
 					BusyStateChange (true);
 
-				var response = await continuation.Handle (request);
+				var response = await base.SendAsync (request, cancellationToken);
 
 				// assumes always executes on UI thread
 				if (--busyCount == 0 && BusyStateChange != null)
@@ -200,6 +204,7 @@ namespace ZUMOAPPNAME
 			}
 
 			#endregion
+
 		}
 	}
 }
