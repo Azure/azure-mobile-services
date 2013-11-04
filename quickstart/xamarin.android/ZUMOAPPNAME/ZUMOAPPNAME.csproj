@@ -50,6 +50,7 @@
     <Reference Include="Microsoft.WindowsAzure.MobileServices.Android">
       <HintPath>..\Components\azure-mobile-services-1.0.4\lib\android\Microsoft.WindowsAzure.MobileServices.Android.dll</HintPath>
     </Reference>
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Resources\Resource.designer.cs" />

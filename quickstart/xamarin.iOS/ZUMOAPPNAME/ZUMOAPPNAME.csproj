@@ -84,6 +84,7 @@
     <Reference Include="Microsoft.WindowsAzure.MobileServices.iOS">
       <HintPath>..\Components\azure-mobile-services-1.0.4\lib\ios\Microsoft.WindowsAzure.MobileServices.iOS.dll</HintPath>
     </Reference>
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />
@@ -121,7 +122,6 @@
   </ItemGroup>
   <ItemGroup>
     <XamarinComponentReference Include="azure-mobile-services">
-      <InstallationInProgress>False</InstallationInProgress>
       <Version>1.0.4</Version>
       <Visible>False</Visible>
     </XamarinComponentReference>
