@@ -15,7 +15,7 @@ NSString *const resultsKey = @"results";
 NSString *const countKey = @"count";
 NSString *const errorKey = @"error";
 NSString *const descriptionKey = @"description";
-NSString *const stringIdValidation = @"[+?`""/\\\\]|[\\u0000-\\u001F]|[\\u007F-\\u009F]|^\\.{1,2}$";
+NSString *const stringIdPattern = @"[+?`""/\\\\]|[\\u0000-\\u001F]|[\\u007F-\\u009F]|^\\.{1,2}$";
 
 #pragma mark * MSJSONSerializer Implementation
 
@@ -180,7 +180,7 @@ static NSArray *allIdKeys;
         if(idAsString.length == 0 || idAsString.length > 255 || trimmedId.length == 0) {
             localError = [self errorForInvalidItemId];
         } else {
-            NSRegularExpression *regEx = [NSRegularExpression regularExpressionWithPattern:stringIdValidation
+            NSRegularExpression *regEx = [NSRegularExpression regularExpressionWithPattern:stringIdPattern
                                                                                    options:NSRegularExpressionCaseInsensitive
                                                                                      error:&localError];
             if ([regEx firstMatchInString:idAsString options:0 range:NSMakeRange(0, idAsString.length)]) {
