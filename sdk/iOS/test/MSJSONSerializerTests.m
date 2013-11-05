@@ -5,9 +5,8 @@
 #import <SenTestingKit/SenTestingKit.h>
 #import "WindowsAzureMobileServices.h"
 #import "MSJSONSerializer.h"
-
 #import "MSClientConnection.h"
-
+#import "MSTable+MSTableTestUtilities.h"
 
 @interface MSJSONSerializerTests : SenTestCase {
     MSJSONSerializer *serializer;
@@ -34,14 +33,12 @@
 # pragma mark * stringFromItem:orError
 -(void)testStringFromItemReturnsId
 {
-    NSArray *validIds = @[
-        @"id",
-        @"true",
-        @"false",
+    NSArray *validIds = [MSTable testValidStringIds];
+    validIds = [validIds arrayByAddingObjectsFromArray:@[
         @{@"id" : @1, @"string": @"1"},
         @{@"id" : @INT_MAX, @"string": [NSString stringWithFormat:@"%d", INT_MAX]},
         @{@"id" : @LONG_LONG_MAX, @"string": [NSString stringWithFormat:@"%lld", LONG_LONG_MAX]}
-        ];
+        ]];
     
     NSError *error = nil;
     
@@ -65,33 +62,19 @@
 
 -(void)testStringFromItemErrorsOnInvalidIds
 {
-    NSArray *invalidIds = @[
-                          @".",
-                          @"..",
-                          [@"id with 256 characters " stringByPaddingToLength:256 withString:@"." startingAtIndex:0],
-                          @"\r",
-                          @"\n",
-                          @"\t",
-                          @"id\twith\ttabs",
-                          @"id\rwith\rreturns",
-                          @"id\nwith\nnewline",
-                          @"id with forward slash /",
-                          @"id with backslash \\",
-                          @"\"id with quotes\"",
-                          @"?",
-                          @"\\",
-                          @"/",
-                          @"`",
-                          @"+"
-                          ];
-    
+    NSArray *invalidIds = [MSTable testInvalidStringIds];
+    invalidIds = [invalidIds arrayByAddingObjectsFromArray:[MSTable testEmptyStringIdsIncludingNull:YES]];
+    invalidIds = [invalidIds arrayByAddingObjectsFromArray:[MSTable testInvalidIntIds]];
+    invalidIds = [invalidIds arrayByAddingObjectsFromArray:[MSTable testNonStringNonIntValidJsonIds]];
+    invalidIds = [invalidIds arrayByAddingObjectsFromArray:[MSTable testNonStringNonIntIds]];    
+                  
     NSError *error = nil;
-    
     for (id testId in invalidIds)
     {
         NSString *actualId = [serializer stringFromItemId:testId orError:&error];
         STAssertNotNil(error, @"error was nil after getting string id %@", actualId);
-        
+        STAssertEquals(MSInvalidItemIdWithRequest, error.code, @"Unexpected error code: %d", error.code);
+        STAssertEqualObjects(@"The item provided did not have a valid id.", error.localizedDescription, @"Unexpected messge: %@", error.localizedDescription);
     }
 }
 
@@ -100,13 +83,8 @@
     NSError *error = nil;
     [serializer stringFromItemId:nil orError:&error];
     STAssertNotNil(error, @"error was nil after getting nil item id");
-}
-
--(void)testStringFromItemErrorsOnNullItemId
-{
-    NSError *error = nil;
-    [serializer stringFromItemId:NULL orError:&error];
-    STAssertNotNil(error, @"error was nil after getting nil item id");
+    STAssertEquals(MSExpectedItemIdWithRequest, error.code, @"Unexpected error code: %d", error.code);
+    STAssertEqualObjects(@"The item id was not provided.", error.localizedDescription, @"Unexpected message: %@", error.localizedDescription);
 }
 
 # pragma mark * dataFromItem:idAllowed:ensureDictionary:orError: Tests

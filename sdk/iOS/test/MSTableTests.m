@@ -62,7 +62,6 @@
 
 #pragma mark * Insert Method Tests
 
-
 // See the WindowsAzureMobileServicesFunctionalTests.m tests for additional
 // insert tests that require a working Windows Azure Mobile Service.
 

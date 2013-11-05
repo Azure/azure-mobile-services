@@ -5,6 +5,7 @@
 #import <SenTestingKit/SenTestingKit.h>
 #import "WindowsAzureMobileServices.h"
 #import "MSTestFilter.h"
+#import "MSTable+MSTableTestUtilities.h"
 
 @interface WindowsAzureMobileServicesFunctionalTests : SenTestCase {
     MSClient *client;
@@ -24,7 +25,7 @@
 {
     NSLog(@"%@ setUp", self.name);
 
-    testsEnabled = NO;
+    testsEnabled = YES;
     STAssertTrue(testsEnabled, @"The functional tests are currently disabled.");
     
     // These functional tests requires a working Windows Mobile Azure Service
@@ -35,6 +36,9 @@
     client = [MSClient
                 clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
                 applicationKey:@"<Application Key>"];
+    
+    client = [MSClient clientWithApplicationURLString:@"https://philiostestservice.azure-mobile.net/"
+                       applicationKey:@"zAnGhbtZtiZhepprgqvREWilHygRmP75"];
     
     done = NO;
     
@@ -59,7 +63,6 @@
     
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *newItem, NSError *error) {
-        
         // Check for an error
         if (error) {
             STAssertTrue(FALSE, @"Insert failed with error: %@", error.localizedDescription);
@@ -134,7 +137,7 @@
         STAssertTrue(items.count == 2, @"items.count was: %d", items.count);
         STAssertTrue(totalCount == 3, @"totalCount was: %d", totalCount);
         
-        [self deleteAllItemswithTable:todoTable completion:^(NSError *error) { done = YES; }];
+        [todoTable deleteAllItemsWithCompletion:^(NSError *error) { done = YES; }];
     };
     
     id query6AfterQuery5 = ^(NSArray *items, NSInteger totalCount, NSError *error) {
@@ -232,22 +235,20 @@
             done = YES;
         }
         
-        [self insertItems:items withTable:todoTable completion:query1AfterInsert];
+        [todoTable insertItems:items completion:query1AfterInsert];
     };
     
-    [self deleteAllItemswithTable:todoTable completion:insertAfterDeleteAll];
+    [todoTable deleteAllItemsWithCompletion:insertAfterDeleteAll];
     
     STAssertTrue([self waitForTest:90.0], @"Test timed out.");
 }
 
-
 #pragma mark * End-to-End Filter Tests
-
 
 -(void) testFilterThatModifiesRequest
 {
     // Create a filter that will replace the request with one requesting
-    // a table that doesn't exit.
+    // a table that doesn't exist.
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
     
     NSURL *badURL = [client.applicationURL
@@ -466,7 +467,6 @@
 
 #pragma mark * Negative Insert Tests
 
-
 -(void) testInsertItemForNonExistentTable
 {
     MSTable *todoTable = [client tableWithName:@"NoSuchTable"];
@@ -497,7 +497,6 @@
 
 
 #pragma mark * Negative Update Tests
-
 
 -(void) testUpdateItemForNonExistentTable
 {
@@ -565,7 +564,6 @@
 
 
 #pragma mark * Negative Delete Tests
-
 
 -(void) testDeleteItemForNonExistentTable
 {
@@ -659,7 +657,6 @@
 
 #pragma mark * Negative ReadWithId Tests
 
-
 -(void) testReadWithIdForNonExistentTable
 {
     MSTable *todoTable = [client tableWithName:@"NoSuchTable"];
@@ -712,79 +709,6 @@
 
 
 #pragma mark * Async Test Helper Method
-
-
--(void) insertItems:(NSArray *)items
-          withTable:(MSTable *)table
-            completion:(void (^)(NSError *))completion
-{
-    __block NSInteger lastItemIndex = -1;
-    
-    void (^ nextInsertBlock)(id, NSError *error);
-    void (^__block __weak weakNextInsertBlock)(id, NSError *error);
-    weakNextInsertBlock = nextInsertBlock = ^(id newItem, NSError *error) {
-        if (error) {
-            completion(error);
-        }
-        else {
-            if (lastItemIndex + 1  < items.count) {
-                lastItemIndex++;
-                id itemToInsert = [items objectAtIndex:lastItemIndex];
-                [table insert:itemToInsert completion:weakNextInsertBlock];
-            }
-            else {
-                completion(nil);
-            }
-        }
-    };
-    
-    nextInsertBlock(nil, nil);
-}
-
--(void) deleteAllItemswithTable:(MSTable *)table
-                     completion:(void (^)(NSError *))completion
-{
-    __block MSReadQueryBlock readCompletion;
-    readCompletion = ^(NSArray *items, NSInteger totalCount, NSError *error) {
-        if (error) {
-            completion(error);
-        }
-        else {
-            [self deleteItems:items withTable:table completion:completion];
-        }
-    };
-    
-    [table readWithQueryString:@"$top=500" completion:readCompletion];
-}
-
-
--(void) deleteItems:(NSArray *)items
-          withTable:(MSTable *)table
-         completion:(void (^)(NSError *))completion
-{
-    __block NSInteger lastItemIndex = -1;
-    
-    void (^nextDeleteBlock)(NSNumber *, NSError *error);
-    void (^__block __weak weakNextDeleteBlock)(NSNumber *, NSError *error);
-    weakNextDeleteBlock = nextDeleteBlock = ^(NSNumber *itemId, NSError *error) {
-        if (error) {
-            completion(error);
-        }
-        else {
-            if (lastItemIndex + 1  < items.count) {
-                lastItemIndex++;
-                id itemToDelete = [items objectAtIndex:lastItemIndex];
-                [table delete:itemToDelete completion:weakNextDeleteBlock];
-            }
-            else {
-                completion(nil);
-            }
-        }
-    };
-    
-    nextDeleteBlock(0, nil);
-}
-
 
 -(BOOL) waitForTest:(NSTimeInterval)testDuration {
     
