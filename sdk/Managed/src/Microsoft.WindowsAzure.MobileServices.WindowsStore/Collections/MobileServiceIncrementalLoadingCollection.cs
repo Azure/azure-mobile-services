@@ -97,16 +97,21 @@ namespace Microsoft.WindowsAzure.MobileServices
             // we pass the count argument to override the pageSize
             return AsyncInfo.Run(async (c) => 
             {
+                int results = 0;
+
                 try
                 {
-                    int results = await base.LoadMoreItemsAsync(c, (int)count);
-                    return new LoadMoreItemsResult() { Count = (uint)results };
+                    results = await base.LoadMoreItemsAsync(c, (int)count);
                 }
                 catch(Exception e)
                 {
-                    OnExceptionOccurred(e);
-                    throw;
+                    if (!OnExceptionOccurred(e))
+                    {
+                        throw;
+                    }
                 }
+
+                return new LoadMoreItemsResult() { Count = (uint)results };
             });
         }
 
@@ -115,8 +120,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// LoadMoreItemsAsync performed by controls.
         /// </summary>
         /// <param name="e">The exception.</param>
-        protected virtual void OnExceptionOccurred(Exception e)
+        /// <returns>True if the exception was handled, otherwise false.</returns>
+        protected virtual bool OnExceptionOccurred(Exception e)
         {
+            return false;
         }
 
         #endregion
