@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -141,6 +140,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public virtual JsonProperty ResolveIdProperty(Type type)
         {
+            return ResolveIdProperty(type, throwIfNotFound: true);
+        }
+
+        internal JsonProperty ResolveIdProperty(Type type, bool throwIfNotFound)
+        {
             JsonProperty property = null;
             if (!this.idPropertyCache.TryGetValue(type, out property))
             {
@@ -148,7 +152,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 this.idPropertyCache.TryGetValue(type, out property);
             }
 
-            if (property == null)
+            if (property == null && throwIfNotFound)
             {
                 throw new InvalidOperationException(
                     string.Format(CultureInfo.InvariantCulture,
@@ -364,7 +368,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
                 // Find the id property
                 JsonProperty idProperty = DetermineIdProperty(type, properties);
-                bool isIntegerIdType = IsIntegerId(idProperty);
+                bool isIntegerIdType = MobileServiceSerializer.IsIntegerId(idProperty);
 
                 // Create a reverse cache of property to memberInfo to be used locally for validating the type
                 Dictionary<JsonProperty, MemberInfo> memberInfoCache = new Dictionary<JsonProperty, MemberInfo>();
@@ -392,14 +396,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             return properties;
-        }
-
-        private static bool IsIntegerId(JsonProperty idProperty)
-        {
-            bool isIntegerIdType = idProperty.PropertyType == typeof(long) ||
-                                   idProperty.PropertyType == typeof(int);
-            return isIntegerIdType;
-        }
+        }        
 
         /// <summary>
         /// Creates the <see cref="IValueProvider"/> used by the serializer to get and set values from a member.

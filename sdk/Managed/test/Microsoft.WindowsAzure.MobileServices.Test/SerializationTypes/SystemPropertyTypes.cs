@@ -3,7 +3,6 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test

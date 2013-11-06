@@ -206,11 +206,23 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 EnsureValidIntId(id, allowDefault);
             }
-        }
+        }                
+
+        public static bool IsIntegerId(JsonProperty idProperty)
+        {
+            return IsIntegerId(idProperty.PropertyType);
+        }        
 
         public static bool IsIntegerId(object id)
         {
-            return id is long || id is int;
+            return id != null && IsIntegerId(id.GetType());
+        }
+
+        private static bool IsIntegerId(Type idType)
+        {
+            bool isIntegerIdType = idType == longType ||
+                                   idType == intType;
+            return isIntegerIdType;
         }
 
         private static void EnsureValidIntId(object id, bool allowDefault)
@@ -445,7 +457,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             Debug.Assert(json != null);
 
             JsonSerializer jsonSerializer = this.SerializerSettings.GetSerializerFromSettings();
-            return json.Select(jtoken => jtoken.ToObject<T>(jsonSerializer));
+            return json.Select(jtoken => Deserialize<T>(jtoken, jsonSerializer));
         }
 
         /// <summary>
@@ -465,8 +477,8 @@ namespace Microsoft.WindowsAzure.MobileServices
             Debug.Assert(json != null);
 
             JsonSerializer jsonSerializer = this.SerializerSettings.GetSerializerFromSettings();
-            return json.ToObject<T>(jsonSerializer);
-        }
+            return Deserialize<T>(json, jsonSerializer);
+        }        
 
         /// <summary>
         /// Deserializes a JSON string into an instance.
@@ -490,7 +502,10 @@ namespace Microsoft.WindowsAzure.MobileServices
             Debug.Assert(json != null);
             Debug.Assert(instance != null);
 
-            JsonConvert.PopulateObject(json.ToString(), instance, this.SerializerSettings);
+            TransformSerializationException<T>(() =>
+            {
+                JsonConvert.PopulateObject(json.ToString(), instance, this.SerializerSettings);
+            }, json);
         }
 
         /// <summary>
@@ -508,6 +523,45 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             JsonSerializer jsonSerializer = this.SerializerSettings.GetSerializerFromSettings();
             return JToken.FromObject(instance, jsonSerializer);
+        }
+
+        private T Deserialize<T>(JToken json, JsonSerializer jsonSerializer)
+        {
+            T result = default(T);
+            TransformSerializationException<T>(() =>
+            {
+                result = json.ToObject<T>(jsonSerializer);
+            }, json);
+            return result;
+        }
+
+        private void TransformSerializationException<T>(Action action, JToken token)
+        {
+            try
+            {
+                action();
+            }
+            catch (JsonSerializationException ex)
+            {
+                var obj = token as JObject;
+                if (obj == null)
+                {
+                    throw;
+                }
+              
+                object id;
+                bool idTokenIsString = TryGetId(obj, true, out id) && id.GetType() == typeof(string);
+
+                JsonProperty idProperty = this.SerializerSettings.ContractResolver.ResolveIdProperty(typeof(T), throwIfNotFound: false);
+                bool idPropertyIsInteger = idProperty != null && IsIntegerId(idProperty);
+                
+                if (idTokenIsString && idPropertyIsInteger)
+                {
+                    throw new JsonSerializationException(ex.Message + Environment.NewLine + Resources.MobileServiceSerializer_IdTypeMismatch, ex);
+                }
+
+                throw;
+            }
         }
     }
 }

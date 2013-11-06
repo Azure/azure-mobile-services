@@ -3640,6 +3640,35 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [TestMethod]
+        public void Deserialize_DoesNotTransformException_WhenIdTypeDoesNotMismatch()
+        {
+            var ex = Throws<JsonSerializationException>(() =>
+            {
+                var token = new JValue(true);
+                DefaultSerializer.Deserialize<LongIdType>(token);
+            });
+
+            Assert.AreEqual(ex.Message, "Error converting value True to type 'Microsoft.WindowsAzure.MobileServices.Test.LongIdType'. Path ''.");
+        }
+
+        [TestMethod]
+        public void Deserialize_TransoformsException_WhenIdTypeMismatches()
+        {
+            DefaultSerializer.SerializerSettings.ContractResolver.ResolveTableName(typeof(LongIdType));
+
+            var ex = Throws<JsonSerializationException>(() =>
+            {
+                var token = new JObject() { {"id", "asdf"} };
+                DefaultSerializer.Deserialize<LongIdType>(token);
+            });
+
+            string expectedMessage = @"Error converting value ""asdf"" to type 'System.Int64'. Path 'id'.
+You might be affected by Mobile Services latest changes to support string Ids. For more details: http://go.microsoft.com/fwlink/?LinkId=330396";
+
+            Assert.AreEqual(ex.Message, expectedMessage);
+        }
+
+        [TestMethod]
         public void VersionTypeSerialization()
         {
             List<Tuple<VersionType, string>> testCases = new List<Tuple<VersionType, string>>

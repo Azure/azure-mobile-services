@@ -264,4 +264,7 @@
   <data name="MobileServiceSerializer_NullOrEmptyStringId" xml:space="preserve">
     <value>The id can not be null or an empty string.</value>
   </data>
+  <data name="MobileServiceSerializer_IdTypeMismatch" xml:space="preserve">
+    <value>You might be affected by Mobile Services latest changes to support string Ids. For more details: http://go.microsoft.com/fwlink/?LinkId=330396</value>
+  </data>
 </root>
