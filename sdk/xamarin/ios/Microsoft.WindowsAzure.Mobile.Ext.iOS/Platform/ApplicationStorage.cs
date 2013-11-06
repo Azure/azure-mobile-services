@@ -36,10 +36,14 @@ namespace Microsoft.WindowsAzure.MobileServices
             if (svalue == null)
                 return false;
 
-            int sepIndex = svalue.IndexOf (":");
-            string valueStr = svalue.Substring (sepIndex + 1);
-            TypeCode type = (TypeCode)Enum.Parse (typeof(TypeCode), svalue.Substring (0, sepIndex));
-            value = Convert.ChangeType (valueStr, type);
+            try {
+                int sepIndex = svalue.IndexOf (":");
+                string valueStr = svalue.Substring (sepIndex + 1);
+                TypeCode type = (TypeCode) Enum.Parse (typeof (TypeCode), svalue.Substring (0, sepIndex));
+                value = Convert.ChangeType (valueStr, type);
+            } catch (Exception) {
+                return false;
+            }
 
             return true;
         }
