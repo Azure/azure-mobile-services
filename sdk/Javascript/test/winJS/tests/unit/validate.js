@@ -42,6 +42,22 @@ $testGroup('Validate.js',
             function (ex) { $assert.contains(ex.toString(), 'foo'); });
     }),
 
+    $test('isValidId')
+    .description('Verify Validate.isValidId works correctly across null/undefined/empty/etc.')
+    .check(function () {
+        $assertThrows(function () { Validate.isValidId(null); });
+        $assertThrows(function () { Validate.isValidId(undefined); });
+        $assertThrows(function () { Validate.isValidId(''); });
+        $assertThrows(function () { Validate.isValidId([]); });
+        $assertThrows(function () { Validate.isValidId(0); });
+        Validate.isValidId(1);
+        Validate.isValidId(654);
+        Validate.isValidId('foo');
+        $assertThrows(
+            function () { Validate.isValidId(null, 'foo'); },
+            function (ex) { $assert.contains(ex.toString(), 'foo'); });
+    }),
+
     $test('isDate')
     .description('Verify Validate.isDate correctly identifies Date instances.')
     .check(function () {

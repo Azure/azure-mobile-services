@@ -10,8 +10,73 @@
 // Declare JSHint globals
 /*global MobileServiceClient:false */
 
+var validStringIds = [
+            "id",
+            "true",
+            "false",
+            "00000000-0000-0000-0000-000000000000",
+            "aa4da0b5-308c-4877-a5d2-03f274632636",
+            "69C8BE62-A09F-4638-9A9C-6B448E9ED4E7",
+            "{EC26F57E-1E65-4A90-B949-0661159D0546}",
+            "87D5B05C93614F8EBFADF7BC10F7AE8C",
+            "someone@someplace.com",
+            "id with spaces",
+            "...",
+            " .",
+            "'id' with single quotes",
+            "id with 255 characters " + new Array(257-24).join('A'),
+            "id with Japanese 私の車はどこですか？",
+            "id with Arabic أين هو سيارتي؟",
+            "id with Russian Где моя машина",
+            "id with some URL significant characters % # &",
+            "id with allowed ascii characters  !#$%&'()*,-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_abcdefghijklmnopqrstuvwxyz{|}",
+            "id with allowed extended ascii characters ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþ"
+        ];
+
+var emptyStringIds = [""];
+var invalidStringIds = [
+            ".",
+            "..",
+            "id with 256 characters " + new Array(257 - 23).join('A'),
+            "\r",
+            "\n",
+            "\t",
+            "id\twith\ttabs",
+            "id\rwith\rreturns",
+            "id\nwith\n\newline",
+            "id with backslash \\",
+            "id with forwardslash \/",
+            "1/8/2010 8:00:00 AM",
+            "\"idWithQuotes\"",
+            "?",
+            "\\",
+            "\/",
+            "`",
+            "+",
+            " ",
+            "control character between 0 and 31 " + String.fromCharCode(16),
+            "control character between 127 and 159" + String.fromCharCode(130)
+    ];
+
+var validIntIds = [1, 925000];
+var invalidIntIds = [-1];
+var nonStringNonIntValidJsonIds = [
+    true,
+    false,
+    1.0,
+    -1.0,
+    0.0,
+    ];
+
+var nonStringNonIntIds = [
+    new Date(2010, 1, 8),
+    {},
+    1.0,
+    "aa4da0b5-308c-4877-a5d2-03f274632636"
+];
+
 $testGroup('MobileServiceTables.js',
-    $test('get')
+    $test('table.read() with no id results')
     .description('Verify MobileTableService.get returns the results')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
@@ -23,6 +88,82 @@ $testGroup('MobileServiceTables.js',
 
         var table = client.getTable('books');
         return table.read('$filter=price eq 100').then(function (results) {
+            $assert.areEqual(results.title, 'test');
+        });
+    }),
+
+    $test('table.read() with null id results')
+    .description('Verify MobileTableService.get returns the results')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            callback(null, { status: 200, responseText: '{"id":null, "title":"test"}' });
+        });
+
+        var table = client.getTable('books');
+        return table.read().then(function (results) {
+            $assert.areEqual(results.id, null);
+            $assert.areEqual(results.title, 'test');
+        });
+    }),
+
+    $test('table.read() with any id response content')
+    .description('Verify table.read returns the results')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testIdData = validStringIds.concat(emptyStringIds).concat(invalidStringIds).concat(validIntIds).concat(invalidIntIds).concat(nonStringNonIntValidJsonIds),
+            testCases = [];
+
+        testIdData.forEach(function (stringId) {
+            testCases.push(function () {
+                client = client.withFilter(function (req, next, callback) {
+                    callback(null, { status: 200, responseText: '[{"id":' + JSON.stringify(stringId) + '}]' });
+                });
+
+                return client.getTable('books').read().then(function (results) {
+                    $assert.areEqual(results.length, 1);
+                    $assert.areEqual(results[0].id, stringId);
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('table.read() with string id filter')
+    .description('Verify table.read returns the results')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testIdData = validStringIds.concat(emptyStringIds).concat(invalidStringIds),
+            testCases = [];
+
+        testIdData.forEach(function (testId) {
+            testCases.push(function () {
+                client = client.withFilter(function (req, next, callback) {
+                    $assert.areEqual(req.url, "http://www.test.com/tables/books?$filter=id eq \'" + encodeURIComponent(testId) + "\'");
+                    callback(null, { status: 200, responseText: '[{"id":' + JSON.stringify(testId) + '}]' });
+                });
+
+                var filter = "$filter=id eq '" + encodeURIComponent(testId) + "'";
+                return client.getTable('books').read(filter).then(function (results) {
+                    $assert.areEqual(results.length, 1);
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('table.read() with null id filter')
+    .description('Verify MobileTableService.get returns the results')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.url, "http://www.test.com/tables/books?$filter=id eq null");
+            callback(null, { status: 200, responseText: '{"id":null, "title":"test"}' });
+        });
+
+        var table = client.getTable('books');
+        return table.read('$filter=id eq null').then(function (results) {
+            $assert.areEqual(results.id, null);
             $assert.areEqual(results.title, 'test');
         });
     }),
@@ -90,6 +231,24 @@ $testGroup('MobileServiceTables.js',
         var query = table.where(function () { return this.price == 100; }).orderBy('title').select('price');
         return table.read(query, { state: 'CA', tags: '#pizza #beer' }).then(function (results) {
             $assert.areEqual(results.title, 'test');
+        });
+    }),
+
+    $test('query via table.read(query) with invalid user-defined query parameters')
+    .description('Verify MobileTableService.query fails with incorrect user-defined parameters')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            callback(null, { status: 200, responseText: '{"title":"test"}' });
+        });
+
+        var table = client.getTable('books');
+        var query2 = table.where({ showComments: true });
+        var query = table.where(function () { return this.price == 100; }).orderBy('title').select('price');
+        return table.read(query, { state: 'CA', $invalid: 'since it starts with a \'$\'' }).then(function (results) {
+            $assert.fail('Should have failed.');
+        }, function (error) {
+            $assert.contains(error.message, 'User-defined query string');
         });
     }),
 
@@ -268,6 +427,82 @@ $testGroup('MobileServiceTables.js',
         });
     }),
 
+    $test('table.insert() success with valid ids (string only)')
+    .description('Verify table.insert works with all valid ids')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testIdData = validStringIds,
+            testCases = [];
+            
+        testIdData.forEach(function (testId) {
+            testCases.push(function () {
+                var originalModelObject = { id: testId, price: 100 };
+
+                client = client.withFilter(function (req, next, callback) {
+                    $assert.areEqual(req.type, 'POST');
+                    $assert.areEqual(req.url, 'http://www.test.com/tables/books');
+                    $assert.areEqual(req.data, '{"id":' + JSON.stringify(testId) + ',"price":100}');
+                    callback(null, { status: 200, responseText: '{"id":' + JSON.stringify(testId) + ', "title":"test"}' });
+                });
+
+                return client.getTable('books').insert(originalModelObject).then(function (result) {
+                    $assert.areEqual(result.id, testId);
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('table.insert() throws with invalid ids')
+    .description('Verify table.insert fails with non string ids or invalid string ids')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testIdData = validIntIds.concat(invalidStringIds).concat(invalidIntIds),
+            testCases = [];
+
+        testIdData.forEach(function (testId) {
+            testCases.push(function () {
+                var originalModelObject = { id: testId, price: 100 };
+
+                client = client.withFilter(function (req, next, callback) {
+                    callback(null, { status: 200, responseText: req.data });
+                });
+
+                return client.getTable('books').insert(originalModelObject).then(function (result) {
+                    $assert.fail('Should have failed');
+                }, function (error) {
+                    $assert.isTrue(error.message.indexOf('member is already set') !== -1 ||
+                                   error.message.indexOf('is not valid') !== -1)
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('table.insert() can return any possible id')
+    .description('Verify table.insert can return all valid ids')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testIdData = validStringIds.concat(validIntIds).concat(invalidIntIds).concat(invalidStringIds),
+            testCases = [];
+
+        testIdData.forEach(function (testId) {
+            testCases.push(function () {
+                var originalModelObject = { id: 'magic', price: 100 };
+
+                client = client.withFilter(function (req, next, callback) {
+                    callback(null, { status: 200, responseText: '{"id":' + JSON.stringify(testId) + '}' });
+                });
+
+                return client.getTable('books').insert(originalModelObject).then(function (result) {
+                    $assert.areEqual(result.id, testId);
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+
     $test('insertThrows')
     .description('Verify MobileTableService.insert throws on an existing id')
     .checkAsync(function () {
@@ -285,7 +520,7 @@ $testGroup('MobileServiceTables.js',
     }),
 
     $test('insertThrows IncorrectCaseID Check')
-    .description('Verify MobileTableService.insert throws on an existing id')
+    .description('Verify MobileTableService.insert throws on incorrect case of id')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
         client = client.withFilter(function (req, next, callback) {
@@ -311,6 +546,54 @@ $testGroup('MobileServiceTables.js',
         var table = client.getTable('books');
         return table.insert({ id: 0 }).then(function (results) {
             $assert.areEqual(results.title, 'test');
+        }, function (error) {
+            $assert.fail('Should have succeeded.');
+        });
+    }),
+
+    $test('insert success with empty string as Id')
+    .description('Verify MobileTableService.insert succeeds on an id of empty string')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            callback(null, { status: 200, responseText: '{"title":"test"}' });
+        });
+
+        var table = client.getTable('books');
+        return table.insert({ id: '' }).then(function (results) {
+            $assert.areEqual(results.title, 'test');
+        }, function (error) {
+            $assert.fail('Should have succeeded.');
+        });
+    }),
+
+    $test('insert success with a string as Id')
+    .description('Verify MobileTableService.insert succeeds on an id of empty string')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            callback(null, { status: 200, responseText: '{"title":"test"}' });
+        });
+
+        var table = client.getTable('books');
+        return table.insert({ id: 'foo' }).then(function (results) {
+            $assert.areEqual(results.title, 'test');
+        }, function (error) {
+            $assert.fail('Should have succeeded.');
+        });
+    }),
+
+    $test('insert success can return string Id')
+    .description('Verify MobileTableService.insert succeeds on a string id')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            callback(null, { status: 200, responseText: '{"id":"alpha", "title":"test"}' });
+        });
+
+        var table = client.getTable('books');
+        return table.insert({ title: 'test' }).then(function (results) {
+            $assert.areEqual(results.id, 'alpha');
         }, function (error) {
             $assert.fail('Should have succeeded.');
         });
@@ -353,6 +636,80 @@ $testGroup('MobileServiceTables.js',
         });
     }),
 
+    $test('table.update() success with valid ids')
+    .description('Verify table.update works with all valid ids')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testIdData = validStringIds.concat(validIntIds),
+            testCases = [];
+
+        testIdData.forEach(function (testId) {
+            testCases.push(function () {
+                var originalModelObject = { id: testId, price: 100 };
+
+                client = client.withFilter(function (req, next, callback) {
+                    $assert.areEqual(req.type, 'PATCH');
+                    $assert.areEqual(req.url, 'http://www.test.com/tables/books/' + encodeURIComponent(testId));
+                    $assert.areEqual(req.data, '{"id":' + JSON.stringify(testId) + ',"price":100}');
+                    callback(null, { status: 200, responseText: '{"id":' + JSON.stringify(testId) + '}' });
+                });
+
+                return client.getTable('books').update(originalModelObject).then(function (result) {
+                    $assert.areEqual(result.id, testId);
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('table.update() throws with invalid ids')
+    .description('Verify table.update fails with invalid ids')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testIdData = invalidIntIds.concat(invalidStringIds),
+            testCases = [];
+
+        testIdData.forEach(function (testId) {
+            testCases.push(function () {
+                var originalModelObject = { id: testId, price: 100 };
+
+                client = client.withFilter(function (req, next, callback) {
+                    callback(null, { status: 200, responseText: req.data });
+                });
+
+                return client.getTable('books').update(originalModelObject).then(function (result) {
+                    $assert.fail('Should have failed');
+                }, function (error) {
+                    $assert.contains(error.message, 'is not valid');
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('table.update() can return any possible id')
+    .description('Verify table.update can return all ids')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testIdData = validStringIds.concat(validIntIds).concat(invalidIntIds).concat(invalidStringIds),
+            testCases = [];
+            
+        testIdData.forEach(function (testId) {
+            testCases.push(function () {
+                var originalModelObject = { id: 1, price: 100 };
+
+                client = client.withFilter(function (req, next, callback) {
+                    callback(null, { status: 200, responseText: '{"id":' + JSON.stringify(testId) + '}' });
+                });
+
+               return client.getTable('books').update(originalModelObject).then(function (result) {
+                    $assert.areEqual(result.id, testId);
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
     $test('update throws no id')
     .description('Verify MobileTableService.update throws when no id')
     .checkAsync(function () {
@@ -385,7 +742,128 @@ $testGroup('MobileServiceTables.js',
         });
     }),
 
-     $test('lookup')
+    $test('update throws empty string id')
+    .description('Verify MobileTableService.update throws empty string id')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            callback(null, { status: 200, responseText: '{"title":"test"}' });
+        });
+
+        var table = client.getTable('books');
+        return table.update({ id: '' }).then(function (results) {
+            $assert.fail('Should have failed.');
+        }, function (error) {
+            $assert.contains(error.message, 'id');
+        });
+    }),
+
+    $test('table.lookup() with static string id and any id response content')
+    .description('Verify table.lookup returns the results')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testIdData = validStringIds.concat(emptyStringIds).concat(invalidStringIds).concat(validIntIds).concat(invalidIntIds).concat(nonStringNonIntValidJsonIds);
+            testCases = [];
+            
+        testIdData.forEach(function (testId) {
+            testCases.push(function () {
+                client = client.withFilter(function (req, next, callback) {
+                    $assert.areEqual(req.url, 'http://www.test.com/tables/books/id');
+                    callback(null, { status: 200, responseText: '{"id":' + JSON.stringify(testId) + '}' });
+                });
+
+                return client.getTable('books').lookup('id').then(function (result) {
+                    $assert.areEqual(result.id, testId);
+                }, function (error) {
+                    $assert.fail("Should have succeeded");
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('table.lookup() with string id and null response type')
+    .description('Verify table.lookup returns the results')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.url, 'http://www.test.com/tables/books/id');
+            callback(null, { status: 200, responseText: '{"id": null }' });
+        });
+
+        var table = client.getTable('books');
+        return table.lookup('id').then(function (result) {
+            $assert.areEqual(result.id, null);
+        }, function (error) {
+            $assert.fail("Should have succeeded");
+        });
+    }),
+
+    $test('table.lookup() with string id and no id response type')
+    .description('Verify table.lookup returns the results')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.url, 'http://www.test.com/tables/books/id');
+            callback(null, { status: 200, responseText: '{"string": "hey" }' });
+        });
+
+        var table = client.getTable('books');
+        return table.lookup('id').then(function (result) {
+            $assert.areEqual(result.string, 'hey');
+        }, function (error) {
+            $assert.fail("Should have succeeded");
+        });
+    }),
+
+    $test('table.lookup() with valid ids')
+    .description('Verify table.lookup returns the results')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testIdData = validStringIds.concat(validIntIds),
+            testCases = [];
+
+        testIdData.forEach(function (testId) {
+            testCases.push(function () {
+                client = client.withFilter(function (req, next, callback) {
+                    $assert.areEqual(req.url, 'http://www.test.com/tables/books/' + encodeURIComponent(testId));
+                    callback(null, { status: 200, responseText: '{"id":' + JSON.stringify(testId) + '}' });
+                });
+
+                return client.getTable('books').lookup(testId).then(function (result) {
+                    $assert.areEqual(result.id, testId);
+                }, function (error) {
+                    $assert.fail("Should have succeeded");
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('table.lookup() throws with invalid id types')
+    .description('Verify table.lookup throws when given an invalid id')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testIdData = invalidStringIds.concat(emptyStringIds).concat(invalidIntIds);
+        testCases = [];
+
+        testIdData.forEach(function (testId) {
+            testCases.push(function () {
+                client = client.withFilter(function (req, next, callback) {
+                    callback(null, { status: 200, responseText: '{"id":' + JSON.stringify(testId) + '}' });
+                });
+
+                return client.getTable('books').lookup(testId).then(function (result) {
+                    $assert.fail('Should have failed');
+                }, function (error) {
+                    $assert.contains(error.message, "is not valid.");
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('lookup with parameter')
     .description('Verify MobileTableService.lookup returns the result')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
@@ -435,6 +913,54 @@ $testGroup('MobileServiceTables.js',
         }, function (error) {
             $assert.contains(error.message, 'id');
         });
+    }),
+
+    $test('table.del() sucess with valid ids')
+    .description('Verify table.del works with all valid ids')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testIdData = validStringIds.concat(validIntIds),
+            testCases = [];
+
+        testIdData.forEach(function (testId) {
+            testCases.push(function () {
+                client = client.withFilter(function (req, next, callback) {
+                    $assert.areEqual(req.type, 'DELETE');
+                    $assert.areEqual(req.url, 'http://www.test.com/tables/books/' + encodeURIComponent(testId));
+                    $assert.isNull(req.data);
+                    callback(null, { status: 200, responseText: null });
+                });
+
+                return table = client.getTable('books').del({ id: testId });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('table.del() throws with invalid ids')
+    .description('Verify table.del fails with all invalid ids')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testIdData = invalidStringIds.concat(invalidIntIds),
+            testCases = [];
+
+        testIdData.forEach(function (testId) {
+            testCases.push(function () {
+                client = client.withFilter(function (req, next, callback) {
+                    $assert.areEqual(req.type, 'DELETE');
+                    $assert.areEqual(req.url, 'http://www.test.com/tables/books/' + encodeURIComponent(testId));
+                    $assert.isNull(req.data);
+                    callback(null, { status: 200, responseText: null });
+                });
+
+                return client.getTable('books').del({ id: testId }).then(function (result) {
+                    $assert.fail('Should have failed');
+                }, function (error) {
+                    $assert.contains(error.message, 'is not valid.');
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
     }),
 
     $test('del')
@@ -497,6 +1023,110 @@ $testGroup('MobileServiceTables.js',
         });
     }),
 
+    $test('table.refresh() with valid ids')
+    .description('Verify table.refresh works with all valid ids')
+    .check(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testIdData = validStringIds.concat(validIntIds),
+            testCases = [];
+
+        testIdData.forEach(function (testId) {
+            testCases.push(function () {
+                var originalModelObject = { id: testId, price: 100, custom: 5 };
+
+                client = client.withFilter(function (req, next, callback) {
+                    $assert.areEqual(req.type, 'GET');
+                    if (typeof testId === 'string') {
+                        var uriId = encodeURIComponent(testId).replace(/\'/g, '%27%27');
+                        $assert.areEqual(req.url, "http://www.test.com/tables/books?$filter=id eq '" + uriId + "'");
+                    } else {
+                        $assert.areEqual(req.url, "http://www.test.com/tables/books?$filter=id eq " + encodeURIComponent(testId));
+                    }
+                    callback(null, { status: 200, responseText: '{"id":' + JSON.stringify(testId) + ', "title":"test", "price": 200}' });
+                });
+
+                return client.getTable('books').refresh(originalModelObject).then(function (results) {
+                    var isWinJs = typeof Windows === "object";
+                    if (isWinJs) {
+                        // For backward compatibility, the WinJS client mutates the original model
+                        // object by adding/overwriting properties from the server response
+                        $assert.isTrue(results === originalModelObject);
+                        $assert.areEqual(results.id, testId);    // We have the original properties
+                        $assert.areEqual(results.custom, 5);
+                        $assert.areEqual(results.price, 200);    // updated with the return from the server
+                        $assert.areEqual(results.title, 'test');
+                    } else {
+                        // The web client simply returns the server response without mutating your
+                        // original model, which is a lot more useful if the server response might
+                        // not be the same kind of object
+                        $assert.isFalse(results === originalModelObject);
+                        $assert.areEqual(results.title, 'test');     // We have the server response properties
+                        $assert.areEqual(results.id, testId);
+                        $assert.areEqual(results.custom, null);        // but no original properties carried over
+                        $assert.areEqual(results.price, 200);
+                        $assert.areEqual(originalModelObject.id, testId); // And the original is unchanged
+                        $assert.areEqual(originalModelObject.price, 100);
+                        $assert.areEqual(originalModelObject.title, undefined);
+                    }
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('table.refresh() with invalid ids')
+    .description('Verify table.refresh does not hit server with nonstring invalid ids')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testIdData = invalidIntIds.concat(nonStringNonIntIds).
+            testCases = [];
+
+        client = client.withFilter(function (req, next, callback) {
+            $assert.fail('Should not have hit server');
+        });
+
+        testIdData.forEach(function (testId) {
+            testCases.push(function () {
+                var originalModelObject = { id: testId, price: 100, custom: 5 };
+
+                return client.getTable('books').refresh(originalModelObject).then(function (results) {
+                    $assert.areEqual(results.id, testId);
+                    $assert.areEqual(results.price, 100);
+                    $assert.areEqual(results.custom, 5);
+                    $assert.areEqual(results.title, null);
+                }, function (error) {
+                    $assert.fail('Should have succeeded');
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('table.refresh() with invalid string ids')
+    .description('Verify table.refresh fails with nonstring invalid ids')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testIdData = invalidStringIds,
+            testCases = [];
+
+        client = client.withFilter(function (req, next, callback) {
+            $assert.fail('Should not have hit server');
+        });
+
+        testIdData.forEach(function (testId) {
+            testCases.push(function () {
+                var originalModelObject = { id: testId, price: 100, custom: 5 };
+
+                return client.getTable('books').refresh(originalModelObject).then(function (results) {
+                    $assert.fail('Should have failed');
+                }, function (error) {
+                    $assert.contains(error.message, 'is not valid');
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
     $test('Refresh')
     .description('Verify MobileTableService.refresh')
     .checkAsync(function () {
@@ -533,7 +1163,7 @@ $testGroup('MobileServiceTables.js',
             }
         });
     }),
-            
+    
     $test('Refresh with params')
     .description('Verify MobileTableService.refresh')
     .checkAsync(function () {
@@ -628,14 +1258,12 @@ $testGroup('MobileServiceTables.js',
         });
     }),
 
-    $test('Refresh - no id')
+    $test('Refresh - no id just returns object')
     .description('Verify MobileTableService.refresh succeeds with no id')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
         client = client.withFilter(function (req, next, callback) {
-            $assert.areEqual(req.type, 'GET');
-            $assert.areEqual(req.url, 'http://www.test.com/tables/books?$filter=id eq 2');
-            callback(null, { status: 200, responseText: '[]' });
+            $assert.fail("Should have not made a server call");
         });
 
         var table = client.getTable('books');
@@ -648,18 +1276,34 @@ $testGroup('MobileServiceTables.js',
         });
     }),
 
-    $test('Refresh - id of 0')
+    $test('Refresh - id of 0 just returns object')
     .description('Verify MobileTableService.refresh succeeds with id of 0')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
         client = client.withFilter(function (req, next, callback) {
-            $assert.areEqual(req.type, 'GET');
-            $assert.areEqual(req.url, 'http://www.test.com/tables/books?$filter=id eq 2');
-            callback(null, { status: 200, responseText: '[]' });
+            $assert.fail("Should have not made a server call");
         });
 
         var table = client.getTable('books');
         var originalModelObject = { id: 0.0, price: 100 };
+
+        return table.refresh(originalModelObject).then(function (results) {
+            $assert.areEqual(results.price, 100);
+        }, function (error) {
+            $assert.fail("Should have succeeded");
+        });
+    }),
+
+    $test('Refresh - empty string id just returns object')
+    .description('Verify MobileTableService.refresh succeeds with id of 0')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.fail("Should have not made a server call");
+        });
+
+        var table = client.getTable('books');
+        var originalModelObject = { id: '', price: 100 };
 
         return table.refresh(originalModelObject).then(function (results) {
             $assert.areEqual(results.price, 100);

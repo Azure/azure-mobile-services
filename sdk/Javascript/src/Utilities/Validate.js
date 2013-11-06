@@ -39,7 +39,7 @@ exports.notNullOrEmpty = function (value, name) {
 
 exports.notNullOrZero = function (value, name) {
     /// <summary>
-    /// Ensure the value is not null, undefined, or empty.
+    /// Ensure the value is not null, undefined, zero, or empty.
     /// </summary>
     /// <param name="value" mayBeNull="true">The value to check.</param>
     /// <param name="name" mayBeNull="true" optional="true" type="String">
@@ -50,6 +50,20 @@ exports.notNullOrZero = function (value, name) {
         throw _.format(Platform.getResourceString("Validate_NotNullOrEmptyError"), name || 'Value');
     }
 };
+
+exports.isValidId = function (value, name) {
+    /// <summary>
+    /// Ensure the value is a valid id for mobile services.
+    /// </summary>
+    /// <param name="value" mayBeNull="true">The value to check.</param>
+    /// <param name="name" mayBeNull="true" optional="true" type="String">
+    /// Optional name of the value to throw.
+    /// </param>
+
+    if (!_.isValidId(value)) {
+        throw _.format(Platform.getResourceString("Validate_InvalidId"), name || 'id');
+    }
+}
 
 exports.isDate = function (value, name) {
     /// <summary>

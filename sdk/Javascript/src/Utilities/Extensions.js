@@ -31,16 +31,16 @@ exports.isNull = function (value) {
 exports.isNullOrZero = function (value) {
     /// <summary>
     /// Gets a value indicating whether the provided value is null (or
-    /// undefined) or zero.
+    /// undefined) or zero / empty string
     /// </summary>
     /// <param name="value" type="Object" mayBeNull="true">
     /// The value to check.
     /// </param>
     /// <returns type="Boolean">
-    /// A value indicating whether the provided value is null (or undefined) or zero.
+    /// A value indicating whether the provided value is null (or undefined) or zero or empty string.
     /// </returns>
 
-    return value === null || value === undefined || value === 0;
+    return value === null || value === undefined || value === 0 || value === '';
 };
 
 exports.isNullOrEmpty = function (value) {
@@ -152,6 +152,38 @@ exports.isObject = function (value) {
 
     return _.isNull(value) || (typeof value === 'object' && !_.isDate(value));
 };
+
+exports.isValidId = function (value) {
+    /// <summary>
+    /// Determine if a value is an acceptable id for use by the mobile service
+    /// </summary>
+    /// <param name="value" type="Object">The value to check.</param>
+    /// <returns type="boolean">
+    /// True if the value is a string or number, meeting all criteria, or false othwerise.
+    /// </returns>
+    if (_.isNullOrZero(value)) {
+        return false;
+    }
+
+    if (_.isString(value)) {
+        // Strings must contain at least one non whitespace character
+        if (value.length === 0 || value.length > 255 || value.trim().length === 0) {
+            return false;
+        }
+
+        var ex = /[+"/?`\\]|[\u0000-\u001F]|[\u007F-\u009F]|^\.{1,2}$/;
+        if (value.match(ex) !== null) {
+            return false;
+        }
+
+        return true;
+
+    } else if (_.isNumber(value)) {
+        return value > 0;
+    }
+
+    return false;
+}
 
 exports.isString = function (value) {
     /// <summary>
