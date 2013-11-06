@@ -108,8 +108,8 @@
     <Content Include="default.html" />
     <Content Include="js\platformSpecificFunctions.js" />
     <None Include="lib\MobileServices.intellisense.js" />
-    <Content Include="lib\MobileServices.Web.js" />
-    <Content Include="lib\MobileServices.Web.min.js" />
+    <Content Include="lib\MobileServices.Web-1.0.3.js" />
+    <Content Include="lib\MobileServices.Web-1.0.3.min.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
