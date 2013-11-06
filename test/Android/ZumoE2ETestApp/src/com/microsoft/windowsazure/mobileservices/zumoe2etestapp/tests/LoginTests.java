@@ -20,8 +20,10 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 
 import com.google.gson.JsonObject;
@@ -160,6 +162,8 @@ public class LoginTests extends TestGroup {
 					final TestExecutionCallback callback) {
 
 				final TestCase testCase = this;
+				long seed = new Date().getTime();
+				final Random rndGen = new Random(seed);
 
 				if (lastUserIdentityObject == null) {
 					log("Last identity is null. Cannot run this test.");
@@ -184,7 +188,7 @@ public class LoginTests extends TestGroup {
 
 				JsonObject token = new JsonObject();
 				token.addProperty("access_token", providerIdentity.get("accessToken").getAsString());
-				client.login(provider, token, new UserAuthenticationCallback() {
+				UserAuthenticationCallback authCallback = new UserAuthenticationCallback() {
 
 					@Override
 					public void onCompleted(MobileServiceUser user,
@@ -201,8 +205,15 @@ public class LoginTests extends TestGroup {
 
 						callback.onTestComplete(testCase, testResult);
 					}
-
-				});
+				};
+				boolean useEnumOverload = rndGen.nextBoolean();
+				if (useEnumOverload) {
+					log("Calling the overload MobileServiceClient.login(MobileServiceAuthenticationProvider, JsonObject, UserAuthenticationCallback)");
+					client.login(provider, token, authCallback);
+				} else {
+					log("Calling the overload MobileServiceClient.login(String, JsonObject, UserAuthenticationCallback)");
+					client.login(provider.toString(), token, authCallback);
+				}
 			}
 		};
 
@@ -210,12 +221,15 @@ public class LoginTests extends TestGroup {
 	}
 
 	public static TestCase createLoginTest(final MobileServiceAuthenticationProvider provider) {
-		TestCase test = new TestCase() {
+		TestCase test = new TestCase("Login with " + provider.toString()) {
 
 			@Override
 			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
 				final TestCase testCase = this;
-				client.login(provider, new UserAuthenticationCallback() {
+				long seed = new Date().getTime();
+				final Random rndGen = new Random(seed);
+
+				UserAuthenticationCallback authCallback = new UserAuthenticationCallback() {
 
 					@Override
 					public void onCompleted(MobileServiceUser user, Exception exception, ServiceFilterResponse response) {
@@ -241,11 +255,19 @@ public class LoginTests extends TestGroup {
 
 						callback.onTestComplete(testCase, result);
 					}
-				});
+				};
+
+				boolean useEnumOverload = rndGen.nextBoolean();
+				if (useEnumOverload) {
+					log("Calling the overload MobileServiceClient.login(MobileServiceAuthenticationProvider, UserAuthenticationCallback)");
+					client.login(provider, authCallback);
+				} else {
+					log("Calling the overload MobileServiceClient.login(String, UserAuthenticationCallback)");
+					client.login(provider.toString(), authCallback);
+				}
 			}
 		};
 
-		test.setName("Login with " + provider.toString());
 		return test;
 	}
 

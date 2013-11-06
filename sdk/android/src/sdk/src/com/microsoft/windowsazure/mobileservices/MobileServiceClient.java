@@ -201,6 +201,18 @@ public class MobileServiceClient {
 	 */
 	public void login(MobileServiceAuthenticationProvider provider,
 			UserAuthenticationCallback callback) {
+		login(provider.toString(), callback);
+	}
+	/**
+	 * Invokes an interactive authentication process using the specified
+	 * Authentication Provider
+	 * 
+	 * @param provider
+	 *            The provider used for the authentication process
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void login(String provider, UserAuthenticationCallback callback) {
 		mLoginInProgress = true;
 
 		final UserAuthenticationCallback externalCallback = callback;
@@ -225,7 +237,7 @@ public class MobileServiceClient {
 	/**
 	 * Invokes Windows Azure Mobile Service authentication using a
 	 * provider-specific oAuth token
-	 * 
+	 *
 	 * @param provider
 	 *            The provider used for the authentication process
 	 * @param oAuthToken
@@ -235,6 +247,23 @@ public class MobileServiceClient {
 	 *            Callback to invoke when the authentication process finishes
 	 */
 	public void login(MobileServiceAuthenticationProvider provider,
+			JsonObject oAuthToken, UserAuthenticationCallback callback) {
+		login(provider.toString(), oAuthToken, callback);
+	}
+
+	/**
+	 * Invokes Windows Azure Mobile Service authentication using a
+	 * provider-specific oAuth token
+	 *
+	 * @param provider
+	 *            The provider used for the authentication process
+	 * @param oAuthToken
+	 *            A Json object representing the oAuth token used for
+	 *            authentication
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void login(String provider,
 			JsonObject oAuthToken, UserAuthenticationCallback callback) {
 		if (oAuthToken == null) {
 			throw new IllegalArgumentException("oAuthToken cannot be null");
@@ -256,6 +285,22 @@ public class MobileServiceClient {
 	 */
 	public void login(MobileServiceAuthenticationProvider provider,
 			String oAuthToken, UserAuthenticationCallback callback) {
+		login(provider.toString(), oAuthToken, callback);
+	}
+
+	/**
+	 * Invokes Windows Azure Mobile Service authentication using a
+	 * provider-specific oAuth token
+	 * 
+	 * @param provider
+	 *            The provider used for the authentication process
+	 * @param oAuthToken
+	 *            The oAuth token used for authentication
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void login(String provider, String oAuthToken,
+			UserAuthenticationCallback callback) {
 		if (oAuthToken == null) {
 			throw new IllegalArgumentException("oAuthToken cannot be null");
 		}
