@@ -157,7 +157,24 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
             JObject value = serializer.Serialize(instance) as JObject;
-            JToken updatedValue = await this.UpdateAsync(value, parameters);
+
+            JToken updatedValue = null;
+            try
+            {
+                updatedValue = await this.UpdateAsync(value, parameters);
+            }
+            catch (MobileServicePreconditionFailedException ex)
+            {
+                T item = default(T);
+                try
+                {
+                    item = serializer.Deserialize<T>(ex.Value);
+                }
+                catch { }
+
+                throw new MobileServicePreconditionFailedException<T>(ex, item);
+            }
+
             serializer.Deserialize<T>(updatedValue, instance);
         }
 

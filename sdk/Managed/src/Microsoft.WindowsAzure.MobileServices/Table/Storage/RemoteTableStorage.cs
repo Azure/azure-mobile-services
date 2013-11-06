@@ -33,9 +33,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// The version system property as a string with the prefix.
         /// </summary>
-        private static readonly string versionSystemPropertyString = string.Format("{0}{1}",
-            MobileServiceSerializer.SystemPropertyPrefix,
-            MobileServiceSystemProperties.Version.ToString());
+        private static readonly string versionSystemPropertyString = String.Format("{0}{1}", MobileServiceSerializer.SystemPropertyPrefix, MobileServiceSystemProperties.Version.ToString()).ToLowerInvariant();
 
         /// <summary>
         /// The <see cref="MobileServiceHttpClient"/> instance to use for the storage context.
