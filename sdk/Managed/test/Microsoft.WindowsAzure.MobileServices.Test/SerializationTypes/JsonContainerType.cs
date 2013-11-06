@@ -9,6 +9,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     [JsonObject(Title="NamedJsonContainerType")]
     public class JsonContainerType
     {
+        public int Id { get; set; }
+
         [JsonProperty(PropertyName = "AnotherPublicProperty")]
         public int OtherThanPublicProperty { get; set; }
 
@@ -18,6 +20,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     [JsonObject]
     public class UnnamedJsonContainerType
     {
+        public int Id { get; set; }
+
         [JsonProperty(PropertyName = "AnotherPublicProperty")]
         public int OtherThanPublicProperty { get; set; }
 

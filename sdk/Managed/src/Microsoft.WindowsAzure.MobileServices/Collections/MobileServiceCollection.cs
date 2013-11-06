@@ -267,7 +267,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             if (busy)
             {
-                throw new InvalidOperationException("Only one operation in flight at a time");
+                throw new InvalidOperationException(Resources.MobileServiceCollection_LoadInProcess);
             }
             busy = true;
 

@@ -4,8 +4,15 @@
 
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
+
 namespace Microsoft.WindowsAzure.MobileServices.Test
 {
+    public class LongIdType
+    {
+        public long Id { get; set; }
+        public string String { get; set; }
+    }
+
     public class IDType
     {
         public int ID { get; set; }
@@ -31,6 +38,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     public class MissingIdType
     {
         public int NotAnId { get; set; }
+    }
+
+    public class StringIdType
+    {
+        public string Id { get; set; }
+
+        public string String { get; set; }
     }
 
     [DataContract]

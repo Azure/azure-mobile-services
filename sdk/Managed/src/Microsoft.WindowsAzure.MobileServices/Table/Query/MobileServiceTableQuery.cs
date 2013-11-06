@@ -145,9 +145,13 @@ namespace Microsoft.WindowsAzure.MobileServices
             // never leak to users.
             MobileServiceTable<U> table = new MobileServiceTable<U>(
                 this.Table.TableName,
-                this.Table.MobileServiceClient);
+                this.Table.MobileServiceClient,
+                this.Table.MobileServiceClient.RemoteStorage);
 
-            return this.QueryProvider.Create(table, Queryable.Select(this.Query, selector), this.Parameters, this.RequestTotalCount);
+            return this.QueryProvider.Create(table,
+                                             Queryable.Select(this.Query, selector),
+                                             MobileServiceTable.AddSystemProperties(Table.SystemProperties, this.Parameters),
+                                             this.RequestTotalCount);
         }
 
         /// <summary>
@@ -216,7 +220,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("keySelector");
             }
 
-            return this.QueryProvider.Create(this.Table, Queryable.ThenBy((IOrderedQueryable<T>)this.Query, keySelector),this.Parameters, this.RequestTotalCount);
+            return this.QueryProvider.Create(this.Table, Queryable.ThenBy((IOrderedQueryable<T>)this.Query, keySelector), this.Parameters, this.RequestTotalCount);
         }
 
         /// <summary>
@@ -283,7 +287,16 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public IMobileServiceTableQuery<T> WithParameters(IDictionary<string, string> parameters)
         {
-            return this.QueryProvider.Create(this.Table, this.Query, parameters != null ? this.Parameters.Add(parameters) : this.Parameters, this.RequestTotalCount);
+            if (parameters != null)
+            {
+                // Make sure to replace any existing value for the key
+                foreach (KeyValuePair<string, string> pair in parameters)
+                {
+                    this.Parameters[pair.Key] = pair.Value;
+                }
+            }
+
+            return this.QueryProvider.Create(this.Table, this.Query, this.Parameters, this.RequestTotalCount);
         }
 
         /// <summary>

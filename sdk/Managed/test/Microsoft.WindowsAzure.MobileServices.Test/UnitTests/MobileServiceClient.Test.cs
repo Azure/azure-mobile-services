@@ -327,10 +327,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             TestHttpHandler hijack = new TestHttpHandler();
             hijack.SetResponseContent("{\"id\":3}");
             MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
-            hijack.OnSendingRequest = async(HttpRequestMessage request) =>
+            hijack.OnSendingRequest = async request =>
             {
                 string content = await request.Content.ReadAsStringAsync();
                 Assert.AreEqual(content, "true");
+
+                return request;
             };
 
             JToken expected = await service.InvokeApiAsync("calculator/add", new JValue(true));
@@ -342,10 +344,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             TestHttpHandler hijack = new TestHttpHandler();
             hijack.SetResponseContent("{\"id\":3}");
             MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
-            hijack.OnSendingRequest = async (HttpRequestMessage request) =>
+            hijack.OnSendingRequest = async request =>
             {
                 string content = await request.Content.ReadAsStringAsync();
                 Assert.AreEqual(content, "null");
+
+                return request;
             };
             
             JToken expected = await service.InvokeApiAsync("calculator/add", new JValue((object) null));
