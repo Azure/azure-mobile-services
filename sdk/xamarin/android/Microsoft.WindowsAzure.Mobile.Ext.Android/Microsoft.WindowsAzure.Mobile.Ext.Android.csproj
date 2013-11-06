@@ -40,6 +40,9 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Mono.Android" />
+    <Reference Include="Xamarin.Auth.Android">
+      <HintPath>..\Components\xamarin.auth-1.2.2\lib\android\Xamarin.Auth.Android.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\..\managed\src\Microsoft.WindowsAzure.MobileServices.WindowsPhone75\ExpressionUtility\ExpressionVisitor.cs">
@@ -61,14 +64,16 @@
     <Compile Include="Platform\PlatformInformation.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\libs\Xamarin.Auth\src\Xamarin.Auth.Android\Xamarin.Auth.Android.csproj">
-      <Project>{fcf02c8c-6dd3-4c59-a8a2-58bc01a4bb21}</Project>
-      <Name>Xamarin.Auth.Android</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.MobileServices.csproj">
       <Project>{726846D2-9CA8-4F41-82C9-4D1AA78D0A18}</Project>
       <Name>Microsoft.WindowsAzure.MobileServices</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <XamarinComponentReference Include="xamarin.auth">
+      <Visible>False</Visible>
+      <Version>1.2.2</Version>
+    </XamarinComponentReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Novell\Novell.MonoDroid.CSharp.targets" />
 </Project>

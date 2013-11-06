@@ -9,3 +9,5 @@ bin
 obj
 packages/*
 .nuget/nuget.exe
+ios/Components
+android/Components

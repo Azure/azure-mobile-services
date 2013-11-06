@@ -53,6 +53,15 @@ namespace Microsoft.WindowsAzure.Mobile.Test
             AppDelegate.Harness.Settings.Custom["MobileServiceRuntimeKey"] = this.keyEntry.Value;
             AppDelegate.Harness.Settings.TagExpression = this.tagsEntry.Value;
 
+            if (!string.IsNullOrEmpty(AppDelegate.Harness.Settings.TagExpression))
+            {
+                AppDelegate.Harness.Settings.TagExpression += " - notXamarin";
+            }
+            else
+            {
+                AppDelegate.Harness.Settings.TagExpression = "!notXamarin";
+            }
+
             NavigationController.PushViewController (new HarnessViewController(), true);
         }
     }

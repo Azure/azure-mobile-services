@@ -47,6 +47,15 @@ namespace Microsoft.WindowsAzure.Mobile.Android.Test
                 editor.Commit();
             }
 
+            if (!string.IsNullOrEmpty(App.Harness.Settings.TagExpression))
+            {
+                App.Harness.Settings.TagExpression += " - notXamarin";
+            }
+            else
+            {
+                App.Harness.Settings.TagExpression = "!notXamarin";
+            }
+
             Task.Factory.StartNew (App.Harness.RunAsync);
 
             Intent intent = new Intent (this, typeof (HarnessActivity));

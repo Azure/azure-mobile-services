@@ -5,8 +5,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Ext.Android", "Microsoft.WindowsAzure.Mobile.Ext.Android\Microsoft.WindowsAzure.Mobile.Ext.Android.csproj", "{0F77566D-014F-4D09-B783-D4E701627D15}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Xamarin.Auth.Android", "..\libs\Xamarin.Auth\src\Xamarin.Auth.Android\Xamarin.Auth.Android.csproj", "{FCF02C8C-6DD3-4C59-A8A2-58BC01A4BB21}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{215A0655-25A6-4FE3-A306-D30888246089}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.TestFramework", "Microsoft.WindowsAzure.Mobile.TestFramework\Microsoft.WindowsAzure.Mobile.TestFramework.csproj", "{DC77CF23-C6BA-40D7-AC6E-2EF7BCA14211}"
@@ -29,10 +27,6 @@ Global
 		{0F77566D-014F-4D09-B783-D4E701627D15}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0F77566D-014F-4D09-B783-D4E701627D15}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0F77566D-014F-4D09-B783-D4E701627D15}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FCF02C8C-6DD3-4C59-A8A2-58BC01A4BB21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FCF02C8C-6DD3-4C59-A8A2-58BC01A4BB21}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FCF02C8C-6DD3-4C59-A8A2-58BC01A4BB21}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FCF02C8C-6DD3-4C59-A8A2-58BC01A4BB21}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DC77CF23-C6BA-40D7-AC6E-2EF7BCA14211}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DC77CF23-C6BA-40D7-AC6E-2EF7BCA14211}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC77CF23-C6BA-40D7-AC6E-2EF7BCA14211}.Release|Any CPU.ActiveCfg = Release|Any CPU
