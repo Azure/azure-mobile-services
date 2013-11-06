@@ -7,12 +7,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
@@ -1511,6 +1507,32 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task UpdateAsyncWithWithMergeConflict()
         {
             await EnsureEmptyTableAsync<ToDoWithSystemPropertiesType>();
+            string id = "an id";
+            IMobileServiceTable table = GetClient().GetTable("stringId_test_table");
+            table.SystemProperties = MobileServiceSystemProperties.Version;
+
+            var item = new JObject() { { "id", id }, {"String", "a value" }};
+            var inserted = await table.InsertAsync(item);
+            item["__version"] = "random";
+
+            MobileServicePreconditionFailedException expectedException = null;
+            try
+            {
+                await table.UpdateAsync(item);
+            }
+            catch (MobileServicePreconditionFailedException ex)
+            {
+                expectedException = ex;
+            }
+            Assert.IsNotNull(expectedException);
+            Assert.AreEqual(expectedException.Value["__version"], inserted["__version"]);
+            Assert.AreEqual(expectedException.Value["String"], inserted["String"]);
+        }
+
+        [AsyncTestMethod]
+        public async Task UpdateAsyncWithWithMergeConflict_Generic()
+        {
+            await EnsureEmptyTableAsync<ToDoWithSystemPropertiesType>();
 
             string id = "an id";
             IMobileServiceTable<ToDoWithSystemPropertiesType> table = GetClient().GetTable<ToDoWithSystemPropertiesType>();
@@ -1535,12 +1557,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             // Update again but with the original version
             item.Version = version;
             item.String = "But wait!";
-            MobileServiceInvalidOperationException expectedException = null;
+            MobileServicePreconditionFailedException<ToDoWithSystemPropertiesType> expectedException = null;
             try
             {
                  await table.UpdateAsync(item);
             }
-            catch (MobileServiceInvalidOperationException exception)
+            catch (MobileServicePreconditionFailedException<ToDoWithSystemPropertiesType> exception)
             {
                 expectedException = exception;
             }
@@ -1555,6 +1577,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.AreEqual(newVersion, serverVersion);
             Assert.AreEqual(stringValue, "Hello!");
+
+            Assert.IsNotNull(expectedException.Item);
+            Assert.AreEqual(newVersion, expectedException.Item.Version);
+            Assert.AreEqual(stringValue, expectedException.Item.String);
 
             // Update one last time with the version from the server
             item.Version = serverVersion;

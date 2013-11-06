@@ -6,10 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -197,18 +196,36 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will complete when the update finishes.
         /// </returns>
-        public Task<JToken> UpdateAsync(JObject instance, IDictionary<string, string> parameters)
+        public async Task<JToken> UpdateAsync(JObject instance, IDictionary<string, string> parameters)
         {
             if (instance == null)
             {
                 throw new ArgumentNullException("instance");
-            }
+            }            
+            
+            MobileServiceInvalidOperationException error = null;
 
             object id = MobileServiceSerializer.GetId(instance);
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
-            return this.StorageContext.UpdateAsync(this.TableName, id, instance, parameters);
-        }
+            try
+            {                
+                return await this.StorageContext.UpdateAsync(this.TableName, id, instance, parameters);
+            }
+            catch (MobileServiceInvalidOperationException ex)
+            {
+                if (ex.Response != null && 
+                    ex.Response.StatusCode != HttpStatusCode.PreconditionFailed)
+                {
+                    throw;
+                }
+
+                error = ex;                    
+            }
+
+            JToken value = await ParseContent(error.Response);
+            throw new MobileServicePreconditionFailedException(error, value);
+        }        
 
         /// <summary>
         /// Deletes an <paramref name="instance"/> from the table.
@@ -345,6 +362,21 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             string systemPropertiesString = string.Join(",", systemProperties);
             return systemPropertiesString;
+        }
+
+        private static async Task<JToken> ParseContent(HttpResponseMessage response)
+        {
+            JToken value = null;
+            try
+            {
+                if (response.Content != null)
+                {
+                    string content = await response.Content.ReadAsStringAsync();
+                    value = content.ParseToJToken();
+                }
+            }
+            catch { }
+            return value;
         }
     }
 }

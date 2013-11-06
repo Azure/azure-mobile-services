@@ -40,7 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FunctionalTests\DataSourceTest.cs" />
-    <Compile Include="FunctionalTests\Table\MobileServiceTable.Generic.Test.cs" />
+    <Compile Include="FunctionalTests\Table\MobileServiceTableTest.cs" />
     <Compile Include="Mocks\MobileServiceTableQueryMock.cs" />
     <Compile Include="SerializationTypes\ComplexType.cs" />
     <Compile Include="SerializationTypes\ConverterType.cs" />
