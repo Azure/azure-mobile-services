@@ -217,7 +217,7 @@ MobileServiceTable.prototype.insert = Platform.async(
 
             if (!_.isNullOrZero(id)) {
                 if (_.isString(id)) {
-                    // String Id's are allowed iif using id
+                    // String Id's are allowed iif using 'id'
                     if (idNames[i] !== idPropertyName) {
                         throw _.format(
                             Platform.getResourceString("MobileServiceTable_InsertIdAlreadySet"),
