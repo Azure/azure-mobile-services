@@ -119,9 +119,6 @@ function defineQueryTestsNamespace() {
     addQueryTest('String.substring, length - movies which end with "r"',
         function (table) { return table.where(function () { return this.Title.substring(this.Title.length - 1, 1) === 'r'; }); },
         function (item) { return /r$/.test(item.Title); });
-    addQueryTest('String.substring (2 parameters) - movies with "father" starting at position 7',
-        function (table) { return table.where(function () { return this.Title.substring(7, 13) === 'father'; }); },
-        function (item) { var result = item.Title.substring(7, 13) === 'father'; return result; }, { debug: true });
     addQueryTest('String.substr - movies with "father" starting at position 7',
         function (table) { return table.where(function () { return this.Title.substr(7, 6) === 'father'; }); },
         function (item) { var result = item.Title.substr(7, 6) === 'father'; return result; }, { debug: true });
