@@ -58,6 +58,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="instance">
         /// The instance to update in the table.
         /// </param>
+        /// <param name="version">
+        /// The version of the object.
+        /// </param>
         /// <param name="parameters">
         /// A dictionary of user-defined parameters and values to provide to the storage
         /// context.
@@ -65,7 +68,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will complete when the update finishes.
         /// </returns>
-        Task<JToken> UpdateAsync(string tableName, object id, JToken instance, IDictionary<string, string> parameters);
+        Task<JToken> UpdateAsync(string tableName, object id, JToken instance, string version, IDictionary<string, string> parameters);
 
         /// <summary>
         /// Executes a lookup against the storage context.

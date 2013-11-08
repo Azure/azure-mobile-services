@@ -5,9 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json.Linq;
@@ -1584,7 +1581,45 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         #region System Property Tests
 
         [AsyncTestMethod]
-        public async Task InsertAsyncStringIdSystemPropertiesRemovedFromRequest()
+        public async Task InsertAsync_RemovesSystemProperties_WhenIdIsString_Generic()
+        {
+            string[] testSystemProperties = SystemPropertiesTestData.ValidSystemProperties;
+
+            foreach (string testSystemProperty in testSystemProperties)
+            {                
+                TestHttpHandler hijack = new TestHttpHandler();
+                hijack.SetResponseContent("{\"id\":\"an id\",\"String\":\"Hey\"}");
+                var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+                hijack.OnSendingRequest = async (request) =>
+                {
+                    string content = await request.Content.ReadAsStringAsync();
+                    JObject obj = JToken.Parse(content) as JObject;
+                    Assert.IsTrue(obj.Properties().Where(p => p.Name == "id").Any());
+                    Assert.IsTrue(obj.Properties().Where(p => p.Name == "String").Any());
+                    Assert.IsFalse(obj.Properties().Where(p => p.Name == testSystemProperty).Any());
+                    return request;
+                };
+                var table = service.GetTable<ToDoWithSystemPropertiesType>();
+
+                JObject itemToInsert = JToken.Parse("{\"id\":\"an id\",\"String\":\"what?\",\"" + testSystemProperty + "\":\"a value\"}") as JObject;
+                var typedItemToInsert = itemToInsert.ToObject<ToDoWithSystemPropertiesType>();
+                await table.InsertAsync(typedItemToInsert);
+            }
+        }
+
+        [AsyncTestMethod]
+        public async Task InsertAsync_DoesNotRemoveSystemProperties_WhenIdIsString()
+        {
+            await InsertAsync_DoesNotRemoveSystemPropertiesTest(client => client.GetTable("some"));
+        }
+
+        [AsyncTestMethod]
+        public async Task InsertAsync_DoesNotRemoveSystemProperties_WhenIdIsString_Generic()
+        {
+            await InsertAsync_DoesNotRemoveSystemPropertiesTest(client => client.GetTable<ToDoWithSystemPropertiesType>());
+        }
+
+        private static async Task InsertAsync_DoesNotRemoveSystemPropertiesTest(Func<IMobileServiceClient, IMobileServiceTable> getTable)
         {
             string[] testSystemProperties = SystemPropertiesTestData.ValidSystemProperties;
 
@@ -1593,16 +1628,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 TestHttpHandler hijack = new TestHttpHandler();
                 hijack.SetResponseContent("{\"id\":\"an id\",\"String\":\"Hey\"}");
                 IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
-
-                IMobileServiceTable table = service.GetTable("someTable");
-
+                IMobileServiceTable table = getTable(service);
                 hijack.OnSendingRequest = async (request) =>
                 {
                     string content = await request.Content.ReadAsStringAsync();
                     JObject obj = JToken.Parse(content) as JObject;
                     Assert.IsTrue(obj.Properties().Where(p => p.Name == "id").Any());
                     Assert.IsTrue(obj.Properties().Where(p => p.Name == "String").Any());
-                    Assert.IsFalse(obj.Properties().Where(p => p.Name == testSystemProperty).Any());
+                    Assert.IsTrue(obj.Properties().Where(p => p.Name == testSystemProperty).Any());
                     return request;
                 };
 
@@ -1640,7 +1673,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task InsertAsyncNullIdSystemPropertiesRemovedFromRequest()
+        public async Task InsertAsync_DoesNotRemoveSystemProperties_WhenIdIsNull()
         {
             string[] testSystemProperties = SystemPropertiesTestData.ValidSystemProperties;
 
@@ -1658,7 +1691,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     JObject obj = JToken.Parse(content) as JObject;
                     Assert.IsTrue(obj.Properties().Where(p => p.Name == "id").Any());
                     Assert.IsTrue(obj.Properties().Where(p => p.Name == "String").Any());
-                    Assert.IsFalse(obj.Properties().Where(p => p.Name == testSystemProperty).Any());
+                    Assert.IsTrue(obj.Properties().Where(p => p.Name == testSystemProperty).Any());
                     return request;
                 };
 
