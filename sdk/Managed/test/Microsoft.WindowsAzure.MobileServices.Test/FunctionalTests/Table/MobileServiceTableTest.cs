@@ -426,7 +426,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task AsyncTableOperationsWithIntegerAsStringIdAgainstIntIdTable()
         {
-            await EnsureEmptyTableAsync<ToDoWithIntId>();
+            await EnsureEmptyTableAsync<ToDoWithStringIdAgainstIntIdTable>();
 
             IMobileServiceTable<ToDoWithStringIdAgainstIntIdTable> stringIdTable = GetClient().GetTable<ToDoWithStringIdAgainstIntIdTable>();
             ToDoWithStringIdAgainstIntIdTable item = new ToDoWithStringIdAgainstIntIdTable() { String = "Hey" };
@@ -1504,7 +1504,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task UpdateAsyncWithWithMergeConflict()
+        public async Task UpdateAsyncWithMergeConflict()
         {
             await EnsureEmptyTableAsync<ToDoWithSystemPropertiesType>();
             string id = "an id";
@@ -1530,7 +1530,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task UpdateAsyncWithWithMergeConflict_Generic()
+        public async Task UpdateAsyncWitMergeConflict_Generic()
         {
             await EnsureEmptyTableAsync<ToDoWithSystemPropertiesType>();
 
