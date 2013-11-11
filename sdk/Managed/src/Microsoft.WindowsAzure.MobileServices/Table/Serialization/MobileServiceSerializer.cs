@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -286,7 +287,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     }
 
                 }
-                else if (!idPropertyType.IsAssignableFrom(idType))
+                else if (!idPropertyType.GetTypeInfo().IsAssignableFrom(idType.GetTypeInfo()))
                 {
                     isInvalid = true;
                 }
@@ -300,7 +301,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
 
             }
-            else if (idPropertyType.IsValueType)
+            else if (idPropertyType.GetTypeInfo().IsValueType)
             {
                 throw new InvalidOperationException(
                      string.Format(Resources.MobileServiceSerializer_LookupInvalidIdType,

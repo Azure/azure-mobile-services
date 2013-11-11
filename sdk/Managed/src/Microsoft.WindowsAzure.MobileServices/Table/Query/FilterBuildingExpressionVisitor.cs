@@ -57,7 +57,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         private const string VBCompareStringMethod = "CompareString";
         private const int VBCompareStringArguments = 3;
         private const int VBCaseSensitiveCompareArgumentIndex = 2;
-        private static readonly MethodInfo stringToLowerMethod = typeof(string).GetMethod("ToLower", new Type[0]);
+        private static readonly MethodInfo stringToLowerMethod = typeof(string).GetRuntimeMethod("ToLower", new Type[0]);
         private static readonly Type typeofInt = typeof(int);
 
         /// <summary>

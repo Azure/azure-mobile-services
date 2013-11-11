@@ -371,7 +371,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 Dictionary<JsonProperty, MemberInfo> memberInfoCache = new Dictionary<JsonProperty, MemberInfo>();
                 foreach (KeyValuePair<MemberInfo, JsonProperty> pair in jsonPropertyCache)
                 {
-                    if (pair.Key.DeclaringType.IsAssignableFrom(type))
+                    if (pair.Key.DeclaringType.GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
                     {
                         memberInfoCache.Add(pair.Value, pair.Key);
                     }
@@ -543,7 +543,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="property">The property to add the member converters to.</param>
         private static void SetMemberConverters(JsonProperty property)
         {
-            if (property.PropertyType.IsValueType)
+            if (property.PropertyType.GetTypeInfo().IsValueType)
             {
                 // The NullHandlingConverter will ensure that nulls get treated as the default value 
                 // for value types.
