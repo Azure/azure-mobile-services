@@ -45,8 +45,8 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         // To ensure that these reflection calls succeed, we need to have actual code that
         // calls these methods. We do this in the static private constructor.
-        private static readonly MethodInfo toStringMethod = typeof(object).GetMethod("ToString");
-        private static readonly MethodInfo concatMethod = typeof(string).GetMethod("Concat", new Type[] { typeof(string), typeof(string) });
+        private static readonly MethodInfo toStringMethod = typeof(object).GetTypeInfo().GetDeclaredMethod("ToString");
+        private static readonly MethodInfo concatMethod = typeof(string).GetRuntimeMethod("Concat", new Type[] { typeof(string), typeof(string) });
 
         // The Visual Basic compiler emits a call to CompareString(left, right, False) from the class
         // Microsoft.VisualBasic.CompilerServices.[Embedded]Operators for lambda expressions with string
@@ -527,7 +527,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     return true;
                 }
                 // check for enum
-                if (fromType.IsEnum)
+                if (fromType.GetTypeInfo().IsEnum)
                 {
                     return true;
                 }
@@ -722,14 +722,14 @@ namespace Microsoft.WindowsAzure.MobileServices
             constExp = null;
             // case 1: enum on left side
             unaryExp = expression.Left as UnaryExpression;
-            if (unaryExp != null && unaryExp.NodeType == ExpressionType.Convert && unaryExp.Operand.Type.IsEnum && expression.Right is ConstantExpression)
+            if (unaryExp != null && unaryExp.NodeType == ExpressionType.Convert && unaryExp.Operand.Type.GetTypeInfo().IsEnum && expression.Right is ConstantExpression)
             {
                 constExp = (ConstantExpression)expression.Right;
                 return true;
             }
             // case 2: enum on right side
             unaryExp = expression.Right as UnaryExpression;
-            if (unaryExp != null && unaryExp.NodeType == ExpressionType.Convert && unaryExp.Operand.Type.IsEnum && expression.Left is ConstantExpression)
+            if (unaryExp != null && unaryExp.NodeType == ExpressionType.Convert && unaryExp.Operand.Type.GetTypeInfo().IsEnum && expression.Left is ConstantExpression)
             {
                 constExp = (ConstantExpression)expression.Left;
                 return true;
@@ -768,7 +768,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>The rewritten expression.</returns>
         private Expression RewriteStringAddition(BinaryExpression expression)
         {
-            return Expression.Call(concatMethod, expression.Left, expression.Right);
+            Expression[] expressions = new [] { expression.Left, expression.Right };
+            return Expression.Call(concatMethod, expressions);
         }
 
         /// <summary>
@@ -853,7 +854,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 this.VisitODataMethodCall(expression, methodName, true);
             }
-            else if (expression.Method.GetBaseDefinition().Equals(toStringMethod))
+            else if (expression.Method.GetRuntimeBaseDefinition().Equals(toStringMethod))
             {
                 // handle the ToString method here
                 // toString will only occur on expression that rely on a parameter,
