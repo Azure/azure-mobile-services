@@ -74,7 +74,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 throw new Exception();
             }
-            return TaskEx.Run(() => TaskEx.Delay(500).ContinueWith(t => (IEnumerable<T>)new TotalCountEnumerable<T>(2, new T[] { Activator.CreateInstance<T>(), Activator.CreateInstance<T>() })));
+            return Task.Run(() => Task.Delay(500).ContinueWith(t => (IEnumerable<T>)new TotalCountEnumerable<T>(2, new T[] { Activator.CreateInstance<T>(), Activator.CreateInstance<T>() })));
         }
 
         public Task<List<T>> ToListAsync()
