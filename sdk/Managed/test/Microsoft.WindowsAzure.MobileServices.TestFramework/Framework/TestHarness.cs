@@ -21,7 +21,7 @@ namespace Microsoft.WindowsAzure.MobileServices.TestFramework
         public TestHarness()
         {
             this.Groups = new List<TestGroup>();
-            this.Settings = new TestSettings();            
+            this.Settings = new TestSettings();
         }
 
         /// <summary>
@@ -141,7 +141,7 @@ namespace Microsoft.WindowsAzure.MobileServices.TestFramework
 
             // Setup the UI
             this.Reporter.StartRun(this);
-            
+
             // The primary test loop is a "recursive" closure that will pass
             // itself as the continuation to async tests.
             // 
@@ -223,7 +223,7 @@ namespace Microsoft.WindowsAzure.MobileServices.TestFramework
                     else
                     {
                         // Otherwise if we've finished the entire test run
-                        
+
                         // Finish the UI for the last group and update the
                         // progress after the very last test method.
                         Reporter.EndGroup(currentGroup);
@@ -242,13 +242,12 @@ namespace Microsoft.WindowsAzure.MobileServices.TestFramework
         {
             Dictionary<Type, TestGroup> groups = new Dictionary<Type, TestGroup>();
             Dictionary<TestGroup, object> instances = new Dictionary<TestGroup, object>();
-            foreach (Type type in testAssembly.GetTypes())
+            foreach (Type type in testAssembly.ExportedTypes)
             {
-                foreach (MethodInfo method in type.GetMethods())
+                foreach (MethodInfo method in type.GetRuntimeMethods())
                 {
-                    if (method.GetCustomAttributes(true).Where(a => a.GetType() == typeof(TestMethodAttribute) ||
-                                                                     a.GetType() == typeof(AsyncTestMethodAttribute))
-                                                        .Any())
+                    if (method.GetCustomAttributes<TestMethodAttribute>().Any() ||
+                            method.GetCustomAttributes<AsyncTestMethodAttribute>().Any())
                     {
                         TestGroup group = null;
                         object instance = null;
@@ -285,11 +284,13 @@ namespace Microsoft.WindowsAzure.MobileServices.TestFramework
             group.Name = type.Name;
             group.Tags.Add(type.Name);
             group.Tags.Add(type.FullName);
-            if (type.GetCustomAttributes(true).Where(a => a.GetType() == typeof(FunctionalTestAttribute)).Any())
+
+            if (type.GetTypeInfo().GetCustomAttributes<FunctionalTestAttribute>().Any())
             {
                 group.Tags.Add("Functional");
             }
-            foreach (TagAttribute attr in type.GetCustomAttributes(true).Where(a => a.GetType() == typeof(TagAttribute)))
+
+            foreach (TagAttribute attr in type.GetTypeInfo().GetCustomAttributes<TagAttribute>())
             {
                 group.Tags.Add(attr.Tag);
             }
@@ -301,7 +302,7 @@ namespace Microsoft.WindowsAzure.MobileServices.TestFramework
             TestMethod test = new TestMethod();
             test.Name = method.Name;
 
-            if (method.GetCustomAttributes(true).Where(a => a.GetType() == typeof(AsyncTestMethodAttribute)).Any())
+            if (method.GetCustomAttributes<AsyncTestMethodAttribute>().Any())
             {
                 test.Test = new AsyncTestMethodAsyncAction(instance, method);
             }
@@ -310,20 +311,20 @@ namespace Microsoft.WindowsAzure.MobileServices.TestFramework
                 test.Test = new TestMethodAsyncAction(instance, method);
             }
 
-            ExcludeTestAttribute excluded = (ExcludeTestAttribute)method.GetCustomAttributes(true).Where(a => a.GetType() == typeof(ExcludeTestAttribute)).FirstOrDefault();
+            ExcludeTestAttribute excluded = method.GetCustomAttribute<ExcludeTestAttribute>();
             if (excluded != null)
             {
                 test.Exclude(excluded.Reason);
             }
 
-            if (method.GetCustomAttributes(true).Where(a => a.GetType() == typeof(FunctionalTestAttribute)).Any())
+            if (method.GetCustomAttributes<FunctionalTestAttribute>().Any())
             {
                 test.Tags.Add("Functional");
             }
 
             test.Tags.Add(type.FullName + "." + method.Name);
             test.Tags.Add(type.Name + "." + method.Name);
-            foreach (TagAttribute attr in method.GetCustomAttributes(true).Where(a => a.GetType() == typeof(TagAttribute)))
+            foreach (TagAttribute attr in method.GetCustomAttributes<TagAttribute>())
             {
                 test.Tags.Add(attr.Tag);
             }

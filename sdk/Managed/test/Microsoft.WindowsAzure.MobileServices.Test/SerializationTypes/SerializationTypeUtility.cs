@@ -28,10 +28,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 return false;
             }
 
-            if (oneType != typeof(long) && 
+            if (oneType != typeof(long) &&
                 oneType != typeof(string))
             {
-                foreach (PropertyInfo property in oneType.GetProperties(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+                foreach (PropertyInfo property in oneType.GetRuntimeProperties())
                 {
                     if (!AreEqual(property.GetValue(one, null), property.GetValue(two, null)))
                     {
@@ -39,7 +39,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     }
                 }
 
-                foreach (FieldInfo field in oneType.GetFields(BindingFlags.FlattenHierarchy | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+                foreach (FieldInfo field in oneType.GetRuntimeFields())
                 {
                     if (!field.Name.StartsWith("<") && !field.IsStatic) // To ensure we don't set backing fields or static fields
                     {
