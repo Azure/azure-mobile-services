@@ -41,6 +41,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Test.Xamarin", "test\Microsoft.WindowsAzure.MobileServices.Test.Xamarin\Microsoft.WindowsAzure.Mobile.Test.Xamarin.csproj", "{BB39BA5E-1A43-481C-B37B-41BC627EB604}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Ext.Android", "src\Microsoft.WindowsAzure.Mobile.Ext.Android\Microsoft.WindowsAzure.Mobile.Ext.Android.csproj", "{0F77566D-014F-4D09-B783-D4E701627D15}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Ext.iOS", "src\Microsoft.WindowsAzure.Mobile.Ext.iOS\Microsoft.WindowsAzure.Mobile.Ext.iOS.csproj", "{A871B137-83A8-4E9B-913D-30EE0288E161}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -315,6 +319,36 @@ Global
 		{BB39BA5E-1A43-481C-B37B-41BC627EB604}.Signed|ARM.ActiveCfg = Release|Any CPU
 		{BB39BA5E-1A43-481C-B37B-41BC627EB604}.Signed|x64.ActiveCfg = Release|Any CPU
 		{BB39BA5E-1A43-481C-B37B-41BC627EB604}.Signed|x86.ActiveCfg = Release|Any CPU
+		{0F77566D-014F-4D09-B783-D4E701627D15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F77566D-014F-4D09-B783-D4E701627D15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F77566D-014F-4D09-B783-D4E701627D15}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{0F77566D-014F-4D09-B783-D4E701627D15}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0F77566D-014F-4D09-B783-D4E701627D15}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0F77566D-014F-4D09-B783-D4E701627D15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F77566D-014F-4D09-B783-D4E701627D15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F77566D-014F-4D09-B783-D4E701627D15}.Release|ARM.ActiveCfg = Release|Any CPU
+		{0F77566D-014F-4D09-B783-D4E701627D15}.Release|x64.ActiveCfg = Release|Any CPU
+		{0F77566D-014F-4D09-B783-D4E701627D15}.Release|x86.ActiveCfg = Release|Any CPU
+		{0F77566D-014F-4D09-B783-D4E701627D15}.Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{0F77566D-014F-4D09-B783-D4E701627D15}.Signed|Any CPU.Build.0 = Release|Any CPU
+		{0F77566D-014F-4D09-B783-D4E701627D15}.Signed|ARM.ActiveCfg = Release|Any CPU
+		{0F77566D-014F-4D09-B783-D4E701627D15}.Signed|x64.ActiveCfg = Release|Any CPU
+		{0F77566D-014F-4D09-B783-D4E701627D15}.Signed|x86.ActiveCfg = Release|Any CPU
+		{A871B137-83A8-4E9B-913D-30EE0288E161}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A871B137-83A8-4E9B-913D-30EE0288E161}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A871B137-83A8-4E9B-913D-30EE0288E161}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{A871B137-83A8-4E9B-913D-30EE0288E161}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{A871B137-83A8-4E9B-913D-30EE0288E161}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{A871B137-83A8-4E9B-913D-30EE0288E161}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A871B137-83A8-4E9B-913D-30EE0288E161}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A871B137-83A8-4E9B-913D-30EE0288E161}.Release|ARM.ActiveCfg = Release|Any CPU
+		{A871B137-83A8-4E9B-913D-30EE0288E161}.Release|x64.ActiveCfg = Release|Any CPU
+		{A871B137-83A8-4E9B-913D-30EE0288E161}.Release|x86.ActiveCfg = Release|Any CPU
+		{A871B137-83A8-4E9B-913D-30EE0288E161}.Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{A871B137-83A8-4E9B-913D-30EE0288E161}.Signed|Any CPU.Build.0 = Release|Any CPU
+		{A871B137-83A8-4E9B-913D-30EE0288E161}.Signed|ARM.ActiveCfg = Release|Any CPU
+		{A871B137-83A8-4E9B-913D-30EE0288E161}.Signed|x64.ActiveCfg = Release|Any CPU
+		{A871B137-83A8-4E9B-913D-30EE0288E161}.Signed|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -334,5 +368,7 @@ Global
 		{B350B243-B88E-4453-A052-3A30571E3D6E} = {33F1EE08-532E-4EB2-AA17-C80C60293009}
 		{CAA8AD4E-F150-4573-92A8-D34BB4634359} = {33F1EE08-532E-4EB2-AA17-C80C60293009}
 		{BB39BA5E-1A43-481C-B37B-41BC627EB604} = {33F1EE08-532E-4EB2-AA17-C80C60293009}
+		{0F77566D-014F-4D09-B783-D4E701627D15} = {33F1EE08-532E-4EB2-AA17-C80C60293009}
+		{A871B137-83A8-4E9B-913D-30EE0288E161} = {33F1EE08-532E-4EB2-AA17-C80C60293009}
 	EndGlobalSection
 EndGlobal
