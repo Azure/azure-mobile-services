@@ -105,24 +105,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Microsoft.WindowsAzure.Mobile.Ext.iOS\Microsoft.WindowsAzure.Mobile.Ext.iOS.csproj">
-      <Project>{a871b137-83a8-4e9b-913d-30ee0288e161}</Project>
-      <Name>Microsoft.WindowsAzure.Mobile.Ext.iOS</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.WindowsAzure.Mobile.TestFramework\Microsoft.WindowsAzure.Mobile.TestFramework.csproj">
-      <Project>{bbcd4119-6a43-4e93-8ac8-05141723d068}</Project>
-      <Name>Microsoft.WindowsAzure.Mobile.TestFramework</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.WindowsAzure.Mobile.Test\Microsoft.WindowsAzure.Mobile.Test.csproj">
-      <Project>{eb0afa6d-701d-4f85-8f1e-50b476a54fa4}</Project>
-      <Name>Microsoft.WindowsAzure.Mobile.Test</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.MobileServices.csproj">
-      <Project>{9fd883da-a709-4306-a48a-86fd8595697a}</Project>
-      <Name>Microsoft.WindowsAzure.MobileServices</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <BundleResource Include="Resources\Default.png" />
   </ItemGroup>
   <ItemGroup>
@@ -140,6 +122,24 @@
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="Resources\Default-568h%402x.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\Microsoft.WindowsAzure.Mobile.Ext.iOS.csproj">
+      <Project>{a871b137-83a8-4e9b-913d-30ee0288e161}</Project>
+      <Name>Microsoft.WindowsAzure.Mobile.Ext.iOS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.Mobile.Xamarin\Microsoft.WindowsAzure.Mobile.Xamarin.csproj">
+      <Project>{b350b243-b88e-4453-a052-3a30571e3d6e}</Project>
+      <Name>Microsoft.WindowsAzure.Mobile.Xamarin</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices.Test.Xamarin\Microsoft.WindowsAzure.Mobile.Test.Xamarin.csproj">
+      <Project>{bb39ba5e-1a43-481c-b37b-41bc627eb604}</Project>
+      <Name>Microsoft.WindowsAzure.Mobile.Test.Xamarin</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices.TestFramework.Xamarin\Microsoft.WindowsAzure.Mobile.TestFramework.Xamarin.csproj">
+      <Project>{caa8ad4e-f150-4573-92a8-d34bb4634359}</Project>
+      <Name>Microsoft.WindowsAzure.Mobile.TestFramework.Xamarin</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.MonoTouch.CSharp.targets" />
 </Project>

@@ -23,10 +23,10 @@
 		</dict>
 	</dict>
 	<key>CFBundleDisplayName</key>
-	<string></string>
+	<string>iOSTest</string>
 	<key>CFBundleIdentifier</key>
-	<string></string>
+	<string>com.mobileservices.iOSTest</string>
 	<key>CFBundleVersion</key>
-	<string></string>
+	<string>1.0</string>
 </dict>
 </plist>

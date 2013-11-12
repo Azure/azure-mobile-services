@@ -2940,6 +2940,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
         #endregion System Properties Tests
 
+        // This test fails on mono because there is already header validation that prevents the invalid etag values this test uses.
+        // If Xamarin ever updates to use the BCL implementation of HttpClient (instead of their own) this tag can be removed.
+        [Tag("notXamarin")]
         [AsyncTestMethod]
         public async Task VersionSystemPropertySetsIfMatchHeader()
         {
@@ -2977,6 +2980,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             }
         }
 
+        // This test fails on mono because there is already header validation that prevents the invalid etag values this test uses.
+        // If Xamarin ever updates to use the BCL implementation of HttpClient (instead of their own) this tag can be removed.
+        [Tag("notXamarin")]
         [AsyncTestMethod]
         public async Task VersionSystemPropertySetFromEtagHeader()
         {

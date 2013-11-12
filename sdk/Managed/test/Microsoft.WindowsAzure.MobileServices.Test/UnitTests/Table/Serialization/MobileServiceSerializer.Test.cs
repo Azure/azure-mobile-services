@@ -3669,8 +3669,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 DefaultSerializer.Deserialize<LongIdType>(token);
             });
 
-            string expectedMessage = @"Error converting value ""asdf"" to type 'System.Int64'. Path 'id'.
-You might be affected by Mobile Services latest changes to support string Ids. For more details: http://go.microsoft.com/fwlink/?LinkId=330396";
+            string expectedMessage = @"Error converting value ""asdf"" to type 'System.Int64'. Path 'id'." + Environment.NewLine + @"You might be affected by Mobile Services latest changes to support string Ids. For more details: http://go.microsoft.com/fwlink/?LinkId=330396";
 
             Assert.AreEqual(ex.Message, expectedMessage);
         }
