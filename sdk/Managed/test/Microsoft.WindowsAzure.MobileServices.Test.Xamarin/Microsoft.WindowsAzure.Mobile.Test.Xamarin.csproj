@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion>10.0</MinimumVisualStudioVersion>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{BB39BA5E-1A43-481C-B37B-41BC627EB604}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.WindowsAzure.MobileServices.Test</RootNamespace>
+    <AssemblyName>Microsoft.WindowsAzure.Mobile.Test</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile7</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\FunctionalTests\DataSourceTest.cs">
+      <Link>FunctionalTests\DataSourceTest.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\FunctionalTests\Table\MobileServiceTableTest.cs">
+      <Link>FunctionalTests\Table\MobileServiceTableTest.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\Mocks\MobileServiceTableQueryMock.cs">
+      <Link>Mocks\MobileServiceTableQueryMock.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\ComplexType.cs">
+      <Link>SerializationTypes\ComplexType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\ConverterType.cs">
+      <Link>SerializationTypes\ConverterType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\SystemPropertyTypes.cs">
+      <Link>SerializationTypes\SystemPropertyTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\InterfacePropertyType.cs">
+      <Link>SerializationTypes\InterfacePropertyType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\TestConverter.cs">
+      <Link>SerializationTypes\TestConverter.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\TestData\IdTestData.cs">
+      <Link>TestData\IdTestData.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\TestData\SystemPropertiesTestData.cs">
+      <Link>TestData\SystemPropertiesTestData.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\UnitTests\Collections\MobileServiceCollection.Test.cs">
+      <Link>UnitTests\Collections\MobileServiceCollection.Test.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\UnitTests\HttpHandlers\TestHttpHandler.cs">
+      <Link>UnitTests\HttpHandlers\TestHttpHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\FunctionalTests\BloggingTest.cs">
+      <Link>FunctionalTests\BloggingTest.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\FunctionalTests\Book.cs">
+      <Link>FunctionalTests\Book.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\FunctionalTests\DataTypesTest.cs">
+      <Link>FunctionalTests\DataTypesTest.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\FunctionalTests\DateTests.cs">
+      <Link>FunctionalTests\DateTests.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\FunctionalTests\FunctionalTestBase.cs">
+      <Link>FunctionalTests\FunctionalTestBase.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\FunctionalTests\QueryingTest.cs">
+      <Link>FunctionalTests\QueryingTest.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\FunctionalTests\ToDoTest.cs">
+      <Link>FunctionalTests\ToDoTest.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\Properties\AssemblyInfo.cs">
+      <Link>Properties\AssemblyInfo.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\BaseTypes.cs">
+      <Link>SerializationTypes\BaseTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\DataContractDerivedDataContractType.cs">
+      <Link>SerializationTypes\DataContractDerivedDataContractType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\DataContractDerivedJsonPropertyType.cs">
+      <Link>SerializationTypes\DataContractDerivedJsonPropertyType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\DataContractDerivedPocoType.cs">
+      <Link>SerializationTypes\DataContractDerivedPocoType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\DataContractType.cs">
+      <Link>SerializationTypes\DataContractType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\DataMemberType.cs">
+      <Link>SerializationTypes\DataMemberType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\DataTableType.cs">
+      <Link>SerializationTypes\DataTableType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\DerivedDuplicateKeyType.cs">
+      <Link>SerializationTypes\DerivedDuplicateKeyType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\DuplicateKeyType.cs">
+      <Link>SerializationTypes\DuplicateKeyType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\IdTypes.cs">
+      <Link>SerializationTypes\IdTypes.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\JsonContainerType.cs">
+      <Link>SerializationTypes\JsonContainerType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\JsonPropertyDerivedDataContractType.cs">
+      <Link>SerializationTypes\JsonPropertyDerivedDataContractType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\JsonPropertyDerivedJsonPropertyType.cs">
+      <Link>SerializationTypes\JsonPropertyDerivedJsonPropertyType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\JsonPropertyType.cs">
+      <Link>SerializationTypes\JsonPropertyType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\PocoDerivedDataContractType.cs">
+      <Link>SerializationTypes\PocoDerivedDataContractType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\PocoDerivedJsonPropertyType.cs">
+      <Link>SerializationTypes\PocoDerivedJsonPropertyType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\PocoDerivedPocoType.cs">
+      <Link>SerializationTypes\PocoDerivedPocoType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\PocoType.cs">
+      <Link>SerializationTypes\PocoType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\SerializationTypeUtility.cs">
+      <Link>SerializationTypes\SerializationTypeUtility.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\SerializationTypes\SimpleTreeType.cs">
+      <Link>SerializationTypes\SimpleTreeType.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\UnitTests\HttpHandlers\ComplexDelegatingHandler.cs">
+      <Link>UnitTests\HttpHandlers\ComplexDelegatingHandler.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\UnitTests\MobileServiceClient.Test.cs">
+      <Link>UnitTests\MobileServiceClient.Test.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\UnitTests\Table\MobileServiceTable.Test.cs">
+      <Link>UnitTests\Table\MobileServiceTable.Test.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\UnitTests\MobileServiceUser.Test.cs">
+      <Link>UnitTests\MobileServiceUser.Test.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\UnitTests\MobileServiceUrlBuilder.Test.cs">
+      <Link>UnitTests\MobileServiceUrlBuilder.Test.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\UnitTests\Table\MobileServiceTable.Generic.Test.cs">
+      <Link>UnitTests\Table\MobileServiceTable.Generic.Test.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\UnitTests\Table\Query\MemberInfoKey.Test.cs">
+      <Link>UnitTests\Table\Query\MemberInfoKey.Test.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\UnitTests\Table\Query\ZumoQuery.Test.cs">
+      <Link>UnitTests\Table\Query\ZumoQuery.Test.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\UnitTests\Table\Serialization\MobileServiceIsoDateTimeConverter.Test.cs">
+      <Link>UnitTests\Table\Serialization\MobileServiceIsoDateTimeConverter.Test.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\UnitTests\Table\Serialization\MobileServiceContractResolver.Test.cs">
+      <Link>UnitTests\Table\Serialization\MobileServiceContractResolver.Test.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\UnitTests\Table\Serialization\MobileServiceSerializer.Test.cs">
+      <Link>UnitTests\Table\Serialization\MobileServiceSerializer.Test.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Test\UnitTests\Table\Serialization\MobileServicePrecisionCheckConverter.Test.cs">
+      <Link>UnitTests\Table\Serialization\MobileServicePrecisionCheckConverter.Test.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\packages\Newtonsoft.Json.5.0.8\lib\portable-net45+wp80+win8\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.Mobile.Xamarin\Microsoft.WindowsAzure.Mobile.Xamarin.csproj">
+      <Project>{b350b243-b88e-4453-a052-3a30571e3d6e}</Project>
+      <Name>Microsoft.WindowsAzure.Mobile.Xamarin</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices.TestFramework.Xamarin\Microsoft.WindowsAzure.Mobile.TestFramework.Xamarin.csproj">
+      <Project>{caa8ad4e-f150-4573-92a8-d34bb4634359}</Project>
+      <Name>Microsoft.WindowsAzure.Mobile.TestFramework.Xamarin</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
+  <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets')" />
+  <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
+    <Error Condition="!Exists('..\..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
+    <Error Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
