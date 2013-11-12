@@ -12,17 +12,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 {
     public class ExceptionHandlingdMobileServiceIncrementalLoadingCollection : MobileServiceIncrementalLoadingCollection<Book>
     {
-        public Exception HandledException { get; private set; }
-
         public ExceptionHandlingdMobileServiceIncrementalLoadingCollection(IMobileServiceTableQuery<Book> query)
             : base(query)
         {
-        }
-
-        protected override void OnExceptionOccurred(Exception exception, bool isHandled = false)
-        {
-            this.HandledException = exception;
-            base.OnExceptionOccurred(exception, true);
+            this.ThrowExceptionsFromLoading = false;
         }
     }
 
@@ -77,7 +70,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             }
 
             Assert.IsNull(ex);
-            Assert.IsNotNull(collection.HandledException);
         }      
     }
 }

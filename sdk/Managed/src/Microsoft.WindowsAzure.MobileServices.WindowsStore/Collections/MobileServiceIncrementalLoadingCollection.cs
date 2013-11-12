@@ -48,7 +48,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification="Overridable method is only used for change notifications")]
         public MobileServiceIncrementalLoadingCollection(IMobileServiceTableQuery<TTable> query, Func<IEnumerable<TTable>, IEnumerable<TCollection>> selector)
-            :base(query, selector, 1) { }
+            :base(query, selector, 1) 
+        {
+            this.ThrowExceptionsFromLoading = true;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection<TTable, TCollection>"/>
@@ -82,6 +85,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
+        /// Indicates if the exceptions from loading more data should be
+        /// thrown or not.
+        /// </summary>
+        protected bool ThrowExceptionsFromLoading { get; set; }
+
+        /// <summary>
         /// Explicit implementation of ISupportIncrementalLoading.LoadMoreItemsAsync 
         /// which delegates the work to the base class
         /// </summary>
@@ -102,7 +111,12 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
                 catch (Exception e)
                 {
-                    OnExceptionOccurred(e, isHandled:false);
+                    OnExceptionOccurred(e);
+
+                    if (this.ThrowExceptionsFromLoading)
+                    {
+                        throw;
+                    }
                 }
 
                 return new LoadMoreItemsResult() { Count = (uint)results };
@@ -114,15 +128,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// LoadMoreItemsAsync performed by controls.
         /// </summary>
         /// <param name="exception">The exception.</param>
-        /// <param name="isHandled">Indicates whether the exception has already been handled or not.</param>
-        protected virtual void OnExceptionOccurred(Exception exception, bool isHandled = false)
+        protected virtual void OnExceptionOccurred(Exception exception)
         {
-            if (!isHandled)
-            {
-                throw new InvalidOperationException(
-                    string.Format(Resources.MobileServiceCollection_IncrementalLoadingFailed, typeof(TCollection).FullName), 
-                    exception);
-            }
+            // Do nothing
         }
     }
 
