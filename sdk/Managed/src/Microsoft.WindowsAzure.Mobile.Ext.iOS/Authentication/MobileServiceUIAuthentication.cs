@@ -16,8 +16,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         private readonly RectangleF rect;
         private readonly object view;
 
-        public MobileServiceUIAuthentication (RectangleF rect, object view, IMobileServiceClient client, MobileServiceAuthenticationProvider provider)
-            : base (client, provider)
+        public MobileServiceUIAuthentication (RectangleF rect, object view, IMobileServiceClient client, string providerName)
+            : base(client, providerName)
         {
             this.rect = rect;
             this.view = view;

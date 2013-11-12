@@ -8,8 +8,8 @@ namespace Microsoft.WindowsAzure.MobileServices
 {
     internal class MobileServiceUIAuthentication : MobileServiceAuthentication
     {
-        public MobileServiceUIAuthentication (Context context, IMobileServiceClient client, MobileServiceAuthenticationProvider provider)
-            : base (client, provider)
+        public MobileServiceUIAuthentication (Context context, IMobileServiceClient client, string providerName)
+            : base (client, providerName)
         {
             this.context = context;
         }

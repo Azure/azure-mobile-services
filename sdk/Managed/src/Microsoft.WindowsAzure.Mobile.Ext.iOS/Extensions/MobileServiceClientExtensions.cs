@@ -23,9 +23,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// Task that will complete when the user has finished authentication.
         /// </returns>
-        public static Task<MobileServiceUser> LoginAsync (this IMobileServiceClient client, UIViewController viewController, MobileServiceAuthenticationProvider provider)
+        public static Task<MobileServiceUser> LoginAsync (this IMobileServiceClient client, UIViewController viewController, string providerName)
         {
-            return LoginAsync (client, default(RectangleF), viewController, provider);
+            return LoginAsync(client, default(RectangleF), viewController, providerName);
         }
 
         /// <summary>
@@ -43,9 +43,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// Task that will complete when the user has finished authentication.
         /// </returns>
-        public static Task<MobileServiceUser> LoginAsync (this IMobileServiceClient client, RectangleF rectangle, UIView view, MobileServiceAuthenticationProvider provider)
+        public static Task<MobileServiceUser> LoginAsync (this IMobileServiceClient client, RectangleF rectangle, UIView view, string providerName)
         {
-            return LoginAsync (client, rectangle, (object)view, provider);
+            return LoginAsync(client, rectangle, (object)view, providerName);
         }
 
         /// <summary>
@@ -60,14 +60,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// Task that will complete when the user has finished authentication.
         /// </returns>
-        public static Task<MobileServiceUser> LoginAsync (this IMobileServiceClient client, UIBarButtonItem barButtonItem, MobileServiceAuthenticationProvider provider)
+        public static Task<MobileServiceUser> LoginAsync (this IMobileServiceClient client, UIBarButtonItem barButtonItem, string providerName)
         {
-            return LoginAsync (client, default(RectangleF), barButtonItem, provider);
+            return LoginAsync(client, default(RectangleF), barButtonItem, providerName);
         }
 
-        internal static Task<MobileServiceUser> LoginAsync (IMobileServiceClient client, RectangleF rect, object view, MobileServiceAuthenticationProvider provider)
+        internal static Task<MobileServiceUser> LoginAsync (IMobileServiceClient client, RectangleF rect, object view, string providerName)
         {
-            var auth = new MobileServiceUIAuthentication (rect, view, client, provider);
+            var auth = new MobileServiceUIAuthentication(rect, view, client, providerName);
             return auth.LoginAsync();
         }
     }
