@@ -107,9 +107,11 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             this.userAgentHeaderValue = GetUserAgentHeader();
 
-            this.httpClient.DefaultRequestHeaders.Add(UserAgentHeader, userAgentHeaderValue);
+            // Work around user agent header passing mono bug
+            // https://bugzilla.xamarin.com/show_bug.cgi?id=15128
+            this.httpClient.DefaultRequestHeaders.TryAddWithoutValidation(UserAgentHeader, userAgentHeaderValue);
             this.httpClient.DefaultRequestHeaders.Add(ZumoVersionHeader, userAgentHeaderValue);
-            this.httpClientSansHandlers.DefaultRequestHeaders.Add(UserAgentHeader, userAgentHeaderValue);
+            this.httpClientSansHandlers.DefaultRequestHeaders.TryAddWithoutValidation(UserAgentHeader, userAgentHeaderValue);
             this.httpClientSansHandlers.DefaultRequestHeaders.Add(ZumoVersionHeader, userAgentHeaderValue);
         }
 

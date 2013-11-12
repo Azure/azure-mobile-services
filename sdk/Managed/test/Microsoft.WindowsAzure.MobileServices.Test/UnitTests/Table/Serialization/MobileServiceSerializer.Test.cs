@@ -204,7 +204,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             PocoType pocoType = new PocoType();
 
             string actual = serializer.Serialize(pocoType).ToString();
-            Assert.AreEqual(actual, "{\r\n  \"PublicField\": null,\r\n  \"PublicProperty\": null\r\n}");
+            Assert.AreEqual(actual, "{" + Environment.NewLine + "  \"PublicField\": null," + Environment.NewLine + "  \"PublicProperty\": null" + Environment.NewLine + "}");
         }
 
         [TestMethod]
@@ -939,6 +939,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
         [Tag("notWP80")]
         [Tag("notWP75")]
+        [Tag("notXamarin")]
         [TestMethod]
         public void LongDeserializationNegative()
         {
@@ -1078,6 +1079,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
         [Tag("notWP80")]
         [Tag("notWP75")]
+        [Tag("notXamarin")]
         [TestMethod]
         public void ULongDeserializationNegative()
         {
@@ -1245,6 +1247,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [Tag("notWP75")]
+        [Tag("notXamarin")]
         [TestMethod]
         public void FloatDeserializationNegative()
         {
@@ -1401,8 +1404,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             }
         }
 
-        [TestMethod]
+        [Tag("notXamarin")]        
         [Tag("notWP75")]
+        [TestMethod]
         public void DoubleDeserializationNegative()
         {
             List<string> testCases = new List<string>() {
@@ -2011,6 +2015,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [Tag("notWP75")]
+        [Tag("notXamarin")]
         [TestMethod]
         public void DateTimeDeserializationNegative()
         {
@@ -2119,6 +2124,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [Tag("notWP75")]
+        [Tag("notXamarin")]
         [TestMethod]
         public void DateTimeOffsetDeserializationNegative()
         {
@@ -2289,6 +2295,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [Tag("notWP75")]
+        [Tag("notXamarin")]
         [TestMethod]
         public void NullableDeserializationNegative()
         {

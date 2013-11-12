@@ -1,0 +1,128 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{DC77CF23-C6BA-40D7-AC6E-2EF7BCA14211}</ProjectGuid>
+    <ProjectTypeGuids>{EFBA0AD7-5A72-4C68-AF49-83D382785DCF};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.WindowsAzure.Mobile.TestFramework</RootNamespace>
+    <AssemblyName>Microsoft.WindowsAzure.Mobile.TestFramework</AssemblyName>
+    <FileAlignment>512</FileAlignment>
+    <AndroidResgenFile>Resources\Resource.Designer.cs</AndroidResgenFile>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AndroidLinkMode>None</AndroidLinkMode>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Mono.Android" />
+    <Reference Include="mscorlib" />
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\..\Managed\packages\Newtonsoft.Json.5.0.5\lib\portable-net40+sl4+wp7+win8\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\ActionContinuation.cs">
+      <Link>Framework\ActionContinuation.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\Assert.cs">
+      <Link>Framework\Assert.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\AsyncTestMethodAsyncAction.cs">
+      <Link>Framework\AsyncTestMethodAsyncAction.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\AsyncTestMethodAttribute.cs">
+      <Link>Framework\AsyncTestMethodAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\ExcludeTestAttribute.cs">
+      <Link>Framework\ExcludeTestAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\FunctionalTestAttribute.cs">
+      <Link>Framework\FunctionalTestAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\FunctionalTestFilter.cs">
+      <Link>Framework\FunctionalTestFilter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\IAsyncExecution.cs">
+      <Link>Framework\IAsyncExecution.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\IContinuation.cs">
+      <Link>Framework\IContinuation.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\ITestReporter.cs">
+      <Link>Framework\ITestReporter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\TagAttribute.cs">
+      <Link>Framework\TagAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\TagManager.cs">
+      <Link>Framework\TagManager.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\TagManager.ExpressionEvaluator.cs">
+      <Link>Framework\TagManager.ExpressionEvaluator.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\TagManager.Tags.cs">
+      <Link>Framework\TagManager.Tags.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\TagTestFilter.cs">
+      <Link>Framework\TagTestFilter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\TestBase.cs">
+      <Link>Framework\TestBase.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\TestFilter.cs">
+      <Link>Framework\TestFilter.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\TestGroup.cs">
+      <Link>Framework\TestGroup.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\TestHarness.cs">
+      <Link>Framework\TestHarness.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\TestMethod.cs">
+      <Link>Framework\TestMethod.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\TestMethodAsyncAction.cs">
+      <Link>Framework\TestMethodAsyncAction.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\TestMethodAttribute.cs">
+      <Link>Framework\TestMethodAttribute.cs</Link>
+    </Compile>
+    <Compile Include="..\..\..\managed\test\Microsoft.WindowsAzure.MobileServices.TestFramework\Framework\TestSettings.cs">
+      <Link>Framework\TestSettings.cs</Link>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,13 @@
+*.suo
+*.csproj.user
+*.ide
+*.DotSettings
+*.userprefs
+UpgradeLog.htm
+#ignore build files
+bin
+obj
+packages/*
+.nuget/nuget.exe
+ios/Components
+android/Components
