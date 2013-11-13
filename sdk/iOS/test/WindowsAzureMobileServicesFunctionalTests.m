@@ -37,9 +37,6 @@
                 clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
                 applicationKey:@"<Application Key>"];
     
-    client = [MSClient clientWithApplicationURLString:@"https://philiostestservice.azure-mobile.net/"
-                       applicationKey:@"zAnGhbtZtiZhepprgqvREWilHygRmP75"];
-    
     done = NO;
     
     STAssertNotNil(client, @"Could not create test client.");

@@ -32,12 +32,6 @@
                         clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
                         applicationKey:@"<Application Key>"];
     
-    //client = [MSClient clientWithApplicationURLString:@"https://philiostestservice.azure-mobile.net/"
-    //                   applicationKey:@"zAnGhbtZtiZhepprgqvREWilHygRmP75"];
-    
-    client = [MSClient clientWithApplicationURLString:@"https://phillipthree.preview.azure-mobile-preview.net/"
-                                                 applicationKey:@"ZqoPMOOjagZVdYYwFEiZvUAiDognQq83"];
-    
     self.done = NO;
     self.table = [client tableWithName:@"stringId_objC_test_table"];
     
@@ -255,7 +249,6 @@
 
 -(void) testReadIdWithInvalidIdsAgainstStringIdTable
 {
-    // Testing readId with valid string Ids covered by: testTableOperationsWithValidStringIdAgainstStringIdTable
     NSArray *testIds = [MSTable testInvalidStringIds];
     for(NSString *testId in testIds)
     {
@@ -334,8 +327,6 @@
         self.done = NO;
         [self.table delete:@{@"id":testId} completion:^(id itemId, NSError *error) {
             STAssertNotNil(error, @"An error should have occurred");
-            //Assert.AreEqual(exception.Response.StatusCode, HttpStatusCode.NotFound);
-            //Assert.IsTrue(exception.Message.Contains(string.Format("Error: An item with id '{0}' does not exist.", testId)));
             self.done = YES;
         }];
         STAssertTrue([self waitForTest:90.0], @"Test timed out.");
@@ -350,8 +341,6 @@
         self.done = NO;
         [self.table deleteWithId:testId completion:^(id itemId, NSError *error) {
             STAssertNotNil(error, @"An error should have occurred");
-            //Assert.AreEqual(exception.Response.StatusCode, HttpStatusCode.NotFound);
-            //Assert.IsTrue(exception.Message.Contains(string.Format("Error: An item with id '{0}' does not exist.", testId)));
             self.done = YES;
         }];
         STAssertTrue([self waitForTest:90.0], @"Test timed out.");
