@@ -21,6 +21,7 @@ namespace ZumoE2ETestApp.Tests
         {
             ZumoTestGroup result = new ZumoTestGroup("Query tests");
             result.AddTest(CreatePopulateTableTest());
+            result.AddTest(CreatePopulateStringIdTableTest());
 
             // Numeric fields
             result.AddTest(CreateQueryTest("GreaterThan and LessThan - Movies from the 90s", m => m.Year > 1989 && m.Year < 2000));
@@ -206,6 +207,27 @@ namespace ZumoE2ETestApp.Tests
             }));
         }
 
+        internal static ZumoTest CreatePopulateStringIdTableTest()
+        {
+            return new ZumoTest("Populate [string id] movies table, if necessary", new TestExecution(async delegate(ZumoTest test)
+            {
+                var client = ZumoTestGlobals.Instance.Client;
+                var table = client.GetTable<AllStringIdMovies>();
+                AllStringIdMovies allMovies = new AllStringIdMovies
+                {
+                    Movies = new StringIdMovie[ZumoQueryTestData.AllMovies.Length]
+                };
+                for (int i = 0; i < allMovies.Movies.Length; i++)
+                {
+                    allMovies.Movies[i] = new StringIdMovie(string.Format("Movie {0:000}", i), ZumoQueryTestData.AllMovies[i]);
+                }
+
+                await table.InsertAsync(allMovies);
+                test.AddLog("Result of populating table: {0}", allMovies.Status);
+                return true;
+            }));
+        }
+
         class OrderByClause
         {
             public OrderByClause(string fieldName, bool isAscending)
@@ -222,7 +244,7 @@ namespace ZumoE2ETestApp.Tests
             string name, Expression<Func<Movie, bool>> whereClause,
             int? top = null, int? skip = null, OrderByClause[] orderBy = null,
             Expression<Func<Movie, string>> selectExpression = null, bool? includeTotalCount = null,
-            string odataQueryExpression = null)
+            string odataQueryExpression = null, bool useStringIdTable = false)
         {
             return CreateQueryTest<ExceptionTypeWhichWillNeverBeThrown>(name, whereClause, top, skip, orderBy, selectExpression, includeTotalCount, odataQueryExpression);
         }
@@ -231,7 +253,7 @@ namespace ZumoE2ETestApp.Tests
             string name, Expression<Func<Movie, bool>> whereClause,
             int? top = null, int? skip = null, OrderByClause[] orderBy = null,
             Expression<Func<Movie, string>> selectExpression = null, bool? includeTotalCount = null,
-            string odataExpression = null)
+            string odataExpression = null, bool useStringIdTable = false)
             where TExpectedException : Exception
         {
             return new ZumoTest(name, async delegate(ZumoTest test)
