@@ -206,11 +206,16 @@ namespace Microsoft.WindowsAzure.MobileServices
             MobileServiceInvalidOperationException error = null;
 
             object id = MobileServiceSerializer.GetId(instance);
+            string version = null;
+            if (!MobileServiceSerializer.IsIntegerId(id))
+            {
+                instance = RemoveSystemProperties(instance, out version);
+            }
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
             try
             {                
-                return await this.StorageContext.UpdateAsync(this.TableName, id, instance, parameters);
+                return await this.StorageContext.UpdateAsync(this.TableName, id, instance, version, parameters);
             }
             catch (MobileServiceInvalidOperationException ex)
             {
@@ -362,6 +367,45 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             string systemPropertiesString = string.Join(",", systemProperties);
             return systemPropertiesString;
+        }
+
+        /// <summary>
+        /// Removes all system properties (name start with '__') from the instance
+        /// if the instance is determined to have a string id and therefore be for table that
+        /// supports system properties.
+        /// </summary>
+        /// <param name="instance">The instance to remove the system properties from.</param>
+        /// <param name="version">Set to the value of the version system property before it is removed.</param>
+        /// <returns>
+        /// The instance with the system properties removed.
+        /// </returns>
+        protected static JObject RemoveSystemProperties(JObject instance, out string version)
+        {
+            version = null;
+
+            bool haveCloned = false;
+            foreach (JProperty property in instance.Properties())
+            {
+                if (property.Name.StartsWith(MobileServiceSerializer.SystemPropertyPrefix))
+                {
+                    // We don't want to alter the original jtoken passed in by the caller
+                    // so if we find a system property to remove, we have to clone first
+                    if (!haveCloned)
+                    {
+                        instance = instance.DeepClone() as JObject;
+                        haveCloned = true;
+                    }
+
+                    if (String.Equals(property.Name, MobileServiceSerializer.VersionSystemPropertyString, StringComparison.OrdinalIgnoreCase))
+                    {
+                        version = (string)instance[property.Name];
+                    }
+
+                    instance.Remove(property.Name);
+                }
+            }
+
+            return instance;
         }
 
         private static async Task<JToken> ParseContent(HttpResponseMessage response)

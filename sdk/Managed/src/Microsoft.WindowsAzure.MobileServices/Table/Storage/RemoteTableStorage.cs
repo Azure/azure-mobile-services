@@ -28,12 +28,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// The HTTP PATCH method used for update operations.
         /// </summary>
-        private static readonly HttpMethod patchHttpMethod = new HttpMethod("PATCH");
-
-        /// <summary>
-        /// The version system property as a string with the prefix.
-        /// </summary>
-        private static readonly string versionSystemPropertyString = String.Format("{0}{1}", MobileServiceSerializer.SystemPropertyPrefix, MobileServiceSystemProperties.Version.ToString()).ToLowerInvariant();
+        private static readonly HttpMethod patchHttpMethod = new HttpMethod("PATCH");        
 
         /// <summary>
         /// The <see cref="MobileServiceHttpClient"/> instance to use for the storage context.
@@ -116,10 +111,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             Debug.Assert(instance != null);
 
-            string unused = null;
-            JToken normalizedInstance = RemoveAnySystemProperties(instance, out unused);
             string uriString = GetUri(tableName, null, parameters);
-            MobileServiceHttpResponse response = await this.httpClient.RequestAsync(HttpMethod.Post, uriString, normalizedInstance.ToString(Formatting.None), true);
+            MobileServiceHttpResponse response = await this.httpClient.RequestAsync(HttpMethod.Post, uriString, instance.ToString(Formatting.None), true);
             return GetJTokenFromResponse(response);
         }
 
@@ -142,16 +135,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will complete when the update finishes.
         /// </returns>
-        public async Task<JToken> UpdateAsync(string tableName, object id, JToken instance, IDictionary<string, string> parameters)
+        public async Task<JToken> UpdateAsync(string tableName, object id, JToken instance, string version, IDictionary<string, string> parameters)
         {
             Debug.Assert(id != null);
             Debug.Assert(instance != null);
 
             Dictionary<string, string> headers = null;
-            string version = null;
 
-            JToken normalizedInstance = RemoveAnySystemProperties(instance, out version);
-            string content = normalizedInstance.ToString(Formatting.None);
+            string content = instance.ToString(Formatting.None);
             string uriString = GetUri(tableName, id, parameters);
 
             if (version != null)
@@ -244,57 +235,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             string queryString = MobileServiceUrlBuilder.GetQueryString(parameters);
 
             return MobileServiceUrlBuilder.CombinePathAndQuery(uriPath, queryString);
-        }
-
-        /// <summary>
-        /// Removes all system properties (name start with '__') from the instance
-        /// if the instance is determined to have a string id and therefore be for table that
-        /// supports system properties.
-        /// </summary>
-        /// <param name="instance">The instance to remove the system properties from.</param>
-        /// <param name="version">Set to the value of the version system property before it is removed.</param>
-        /// <returns>
-        /// The instance with the system properties removed.
-        /// </returns>
-        private static JToken RemoveAnySystemProperties(JToken instance, out string version)
-        {
-            version = null;
-            JObject jobject = instance as JObject;
-            if (jobject != null)
-            {
-                object id = null;
-                bool gotId = MobileServiceSerializer.TryGetId(jobject, false, out id);
-                if (!gotId || !MobileServiceSerializer.IsIntegerId(id))
-                {
-                    bool haveCloned = false;
-                    foreach (JProperty property in jobject.Properties())
-                    {
-                        if (property.Name.StartsWith(MobileServiceSerializer.SystemPropertyPrefix))
-                        {
-                            // We don't want to alter the original jtoken passed in by the caller
-                            // so if we find a system property to remove, we have to clone first
-                            if (!haveCloned)
-                            {
-                                jobject = jobject.DeepClone() as JObject;
-                                haveCloned = true;
-                            }
-
-                            if (string.Equals(property.Name, versionSystemPropertyString, StringComparison.OrdinalIgnoreCase))
-                            {
-                                version = (string)jobject[property.Name];
-                            }
-
-                            jobject.Remove(property.Name);
-                        }
-                    }
-                }
-
-                instance = jobject;
-            }
-
-            return instance;
-        }
-
+        }        
 
         /// <summary>
         /// Parses the response content into a JToken and adds the version system property
@@ -307,7 +248,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             JToken jtoken = response.Content.ParseToJToken();
             if (response.Etag != null)
             {
-                jtoken[versionSystemPropertyString] = GetValueFromEtag(response.Etag);
+                jtoken[MobileServiceSerializer.VersionSystemPropertyString] = GetValueFromEtag(response.Etag);
             }
 
             return jtoken;

@@ -5,9 +5,8 @@
 #import <SenTestingKit/SenTestingKit.h>
 #import "WindowsAzureMobileServices.h"
 #import "MSJSONSerializer.h"
-
 #import "MSClientConnection.h"
-
+#import "MSTable+MSTableTestUtilities.h"
 
 @interface MSJSONSerializerTests : SenTestCase {
     MSJSONSerializer *serializer;
@@ -17,9 +16,7 @@
 
 @implementation MSJSONSerializerTests
 
-
 # pragma mark * Setup and TearDown Methods
-
 
 - (void) setUp
 {
@@ -33,9 +30,64 @@
     NSLog(@"%@ tearDown", self.name);
 }
 
+# pragma mark * stringFromItem:orError
+-(void)testStringFromItemReturnsId
+{
+    NSArray *validIds = [MSTable testValidStringIds];
+    validIds = [validIds arrayByAddingObjectsFromArray:@[
+        @{@"id" : @1, @"string": @"1"},
+        @{@"id" : @INT_MAX, @"string": [NSString stringWithFormat:@"%d", INT_MAX]},
+        @{@"id" : @LONG_LONG_MAX, @"string": [NSString stringWithFormat:@"%lld", LONG_LONG_MAX]}
+        ]];
+    
+    NSError *error = nil;
+    
+    for (id test in validIds)
+    {
+        id testId;
+        NSString *expected;
+        if([test isKindOfClass:[NSDictionary class]]) {
+            testId = [test objectForKey:@"id"];
+            expected = [test objectForKey:@"string"];
+        } else {
+            testId = test;
+            expected = test;
+        }
+        NSString *actualId = [serializer stringFromItemId:testId orError:&error];
+        
+        STAssertNil(error, @"error was not nil after getting string id for %@", testId);
+        STAssertTrue([actualId isEqualToString:expected], @"error string id was %@ and not %@", actualId, expected);
+    }
+}
+
+-(void)testStringFromItemErrorsOnInvalidIds
+{
+    NSArray *invalidIds = [MSTable testInvalidStringIds];
+    invalidIds = [invalidIds arrayByAddingObjectsFromArray:[MSTable testEmptyStringIdsIncludingNull:YES]];
+    invalidIds = [invalidIds arrayByAddingObjectsFromArray:[MSTable testInvalidIntIds]];
+    invalidIds = [invalidIds arrayByAddingObjectsFromArray:[MSTable testNonStringNonIntValidJsonIds]];
+    invalidIds = [invalidIds arrayByAddingObjectsFromArray:[MSTable testNonStringNonIntIds]];    
+                  
+    NSError *error = nil;
+    for (id testId in invalidIds)
+    {
+        NSString *actualId = [serializer stringFromItemId:testId orError:&error];
+        STAssertNotNil(error, @"error was nil after getting string id %@", actualId);
+        STAssertEquals(MSInvalidItemIdWithRequest, error.code, @"Unexpected error code: %d", error.code);
+        STAssertEqualObjects(@"The item provided did not have a valid id.", error.localizedDescription, @"Unexpected messge: %@", error.localizedDescription);
+    }
+}
+
+-(void)testStringFromItemErrorsOnNilItemId
+{
+    NSError *error = nil;
+    [serializer stringFromItemId:nil orError:&error];
+    STAssertNotNil(error, @"error was nil after getting nil item id");
+    STAssertEquals(MSExpectedItemIdWithRequest, error.code, @"Unexpected error code: %d", error.code);
+    STAssertEqualObjects(@"The item id was not provided.", error.localizedDescription, @"Unexpected message: %@", error.localizedDescription);
+}
 
 # pragma mark * dataFromItem:idAllowed:ensureDictionary:orError: Tests
-
 
 -(void)testDataFromItemReturnsData
 {
@@ -51,6 +103,86 @@
     STAssertNil(error, @"error was not nil after serializing item.");
     
     NSString *expected = @"{\"id\":5,\"name\":\"bob\"}";
+    NSString *actual = [[NSString alloc] initWithData:data
+                                             encoding:NSUTF8StringEncoding];
+    
+    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+}
+
+-(void)testDataFromItemWithStringIdReturnsData
+{
+    NSDictionary *item = @{ @"id" : @"MY-ID", @"name" : @"bob" };
+    
+    NSError *error = nil;
+    NSData *data = [serializer dataFromItem:item
+                                  idAllowed:YES
+                           ensureDictionary:YES
+                                    orError:&error];
+    
+    STAssertNotNil(data, @"data was nil after serializing item.");
+    STAssertNil(error, @"error was not nil after serializing item.");
+    
+    NSString *expected = @"{\"id\":\"MY-ID\",\"name\":\"bob\"}";
+    NSString *actual = [[NSString alloc] initWithData:data
+                                             encoding:NSUTF8StringEncoding];
+    
+    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+}
+
+-(void)testDataFromItemWithStringIdReturnsDataWithIdNotAllowed
+{
+    NSDictionary *item = @{ @"id" : @"MY-ID", @"name" : @"bob" };
+    
+    NSError *error = nil;
+    NSData *data = [serializer dataFromItem:item
+                                  idAllowed:NO
+                           ensureDictionary:YES
+                                    orError:&error];
+    
+    STAssertNotNil(data, @"data was nil after serializing item.");
+    STAssertNil(error, @"error was not nil after serializing item.");
+    
+    NSString *expected = @"{\"id\":\"MY-ID\",\"name\":\"bob\"}";
+    NSString *actual = [[NSString alloc] initWithData:data
+                                             encoding:NSUTF8StringEncoding];
+    
+    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+}
+
+-(void)testDataFromItemWithNullUppercaseIdReturnsDataWithIdNotAllowed
+{
+    NSDictionary *item = @{ @"ID" : [NSNull null], @"name" : @"bob" };
+    
+    NSError *error = nil;
+    NSData *data = [serializer dataFromItem:item
+                                  idAllowed:NO
+                           ensureDictionary:YES
+                                    orError:&error];
+    
+    STAssertNotNil(data, @"data was nil after serializing item.");
+    STAssertNil(error, @"error was not nil after serializing item.");
+    
+    NSString *expected = @"{\"ID\":null,\"name\":\"bob\"}";
+    NSString *actual = [[NSString alloc] initWithData:data
+                                             encoding:NSUTF8StringEncoding];
+    
+    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+}
+
+-(void)testDataFromItemWithEmptyUppercaseIdReturnsDataWithIdNotAllowed
+{
+    NSDictionary *item = @{ @"ID" : @"", @"name" : @"bob" };
+    
+    NSError *error = nil;
+    NSData *data = [serializer dataFromItem:item
+                                  idAllowed:NO
+                           ensureDictionary:YES
+                                    orError:&error];
+    
+    STAssertNotNil(data, @"data was nil after serializing item.");
+    STAssertNil(error, @"error was not nil after serializing item.");
+    
+    NSString *expected = @"{\"ID\":\"\",\"name\":\"bob\"}";
     NSString *actual = [[NSString alloc] initWithData:data
                                              encoding:NSUTF8StringEncoding];
     
@@ -141,6 +273,48 @@
                  @"description was: %@", description);
 }
 
+-(void)testDataFromItemErrorWithMultipleIdNotAllowed
+{
+    NSError *error = nil;
+    NSDictionary *item = @{ @"id" : @5, @"Id": @10, @"name" : @"bob" };
+    NSData *data = [serializer dataFromItem:item
+                                  idAllowed:NO
+                           ensureDictionary:YES
+                                    orError:&error];
+    
+    STAssertNil(data, @"data was not nil after serializing item.");
+    STAssertNotNil(error, @"error was nil after serializing item.");
+    STAssertTrue(error.domain == MSErrorDomain,
+                 @"error domain should have been MSErrorDomain.");
+    STAssertTrue(error.code == MSExistingItemIdWithRequest,
+                 @"error code should have been MSExistingItemIdWithRequest.");
+    
+    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+    STAssertTrue([description isEqualToString:@"The item provided must not have an id."],
+                 @"description was: %@", description);
+}
+
+-(void)testDataFromItemErrorWithStringUpperCaseIdNotAllowed
+{
+    NSError *error = nil;
+    NSDictionary *item = @{ @"iD" : @"MY-ID", @"name" : @"bob" };
+    NSData *data = [serializer dataFromItem:item
+                                  idAllowed:NO
+                           ensureDictionary:YES
+                                    orError:&error];
+    
+    STAssertNil(data, @"data was not nil after serializing item.");
+    STAssertNotNil(error, @"error was nil after serializing item.");
+    STAssertTrue(error.domain == MSErrorDomain,
+                 @"error domain should have been MSErrorDomain.");
+    STAssertTrue(error.code == MSInvalidItemIdWithRequest,
+                 @"error code should have been MSInvalidItemIdWithRequest.");
+    
+    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+    STAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
+                 @"description was: %@", description);
+}
+
 -(void)testDataFromItemErrorWithIdUpperCaseNotAllowed
 {
     NSError *error = nil;
@@ -199,11 +373,9 @@
                                              encoding:NSUTF8StringEncoding];
     
     STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
-    
 }
 
 # pragma mark * itemIdFromItem: Tests
-
 
 -(void)testItemIdFromItemReturnsId
 {
@@ -214,6 +386,16 @@
     
     STAssertNil(error, @"error should have been nil.");
     STAssertEquals(expected, [itemId longLongValue], @"itemId was not correct.");
+}
+
+-(void)testItemIdFromItemWithStringIdReturnsId
+{
+    NSDictionary *item = @{ @"id" : @"my-id", @"name" : @"bob" };
+    NSError *error = nil;
+    NSString *itemId = [serializer itemIdFromItem:item orError:&error];
+
+    STAssertNil(error, @"error should have been nil.");
+    STAssertEquals(@"my-id", itemId, @"itemId was not correct.");
 }
 
 -(void)testItemIdFromItemThrowsForMissingId
@@ -227,12 +409,12 @@
     STAssertNil(itemId, @"itemId should have been nil.");
 }
 
--(void)testItemIdFromItemThrowsForNonNumericMissingId
+-(void)testItemIdFromItemThrowsForNonNumericNonStringMissingId
 {
-    NSDictionary *item = @{ @"id" : @"anId", @"name" : @"bob" };
+    NSDictionary *item = @{ @"id" : [NSNull null], @"name" : @"bob" };
     
     NSError *error = nil;
-    NSNumber *itemId = [serializer itemIdFromItem:item orError:&error];
+    id itemId = [serializer itemIdFromItem:item orError:&error];
     
     STAssertNotNil(error, @"error should not have been nil.");
     STAssertNil(itemId, @"itemId should have been nil.");
@@ -251,7 +433,6 @@
 
 
 # pragma mark * itemFromData: Tests
-
 
 -(void)testItemFromDataReturnsOriginalItemUpdated
 {

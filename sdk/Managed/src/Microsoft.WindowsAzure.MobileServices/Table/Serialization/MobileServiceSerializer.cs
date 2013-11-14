@@ -26,6 +26,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal const string SystemPropertyPrefix = "__";
 
         /// <summary>
+        /// The version system property as a string with the prefix.
+        /// </summary>
+        internal static readonly string VersionSystemPropertyString = String.Format("{0}{1}", MobileServiceSerializer.SystemPropertyPrefix, MobileServiceSystemProperties.Version.ToString()).ToLowerInvariant();
+
+        /// <summary>
         /// The name of the reserved Mobile Services id member.
         /// </summary>
         /// <remarks>
@@ -218,7 +223,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             return id != null && IsIntegerId(id.GetType());
         }
 
-        private static bool IsIntegerId(Type idType)
+        public static bool IsIntegerId(Type idType)
         {
             bool isIntegerIdType = idType == longType ||
                                    idType == intType;
@@ -363,10 +368,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The type of the Id property for items of the given type, or null if the type does not
         /// have an Id property.
         /// </returns>
-        public Type GetIdPropertyType<T>()
+        public Type GetIdPropertyType<T>(bool throwIfNotFound = true)
         {
             Type idPropertyType = null;
-            JsonProperty idProperty = this.SerializerSettings.ContractResolver.ResolveIdProperty(typeof(T));
+            JsonProperty idProperty = this.SerializerSettings.ContractResolver.ResolveIdProperty(typeof(T), throwIfNotFound);
 
             if (idProperty != null)
             {
