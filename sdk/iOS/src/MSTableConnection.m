@@ -34,17 +34,26 @@
         {
             id item = nil;
             
-            if (!error) {
-                
+            if (!error) {                
                 [connection isSuccessfulResponse:response
                                         data:data
                                          orError:&error];
+                
                 if (!error)
                 {
                     item = [connection itemFromData:data
                                            response:response
                                    ensureDictionary:YES
                                             orError:&error];
+                }
+                
+                if (response && item && !error) {
+                    NSString *version = [[response allHeaderFields] objectForKey:@"Etag"];
+                    if(version.length > 1 && [version characterAtIndex:0] == '\"' && [version characterAtIndex:version.length-1] == '\"') {
+                        NSRange range = { 1, version.length - 2 };
+                        version = [version substringWithRange:range];
+                    }
+                    [item setValue:[version stringByReplacingOccurrencesOfString:@"\\\"" withString:@"\""] forKey:MSSystemColumnVersion];
                 }
             }
             

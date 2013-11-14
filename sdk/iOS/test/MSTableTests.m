@@ -6,7 +6,7 @@
 #import "MSTable.h"
 #import "MSTestFilter.h"
 #import "MSQuery.h"
-
+#import "MSTable+MSTableTestUtilities.h"
 
 @interface MSTableTests : SenTestCase {
     MSClient *client;
@@ -1298,14 +1298,502 @@
     STAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
+# pragma mark System Property Tests
+
+-(void) testInsertStringIdPropertiesNotRemovedFromRequest
+{
+    __block NSURLRequest *actualRequest = nil;
+    NSArray *testProperties = [MSTable testNonSystemProperties];
+    testProperties = [testProperties arrayByAddingObjectsFromArray:[MSTable testValidSystemProperties]];
+    
+    
+    for (NSString *property in testProperties)
+    {
+        MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+        NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                                       initWithURL:nil
+                                       statusCode:200
+                                       HTTPVersion:nil headerFields:nil];
+        testFilter.responseToUse = response;
+        
+        NSString *dataString = [NSString stringWithFormat:@"{\"id\":\"an id\",\"%@\":\"a value\",\"string\":\"What?\"}", property];
+        testFilter.dataToUse = [dataString dataUsingEncoding:NSUTF8StringEncoding];
+        testFilter.ignoreNextFilter = YES;
+        testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+            actualRequest = request;
+            return request;
+        };
+        
+        MSClient *filteredClient = [client clientWithFilter:testFilter];
+        MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
+
+        NSDictionary *itemToInsert = @{@"id": @"an id", @"string": @"What?", property: @"a value"};
+        [todoTable insert:itemToInsert completion:^(NSDictionary *item, NSError *error) {
+            NSData *actualBody = actualRequest.HTTPBody;
+            NSString *bodyString = [[NSString alloc] initWithData:actualBody
+                                                         encoding:NSUTF8StringEncoding];
+            STAssertTrue([bodyString rangeOfString:property].location != NSNotFound, @"The body was not serialized as expected.");
+            STAssertEqualObjects(@"a value", [item objectForKey:property], @"Property %@ was removed", property);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    }
+}
+
+-(void) testInsertNullIdSystemPropertiesNotRemovedFromRequest
+{
+    __block NSURLRequest *actualRequest = nil;
+    NSArray *testSystemProperties = [MSTable testValidSystemProperties];
+
+    for (NSString *property in testSystemProperties)
+    {
+        MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+        NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                                       initWithURL:nil
+                                       statusCode:200
+                                       HTTPVersion:nil headerFields:nil];
+        testFilter.responseToUse = response;
+        NSString *dataString = [NSString stringWithFormat:@"{\"id\":\"an id\",\"%@\":\"a value\",\"string\":\"What?\"}", property];
+        testFilter.dataToUse = [dataString dataUsingEncoding:NSUTF8StringEncoding];
+        testFilter.ignoreNextFilter = YES;
+        testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+            actualRequest = request;
+            return request;
+        };
+        
+        MSClient *filteredClient = [client clientWithFilter:testFilter];
+        MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
+        
+        NSDictionary *itemToInsert = @{@"id": [NSNull null], @"string": @"What?", property: @"a value"};
+        [todoTable insert:itemToInsert completion:^(NSDictionary *item, NSError *error) {
+            NSData *actualBody = actualRequest.HTTPBody;
+            NSString *bodyString = [[NSString alloc] initWithData:actualBody
+                                                         encoding:NSUTF8StringEncoding];
+            STAssertTrue([bodyString rangeOfString:property].location != NSNotFound, @"The body was not serialized as expected.");
+            STAssertEqualObjects(@"a value", [item objectForKey:property], @"system property %@ was removed", property);
+            
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    }
+}
+
+-(void) testInsertNullIdNonSystemPropertiesNotRemovedFromRequest
+{
+    __block NSURLRequest *actualRequest = nil;
+    NSArray *testProperties = [MSTable testNonSystemProperties];
+    
+    for (NSString *property in testProperties)
+    {
+        MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+        NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                                       initWithURL:nil
+                                       statusCode:200
+                                       HTTPVersion:nil headerFields:nil];
+        testFilter.responseToUse = response;
+        NSString *dataString = [NSString stringWithFormat:@"{\"id\":\"an id\",\"%@\":\"a value\",\"string\":\"Hey?\"}", property];
+        testFilter.dataToUse = [dataString dataUsingEncoding:NSUTF8StringEncoding];
+        testFilter.ignoreNextFilter = YES;
+        testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+            actualRequest = request;
+            return request;
+        };
+        
+        MSClient *filteredClient = [client clientWithFilter:testFilter];
+        MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
+        
+        NSDictionary *itemToInsert = @{@"id": [NSNull null], @"string": @"what?", property: @"a value"};
+        [todoTable insert:itemToInsert completion:^(NSDictionary *item, NSError *error) {
+            NSData *actualBody = actualRequest.HTTPBody;
+            NSString *bodyString = [[NSString alloc] initWithData:actualBody
+                                                         encoding:NSUTF8StringEncoding];
+            STAssertTrue([bodyString rangeOfString:property].location != NSNotFound, @"Error: The body was not serialized as expected.");
+            STAssertEqualObjects(@"a value", [item objectForKey:property], @"Error: Non system property %@ was removed", property);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    }
+}
+
+-(void) testUpdateAsyncStringIdSystemPropertiesRemovedFromRequest
+{
+    __block NSURLRequest *actualRequest = nil;
+    NSArray *testProperties = [MSTable testValidSystemProperties];
+    
+    for (NSString *property in testProperties)
+    {
+        MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+        NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                                       initWithURL:nil
+                                       statusCode:200
+                                       HTTPVersion:nil headerFields:nil];
+        testFilter.responseToUse = response;
+        testFilter.dataToUse = [@"{\"id\":\"an id\",\"String\":\"Hey\"}" dataUsingEncoding:NSUTF8StringEncoding];
+        testFilter.ignoreNextFilter = YES;
+        testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+            actualRequest = request;
+            return request;
+        };
+        
+        MSClient *filteredClient = [client clientWithFilter:testFilter];
+        MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
+        
+        NSDictionary *itemToInsert = @{@"id": @"an id", @"string": @"What?", property: @"a value"};
+        [todoTable update:itemToInsert completion:^(NSDictionary *item, NSError *error) {
+            NSData *actualBody = actualRequest.HTTPBody;
+            NSString *bodyString = [[NSString alloc] initWithData:actualBody
+                                                         encoding:NSUTF8StringEncoding];
+            STAssertEqualObjects(bodyString, @"{\"id\":\"an id\",\"string\":\"What?\"}",
+                                 @"The body was not serialized as expected.");
+            
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    }
+}
+
+-(void) testUpdateStringIdNonSystemPropertiesNotRemovedFromRequest
+{
+    __block NSURLRequest *actualRequest = nil;
+    NSArray *testProperties = [MSTable testNonSystemProperties];
+    
+    for (NSString *property in testProperties)
+    {
+        MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+        NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                                       initWithURL:nil
+                                       statusCode:200
+                                       HTTPVersion:nil headerFields:nil];
+        testFilter.responseToUse = response;
+        
+        NSString *dataString = [NSString stringWithFormat:@"{\"id\":\"an id\",\"%@\":\"a value\",\"string\":\"Hey\"}", property];
+        testFilter.dataToUse = [dataString dataUsingEncoding:NSUTF8StringEncoding];
+        testFilter.ignoreNextFilter = YES;
+        testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+            actualRequest = request;
+            return request;
+        };
+        
+        MSClient *filteredClient = [client clientWithFilter:testFilter];
+        MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
+        
+        NSDictionary *itemToInsert = @{@"id": @"an id", @"string": @"What?", property: @"a value"};
+        [todoTable insert:itemToInsert completion:^(NSDictionary *item, NSError *error) {
+            NSData *actualBody = actualRequest.HTTPBody;
+            NSString *bodyString = [[NSString alloc] initWithData:actualBody
+                                                         encoding:NSUTF8StringEncoding];
+            STAssertTrue([bodyString rangeOfString:property].location != NSNotFound, @"The body was not serialized as expected.");
+            STAssertEqualObjects(@"a value", [item objectForKey:property], @"Non system property %@ was removed", property);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    }
+}
+
+-(void) testUpdateIntegerIdNoPropertiesRemovedFromRequest
+{
+    __block NSURLRequest *actualRequest = nil;
+    NSArray *testProperties = [MSTable testNonSystemProperties];
+    testProperties = [testProperties arrayByAddingObjectsFromArray:[MSTable testValidSystemProperties]];
+    
+    for (NSString *property in testProperties)
+    {
+        MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+        NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                                       initWithURL:nil
+                                       statusCode:200
+                                       HTTPVersion:nil headerFields:nil];
+        testFilter.responseToUse = response;
+        
+        NSString *dataString = [NSString stringWithFormat:@"{\"id\":5,\"%@\":\"a value\",\"string\":\"Hey\"}", property];
+        testFilter.dataToUse = [dataString dataUsingEncoding:NSUTF8StringEncoding];
+        testFilter.ignoreNextFilter = YES;
+        testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+            actualRequest = request;
+            return request;
+        };
+        
+        MSClient *filteredClient = [client clientWithFilter:testFilter];
+        MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
+        
+        NSDictionary *itemToUpdate = @{@"id": @5, @"string": @"What?", property: @"a value"};
+        [todoTable update:itemToUpdate completion:^(NSDictionary *item, NSError *error) {
+            NSData *actualBody = actualRequest.HTTPBody;
+            NSString *bodyString = [[NSString alloc] initWithData:actualBody
+                                                         encoding:NSUTF8StringEncoding];
+            STAssertTrue([bodyString rangeOfString:property].location != NSNotFound,
+                         @"The body was not serialized as expected: %@", bodyString);
+            STAssertEqualObjects(@"a value", [item objectForKey:property], @"Property %@ was removed", property);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    }
+}
+
+- (BOOL) checkRequestURL:(NSURL *)url SystemProperty:(MSSystemProperties) property
+{
+    NSString *query = [url query];
+    
+    BOOL result = YES;
+    if (property == MSSystemPropertyNone)
+    {
+        return query == nil || [query rangeOfString:@"__systemProperties"].location == NSNotFound;
+    } else if (property == MSSystemPropertyAll) {
+        return [query rangeOfString:@"__systemProperties=%2A"].location != NSNotFound;
+    }
+    
+    // Check individual combinations
+    if(query == nil || [query rangeOfString:@"__systemProperties"].location == NSNotFound) {
+        return NO;
+    }
+    
+    if (property & MSSystemPropertyCreatedAt)
+    {
+        result = result && [query rangeOfString:@"__createdAt"].location != NSNotFound;
+    }
+    
+    if (property & MSSystemPropertyUpdatedAt)
+    {
+        result = result &&  [query rangeOfString:@"__updatedAt"].location != NSNotFound;
+    }
+    
+    if (property & MSSystemPropertyVersion)
+    {
+        result = result &&  [query rangeOfString:@"__version"].location != NSNotFound;
+    }
+    
+    return result;
+}
+
+-(void) testTableOperationSystemPropertiesQueryStringIsCorrect
+{
+    __block NSURLRequest *actualRequest = nil;
+    NSArray *testSystemProperties = [MSTable testSystemProperties];
+    
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                                   initWithURL:nil
+                                   statusCode:200
+                                   HTTPVersion:nil headerFields:nil];
+    testFilter.responseToUse = response;
+    testFilter.ignoreNextFilter = YES;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
+    
+    for (NSNumber *systemPropertyAsNumber in testSystemProperties)
+    {
+        NSUInteger systemProperty = [systemPropertyAsNumber unsignedIntegerValue];
+        todoTable.SystemProperties = systemProperty;
+
+        // String Id (Insert, Update, ReadWithId, Delete)
+
+        done = NO;
+        NSDictionary *item = @{@"id":@"an id",@"String":@"what?"};
+        testFilter.dataToUse = [@"{\"id\":\"an id\",\"String\":\"Hey\"}" dataUsingEncoding:NSUTF8StringEncoding];
+        [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error for property %d with url: %@", systemProperty, [[actualRequest URL] query]);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        
+        done = NO;
+        [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
+            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        
+        done = NO;
+        [todoTable readWithId:item completion:^(NSDictionary *item, NSError *error) {
+            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        
+        done = NO;
+        [todoTable delete:item completion:^(id itemId, NSError *error) {
+            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        
+        // Integer Id
+        done = NO;
+        item = @{@"String": @"what?"};
+        testFilter.dataToUse = [@"{\"id\":5,\"String\":\"Hey\"}" dataUsingEncoding:NSUTF8StringEncoding];
+        [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        
+        done = NO;
+        item = @{@"id": @5, @"String": @"what?"};
+        [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
+            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        
+        done = NO;
+        [todoTable readWithId:item completion:^(NSDictionary *item, NSError *error) {
+            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        
+        done = NO;
+        [todoTable delete:item completion:^(id itemId, NSError *error) {
+            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+
+        // Query
+        
+        done = NO;
+        [todoTable readWithQueryString:@"$filter=id eq 5" completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+
+        done = NO;
+        [todoTable readWithQueryString:@"$select=id,String" completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    }
+}
+
+-(void) testTableOperationUserParameterWithSystemPropertyQueryStringIsCorrect
+{
+    __block NSURLRequest *actualRequest = nil;
+    NSArray *testSystemProperties = [MSTable testSystemProperties];
+    
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                                   initWithURL:nil
+                                   statusCode:200
+                                   HTTPVersion:nil headerFields:nil];
+    testFilter.responseToUse = response;
+    testFilter.ignoreNextFilter = YES;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
+    
+    for (NSNumber *systemProperty in testSystemProperties)
+    {
+        todoTable.SystemProperties = [systemProperty integerValue];
+        
+        done = NO;
+        NSDictionary *item = @{@"id":@"an id", @"string":@"what?"};
+        
+        testFilter.dataToUse = [@"{\"id\":\"an id\",\"String\":\"Hey\"}" dataUsingEncoding:NSUTF8StringEncoding];
+        [todoTable insert:item parameters:@{ @"__systemProperties": @"__createdAt"} completion:^(NSDictionary *item, NSError *error) {
+            NSString *url = [[actualRequest URL] query];
+            STAssertTrue([url rangeOfString:@"__systemProperties=__createdAt"].location != NSNotFound, @"Incorrect query: %@", url);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        
+        done = NO;
+        [todoTable update:item parameters:@{ @"__systemProperties": @"createdAt"} completion:^(NSDictionary *item, NSError *error) {
+            NSString *url = [[actualRequest URL] query];
+            STAssertTrue([url rangeOfString:@"__systemProperties=createdAt"].location != NSNotFound, @"Incorrect query: %@", url);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        
+        done = NO;
+        [todoTable readWithId:@"an id" parameters:@{ @"__systemProperties": @"CreatedAt"} completion:^(NSDictionary *item, NSError *error) {
+            NSString *url = [[actualRequest URL] query];
+            STAssertTrue([url rangeOfString:@"__systemProperties=CreatedAt"].location != NSNotFound, @"Incorrect query: %@", url);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        
+        done = NO;
+        [todoTable delete:item parameters:@{ @"__systemProperties": @"unknown"} completion:^(id itemId, NSError *error) {
+            NSString *url = [[actualRequest URL] query];
+            STAssertTrue([url rangeOfString:@"__systemProperties=unknown"].location != NSNotFound, @"Incorrect query: %@", url);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        
+        // Integer Id
+        done = NO;
+        item = @{@"string":@"what?"};
+        testFilter.dataToUse = [@"{\"id\":5,\"String\":\"Hey\"}" dataUsingEncoding:NSUTF8StringEncoding];
+        [todoTable insert:item parameters:@{ @"__systemProperties": @"__createdAt"} completion:^(NSDictionary *item, NSError *error) {
+            NSString *url = [[actualRequest URL] query];
+            STAssertTrue([url rangeOfString:@"__systemProperties=__createdAt"].location != NSNotFound, @"Incorrect query: %@", url);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        
+        done = NO;
+        item = @{@"id":@5, @"string":@"what?"};
+        [todoTable update:item parameters:@{ @"__systemProperties": @"createdAt"} completion:^(NSDictionary *item, NSError *error) {
+            NSString *url = [[actualRequest URL] query];
+            STAssertTrue([url rangeOfString:@"__systemProperties=createdAt"].location != NSNotFound, @"Incorrect query: %@", url);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        
+        done = NO;
+        [todoTable readWithId:@5 parameters:@{ @"__systemProperties": @"CreatedAt"} completion:^(NSDictionary *item, NSError *error) {
+            NSString *url = [[actualRequest URL] query];
+            STAssertTrue([url rangeOfString:@"__systemProperties=CreatedAt"].location != NSNotFound, @"Incorrect query: %@", url);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        
+        done = NO;
+        [todoTable delete:item parameters:@{ @"__systemProperties": @"unknown"} completion:^(id itemId, NSError *error) {
+            NSString *url = [[actualRequest URL] query];
+            STAssertTrue([url rangeOfString:@"__systemProperties=unknown"].location != NSNotFound, @"Incorrect query: %@", url);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        
+        // Query
+        
+        done = NO;
+        [todoTable readWithQueryString:@"$filter=id%20eq%205&__systemproperties=__createdAt" completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+            NSString *url = [[actualRequest URL] query];
+            STAssertEqualObjects(@"$filter=id%20eq%205&__systemproperties=__createdAt", url, @"Incorrect query: %@", url);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        
+        done = NO;
+        [todoTable readWithQueryString:@"$select=id,String&__systemProperties=__CreatedAt" completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+            NSString *url = [[actualRequest URL] query];
+            STAssertEqualObjects(@"$select=id,String&__systemProperties=__CreatedAt", url, @"Incorrect query: %@", url);
+            done = YES;
+        }];
+        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    }
+}
 
 #pragma mark * Async Test Helper Method
 
 
 -(BOOL) waitForTest:(NSTimeInterval)testDuration {
-    
+ 
     NSDate *timeoutAt = [NSDate dateWithTimeIntervalSinceNow:testDuration];
-    
+ 
     while (!done) {
         [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
                                  beforeDate:timeoutAt];
@@ -1313,7 +1801,7 @@
             break;
         }
     };
-    
+ 
     return done;
 }
 

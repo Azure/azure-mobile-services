@@ -27,9 +27,43 @@ NSString *const inlineCountNone = @"none";
 
 #pragma mark * Public URL Builder Methods
 
++ (NSURL *) addTableSystemProperties:(MSTable *)table toURL:(NSURL *)url
+{
+    if (table.SystemProperties == MSSystemPropertyNone) {
+        return url;
+    }
+
+    if(url.query != nil && [url.query rangeOfString:@"__systemProperties" options:NSCaseInsensitiveSearch].location != NSNotFound)
+    {
+        return url;
+    }
+                               
+    NSString *value = @"";
+    if(table.SystemProperties == MSSystemPropertyAll) {
+        value = encodeToPercentEscapeString(@"*");
+    } else {
+        NSMutableArray *properties = [NSMutableArray array];
+        if (table.SystemProperties & MSSystemPropertyCreatedAt)
+        {
+            [properties addObject:@"__createdAt"];
+        }
+        if (table.SystemProperties & MSSystemPropertyUpdatedAt)
+        {
+            [properties addObject:@"__updatedAt"];
+        }
+        if (table.SystemProperties & MSSystemPropertyVersion)
+        {
+            [properties addObject:@"__version"];
+        }
+        value = [properties componentsJoinedByString:@","];
+    }
+    
+    return [MSURLBuilder URLByAppendingQueryString:[@"__systemProperties=" stringByAppendingString:value] toURL:url];
+}
 
 +(NSURL *) URLForTable:(MSTable *)table
-        parameters:(NSDictionary *)parameters
+            parameters:(NSDictionary *)parameters
+                 query:( NSString *)query
                orError:(NSError **)error
 {
     NSURL *url = nil;
@@ -39,17 +73,36 @@ NSString *const inlineCountNone = @"none";
         
         // Create the table path
         NSString *tablePath = [NSString stringWithFormat:@"tables/%@", table.name];
-
+        
         // Append it to the application URL; Don't percent encode the tablePath
         // because URLByAppending will percent encode for us
         url = [table.client.applicationURL URLByAppendingPathComponent:tablePath];
         
+        // Add on the querystring now
+        /* ???
+        if([query respondsToSelector:@selector(stringByAddingPercentEncodingWithAllowedCharacters:)]) {
+            url = [MSURLBuilder URLByAppendingQueryString:[query stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]] toURL:url];
+        }
+        */
+        
+        url = [MSURLBuilder URLByAppendingQueryString:query toURL:url];
+            
         // Add the query parameters if any
         url = [MSURLBuilder URLByAppendingQueryParameters:parameters
-                                                         toURL:url];
+                                                    toURL:url];
+        
+        // Check if we should add in system properties
+        url = [MSURLBuilder addTableSystemProperties:table toURL:url];
     }
     
     return url;
+}
+
++(NSURL *) URLForTable:(MSTable *)table
+        parameters:(NSDictionary *)parameters
+               orError:(NSError **)error
+{
+    return [MSURLBuilder URLForTable:table parameters:parameters query:nil orError:error];
 }
 
 +(NSURL *) URLForTable:(MSTable *)table
@@ -75,9 +128,7 @@ NSString *const inlineCountNone = @"none";
 {
     // Get the URL for the table; no need to pass in the error parameter because
     // only user-parameters can cause an error
-    NSURL *url = [self URLForTable:table parameters:nil orError:nil];
-    
-    return [MSURLBuilder URLByAppendingQueryString:query toURL:url];
+    return [self URLForTable:table parameters:nil query:query orError:nil];
 }
 
 +(NSURL *)URLForApi:(MSClient *)client

@@ -25,6 +25,7 @@
 -(NSData *)dataFromItem:(id)item
               idAllowed:(BOOL)idAllowed
        ensureDictionary:(BOOL)ensureDictionary
+ removeSystemProperties:(BOOL)removeSystemProperties
                 orError:(NSError **)error;
 
 // Called to obtain the id of an item.

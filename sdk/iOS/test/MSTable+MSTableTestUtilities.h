@@ -15,4 +15,11 @@
 +(NSArray *) testInvalidIntIds;
 +(NSArray *) testNonStringNonIntValidJsonIds;
 +(NSArray *) testNonStringNonIntIds;
+
++(NSArray *) testSystemProperties;
++(NSArray *) testValidSystemProperties;
++(NSArray *) testNonSystemProperties;
++(NSArray *) testValidSystemPropertyQueryStrings;
++(NSArray *) testInvalidSystemPropertyQueryStrings;
++(NSString *) testInvalidSystemParameterQueryString;
 @end

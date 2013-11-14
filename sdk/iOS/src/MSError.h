@@ -28,6 +28,12 @@ extern NSString *const MSErrorRequestKey;
 /// dicitionary may return nil.
 extern NSString *const MSErrorResponseKey;
 
+/// The key to use with the *NSError* userInfo dictionary to retrieve the
+/// server item that was returned from the Windows Azure Mobile Service related to
+/// the precondition failed error. This will only be present on MSPreconditionFailed
+/// errors.
+extern NSString *const MSErrorServerItem;
+
 
 #pragma mark * MSErrorCodes
 
@@ -60,7 +66,7 @@ extern NSString *const MSErrorResponseKey;
 #define MSExistingItemIdWithRequest             -1107
 
 /// Indicates that the response from the Windows Azure Mobile Service did not
-/// inlcude an item as expected.
+/// include an item as expected.
 #define MSExpectedItemWithResponse              -1201
 
 /// Indicates that the response from the Windows Azure Mobile Service did not
@@ -83,7 +89,11 @@ extern NSString *const MSErrorResponseKey;
 /// there was an error and an error message was provided.
 #define MSErrorMessageErrorCode                 -1302
 
-/// Indicates that a request to the Windows Azure Mobile Service failed becaus
+/// Indicates that the response from the Windows Azure Mobile Service indicated
+/// there was an error
+#define MSErrorPreconditionFailed               -1303
+
+/// Indicates that a request to the Windows Azure Mobile Service failed because
 /// the *NSPredicate* used in the query could not be translated into a query
 /// string supported by the Windows Azure Mobile Service.
 #define MSPredicateNotSupported                 -1400

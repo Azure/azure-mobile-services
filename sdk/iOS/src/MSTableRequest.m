@@ -112,7 +112,8 @@ NSString *const httpDelete = @"DELETE";
         // Create the body or capture the error from serialization
         NSData *data = [table.client.serializer dataFromItem:item
                                                    idAllowed:NO
-                                            ensureDictionary:YES 
+                                            ensureDictionary:YES
+                                      removeSystemProperties:NO
                                                      orError:&error];
         if (!error) {
             // Set the body
@@ -168,11 +169,13 @@ NSString *const httpDelete = @"DELETE";
                 // Create the request
                 request = [[MSTableItemRequest alloc] initWithURL:url
                                                         withTable:table];
+                request.itemId = itemId;
             
                 // Create the body or capture the error from serialization
                 NSData *data = [serializer dataFromItem:item
                                               idAllowed:YES
                                        ensureDictionary:YES
+                                 removeSystemProperties:YES
                                                 orError:&error];
                 if (!error) {
 
@@ -182,7 +185,6 @@ NSString *const httpDelete = @"DELETE";
                     // Set the properties
                     request.requestType = MSTableUpdateRequestType;
                     request.item = item;
-
                     
                     // Set the method and headers
                     request.HTTPMethod = httpPatch;

@@ -28,6 +28,17 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
                                  NSInteger totalCount,
                                  NSError *error);
 
+typedef NS_OPTIONS(NSUInteger, MSSystemProperties) {
+    MSSystemPropertyNone        = 0,
+    MSSystemPropertyCreatedAt   = 1 << 0,
+    MSSystemPropertyUpdatedAt   = 1 << 1,
+    MSSystemPropertyVersion     = 1 << 2,
+    MSSystemPropertyAll         = 0xFFFF
+};
+
+extern NSString *const MSSystemColumnCreatedAt;
+extern NSString *const MSSystemColumnUpdatedAt;
+extern NSString *const MSSystemColumnVersion;
 
 #pragma mark * MSTable Public Interface
 
@@ -51,6 +62,7 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
 /// The client associated with this table.
 @property (nonatomic, strong, readonly)         MSClient *client;
 
+@property (nonatomic) MSSystemProperties SystemProperties;
 ///@}
 
 #pragma mark * Public Initializers
