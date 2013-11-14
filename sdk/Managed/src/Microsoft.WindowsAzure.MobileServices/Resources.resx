@@ -266,5 +266,7 @@
   </data>
   <data name="MobileServiceSerializer_IdTypeMismatch" xml:space="preserve">
     <value>You might be affected by Mobile Services latest changes to support string Ids. For more details: http://go.microsoft.com/fwlink/?LinkId=330396</value>
+  <data name="MobileServiceCollection_IncrementalLoadingFailed" xml:space="preserve">
+    <value>Failed to incrementally load more items of type '{0}'. See the inner exception for details.</value>
   </data>
 </root>
