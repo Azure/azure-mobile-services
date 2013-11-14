@@ -74,8 +74,6 @@ function getWhereClauseCreator(testName) {
             return function (table) { return table.where(function () { return this.Title.indexOf('é') >= 0; }); };
         case 'String.substring, length - movies which end with "r"':
             return function (table) { return table.where(function () { return this.Title.substring(this.Title.length - 1, 1) === 'r'; }); };
-        case 'String.substring (2 parameters) - movies with "father" starting at position 7':
-            return function (table) { return table.where(function () { return this.Title.substring(7, 13) === 'father'; }); };
         case 'String.substr - movies with "father" starting at position 7':
             return function (table) { return table.where(function () { return this.Title.substr(7, 6) === 'father'; }); };
         case 'Equals - movies since 1980 with rating PG-13':

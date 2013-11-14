@@ -203,6 +203,14 @@ namespace Microsoft.WindowsAzure.MobileServices {
                 return ResourceManager.GetString("MobileServiceContractResolver_IntegerIdTypeWithSystemPropertyAttributes", resourceCulture);
             }
         }
+
+        ///   Looks up a localized string similar to Failed to incrementally load more items of type &apos;{0}&apos;. See the inner exception for details..
+        /// </summary>
+        internal static string MobileServiceCollection_IncrementalLoadingFailed {
+            get {
+                return ResourceManager.GetString("MobileServiceCollection_IncrementalLoadingFailed", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to No &apos;{0}&apos; member found on type &apos;{1}&apos;..
