@@ -384,6 +384,17 @@ function createZumoNamespace() {
         return result;
     }
 
+    function randomDate() {
+        var year = Math.floor(Math.random() * 9999) + 1;
+        var month = Math.floor(Math.random() * 12);
+        var day = Math.floor(Math.random() * 31);
+        var hour = Math.floor(Math.random() * 24);
+        var minute = Math.floor(Math.random() * 60);
+        var second = Math.floor(Math.random() * 60);
+        var milliseconds = Math.floor(Math.random() * 100);
+        return new Date(Date.UTC(year, month, day, hour, minute, second, milliseconds));
+    }
+
     return {
         testGroups: testGroups,
         currentGroup: currentGroup,
@@ -408,6 +419,7 @@ function createZumoNamespace() {
             compare: compareValues,
             traceResponse: traceResponse,
             dateToString: dateToString,
+            randomDate: randomDate,
             globalTestParams: {}
         }
     };

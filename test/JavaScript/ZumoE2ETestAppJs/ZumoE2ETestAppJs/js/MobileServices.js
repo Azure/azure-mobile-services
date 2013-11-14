@@ -15,7 +15,7 @@
     /// will define the module's exports when invoked.
     /// </field>
     var $__modules__ = { };
-    var $__fileVersion__ = "1.0.11024.0";
+    var $__fileVersion__ = "1.0.11106.0";
     
     function require(name) {
         /// <summary>
@@ -665,11 +665,25 @@
                 }
                 Validate.notNull(callback, 'callback');
         
-                for (var i in idNames) {            
-                    if (!_.isNullOrZero(instance[idNames[i]])) {
-                        throw _.format(
-                            Platform.getResourceString("MobileServiceTable_InsertIdAlreadySet"),
-                            idPropertyName);
+                // Integer Ids can not have any Id set
+                for (var i in idNames) {
+                    var id = instance[idNames[i]];
+        
+                    if (!_.isNullOrZero(id)) {
+                        if (_.isString(id)) {
+                            // String Id's are allowed iif using 'id'
+                            if (idNames[i] !== idPropertyName) {
+                                throw _.format(
+                                    Platform.getResourceString("MobileServiceTable_InsertIdAlreadySet"),
+                                    idPropertyName);
+                            } else {
+                                Validate.isValidId(id, idPropertyName);
+                            }
+                        } else {
+                            throw _.format(
+                                Platform.getResourceString("MobileServiceTable_InsertIdAlreadySet"),
+                                idPropertyName);
+                        }
                     }
                 }
         
@@ -720,7 +734,7 @@
         
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
-                Validate.notNullOrZero(instance[idPropertyName], 'instance.' + idPropertyName);
+                Validate.isValidId(instance[idPropertyName], 'instance.' + idPropertyName);
                 if (!_.isNull(parameters)) {
                     Validate.isValidParametersObject(parameters, 'parameters');
                 }
@@ -730,7 +744,7 @@
                 var urlFragment =  _.url.combinePathSegments(
                         tableRouteSeperatorName,
                         this.getTableName(),
-                        instance[idPropertyName].toString());
+                        encodeURIComponent(instance[idPropertyName].toString()));
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
@@ -776,9 +790,13 @@
         
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
-                if (_.isNullOrZero(instance[idPropertyName]))
+                if (!_.isValidId(instance[idPropertyName], idPropertyName))
                 {
-                    callback(null, instance);
+                    if (typeof instance[idPropertyName] === 'string' && instance[idPropertyName] !== '') {
+                        throw _.format(Platform.getResourceString("Validate_InvalidId"), idPropertyName);
+                    } else {
+                        callback(null, instance);
+                    }
                     return;
                 }
         
@@ -788,11 +806,16 @@
                 Validate.notNull(callback, 'callback');
         
                 // Construct the URL
-        
                 var urlFragment = _.url.combinePathSegments(
                         tableRouteSeperatorName,
                         this.getTableName());
-                urlFragment = _.url.combinePathAndQuery(urlFragment, "?$filter=id eq " + instance[idPropertyName].toString());
+        
+                if (typeof instance[idPropertyName] === 'string') {
+                    var id = encodeURIComponent(instance[idPropertyName]).replace(/\'/g, '%27%27');
+                    urlFragment = _.url.combinePathAndQuery(urlFragment, "?$filter=id eq '" + id + "'");
+                } else {
+                    urlFragment = _.url.combinePathAndQuery(urlFragment, "?$filter=id eq " + encodeURIComponent(instance[idPropertyName].toString()));
+                }
         
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
@@ -814,9 +837,10 @@
                             }
         
                             if (!result) {
-                                throw _.format(
+                                var message =_.format(
                                     Platform.getResourceString("MobileServiceTable_NotSingleObject"),
                                     idPropertyName);
+                                callback(_.createError(message), null);
                             }
         
                             result = Platform.allowPlatformToMutateOriginal(instance, result);
@@ -847,7 +871,7 @@
                 }
         
                 // Validate the arguments
-                Validate.notNullOrZero(id, idPropertyName);
+                Validate.isValidId(id, idPropertyName);
                 if (!_.isNull(parameters)) {
                     Validate.isValidParametersObject(parameters);
                 }
@@ -857,7 +881,7 @@
                 var urlFragment = _.url.combinePathSegments(
                         tableRouteSeperatorName,
                         this.getTableName(),
-                        id.toString());
+                        encodeURIComponent(id.toString()));
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
@@ -901,7 +925,7 @@
         
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
-                Validate.notNullOrZero(instance[idPropertyName], 'instance.' + idPropertyName);
+                Validate.isValidId(instance[idPropertyName], 'instance.' + idPropertyName);
                 if (!_.isNull(parameters)) {
                     Validate.isValidParametersObject(parameters);
                 }
@@ -911,7 +935,7 @@
                 var urlFragment =  _.url.combinePathSegments(
                         tableRouteSeperatorName,
                         this.getTableName(),
-                        instance[idPropertyName].toString());
+                        encodeURIComponent(instance[idPropertyName].toString()));
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
@@ -1195,26 +1219,6 @@
                 loginWithLoginControl(this, provider, useSingleSignOn, callback);
             }
         };
-        
-        function isValidProvider(provider) {
-            /// <summary>
-            /// Determines that the given string is one of the known providers.
-            /// </summary>
-            /// <param name="provider" type="String">
-            /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google', or 'microsoftaccount'.
-            /// </param>
-            /// <returns>
-            /// True if the given provider is valid, and false otherwise.
-            /// </returns>
-        
-            for (var i = 0, j = authenticationProviders.length; i < j; i++) {
-                if (authenticationProviders[i] === provider) {
-                    return true;
-                }
-            }
-        
-            return false;
-        }
         
         function onLoginComplete(error, token, client, callback) {
             /// <summary>
@@ -1752,16 +1756,16 @@
         exports.isNullOrZero = function (value) {
             /// <summary>
             /// Gets a value indicating whether the provided value is null (or
-            /// undefined) or zero.
+            /// undefined) or zero / empty string
             /// </summary>
             /// <param name="value" type="Object" mayBeNull="true">
             /// The value to check.
             /// </param>
             /// <returns type="Boolean">
-            /// A value indicating whether the provided value is null (or undefined) or zero.
+            /// A value indicating whether the provided value is null (or undefined) or zero or empty string.
             /// </returns>
         
-            return value === null || value === undefined || value === 0;
+            return value === null || value === undefined || value === 0 || value === '';
         };
         
         exports.isNullOrEmpty = function (value) {
@@ -1873,6 +1877,38 @@
         
             return _.isNull(value) || (typeof value === 'object' && !_.isDate(value));
         };
+        
+        exports.isValidId = function (value) {
+            /// <summary>
+            /// Determine if a value is an acceptable id for use by the mobile service
+            /// </summary>
+            /// <param name="value" type="Object">The value to check.</param>
+            /// <returns type="boolean">
+            /// True if the value is a string or number, meeting all criteria, or false othwerise.
+            /// </returns>
+            if (_.isNullOrZero(value)) {
+                return false;
+            }
+        
+            if (_.isString(value)) {
+                // Strings must contain at least one non whitespace character
+                if (value.length === 0 || value.length > 255 || value.trim().length === 0) {
+                    return false;
+                }
+        
+                var ex = /[+"/?`\\]|[\u0000-\u001F]|[\u007F-\u009F]|^\.{1,2}$/;
+                if (value.match(ex) !== null) {
+                    return false;
+                }
+        
+                return true;
+        
+            } else if (_.isNumber(value)) {
+                return value > 0;
+            }
+        
+            return false;
+        }
         
         exports.isString = function (value) {
             /// <summary>
@@ -2292,7 +2328,7 @@
         
         exports.notNullOrZero = function (value, name) {
             /// <summary>
-            /// Ensure the value is not null, undefined, or empty.
+            /// Ensure the value is not null, undefined, zero, or empty.
             /// </summary>
             /// <param name="value" mayBeNull="true">The value to check.</param>
             /// <param name="name" mayBeNull="true" optional="true" type="String">
@@ -2303,6 +2339,20 @@
                 throw _.format(Platform.getResourceString("Validate_NotNullOrEmptyError"), name || 'Value');
             }
         };
+        
+        exports.isValidId = function (value, name) {
+            /// <summary>
+            /// Ensure the value is a valid id for mobile services.
+            /// </summary>
+            /// <param name="value" mayBeNull="true">The value to check.</param>
+            /// <param name="name" mayBeNull="true" optional="true" type="String">
+            /// Optional name of the value to throw.
+            /// </param>
+        
+            if (!_.isValidId(value)) {
+                throw _.format(Platform.getResourceString("Validate_InvalidId"), name || 'id');
+            }
+        }
         
         exports.isDate = function (value, name) {
             /// <summary>
@@ -9536,11 +9586,11 @@
 })(this || exports);
 
 // SIG // Begin signature block
-// SIG // MIIkHwYJKoZIhvcNAQcCoIIkEDCCJAwCAQExDzANBglg
+// SIG // MIIkIAYJKoZIhvcNAQcCoIIkETCCJA0CAQExDzANBglg
 // SIG // hkgBZQMEAgEFADB3BgorBgEEAYI3AgEEoGkwZzAyBgor
 // SIG // BgEEAYI3AgEeMCQCAQEEEBDgyQbOONQRoqMAEEvTUJAC
 // SIG // AQACAQACAQACAQACAQAwMTANBglghkgBZQMEAgEFAAQg
-// SIG // 2X5JRkUngY9zfP+M4VLTJY6uUKPCTwYL4mohuYw0kA2g
+// SIG // kMIvjPsnHY/m2TufjipGYKDZU1fyHceWu19F5hRt0a2g
 // SIG // gg2SMIIGEDCCA/igAwIBAgITMwAAABp3u3SzB9EWuAAA
 // SIG // AAAAGjANBgkqhkiG9w0BAQsFADB+MQswCQYDVQQGEwJV
 // SIG // UzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMH
@@ -9646,7 +9696,7 @@
 // SIG // nvi/a7dLl+LrdXga7Oo3mXkYS//WsyNodeav+vyL6wuA
 // SIG // 6mk7r/ww7QRMjt/fdW1jkT3RnVZOT7+AVyKheBEyIXrv
 // SIG // QQqxP/uozKRdwaGIm1dxVk5IRcBCyZt2WwqASGv9eZ/B
-// SIG // vW1taslScxMNelDNMYIV5TCCFeECAQEwgZUwfjELMAkG
+// SIG // vW1taslScxMNelDNMYIV5jCCFeICAQEwgZUwfjELMAkG
 // SIG // A1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAO
 // SIG // BgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29m
 // SIG // dCBDb3Jwb3JhdGlvbjEoMCYGA1UEAxMfTWljcm9zb2Z0
@@ -9654,31 +9704,31 @@
 // SIG // B9EWuAAAAAAAGjANBglghkgBZQMEAgEFAKCB1DAZBgkq
 // SIG // hkiG9w0BCQMxDAYKKwYBBAGCNwIBBDAcBgorBgEEAYI3
 // SIG // AgELMQ4wDAYKKwYBBAGCNwIBFTAvBgkqhkiG9w0BCQQx
-// SIG // IgQgdmOzGCEhiBULs7InzbGPj/QI6e1+mdMcJSOEJnnf
-// SIG // FnkwaAYKKwYBBAGCNwIBDDFaMFigPoA8AE0AaQBjAHIA
+// SIG // IgQgDQZUtfTjYkQuRd3UzXRc+giK2kkgz92Lu4XoLbYB
+// SIG // jVswaAYKKwYBBAGCNwIBDDFaMFigPoA8AE0AaQBjAHIA
 // SIG // bwBzAG8AZgB0ACAAVwBpAG4AZABvAHcAcwAgAEEAegB1
 // SIG // AHIAZQAgAE0AbwBiAGkAbABloRaAFGh0dHA6Ly93d3cu
-// SIG // YXNwLm5ldC8gMA0GCSqGSIb3DQEBAQUABIIBAKdA69Ca
-// SIG // y7fhromxAmnUVWSRN5+n/f+3g90ffQYYMqPvCuowiUkr
-// SIG // 5FiZAtFeEYKDD3qjPYfQoI4JybLhOKC/50L66mayXGuK
-// SIG // Ou73LTJxKK8J8aU0D452dCKCX2EnsPUdeziexzoyoC+C
-// SIG // +fglUhRlR2yTHnd3UKtFErJf9e1ai7ntHHvACbKppaFe
-// SIG // 0d8BBB9DDn+EOsBdMe97wYRmBVLoJhf9kiehGZBfrdUW
-// SIG // r0hdGdaWdhUnOyxOz9XHyLHKrxYVb8RxSZReAT5RAxuj
-// SIG // cABqv1eUgCxaiHjNIFCd2yvkXip5PSKCUgyY2WvN0ymF
-// SIG // aNgFH4NZb7xptnDGHV5lkJQUHm+hghNJMIITRQYKKwYB
-// SIG // BAGCNwMDATGCEzUwghMxBgkqhkiG9w0BBwKgghMiMIIT
-// SIG // HgIBAzEPMA0GCWCGSAFlAwQCAQUAMIIBPQYLKoZIhvcN
+// SIG // YXNwLm5ldC8gMA0GCSqGSIb3DQEBAQUABIIBADmQqD+S
+// SIG // jUylOYGwEaXxza0Ag5d4vmDnAHZYwVV5uBvT6F+/h3ds
+// SIG // hk5AAymsyrsDNeKpQZbIlvRiPZsLWgXIC3WnCnoL+ZnU
+// SIG // 0ZWIO6nz8WQKcmzc7cSZvfdx6os4O5VsUqvGUZjGTmfR
+// SIG // o6JTWqgNDC8nfA8oO97kv0dDaYBpE9h1umlrzsNBidok
+// SIG // XAQpBQvy54RBfpiuVxz0rAwEBwhbNfAvSJfUySTCf34M
+// SIG // FeAe1gATXTzdm/J7UIU2lKkBNi8lT+9RhqOHekpqfBrA
+// SIG // Sqh6HRspHBz4guJM8ZnOmXim5Ja2Br/gocCT0B9JTa8f
+// SIG // Yc/Y+5Na8qRF8jW1luBIAgkOnW2hghNKMIITRgYKKwYB
+// SIG // BAGCNwMDATGCEzYwghMyBgkqhkiG9w0BBwKgghMjMIIT
+// SIG // HwIBAzEPMA0GCWCGSAFlAwQCAQUAMIIBPQYLKoZIhvcN
 // SIG // AQkQAQSgggEsBIIBKDCCASQCAQEGCisGAQQBhFkKAwEw
-// SIG // MTANBglghkgBZQMEAgEFAAQgr0u+aigy6brxRpE0tXeU
-// SIG // onl9dbtCd4qMPMteXhQzFd4CBlJpOp6MGBgTMjAxMzEw
-// SIG // MjQxOTEzNDQuODczWjAHAgEBgAIB9KCBuaSBtjCBszEL
+// SIG // MTANBglghkgBZQMEAgEFAAQgzlg6rNFYTwJh++sGbP1f
+// SIG // O/0zAjM8aMNCyPbmu2Q1H48CBlJsdvsYThgTMjAxMzEx
+// SIG // MDcwMTM2NTEuMTY1WjAHAgEBgAIB9KCBuaSBtjCBszEL
 // SIG // MAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24x
 // SIG // EDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jv
 // SIG // c29mdCBDb3Jwb3JhdGlvbjENMAsGA1UECxMETU9QUjEn
 // SIG // MCUGA1UECxMebkNpcGhlciBEU0UgRVNOOkI4RUMtMzBB
 // SIG // NC03MTQ0MSUwIwYDVQQDExxNaWNyb3NvZnQgVGltZS1T
-// SIG // dGFtcCBTZXJ2aWNloIIOzDCCBnEwggRZoAMCAQICCmEJ
+// SIG // dGFtcCBTZXJ2aWNloIIOzTCCBnEwggRZoAMCAQICCmEJ
 // SIG // gSoAAAAAAAIwDQYJKoZIhvcNAQELBQAwgYgxCzAJBgNV
 // SIG // BAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYD
 // SIG // VQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQg
@@ -9766,7 +9816,7 @@
 // SIG // 51mAj9o8PPtL5U29Z3nMvLANCc5ABpCCle3eEe1tmsIE
 // SIG // fw0voonmhfgDHM2fEDKFfMw0fIyTrZWY4ByIdO9DkyG+
 // SIG // zv4EgZyftqgTUPd0XVAhh9uwyz8OSNspha7L3C5kb2IV
-// SIG // VZ17xsQSFSJXiXqhggN1MIICXQIBATCB46GBuaSBtjCB
+// SIG // VZ17xsQSFSJXiXqhggN2MIICXgIBATCB46GBuaSBtjCB
 // SIG // szELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0
 // SIG // b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1p
 // SIG // Y3Jvc29mdCBDb3Jwb3JhdGlvbjENMAsGA1UECxMETU9Q
@@ -9780,41 +9830,41 @@
 // SIG // MScwJQYDVQQLEx5uQ2lwaGVyIE5UUyBFU046QjAyNy1D
 // SIG // NkY4LTFEODgxKzApBgNVBAMTIk1pY3Jvc29mdCBUaW1l
 // SIG // IFNvdXJjZSBNYXN0ZXIgQ2xvY2swDQYJKoZIhvcNAQEF
-// SIG // BQACBQDWE7kwMCIYDzIwMTMxMDI0MTUyMDE2WhgPMjAx
-// SIG // MzEwMjUxNTIwMTZaMHMwOQYKKwYBBAGEWQoEATErMCkw
-// SIG // CgIFANYTuTACAQAwBgIBAAIBBTAHAgEAAgIXuDAKAgUA
-// SIG // 1hUKsAIBADA2BgorBgEEAYRZCgQCMSgwJjAMBgorBgEE
-// SIG // AYRZCgMBoAowCAIBAAIDFuNgoQowCAIBAAIDB6EgMA0G
-// SIG // CSqGSIb3DQEBBQUAA4IBAQAFyekPkfHCokoDVxi/mw//
-// SIG // diLgI8hMZizTzoqC8MmAfy4+sRqdpis9rwcTSYIuVXcM
-// SIG // U5AoB4ksvu470OCN3QzB6nKpKGW26vkj88vu5EB6BuyR
-// SIG // IAQJIRBWZS96VJjyTv1LmsrRVOW17HSFUs/Ckc7dhX5z
-// SIG // MtCXnVW8e23TH65rcRnBeA90xAlefdNbr3TPxheyvwGG
-// SIG // DlgyMykicKR+G82pBkadegC1rtZlLLsP//OQkgcZSd8f
-// SIG // r3bFUjHF5v42bmZLkF5qeEDQvx72z2CbUaZWItReHUYY
-// SIG // gGl8/22ncC94Wcv0EDUOWhZWtUMW58vnLp6lxQqmGC5J
-// SIG // VmFEmdEV1igSMYIC9TCCAvECAQEwgZMwfDELMAkGA1UE
-// SIG // BhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNV
-// SIG // BAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBD
-// SIG // b3Jwb3JhdGlvbjEmMCQGA1UEAxMdTWljcm9zb2Z0IFRp
-// SIG // bWUtU3RhbXAgUENBIDIwMTACEzMAAAAqn0sjX8+w8J0A
-// SIG // AAAAACowDQYJYIZIAWUDBAIBBQCgggEyMBoGCSqGSIb3
-// SIG // DQEJAzENBgsqhkiG9w0BCRABBDAvBgkqhkiG9w0BCQQx
-// SIG // IgQgrwBOWsSGrw1P9Aczs58ByaExxfsKqXfmbjz2D9eG
-// SIG // 5ZIwgeIGCyqGSIb3DQEJEAIMMYHSMIHPMIHMMIGxBBQk
-// SIG // fYJ44IESW3V+5Lg8GfLZezz94jCBmDCBgKR+MHwxCzAJ
-// SIG // BgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAw
-// SIG // DgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3Nv
-// SIG // ZnQgQ29ycG9yYXRpb24xJjAkBgNVBAMTHU1pY3Jvc29m
-// SIG // dCBUaW1lLVN0YW1wIFBDQSAyMDEwAhMzAAAAKp9LI1/P
-// SIG // sPCdAAAAAAAqMBYEFPrhUZRkUgz4O0j2m8Ja9aUHr4D/
-// SIG // MA0GCSqGSIb3DQEBCwUABIIBAIxKjtrFqdWh44NERIDb
-// SIG // JDhfvid3lCnX8oVXHe8o6rTI2tmIv8PJpCrIGRvyGWDe
-// SIG // elTBBrE6wdbnOJx/8gG1tCpg2q+1OTDneSj237VnM+uT
-// SIG // ezi/ovnz26dQ+mCi9T+au0D/rIBHgHihwGhwCpLSjjIh
-// SIG // Rpv5C0Dsi4Zgw5YQWYK6WXd79oP2Uyr8bZMFB7Za7932
-// SIG // t+ONJYnV2lY9aT1AVy4isVKKA1n3qz5a+2vjH+PNmDDb
-// SIG // 6uFNtRddO5oqvO1Xszd6b7MqEcHqFDL44BEnnXxn22DY
-// SIG // Nk9voPuWGWdWYCjKh4CNcWueRGmh16EEW5Bb+JMojRrx
-// SIG // ieIfDE1T7LUbeWU=
+// SIG // BQACBQDWJVwEMCIYDzIwMTMxMTA3MDAyMzMyWhgPMjAx
+// SIG // MzExMDgwMDIzMzJaMHQwOgYKKwYBBAGEWQoEATEsMCow
+// SIG // CgIFANYlXAQCAQAwBwIBAAICFkEwBwIBAAICFwIwCgIF
+// SIG // ANYmrYQCAQAwNgYKKwYBBAGEWQoEAjEoMCYwDAYKKwYB
+// SIG // BAGEWQoDAaAKMAgCAQACAxbjYKEKMAgCAQACAwehIDAN
+// SIG // BgkqhkiG9w0BAQUFAAOCAQEAzbk3EACWA7gAYkGVS/G8
+// SIG // shVCG1nyuqbPjcKAtVb2xQVBg+loPAoeeoh8SKCtr5nc
+// SIG // iaHXgVuRZcabHaJ9+U7uZggADg4pNFHGHtWSfPYr+S4n
+// SIG // D5oyYkRyV5KOY6RsAxXt6tlPsKs2D1vR5FjZ62APAFMB
+// SIG // CtjMO2bFpnaotBtOkR1+0DansoT3cT1nihIZKV/9d27D
+// SIG // bcZhjQJYv9dEbMTq0GO1IJbAEQc+3bTiLXxVHV5h6oXx
+// SIG // B4jgDLW4xGXQjoQCIKWuRDTkCKvinvKWzHJAz5kXC9q8
+// SIG // ic0XIQ7phfKicj/7Q8R+tUFEfD3scgnbGrp2LxWSERwe
+// SIG // Ss/WiYMEDpxPCTGCAvUwggLxAgEBMIGTMHwxCzAJBgNV
+// SIG // BAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYD
+// SIG // VQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQg
+// SIG // Q29ycG9yYXRpb24xJjAkBgNVBAMTHU1pY3Jvc29mdCBU
+// SIG // aW1lLVN0YW1wIFBDQSAyMDEwAhMzAAAAKp9LI1/PsPCd
+// SIG // AAAAAAAqMA0GCWCGSAFlAwQCAQUAoIIBMjAaBgkqhkiG
+// SIG // 9w0BCQMxDQYLKoZIhvcNAQkQAQQwLwYJKoZIhvcNAQkE
+// SIG // MSIEIFVHswXMVTEM8BzwLm9OR6YWbYNGq2YdaJF1Kq+6
+// SIG // NA7LMIHiBgsqhkiG9w0BCRACDDGB0jCBzzCBzDCBsQQU
+// SIG // JH2CeOCBElt1fuS4PBny2Xs8/eIwgZgwgYCkfjB8MQsw
+// SIG // CQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQ
+// SIG // MA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9z
+// SIG // b2Z0IENvcnBvcmF0aW9uMSYwJAYDVQQDEx1NaWNyb3Nv
+// SIG // ZnQgVGltZS1TdGFtcCBQQ0EgMjAxMAITMwAAACqfSyNf
+// SIG // z7DwnQAAAAAAKjAWBBSJhykN3fZFEx9bMm7ZE5nqLJlR
+// SIG // 1jANBgkqhkiG9w0BAQsFAASCAQBcKXGdTJEk4dxPSYEp
+// SIG // YTOyW+R5uTsKLLnZ3grwHwPWZhz5cwCG0Bg27qQ33/7z
+// SIG // lDc5WByIBLboijfC/4h2XJFS8Ix+YgzD3PfJpiucrNCk
+// SIG // 3ZWjlrmUxjXKnUNfo2RY+iKyh3Mu2/TzsJSzjDCR6Ohh
+// SIG // n5wgy+MvgPSY2sHuhTWOEhNisxxiRTeDSKriCjmix70U
+// SIG // js7jWH+Q+607SauX6cIrmPvQjAQpL13rRW34kn4hDS3X
+// SIG // cUstyE2n+QXtVj+BM+6HhJ90DpRxMoXLAfgmU7WfPU1n
+// SIG // EHl5PNZT3kg964jWSeydC6RoqEPSUaojwMPHekLCZ6mf
+// SIG // L+DAenx8uDeRUdMc
 // SIG // End signature block
