@@ -5,7 +5,7 @@ namespace ZUMOAPPNAME
 {
 	public class ToDoItem
 	{
-		public int Id { get; set; }
+		public string Id { get; set; }
 
 		[JsonProperty(PropertyName = "text")]
 		public string Text { get; set; }
