@@ -12,7 +12,7 @@ using ZumoE2ETestApp.Framework;
 namespace ZumoE2ETestApp.Tests.Types
 {
     [DataTable(ZumoTestGlobals.RoundTripTableName)]
-    public class RoundTripTableItem
+    public class RoundTripTableItem : ICloneableItem<RoundTripTableItem>
     {
         [JsonProperty(PropertyName = "id")]
         public int Id { get; set; }
@@ -57,6 +57,12 @@ namespace ZumoE2ETestApp.Tests.Types
             this.Long1 = rndGen.Next();
             this.ComplexType1 = new ComplexType[] { new ComplexType(rndGen) };
             this.ComplexType2 = new ComplexType2(rndGen);
+        }
+
+        object ICloneableItem<RoundTripTableItem>.Id
+        {
+            get { return this.Id; }
+            set { this.Id = (int)value; }
         }
 
         public RoundTripTableItem Clone()

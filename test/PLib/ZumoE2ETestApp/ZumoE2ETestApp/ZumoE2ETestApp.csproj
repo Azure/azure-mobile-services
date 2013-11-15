@@ -119,6 +119,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tests\ExceptionTypeWhichWillNeverBeThrown.cs" />
     <Compile Include="Tests\TestStore.cs" />
+    <Compile Include="Tests\Types\ICloneableItem.cs" />
     <Compile Include="Tests\Types\StringIdRoundTripTableItem.cs" />
     <Compile Include="Tests\Types\Movie.cs" />
     <Compile Include="Tests\Types\RoundTripTableItem.cs" />

@@ -12,7 +12,7 @@ using ZumoE2ETestApp.Framework;
 namespace ZumoE2ETestApp.Tests.Types
 {
     [DataTable(ZumoTestGlobals.StringIdRoundTripTableName)]
-    public class StringIdRoundTripTableItem
+    public class StringIdRoundTripTableItem : ICloneableItem<StringIdRoundTripTableItem>
     {
         [JsonProperty(PropertyName = "id")]
         public string Id { get; set; }
@@ -40,6 +40,12 @@ namespace ZumoE2ETestApp.Tests.Types
             this.Bool = rndGen.Next(2) == 0;
             this.Number = rndGen.Next(10000) * rndGen.NextDouble();
             this.ComplexType = Enumerable.Range(0, rndGen.Next(3, 5)).Select(_ => Util.CreateSimpleRandomString(rndGen, 10)).ToArray();
+        }
+
+        object ICloneableItem<StringIdRoundTripTableItem>.Id
+        {
+            get { return this.Id; }
+            set { this.Id = (string)value; }
         }
 
         public StringIdRoundTripTableItem Clone()

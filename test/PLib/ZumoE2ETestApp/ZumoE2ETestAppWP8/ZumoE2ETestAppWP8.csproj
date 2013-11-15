@@ -128,6 +128,9 @@
     <Compile Include="..\ZumoE2ETestApp\Tests\Types\StringIdRoundTripTableItem.cs">
       <Link>Tests\Types\StringIdRoundTripTableItem.cs</Link>
     </Compile>
+    <Compile Include="..\ZumoE2ETestApp\Tests\Types\ICloneableItem.cs">
+      <Link>Tests\Types\ICloneableItem.cs</Link>
+    </Compile>
     <Compile Include="..\ZumoE2ETestApp\Tests\ZumoCUDTests.cs">
       <Link>Tests\ZumoCUDTests.cs</Link>
     </Compile>
