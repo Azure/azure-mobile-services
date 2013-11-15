@@ -42,7 +42,6 @@ namespace ZumoE2ETestApp.Tests.Types
         [JsonProperty(PropertyName = "complexType1")]
         public ComplexType[] ComplexType1 { get; set; }
 
-        // Complex type, ICustomMobileServiceTableSerialization
         [JsonProperty(PropertyName = "complexType2")]
         public ComplexType2 ComplexType2 { get; set; }
 

@@ -153,6 +153,9 @@
     <Compile Include="..\ZumoE2ETestApp\Tests\Types\RoundTripTableItem.cs">
       <Link>Tests\RoundTripTableItem.cs</Link>
     </Compile>
+    <Compile Include="..\ZumoE2ETestApp\Tests\Types\StringIdRoundTripTableItem.cs">
+      <Link>Tests\Types\StringIdRoundTripTableItem.cs</Link>
+    </Compile>
     <Compile Include="..\ZumoE2ETestApp\Tests\ZumoCUDTests.cs">
       <Link>Tests\ZumoCUDTests.cs</Link>
     </Compile>

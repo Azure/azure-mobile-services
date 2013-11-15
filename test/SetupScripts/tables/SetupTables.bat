@@ -23,6 +23,9 @@ REM Tables specific to JS tests
 call azure mobile table create --integerId %1 w8jsRoundTripTable
 call azure mobile table create %1 w8jsServerQueryMovies
 
+REM Tables specific to Managed tests
+call azure mobile table create %1 --integerId w8RoundTripTable
+
 call azure mobile table update -p insert=admin,read=admin,update=admin,delete=admin %1 admin
 call azure mobile table update -p insert=application,read=application,update=application,delete=application %1 application
 call azure mobile table update -p insert=user,read=user,update=user,delete=user %1 authenticated
@@ -48,5 +51,10 @@ call azure mobile script upload %1 table/w8jsRoundTripTable.insert -f w8jsRoundT
 call azure mobile script upload %1 table/w8jsRoundTripTable.read -f w8jsRoundTripTable.read.js
 call azure mobile script upload %1 table/w8jsRoundTripTable.update -f w8jsRoundTripTable.update.js
 call azure mobile script upload %1 table/w8jsServerQueryMovies.read -f w8jsServerQueryMovies.read.js
+
+REM Tables specific to managed tests
+call azure mobile script upload %1 table/w8RoundTripTable.insert -f w8RoundTripTable.insert.js
+call azure mobile script upload %1 table/w8RoundTripTable.read -f w8RoundTripTable.read.js
+call azure mobile script upload %1 table/w8RoundTripTable.update -f w8RoundTripTable.update.js
 
 :TheEnd

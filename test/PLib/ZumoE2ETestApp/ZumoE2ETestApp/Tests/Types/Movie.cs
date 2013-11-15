@@ -10,8 +10,18 @@ using ZumoE2ETestApp.Framework;
 
 namespace ZumoE2ETestApp.Tests.Types
 {
+    public interface IMovie
+    {
+        string Title { get; set; }
+        int Duration { get; set; }
+        string MPAARating { get; set; }
+        DateTime ReleaseDate { get; set; }
+        bool BestPictureWinner { get; set; }
+        int Year { get; set; }
+    }
+
     [DataTable(ZumoTestGlobals.MoviesTableName)]
-    public class Movie
+    public class Movie : IMovie
     {
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public int Id { get; set; }
@@ -56,8 +66,8 @@ namespace ZumoE2ETestApp.Tests.Types
         }
     }
 
-    [DataTable(ZumoTestGlobals.MoviesTableName)]
-    public class StringIdMovie
+    [DataTable(ZumoTestGlobals.StringIdMoviesTableName)]
+    public class StringIdMovie : IMovie
     {
         public string Id { get; set; }
         public string Title { get; set; }
@@ -81,7 +91,7 @@ namespace ZumoE2ETestApp.Tests.Types
 
         public override string ToString()
         {
-            return string.Format(CultureInfo.InvariantCulture, "Movie[Title={0},Duration={1},Rating={2},ReleaseDate={3},BestPictureWinner={4},Year={5}",
+            return string.Format(CultureInfo.InvariantCulture, "Movie/string id[Title={0},Duration={1},Rating={2},ReleaseDate={3},BestPictureWinner={4},Year={5}",
                 Title, Duration, MPAARating,
                 ReleaseDate.ToUniversalTime().ToString("yyyy-MM-dd:HH:mm:ss.fffZ", CultureInfo.InvariantCulture),
                 BestPictureWinner, Year);
@@ -101,7 +111,7 @@ namespace ZumoE2ETestApp.Tests.Types
 
         public override bool Equals(object obj)
         {
-            Movie other = obj as Movie;
+            StringIdMovie other = obj as StringIdMovie;
             if (other == null) return false;
             if (this.Title != other.Title) return false;
             if (this.Duration != other.Duration) return false;
@@ -124,7 +134,7 @@ namespace ZumoE2ETestApp.Tests.Types
         public Movie[] Movies { get; set; }
     }
 
-    [DataTable(ZumoTestGlobals.MoviesTableName)]
+    [DataTable(ZumoTestGlobals.StringIdMoviesTableName)]
     public class AllStringIdMovies
     {
         [JsonProperty(PropertyName = "id")]
