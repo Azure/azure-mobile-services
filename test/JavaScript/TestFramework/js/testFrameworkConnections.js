@@ -85,14 +85,6 @@ document.getElementById('btnRunTests').onclick = function (evt) {
                     }
 
                 }
-                else {
-                    if (currentGroup.name == zumo.AllTestsGroupName) {
-                        btnRunAllTests.textContent = "Failed";
-                    }
-                    else {
-                        btnRunAllUnattendedTests.textContent = "Failed";
-                    }
-                }
             }
 
             if (showAlerts) {
@@ -161,6 +153,12 @@ function uploadLogs(url, logs, allTests, done) {
                 done();
             }
             document.getElementById('btnSendLogs').textContent = xhr.responseText;
+            if (!testPlatform.IsHTMLApplication) {
+                Windows.Storage.KnownFolders.picturesLibrary.createFileAsync("done.txt", Windows.Storage.CreationCollisionOption.replaceExisting).then(function (file) {
+                    Windows.Storage.FileIO.writeTextAsync(file, xhr.responseText);
+                });
+            }
+           
         }
     }
 

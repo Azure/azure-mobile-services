@@ -16,12 +16,13 @@
   <Applications>
     <Application Id="App" StartPage="default.html">
       <VisualElements DisplayName="zumotestblu2" Logo="images\logo.png" SmallLogo="images\smalllogo.png" Description="ZumoE2ETestAppJs" ForegroundText="light" BackgroundColor="#464646" ToastCapable="true">
-        <DefaultTile ShowName="allLogos" />
+        <DefaultTile ShowName="logoOnly" />
         <SplashScreen Image="images\splashscreen.png" />
       </VisualElements>
     </Application>
   </Applications>
   <Capabilities>
     <Capability Name="internetClient" />
+    <Capability Name="picturesLibrary" />
   </Capabilities>
 </Package>
