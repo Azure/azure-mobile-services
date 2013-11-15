@@ -43,8 +43,8 @@ function createZumoNamespace() {
 
         var now = new Date();
         text = '[' + dateToString(now) + '] ' + text;
-        if (text.length > 200) {
-            text = text.substring(0, 200) + '... (truncated)';
+        if (text.length > 500) {
+            text = text.substring(0, 500) + '... (truncated)';
         }
 
         this.logs.push(text);
