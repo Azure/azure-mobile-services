@@ -131,6 +131,9 @@
     <Compile Include="..\ZumoE2ETestApp\Tests\Types\ICloneableItem.cs">
       <Link>Tests\Types\ICloneableItem.cs</Link>
     </Compile>
+    <Compile Include="..\ZumoE2ETestApp\Tests\Types\VersionedType.cs">
+      <Link>Tests\Types\VersionedType.cs</Link>
+    </Compile>
     <Compile Include="..\ZumoE2ETestApp\Tests\ZumoCUDTests.cs">
       <Link>Tests\ZumoCUDTests.cs</Link>
     </Compile>

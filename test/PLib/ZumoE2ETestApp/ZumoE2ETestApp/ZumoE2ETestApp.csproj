@@ -123,6 +123,7 @@
     <Compile Include="Tests\Types\StringIdRoundTripTableItem.cs" />
     <Compile Include="Tests\Types\Movie.cs" />
     <Compile Include="Tests\Types\RoundTripTableItem.cs" />
+    <Compile Include="Tests\Types\VersionedType.cs" />
     <Compile Include="Tests\ZumoCUDTests.cs" />
     <Compile Include="Tests\ZumoCustomApiTests.cs">
       <SubType>Code</SubType>
