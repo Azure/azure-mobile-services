@@ -300,7 +300,9 @@ function defineQueryTestsNamespace() {
         var table = client.getTable(tableNameForServerSideFilterTest);
         table.read({ testName: 'getWhereClauseCreator' }).done(function (results) {
             var actualGetWhereClauseCreator = results[0].code;
-            if (getWhereClauseCreator === actualGetWhereClauseCreator) {
+            var clientFunction = getWhereClauseCreator.replace(/\r\n/g, '\n');
+            var serverFunction = actualGetWhereClauseCreator.replace(/\r\n/g, '\n');
+            if (clientFunction === serverFunction) {
                 test.addLog('Function matches');
                 done(true);
             } else {
