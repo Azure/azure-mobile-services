@@ -1,0 +1,30 @@
+%YAML 1.2
+---
+libraries: 
+  ios: 
+    - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Release\Microsoft.WindowsAzure.Mobile.dll
+    - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Release\Microsoft.WindowsAzure.Mobile.Ext.dll
+    - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Release\Xamarin.Auth.iOS.dll
+    - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Release\Newtonsoft.Json.dll
+  android:
+    - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.Android\bin\Release\Microsoft.WindowsAzure.Mobile.dll
+    - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.Android\bin\Release\Microsoft.WindowsAzure.Mobile.Ext.dll
+    - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.Android\bin\Release\Xamarin.Auth.Android.dll
+    - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.Android\bin\Release\Newtonsoft.Json.dll
+icons: 
+  - azure-mobile-services_128x128.png
+  - azure-mobile-services_512x512.png
+version: "1.1"
+details: Details.md
+getting-started: GettingStarted.md
+samples: 
+  iOS Sample: ..\quickstart\xamarin.iOS\ZUMOAPPNAME.sln
+id: azure-mobile-services
+summary: Store data in the cloud, authenticate users, and send push notifications.
+publisher-url: http://www.windowsazure.com/en-us/develop/mobile/
+license: License.md
+screenshots: 
+  - screenshots/WAMS-Create.png
+name: Azure Mobile Services
+publisher: Microsoft
+...

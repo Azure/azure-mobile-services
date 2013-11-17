@@ -6,6 +6,7 @@ target
 *.swp
 *.orig
 *.log
+*.userprefs
 seed.txt
 map.txt
 .metadata
