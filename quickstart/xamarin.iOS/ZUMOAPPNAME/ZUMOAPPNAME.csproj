@@ -77,15 +77,15 @@
   <ItemGroup>
     <Reference Include="Microsoft.WindowsAzure.Mobile, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Debug\Microsoft.WindowsAzure.Mobile.dll</HintPath>
+      <HintPath>..\Components\azure-mobile-services-1.1.0\lib\ios\Microsoft.WindowsAzure.Mobile.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Mobile.Ext, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Debug\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
+      <HintPath>..\Components\azure-mobile-services-1.1.0\lib\ios\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Debug\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\Components\azure-mobile-services-1.1.0\lib\ios\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
@@ -95,10 +95,15 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="Xamarin.Auth.iOS, Version=1.2.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Debug\Xamarin.Auth.iOS.dll</HintPath>
+      <HintPath>..\Components\azure-mobile-services-1.1.0\lib\ios\Xamarin.Auth.iOS.dll</HintPath>
     </Reference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <XamarinComponentReference Include="azure-mobile-services">
+      <Visible>False</Visible>
+      <Version>1.1.0</Version>
+    </XamarinComponentReference>
+  </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
   </ItemGroup>
@@ -129,11 +134,5 @@
     <BundleResource Include="Resources\Default-Landscape.png" />
     <BundleResource Include="Resources\Default-Portrait%402x.png" />
     <BundleResource Include="Resources\Default-Landscape%402x.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <XamarinComponentReference Include="azure-mobile-services">
-      <Version>1.0.4</Version>
-      <Visible>False</Visible>
-    </XamarinComponentReference>
   </ItemGroup>
 </Project>
