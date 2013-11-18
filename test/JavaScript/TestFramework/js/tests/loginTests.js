@@ -167,7 +167,7 @@ function defineLoginTestsNamespace() {
             var client = zumo.getClient();
             var table = client.getTable(tableName);
             var currentUser = client.currentUser;
-            var item = { text: 'hello' };
+            var item = { name: 'hello' };
             var insertedItem;
 
             var validateCRUDResult = function (operation, error) {

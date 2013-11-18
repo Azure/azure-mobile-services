@@ -10,10 +10,10 @@ echo   with all four providers.
 goto :TheEnd
 
 :Start
-call azure mobile table create %1 w8Admin
-call azure mobile table create %1 w8Application
-call azure mobile table create %1 w8Authenticated
-call azure mobile table create %1 w8Public
+call azure mobile table create --integerId %1 w8Admin
+call azure mobile table create --integerId %1 w8Application
+call azure mobile table create --integerId %1 w8Authenticated
+call azure mobile table create --integerId %1 w8Public
 call azure mobile table create --integerId %1 w8RoundTripTable
 call azure mobile table create --integerId %1 intIdMovies
 call azure mobile table create %1 w8PushTest
