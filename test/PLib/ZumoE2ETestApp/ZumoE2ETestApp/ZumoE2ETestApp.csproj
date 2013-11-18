@@ -119,8 +119,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tests\ExceptionTypeWhichWillNeverBeThrown.cs" />
     <Compile Include="Tests\TestStore.cs" />
+    <Compile Include="Tests\Types\ICloneableItem.cs" />
+    <Compile Include="Tests\Types\StringIdRoundTripTableItem.cs" />
     <Compile Include="Tests\Types\Movie.cs" />
     <Compile Include="Tests\Types\RoundTripTableItem.cs" />
+    <Compile Include="Tests\Types\VersionedType.cs" />
     <Compile Include="Tests\ZumoCUDTests.cs" />
     <Compile Include="Tests\ZumoCustomApiTests.cs">
       <SubType>Code</SubType>
@@ -208,11 +211,11 @@
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Mobile, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\WindowsAzure.MobileServices.1.0.3\lib\netcore45\Microsoft.WindowsAzure.Mobile.dll</HintPath>
+      <HintPath>..\packages\WindowsAzure.MobileServices.1.0.4\lib\netcore45\Microsoft.WindowsAzure.Mobile.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Mobile.Ext, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\WindowsAzure.MobileServices.1.0.3\lib\netcore45\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
+      <HintPath>..\packages\WindowsAzure.MobileServices.1.0.4\lib\netcore45\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

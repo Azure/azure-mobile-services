@@ -3,12 +3,18 @@
 // ----------------------------------------------------------------------------
 
 using System;
+using System.Linq;
 using ZumoE2ETestApp.Tests.Types;
 
 namespace ZumoE2ETestApp.Tests
 {
     public static class ZumoQueryTestData
     {
+        public static StringIdMovie[] AllStringIdMovies()
+        {
+            return AllMovies.Select((m, i) => new StringIdMovie(string.Format("Movie {0:000}", i), m)).ToArray();
+        }
+
         public static Movie[] AllMovies = new Movie[]
         {
             new Movie

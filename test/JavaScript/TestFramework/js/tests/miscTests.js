@@ -10,6 +10,7 @@ function defineMiscTestsNamespace() {
     var i;
     var roundTripTableName = 'w8jsRoundTripTable';
     var paramsTableName = 'ParamsTestTable';
+    var stringIdTableName = 'stringIdRoundTripTable';
 
     tests.push(new zumo.Test('Filter does not modify client', function (test, done) {
         var client = zumo.getClient();
@@ -211,6 +212,101 @@ function defineMiscTestsNamespace() {
                 }, handleError('lookup'));
             }, handleError('update'));
         }, handleError('insert'));
+    }));
+
+    tests.push(new zumo.Test('Using filters to access optimistic concurrency features', function (test, done) {
+        var client = zumo.getClient();
+
+        var ocFilter = function (req, next, callback) {
+            var url = req.url;
+            url = addSystemProperties(url);
+            req.url = url;
+
+            removeSystemPropertiesFromBody(req);
+            next(req, function (error, response) {
+                if (response && response.getResponseHeader) {
+                    var etag = response.getResponseHeader('ETag');
+                    if (etag) {
+                        if (etag.substring(0, 1) === '\"') {
+                            etag = etag.substring(1);
+                        }
+                        if (etag.substring(etag.length - 1) === '\"') {
+                            etag = etag.substring(0, etag.length - 1);
+                        }
+                        var body = JSON.parse(response.responseText);
+                        body['__version'] = etag;
+                        response.responseText = JSON.stringify(body);
+                    }
+                }
+
+                callback(error, response);
+            });
+
+            function addSystemProperties(url) {
+                var queryIndex = url.indexOf('?');
+                var query, urlNoQuery;
+                if (queryIndex >= 0) {
+                    urlNoQuery = url.substring(0, queryIndex);
+                    query = url.substring(queryIndex + 1) + '&';
+                } else {
+                    urlNoQuery = url;
+                    query = '';
+                }
+                query = query + '__systemProperties=*';
+                return urlNoQuery + '?' + query;
+            }
+
+            function removeSystemPropertiesFromBody(request) {
+                var method = request.type;
+                var data = request.data;
+                if (method === 'PATCH' || method === 'PUT') {
+                    var body = JSON.parse(data);
+                    if (typeof body === 'object') {
+                        var toRemove = [];
+                        for (var k in body) {
+                            if (k.indexOf('__') === 0) {
+                                toRemove.push(k);
+                                if (k === '__version') {
+                                    var etag = '\"' + body[k] + '\"';
+                                    req.headers['If-Match'] = etag;
+                                }
+                            }
+                        }
+
+                        if (toRemove.length) {
+                            for (var i = 0; i < toRemove.length; i++) {
+                                delete body[toRemove[i]];
+                            }
+                            req.data = JSON.stringify(body);
+                        }
+                    }
+                }
+            }
+        };
+
+        client = client.withFilter(ocFilter);
+        var table = client.getTable(stringIdTableName);
+
+        var errFunction = function (err) {
+            test.addLog('Error: ', err);
+            done(false);
+        };
+        table.insert({ name: 'John Doe', number: 123 }).done(function (inserted) {
+            test.addLog('Inserted: ', inserted);
+            inserted.name = 'Jane Roe';
+            table.update(inserted).done(function (updated) {
+                test.addLog('Updated: ', updated);
+                test.addLog('Now updating with incorrect version');
+                updated['__version'] = 'incorrect';
+                table.update(updated).done(function (updated2) {
+                    test.addLog('Updated again (should not happen): ', updated2);
+                    done(false);
+                }, function (err) {
+                    test.addLog('Got (expected) error: ', err);
+                    done(true);
+                });
+            }, errFunction);
+        }, errFunction);
     }));
 
     function createFilterCaptureTest(successfulRequest) {

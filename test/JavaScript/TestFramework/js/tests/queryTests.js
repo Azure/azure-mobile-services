@@ -8,8 +8,9 @@ function defineQueryTestsNamespace() {
     var tests = [];
     var serverSideTests = [];
     var i;
-    var tableName = 'w8jsMovies';
+    var tableName = 'intIdMovies';
     var tableNameForServerSideFilterTest = 'w8jsServerQueryMovies';
+    var stringIdMoviesTableName = 'stringIdMovies';
 
     var populateTableTest = new zumo.Test('Populate table, if necessary', function (test, done) {
         test.addLog('Populating the table');
@@ -29,7 +30,34 @@ function defineQueryTestsNamespace() {
     });
 
     tests.push(populateTableTest);
-    serverSideTests.push(populateTableTest);
+
+    var populateStringIdTableTest = new zumo.Test('Populate string id table, if necessary', function (test, done) {
+        test.addLog('Populating the string id table');
+        var item = {
+            movies: zumo.tests.getQueryTestData()
+        };
+        item.movies.forEach(function (movie, index) {
+            var strIndex = index.toString();
+            var id = 'Movie ';
+            for (var i = strIndex.length; i < 3; i++) {
+                id = id + '0';
+            }
+
+            movie.id = id + strIndex;
+        });
+        var client = zumo.getClient();
+        var table = client.getTable(stringIdMoviesTableName);
+        table.insert(item).done(function (readItem) {
+            var status = readItem ? readItem.status : (item.status || 'no status');
+            test.addLog('status: ' + JSON.stringify(status));
+            done(true);
+        }, function (err) {
+            test.addLog('Error populating the table: ' + JSON.stringify(err));
+            done(false);
+        });
+    });
+
+    tests.push(populateStringIdTableTest);
 
     // For server-side filtering tests, we will create a function to add the tests;
     // We'll then compare with the function which we expect from the client, to make
@@ -39,7 +67,8 @@ function defineQueryTestsNamespace() {
     var getWhereClauseSwitchBody = '';
 
     function addQueryTest(testName, getQueryFunction, filter, options) {
-        tests.push(createQueryTest(testName, getQueryFunction, filter, options));
+        tests.push(createQueryTest(testName, getQueryFunction, filter, options, false));
+        tests.push(createQueryTest('String id: ' + testName, getQueryFunction, filter, options, true));
         options = options || {};
 
         if (!getQueryFunction || !filter || typeof getQueryFunction === 'string') {
@@ -191,7 +220,7 @@ function defineQueryTestsNamespace() {
     addQueryTest('Get all using large $top: take(500)', null, null, { top: 500 });
     addQueryTest('Skip all using large skip: skip(500)', null, null, { skip: 500 });
     addQueryTest('Get first ($top) - 10', null, null, { top: 10 });
-    addQueryTest('Get last ($skip) - 10', null, null, { skip: zumo.tests.getQueryTestData().length - 10 });
+    addQueryTest('Get last ($skip) - 10', null, null, { skip: zumo.tests.getQueryTestData().length - 10, sortFields: [new OrderByClause('id', true)] });
     addQueryTest('Skip, take and includeTotalCount: movies 11-20, ordered by title', null, null,
         { top: 10, skip: 10, includeTotalCount: true, sortFields: [new OrderByClause('Title', true)] });
     addQueryTest('Skip, take and includeTotalCount with filter: movies 11-20, which won the best picture, ordered by release date',
@@ -258,6 +287,10 @@ function defineQueryTestsNamespace() {
         }));
     }
 
+    tests.push(createQueryTest('String id: query by id',
+        function (table) { return table.where(function () { return this.id.indexOf('Movie 12') === 0; }); },
+        function (item, index) { return index >= 120 && index <= 129; }, {}, true));
+
     // Now that all server-side tests have been added, will add one test to validate the server-side script
     var getWhereClauseCreator = getWhereClauseCreatorHeader + getWhereClauseSwitchBody + getWhereClauseCreatorFooter;
     serverSideTests.splice(0, 0, new zumo.Test('Validate getWhereClauseCreator server function', function (test, done) {
@@ -267,7 +300,9 @@ function defineQueryTestsNamespace() {
         var table = client.getTable(tableNameForServerSideFilterTest);
         table.read({ testName: 'getWhereClauseCreator' }).done(function (results) {
             var actualGetWhereClauseCreator = results[0].code;
-            if (getWhereClauseCreator === actualGetWhereClauseCreator) {
+            var clientFunction = getWhereClauseCreator.replace(/\r\n/g, '\n');
+            var serverFunction = actualGetWhereClauseCreator.replace(/\r\n/g, '\n');
+            if (clientFunction === serverFunction) {
                 test.addLog('Function matches');
                 done(true);
             } else {
@@ -391,18 +426,7 @@ function defineQueryTestsNamespace() {
         return filteredMovies;
     }
 
-    // options structure:
-    // {
-    //   top (number): number of elements to 'take'
-    //   skip (number): number of elements to 'skip'
-    //   includeTotalCount (boolean): whether to request a total could (wrapped response)
-    //   sortFields (array of OrderByClause): fields to sort the data by
-    //   selectFields (array of string): fields to retrieve
-    //   debug (boolean): whether to log more information than normal
-    //   isNegativeClientValidation (boolean): if an exception should be thrown before the request is sent the server
-    //   isNegativeServerValidation (boolean): if the error callback should be returned by the server
-    // }
-    function createQueryTest(testName, getQueryFunction, filter, options) {
+    function createQueryTest(testName, getQueryFunction, filter, options, useStringIdTable) {
         /// <param name="testName" type="String">Name of the test to be created.</param>
         /// <param name="getQueryFunction" optional="true" type="function or String">Either a function which takes a
         ///    table object and returns a query, or a String with the OData query to be sent to the server.</param>
@@ -425,6 +449,7 @@ function defineQueryTestsNamespace() {
             var readODataQuery = null;
             var exception = null;
             options = options || {};
+            useStringIdTable = !!useStringIdTable;
             var top = options.top;
             var skip = options.skip;
             var sortFields = options.sortFields;
@@ -437,7 +462,7 @@ function defineQueryTestsNamespace() {
             try {
                 var client = zumo.getClient();
                 var allMovies = zumo.tests.getQueryTestData();
-                var table = client.getTable(tableName);
+                var table = useStringIdTable ? client.getTable(stringIdMoviesTableName) : client.getTable(tableName);
 
                 if (getQueryFunction) {
                     if (typeof getQueryFunction === 'string') {

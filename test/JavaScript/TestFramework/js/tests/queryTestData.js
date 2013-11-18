@@ -1788,7 +1788,7 @@ function createQueryTestData() {
         Year: 1984,
         Duration: 117,
         MPAARating: "PG",
-        ReleaseDate: new Date(Date.UTC(1984, 3, 11)),
+        ReleaseDate: new Date(Date.UTC(1984, 2, 11)),
         BestPictureWinner: false
     });
     movies.push({

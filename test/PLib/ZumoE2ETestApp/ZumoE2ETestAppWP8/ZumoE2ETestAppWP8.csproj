@@ -125,6 +125,15 @@
     <Compile Include="..\ZumoE2ETestApp\Tests\Types\RoundTripTableItem.cs">
       <Link>Tests\Types\RoundTripTableItem.cs</Link>
     </Compile>
+    <Compile Include="..\ZumoE2ETestApp\Tests\Types\StringIdRoundTripTableItem.cs">
+      <Link>Tests\Types\StringIdRoundTripTableItem.cs</Link>
+    </Compile>
+    <Compile Include="..\ZumoE2ETestApp\Tests\Types\ICloneableItem.cs">
+      <Link>Tests\Types\ICloneableItem.cs</Link>
+    </Compile>
+    <Compile Include="..\ZumoE2ETestApp\Tests\Types\VersionedType.cs">
+      <Link>Tests\Types\VersionedType.cs</Link>
+    </Compile>
     <Compile Include="..\ZumoE2ETestApp\Tests\ZumoCUDTests.cs">
       <Link>Tests\ZumoCUDTests.cs</Link>
     </Compile>
@@ -248,15 +257,15 @@
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Mobile, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\WindowsAzure.MobileServices.1.0.3\lib\wp8\Microsoft.WindowsAzure.Mobile.dll</HintPath>
+      <HintPath>..\packages\WindowsAzure.MobileServices.1.0.4\lib\wp8\Microsoft.WindowsAzure.Mobile.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Mobile.Ext, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\WindowsAzure.MobileServices.1.0.3\lib\wp8\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
+      <HintPath>..\packages\WindowsAzure.MobileServices.1.0.4\lib\wp8\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Mobile.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\WindowsAzure.MobileServices.1.0.3\lib\wp8\Microsoft.WindowsAzure.Mobile.UI.dll</HintPath>
+      <HintPath>..\packages\WindowsAzure.MobileServices.1.0.4\lib\wp8\Microsoft.WindowsAzure.Mobile.UI.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

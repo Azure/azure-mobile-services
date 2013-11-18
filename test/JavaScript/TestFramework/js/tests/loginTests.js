@@ -13,10 +13,10 @@ function defineLoginTestsNamespace() {
     var TABLE_PERMISSION_APPLICATION = 2;
     var TABLE_PERMISSION_USER = 3;
     var TABLE_PERMISSION_ADMIN = 4;
-    var TABLE_NAME_PUBLIC = 'w8Public';
-    var TABLE_NAME_APPLICATION = 'w8Application';
-    var TABLE_NAME_AUTHENTICATED = 'w8Authenticated';
-    var TABLE_NAME_ADMIN = 'w8Admin';
+    var TABLE_NAME_PUBLIC = 'public';
+    var TABLE_NAME_APPLICATION = 'application';
+    var TABLE_NAME_AUTHENTICATED = 'authenticated';
+    var TABLE_NAME_ADMIN = 'admin';
 
     var tables = [
         { name: TABLE_NAME_PUBLIC, permission: TABLE_PERMISSION_PUBLIC },
@@ -167,7 +167,7 @@ function defineLoginTestsNamespace() {
             var client = zumo.getClient();
             var table = client.getTable(tableName);
             var currentUser = client.currentUser;
-            var item = { text: 'hello' };
+            var item = { name: 'hello' };
             var insertedItem;
 
             var validateCRUDResult = function (operation, error) {
