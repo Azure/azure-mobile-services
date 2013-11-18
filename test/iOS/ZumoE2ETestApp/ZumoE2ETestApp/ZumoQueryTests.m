@@ -40,7 +40,7 @@
 
 @implementation ZumoQueryTests
 
-static NSString *queryTestsTableName = @"iosMovies";
+static NSString *queryTestsTableName = @"intIdMovies";
 
 + (NSArray *)createTests {
     NSMutableArray *result = [[NSMutableArray alloc] init];
