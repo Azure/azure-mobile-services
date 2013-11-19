@@ -105,7 +105,7 @@ NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
                                                   orError:error];
             
             NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : @"The server's version did not match the passed version",
-                                        MSErrorServerItem: serverItem };
+                                        MSErrorServerItemKey: serverItem };
             
             *error = [NSError errorWithDomain:MSErrorDomain code:MSErrorPreconditionFailed userInfo:userInfo];
         } else {

@@ -32,7 +32,7 @@ extern NSString *const MSErrorResponseKey;
 /// server item that was returned from the Windows Azure Mobile Service related to
 /// the precondition failed error. This will only be present on MSPreconditionFailed
 /// errors.
-extern NSString *const MSErrorServerItem;
+extern NSString *const MSErrorServerItemKey;
 
 
 #pragma mark * MSErrorCodes

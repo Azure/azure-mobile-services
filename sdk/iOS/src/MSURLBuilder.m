@@ -79,12 +79,6 @@ NSString *const inlineCountNone = @"none";
         url = [table.client.applicationURL URLByAppendingPathComponent:tablePath];
         
         // Add on the querystring now
-        /* ???
-        if([query respondsToSelector:@selector(stringByAddingPercentEncodingWithAllowedCharacters:)]) {
-            url = [MSURLBuilder URLByAppendingQueryString:[query stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]] toURL:url];
-        }
-        */
-        
         url = [MSURLBuilder URLByAppendingQueryString:query toURL:url];
             
         // Add the query parameters if any

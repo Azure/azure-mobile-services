@@ -918,14 +918,14 @@
     [savedItem setValue:@"But Wait!" forKey:@"String"];
     [self.table update:savedItem completion:^(NSDictionary *item, NSError *error) {
         STAssertNotNil(error, @"An error should have occcurred");
+        STAssertEquals(MSErrorPreconditionFailed, error.code, @"Should have had precondition failed error");
         
         //NSDictionary *itemResponse = error.localizedDescription;
         NSHTTPURLResponse *response = [error.userInfo objectForKey:MSErrorResponseKey];
         STAssertNotNil(response, @"response should have been available");
+        STAssertEquals(412, response.statusCode, @"response should have been pre condition failed");
         
-        STAssertEquals(MSErrorPreconditionFailed, error.code, @"Should have had precondition failed error");
-        
-        NSDictionary *actualItem = [error.userInfo objectForKey:MSErrorServerItem];
+        NSDictionary *actualItem = [error.userInfo objectForKey:MSErrorServerItemKey];
         STAssertEqualObjects([actualItem objectForKey:MSSystemColumnVersion], [savedItem2 objectForKey:MSSystemColumnVersion], @"Unexpected version");
         STAssertEqualObjects([actualItem objectForKey:@"string"], @"Hello!", @"Unexpected value");
         
