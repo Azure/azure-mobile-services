@@ -1,6 +1,6 @@
 function insert(item, user, request) {
     item.id = 1;
-    var table = tables.currentTable;
+    var table = tables.current;
     table.take(1).read({
         success: function(items) {
             if (items.length > 0) {

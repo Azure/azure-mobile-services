@@ -159,10 +159,114 @@
 
 @end
 
+// Filter which will save the User-Agent request header
+@interface FilterToSimulateOptimisticConcurrency : NSObject <MSFilter>
+
+@end
+
+@implementation FilterToSimulateOptimisticConcurrency
+
+- (void)handleRequest:(NSURLRequest *)request next:(MSFilterNextBlock)onNext response:(MSFilterResponseBlock)onResponse {
+
+    // Append __systemProperties=* to request URI
+    NSString *url = [[request URL] absoluteString];
+    NSString *query, *urlWithoutQuery;
+    NSRange indexOfQuery = [url rangeOfString:@"?"];
+    if (indexOfQuery.location == NSNotFound) {
+        query = @"";
+        urlWithoutQuery = url;
+    } else {
+        query = [url substringFromIndex:(indexOfQuery.location + 1)];
+        query = [query stringByAppendingString:@"&"];
+        urlWithoutQuery = [url substringToIndex:indexOfQuery.location];
+    }
+    urlWithoutQuery = [urlWithoutQuery stringByAppendingString:@"?"];
+    query = [query stringByAppendingString:@"__systemProperties=*"];
+    url = [urlWithoutQuery stringByAppendingString:query];
+
+    // Clone the request and headers
+    NSMutableURLRequest *newRequest = [[NSMutableURLRequest alloc] initWithURL:[NSURL URLWithString:url]];
+    NSString *HTTPMethod = [request HTTPMethod];
+    [newRequest setHTTPMethod:HTTPMethod];
+    NSDictionary *requestHeaders = [request allHTTPHeaderFields];
+    for (NSString *headerName in [requestHeaders keyEnumerator]) {
+        NSString *headerValue = [requestHeaders objectForKey:headerName];
+        [newRequest setValue:headerValue forHTTPHeaderField:headerName];
+    }
+    [newRequest setHTTPBody:[request HTTPBody]];
+    
+    // Remove the system properties from the request
+    if ([HTTPMethod isEqualToString:@"PUT"] || [HTTPMethod isEqualToString:@"PATCH"]) {
+        NSError *error;
+        NSData *requestBody = [request HTTPBody];
+        id body = [NSJSONSerialization JSONObjectWithData:requestBody options:0 error:&error];
+        if (error) {
+            onResponse(nil, nil, error);
+            return;
+        }
+        if ([body isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *item = body;
+            NSString *version = nil;
+            NSMutableDictionary *newItem = [[NSMutableDictionary alloc] init];
+            BOOL propertyRemoved = NO;
+            for (NSString *key in [item allKeys]) {
+                if ([key hasPrefix:@"__"]) {
+                    propertyRemoved = YES;
+                    if ([key isEqualToString:@"__version"]) {
+                        version = [item objectForKey:key];
+                    }
+                } else {
+                    [newItem setValue:[item objectForKey:key] forKey:key];
+                }
+            }
+            
+            if (version) {
+                NSString *etag = [NSString stringWithFormat:@"\"%@\"", version];
+                [newRequest setValue:etag forHTTPHeaderField:@"If-Match"];
+            }
+            
+            if (propertyRemoved) {
+                NSData *newBody = [NSJSONSerialization dataWithJSONObject:newItem options:0 error:&error];
+                if (error) {
+                    onResponse(nil, nil, error);
+                    return;
+                }
+                [newRequest setHTTPBody:newBody];
+            }
+        }
+    }
+
+    // Now send the updated request
+    onNext(newRequest, ^(NSHTTPURLResponse *response, NSData *data, NSError *error) {
+        if (error) {
+            onResponse(response, data, error);
+            return;
+        }
+
+        // Move the response ETag header into a __version field
+        NSDictionary *respHeaders = [response allHeaderFields];
+        NSString *etag = [respHeaders objectForKey:@"ETag"];
+        if ([etag hasPrefix:@"\""]) etag = [etag substringFromIndex:1];
+        if ([etag hasSuffix:@"\""]) etag = [etag substringToIndex:([etag length] - 1)];
+        id body = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+        if ([body isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *item = body;
+            [item setValue:etag forKey:@"__version"];
+            data = [NSJSONSerialization dataWithJSONObject:item options:0 error:&error];
+            if (error) data = nil;
+        }
+
+        onResponse(response, data, error);
+    });
+}
+
+@end
+
 // Main implementation
 @implementation ZumoMiscTests
 
 static NSString *tableName = @"iOSRoundTripTable";
+static NSString *stringIdTableName = @"stringIdRoundTripTable";
 static NSString *parameterTestTableName = @"ParamsTestTable";
 
 + (NSArray *)createTests {
@@ -172,7 +276,54 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
     [result addObject:[self createFilterTestWhichBypassesService]];
     [result addObject:[self createFilterTestToEnsureWithFilterDoesNotChangeClient]];
     [result addObject:[self createParameterPassingTest]];
+    [result addObject:[self createOptimisticConcurrencyWithFilterTest]];
     return result;
+}
+
++ (ZumoTest *)createOptimisticConcurrencyWithFilterTest {
+    return [ZumoTest createTestWithName:@"Using filters to access optimistic concurrency feature" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+        MSClient *client = [[ZumoTestGlobals sharedInstance] client];
+        client = [client clientWithFilter:[[FilterToSimulateOptimisticConcurrency alloc] init]];
+        MSTable *table = [client tableWithName:stringIdTableName];
+        NSDictionary *item = @{@"name":@"John Doe",@"number":@123};
+        [table insert:item completion:^(NSDictionary *inserted, NSError *error) {
+            if (error) {
+                [test addLog:[NSString stringWithFormat:@"Error inserting first item: %@", error]];
+                completion(NO);
+                return;
+            }
+            
+            [test addLog:[NSString stringWithFormat:@"Inserted: %@", inserted]];
+            id itemId = [inserted objectForKey:@"id"];
+            [inserted setValue:@"Jane Roe" forKey:@"name"];
+            [table update:inserted completion:^(NSDictionary *updated, NSError *error) {
+                if (error) {
+                    [test addLog:[NSString stringWithFormat:@"Error inserting first item: %@", error]];
+                    completion(NO);
+                    return;
+                }
+
+                [test addLog:[NSString stringWithFormat:@"Updated: %@", updated]];
+                [test addLog:@"Now updating with incorrect version"];
+                [updated setValue:@"incorrect" forKey:@"__version"];
+                [table update:updated completion:^(NSDictionary *updated2, NSError *error) {
+                    BOOL testPassed = NO;
+                    if (error) {
+                        [test addLog:[NSString stringWithFormat:@"Got error as expected: %@", error]];
+                        testPassed = YES;
+                    } else {
+                        [test addLog:[NSString stringWithFormat:@"Error, update should not have worked, but it did: %@", updated2]];
+                    }
+                    
+                    [test addLog:@"Cleaning up..."];
+                    [table deleteWithId:itemId completion:^(NSNumber *itemId, NSError *error) {
+                        [test addLog:[@"Delete item result: " stringByAppendingString:error ? @"failed" : @"succeeded"]];
+                        completion(testPassed);
+                    }];
+                }];
+            }];
+        }];
+    }];
 }
 
 + (ZumoTest *)createParameterPassingTest {
