@@ -58,7 +58,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 161,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1967, 12, 28, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1967, 12, 29, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Good, the Bad and the Ugly",
                 Year = 1966
             },
@@ -67,7 +67,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 96,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1957, 03, 31, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1957, 4, 10, 0, 0, 0, DateTimeKind.Utc),
                 Title = "12 Angry Men",
                 Year = 1957
             },
@@ -166,7 +166,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 141,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1956, 11, 18, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1956, 11, 19, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Seven Samurai",
                 Year = 1954
             },
@@ -211,7 +211,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 175,
                 MPAARating = "PG-13",
-                ReleaseDate = new DateTime(1968, 12, 20, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1968, 12, 21, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Once Upon a Time in the West",
                 Year = 1968
             },
@@ -238,7 +238,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = true,
                 Duration = 102,
                 MPAARating = "PG",
-                ReleaseDate = new DateTime(1943, 01, 22, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1943, 01, 23, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Casablanca",
                 Year = 1942
             },
@@ -274,7 +274,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 109,
                 MPAARating = "TV-14",
-                ReleaseDate = new DateTime(1960, 09, 07, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1960, 9, 8, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Psycho",
                 Year = 1960
             },
@@ -301,7 +301,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 110,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1950, 08, 24, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1950, 08, 25, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Sunset Blvd.",
                 Year = 1950
             },
@@ -355,7 +355,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 95,
                 MPAARating = "PG",
-                ReleaseDate = new DateTime(1964, 01, 28, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1964, 01, 29, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb",
                 Year = 1964
             },
@@ -382,7 +382,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 136,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1959, 09, 25, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1959, 09, 26, 0, 0, 0, DateTimeKind.Utc),
                 Title = "North by Northwest",
                 Year = 1959
             },
@@ -391,7 +391,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 87,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1931, 03, 06, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1931, 03, 07, 0, 0, 0, DateTimeKind.Utc),
                 Title = "City Lights",
                 Year = 1931
             },
@@ -409,7 +409,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 119,
                 MPAARating = "PG",
-                ReleaseDate = new DateTime(1941, 09, 04, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1941, 9, 5, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Citizen Kane",
                 Year = 1941
             },
@@ -418,7 +418,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 87,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1936, 02, 24, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1936, 02, 25, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Modern Times",
                 Year = 1936
             },
@@ -436,7 +436,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 129,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1958, 07, 20, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1958, 07, 21, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Vertigo",
                 Year = 1958
             },
@@ -508,7 +508,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 88,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1957, 10, 24, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1957, 10, 25, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Paths of Glory",
                 Year = 1957
             },
@@ -526,7 +526,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 107,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1944, 04, 23, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1944, 04, 24, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Double Indemnity",
                 Year = 1944
             },
@@ -607,7 +607,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = true,
                 Duration = 227,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1963, 01, 29, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1963, 01, 30, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Lawrence of Arabia",
                 Year = 1962
             },
@@ -616,7 +616,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 129,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1963, 03, 15, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1963, 03, 16, 0, 0, 0, DateTimeKind.Utc),
                 Title = "To Kill a Mockingbird",
                 Year = 1962
             },
@@ -634,7 +634,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 125,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1941, 03, 06, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1941, 3, 7, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Great Dictator",
                 Year = 1940
             },
@@ -670,7 +670,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 93,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1949, 08, 30, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1949, 08, 31, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Third Man",
                 Year = 1949
             },
@@ -679,7 +679,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 126,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1948, 01, 23, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1948, 01, 24, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Treasure of the Sierra Madre",
                 Year = 1948
             },
@@ -778,7 +778,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 103,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1952, 04, 10, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1952, 04, 11, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Singin' in the Rain",
                 Year = 1952
             },
@@ -796,7 +796,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 120,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1959, 03, 28, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1959, 03, 29, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Some Like It Hot",
                 Year = 1959
             },
@@ -814,7 +814,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 114,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1927, 03, 12, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1927, 03, 13, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Metropolis",
                 Year = 1927
             },
@@ -823,7 +823,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 88,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1951, 12, 25, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1951, 12, 26, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Rashomon",
                 Year = 1950
             },
@@ -832,7 +832,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 93,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1949, 12, 12, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1949, 12, 13, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Bicycle Thieves",
                 Year = 1948
             },
@@ -841,7 +841,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 141,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1968, 04, 05, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1968, 4, 6, 0, 0, 0, DateTimeKind.Utc),
                 Title = "2001: A Space Odyssey",
                 Year = 1968
             },
@@ -859,7 +859,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = true,
                 Duration = 138,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1951, 01, 14, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1951, 1, 15, 0, 0, 0, DateTimeKind.Utc),
                 Title = "All About Eve",
                 Year = 1950
             },
@@ -868,7 +868,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = true,
                 Duration = 125,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1960, 09, 15, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1960, 9, 16, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Apartment",
                 Year = 1960
             },
@@ -904,7 +904,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = true,
                 Duration = 161,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1957, 12, 13, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1957, 12, 14, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Bridge on the River Kwai",
                 Year = 1957
             },
@@ -922,7 +922,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 116,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1958, 02, 05, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1958, 2, 6, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Witness for the Prosecution",
                 Year = 1957
             },
@@ -976,7 +976,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 129,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1939, 10, 18, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1939, 10, 19, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Mr. Smith Goes to Washington",
                 Year = 1939
             },
@@ -985,7 +985,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 75,
                 MPAARating = "TV-MA",
-                ReleaseDate = new DateTime(1961, 09, 12, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1961, 09, 13, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Yojimbo",
                 Year = 1961
             },
@@ -994,7 +994,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 172,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1963, 07, 03, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1963, 7, 4, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Great Escape",
                 Year = 1963
             },
@@ -1003,7 +1003,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 132,
                 MPAARating = "R",
-                ReleaseDate = new DateTime(1967, 05, 09, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1967, 5, 10, 0, 0, 0, DateTimeKind.Utc),
                 Title = "For a Few Dollars More",
                 Year = 1965
             },
@@ -1030,7 +1030,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = true,
                 Duration = 108,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1954, 06, 23, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1954, 06, 24, 0, 0, 0, DateTimeKind.Utc),
                 Title = "On the Waterfront",
                 Year = 1954
             },
@@ -1048,7 +1048,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 96,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1958, 10, 12, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1958, 10, 13, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Seventh Seal",
                 Year = 1957
             },
@@ -1066,7 +1066,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 100,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1941, 10, 17, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1941, 10, 18, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Maltese Falcon",
                 Year = 1941
             },
@@ -1084,7 +1084,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 75,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1927, 02, 23, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1927, 02, 24, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The General",
                 Year = 1926
             },
@@ -1102,7 +1102,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = true,
                 Duration = 130,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1940, 04, 11, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1940, 04, 12, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Rebecca",
                 Year = 1940
             },
@@ -1129,7 +1129,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 91,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1959, 06, 21, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1959, 06, 22, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Wild Strawberries",
                 Year = 1957
             },
@@ -1147,7 +1147,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 68,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1921, 02, 05, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1921, 2, 6, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Kid",
                 Year = 1921
             },
@@ -1165,7 +1165,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 108,
                 MPAARating = "PG-13",
-                ReleaseDate = new DateTime(1958, 06, 07, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1958, 6, 8, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Touch of Evil",
                 Year = 1958
             },
@@ -1201,7 +1201,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 126,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1967, 10, 31, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1967, 11, 1, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Cool Hand Luke",
                 Year = 1967
             },
@@ -1219,7 +1219,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 72,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1924, 12, 31, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1925, 6, 26, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Gold Rush",
                 Year = 1925
             },
@@ -1228,7 +1228,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 101,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1951, 06, 29, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1951, 06, 30, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Strangers on a Train",
                 Year = 1951
             },
@@ -1237,7 +1237,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = true,
                 Duration = 105,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1934, 02, 22, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1934, 02, 23, 0, 0, 0, DateTimeKind.Utc),
                 Title = "It Happened One Night",
                 Year = 1934
             },
@@ -1291,7 +1291,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 85,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1952, 07, 29, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1952, 07, 30, 0, 0, 0, DateTimeKind.Utc),
                 Title = "High Noon",
                 Year = 1952
             },
@@ -1318,7 +1318,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 110,
                 MPAARating = "PG",
-                ReleaseDate = new DateTime(1969, 10, 23, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1969, 10, 24, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Butch Cassidy and the Sundance Kid",
                 Year = 1969
             },
@@ -1327,7 +1327,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 101,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1939, 08, 24, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1939, 08, 25, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Wizard of Oz",
                 Year = 1939
             },
@@ -1381,7 +1381,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 101,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1946, 09, 05, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1946, 9, 6, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Notorious",
                 Year = 1946
             },
@@ -1399,7 +1399,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = true,
                 Duration = 238,
                 MPAARating = "G",
-                ReleaseDate = new DateTime(1940, 01, 16, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1940, 01, 17, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Gone with the Wind",
                 Year = 1939
             },
@@ -1426,7 +1426,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 129,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1940, 03, 14, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1940, 03, 15, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Grapes of Wrath",
                 Year = 1940
             },
@@ -1489,7 +1489,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 114,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1946, 08, 30, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1946, 08, 31, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Big Sleep",
                 Year = 1946
             },
@@ -1498,7 +1498,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 105,
                 MPAARating = "PG",
-                ReleaseDate = new DateTime(1954, 05, 28, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1954, 05, 29, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Dial M for Murder",
                 Year = 1954
             },
@@ -1507,7 +1507,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = true,
                 Duration = 212,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1960, 03, 29, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1960, 03, 30, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Ben-Hur",
                 Year = 1959
             },
@@ -1552,7 +1552,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 93,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1955, 11, 23, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1955, 11, 24, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Night of the Hunter",
                 Year = 1955
             },
@@ -1642,7 +1642,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 99,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1959, 11, 15, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1959, 11, 16, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The 400 Blows",
                 Year = 1959
             },
@@ -1651,7 +1651,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 83,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1967, 03, 15, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1967, 03, 16, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Persona",
                 Year = 1966
             },
@@ -1660,7 +1660,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 106,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1967, 12, 21, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1967, 12, 22, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Graduate",
                 Year = 1967
             },
@@ -1678,7 +1678,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 85,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1956, 06, 05, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1956, 6, 6, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Killing",
                 Year = 1956
             },
@@ -1732,7 +1732,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 131,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1966, 06, 21, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1966, 06, 22, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Who's Afraid of Virginia Woolf?",
                 Year = 1966
             },
@@ -1741,7 +1741,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 108,
                 MPAARating = "PG",
-                ReleaseDate = new DateTime(1956, 07, 15, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1956, 07, 16, 0, 0, 0, DateTimeKind.Utc),
                 Title = "La Strada",
                 Year = 1954
             },
@@ -1750,7 +1750,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 126,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1962, 10, 23, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1962, 10, 24, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Manchurian Candidate",
                 Year = 1962
             },
@@ -1759,7 +1759,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 134,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1961, 09, 24, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1961, 09, 25, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Hustler",
                 Year = 1961
             },
@@ -1777,7 +1777,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 145,
                 MPAARating = "R",
-                ReleaseDate = new DateTime(1969, 06, 17, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1969, 06, 18, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Wild Bunch",
                 Year = 1969
             },
@@ -1795,7 +1795,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 160,
                 MPAARating = "TV-PG",
-                ReleaseDate = new DateTime(1959, 08, 31, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1959, 9, 1, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Anatomy of a Murder",
                 Year = 1959
             },
@@ -1804,7 +1804,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 120,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1953, 08, 09, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1953, 8, 10, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Stalag 17",
                 Year = 1953
             },
@@ -1831,7 +1831,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 80,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1948, 08, 27, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1948, 8, 28, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Rope",
                 Year = 1948
             },
@@ -1849,7 +1849,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 123,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1962, 04, 21, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1962, 4, 22, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Man Who Shot Liberty Valance",
                 Year = 1962
             },
@@ -1885,7 +1885,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 118,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1953, 09, 01, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1953, 9, 2, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Roman Holiday",
                 Year = 1953
             },
@@ -1948,7 +1948,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 99,
                 MPAARating = "R",
-                ReleaseDate = new DateTime(1967, 01, 17, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1967, 01, 18, 0, 0, 0, DateTimeKind.Utc),
                 Title = "A Fistful of Dollars",
                 Year = 1964
             },
@@ -1957,7 +1957,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 125,
                 MPAARating = "PG",
-                ReleaseDate = new DateTime(1951, 11, 30, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1951, 12, 1, 0, 0, 0, DateTimeKind.Utc),
                 Title = "A Streetcar Named Desire",
                 Year = 1951
             },
@@ -2002,7 +2002,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 136,
                 MPAARating = "R",
-                ReleaseDate = new DateTime(1968, 06, 11, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1968, 06, 12, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Rosemary's Baby",
                 Year = 1968
             },
@@ -2011,7 +2011,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 104,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1950, 10, 12, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1950, 10, 13, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Harvey",
                 Year = 1950
             },
@@ -2037,7 +2037,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = true,
                 Duration = 133,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1930, 08, 23, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1930, 08, 24, 0, 0, 0, DateTimeKind.Utc),
                 Title = "All Quiet on the Western Front",
                 Year = 1930
             },
@@ -2064,7 +2064,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 66,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1925, 12, 23, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1925, 12, 24, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Battleship Potemkin",
                 Year = 1925
             },
@@ -2082,7 +2082,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 81,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1929, 06, 02, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1929, 6, 3, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Nosferatu",
                 Year = 1922
             },
@@ -2118,7 +2118,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 102,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1938, 02, 17, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1938, 2, 18, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Bringing Up Baby",
                 Year = 1938
             },
@@ -2127,7 +2127,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 108,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1943, 01, 14, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1943, 1, 15, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Shadow of a Doubt",
                 Year = 1943
             },
@@ -2199,7 +2199,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = true,
                 Duration = 109,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1967, 10, 13, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1967, 10, 14, 0, 0, 0, DateTimeKind.Utc),
                 Title = "In the Heat of the Night",
                 Year = 1967
             },
@@ -2217,7 +2217,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 118,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1944, 09, 22, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1944, 9, 23, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Arsenic and Old Lace",
                 Year = 1944
             },
@@ -2226,7 +2226,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 119,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1956, 03, 12, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1956, 3, 13, 0, 0, 0, DateTimeKind.Utc),
                 Title = "The Searchers",
                 Year = 1956
             },
@@ -2244,7 +2244,7 @@ namespace ZumoE2ETestApp.Tests
                 BestPictureWinner = false,
                 Duration = 141,
                 MPAARating = null,
-                ReleaseDate = new DateTime(1959, 04, 03, 0, 0, 0, DateTimeKind.Utc),
+                ReleaseDate = new DateTime(1959, 4, 4, 0, 0, 0, DateTimeKind.Utc),
                 Title = "Rio Bravo",
                 Year = 1959
             },
