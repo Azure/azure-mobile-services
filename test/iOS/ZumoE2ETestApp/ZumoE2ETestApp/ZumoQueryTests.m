@@ -47,6 +47,7 @@ static NSString *stringIdQueryTestsTableName = @"stringIdMovies";
     NSMutableArray *result = [[NSMutableArray alloc] init];
     
     [result addObject:[self createPopulateTest]];
+    [result addObject:[self createPopulateStringIdTableTest]];
 
     [self addQueryTestToGroup:result name:@"GreaterThan and LessThan - Movies from the 90s" predicate:[NSPredicate predicateWithFormat:@"(Year > 1989) and (Year < 2000)"]];
 
@@ -309,6 +310,7 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
 + (ZumoTest *)createQueryTestWithName:(NSString *)name andPredicate:(NSPredicate *)predicate andTop:(NSNumber *)top andSkip:(NSNumber *)skip andOrderBy:(NSArray *)orderByClauses andIncludeTotalCount:(BOOL)includeTotalCount andSelectFields:(NSArray *)selectFields useStringIdTable:(BOOL)useStringIdTable {
     NSString *testName = [NSString stringWithFormat:@"[%@ id] %@", useStringIdTable ? @"string" : @"int", name];
     ZumoTest *result = [ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client tableWithName:queryTestsTableName];
         NSArray *allItems = [ZumoQueryTestData getMovies];
@@ -459,13 +461,13 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
     } else {
         BOOL allItemsEqual = YES;
         for (int i = 0; i < actualCount; i++) {
-            NSDictionary *expectedItem = expectedItems[i];
-            NSDictionary *actualItem = actualItems[i];
+            NSDictionary *expectedItem = [expectedItems objectAtIndex:i];
+            NSDictionary *actualItem = [actualItems objectAtIndex:i];
             BOOL allValuesEqual = YES;
             for (NSString *key in [expectedItem keyEnumerator]) {
                 if ([key isEqualToString:@"id"]) continue; // don't care about id
-                id expectedValue = expectedItem[key];
-                id actualValue = actualItem[key];
+                id expectedValue = [expectedItem objectForKey:key];
+                id actualValue = [actualItem objectForKey:key];
                 if (![expectedValue isEqual:actualValue]) {
                     allValuesEqual = NO;
                     [test addLog:[NSString stringWithFormat:@"Error comparing field %@ of item %d: expected - %@, actual - %@", key, i, expectedValue, actualValue]];
