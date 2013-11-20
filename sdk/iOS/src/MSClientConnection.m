@@ -98,21 +98,9 @@ NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
     BOOL isSuccessful = response.statusCode < 400;
     
     if (!isSuccessful && self.completion && error) {
-        if (response.statusCode == 412) {
-            NSDictionary *serverItem = [self itemFromData:data
-                                                 response:response
-                                         ensureDictionary:YES
-                                                  orError:error];
-            
-            NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : @"The server's version did not match the passed version",
-                                        MSErrorServerItemKey: serverItem };
-            
-            *error = [NSError errorWithDomain:MSErrorDomain code:MSErrorPreconditionFailed userInfo:userInfo];
-        } else {
-            // Read the error message from the response body
-            *error =[self.client.serializer errorFromData:data
+        // Read the error message from the response body
+        *error =[self.client.serializer errorFromData:data
                                              MIMEType:response.MIMEType];
-        }
         [self addRequestAndResponse:response toError:error];
     }
     

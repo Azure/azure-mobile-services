@@ -457,7 +457,7 @@
         STAssertEqualObjects([item objectForKey:MSSystemColumnVersion],[savedItem objectForKey:MSSystemColumnVersion], @"Incorrect property");
         self.done = YES;
     }];
-    [self waitForTest:30];
+    [self waitForTest:30.0];
 }
 
 -(void) testAsyncTableOperationsWithSystemPropertiesSetExplicitly
@@ -620,17 +620,6 @@
         }];
         [self waitForTest:30.0];
         
-        /*
-        self.done = NO;
-        [self.table readWithQueryString:[query queryStringOrError:nil] completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-            STAssertEquals(shouldHaveCreatedAt, (BOOL)([item objectForKey:MSSystemColumnCreatedAt] != nil), @"Property invalid: %@", systemProperties);
-            STAssertEquals(shouldHaveUpdatedAt, (BOOL)([item objectForKey:MSSystemColumnUpdatedAt] != nil), @"Property invalid: %@", systemProperties);
-            STAssertEquals(shouldHaveVersion, (BOOL)([item objectForKey:MSSystemColumnVersion] != nil), @"Property invalid: %@", systemProperties);
-            self.done = YES;
-        }];
-        [self waitForTest:30];
-        */
-        
         self.done = NO;
         [self.table delete:item completion:^(id itemId, NSError *error) {
             self.done = YES;
@@ -648,7 +637,7 @@
         savedItem = item;
         self.done = YES;
     }];
-    [self waitForTest:30];
+    [self waitForTest:30.0];
 
     NSCharacterSet *equals = [NSCharacterSet characterSetWithCharactersInString:@"="];
     for (NSString *systemProperties in [MSTable testInvalidSystemPropertyQueryStrings])
@@ -659,8 +648,8 @@
         self.done = NO;
         [self.table insert:item parameters:userParams completion:^(NSDictionary *item, NSError *error) {
             STAssertNotNil(error, @"An error should have occurred");
-            // Assert.AreEqual(exception.Response.StatusCode, HttpStatusCode.BadRequest);
-            // Assert.IsTrue(exception.Message.Contains("is not a supported system property."));
+            STAssertEquals(error.code, MSErrorMessageErrorCode, @"Unexpected error %d", error.code);
+            STAssertTrue([error.localizedDescription rangeOfString:@"is not a supported system property."].location != NSNotFound, @"Unexpected message %@", error.localizedDescription);
             self.done = YES;
         }];
         [self waitForTest:30.0];
@@ -671,8 +660,8 @@
         query.parameters = userParams;
         [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
             STAssertNotNil(error, @"An error should have occurred");
-            // Assert.AreEqual(exception.Response.StatusCode, HttpStatusCode.BadRequest);
-            // Assert.IsTrue(exception.Message.Contains("is not a supported system property."));
+            STAssertEquals(error.code, MSErrorMessageErrorCode, @"Unexpected error %d", error.code);
+            STAssertTrue([error.localizedDescription rangeOfString:@"is not a supported system property."].location != NSNotFound, @"Unexpected message %@", error.localizedDescription);
             self.done = YES;
             }];
         [self waitForTest:30.0];
@@ -682,8 +671,8 @@
         query.predicate = predicate;
         [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
             STAssertNotNil(error, @"An error should have occurred");
-            // Assert.AreEqual(exception.Response.StatusCode, HttpStatusCode.BadRequest);
-            // Assert.IsTrue(exception.Message.Contains("is not a supported system property."));
+            STAssertEquals(error.code, MSErrorMessageErrorCode, @"Unexpected error %d", error.code);
+            STAssertTrue([error.localizedDescription rangeOfString:@"is not a supported system property."].location != NSNotFound, @"Unexpected message %@", error.localizedDescription);
             self.done = YES;
         }];
         [self waitForTest:30.0];
@@ -691,8 +680,8 @@
         self.done = NO;
         [self.table readWithId:@"an id" parameters:userParams completion:^(NSDictionary *item, NSError *error) {
             STAssertNotNil(error, @"An error should have occurred");
-            // Assert.AreEqual(exception.Response.StatusCode, HttpStatusCode.BadRequest);
-            // Assert.IsTrue(exception.Message.Contains("is not a supported system property."));
+            STAssertEquals(error.code, MSErrorMessageErrorCode, @"Unexpected error %d", error.code);
+            STAssertTrue([error.localizedDescription rangeOfString:@"is not a supported system property."].location != NSNotFound, @"Unexpected message %@", error.localizedDescription);
             self.done = YES;
         }];
         [self waitForTest:30.0];
@@ -701,8 +690,8 @@
         [savedItem setValue:@"Hello!" forKey:@"String"];
         [self.table update:savedItem parameters:userParams completion:^(NSDictionary *item, NSError *error) {
             STAssertNotNil(error, @"An error should have occurred");
-            // Assert.AreEqual(exception.Response.StatusCode, HttpStatusCode.BadRequest);
-            // Assert.IsTrue(exception.Message.Contains("is not a supported system property."));
+            STAssertEquals(error.code, MSErrorMessageErrorCode, @"Unexpected error %d", error.code);
+            STAssertTrue([error.localizedDescription rangeOfString:@"is not a supported system property."].location != NSNotFound, @"Unexpected message %@", error.localizedDescription);
             self.done = YES;
         }];
         [self waitForTest:30.0];
@@ -796,6 +785,7 @@
         self.table.SystemProperties = [systemProperties unsignedIntegerValue];
         MSQuery *query = self.table.query;
         [query orderByAscending:MSSystemColumnCreatedAt];
+        self.done = NO;
         [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
             for (NSUInteger i = 0; i < items.count - 1; i++) {
                 NSInteger idOne = [[[items objectAtIndex:i] objectForKey:@"id"] integerValue];

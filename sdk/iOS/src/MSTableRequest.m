@@ -151,12 +151,11 @@ NSString *const httpDelete = @"DELETE";
     id<MSSerializer> serializer = table.client.serializer;
     
     id itemId = [serializer itemIdFromItem:item orError:&error];
-    
     if (!error) {
-    
         // Ensure we can get a string from the item Id
         NSString *idString = [serializer stringFromItemId:itemId
                                                   orError:&error];
+        
         if (!error) {        
 
             // Create the URL
@@ -165,12 +164,23 @@ NSString *const httpDelete = @"DELETE";
                                          parameters:parameters
                                                 orError:&error];
             if (!error) {
-                
                 // Create the request
                 request = [[MSTableItemRequest alloc] initWithURL:url
                                                         withTable:table];
                 request.itemId = itemId;
             
+                NSString *version = nil;
+                
+                // If string id, cache the version field as we strip it out during serialization
+                if([itemId isKindOfClass:[NSString class]]) {
+                    @try {
+                        version = [item objectForKey:MSSystemColumnVersion];
+                    }
+                    @catch (NSException *exception) {
+                        // Do nothing
+                    }
+                }
+                
                 // Create the body or capture the error from serialization
                 NSData *data = [serializer dataFromItem:item
                                               idAllowed:YES
@@ -178,7 +188,6 @@ NSString *const httpDelete = @"DELETE";
                                  removeSystemProperties:YES
                                                 orError:&error];
                 if (!error) {
-
                     // Set the body
                     request.HTTPBody = data;
                     
@@ -188,6 +197,12 @@ NSString *const httpDelete = @"DELETE";
                     
                     // Set the method and headers
                     request.HTTPMethod = httpPatch;
+                    
+                    // Version becomes an etag if passed
+                    if(version) {
+                        version = [NSString stringWithFormat:@"\"%@\"", [version stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""]];
+                        [request addValue:version forHTTPHeaderField:@"If-Match"];
+                    }
                 }
             }
         }
