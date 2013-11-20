@@ -245,15 +245,22 @@
 
         // Move the response ETag header into a __version field
         NSDictionary *respHeaders = [response allHeaderFields];
-        NSString *etag = [respHeaders objectForKey:@"ETag"];
-        if ([etag hasPrefix:@"\""]) etag = [etag substringFromIndex:1];
-        if ([etag hasSuffix:@"\""]) etag = [etag substringToIndex:([etag length] - 1)];
-        id body = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
-        if ([body isKindOfClass:[NSDictionary class]]) {
-            NSDictionary *item = body;
-            [item setValue:etag forKey:@"__version"];
-            data = [NSJSONSerialization dataWithJSONObject:item options:0 error:&error];
-            if (error) data = nil;
+        NSString *contentType = [respHeaders objectForKey:@"Content-Type"];
+        if ([contentType isEqualToString:@"application/json"]) {
+            NSString *etag = [respHeaders objectForKey:@"ETag"];
+            if (etag && data) {
+                if ([etag hasPrefix:@"\""]) etag = [etag substringFromIndex:1];
+                if ([etag hasSuffix:@"\""]) etag = [etag substringToIndex:([etag length] - 1)];
+                id body = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+                if (!error) {
+                    if ([body isKindOfClass:[NSDictionary class]]) {
+                        NSMutableDictionary *item = [[NSMutableDictionary alloc] initWithDictionary:body];
+                        [item setValue:etag forKey:@"__version"];
+                        data = [NSJSONSerialization dataWithJSONObject:item options:0 error:&error];
+                        if (error) data = nil;
+                    }
+                }
+            }
         }
 
         onResponse(response, data, error);
@@ -295,18 +302,19 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
             
             [test addLog:[NSString stringWithFormat:@"Inserted: %@", inserted]];
             id itemId = [inserted objectForKey:@"id"];
-            [inserted setValue:@"Jane Roe" forKey:@"name"];
-            [table update:inserted completion:^(NSDictionary *updated, NSError *error) {
+            NSMutableDictionary *toUpdate = [[NSMutableDictionary alloc] initWithDictionary:inserted];
+            [toUpdate setValue:@"Jane Roe" forKey:@"name"];
+            [table update:toUpdate completion:^(NSDictionary *updated, NSError *error) {
                 if (error) {
-                    [test addLog:[NSString stringWithFormat:@"Error inserting first item: %@", error]];
+                    [test addLog:[NSString stringWithFormat:@"Error updating item: %@", error]];
                     completion(NO);
                     return;
                 }
 
                 [test addLog:[NSString stringWithFormat:@"Updated: %@", updated]];
                 [test addLog:@"Now updating with incorrect version"];
-                [updated setValue:@"incorrect" forKey:@"__version"];
-                [table update:updated completion:^(NSDictionary *updated2, NSError *error) {
+                [toUpdate setValue:@"incorrect" forKey:@"__version"];
+                [table update:toUpdate completion:^(NSDictionary *updated2, NSError *error) {
                     BOOL testPassed = NO;
                     if (error) {
                         [test addLog:[NSString stringWithFormat:@"Got error as expected: %@", error]];
