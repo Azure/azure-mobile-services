@@ -26,6 +26,10 @@ call azure mobile table create %1 w8jsServerQueryMovies
 REM Tables specific to Managed tests
 call azure mobile table create %1 --integerId w8RoundTripTable
 
+REM Tables specific to iOS tests
+call azure mobile table create --integerId %1 iosRoundTripTable
+call azure mobile table create --integerId %1 iosPushTest
+
 call azure mobile table update -p insert=admin,read=admin,update=admin,delete=admin %1 admin
 call azure mobile table update -p insert=application,read=application,update=application,delete=application %1 application
 call azure mobile table update -p insert=user,read=user,update=user,delete=user %1 authenticated
@@ -56,5 +60,9 @@ REM Tables specific to managed tests
 call azure mobile script upload %1 table/w8RoundTripTable.insert -f w8RoundTripTable.insert.js
 call azure mobile script upload %1 table/w8RoundTripTable.read -f w8RoundTripTable.read.js
 call azure mobile script upload %1 table/w8RoundTripTable.update -f w8RoundTripTable.update.js
+
+REM Tables specific to iOS tests
+call azure mobile script upload %1 table/iosRoundTripTable.insert -f iosRoundTripTable.insert.js
+call azure mobile script upload %1 table/iosPushTest.insert -f iosPushTest.insert.js
 
 :TheEnd
