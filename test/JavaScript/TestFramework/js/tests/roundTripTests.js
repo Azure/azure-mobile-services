@@ -104,11 +104,10 @@ function defineRoundTripTestsNamespace() {
     var itemBool = true;
     var itemComplex = ['abc', 'def', 'ghi'];
 
-    var uniqueId = new Date().toISOString();
     var differentIds = { ascii: 'id-', latin: 'ãéìôü ÇñÑ', arabic: 'الكتاب على الطاولة', chinese: '这本书在桌子上', hebrew: 'הספר הוא על השולחן' };
     tests.push(createStringIdRoundTripTest('String id - no id on insert, multiple properties', { name: itemName, number: itemNumber, bool: itemBool, date1: zumo.util.randomDate(), complex: itemComplex }));
     for (var t in differentIds) {
-        tests.push(createStringIdRoundTripTest('String id - ' + t + ' id on insert, multiple properties', { id: differentIds[t] + uniqueId, name: t, number: itemNumber, bool: itemBool, date1: zumo.util.randomDate(), complex: itemComplex }));
+        tests.push(createStringIdRoundTripTest('String id - ' + t + ' id on insert, multiple properties', { id: differentIds[t], name: t, number: itemNumber, bool: itemBool, date1: zumo.util.randomDate(), complex: itemComplex }));
     }
 
     var invalidIds = ['.', '..', 'control\u0010characters', 'large id' + Array(260).join('*')];
@@ -151,12 +150,17 @@ function defineRoundTripTestsNamespace() {
             var strItem = JSON.stringify(objectToInsert);
             var originalItem = JSON.parse(strItem, dateReviver);
             var hasId = !!objectToInsert.id;
+            if (hasId) {
+                // force id to be unique
+                originalItem.id = originalItem.id + '-' + (new Date().toISOString());
+            }
+            var originalId = originalItem.id;
             table.insert(originalItem).done(function (itemInserted) {
                 test.addLog('Inserted item: ', JSON.stringify(itemInserted));
                 var id = itemInserted.id;
 
                 if (hasId) {
-                    if (objectToInsert.id !== id) {
+                    if (originalId !== id) {
                         test.addLog('Error, id passed to insert is not the same (' + objectToInsert.id + ') as the id returned by the server (' + id + ')');
                         done(false);
                         return;
