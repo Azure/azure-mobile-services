@@ -466,7 +466,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 				} else if (isNumericType(idElement)) {
 					long id = getNumericValue(idElement);
 					
-					if (isValidNumericId(id) && !isDefaultNumericId(id)) {
+					if (!isDefaultNumericId(id)) {
 						throw new IllegalArgumentException("The entity to insert should not have a numeric " + idProperty + " property defined.");
 					}
 					

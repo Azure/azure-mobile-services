@@ -1907,7 +1907,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 	}
 
 	public void testInsertWithIntIdItem() throws Throwable {
-		long[] testIdData = IdTestData.ValidIntIds;
+		long[] testIdData = IdTestData.concat(IdTestData.ValidIntIds, IdTestData.InvalidIntIds);
 
 		for (long testId : testIdData) {
 			insertWithIntIdItem(testId);
