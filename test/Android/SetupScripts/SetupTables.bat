@@ -18,6 +18,7 @@ call azure mobile  table create %1 droidRoundTripTable
 call azure mobile  table create %1 droidMovies
 call azure mobile  table create %1 droidPushTest
 call azure mobile  table create %1 ParamsTestTable
+call azure mobile  table create %1 droidStringIdTable
 
 call azure mobile  table update -p insert=admin,read=admin,update=admin,delete=admin %1 droidAdmin
 call azure mobile  table update -p insert=application,read=application,update=application,delete=application %1 droidApplication

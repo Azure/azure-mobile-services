@@ -98,11 +98,15 @@ class JsonEntityParser {
 		// If the property name is id or if there's no id defined, then return without performing changes
 		if (propertyName.equals("id") || propertyName.length() == 0) return;
 		
-		// Get the current id value and remove the JSon property
-		String value = element.get("id").getAsString();		
-		element.remove("id");
-		
-		// Create a new id property using the given property name
-		element.addProperty(propertyName, value);
+		if (element.has("id")) {
+			
+			JsonElement idElement = element.get("id");
+			
+			String value = idElement.isJsonNull() ? null : idElement.getAsString();			
+			element.remove("id");
+			
+			// Create a new id property using the given property name
+			element.addProperty(propertyName, value);
+		}
 	}
 }
