@@ -152,10 +152,10 @@
       <HintPath>..\packages\Microsoft.Bcl.Async.1.0.16\lib\win8\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Mobile">
-      <HintPath>..\packages\WindowsAzure.MobileServices.1.0.2\lib\netcore45\Microsoft.WindowsAzure.Mobile.dll</HintPath>
+      <HintPath>..\packages\WindowsAzure.MobileServices.1.1.0\lib\netcore45\Microsoft.WindowsAzure.Mobile.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Mobile.Ext">
-      <HintPath>..\packages\WindowsAzure.MobileServices.1.0.2\lib\netcore45\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
+      <HintPath>..\packages\WindowsAzure.MobileServices.1.1.0\lib\netcore45\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\netcore45\Newtonsoft.Json.dll</HintPath>
