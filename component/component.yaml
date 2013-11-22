@@ -1,6 +1,16 @@
-%YAML 1.2
----
-libraries: 
+id: azure-mobile-services
+version: 1.1.0
+name: Azure Mobile Services
+publisher: Microsoft
+publisher-url: http://www.windowsazure.com/en-us/develop/mobile/
+summary: Store data in the cloud, authenticate users, and send push notifications.
+license: LICENSE.md
+details: Details.md
+getting-started: GettingStarted.md
+icons:
+  - azure-mobile-services_512x512.png
+  - azure-mobile-services_128x128.png
+libraries:
   ios: 
     - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Release\Microsoft.WindowsAzure.Mobile.dll
     - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Release\Microsoft.WindowsAzure.Mobile.Ext.dll
@@ -11,20 +21,22 @@ libraries:
     - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.Android\bin\Release\Microsoft.WindowsAzure.Mobile.Ext.dll
     - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.Android\bin\Release\Xamarin.Auth.Android.dll
     - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.Android\bin\Release\Newtonsoft.Json.dll
-icons: 
-  - azure-mobile-services_128x128.png
-  - azure-mobile-services_512x512.png
-version: "1.1.0"
-details: Details.md
-getting-started: GettingStarted.md
-samples: 
-  iOS Sample: ..\quickstart\xamarin.iOS\ZUMOAPPNAME.sln
-id: azure-mobile-services
-summary: Store data in the cloud, authenticate users, and send push notifications.
-publisher-url: http://www.windowsazure.com/en-us/develop/mobile/
-license: License.md
-screenshots: 
+samples:
+  - name: Android Sample
+    path: samples\androidsample.sln
+  - name: iOS Sample
+    path: samples\iOSsample.sln
+screenshots:
+  - screenshots/WAMS-New.PNG
+  - screenshots/WAMS-SQLdb1.png
+  - screenshots/WAMS-SQLdb2.png
+  - screenshots/WAMS-userauth.png
+  - screenshots/WAMS-push1.png
+  - screenshots/WAMS-push2.png
   - screenshots/WAMS-Create.png
-name: Azure Mobile Services
-publisher: Microsoft
-...
+  - screenshots/WAMS-Script1.png
+  - screenshots/WAMS-Script2.png
+  - screenshots/WAMS-Scheduler2.png
+  - screenshots/WAMS-Keys.png
+  - screenshots/WAMS-EmptyData.png
+  - screenshots/WAMS-DataPermissions.png

@@ -1,2 +1,5 @@
 *.xam
 xpkg
+*.suo
+bin
+obj
