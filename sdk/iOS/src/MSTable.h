@@ -62,7 +62,7 @@ extern NSString *const MSSystemColumnVersion;
 /// The client associated with this table.
 @property (nonatomic, strong, readonly)         MSClient *client;
 
-@property (nonatomic) MSSystemProperties SystemProperties;
+@property (nonatomic) MSSystemProperties systemProperties;
 ///@}
 
 #pragma mark * Public Initializers

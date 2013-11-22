@@ -1588,7 +1588,7 @@
     for (NSNumber *systemPropertyAsNumber in testSystemProperties)
     {
         NSUInteger systemProperty = [systemPropertyAsNumber unsignedIntegerValue];
-        todoTable.SystemProperties = systemProperty;
+        todoTable.systemProperties = systemProperty;
 
         // String Id (Insert, Update, ReadWithId, Delete)
 
@@ -1694,7 +1694,7 @@
     
     for (NSNumber *systemProperty in testSystemProperties)
     {
-        todoTable.SystemProperties = [systemProperty integerValue];
+        todoTable.systemProperties = [systemProperty integerValue];
         
         done = NO;
         NSDictionary *item = @{@"id":@"an id", @"string":@"what?"};

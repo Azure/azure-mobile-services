@@ -362,7 +362,7 @@
     NSString *myid = @"an id";
     
     NSDictionary *item = @{ @"id": myid, @"String": @"a value" };
-    self.table.SystemProperties = MSSystemPropertyAll;
+    self.table.systemProperties = MSSystemPropertyAll;
     self.done = NO;
     [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
         STAssertNotNil([item objectForKey:MSSystemColumnCreatedAt], @"Missing property");
@@ -464,7 +464,7 @@
 {
     NSDictionary *item = @{ @"String": @"a value" };
     
-    self.table.SystemProperties = MSSystemPropertyVersion | MSSystemPropertyCreatedAt | MSSystemPropertyUpdatedAt;
+    self.table.systemProperties = MSSystemPropertyVersion | MSSystemPropertyCreatedAt | MSSystemPropertyUpdatedAt;
     [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
         STAssertNotNil([item objectForKey:MSSystemColumnCreatedAt], @"Missing property");
         STAssertNotNil([item objectForKey:MSSystemColumnUpdatedAt], @"Missing property");
@@ -475,7 +475,7 @@
     
     // Explicit System Properties insert
     self.done = NO;
-    self.table.SystemProperties = MSSystemPropertyVersion | MSSystemPropertyCreatedAt;
+    self.table.systemProperties = MSSystemPropertyVersion | MSSystemPropertyCreatedAt;
     [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
         STAssertNotNil([item objectForKey:MSSystemColumnCreatedAt], @"Missing property");
         STAssertNil([item objectForKey:MSSystemColumnUpdatedAt], @"Shouldn't have had updated");
@@ -486,7 +486,7 @@
 
     self.done = NO;
     __block NSString *savedItemId;
-    self.table.SystemProperties = MSSystemPropertyUpdatedAt | MSSystemPropertyCreatedAt;
+    self.table.systemProperties = MSSystemPropertyUpdatedAt | MSSystemPropertyCreatedAt;
     [self.table readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
         NSDictionary *item = [items objectAtIndex:0];
         STAssertNotNil([item objectForKey:MSSystemColumnCreatedAt], @"Missing property");
@@ -498,7 +498,7 @@
     [self waitForTest:30.0];
 
     self.done = NO;
-    self.table.SystemProperties = MSSystemPropertyUpdatedAt;
+    self.table.systemProperties = MSSystemPropertyUpdatedAt;
     [self.table readWithId:savedItemId completion:^(NSDictionary *item, NSError *error) {
         STAssertNil([item objectForKey:MSSystemColumnCreatedAt], @"Has extra property");
         STAssertNotNil([item objectForKey:MSSystemColumnUpdatedAt], @"Missing property");
@@ -765,7 +765,7 @@
 
 -(void) testAsyncFilterSelectOrderingOperationsNotImpactedBySystemProperties
 {
-    self.table.SystemProperties = MSSystemPropertyAll;
+    self.table.systemProperties = MSSystemPropertyAll;
     
     __block NSMutableArray *savedItems = [NSMutableArray array];
     for(NSUInteger i = 1; i < 6; i++)
@@ -782,7 +782,7 @@
     //testSystemProperties
     for (NSNumber *systemProperties in [MSTable testSystemProperties])
     {
-        self.table.SystemProperties = [systemProperties unsignedIntegerValue];
+        self.table.systemProperties = [systemProperties unsignedIntegerValue];
         MSQuery *query = self.table.query;
         [query orderByAscending:MSSystemColumnCreatedAt];
         self.done = NO;
@@ -885,7 +885,7 @@
 -(void) testUpdateAsyncWithWithMergeConflict
 {
     NSDictionary *item = @{ @"id": @"an id", @"String": @"a value" };
-    self.table.SystemProperties = MSSystemPropertyAll;
+    self.table.systemProperties = MSSystemPropertyAll;
     __block NSDictionary *savedItem;
     [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
         savedItem = item;

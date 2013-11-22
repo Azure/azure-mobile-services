@@ -29,7 +29,7 @@ NSString *const inlineCountNone = @"none";
 
 + (NSURL *) addTableSystemProperties:(MSTable *)table toURL:(NSURL *)url
 {
-    if (table.SystemProperties == MSSystemPropertyNone) {
+    if (table.systemProperties == MSSystemPropertyNone) {
         return url;
     }
 
@@ -39,19 +39,19 @@ NSString *const inlineCountNone = @"none";
     }
                                
     NSString *value = @"";
-    if(table.SystemProperties == MSSystemPropertyAll) {
+    if(table.systemProperties == MSSystemPropertyAll) {
         value = encodeToPercentEscapeString(@"*");
     } else {
         NSMutableArray *properties = [NSMutableArray array];
-        if (table.SystemProperties & MSSystemPropertyCreatedAt)
+        if (table.systemProperties & MSSystemPropertyCreatedAt)
         {
             [properties addObject:@"__createdAt"];
         }
-        if (table.SystemProperties & MSSystemPropertyUpdatedAt)
+        if (table.systemProperties & MSSystemPropertyUpdatedAt)
         {
             [properties addObject:@"__updatedAt"];
         }
-        if (table.SystemProperties & MSSystemPropertyVersion)
+        if (table.systemProperties & MSSystemPropertyVersion)
         {
             [properties addObject:@"__version"];
         }
