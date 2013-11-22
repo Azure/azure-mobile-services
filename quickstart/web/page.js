@@ -27,7 +27,7 @@ $(function() {
     }
 
     function getTodoItemId(formElement) {
-        return Number($(formElement).closest('li').attr('data-todoitem-id'));
+        return $(formElement).closest('li').attr('data-todoitem-id');
     }
 
     // Handle insert
