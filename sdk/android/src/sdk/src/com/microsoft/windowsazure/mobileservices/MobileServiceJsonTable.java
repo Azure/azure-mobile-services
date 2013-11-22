@@ -471,8 +471,10 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 					}
 					
 					json.remove(idProperty);
-				} else {
+				} else if (idElement.isJsonNull()) {
 					json.remove(idProperty);
+				} else {
+					throw new IllegalArgumentException("The entity to insert should not have an " + idProperty + " defined with an invalid value");
 				}
 			}
 		}
