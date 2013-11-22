@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using ZumoE2ETestApp.Framework;
 
 namespace ZumoE2ETestApp.UIElements
 {
@@ -64,21 +65,7 @@ namespace ZumoE2ETestApp.UIElements
             string uploadUrl = this.uploadUrl;
             if (!string.IsNullOrEmpty(uploadUrl))
             {
-                uploadUrl = uploadUrl + "?platform=net45";
-
-                using (var client = new HttpClient())
-                {
-                    using (var request = new HttpRequestMessage(HttpMethod.Post, uploadUrl))
-                    {
-                        request.Content = new StringContent(this.logs, Encoding.UTF8, "text/plain");
-                        using (var response = await client.SendAsync(request))
-                        {
-                            var body = await response.Content.ReadAsStringAsync();
-                            var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
-                            MessageBox.Show(body, title);
-                        }
-                    }
-                }
+                await Util.UploadLogs(uploadUrl, this.logs, "net45", false);
             }
         }
 

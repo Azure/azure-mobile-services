@@ -46,14 +46,14 @@ NSDictionary *lastUserIdentityObject;
     NSMutableArray *result = [[NSMutableArray alloc] init];
     [result addObject:[self createClearAuthCookiesTest]];
     [result addObject:[self createLogoutTest]];
-    [result addObject:[self createCRUDTestForProvider:nil forTable:@"iosApplication" ofType:ZumoTableApplication andAuthenticated:NO]];
-    [result addObject:[self createCRUDTestForProvider:nil forTable:@"iosAuthenticated" ofType:ZumoTableAuthenticated andAuthenticated:NO]];
-    [result addObject:[self createCRUDTestForProvider:nil forTable:@"iosAdmin" ofType:ZumoTableAdminScripts andAuthenticated:NO]];
+    [result addObject:[self createCRUDTestForProvider:nil forTable:@"application" ofType:ZumoTableApplication andAuthenticated:NO]];
+    [result addObject:[self createCRUDTestForProvider:nil forTable:@"authenticated" ofType:ZumoTableAuthenticated andAuthenticated:NO]];
+    [result addObject:[self createCRUDTestForProvider:nil forTable:@"admin" ofType:ZumoTableAdminScripts andAuthenticated:NO]];
     
     int indexOfLastUnattendedTest = [result count];
     
     NSArray *providers = @[@"facebook", @"google", @"twitter", @"microsoftaccount"];
-    NSArray *providersWithRecycledTokenSupport = @[@"facebook", @"google"];
+    NSArray *providersWithRecycledTokenSupport = @[@"facebook"]; //, @"google"]; Known bug - Drop login via Google token until Google client flow is reintroduced
     NSString *provider;
     
     for (int useSimplifiedLogin = 0; useSimplifiedLogin <= 1; useSimplifiedLogin++) {
@@ -62,15 +62,15 @@ NSDictionary *lastUserIdentityObject;
             [result addObject:[self createLogoutTest]];
             [result addObject:[self createSleepTest:3]];
             [result addObject:[self createLoginTestForProvider:provider usingSimplifiedMode:useSimplified]];
-            [result addObject:[self createCRUDTestForProvider:provider forTable:@"iosApplication" ofType:ZumoTableApplication andAuthenticated:YES]];
-            [result addObject:[self createCRUDTestForProvider:provider forTable:@"iosAuthenticated" ofType:ZumoTableAuthenticated andAuthenticated:YES]];
-            [result addObject:[self createCRUDTestForProvider:provider forTable:@"iosAdmin" ofType:ZumoTableAdminScripts andAuthenticated:YES]];
+            [result addObject:[self createCRUDTestForProvider:provider forTable:@"application" ofType:ZumoTableApplication andAuthenticated:YES]];
+            [result addObject:[self createCRUDTestForProvider:provider forTable:@"authenticated" ofType:ZumoTableAuthenticated andAuthenticated:YES]];
+            [result addObject:[self createCRUDTestForProvider:provider forTable:@"admin" ofType:ZumoTableAdminScripts andAuthenticated:YES]];
             
             if ([providersWithRecycledTokenSupport containsObject:provider]) {
                 [result addObject:[self createLogoutTest]];
                 [result addObject:[self createSleepTest:1]];
                 [result addObject:[self createClientSideLoginWithProvider:provider]];
-                [result addObject:[self createCRUDTestForProvider:provider forTable:@"iosAuthenticated" ofType:ZumoTableAuthenticated andAuthenticated:YES]];
+                [result addObject:[self createCRUDTestForProvider:provider forTable:@"authenticated" ofType:ZumoTableAuthenticated andAuthenticated:YES]];
             }
         }
     }
@@ -126,13 +126,13 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
     ZumoTest *result = [ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client tableWithName:tableName];
-        [table insert:@{@"foo":@"bar"} completion:^(NSDictionary *inserted, NSError *insertError) {
+        [table insert:@{@"name":@"john"} completion:^(NSDictionary *inserted, NSError *insertError) {
             if (![self validateCRUDResultForTest:test andOperation:@"Insert" andError:insertError andExpected:crudShouldWork]) {
                 completion(NO);
                 return;
             }
             
-            NSDictionary *toUpdate = crudShouldWork ? inserted : @{@"foo":@"bar",@"id":[NSNumber numberWithInt:1]};
+            NSDictionary *toUpdate = crudShouldWork ? inserted : @{@"name":@"jane",@"id":[NSNumber numberWithInt:1]};
             [table update:toUpdate completion:^(NSDictionary *updated, NSError *updateError) {
                 if (![self validateCRUDResultForTest:test andOperation:@"Update" andError:updateError andExpected:crudShouldWork]) {
                     completion(NO);

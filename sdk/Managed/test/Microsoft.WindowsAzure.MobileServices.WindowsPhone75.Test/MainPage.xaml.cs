@@ -88,7 +88,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     testName = "Google Login";
                 }
 
-                TestResultsTextBlock.Text = await LoginTests.ExecuteTest(testName, () => LoginTests.TestLoginAsync(provider));
+                bool useProviderStringOverload = UseProviderStringOverloadCheckBox.IsChecked.Value;
+
+                TestResultsTextBlock.Text = await LoginTests.ExecuteTest(testName, () => LoginTests.TestLoginAsync(provider, useProviderStringOverload));
             }
         }
 

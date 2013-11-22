@@ -10,12 +10,12 @@ echo   with all four providers.
 goto :TheEnd
 
 :Start
-call azure mobile table create %1 w8Admin
-call azure mobile table create %1 w8Application
-call azure mobile table create %1 w8Authenticated
-call azure mobile table create %1 w8Public
-call azure mobile table create %1 w8RoundTripTable
-call azure mobile table create %1 w8Movies
+call azure mobile table create --integerId %1 w8Admin
+call azure mobile table create --integerId %1 w8Application
+call azure mobile table create --integerId %1 w8Authenticated
+call azure mobile table create --integerId %1 w8Public
+call azure mobile table create --integerId %1 w8RoundTripTable
+call azure mobile table create --integerId %1 intIdMovies
 call azure mobile table create %1 w8PushTest
 call azure mobile table create %1 wp8PushTest
 call azure mobile table create %1 ParamsTestTable
@@ -24,7 +24,6 @@ call azure mobile table update -p insert=admin,read=admin,update=admin,delete=ad
 call azure mobile table update -p insert=application,read=application,update=application,delete=application %1 w8Application
 call azure mobile table update -p insert=user,read=user,update=user,delete=user %1 w8Authenticated
 call azure mobile table update -p insert=application,read=public,update=public,delete=public %1 w8Public
-
 
 call azure mobile script upload %1 table/w8Movies.insert -f w8Movies.insert.js
 call azure mobile script upload %1 table/w8RoundTripTable.insert -f w8RoundTripTable.insert.js

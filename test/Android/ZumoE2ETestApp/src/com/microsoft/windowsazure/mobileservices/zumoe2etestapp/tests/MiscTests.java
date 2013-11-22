@@ -21,11 +21,17 @@ package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
 import static com.microsoft.windowsazure.mobileservices.MobileServiceQueryOperations.field;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 import java.util.UUID;
+
+import org.apache.http.Header;
+import org.apache.http.client.methods.HttpGet;
+
+import android.util.Pair;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -46,6 +52,7 @@ import com.microsoft.windowsazure.mobileservices.TableJsonQueryCallback;
 import com.microsoft.windowsazure.mobileservices.TableOperationCallback;
 import com.microsoft.windowsazure.mobileservices.TableQueryCallback;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.ExpectedValueException;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.FroyoAndroidHttpClientFactory;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestGroup;
@@ -59,6 +66,8 @@ public class MiscTests extends TestGroup {
 
 	protected static final String ROUND_TRIP_TABLE_NAME = "droidRoundTripTable";
 	protected static final String PARAM_TEST_TABLE_NAME = "ParamsTestTable";
+	protected static final String MOVIES_TABLE_NAME = "droidMovies";
+	private static final String APP_API_NAME = "application";
 	
 	
 	public MiscTests() {
@@ -153,9 +162,118 @@ public class MiscTests extends TestGroup {
 		this.addTest(createParameterPassingTest(true));
 		this.addTest(createParameterPassingTest(false));
 		
+		this.addTest(createHttpContentApiTest());
+		
+		this.addTest(createFroyoFixedRequestTest());
+
+		this.addTest(new TestCase("User-Agent validation") {
+
+			@Override
+			protected void executeTest(MobileServiceClient client,
+					final TestExecutionCallback callback) {
+				final TestCase testCase = this;
+				final TestResult testResult = new TestResult();
+				testResult.setTestCase(testCase);
+				testResult.setStatus(TestStatus.Failed);
+				client = client.withFilter(new ServiceFilter() {
+
+					@Override
+					public void handleRequest(ServiceFilterRequest request,
+							NextServiceFilterCallback nextServiceFilterCallback,
+							final ServiceFilterResponseCallback responseCallback) {
+						Header[] headers = request.getHeaders();
+						for (Header reqHeader : headers) {
+							if (reqHeader.getName() == "User-Agent") {
+								String userAgent = reqHeader.getValue();
+								log("User-Agent: " + userAgent);
+								testResult.setStatus(TestStatus.Passed);
+								String clientVersion = userAgent;
+								if (clientVersion.endsWith(")")) {
+									clientVersion = clientVersion.substring(0, clientVersion.length() - 1);
+								}
+								int indexOfEquals = clientVersion.lastIndexOf('=');
+								if (indexOfEquals >= 0) {
+									clientVersion = clientVersion.substring(indexOfEquals + 1);
+									Util.getGlobalTestParameters().put(ClientVersionKey, clientVersion);
+								}
+							}
+						}
+
+						nextServiceFilterCallback.onNext(request, new ServiceFilterResponseCallback() {
+
+							@Override
+							public void onResponse(ServiceFilterResponse response, Exception exception) {
+								if (response != null) {
+									Header[] respHeaders = response.getHeaders();
+									for (Header header : respHeaders) {
+										if (header.getName().equalsIgnoreCase("x-zumo-version")) {
+											String runtimeVersion = header.getValue();
+											Util.getGlobalTestParameters().put(ServerVersionKey, runtimeVersion);
+										}
+									}
+								}
+								responseCallback.onResponse(response, exception);
+							}
+						});
+					}
+				});
+
+				log("execute query to activate filter");
+				client.getTable(ROUND_TRIP_TABLE_NAME).top(5).execute(new TableJsonQueryCallback() {
+
+					@Override
+					public void onCompleted(JsonElement result, int count, Exception exception,
+							ServiceFilterResponse response) {
+						if (exception != null) {
+							createResultFromException(testResult, exception);
+						}
+
+						if (callback != null) callback.onTestComplete(testCase, testResult);
+					}
+				});
+			}
+		});
 	}
 
-	
+	private TestCase createFroyoFixedRequestTest() {
+			final TestCase test = new TestCase() {
+			
+			@Override
+			protected void executeTest(MobileServiceClient client,
+					final TestExecutionCallback callback) {
+				final TestResult result = new TestResult();
+				result.setTestCase(this);
+				result.setStatus(TestStatus.Passed);
+				final TestCase testCase = this;
+
+				// duplicate the client
+				MobileServiceClient froyoClient = new MobileServiceClient(client);
+				
+				log("add custom AndroidHttpClientFactory with Froyo support");
+				froyoClient.setAndroidHttpClientFactory(new FroyoAndroidHttpClientFactory());
+				
+				MobileServiceTable<RoundTripTableElement> table = 
+						froyoClient.getTable(ROUND_TRIP_TABLE_NAME, RoundTripTableElement.class);
+				
+				table.where().field("id").eq(1).execute(new TableQueryCallback<RoundTripTableElement>() {
+					
+					@Override
+					public void onCompleted(List<RoundTripTableElement> r, int count,
+							Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							createResultFromException(result, exception);
+						}
+						callback.onTestComplete(testCase, result);
+					}
+				});
+			}
+		};
+		
+		test.setName("Simple request on Froyo");
+		return test;
+	}
+
+
 
 	private TestCase createParameterPassingTest(final boolean typed) {
 		TestCase test = new TestCase() {
@@ -412,4 +530,104 @@ public class MiscTests extends TestGroup {
 		return test;
 	}
 
+	private TestCase createHttpContentApiTest() {
+		String name = "Use \"text/plain\" Content and \"identity\" Encoding Headers";
+		
+		TestCase test = new TestCase(name) {
+			MobileServiceClient mClient;
+			List<Pair<String, String>> mQuery;
+			List<Pair<String, String>> mHeaders;
+			TestExecutionCallback mCallback;
+			JsonObject mExpectedResult;
+			int mExpectedStatusCode;
+			String mHttpMethod;
+			byte[] mContent;
+			
+			TestResult mResult;
+			
+			@Override
+			protected void executeTest(MobileServiceClient client,
+					TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mClient = client;
+				mCallback = callback;
+				
+				createHttpContentTestInput();
+				
+				mClient.invokeApi(APP_API_NAME, mContent, mHttpMethod, mHeaders, mQuery, new ServiceFilterResponseCallback() {
+					
+					@Override
+					public void onResponse(ServiceFilterResponse response, Exception exception) {
+						if (response == null) {
+							createResultFromException(exception);
+							mCallback.onTestComplete(mResult.getTestCase(), mResult);
+							return;
+						}
+						
+						Exception ex = validateResponse(response);
+						if (ex != null) {
+							createResultFromException(mResult, ex);
+						} else {
+							mResult.getTestCase().log("Header validated successfully");
+							
+							String responseContent = response.getContent();
+							
+							mResult.getTestCase().log("Response content: " + responseContent);
+							
+							JsonElement jsonResponse = null;
+							String decodedContent = responseContent
+									.replace("__{__", "{")
+									.replace("__}__", "}")
+									.replace("__[__", "[")
+									.replace("__]__", "]");
+							jsonResponse = new JsonParser().parse(decodedContent);
+														
+							if (!Util.compareJson(mExpectedResult, jsonResponse)) {
+								createResultFromException(mResult, new ExpectedValueException(mExpectedResult, jsonResponse));
+							}
+						}
+						
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+
+					private Exception validateResponse(ServiceFilterResponse response) {
+						if (mExpectedStatusCode != response.getStatus().getStatusCode()) {
+							mResult.getTestCase().log("Invalid status code");
+							String content = response.getContent();
+							if (content != null) {
+								mResult.getTestCase().log("Response: " + content);
+							}
+							return new ExpectedValueException(mExpectedStatusCode, response.getStatus().getStatusCode());
+						} else {
+							return null;							
+						}						
+					}
+				});
+			}
+			
+			private void createHttpContentTestInput() {
+				mHttpMethod = HttpGet.METHOD_NAME;
+				log("Method = " + mHttpMethod);
+				
+				mExpectedResult = new JsonObject();
+				mExpectedResult.addProperty("method", mHttpMethod);
+				JsonObject user = new JsonObject();
+				user.addProperty("level", "anonymous");
+				mExpectedResult.add("user", user);
+				
+				mHeaders = new ArrayList<Pair<String,String>>();
+				mHeaders.add(new Pair<String, String>("Accept", "text/plain"));
+				mHeaders.add(new Pair<String, String>("Accept-Encoding", "identity"));
+				
+				mQuery = new ArrayList<Pair<String,String>>();
+				mQuery.add(new Pair<String, String>("format", "other"));
+				
+				mExpectedStatusCode = 200;				
+			}
+		};
+		
+		return test;
+	}
 }

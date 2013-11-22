@@ -33,6 +33,8 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 
+import android.net.http.AndroidHttpClient;
+
 /**
  * ServiceFilterResponse implementation
  */
@@ -63,7 +65,7 @@ public class ServiceFilterResponseImpl implements ServiceFilterResponse {
 		// Get the response's content
 		HttpEntity entity = mResponse.getEntity();
 		if (entity != null) {
-			InputStream instream = entity.getContent();
+			InputStream instream = AndroidHttpClient.getUngzippedContent(entity);
 			
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
 			byte[] buffer = new byte[1024];

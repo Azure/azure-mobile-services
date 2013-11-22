@@ -13,6 +13,8 @@ function createZumoNamespace() {
     var TSRunning = 3;
     var AllTestsGroupName = "All tests";
     var AllTestsUnattendedGroupName = AllTestsGroupName + ' (unattended)';
+    var ClientVersionKey = 'client-version';
+    var ServerVersionKey = 'server-version';
 
 
     function ZumoTest(name, execution) {
@@ -41,8 +43,8 @@ function createZumoNamespace() {
 
         var now = new Date();
         text = '[' + dateToString(now) + '] ' + text;
-        if (text.length > 200) {
-            text = text.substring(0, 200) + '... (truncated)';
+        if (text.length > 500) {
+            text = text.substring(0, 500) + '... (truncated)';
         }
 
         this.logs.push(text);
@@ -337,7 +339,11 @@ function createZumoNamespace() {
         if (xhr) {
             test.addLog('Response info:');
             test.addLog('  Status code: ' + xhr.status);
-            test.addLog('  Headers: ' + xhr.getAllResponseHeaders());
+
+            if (xhr.getAllResponseHeaders) {
+                test.addLog('  Headers: ' + xhr.getAllResponseHeaders());
+            }
+
             test.addLog('  Body: ' + xhr.responseText);
         } else {
             test.addLog('No XMLHttpRequest information');
@@ -378,6 +384,17 @@ function createZumoNamespace() {
         return result;
     }
 
+    function randomDate() {
+        var year = Math.floor(Math.random() * 9999) + 1;
+        var month = Math.floor(Math.random() * 12);
+        var day = Math.floor(Math.random() * 31);
+        var hour = Math.floor(Math.random() * 24);
+        var minute = Math.floor(Math.random() * 60);
+        var second = Math.floor(Math.random() * 60);
+        var milliseconds = Math.floor(Math.random() * 100);
+        return new Date(Date.UTC(year, month, day, hour, minute, second, milliseconds));
+    }
+
     return {
         testGroups: testGroups,
         currentGroup: currentGroup,
@@ -390,6 +407,10 @@ function createZumoNamespace() {
         TSRunning: TSRunning,
         AllTestsGroupName: AllTestsGroupName,
         AllTestsUnattendedGroupName: AllTestsUnattendedGroupName,
+        constants: {
+            CLIENT_VERSION_KEY: ClientVersionKey,
+            SERVER_VERSION_KEY: ServerVersionKey
+        },
         Test: ZumoTest,
         Group: ZumoTestGroup,
         tests: {},
@@ -397,7 +418,9 @@ function createZumoNamespace() {
             createSeparatorTest: createSeparatorTest,
             compare: compareValues,
             traceResponse: traceResponse,
-            dateToString: dateToString
+            dateToString: dateToString,
+            randomDate: randomDate,
+            globalTestParams: {}
         }
     };
 }

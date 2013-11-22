@@ -210,7 +210,11 @@ public class ToDoActivity extends Activity {
 	 *            The dialog title
 	 */
 	private void createAndShowDialog(Exception exception, String title) {
-		createAndShowDialog(exception.toString(), title);
+		Throwable ex = exception;
+		if(exception.getCause() != null){
+			ex = exception.getCause();
+		}
+		createAndShowDialog(ex.getMessage(), title);
 	}
 
 	/**

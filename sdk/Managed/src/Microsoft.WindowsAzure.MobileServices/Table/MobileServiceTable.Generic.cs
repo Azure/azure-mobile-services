@@ -23,6 +23,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     internal class MobileServiceTable<T> : MobileServiceTable, IMobileServiceTable<T>
     {
         private MobileServiceTableQueryProvider queryProvider;
+        private bool hasIntegerId; 
 
         /// <summary>
         /// Initializes a new instance of the MobileServiceTables class.
@@ -33,11 +34,17 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="client">
         /// The <see cref="MobileServiceClient"/> associated with this table.
         /// </param>
-        public MobileServiceTable(string tableName, MobileServiceClient client)
-            : base(tableName, client)
+        /// <param name="storageContext">
+        /// The <see cref="ITableStorage"/> implementation to use with this table.
+        /// </param>
+        public MobileServiceTable(string tableName, MobileServiceClient client, ITableStorage storageContext)
+            : base(tableName, client, storageContext)
         {
             this.queryProvider = new MobileServiceTableQueryProvider();
-        }
+            this.SystemProperties = client.Serializer.GetSystemProperties(typeof(T));
+            Type idType = client.Serializer.GetIdPropertyType<T>(throwIfNotFound: false);
+            this.hasIntegerId = idType == null || MobileServiceSerializer.IsIntegerId(idType);
+        }        
 
         /// <summary>
         /// Returns instances from a table.
@@ -112,22 +119,13 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
-
-            object id = serializer.GetId(instance);
-
-            // Make sure the instance doesn't have an id set for an insertion
-            if (!serializer.IsDefaultId(id))
+            JObject value = serializer.Serialize(instance) as JObject;
+            if (!this.hasIntegerId)
             {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        Resources.MobileServiceTable_InsertWithExistingId,
-                        MobileServiceUrlBuilder.IdPropertyName),
-                        "instance");
-            }
-
-            string value = serializer.Serialize(instance);
-            string insertedValue = await this.SendInsertAsync(value, parameters);
+                string unused;
+                value = RemoveSystemProperties(value, out unused);
+            } 
+            JToken insertedValue = await this.InsertAsync(value, parameters);
             serializer.Deserialize<T>(insertedValue, instance);
         }
 
@@ -166,20 +164,25 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
-            object id = serializer.GetId(instance);
+            JObject value = serializer.Serialize(instance) as JObject;
 
-            if (serializer.IsDefaultId(id))
+            JToken updatedValue = null;
+            try
             {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        Resources.MobileServiceTable_UpdateWithoutId,
-                        MobileServiceUrlBuilder.IdPropertyName),
-                        "instance");
+                updatedValue = await this.UpdateAsync(value, parameters);
+            }
+            catch (MobileServicePreconditionFailedException ex)
+            {
+                T item = default(T);
+                try
+                {
+                    item = serializer.Deserialize<T>(ex.Value);
+                }
+                catch { }
+
+                throw new MobileServicePreconditionFailedException<T>(ex, item);
             }
 
-            string value = serializer.Serialize(instance);
-            string updatedValue = await this.SendUpdateAsync(id, value, parameters);
             serializer.Deserialize<T>(updatedValue, instance);
         }
 
@@ -218,25 +221,13 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
-            object id = serializer.GetId(instance);
-
-            if (serializer.IsDefaultId(id))
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        Resources.MobileServiceTable_DeleteWithoutId,
-                        MobileServiceUrlBuilder.IdPropertyName),
-                        "instance");
-            }
-
-            // Send the request
-            await this.SendDeleteAsync(id, parameters);
+            JObject value = serializer.Serialize(instance) as JObject;
+            await this.DeleteAsync(value, parameters);
 
             // Clear the instance id since it's no longer associated with that
             // id on the server (note that reflection is goodly enough to turn
             // null into the correct value for us).
-            serializer.ClearId(instance);
+            serializer.SetIdToDefault(instance);
         }
 
         /// <summary>
@@ -268,12 +259,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public new async Task<T> LookupAsync(object id, IDictionary<string, string> parameters)
         {
-            if (this.MobileServiceClient.Serializer.IsDefaultId(id))
-            {
-                throw new ArgumentOutOfRangeException("id");
-            }
-
-            string value = await base.SendLookupAsync(id, parameters);
+            // Ensure that the id passed in is assignable to the Id property of T
+            this.MobileServiceClient.Serializer.EnsureValidIdForType<T>(id);
+            JToken value = await base.LookupAsync(id, parameters);
             return this.MobileServiceClient.Serializer.Deserialize<T>(value);
         }
 
@@ -314,16 +302,22 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
-            object id = serializer.GetId(instance);
+            object id = serializer.GetId(instance, allowDefault: true);
 
-            if (!serializer.IsDefaultId(id))
+            if (MobileServiceSerializer.IsDefaultId(id))
             {
-                // Get the latest version of this element
-                string refreshed = await this.GetSingleValueAsync(id, parameters);
-
-                // Deserialize that value back into the current instance
-                serializer.Deserialize<T>(refreshed, instance);
+                return;
             }
+            if (id is string)
+            {
+                MobileServiceSerializer.EnsureValidStringId(id, allowDefault: true);
+            }
+
+            // Get the latest version of this element
+            JObject refreshed = await this.GetSingleValueAsync(id, parameters);
+
+            // Deserialize that value back into the current instance
+            serializer.Deserialize<T>(refreshed, instance);
         }
 
         /// <summary>
@@ -538,32 +532,32 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// The desired element as JSON object.
         /// </returns>
-        private async Task<string> GetSingleValueAsync(object id, IDictionary<string, string> parameters)
+        private async Task<JObject> GetSingleValueAsync(object id, IDictionary<string, string> parameters)
         {
             Debug.Assert(id != null);
 
             // Create a query for just this item
             string query = string.Format(
                 CultureInfo.InvariantCulture,
-                "$filter={0} eq {1}",
-                MobileServiceUrlBuilder.IdPropertyName,
+                "$filter=({0} eq {1})",
+                MobileServiceSerializer.IdPropertyName,
                 FilterBuildingExpressionVisitor.ToODataConstant(id));
 
             // Send the query
             JToken response = await this.ReadAsync(query, parameters);
 
             // Get the first element in the response
-            JObject obj = response as JObject;
-            if (obj == null)
+            JObject jobject = response as JObject;
+            if (jobject == null)
             {
                 JArray array = response as JArray;
                 if (array != null && array.Count > 0)
                 {
-                    obj = array.FirstOrDefault() as JObject;
+                    jobject = array.FirstOrDefault() as JObject;
                 }
             }
 
-            if (obj == null)
+            if (jobject == null)
             {
                 string responseStr = response != null ? response.ToString() : "null";
                 throw new InvalidOperationException(
@@ -573,7 +567,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                         responseStr));
             }
 
-            return obj.ToString();
+            return jobject;
         }
     }
 }

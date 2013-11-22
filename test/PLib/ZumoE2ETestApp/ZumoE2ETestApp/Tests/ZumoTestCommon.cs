@@ -25,7 +25,10 @@ namespace ZumoE2ETestApp.Tests
             return new ZumoTest("Simple alert", async delegate(ZumoTest test)
             {
                 InputDialog dialog = new InputDialog("Information", alert, "OK");
-                await dialog.Display();
+                if (ZumoTestGlobals.ShowAlerts)
+                {
+                    await dialog.Display();
+                }
                 return true;
             })
             {
@@ -57,8 +60,14 @@ namespace ZumoE2ETestApp.Tests
 
 #if !WINDOWS_PHONE
                 InputDialog dialog = new InputDialog("Question", question, "No", "Yes");
-                await dialog.Display();
-                bool answerWasYes = !dialog.Cancelled;
+                bool answerWasYes = expectedAnswer;
+
+                if (ZumoTestGlobals.ShowAlerts)
+                {
+                    await dialog.Display();
+                    answerWasYes = !dialog.Cancelled;
+                }
+
 #else
                 bool answerWasYes = await InputDialog.DisplayYesNo(question);
 #endif
@@ -84,6 +93,14 @@ namespace ZumoE2ETestApp.Tests
             return new ZumoTest("Input: " + title, async delegate(ZumoTest test)
             {
                 string initialText;
+                if (System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings.TryGetValue<string>(key, out initialText))
+                {
+                    // From the isolated storage, takes precedence (used in automation)
+                    test.AddLog("Retrieved value from isolated storage: {0}", initialText);
+                    propertyBag[key] = initialText;
+                    return true;
+                }
+
                 propertyBag.TryGetValue(key, out initialText);
                 var result = await InputDialog.Display(title, initialText);
                 if (result != null)

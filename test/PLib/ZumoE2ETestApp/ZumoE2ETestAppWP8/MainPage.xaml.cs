@@ -35,6 +35,7 @@ namespace ZumoE2ETestAppWP8
         public MainPage()
         {
             InitializeComponent();
+
             this.allTestGroups = TestStore.CreateTestGroups();
             if (this.appBtnBack == null)
             {
@@ -76,6 +77,21 @@ namespace ZumoE2ETestAppWP8
                     this.txtAppKey.Text = savedAppInfo.LastService.AppKey;
                 }
             }
+
+            // Check if any of the text box values can be found in app settings
+            // This is used for test automation, and takes precedence over saved app info.
+            Action<TextBox, string> overrideFromAppSettings = (control, settingName) =>
+            {
+                string value;
+                if (System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings.TryGetValue<string>(settingName, out value))
+                {
+                    control.Text = value;
+                }
+            };
+
+            overrideFromAppSettings(this.txtAppUrl, "appUrl");
+            overrideFromAppSettings(this.txtAppKey, "appKey");
+            overrideFromAppSettings(this.txtUploadUrl, "uploadUrl");
         }
 
         private void lstTestGroups_SelectionChanged_1(object sender, SelectionChangedEventArgs e)
@@ -142,20 +158,7 @@ namespace ZumoE2ETestAppWP8
             }
 
             var logs = string.Join(Environment.NewLine, this.currentGroup.GetLogs());
-            uploadUrl = uploadUrl + "?platform=wp8";
-            using (var client = new HttpClient())
-            {
-                using (var request = new HttpRequestMessage(HttpMethod.Post, uploadUrl))
-                {
-                    request.Content = new StringContent(logs, Encoding.UTF8, "text/plain");
-                    using (var response = await client.SendAsync(request))
-                    {
-                        var body = await response.Content.ReadAsStringAsync();
-                        var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
-                        MessageBox.Show(body, title, MessageBoxButton.OK);
-                    }
-                }
-            }
+            await Util.UploadLogs(uploadUrl, logs, "wp8", false);
         }
 
         private async void appBtnRunTests_Click_1(object sender, EventArgs e)
@@ -211,19 +214,7 @@ namespace ZumoE2ETestAppWP8
                     if (testGroup.Name.StartsWith(TestStore.AllTestsGroupName) && !string.IsNullOrEmpty(this.txtUploadUrl.Text))
                     {
                         // Upload logs automatically if running all tests
-                        using (var client = new HttpClient())
-                        {
-                            using (var request = new HttpRequestMessage(HttpMethod.Post, this.txtUploadUrl.Text + "?platform=wp8"))
-                            {
-                                request.Content = new StringContent(string.Join("\n", testGroup.GetLogs()), Encoding.UTF8, "text/plain");
-                                using (var response = await client.SendAsync(request))
-                                {
-                                    var body = await response.Content.ReadAsStringAsync();
-                                    var title = response.IsSuccessStatusCode ? "Upload successful" : "Error uploading logs";
-                                    MessageBox.Show(body, title, MessageBoxButton.OK);
-                                }
-                            }
-                        }
+                        await Util.UploadLogs(this.txtUploadUrl.Text, string.Join("\n", testGroup.GetLogs()), "wp8", true);
                     }
                     else
                     {

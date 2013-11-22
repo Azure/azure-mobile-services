@@ -142,23 +142,47 @@ static NSString *pushClientKey = @"PushClientKey";
 
 + (NSArray *)createTests {
     NSMutableArray *result = [[NSMutableArray alloc] init];
-    [result addObject:[self createValidatePushRegistrationTest]];
-    [result addObject:[self createFeedbackTest]];
-    [result addObject:[self createPushTestWithName:@"Push simple alert" forPayload:@{@"alert":@"push received"} withDelay:0]];
-    [result addObject:[self createPushTestWithName:@"Push simple badge" forPayload:@{@"badge":@9} withDelay:0]];
-    [result addObject:[self createPushTestWithName:@"Push simple sound and alert" forPayload:@{@"alert":@"push received",@"sound":@"default"} withDelay:0]];
-    [result addObject:[self createPushTestWithName:@"Push alert with loc info and parameters" forPayload:@{@"alert":@{@"loc-key":@"LOC_STRING",@"loc-args":@[@"first",@"second"]}} withDelay:0]];
-    [result addObject:[self createPushTestWithName:@"Push with only custom info (no alert / badge / sound)" forPayload:@{@"payload":@{@"foo":@"bar"}} withDelay:0]];
-    [result addObject:[self createPushTestWithName:@"Push with alert, badge and sound" forPayload:@{@"alert":@"simple alert", @"badge":@7, @"sound":@"default", @"payload":@{@"custom":@"value"}} withDelay:0]];
-    [result addObject:[self createPushTestWithName:@"Push with alert with non-ASCII characters" forPayload:@{@"alert":@"Latin-ãéìôü ÇñÑ, arabic-لكتاب على الطاولة, chinese-这本书在桌子上"} withDelay:0]];
+    if ([self isRunningOnSimulator]) {
+        [result addObject:[ZumoTest createTestWithName:@"No push on simulator" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+            [test addLog:@"Running on a simulator, no push tests can be executed"];
+            [test setTestStatus:TSPassed];
+            completion(YES);
+        }]];
+    } else {
+        [result addObject:[self createValidatePushRegistrationTest]];
+        [result addObject:[self createFeedbackTest]];
+        [result addObject:[self createPushTestWithName:@"Push simple alert" forPayload:@{@"alert":@"push received"} withDelay:0]];
+        [result addObject:[self createPushTestWithName:@"Push simple badge" forPayload:@{@"badge":@9} withDelay:0]];
+        [result addObject:[self createPushTestWithName:@"Push simple sound and alert" forPayload:@{@"alert":@"push received",@"sound":@"default"} withDelay:0]];
+        [result addObject:[self createPushTestWithName:@"Push alert with loc info and parameters" forPayload:@{@"alert":@{@"loc-key":@"LOC_STRING",@"loc-args":@[@"first",@"second"]}} withDelay:0]];
+        [result addObject:[self createPushTestWithName:@"Push with only custom info (no alert / badge / sound)" forPayload:@{@"payload":@{@"foo":@"bar"}} withDelay:0]];
+        [result addObject:[self createPushTestWithName:@"Push with alert, badge and sound" forPayload:@{@"alert":@"simple alert", @"badge":@7, @"sound":@"default", @"payload":@{@"custom":@"value"}} withDelay:0]];
+        [result addObject:[self createPushTestWithName:@"Push with alert with non-ASCII characters" forPayload:@{@"alert":@"Latin-ãéìôü ÇñÑ, arabic-لكتاب على الطاولة, chinese-这本书在桌子上"} withDelay:0]];
     
-    [result addObject:[self createPushTestWithName:@"(Neg) Push with large payload" forPayload:@{@"alert":[@"" stringByPaddingToLength:256 withString:@"*" startingAtIndex:0]} withDelay:0 isNegativeTest:YES]];
+        [result addObject:[self createPushTestWithName:@"(Neg) Push with large payload" forPayload:@{@"alert":[@"" stringByPaddingToLength:256 withString:@"*" startingAtIndex:0]} withDelay:0 isNegativeTest:YES]];
+    }
     
     return result;
 }
 
++ (BOOL)isRunningOnSimulator {
+    NSString *deviceModel = [[UIDevice currentDevice] model];
+    if ([deviceModel rangeOfString:@"Simulator" options:NSCaseInsensitiveSearch].location == NSNotFound) {
+        return NO;
+    } else {
+        return YES;
+    }
+}
+
 + (ZumoTest *)createValidatePushRegistrationTest {
     ZumoTest *result = [ZumoTest createTestWithName:@"Validate push registration" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+        if ([self isRunningOnSimulator]) {
+            [test addLog:@"Test running on a simulator, skipping test."];
+            [test setTestStatus:TSSkipped];
+            completion(YES);
+            return;
+        }
+        
         ZumoTestGlobals *globals = [ZumoTestGlobals sharedInstance];
         [test addLog:[globals remoteNotificationRegistrationStatus]];
         if ([globals deviceToken]) {
@@ -182,6 +206,13 @@ static NSString *pushClientKey = @"PushClientKey";
 
 + (ZumoTest *)createPushTestWithName:(NSString *)name forPayload:(NSDictionary *)payload withDelay:(int)seconds isNegativeTest:(BOOL)isNegative {
     ZumoTest *result = [ZumoTest createTestWithName:name andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+        if ([self isRunningOnSimulator]) {
+            [test addLog:@"Test running on a simulator, skipping test."];
+            [test setTestStatus:TSSkipped];
+            completion(YES);
+            return;
+        }
+
         NSString *deviceToken = [[ZumoTestGlobals sharedInstance] deviceToken];
         if (!deviceToken) {
             [test addLog:@"Device not correctly registered for push"];
@@ -215,6 +246,13 @@ static NSString *pushClientKey = @"PushClientKey";
 
 + (ZumoTest *)createFeedbackTest {
     ZumoTest *result = [ZumoTest createTestWithName:@"Simple feedback test" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+        if ([self isRunningOnSimulator]) {
+            [test addLog:@"Test running on a simulator, skipping test."];
+            [test setTestStatus:TSSkipped];
+            completion(YES);
+            return;
+        }
+
         if (![[ZumoTestGlobals sharedInstance] deviceToken]) {
             [test addLog:@"Device not correctly registered for push"];
             [test setTestStatus:TSFailed];

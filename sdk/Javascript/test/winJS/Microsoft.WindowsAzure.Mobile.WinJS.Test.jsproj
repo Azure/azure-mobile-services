@@ -85,6 +85,7 @@
     <Content Include="tests\functional\basics.js" />
     <Content Include="tests\functional\blogging.js" />
     <Content Include="tests\functional\dates.js" />
+    <Content Include="tests\functional\mobileServiceTable.Functional.js" />
     <Content Include="tests\functional\todo.js" />
     <Content Include="tests\TestFramework.js" />
     <Content Include="tests\TestInterface.js" />
@@ -116,7 +117,6 @@
     <Message Importance="high" Text="Generating Test Library" />
     <MergeJSModules LibraryDefinitions="Tests.library" />
   </Target>
- 
   <PropertyGroup>
     <BuildDependsOn>
       CreateTestLibrary;

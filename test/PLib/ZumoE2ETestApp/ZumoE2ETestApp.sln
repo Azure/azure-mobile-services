@@ -10,20 +10,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{F1DF32
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Microsoft.Bcl.Build", "Microsoft.Bcl.Build", "{968E5896-C4B5-45CA-AA79-A14FB21783E0}"
-	ProjectSection(SolutionItems) = preProject
-		packages\Microsoft.Bcl.Build.1.0.7\tools\Install.ps1 = packages\Microsoft.Bcl.Build.1.0.7\tools\Install.ps1
-		packages\Microsoft.Bcl.Build.1.0.7\License.rtf = packages\Microsoft.Bcl.Build.1.0.7\License.rtf
-		packages\Microsoft.Bcl.Build.1.0.7\Microsoft.Bcl.Build.1.0.7.nuspec = packages\Microsoft.Bcl.Build.1.0.7\Microsoft.Bcl.Build.1.0.7.nuspec
-		packages\Microsoft.Bcl.Build.1.0.7\tools\Microsoft.Bcl.Build.targets = packages\Microsoft.Bcl.Build.1.0.7\tools\Microsoft.Bcl.Build.targets
-		packages\Microsoft.Bcl.Build.1.0.7\tools\Uninstall.ps1 = packages\Microsoft.Bcl.Build.1.0.7\tools\Uninstall.ps1
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZumoE2ETestAppWP8", "ZumoE2ETestAppWP8\ZumoE2ETestAppWP8.csproj", "{520D957A-0B0E-4E85-A54F-DC5CE97C4A67}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZumoE2ETestAppNet45", "ZumoE2ETestAppNet45\ZumoE2ETestAppNet45.csproj", "{504B8436-CB5B-4337-A290-A2105D605A27}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZumoE2ETestAppWP75", "ZumoE2ETestAppWP75\ZumoE2ETestAppWP75.csproj", "{9B2E3AC5-EBDC-444F-964D-588AEAA512D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -91,18 +80,6 @@ Global
 		{504B8436-CB5B-4337-A290-A2105D605A27}.Release|ARM.ActiveCfg = Release|Any CPU
 		{504B8436-CB5B-4337-A290-A2105D605A27}.Release|x64.ActiveCfg = Release|Any CPU
 		{504B8436-CB5B-4337-A290-A2105D605A27}.Release|x86.ActiveCfg = Release|Any CPU
-		{9B2E3AC5-EBDC-444F-964D-588AEAA512D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9B2E3AC5-EBDC-444F-964D-588AEAA512D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9B2E3AC5-EBDC-444F-964D-588AEAA512D6}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{9B2E3AC5-EBDC-444F-964D-588AEAA512D6}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{9B2E3AC5-EBDC-444F-964D-588AEAA512D6}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{9B2E3AC5-EBDC-444F-964D-588AEAA512D6}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{9B2E3AC5-EBDC-444F-964D-588AEAA512D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9B2E3AC5-EBDC-444F-964D-588AEAA512D6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9B2E3AC5-EBDC-444F-964D-588AEAA512D6}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{9B2E3AC5-EBDC-444F-964D-588AEAA512D6}.Release|ARM.ActiveCfg = Release|Any CPU
-		{9B2E3AC5-EBDC-444F-964D-588AEAA512D6}.Release|x64.ActiveCfg = Release|Any CPU
-		{9B2E3AC5-EBDC-444F-964D-588AEAA512D6}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -46,8 +46,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 }
 
                 bool useSingleSignOn = UseSingleSignOnCheckBox.IsChecked.Value;
+                bool useStringProviderOverload = UseStringProviderOverloadCheckBox.IsChecked.Value;
 
-                TestResultsTextBlock.Text = await LoginTests.ExecuteTest(testName, () => LoginTests.TestLoginAsync(provider, useSingleSignOn));
+                TestResultsTextBlock.Text = await LoginTests.ExecuteTest(testName, () => LoginTests.TestLoginAsync(provider, useSingleSignOn, useStringProviderOverload));
             }
         }
     }

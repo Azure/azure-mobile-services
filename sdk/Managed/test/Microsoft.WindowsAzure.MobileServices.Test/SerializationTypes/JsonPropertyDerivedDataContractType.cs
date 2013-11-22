@@ -15,7 +15,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         public JsonPropertyDerivedDataContractType(string valueToSet, bool onlySetSerializableMembers = false)
-            :base(valueToSet, onlySetSerializableMembers)
         {
             this.DerivedInternalFieldNamedDataMember = null;
             this.DerivedPrivateFieldNamedDataMember = null;

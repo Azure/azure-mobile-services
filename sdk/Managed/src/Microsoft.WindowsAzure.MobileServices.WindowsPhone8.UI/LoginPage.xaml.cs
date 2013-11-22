@@ -47,6 +47,19 @@ namespace Microsoft.WindowsAzure.MobileServices
         void BrowserControl_LoadCompleted(object sender, NavigationEventArgs e)
         {
             HideProgressBar();
+#if DEBUG
+            // For test automation purposes, we can register some scripts in the app's isolated storage
+            // which can "automatically" login in the providers. This way we can have an unattended test run.
+            bool testMode;
+            string loginScript;
+            if (System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings.TryGetValue<bool>("testMode", out testMode) &&
+                testMode &&
+                System.IO.IsolatedStorage.IsolatedStorageSettings.ApplicationSettings.TryGetValue<string>("loginScript", out loginScript) &&
+                !string.IsNullOrEmpty(loginScript))
+            {
+                browserControl.InvokeScript("eval", loginScript);
+            }
+#endif
         }
 
         /// <summary>

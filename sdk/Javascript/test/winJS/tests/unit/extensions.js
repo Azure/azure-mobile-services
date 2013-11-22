@@ -34,6 +34,38 @@ $testGroup('Extensions.js',
         $assert.isFalse(Extensions.isNullOrEmpty({ }), '{ } is not null or empty.');
     }),
 
+    $test('isValidId')
+    .description('Verify isValidId works correctly across id types')
+    .check(function() {
+        $assert.isFalse(Extensions.isValidId(null), 'null is an invalid id');
+        $assert.isFalse(Extensions.isValidId(undefined), 'undefined is an invalid id');
+        $assert.isFalse(Extensions.isValidId(''), 'empty string is an invalid id');
+        $assert.isFalse(Extensions.isValidId([]), 'empty array can not be an id');
+        $assert.isFalse(Extensions.isValidId({ }), '{ } is an invalid id');
+        $assert.isFalse(Extensions.isValidId(0), '0 is an invalid id');
+        $assert.isFalse(Extensions.isValidId(new Array(257).join('A')), 'length of 256 is invalid');
+        $assert.isFalse(Extensions.isValidId('a+b'), 'id can not contain a +');        
+        $assert.isFalse(Extensions.isValidId('a"b'), 'id can not contain a "');
+        $assert.isFalse(Extensions.isValidId('a/b'), 'id can not contain a /');
+        $assert.isFalse(Extensions.isValidId('a?b'), 'id can not contain a ?');
+        $assert.isFalse(Extensions.isValidId('a\\b'), 'id can not contain a \\');
+        $assert.isFalse(Extensions.isValidId('a`b'), 'id can not contain a `');
+        $assert.isFalse(Extensions.isValidId('.'), 'id can not be .');
+        $assert.isFalse(Extensions.isValidId('..'), 'id can not be ..');
+        $assert.isFalse(Extensions.isValidId('A\u0000C'), 'id can not contain control character u0000');
+        $assert.isFalse(Extensions.isValidId('A__\u0008C'), 'id can not contain control character u0008');
+
+        $assert.isTrue(Extensions.isValidId(10), '10 is a valid id');
+        $assert.isTrue(Extensions.isValidId('id'), 'id is a valid id');
+        $assert.isTrue(Extensions.isValidId('12.0'), 'id can be a string number');
+        $assert.isTrue(Extensions.isValidId('true'), 'id can be a string respresentation of a boolean');
+        $assert.isTrue(Extensions.isValidId('false'), 'id can be a string respresentation of a boolean (false)');
+        $assert.isTrue(Extensions.isValidId('aa4da0b5-308c-4877-a5d2-03f274632636'), 'id can contain a guid');
+        $assert.isTrue(Extensions.isValidId('69C8BE62-A09F-4638-9A9C-6B448E9ED4E7'), 'id can contain another guid');
+        $assert.isTrue(Extensions.isValidId('{EC26F57E-1E65-4A90-B949-0661159D0546}'), 'id can contain brackets and guids');
+        $assert.isTrue(Extensions.isValidId('id with Russian Где моя машина'), 'id can contain other language characters');
+    }),
+
     $test('format')
     .description('Verify Extensions.format')
     .check(function () {

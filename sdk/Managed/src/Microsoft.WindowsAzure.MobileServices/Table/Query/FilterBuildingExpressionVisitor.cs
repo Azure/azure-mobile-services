@@ -47,7 +47,19 @@ namespace Microsoft.WindowsAzure.MobileServices
         // calls these methods. We do this in the static private constructor.
         private static readonly MethodInfo toStringMethod = typeof(object).GetMethod("ToString");
         private static readonly MethodInfo concatMethod = typeof(string).GetMethod("Concat", new Type[] { typeof(string), typeof(string) });
-        
+
+        // The Visual Basic compiler emits a call to CompareString(left, right, False) from the class
+        // Microsoft.VisualBasic.CompilerServices.[Embedded]Operators for lambda expressions with string
+        // comparisons. Since the class isn't part of the portable libraries, we can do a type
+        // validation based on the type name when visiting the expression.
+        private const string VBOperatorClass = "Microsoft.VisualBasic.CompilerServices.Operators";
+        private const string VBOperatorClassAlt = "Microsoft.VisualBasic.CompilerServices.EmbeddedOperators";
+        private const string VBCompareStringMethod = "CompareString";
+        private const int VBCompareStringArguments = 3;
+        private const int VBCaseSensitiveCompareArgumentIndex = 2;
+        private static readonly MethodInfo stringToLowerMethod = typeof(string).GetMethod("ToLower", new Type[0]);
+        private static readonly Type typeofInt = typeof(int);
+
         /// <summary>
         /// Defines the instance methods that are translated into OData filter
         /// expressions.
@@ -73,8 +85,8 @@ namespace Microsoft.WindowsAzure.MobileServices
                             { new MemberInfoKey(typeof(string), "Contains", true, true, typeof(string)), subStringOfFilterMethod },
                             { new MemberInfoKey(typeof(string), "Replace", true, true, typeof(string), typeof(string)), replaceFilterMethod },
                             { new MemberInfoKey(typeof(string), "Replace", true, true, typeof(char), typeof(char)), replaceFilterMethod },
-                            { new MemberInfoKey(typeof(string), "Substring", true, true, typeof(int)), substringFilterMethod },
-                            { new MemberInfoKey(typeof(string), "Substring", true, true, typeof(int), typeof(int)), substringFilterMethod },
+                            { new MemberInfoKey(typeof(string), "Substring", true, true, typeofInt), substringFilterMethod },
+                            { new MemberInfoKey(typeof(string), "Substring", true, true, typeofInt, typeofInt), substringFilterMethod },
                         };
                 }
 
@@ -152,14 +164,14 @@ namespace Microsoft.WindowsAzure.MobileServices
                     implicitConversions =
                         new Dictionary<Type, Type[]>
                         {
-                            { typeof(sbyte),  new[] { typeof(short), typeof(int), typeof(long), typeof(float), typeof(double), typeof(decimal) } },
-                            { typeof(byte),   new[] { typeof(short), typeof(ushort), typeof(int), typeof(uint), typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal) } },
-                            { typeof(short),  new[] { typeof(int), typeof(long), typeof(float), typeof(double), typeof(decimal) } },
-                            { typeof(ushort), new[] { typeof(int), typeof(uint), typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal) } },
-                            { typeof(int),    new[] { typeof(long), typeof(float), typeof(double), typeof(decimal) } },
+                            { typeof(sbyte),  new[] { typeof(short), typeofInt, typeof(long), typeof(float), typeof(double), typeof(decimal) } },
+                            { typeof(byte),   new[] { typeof(short), typeof(ushort), typeofInt, typeof(uint), typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal) } },
+                            { typeof(short),  new[] { typeofInt, typeof(long), typeof(float), typeof(double), typeof(decimal) } },
+                            { typeof(ushort), new[] { typeofInt, typeof(uint), typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal) } },
+                            { typeofInt,    new[] { typeof(long), typeof(float), typeof(double), typeof(decimal) } },
                             { typeof(uint),   new[] { typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal) } },
                             { typeof(long),   new[] { typeof(float), typeof(double), typeof(decimal) } },
-                            { typeof(char),   new[] { typeof(ushort), typeof(int), typeof(uint), typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal) } },
+                            { typeof(char),   new[] { typeof(ushort), typeofInt, typeof(uint), typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal) } },
                             { typeof(float),  new[] { typeof(double) } },
                             { typeof(ulong),  new[] { typeof(float), typeof(double), typeof(decimal) } }
                         };
@@ -277,7 +289,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return string.Format(CultureInfo.InvariantCulture, "{0}M", value);
             }
-            else if (handle.Equals(typeof(int).TypeHandle) || handle.Equals(typeof(short).TypeHandle) 
+            else if (handle.Equals(typeofInt.TypeHandle) || handle.Equals(typeof(short).TypeHandle) 
                 || handle.Equals(typeof(ushort).TypeHandle) || handle.Equals(typeof(sbyte).TypeHandle))
             {
                 return string.Format(CultureInfo.InvariantCulture, "{0}", value);
@@ -547,6 +559,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 // special case for enums, because we send them as strings
                 UnaryExpression enumExpression = null;
                 ConstantExpression constantExpression = null;
+                BinaryExpression stringCompareExpression = null;
                 if (this.CheckEnumExpression(expression, out enumExpression, out constantExpression))
                 {
                     this.Visit(this.RewriteEnumExpression(enumExpression, (ConstantExpression)expression.Right, expression.NodeType));            
@@ -559,6 +572,11 @@ namespace Microsoft.WindowsAzure.MobileServices
                     //rewrite addition into a call to concat, instead of duplicating generation code.
                     this.Visit(this.RewriteStringAddition(expression));
                 }
+                // special case for string comparisons emitted by the VB compiler
+                else if (this.CheckVBStringCompareExpression(expression, out stringCompareExpression))
+                {
+                    this.Visit(stringCompareExpression);
+                }
                 else
                 {
                     this.filter.Append("(");
@@ -566,8 +584,10 @@ namespace Microsoft.WindowsAzure.MobileServices
                     switch (expression.NodeType)
                     {
                         case ExpressionType.AndAlso:
+                        case ExpressionType.And:
                             this.filter.Append(" and ");
                             break;
+                        case ExpressionType.Or:
                         case ExpressionType.OrElse:
                             this.filter.Append(" or ");
                             break;
@@ -619,7 +639,76 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return expression;
         }
-        
+
+        /// <summary>
+        /// Checks if the binary expression is a string comparison emitted by the Visual Basic compiler.
+        /// </summary>
+        /// <remarks>The VB compiler translates string comparisons such as
+        /// <code>(Function(x) x.Name = "a string value")</code> not as a binary expression with the field
+        /// on the left side and the string value on the right side. Instead, it converts it into a call
+        /// to <code>Microsoft.VisualBasic.CompilerServices.Operators.CompareString</code> (or
+        /// <code>Microsoft.VisualBasic.CompilerServices.EmbeddedOperators</code> for phone platforms)
+        /// for the string value, and compares the expression to zero.</remarks>
+        /// <param name="expression">The binary expression to check.</param>
+        /// <param name="stringComparison">A normalized string comparison expression.</param>
+        /// <returns>True if the expression is a string comparison expression emitted by the VB compiler,
+        /// otherwise false</returns>
+        private bool CheckVBStringCompareExpression(BinaryExpression expression, out BinaryExpression stringComparison)
+        {
+            stringComparison = null;
+            if (expression.Left.Type == typeofInt && 
+                expression.Left.NodeType == ExpressionType.Call &&
+                expression.Right.Type == typeofInt &&
+                expression.Right.NodeType == ExpressionType.Constant &&
+                ((ConstantExpression)expression.Right).Value.Equals(0)) {
+                    MethodCallExpression methodCall = (MethodCallExpression)expression.Left;
+                    if ((methodCall.Method.DeclaringType.FullName == VBOperatorClass || methodCall.Method.DeclaringType.FullName == VBOperatorClassAlt) &&
+                        methodCall.Method.Name == VBCompareStringMethod &&
+                        methodCall.Arguments.Count == VBCompareStringArguments &&
+                        methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex].Type == typeof(bool) &&
+                        methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex].NodeType == ExpressionType.Constant)
+                    {
+                        bool doCaseInsensitiveComparison = ((ConstantExpression)methodCall.Arguments[VBCaseSensitiveCompareArgumentIndex]).Value.Equals(true);
+                        Expression leftExpression = methodCall.Arguments[0];
+                        Expression rightExpression = methodCall.Arguments[1];
+                        if (doCaseInsensitiveComparison)
+                        {
+                            leftExpression = MethodCallExpression.Call(leftExpression, stringToLowerMethod);
+                            rightExpression = MethodCallExpression.Call(rightExpression, stringToLowerMethod);
+                        }
+
+                        switch (expression.NodeType)
+                        {
+                            case ExpressionType.Equal:
+                                stringComparison = BinaryExpression.Equal(leftExpression, rightExpression);
+                                break;
+                            case ExpressionType.NotEqual:
+                                stringComparison = BinaryExpression.NotEqual(leftExpression, rightExpression);
+                                break;
+                            case ExpressionType.LessThan:
+                                stringComparison = BinaryExpression.LessThan(leftExpression, rightExpression);
+                                break;
+                            case ExpressionType.LessThanOrEqual:
+                                stringComparison = BinaryExpression.LessThanOrEqual(leftExpression, rightExpression);
+                                break;
+                            case ExpressionType.GreaterThan:
+                                stringComparison = BinaryExpression.GreaterThan(leftExpression, rightExpression);
+                                break;
+                            case ExpressionType.GreaterThanOrEqual:
+                                stringComparison = BinaryExpression.GreaterThanOrEqual(leftExpression, rightExpression);
+                                break;
+                        }
+
+                        if (stringComparison != null)
+                        {
+                            return true;
+                        }
+                    }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Checks if the binary expression is an enum expression.
         /// </summary>

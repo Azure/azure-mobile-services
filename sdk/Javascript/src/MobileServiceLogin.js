@@ -10,7 +10,6 @@ var _ = require('Extensions');
 var Validate = require('Validate');
 var Platform = require('Platform');
 
-var authenticationProviders = ['facebook', 'google', 'twitter', 'microsoftaccount'];
 var loginUrl = "login";
 var loginDone = "done";
 
@@ -131,9 +130,6 @@ MobileServiceLogin.prototype.login = function (provider, token, useSingleSignOn,
         Validate.notNull(provider);
         Validate.isString(provider);
         provider = provider.toLowerCase();
-        if (!isValidProvider(provider)) {
-            throw Platform.getResourceString("MobileServiceLogin_InvalidProvider");
-        }
     }
 
     if (!_.isNull(provider)) {
@@ -222,13 +218,7 @@ MobileServiceLogin.prototype.loginWithProvider = function(provider, token, useSi
         }
     }
 
-    // Ensure we have one of the known providers
     provider = provider.toLowerCase();
-    if (!isValidProvider(provider)) {
-        throw _.format(
-            Platform.getResourceString("MobileServiceLogin_AuthenticationProviderNotSupported"),
-            authenticationProviders.join(', '));
-    }
     
     // Either login with the token or the platform specific login control.
     if (!_.isNull(token)) {
@@ -238,26 +228,6 @@ MobileServiceLogin.prototype.loginWithProvider = function(provider, token, useSi
         loginWithLoginControl(this, provider, useSingleSignOn, callback);
     }
 };
-
-function isValidProvider(provider) {
-    /// <summary>
-    /// Determines that the given string is one of the known providers.
-    /// </summary>
-    /// <param name="provider" type="String">
-    /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google', or 'microsoftaccount'.
-    /// </param>
-    /// <returns>
-    /// True if the given provider is valid, and false otherwise.
-    /// </returns>
-
-    for (var i = 0, j = authenticationProviders.length; i < j; i++) {
-        if (authenticationProviders[i] === provider) {
-            return true;
-        }
-    }
-
-    return false;
-}
 
 function onLoginComplete(error, token, client, callback) {
     /// <summary>

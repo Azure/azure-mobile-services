@@ -7,6 +7,8 @@
 NSString *const UserDefaultApplicationUrl = @"ZumoE2ETest_AppUrl";
 NSString *const UserDefaultApplicationKey = @"ZumoE2ETest_AppKey";
 NSString *const UserDefaultUploadLogsUrl = @"ZumoE2ETest_UploadLogUrl";
+NSString *const RUNTIME_VERSION_KEY = @"client-version";
+NSString *const CLIENT_VERSION_KEY = @"server-version";
 
 @implementation ZumoTestGlobals
 
@@ -21,8 +23,20 @@ NSString *const UserDefaultUploadLogsUrl = @"ZumoE2ETest_UploadLogUrl";
     return instance;
 }
 
+- (id)init {
+    self = [super init];
+    if (self) {
+        self->globalTestParameters = [[NSMutableDictionary alloc] init];
+    }
+    return self;
+}
+
 - (void)initializeClientWithAppUrl:(NSString *)url andKey:(NSString *)appKey {
     [self setClient:[MSClient clientWithApplicationURLString:url applicationKey:appKey]];
+}
+
+- (NSMutableDictionary *)globalTestParameters {
+    return self->globalTestParameters;
 }
 
 - (void)saveAppInfo:(NSString *)appUrl key:(NSString *)appKey {
@@ -97,6 +111,22 @@ NSString *const UserDefaultUploadLogsUrl = @"ZumoE2ETest_UploadLogUrl";
     return dict;
 }
 
++(BOOL)compareObjects:(NSDictionary *)obj1 with:(NSDictionary *)obj2 log:(NSMutableArray *)errors {
+    NSDictionary *first = [self cloneAndRemoveId:obj1];
+    NSDictionary *second = [self cloneAndRemoveId:obj2];
+    return [self compareJson:first with:second log:errors];
+}
+
++(NSDictionary *)cloneAndRemoveId:(NSDictionary *)dic {
+    NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
+    for (NSString *key in [dic allKeys]) {
+        if (![key isEqualToString:@"id"]) {
+            [result setValue:[dic objectForKey:key] forKey:key];
+        }
+    }
+    return result;
+}
+
 +(BOOL)compareJson:(id)json1 with:(id)json2 log:(NSMutableArray *)errors {
     if (!json1 && !json2) return YES;
     if ([json1 isKindOfClass:[NSNull class]] && [json2 isKindOfClass:[NSNull class]]) return YES;
@@ -120,7 +150,7 @@ NSString *const UserDefaultUploadLogsUrl = @"ZumoE2ETest_UploadLogUrl";
         [errors addObject:[NSString stringWithFormat:@"Only one is a string - json1 = %@, json2 = %@", json1, json2]];
         return NO;
     }
-    
+
     BOOL firstIsNumber = [json1 isKindOfClass:[NSNumber class]];
     BOOL secondIsNumber = [json2 isKindOfClass:[NSNumber class]];
     if (firstIsNumber && secondIsNumber) {
@@ -134,6 +164,22 @@ NSString *const UserDefaultUploadLogsUrl = @"ZumoE2ETest_UploadLogUrl";
         }
     } else if (firstIsNumber || secondIsNumber) {
         [errors addObject:[NSString stringWithFormat:@"Only one is a number/bool - json1 = %@, json2 = %@", json1, json2]];
+        return NO;
+    }
+    
+    BOOL firstIsDate = [json1 isKindOfClass:[NSDate class]];
+    BOOL secondIsDate = [json2 isKindOfClass:[NSDate class]];
+    if (firstIsDate && secondIsDate) {
+        NSDate *date1 = json1;
+        NSDate *date2 = json2;
+        if ([self compareDate:date1 withDate:date2]) {
+            return YES;
+        } else {
+            [errors addObject:[NSString stringWithFormat:@"Different date - json1 = %@, json2 = %@", date1, date2]];
+            return NO;
+        }
+    } else if (firstIsDate || secondIsDate) {
+        [errors addObject:[NSString stringWithFormat:@"Only one is a date - json1 = %@, json2 = %@", json1, json2]];
         return NO;
     }
 

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="library">
+    <target name="library">
+        <javadoc access="public" author="false" classpath="libs/gson-2.2.2.jar" destdir="doc" nodeprecated="true" nodeprecatedlist="true" noindex="false" nonavbar="false" notree="false" packagenames="com.microsoft.windowsazure.mobileservices" source="1.6" sourcepath="src:gen" splitindex="true" use="true" version="false">
+        	<arg value="-notimestamp" />    
+        </javadoc>
+        <jar destfile="bin/mobileservices-1.0.1.jar">
+            <fileset dir="doc" />
+            <fileset dir="src"/>
+            <fileset dir="bin/classes" includes="**/*.class" />
+        </jar>
+    </target>
+</project>

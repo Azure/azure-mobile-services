@@ -25,6 +25,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         string TableName { get; }
 
         /// <summary>
+        /// The Mobile Service system properties to be included with items.
+        /// </summary>
+        MobileServiceSystemProperties SystemProperties { get; set; }
+
+        /// <summary>
         /// Excutes a query against the table.
         /// </summary>
         /// <param name="query">

@@ -46,6 +46,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal string applicationInstallationId;
 
         /// <summary>
+        /// Gets the <see cref="ITableStorage"/> instance for the remote Mobile Service.
+        /// </summary>
+        internal RemoteTableStorage RemoteStorage { get; private set; }
+
+        /// <summary>
         /// Gets the Uri to the Mobile Services application that is provided by
         /// the call to MobileServiceClient(...).
         /// </summary>
@@ -191,6 +196,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             handlers = handlers ?? EmptyHttpMessageHandlers;
             this.HttpClient = new MobileServiceHttpClient(this, handlers);
+            this.RemoteStorage = new RemoteTableStorage(this.HttpClient);
             this.Serializer = new MobileServiceSerializer();
         }
 
@@ -220,7 +226,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                         "tableName"));
             }
 
-            return new MobileServiceTable(tableName, this);
+            return new MobileServiceTable(tableName, this, this.RemoteStorage);
         }
 
         /// <summary>
@@ -236,7 +242,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public IMobileServiceTable<T> GetTable<T>()
         {
             string tableName = this.SerializerSettings.ContractResolver.ResolveTableName(typeof(T));
-            return new MobileServiceTable<T>(tableName, this);
+            return new MobileServiceTable<T>(tableName, this, this.RemoteStorage);
         }
 
         /// <summary>
@@ -272,9 +278,54 @@ namespace Microsoft.WindowsAzure.MobileServices
         [SuppressMessage("Microsoft.Naming", "CA1726:UsePreferredTerms", MessageId = "Login", Justification = "Login is more appropriate than LogOn for our usage.")]
         public Task<MobileServiceUser> LoginAsync(MobileServiceAuthenticationProvider provider, JObject token)
         {
+            if (!Enum.IsDefined(typeof(MobileServiceAuthenticationProvider), provider))
+            {
+                throw new ArgumentOutOfRangeException("provider");
+            }
+
+            return this.LoginAsync(provider.ToString(), token);
+        }
+
+        /// <summary>
+        /// Logs a user into a Windows Azure Mobile Service with the provider and optional token object.
+        /// </summary>
+        /// <param name="provider">
+        /// Authentication provider to use.
+        /// </param>
+        /// <param name="token">
+        /// Provider specific object with existing OAuth token to log in with.
+        /// </param>
+        /// <remarks>
+        /// The token object needs to be formatted depending on the specific provider. These are some
+        /// examples of formats based on the providers:
+        /// <list type="bullet">
+        ///   <item>
+        ///     <term>MicrosoftAccount</term>
+        ///     <description><code>{"authenticationToken":"&lt;the_authentication_token&gt;"}</code></description>
+        ///   </item>
+        ///   <item>
+        ///     <term>Facebook</term>
+        ///     <description><code>{"access_token":"&lt;the_access_token&gt;"}</code></description>
+        ///   </item>
+        ///   <item>
+        ///     <term>Google</term>
+        ///     <description><code>{"access_token":"&lt;the_access_token&gt;"}</code></description>
+        ///   </item>
+        /// </list>
+        /// </remarks>
+        /// <returns>
+        /// Task that will complete when the user has finished authentication.
+        /// </returns>
+        public Task<MobileServiceUser> LoginAsync(string provider, JObject token)
+        {
             if (token == null)
             {
                 throw new ArgumentNullException("token");
+            }
+
+            if (!Enum.IsDefined(typeof(MobileServiceAuthenticationProvider), provider))
+            {
+                throw new ArgumentOutOfRangeException("provider");
             }
 
             MobileServiceTokenAuthentication auth = new MobileServiceTokenAuthentication(this, provider, token);
@@ -355,11 +406,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             string content = null;
             if (body != null)
             {
-                content = serializer.Serialize(body);
+                content = serializer.Serialize(body).ToString();
             }
 
             string response = await this.InternalInvokeApiAsync(apiName, content, method, parameters);
-            return serializer.Deserialize<U>(response);
+            return serializer.Deserialize<U>(JToken.Parse(response));
         }
 
         /// <summary>
@@ -447,10 +498,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// A dictionary of user-defined parameters and values to include in the request URI query string.
         /// </param>
         /// <returns>The response content from the custom api invocation.</returns>
-        private Task<string> InternalInvokeApiAsync(string apiName, string content, HttpMethod method, IDictionary<string, string> parameters = null)
+        private async Task<string> InternalInvokeApiAsync(string apiName, string content, HttpMethod method, IDictionary<string, string> parameters = null)
         {
             method = method ?? defaultHttpMethod;
-            return this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), content);
+            MobileServiceHttpResponse response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), content);
+            return response.Content;
         }
 
         /// <summary>

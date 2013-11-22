@@ -13,20 +13,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     public class MobileServiceUrlBuilderTests : TestBase
     {
         [TestMethod]
-        public void GetUriFragmentWithTableNameTest()
-        {
-            Assert.AreEqual("tables/someTable", MobileServiceUrlBuilder.GetUriFragment("someTable"));
-        }
-
-        [TestMethod]
-        public void GetUriFragmentWithTableNameAndIdTest()
-        {
-            Assert.AreEqual("tables/someTable/5", MobileServiceUrlBuilder.GetUriFragment("someTable", 5));
-            Assert.AreEqual("tables/someTable/12.2", MobileServiceUrlBuilder.GetUriFragment("someTable", 12.2));
-            Assert.AreEqual("tables/someTable/hi", MobileServiceUrlBuilder.GetUriFragment("someTable", "hi"));
-        }
-
-        [TestMethod]
         public void GetQueryStringTest()
         {
             var parameters = new Dictionary<string, string>() { { "x", "$y" }, { "&hello", "?good bye" }, { "a$", "b" } };

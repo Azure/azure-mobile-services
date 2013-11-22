@@ -9,6 +9,7 @@ function defineUpdateDeleteTestsNamespace() {
     var tests = [];
     var i;
     var tableName = 'w8jsRoundTripTable';
+    var stringIdTableName = 'stringIdRoundTripTable';
 
     tests.push(createDeleteTest('Delete item', function (test, done, table, id) {
         table.del({ id: id }).done(function () {
@@ -69,6 +70,31 @@ function defineUpdateDeleteTestsNamespace() {
             }
         });
     }));
+
+    var ids = ['with space', '1234567', 'non-english ãéìôü ÇñÑالكتاب على الطاولة这本书在桌子上הספר הוא על השולחן'];
+    ids.forEach(function (id) {
+        tests.push(new zumo.Test('[string id] Delete, id = ' + id, function (test, done) {
+            var client = zumo.getClient();
+            var table = client.getTable(stringIdTableName);
+
+            function afterInsert(place) {
+                // insert will either have failed (item already exists) or succeeded (item didn't exist);
+                // in either case we'll be able to delete it.
+                return function (obj) {
+                    test.addLog(place + ': ', obj);
+                    table.del({ id: id }).done(function () {
+                        test.addLog('Delete succeeded');
+                        done(true);
+                    }, function (err) {
+                        test.addLog('Error calling delete: ', err);
+                        done(false);
+                    });
+                }
+            }
+
+            table.insert({ id: id, name: 'test' }).done(afterInsert('Inserted'), afterInsert('Insert error (likely expected)'));
+        }));
+    });
 
     tests.push(createUpdateTest('Update item', function (test, done, table, insertedItem) {
         var newNumber = 999;
@@ -145,6 +171,54 @@ function defineUpdateDeleteTestsNamespace() {
             }
         });
     }));
+
+    ids.forEach(function (id) {
+        tests.push(new zumo.Test('[string id] Update, id = ' + id, function (test, done) {
+            var client = zumo.getClient();
+            var table = client.getTable(stringIdTableName);
+
+            function afterDelete(callbackName, testResult) {
+                return function (obj) {
+                    test.addLog('In delete ' + callbackName + ' callback, arg = ', obj);
+                    done(testResult);
+                }
+            }
+
+            function afterInsert(place) {
+                // insert will either have failed (item already exists) or succeeded (item didn't exist);
+                // in either case we'll be able to delete it.
+                return function (obj) {
+                    test.addLog(place + ': ', obj);
+                    var toUpdate = { id: id, name: 'test2' };
+                    table.update({ id: id, name: 'test2' }).done(function (updated) {
+                        test.addLog('Updated: ', updated);
+                        table.lookup(id).done(function (item) {
+                            var errors = [];
+                            var testResult = true;
+                            if (zumo.util.compare(toUpdate, item, errors)) {
+                                test.addLog('Item was updated successfully');
+                            } else {
+                                testResult = false;
+                                test.addLog('Error during update:');
+                                errors.forEach(function (error) {
+                                    test.addLog(error);
+                                });
+                            }
+                            table.del({ id: id }).done(afterDelete('success', testResult), afterDelete('error', testResult));
+                        }, function (err) {
+                            test.addLog('Error calling lookup: ', err);
+                            done(false);
+                        });
+                    }, function (err) {
+                        test.addLog('Error calling update: ', err);
+                        done(false);
+                    });
+                }
+            }
+
+            table.insert({ id: id, name: 'test' }).done(afterInsert('Inserted'), afterInsert('Insert error (likely expected)'));
+        }));
+    });
 
     function createDeleteTest(testName, actionAfterInsert) {
         // actionAfterInsert: function(test, done, table, insertedItemId)

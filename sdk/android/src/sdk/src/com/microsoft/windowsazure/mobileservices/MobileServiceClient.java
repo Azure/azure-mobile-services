@@ -39,8 +39,14 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.protocol.HTTP;
 
+import android.accounts.Account;
+import android.accounts.AccountManager;
+import android.accounts.AccountManagerCallback;
+import android.accounts.AccountManagerFuture;
+import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Bundle;
 import android.util.Pair;
 
 import com.google.gson.GsonBuilder;
@@ -94,7 +100,12 @@ public class MobileServiceClient {
 	 * Context where the MobileServiceClient is created
 	 */
 	private Context mContext;
-
+	
+	/**
+	 * AndroidHttpClientFactory used for request execution
+	 */
+	private AndroidHttpClientFactory mAndroidHttpClientFactory;
+	
 	/**
 	 * UTF-8 encoding
 	 */
@@ -104,6 +115,16 @@ public class MobileServiceClient {
 	 * Custom API Url
 	 */
 	private static final String CUSTOM_API_URL = "api/";
+	
+	/**
+	 * Google account type
+	 */
+	public static final String GOOGLE_ACCOUNT_TYPE = "com.google";
+
+	/**
+	 * Authentication token type required for client login
+	 */
+	public static final String GOOGLE_USER_INFO_SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
 
 	/**
 	 * Creates a GsonBuilder with custom serializers to use with Windows Azure
@@ -149,7 +170,7 @@ public class MobileServiceClient {
 	public MobileServiceClient(MobileServiceClient client) {
 		initialize(client.getAppUrl(), client.getAppKey(),
 				client.getCurrentUser(), client.getGsonBuilder(),
-				client.getContext());
+				client.getContext(), client.getAndroidHttpClientFactory());
 	}
 
 	/**
@@ -166,7 +187,7 @@ public class MobileServiceClient {
 		GsonBuilder gsonBuilder = createMobileServiceGsonBuilder();
 		gsonBuilder.serializeNulls(); // by default, add null serialization
 
-		initialize(appUrl, appKey, null, gsonBuilder, context);
+		initialize(appUrl, appKey, null, gsonBuilder, context, new AndroidHttpClientFactoryImpl());
 	}
 
 	/**
@@ -180,6 +201,18 @@ public class MobileServiceClient {
 	 */
 	public void login(MobileServiceAuthenticationProvider provider,
 			UserAuthenticationCallback callback) {
+		login(provider.toString(), callback);
+	}
+	/**
+	 * Invokes an interactive authentication process using the specified
+	 * Authentication Provider
+	 * 
+	 * @param provider
+	 *            The provider used for the authentication process
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void login(String provider, UserAuthenticationCallback callback) {
 		mLoginInProgress = true;
 
 		final UserAuthenticationCallback externalCallback = callback;
@@ -204,7 +237,7 @@ public class MobileServiceClient {
 	/**
 	 * Invokes Windows Azure Mobile Service authentication using a
 	 * provider-specific oAuth token
-	 * 
+	 *
 	 * @param provider
 	 *            The provider used for the authentication process
 	 * @param oAuthToken
@@ -214,6 +247,23 @@ public class MobileServiceClient {
 	 *            Callback to invoke when the authentication process finishes
 	 */
 	public void login(MobileServiceAuthenticationProvider provider,
+			JsonObject oAuthToken, UserAuthenticationCallback callback) {
+		login(provider.toString(), oAuthToken, callback);
+	}
+
+	/**
+	 * Invokes Windows Azure Mobile Service authentication using a
+	 * provider-specific oAuth token
+	 *
+	 * @param provider
+	 *            The provider used for the authentication process
+	 * @param oAuthToken
+	 *            A Json object representing the oAuth token used for
+	 *            authentication
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void login(String provider,
 			JsonObject oAuthToken, UserAuthenticationCallback callback) {
 		if (oAuthToken == null) {
 			throw new IllegalArgumentException("oAuthToken cannot be null");
@@ -235,6 +285,22 @@ public class MobileServiceClient {
 	 */
 	public void login(MobileServiceAuthenticationProvider provider,
 			String oAuthToken, UserAuthenticationCallback callback) {
+		login(provider.toString(), oAuthToken, callback);
+	}
+
+	/**
+	 * Invokes Windows Azure Mobile Service authentication using a
+	 * provider-specific oAuth token
+	 * 
+	 * @param provider
+	 *            The provider used for the authentication process
+	 * @param oAuthToken
+	 *            The oAuth token used for authentication
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void login(String provider, String oAuthToken,
+			UserAuthenticationCallback callback) {
 		if (oAuthToken == null) {
 			throw new IllegalArgumentException("oAuthToken cannot be null");
 		}
@@ -258,6 +324,112 @@ public class MobileServiceClient {
 						}
 					}
 				});
+	}
+	
+	/**
+	 * Invokes Windows Azure Mobile Service authentication using a
+	 * the Google account registered in the device
+	 * 
+	 * @param activity
+	 *            The activity that triggered the authentication
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void loginWithGoogleAccount(Activity activity, final UserAuthenticationCallback callback) {
+		loginWithGoogleAccount(activity, GOOGLE_USER_INFO_SCOPE, callback);
+	}
+	
+	/**
+	 * Invokes Windows Azure Mobile Service authentication using a
+	 * the Google account registered in the device
+	 * 
+	 * @param activity
+	 *            The activity that triggered the authentication
+	 * @param scopes
+	 *            The scopes used as authentication token type for login
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void loginWithGoogleAccount(Activity activity, String scopes, final UserAuthenticationCallback callback) {
+		AccountManager acMgr = AccountManager.get(activity.getApplicationContext());
+		Account[] accounts = acMgr.getAccountsByType(GOOGLE_ACCOUNT_TYPE);
+		
+		Account account;
+		if (accounts.length == 0) {
+			account = null;
+		} else {
+			account = accounts[0];
+		}
+		
+		loginWithGoogleAccount(activity, account, scopes, callback);
+	}
+	
+	/**
+	 * Invokes Windows Azure Mobile Service authentication using a
+	 * the Google account registered in the device
+	 * 
+	 * @param activity
+	 *            The activity that triggered the authentication
+	 * @param account
+	 *            The account used for the login operation
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void loginWithGoogleAccount(Activity activity, Account account, final UserAuthenticationCallback callback) {
+		loginWithGoogleAccount(activity, account, GOOGLE_USER_INFO_SCOPE, callback);
+	}
+	
+
+	/**
+	 * Invokes Windows Azure Mobile Service authentication using a
+	 * the Google account registered in the device
+	 * 
+	 * @param activity
+	 *            The activity that triggered the authentication
+	 * @param account
+	 *            The account used for the login operation
+	 * @param scopes
+	 *            The scopes used as authentication token type for login
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void loginWithGoogleAccount(Activity activity, Account account, String scopes, final UserAuthenticationCallback callback) {
+		try {
+			if (account == null) {
+				callback.onCompleted(null, new IllegalArgumentException("account"), null);
+			}
+					
+			final MobileServiceClient client = this;
+			
+			AccountManagerCallback<Bundle> authCallback = new AccountManagerCallback<Bundle>() {
+				
+				@Override
+				public void run(AccountManagerFuture<Bundle> futureBundle) {
+					try {
+						if (futureBundle.isCancelled()) {
+							callback.onCompleted(null, new MobileServiceException("User cancelled"), null);
+						} else {
+							Bundle bundle = futureBundle.getResult();
+							
+							String token = (String)(bundle.get(AccountManager.KEY_AUTHTOKEN));
+							
+							JsonObject json = new JsonObject();
+							json.addProperty("access_token", token);
+							
+							client.login(MobileServiceAuthenticationProvider.Google, json, callback);	
+						}
+					} catch (Exception e) {
+						callback.onCompleted(null, e, null);
+					}
+				}
+			};
+			
+			AccountManager acMgr = AccountManager.get(activity.getApplicationContext());
+			acMgr.getAuthToken(account, scopes, null, activity, authCallback, null);
+			
+		} catch (Exception e) {
+			callback.onCompleted(null, e, null);
+		}
 	}
 
 	/**
@@ -579,15 +751,15 @@ public class MobileServiceClient {
 		String url = uriBuilder.build().toString();
 		
 		if (httpMethod.equalsIgnoreCase(HttpGet.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpGet(url));
+			request = new ServiceFilterRequestImpl(new HttpGet(url), getAndroidHttpClientFactory());
 		} else if (httpMethod.equalsIgnoreCase(HttpPost.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpPost(url));
+			request = new ServiceFilterRequestImpl(new HttpPost(url), getAndroidHttpClientFactory());
 		} else if (httpMethod.equalsIgnoreCase(HttpPut.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpPut(url));
+			request = new ServiceFilterRequestImpl(new HttpPut(url), getAndroidHttpClientFactory());
 		} else if (httpMethod.equalsIgnoreCase(HttpPatch.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpPatch(url));
+			request = new ServiceFilterRequestImpl(new HttpPatch(url), getAndroidHttpClientFactory());
 		} else if (httpMethod.equalsIgnoreCase(HttpDelete.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpDelete(url));
+			request = new ServiceFilterRequestImpl(new HttpDelete(url), getAndroidHttpClientFactory());
 		} else {
 			if (callback != null) {
 				callback.onResponse(null, new IllegalArgumentException("httpMethod not supported"));
@@ -758,7 +930,7 @@ public class MobileServiceClient {
 	 */
 	private void initialize(URL appUrl, String appKey,
 			MobileServiceUser currentUser, GsonBuilder gsonBuiler,
-			Context context) {
+			Context context, AndroidHttpClientFactory androidHttpClientFactory) {
 		if (appUrl == null || appUrl.toString().trim().length() == 0) {
 			throw new IllegalArgumentException("Invalid Application URL");
 		}
@@ -789,6 +961,7 @@ public class MobileServiceClient {
 		mCurrentUser = currentUser;
 		mContext = context;
 		mGsonBuilder = gsonBuiler;
+		mAndroidHttpClientFactory = androidHttpClientFactory;
 	}
 
 	/**
@@ -845,5 +1018,19 @@ public class MobileServiceClient {
 	 */
 	public void setContext(Context mContext) {
 		this.mContext = mContext;
+	}
+	
+	/**
+	 * Gets the AndroidHttpClientFactory
+	 */
+	public AndroidHttpClientFactory getAndroidHttpClientFactory() {
+		return mAndroidHttpClientFactory;
+	}
+
+	/**
+	 * Sets the AndroidHttpClientFactory
+	 */
+	public void setAndroidHttpClientFactory(AndroidHttpClientFactory mAndroidHttpClientFactory) {
+		this.mAndroidHttpClientFactory = mAndroidHttpClientFactory;
 	}
 }

@@ -37,6 +37,10 @@
                             <input id='txtAppUrl' /></th>
                         <th id='saveAppInfoCell'>
                             <button id='btnSaveAppInfo'>Save App Info</button></th>
+                        <td>
+                            <button id="btnRunAllTests">Run All Tests</button>
+                        </td>
+
                     </tr>
                     <tr>
                         <th id='appKeyLabelCell'>App Key:</th>
@@ -44,6 +48,9 @@
                             <input id='txtAppKey' /></th>
                         <th id='loadAppInfoCell'>
                             <button id='btnLoadAppInfo'>Load App Info</button></th>
+                        <td>
+                            <button id="btnRunAllUnattendedTests">Run All Tests (unattended)</button>
+                        </td>
                     </tr>
                 </table>
             </td>
@@ -95,8 +102,27 @@
     </table>
     
     <script src="../../TestFramework/js/testFrameworkConnections.js"></script>
-    
+    <script type="text/javascript">
+        if (window.navigator.userAgent.toLowerCase().indexOf("firefox") > 0) { //Firefox innerText define
+            HTMLElement.prototype.__defineGetter__("innerText", function () {
+                var anyString = "";
+                var childS = this.childNodes;
+                for (var i = 0; i < childS.length; i++) {
+                    if (childS[i].nodetype == Node.ELEMENT_NODE) {
+                        anyString += childS[i].tagname == "br" ? '\n' : childS[i].innertext;
+                    }
+                    else if (childS[i].nodeType == Node.TEXT_NODE) {
+                        anyString += childS[i].nodeValue;
+                    }
+                }
+                return anyString;
+            });
 
+            HTMLElement.prototype.__defineSetter__("innerText", function (sText) {
+                this.textContent = sText;
+            });
+        }
+    </script>
 
 </body>
 </html>

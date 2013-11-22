@@ -13,10 +13,10 @@ function defineLoginTestsNamespace() {
     var TABLE_PERMISSION_APPLICATION = 2;
     var TABLE_PERMISSION_USER = 3;
     var TABLE_PERMISSION_ADMIN = 4;
-    var TABLE_NAME_PUBLIC = 'w8Public';
-    var TABLE_NAME_APPLICATION = 'w8Application';
-    var TABLE_NAME_AUTHENTICATED = 'w8Authenticated';
-    var TABLE_NAME_ADMIN = 'w8Admin';
+    var TABLE_NAME_PUBLIC = 'public';
+    var TABLE_NAME_APPLICATION = 'application';
+    var TABLE_NAME_AUTHENTICATED = 'authenticated';
+    var TABLE_NAME_ADMIN = 'admin';
 
     var tables = [
         { name: TABLE_NAME_PUBLIC, permission: TABLE_PERMISSION_PUBLIC },
@@ -26,7 +26,7 @@ function defineLoginTestsNamespace() {
 
     var supportRecycledToken = {
         facebook: true,
-        google: true,
+        google: false, // Known bug - Drop login via Google token until Google client flow is reintroduced
         twitter: false,
         microsoftaccount: false
     };
@@ -167,7 +167,7 @@ function defineLoginTestsNamespace() {
             var client = zumo.getClient();
             var table = client.getTable(tableName);
             var currentUser = client.currentUser;
-            var item = { text: 'hello' };
+            var item = { name: 'hello' };
             var insertedItem;
 
             var validateCRUDResult = function (operation, error) {
@@ -183,12 +183,19 @@ function defineLoginTestsNamespace() {
                     if (error) {
                         var xhr = error.request;
                         if (xhr) {
-                            if (xhr.status == 401) {
-                                test.addLog('Got expected response code (401) for ', operation);
+                            var isInternetExplorer10 = testPlatform.IsHTMLApplication && window.ActiveXObject && window.navigator.userAgent.toLowerCase().match(/msie ([\d.]+)/)[1] == "10.0";
+                            // IE 10 has a bug in which it doesn't set the status code correctly - https://connect.microsoft.com/IE/feedback/details/785990
+                            // so we cannot validate the status code if this is the case.
+                            if (isInternetExplorer10) {
                                 result = true;
                             } else {
-                                zumo.util.traceResponse(test, xhr);
-                                test.addLog('Error, incorrect response.');
+                                if (xhr.status == 401) {
+                                    test.addLog('Got expected response code (401) for ', operation);
+                                    result = true;
+                                } else {
+                                    zumo.util.traceResponse(test, xhr);
+                                    test.addLog('Error, incorrect response.');
+                                }
                             }
                         } else {
                             test.addLog('Error, error object does not have a \'request\' (for the XMLHttpRequest object) property.');

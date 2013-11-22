@@ -63,9 +63,14 @@ public class URLTests extends InstrumentationTestCase {
 		testLoginURL(MobileServiceAuthenticationProvider.Twitter);
 		testLoginURL(MobileServiceAuthenticationProvider.MicrosoftAccount);
 		testLoginURL(MobileServiceAuthenticationProvider.Google);
+
+		testLoginURL("facebook");
+		testLoginURL("TWITTER");
+		testLoginURL("GOOGLE");
+		testLoginURL("MicrosoftAccount");
 	}
 
-	private void testLoginURL(final MobileServiceAuthenticationProvider provider) throws Throwable {
+	private void testLoginURL(final Object provider) throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 		final ResultsContainer result = new ResultsContainer();
 
@@ -97,7 +102,7 @@ public class URLTests extends InstrumentationTestCase {
 					}
 				});
 
-				client.login(provider, "{myToken:123}", new UserAuthenticationCallback() {
+				UserAuthenticationCallback callback = new UserAuthenticationCallback() {
 
 					@Override
 					public void onCompleted(MobileServiceUser user, Exception exception, ServiceFilterResponse response) {
@@ -107,7 +112,13 @@ public class URLTests extends InstrumentationTestCase {
 
 						latch.countDown();
 					}
-				});
+				};
+
+				if (provider.getClass().equals(MobileServiceAuthenticationProvider.class)) {
+					client.login((MobileServiceAuthenticationProvider)provider, "{\"myToken\":123}", callback);
+				} else {
+					client.login((String)provider, "{\"myToken\":123}", callback);
+				}
 			}
 		});
 

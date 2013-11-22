@@ -57,11 +57,16 @@ class MobileServiceConnection {
 	 * Header value to represent JSON content-type
 	 */
 	static final String JSON_CONTENTTYPE = "application/json";
+	
+	/**
+	 * Header value to represent GZIP content-encoding
+	 */
+	private static final String GZIP_CONTENTENCODING = "gzip";
 
 	/**
 	 * Current SDK version
 	 */
-	private static final String SDK_VERSION = "1.0";
+	private static final String SDK_VERSION = "1.0.10814.0";
 
 	/**
 	 * Constructor for the MobileServiceConnection
@@ -160,6 +165,10 @@ class MobileServiceConnection {
 		if (!requestContainsHeader(request, "Accept")) {
 			request.addHeader("Accept", JSON_CONTENTTYPE);
 		}
+		
+		if (!requestContainsHeader(request, "Accept-Encoding")) {
+			request.addHeader("Accept-Encoding", GZIP_CONTENTENCODING);
+		}
 	}
 	
 	/**
@@ -183,9 +192,9 @@ class MobileServiceConnection {
 	 */
 	static String getUserAgent() {
 		String userAgent = String.format(
-				"ZUMO/%s (lang=%s; os=%s; os_version=%s; arch=%s)",
-				SDK_VERSION, "Java", "Android", Build.VERSION.RELEASE,
-				Build.CPU_ABI);
+				"ZUMO/1.0 (lang=%s; os=%s; os_version=%s; arch=%s; version=%s)",
+				"Java", "Android", Build.VERSION.RELEASE,
+				Build.CPU_ABI, SDK_VERSION);
 
 		return userAgent;
 	}

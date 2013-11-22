@@ -17,10 +17,10 @@ namespace ZumoE2ETestApp.Tests
 {
     internal static class ZumoLoginTests
     {
-        private const string TablePublicPermission = "w8Public";
-        private const string TableApplicationPermission = "w8Application";
-        private const string TableUserPermission = "w8Authenticated";
-        private const string TableAdminPermission = "w8Admin";
+        private const string TablePublicPermission = "public";
+        private const string TableApplicationPermission = "application";
+        private const string TableUserPermission = "authenticated";
+        private const string TableAdminPermission = "admin";
 
         private static JObject lastUserIdentityObject = null;
 
@@ -42,7 +42,7 @@ namespace ZumoE2ETestApp.Tests
             providersWithRecycledTokenSupport = new Dictionary<MobileServiceAuthenticationProvider, bool>
             {
                 { MobileServiceAuthenticationProvider.Facebook, true },
-                { MobileServiceAuthenticationProvider.Google, true },
+                { MobileServiceAuthenticationProvider.Google, false },   // Known bug - Drop login via Google token until Google client flow is reintroduced
                 { MobileServiceAuthenticationProvider.MicrosoftAccount, false },
                 { MobileServiceAuthenticationProvider.Twitter, false },
             };
@@ -267,7 +267,7 @@ namespace ZumoE2ETestApp.Tests
                     tableType == TablePermission.Application || 
                     (tableType == TablePermission.User && userIsAuthenticated);
                 var item = new JObject();
-                item.Add("Name", "John Doe");
+                item.Add("name", "John Doe");
                 int id = 1;
                 Dictionary<string, string> queryParameters = new Dictionary<string, string>
                 {
@@ -323,7 +323,7 @@ namespace ZumoE2ETestApp.Tests
                 ex = null;
                 try
                 {
-                    item["Name"] = "Jane Roe";
+                    item["name"] = "Jane Roe";
                     var updated = await table.UpdateAsync(item, queryParameters);
                     test.AddLog("Updated item: {0}", updated);
                 }

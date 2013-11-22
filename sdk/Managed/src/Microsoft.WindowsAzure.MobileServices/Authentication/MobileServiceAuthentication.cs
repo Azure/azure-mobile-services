@@ -37,17 +37,20 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The <see cref="MobileServiceClient"/> associated with this 
         /// MobileServiceLogin instance.
         /// </param>
-        /// <param name="provider">
+        /// <param name="providerName">
         /// The <see cref="MobileServiceAuthenticationProvider"/> used to authenticate.
         /// </param>
-        public MobileServiceAuthentication(IMobileServiceClient client, MobileServiceAuthenticationProvider provider)
+        public MobileServiceAuthentication(IMobileServiceClient client, string providerName)
         {
             Debug.Assert(client != null, "client should not be null.");
+            if (providerName == null)
+            {
+                throw new ArgumentNullException("providerName");
+            }
 
             this.Client = client;
-            this.Provider = provider;
 
-            string providerName = this.Provider.ToString().ToLower();
+            this.ProviderName = providerName.ToLower();
 
             this.StartUri = new Uri(this.Client.ApplicationUri, MobileServiceAuthentication.LoginAsyncUriFragment + "/" + providerName);
             this.EndUri = new Uri(this.Client.ApplicationUri, MobileServiceAuthentication.LoginAsyncDoneUriFragment);
@@ -60,9 +63,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         protected IMobileServiceClient Client { get; private set; }
 
         /// <summary>
-        /// Indicates whether a login operation is currently in progress.
+        /// The name of the authentication provider used by this
+        /// <see cref="MobileServiceAuthentication"/> instance.
         /// </summary>
-        protected MobileServiceAuthenticationProvider Provider { get; private set; }
+        protected string ProviderName { get; private set; }
 
         /// <summary>
         /// The start uri to use for authentication.
@@ -81,19 +85,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         protected Uri EndUri { get; private set; }
 
         /// <summary>
-        /// Log a user into a Mobile Services application given a provider name and 
-        /// optional token object.
+        /// Log a user into a Mobile Services application with the provider name and
+        /// optional token object from this instance.
         /// </summary>
         /// <returns>
         /// Task that will complete when the user has finished authentication.
         /// </returns>
         internal async Task<MobileServiceUser> LoginAsync()
         {
-            if (!Enum.IsDefined(typeof(MobileServiceAuthenticationProvider), Provider))
-            {
-                throw new ArgumentOutOfRangeException("provider");
-            }
-
             string response = await this.LoginAsyncOverride();
             if (!string.IsNullOrEmpty(response))
             {

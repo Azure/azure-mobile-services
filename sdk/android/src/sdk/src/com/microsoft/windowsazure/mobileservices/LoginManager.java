@@ -111,10 +111,14 @@ class LoginManager {
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
-	public void authenticate(MobileServiceAuthenticationProvider provider,
-			Context context, final UserAuthenticationCallback callback) {
+	public void authenticate(String provider, Context context,
+			final UserAuthenticationCallback callback) {
 		if (context == null) {
-			throw new IllegalArgumentException("context can not be null");
+			throw new IllegalArgumentException("context cannot be null");
+		}
+
+		if (provider == null || provider.length() == 0) {
+			throw new IllegalArgumentException("provider cannot be null or empty");
 		}
 
 		// Create login URL
@@ -127,7 +131,7 @@ class LoginManager {
 		final UserAuthenticationCallback externalCallback = callback;
 
 		// Shows an interactive view with the provider's login
-		showLoginUI(provider, startUrl, endUrl, context,
+		showLoginUI(startUrl, endUrl, context,
 				new LoginUIOperationCallback() {
 
 					@Override
@@ -185,16 +189,20 @@ class LoginManager {
 	 *            Callback to invoke when the authentication process finishes
 	 */
 
-	public void authenticate(MobileServiceAuthenticationProvider provider,
+	public void authenticate(String provider,
 			String oAuthToken, final UserAuthenticationCallback callback) {
 		if (oAuthToken == null || oAuthToken.trim() == "") {
 			throw new IllegalArgumentException(
 					"oAuthToken can not be null or empty");
 		}
 
+		if (provider == null || provider.length() == 0) {
+			throw new IllegalArgumentException("provider cannot be null or empty");
+		}
+
 		// Create the login URL
 		String url = mClient.getAppUrl().toString() + LoginManager.START_URL
-				+ provider.toString().toLowerCase(Locale.getDefault());
+				+ provider.toLowerCase(Locale.getDefault());
 
 		authenticateWithToken(oAuthToken, url, callback);
 	}
@@ -213,8 +221,7 @@ class LoginManager {
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
-	protected void showLoginUI(MobileServiceAuthenticationProvider provider,
-			final String startUrl, final String endUrl, final Context context,
+	private void showLoginUI(final String startUrl, final String endUrl, final Context context,
 			LoginUIOperationCallback callback) {
 		if (startUrl == null || startUrl == "") {
 			throw new IllegalArgumentException(
@@ -234,8 +241,6 @@ class LoginManager {
 		final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		// Create the Web View to show the login page
 		final WebView wv = new WebView(context);
-		builder.setTitle("Connecting to a service");
-		builder.setCancelable(true);
 		builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
 
 			@Override
@@ -246,23 +251,6 @@ class LoginManager {
 				}
 			}
 		});
-
-		// Set cancel button's action
-		builder.setNegativeButton("Cancel",
-				new DialogInterface.OnClickListener() {
-
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						if (externalCallback != null) {
-							externalCallback
-									.onCompleted(null,
-											new MobileServiceException(
-													"User Canceled"));
-						}
-						wv.destroy();
-					}
-				});
-
 		wv.getSettings().setJavaScriptEnabled(true);
 
 		wv.requestFocus(View.FOCUS_DOWN);
@@ -423,7 +411,7 @@ class LoginManager {
 
 		// Create a request
 		final ServiceFilterRequest request = new ServiceFilterRequestImpl(
-				new HttpPost(url));
+				new HttpPost(url), mClient.getAndroidHttpClientFactory());
 		request.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
 		
 		try {
