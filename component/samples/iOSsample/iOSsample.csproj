@@ -77,15 +77,15 @@
   <ItemGroup>
     <Reference Include="Microsoft.WindowsAzure.Mobile, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Debug\Microsoft.WindowsAzure.Mobile.dll</HintPath>
+      <HintPath>..\..\lib\ios\Microsoft.WindowsAzure.Mobile.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.WindowsAzure.Mobile.Ext, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Debug\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
+      <HintPath>..\..\lib\ios\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Debug\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\..\lib\ios\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Xml" />
@@ -95,7 +95,7 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="Xamarin.Auth.iOS, Version=1.2.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Debug\Xamarin.Auth.iOS.dll</HintPath>
+      <HintPath>..\..\lib\ios\Xamarin.Auth.iOS.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -3,3 +3,4 @@ xpkg
 *.suo
 bin
 obj
+lib

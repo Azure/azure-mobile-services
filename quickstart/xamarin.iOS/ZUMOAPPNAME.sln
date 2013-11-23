@@ -5,26 +5,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZUMOAPPNAME", "ZUMOAPPNAME\
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Ad-Hoc|iPhone = Ad-Hoc|iPhone
-		Ad-Hoc|iPhoneSimulator = Ad-Hoc|iPhoneSimulator
-		AppStore|iPhone = AppStore|iPhone
-		AppStore|iPhoneSimulator = AppStore|iPhoneSimulator
 		Debug|iPhone = Debug|iPhone
 		Debug|iPhoneSimulator = Debug|iPhoneSimulator
 		Release|iPhone = Release|iPhone
 		Release|iPhoneSimulator = Release|iPhoneSimulator
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{07F1CD1B-626F-4BE5-9840-97B44CBB94C9}.Ad-Hoc|iPhone.ActiveCfg = Ad-Hoc|iPhone
-		{07F1CD1B-626F-4BE5-9840-97B44CBB94C9}.Ad-Hoc|iPhone.Build.0 = Ad-Hoc|iPhone
-		{07F1CD1B-626F-4BE5-9840-97B44CBB94C9}.Ad-Hoc|iPhoneSimulator.ActiveCfg = Ad-Hoc|iPhoneSimulator
-		{07F1CD1B-626F-4BE5-9840-97B44CBB94C9}.Ad-Hoc|iPhoneSimulator.Build.0 = Ad-Hoc|iPhoneSimulator
-		{07F1CD1B-626F-4BE5-9840-97B44CBB94C9}.Ad-Hoc|iPhoneSimulator.Deploy.0 = Ad-Hoc|iPhoneSimulator
-		{07F1CD1B-626F-4BE5-9840-97B44CBB94C9}.AppStore|iPhone.ActiveCfg = AppStore|iPhone
-		{07F1CD1B-626F-4BE5-9840-97B44CBB94C9}.AppStore|iPhone.Build.0 = AppStore|iPhone
-		{07F1CD1B-626F-4BE5-9840-97B44CBB94C9}.AppStore|iPhoneSimulator.ActiveCfg = AppStore|iPhoneSimulator
-		{07F1CD1B-626F-4BE5-9840-97B44CBB94C9}.AppStore|iPhoneSimulator.Build.0 = AppStore|iPhoneSimulator
-		{07F1CD1B-626F-4BE5-9840-97B44CBB94C9}.AppStore|iPhoneSimulator.Deploy.0 = AppStore|iPhoneSimulator
 		{07F1CD1B-626F-4BE5-9840-97B44CBB94C9}.Debug|iPhone.ActiveCfg = Debug|iPhone
 		{07F1CD1B-626F-4BE5-9840-97B44CBB94C9}.Debug|iPhone.Build.0 = Debug|iPhone
 		{07F1CD1B-626F-4BE5-9840-97B44CBB94C9}.Debug|iPhoneSimulator.ActiveCfg = Debug|iPhoneSimulator
