@@ -40,7 +40,7 @@
 
 @implementation ZumoLoginTests
 
-NSDictionary *lastUserIdentityObject;
+static NSString *lastUserIdentityObjectKey = @"lastUserIdentityObject";
 
 + (NSArray *)createTests {
     NSMutableArray *result = [[NSMutableArray alloc] init];
@@ -147,7 +147,27 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
                     }
                     
                     if (!readError && tableType == ZumoTableAuthenticated) {
-                        lastUserIdentityObject = read[@"Identities"];
+                        id serverIdentities = [read objectForKey:@"Identities"];
+                        NSDictionary *identities;
+                        if ([serverIdentities isKindOfClass:[NSString class]]) {
+                            NSString *identitiesJson = serverIdentities;
+                            NSData *identitiesData = [identitiesJson dataUsingEncoding:NSUTF8StringEncoding];
+                            NSError *jsonError;
+                            identities = [NSJSONSerialization JSONObjectWithData:identitiesData options:0 error:&jsonError];
+                            if (jsonError) {
+                                [test addLog:[NSString stringWithFormat:@"Identities value is not a valid JSON object: %@", jsonError]];
+                                completion(NO);
+                                return;
+                            }
+                        } else if ([serverIdentities isKindOfClass:[NSDictionary class]]) {
+                            // it's already a dictionary
+                            identities = serverIdentities;
+                        } else {
+                            [test addLog:@"Server identities is not a dictionary of values"];
+                            completion(NO);
+                            return;
+                        }
+                        [[[ZumoTestGlobals sharedInstance] globalTestParameters] setObject:identities forKey:lastUserIdentityObjectKey];
                     }
                     
                     [table deleteWithId:itemId completion:^(NSNumber *deletedId, NSError *deleteError) {
@@ -189,7 +209,7 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
 
 + (ZumoTest *)createClientSideLoginWithProvider:(NSString *)provider {
     return [ZumoTest createTestWithName:[NSString stringWithFormat:@"Login via token for %@", provider] andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
-        NSDictionary *lastIdentity = lastUserIdentityObject;
+        NSDictionary *lastIdentity = [[[ZumoTestGlobals sharedInstance] globalTestParameters] objectForKey:lastUserIdentityObjectKey];
         if (!lastIdentity) {
             [test addLog:@"Last identity is null. Cannot run this test."];
             [test setTestStatus:TSFailed];
@@ -197,10 +217,10 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
             return;
         }
         
-        lastUserIdentityObject = nil;
+        [[[ZumoTestGlobals sharedInstance] globalTestParameters] removeObjectForKey:lastUserIdentityObjectKey];
         
         [test addLog:[NSString stringWithFormat:@"Last user identity object: %@", lastIdentity]];
-        NSDictionary *providerIdentity = lastIdentity[provider];
+        NSDictionary *providerIdentity = [lastIdentity objectForKey:provider];
         if (!providerIdentity) {
             [test addLog:@"Don't have identity for specified provider. Cannot run this test."];
             [test setTestStatus:TSFailed];
@@ -209,7 +229,7 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
         }
 
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        NSDictionary *token = @{@"access_token": providerIdentity[@"accessToken"]};
+        NSDictionary *token = @{@"access_token": [providerIdentity objectForKey:@"accessToken"]};
         [client loginWithProvider:provider token:token completion:^(MSUser *user, NSError *error) {
             if (error) {
                 [test addLog:[NSString stringWithFormat:@"Error logging in: %@", error]];

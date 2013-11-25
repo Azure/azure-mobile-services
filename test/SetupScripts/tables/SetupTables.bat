@@ -28,7 +28,11 @@ call azure mobile table create %1 --integerId w8RoundTripTable
 
 REM Tables specific to iOS tests
 call azure mobile table create --integerId %1 iosRoundTripTable
-call azure mobile table create --integerId %1 iosPushTest
+
+REM Tables specific to push tests
+call azure mobile table create %1 iosPushTest
+call azure mobile table create %1 w8PushTest
+call azure mobile table create %1 wp8PushTest
 
 call azure mobile table update -p insert=admin,read=admin,update=admin,delete=admin %1 admin
 call azure mobile table update -p insert=application,read=application,update=application,delete=application %1 application
@@ -63,6 +67,10 @@ call azure mobile script upload %1 table/w8RoundTripTable.update -f w8RoundTripT
 
 REM Tables specific to iOS tests
 call azure mobile script upload %1 table/iosRoundTripTable.insert -f iosRoundTripTable.insert.js
+
+REM Tables specific to push tests
 call azure mobile script upload %1 table/iosPushTest.insert -f iosPushTest.insert.js
+call azure mobile script upload %1 table/w8PushTest.insert -f w8PushTest.insert.js
+call azure mobile script upload %1 table/wp8PushTest.insert -f wp8PushTest.insert.js
 
 :TheEnd
