@@ -23,7 +23,11 @@ else
 
   #Tables specific to iOS tests
   azure mobile table create --integerId $1 iosRoundTripTable
-  azure mobile table create --integerId $1 iosPushTest
+
+  #Tables used in push tests
+  azure mobile table create $1 iosPushTest
+  azure mobile table create $1 w8PushTest
+  azure mobile table create $1 wp8PushTest
 
   azure mobile table update -p insert=admin,read=admin,update=admin,delete=admin $1 admin
   azure mobile table update -p insert=application,read=application,update=application,delete=application $1 application
@@ -57,6 +61,10 @@ else
 
   #Tables specific to iOS tests
   azure mobile script upload $1 table/iosRoundTripTable.insert -f iosRoundTripTable.insert.js
+
+  #Tables used in Push tests
+  azure mobile script upload $1 table/w8PushTest.insert -f w8PushTest.insert.js
+  azure mobile script upload $1 table/wp8PushTest.insert -f wp8PushTest.insert.js
   azure mobile script upload $1 table/iosPushTest.insert -f iosPushTest.insert.js
 
 fi
