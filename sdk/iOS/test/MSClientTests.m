@@ -603,8 +603,7 @@
                  parameters:nil
                     headers:nil
                  completion:
-     ^(NSData *result, NSURLResponse *response, NSError *error) {
-         
+     ^(id result, NSHTTPURLResponse *response, NSError *error) {
          NSString *bodyString = [[NSString alloc] initWithData:actualRequest.HTTPBody
                                                       encoding:NSUTF8StringEncoding];
          
