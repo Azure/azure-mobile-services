@@ -574,6 +574,49 @@
     STAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
+- (void) testInvokeApiAllowsArrayDataOut
+{
+    MSClient *client = [MSClient clientWithApplicationURLString:@"http://someURL.com"];
+    
+    __block NSURLRequest *actualRequest = nil;
+
+    // Use the filter to capture the request being sent
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    testFilter.ignoreNextFilter = YES;
+    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
+                                                           statusCode:200
+                                                          HTTPVersion:nil
+                                                         headerFields:nil];
+    
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    // Create a client that uses the filter
+    MSClient *filterClient = [client clientWithFilter:testFilter];
+    
+    // Invoke the API
+    [filterClient invokeAPI:@"somApi"
+                       body:@[@"apple", @"orange", @"banana"]
+                 HTTPMethod:@"Get"
+                 parameters:nil
+                    headers:nil
+                 completion:
+     ^(NSData *result, NSURLResponse *response, NSError *error) {
+         
+         NSString *bodyString = [[NSString alloc] initWithData:actualRequest.HTTPBody
+                                                      encoding:NSUTF8StringEncoding];
+         
+         STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+         STAssertNil(error, @"error should have been nil.");
+         STAssertEqualObjects(@"[\"apple\",\"orange\",\"banana\"]", bodyString, @"Unexpected body found: %@", bodyString);
+         
+         done = YES;
+     }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
 
 #pragma mark * Async Test Helper Method
 
