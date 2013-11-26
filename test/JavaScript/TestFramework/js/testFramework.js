@@ -32,11 +32,6 @@ function createZumoNamespace() {
         /// <param name="text" type="String">The text to be added to the log</param>
         /// <param name="args" optional="true">Any additional arguments, which will be
         ///       JSON.stringify'ed and concatenated with the text.</param>
-        text = addTimestamp(stringFormat(text, arguments));
-        this.logs.push(text);
-    }
-
-    function stringFormat(text, args) {
         for (var i = 1; i < arguments.length; i++) {
             var arg = arguments[i];
             if (typeof arg === 'string') {
@@ -45,7 +40,8 @@ function createZumoNamespace() {
                 text = text + JSON.stringify(arg);
             }
         }
-        return text;
+        text = addTimestamp(text);
+        this.logs.push(text);
     }
 
     function addTimestamp(text) {
@@ -61,7 +57,15 @@ function createZumoNamespace() {
         /// <param name="text" type="String">The text to be added to the log</param>
         /// <param name="args" optional="true">Any additional arguments, which will be
         ///       JSON.stringify'ed and concatenated with the text.</param>
-        text = addTimestamp(stringFormat(text, arguments));
+        for (var i = 1; i < arguments.length; i++) {
+            var arg = arguments[i];
+            if (typeof arg === 'string') {
+                text = text + arg;
+            } else {
+                text = text + JSON.stringify(arg);
+            }
+        }
+        text = addTimestamp(text);
 
         if (text.length > 500) {
             text = text.substring(0, 500) + '... (truncated)';
