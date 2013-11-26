@@ -15,7 +15,7 @@
     /// will define the module's exports when invoked.
     /// </field>
     var $__modules__ = { };
-    var $__fileVersion__ = "1.0.11023.0";
+    var $__fileVersion__ = "1.0.11121.0";
     
     function require(name) {
         /// <summary>
@@ -53,6 +53,7 @@
         {
             "Validate_NotNullError"                                 : "{0} cannot be null.",
             "Validate_NotNullOrEmptyError"                          : "{0} cannot be null or empty.",
+            "Validate_InvalidId"                                    : "{0} is not valid.",
             "Validate_TypeCheckError"                               : "{0} is expected to be a value of type {1}, not {2}.",
             "Validate_LengthUnexpected"                             : "{0} is expected to have length {1}, not {2}.",
             "Validate_InvalidUserParameter"                         : "{0} contains an invalid user-defined query string parameter: {1}. User-defined query string parameters must not begin with a '$'.",
@@ -685,11 +686,25 @@
                 }
                 Validate.notNull(callback, 'callback');
         
-                for (var i in idNames) {            
-                    if (!_.isNullOrZero(instance[idNames[i]])) {
-                        throw _.format(
-                            Platform.getResourceString("MobileServiceTable_InsertIdAlreadySet"),
-                            idPropertyName);
+                // Integer Ids can not have any Id set
+                for (var i in idNames) {
+                    var id = instance[idNames[i]];
+        
+                    if (!_.isNullOrZero(id)) {
+                        if (_.isString(id)) {
+                            // String Id's are allowed iif using 'id'
+                            if (idNames[i] !== idPropertyName) {
+                                throw _.format(
+                                    Platform.getResourceString("MobileServiceTable_InsertIdAlreadySet"),
+                                    idPropertyName);
+                            } else {
+                                Validate.isValidId(id, idPropertyName);
+                            }
+                        } else {
+                            throw _.format(
+                                Platform.getResourceString("MobileServiceTable_InsertIdAlreadySet"),
+                                idPropertyName);
+                        }
                     }
                 }
         
@@ -740,7 +755,7 @@
         
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
-                Validate.notNullOrZero(instance[idPropertyName], 'instance.' + idPropertyName);
+                Validate.isValidId(instance[idPropertyName], 'instance.' + idPropertyName);
                 if (!_.isNull(parameters)) {
                     Validate.isValidParametersObject(parameters, 'parameters');
                 }
@@ -750,7 +765,7 @@
                 var urlFragment =  _.url.combinePathSegments(
                         tableRouteSeperatorName,
                         this.getTableName(),
-                        instance[idPropertyName].toString());
+                        encodeURIComponent(instance[idPropertyName].toString()));
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
@@ -796,9 +811,13 @@
         
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
-                if (_.isNullOrZero(instance[idPropertyName]))
+                if (!_.isValidId(instance[idPropertyName], idPropertyName))
                 {
-                    callback(null, instance);
+                    if (typeof instance[idPropertyName] === 'string' && instance[idPropertyName] !== '') {
+                        throw _.format(Platform.getResourceString("Validate_InvalidId"), idPropertyName);
+                    } else {
+                        callback(null, instance);
+                    }
                     return;
                 }
         
@@ -808,11 +827,16 @@
                 Validate.notNull(callback, 'callback');
         
                 // Construct the URL
-        
                 var urlFragment = _.url.combinePathSegments(
                         tableRouteSeperatorName,
                         this.getTableName());
-                urlFragment = _.url.combinePathAndQuery(urlFragment, "?$filter=id eq " + instance[idPropertyName].toString());
+        
+                if (typeof instance[idPropertyName] === 'string') {
+                    var id = encodeURIComponent(instance[idPropertyName]).replace(/\'/g, '%27%27');
+                    urlFragment = _.url.combinePathAndQuery(urlFragment, "?$filter=id eq '" + id + "'");
+                } else {
+                    urlFragment = _.url.combinePathAndQuery(urlFragment, "?$filter=id eq " + encodeURIComponent(instance[idPropertyName].toString()));
+                }
         
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
@@ -834,9 +858,10 @@
                             }
         
                             if (!result) {
-                                throw _.format(
+                                var message =_.format(
                                     Platform.getResourceString("MobileServiceTable_NotSingleObject"),
                                     idPropertyName);
+                                callback(_.createError(message), null);
                             }
         
                             result = Platform.allowPlatformToMutateOriginal(instance, result);
@@ -867,7 +892,7 @@
                 }
         
                 // Validate the arguments
-                Validate.notNullOrZero(id, idPropertyName);
+                Validate.isValidId(id, idPropertyName);
                 if (!_.isNull(parameters)) {
                     Validate.isValidParametersObject(parameters);
                 }
@@ -877,7 +902,7 @@
                 var urlFragment = _.url.combinePathSegments(
                         tableRouteSeperatorName,
                         this.getTableName(),
-                        id.toString());
+                        encodeURIComponent(id.toString()));
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
@@ -921,7 +946,7 @@
         
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
-                Validate.notNullOrZero(instance[idPropertyName], 'instance.' + idPropertyName);
+                Validate.isValidId(instance[idPropertyName], 'instance.' + idPropertyName);
                 if (!_.isNull(parameters)) {
                     Validate.isValidParametersObject(parameters);
                 }
@@ -931,7 +956,7 @@
                 var urlFragment =  _.url.combinePathSegments(
                         tableRouteSeperatorName,
                         this.getTableName(),
-                        instance[idPropertyName].toString());
+                        encodeURIComponent(instance[idPropertyName].toString()));
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
@@ -1215,26 +1240,6 @@
                 loginWithLoginControl(this, provider, useSingleSignOn, callback);
             }
         };
-        
-        function isValidProvider(provider) {
-            /// <summary>
-            /// Determines that the given string is one of the known providers.
-            /// </summary>
-            /// <param name="provider" type="String">
-            /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google', or 'microsoftaccount'.
-            /// </param>
-            /// <returns>
-            /// True if the given provider is valid, and false otherwise.
-            /// </returns>
-        
-            for (var i = 0, j = authenticationProviders.length; i < j; i++) {
-                if (authenticationProviders[i] === provider) {
-                    return true;
-                }
-            }
-        
-            return false;
-        }
         
         function onLoginComplete(error, token, client, callback) {
             /// <summary>
@@ -2109,16 +2114,16 @@
         exports.isNullOrZero = function (value) {
             /// <summary>
             /// Gets a value indicating whether the provided value is null (or
-            /// undefined) or zero.
+            /// undefined) or zero / empty string
             /// </summary>
             /// <param name="value" type="Object" mayBeNull="true">
             /// The value to check.
             /// </param>
             /// <returns type="Boolean">
-            /// A value indicating whether the provided value is null (or undefined) or zero.
+            /// A value indicating whether the provided value is null (or undefined) or zero or empty string.
             /// </returns>
         
-            return value === null || value === undefined || value === 0;
+            return value === null || value === undefined || value === 0 || value === '';
         };
         
         exports.isNullOrEmpty = function (value) {
@@ -2230,6 +2235,38 @@
         
             return _.isNull(value) || (typeof value === 'object' && !_.isDate(value));
         };
+        
+        exports.isValidId = function (value) {
+            /// <summary>
+            /// Determine if a value is an acceptable id for use by the mobile service
+            /// </summary>
+            /// <param name="value" type="Object">The value to check.</param>
+            /// <returns type="boolean">
+            /// True if the value is a string or number, meeting all criteria, or false othwerise.
+            /// </returns>
+            if (_.isNullOrZero(value)) {
+                return false;
+            }
+        
+            if (_.isString(value)) {
+                // Strings must contain at least one non whitespace character
+                if (value.length === 0 || value.length > 255 || value.trim().length === 0) {
+                    return false;
+                }
+        
+                var ex = /[+"/?`\\]|[\u0000-\u001F]|[\u007F-\u009F]|^\.{1,2}$/;
+                if (value.match(ex) !== null) {
+                    return false;
+                }
+        
+                return true;
+        
+            } else if (_.isNumber(value)) {
+                return value > 0;
+            }
+        
+            return false;
+        }
         
         exports.isString = function (value) {
             /// <summary>
@@ -2909,7 +2946,7 @@
         
         exports.notNullOrZero = function (value, name) {
             /// <summary>
-            /// Ensure the value is not null, undefined, or empty.
+            /// Ensure the value is not null, undefined, zero, or empty.
             /// </summary>
             /// <param name="value" mayBeNull="true">The value to check.</param>
             /// <param name="name" mayBeNull="true" optional="true" type="String">
@@ -2920,6 +2957,20 @@
                 throw _.format(Platform.getResourceString("Validate_NotNullOrEmptyError"), name || 'Value');
             }
         };
+        
+        exports.isValidId = function (value, name) {
+            /// <summary>
+            /// Ensure the value is a valid id for mobile services.
+            /// </summary>
+            /// <param name="value" mayBeNull="true">The value to check.</param>
+            /// <param name="name" mayBeNull="true" optional="true" type="String">
+            /// Optional name of the value to throw.
+            /// </param>
+        
+            if (!_.isValidId(value)) {
+                throw _.format(Platform.getResourceString("Validate_InvalidId"), name || 'id');
+            }
+        }
         
         exports.isDate = function (value, name) {
             /// <summary>

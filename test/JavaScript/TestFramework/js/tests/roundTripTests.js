@@ -8,6 +8,7 @@
 function defineRoundTripTestsNamespace() {
     var tests = [];
     var tableName = 'w8jsRoundTripTable';
+    var stringIdTableName = 'stringIdRoundTripTable';
 
     tests.push(new zumo.Test('Setup dynamic schema', function (test, done) {
         var table = zumo.getClient().getTable(tableName);
@@ -41,13 +42,12 @@ function defineRoundTripTestsNamespace() {
     tests.push(createRoundTripTest('String: non-ASCII characters - Hebrew', 'string1', 'הספר הוא על השולחן'));
 
     tests.push(createRoundTripTest('Date: now', 'date1', new Date()));
-    tests.push(createRoundTripTest('Date: now (UTC)', 'date1', new Date(Date.UTC)));
     tests.push(createRoundTripTest('Date: null', 'date1', null));
-    tests.push(createRoundTripTest('Date: unix 0', 'date1', new Date(1970, 1, 1, 0, 0, 0, 0)));
-    tests.push(createRoundTripTest('Date: before unix 0', 'date1', new Date(1969, 12, 31, 23, 59, 59, 999)));
-    tests.push(createRoundTripTest('Date: after unix 0', 'date1', new Date(1970, 1, 1, 0, 0, 0, 1)));
-    tests.push(createRoundTripTest('Date: distant past', 'date1', new Date(1, 2, 3, 4, 5, 6, 7)));
-    tests.push(createRoundTripTest('Date: distant future', 'date1', new Date(9876, 5, 4, 3, 2, 1)));
+    tests.push(createRoundTripTest('Date: unix 0', 'date1', new Date(Date.UTC(1970, 1 - 1, 1, 0, 0, 0, 0))));
+    tests.push(createRoundTripTest('Date: before unix 0', 'date1', new Date(Date.UTC(1969, 12 - 1, 31, 23, 59, 59, 999))));
+    tests.push(createRoundTripTest('Date: after unix 0', 'date1', new Date(Date.UTC(1970, 1 - 1, 1, 0, 0, 0, 1))));
+    tests.push(createRoundTripTest('Date: distant past', 'date1', new Date(1, 2 - 1, 3, 4, 5, 6, 7)));
+    tests.push(createRoundTripTest('Date: distant future', 'date1', new Date(9876, 5 - 1, 4, 3, 2, 1)));
 
     tests.push(createRoundTripTest('Bool: true', 'bool1', true));
     tests.push(createRoundTripTest('Bool: false', 'bool1', false));
@@ -81,6 +81,137 @@ function defineRoundTripTestsNamespace() {
     tests.push(createNegativeRoundTripTest('(Neg) Insert item with \'Id\' property (value = 1)', { Id: 1, string1: 'hello' }));
     tests.push(createNegativeRoundTripTest('(Neg) Insert item with \'ID\' property (value = 1)', { ID: 1, string1: 'hello' }));
 
+    tests.push(new zumo.Test('Setup string id dynamic schema', function (test, done) {
+        var table = zumo.getClient().getTable(stringIdTableName);
+        var item = {
+            name: 'a string',
+            number: 123.45,
+            bool: true,
+            date1: new Date(),
+            complex: [ 'a complex object which will be converted to string at the database' ]
+        };
+        table.insert(item).done(function () {
+            test.addLog('Successfully set up the dynamic schema: ' + JSON.stringify(item));
+            done(true);
+        }, function (err) {
+            test.addLog('Error setting up dynamic schema: ' + JSON.stringify(err));
+            done(false);
+        });
+    }));
+
+    var itemName = 'ãéìôü ÇñÑ - الكتاب على الطاولة - 这本书在桌子上 - ⒈①Ⅻㄨㄩ 啊阿鼾齄 丂丄狚狛 狜狝﨨﨩 ˊˋ˙–〇 㐀㐁䶴䶵 - 本は机の上に - הספר הוא על השולחן';
+    var itemNumber = Number.MAX_VALUE;
+    var itemBool = true;
+    var itemComplex = ['abc', 'def', 'ghi'];
+
+    var differentIds = { ascii: 'id-', latin: 'ãéìôü ÇñÑ', arabic: 'الكتاب على الطاولة', chinese: '这本书在桌子上', hebrew: 'הספר הוא על השולחן' };
+    tests.push(createStringIdRoundTripTest('String id - no id on insert, multiple properties', { name: itemName, number: itemNumber, bool: itemBool, date1: zumo.util.randomDate(), complex: itemComplex }));
+    for (var t in differentIds) {
+        tests.push(createStringIdRoundTripTest('String id - ' + t + ' id on insert, multiple properties', { id: differentIds[t], name: t, number: itemNumber, bool: itemBool, date1: zumo.util.randomDate(), complex: itemComplex }));
+    }
+
+    var invalidIds = ['.', '..', 'control\u0010characters', 'large id' + Array(260).join('*')];
+    invalidIds.forEach(function (id) {
+        tests.push(createNegativeRoundTripTest('(Neg) String id - insert with invalid id: ' + (id.length > 30 ? (id.substring(0, 30) + '...') : id), { id: id, name: 'hello' }));
+    });
+
+    var currentIEVersion = zumo.getIEBrowserVersion(); // get IE8 version ...
+    function dateReviver(key, value) {
+        var re = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})\.(\d{3})Z$/;
+        if (typeof value === 'string') {
+            if (currentIEVersion === 8.0) {
+                // UTC date(yyyy-mm-ddTtt:hh:mm:milZ) format isn't supported in IE8
+                re = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z$/;
+                if (value === '--T::Z') { // '--T::Z this format is not supported by IE8 so we use defult date
+                    value = '1970-01-01T00:00:00Z'; //Default Date and time
+                    item[propertyName] = value;
+                }
+            }
+
+            var a = re.exec(value);
+            if (a) {
+                if (currentIEVersion === 8.0) {
+                    var d = new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4], +a[5], +a[6]));
+                    return d;
+                }
+
+                var d = new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4], +a[5], +a[6], +a[7]));
+                return d;
+
+            }
+        }
+        return value;
+    }
+
+    function createStringIdRoundTripTest(testName, objectToInsert) {
+        return new zumo.Test(testName, function (test, done) {
+            var table = zumo.getClient().getTable(stringIdTableName);
+            var currentIEVersion = zumo.getIEBrowserVersion();
+            var strItem = JSON.stringify(objectToInsert);
+            var originalItem = JSON.parse(strItem, dateReviver);
+            var hasId = !!objectToInsert.id;
+            if (hasId) {
+                // force id to be unique
+                originalItem.id = originalItem.id + '-' + (new Date().toISOString());
+            }
+            var originalId = originalItem.id;
+            table.insert(originalItem).done(function (itemInserted) {
+                test.addLog('Inserted item: ', JSON.stringify(itemInserted));
+                var id = itemInserted.id;
+
+                if (hasId) {
+                    if (originalId !== id) {
+                        test.addLog('Error, id passed to insert is not the same (' + objectToInsert.id + ') as the id returned by the server (' + id + ')');
+                        done(false);
+                        return;
+                    }
+                } else {
+                    if (!id) {
+                        test.addLog('Error, inserted object does not have an \'id\' property');
+                        done(false);
+                        return;
+                    } else {
+                        if (typeof id !== 'string') {
+                            test.addLog('Error, id should be a string');
+                            done(false);
+                            return;
+                        }
+                    }
+                }
+
+                table.lookup(id).done(function (retrieved) {
+                    test.addLog('Retrieved the item from the service: ' + JSON.stringify(retrieved));
+                    var errors = [];
+                    if (zumo.util.compare(originalItem, retrieved, errors)) {
+                        test.addLog('Object round tripped successfully.');
+                        test.addLog('Now trying to insert an item with an existing id (should fail)');
+                        var newItem = { id: id, name: 'something' };
+                        table.insert(newItem).done(function (inserted2) {
+                            test.addLog('Error, item was inserted but should not have been: ', inserted2);
+                            done(false);
+                        }, function (err) {
+                            test.addLog('Ok, got expected error');
+                            done(true);
+                        });
+                    } else {
+                        for (var index = 0; index < errors.length; index++) {
+                            var error = errors[index];
+                            test.addLog(error);
+                        }
+                        test.addLog('Round-tripped item is different!');
+                        done(false);
+                    }
+                }, function (err) {
+                    test.addLog('Error retrieving data: ' + JSON.stringify(err));
+                    done(false);
+                });
+            }, function (err) {
+                test.addLog('Error inserting data: ' + JSON.stringify(err));
+                done(false);
+            });
+        });
+    }
+
     function createNegativeRoundTripTest(testName, objectToInsert) {
         return new zumo.Test(testName, function (test, done) {
             var table = zumo.getClient().getTable(tableName);
@@ -100,33 +231,8 @@ function defineRoundTripTestsNamespace() {
             item[propertyName] = value;
             var table = zumo.getClient().getTable(tableName);
             var currentIEVersion = zumo.getIEBrowserVersion(); // get IE8 version ...
-            var dateReviver = function (key, value) {
-                var re = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})\.(\d{3})Z$/;
-                if (typeof value === 'string') {
-                    if (currentIEVersion === 8.0) {
-                        // UTC date(yyyy-mm-ddTtt:hh:mm:milZ) format isn't supported in IE8
-                        re = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z$/;
-                        if (value === '--T::Z') { // '--T::Z this format is not supported by IE8 so we use defult date
-                            value = '1970-01-01T00:00:00Z'; //Default Date and time
-                            item[propertyName] = value;
-                        }
-                    }
-
-                    var a = re.exec(value);
-                    if (a) {
-                        if (currentIEVersion === 8.0) {
-                            var d = new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4], +a[5], +a[6]));
-                            return d;
-                        }
-
-                        var d = new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4], +a[5], +a[6], +a[7]));
-                        return d;
-
-                    }
-                }
-                return value;
-            }
-            var originalItem = JSON.parse(JSON.stringify(item), dateReviver);
+            var strItem = JSON.stringify(item);
+            var originalItem = JSON.parse(strItem, dateReviver);
             table.insert(item).done(function (itemInserted) {
                 test.addLog('Inserted item: ', JSON.stringify(itemInserted));
                 var id = itemInserted.id;

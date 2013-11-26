@@ -113,10 +113,6 @@
     <Content Include="images\splashscreen.png" />
     <Content Include="images\storelogo.png" />
     <Content Include="js\default.js" />
-    <Content Include="js\MobileServices.intellisense.js" />
-    <Content Include="js\MobileServices.js" />
-    <Content Include="js\MobileServices.min.js" />
-    <Content Include="js\MobileServices.pri" />
     <Content Include="js\platformSpecificFunctions.js" />
     <Content Include="js\wl.js" />
     <Content Include="packages.config" />

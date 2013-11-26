@@ -34,6 +34,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 
 abstract class MobileServiceTableBase<E> {
 
@@ -200,44 +201,6 @@ abstract class MobileServiceTableBase<E> {
 	}
 	
 	/**
-	 * Deletes an entity from a Mobile Service Table
-	 * 
-	 * @param element
-	 *            The entity to delete
-	 * @param parameters
-	 * 			  A list of user-defined parameters and values to include in the request URI query string
-	 * @param callback
-	 *            Callback to invoke when the operation is completed
-	 */
-	public void delete(Object element, List<Pair<String, String>> parameters, TableDeleteCallback callback) {
-		int id = -1;
-		try {
-			id = getObjectId(element);
-			
-			if (id == 0) {
-				throw new IllegalArgumentException("You must specify an id property with a valid value for deleting an object.");
-			}
-		} catch (Exception e) {
-			callback.onCompleted(e, null);
-			return;
-		}
-
-		this.delete(id, parameters, callback);
-	}
-
-	/**
-	 * Deletes an entity from a Mobile Service Table using a given id
-	 * 
-	 * @param id
-	 *            The id of the entity to delete
-	 * @param callback
-	 *            Callback to invoke when the operation is completed
-	 */
-	public void delete(int id, final TableDeleteCallback callback) {
-		this.delete(id, null, callback);
-	}
-	
-	/**
 	 * Deletes an entity from a Mobile Service Table using a given id
 	 * 
 	 * @param id
@@ -247,14 +210,25 @@ abstract class MobileServiceTableBase<E> {
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
-	public void delete(int id, List<Pair<String, String>> parameters, final TableDeleteCallback callback) {
+	public void delete(Object elementOrId, List<Pair<String, String>> parameters, final TableDeleteCallback callback) {
+		try {	
+			validateId(elementOrId);
+		} catch (Exception e) {
+			if (callback != null) {
+				callback.onCompleted(e, null);
+			}
+				
+			return;
+		}
+				
 		// Create delete request
 		ServiceFilterRequest delete;
+		
 		try {
 			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
 			uriBuilder.path(TABLES_URL);
 			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
-			uriBuilder.appendPath(Integer.valueOf(id).toString());
+			uriBuilder.appendPath(getObjectId(elementOrId).toString());
 
 			if (parameters != null && parameters.size() > 0) {
 				for (Pair<String, String> parameter : parameters) {
@@ -266,6 +240,7 @@ abstract class MobileServiceTableBase<E> {
 			if (callback != null) {
 				callback.onCompleted(e, null);
 			}
+			
 			return;
 		}
 
@@ -310,30 +285,42 @@ abstract class MobileServiceTableBase<E> {
 	 *            The element to use
 	 * @return The id of the element
 	 */
-	protected int getObjectId(Object element) {
-		if (element == null) {
+	protected Object getObjectId(Object element) {
+		if (element == null || (element instanceof JsonNull)) {
 			throw new InvalidParameterException("Element cannot be null");
 		} else if (element instanceof Integer) {
 			return ((Integer) element).intValue();
-		}
-
-		JsonObject jsonObject;
-		if (element instanceof JsonObject) {
-			jsonObject = (JsonObject) element;
+		} else if (element instanceof String) {
+			return element;
 		} else {
-			jsonObject = mClient.getGsonBuilder().create().toJsonTree(element)
-					.getAsJsonObject();
+			JsonObject jsonObject;
+			
+			if (element instanceof JsonObject) {
+				jsonObject = (JsonObject)element;
+			} else {
+				jsonObject = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
+			}
+			
+			updateIdProperty(jsonObject);
+	
+			JsonElement idProperty = jsonObject.get("id");
+			
+			if (idProperty == null || (idProperty instanceof JsonNull)) {
+				throw new InvalidParameterException("Element must contain id property");
+			}
+	
+			if (idProperty.isJsonPrimitive()) {
+				if (idProperty.getAsJsonPrimitive().isNumber()) {
+					return idProperty.getAsJsonPrimitive().getAsLong();
+				} else if(idProperty.getAsJsonPrimitive().isString()) {
+					return idProperty.getAsJsonPrimitive().getAsString();
+				} else {
+					throw new InvalidParameterException("Invalid id type");
+				}
+			} else {
+				throw new InvalidParameterException("Invalid id type");
+			}
 		}
-		
-		updateIdProperty(jsonObject);
-
-		JsonElement idProperty = jsonObject.get("id");
-		if (idProperty instanceof JsonNull || idProperty == null) {
-			throw new InvalidParameterException(
-					"Element must contain id property");
-		}
-
-		return idProperty.getAsInt();
 	}
 	
 	/**
@@ -344,30 +331,310 @@ abstract class MobileServiceTableBase<E> {
 	protected void updateIdProperty(final JsonObject json) throws IllegalArgumentException {
 		for (Map.Entry<String,JsonElement> entry : json.entrySet()){
 			String key = entry.getKey();
+			
 			if (key.equalsIgnoreCase("id")) {
 				JsonElement element = entry.getValue();
+				
 				if (isValidTypeId(element)) {
 					if (!key.equals("id")) {
 						//force the id name to 'id', no matter the casing 
 						json.remove(key);
 						// Create a new id property using the given property name
-						json.addProperty("id", entry.getValue().getAsNumber());
+						
+						JsonPrimitive value = entry.getValue().getAsJsonPrimitive();
+						if (value.isNumber()) {
+							json.addProperty("id", value.getAsLong());
+						} else {
+							json.addProperty("id", value.getAsString());
+						}
 					}
+					
 					return;
 				} else {
-					throw new IllegalArgumentException("The id must be numeric");
+					throw new IllegalArgumentException("The id must be numeric or string");
 				}
 			}
 		}
 	}
 	
 	/**
-	 * Validates if the id property is numeric.
+	 * Validates if the id property is numeric or string.
 	 * @param element
 	 * @return
 	 */
 	protected boolean isValidTypeId(JsonElement element) {
-		return element.isJsonPrimitive() && element.getAsJsonPrimitive().isNumber();
+		return isStringType(element) || isNumericType(element);
 	}
 
+	/**
+	 * Validates the id value from an Object on Lookup/Update/Delete action
+	 * 
+	 * @param elementOrId The Object to validate
+	 */
+	protected void validateId(final Object elementOrId) {
+		if (elementOrId == null || (elementOrId instanceof JsonNull)) {
+			throw new IllegalArgumentException("Element or id cannot be null.");
+		} else if (isStringType(elementOrId)) {				
+			String id = getStringValue(elementOrId);
+			
+			if (!isValidStringId(id) || isDefaultStringId(id)) {
+				throw new IllegalArgumentException("The string id is invalid.");
+			}
+		} else if (isNumericType(elementOrId)) {				
+			long id = getNumericValue(elementOrId);
+			
+			if (!isValidNumericId(id) || isDefaultNumericId(id)) {
+				throw new IllegalArgumentException("The numeric id is invalid.");
+			}
+		} else if (elementOrId instanceof JsonObject) {
+			validateId((JsonObject)elementOrId);
+		} else {
+			validateId(mClient.getGsonBuilder().create().toJsonTree(elementOrId).getAsJsonObject());
+		}
+	}
+	
+	/**
+	 * Validates the id property from a JsonObject on Lookup/Update/Delete action
+	 * 
+	 * @param element The JsonObject to validate
+	 */
+	protected void validateId(final JsonObject element) {
+		if (element == null) {
+			throw new IllegalArgumentException("The entity cannot be null.");			
+		} else {
+			updateIdProperty(element);
+			
+			if (element.has("id")) {
+				JsonElement idElement = element.get("id");
+				
+				if(isStringType(idElement)) {
+					String id = getStringValue(idElement);
+					
+					if (!isValidStringId(id) || isDefaultStringId(id)) {
+						throw new IllegalArgumentException("The entity has an invalid string value on id property.");
+					}
+				} else if (isNumericType(idElement)) {
+					long id = getNumericValue(idElement);
+					
+					if (!isValidNumericId(id) || isDefaultNumericId(id)) {
+						throw new IllegalArgumentException("The entity has an invalid numeric value on id property.");
+					}
+				} else {
+					throw new IllegalArgumentException("The entity must have a valid numeric or string id property.");
+				}
+			} else {
+				throw new IllegalArgumentException("You must specify an id property with a valid numeric or string value.");
+			}
+		}
+	}
+	
+	/**
+	 * Validates if the object represents a string value.
+	 * @param o
+	 * @return
+	 */
+	protected boolean isStringType(Object o) {
+		boolean result = (o instanceof String);
+		
+		if (o instanceof JsonElement) {
+			JsonElement json = (JsonElement)o;
+			
+			if (json.isJsonPrimitive()) {
+				JsonPrimitive primitive = json.getAsJsonPrimitive();
+				result = primitive.isString();				
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Returns the string value represented by the object.
+	 * @param o
+	 * @return
+	 */
+	protected String getStringValue(Object o) {		
+		String result;
+		
+		if (o instanceof String) {
+			result = (String)o;		
+		} else if (o instanceof JsonElement) {
+			JsonElement json = (JsonElement)o;
+			
+			if (json.isJsonPrimitive()) {
+				JsonPrimitive primitive = json.getAsJsonPrimitive();
+				
+				if (primitive.isString()) {
+					result = primitive.getAsString();
+				} else {
+					throw new IllegalArgumentException("Object does not represent a string value.");
+				}
+			} else {
+				throw new IllegalArgumentException("Object does not represent a string value.");
+			}				
+		} else {
+			throw new IllegalArgumentException("Object does not represent a string value.");
+		}
+		
+		return result;
+	}
+
+	/**
+	 * Validates if the string id is valid.
+	 * @param id
+	 * @return
+	 */
+	protected boolean isValidStringId(String id) {
+		boolean result = isDefaultStringId(id);
+		
+		if (!result && id != null) {
+			result = id.length() <= 255;
+			result &= !containsControlCharacter(id);
+			result &= !containsSpecialCharacter(id);
+			result &= !id.equals(".");
+			result &= !id.equals("..");
+		}
+		
+		return result;
+	}
+
+	/**
+	 * Validates if the string id is a default value.
+	 * @param id
+	 * @return
+	 */
+	protected boolean isDefaultStringId(String id) {
+		return (id == null) || (id.equals(""));
+	}
+	
+	/**
+	 * Validates if a given string contains a control character.
+	 * @param s
+	 * @return
+	 */
+	protected boolean containsControlCharacter(String s) {
+		boolean result = false;
+		
+		final int length = s.length();
+		
+		for (int offset = 0; offset < length; ) {
+		   final int codepoint = s.codePointAt(offset);
+
+		   if (Character.isISOControl(codepoint)) {
+			   result = true;
+			   break;
+		   }
+
+		   offset += Character.charCount(codepoint);
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Validates if a given string contains any of the following special characters: "(U+0022),  +(U+002B), /(U+002F), ?(U+003F), \(U+005C), `(U+0060)
+	 * @param s
+	 * @return
+	 */
+	protected boolean containsSpecialCharacter(String s) {
+		boolean result = false;
+		
+		final int length = s.length();
+		
+		final int cpQuotationMark = 0x0022;
+		final int cpPlusSign = 0x002B;
+		final int cpSolidus = 0x002F;
+		final int cpQuestionMark = 0x003F;
+		final int cpReverseSolidus = 0x005C;
+		final int cpGraveAccent = 0x0060;
+		
+		for (int offset = 0; offset < length; ) {
+		   final int codepoint = s.codePointAt(offset);
+
+		   if (codepoint == cpQuotationMark 
+				   || codepoint == cpPlusSign
+				   || codepoint == cpSolidus
+				   || codepoint == cpQuestionMark
+				   || codepoint == cpReverseSolidus
+				   || codepoint == cpGraveAccent) {
+			   result = true;
+			   break;
+		   }
+
+		   offset += Character.charCount(codepoint);
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Validates if the object represents a numeric value.
+	 * @param o
+	 * @return
+	 */
+	protected boolean isNumericType(Object o) {
+		boolean result = (o instanceof Integer) || (o instanceof Long);
+		
+		if (o instanceof JsonElement) {
+			JsonElement json = (JsonElement)o;
+			
+			if (json.isJsonPrimitive()) {
+				JsonPrimitive primitive = json.getAsJsonPrimitive();
+				result = primitive.isNumber();				
+			}
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Returns the numeric value represented by the object.
+	 * @param o
+	 * @return
+	 */
+	protected long getNumericValue(Object o) {		
+		long result;
+		
+		if (o instanceof Integer) {
+			result = (Integer)o;		
+		} else if (o instanceof Long) {
+			result = (Long)o;		
+		} else if (o instanceof JsonElement) {
+			JsonElement json = (JsonElement)o;
+			
+			if (json.isJsonPrimitive()) {
+				JsonPrimitive primitive = json.getAsJsonPrimitive();
+				
+				if (primitive.isNumber()) {
+					result = primitive.getAsLong();
+				} else {
+					throw new IllegalArgumentException("Object does not represent a string value.");
+				}
+			} else {
+				throw new IllegalArgumentException("Object does not represent a string value.");
+			}				
+		} else {
+			throw new IllegalArgumentException("Object does not represent a string value.");
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Validates if the numeric id is valid.
+	 * @param id
+	 * @return
+	 */
+	protected boolean isValidNumericId(long id) {
+		return isDefaultNumericId(id) || id > 0;
+	}
+
+	/**
+	 * Validates if the numeric id is a default value.
+	 * @param id
+	 * @return
+	 */
+	protected boolean isDefaultNumericId(long id) {
+		return (id == 0);
+	}
 }

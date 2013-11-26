@@ -14,7 +14,7 @@
 #import "MSLoginController.h"
 
 #define WindowsAzureMobileServicesSdkMajorVersion 1
-#define WindowsAzureMobileServicesSdkMinorVersion 0
+#define WindowsAzureMobileServicesSdkMinorVersion 1
 #define WindowsAzureMobileServicesSdkBuildVersion 0
 
 #endif
