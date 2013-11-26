@@ -9,8 +9,6 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json.Linq;
@@ -1449,6 +1447,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.AreEqual("an id", item.Id);
             Assert.AreEqual("Hey", item.String);
+        }
+
+        [AsyncTestMethod]
+        public async Task InsertAsync_DerivedTypeOnBaseTable_Succeeds()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.SetResponseContent("{\"id\":23,\"PublicProperty\":\"Hey\"}");
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            IMobileServiceTable<PocoType> table = service.GetTable<PocoType>();
+
+            var item = new PocoDerivedPocoType() { PublicProperty = "Hey" };
+            await table.InsertAsync(item);
+
+            Assert.AreEqual(23L, item.Id);
+            Assert.AreEqual("Hey", item.PublicProperty);
         }
 
         [AsyncTestMethod]
