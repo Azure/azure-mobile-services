@@ -63,7 +63,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// via the DataContractAttribute, DataTableAttribute and/or the JsonObjectAttribute.
         /// </summary>
         private readonly Dictionary<Type, string> tableNameCache = new Dictionary<Type, string>();
-
+        
         /// <summary>
         /// Indicates if the property names should be camel-cased when serialized
         /// out into JSON.
@@ -361,7 +361,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             IList<JsonProperty> properties = base.CreateProperties(type, memberSerialization);
 
             // If this type is for a known table, ensure that it has an id.
-            if (this.tableNameCache.ContainsKey(type))
+            if (this.tableNameCache.ContainsKey(type) || this.tableNameCache.Keys.Any(t => t.IsAssignableFrom(type)))
             {
                 // Filter out properties that are not read/write
                 properties = properties.Where(p => p.Writable).ToList();
