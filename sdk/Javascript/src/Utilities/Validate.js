@@ -63,7 +63,7 @@ exports.isValidId = function (value, name) {
     if (!_.isValidId(value)) {
         throw _.format(Platform.getResourceString("Validate_InvalidId"), name || 'id');
     }
-}
+};
 
 exports.isDate = function (value, name) {
     /// <summary>

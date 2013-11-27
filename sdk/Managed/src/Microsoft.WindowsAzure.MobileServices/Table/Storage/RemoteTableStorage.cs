@@ -41,8 +41,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="httpClient">
         /// The <see cref="MobileServiceHttpClient"/> instance to use for the storage context.
         /// </param>
-        /// The table name to use with the storage context.
-        /// </param>
         public RemoteTableStorage(MobileServiceHttpClient httpClient)
         {
             Debug.Assert(httpClient != null);
@@ -127,11 +125,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="instance">
         /// The instance to update in the table.
         /// </param>
-        /// <param name="instance">
-        /// The instance to update in the table.
-        /// </param>
         /// <param name="version">
-        /// The version of the instance
+        /// The version of the instance.
+        /// </param>
+        /// <param name="parameters">
+        /// The additional paramaters to add to the querystring.
         /// </param>
         /// <returns>
         /// A task that will complete when the update finishes.
@@ -284,7 +282,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// by double quotes and any internal quotes must be escaped with a 
         /// '\'.
         /// </summary>
-        /// <param name="value">The etag to get the value from.</param>
+        /// <param name="etag">The etag to get the value from.</param>
         /// <returns>
         /// The value.
         /// </returns>

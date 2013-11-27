@@ -171,7 +171,7 @@ exports.isValidId = function (value) {
             return false;
         }
 
-        var ex = /[+"/?`\\]|[\u0000-\u001F]|[\u007F-\u009F]|^\.{1,2}$/;
+        var ex = /[+"\/?`\\]|[\u0000-\u001F]|[\u007F-\u009F]|^\.{1,2}$/;
         if (value.match(ex) !== null) {
             return false;
         }
@@ -183,7 +183,7 @@ exports.isValidId = function (value) {
     }
 
     return false;
-}
+};
 
 exports.isString = function (value) {
     /// <summary>
