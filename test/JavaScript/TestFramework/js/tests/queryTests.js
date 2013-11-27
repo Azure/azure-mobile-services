@@ -307,9 +307,9 @@ function defineQueryTestsNamespace() {
                 done(true);
             } else {
                 test.addLog('Error, functions do not match. Expected:');
-                test.addLog(getWhereClauseCreator);
+                test.addFullLog(getWhereClauseCreator);
                 test.addLog('Actual:');
-                test.addLog(actualGetWhereClauseCreator);
+                test.addFullLog(actualGetWhereClauseCreator);
                 done(false);
             }
         }, function (err) {

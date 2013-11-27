@@ -25,7 +25,7 @@ function createZumoNamespace() {
         this.logs = [];
     }
 
-    ZumoTest.prototype.addLog = function (text, args) {
+    ZumoTest.prototype.addFullLog = function (text, args) {
         /// <summary>
         /// Adds a new log entry to the test
         /// </summary>
@@ -40,9 +40,33 @@ function createZumoNamespace() {
                 text = text + JSON.stringify(arg);
             }
         }
+        text = addTimestamp(text);
+        this.logs.push(text);
+    }
 
+    function addTimestamp(text) {
         var now = new Date();
         text = '[' + dateToString(now) + '] ' + text;
+        return text;
+    }
+
+    ZumoTest.prototype.addLog = function (text, args) {
+        /// <summary>
+        /// Adds a new log entry to the test, capped at a maximum of 500 characters
+        /// </summary>
+        /// <param name="text" type="String">The text to be added to the log</param>
+        /// <param name="args" optional="true">Any additional arguments, which will be
+        ///       JSON.stringify'ed and concatenated with the text.</param>
+        for (var i = 1; i < arguments.length; i++) {
+            var arg = arguments[i];
+            if (typeof arg === 'string') {
+                text = text + arg;
+            } else {
+                text = text + JSON.stringify(arg);
+            }
+        }
+        text = addTimestamp(text);
+
         if (text.length > 500) {
             text = text.substring(0, 500) + '... (truncated)';
         }
