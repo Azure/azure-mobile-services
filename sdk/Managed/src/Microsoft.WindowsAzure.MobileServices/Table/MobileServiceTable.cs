@@ -339,7 +339,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Gets the system properties header value from the <see cref="MobileServiceSystemProperty"/>.
+        /// Gets the system properties header value from the <see cref="MobileServiceSystemProperties"/>.
         /// </summary>
         /// <param name="properties">The system properties to set in the system properties header.</param>
         /// <returns>

@@ -27,7 +27,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// <typeparam name="TCollection">Type of elements ending up in the collection.</typeparam>
     /// <remarks>
     /// Currently handles asynchronously loading the data, notifying the controls and paging. 
-    /// Use the <see cref="MobileServiceCollection<T>"/> class if the table and collection items
+    /// Use the <see cref="MobileServiceCollection{T}"/> class if the table and collection items
     /// are of the same type.
     /// </remarks>
     public class MobileServiceCollection<TTable, TCollection> : 
@@ -59,7 +59,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         private int itemsReceived;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection<TTable, TCollection>"/>
+        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection{TTable, TCollection}"/>
         /// class.
         /// </summary>
         /// <param name="query">
@@ -96,7 +96,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection<TTable, TCollection>"/>
+        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection{TTable, TCollection}"/>
         /// class.
         /// </summary>
         /// <param name="query">
@@ -112,7 +112,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             : this(query, ie => ie.Select(selector), pageSize) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection<TTable, TCollection>"/>
+        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection{TTable, TCollection}"/>
         /// class. This constructior should be used in cases where TTable and TCollection are the same type.
         /// </summary>
         /// <param name="query">
@@ -364,7 +364,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     public class MobileServiceCollection<T> : MobileServiceCollection<T, T>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection<T>"/> class.
+        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection{T}"/> class.
         /// </summary>
         /// <param name="query">
         /// The data source's query which provides the data.
