@@ -34,17 +34,41 @@
         {
             id item = nil;
             
-            if (!error) {
-                
+            if (!error) {                
                 [connection isSuccessfulResponse:response
                                         data:data
                                          orError:&error];
+                
                 if (!error)
                 {
                     item = [connection itemFromData:data
                                            response:response
                                    ensureDictionary:YES
                                             orError:&error];
+                } else if (response && response.statusCode == 412) {
+                    NSError *serverItemError;
+                    NSDictionary *serverItem = [connection itemFromData:data
+                                                               response:response
+                                                       ensureDictionary:YES
+                                                                orError:&serverItemError];
+                    
+                    // Only override default error if response was a valid item
+                    if (!serverItemError) {
+                        NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : @"The server's version did not match the passed version",
+                                                    MSErrorServerItemKey: serverItem };
+                        error = [NSError errorWithDomain:MSErrorDomain code:MSErrorPreconditionFailed userInfo:userInfo];
+                    }
+                }
+                
+                if (response && item && !error) {
+                    NSString *version = [[response allHeaderFields] objectForKey:@"Etag"];
+                    if (version) {
+                        if(version.length > 1 && [version characterAtIndex:0] == '\"' && [version characterAtIndex:version.length-1] == '\"') {
+                            NSRange range = { 1, version.length - 2 };
+                            version = [version substringWithRange:range];
+                        }
+                        [item setValue:[version stringByReplacingOccurrencesOfString:@"\\\"" withString:@"\""] forKey:MSSystemColumnVersion];                        
+                    }
                 }
             }
             

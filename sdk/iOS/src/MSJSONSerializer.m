@@ -45,10 +45,11 @@ static NSArray *allIdKeys;
 }
 
 # pragma mark * MSSerializer Protocol Implementation
--(NSData *) dataFromItem:(id)item
-               idAllowed:(BOOL)idAllowed
-        ensureDictionary:(BOOL)ensureDictionary
-                 orError:(NSError **)error
+-(NSData *)dataFromItem:(id)item
+              idAllowed:(BOOL)idAllowed
+       ensureDictionary:(BOOL)ensureDictionary
+ removeSystemProperties:(BOOL)removeSystemProperties
+                orError:(NSError **)error;
 {
     NSData *data = nil;
     NSError *localError = nil;
@@ -96,7 +97,15 @@ static NSArray *allIdKeys;
     if (!localError)
     {
         // Convert any NSDate instances into strings formatted with the date.
-        item = [self preSerializeItem:item];
+        if (removeSystemProperties) {
+            id itemIdField = nil;
+            if([item isKindOfClass:[NSDictionary class]]) {
+                itemIdField = [item objectForKey:idKey];
+            }
+            removeSystemProperties = [itemIdField isKindOfClass:[NSString class]];
+        }
+        
+        item = [self preSerializeItem:item RemoveSystemProperties:removeSystemProperties];
 
         // ... then make sure the |NSJSONSerializer| can serialize it, otherwise
         // the |NSJSONSerializer| will throw an exception, which we don't
@@ -341,7 +350,6 @@ static NSArray *allIdKeys;
                       NSNotFound != [MIMEType rangeOfString:@"JSON"
                                                     options:NSCaseInsensitiveSearch].location;
         if (isJson) {
-        
             id JSONObject = [NSJSONSerialization JSONObjectWithData:data
                                     options: NSJSONReadingMutableContainers |
                                              NSJSONReadingAllowFragments
@@ -400,24 +408,31 @@ static NSArray *allIdKeys;
 
 #pragma mark * Private Pre/Post Serialization Methods
 
-
--(id) preSerializeItem:(id)item
+-(id) preSerializeItem:(id)item RemoveSystemProperties:(BOOL)removeSystemProperties
 {
     id preSerializedItem = nil;
     
     if ([item isKindOfClass:[NSDictionary class]]) {
         preSerializedItem = [item mutableCopy];
+        
+        if(removeSystemProperties) {
+            NSSet *systemProperties = [preSerializedItem keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+                return [[key substringToIndex:2] isEqualToString:@"__"];
+            }];
+            [preSerializedItem removeObjectsForKeys:[systemProperties allObjects]];
+        }
+        
         for (NSString *key in [preSerializedItem allKeys]) {
             id value = [preSerializedItem valueForKey:key];
-            id preSerializedValue = [self preSerializeItem:value];
+            id preSerializedValue = [self preSerializeItem:value RemoveSystemProperties:NO];
             [preSerializedItem setObject:preSerializedValue forKey:key];
         }
     }
     else if([item isKindOfClass:[NSArray class]]) {
         preSerializedItem = [item mutableCopy];
         for (NSInteger i = 0; i < [preSerializedItem count]; i++) {
-            id value = [preSerializedItem objectAtIndex:i];
-            id preSerializedValue = [self preSerializeItem:value];
+            id value = [preSerializedItem objectAtIndex	:i];
+            id preSerializedValue = [self preSerializeItem:value RemoveSystemProperties:NO];
             [preSerializedItem setObject:preSerializedValue atIndex:i];
         }
     }

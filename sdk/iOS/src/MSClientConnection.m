@@ -98,7 +98,6 @@ NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
     BOOL isSuccessful = response.statusCode < 400;
     
     if (!isSuccessful && self.completion && error) {
-        
         // Read the error message from the response body
         *error =[self.client.serializer errorFromData:data
                                              MIMEType:response.MIMEType];

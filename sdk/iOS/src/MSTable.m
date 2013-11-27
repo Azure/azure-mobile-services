@@ -12,6 +12,9 @@
 
 #pragma mark * MSTable Implementation
 
+NSString *const MSSystemColumnCreatedAt = @"__createdAt";
+NSString *const MSSystemColumnUpdatedAt = @"__updatedAt";
+NSString *const MSSystemColumnVersion = @"__version";
 
 @implementation MSTable
 
@@ -69,15 +72,15 @@
 -(void) update:(NSDictionary *)item
     parameters:(NSDictionary *)parameters
     completion:(MSItemBlock)completion
-{
-    // Create the request
+{    
     MSTableItemRequest *request = [MSTableRequest
                                    requestToUpdateItem:item
                                    table:self
                                    parameters:parameters
                                    completion:completion];
+    
     // Send the request
-    if (request) {
+    if (request) {        
         MSTableConnection *connection =
             [MSTableConnection connectionWithItemRequest:request
                                               completion:completion];

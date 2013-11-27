@@ -97,6 +97,7 @@
     NSData *data = [serializer dataFromItem:item
                                   idAllowed:YES
                            ensureDictionary:YES
+                     removeSystemProperties:NO
                                     orError:&error];
     
     STAssertNotNil(data, @"data was nil after serializing item.");
@@ -117,6 +118,7 @@
     NSData *data = [serializer dataFromItem:item
                                   idAllowed:YES
                            ensureDictionary:YES
+                     removeSystemProperties:NO
                                     orError:&error];
     
     STAssertNotNil(data, @"data was nil after serializing item.");
@@ -137,6 +139,7 @@
     NSData *data = [serializer dataFromItem:item
                                   idAllowed:NO
                            ensureDictionary:YES
+                     removeSystemProperties:NO
                                     orError:&error];
     
     STAssertNotNil(data, @"data was nil after serializing item.");
@@ -157,6 +160,7 @@
     NSData *data = [serializer dataFromItem:item
                                   idAllowed:NO
                            ensureDictionary:YES
+                     removeSystemProperties:NO
                                     orError:&error];
     
     STAssertNotNil(data, @"data was nil after serializing item.");
@@ -177,6 +181,7 @@
     NSData *data = [serializer dataFromItem:item
                                   idAllowed:NO
                            ensureDictionary:YES
+                     removeSystemProperties:NO
                                     orError:&error];
     
     STAssertNotNil(data, @"data was nil after serializing item.");
@@ -195,6 +200,7 @@
     NSData *data = [serializer dataFromItem:nil
                                   idAllowed:YES
                            ensureDictionary:YES
+                     removeSystemProperties:NO
                                     orError:&error];
     
     STAssertNil(data, @"data was not nil after serializing item.");
@@ -240,6 +246,7 @@
     NSData *data = [serializer dataFromItem:item
                                   idAllowed:YES
                            ensureDictionary:YES
+                     removeSystemProperties:NO
                                     orError:&error];
     
     STAssertNotNil(data, @"data was nil after serializing item.");
@@ -259,6 +266,7 @@
     NSData *data = [serializer dataFromItem:item
                                   idAllowed:NO
                            ensureDictionary:YES
+                     removeSystemProperties:NO
                                     orError:&error];
     
     STAssertNil(data, @"data was not nil after serializing item.");
@@ -280,6 +288,7 @@
     NSData *data = [serializer dataFromItem:item
                                   idAllowed:NO
                            ensureDictionary:YES
+                     removeSystemProperties:NO
                                     orError:&error];
     
     STAssertNil(data, @"data was not nil after serializing item.");
@@ -301,6 +310,7 @@
     NSData *data = [serializer dataFromItem:item
                                   idAllowed:NO
                            ensureDictionary:YES
+                     removeSystemProperties:NO
                                     orError:&error];
     
     STAssertNil(data, @"data was not nil after serializing item.");
@@ -322,6 +332,7 @@
     NSData *data = [serializer dataFromItem:item
                                   idAllowed:NO
                            ensureDictionary:YES
+                     removeSystemProperties:NO
                                     orError:&error];
     
     STAssertNil(data, @"data was not nil after serializing item.");
@@ -343,6 +354,7 @@
     NSData *data = [serializer dataFromItem:item
                                   idAllowed:NO
                            ensureDictionary:YES
+                     removeSystemProperties:NO
                                     orError:&error];
     
     STAssertNotNil(data, @"data was nil after serializing item.");
@@ -363,6 +375,7 @@
     NSData *data = [serializer dataFromItem:item
                                   idAllowed:YES
                            ensureDictionary:NO
+                     removeSystemProperties:NO
                                     orError:&error];
     
     STAssertNotNil(data, @"data was nil after serializing item.");
@@ -833,6 +846,53 @@
     STAssertTrue([[error localizedDescription] isEqualToString:
                   @"<Hey>This sure is some poor xml</Hey>"],
                   @"error description was: %@", [error localizedDescription]);
+}
+
+-(void)testSystemPropertiesNotRemovedWithIntId
+{
+    NSError *error;
+    
+    NSDictionary *item = @{@"id": @7, @"__Prop1": @6};
+    NSData *data = [serializer dataFromItem:item idAllowed:YES ensureDictionary:NO removeSystemProperties:YES orError:&error];
+    
+    STAssertNil(error, @"An error occurred %d", error.code);
+    
+    NSString *expected = @"{\"id\":7,\"__Prop1\":6}";
+    NSString *actual = [[NSString alloc] initWithData:data
+                                             encoding:NSUTF8StringEncoding];
+    
+    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+}
+
+-(void)testSystemPropertiesNotRemovedWithArray
+{
+    NSError *error;
+    
+    NSArray *item = @[@{@"id": @7, @"__Prop1": @6}];
+    NSData *data = [serializer dataFromItem:item idAllowed:YES ensureDictionary:NO removeSystemProperties:YES orError:&error];
+    
+    STAssertNil(error, @"An error occurred %d", error.code);
+    
+    NSString *expected = @"[{\"id\":7,\"__Prop1\":6}]";
+    NSString *actual = [[NSString alloc] initWithData:data
+                                             encoding:NSUTF8StringEncoding];
+    
+    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
+}
+
+-(void)testSystemPropertiesRemovedWithStringId
+{
+    NSError *error;
+    NSDictionary *item = @{@"id": @"one", @"__Prop1": @6, @"__prop4": @"help"};
+    NSData *data = [serializer dataFromItem:item idAllowed:YES ensureDictionary:NO removeSystemProperties:YES orError:&error];
+    
+    STAssertNil(error, @"An error occurred %d", error.code);
+    
+    NSString *expected = @"{\"id\":\"one\"}";
+    NSString *actual = [[NSString alloc] initWithData:data
+                                         encoding:NSUTF8StringEncoding];
+    
+    STAssertTrue([expected isEqualToString:actual], @"JSON was: %@", actual);
 }
 
 @end
