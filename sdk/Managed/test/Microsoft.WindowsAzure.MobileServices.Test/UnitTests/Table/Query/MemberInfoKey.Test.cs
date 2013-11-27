@@ -21,14 +21,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             while (type != null)
             {
                 yield return type;
-                type = type.BaseType;
+                type = type.GetTypeInfo().BaseType;
             }
         }
 
         private static IEnumerable<MethodInfo> GetMethods(Type type, string name, Type[] parameterTypes)
         {
             return GetBaseTypesAndSelf(type)
-                .SelectMany(t => t.GetMethods().Where(m => m.Name == name))
+                .SelectMany(t => t.GetRuntimeMethods().Where(m => m.Name == name))
                 .Where(m => m.GetParameters().Select(p => p.ParameterType).SequenceEqual(parameterTypes));
         }
 
@@ -44,8 +44,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             return
                 GetBaseTypesAndSelf(type)
-                .SelectMany(t => t.GetProperties().Where(
-                    p => p.Name == name && p.CanRead && !p.GetGetMethod().IsStatic))
+                .SelectMany(t => t.GetRuntimeProperties().Where(
+                    p => p.Name == name && p.CanRead && !p.GetMethod.IsStatic))
                 .Cast<MemberInfo>()
                 .SingleOrDefault();
         }
@@ -61,8 +61,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [TestMethod]
         public void CorrectlyMatchesInstanceMemberInfos()
         {
-             Dictionary<MethodInfo, MemberInfoKey> instanceMethods = 
-                 new Dictionary<MethodInfo, MemberInfoKey>() {
+            Dictionary<MethodInfo, MemberInfoKey> instanceMethods =
+                new Dictionary<MethodInfo, MemberInfoKey>() {
                 { FindInstanceMethod(typeof(string), "ToLower"), 
                     new MemberInfoKey(typeof(string), "ToLower", true, true) },
                 { FindInstanceMethod(typeof(string), "ToLowerInvariant"),
@@ -93,27 +93,27 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     new MemberInfoKey(typeof(string), "Substring", true, true, typeof(int), typeof(int)) },
             };
 
-             foreach (MethodInfo key in instanceMethods.Keys)
-             {
-                 foreach (var pair in instanceMethods)
-                 {
-                     MemberInfoKey other = new MemberInfoKey(key);
-                     if (key == pair.Key)
-                     {
-                         Assert.IsTrue(pair.Value.Equals(other));
-                     }
-                     else
-                     {
-                         Assert.IsFalse(pair.Value.Equals(other));
-                     }
-                 }
-             }
+            foreach (MethodInfo key in instanceMethods.Keys)
+            {
+                foreach (var pair in instanceMethods)
+                {
+                    MemberInfoKey other = new MemberInfoKey(key);
+                    if (key == pair.Key)
+                    {
+                        Assert.IsTrue(pair.Value.Equals(other));
+                    }
+                    else
+                    {
+                        Assert.IsFalse(pair.Value.Equals(other));
+                    }
+                }
+            }
         }
 
         [TestMethod]
         public void CorrectlyMatchesStaticMemberInfos()
         {
-            Dictionary<MethodInfo, MemberInfoKey> staticMethods = 
+            Dictionary<MethodInfo, MemberInfoKey> staticMethods =
                 new Dictionary<MethodInfo, MemberInfoKey>
             {
                 { FindStaticMethod(typeof(Math), "Floor", typeof(double)), 
@@ -131,21 +131,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             MethodInfo possibleFloorMethod = FindStaticMethod(typeof(Decimal), "Floor", typeof(decimal));
             if (possibleFloorMethod != null)
             {
-                staticMethods.Add(possibleFloorMethod, 
+                staticMethods.Add(possibleFloorMethod,
                     new MemberInfoKey(typeof(Decimal), "Floor", true, false, typeof(decimal)));
             }
 
             MethodInfo possibleCeilingMethod = FindStaticMethod(typeof(Decimal), "Ceiling", typeof(decimal));
             if (possibleCeilingMethod != null)
             {
-                staticMethods.Add(possibleCeilingMethod, 
+                staticMethods.Add(possibleCeilingMethod,
                     new MemberInfoKey(typeof(Decimal), "Ceiling", true, false, typeof(decimal)));
             }
 
             MethodInfo possibleRoundMethod = FindStaticMethod(typeof(Decimal), "Round", typeof(decimal));
             if (possibleRoundMethod != null)
             {
-                staticMethods.Add(possibleRoundMethod, 
+                staticMethods.Add(possibleRoundMethod,
                     new MemberInfoKey(typeof(Decimal), "Round", true, false, typeof(decimal)));
             }
 
@@ -153,21 +153,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             MethodInfo possibleCeilingMethodMath = FindStaticMethod(typeof(Math), "Ceiling", typeof(decimal));
             if (possibleCeilingMethodMath != null)
             {
-                staticMethods.Add(possibleCeilingMethodMath, 
+                staticMethods.Add(possibleCeilingMethodMath,
                     new MemberInfoKey(typeof(Math), "Ceiling", true, false, typeof(decimal)));
             }
 
             MethodInfo possibleFloorMethodMath = FindStaticMethod(typeof(Math), "Floor", typeof(decimal));
             if (possibleFloorMethodMath != null)
             {
-                staticMethods.Add(possibleFloorMethodMath, 
+                staticMethods.Add(possibleFloorMethodMath,
                     new MemberInfoKey(typeof(Math), "Floor", true, false, typeof(decimal)));
             }
 
             MethodInfo possibleRoundMethodMath = FindStaticMethod(typeof(Math), "Round", typeof(decimal));
             if (possibleRoundMethodMath != null)
             {
-                staticMethods.Add(possibleRoundMethodMath, 
+                staticMethods.Add(possibleRoundMethodMath,
                     new MemberInfoKey(typeof(Math), "Round", true, false, typeof(decimal)));
             }
 
@@ -191,7 +191,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [TestMethod]
         public void CorrectlyMatchesPropertyInfos()
         {
-            Dictionary<MemberInfo, MemberInfoKey> instanceProperties = 
+            Dictionary<MemberInfo, MemberInfoKey> instanceProperties =
                 new Dictionary<MemberInfo, MemberInfoKey>() {
                  { FindInstanceProperty(typeof(string), "Length"), 
                      new MemberInfoKey(typeof(string), "Length", false, true) },

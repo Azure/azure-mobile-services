@@ -607,8 +607,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         private string GetUserAgentHeader()
         {
-            AssemblyFileVersionAttribute fileVersionAttribute = Assembly.GetExecutingAssembly()
-                                                                        .GetCustomAttributes(typeof(AssemblyFileVersionAttribute), true)
+            AssemblyFileVersionAttribute fileVersionAttribute = typeof(MobileServiceClient).GetTypeInfo().Assembly                                    
+                                                                        .GetCustomAttributes(typeof(AssemblyFileVersionAttribute))
                                                                         .Cast<AssemblyFileVersionAttribute>()
                                                                         .FirstOrDefault();
             string fileVersion = fileVersionAttribute.Version;

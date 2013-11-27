@@ -39,7 +39,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             this.memberInfo = memberInfo;
             this.memberName = memberInfo.Name;
-            this.type = memberInfo.ReflectedType;
+            this.type = memberInfo.DeclaringType;
 
             MethodInfo asMethod = memberInfo as MethodInfo;
             if (asMethod != null)

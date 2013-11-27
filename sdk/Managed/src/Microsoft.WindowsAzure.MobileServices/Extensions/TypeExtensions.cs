@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -20,7 +21,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns></returns>
         public static Type UnwrapNullable(this Type thisType)
         {
-            return thisType.IsGenericType && thisType.GetGenericTypeDefinition() == nullableType
+            return thisType.GetTypeInfo().IsGenericType && thisType.GetGenericTypeDefinition() == nullableType
                 ?
                 Nullable.GetUnderlyingType(thisType)
                 :

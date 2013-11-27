@@ -89,7 +89,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 // By default, use the type name itself
                 name = type.Name;
 
-                DataContractAttribute dataContractAttribute = type.GetCustomAttributes(typeof(DataContractAttribute), true)
+                DataContractAttribute dataContractAttribute = type.GetTypeInfo().GetCustomAttributes(typeof(DataContractAttribute), true)
                                                                   .FirstOrDefault() as DataContractAttribute;
                 if (dataContractAttribute != null)
                 {
@@ -99,7 +99,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     }
                 }
 
-                JsonContainerAttribute jsonContainerAttribute = type.GetCustomAttributes(typeof(JsonContainerAttribute), true)
+                JsonContainerAttribute jsonContainerAttribute = type.GetTypeInfo().GetCustomAttributes(typeof(JsonContainerAttribute), true)
                                                                     .FirstOrDefault() as JsonContainerAttribute;
                 if (jsonContainerAttribute != null)
                 {
@@ -109,7 +109,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     }
                 }
 
-                DataTableAttribute dataTableAttribute = type.GetCustomAttributes(typeof(DataTableAttribute), true)
+                DataTableAttribute dataTableAttribute = type.GetTypeInfo().GetCustomAttributes(typeof(DataTableAttribute), true)
                                                             .FirstOrDefault() as DataTableAttribute;
                 if (dataTableAttribute != null)
                 {
@@ -222,7 +222,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 if (!string.IsNullOrEmpty(propertyName) && char.IsUpper(propertyName[0]))
                 {
                     string original = propertyName;
-                    propertyName = char.ToLower(propertyName[0], CultureInfo.InvariantCulture).ToString();
+                    propertyName = char.ToLower(propertyName[0]).ToString();
                     if (original.Length > 1)
                     {
                         propertyName += original.Substring(1);
@@ -255,21 +255,21 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             JsonObjectContract contract = base.CreateObjectContract(type);
 
-            DataContractAttribute dataContractAttribute = type.GetCustomAttributes(typeof(DataContractAttribute), true)
+            DataContractAttribute dataContractAttribute = type.GetTypeInfo().GetCustomAttributes(typeof(DataContractAttribute), true)
                                                               .FirstOrDefault() as DataContractAttribute;
             if (dataContractAttribute == null)
             {
                 // Make sure the type does not have a base class with a [DataContract]
-                Type baseTypeWithDataContract = type.BaseType;
+                Type baseTypeWithDataContract = type.GetTypeInfo().BaseType;
                 while (baseTypeWithDataContract != null)
                 {
-                    if (baseTypeWithDataContract.GetCustomAttributes(typeof(DataContractAttribute), true).Any())
+                    if (baseTypeWithDataContract.GetTypeInfo().GetCustomAttributes(typeof(DataContractAttribute), true).Any())
                     {
                         break;
                     }
                     else
                     {
-                        baseTypeWithDataContract = baseTypeWithDataContract.BaseType;
+                        baseTypeWithDataContract = baseTypeWithDataContract.GetTypeInfo().BaseType;
                     }
                 }
 
@@ -287,11 +287,8 @@ namespace Microsoft.WindowsAzure.MobileServices
                 // attributes are ignored if there is no [DataContract] attribute on the type.
                 // To ensure types are not serialized differently, an exception must be thrown if this 
                 // type is using [DataMember] attributes without a [DataContract] on the type itself.
-                if (type.GetMembers(BindingFlags.Public |
-                                    BindingFlags.NonPublic |
-                                    BindingFlags.FlattenHierarchy |
-                                    BindingFlags.Instance)
-                         .Where(m => m.GetCustomAttributes(typeof(DataMemberAttribute), true)
+                if (type.GetRuntimeProperties()
+                         .Where( m => m.GetCustomAttributes(typeof(DataMemberAttribute), true)
                                        .FirstOrDefault() != null)
                          .Any())
                 {
@@ -374,7 +371,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 Dictionary<JsonProperty, MemberInfo> memberInfoCache = new Dictionary<JsonProperty, MemberInfo>();
                 foreach (KeyValuePair<MemberInfo, JsonProperty> pair in jsonPropertyCache)
                 {
-                    if (pair.Key.DeclaringType.IsAssignableFrom(type))
+                    if (pair.Key.DeclaringType.GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
                     {
                         memberInfoCache.Add(pair.Value, pair.Key);
                     }
@@ -546,7 +543,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="property">The property to add the member converters to.</param>
         private static void SetMemberConverters(JsonProperty property)
         {
-            if (property.PropertyType.IsValueType)
+            if (property.PropertyType.GetTypeInfo().IsValueType)
             {
                 // The NullHandlingConverter will ensure that nulls get treated as the default value 
                 // for value types.
@@ -601,7 +598,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             /// </returns>
             public override bool CanConvert(Type objectType)
             {
-                return objectType.IsValueType || (inner != null && inner.CanConvert(objectType));
+                return objectType.GetTypeInfo().IsValueType || (inner != null && inner.CanConvert(objectType));
             }
 
             /// <summary>
@@ -632,7 +629,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 else if (reader.TokenType == JsonToken.Null)
                 {
                     //create default values if null is not a valid value
-                    if (objectType.IsValueType)
+                    if (objectType.GetTypeInfo().IsValueType)
                     {
                         //create default value
                         return Activator.CreateInstance(objectType);

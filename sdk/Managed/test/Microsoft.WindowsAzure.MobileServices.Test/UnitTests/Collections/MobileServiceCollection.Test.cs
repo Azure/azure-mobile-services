@@ -32,7 +32,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             try
             {
-                await TaskEx.WhenAll(collection.LoadMoreItemsAsync(tokenSource.Token), collection.LoadMoreItemsAsync(tokenSource.Token));
+                await Task.WhenAll(collection.LoadMoreItemsAsync(tokenSource.Token), collection.LoadMoreItemsAsync(tokenSource.Token));
             }
             catch (InvalidOperationException e)
             {
