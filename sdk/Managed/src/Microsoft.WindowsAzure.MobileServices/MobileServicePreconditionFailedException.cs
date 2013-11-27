@@ -13,10 +13,10 @@ namespace Microsoft.WindowsAzure.MobileServices
     {
         /// <summary>
         /// Initializes a new instance of the
-        /// MobileServicePreconditionFailedException class.
+        /// <see cref="MobileServicePreconditionFailedException"/> class.
         /// </summary>
         /// <param name="innerException">
-        /// The exception message.
+        /// The inner exception.
         /// </param>
         /// <param name="value">
         /// The current item from the server that the precodition failed for.
@@ -36,9 +36,10 @@ namespace Microsoft.WindowsAzure.MobileServices
     {
         /// <summary>
         /// Initializes a new instance of the
-        /// MobileServicePreconditionFailedException class.
+        /// <see cref="MobileServicePreconditionFailedException"/> class.
         /// </summary>
         /// <param name="innerException">
+        /// The inner exception.
         /// </param>
         /// <param name="item">
         /// The current item from the server that the precodition failed for.
