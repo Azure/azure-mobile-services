@@ -39,6 +39,7 @@ extern NSString *const CLIENT_VERSION_KEY;
 + (NSDate *)createDateWithYear:(NSInteger)year month:(NSInteger)month day:(NSInteger)day;
 + (BOOL)compareDate:(NSDate *)date1 withDate:(NSDate *)date2;
 + (BOOL)compareObjects:(NSDictionary *)obj1 with:(NSDictionary *)obj2 log:(NSMutableArray *)errors;
++ (BOOL)compareObjects:(NSDictionary *)obj1 with:(NSDictionary *)obj2 ignoreKeys:(NSArray *)keys log:(NSMutableArray *)errors;
 + (BOOL)compareJson:(id)json1 with:(id)json2 log:(NSMutableArray *)errors;
 + (NSString *)dateToString:(NSDate *)date;
 
