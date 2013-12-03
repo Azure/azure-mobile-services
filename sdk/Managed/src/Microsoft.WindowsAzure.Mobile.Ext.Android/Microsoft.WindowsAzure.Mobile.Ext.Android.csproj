@@ -34,7 +34,7 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
     <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
-    <DocumentationFile>bin\Release\Microsoft.WindowsAzure.Mobile.Ext.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\Microsoft.WindowsAzure.Mobile.Ext.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -56,6 +56,7 @@
     <Compile Include="..\..\..\managed\src\Microsoft.WindowsAzure.MobileServices.WindowsStore\Platform\ExpressionUtility.cs">
       <Link>Platform\ExpressionUtility.cs</Link>
     </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Authentication\MobileServiceUIAuthentication.cs" />
     <Compile Include="ExpressionUtility\ExpressionVisitor.cs" />
     <Compile Include="Extensions\MobileServiceClientExtensions.cs" />

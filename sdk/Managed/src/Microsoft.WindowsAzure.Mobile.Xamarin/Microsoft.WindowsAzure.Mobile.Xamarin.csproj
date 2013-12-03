@@ -35,7 +35,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\Microsoft.WindowsAzure.Mobile.XML</DocumentationFile>
+    <DocumentationFile>bin\Release\Microsoft.WindowsAzure.Mobile.xml</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices\Authentication\MobileServiceTokenAuthentication.cs">
