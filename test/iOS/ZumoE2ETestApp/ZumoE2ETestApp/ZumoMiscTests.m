@@ -280,12 +280,12 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
 
 + (NSArray *)createTests {
     NSMutableArray *result = [[NSMutableArray alloc] init];
-//    [result addObject:[self createUserAgentTest]];
-//    [result addObject:[self createFilterWithMultipleRequestsTest]];
-//    [result addObject:[self createFilterTestWhichBypassesService]];
-//    [result addObject:[self createFilterTestToEnsureWithFilterDoesNotChangeClient]];
-//    [result addObject:[self createParameterPassingTest]];
-//    [result addObject:[self createOptimisticConcurrencyWithFilterTest]];
+    [result addObject:[self createUserAgentTest]];
+    [result addObject:[self createFilterWithMultipleRequestsTest]];
+    [result addObject:[self createFilterTestWhichBypassesService]];
+    [result addObject:[self createFilterTestToEnsureWithFilterDoesNotChangeClient]];
+    [result addObject:[self createParameterPassingTest]];
+    [result addObject:[self createOptimisticConcurrencyWithFilterTest]];
     
     [result addObject:[self createOptimisticConcurrencyTest:@"Update conflicts (client side) - client wins" conflictPolicy:CPClientWins]];
     [result addObject:[self createOptimisticConcurrencyTest:@"Update conflicts (client side) - server wins" conflictPolicy:CPServerWins]];
