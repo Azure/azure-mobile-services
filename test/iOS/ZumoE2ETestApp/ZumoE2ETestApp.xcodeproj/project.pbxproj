@@ -32,7 +32,7 @@
 		872B031F1675A128003613A1 /* ZumoTestStore.m in Sources */ = {isa = PBXBuildFile; fileRef = 872B031E1675A127003613A1 /* ZumoTestStore.m */; };
 		872B0324167660C2003613A1 /* ZumoSavedAppsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 872B0323167660C2003613A1 /* ZumoSavedAppsTableViewController.m */; };
 		872B032A16768EF0003613A1 /* ZumoSavedAppsHeader.xib in Resources */ = {isa = PBXBuildFile; fileRef = 872B032916768EF0003613A1 /* ZumoSavedAppsHeader.xib */; };
-		879E43C8184E4E9000D1B6A7 /* WindowsAzureMobileServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 879E43C7184E4E9000D1B6A7 /* WindowsAzureMobileServices.framework */; };
+		876E879218514C2400558025 /* WindowsAzureMobileServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 876E879118514C2400558025 /* WindowsAzureMobileServices.framework */; };
 		87B36928167AE7D300F42BCE /* ZumoQueryTestData.m in Sources */ = {isa = PBXBuildFile; fileRef = 87B36927167AE7D300F42BCE /* ZumoQueryTestData.m */; };
 		87B36932168050D700F42BCE /* ZumoLogUpdater.m in Sources */ = {isa = PBXBuildFile; fileRef = 87B36931168050D700F42BCE /* ZumoLogUpdater.m */; };
 		87B3693516875B1100F42BCE /* ZumoPushTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 87B3693416875B1100F42BCE /* ZumoPushTests.m */; };
@@ -85,7 +85,7 @@
 		872B0322167660C2003613A1 /* ZumoSavedAppsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZumoSavedAppsTableViewController.h; sourceTree = "<group>"; };
 		872B0323167660C2003613A1 /* ZumoSavedAppsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZumoSavedAppsTableViewController.m; sourceTree = "<group>"; };
 		872B032916768EF0003613A1 /* ZumoSavedAppsHeader.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = ZumoSavedAppsHeader.xib; sourceTree = "<group>"; };
-		879E43C7184E4E9000D1B6A7 /* WindowsAzureMobileServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = WindowsAzureMobileServices.framework; sourceTree = "<group>"; };
+		876E879118514C2400558025 /* WindowsAzureMobileServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = WindowsAzureMobileServices.framework; sourceTree = "<group>"; };
 		87B36926167AE7D300F42BCE /* ZumoQueryTestData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZumoQueryTestData.h; sourceTree = "<group>"; };
 		87B36927167AE7D300F42BCE /* ZumoQueryTestData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZumoQueryTestData.m; sourceTree = "<group>"; };
 		87B36930168050D700F42BCE /* ZumoLogUpdater.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZumoLogUpdater.h; sourceTree = "<group>"; };
@@ -107,7 +107,7 @@
 			files = (
 				872B02BF1672A73B003613A1 /* UIKit.framework in Frameworks */,
 				872B02C11672A73B003613A1 /* Foundation.framework in Frameworks */,
-				879E43C8184E4E9000D1B6A7 /* WindowsAzureMobileServices.framework in Frameworks */,
+				876E879218514C2400558025 /* WindowsAzureMobileServices.framework in Frameworks */,
 				872B02C31672A73B003613A1 /* CoreGraphics.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -135,7 +135,7 @@
 		872B02BD1672A73B003613A1 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				879E43C7184E4E9000D1B6A7 /* WindowsAzureMobileServices.framework */,
+				876E879118514C2400558025 /* WindowsAzureMobileServices.framework */,
 				872B02BE1672A73B003613A1 /* UIKit.framework */,
 				872B02C01672A73B003613A1 /* Foundation.framework */,
 				872B02C21672A73B003613A1 /* CoreGraphics.framework */,
