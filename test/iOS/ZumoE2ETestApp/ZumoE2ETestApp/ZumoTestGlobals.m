@@ -112,15 +112,26 @@ NSString *const CLIENT_VERSION_KEY = @"server-version";
 }
 
 +(BOOL)compareObjects:(NSDictionary *)obj1 with:(NSDictionary *)obj2 log:(NSMutableArray *)errors {
-    NSDictionary *first = [self cloneAndRemoveId:obj1];
-    NSDictionary *second = [self cloneAndRemoveId:obj2];
+    return [self compareObjects:obj1 with:obj2 ignoreKeys:@[@"id"] log:errors];
+}
+
++ (BOOL)compareObjects:(NSDictionary *)obj1 with:(NSDictionary *)obj2 ignoreKeys:(NSArray *)keys log:(NSMutableArray *)errors {
+    NSDictionary *first = [self clone:obj1 removingKeys:keys];
+    NSDictionary *second = [self clone:obj2 removingKeys:keys];
     return [self compareJson:first with:second log:errors];
 }
 
-+(NSDictionary *)cloneAndRemoveId:(NSDictionary *)dic {
++(NSDictionary *)clone:(NSDictionary *)dic removingKeys:(NSArray *)keys {
     NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
     for (NSString *key in [dic allKeys]) {
-        if (![key isEqualToString:@"id"]) {
+        BOOL copyValue = YES;
+        for (NSString *keyToRemove in keys) {
+            if ([key isEqualToString:keyToRemove]) {
+                copyValue = NO;
+                break;
+            }
+        }
+        if (copyValue) {
             [result setValue:[dic objectForKey:key] forKey:key];
         }
     }
@@ -217,7 +228,7 @@ NSString *const CLIENT_VERSION_KEY = @"server-version";
                 id value1 = dic1[key];
                 id value2 = dic2[key];
                 if (![self compareJson:value1 with:value2 log:errors]) {
-                    [errors addObject:[NSString stringWithFormat:@"Error comparing element with key '%@ 'of the dictionary", key]];
+                    [errors addObject:[NSString stringWithFormat:@"Error comparing element with key '%@' of the dictionary", key]];
                     return NO;
                 }
             }

@@ -58,22 +58,25 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateParameterPassingTest(true));
             result.AddTest(CreateParameterPassingTest(false));
 
-            result.AddTest(CreateOptimisticConcurrencyTest("Conflicts - client wins", (clientItem, serverItem) =>
+            result.AddTest(CreateOptimisticConcurrencyTest("Conflicts (client side) - client wins", (clientItem, serverItem) =>
             {
                 var mergeResult = clientItem.Clone();
                 mergeResult.Version = serverItem.Version;
                 return mergeResult;
             }));
-            result.AddTest(CreateOptimisticConcurrencyTest("Conflicts - server wins", (clientItem, serverItem) =>
+            result.AddTest(CreateOptimisticConcurrencyTest("Conflicts (client side) - server wins", (clientItem, serverItem) =>
             {
                 return serverItem;
             }));
-            result.AddTest(CreateOptimisticConcurrencyTest("Conflicts - Name from client, Number from server", (clientItem, serverItem) =>
+            result.AddTest(CreateOptimisticConcurrencyTest("Conflicts (client side) - Name from client, Number from server", (clientItem, serverItem) =>
             {
                 var mergeResult = serverItem.Clone();
                 mergeResult.Name = clientItem.Name;
                 return mergeResult;
             }));
+
+            result.AddTest(CreateOptimisticConcurrencyWithServerConflictsTest("Conflicts (server side) - client wins", true));
+            result.AddTest(CreateOptimisticConcurrencyWithServerConflictsTest("Conflicts (server side) - server wins", false));
 
             result.AddTest(CreateSystemPropertiesTest(true));
             result.AddTest(CreateSystemPropertiesTest(false));
@@ -265,6 +268,66 @@ namespace ZumoE2ETestApp.Tests
                     return false;
                 }
 
+                return true;
+            });
+        }
+
+        private static ZumoTest CreateOptimisticConcurrencyWithServerConflictsTest(string testName, bool clientWins)
+        {
+            return new ZumoTest(testName, async delegate(ZumoTest test)
+            {
+                var client = ZumoTestGlobals.Instance.Client;
+                var table = client.GetTable<VersionedType>();
+                DateTime now = DateTime.UtcNow;
+                int seed = now.Year * 10000 + now.Month * 100 + now.Day;
+                test.AddLog("Using seed: {0}", seed);
+                Random rndGen = new Random(seed);
+                var item = new VersionedType(rndGen);
+                await table.InsertAsync(item);
+                test.AddLog("[client 1] Inserted item: {0}", item);
+
+                var client2 = new MobileServiceClient(client.ApplicationUri, client.ApplicationKey);
+                var table2 = client.GetTable<VersionedType>();
+                var item2 = await table2.LookupAsync(item.Id);
+                test.AddLog("[client 2] Retrieved the item");
+                item2.Name = Util.CreateSimpleRandomString(rndGen, 20);
+                item2.Number = rndGen.Next(100000);
+                test.AddLog("[client 2] Updated the item, will update on the server now");
+                await table2.UpdateAsync(item2);
+                test.AddLog("[client 2] Item has been updated: {0}", item2);
+
+                test.AddLog("[client 1] Will try to update - using policy that data on {0} wins", clientWins ? "client" : "server");
+                string oldName = item2.Name;
+                string newName = Util.CreateSimpleRandomString(rndGen, 20);
+                item.Name = newName;
+                await table.UpdateAsync(item, new Dictionary<string, string> { { "conflictPolicy", clientWins ? "clientWins" : "serverWins" } });
+                test.AddLog("[client 1] Updated the item: {0}", item);
+
+                test.AddLog("[client 2] Now refreshing the second item");
+                await table2.RefreshAsync(item2);
+                test.AddLog("[client 2] Refreshed: {0}", item2);
+                if (clientWins)
+                {
+                    // The name should be the new one
+                    if (item.Name != newName || item2.Name != newName)
+                    {
+                        test.AddLog("Error, name wasn't updated in a 'client wins' policy");
+                        return false;
+                    }
+                }
+                else
+                {
+                    // The name should have remained the old one
+                    if (item.Name != oldName || item2.Name != oldName)
+                    {
+                        test.AddLog("Error, name was updated in a 'server wins' policy");
+                        return false;
+                    }
+                }
+
+                test.AddLog("Table operations behaved as expected. Cleaning up...");
+                await table.DeleteAsync(item);
+                test.AddLog("...done");
                 return true;
             });
         }
