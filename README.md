@@ -20,20 +20,7 @@ To get the source code of our SDKs and samples via **git** just type:
 
 ## Change log
 
-Those are the changes introduced in the version 1.1.0 of our SDKs:
-
-- Support for tables with string ids (all SDKs)
-- Support for optimistic concurrency (version / ETag) validation (Managed SDK)
-- Support for `__createdAt` / `__updatedAt` table columns (Managed SDK)
-- Overload for log in which takes the provider as a string, in addition to the one with enums (Android and Managed SDK)
-- Removed client restriction on valid providers for login (JavaScript)
-- Fix #121 - exceptions in `MobileServiceIncrementalLoadingCollection.LoadMoreItemsAsync` causes the app to crash
-- Dropped support for Windows Phone 7.x clients (WP7.5 can still use the client version 1.0.3)
-
-Those are the changes introduced in the version 1.0.3 of our SDKs:
-
-- Fixed query issues in Visual Basic expressions (Managed SDK)
-- Added support for `String.substr` inside functions on `where` clauses (JavaScript)
+see [Change Log](CHANGELOG.md)
 
 ## Managed Windows 8 and Windows Phone 8 Client SDK
 
