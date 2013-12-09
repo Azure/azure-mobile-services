@@ -410,6 +410,10 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             string response = await this.InternalInvokeApiAsync(apiName, content, method, parameters);
+            if (string.IsNullOrEmpty(response))
+            {
+                return default(U);
+            }
             return serializer.Deserialize<U>(JToken.Parse(response));
         }
 
@@ -501,7 +505,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         private async Task<string> InternalInvokeApiAsync(string apiName, string content, HttpMethod method, IDictionary<string, string> parameters = null)
         {
             method = method ?? defaultHttpMethod;
-            MobileServiceHttpResponse response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), content);
+            MobileServiceHttpResponse response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), content, false);
             return response.Content;
         }
 
