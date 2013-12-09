@@ -497,12 +497,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task InvokeCustomAPIWithNullResponse_Success()
+        public async Task InvokeCustomAPIWithEmptyStringResponse_Success()
         {
             TestHttpHandler hijack = new TestHttpHandler();
 
             hijack.Response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
-            hijack.Response.Content = null;
+            hijack.Response.Content = new StringContent("", Encoding.UTF8, "application/json");
 
             MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
 
@@ -517,7 +517,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             TestHttpHandler hijack = new TestHttpHandler();
 
             hijack.Response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
-            hijack.Response.Content = null; 
+            hijack.Response.Content = null;
 
             MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
 
