@@ -291,6 +291,7 @@ namespace ZumoE2ETestApp.Tests
                     Movies = ZumoQueryTestData.AllMovies
                 };
                 await table.InsertAsync(allMovies);
+                while ((await table.ReadAsync(table.Skip(allMovies.Movies.Length - 1).Take(1))).ToArray().Length > 0) { };
                 test.AddLog("Result of populating table: {0}", allMovies.Status);
                 return true;
             }));
@@ -312,6 +313,7 @@ namespace ZumoE2ETestApp.Tests
                 }
 
                 await table.InsertAsync(allMovies);
+                while ((await table.ReadAsync(table.Skip(allMovies.Movies.Length - 1).Take(1))).ToArray().Length > 0) { };
                 test.AddLog("Result of populating table: {0}", allMovies.Status);
                 return true;
             }));

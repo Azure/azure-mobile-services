@@ -1,14 +1,15 @@
 function insert(item, user, request) {
     item.id = 1;
-    var table = tables.getTable('iosmovies');
+    var table = tables.getTable('iosMovies');
     table.take(1).read({
-        success: function(items) {
+        success: function (items) {
             if (items.length > 0) {
                 // table already populated
-                request.respond(201, {id: 1, status: 'Already populated'});
+                request.respond(201, { id: 1, status: 'Already populated' });
             } else {
                 // Need to populate the table
                 populateTable(table, request, item.movies);
+                request.respond(201, { id: 1, status: 'Table populated successfully' });
             }
         }
     });
@@ -17,24 +18,22 @@ function insert(item, user, request) {
 function populateTable(table, request, films) {
     var index = 0;
     films.forEach(changeReleaseDate);
-    var insertNext = function() {
-        if (index >= films.length) {
-            request.respond(201, {id : 1, status : 'Table populated successfully'});
-        } else {
+    var insertNext = function () {
+        if (index < films.length) {
             var toInsert = films[index];
             table.insert(toInsert, {
-                success: function() {
+                success: function () {
                     index++;
                     if ((index % 20) === 0) {
                         console.log('Inserted %d items', index);
                     }
-                    
+
                     insertNext();
                 }
             });
         }
     };
-    
+
     insertNext();
 }
 
