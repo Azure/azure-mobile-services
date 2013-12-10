@@ -291,8 +291,19 @@ namespace ZumoE2ETestApp.Tests
                     Movies = ZumoQueryTestData.AllMovies
                 };
                 await table.InsertAsync(allMovies);
-                test.AddLog("Result of populating table: {0}", allMovies.Status);
-                return true;
+
+                for (int i = 0; i < 10; i++)
+                {
+                    if ((await table.Skip(allMovies.Movies.Length - 1).ToListAsync()).Count == 1)
+                    {
+                        test.AddLog("Result of populating table: {0}", allMovies.Status);
+                        return true;
+                    }
+                    new System.Threading.ManualResetEvent(false).WaitOne(5000);
+                }
+
+                test.AddLog("Result of populating table: Time out. Not populate enough data.");
+                return false;
             }));
         }
 
@@ -312,8 +323,19 @@ namespace ZumoE2ETestApp.Tests
                 }
 
                 await table.InsertAsync(allMovies);
-                test.AddLog("Result of populating table: {0}", allMovies.Status);
-                return true;
+
+                for (int i = 0; i < 10; i++)
+                {
+                    if ((await table.Skip(allMovies.Movies.Length - 1).ToListAsync()).Count == 1)
+                    {
+                        test.AddLog("Result of populating table: {0}", allMovies.Status);
+                        return true;
+                    }
+                    new System.Threading.ManualResetEvent(false).WaitOne(5000);
+                }
+
+                test.AddLog("Result of populating table: Time out. Not populate enough data.");
+                return false;
             }));
         }
 
