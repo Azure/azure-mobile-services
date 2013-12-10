@@ -5,8 +5,8 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Net;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.Live;
 using Microsoft.WindowsAzure.MobileServices;
@@ -343,6 +343,11 @@ namespace ZumoE2ETestApp.Tests
                     var item2 = await table.LookupAsync(id, queryParameters);
                     test.AddLog("Retrieved item via Lookup: {0}", item2);
                     var obj = item2 as JObject;
+                    bool usersEnabled = false;
+                    if (obj["UsersEnabled"] != null)
+                    {
+                        usersEnabled = obj["UsersEnabled"].Value<bool>();
+                    }
                     if (obj["Identities"] != null)
                     {
                         string identities = obj["Identities"].Value<string>();
@@ -350,6 +355,12 @@ namespace ZumoE2ETestApp.Tests
                         {
                             var identitiesObj = JObject.Parse(identities);
                             test.AddLog("Identities object: {0}", identitiesObj);
+                            bool hasScreenNameOrName = HasScreenNameOrName(providerName, identitiesObj);
+                            test.AddLog("Found screen name or name: {0}", hasScreenNameOrName);
+                            if (!hasScreenNameOrName)
+                            {
+                                return false;
+                            }
                             lastUserIdentityObject = identitiesObj;
                         }
                         catch (Exception ex2)
@@ -408,6 +419,17 @@ namespace ZumoE2ETestApp.Tests
 
                 return true;
             });
+        }
+
+        private static bool HasScreenNameOrName(string providerName, JObject identitiesObj)
+        {
+            string provider = providerName.ToLowerInvariant();
+            if (provider == "microsoftaccount")
+            {
+                provider = "microsoft";
+            }
+            bool hasScreenNameOrName = identitiesObj[provider]["screen_name"] != null || identitiesObj[provider]["name"] != null;
+            return hasScreenNameOrName;
         }
 
         private static bool ValidateExpectedError(ZumoTest test, MobileServiceInvalidOperationException exception, bool operationShouldSucceed)
