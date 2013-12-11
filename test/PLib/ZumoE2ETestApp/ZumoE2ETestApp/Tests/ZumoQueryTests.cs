@@ -292,14 +292,20 @@ namespace ZumoE2ETestApp.Tests
                 };
                 await table.InsertAsync(allMovies);
 
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 20; i++)
                 {
-                    if ((await table.Skip(allMovies.Movies.Length - 1).ToListAsync()).Count == 1)
+                    var counter = await table.Take(0).IncludeTotalCount().ToListAsync();
+                    var totalCount = ((ITotalCountProvider)counter).TotalCount;
+                    if (totalCount == allMovies.Movies.Length)
                     {
                         test.AddLog("Result of populating table: {0}", allMovies.Status);
                         return true;
                     }
-                    new System.Threading.ManualResetEvent(false).WaitOne(5000);
+                    else
+                    {
+                        test.AddLog("Already inserted {0} items, waiting for insertion to complete", totalCount);
+                        await Util.TaskDelay(5000);
+                    }
                 }
 
                 test.AddLog("Result of populating table: Time out. Not populate enough data.");
@@ -321,20 +327,25 @@ namespace ZumoE2ETestApp.Tests
                 {
                     allMovies.Movies[i] = new StringIdMovie(string.Format("Movie {0:000}", i), ZumoQueryTestData.AllMovies[i]);
                 }
-
                 await table.InsertAsync(allMovies);
 
-                for (int i = 0; i < 10; i++)
+                for (int i = 0; i < 20; i++)
                 {
-                    if ((await table.Skip(allMovies.Movies.Length - 1).ToListAsync()).Count == 1)
+                    var counter = await table.Take(0).IncludeTotalCount().ToListAsync();
+                    var totalCount = ((ITotalCountProvider)counter).TotalCount;
+                    if (totalCount == allMovies.Movies.Length)
                     {
-                        test.AddLog("Result of populating table: {0}", allMovies.Status);
+                        test.AddLog("Result of populating [string id] table: {0}", allMovies.Status);
                         return true;
                     }
-                    new System.Threading.ManualResetEvent(false).WaitOne(5000);
+                    else
+                    {
+                        test.AddLog("Already inserted {0} items, waiting for insertion to complete", totalCount);
+                        await Util.TaskDelay(5000);
+                    }
                 }
 
-                test.AddLog("Result of populating table: Time out. Not populate enough data.");
+                test.AddLog("Result of populating [string id] table: Time out. Not populate enough data.");
                 return false;
             }));
         }
