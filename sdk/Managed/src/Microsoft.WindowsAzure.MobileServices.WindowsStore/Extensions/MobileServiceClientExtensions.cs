@@ -4,6 +4,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -46,6 +47,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             MobileServiceUIAuthentication auth = new MobileServiceUIAuthentication(client, provider);
 
             return auth.LoginAsync();
+        }
+
+        public static Push GetPush(this MobileServiceClient client)
+        {
+            return new Push(client);
         }
     }
 }
