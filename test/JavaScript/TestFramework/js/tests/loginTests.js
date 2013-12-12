@@ -239,9 +239,31 @@ function defineLoginTestsNamespace() {
                             test.addLog('Error, query should have returned exactly one item');
                             done(false);
                         } else {
-                            if (items[0].Identities) {
+                            var retrievedItem = items[0];
+                            var usersFeatureEnabled = retrievedItem.UsersEnabled;
+                            if (retrievedItem.Identities) {
                                 lastUserIdentityObject = JSON.parse(items[0].Identities);
                                 test.addLog('Identities object: ', lastUserIdentityObject);
+                                var providerName = provider;
+                                if (providerName.toLowerCase() === 'microsoftaccount') {
+                                    providerName = 'microsoft';
+                                }
+                                var providerIdentity = lastUserIdentityObject[providerName];
+                                if (!providerIdentity) {
+                                    test.addLog('Error, cannot fetch the identity for provider ', providerName);
+                                    done(false);
+                                    return;
+                                }
+                                if (usersFeatureEnabled) {
+                                    var userName = providerIdentity.name || providerIdentity.screen_name;
+                                    if (userName) {
+                                        test.addLog('Found user name: ', userName);
+                                    } else {
+                                        test.addLog('Could not find user name!');
+                                        done(false);
+                                        return;
+                                    }
+                                }
                             }
                             readCallback();
                         }
