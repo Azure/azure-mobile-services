@@ -21,8 +21,27 @@ function defineQueryTestsNamespace() {
         var table = client.getTable(tableName);
         table.insert(item).done(function (readItem) {
             var status = readItem ? readItem.status : (item.status || 'no status');
-            test.addLog('status: ' + JSON.stringify(status));
-            done(true);
+            var tryTimes = 0;
+            function isPopulated() {
+                table.take(0).includeTotalCount().read().done(function (results) {
+                    var totalCount = results.totalCount;
+                    if (totalCount === item.movies.length) {
+                        test.addLog('status: ' + JSON.stringify(status));
+                        done(true);
+                    } else {
+                        tryTimes++;
+                        if (tryTimes < 20) {
+                            test.addLog('Already inserted ' + totalCount + ' items, waiting for insertion to complete');
+                            setTimeout(isPopulated, 5000);
+                        } else {
+                            test.addLog('Error populating the table, not populate enough data.');
+                            done(false);
+                        }
+                    }
+                });
+            }
+            isPopulated();
+
         }, function (err) {
             test.addLog('Error populating the table: ' + JSON.stringify(err));
             done(false);
@@ -49,10 +68,29 @@ function defineQueryTestsNamespace() {
         var table = client.getTable(stringIdMoviesTableName);
         table.insert(item).done(function (readItem) {
             var status = readItem ? readItem.status : (item.status || 'no status');
-            test.addLog('status: ' + JSON.stringify(status));
-            done(true);
+            var tryTimes = 0;
+            function isPopulated() {
+                table.take(0).includeTotalCount().read().done(function (results) {
+                    var totalCount = results.totalCount;
+                    if (totalCount === item.movies.length) {
+                        test.addLog('status: ' + JSON.stringify(status));
+                        done(true);
+                    } else {
+                        tryTimes++;
+                        if (tryTimes < 20) {
+                            test.addLog('Already inserted ' + totalCount + ' items, waiting for insertion to complete');
+                            setTimeout(isPopulated, 5000);
+                        } else {
+                            test.addLog('Error populating the string id table, not populate enough data.');
+                            done(false);
+                        }
+                    }
+                });
+            }
+            isPopulated();
+
         }, function (err) {
-            test.addLog('Error populating the table: ' + JSON.stringify(err));
+            test.addLog('Error populating the string id table: ' + JSON.stringify(err));
             done(false);
         });
     });
