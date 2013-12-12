@@ -355,12 +355,17 @@ namespace ZumoE2ETestApp.Tests
                         {
                             var identitiesObj = JObject.Parse(identities);
                             test.AddLog("Identities object: {0}", identitiesObj);
-                            bool hasScreenNameOrName = HasScreenNameOrName(providerName, identitiesObj);
-                            test.AddLog("Found screen name or name: {0}", hasScreenNameOrName);
-                            if (!hasScreenNameOrName)
+                            if (usersEnabled)
                             {
-                                return false;
+                                string userName = NameOrScreenName(providerName, identitiesObj);
+                                test.AddLog("User name: {0}", userName ?? "<<null>>");
+                                if (userName == null)
+                                {
+                                    test.AddLog("Error, with users feature enabled, user identity should have a name (or screen_name in case of twitter)");
+                                    return false;
+                                }
                             }
+
                             lastUserIdentityObject = identitiesObj;
                         }
                         catch (Exception ex2)
@@ -421,15 +426,23 @@ namespace ZumoE2ETestApp.Tests
             });
         }
 
-        private static bool HasScreenNameOrName(string providerName, JObject identitiesObj)
+        private static string NameOrScreenName(string providerName, JObject identities)
         {
             string provider = providerName.ToLowerInvariant();
             if (provider == "microsoftaccount")
             {
                 provider = "microsoft";
             }
-            bool hasScreenNameOrName = identitiesObj[provider]["screen_name"] != null || identitiesObj[provider]["name"] != null;
-            return hasScreenNameOrName;
+
+            JToken name = identities[provider]["screen_name"] ?? identities[provider]["name"];
+            if (name != null)
+            {
+                return name.Value<string>();
+            }
+            else
+            {
+                return null;
+            }
         }
 
         private static bool ValidateExpectedError(ZumoTest test, MobileServiceInvalidOperationException exception, bool operationShouldSucceed)
