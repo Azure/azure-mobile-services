@@ -592,14 +592,12 @@ function removeSystemProperties(instance) {
 }
 
 function addSystemProperties(parameters, properties, querystring) {
-    if (properties === MobileServiceSystemProperties.None || (typeof querystring === 'string' && querystring.toLowerCase().indexOf('__systemproperties') !== -1)) {
+    if (properties === MobileServiceSystemProperties.None || (typeof querystring === 'string' && querystring.toLowerCase().indexOf('__systemproperties') >= 0)) {
         return parameters;
     }
 
-    // Initialize an array if none passed in
-    if (parameters === null) {
-        parameters = {};
-    }
+    // Initialize an object if none passed in
+    parameters = parameters || {};
 
     // Don't override system properties if already set
     if(!_.isNull(parameters['__systemProperties'])) {
@@ -637,18 +635,19 @@ function getItemFromResponse(response) {
     return result;
 }
 
+// Add wrapping double quotes and escape all double quotes
 function getEtagFromVersion(version) {
-    var result = version.replace(/^[\\]["]/, '"');
+    var result = version.replace(/\"/g, '\\\"');
     return "\"" + result + "\"";
 }
 
-// Remove surrounding double quotes and escape internal quotes
+// Remove surrounding double quotes and unescape internal quotes
 function getVersionFromEtag(etag) {
     var len = etag.length,
-        result;
+        result = etag;
 
     if (len > 1 && etag[0] === '"' && etag[len - 1] === '"') {
         result = etag.substr(1, len - 2);
     }
-    return result.replace(/\\\"/, '"');
+    return result.replace(/\\\"/g, '"');
 }

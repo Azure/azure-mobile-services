@@ -15,10 +15,10 @@ var testData = require("constants");
 function checkRequestURL(url, property)
 {
     if (property === WindowsAzure.MobileServiceTable.SystemProperties.None) {
-        $assert.isTrue(url.indexOf('__systemProperties') === -1); 
+        $assert.isTrue(url.indexOf('__systemProperties') < 0); 
         return;
     } else if (property === WindowsAzure.MobileServiceTable.SystemProperties.All) {
-        $assert.contains(url, '__systemProperties=*'); // %2A
+        $assert.contains(url, '__systemProperties=*');
         return;
     }
 
@@ -1289,7 +1289,6 @@ $testGroup('MobileServiceTables.js',
                 client = client.withFilter(function (req, next, callback) {
                     // check serialization of object
                     var serializedItem = '{"id":"an id","string":"What?","' + testProperty + '":"a value"}';
-                    //$assert.areEqual(req.data, serializedItem);
                     callback(null, { status: 200, responseText: serializedItem });
                 });
 
@@ -1536,12 +1535,12 @@ $testGroup('MobileServiceTables.js',
             deleteClient;
 
         client = client.withFilter(function (req, next, callback) {
-            var value = req.url.substring(req.url.toLowerCase().indexOf('__systemproperties=') + 19);
+            var value = req.url.substring(req.url.toLowerCase().indexOf('__systemproperties=') + '__systemproperties='.length);
             callback(null, { status: 200, responseText: '{"value":"' + value + '"}' });
         });
 
         deleteClient = client.withFilter(function (req, next, callback) {
-            var value = req.url.substring(req.url.indexOf('__systemProperties=') + 19);
+            var value = req.url.substring(req.url.indexOf('__systemProperties=') + '__systemproperties='.length);
             $assert.areEqual(value, 'unknown');
             callback(null, { status: 200 });
         });
@@ -1644,5 +1643,25 @@ $testGroup('MobileServiceTables.js',
         });
 
         return $chain.apply(null, testCases);
+    }),
+
+    $test('testETagUpdateEncoding')
+    .tag('SystemProperties')
+    .description('Verify eTag is encoded/decoded and overrides passed down __version')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testProperties = testData.testSystemProperties;
+
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers['If-Match'], '"test\\"qu\\"oteAnd\\\\""');
+            callback(null, { status: 200, getResponseHeader: function () { return '"nowrapping\\\"OrEscaped"Quotes"'; }, responseText: '{"id":null, "title":"test", "__version":"apple"}' });
+        });
+
+        var table = client.getTable('books');
+        table.systemProperties = WindowsAzure.MobileServiceTable.SystemProperties.Version;
+
+        return table.update({ id: 'my id', value: 'A', __version: 'test"qu"oteAnd\\"' }).then(function (result) {
+            $assert.areEqual(result.__version, 'nowrapping"OrEscaped"Quotes');
+        });
     })
 );
