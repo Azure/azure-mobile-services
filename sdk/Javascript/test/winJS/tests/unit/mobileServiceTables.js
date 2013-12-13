@@ -10,70 +10,32 @@
 // Declare JSHint globals
 /*global MobileServiceClient:false */
 
-var validStringIds = [
-            "id",
-            "true",
-            "false",
-            "00000000-0000-0000-0000-000000000000",
-            "aa4da0b5-308c-4877-a5d2-03f274632636",
-            "69C8BE62-A09F-4638-9A9C-6B448E9ED4E7",
-            "{EC26F57E-1E65-4A90-B949-0661159D0546}",
-            "87D5B05C93614F8EBFADF7BC10F7AE8C",
-            "someone@someplace.com",
-            "id with spaces",
-            "...",
-            " .",
-            "'id' with single quotes",
-            "id with 255 characters " + new Array(257-24).join('A'),
-            "id with Japanese 私の車はどこですか？",
-            "id with Arabic أين هو سيارتي؟",
-            "id with Russian Где моя машина",
-            "id with some URL significant characters % # &",
-            "id with allowed ascii characters  !#$%&'()*,-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_abcdefghijklmnopqrstuvwxyz{|}",
-            "id with allowed extended ascii characters ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþ"
-        ];
+var testData = require("constants");
 
-var emptyStringIds = [""];
-var invalidStringIds = [
-            ".",
-            "..",
-            "id with 256 characters " + new Array(257 - 23).join('A'),
-            "\r",
-            "\n",
-            "\t",
-            "id\twith\ttabs",
-            "id\rwith\rreturns",
-            "id\nwith\n\newline",
-            "id with backslash \\",
-            "id with forwardslash \/",
-            "1/8/2010 8:00:00 AM",
-            "\"idWithQuotes\"",
-            "?",
-            "\\",
-            "\/",
-            "`",
-            "+",
-            " ",
-            "control character between 0 and 31 " + String.fromCharCode(16),
-            "control character between 127 and 159" + String.fromCharCode(130)
-    ];
+function checkRequestURL(url, property)
+{
+    if (property === WindowsAzure.MobileServiceTable.SystemProperties.None) {
+        $assert.isTrue(url.indexOf('__systemProperties') === -1); 
+        return;
+    } else if (property === WindowsAzure.MobileServiceTable.SystemProperties.All) {
+        $assert.contains(url, '__systemProperties=*'); // %2A
+        return;
+    }
 
-var validIntIds = [1, 925000];
-var invalidIntIds = [-1];
-var nonStringNonIntValidJsonIds = [
-    true,
-    false,
-    1.0,
-    -1.0,
-    0.0,
-    ];
-
-var nonStringNonIntIds = [
-    new Date(2010, 1, 8),
-    {},
-    1.0,
-    "aa4da0b5-308c-4877-a5d2-03f274632636"
-];
+    $assert.contains(url, '__systemProperties');
+    
+    if (property & WindowsAzure.MobileServiceTable.SystemProperties.All.CreatedAt) {
+        $assert.contains(url, '__createdAt');
+    }
+    
+    if (property & WindowsAzure.MobileServiceTable.SystemProperties.All.UpdatedAt) {
+        $assert.contains(url, '__updatedAt');
+    }
+    
+    if (property & WindowsAzure.MobileServiceTable.SystemProperties.All.Version) {
+        $assert.contains(url, '__version');
+    }
+}
 
 $testGroup('MobileServiceTables.js',
     $test('table.read() with no id results')
@@ -111,7 +73,7 @@ $testGroup('MobileServiceTables.js',
     .description('Verify table.read returns the results')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
-            testIdData = validStringIds.concat(emptyStringIds).concat(invalidStringIds).concat(validIntIds).concat(invalidIntIds).concat(nonStringNonIntValidJsonIds),
+            testIdData = testData.validStringIds.concat(testData.emptyStringIds).concat(testData.invalidStringIds).concat(testData.validIntIds).concat(testData.invalidIntIds).concat(testData.nonStringNonIntValidJsonIds),
             testCases = [];
 
         testIdData.forEach(function (stringId) {
@@ -133,7 +95,7 @@ $testGroup('MobileServiceTables.js',
     .description('Verify table.read returns the results')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
-            testIdData = validStringIds.concat(emptyStringIds).concat(invalidStringIds),
+            testIdData = testData.validStringIds.concat(testData.emptyStringIds).concat(testData.invalidStringIds),
             testCases = [];
 
         testIdData.forEach(function (testId) {
@@ -431,7 +393,7 @@ $testGroup('MobileServiceTables.js',
     .description('Verify table.insert works with all valid ids')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
-            testIdData = validStringIds,
+            testIdData = testData.validStringIds,
             testCases = [];
             
         testIdData.forEach(function (testId) {
@@ -457,7 +419,7 @@ $testGroup('MobileServiceTables.js',
     .description('Verify table.insert fails with non string ids or invalid string ids')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
-            testIdData = validIntIds.concat(invalidStringIds).concat(invalidIntIds),
+            testIdData = testData.validIntIds.concat(testData.invalidStringIds).concat(testData.invalidIntIds),
             testCases = [];
 
         testIdData.forEach(function (testId) {
@@ -483,7 +445,7 @@ $testGroup('MobileServiceTables.js',
     .description('Verify table.insert can return all valid ids')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
-            testIdData = validStringIds.concat(validIntIds).concat(invalidIntIds).concat(invalidStringIds),
+            testIdData = testData.validStringIds.concat(testData.validIntIds).concat(testData.invalidIntIds).concat(testData.invalidStringIds),
             testCases = [];
 
         testIdData.forEach(function (testId) {
@@ -640,7 +602,7 @@ $testGroup('MobileServiceTables.js',
     .description('Verify table.update works with all valid ids')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
-            testIdData = validStringIds.concat(validIntIds),
+            testIdData = testData.validStringIds.concat(testData.validIntIds),
             testCases = [];
 
         testIdData.forEach(function (testId) {
@@ -666,7 +628,7 @@ $testGroup('MobileServiceTables.js',
     .description('Verify table.update fails with invalid ids')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
-            testIdData = invalidIntIds.concat(invalidStringIds),
+            testIdData = testData.invalidIntIds.concat(testData.invalidStringIds),
             testCases = [];
 
         testIdData.forEach(function (testId) {
@@ -691,7 +653,7 @@ $testGroup('MobileServiceTables.js',
     .description('Verify table.update can return all ids')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
-            testIdData = validStringIds.concat(validIntIds).concat(invalidIntIds).concat(invalidStringIds),
+            testIdData = testData.validStringIds.concat(testData.validIntIds).concat(testData.invalidIntIds).concat(testData.invalidStringIds),
             testCases = [];
             
         testIdData.forEach(function (testId) {
@@ -762,7 +724,7 @@ $testGroup('MobileServiceTables.js',
     .description('Verify table.lookup returns the results')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
-            testIdData = validStringIds.concat(emptyStringIds).concat(invalidStringIds).concat(validIntIds).concat(invalidIntIds).concat(nonStringNonIntValidJsonIds);
+            testIdData = testData.validStringIds.concat(testData.emptyStringIds).concat(testData.invalidStringIds).concat(testData.validIntIds).concat(testData.invalidIntIds).concat(testData.nonStringNonIntValidJsonIds);
             testCases = [];
             
         testIdData.forEach(function (testId) {
@@ -820,7 +782,7 @@ $testGroup('MobileServiceTables.js',
     .description('Verify table.lookup returns the results')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
-            testIdData = validStringIds.concat(validIntIds),
+            testIdData = testData.validStringIds.concat(testData.validIntIds),
             testCases = [];
 
         testIdData.forEach(function (testId) {
@@ -844,7 +806,7 @@ $testGroup('MobileServiceTables.js',
     .description('Verify table.lookup throws when given an invalid id')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
-            testIdData = invalidStringIds.concat(emptyStringIds).concat(invalidIntIds);
+            testIdData = testData.invalidStringIds.concat(testData.emptyStringIds).concat(testData.invalidIntIds);
         testCases = [];
 
         testIdData.forEach(function (testId) {
@@ -919,7 +881,7 @@ $testGroup('MobileServiceTables.js',
     .description('Verify table.del works with all valid ids')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
-            testIdData = validStringIds.concat(validIntIds),
+            testIdData = testData.validStringIds.concat(testData.validIntIds),
             testCases = [];
 
         testIdData.forEach(function (testId) {
@@ -941,7 +903,7 @@ $testGroup('MobileServiceTables.js',
     .description('Verify table.del fails with all invalid ids')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
-            testIdData = invalidStringIds.concat(invalidIntIds),
+            testIdData = testData.invalidStringIds.concat(testData.invalidIntIds),
             testCases = [];
 
         testIdData.forEach(function (testId) {
@@ -1027,7 +989,7 @@ $testGroup('MobileServiceTables.js',
     .description('Verify table.refresh works with all valid ids')
     .check(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
-            testIdData = validStringIds.concat(validIntIds),
+            testIdData = testData.validStringIds.concat(testData.validIntIds),
             testCases = [];
 
         testIdData.forEach(function (testId) {
@@ -1078,7 +1040,7 @@ $testGroup('MobileServiceTables.js',
     .description('Verify table.refresh does not hit server with nonstring invalid ids')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
-            testIdData = invalidIntIds.concat(nonStringNonIntIds).
+            testIdData = testData.invalidIntIds.concat(testData.nonStringNonIntIds).
             testCases = [];
 
         client = client.withFilter(function (req, next, callback) {
@@ -1106,7 +1068,7 @@ $testGroup('MobileServiceTables.js',
     .description('Verify table.refresh fails with nonstring invalid ids')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
-            testIdData = invalidStringIds,
+            testIdData = testData.invalidStringIds,
             testCases = [];
 
         client = client.withFilter(function (req, next, callback) {
@@ -1310,6 +1272,377 @@ $testGroup('MobileServiceTables.js',
         }, function (error) {
             $assert.fail("Should have succeeded");
         });
-    })
+    }),
 
+    // Optimistic concurrency and system column tests
+
+    $test('testInsertStringIdPropertiesNotRemovedFromRequest')
+    .tag('SystemProperties')
+    .description('Verify properties not removed in string id tables when no system properties specified')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testProperties = testData.testNonSystemProperties.concat(testData.testValidSystemProperties),
+            testCases = [];
+
+        testProperties.forEach(function (testProperty) {
+            testCases.push(function () {
+                client = client.withFilter(function (req, next, callback) {
+                    // check serialization of object
+                    var serializedItem = '{"id":"an id","string":"What?","' + testProperty + '":"a value"}';
+                    //$assert.areEqual(req.data, serializedItem);
+                    callback(null, { status: 200, responseText: serializedItem });
+                });
+
+                var item = { id: 'an id', string: 'What?' };
+                item[testProperty] = 'a value';
+
+                return client.getTable('someTable').insert(item).then(function (result) {
+                    $assert.areEqual(result[testProperty], 'a value');
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('testInsertNullIdSystemPropertiesNotRemovedFromRequest')
+    .tag('SystemProperties')
+    .description('Verify system and non system properties not removed for null id')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testProperties = testData.testNonSystemProperties.concat(testData.testValidSystemProperties),
+            testCases = [];
+
+        testProperties.forEach(function (testProperty) {
+            testCases.push(function () {
+                client = client.withFilter(function (req, next, callback) {
+                    // check serialization of object
+                    var serializedItem = '{"id":null,"string":"What?","' + testProperty + '":"a value"}';
+                    $assert.areEqual(req.data, serializedItem);
+                    callback(null, { status: 200, responseText: '{"id":"an id","string":"What?","' + testProperty + '":"a value"}' });
+                });
+
+                var item = { id: null, string: 'What?' };
+                item[testProperty] = 'a value';
+
+                return client.getTable('someTable').insert(item).then(function (result) {
+                    $assert.areEqual(result[testProperty], 'a value');
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('testUpdateAsyncStringIdSystemPropertiesRemovedFromRequest')
+    .tag('SystemProperties')
+    .description('Verify system  properties are removed for updates')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testProperties = testData.testValidSystemProperties,
+            testCases = [];
+
+        testProperties.forEach(function (testProperty) {
+            testCases.push(function () {
+                client = client.withFilter(function (req, next, callback) {
+                    // check serialization of object
+                    var serializedItem = '{"id":"an id","string":"What?"}';
+                    $assert.areEqual(req.data, serializedItem);
+                    callback(null, { status: 200, responseText: serializedItem });
+                });
+
+                var item = { id: 'an id', string: 'What?' };
+                item[testProperty] = 'a value';
+
+                return client.getTable('someTable').update(item).then(function (result) {
+                    // do nothing
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('testUpdateStringIdNonSystemPropertiesNotRemovedFromRequest')
+    .tag('SystemProperties')
+    .description('Verify non system properties are not removed for updates')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testProperties = testData.testNonSystemProperties,
+            testCases = [];
+
+        testProperties.forEach(function (testProperty) {
+            testCases.push(function () {
+                client = client.withFilter(function (req, next, callback) {
+                    // check serialization of object
+                    var serializedItem = '{"id":"an id","string":"What?","' + testProperty + '":"a value"}';
+                    $assert.areEqual(req.data, serializedItem);
+                    callback(null, { status: 200, responseText: serializedItem });
+                });
+
+                var item = { id: 'an id', string: 'What?' };
+                item[testProperty] = 'a value';
+
+                return client.getTable('someTable').update(item).then(function (result) {
+                    // do nothing
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('testUpdateIntegerIdNoPropertiesRemovedFromRequest')
+    .tag('SystemProperties')
+    .description('Verify system properties are not removed for updates on integer ids')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testProperties = testData.testNonSystemProperties.concat(testData.testValidSystemProperties),
+            testCases = [];
+
+        testProperties.forEach(function (testProperty) {
+            testCases.push(function () {
+                client = client.withFilter(function (req, next, callback) {
+                    // check serialization of object
+                    var serializedItem = '{"id":5,"string":"What?","' + testProperty + '":"a value"}';
+                    $assert.areEqual(req.data, serializedItem);
+                    callback(null, { status: 200, responseText: req.data });
+                });
+
+                var item = { id: 5, string: 'What?' };
+                item[testProperty] = 'a value';
+
+                return client.getTable('someTable').update(item).then(function (result) {
+                    $assert.areEqual(item[testProperty], result[testProperty]);
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+        });
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('testTableOperationSystemPropertiesQueryStringIsCorrect')
+    .tag('SystemProperties')
+    .description('Verify system properties are added to querystring')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testProperties = testData.testSystemProperties,
+            testCases = [];
+
+        testProperties.forEach(function (testSystemProperty) {
+            client = client.withFilter(function (req, next, callback) {
+                checkRequestURL(req.url, testSystemProperty);
+                callback(null, { status: 200, responseText: req.data });
+            });
+
+            var table = client.getTable('someTable');
+            table.systemProperties = testSystemProperty;
+
+            testCases.push(function () {
+                return table.insert({ id: 'an id', string: 'What?' }).then(function (result) {
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            testCases.push(function () {
+                return table.update({ id: 'an id', string: 'What?' }).then(function (result) {
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            testCases.push(function () {
+                return table.lookup('an id').then(function (result) {
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            testCases.push(function () {
+                return table.del({ id: 'an id', string: 'What?' }).then(function (result) {
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            // With integer ids
+            testCases.push(function () {
+                return table.insert({ string: 'What?' }).then(function (result) {
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            testCases.push(function () {
+                return table.update({ id: 5, string: 'What?' }).then(function (result) {
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            testCases.push(function () {
+                return table.lookup(5).then(function (result) {
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            testCases.push(function () {
+                return table.del({ id: 5, string: 'What?' }).then(function (result) {
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            // Query
+            testCases.push(function () {
+                return table.read('$filter=id eq 5').then(function (result) {
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            testCases.push(function () {
+                return table.read('select=id,String').then(function (result) {
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            testCases.push(function () {
+                return table.where(function() { return this.id == 5 }).read().then(function (result) {
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+        });
+
+        return $chain.apply(null, testCases);
+    }),
+
+    $test('testTableOperationUserParameterWithSystemPropertyQueryStringIsCorrect')
+    .tag('SystemProperties')
+    .description('Verify system properties are not added to querystring if present')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+            testProperties = testData.testSystemProperties,
+            testCases = [],
+            deleteClient;
+
+        client = client.withFilter(function (req, next, callback) {
+            var value = req.url.substring(req.url.toLowerCase().indexOf('__systemproperties=') + 19);
+            callback(null, { status: 200, responseText: '{"value":"' + value + '"}' });
+        });
+
+        deleteClient = client.withFilter(function (req, next, callback) {
+            var value = req.url.substring(req.url.indexOf('__systemProperties=') + 19);
+            $assert.areEqual(value, 'unknown');
+            callback(null, { status: 200 });
+        });
+
+        testProperties.forEach(function (testSystemProperty) {
+            var table = client.getTable('someTable'),
+                deleteTable = deleteClient.getTable('someTable');
+
+            table.systemProperties = testSystemProperty;
+            deleteTable.systemProperties = testSystemProperty;
+
+            testCases.push(function () {
+                return table.insert({ id: 'an id', string: 'What?' }, { __systemProperties: '__createdAt' }).then(function (result) {
+                    $assert.areEqual(result.value, '__createdAt');
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            testCases.push(function () {
+                return table.update({ id: 'an id', string: 'What?' }, { __systemProperties: 'createdAt' }).then(function (result) {
+                    $assert.areEqual(result.value, 'createdAt');
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            testCases.push(function () {
+                return table.lookup('an id', { __systemProperties: 'CreatedAt' }).then(function (result) {
+                    $assert.areEqual(result.value, 'CreatedAt');
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            testCases.push(function () {
+                return deleteTable.del({ id: 'an id', string: 'What?' }, { __systemProperties: 'unknown' }).then(function (result) {
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            // Integer ids
+
+            testCases.push(function () {
+                return table.insert({ string: 'What?' }, { __systemProperties: '__createdAt' }).then(function (result) {
+                    $assert.areEqual(result.value, '__createdAt');
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            testCases.push(function () {
+                return table.update({ id: 5, string: 'What?' }, { __systemProperties: 'createdAt' }).then(function (result) {
+                    $assert.areEqual(result.value, 'createdAt');
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            testCases.push(function () {
+                return table.lookup(5, { __systemProperties: 'CreatedAt' }).then(function (result) {
+                    $assert.areEqual(result.value, 'CreatedAt');
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            testCases.push(function () {
+                return deleteTable.del({ id: 'an id', string: 'What?' }, { __systemProperties: 'unknown' }).then(function (result) {
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            // Query
+            testCases.push(function () {
+                return table.read('$filter=id%20eq%205&__systemproperties=__createdAt').then(function (result) {
+                    $assert.areEqual(result.value, '__createdAt');
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            testCases.push(function () {
+                return table.read('"$select=id,String&__systemProperties=__CreatedAt').then(function (result) {
+                    $assert.areEqual(result.value, '__CreatedAt');
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+
+            testCases.push(function () {
+                return table.where(function () { return this.id == 20 }).read({ __systemProperties: 'Version' }).then(function (result) {
+                    $assert.areEqual(result.value, 'Version');
+                }, function (error) {
+                    $assert.fail('should not have failed');
+                });
+            });
+        });
+
+        return $chain.apply(null, testCases);
+    })
 );

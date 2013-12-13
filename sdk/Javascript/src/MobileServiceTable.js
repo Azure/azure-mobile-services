@@ -19,6 +19,27 @@ var idPropertyName = "id";
 var tableRouteSeperatorName = "tables";
 var idNames = ["ID", "Id", "id", "iD"];
 
+var MobileServiceSystemProperties = {
+    None: 0,
+    CreatedAt: 1,
+    UpdatedAt: 2,
+    Version: 4,
+    All: 0xFFFF
+}
+
+var MobileServiceSystemColumns = {
+    CreatedAt: "__createdAt",
+    UpdatedAt: "__updatedAt",
+    Version: "__version"
+}
+
+Platform.addToMobileServicesClientNamespace({
+    MobileServiceTable:
+        {
+            SystemProperties: MobileServiceSystemProperties
+        }
+});
+
 function MobileServiceTable(tableName, client) {
     /// <summary>
     /// Initializes a new instance of the MobileServiceTable class.
@@ -47,6 +68,8 @@ function MobileServiceTable(tableName, client) {
         /// </returns>
         return client;
     };
+
+    this.systemProperties = 0;
 }
 
 // Export the MobileServiceTable class
@@ -130,6 +153,7 @@ MobileServiceTable.prototype._read = function (query, parameters, callback) {
     }
 
     // Add any user-defined query string parameters
+    parameters = addSystemProperties(parameters, this.systemProperties, queryString);
     if (!_.isNull(parameters)) {
         var userDefinedQueryString = _.url.getQueryString(parameters);
         if (!_.isNullOrEmpty(queryString)) {
@@ -235,6 +259,7 @@ MobileServiceTable.prototype.insert = Platform.async(
 
         // Construct the URL
         var urlFragment = _.url.combinePathSegments(tableRouteSeperatorName, this.getTableName());
+        parameters = addSystemProperties(parameters, this.systemProperties);
         if (!_.isNull(parameters)) {
             var queryString = _.url.getQueryString(parameters);
             urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
@@ -249,8 +274,7 @@ MobileServiceTable.prototype.insert = Platform.async(
                 if (!_.isNull(error)) {
                     callback(error, null);
                 } else {
-                    var result = _.fromJson(response.responseText);
-
+                    var result = getItemFromResponse(response);
                     result = Platform.allowPlatformToMutateOriginal(instance, result);
                     callback(null, result);
                 }
@@ -271,6 +295,9 @@ MobileServiceTable.prototype.update = Platform.async(
         /// <param name="callback" type="Function">
         /// The callback to invoke when the update is complete.
         /// </param>
+        var version,
+            headers = [],
+            serverInstance;
 
         // Account for absent optional arguments
         if (_.isNull(callback) && (typeof parameters === 'function')) {
@@ -285,7 +312,15 @@ MobileServiceTable.prototype.update = Platform.async(
             Validate.isValidParametersObject(parameters, 'parameters');
         }
         Validate.notNull(callback, 'callback');
-    
+
+        if (_.isString(instance[idPropertyName])) {
+            version = instance.__version;
+            serverInstance = removeSystemProperties(instance);
+        } else {
+            serverInstance = instance;
+        }
+        parameters = addSystemProperties(parameters, this.systemProperties);
+
         // Construct the URL
         var urlFragment =  _.url.combinePathSegments(
                 tableRouteSeperatorName,
@@ -296,16 +331,25 @@ MobileServiceTable.prototype.update = Platform.async(
             urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
         }
 
+        if (!_.isNullOrEmpty(version)) {
+            headers['If-Match'] = getEtagFromVersion(version);
+        }
+
         // Make the request
         this.getMobileServiceClient()._request(
             'PATCH',
             urlFragment,
-            instance,
+            serverInstance,
+            false,
+            headers,
             function (error, response) {
                 if (!_.isNull(error)) {
+                    if (error.request && error.request.status === 412) {
+                        error.serverInstance = _.fromJson(error.request.responseText);
+                    }
                     callback(error, null);
                 } else {
-                    var result = _.fromJson(response.responseText);                    
+                    var result = getItemFromResponse(response);
                     result = Platform.allowPlatformToMutateOriginal(instance, result);
                     callback(null, result);
                 }
@@ -428,6 +472,8 @@ MobileServiceTable.prototype.lookup = Platform.async(
                 tableRouteSeperatorName,
                 this.getTableName(),
                 encodeURIComponent(id.toString()));
+
+        parameters = addSystemProperties(parameters, this.systemProperties);
         if (!_.isNull(parameters)) {
             var queryString = _.url.getQueryString(parameters);
             urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
@@ -442,7 +488,7 @@ MobileServiceTable.prototype.lookup = Platform.async(
                 if (!_.isNull(error)) {
                     callback(error, null);
                 } else {
-                    var result = _.fromJson(response.responseText);
+                    var result = getItemFromResponse(response);
                     callback(null, result);
                 }
             });
@@ -472,6 +518,7 @@ MobileServiceTable.prototype.del = Platform.async(
         // Validate the arguments
         Validate.notNull(instance, 'instance');
         Validate.isValidId(instance[idPropertyName], 'instance.' + idPropertyName);
+        parameters = addSystemProperties(parameters, this.systemProperties);
         if (!_.isNull(parameters)) {
             Validate.isValidParametersObject(parameters);
         }
@@ -531,4 +578,77 @@ var i = 0;
 for (; i < queryOperators.length; i++) {
     // Avoid unintended closure capture
     copyOperator(queryOperators[i]);
+}
+
+// Table system properties
+function removeSystemProperties(instance) {
+    var copy = {};
+    for(var property in instance) {
+        if (property.substr(0, 2) !== '__') {
+            copy[property] = instance[property];
+        }
+    }
+    return copy;
+}
+
+function addSystemProperties(parameters, properties, querystring) {
+    if (properties === MobileServiceSystemProperties.None || (typeof querystring === 'string' && querystring.toLowerCase().indexOf('__systemproperties') !== -1)) {
+        return parameters;
+    }
+
+    // Initialize an array if none passed in
+    if (parameters === null) {
+        parameters = {};
+    }
+
+    // Don't override system properties if already set
+    if(!_.isNull(parameters['__systemProperties'])) {
+        return parameters;
+    }
+
+    if (properties === MobileServiceSystemProperties.All) {
+        parameters['__systemProperties'] = '*';
+    } else {
+        var options = [];
+        if (MobileServiceSystemProperties.CreatedAt & properties) {
+            options.push(MobileServiceSystemColumns.CreatedAt);
+        }
+        if (MobileServiceSystemProperties.UpdatedAt & properties) {
+            options.push(MobileServiceSystemColumns.UpdatedAt);
+        }
+        if (MobileServiceSystemProperties.Version & properties) {
+            options.push(MobileServiceSystemColumns.Version);
+        }
+        parameters['__systemProperties'] = options.join(',');
+    }
+
+    return parameters;
+}
+
+// Add double quotes and unescape any internal quotes
+function getItemFromResponse(response) {
+    var result = _.fromJson(response.responseText);
+    if (response.getResponseHeader) {
+        var eTag = response.getResponseHeader('ETag');
+        if (!_.isNullOrEmpty(eTag)) {
+            result.__version = getVersionFromEtag(eTag);
+        }
+    }
+    return result;
+}
+
+function getEtagFromVersion(version) {
+    var result = version.replace(/^[\\]["]/, '"');
+    return "\"" + result + "\"";
+}
+
+// Remove surrounding double quotes and escape internal quotes
+function getVersionFromEtag(etag) {
+    var len = etag.length,
+        result;
+
+    if (len > 1 && etag[0] === '"' && etag[len - 1] === '"') {
+        result = etag.substr(1, len - 2);
+    }
+    return result.replace(/\\\"/, '"');
 }
