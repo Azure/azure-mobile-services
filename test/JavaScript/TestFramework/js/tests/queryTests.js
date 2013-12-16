@@ -12,6 +12,30 @@ function defineQueryTestsNamespace() {
     var tableNameForServerSideFilterTest = 'w8jsServerQueryMovies';
     var stringIdMoviesTableName = 'stringIdMovies';
 
+    function isAllDataPopulated(test, table, expectCount, success, error) {
+        var retryTimes = 20;
+        function checkDataCount() {
+            table.take(0).includeTotalCount().read().done(function (results) {
+                var totalCount = results.totalCount;
+                if (totalCount === expectCount) {
+                    success();
+                } else {
+                    if (retryTimes-- > 0) {
+                        test.addLog('Already inserted ' + totalCount + ' items, waiting for insertion to complete');
+                        setTimeout(checkDataCount, 5000);
+                    } else {
+                        error();
+                    }
+                }
+            }, function (err) {
+                test.addLog('Error reading data: ' + +JSON.stringify(err) + ' Now try again...');
+                setTimeout(checkDataCount, 5000);
+            });
+        }
+
+        checkDataCount();
+    }
+
     var populateTableTest = new zumo.Test('Populate table, if necessary', function (test, done) {
         test.addLog('Populating the table');
         var item = {
@@ -21,27 +45,13 @@ function defineQueryTestsNamespace() {
         var table = client.getTable(tableName);
         table.insert(item).done(function (readItem) {
             var status = readItem ? readItem.status : (item.status || 'no status');
-            var tryTimes = 0;
-            function isPopulated() {
-                table.take(0).includeTotalCount().read().done(function (results) {
-                    var totalCount = results.totalCount;
-                    if (totalCount === item.movies.length) {
-                        test.addLog('status: ' + JSON.stringify(status));
-                        done(true);
-                    } else {
-                        tryTimes++;
-                        if (tryTimes < 20) {
-                            test.addLog('Already inserted ' + totalCount + ' items, waiting for insertion to complete');
-                            setTimeout(isPopulated, 5000);
-                        } else {
-                            test.addLog('Error populating the table, not populate enough data.');
-                            done(false);
-                        }
-                    }
-                });
-            }
-            isPopulated();
-
+            isAllDataPopulated(test, table, item.movies.length, function () {
+                test.addLog('status: ' + JSON.stringify(status));
+                done(true);
+            }, function () {
+                test.addLog('Error populating the table: Time out. Not populate enough data.');
+                done(false);
+            });
         }, function (err) {
             test.addLog('Error populating the table: ' + JSON.stringify(err));
             done(false);
@@ -68,27 +78,13 @@ function defineQueryTestsNamespace() {
         var table = client.getTable(stringIdMoviesTableName);
         table.insert(item).done(function (readItem) {
             var status = readItem ? readItem.status : (item.status || 'no status');
-            var tryTimes = 0;
-            function isPopulated() {
-                table.take(0).includeTotalCount().read().done(function (results) {
-                    var totalCount = results.totalCount;
-                    if (totalCount === item.movies.length) {
-                        test.addLog('status: ' + JSON.stringify(status));
-                        done(true);
-                    } else {
-                        tryTimes++;
-                        if (tryTimes < 20) {
-                            test.addLog('Already inserted ' + totalCount + ' items, waiting for insertion to complete');
-                            setTimeout(isPopulated, 5000);
-                        } else {
-                            test.addLog('Error populating the string id table, not populate enough data.');
-                            done(false);
-                        }
-                    }
-                });
-            }
-            isPopulated();
-
+            isAllDataPopulated(test, table, item.movies.length, function () {
+                test.addLog('status: ' + JSON.stringify(status));
+                done(true);
+            }, function () {
+                test.addLog('Error populating the string id table: Time out. Not populate enough data.');
+                done(false);
+            });
         }, function (err) {
             test.addLog('Error populating the string id table: ' + JSON.stringify(err));
             done(false);

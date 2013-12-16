@@ -217,6 +217,7 @@ static NSString *stringIdQueryTestsTableName = @"stringIdMovies";
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         NSArray *movies = [ZumoQueryTestData getMovies];
         NSDictionary *item = @{@"movies" : movies};
+        
         MSTable *table = [client tableWithName:queryTestsTableName];
         [table insert:item completion:^(NSDictionary *item, NSError *error) {
             if (error) {
@@ -224,14 +225,43 @@ static NSString *stringIdQueryTestsTableName = @"stringIdMovies";
                 [test setTestStatus:TSFailed];
                 completion(NO);
             } else {
-                [test addLog:@"Table is populated and ready for query tests"];
-                [test setTestStatus:TSPassed];
-                completion(YES);
+                [self isAllDataPopulated:table test:test expectCount:[movies count] retryTimes:20 completion:completion];
             }
         }];
     }];
     
     return result;
+}
+
++ (void)isAllDataPopulated:(MSTable *)table test:(ZumoTest *)test expectCount:(NSInteger)expectCount retryTimes:(NSInteger)retryTimes completion:(ZumoTestCompletion)completion {
+    MSQuery *query = [table query];
+    query.includeTotalCount = YES;
+    query.fetchLimit = 0;
+    
+    if(retryTimes-- == 0)
+    {
+        [test addLog:@"Error populate table: Time out. Not populate enough data."];
+        [test setTestStatus:TSFailed];
+        completion(NO);
+        return;
+    }
+    
+    [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        if (!error) {
+            if (totalCount == expectCount){
+                [test addLog:@"Table is populated and ready for query tests"];
+                [test setTestStatus:TSPassed];
+                completion(YES);
+                return;
+            } else {
+                [test addLog:[NSString stringWithFormat:@"Already inserted %zd items, waiting for insertionn to complete", (ssize_t)totalCount]];
+                [NSThread sleepForTimeInterval: 5];
+                [self isAllDataPopulated:table test:test expectCount:expectCount retryTimes:retryTimes completion:completion];
+            }
+        } else {
+            [test addLog:[NSString stringWithFormat:@"Error read table, try again..."]];
+        }
+    }];
 }
 
 + (ZumoTest *)createPopulateStringIdTableTest {
@@ -253,15 +283,14 @@ static NSString *stringIdQueryTestsTableName = @"stringIdMovies";
                 [test setTestStatus:TSFailed];
                 completion(NO);
             } else {
-                [test addLog:@"Table is populated and ready for query tests"];
-                [test setTestStatus:TSPassed];
-                completion(YES);
+                [self isAllDataPopulated:table test:test expectCount:[movies count] retryTimes:20 completion:completion];
             }
         }];
     }];
     
     return result;
 }
+
 
 typedef void (^ActionQuery)(MSQuery *query);
 typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
@@ -312,7 +341,7 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
     ZumoTest *result = [ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
 
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        MSTable *table = [client tableWithName:queryTestsTableName];
+        MSTable *table = [client tableWithName:useStringIdTable ? stringIdQueryTestsTableName : queryTestsTableName];
         NSArray *allItems = [ZumoQueryTestData getMovies];
         if (!top && !skip && !orderByClauses && !includeTotalCount && !selectFields) {
             // use simple readWithPredicate
