@@ -9,7 +9,7 @@ function insert(item, user, request) {
             } else {
                 // Need to populate the table
                 populateTable(table, request, item.movies);
-                request.respond(201, { id: 1, status: 'Table populated successfully' });
+                request.respond(201, { id: 1, status: 'Table is being populated' });
             }
         }
     });

@@ -28,8 +28,8 @@ function defineQueryTestsNamespace() {
                     }
                 }
             }, function (err) {
-                test.addLog('Error reading data: ' + +JSON.stringify(err) + ' Now try again...');
-                setTimeout(checkDataCount, 5000);
+                test.addLog('Error querying data: ' + +JSON.stringify(err));
+                error();
             });
         }
 

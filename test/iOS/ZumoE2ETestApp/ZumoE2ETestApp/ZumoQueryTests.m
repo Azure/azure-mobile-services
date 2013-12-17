@@ -259,7 +259,10 @@ static NSString *stringIdQueryTestsTableName = @"stringIdMovies";
                 [self isAllDataPopulated:table test:test expectCount:expectCount retryTimes:retryTimes completion:completion];
             }
         } else {
-            [test addLog:[NSString stringWithFormat:@"Error read table, try again..."]];
+            [test addLog:[NSString stringWithFormat:@"Error querying table: %@", error]];
+            [test setTestStatus:TSFailed];
+            completion(NO);
+			return;
         }
     }];
 }
