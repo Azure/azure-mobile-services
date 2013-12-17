@@ -28,7 +28,7 @@ function defineQueryTestsNamespace() {
                     }
                 }
             }, function (err) {
-                test.addLog('Error querying data: ' + +JSON.stringify(err));
+                test.addLog('Error querying data: ' + JSON.stringify(err));
                 error();
             });
         }
@@ -53,7 +53,7 @@ function defineQueryTestsNamespace() {
                 done(false);
             });
         }, function (err) {
-            test.addLog('Error populating the table: ' + JSON.stringify(err));
+            test.addLog('Error populating the table: ' + err);
             done(false);
         });
     });
@@ -86,7 +86,7 @@ function defineQueryTestsNamespace() {
                 done(false);
             });
         }, function (err) {
-            test.addLog('Error populating the string id table: ' + JSON.stringify(err));
+            test.addLog('Error populating the string id table: ' + err);
             done(false);
         });
     });
