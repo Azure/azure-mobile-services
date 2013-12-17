@@ -53,7 +53,7 @@ function defineQueryTestsNamespace() {
                 done(false);
             });
         }, function (err) {
-            test.addLog('Error populating the table: ' + err);
+            test.addLog('Error populating the table: ', err);
             done(false);
         });
     });
@@ -86,7 +86,7 @@ function defineQueryTestsNamespace() {
                 done(false);
             });
         }, function (err) {
-            test.addLog('Error populating the string id table: ' + err);
+            test.addLog('Error populating the string id table: ', err);
             done(false);
         });
     });
