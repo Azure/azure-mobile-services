@@ -259,7 +259,7 @@
     <value>The type '{0}' has an integer id member and therefore can not have any members with the system property attribute '{1}'.</value>
   </data>
   <data name="MobileServiceSerializer_InvalidStringId" xml:space="preserve">
-    <value>The string id '{0}' is invalid. An id must not contain any control characters or the characters ",+,?,\,/`.</value>
+    <value>The string id '{0}' is invalid. An id must not contain any control characters or the characters ",+,?,\,/,`.</value>
   </data>
   <data name="MobileServiceSerializer_NullOrEmptyStringId" xml:space="preserve">
     <value>The id can not be null or an empty string.</value>

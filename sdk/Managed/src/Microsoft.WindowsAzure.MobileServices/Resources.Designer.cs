@@ -188,6 +188,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to incrementally load more items of type &apos;{0}&apos;. See the inner exception for details..
+        /// </summary>
+        internal static string MobileServiceCollection_IncrementalLoadingFailed {
+            get {
+                return ResourceManager.GetString("MobileServiceCollection_IncrementalLoadingFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Loading of more items already in process..
         /// </summary>
         internal static string MobileServiceCollection_LoadInProcess {
@@ -202,15 +211,6 @@ namespace Microsoft.WindowsAzure.MobileServices {
         internal static string MobileServiceContractResolver_IntegerIdTypeWithSystemPropertyAttributes {
             get {
                 return ResourceManager.GetString("MobileServiceContractResolver_IntegerIdTypeWithSystemPropertyAttributes", resourceCulture);
-            }
-        }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Failed to incrementally load more items of type &apos;{0}&apos;. See the inner exception for details..
-        /// </summary>
-        internal static string MobileServiceCollection_IncrementalLoadingFailed {
-            get {
-                return ResourceManager.GetString("MobileServiceCollection_IncrementalLoadingFailed", resourceCulture);
             }
         }
         
@@ -332,7 +332,7 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The string id &apos;{0}&apos; is invalid. An id must not contain any control characters or the characters &quot;,+,?,\,/`..
+        ///   Looks up a localized string similar to The string id &apos;{0}&apos; is invalid. An id must not contain any control characters or the characters &quot;,+,?,\,/,`..
         /// </summary>
         internal static string MobileServiceSerializer_InvalidStringId {
             get {
