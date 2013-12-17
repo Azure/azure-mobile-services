@@ -291,8 +291,25 @@ namespace ZumoE2ETestApp.Tests
                     Movies = ZumoQueryTestData.AllMovies
                 };
                 await table.InsertAsync(allMovies);
-                test.AddLog("Result of populating table: {0}", allMovies.Status);
-                return true;
+
+                for (int i = 0; i < 20; i++)
+                {
+                    var counter = await table.Take(0).IncludeTotalCount().ToListAsync();
+                    var totalCount = ((ITotalCountProvider)counter).TotalCount;
+                    if (totalCount == allMovies.Movies.Length)
+                    {
+                        test.AddLog("Result of populating table: {0}", allMovies.Status);
+                        return true;
+                    }
+                    else
+                    {
+                        test.AddLog("Already inserted {0} items, waiting for insertion to complete", totalCount);
+                        await Util.TaskDelay(5000);
+                    }
+                }
+
+                test.AddLog("Result of populating table: Time out. Not populate enough data.");
+                return false;
             }));
         }
 
@@ -310,10 +327,26 @@ namespace ZumoE2ETestApp.Tests
                 {
                     allMovies.Movies[i] = new StringIdMovie(string.Format("Movie {0:000}", i), ZumoQueryTestData.AllMovies[i]);
                 }
-
                 await table.InsertAsync(allMovies);
-                test.AddLog("Result of populating table: {0}", allMovies.Status);
-                return true;
+
+                for (int i = 0; i < 20; i++)
+                {
+                    var counter = await table.Take(0).IncludeTotalCount().ToListAsync();
+                    var totalCount = ((ITotalCountProvider)counter).TotalCount;
+                    if (totalCount == allMovies.Movies.Length)
+                    {
+                        test.AddLog("Result of populating [string id] table: {0}", allMovies.Status);
+                        return true;
+                    }
+                    else
+                    {
+                        test.AddLog("Already inserted {0} items, waiting for insertion to complete", totalCount);
+                        await Util.TaskDelay(5000);
+                    }
+                }
+
+                test.AddLog("Result of populating [string id] table: Time out. Not populate enough data.");
+                return false;
             }));
         }
 
