@@ -1029,6 +1029,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 where (p.SmallId / 100.0) == 2
                 select p);
             Assert.AreEqual("((SmallId div 100.0) eq 2.0)", query.Filter);
+
+            query = Compile<Product, Product>(table =>
+                from p in table
+                where (p.Weight * 31.213 ) == 60200000000000000000000000.0
+                select p);
+            Assert.AreEqual("((Weight mul 31.213) eq 6.02E+25)", query.Filter);
         }        
     }
 }
