@@ -296,7 +296,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
             else if (handle.Equals(typeof(double).TypeHandle))
             {
-                return string.Format(CultureInfo.InvariantCulture, "{0}", value);
+                string temp = string.Format(CultureInfo.InvariantCulture, "{0}", value);
+                if (temp.Contains("E") || temp.Contains(".")) {
+                    return temp;
+                }
+                return temp + ".0";
             }
             else if (handle.Equals(typeof(char).TypeHandle))
             {
