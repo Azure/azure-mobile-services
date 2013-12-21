@@ -6,15 +6,39 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
+using Newtonsoft.Json;
+
 namespace Microsoft.WindowsAzure.MobileServices
 {
+    // {
+    // platform: "wns" // {"wns"|"mpns"|"apns"|"gcm"}
+    // channelUri: "" // if wns or mpns
+    // deviceToken: "" // if apns
+    // gcmRegistrationId: "" // if gcm
+    // tags: "tag"|["a","b"] // non-empty string or array of tags (optional)
+    // bodyTemplate: '<toast>
+    //      <visual lang="en-US">
+    //        <binding template="ToastText01">
+    //          <text id="1">$(myTextProp1)</text>
+    //        </binding>
+    //      </visual>
+    //    </toast>' // if template registration
+    // templateName: "" // if template registration
+    // wnsHeaders: { // if wns template registration }
+    // mpnsHeaders: { // if mpns template //}
+    // expiry: "" // if apns template//
+    // }
     [KnownType(typeof(TemplateRegistration))]
-    [DataContract(Name = "WindowsRegistrationDescription", Namespace = "http://schemas.microsoft.com/netservices/2010/10/servicebus/connect")]
+    [JsonObject(MemberSerialization.OptIn)]
     public class Registration
     {
         private HashSet<string> tags = new HashSet<string>();
 
         public const string NativeRegistrationName = "$Default";
+
+        internal Registration()
+        {            
+        }
 
         public Registration(string channelUri)
         {
@@ -35,11 +59,20 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
+        [JsonProperty(PropertyName = "platform")]
+        internal string Platform
+        {
+            get
+            {
+                return "wns";
+            }
+        }
+
         /// <summary>
         /// If specified, restricts the notifications that the registration will receive to only those that
         /// are annotated with one of the specified <see cref="TagFilter.Tags"/>.
         /// </summary>
-        [DataMember(Order = 3, Name = "Tags", IsRequired = false, EmitDefaultValue = false)]
+        [JsonProperty(PropertyName = "tags")]
         internal string TagsString
         {
             get
@@ -57,7 +90,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
-        [IgnoreDataMember]
         public ISet<string> Tags
         {
             get
@@ -79,14 +111,16 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// The Uri of the Channel returned by the Push Notification Channel Manager.
         /// </summary>
-        [DataMember(Order = 4, Name = "ChannelUri", IsRequired = true)]
+        [JsonProperty(PropertyName = "channelUri")]
         public string ChannelUri { get; set; }
 
         /// <summary>
-        /// The registration name .
+        /// The registration id.
         /// </summary>
-        [DataMember(Order = 2, Name = "RegistrationId", IsRequired = false, EmitDefaultValue = false)]
+        [JsonProperty]
         public string RegistrationId { get; internal set; }
+
+        public bool ShouldSerializeRegistrationId() { return false; }
 
         internal virtual string Name
         {

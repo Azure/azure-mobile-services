@@ -16,11 +16,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         readonly PushHttpClient pushHttpClient;
         readonly LocalStorageManager localStorageManager;
 
-        public RegistrationManager(PushHttpClient pushHttpClient, LocalStorageManager storagManager)
+        public RegistrationManager(PushHttpClient pushHttpClient, LocalStorageManager storageManager)
         {
             this.pushHttpClient = pushHttpClient;
 
-            this.localStorageManager = storagManager;
+            this.localStorageManager = storageManager;
         }
 
         /// <summary>

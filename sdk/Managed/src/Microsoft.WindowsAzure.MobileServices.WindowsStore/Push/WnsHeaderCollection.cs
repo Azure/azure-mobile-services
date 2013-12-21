@@ -4,11 +4,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
+
+using Newtonsoft.Json;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
-    [CollectionDataContract(Name = "WnsHeaders", Namespace = "http://schemas.microsoft.com/netservices/2010/10/servicebus/connect", ItemName = "WnsHeader", KeyName = "Header", ValueName = "Value")]
+    [JsonObject]
     public sealed class WnsHeaderCollection : Dictionary<string, string>
     {
         public WnsHeaderCollection()

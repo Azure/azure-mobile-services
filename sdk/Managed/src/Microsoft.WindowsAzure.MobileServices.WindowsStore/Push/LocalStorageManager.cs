@@ -48,6 +48,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.StorageValues = StaticStorage != null ? StaticStorage.CreateContainer(name) : ApplicationData.Current.LocalSettings.CreateContainer(name, ApplicationDataCreateDisposition.Always).Values;
 
             this.ReadContent();
+            this.ClearRegistrations();
         }
 
         private IPropertySet StorageValues

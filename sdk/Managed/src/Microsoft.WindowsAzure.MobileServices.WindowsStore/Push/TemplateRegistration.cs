@@ -4,13 +4,32 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 
 using Windows.Data.Xml.Dom;
 
+using Newtonsoft.Json;
+
 namespace Microsoft.WindowsAzure.MobileServices
 {
-    [DataContract(Name = "WindowsTemplateRegistrationDescription", Namespace = "http://schemas.microsoft.com/netservices/2010/10/servicebus/connect")]
+    // {
+    // platform: "wns" // {"wns"|"mpns"|"apns"|"gcm"}
+    // channelUri: "" // if wns or mpns
+    // deviceToken: "" // if apns
+    // gcmRegistrationId: "" // if gcm
+    // tags: "tag"|["a","b"] // non-empty string or array of tags (optional)
+    // bodyTemplate: '<toast>
+    //      <visual lang="en-US">
+    //        <binding template="ToastText01">
+    //          <text id="1">$(myTextProp1)</text>
+    //        </binding>
+    //      </visual>
+    //    </toast>' // if template registration
+    // templateName: "" // if template registration
+    // wnsHeaders: { // if wns template registration }
+    // mpnsHeaders: { // if mpns template //}
+    // expiry: "" // if apns template//
+    // }
+    [JsonObject]
     public sealed class TemplateRegistration : Registration
     {
         private const string WnsTypeName = "X-WNS-Type";
@@ -59,7 +78,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
             }
 
-            this.BodyTemplateData = new CDataMember(bodyTemplate);
+            this.BodyTemplate = bodyTemplate;
 
             // We only support xml as bodyTemplate even for wns/raw
             if (!this.WnsHeaders.ContainsKey(WnsTypeName))
@@ -90,47 +109,25 @@ namespace Microsoft.WindowsAzure.MobileServices
             : base(channelUri)
         {
             this.WnsHeaders = new WnsHeaderCollection();
-            this.BodyTemplateData = new CDataMember();
         }
 
         /// <summary>
         /// Gets or Sets headers that should be sent to WNS with the notification
         /// </summary>
-        [DataMember(Order = 5, Name = "WnsHeaders", IsRequired = true)]
-        public WnsHeaderCollection WnsHeaders { get; set; }
-
-        /// <summary>
-        /// Gets or Sets an xml fragment of the notification with placeholder expressions
-        /// </summary>
-        [DataMember(Order = 4, Name = "BodyTemplate", IsRequired = true)]
-        internal CDataMember BodyTemplateData { get; set; }
+        [JsonProperty(PropertyName = "wnsheaders")]
+        public WnsHeaderCollection WnsHeaders { get; set; }        
 
         /// <summary>
         /// Get or set templateName
         /// </summary>
-        [DataMember(Order = 6, Name = "TemplateName", IsRequired = false)]
+        [JsonProperty(PropertyName = "templatename")]
         public string TemplateName { get; set; }
 
         /// <summary>
         /// Gets or sets bodyTemplate as string
         /// </summary>
-        public string BodyTemplate
-        {
-            get
-            {
-                if (this.BodyTemplateData != null)
-                {
-                    return this.BodyTemplateData.Value;
-                }
-
-                return null;
-            }
-
-            set
-            {
-                this.BodyTemplateData = new CDataMember(value);
-            }
-        }
+        [JsonProperty(PropertyName = "bodytemplate")]
+        public string BodyTemplate { get; set; }
 
         private static string DetectBodyType(XmlDocument template)
         {

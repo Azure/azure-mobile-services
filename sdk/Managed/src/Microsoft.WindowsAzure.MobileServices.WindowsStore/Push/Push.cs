@@ -204,9 +204,9 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new NotSupportedException();
             }
 
-            public bool ContainsKey(string key)
+            public bool ContainsKey(string tileId)
             {
-                return hubForTiles.ContainsKey(key);
+                return hubForTiles.ContainsKey(tileId);
             }
 
             public ICollection<string> Keys
@@ -214,15 +214,15 @@ namespace Microsoft.WindowsAzure.MobileServices
                 get { return hubForTiles.Keys; }
             }
 
-            public bool Remove(string key)
+            public bool Remove(string tileId)
             {
                 Push hub;
-                return this.hubForTiles.TryRemove(key, out hub);
+                return this.hubForTiles.TryRemove(tileId, out hub);
             }
 
-            public bool TryGetValue(string key, out Push value)
+            public bool TryGetValue(string tileId, out Push value)
             {
-                return this.hubForTiles.TryGetValue(key, out value);
+                return this.hubForTiles.TryGetValue(tileId, out value);
             }
 
             public ICollection<Push> Values
