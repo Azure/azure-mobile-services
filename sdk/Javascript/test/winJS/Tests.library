@@ -6,4 +6,6 @@
   <Module Path="tests\TestInterface.js" />
   <Module Path="tests\unit\*.js" EntryPoint="true" />
   <Module Path="tests\functional\*.js" EntryPoint="true" />
+  
+  <Module Path="tests\utilities\*.js" />
 </Library>

@@ -4,4 +4,6 @@
 
   <Module Path="..\WinJS\tests\unit\*.js" EntryPoint="true" />
   <Module Path="..\WinJS\tests\functional\*.js" EntryPoint="true" />
+
+  <Module Path="..\WinJS\tests\utilities\*.js" />
 </Library>
