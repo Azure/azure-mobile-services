@@ -2,4 +2,4 @@ bin/
 obj/
 *.suo
 packages/*
-.nuget/nuget.exe
+.nuget/Nuget.exe
