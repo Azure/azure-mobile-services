@@ -115,19 +115,19 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Gets or Sets headers that should be sent to WNS with the notification
         /// </summary>
         [JsonProperty(PropertyName = "wnsheaders")]
-        public WnsHeaderCollection WnsHeaders { get; set; }        
+        public WnsHeaderCollection WnsHeaders { get; private set; }        
 
         /// <summary>
         /// Get or set templateName
         /// </summary>
         [JsonProperty(PropertyName = "templatename")]
-        public string TemplateName { get; set; }
+        public string TemplateName { get; private set; }
 
         /// <summary>
         /// Gets or sets bodyTemplate as string
         /// </summary>
         [JsonProperty(PropertyName = "bodytemplate")]
-        public string BodyTemplate { get; set; }
+        public string BodyTemplate { get; private set; }
 
         private static string DetectBodyType(XmlDocument template)
         {
@@ -148,12 +148,12 @@ namespace Microsoft.WindowsAzure.MobileServices
                 return this.TemplateName;
             }
         }
-    }
 
-    enum TemplateRegistrationType
-    {
-        Toast,
-        Tile,
-        Badge
-    }
+        enum TemplateRegistrationType
+        {
+            Toast,
+            Tile,
+            Badge
+        }
+    }    
 }

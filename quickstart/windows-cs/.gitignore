@@ -2,3 +2,5 @@ bin/
 bld/
 obj/
 *.suo
+packages/*
+.nuget/nuget.exe

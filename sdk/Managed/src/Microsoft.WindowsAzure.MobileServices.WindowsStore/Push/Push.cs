@@ -2,11 +2,10 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //------------------------------------------------------------
 
-using System.Collections.Concurrent;
-
 namespace Microsoft.WindowsAzure.MobileServices
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
@@ -59,7 +58,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         public Task RegisterNativeAsync(string channelUri, IEnumerable<string> tags)
         {
-            if (string.IsNullOrEmpty(channelUri))
+            if (string.IsNullOrWhiteSpace(channelUri))
             {
                 throw new ArgumentNullException("channelUri");
             }
@@ -90,7 +89,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         public Task RegisterTemplateAsync(string channelUri, string xmlTemplate, string templateName, IEnumerable<string> tags)
         {
-            if (string.IsNullOrEmpty(channelUri))
+            if (string.IsNullOrWhiteSpace(channelUri))
             {
                 throw new ArgumentNullException("channelUri");
             }
@@ -122,7 +121,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         public Task UnregisterAllAsync(string channelUri)
         {
-            if (string.IsNullOrEmpty(channelUri))
+            if (string.IsNullOrWhiteSpace(channelUri))
             {
                 throw new ArgumentNullException("channelUri");
             }
@@ -137,7 +136,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("registration");
             }
 
-            if (string.IsNullOrEmpty(registration.ChannelUri))
+            if (string.IsNullOrWhiteSpace(registration.ChannelUri))
             {
                 throw new ArgumentNullException("registration.ChannelUri");
             }
@@ -152,7 +151,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("registration");
             }
 
-            if (string.IsNullOrEmpty(registration.ChannelUri))
+            if (string.IsNullOrWhiteSpace(registration.ChannelUri))
             {
                 throw new ArgumentNullException("registration.ChannelUri");
             }
@@ -177,7 +176,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 get
                 {
-                    if (string.IsNullOrEmpty(tileId))
+                    if (string.IsNullOrWhiteSpace(tileId))
                     {
                         throw new ArgumentNullException("tileId");
                     }

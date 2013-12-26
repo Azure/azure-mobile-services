@@ -107,7 +107,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             StringBuilder text = new StringBuilder();
             
             // Add the filter
-            if (!string.IsNullOrEmpty(this.Filter))
+            if (!string.IsNullOrWhiteSpace(this.Filter))
             {
                 text.AppendFormat(CultureInfo.InvariantCulture, "{0}$filter={1}", separator, this.Filter);
                 separator = '&';

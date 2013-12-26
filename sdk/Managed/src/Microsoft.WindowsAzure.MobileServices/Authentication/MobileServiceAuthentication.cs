@@ -116,7 +116,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal async Task<MobileServiceUser> LoginAsync()
         {
             string response = await this.LoginAsyncOverride();
-            if (!string.IsNullOrEmpty(response))
+            if (!string.IsNullOrWhiteSpace(response))
             {
                 JToken authToken = JToken.Parse(response);
 
