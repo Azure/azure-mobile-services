@@ -272,7 +272,7 @@
     NSString *countAsString;
     for (NSString *testId in testIds)
     {
-        countAsString = [NSString stringWithFormat:@"%d", count++];
+        countAsString = [NSString stringWithFormat:@"%lu", (unsigned long)count++];
         NSDictionary *item = @{ @"id": testId, @"string": countAsString };
         
         self.done = NO;
@@ -770,7 +770,7 @@
     __block NSMutableArray *savedItems = [NSMutableArray array];
     for(NSUInteger i = 1; i < 6; i++)
     {
-        NSDictionary *item = @{@"id": [NSString stringWithFormat:@"%d", i], @"String": @"a value"};
+        NSDictionary *item = @{@"id": [NSString stringWithFormat:@"%lu", (unsigned long)i], @"String": @"a value"};
         self.done = NO;
         [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
             [savedItems addObject:item];

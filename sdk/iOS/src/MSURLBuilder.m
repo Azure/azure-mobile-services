@@ -197,15 +197,15 @@ NSString *const inlineCountNone = @"none";
             
             // Add the $top parameter
             if (query.fetchLimit >= 0) {
-                NSString *topValue = [NSString stringWithFormat:@"%u",
-                                      query.fetchLimit];
+                NSString *topValue = [NSString stringWithFormat:@"%ld",
+                                      (long)query.fetchLimit];
                 [queryParameters setValue:topValue forKey:topParameter];
             }
             
             // Add the $skip parameter
             if (query.fetchOffset >= 0) {
-                NSString *skipValue = [NSString stringWithFormat:@"%u",
-                                       query.fetchOffset];
+                NSString *skipValue = [NSString stringWithFormat:@"%ld",
+                                       (long)query.fetchOffset];
                 [queryParameters setValue:skipValue forKey:skipParameter];
             }
             

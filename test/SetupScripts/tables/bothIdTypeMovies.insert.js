@@ -9,6 +9,7 @@ function insert(item, user, request) {
             } else {
                 // Need to populate the table
                 populateTable(table, request, item.movies);
+                request.respond(201, { id: 1, status: 'Table is being populated' });
             }
         }
     });
@@ -18,9 +19,7 @@ function populateTable(table, request, films) {
     var index = 0;
     films.forEach(changeReleaseDate);
     var insertNext = function() {
-        if (index >= films.length) {
-            request.respond(201, {id : 1, status : 'Table populated successfully'});
-        } else {
+        if (index < films.length) {
             var toInsert = films[index];
             table.insert(toInsert, {
                 success: function() {

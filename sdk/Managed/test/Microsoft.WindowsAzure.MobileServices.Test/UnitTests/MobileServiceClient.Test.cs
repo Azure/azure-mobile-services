@@ -495,6 +495,35 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.Contains(hijack.Request.RequestUri.Query, "?a=1&b=2");
             Assert.Contains(response.Content.ReadAsStringAsync().Result, "{\"id\":\"2\"}");
         }
-    
+
+        [AsyncTestMethod]
+        public async Task InvokeCustomAPIWithEmptyStringResponse_Success()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+
+            hijack.Response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+            hijack.Response.Content = new StringContent("", Encoding.UTF8, "application/json");
+
+            MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            JToken expected = await service.InvokeApiAsync("testapi");
+            Assert.AreEqual(hijack.Request.RequestUri.LocalPath, "/api/testapi");
+            Assert.AreEqual(expected, null);
+        }
+
+        [AsyncTestMethod]
+        public async Task InvokeGenericCustomAPIWithNullResponse_Success()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+
+            hijack.Response = new HttpResponseMessage(System.Net.HttpStatusCode.OK);
+            hijack.Response.Content = null;
+
+            MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            IntType expected = await service.InvokeApiAsync<IntType>("testapi");
+            Assert.AreEqual(hijack.Request.RequestUri.LocalPath, "/api/testapi");
+            Assert.AreEqual(expected, null);
+        }   
     }
 }

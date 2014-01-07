@@ -94,6 +94,7 @@
     <Content Include="tests\unit\mobileServicesClient._request.js" />
     <Content Include="tests\unit\mobileServiceTables.js" />
     <Content Include="tests\unit\validate.js" />
+    <Content Include="tests\utilities\constants.js" />
     <None Include="Microsoft.Azure.Zumo.Windows.WinJS.Test_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
