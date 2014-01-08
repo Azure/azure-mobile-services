@@ -28,18 +28,25 @@ namespace Microsoft.WindowsAzure.MobileServices
     // mpnsHeaders: { // if mpns template //}
     // expiry: "" // if apns template//
     // }
+    /// <summary>
+    /// Registration is used to define a target that is registered for notifications
+    /// </summary>
     [KnownType(typeof(TemplateRegistration))]
     [JsonObject(MemberSerialization.OptIn)]
     public class Registration
     {
         private HashSet<string> tags = new HashSet<string>();
 
-        public const string NativeRegistrationName = "$Default";
+        internal const string NativeRegistrationName = "$Default";
 
         internal Registration()
         {            
         }
 
+        /// <summary>
+        /// Create a default Registration for a channelUri
+        /// </summary>
+        /// <param name="channelUri">The channel uri</param>
         public Registration(string channelUri)
         {
             if (string.IsNullOrWhiteSpace(channelUri))
@@ -50,6 +57,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.ChannelUri = channelUri;
         }
 
+        /// <summary>
+        /// Create a default Registration for a channelUri with specific tags
+        /// </summary>
+        /// <param name="channelUri">The channel uri</param>
+        /// <param name="tags">The tags to register to receive notifications from</param>
         public Registration(string channelUri, IEnumerable<string> tags)
             : this(channelUri)
         {
@@ -68,10 +80,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
-        /// <summary>
-        /// If specified, restricts the notifications that the registration will receive to only those that
-        /// are annotated with one of the specified <see cref="TagFilter.Tags"/>.
-        /// </summary>
         [JsonProperty(PropertyName = "tags")]
         internal string TagsString
         {
@@ -90,6 +98,10 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
+        /// <summary>
+        /// If specified, restricts the notifications that the registration will receive to only those that
+        /// are annotated with one of the specified tags.
+        /// </summary>
         public ISet<string> Tags
         {
             get
@@ -120,6 +132,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         [JsonProperty]
         public string RegistrationId { get; internal set; }
 
+        /// <summary>
+        /// Internal--Helper method hinting to Json.Net that RegistrationId should not be serialized
+        /// </summary>
+        /// <returns>false</returns>
         public bool ShouldSerializeRegistrationId() { return false; }
 
         internal virtual string Name

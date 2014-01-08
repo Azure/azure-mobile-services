@@ -28,11 +28,22 @@ namespace Microsoft.WindowsAzure.MobileServices
     // mpnsHeaders: { // if mpns template //}
     // expiry: "" // if apns template//
     // }
+    /// <summary>
+    /// Registration is used to define a target that is registered for notifications. A TemplateRegistration allows the client application
+    /// to define the format of the registration.
+    /// </summary>
     [JsonObject]
     public sealed class TemplateRegistration : Registration
     {
-        public const string NotificationType = "X-WindowsPhone-Target";
-        public const string NotificationClass = "X-NotificationClass";
+        /// <summary>
+        /// Name of the MpnsHeader key for Windows Phone Notification Target
+        /// </summary>
+        internal const string NotificationType = "X-WindowsPhone-Target";
+
+        /// <summary>
+        /// Name of the MpnsHeader key for Windows Phone Notification Class
+        /// </summary>
+        internal const string NotificationClass = "X-NotificationClass";
 
         internal const string NamespaceName = "WPNotification";
         internal const string Tile = "token";
@@ -42,16 +53,37 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal const string ToastClass = "2";
         internal const string RawClass = "3";
 
+        /// <summary>
+        /// Create a TemplateRegistration
+        /// </summary>
+        /// <param name="channelUri">The channel uri</param>
+        /// <param name="bodyTemplate">The template xml in string format</param>
+        /// <param name="templateName">The template name</param>
         public TemplateRegistration(string channelUri, string bodyTemplate, string templateName)
             : this(channelUri, bodyTemplate, templateName, null, null)
         {
         }
 
+        /// <summary>
+        /// Create a TemplateRegistration
+        /// </summary>
+        /// <param name="channelUri">The channel uri</param>
+        /// <param name="bodyTemplate">The template xml in string format</param>
+        /// <param name="templateName">The template name</param>
+        /// <param name="tags">The tags that restrict which notifications this registration will receive</param>
         public TemplateRegistration(string channelUri, string bodyTemplate, string templateName, IEnumerable<string> tags)
             : this(channelUri, bodyTemplate, templateName, tags, null)
         {
         }
 
+        /// <summary>
+        /// Create a TemplateRegistration
+        /// </summary>
+        /// <param name="channelUri">The channel uri</param>
+        /// <param name="bodyTemplate">The template xml in string format</param>
+        /// <param name="templateName">The template name</param>
+        /// <param name="tags">The tags that restrict which notifications this registration will receive</param>
+        /// <param name="additionalHeaders">Additional headers</param>
         public TemplateRegistration(string channelUri, string bodyTemplate, string templateName, IEnumerable<string> tags, IEnumerable<KeyValuePair<string, string>> additionalHeaders)
             : base(channelUri, tags)
         {
@@ -115,7 +147,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         [JsonProperty(PropertyName = "mpnsheaders")]
         public MpnsHeaderCollection MpnsHeaders { get; private set; }
 
-
+        /// <summary>
+        /// Get or set templateName
+        /// </summary>
         [JsonProperty(PropertyName = "templatename")]
         public string TemplateName { get; private set; }
 

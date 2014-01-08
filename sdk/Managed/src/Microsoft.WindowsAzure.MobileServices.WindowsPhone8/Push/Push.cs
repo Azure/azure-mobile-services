@@ -18,8 +18,12 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// RegistrationException: generatal registration operation error.
     public sealed class Push
     {
-        private readonly RegistrationManager registrationManager;        
+        private readonly RegistrationManager registrationManager;
 
+        /// <summary>
+        /// Creates a Push object for registering for notifications
+        /// </summary>
+        /// <param name="client">The MobileServiceClient to create with.</param>
         public Push(MobileServiceClient client)
         {
             if (client == null)
@@ -36,11 +40,22 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         private MobileServiceClient Client { get; set; }
 
+        /// <summary>
+        /// Register a particular channelUri
+        /// </summary>
+        /// <param name="channelUri">The channelUri to register</param>
+        /// <returns>Task that completes when registration is complete</returns>
         public Task RegisterNativeAsync(string channelUri)
         {
             return this.RegisterNativeAsync(channelUri, null);
         }
 
+        /// <summary>
+        /// Register a particular channelUri
+        /// </summary>
+        /// <param name="channelUri">The channelUri to register</param>
+        /// <param name="tags">The tags to register to receive notifcations from</param>
+        /// <returns>Task that completes when registration is complete</returns>
         public Task RegisterNativeAsync(string channelUri, IEnumerable<string> tags)
         {
             if (string.IsNullOrWhiteSpace(channelUri))
@@ -52,11 +67,26 @@ namespace Microsoft.WindowsAzure.MobileServices
             return registrationManager.RegisterAsync(registration);
         }
 
+        /// <summary>
+        /// Register a particular channelUri with a template
+        /// </summary>
+        /// <param name="channelUri">The channelUri to register</param>
+        /// <param name="xmlTemplate">The XmlDocument defining the template</param>
+        /// <param name="templateName">The template name</param>
+        /// <returns>Task that completes when registration is complete</returns>
         public Task RegisterTemplateAsync(string channelUri, string xmlTemplate, string templateName)
         {
             return this.RegisterTemplateAsync(channelUri, xmlTemplate, templateName, null);
         }
 
+        /// <summary>
+        /// Register a particular channelUri with a template
+        /// </summary>
+        /// <param name="channelUri">The channelUri to register</param>
+        /// <param name="xmlTemplate">The XmlDocument defining the template</param>
+        /// <param name="templateName">The template name</param>
+        /// <param name="tags">The tags to register to receive notifcations from</param>
+        /// <returns>Task that completes when registration is complete</returns>        
         public Task RegisterTemplateAsync(string channelUri, string xmlTemplate, string templateName, IEnumerable<string> tags)
         {
             if (string.IsNullOrWhiteSpace(channelUri))
@@ -79,16 +109,30 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         }
 
+        /// <summary>
+        /// Unregister any registrations previously registered from this device
+        /// </summary>
+        /// <returns>Task that completes when unregister is complete</returns>
         public Task UnregisterNativeAsync()
         {
             return this.UnregisterTemplateAsync(Registration.NativeRegistrationName);
         }
 
+        /// <summary>
+        /// Unregister any registrations with given templateName registered from this device
+        /// </summary>
+        /// <param name="templateName">The template name</param>
+        /// <returns>Task that completes when unregister is complete</returns>
         public Task UnregisterTemplateAsync(string templateName)
         {
             return this.registrationManager.UnregisterAsync(templateName);
         }
 
+        /// <summary>
+        /// Unregister any registrations with given channelUri
+        /// </summary>
+        /// <param name="channelUri">The channel Uri</param>
+        /// <returns>Task that completes when unregister is complete</returns>
         public Task UnregisterAllAsync(string channelUri)
         {
             if (string.IsNullOrWhiteSpace(channelUri))
@@ -99,6 +143,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             return this.registrationManager.DeleteRegistrationsForChannelAsync(channelUri);
         }
 
+        /// <summary>
+        /// Register for notifications
+        /// </summary>
+        /// <param name="registration">The object defining the registration</param>
+        /// <returns>Task that will complete when the registration is completed</returns>
         public Task RegisterAsync(Registration registration)
         {
             if (registration == null)
@@ -114,6 +163,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             return this.registrationManager.RegisterAsync(registration);
         }
 
+        /// <summary>
+        /// Unregister for notifications
+        /// </summary>
+        /// <param name="registration">The object defining the registration</param>
+        /// <returns>Task that will complete when the unregister is completed</returns>
         public Task UnregisterAsync(Registration registration)
         {
             if (registration == null)

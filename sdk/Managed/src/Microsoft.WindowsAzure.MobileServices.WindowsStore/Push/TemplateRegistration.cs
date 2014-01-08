@@ -29,21 +29,46 @@ namespace Microsoft.WindowsAzure.MobileServices
     // mpnsHeaders: { // if mpns template //}
     // expiry: "" // if apns template//
     // }
+    /// <summary>
+    /// Registration is used to define a target that is registered for notifications. A TemplateRegistration allows the client application
+    /// to define the format of the registration.
+    /// </summary>
     [JsonObject]
     public sealed class TemplateRegistration : Registration
     {
         private const string WnsTypeName = "X-WNS-Type";
 
+        /// <summary>
+        /// Create a TemplateRegistration
+        /// </summary>
+        /// <param name="channelUri">The channel uri</param>
+        /// <param name="bodyTemplate">The template xml in string format</param>
+        /// <param name="templateName">The template name</param>
         public TemplateRegistration(string channelUri, string bodyTemplate, string templateName)
             : this(channelUri, bodyTemplate, templateName, null, null)
         {
         }
 
+        /// <summary>
+        /// Create a TemplateRegistration
+        /// </summary>
+        /// <param name="channelUri">The channel uri</param>
+        /// <param name="bodyTemplate">The template xml in string format</param>
+        /// <param name="templateName">The template name</param>
+        /// <param name="tags">The tags that restrict which notifications this registration will receive</param>
         public TemplateRegistration(string channelUri, string bodyTemplate, string templateName, IEnumerable<string> tags)
             : this(channelUri, bodyTemplate, templateName, tags, null)
         {
         }
 
+        /// <summary>
+        /// Create a TemplateRegistration
+        /// </summary>
+        /// <param name="channelUri">The channel uri</param>
+        /// <param name="bodyTemplate">The template xml in string format</param>
+        /// <param name="templateName">The template name</param>
+        /// <param name="tags">The tags that restrict which notifications this registration will receive</param>
+        /// <param name="additionalHeaders">Additional headers</param>
         public TemplateRegistration(string channelUri, string bodyTemplate, string templateName, IEnumerable<string> tags, IEnumerable<KeyValuePair<string, string>> additionalHeaders)
             : base(channelUri, tags)
         {

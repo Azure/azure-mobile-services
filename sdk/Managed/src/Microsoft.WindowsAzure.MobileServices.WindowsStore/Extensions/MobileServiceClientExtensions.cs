@@ -47,6 +47,15 @@ namespace Microsoft.WindowsAzure.MobileServices
             return auth.LoginAsync();
         }
 
+        /// <summary>
+        /// Extension method to get a Push object made from an existing MobileServiceClient.
+        /// </summary>
+        /// <param name="client">
+        /// The MobileServiceClient to create with.
+        /// </param>
+        /// <returns>
+        /// The Push object used for registering for notifications.
+        /// </returns>
         public static Push GetPush(this MobileServiceClient client)
         {
             return new Push(client);

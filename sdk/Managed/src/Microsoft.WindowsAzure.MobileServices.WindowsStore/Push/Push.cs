@@ -18,11 +18,11 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// ArgumentException: when argument is not valid.
     /// RegistrationNotFoundException: When try to query/delete not existing registration(s).
     /// RegistrationAuthorizationException: When there is authorization error.
-    /// RegistrationException: generatal registration operation error.
+    /// RegistrationException: general registration operation error.
     public sealed class Push
     {
-        private readonly RegistrationManager registrationManager;        
-
+        private readonly RegistrationManager registrationManager;
+        
         internal Push(MobileServiceClient client)
             : this(client, string.Empty, null)
         {
@@ -45,17 +45,34 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.SecondaryTiles = tiles ?? new SecondaryTilesList(this);
         }
 
+        /// <summary>
+        /// The TileId associated with this specific object. String.Empty is default if not created via SecondaryTiles property.
+        /// </summary>
         public string TileId { get; private set; }
 
+        /// <summary>
+        /// Access this member with an indexer to access secondary tile registrations. Example: push.SecondaryTiles["tileName"].RegisterNativeAsync("mychannelUri");
+        /// </summary>
         public IDictionary<string, Push> SecondaryTiles { get; set; }
 
         private MobileServiceClient Client { get; set; }
 
+        /// <summary>
+        /// Register a particular channelUri
+        /// </summary>
+        /// <param name="channelUri">The channelUri to register</param>
+        /// <returns>Task that completes when registration is complete</returns>
         public Task RegisterNativeAsync(string channelUri)
         {
             return this.RegisterNativeAsync(channelUri, null);
         }
 
+        /// <summary>
+        /// Register a particular channelUri
+        /// </summary>
+        /// <param name="channelUri">The channelUri to register</param>
+        /// <param name="tags">The tags to register to receive notifcations from</param>
+        /// <returns>Task that completes when registration is complete</returns>
         public Task RegisterNativeAsync(string channelUri, IEnumerable<string> tags)
         {
             if (string.IsNullOrWhiteSpace(channelUri))
@@ -67,11 +84,26 @@ namespace Microsoft.WindowsAzure.MobileServices
             return registrationManager.RegisterAsync(registration);
         }
 
+        /// <summary>
+        /// Register a particular channelUri with a template
+        /// </summary>
+        /// <param name="channelUri">The channelUri to register</param>
+        /// <param name="xmlTemplate">The XmlDocument defining the template</param>
+        /// <param name="templateName">The template name</param>
+        /// <returns>Task that completes when registration is complete</returns>
         public Task RegisterTemplateAsync(string channelUri, XmlDocument xmlTemplate, string templateName)
         {
             return this.RegisterTemplateAsync(channelUri, xmlTemplate, templateName, tags: null);
         }
 
+        /// <summary>
+        /// Register a particular channelUri with a template
+        /// </summary>
+        /// <param name="channelUri">The channelUri to register</param>
+        /// <param name="xmlTemplate">The XmlDocument defining the template</param>
+        /// <param name="templateName">The template name</param>
+        /// <param name="tags">The tags to register to receive notifcations from</param>
+        /// <returns>Task that completes when registration is complete</returns>        
         public Task RegisterTemplateAsync(string channelUri, XmlDocument xmlTemplate, string templateName, IEnumerable<string> tags)
         {
             if (xmlTemplate == null)
@@ -82,11 +114,26 @@ namespace Microsoft.WindowsAzure.MobileServices
             return this.RegisterTemplateAsync(channelUri, xmlTemplate.GetXml(), templateName, tags);
         }
 
+        /// <summary>
+        /// Register a particular channelUri with a template
+        /// </summary>
+        /// <param name="channelUri">The channelUri to register</param>
+        /// <param name="xmlTemplate">The string defining the template</param>
+        /// <param name="templateName">The template name</param>
+        /// <returns>Task that completes when registration is complete</returns>
         public Task RegisterTemplateAsync(string channelUri, string xmlTemplate, string templateName)
         {
             return this.RegisterTemplateAsync(channelUri, xmlTemplate, templateName, null);
         }
 
+        /// <summary>
+        /// Register a particular channelUri with a template
+        /// </summary>
+        /// <param name="channelUri">The channelUri to register</param>
+        /// <param name="xmlTemplate">The string defining the template</param>
+        /// <param name="templateName">The template name</param>
+        /// <param name="tags">The tags to register to receive notifcations from</param>
+        /// <returns>Task that completes when registration is complete</returns>
         public Task RegisterTemplateAsync(string channelUri, string xmlTemplate, string templateName, IEnumerable<string> tags)
         {
             if (string.IsNullOrWhiteSpace(channelUri))
@@ -109,16 +156,30 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         }
 
+        /// <summary>
+        /// Unregister any registrations previously registered from this device
+        /// </summary>
+        /// <returns>Task that completes when unregister is complete</returns>
         public Task UnregisterNativeAsync()
         {
             return this.UnregisterTemplateAsync(Registration.NativeRegistrationName);
         }
 
+        /// <summary>
+        /// Unregister any registrations with given templateName registered from this device
+        /// </summary>
+        /// <param name="templateName">The template name</param>
+        /// <returns>Task that completes when unregister is complete</returns>
         public Task UnregisterTemplateAsync(string templateName)
         {
             return this.registrationManager.UnregisterAsync(templateName);
         }
 
+        /// <summary>
+        /// Unregister any registrations with given channelUri
+        /// </summary>
+        /// <param name="channelUri">The channel Uri</param>
+        /// <returns>Task that completes when unregister is complete</returns>
         public Task UnregisterAllAsync(string channelUri)
         {
             if (string.IsNullOrWhiteSpace(channelUri))
@@ -129,6 +190,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             return this.registrationManager.DeleteRegistrationsForChannelAsync(channelUri);
         }
 
+        /// <summary>
+        /// Register for notifications
+        /// </summary>
+        /// <param name="registration">The object defining the registration</param>
+        /// <returns>Task that will complete when the registration is completed</returns>
         public Task RegisterAsync(Registration registration)
         {
             if (registration == null)
@@ -144,6 +210,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             return this.registrationManager.RegisterAsync(registration);
         }
 
+        /// <summary>
+        /// Unregister for notifications
+        /// </summary>
+        /// <param name="registration">The object defining the registration</param>
+        /// <returns>Task that will complete when the unregister is completed</returns>
         public Task UnregisterAsync(Registration registration)
         {
             if (registration == null)
@@ -160,7 +231,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Collection of notificationHub for secondary tiles
+        /// Collection of Push objects for secondary tiles
         /// </summary>
         private class SecondaryTilesList : IDictionary<string, Push>
         {
@@ -172,6 +243,11 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             readonly ConcurrentDictionary<string, Push> hubForTiles = new ConcurrentDictionary<string, Push>();
 
+            /// <summary>
+            /// Indexer for creating/looking up tileId-specific Push objects
+            /// </summary>
+            /// <param name="tileId">The tileId of a secondary tile</param>
+            /// <returns>Push object for performing registrations on</returns>
             public Push this[string tileId]
             {
                 get
