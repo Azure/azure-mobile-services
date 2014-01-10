@@ -578,7 +578,8 @@ static NSDictionary *staticFunctionInfoLookup;
     // We need to determine the c-language type of the number in order
     // to properly format it
     const char *cType = [number objCType];
-        
+    
+    // 64-bit [NSNumber numberWithBool:] returns 'c' (char) and don't match the BOOL encode of 'B'
     if (strcmp(@encode(BOOL), cType) == 0 || strcmp(@encode(char), cType) == 0) {
         result = [number boolValue] ? trueConstant : falseConstant;
     }

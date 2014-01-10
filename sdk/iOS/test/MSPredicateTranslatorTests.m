@@ -49,6 +49,8 @@
            @"FALSEPREDICATE OR Price <= 5.99"],
         
         // Test cases for comparison opperators and number formating.
+        // We do not test numberWithInteger or numberWithLong as their translation is different
+        // on 32 vs 64-bit systems resulting in slightly different oData queries
         @[ @"(Price gt 50f)",
            @"Price > %@", [NSNumber numberWithFloat:50.0]],
         
