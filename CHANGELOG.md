@@ -1,5 +1,18 @@
 # Windows Azure Mobile Services Change Log
 
+### Version 1.1.2
+**iOS SDK**
+- Supports the arm64 architecture
+- Now requires iOS 6 or newer to use 
+
+**Javascript SDK**
+- Support for optimistic concurrency (version / ETag) validation
+- Support for `__createdAt` / `__updatedAt` table columns
+
+**Managed SDK**
+- Fix [#192](https://github.com/WindowsAzure/azure-mobile-services/issues/192) - Serialized query is ambiguous if double literal has no fractional part
+- Fixed Nuget support for Windows Phone 8
+
 ### Version 1.1.1
 **iOS SDK**
 - Support for optimistic concurrency (version / ETag) validation
