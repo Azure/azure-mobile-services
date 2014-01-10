@@ -11,6 +11,7 @@
 
 **Managed SDK**
 - Fix [#192](https://github.com/WindowsAzure/azure-mobile-services/issues/192) - Serialized query is ambiguous if double literal has no fractional part
+- Fixed Nuget support for Windows Phone 8
 
 ### Version 1.1.1
 **iOS SDK**
