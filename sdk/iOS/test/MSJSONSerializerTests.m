@@ -73,7 +73,8 @@
     {
         NSString *actualId = [serializer stringFromItemId:testId orError:&error];
         STAssertNotNil(error, @"error was nil after getting string id %@", actualId);
-        STAssertEquals(MSInvalidItemIdWithRequest, error.code, @"Unexpected error code: %d", error.code);
+        
+        STAssertEquals([@MSInvalidItemIdWithRequest integerValue], error.code, @"Unexpected error code: %d", error.code);
         STAssertEqualObjects(@"The item provided did not have a valid id.", error.localizedDescription, @"Unexpected messge: %@", error.localizedDescription);
     }
 }
@@ -83,7 +84,7 @@
     NSError *error = nil;
     [serializer stringFromItemId:nil orError:&error];
     STAssertNotNil(error, @"error was nil after getting nil item id");
-    STAssertEquals(MSExpectedItemIdWithRequest, error.code, @"Unexpected error code: %d", error.code);
+    STAssertEquals([@MSExpectedItemIdWithRequest integerValue], error.code, @"Unexpected error code: %d", error.code);
     STAssertEqualObjects(@"The item id was not provided.", error.localizedDescription, @"Unexpected message: %@", error.localizedDescription);
 }
 

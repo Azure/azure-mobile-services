@@ -102,7 +102,12 @@
 {
     query = [[MSQuery alloc] initWithTable:table predicate:nil];
     query.fetchOffset = 542;
-    STAssertTrue([query.description isEqualToString:@"$inlinecount=none&$skip=542"],
+    
+    NSArray *result = [[query.description componentsSeparatedByString:@"&"]
+                        sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSArray *expected = @[@"$inlinecount=none", @"$skip=542"];
+    
+    STAssertTrue([result isEqualToArray:expected],
                  @"OData query string was: %@",
                  query.description);
 }
@@ -111,7 +116,11 @@
 {
     query = [[MSQuery alloc] initWithTable:table predicate:nil];
     query.fetchOffset = 0;
-    STAssertTrue([query.description isEqualToString:@"$inlinecount=none&$skip=0"],
+    NSArray *result = [[query.description componentsSeparatedByString:@"&"]
+                       sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSArray *expected = @[@"$inlinecount=none", @"$skip=0"];
+    
+    STAssertTrue([result isEqualToArray:expected],
                  @"OData query string was: %@",
                  query.description);
 }
@@ -141,9 +150,12 @@
         @"key1": @"someValue",
         @"key2": @"14",
     };
+
+    NSArray *result = [[query.description componentsSeparatedByString:@"&"]
+                       sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSArray *expected = @[@"$inlinecount=none", @"key1=someValue", @"key2=14"];
     
-    STAssertTrue([query.description isEqualToString:
-                 @"key2=14&key1=someValue&$inlinecount=none"],
+    STAssertTrue([result isEqualToArray:expected],
                  @"Query string was: %@",
                  query.description);
 }
@@ -168,8 +180,12 @@
     [query orderByAscending:@"name"];
     [query orderByDescending:@"zipcode"];
     [query orderByAscending:@"birthdate"];
-    STAssertTrue([query.description isEqualToString:
-                @"$orderby=name%20asc,zipcode%20desc,birthdate%20asc&$inlinecount=none"],
+    
+    NSArray *result = [[query.description componentsSeparatedByString:@"&"]
+                       sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    NSArray *expected = @[@"$inlinecount=none", @"$orderby=name%20asc,zipcode%20desc,birthdate%20asc"];
+
+    STAssertTrue([result isEqualToArray:expected],
                  @"Query string was: %@",
                  query.description);
 }

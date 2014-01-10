@@ -172,7 +172,7 @@
         [self.table readWithId:testId completion:^(NSDictionary *item, NSError *error) {
             STAssertNil(item, @"Item should have been deleted");
             NSString *expectedErrorMessage = [NSString stringWithFormat:@"Error: An item with id '%@' does not exist.", testId];
-            STAssertEquals(MSErrorMessageErrorCode, error.code, @"Unexpected error code: %d: %@", error.code, error.localizedDescription);
+            STAssertEquals([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %d: %@", error.code, error.localizedDescription);
             STAssertEqualObjects(expectedErrorMessage, error.localizedDescription, @"Wrong error: %@", error.localizedDescription);
             self.done = YES;
         }];
@@ -257,7 +257,7 @@
         self.done = NO;
         [self.table readWithId:testId completion:^(NSDictionary *item, NSError *error) {
             STAssertNil(item, @"Unexpected item found for id %@", testId);
-            STAssertEquals(MSInvalidItemIdWithRequest, error.code, @"Unexpected error code: %d", error.code);
+            STAssertEquals([@MSInvalidItemIdWithRequest integerValue], error.code, @"Unexpected error code: %d", error.code);
             STAssertEqualObjects(@"The item provided did not have a valid id.", error.localizedDescription, @"Incorrect error message: %@", error.localizedDescription);
             self.done = YES;
         }];
@@ -296,7 +296,7 @@
         self.done = NO;
         [self.table insert:@{@"id": testId, @"string": @"No we're talking!"} completion:^(NSDictionary *item, NSError *error) {
             STAssertNotNil(error, @"An error should have occurred");
-            STAssertEquals(MSErrorMessageErrorCode, error.code, @"Unexpected error code:  %d", error.code);
+            STAssertEquals([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code:  %d", error.code);
             STAssertEqualObjects(@"Error: Could not insert the item because an item with that id already exists.", error.localizedDescription, @"Wrong error: %@", error.localizedDescription);
             self.done = YES;
         }];
@@ -312,7 +312,7 @@
         self.done = NO;
         [self.table update:@{@"id":testId, @"string": @"Alright!"} completion:^(NSDictionary *item, NSError *error) {
             STAssertNotNil(error, @"An error should have occurred");
-            STAssertEquals(MSErrorMessageErrorCode, error.code, @"Unexpected error code:  %d", error.code);
+            STAssertEquals([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code:  %d", error.code);
             NSString *expectedErrorMessage = [NSString stringWithFormat:@"Error: An item with id '%@' does not exist.", testId];
             STAssertEqualObjects(expectedErrorMessage, error.localizedDescription, @"Wrong error: %@", error.localizedDescription);
             self.done = YES;
@@ -329,7 +329,7 @@
         self.done = NO;
         [self.table delete:@{@"id":testId} completion:^(id itemId, NSError *error) {
             STAssertNotNil(error, @"An error should have occurred");
-            STAssertEquals(MSErrorMessageErrorCode, error.code, @"Unexpected error code: %d", error.code);
+            STAssertEquals([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %d", error.code);
             NSString *expectedErrorMessage = [NSString stringWithFormat:@"Error: An item with id '%@' does not exist.", testId];
             STAssertEqualObjects(expectedErrorMessage, error.localizedDescription, @"Wrong error: %@", error.localizedDescription);
             self.done = YES;
@@ -346,7 +346,7 @@
         self.done = NO;
         [self.table deleteWithId:testId completion:^(id itemId, NSError *error) {
             STAssertNotNil(error, @"An error should have occurred");	
-            STAssertEquals(MSErrorMessageErrorCode, error.code, @"Unexpected error code: %d", error.code);
+            STAssertEquals([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %d", error.code);
             NSString *expectedErrorMessage = [NSString stringWithFormat:@"Error: An item with id '%@' does not exist.", testId];
             STAssertEqualObjects(expectedErrorMessage, error.localizedDescription, @"Wrong error: %@", error.localizedDescription);
             self.done = YES;
@@ -648,7 +648,7 @@
         self.done = NO;
         [self.table insert:item parameters:userParams completion:^(NSDictionary *item, NSError *error) {
             STAssertNotNil(error, @"An error should have occurred");
-            STAssertEquals(error.code, MSErrorMessageErrorCode, @"Unexpected error %d", error.code);
+            STAssertEquals(error.code, [@MSErrorMessageErrorCode integerValue], @"Unexpected error %d", error.code);
             STAssertTrue([error.localizedDescription rangeOfString:@"is not a supported system property."].location != NSNotFound, @"Unexpected message %@", error.localizedDescription);
             self.done = YES;
         }];
@@ -660,7 +660,7 @@
         query.parameters = userParams;
         [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
             STAssertNotNil(error, @"An error should have occurred");
-            STAssertEquals(error.code, MSErrorMessageErrorCode, @"Unexpected error %d", error.code);
+            STAssertEquals(error.code, [@MSErrorMessageErrorCode integerValue], @"Unexpected error %d", error.code);
             STAssertTrue([error.localizedDescription rangeOfString:@"is not a supported system property."].location != NSNotFound, @"Unexpected message %@", error.localizedDescription);
             self.done = YES;
             }];
@@ -671,7 +671,7 @@
         query.predicate = predicate;
         [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
             STAssertNotNil(error, @"An error should have occurred");
-            STAssertEquals(error.code, MSErrorMessageErrorCode, @"Unexpected error %d", error.code);
+            STAssertEquals(error.code, [@MSErrorMessageErrorCode integerValue], @"Unexpected error %d", error.code);
             STAssertTrue([error.localizedDescription rangeOfString:@"is not a supported system property."].location != NSNotFound, @"Unexpected message %@", error.localizedDescription);
             self.done = YES;
         }];
@@ -680,7 +680,7 @@
         self.done = NO;
         [self.table readWithId:@"an id" parameters:userParams completion:^(NSDictionary *item, NSError *error) {
             STAssertNotNil(error, @"An error should have occurred");
-            STAssertEquals(error.code, MSErrorMessageErrorCode, @"Unexpected error %d", error.code);
+            STAssertEquals(error.code, [@MSErrorMessageErrorCode integerValue], @"Unexpected error %d", error.code);
             STAssertTrue([error.localizedDescription rangeOfString:@"is not a supported system property."].location != NSNotFound, @"Unexpected message %@", error.localizedDescription);
             self.done = YES;
         }];
@@ -690,7 +690,7 @@
         [savedItem setValue:@"Hello!" forKey:@"String"];
         [self.table update:savedItem parameters:userParams completion:^(NSDictionary *item, NSError *error) {
             STAssertNotNil(error, @"An error should have occurred");
-            STAssertEquals(error.code, MSErrorMessageErrorCode, @"Unexpected error %d", error.code);
+            STAssertEquals(error.code, [@MSErrorMessageErrorCode integerValue], @"Unexpected error %d", error.code);
             STAssertTrue([error.localizedDescription rangeOfString:@"is not a supported system property."].location != NSNotFound, @"Unexpected message %@", error.localizedDescription);
             self.done = YES;
         }];
@@ -716,7 +716,7 @@
     self.done = NO;
     [self.table insert:item parameters:userParams completion:^(NSDictionary *item, NSError *error) {
         STAssertNotNil(error, @"An error should have occurred");
-        STAssertEquals(MSErrorMessageErrorCode, error.code, @"Unexpected error code: %d: %@", error.code, error.localizedDescription);
+        STAssertEquals([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %d: %@", error.code, error.localizedDescription);
         STAssertTrue([error.localizedDescription rangeOfString:@"Custom query parameter names must start with a letter."].location != NSNotFound, @"Incorrect error: %@", error.localizedDescription);
         self.done = YES;
     }];
@@ -728,7 +728,7 @@
     query.parameters = userParams;
     [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
         STAssertNotNil(error, @"An error should have occurred");
-        STAssertEquals(MSErrorMessageErrorCode, error.code, @"Unexpected error code: %d: %@", error.code, error.localizedDescription);
+        STAssertEquals([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %d: %@", error.code, error.localizedDescription);
         STAssertTrue([error.localizedDescription rangeOfString:@"Custom query parameter names must start with a letter."].location != NSNotFound, @"Incorrect error: %@", error.localizedDescription);
         self.done = YES;
     }];
@@ -738,7 +738,7 @@
     query.predicate = [NSPredicate predicateWithFormat:@"__version == %@", [savedItem objectForKey:MSSystemColumnVersion]];
     [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
         STAssertNotNil(error, @"An error should have occurred");
-        STAssertEquals(MSErrorMessageErrorCode, error.code, @"Unexpected error code: %d: %@", error.code, error.localizedDescription);
+        STAssertEquals([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %d: %@", error.code, error.localizedDescription);
         STAssertTrue([error.localizedDescription rangeOfString:@"Custom query parameter names must start with a letter."].location != NSNotFound, @"Incorrect error: %@", error.localizedDescription);
         self.done = YES;
     }];
@@ -746,7 +746,7 @@
     self.done = NO;
     [self.table readWithId:@"an id" parameters:userParams completion:^(NSDictionary *item, NSError *error) {
         STAssertNotNil(error, @"An error should have occurred");
-        STAssertEquals(MSErrorMessageErrorCode, error.code, @"Unexpected error code: %d: %@", error.code, error.localizedDescription);
+        STAssertEquals([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %d: %@", error.code, error.localizedDescription);
         STAssertTrue([error.localizedDescription rangeOfString:@"Custom query parameter names must start with a letter."].location != NSNotFound, @"Incorrect error: %@", error.localizedDescription);
         self.done = YES;
     }];
@@ -756,7 +756,7 @@
     [savedItem setValue:@"Hello!" forKey:@"String"];
     [self.table update:savedItem parameters:userParams completion:^(NSDictionary *item, NSError *error) {
         STAssertNotNil(error, @"An error should have occurred");
-        STAssertEquals(MSErrorMessageErrorCode, error.code, @"Unexpected error code: %d: %@", error.code, error.localizedDescription);
+        STAssertEquals([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %d: %@", error.code, error.localizedDescription);
         STAssertTrue([error.localizedDescription rangeOfString:@"Custom query parameter names must start with a letter."].location != NSNotFound, @"Incorrect error: %@", error.localizedDescription);
         self.done = YES;
     }];
@@ -908,12 +908,12 @@
     [savedItem setValue:@"But Wait!" forKey:@"String"];
     [self.table update:savedItem completion:^(NSDictionary *item, NSError *error) {
         STAssertNotNil(error, @"An error should have occcurred");
-        STAssertEquals(MSErrorPreconditionFailed, error.code, @"Should have had precondition failed error");
+        STAssertEquals([@MSErrorPreconditionFailed integerValue], error.code, @"Should have had precondition failed error");
         
         //NSDictionary *itemResponse = error.localizedDescription;
         NSHTTPURLResponse *response = [error.userInfo objectForKey:MSErrorResponseKey];
         STAssertNotNil(response, @"response should have been available");
-        STAssertEquals(412, response.statusCode, @"response should have been pre condition failed");
+        STAssertEquals([@412 integerValue], response.statusCode, @"response should have been pre condition failed");
         
         NSDictionary *actualItem = [error.userInfo objectForKey:MSErrorServerItemKey];
         STAssertEqualObjects([actualItem objectForKey:MSSystemColumnVersion], [savedItem2 objectForKey:MSSystemColumnVersion], @"Unexpected version");

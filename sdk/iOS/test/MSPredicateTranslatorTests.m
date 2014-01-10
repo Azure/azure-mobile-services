@@ -31,21 +31,23 @@
     // the second element is the predicate format string; and all
     // additional elements are the arguments to the format string
     NSArray *testCases = @[
+        // BOOL test
+        @[ @"(Complete eq true)",
+            @"Complete == YES"],
+        
+        // Test cases for TRUEPREDICATE, FALSEPREDICATE
+        @[ @"(1 eq 1)",
+           @"TRUEPREDICATE"],
     
+        @[ @"((1 eq 1) and startswith(name,'b'))",
+           @"TRUEPREDICATE && name BEGINSWITH 'b'"],
     
-    // Test cases for TRUEPREDICATE, FALSEPREDICATE
-    @[ @"(1 eq 1)",
-    @"TRUEPREDICATE"],
+        @[ @"(1 eq 0)",
+           @"FALSEPREDICATE"],
     
-    @[ @"((1 eq 1) and startswith(name,'b'))",
-    @"TRUEPREDICATE && name BEGINSWITH 'b'"],
-    
-    @[ @"(1 eq 0)",
-    @"FALSEPREDICATE"],
-    
-    @[ @"((1 eq 0) or (Price le 5.99d))",
-    @"FALSEPREDICATE OR Price <= 5.99"],
-    
+        @[ @"((1 eq 0) or (Price le 5.99d))",
+           @"FALSEPREDICATE OR Price <= 5.99"],
+        
         // Test cases for comparison opperators and number formating.
         @[ @"(Price gt 50f)",
            @"Price > %@", [NSNumber numberWithFloat:50.0]],
@@ -55,10 +57,7 @@
         
         @[ @"(Count lt -25)",
            @"Count < %@", [NSNumber numberWithInt:-25]],
-        
-        @[ @"(Count le 500)",
-           @"Count =< %@", [NSNumber numberWithInteger:500]],
-        
+                
         @[ @"(Price eq 1.99m)",
            @"Price == %@", [NSDecimalNumber decimalNumberWithString:@"1.99"]],
         
@@ -142,9 +141,7 @@
     
         @[ @"((Zipcode eq (98007 add 1)) or (Zipcode eq (98007 sub 1)) or (Zipcode eq 98007))",
            @"Zipcode IN { %@ + 1, %@ - 1, %@ }", @98007, @98007, @98007],
-
     ];
-
     
     for (NSArray *testCase in testCases) {
         
@@ -196,7 +193,6 @@
     // the second element is the predicate format string; and all
     // additional elements are the substitution variables
     NSArray *testCases = @[
-    
         // Test cases for comparison opperators and number formating.
         @[ @"(Price gt 50f)",
            @"Price > $price", @{ @"price":[NSNumber numberWithFloat:50.0]}],
@@ -207,15 +203,15 @@
         @[ @"(Count lt -25)",
            @"Count < $count", @{ @"count":[NSNumber numberWithInt:-25]}],
         
-        @[ @"(Count le 500)",
-           @"Count =< $count", @{ @"count":[NSNumber numberWithInteger:500]}],
-        
         @[ @"(Price eq 1.99m)",
            @"Price == $price", @{ @"price":[NSDecimalNumber decimalNumberWithString:@"1.99"]}],
         
         @[ @"(Count ne 200l)",
            @"Count != $count", @{ @"count" :[NSNumber numberWithLongLong:200]}],
     
+        @[ @"(Complete eq true)",
+           @"Complete == $complete", @{ @"complete": @YES }],
+        
         // Test cases for strings
         @[ @"(tolower(name) eq 'bob')",
            @"lowercase:(name) = $name", @{ @"name":@"bob"}],
