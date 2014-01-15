@@ -54,6 +54,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             try
             {
                 await this.UpsertRegistration(registration);
+                return;
             }
             catch (Exception)
             // TODO: catch (RegistrationGoneException)
