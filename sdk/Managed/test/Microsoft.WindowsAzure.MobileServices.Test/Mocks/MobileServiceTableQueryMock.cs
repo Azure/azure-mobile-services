@@ -103,5 +103,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             get { throw new NotImplementedException(); }
         }
+
+
+        public IQueryable<T> Query
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }

@@ -10,6 +10,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Query;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -120,7 +121,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             if (!this.hasIntegerId)
             {
                 string unused;
-                value = RemoveSystemProperties(value, out unused);
+                value = MobileServiceSerializer.RemoveSystemProperties(value, out unused);
             } 
             JToken insertedValue = await this.InsertAsync(value, parameters);
             serializer.Deserialize<T>(insertedValue, instance);
@@ -538,11 +539,16 @@ namespace Microsoft.WindowsAzure.MobileServices
                 CultureInfo.InvariantCulture,
                 "$filter=({0} eq {1})",
                 MobileServiceSerializer.IdPropertyName,
-                FilterBuildingExpressionVisitor.ToODataConstant(id));
+                ODataExpressionVisitor.ToODataConstant(id));
 
             // Send the query
             JToken response = await this.ReadAsync(query, parameters);
 
+            return GetSingleValue(response);
+        }
+
+        private static JObject GetSingleValue(JToken response)
+        {
             // Get the first element in the response
             JObject jobject = response as JObject;
             if (jobject == null)

@@ -9,9 +9,10 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Sync;
 using Newtonsoft.Json.Linq;
 
-namespace Microsoft.WindowsAzure.MobileServices
+namespace Microsoft.WindowsAzure.MobileServices.Query
 {
     internal class MobileServiceTableQueryProvider
     {
@@ -24,6 +25,13 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The name of the count key in an inline count response object.
         /// </summary>
         protected const string InlineCountCountKey = "count";
+
+        private IMobileServiceSyncTable syncTable;
+
+        public MobileServiceTableQueryProvider(IMobileServiceSyncTable syncTable = null)
+        {
+            this.syncTable = syncTable;
+        }
 
         /// <summary>
         /// Create a new query based off a table and and a new
@@ -82,7 +90,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// Results of the query.
         /// </returns>
-        internal async Task<IEnumerable<T>> Execute<T>(MobileServiceTableQuery<T> query)
+        internal async Task<IEnumerable<T>> Execute<T>(IMobileServiceTableQuery<T> query)
         {
             // Compile the query from the underlying IQueryable's expression
             // tree
@@ -90,11 +98,11 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             // Send the query
             string odata = compiledQuery.ToQueryString();
-            JToken response = await query.Table.ReadAsync(odata, query.Parameters);
+            JToken response = await this.Execute<T>(query, odata);
 
             // Parse the results
             long totalCount;
-            JArray values = this.GetResponseSequence(response, out totalCount);
+            JArray values = GetResponseSequence(response, out totalCount);
 
             return new TotalCountEnumerable<T>(
                 totalCount,
@@ -112,13 +120,22 @@ namespace Microsoft.WindowsAzure.MobileServices
                     }));
         }
 
+        protected virtual Task<JToken> Execute<T>(IMobileServiceTableQuery<T> query, string odata)
+        {
+            if (this.syncTable == null)
+            {
+                return query.Table.ReadAsync(odata, query.Parameters);
+            }
+            return this.syncTable.ReadAsync(odata);
+        }
+
         /// <summary>
         /// Compile the query into a MobileServiceTableQueryDescription.
         /// </summary>
         /// <returns>
         /// The compiled OData query.
         /// </returns>
-        internal MobileServiceTableQueryDescription Compile<T>(MobileServiceTableQuery<T> query)
+        internal MobileServiceTableQueryDescription Compile<T>(IMobileServiceTableQuery<T> query)
         {
             // Compile the query from the underlying IQueryable's expression
             // tree
@@ -126,6 +143,12 @@ namespace Microsoft.WindowsAzure.MobileServices
             MobileServiceTableQueryDescription compiledQuery = translator.Translate();
 
             return compiledQuery;
+        }
+
+        internal string ToQueryString<T>(IMobileServiceTableQuery<T> query)
+        {
+            MobileServiceTableQueryDescription description = this.Compile(query);
+            return description.ToQueryString();
         }
 
         /// <summary>
@@ -143,7 +166,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// The response as a JSON array.
         /// </returns>
-        internal JArray GetResponseSequence(JToken response, out long totalCount)
+        internal static JArray GetResponseSequence(JToken response, out long totalCount)
         {
             Debug.Assert(response != null);
 

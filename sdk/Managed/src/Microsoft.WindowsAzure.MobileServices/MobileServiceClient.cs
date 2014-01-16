@@ -4,14 +4,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Sync;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -82,6 +79,15 @@ namespace Microsoft.WindowsAzure.MobileServices
 
                 this.Serializer.SerializerSettings = value;
             }
+        }
+
+        /// <summary>
+        /// Instance of <see cref="IMobileServiceSyncContext"/>
+        /// </summary>
+        public IMobileServiceSyncContext SyncContext
+        {
+            get;
+            private set;
         }
 
         /// <summary>
@@ -192,6 +198,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             handlers = handlers ?? EmptyHttpMessageHandlers;
             this.HttpClient = new MobileServiceHttpClient(handlers, this.ApplicationUri, this.applicationInstallationId, this.ApplicationKey);
             this.Serializer = new MobileServiceSerializer();
+            this.SyncContext = new MobileServiceSyncContext(this);
         }
 
         /// <summary>
@@ -206,21 +213,23 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public IMobileServiceTable GetTable(string tableName)
         {
-            if (tableName == null)
-            {
-                throw new ArgumentNullException("tableName");
-            }
-            
-            if (string.IsNullOrWhiteSpace(tableName))
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        Resources.MobileServiceClient_EmptyArgument,
-                        "tableName"));
-            }
+            ValidateTableName(tableName);
 
             return new MobileServiceTable(tableName, this);
+        }        
+
+
+        /// <summary>
+        /// Returns a <see cref="IMobileServiceSyncTable"/> instance, which provides
+        /// untyped data operations for that table.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <returns>The table.</returns>
+        public IMobileServiceSyncTable GetSyncTable(string tableName)
+        {
+            ValidateTableName(tableName);
+
+            return new MobileServiceSyncTable(tableName, this);
         }
 
         /// <summary>
@@ -237,6 +246,23 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             string tableName = this.SerializerSettings.ContractResolver.ResolveTableName(typeof(T));
             return new MobileServiceTable<T>(tableName, this);
+        }
+
+
+        /// <summary>
+        /// Returns a <see cref="IMobileServiceSyncTable{T}"/> instance, which provides 
+        /// strongly typed data operations for local table.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type of the instances in the table.
+        /// </typeparam>
+        /// <returns>
+        /// The table.
+        /// </returns>
+        public IMobileServiceSyncTable<T> GetSyncTable<T>()
+        {
+            string tableName = this.SerializerSettings.ContractResolver.ResolveTableName(typeof(T));
+            return new MobileServiceSyncTable<T>(tableName, this);
         }
 
         /// <summary>
@@ -553,8 +579,26 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             if (disposing)
             {
+                ((MobileServiceSyncContext)this.SyncContext).Dispose();
                 // free managed resources
                 this.HttpClient.Dispose();
+            }
+        }
+
+        private static void ValidateTableName(string tableName)
+        {
+            if (tableName == null)
+            {
+                throw new ArgumentNullException("tableName");
+            }
+
+            if (string.IsNullOrWhiteSpace(tableName))
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        Resources.MobileServiceClient_EmptyArgument,
+                        "tableName"));
             }
         }
 

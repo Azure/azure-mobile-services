@@ -5,8 +5,8 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Sync;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -33,6 +33,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// MobileServiceClient.Login().
         /// </summary>
         MobileServiceUser CurrentUser { get; set; }
+        
+        /// <summary>
+        /// Returns a <see cref="IMobileServiceSyncContext"/> instance.
+        /// </summary>
+        IMobileServiceSyncContext SyncContext { get; }
 
         /// <summary>
         /// Returns a <see cref="IMobileServiceTable"/> instance, which provides 
@@ -47,6 +52,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         IMobileServiceTable GetTable(string tableName);
 
         /// <summary>
+        /// Returns a <see cref="IMobileServiceSyncTable"/> instance, which provides
+        /// untyped data operations for local table.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <returns>The table.</returns>
+        IMobileServiceSyncTable GetSyncTable(string tableName);
+
+        /// <summary>
         /// Returns a <see cref="IMobileServiceTable{T}"/> instance, which provides 
         /// strongly typed data operations for that table.
         /// </summary>
@@ -57,6 +70,18 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The table.
         /// </returns>
         IMobileServiceTable<T> GetTable<T>();
+
+        /// <summary>
+        /// Returns a <see cref="IMobileServiceTable{T}"/> instance, which provides 
+        /// strongly typed data operations for local table.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type of the instances in the table.
+        /// </typeparam>
+        /// <returns>
+        /// The table.
+        /// </returns>
+        IMobileServiceSyncTable<T> GetSyncTable<T>();
 
         /// <summary>
         /// Logs a user into a Windows Azure Mobile Service with the provider and a token object.

@@ -1401,7 +1401,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             IMobileServiceTable<StringType> table = service.GetTable<StringType>();
 
-            hijack.Response.StatusCode = HttpStatusCode.NotFound;
+            hijack.Response = TestHttpHandler.CreateResponse(String.Empty, HttpStatusCode.NotFound);
             InvalidOperationException expected = null;
 
             try

@@ -288,4 +288,97 @@
   <data name="Push_TagNoCommas" xml:space="preserve">
     <value>Tags must not contain ','.</value>
   </data>
+  <data name="MobileServiceSyncTable_IdMustBeString" xml:space="preserve">
+    <value>The id must be of type string.</value>
+  </data>
+  <data name="SyncContext_NotInitialized" xml:space="preserve">
+    <value>SyncContext is not yet intialized.</value>
+  </data>
+  <data name="SyncStore_FailedToUpsertItem" xml:space="preserve">
+    <value>Failed to update the item in the sync store.</value>
+  </data>
+  <data name="MobileServiceTableQueryDescription_UnrecognizedQueryParameter" xml:space="preserve">
+    <value>Unrecognized query parameter '{0}'.</value>
+  </data>
+  <data name="SyncContext_DeletePending" xml:space="preserve">
+    <value>Delete operation on the item is already in the queue.</value>
+  </data>
+  <data name="SyncContext_DuplicateInsert" xml:space="preserve">
+    <value>Insert operation on the item is already in the queue.</value>
+  </data>
+  <data name="SyncContext_UpdatePending" xml:space="preserve">
+    <value>Update operation on the item is already in the queue.</value>
+  </data>
+  <data name="ODataExpressionParser_UnterminatedStringLiteral" xml:space="preserve">
+    <value>Unterminated string literal.</value>
+  </data>
+  <data name="ODataExpressionParser_SyntaxError" xml:space="preserve">
+    <value>Invalid syntax for odata query.</value>
+  </data>
+  <data name="ODataExpressionParser_DigitExpected" xml:space="preserve">
+    <value>Digit expected.</value>
+  </data>
+  <data name="ODataExpressionParser_CloseParanOrCommaExpected" xml:space="preserve">
+    <value>"')' or ',' expected.</value>
+  </data>
+  <data name="ODataExpressionParser_ExpressionExpected" xml:space="preserve">
+    <value>Expression expected.</value>
+  </data>
+  <data name="ODataExpressionParser_OpenParanExpected" xml:space="preserve">
+    <value>'(' expected.</value>
+  </data>
+  <data name="ODataExpressionParser_SubstringArgsCount" xml:space="preserve">
+    <value>Function 'substring' requires 2 or 3 parameters.</value>
+  </data>
+  <data name="ODataExpressionParser_CloseParanOrOperatorExpected" xml:space="preserve">
+    <value>')' or operator expected</value>
+  </data>
+  <data name="ODataExpressionParser_FunctionArgsCount" xml:space="preserve">
+    <value>Function '{0}' requires {1} parameter(s).</value>
+  </data>
+  <data name="ODataExpressionParser_IdentifierExpected" xml:space="preserve">
+    <value>Expected identifier.</value>
+  </data>
+  <data name="ODataExpressionParser_IntegerLiteralExpected" xml:space="preserve">
+    <value>Expected integer literal</value>
+  </data>
+  <data name="ODataExpressionParser_InvalidIntegerLiteral" xml:space="preserve">
+    <value>Invalid integer literal '{0}'</value>
+  </data>
+  <data name="ODataExpressionParser_InvalidRealLiteral" xml:space="preserve">
+    <value>Invalid real literal '{0}'</value>
+  </data>
+  <data name="ODataExpressionParser_InvalidTypeCreation" xml:space="preserve">
+    <value>Invalid '{0}' type creation expression</value>
+  </data>
+  <data name="ODataExpressionParser_RealLiteralExpected" xml:space="preserve">
+    <value>Expected real literal</value>
+  </data>
+  <data name="ODataExpressionParser_StringLiteralExpected" xml:space="preserve">
+    <value>Expected string literal</value>
+  </data>
+  <data name="SyncStore_FailedToDeleteOperation" xml:space="preserve">
+    <value>Failed to delete operation from the sync store.</value>
+  </data>
+  <data name="SyncStore_FailedToReadItem" xml:space="preserve">
+    <value>Failed to read the item from sync store.</value>
+  </data>
+  <data name="SyncStore_FailedToLoadError" xml:space="preserve">
+    <value>Failed to read errors from the sync store.</value>
+  </data>
+  <data name="SyncStore_FailedToDeleteError" xml:space="preserve">
+    <value>Failed to delete error from the sync store.</value>
+  </data>
+  <data name="SyncStore_OperationFailed" xml:space="preserve">
+    <value>Failed to perform operation on sync store.</value>
+  </data>
+  <data name="MobileServiceSyncTable_PullWithSelectNotSupported" xml:space="preserve">
+    <value>Pull query with select clause is not supported.</value>
+  </data>
+  <data name="MobileServiceTableOperation_ItemNotFound" xml:space="preserve">
+    <value>Operation must have an item associated with it.</value>
+  </data>
+  <data name="MobileServiceTable_ItemNotFoundInStore" xml:space="preserve">
+    <value>Item not found in local store.</value>
+  </data>
 </root>
