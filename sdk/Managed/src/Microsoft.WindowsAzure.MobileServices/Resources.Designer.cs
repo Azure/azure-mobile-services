@@ -62,6 +62,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Template name is conflict with reserved name..
+        /// </summary>
+        internal static string ConflictWithReservedName {
+            get {
+                return ResourceManager.GetString("ConflictWithReservedName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The Linq IQueryable Select() operation is not supported on the Windows Phone 7.5 platform..
         /// </summary>
         internal static string ExpressionUtility_ProjectionNotSupportedOnWindowsPhone75 {
@@ -148,6 +157,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         internal static string IAuthenticationBroker_LoginFailed {
             get {
                 return ResourceManager.GetString("IAuthenticationBroker_LoginFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template name can&apos;t contain &quot;;&quot; or &quot;:&quot;..
+        /// </summary>
+        internal static string InvalidTemplateName {
+            get {
+                return ResourceManager.GetString("InvalidTemplateName", resourceCulture);
             }
         }
         
@@ -481,6 +499,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         internal static string MobileServiceTableUrlBuilder_InvalidParameterBeginsWithDollarSign {
             get {
                 return ResourceManager.GetString("MobileServiceTableUrlBuilder_InvalidParameterBeginsWithDollarSign", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The bodyTemplate is not in accepted XML format. The first node of the bodyTemplate should be Badge/Tile/Toast, except wns/raw template, which need to be an valid XML..
+        /// </summary>
+        internal static string NotSupportedXMLFormatAsBodyTemplate {
+            get {
+                return ResourceManager.GetString("NotSupportedXMLFormatAsBodyTemplate", resourceCulture);
             }
         }
         

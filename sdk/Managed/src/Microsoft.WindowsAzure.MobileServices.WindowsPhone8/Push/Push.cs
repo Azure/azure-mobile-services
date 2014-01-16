@@ -9,13 +9,8 @@ namespace Microsoft.WindowsAzure.MobileServices
     using System.Threading.Tasks;
 
     /// <summary>
-    /// Define a class help to create/update/query/delete notification registrations
-    /// </summary>
-    /// Exceptions: 
-    /// ArgumentException: when argument is not valid.
-    /// RegistrationNotFoundException: When try to query/delete not existing registration(s).
-    /// RegistrationAuthorizationException: When there is authorization error.
-    /// RegistrationException: generatal registration operation error.
+    /// Define a class help to create/update/delete notification registrations
+    /// </summary>    
     public sealed class Push
     {
         private readonly RegistrationManager registrationManager;
@@ -31,14 +26,10 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("client");
             }
 
-            this.Client = client;
-
-            var storageManager = new LocalStorageManager(client.ApplicationUri.AbsoluteUri);
+            var storageManager = new LocalStorageManager(client.ApplicationUri.Host);
             var pushHttpClient = new PushHttpClient(client.HttpClient, client.Serializer);
             this.registrationManager = new RegistrationManager(pushHttpClient, storageManager);
         }
-
-        private MobileServiceClient Client { get; set; }
 
         /// <summary>
         /// Register a particular channelUri

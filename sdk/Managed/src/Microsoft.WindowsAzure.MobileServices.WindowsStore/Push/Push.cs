@@ -12,13 +12,8 @@ namespace Microsoft.WindowsAzure.MobileServices
     using Windows.Data.Xml.Dom;
 
     /// <summary>
-    /// Define a class help to create/update/query/delete notification registrations
+    /// Define a class help to create/update/delete notification registrations
     /// </summary>
-    /// Exceptions: 
-    /// ArgumentException: when argument is not valid.
-    /// RegistrationNotFoundException: When try to query/delete not existing registration(s).
-    /// RegistrationAuthorizationException: When there is authorization error.
-    /// RegistrationException: general registration operation error.
     public sealed class Push
     {
         private readonly RegistrationManager registrationManager;
@@ -38,7 +33,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.Client = client;
             this.TileId = tileId;
 
-            var storageManager = new LocalStorageManager(client.ApplicationUri.AbsoluteUri, tileId);
+            var storageManager = new LocalStorageManager(client.ApplicationUri.Host, tileId);
             var pushHttpClient = new PushHttpClient(client.HttpClient, client.Serializer);
             this.registrationManager = new RegistrationManager(pushHttpClient, storageManager);
 

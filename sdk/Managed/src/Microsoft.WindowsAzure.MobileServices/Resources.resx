@@ -270,4 +270,13 @@
   <data name="MobileServiceCollection_IncrementalLoadingFailed" xml:space="preserve">
     <value>Failed to incrementally load more items of type '{0}'. See the inner exception for details.</value>
   </data>
+  <data name="ConflictWithReservedName" xml:space="preserve">
+    <value>Template name is conflict with reserved name.</value>
+  </data>
+  <data name="InvalidTemplateName" xml:space="preserve">
+    <value>Template name can't contain ";" or ":".</value>
+  </data>
+  <data name="NotSupportedXMLFormatAsBodyTemplate" xml:space="preserve">
+    <value>The bodyTemplate is not in accepted XML format. The first node of the bodyTemplate should be Badge/Tile/Toast, except wns/raw template, which need to be an valid XML.</value>
+  </data>
 </root>

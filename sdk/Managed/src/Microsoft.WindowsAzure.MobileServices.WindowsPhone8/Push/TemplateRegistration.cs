@@ -10,24 +10,6 @@ using Newtonsoft.Json;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
-    // {
-    // platform: "wns" // {"wns"|"mpns"|"apns"|"gcm"}
-    // channelUri: "" // if wns or mpns
-    // deviceToken: "" // if apns
-    // gcmRegistrationId: "" // if gcm
-    // tags: "tag"|["a","b"] // non-empty string or array of tags (optional)
-    // bodyTemplate: '<toast>
-    //      <visual lang="en-US">
-    //        <binding template="ToastText01">
-    //          <text id="1">$(myTextProp1)</text>
-    //        </binding>
-    //      </visual>
-    //    </toast>' // if template registration
-    // templateName: "" // if template registration
-    // wnsHeaders: { // if wns template registration }
-    // mpnsHeaders: { // if mpns template //}
-    // expiry: "" // if apns template//
-    // }
     /// <summary>
     /// Registration is used to define a target that is registered for notifications. A TemplateRegistration allows the client application
     /// to define the format of the registration.
@@ -99,12 +81,12 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             if (templateName.Equals(Registration.NativeRegistrationName))
             {
-                throw new ArgumentException("Resource.ConflictWithReservedName");
+                throw new ArgumentException(Resources.ConflictWithReservedName);
             }
 
             if (templateName.Contains(":") || templateName.Contains(";"))
             {
-                throw new ArgumentException("Resource.InvalidTemplateName");
+                throw new ArgumentException(Resources.InvalidTemplateName);
             }
 
             this.TemplateName = templateName;
@@ -121,26 +103,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.BodyTemplate = bodyTemplate;
             this.DetectBodyType();
         }
-
-        internal TemplateRegistration(string channelUri)
-            : base(channelUri)
-        {
-            this.MpnsHeaders = new MpnsHeaderCollection();
-        }
-
-        internal TemplateRegistration(XElement content)
-            : base(content)
-        {
-            if (content == null)
-            {
-                throw new ArgumentNullException("content");
-            }
-
-            this.MpnsHeaders = content.GetElementValue<MpnsHeaderCollection>("MpnsHeaders");
-            this.BodyTemplate = content.GetElementValueAsString("BodyTemplate");
-            this.TemplateName = content.GetElementValueAsString("TemplateName");
-        }
-
+        
         /// <summary>
         /// Gets headers that should be sent to WNS with the notification
         /// </summary>
@@ -148,7 +111,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public MpnsHeaderCollection MpnsHeaders { get; private set; }
 
         /// <summary>
-        /// Get or set templateName
+        /// Get templateName
         /// </summary>
         [JsonProperty(PropertyName = "templatename")]
         public string TemplateName { get; private set; }
@@ -183,12 +146,12 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
             catch (Exception)
             {
-                throw new ArgumentException("Resource.NotSupportedXMLFormatAsBodyTemplate");
+                throw new ArgumentException(Resources.NotSupportedXMLFormatAsBodyTemplate);
             }
 
             if (body == null)
             {
-                throw new ArgumentException("Resource.NotSupportedXMLFormatAsBodyTemplate");
+                throw new ArgumentException(Resources.NotSupportedXMLFormatAsBodyTemplate);
             }
 
             this.MpnsHeaders.Remove(NotificationType);
@@ -213,7 +176,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
             else
             {
-                throw new ArgumentException("Resource.NotSupportedXMLFormatAsBodyTemplate");
+                throw new ArgumentException(Resources.NotSupportedXMLFormatAsBodyTemplate);
             }
         }
 

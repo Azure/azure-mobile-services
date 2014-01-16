@@ -7,9 +7,6 @@ namespace Microsoft.WindowsAzure.MobileServices
     using System;    
     using System.Collections.Generic;
     using System.Linq;
-
-    using Windows.ApplicationModel;
-
     using System.IO.IsolatedStorage;
 
     /// <summary>
@@ -23,11 +20,11 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// </summary>
     internal class LocalStorageManager : IDisposable
     {
-        internal static IStaticLocalStorage StaticStorage;
-
+        internal const string StorageVersion = "v1.0.0"; 
+        
         internal const string PrimaryChannelId = "$Primary";
 
-        internal const string StorageVersion = "v1.0.0";
+        private readonly object flushLock = new object();
 
         private string channelUri;
 
@@ -39,9 +36,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         private ConcurrentDictionary<string, StoredRegistrationEntry> registrations;
 
-        private readonly IDictionary<string, object> storageValues;
-
-        private readonly object flushLock = new object();
+        private readonly IDictionary<string, object> storageValues;        
 
         public LocalStorageManager(string applicationUri)
         {
@@ -49,20 +44,12 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.keyNameForChannelUri = string.Format("{0}-Channel", applicationUri);
             this.keyNameForRegistrations = string.Format("{0}-Registrations", applicationUri);
 
-            if (StaticStorage != null)
-            {
-                this.storageValues = StaticStorage.Settings;
-                StaticStorage.KeyNameForChannelUri = this.keyNameForChannelUri;
-                StaticStorage.KeyNameForRegistrations = this.keyNameForRegistrations;
-                StaticStorage.KeyNameForVersion = this.keyNameForVersion;
-            }
-            else
-            {
-                this.storageValues = IsolatedStorageSettings.ApplicationSettings;
-            }
-
-            this.ReadContent();
+            this.storageValues = IsolatedStorageSettings.ApplicationSettings;
+            
+            this.InitializeRegistrationInfoFromStorage();
         }
+
+        public bool IsRefreshNeeded { get; private set; }
 
         public string ChannelUri
         {
@@ -78,9 +65,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     this.Flush();
                 }
             }
-        }
-
-        public bool IsRefreshNeeded { get; private set; }
+        }        
 
         public StoredRegistrationEntry GetRegistration(string registrationName)
         {
@@ -92,12 +77,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return null;
         }
-
-        public void DeleteAllRegistrations()
-        {
-            this.registrations.Clear();
-        }
-
+        
         public bool DeleteRegistration(string registrationName)
         {
             if (this.registrations.Remove(registrationName))
@@ -109,14 +89,8 @@ namespace Microsoft.WindowsAzure.MobileServices
             return false;
         }
 
-        public void UpdateRegistration<T>(string registrationName, ref T registration) where T : Registration
+        public void UpdateRegistrationByRegistrationName<T>(string registrationName, T registration) where T : Registration
         {
-            if (registration == null)
-            {
-                this.DeleteRegistration(registrationName);
-                return;
-            }
-
             StoredRegistrationEntry cacheReg = new StoredRegistrationEntry(registrationName, registration.RegistrationId);
             this.registrations.AddOrUpdate(registrationName, cacheReg, (key, oldValue) => cacheReg);
 
@@ -124,17 +98,17 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.Flush();
         }
 
-        public void UpdateRegistration(Registration registration)
+        public void UpdateRegistrationByRegistrationId(Registration registration)
         {
             // update registation is registartionId is in cached registartions, otherwise create new one
             var found = registrations.FirstOrDefault(v => v.Value.RegistrationId.Equals(registration.RegistrationId));
             if (!found.Equals(default(KeyValuePair<string, StoredRegistrationEntry>)))
             {
-                this.UpdateRegistration(found.Key, ref registration);
+                this.UpdateRegistrationByRegistrationName(found.Key, registration);
             }
             else
             {
-                this.UpdateRegistration(registration.Name, ref registration);
+                this.UpdateRegistrationByRegistrationName(registration.Name, registration);
             }
         }
 
@@ -148,27 +122,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             this.ChannelUri = refreshedChannelUri;
             this.IsRefreshNeeded = false;
-        }
-
-        public void Flush()
-        {
-            lock (this.flushLock)
-            {
-                SetContent(this.storageValues, this.keyNameForVersion, StorageVersion);
-                SetContent(this.storageValues, this.keyNameForChannelUri, this.channelUri);
-
-                string str = string.Empty;
-                if (this.registrations != null)
-                {
-                    var entries = this.registrations.Select(v => v.Value.ToString());
-                    str = string.Join(";", entries);
-                }
-
-                SetContent(this.storageValues, this.keyNameForRegistrations, str);
-                IsolatedStorageSettings.ApplicationSettings.Save();
-
-            }
-        }
+        }        
 
         internal static string ReadContent(IDictionary<string, object> values, string key)
         {
@@ -192,8 +146,30 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
-        private void ReadContent()
+        private void Flush()
         {
+            lock (this.flushLock)
+            {
+                SetContent(this.storageValues, this.keyNameForVersion, StorageVersion);
+                SetContent(this.storageValues, this.keyNameForChannelUri, this.channelUri);
+
+                string str = string.Empty;
+                if (this.registrations != null)
+                {
+                    var entries = this.registrations.Select(v => v.Value.ToString());
+                    str = string.Join(";", entries);
+                }
+
+                SetContent(this.storageValues, this.keyNameForRegistrations, str);
+                IsolatedStorageSettings.ApplicationSettings.Save();
+
+            }
+        }
+
+        private void InitializeRegistrationInfoFromStorage()
+        {
+            this.registrations = new ConcurrentDictionary<string, StoredRegistrationEntry>();
+
             // Read channelUri
             this.channelUri = ReadContent(this.storageValues, this.keyNameForChannelUri);
 

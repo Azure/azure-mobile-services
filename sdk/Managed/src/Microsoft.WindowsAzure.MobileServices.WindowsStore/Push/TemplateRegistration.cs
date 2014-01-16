@@ -11,24 +11,6 @@ using Newtonsoft.Json;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
-    // {
-    // platform: "wns" // {"wns"|"mpns"|"apns"|"gcm"}
-    // channelUri: "" // if wns or mpns
-    // deviceToken: "" // if apns
-    // gcmRegistrationId: "" // if gcm
-    // tags: "tag"|["a","b"] // non-empty string or array of tags (optional)
-    // bodyTemplate: '<toast>
-    //      <visual lang="en-US">
-    //        <binding template="ToastText01">
-    //          <text id="1">$(myTextProp1)</text>
-    //        </binding>
-    //      </visual>
-    //    </toast>' // if template registration
-    // templateName: "" // if template registration
-    // wnsHeaders: { // if wns template registration }
-    // mpnsHeaders: { // if mpns template //}
-    // expiry: "" // if apns template//
-    // }
     /// <summary>
     /// Registration is used to define a target that is registered for notifications. A TemplateRegistration allows the client application
     /// to define the format of the registration.
@@ -84,12 +66,12 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             if (templateName.Equals(Registration.NativeRegistrationName))
             {
-                throw new ArgumentException("TODO");
+                throw new ArgumentException(Resources.ConflictWithReservedName);
             }
 
             if (templateName.Contains(":") || templateName.Contains(";"))
             {
-                throw new ArgumentException("TODO");
+                throw new ArgumentException(Resources.InvalidTemplateName);
             }
 
             this.TemplateName = templateName;
@@ -130,26 +112,20 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
-        internal TemplateRegistration(string channelUri)
-            : base(channelUri)
-        {
-            this.WnsHeaders = new WnsHeaderCollection();
-        }
-
         /// <summary>
-        /// Gets or Sets headers that should be sent to WNS with the notification
+        /// Gets headers that should be sent to WNS with the notification
         /// </summary>
         [JsonProperty(PropertyName = "wnsheaders")]
         public WnsHeaderCollection WnsHeaders { get; private set; }        
 
         /// <summary>
-        /// Get or set templateName
+        /// Get templateName
         /// </summary>
         [JsonProperty(PropertyName = "templatename")]
         public string TemplateName { get; private set; }
 
         /// <summary>
-        /// Gets or sets bodyTemplate as string
+        /// Gets bodyTemplate as string
         /// </summary>
         [JsonProperty(PropertyName = "bodytemplate")]
         public string BodyTemplate { get; private set; }
@@ -160,7 +136,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             if (template.FirstChild == null ||
                 !Enum.TryParse(template.FirstChild.NodeName, true, out registrationType))
             {
-                throw new ArgumentException("TODO");
+                throw new ArgumentException(Resources.NotSupportedXMLFormatAsBodyTemplate);
             }
 
             return "wns/" + template.FirstChild.NodeName.ToLowerInvariant();
@@ -172,13 +148,13 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return this.TemplateName;
             }
-        }
+        }   
+    }
 
-        enum TemplateRegistrationType
-        {
-            Toast,
-            Tile,
-            Badge
-        }
-    }    
+    enum TemplateRegistrationType
+    {
+        Toast,
+        Tile,
+        Badge
+    }
 }

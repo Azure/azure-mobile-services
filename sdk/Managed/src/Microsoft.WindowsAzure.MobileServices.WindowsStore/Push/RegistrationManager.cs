@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -56,10 +57,13 @@ namespace Microsoft.WindowsAzure.MobileServices
                 await this.UpsertRegistration(registration);
                 return;
             }
-            catch (Exception)
-            // TODO: catch (RegistrationGoneException)
+            catch (MobileServiceInvalidOperationException e)
             {
                 // if we get an RegistrationGoneException (410) from service, we will recreate registration id and will try to do upsert one more time.
+                if (e.Response.StatusCode != HttpStatusCode.Gone)
+                {
+                    throw;                    
+                }
             }
 
             // recreate registration id.
@@ -68,22 +72,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         public async Task<IEnumerable<Registration>> GetRegistrationsForChannelAsync(string channelUri)
-        {
-            // TODO: Fix exceptions
-            //try
-            //{
-                List<Registration> registrations = new List<Registration>(await this.pushHttpClient.ListRegistrationsAsync(channelUri));
-                for (int i = 0; i < registrations.Count; i++)
-                {
-                    this.localStorageManager.UpdateRegistration(registrations[i]);
-                }
+        {            
+            List<Registration> registrations = new List<Registration>(await this.pushHttpClient.ListRegistrationsAsync(channelUri));
+            for (int i = 0; i < registrations.Count; i++)
+            {
+                this.localStorageManager.UpdateRegistrationByRegistrationId(registrations[i]);
+            }
 
-                return registrations;
-            //}
-            //catch (Exception e)
-            //{
-            //    throw HttpUtilities.ConvertToRegistrationException(e);
-            //}
+            return registrations;
         }
 
         public async Task UnregisterAsync(string registrationName)
@@ -99,81 +95,33 @@ namespace Microsoft.WindowsAzure.MobileServices
                 return;
             }
 
-            // TODO: Fix exceptions
-            //try
-            //{
-                await this.pushHttpClient.UnregisterAsync(cached.RegistrationId);
-                this.localStorageManager.DeleteRegistration(registrationName);
-            //}
-            //catch (Exception e)
-            //{
-            //    throw HttpUtilities.ConvertToRegistrationException(e);
-            //}
+            await this.pushHttpClient.UnregisterAsync(cached.RegistrationId);
+            this.localStorageManager.DeleteRegistration(registrationName);            
         }
 
         public async Task DeleteRegistrationsForChannelAsync(string channelUri)
         {
-            // TODO: Fix exceptions
-            //try
-            //{
-                List<Registration> registrations = new List<Registration>(await this.pushHttpClient.ListRegistrationsAsync(channelUri));
-                foreach (var registration in registrations)
-                {
-                    await this.pushHttpClient.UnregisterAsync(registration.RegistrationId);
-                }
+            List<Registration> registrations = new List<Registration>(await this.pushHttpClient.ListRegistrationsAsync(channelUri));
+            foreach (var registration in registrations)
+            {
+                await this.pushHttpClient.UnregisterAsync(registration.RegistrationId);
+            }
 
-                // clear local storage
-                this.localStorageManager.ClearRegistrations();
-            //}
-            //catch (Exception e)
-            //{
-            //    throw HttpUtilities.ConvertToRegistrationException(e);
-            //}
+            // clear local storage
+            this.localStorageManager.ClearRegistrations();            
         }        
 
         async Task<Registration> CreateRegistrationIdAsync(Registration registration)
         {
-            // TODO: Deal with exceptions
-            //try
-            //{
-                registration.RegistrationId = await this.pushHttpClient.CreateRegistrationIdAsync();
-                this.localStorageManager.UpdateRegistration(registration.Name, ref registration);
-                return registration;
-            //}
-            //catch (Exception ex)
-            //{
-            //    // if return as NotFound, it should be notificationHubNotFound
-            //    var exception = ex is AggregateException ? ((AggregateException)ex).Flatten().InnerException : ex;
-            //    WindowsAzureException azureException = exception as WindowsAzureException;
-            //    if (azureException != null && azureException.ErrorCode == (int)HttpStatusCode.NotFound)
-            //    {
-            //        throw new NotificationHubNotFoundException(exception.Message, exception);
-            //    }
-
-            //    throw HttpUtilities.ConvertToRegistrationException(ex);
-            //}
+            registration.RegistrationId = await this.pushHttpClient.CreateRegistrationIdAsync();
+            this.localStorageManager.UpdateRegistrationByRegistrationName(registration.Name, registration);
+            return registration;            
         }
 
         async Task UpsertRegistration<T>(T registration) where T : Registration
         {
-            // TODO: Deal with exceptions
-            //try
-            //{
-                await this.pushHttpClient.CreateOrUpdateRegistrationAsync(registration);
-                this.localStorageManager.UpdateRegistration(registration.Name, ref registration);
-            //}
-            //catch (Exception ex)
-            //{
-            //    // if return as NotFound, it should be notificationHubNotFound
-            //    var exception = ex is AggregateException ? ((AggregateException)ex).Flatten().InnerException : ex;
-            //    WindowsAzureException azureException = exception as WindowsAzureException;
-            //    if (azureException != null && azureException.ErrorCode == (int)HttpStatusCode.NotFound)
-            //    {
-            //        throw new NotificationHubNotFoundException(exception.Message, exception);
-            //    }
-
-            //    throw HttpUtilities.ConvertToRegistrationException(exception);
-            //}
+            await this.pushHttpClient.CreateOrUpdateRegistrationAsync(registration);
+            this.localStorageManager.UpdateRegistrationByRegistrationName(registration.Name, registration);            
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// <summary>
     /// Simple concurrentDictionary
     /// </summary>
-    internal class ConcurrentDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ICollection<KeyValuePair<TKey, TValue>>, IEnumerable<KeyValuePair<TKey, TValue>>, IEnumerable, IDisposable
+    internal class ConcurrentDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IDisposable
     {
         readonly Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>();
 
