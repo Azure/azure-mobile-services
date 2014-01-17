@@ -11,6 +11,7 @@
 
 var _ = require('Extensions');
 var Validate = require('Validate');
+var Push = require('Push');
 
 exports.async = function async(func) {
     /// <summary>
@@ -78,6 +79,14 @@ exports.addToMobileServicesClientNamespace = function (declarations) {
         // library at the moment, but it could also appear if customers are
         // using other Microsoft libraries in WinJS.        
     }
+};
+
+exports.tryRemoveSetting = function removeSettings(name, values) {
+    if (values[name]) {
+        values.remove(name);
+        return true;
+    }
+    return false;
 };
 
 exports.readSetting = function readSetting(name) {
@@ -329,3 +338,5 @@ exports.allowPlatformToMutateOriginal = function (original, updated) {
 
     return original;
 };
+
+exports.Push = Push;

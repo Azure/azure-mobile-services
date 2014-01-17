@@ -52,6 +52,10 @@ function MobileServiceClient(applicationUrl, applicationKey) {
         Validate.notNullOrEmpty(tableName, 'tableName');
         return new MobileServiceTable(tableName, this);
     };
+    
+    if (Platform.Push) {
+        this.push = new Platform.Push(this);
+    }
 }
 
 // Export the MobileServiceClient class
