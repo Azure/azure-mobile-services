@@ -2,10 +2,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
+using System.Threading.Tasks;
+
 namespace Microsoft.WindowsAzure.MobileServices
 {
-    using System.Threading.Tasks;
-
     /// <summary>
     /// Extension methods for UI-based login.
     /// </summary>

@@ -201,7 +201,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                                                         IDictionary<string, string> requestHeaders = null)
         {
             Debug.Assert(method != null);
-            Debug.Assert(!string.IsNullOrWhiteSpace(uriPathAndQuery));
+            Debug.Assert(!string.IsNullOrEmpty(uriPathAndQuery));
 
             // Create the request
             HttpContent httpContent = CreateHttpContent(content);
@@ -256,7 +256,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public async Task<HttpResponseMessage> RequestAsync(HttpMethod method, string uriPathAndQuery, HttpContent content, IDictionary<string, string> requestHeaders)
         {
             Debug.Assert(method != null);
-            Debug.Assert(!string.IsNullOrWhiteSpace(uriPathAndQuery));
+            Debug.Assert(!string.IsNullOrEmpty(uriPathAndQuery));
 
             // Create the request
             HttpRequestMessage request = this.CreateHttpRequestMessage(method, uriPathAndQuery, requestHeaders, content);
@@ -457,7 +457,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         private HttpRequestMessage CreateHttpRequestMessage(HttpMethod method, string uriPathAndQuery, IDictionary<string, string> requestHeaders, HttpContent content)
         {
             Debug.Assert(method != null);
-            Debug.Assert(!string.IsNullOrWhiteSpace(uriPathAndQuery));
+            Debug.Assert(!string.IsNullOrEmpty(uriPathAndQuery));
 
             HttpRequestMessage request = new HttpRequestMessage();
 
@@ -476,13 +476,13 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             // Set Mobile Services authentication, application, and telemetry headers
             request.Headers.Add(RequestInstallationIdHeader, client.applicationInstallationId);
-            if (!string.IsNullOrWhiteSpace(client.ApplicationKey))
+            if (!string.IsNullOrEmpty(client.ApplicationKey))
             {
                 request.Headers.Add(RequestApplicationKeyHeader, client.ApplicationKey);
             }
 
-            if (client.CurrentUser != null && 
-                !string.IsNullOrWhiteSpace(client.CurrentUser.MobileServiceAuthenticationToken))
+            if (client.CurrentUser != null &&
+                !string.IsNullOrEmpty(client.CurrentUser.MobileServiceAuthenticationToken))
             {
                 request.Headers.Add(RequestAuthenticationHeader, client.CurrentUser.MobileServiceAuthenticationToken);
             }

@@ -78,9 +78,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public static string CombinePathAndQuery(string path, string queryString)
         {
-            Debug.Assert(!string.IsNullOrWhiteSpace(path));
+            Debug.Assert(!string.IsNullOrEmpty(path));
 
-            if (!string.IsNullOrWhiteSpace(queryString))
+            if (!string.IsNullOrEmpty(queryString))
             {
                 path = string.Format(CultureInfo.InvariantCulture, "{0}?{1}", path,queryString.TrimStart('?'));
             }

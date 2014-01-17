@@ -219,7 +219,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             if (this.CamelCasePropertyNames)
             {
-                if (!string.IsNullOrWhiteSpace(propertyName) && char.IsUpper(propertyName[0]))
+                if (!string.IsNullOrEmpty(propertyName) && char.IsUpper(propertyName[0]))
                 {
                     string original = propertyName;
                     propertyName = char.ToLower(propertyName[0]).ToString();
