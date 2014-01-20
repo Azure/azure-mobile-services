@@ -190,6 +190,7 @@
     <Content Include="MobileServiceTable.js" />
     <Content Include="Platforms\Platform.Web.js" />
     <Content Include="Platforms\Platform.WinJS.js" />
+    <Content Include="Push\Push.js" />
     <Content Include="Transports\IframeTransport.js" />
     <Content Include="Transports\DirectAjaxTransport.js" />
     <Content Include="Utilities\Extensions.js" />
