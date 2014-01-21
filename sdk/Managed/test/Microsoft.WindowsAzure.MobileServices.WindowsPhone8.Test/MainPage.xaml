@@ -81,6 +81,9 @@
                 <Button x:Name="GoogleButton"
                         Content="Google" 
                         Click="LoginButtonClicked"/>
+                <Button x:Name="AzureActiveDirectoryButton"
+                        Content="Windows Azure Active Directory" 
+                        Click="LoginButtonClicked"/>
                 <CheckBox x:Name="UseProviderStringOverloadCheckBox"
                           Content="Use overload with string provider"
                           IsChecked="false"/>
