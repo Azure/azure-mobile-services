@@ -323,11 +323,6 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("token");
             }
 
-            if (!Enum.IsDefined(typeof(MobileServiceAuthenticationProvider), provider))
-            {
-                throw new ArgumentOutOfRangeException("provider");
-            }
-
             MobileServiceTokenAuthentication auth = new MobileServiceTokenAuthentication(this, provider, token);
             return auth.LoginAsync();
         }
