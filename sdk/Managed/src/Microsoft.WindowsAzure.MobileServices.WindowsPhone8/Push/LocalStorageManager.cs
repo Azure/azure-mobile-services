@@ -162,7 +162,6 @@ namespace Microsoft.WindowsAzure.MobileServices
 
                 SetContent(this.storageValues, this.keyNameForRegistrations, str);
                 IsolatedStorageSettings.ApplicationSettings.Save();
-
             }
         }
 

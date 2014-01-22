@@ -61,7 +61,6 @@
       <Link>ExpressionUtility\VisitorHelper.cs</Link>
     </Compile>
     <Compile Include="Push\ConcurrentDictionary.cs" />
-    <Compile Include="Push\IStaticLocalStorage.cs" />
     <Compile Include="Push\LocalStorageManager.cs" />
     <Compile Include="Push\Push.cs" />
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\PushHttpClient.cs">
@@ -75,8 +74,6 @@
       <Link>Push\StoredRegistrationEntry.cs</Link>
     </Compile>
     <Compile Include="Push\TemplateRegistration.cs" />
-    <Compile Include="Push\MpnsHeaderCollection.cs" />
-    <Compile Include="Push\XElementHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.Mobile.csproj">

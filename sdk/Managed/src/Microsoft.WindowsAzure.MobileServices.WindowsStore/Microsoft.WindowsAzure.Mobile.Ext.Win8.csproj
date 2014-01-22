@@ -50,7 +50,6 @@
     <Compile Include="Authentication\AuthenticationBroker.cs" />
     <Compile Include="Platform\PlatformInformation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Push\IStaticLocalStorage.cs" />
     <Compile Include="Push\LocalStorageManager.cs" />
     <Compile Include="Push\Push.cs" />
     <Compile Include="Push\PushHttpClient.cs" />
@@ -58,7 +57,6 @@
     <Compile Include="Push\RegistrationManager.cs" />
     <Compile Include="Push\StoredRegistrationEntry.cs" />
     <Compile Include="Push\TemplateRegistration.cs" />
-    <Compile Include="Push\WnsHeaderCollection.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.Mobile.csproj">

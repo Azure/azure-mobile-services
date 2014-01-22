@@ -91,7 +91,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             this.TemplateName = templateName;
 
-            this.MpnsHeaders = new MpnsHeaderCollection();
+            this.MpnsHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             if (additionalHeaders != null)
             {
                 foreach (var item in additionalHeaders)
@@ -107,19 +107,19 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Gets headers that should be sent to WNS with the notification
         /// </summary>
-        [JsonProperty(PropertyName = "mpnsheaders")]
-        public MpnsHeaderCollection MpnsHeaders { get; private set; }
+        [JsonProperty(PropertyName = "headers")]
+        public IDictionary<string, string> MpnsHeaders { get; private set; }
 
         /// <summary>
         /// Get templateName
         /// </summary>
-        [JsonProperty(PropertyName = "templatename")]
+        [JsonProperty(PropertyName = "templateName")]
         public string TemplateName { get; private set; }
 
         /// <summary>
         /// Gets or sets bodyTemplate as string
         /// </summary>
-        [JsonProperty(PropertyName = "bodytemplate")]
+        [JsonProperty(PropertyName = "templateBody")]
         public string BodyTemplate { get; private set; }
 
         private void DetectBodyType()

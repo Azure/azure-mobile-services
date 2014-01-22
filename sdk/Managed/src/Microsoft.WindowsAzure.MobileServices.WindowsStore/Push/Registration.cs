@@ -35,8 +35,6 @@ namespace Microsoft.WindowsAzure.MobileServices
     [JsonObject(MemberSerialization.OptIn)]
     public class Registration
     {
-        private HashSet<string> tags = new HashSet<string>();
-
         internal const string NativeRegistrationName = "$Default";
 
         internal Registration()
@@ -48,13 +46,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="channelUri">The channel uri</param>
         public Registration(string channelUri)
-        {
-            if (string.IsNullOrWhiteSpace(channelUri))
-            {
-                throw new ArgumentNullException("channelUri");
-            }
-
-            this.ChannelUri = channelUri;
+            : this(channelUri, null)
+        {            
         }
 
         /// <summary>
@@ -63,12 +56,15 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="channelUri">The channel uri</param>
         /// <param name="tags">The tags to register to receive notifications from</param>
         public Registration(string channelUri, IEnumerable<string> tags)
-            : this(channelUri)
         {
-            if (tags != null)
+            if (string.IsNullOrWhiteSpace(channelUri))
             {
-                this.Tags = new HashSet<string>(tags);
+                throw new ArgumentNullException("channelUri");
             }
+
+            this.ChannelUri = channelUri;
+
+            this.Tags = tags != null ? new HashSet<string>(tags) : new HashSet<string>();
         }
 
         [JsonProperty(PropertyName = "platform")]
@@ -80,56 +76,23 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
-        [JsonProperty(PropertyName = "tags")]
-        internal string TagsString
-        {
-            get
-            {
-                if (this.tags != null)
-                {
-                    return this.tags.Count > 0 ? string.Join(",", this.tags) : null;
-                }
-
-                return string.Empty;
-            }
-            set
-            {
-                this.tags = value != null ? new HashSet<string>(value.Split(',')) : new HashSet<string>();
-            }
-        }
-
         /// <summary>
         /// If specified, restricts the notifications that the registration will receive to only those that
         /// are annotated with one of the specified tags.
         /// </summary>
-        public ISet<string> Tags
-        {
-            get
-            {
-                return this.tags;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    this.TagsString = null;
-                    return;
-                }
-
-                this.TagsString = string.Join(",", value);
-            }
-        }
+        [JsonProperty(PropertyName = "tags")]
+        public ISet<string> Tags { get; set; }        
 
         /// <summary>
         /// The Uri of the Channel returned by the Push Notification Channel Manager.
         /// </summary>
-        [JsonProperty(PropertyName = "channelUri")]
+        [JsonProperty(PropertyName = "deviceId")]
         public string ChannelUri { get; set; }
 
         /// <summary>
         /// The registration id.
         /// </summary>
-        [JsonProperty]
+        [JsonProperty(PropertyName = "registrationId")]
         public string RegistrationId { get; internal set; }
 
         /// <summary>

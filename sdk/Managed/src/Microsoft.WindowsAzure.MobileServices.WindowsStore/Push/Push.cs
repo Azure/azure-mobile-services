@@ -206,26 +206,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Unregister for notifications
-        /// </summary>
-        /// <param name="registration">The object defining the registration</param>
-        /// <returns>Task that will complete when the unregister is completed</returns>
-        public Task UnregisterAsync(Registration registration)
-        {
-            if (registration == null)
-            {
-                throw new ArgumentNullException("registration");
-            }
-
-            if (string.IsNullOrWhiteSpace(registration.ChannelUri))
-            {
-                throw new ArgumentNullException("registration.ChannelUri");
-            }
-
-            return this.registrationManager.UnregisterAsync(registration.Name);
-        }
-
-        /// <summary>
         /// Collection of Push objects for secondary tiles
         /// </summary>
         private class SecondaryTilesList : IDictionary<string, Push>
