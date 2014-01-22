@@ -4,10 +4,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.ServiceModel.Security;
 
 using Windows.Data.Xml.Dom;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Schema;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -54,26 +57,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         public TemplateRegistration(string channelUri, string bodyTemplate, string templateName, IEnumerable<string> tags, IEnumerable<KeyValuePair<string, string>> additionalHeaders)
             : base(channelUri, tags)
         {
-            if (string.IsNullOrWhiteSpace(templateName))
-            {
-                throw new ArgumentNullException("templateName");
-            }
-
-            if (string.IsNullOrWhiteSpace(bodyTemplate))
-            {
-                throw new ArgumentNullException("bodyTemplate");
-            }
-
-            if (templateName.Equals(Registration.NativeRegistrationName))
-            {
-                throw new ArgumentException(Resources.ConflictWithReservedName);
-            }
-
-            if (templateName.Contains(":") || templateName.Contains(";"))
-            {
-                throw new ArgumentException(Resources.InvalidTemplateName);
-            }
-
             this.TemplateName = templateName;
 
             this.WnsHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -88,6 +71,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.BodyTemplate = bodyTemplate;
 
             // We only support xml as bodyTemplate even for wns/raw
+            // TODO: Double check we are validating correctly
             if (!this.WnsHeaders.ContainsKey(WnsTypeName))
             {
                 XmlDocument xmlDocument = new XmlDocument();
@@ -97,6 +81,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
                 catch (Exception e)
                 {
+                    // TODO: Resource
                     throw new ArgumentException("Cannot autodetect X-WNS type from bodyTemplate: provide a body template with a valid toast/tile/badge content or specify a X-WNS-Type header.", e);
                 }
 
@@ -107,6 +92,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
                 else
                 {
+                    // TODO: Resource
                     throw new ArgumentException("Cannot autodetect X-WNS type from bodyTemplate: provide a body template with a valid toast/tile/badge content or specify a X-WNS-Type header.");
                 }
             }
@@ -122,13 +108,13 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Get templateName
         /// </summary>
         [JsonProperty(PropertyName = "templateName")]
-        public string TemplateName { get; private set; }
+        public string TemplateName { get; set; }
 
         /// <summary>
         /// Gets bodyTemplate as string
         /// </summary>
         [JsonProperty(PropertyName = "templateBody")]
-        public string BodyTemplate { get; private set; }
+        public string BodyTemplate { get; set; }
 
         private static string DetectBodyType(XmlDocument template)
         {
@@ -136,6 +122,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             if (template.FirstChild == null ||
                 !Enum.TryParse(template.FirstChild.NodeName, true, out registrationType))
             {
+                // First node of the body template should be toast/tile/badge
                 throw new ArgumentException(Resources.NotSupportedXMLFormatAsBodyTemplate);
             }
 
@@ -148,7 +135,32 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return this.TemplateName;
             }
-        }   
+        }
+
+        internal override void Validate()
+        {
+            base.Validate();
+
+            if (string.IsNullOrWhiteSpace(this.TemplateName))
+            {
+                throw new ArgumentNullException("templateName");
+            }
+
+            if (string.IsNullOrWhiteSpace(this.BodyTemplate))
+            {
+                throw new ArgumentNullException("bodyTemplate");
+            }
+
+            if (this.TemplateName.Equals(Registration.NativeRegistrationName))
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Resources.ConflictWithReservedName, Registration.NativeRegistrationName));
+            }
+
+            if (this.TemplateName.Contains(":") || this.TemplateName.Contains(";"))
+            {
+                throw new ArgumentException(Resources.InvalidTemplateName);
+            }            
+        }
     }
 
     enum TemplateRegistrationType

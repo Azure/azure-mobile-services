@@ -62,7 +62,7 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Template name is conflict with reserved name..
+        ///   Looks up a localized string similar to Template name conflicts with reserved name &apos;{0}&apos;..
         /// </summary>
         internal static string ConflictWithReservedName {
             get {

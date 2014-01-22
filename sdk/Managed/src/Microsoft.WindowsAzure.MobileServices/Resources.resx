@@ -271,7 +271,7 @@
     <value>Failed to incrementally load more items of type '{0}'. See the inner exception for details.</value>
   </data>
   <data name="ConflictWithReservedName" xml:space="preserve">
-    <value>Template name is conflict with reserved name.</value>
+    <value>Template name conflicts with reserved name '{0}'.</value>
   </data>
   <data name="InvalidTemplateName" xml:space="preserve">
     <value>Template name can't contain ";" or ":".</value>

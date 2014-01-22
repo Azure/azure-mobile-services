@@ -34,6 +34,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns></returns>
         public async Task RegisterAsync<T>(T registration) where T : Registration
         {
+            registration.Validate();
+
             // if localStorage is empty or has different storage version, we need retrieve registrations and refresh local storage
             if (this.localStorageManager.IsRefreshNeeded)
             {
@@ -60,13 +62,14 @@ namespace Microsoft.WindowsAzure.MobileServices
             catch (MobileServiceInvalidOperationException e)
             {
                 // if we get an RegistrationGoneException (410) from service, we will recreate registration id and will try to do upsert one more time.
+                // The likely cause of this is an expired registration in local storage due to a long unused app.
                 if (e.Response.StatusCode != HttpStatusCode.Gone)
                 {
                     throw;                    
                 }
             }
 
-            // recreate registration id.
+            // recreate registration id if we encountered a previously expired registrationId
             await this.CreateRegistrationIdAsync(registration);
             await this.UpsertRegistration(registration);
         }
@@ -96,7 +99,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             await this.pushHttpClient.UnregisterAsync(cached.RegistrationId);
-            this.localStorageManager.DeleteRegistration(registrationName);            
+            this.localStorageManager.DeleteRegistrationByName(registrationName);            
         }
 
         public async Task DeleteRegistrationsForChannelAsync(string channelUri)
@@ -105,6 +108,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             foreach (var registration in registrations)
             {
                 await this.pushHttpClient.UnregisterAsync(registration.RegistrationId);
+                this.localStorageManager.DeleteRegistrationByRegistrationId(registration);
             }
 
             // clear local storage
@@ -114,14 +118,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         async Task<Registration> CreateRegistrationIdAsync(Registration registration)
         {
             registration.RegistrationId = await this.pushHttpClient.CreateRegistrationIdAsync();
-            this.localStorageManager.UpdateRegistrationByRegistrationName(registration.Name, registration);
+            this.localStorageManager.UpdateRegistrationByName(registration.Name, registration);
             return registration;            
         }
 
         async Task UpsertRegistration<T>(T registration) where T : Registration
         {
             await this.pushHttpClient.CreateOrUpdateRegistrationAsync(registration);
-            this.localStorageManager.UpdateRegistrationByRegistrationName(registration.Name, registration);            
+            this.localStorageManager.UpdateRegistrationByName(registration.Name, registration);            
         }
     }
 }

@@ -133,5 +133,25 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return this.registrationManager.DeleteRegistrationsForChannelAsync(channelUri);
         }
+
+        /// <summary>
+        /// Register for notifications
+        /// </summary>
+        /// <param name="registration">The object defining the registration</param>
+        /// <returns>Task that will complete when the registration is completed</returns>
+        public Task RegisterAsync(Registration registration)
+        {
+            if (registration == null)
+            {
+                throw new ArgumentNullException("registration");
+            }
+
+            if (string.IsNullOrWhiteSpace(registration.ChannelUri))
+            {
+                throw new ArgumentNullException("registration.ChannelUri");
+            }
+
+            return this.registrationManager.RegisterAsync(registration);
+        }
     }
 }

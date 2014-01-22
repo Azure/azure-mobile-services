@@ -160,18 +160,25 @@ namespace Microsoft.WindowsAzure.MobileServices
             if (string.Equals(body.Name.Namespace.NamespaceName, NamespaceName, StringComparison.OrdinalIgnoreCase) &&
                 Enum.TryParse(body.Name.LocalName, true, out registrationType))
             {
+                string notificationClass;
                 switch (registrationType)
-                {
+                {                        
                     case TemplateRegistrationType.Toast:
                         this.MpnsHeaders.Add(NotificationType, Toast);
-                        this.MpnsHeaders.Add(NotificationClass, ToastClass);
+                        notificationClass = ToastClass;                        
                         break;
                     case TemplateRegistrationType.Tile:
                         this.MpnsHeaders.Add(NotificationType, Tile);
+                        notificationClass = TileClass;
                         this.MpnsHeaders.Add(NotificationClass, TileClass);
                         break;
                     default:
                         throw new NotSupportedException(registrationType.ToString());
+                }
+
+                if (!this.MpnsHeaders.ContainsKey(NotificationClass))
+                {
+                    this.MpnsHeaders.Add(NotificationClass, notificationClass);
                 }
             }
             else

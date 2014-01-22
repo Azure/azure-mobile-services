@@ -79,7 +79,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             return null;
         }
 
-        public bool DeleteRegistration(string registrationName)
+        public bool DeleteRegistrationByName(string registrationName)
         {
             StoredRegistrationEntry reg;
             if (this.registrations.TryRemove(registrationName, out reg))
@@ -91,7 +91,18 @@ namespace Microsoft.WindowsAzure.MobileServices
             return false;
         }
 
-        public void UpdateRegistrationByRegistrationName<T>(string registrationName, T registration) where T : Registration
+        public bool DeleteRegistrationByRegistrationId(Registration registration)
+        {
+            var found = registrations.FirstOrDefault(v => v.Value.RegistrationId.Equals(registration.RegistrationId));
+            if (!found.Equals(default(KeyValuePair<string, StoredRegistrationEntry>)))
+            {
+                return this.DeleteRegistrationByName(found.Key);                
+            }
+
+            return false;
+        }
+
+        public void UpdateRegistrationByName<T>(string registrationName, T registration) where T : Registration
         {
             StoredRegistrationEntry cacheReg = new StoredRegistrationEntry(registrationName, registration.RegistrationId);
             this.registrations.AddOrUpdate(registrationName, cacheReg, (key, oldValue) => cacheReg);
@@ -106,11 +117,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             var found = registrations.FirstOrDefault(v => v.Value.RegistrationId.Equals(registration.RegistrationId));
             if (!found.Equals(default(KeyValuePair<string, StoredRegistrationEntry>)))
             {
-                this.UpdateRegistrationByRegistrationName(found.Key, registration);
+                this.UpdateRegistrationByName(found.Key, registration);
             }
             else
             {
-                this.UpdateRegistrationByRegistrationName(registration.Name, registration);
+                this.UpdateRegistrationByName(registration.Name, registration);
             }
         }
 

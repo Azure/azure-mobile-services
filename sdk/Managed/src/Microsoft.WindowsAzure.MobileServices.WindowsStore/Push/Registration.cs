@@ -4,30 +4,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 
 using Newtonsoft.Json;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
-    // {
-    // platform: "wns" // {"wns"|"mpns"|"apns"|"gcm"}
-    // channelUri: "" // if wns or mpns
-    // deviceToken: "" // if apns
-    // gcmRegistrationId: "" // if gcm
-    // tags: "tag"|["a","b"] // non-empty string or array of tags (optional)
-    // bodyTemplate: '<toast>
-    //      <visual lang="en-US">
-    //        <binding template="ToastText01">
-    //          <text id="1">$(myTextProp1)</text>
-    //        </binding>
-    //      </visual>
-    //    </toast>' // if template registration
-    // templateName: "" // if template registration
-    // wnsHeaders: { // if wns template registration }
-    // mpnsHeaders: { // if mpns template //}
-    // expiry: "" // if apns template//
-    // }
     /// <summary>
     /// Registration is used to define a target that is registered for notifications
     /// </summary>
@@ -56,15 +39,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="channelUri">The channel uri</param>
         /// <param name="tags">The tags to register to receive notifications from</param>
         public Registration(string channelUri, IEnumerable<string> tags)
-        {
-            if (string.IsNullOrWhiteSpace(channelUri))
-            {
-                throw new ArgumentNullException("channelUri");
-            }
-
+        {            
             this.ChannelUri = channelUri;
 
             this.Tags = tags != null ? new HashSet<string>(tags) : new HashSet<string>();
+
+            this.Validate();
         }
 
         [JsonProperty(PropertyName = "platform")]
@@ -106,6 +86,35 @@ namespace Microsoft.WindowsAzure.MobileServices
             get
             {
                 return NativeRegistrationName;
+            }
+        }
+
+        internal virtual void Validate()
+        {
+            if (string.IsNullOrWhiteSpace(this.ChannelUri))
+            {
+                throw new ArgumentNullException("channelUri");
+            }
+
+            if (this.Tags != null)
+            {
+                if (this.Tags.Any(s => s.Contains(",")))
+                {
+                    // TODO: Resource
+                    throw new InvalidDataContractException("Tags must not contain ','.");
+                }
+            }
+
+            if (this.Name.Contains(":"))
+            {
+                // TODO: Resource
+                throw new ArgumentException("Name must not contain a ':'.");
+            }
+
+            if (this.Name.Contains(";"))
+            {
+                // TODO: Resource
+                throw new ArgumentException("Name must not contain a ';'.");
             }
         }
     }
