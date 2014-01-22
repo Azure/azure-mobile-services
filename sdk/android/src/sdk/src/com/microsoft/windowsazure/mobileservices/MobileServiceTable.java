@@ -25,6 +25,7 @@ package com.microsoft.windowsazure.mobileservices;
 
 import java.lang.reflect.Field;
 import java.security.InvalidParameterException;
+import java.util.EnumSet;
 import java.util.List;
 
 import android.util.Pair;
@@ -85,8 +86,7 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 		}
 
 		@Override
-		public void onCompleted(JsonObject jsonEntity, Exception exception,
-				ServiceFilterResponse response) {
+		public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
 			if (exception == null && jsonEntity != null) {
 				E entity = null;
 				Exception ex = null;
@@ -102,6 +102,23 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 
 				if (mCallback != null)
 					mCallback.onCompleted(entity, ex, response);
+			} else if (exception instanceof MobileServicePreconditionFailedException) {
+				MobileServicePreconditionFailedExceptionBase ex = (MobileServicePreconditionFailedExceptionBase)exception;
+				
+				E entity = null;
+				
+				try {
+					entity = parseResults(ex.getValue()).get(0);
+					
+					if (entity != null && mOriginalEntity != null) {
+						copyFields(entity, mOriginalEntity);
+						entity = mOriginalEntity;
+					}
+				} catch (Exception e) {
+				}
+				
+				if (mCallback != null)
+					mCallback.onCompleted(null, new MobileServicePreconditionFailedException(ex, entity), response);					
 			} else {
 				if (mCallback != null)
 					mCallback.onCompleted(null, exception, response);
@@ -124,6 +141,15 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 		initialize(name, client);
 		mInternalTable = new MobileServiceJsonTable(name, client);
 		mClazz = clazz;
+	}
+	
+	public EnumSet<MobileServiceSystemProperty> getSystemProperties() {
+		return mInternalTable.getSystemProperties();
+	}
+
+	public void setSystemProperties(EnumSet<MobileServiceSystemProperty> systemProperties) {
+		this.mSystemProperties = systemProperties;
+		this.mInternalTable.setSystemProperties(systemProperties);
 	}
 
 	/**
@@ -214,6 +240,16 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 			}
 
 			return;
+		}
+		
+		String idProperty = hasIdProperty(json);
+		
+		if (idProperty != null) {
+			JsonElement idElement = json.get(idProperty);
+			
+			if (!isNumericType(idElement) && !idElement.isJsonNull()) {
+				json = removeSystemProperties(json);
+			}
 		}
 
 		mInternalTable.insert(json, parameters, new ParseResultOperationCallback(callback,

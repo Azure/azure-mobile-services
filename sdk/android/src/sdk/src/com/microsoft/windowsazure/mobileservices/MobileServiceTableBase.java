@@ -22,8 +22,12 @@ package com.microsoft.windowsazure.mobileservices;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.http.client.methods.HttpDelete;
 
@@ -42,6 +46,21 @@ abstract class MobileServiceTableBase<E> {
 	 * Tables URI part
 	 */
 	public static final String TABLES_URL = "tables/";
+	
+	/**
+	 * The string prefix used to indicate system properties
+	 */
+	protected static final String SystemPropertyPrefix = "__";
+	
+	/**
+	 * The name of the _system query string parameter
+	 */
+    protected static final String SystemPropertiesQueryParameterName = "__systemproperties";
+    
+    /**
+	 * The version system property as a string with the prefix.
+	 */
+    protected static final String VersionSystemPropertyString = String.format("{0}{1}", SystemPropertyPrefix, MobileServiceSystemProperty.Version.toString()).toLowerCase(Locale.getDefault());
 
 	/**
 	 * The MobileServiceClient used to invoke table operations
@@ -52,6 +71,11 @@ abstract class MobileServiceTableBase<E> {
 	 * The name of the represented table
 	 */
 	protected String mTableName;
+	
+	/**
+	 * The Mobile Service system properties to be included with items.
+	 */ 
+	protected EnumSet<MobileServiceSystemProperty> mSystemProperties;
 
 	protected void initialize(String name, MobileServiceClient client) {
 		if (name == null || name.toString().trim().length() == 0) {
@@ -83,6 +107,14 @@ abstract class MobileServiceTableBase<E> {
 	 */
 	public String getTableName() {
 		return mTableName;
+	}
+	
+	public EnumSet<MobileServiceSystemProperty> getSystemProperties() {
+		return mSystemProperties;
+	}
+
+	public void setSystemProperties(EnumSet<MobileServiceSystemProperty> systemProperties) {
+		this.mSystemProperties = systemProperties;
 	}
 
 	/**
@@ -229,12 +261,15 @@ abstract class MobileServiceTableBase<E> {
 			uriBuilder.path(TABLES_URL);
 			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
 			uriBuilder.appendPath(getObjectId(elementOrId).toString());
+			
+			parameters = addSystemProperties(mSystemProperties, parameters);
 
 			if (parameters != null && parameters.size() > 0) {
 				for (Pair<String, String> parameter : parameters) {
 					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
 				}
 			}
+			
 			delete = new ServiceFilterRequestImpl(new HttpDelete(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());			
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
@@ -398,7 +433,7 @@ abstract class MobileServiceTableBase<E> {
 	 * 
 	 * @param element The JsonObject to validate
 	 */
-	protected void validateId(final JsonObject element) {
+	protected Object validateId(final JsonObject element) {
 		if (element == null) {
 			throw new IllegalArgumentException("The entity cannot be null.");			
 		} else {
@@ -413,19 +448,40 @@ abstract class MobileServiceTableBase<E> {
 					if (!isValidStringId(id) || isDefaultStringId(id)) {
 						throw new IllegalArgumentException("The entity has an invalid string value on id property.");
 					}
+					
+					return id;
 				} else if (isNumericType(idElement)) {
 					long id = getNumericValue(idElement);
 					
 					if (!isValidNumericId(id) || isDefaultNumericId(id)) {
 						throw new IllegalArgumentException("The entity has an invalid numeric value on id property.");
 					}
-				} else {
+					
+					return id;
+				} else if (idElement.isJsonNull()) {
+					throw new IllegalArgumentException("The entity must have a valid numeric or string id property.");
+				}
+				else {
 					throw new IllegalArgumentException("The entity must have a valid numeric or string id property.");
 				}
 			} else {
 				throw new IllegalArgumentException("You must specify an id property with a valid numeric or string value.");
 			}
 		}
+	}
+	
+	protected String hasIdProperty(JsonObject json) {
+		String[] idPropertyNames = new String[] { "id", "Id", "iD", "ID" };
+		
+		for (int i = 0; i < idPropertyNames.length; i++) {
+			String idProperty = idPropertyNames[i];
+			
+			if (json.has(idProperty)) {
+				return idProperty;
+			}
+		}
+		
+		return null;
 	}
 	
 	/**
@@ -637,4 +693,155 @@ abstract class MobileServiceTableBase<E> {
 	protected boolean isDefaultNumericId(long id) {
 		return (id == 0);
 	}
+
+	/**
+	 * Adds the tables requested system properties to the parameters collection.
+	 * @param	systemProperties	The system properties to add.
+	 * @param	parameters			The parameters collection.
+	 * @return						The parameters collection with any requested system properties included.
+	 */ 
+	protected List<Pair<String, String>> addSystemProperties(EnumSet<MobileServiceSystemProperty> systemProperties, List<Pair<String, String>> parameters) {
+		boolean containsSystemProperties = false;
+		
+		List<Pair<String,String>> result = new  ArrayList<Pair<String,String>>(parameters.size());
+		
+		// Make sure we have a case-insensitive parameters list
+        if (parameters != null) {
+        	for (Pair<String,String> parameter : parameters) {
+        		result.add(parameter);
+        		containsSystemProperties = containsSystemProperties || parameter.first.equalsIgnoreCase(SystemPropertiesQueryParameterName);
+        	}
+        }
+
+        // If there is already a user parameter for the system properties, just use it
+        if (!containsSystemProperties) {
+            String systemPropertiesString = GetSystemPropertiesString(systemProperties);
+            
+            if (systemPropertiesString != null) {
+                result.add(new Pair<String,String>(SystemPropertiesQueryParameterName,systemPropertiesString));
+            }
+        }
+
+        return result;
+    }
+	
+    /**
+	 * Removes all system properties (name start with '__') from the instance if the instance is determined to have a string id and 
+	 * therefore be for table that supports system properties.
+	 * @param	instance	The instance to remove the system properties from.
+	 * @param	version		Set to the value of the version system property before it is removed.
+	 * @return				The instance with the system properties removed.
+	 */
+    protected JsonObject removeSystemProperties(JsonObject instance)
+    {
+        boolean haveCloned = false;
+        
+        for (Entry<String,JsonElement> property : instance.entrySet()) {
+            if (property.getKey().startsWith(SystemPropertyPrefix)) {
+                // We don't want to alter the original jtoken passed in by the caller
+                // so if we find a system property to remove, we have to clone first
+                if (!haveCloned) {
+                    instance = (JsonObject) new JsonParser().parse(instance.toString());
+                    haveCloned = true;
+                }
+
+                instance.remove(property.getKey());
+            }
+        }
+
+        return instance;
+    }
+    
+    /**
+	 * Gets the version system property.
+	 * @param	instance	The instance to remove the system properties from.
+	 * @return				The value of the version system property or null if none present.
+	 */
+    protected String getVersionSystemProperty(JsonObject instance)
+    {
+        String version = null;
+        
+        for (Entry<String,JsonElement> property : instance.entrySet()) {
+            if (property.getKey().equalsIgnoreCase(VersionSystemPropertyString)) {
+                version = property.getValue().getAsString();
+            }
+        }
+
+        return version;
+    }
+    
+    /**
+	 * Gets a valid etag from a string value. Etags are surrounded by double quotes and any internal quotes 
+	 * must be escaped with a '\'.
+	 * @param	value	The value to create the etag from.
+	 * @return			The etag.
+	 */
+    protected String getEtagFromValue(String value) {
+        // If the value has double quotes, they will need to be escaped.
+        for (int i = 0; i < value.length(); i++) {
+            if (value.charAt(i) == '"') {
+            	if (i == 0) {
+            		value = String.format("{0}{1}", "\\", value);
+            	} else if (value.charAt(i - 1) != '\\') {
+            		value = String.format("{0}{1}{2}", value.substring(0, i), "\\", value.substring(i));
+            	}
+            }
+        }
+
+        // All etags are quoted;
+        return String.format("\"{0}\"", value);
+    }
+
+    /**
+	 * Gets a value from an etag. Etags are surrounded by double quotes and any internal quotes 
+	 * must be escaped with a '\'.
+	 * @param	etag	The etag to get the value from.
+	 * @return			The value.
+	 */
+    protected String getValueFromEtag(String etag) {
+        int length = etag.length();
+        
+        if (length > 1 && etag.charAt(0) == '\"' && etag.charAt(length - 1) == '\"') {
+            etag = etag.substring(1, length - 2);
+        }
+
+        return etag.replace("\\\"", "\"");
+    }
+	
+	/**
+	 * Gets the system properties header value from the MobileServiceSystemProperties.
+	 * @param	properties	The system properties to set in the system properties header.
+	 * @return				The system properties header value. Returns null if properties is null or empty.
+	 */
+    private String GetSystemPropertiesString(EnumSet<MobileServiceSystemProperty> properties) {
+        if (properties == null || properties.isEmpty()) {
+            return null;
+        }
+        
+        if (properties.containsAll(EnumSet.allOf(MobileServiceSystemProperty.class))) {
+            return "*";
+        }
+        
+        StringBuilder sb = new StringBuilder();
+        
+        int i = 0;
+
+        for (MobileServiceSystemProperty systemProperty : properties) {
+            String property = systemProperty.toString().trim();
+            
+            char firstLetterAsLower = property.charAt(0);
+            
+            sb.append(SystemPropertyPrefix);
+            sb.append(firstLetterAsLower);
+            sb.append(property.substring(1));
+            
+            i++;
+            
+            if (i < properties.size()) {
+            	sb.append(",");
+            }
+        }
+
+        return sb.toString();
+    }
 }

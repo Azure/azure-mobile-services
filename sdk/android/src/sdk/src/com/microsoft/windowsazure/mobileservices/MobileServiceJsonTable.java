@@ -24,6 +24,7 @@ import java.net.URLEncoder;
 import java.security.InvalidParameterException;
 import java.util.List;
 
+import org.apache.http.Header;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.protocol.HTTP;
@@ -76,6 +77,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 				url += "?$filter=" + filtersUrl + query.getRowSetModifiers();
 			} else {
 				String rowSetModifiers = query.getRowSetModifiers();
+				
 				if (rowSetModifiers.length() > 0) {
 					url += "?" + query.getRowSetModifiers().substring(1);
 				}
@@ -132,6 +134,8 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
 			uriBuilder.appendPath(URLEncoder.encode(id.toString(), MobileServiceClient.UTF8_ENCODING));
 			
+			parameters = addSystemProperties(mSystemProperties, parameters);
+			
 			if (parameters != null && parameters.size() > 0) {
 				for (Pair<String, String> parameter : parameters) {
 					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
@@ -155,12 +159,19 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 						if (results.isJsonArray()) { // empty result
 							callback.onCompleted(
 									null,
-									new MobileServiceException(
-											"A record with the specified Id cannot be found"),
-											response);
+									new MobileServiceException("A record with the specified Id cannot be found"),response);
 						} else { // Lookup result
-							callback.onCompleted(results.getAsJsonObject(),
-									exception, response);
+							JsonObject patchedJson = results.getAsJsonObject();
+							
+							for (Header header : response.getHeaders()) {
+								if (header.getName().equalsIgnoreCase("ETag")) {
+									patchedJson.remove(VersionSystemPropertyString);
+									patchedJson.addProperty(VersionSystemPropertyString, getValueFromEtag(header.getValue()));
+									break;
+								}
+							}
+							
+							callback.onCompleted(patchedJson, exception, response);
 						}
 					} else {
 						callback.onCompleted(null, exception, response);
@@ -213,6 +224,8 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
 			uriBuilder.path(TABLES_URL);
 			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
+			
+			parameters = addSystemProperties(mSystemProperties, parameters);
 
 			if (parameters != null && parameters.size() > 0) {
 				for (Pair<String, String> parameter : parameters) {
@@ -247,6 +260,14 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 					if (exception == null && jsonEntity != null) {
 						JsonObject patchedJson = patchOriginalEntityWithResponseEntity(
 								element, jsonEntity);
+						
+						for (Header header : response.getHeaders()) {
+							if (header.getName().equalsIgnoreCase("ETag")) {
+								patchedJson.remove(VersionSystemPropertyString);
+								patchedJson.addProperty(VersionSystemPropertyString, getValueFromEtag(header.getValue()));
+								break;
+							}
+						}
 
 						callback.onCompleted(patchedJson, exception, response);
 					} else {
@@ -280,9 +301,13 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
-	public void update(final JsonObject element, final List<Pair<String, String>> parameters, final TableJsonOperationCallback callback) {
+	public void update(final JsonObject element, List<Pair<String, String>> parameters, final TableJsonOperationCallback callback) {
+		Object id = null;		
+		String version = null;
+		String content = null;
+		
 		try {			
-			validateId(element);
+			id = validateId(element);
 		} catch (Exception e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
@@ -290,8 +315,13 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 			
 			return;
 		}
-
-		String content = element.toString();
+		
+		if (!isNumericType(id)) {
+			version = getVersionSystemProperty(element);
+			content = removeSystemProperties(element).toString();
+		} else {
+			content = element.toString();
+		}
 
 		ServiceFilterRequest patch;
 		
@@ -299,15 +329,22 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
 			uriBuilder.path(TABLES_URL);
 			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
-			uriBuilder.appendPath(getObjectId(element).toString());
+			uriBuilder.appendPath(id.toString());
+			
+			parameters = addSystemProperties(mSystemProperties, parameters);
 
 			if (parameters != null && parameters.size() > 0) {
 				for (Pair<String, String> parameter : parameters) {
 					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
 				}
 			}
+			
 			patch = new ServiceFilterRequestImpl(new HttpPatch(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());
 			patch.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);	
+			
+			if (version != null) {
+                patch.addHeader("If-Match", getEtagFromValue(version));
+            }
 		} catch (UnsupportedEncodingException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
@@ -335,7 +372,26 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 					if (exception == null && jsonEntity != null) {
 						JsonObject patchedJson = patchOriginalEntityWithResponseEntity(
 								element, jsonEntity);
+						
+						for (Header header : response.getHeaders()) {
+							if (header.getName().equalsIgnoreCase("ETag")) {
+								patchedJson.remove(VersionSystemPropertyString);
+								patchedJson.addProperty(VersionSystemPropertyString, getValueFromEtag(header.getValue()));
+								break;
+							}
+						}
+						
 						callback.onCompleted(patchedJson, exception, response);
+					} else if (exception != null && response != null && response.getStatus() != null && response.getStatus().getStatusCode() == 412) {
+						String content = response.getContent();
+						
+						JsonObject serverEntity = null;
+						
+						if (content != null) {
+							serverEntity = new JsonParser().parse(content).getAsJsonObject();
+						}
+						
+						callback.onCompleted(jsonEntity, new MobileServicePreconditionFailedExceptionBase(exception, serverEntity), response);
 					} else {
 						callback.onCompleted(jsonEntity, exception, response);
 					}
