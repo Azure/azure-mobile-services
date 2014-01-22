@@ -939,7 +939,7 @@
 {
     NSDate *timeoutAt = [NSDate dateWithTimeIntervalSinceNow:testDuration];
     while (!self.done) {
-        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
+        [[NSRunLoop currentRunLoop] runMode:NSRunLoopCommonModes
                                  beforeDate:timeoutAt];
         if([timeoutAt timeIntervalSinceNow] <= 0.0) {
             break;
