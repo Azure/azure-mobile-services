@@ -26,7 +26,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         public async Task<IEnumerable<Registration>> ListRegistrationsAsync(string channelUri)
         {
-            var response = await httpClient.RequestAsync(HttpMethod.Get, string.Format("/push/registrations?channelUri={0}&platform=wns", Uri.EscapeUriString(channelUri)));
+            var response = await httpClient.RequestAsync(HttpMethod.Get, string.Format("/push/registrations?deviceId={0}&platform=wns", Uri.EscapeUriString(channelUri)));
             var jsonRegistrations = JToken.Parse(response.Content) as JArray;
             return serializer.Deserialize<Registration>(jsonRegistrations);
         }
