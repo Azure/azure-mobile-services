@@ -512,7 +512,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns></returns>
         private string CreateAPIUriString(string apiName, IDictionary<string, string> parameters = null) {
             string uriFragment = string.Format(CultureInfo.InvariantCulture, "api/{0}", apiName);
-            string queryString = MobileServiceUrlBuilder.GetQueryString(parameters);
+            string queryString = MobileServiceUrlBuilder.GetQueryString(parameters, false);
             
             return MobileServiceUrlBuilder.CombinePathAndQuery(uriFragment, queryString);            
         }
