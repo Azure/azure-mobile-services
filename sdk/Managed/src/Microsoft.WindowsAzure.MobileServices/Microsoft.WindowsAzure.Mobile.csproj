@@ -71,8 +71,6 @@
     <Compile Include="Table\Serialization\CreatedAtAttribute.cs" />
     <Compile Include="Table\Serialization\VersionAttribute.cs" />
     <Compile Include="Table\Serialization\ISystemPropertyAttribute.cs" />
-    <Compile Include="Table\Storage\ITableStorage.cs" />
-    <Compile Include="Table\Storage\RemoteTableStorage.cs" />
     <Compile Include="Table\IMobileServiceTable.cs" />
     <Compile Include="Table\IMobileServiceTable.Generic.cs" />
     <Compile Include="Table\MobileServiceTable.cs" />
@@ -119,6 +117,7 @@
       <HintPath>..\..\packages\Microsoft.Net.Http.2.2.15\lib\portable-net40+sl4+win8+wp71\System.Net.Http.Primitives.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets')" />
