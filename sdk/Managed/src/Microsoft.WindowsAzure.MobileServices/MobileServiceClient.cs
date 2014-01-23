@@ -46,11 +46,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal string applicationInstallationId;
 
         /// <summary>
-        /// Gets the <see cref="ITableStorage"/> instance for the remote Mobile Service.
-        /// </summary>
-        internal RemoteTableStorage RemoteStorage { get; private set; }
-
-        /// <summary>
         /// Gets the Uri to the Mobile Services application that is provided by
         /// the call to MobileServiceClient(...).
         /// </summary>
@@ -196,7 +191,6 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             handlers = handlers ?? EmptyHttpMessageHandlers;
             this.HttpClient = new MobileServiceHttpClient(this, handlers);
-            this.RemoteStorage = new RemoteTableStorage(this.HttpClient);
             this.Serializer = new MobileServiceSerializer();
         }
 
@@ -226,7 +220,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                         "tableName"));
             }
 
-            return new MobileServiceTable(tableName, this, this.RemoteStorage);
+            return new MobileServiceTable(tableName, this);
         }
 
         /// <summary>
@@ -242,7 +236,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public IMobileServiceTable<T> GetTable<T>()
         {
             string tableName = this.SerializerSettings.ContractResolver.ResolveTableName(typeof(T));
-            return new MobileServiceTable<T>(tableName, this, this.RemoteStorage);
+            return new MobileServiceTable<T>(tableName, this);
         }
 
         /// <summary>
