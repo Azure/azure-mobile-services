@@ -411,6 +411,32 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task InvokeCustomAPIGetWithODataParams()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+            hijack.SetResponseContent("{\"id\":3}");
+            MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            var myParams = new Dictionary<string, string>() { { "$select", "one,two" }, { "$take", "1" } };
+            IntType expected = await service.InvokeApiAsync<IntType>("calculator/add", HttpMethod.Get, myParams);
+
+            Assert.Contains(hijack.Request.RequestUri.Query, "?%24select=one%2Ctwo&%24take=1");
+        }
+
+        [AsyncTestMethod]
+        public async Task InvokeCustomAPIGetWithODataParamsJToken()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+            hijack.SetResponseContent("{\"id\":3}");
+            MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            var myParams = new Dictionary<string, string>() { { "$select", "one,two" } };
+            JToken expected = await service.InvokeApiAsync("calculator/add", HttpMethod.Get, myParams);
+
+            Assert.Contains(hijack.Request.RequestUri.Query, "?%24select=one%2Ctwo");
+        }
+
+        [AsyncTestMethod]
         public async Task InvokeCustomAPIPostWithBody()
         {
             TestHttpHandler hijack = new TestHttpHandler();
