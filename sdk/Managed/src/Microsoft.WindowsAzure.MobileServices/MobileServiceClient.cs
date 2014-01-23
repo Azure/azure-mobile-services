@@ -323,11 +323,6 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("token");
             }
 
-            if (!Enum.IsDefined(typeof(MobileServiceAuthenticationProvider), provider))
-            {
-                throw new ArgumentOutOfRangeException("provider");
-            }
-
             MobileServiceTokenAuthentication auth = new MobileServiceTokenAuthentication(this, provider, token);
             return auth.LoginAsync();
         }
@@ -517,7 +512,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns></returns>
         private string CreateAPIUriString(string apiName, IDictionary<string, string> parameters = null) {
             string uriFragment = string.Format(CultureInfo.InvariantCulture, "api/{0}", apiName);
-            string queryString = MobileServiceUrlBuilder.GetQueryString(parameters);
+            string queryString = MobileServiceUrlBuilder.GetQueryString(parameters, false);
             
             return MobileServiceUrlBuilder.CombinePathAndQuery(uriFragment, queryString);            
         }

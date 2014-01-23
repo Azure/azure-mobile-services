@@ -31,6 +31,17 @@ namespace Microsoft.WindowsAzure.MobileServices
         protected const string LoginAsyncDoneUriFragment = "login/done";
 
         /// <summary>
+        /// Name of the authentication provider as expected by the service REST API.
+        /// </summary>
+        private string providerName;
+
+        /// <summary>
+        /// The name for the Azure Active Directory authentication provider as used by the
+        /// service REST API.
+        /// </summary>
+        internal const string WindowsAzureActiveDirectoryRestApiPathName = "aad";
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="MobileServiceAuthentication"/> class.
         /// </summary>
         /// <param name="client">
@@ -50,9 +61,9 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             this.Client = client;
 
-            this.ProviderName = providerName.ToLower();
+            this.ProviderName = providerName;
 
-            this.StartUri = new Uri(this.Client.ApplicationUri, MobileServiceAuthentication.LoginAsyncUriFragment + "/" + providerName);
+            this.StartUri = new Uri(this.Client.ApplicationUri, MobileServiceAuthentication.LoginAsyncUriFragment + "/" + this.ProviderName);
             this.EndUri = new Uri(this.Client.ApplicationUri, MobileServiceAuthentication.LoginAsyncDoneUriFragment);
         }
 
@@ -66,7 +77,18 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The name of the authentication provider used by this
         /// <see cref="MobileServiceAuthentication"/> instance.
         /// </summary>
-        protected string ProviderName { get; private set; }
+        protected string ProviderName
+        {
+            get { return this.providerName; }
+            private set
+            {
+                this.providerName = value.ToLowerInvariant();
+                if (this.providerName.Equals(MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory.ToString(), StringComparison.OrdinalIgnoreCase))
+                {
+                    this.providerName = WindowsAzureActiveDirectoryRestApiPathName;
+                }
+            }
+        }
 
         /// <summary>
         /// The start uri to use for authentication.

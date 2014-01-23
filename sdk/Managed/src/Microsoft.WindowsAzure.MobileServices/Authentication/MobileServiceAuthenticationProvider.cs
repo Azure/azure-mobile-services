@@ -27,6 +27,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Facebook authentication provider.
         /// </summary>
-        Facebook
+        Facebook,
+
+        /// <summary>
+        /// Azure Active Directory authentication provider.
+        /// </summary>
+        WindowsAzureActiveDirectory,
     }
 }
