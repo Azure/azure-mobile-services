@@ -27,7 +27,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A URI query string.
         /// </returns>
-        public static string GetQueryString(IDictionary<string, string> parameters)
+        public static string GetQueryString(IDictionary<string, string> parameters, bool useTableAPIRules = true)
         {
             string parametersString = null;
 
@@ -37,7 +37,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 string formatString = "{0}={1}";
                 foreach (var parameter in parameters)
                 {
-                    if (parameter.Key.StartsWith("$"))
+                    if (useTableAPIRules && parameter.Key.StartsWith("$"))
                     {
                         throw new ArgumentException(
                             string.Format(
