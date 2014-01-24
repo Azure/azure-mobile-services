@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Xml.Linq;
 
 using Newtonsoft.Json;
@@ -34,6 +35,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal const string TileClass = "1";
         internal const string ToastClass = "2";
         internal const string RawClass = "3";
+
+        internal TemplateRegistration()
+        {            
+        }
 
         /// <summary>
         /// Create a TemplateRegistration
@@ -102,6 +107,8 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             this.BodyTemplate = bodyTemplate;
             this.DetectBodyType();
+
+            this.OnValidate();
         }
         
         /// <summary>
@@ -193,6 +200,47 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return this.TemplateName;
             }
+        }
+
+        private void OnValidate()
+        {
+            if (this.TemplateName.Contains(":"))
+            {
+                // TODO: Resource
+                throw new ArgumentException("Name must not contain a ':'.");
+            }
+
+            if (this.TemplateName.Contains(";"))
+            {
+                // TODO: Resource
+                throw new ArgumentException("Name must not contain a ';'.");
+            }
+
+            if (string.IsNullOrWhiteSpace(this.TemplateName))
+            {
+                throw new ArgumentNullException("templateName");
+            }
+
+            if (string.IsNullOrWhiteSpace(this.BodyTemplate))
+            {
+                throw new ArgumentNullException("bodyTemplate");
+            }
+
+            if (this.TemplateName.Equals(Registration.NativeRegistrationName))
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Resources.ConflictWithReservedName, Registration.NativeRegistrationName));
+            }
+
+            if (this.TemplateName.Contains(":") || this.TemplateName.Contains(";"))
+            {
+                throw new ArgumentException(Resources.InvalidTemplateName);
+            }
+        }
+
+        internal override void Validate()
+        {
+            base.Validate();
+            this.OnValidate();
         }
 
         enum TemplateRegistrationType

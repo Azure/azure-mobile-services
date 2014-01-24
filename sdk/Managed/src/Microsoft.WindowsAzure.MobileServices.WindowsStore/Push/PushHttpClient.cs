@@ -4,7 +4,9 @@
 
 using System;
 using System.Net.Http;
+using System.Reflection;
 
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -16,19 +18,16 @@ namespace Microsoft.WindowsAzure.MobileServices
     {
         private readonly MobileServiceHttpClient httpClient;
 
-        private readonly MobileServiceSerializer serializer;
-
-        internal PushHttpClient(MobileServiceHttpClient httpClient, MobileServiceSerializer serializer)
+        internal PushHttpClient(MobileServiceHttpClient httpClient)
         {
             this.httpClient = httpClient;
-            this.serializer = serializer;
         }
 
         public async Task<IEnumerable<Registration>> ListRegistrationsAsync(string channelUri)
         {
             var response = await httpClient.RequestAsync(HttpMethod.Get, string.Format("/push/registrations?deviceId={0}&platform=wns", Uri.EscapeUriString(channelUri)));
-            var jsonRegistrations = JToken.Parse(response.Content) as JArray;
-            return serializer.Deserialize<Registration>(jsonRegistrations);
+            
+            return JsonConvert.DeserializeObject<IEnumerable<Registration>>(response.Content, new JsonConverter[] { new RegistrationConverter() });
         }
 
         public Task UnregisterAsync(string registrationId)
@@ -45,8 +44,29 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         public Task CreateOrUpdateRegistrationAsync(Registration registration)
         {
-            var content = this.serializer.Serialize(registration).ToString();
+            var content = JsonConvert.SerializeObject(registration);
             return httpClient.RequestAsync(HttpMethod.Put, "/push/registrations/" + registration.RegistrationId, content, ensureResponseContent: false);
+        }        
+    }
+
+    class RegistrationConverter : JsonConverter
+    {
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {            
+            JObject jObject = JObject.Load(reader);
+            object registration = jObject.Property("templateBody") == null ? new Registration() : new TemplateRegistration();
+            serializer.Populate(jObject.CreateReader(), registration);
+            return registration;
+        }
+
+        public override bool CanConvert(Type objectType)
+        {
+            return typeof(Registration).GetTypeInfo().IsAssignableFrom(objectType.GetTypeInfo());
         }
     }
 }

@@ -74,15 +74,13 @@ namespace Microsoft.WindowsAzure.MobileServices
             await this.UpsertRegistration(registration);
         }
 
-        public async Task<IEnumerable<Registration>> GetRegistrationsForChannelAsync(string channelUri)
+        public async Task GetRegistrationsForChannelAsync(string channelUri)
         {            
             List<Registration> registrations = new List<Registration>(await this.pushHttpClient.ListRegistrationsAsync(channelUri));
             for (int i = 0; i < registrations.Count; i++)
             {
                 this.localStorageManager.UpdateRegistrationByRegistrationId(registrations[i]);
             }
-
-            return registrations;
         }
 
         public async Task UnregisterAsync(string registrationName)

@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Xml.Linq;
 
 using Newtonsoft.Json;
 
@@ -44,7 +43,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.ChannelUri = channelUri;
             this.Tags = tags != null ? new HashSet<string>(tags) : new HashSet<string>();
 
-            this.Validate();
+            this.OnValidate();
         }
 
         [JsonProperty(PropertyName = "platform")]
@@ -89,7 +88,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
-        internal virtual void Validate()
+        private void OnValidate()
         {
             if (string.IsNullOrWhiteSpace(this.ChannelUri))
             {
@@ -98,24 +97,17 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             if (this.Tags != null)
             {
-                if (this.Tags.Any(s => s.Contains(',')))
+                if (this.Tags.Any(s => s.Contains(",")))
                 {
                     // TODO: Resource
-                    throw new ArgumentException("Tags must not contain ','.");
+                    throw new InvalidDataContractException("Tags must not contain ','.");
                 }
             }
+        }
 
-            if (this.Name.Contains(':'))
-            {
-                // TODO: Resource
-                throw new ArgumentException("Name must not contain a ':'.");
-            }
-
-            if (this.Name.Contains(';'))
-            {
-                // TODO: Resource
-                throw new ArgumentException("Name must not contain a ';'.");
-            }
+        internal virtual void Validate()
+        {
+            this.OnValidate();
         }
     }
 }

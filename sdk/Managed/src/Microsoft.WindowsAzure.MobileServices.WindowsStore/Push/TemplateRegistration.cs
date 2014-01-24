@@ -5,12 +5,10 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.ServiceModel.Security;
 
 using Windows.Data.Xml.Dom;
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Schema;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -22,6 +20,10 @@ namespace Microsoft.WindowsAzure.MobileServices
     public sealed class TemplateRegistration : Registration
     {
         private const string WnsTypeName = "X-WNS-Type";
+
+        internal TemplateRegistration()
+        {            
+        }
 
         /// <summary>
         /// Create a TemplateRegistration
@@ -96,6 +98,8 @@ namespace Microsoft.WindowsAzure.MobileServices
                     throw new ArgumentException("Cannot autodetect X-WNS type from bodyTemplate: provide a body template with a valid toast/tile/badge content or specify a X-WNS-Type header.");
                 }
             }
+
+            this.OnValidate();
         }
 
         /// <summary>
@@ -137,9 +141,19 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
-        internal override void Validate()
+        private void OnValidate()
         {
-            base.Validate();
+            if (this.TemplateName.Contains(":"))
+            {
+                // TODO: Resource
+                throw new ArgumentException("Name must not contain a ':'.");
+            }
+
+            if (this.TemplateName.Contains(";"))
+            {
+                // TODO: Resource
+                throw new ArgumentException("Name must not contain a ';'.");
+            }
 
             if (string.IsNullOrWhiteSpace(this.TemplateName))
             {
@@ -159,7 +173,13 @@ namespace Microsoft.WindowsAzure.MobileServices
             if (this.TemplateName.Contains(":") || this.TemplateName.Contains(";"))
             {
                 throw new ArgumentException(Resources.InvalidTemplateName);
-            }            
+            }
+        }
+
+        internal override void Validate()
+        {
+            base.Validate();
+            this.OnValidate();
         }
     }
 
