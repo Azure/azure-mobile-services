@@ -21,7 +21,6 @@ package com.microsoft.windowsazure.mobileservices;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.security.InvalidParameterException;
 import java.util.List;
 
 import org.apache.http.Header;
@@ -163,11 +162,13 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 						} else { // Lookup result
 							JsonObject patchedJson = results.getAsJsonObject();
 							
-							for (Header header : response.getHeaders()) {
-								if (header.getName().equalsIgnoreCase("ETag")) {
-									patchedJson.remove(VersionSystemPropertyString);
-									patchedJson.addProperty(VersionSystemPropertyString, getValueFromEtag(header.getValue()));
-									break;
+							if (response != null && response.getHeaders() != null) {
+								for (Header header : response.getHeaders()) {
+									if (header.getName().equalsIgnoreCase("ETag")) {
+										patchedJson.remove(VersionSystemPropertyName);
+										patchedJson.addProperty(VersionSystemPropertyName, getValueFromEtag(header.getValue()));
+										break;
+									}
 								}
 							}
 							
@@ -188,7 +189,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	 *            The JsonObject to insert
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
-	 * @throws InvalidParameterException   
+	 * @throws IllegalArgumentException   
 	 */
 	public void insert(final JsonObject element, TableJsonOperationCallback callback) {
 		this.insert(element, null, callback);
@@ -203,7 +204,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	 * 			  A list of user-defined parameters and values to include in the request URI query string
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
-	 * @throws InvalidParameterException
+	 * @throws IllegalArgumentException
 	 */
 	public void insert(final JsonObject element, List<Pair<String, String>> parameters,
 			final TableJsonOperationCallback callback) {
@@ -261,11 +262,13 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 						JsonObject patchedJson = patchOriginalEntityWithResponseEntity(
 								element, jsonEntity);
 						
-						for (Header header : response.getHeaders()) {
-							if (header.getName().equalsIgnoreCase("ETag")) {
-								patchedJson.remove(VersionSystemPropertyString);
-								patchedJson.addProperty(VersionSystemPropertyString, getValueFromEtag(header.getValue()));
-								break;
+						if (response != null && response.getHeaders() != null) {
+							for (Header header : response.getHeaders()) {
+								if (header.getName().equalsIgnoreCase("ETag")) {
+									patchedJson.remove(VersionSystemPropertyName);
+									patchedJson.addProperty(VersionSystemPropertyName, getValueFromEtag(header.getValue()));
+									break;
+								}
 							}
 						}
 
@@ -373,11 +376,13 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 						JsonObject patchedJson = patchOriginalEntityWithResponseEntity(
 								element, jsonEntity);
 						
-						for (Header header : response.getHeaders()) {
-							if (header.getName().equalsIgnoreCase("ETag")) {
-								patchedJson.remove(VersionSystemPropertyString);
-								patchedJson.addProperty(VersionSystemPropertyString, getValueFromEtag(header.getValue()));
-								break;
+						if (response != null && response.getHeaders() != null) {
+							for (Header header : response.getHeaders()) {
+								if (header.getName().equalsIgnoreCase("ETag")) {
+									patchedJson.remove(VersionSystemPropertyName);
+									patchedJson.addProperty(VersionSystemPropertyName, getValueFromEtag(header.getValue()));
+									break;
+								}
 							}
 						}
 						

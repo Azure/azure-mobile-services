@@ -20,14 +20,15 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.net.URLEncoder;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TreeMap;
 
 import org.apache.http.client.methods.HttpDelete;
 
@@ -39,6 +40,7 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.google.gson.annotations.SerializedName;
 
 abstract class MobileServiceTableBase<E> {
 
@@ -58,9 +60,20 @@ abstract class MobileServiceTableBase<E> {
     protected static final String SystemPropertiesQueryParameterName = "__systemproperties";
     
     /**
+	 * The system property names with the correct prefix.
+	 */
+    protected static final TreeMap<String,MobileServiceSystemProperty> SystemPropertyNameToEnum;
+    static { 
+    	SystemPropertyNameToEnum = new TreeMap<String,MobileServiceSystemProperty>(String.CASE_INSENSITIVE_ORDER);
+    	SystemPropertyNameToEnum.put(getSystemPropertyString(MobileServiceSystemProperty.CreatedAt),MobileServiceSystemProperty.CreatedAt);
+    	SystemPropertyNameToEnum.put(getSystemPropertyString(MobileServiceSystemProperty.UpdatedAt),MobileServiceSystemProperty.UpdatedAt);
+    	SystemPropertyNameToEnum.put(getSystemPropertyString(MobileServiceSystemProperty.Version),MobileServiceSystemProperty.Version);
+    }
+    
+    /**
 	 * The version system property as a string with the prefix.
 	 */
-    protected static final String VersionSystemPropertyString = String.format("{0}{1}", SystemPropertyPrefix, MobileServiceSystemProperty.Version.toString()).toLowerCase(Locale.getDefault());
+    protected static final String VersionSystemPropertyName = getSystemPropertyString(MobileServiceSystemProperty.Version);
 
 	/**
 	 * The MobileServiceClient used to invoke table operations
@@ -75,7 +88,7 @@ abstract class MobileServiceTableBase<E> {
 	/**
 	 * The Mobile Service system properties to be included with items.
 	 */ 
-	protected EnumSet<MobileServiceSystemProperty> mSystemProperties;
+	protected EnumSet<MobileServiceSystemProperty> mSystemProperties = EnumSet.noneOf(MobileServiceSystemProperty.class);
 
 	protected void initialize(String name, MobileServiceClient client) {
 		if (name == null || name.toString().trim().length() == 0) {
@@ -322,7 +335,7 @@ abstract class MobileServiceTableBase<E> {
 	 */
 	protected Object getObjectId(Object element) {
 		if (element == null || (element instanceof JsonNull)) {
-			throw new InvalidParameterException("Element cannot be null");
+			throw new IllegalArgumentException("Element cannot be null");
 		} else if (element instanceof Integer) {
 			return ((Integer) element).intValue();
 		} else if (element instanceof String) {
@@ -341,7 +354,7 @@ abstract class MobileServiceTableBase<E> {
 			JsonElement idProperty = jsonObject.get("id");
 			
 			if (idProperty == null || (idProperty instanceof JsonNull)) {
-				throw new InvalidParameterException("Element must contain id property");
+				throw new IllegalArgumentException("Element must contain id property");
 			}
 	
 			if (idProperty.isJsonPrimitive()) {
@@ -350,10 +363,10 @@ abstract class MobileServiceTableBase<E> {
 				} else if(idProperty.getAsJsonPrimitive().isString()) {
 					return idProperty.getAsJsonPrimitive().getAsString();
 				} else {
-					throw new InvalidParameterException("Invalid id type");
+					throw new IllegalArgumentException("Invalid id type");
 				}
 			} else {
-				throw new InvalidParameterException("Invalid id type");
+				throw new IllegalArgumentException("Invalid id type");
 			}
 		}
 	}
@@ -703,7 +716,7 @@ abstract class MobileServiceTableBase<E> {
 	protected List<Pair<String, String>> addSystemProperties(EnumSet<MobileServiceSystemProperty> systemProperties, List<Pair<String, String>> parameters) {
 		boolean containsSystemProperties = false;
 		
-		List<Pair<String,String>> result = new  ArrayList<Pair<String,String>>(parameters.size());
+		List<Pair<String,String>> result = new  ArrayList<Pair<String,String>>(parameters != null ? parameters.size() : 0);
 		
 		// Make sure we have a case-insensitive parameters list
         if (parameters != null) {
@@ -715,7 +728,7 @@ abstract class MobileServiceTableBase<E> {
 
         // If there is already a user parameter for the system properties, just use it
         if (!containsSystemProperties) {
-            String systemPropertiesString = GetSystemPropertiesString(systemProperties);
+            String systemPropertiesString = getSystemPropertiesString(systemProperties);
             
             if (systemPropertiesString != null) {
                 result.add(new Pair<String,String>(SystemPropertiesQueryParameterName,systemPropertiesString));
@@ -737,8 +750,8 @@ abstract class MobileServiceTableBase<E> {
         boolean haveCloned = false;
         
         for (Entry<String,JsonElement> property : instance.entrySet()) {
-            if (property.getKey().startsWith(SystemPropertyPrefix)) {
-                // We don't want to alter the original jtoken passed in by the caller
+        	if (SystemPropertyNameToEnum.containsKey(property.getKey())) {
+        		// We don't want to alter the original JsonObject passed in by the caller
                 // so if we find a system property to remove, we have to clone first
                 if (!haveCloned) {
                     instance = (JsonObject) new JsonParser().parse(instance.toString());
@@ -746,7 +759,7 @@ abstract class MobileServiceTableBase<E> {
                 }
 
                 instance.remove(property.getKey());
-            }
+        	}
         }
 
         return instance;
@@ -762,7 +775,7 @@ abstract class MobileServiceTableBase<E> {
         String version = null;
         
         for (Entry<String,JsonElement> property : instance.entrySet()) {
-            if (property.getKey().equalsIgnoreCase(VersionSystemPropertyString)) {
+            if (property.getKey().equalsIgnoreCase(VersionSystemPropertyName)) {
                 version = property.getValue().getAsString();
             }
         }
@@ -813,7 +826,7 @@ abstract class MobileServiceTableBase<E> {
 	 * @param	properties	The system properties to set in the system properties header.
 	 * @return				The system properties header value. Returns null if properties is null or empty.
 	 */
-    private String GetSystemPropertiesString(EnumSet<MobileServiceSystemProperty> properties) {
+    private static String getSystemPropertiesString(EnumSet<MobileServiceSystemProperty> properties) {
         if (properties == null || properties.isEmpty()) {
             return null;
         }
@@ -827,13 +840,7 @@ abstract class MobileServiceTableBase<E> {
         int i = 0;
 
         for (MobileServiceSystemProperty systemProperty : properties) {
-            String property = systemProperty.toString().trim();
-            
-            char firstLetterAsLower = property.charAt(0);
-            
-            sb.append(SystemPropertyPrefix);
-            sb.append(firstLetterAsLower);
-            sb.append(property.substring(1));
+            sb.append(getSystemPropertyString(systemProperty));
             
             i++;
             
@@ -844,4 +851,42 @@ abstract class MobileServiceTableBase<E> {
 
         return sb.toString();
     }
+
+	/**
+	 * Gets the system property header value from the MobileServiceSystemProperty.
+	 * @param	systemProperty	The system property to set in the system properties header.
+	 * @return					The system property header value.
+	 */
+    private static String getSystemPropertyString(MobileServiceSystemProperty systemProperty) {
+    	String property = systemProperty.toString().trim();
+    	char firstLetterAsLower = property.toLowerCase(Locale.getDefault()).charAt(0);
+		return SystemPropertyPrefix + firstLetterAsLower + property.substring(1);
+    }
+    
+    /**
+	 * Returns the system properties defined or annotated in the entity class
+	 * @param	clazz	Target entity class
+	 * @return 			List of entities
+	 */
+	protected <F> EnumSet<MobileServiceSystemProperty> getSystemProperties(Class<F> clazz) {
+		EnumSet<MobileServiceSystemProperty> result = EnumSet.noneOf(MobileServiceSystemProperty.class);
+		
+		// Search for system properties annotations, regardless case
+		for (Field field : clazz.getDeclaredFields()) {
+			SerializedName serializedName = field.getAnnotation(SerializedName.class);
+			
+			if(serializedName != null) {
+				if (SystemPropertyNameToEnum.containsKey(serializedName.value())) {
+					result.add(SystemPropertyNameToEnum.get(serializedName.value()));
+				}
+			} else {
+				if (SystemPropertyNameToEnum.containsKey(field.getName())) {
+					result.add(SystemPropertyNameToEnum.get(field.getName()));
+				}
+			}
+		}
+
+		// Otherwise, return empty
+		return result;
+	}
 }

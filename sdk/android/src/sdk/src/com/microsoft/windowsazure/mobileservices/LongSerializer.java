@@ -20,7 +20,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices;
 
 import java.lang.reflect.Type;
-import java.security.InvalidParameterException;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
@@ -45,7 +44,7 @@ class LongSerializer implements JsonSerializer<Long> {
 		Long minAllowedValue = Long.valueOf(0xFFE0000000000000L);
 		if (element != null) {
 			if (element > maxAllowedValue || element < minAllowedValue) {
-				throw new InvalidParameterException(
+				throw new IllegalArgumentException(
 						"Long value must be between " + minAllowedValue
 								+ " and " + maxAllowedValue);
 			} else {

@@ -24,7 +24,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices;
 
 import java.lang.reflect.Field;
-import java.security.InvalidParameterException;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -135,12 +134,12 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 	 * @param client
 	 *            The MobileServiceClient used to invoke table operations
 	 */
-	public MobileServiceTable(String name, MobileServiceClient client,
-			Class<E> clazz) {
-
+	public MobileServiceTable(String name, MobileServiceClient client, Class<E> clazz) {
 		initialize(name, client);
+		
 		mInternalTable = new MobileServiceJsonTable(name, client);
 		mClazz = clazz;
+		mSystemProperties = getSystemProperties(clazz);
 	}
 	
 	public EnumSet<MobileServiceSystemProperty> getSystemProperties() {
@@ -234,7 +233,7 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 		JsonObject json = null;
 		try {
 			json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
-		} catch (InvalidParameterException e) {
+		} catch (IllegalArgumentException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}
@@ -286,7 +285,7 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 		
 		try {
 			json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
-		} catch (InvalidParameterException e) {
+		} catch (IllegalArgumentException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}

@@ -197,13 +197,13 @@ class IdTestData
     public static long[] ValidIntIds = new long[] {
         1,
         Integer.MAX_VALUE,
-        Long.MAX_VALUE
+        9007199254740992L,
     };
 
     public static long[] InvalidIntIds = new long[] {
         -1,
         Integer.MIN_VALUE,
-        Long.MIN_VALUE,
+        -9007199254740992L,
     };
 
     public static Object[] NonStringNonIntValidJsonIds = new Object[] {
