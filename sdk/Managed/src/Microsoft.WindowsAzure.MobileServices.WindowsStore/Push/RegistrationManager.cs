@@ -75,12 +75,18 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         public async Task GetRegistrationsForChannelAsync(string channelUri)
-        {            
+        {             
             List<Registration> registrations = new List<Registration>(await this.pushHttpClient.ListRegistrationsAsync(channelUri));
-            for (int i = 0; i < registrations.Count; i++)
+            var count = registrations.Count;
+            if (count == 0)
+            {
+                this.localStorageManager.ClearRegistrations();
+            }
+
+            for (int i = 0; i < count; i++)
             {
                 this.localStorageManager.UpdateRegistrationByRegistrationId(registrations[i]);
-            }
+            }            
         }
 
         public async Task UnregisterAsync(string registrationName)
