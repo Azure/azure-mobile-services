@@ -23,7 +23,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         private const string WnsTypeName = "X-WNS-Type";
 
         internal TemplateRegistration()
-        {            
+        {
         }
 
         /// <summary>
@@ -67,12 +67,12 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             if (templateName.Equals(Registration.NativeRegistrationName))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Resources.ConflictWithReservedName, Registration.NativeRegistrationName));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Resources.Push_ConflictWithReservedName, Registration.NativeRegistrationName));
             }
 
             if (templateName.Contains(":") || templateName.Contains(";"))
             {
-                throw new ArgumentException(Resources.InvalidTemplateName);
+                throw new ArgumentException(Resources.Push_InvalidTemplateName);
             }
 
             if (string.IsNullOrWhiteSpace(bodyTemplate))
@@ -81,7 +81,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             this.TemplateName = templateName;
-            this.WnsHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);            
+            this.WnsHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             if (additionalHeaders != null)
             {
                 foreach (var item in additionalHeaders)
@@ -92,32 +92,23 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             this.BodyTemplate = bodyTemplate;
 
-            // We only support xml as bodyTemplate even for wns/raw
-            // TODO: Double check we are validating correctly
             if (!this.WnsHeaders.ContainsKey(WnsTypeName))
             {
+                // Because there are no headers, it is not raw
+                // This means it must be XML
                 XmlDocument xmlDocument = new XmlDocument();
                 try
                 {
-                    xmlDocument.LoadXml(bodyTemplate);                    
+                    xmlDocument.LoadXml(bodyTemplate);
                 }
                 catch (Exception e)
                 {
-                    // TODO: Resource
-                    throw new ArgumentException("Parameter must be valid XML.", "bodyTemplate", e);
+                    throw new ArgumentException(Resources.Push_BodyTemplateMustBeXml, "bodyTemplate", e);
                 }
 
                 var payloadType = TemplateRegistration.DetectBodyType(xmlDocument);
-                if (payloadType != null)
-                {
-                    this.WnsHeaders.Add(WnsTypeName, payloadType);
-                }
-                else
-                {
-                    // TODO: Resource
-                    throw new ArgumentException("Cannot autodetect X-WNS type from bodyTemplate: provide a body template with a valid toast/tile/badge content or specify a X-WNS-Type header.");
-                }
-            }            
+                this.WnsHeaders.Add(WnsTypeName, payloadType);
+            }
 
             this.WnsHeaders = new ReadOnlyDictionary<string, string>(this.WnsHeaders);
         }
@@ -126,7 +117,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Gets headers that should be sent to WNS with the notification
         /// </summary>
         [JsonProperty(PropertyName = "headers")]
-        public IDictionary<string, string> WnsHeaders { get; internal set; }        
+        public IDictionary<string, string> WnsHeaders { get; internal set; }
 
         /// <summary>
         /// Get templateName
@@ -147,7 +138,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 !Enum.TryParse(template.FirstChild.NodeName, true, out registrationType))
             {
                 // First node of the body template should be toast/tile/badge
-                throw new ArgumentException(Resources.NotSupportedXMLFormatAsBodyTemplate);
+                throw new ArgumentException(Resources.Push_NotSupportedXMLFormatAsBodyTemplateWin8);
             }
 
             return "wns/" + template.FirstChild.NodeName.ToLowerInvariant();

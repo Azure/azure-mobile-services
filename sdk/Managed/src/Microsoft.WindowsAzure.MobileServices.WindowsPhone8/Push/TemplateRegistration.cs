@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Xml.Linq;
 
 using Newtonsoft.Json;
@@ -38,7 +37,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal const string RawClass = "3";
 
         internal TemplateRegistration()
-        {            
+        {
         }
 
         /// <summary>
@@ -87,31 +86,31 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             if (templateName.Equals(Registration.NativeRegistrationName))
             {
-                throw new ArgumentException(Resources.ConflictWithReservedName);
+                throw new ArgumentException(Resources.Push_ConflictWithReservedName);
             }
 
             if (templateName.Contains(":") || templateName.Contains(";"))
             {
-                throw new ArgumentException(Resources.InvalidTemplateName);
+                throw new ArgumentException(Resources.Push_InvalidTemplateName);
             }
 
             this.TemplateName = templateName;
 
-            this.MpnsHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);            
+            this.MpnsHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             if (additionalHeaders != null)
             {
                 foreach (var item in additionalHeaders)
                 {
                     this.MpnsHeaders.Add(item.Key, item.Value);
                 }
-            }            
+            }
 
             this.BodyTemplate = bodyTemplate;
             this.DetectBodyType();
 
             this.MpnsHeaders = new ReadOnlyDictionary<string, string>(this.MpnsHeaders);
         }
-        
+
         /// <summary>
         /// Gets headers that should be sent to WNS with the notification
         /// </summary>
@@ -139,59 +138,59 @@ namespace Microsoft.WindowsAzure.MobileServices
                 return;
             }
 
-            XElement body = null;
-            try
+            if (!this.MpnsHeaders.ContainsKey(NotificationType))
             {
-                var elements = XElement.Parse(this.BodyTemplate).Elements();
-                foreach (var element in elements)
+                // AutoDetectType
+                XElement body = null;
+                try
                 {
-                    if (element.NodeType == System.Xml.XmlNodeType.Element)
+                    var elements = XElement.Parse(this.BodyTemplate).Elements();
+                    foreach (var element in elements)
                     {
-                        body = element;
-                        break;
+                        if (element.NodeType == System.Xml.XmlNodeType.Element)
+                        {
+                            body = element;
+                            break;
+                        }
+                    }
+                }
+                catch (Exception)
+                {
+                    throw new ArgumentException(Resources.Push_BodyTemplateMustBeXml, "bodyTemplate");
+                }
+
+                if (body == null)
+                {
+                    throw new ArgumentException(Resources.Push_BodyTemplateMustContainElement, "bodyTemplate");
+                }
+
+                TemplateRegistrationType registrationType;
+                if (string.Equals(body.Name.Namespace.NamespaceName, NamespaceName, StringComparison.OrdinalIgnoreCase)
+                    && Enum.TryParse(body.Name.LocalName, true, out registrationType))
+                {
+                    switch (registrationType)
+                    {
+                        case TemplateRegistrationType.Toast:
+                            this.MpnsHeaders.Add(NotificationType, Toast);
+                            break;
+                        case TemplateRegistrationType.Tile:
+                            this.MpnsHeaders.Add(NotificationType, Tile);
+                            break;
                     }
                 }
             }
-            catch (Exception)
-            {
-                throw new ArgumentException(Resources.NotSupportedXMLFormatAsBodyTemplate);
-            }
 
-            if (body == null)
+            if (!this.MpnsHeaders.ContainsKey(NotificationClass) && this.MpnsHeaders.ContainsKey(NotificationType))
             {
-                throw new ArgumentException(Resources.NotSupportedXMLFormatAsBodyTemplate);
-            }
-
-            this.MpnsHeaders.Remove(NotificationType);
-
-            TemplateRegistrationType registrationType;
-            if (string.Equals(body.Name.Namespace.NamespaceName, NamespaceName, StringComparison.OrdinalIgnoreCase) &&
-                Enum.TryParse(body.Name.LocalName, true, out registrationType))
-            {
-                string notificationClass;
-                switch (registrationType)
-                {                        
-                    case TemplateRegistrationType.Toast:
-                        this.MpnsHeaders.Add(NotificationType, Toast);
-                        notificationClass = ToastClass;                        
+                switch (this.MpnsHeaders[NotificationType])
+                {
+                    case Toast:
+                        this.MpnsHeaders.Add(NotificationClass, ToastClass);
                         break;
-                    case TemplateRegistrationType.Tile:
-                        this.MpnsHeaders.Add(NotificationType, Tile);
-                        notificationClass = TileClass;
+                    case Tile:
                         this.MpnsHeaders.Add(NotificationClass, TileClass);
                         break;
-                    default:
-                        throw new NotSupportedException(registrationType.ToString());
                 }
-
-                if (!this.MpnsHeaders.ContainsKey(NotificationClass))
-                {
-                    this.MpnsHeaders.Add(NotificationClass, notificationClass);
-                }
-            }
-            else
-            {
-                throw new ArgumentException(Resources.NotSupportedXMLFormatAsBodyTemplate);
             }
         }
 

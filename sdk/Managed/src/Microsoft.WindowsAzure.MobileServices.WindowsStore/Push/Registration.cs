@@ -21,7 +21,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal const string NativeRegistrationName = "$Default";
 
         internal Registration()
-        {            
+        {
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="channelUri">The channel uri</param>
         public Registration(string channelUri)
             : this(channelUri, null)
-        {            
+        {
         }
 
         /// <summary>
@@ -49,13 +49,12 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 if (tags.Any(s => s.Contains(",")))
                 {
-                    // TODO: Resource
-                    throw new ArgumentException("Tags must not contain ','.");
+                    throw new ArgumentException(Resources.Push_TagNoCommas, "tags");
                 }
             }
 
             this.ChannelUri = channelUri;
-            this.Tags = tags != null ? new HashSet<string>(tags) : new HashSet<string>();            
+            this.Tags = tags != null ? new HashSet<string>(tags) : new HashSet<string>();
         }
 
         [JsonProperty(PropertyName = "platform")]
@@ -98,6 +97,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return NativeRegistrationName;
             }
-        }        
+        }
     }
 }

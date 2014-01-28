@@ -21,7 +21,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal const string NativeRegistrationName = "$Default";
 
         internal Registration()
-        {            
+        {
         }
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="channelUri">The channel uri</param>
         public Registration(string channelUri)
             : this(channelUri, null)
-        {            
+        {
         }
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="channelUri">The channel uri</param>
         /// <param name="tags">The tags to register to receive notifications from</param>
-        public Registration(string channelUri, IEnumerable<string> tags)            
+        public Registration(string channelUri, IEnumerable<string> tags)
         {
             if (string.IsNullOrWhiteSpace(channelUri))
             {
@@ -49,13 +49,12 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 if (tags.Any(s => s.Contains(",")))
                 {
-                    // TODO: Resource
-                    throw new ArgumentException("Tags must not contain ','.");
+                    throw new ArgumentException(Resources.Push_TagNoCommas, "tags");
                 }
             }
 
             this.ChannelUri = channelUri;
-            this.Tags = tags != null ? new HashSet<string>(tags) : new HashSet<string>();            
+            this.Tags = tags != null ? new HashSet<string>(tags) : new HashSet<string>();
         }
 
         [JsonProperty(PropertyName = "platform")]
@@ -65,7 +64,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return "mpns";
             }
-        }                
+        }
 
         /// <summary>
         /// If specified, restricts the notifications that the registration will receive to only those that
@@ -73,7 +72,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         [JsonProperty(PropertyName = "tags")]
         public ISet<string> Tags { get; set; }
-        
+
         /// <summary>
         /// The Uri of the Channel returned by the Push Notification Channel Manager.
         /// </summary>
@@ -98,6 +97,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return NativeRegistrationName;
             }
-        }       
+        }
     }
 }

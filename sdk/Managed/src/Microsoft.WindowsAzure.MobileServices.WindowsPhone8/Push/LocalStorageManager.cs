@@ -4,7 +4,7 @@
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
-    using System;    
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.IO.IsolatedStorage;
@@ -20,8 +20,8 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// </summary>
     internal class LocalStorageManager : IDisposable
     {
-        internal const string StorageVersion = "v1.0.0"; 
-        
+        internal const string StorageVersion = "v1.0.0";
+
         internal const string PrimaryChannelId = "$Primary";
 
         private readonly object flushLock = new object();
@@ -36,7 +36,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         private ConcurrentDictionary<string, StoredRegistrationEntry> registrations;
 
-        private readonly IDictionary<string, object> storageValues;        
+        private readonly IDictionary<string, object> storageValues;
 
         public LocalStorageManager(string applicationUri)
         {
@@ -45,7 +45,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.keyNameForRegistrations = string.Format("{0}-Registrations", applicationUri);
 
             this.storageValues = IsolatedStorageSettings.ApplicationSettings;
-            
+
             this.InitializeRegistrationInfoFromStorage();
         }
 
@@ -65,7 +65,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     this.Flush();
                 }
             }
-        }        
+        }
 
         public StoredRegistrationEntry GetRegistration(string registrationName)
         {
@@ -77,7 +77,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return null;
         }
-        
+
         public bool DeleteRegistrationByName(string registrationName)
         {
             if (this.registrations.Remove(registrationName))
@@ -94,9 +94,9 @@ namespace Microsoft.WindowsAzure.MobileServices
             var found = registrations.FirstOrDefault(v => v.Value.RegistrationId.Equals(registration.RegistrationId));
             if (!found.Equals(default(KeyValuePair<string, StoredRegistrationEntry>)))
             {
-                return this.DeleteRegistrationByName(found.Key);                
+                return this.DeleteRegistrationByName(found.Key);
             }
-            
+
             return false;
         }
 
@@ -133,7 +133,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             this.ChannelUri = refreshedChannelUri;
             this.IsRefreshNeeded = false;
-        }        
+        }
 
         internal static string ReadContent(IDictionary<string, object> values, string key)
         {

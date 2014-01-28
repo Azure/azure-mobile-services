@@ -17,7 +17,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     public sealed class Push
     {
         private readonly RegistrationManager registrationManager;
-        
+
         internal Push(MobileServiceClient client)
             : this(client, string.Empty, null)
         {
@@ -236,7 +236,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     {
                         return hubForTiles[tileId];
                     }
-                    
+
                     var hubForTile = new Push(this.parent.Client, tileId, this);
                     return hubForTiles.GetOrAdd(tileId, hubForTile);
                 }

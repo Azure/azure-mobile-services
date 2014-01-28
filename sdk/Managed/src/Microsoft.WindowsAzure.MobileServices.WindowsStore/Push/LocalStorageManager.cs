@@ -48,7 +48,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.storageValues = ApplicationData.Current.LocalSettings.CreateContainer(name, ApplicationDataCreateDisposition.Always).Values;
 
             this.InitializeRegistrationInfoFromStorage();
-        }        
+        }
 
         public bool IsRefreshNeeded { get; private set; }
 
@@ -96,7 +96,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             var found = registrations.FirstOrDefault(v => v.Value.RegistrationId.Equals(registration.RegistrationId));
             if (!found.Equals(default(KeyValuePair<string, StoredRegistrationEntry>)))
             {
-                return this.DeleteRegistrationByName(found.Key);                
+                return this.DeleteRegistrationByName(found.Key);
             }
 
             return false;
@@ -205,6 +205,6 @@ namespace Microsoft.WindowsAzure.MobileServices
                     this.registrations.AddOrUpdate(reg.RegistrationName, reg, (key, oldValue) => reg);
                 }
             }
-        }        
+        }
     }
 }

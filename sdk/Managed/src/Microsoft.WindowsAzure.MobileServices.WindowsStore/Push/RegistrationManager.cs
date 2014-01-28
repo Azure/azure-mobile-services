@@ -63,7 +63,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 // The likely cause of this is an expired registration in local storage due to a long unused app.
                 if (e.Response.StatusCode != HttpStatusCode.Gone)
                 {
-                    throw;                    
+                    throw;
                 }
             }
 
@@ -73,7 +73,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         public async Task GetRegistrationsForChannelAsync(string channelUri)
-        {             
+        {
             List<Registration> registrations = new List<Registration>(await this.pushHttpClient.ListRegistrationsAsync(channelUri));
             var count = registrations.Count;
             if (count == 0)
@@ -84,7 +84,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             for (int i = 0; i < count; i++)
             {
                 this.localStorageManager.UpdateRegistrationByRegistrationId(registrations[i]);
-            }            
+            }
         }
 
         public async Task UnregisterAsync(string registrationName)
@@ -101,7 +101,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             await this.pushHttpClient.UnregisterAsync(cached.RegistrationId);
-            this.localStorageManager.DeleteRegistrationByName(registrationName);            
+            this.localStorageManager.DeleteRegistrationByName(registrationName);
         }
 
         public async Task DeleteRegistrationsForChannelAsync(string channelUri)
@@ -114,20 +114,20 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             // clear local storage
-            this.localStorageManager.ClearRegistrations();            
-        }        
+            this.localStorageManager.ClearRegistrations();
+        }
 
         async Task<Registration> CreateRegistrationIdAsync(Registration registration)
         {
             registration.RegistrationId = await this.pushHttpClient.CreateRegistrationIdAsync();
             this.localStorageManager.UpdateRegistrationByName(registration.Name, registration);
-            return registration;            
+            return registration;
         }
 
         async Task UpsertRegistration<T>(T registration) where T : Registration
         {
             await this.pushHttpClient.CreateOrUpdateRegistrationAsync(registration);
-            this.localStorageManager.UpdateRegistrationByName(registration.Name, registration);            
+            this.localStorageManager.UpdateRegistrationByName(registration.Name, registration);
         }
     }
 }

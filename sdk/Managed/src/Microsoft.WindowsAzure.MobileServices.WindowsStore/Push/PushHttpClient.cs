@@ -26,7 +26,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public async Task<IEnumerable<Registration>> ListRegistrationsAsync(string channelUri)
         {
             var response = await httpClient.RequestAsync(HttpMethod.Get, string.Format("/push/registrations?deviceId={0}&platform=wns", Uri.EscapeUriString(channelUri)));
-            
+
             return JsonConvert.DeserializeObject<IEnumerable<Registration>>(response.Content, new JsonConverter[] { new RegistrationConverter() });
         }
 
@@ -46,7 +46,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             var content = JsonConvert.SerializeObject(registration);
             return httpClient.RequestAsync(HttpMethod.Put, "/push/registrations/" + registration.RegistrationId, content, ensureResponseContent: false);
-        }        
+        }
     }
 
     class RegistrationConverter : JsonConverter
@@ -57,7 +57,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {            
+        {
             JObject jObject = JObject.Load(reader);
             object registration = jObject.Property("templateBody") == null ? new Registration() : new TemplateRegistration();
             serializer.Populate(jObject.CreateReader(), registration);
