@@ -238,7 +238,7 @@
     <value>All message handlers except the last must be of the type '{0}'</value>
   </data>
   <data name="MobileServiceContractResolver_MultipleSystemPropertyAttributes" xml:space="preserve">
-    <value>A member can only have one system property attribute. The member '{0}' on type '{1}' has system property attributes '{2}' and '{3}'. </value>
+    <value>A member can only have one system property attribute. The member '{0}' on type '{1}' has system property attributes '{2}' and '{3}'.</value>
   </data>
   <data name="MobileServiceCollection_LoadInProcess" xml:space="preserve">
     <value>Loading of more items already in process.</value>
