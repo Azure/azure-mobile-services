@@ -139,7 +139,9 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 		
 		mInternalTable = new MobileServiceJsonTable(name, client);
 		mClazz = clazz;
+		
 		mSystemProperties = getSystemProperties(clazz);
+		mInternalTable.setSystemProperties(mSystemProperties);			
 	}
 	
 	public EnumSet<MobileServiceSystemProperty> getSystemProperties() {

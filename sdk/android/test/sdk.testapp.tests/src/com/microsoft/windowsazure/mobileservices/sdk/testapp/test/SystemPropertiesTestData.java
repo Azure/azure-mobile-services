@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
+import android.util.Pair;
+
 import com.microsoft.windowsazure.mobileservices.MobileServiceSystemProperty;
 
 public class SystemPropertiesTestData {
@@ -145,4 +147,28 @@ public class SystemPropertiesTestData {
 
 	// Missing ‘__’ prefix to systemProperties query string parameter
 	public static String InvalidSystemParameterQueryString = "_systemProperties=__createdAt,__version";
+
+	public static List<Pair<String, String>> VersionsSerialize;
+	static {
+		VersionsSerialize = new ArrayList<Pair<String, String>>();
+		VersionsSerialize.add(new Pair<String, String>("AAAAAAAAH2o=", "\"AAAAAAAAH2o=\""));
+		VersionsSerialize.add(new Pair<String, String>("a version", "\"a version\""));
+		VersionsSerialize.add(new Pair<String, String>("a version with a \" quote", "\"a version with a \\\" quote\""));
+		VersionsSerialize.add(new Pair<String, String>("a version with an already escaped \\\" quote", "\"a version with an already escaped \\\" quote\""));
+		VersionsSerialize.add(new Pair<String, String>("\"a version with a quote at the start", "\"\\\"a version with a quote at the start\""));
+		VersionsSerialize.add(new Pair<String, String>("a version with a quote at the end\"", "\"a version with a quote at the end\\\"\""));
+		VersionsSerialize.add(new Pair<String, String>("datetime'2013-10-08T04%3A12%3A36.96Z'", "\"datetime'2013-10-08T04%3A12%3A36.96Z'\""));
+	}
+
+	public static List<Pair<String, String>> VersionsDeserialize;
+	static {
+		VersionsDeserialize = new ArrayList<Pair<String, String>>();
+		VersionsDeserialize.add(new Pair<String, String>("AAAAAAAAH2o=", "\"AAAAAAAAH2o=\""));
+		VersionsDeserialize.add(new Pair<String, String>("a version", "\"a version\""));
+		VersionsDeserialize.add(new Pair<String, String>("a version with a \" quote", "\"a version with a \\\" quote\""));
+		VersionsDeserialize.add(new Pair<String, String>("a version with an already escaped \" quote", "\"a version with an already escaped \\\" quote\""));
+		VersionsDeserialize.add(new Pair<String, String>("\"a version with a quote at the start", "\"\\\"a version with a quote at the start\""));
+		VersionsDeserialize.add(new Pair<String, String>("a version with a quote at the end\"", "\"a version with a quote at the end\\\"\""));
+		VersionsDeserialize.add(new Pair<String, String>("datetime'2013-10-08T04%3A12%3A36.96Z'", "\"datetime'2013-10-08T04%3A12%3A36.96Z'\""));
+	}
 }

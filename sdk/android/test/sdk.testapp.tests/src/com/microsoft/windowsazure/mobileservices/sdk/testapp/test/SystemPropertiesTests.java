@@ -21,12 +21,17 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
+
+import org.apache.http.Header;
+import org.apache.http.HeaderElement;
+import org.apache.http.ParseException;
 
 import android.test.InstrumentationTestCase;
 import android.util.Pair;
@@ -38,6 +43,7 @@ import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.MobileServiceSystemProperty;
+import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
@@ -46,6 +52,7 @@ import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
 import com.microsoft.windowsazure.mobileservices.TableJsonQueryCallback;
+import com.microsoft.windowsazure.mobileservices.TableOperationCallback;
 
 public class SystemPropertiesTests extends InstrumentationTestCase {
 	String appUrl = "";
@@ -424,8 +431,6 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 		}
 	}
 
-
-
 	public void testInsertUserParameterWithSystemProperties() throws Throwable {
 		List<EnumSet<MobileServiceSystemProperty>> allSystemProperties = SystemPropertiesTestData.AllSystemProperties;
 
@@ -476,9 +481,9 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				msTable.setSystemProperties(systemProperties);
-				
-				List<Pair<String,String>> parameters = new ArrayList<Pair<String,String>>();
-				parameters.add(new Pair<String,String>("__systemproperties", "__createdAt"));
+
+				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+				parameters.add(new Pair<String, String>("__systemproperties", "__createdAt"));
 
 				// Call the insert method
 				msTable.insert(obj, parameters, new TableJsonOperationCallback() {
@@ -559,9 +564,9 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				msTable.setSystemProperties(systemProperties);
-				
-				List<Pair<String,String>> parameters = new ArrayList<Pair<String,String>>();
-				parameters.add(new Pair<String,String>("__systemproperties", "__createdAt"));
+
+				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+				parameters.add(new Pair<String, String>("__systemproperties", "__createdAt"));
 
 				// Call the insert method
 				msTable.insert(obj, parameters, new TableJsonOperationCallback() {
@@ -1034,8 +1039,6 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 		}
 	}
 
-
-	
 	public void testUpdateUserParameterWithSystemProperties() throws Throwable {
 		List<EnumSet<MobileServiceSystemProperty>> allSystemProperties = SystemPropertiesTestData.AllSystemProperties;
 
@@ -1086,9 +1089,9 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				msTable.setSystemProperties(systemProperties);
-				
-				List<Pair<String,String>> parameters = new ArrayList<Pair<String,String>>();
-				parameters.add(new Pair<String,String>("__systemproperties", "createdAt"));
+
+				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+				parameters.add(new Pair<String, String>("__systemproperties", "createdAt"));
 
 				// Call the update method
 				msTable.update(obj, parameters, new TableJsonOperationCallback() {
@@ -1169,9 +1172,9 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				msTable.setSystemProperties(systemProperties);
-				
-				List<Pair<String,String>> parameters = new ArrayList<Pair<String,String>>();
-				parameters.add(new Pair<String,String>("__systemproperties", "createdAt"));
+
+				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+				parameters.add(new Pair<String, String>("__systemproperties", "createdAt"));
 
 				// Call the update method
 				msTable.update(obj, parameters, new TableJsonOperationCallback() {
@@ -1361,7 +1364,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 			fail(exception.getMessage());
 		}
 	}
-	
+
 	public void testLookupUserParameterWithSystemProperties() throws Throwable {
 		List<EnumSet<MobileServiceSystemProperty>> allSystemProperties = SystemPropertiesTestData.AllSystemProperties;
 
@@ -1411,9 +1414,9 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				msTable.setSystemProperties(systemProperties);
-				
-				List<Pair<String,String>> parameters = new ArrayList<Pair<String,String>>();
-				parameters.add(new Pair<String,String>("__systemproperties", "CreatedAt"));
+
+				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+				parameters.add(new Pair<String, String>("__systemproperties", "CreatedAt"));
 
 				// Call the lookup method
 				msTable.lookUp("an id", parameters, new TableJsonOperationCallback() {
@@ -1493,9 +1496,9 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				msTable.setSystemProperties(systemProperties);
-				
-				List<Pair<String,String>> parameters = new ArrayList<Pair<String,String>>();
-				parameters.add(new Pair<String,String>("__systemproperties", "CreatedAt"));
+
+				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+				parameters.add(new Pair<String, String>("__systemproperties", "CreatedAt"));
 
 				// Call the lookup method
 				msTable.lookUp(5, parameters, new TableJsonOperationCallback() {
@@ -1679,8 +1682,6 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 		}
 	}
 
-
-	
 	public void testDeleteUserParameterWithSystemProperties() throws Throwable {
 		List<EnumSet<MobileServiceSystemProperty>> allSystemProperties = SystemPropertiesTestData.AllSystemProperties;
 
@@ -1730,9 +1731,9 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				msTable.setSystemProperties(systemProperties);
-				
-				List<Pair<String,String>> parameters = new ArrayList<Pair<String,String>>();
-				parameters.add(new Pair<String,String>("__systemproperties", "unknown"));
+
+				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+				parameters.add(new Pair<String, String>("__systemproperties", "unknown"));
 
 				// Call the delete method
 				msTable.delete("an id", parameters, new TableDeleteCallback() {
@@ -1809,9 +1810,9 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 				MobileServiceJsonTable msTable = client.getTable(tableName);
 
 				msTable.setSystemProperties(systemProperties);
-				
-				List<Pair<String,String>> parameters = new ArrayList<Pair<String,String>>();
-				parameters.add(new Pair<String,String>("__systemproperties", "unknown"));
+
+				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+				parameters.add(new Pair<String, String>("__systemproperties", "unknown"));
 
 				// Call the delete method
 				msTable.delete(obj, parameters, new TableDeleteCallback() {
@@ -1891,7 +1892,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 				msTable.setSystemProperties(systemProperties);
 
 				// Call the execute method with projection
-				msTable.select("Id","String").execute(new TableJsonQueryCallback() {
+				msTable.select("Id", "String").execute(new TableJsonQueryCallback() {
 
 					@Override
 					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
@@ -1918,7 +1919,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 			fail(exception.getMessage());
 		}
 	}
-	
+
 	public void testFilterQueryStringWithSystemProperties() throws Throwable {
 		List<EnumSet<MobileServiceSystemProperty>> allSystemProperties = SystemPropertiesTestData.AllSystemProperties;
 
@@ -2049,7 +2050,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 				msTable.setSystemProperties(systemProperties);
 
 				// Call the execute method with projection
-				msTable.select("id","String").execute(new TableJsonQueryCallback() {
+				msTable.select("id", "String").execute(new TableJsonQueryCallback() {
 
 					@Override
 					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
@@ -2076,7 +2077,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 			fail(exception.getMessage());
 		}
 	}
-	
+
 	public void testFilterQueryStringWithSystemPropertiesIntId() throws Throwable {
 		List<EnumSet<MobileServiceSystemProperty>> allSystemProperties = SystemPropertiesTestData.AllSystemProperties;
 
@@ -2156,10 +2157,6 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 		}
 	}
 
-
-	
-	
-
 	public void testSelectUserParameterWithSystemProperties() throws Throwable {
 		List<EnumSet<MobileServiceSystemProperty>> allSystemProperties = SystemPropertiesTestData.AllSystemProperties;
 
@@ -2211,7 +2208,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 				msTable.setSystemProperties(systemProperties);
 
 				// Call the execute method with projection
-				msTable.select("Id","String").parameter("__systemproperties", "__createdAt").execute(new TableJsonQueryCallback() {
+				msTable.select("Id", "String").parameter("__systemproperties", "__createdAt").execute(new TableJsonQueryCallback() {
 
 					@Override
 					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
@@ -2238,7 +2235,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 			fail(exception.getMessage());
 		}
 	}
-	
+
 	public void testFilterUserParameterWithSystemProperties() throws Throwable {
 		List<EnumSet<MobileServiceSystemProperty>> allSystemProperties = SystemPropertiesTestData.AllSystemProperties;
 
@@ -2369,7 +2366,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 				msTable.setSystemProperties(systemProperties);
 
 				// Call the execute method with projection
-				msTable.select("id","String").parameter("__systemproperties", "__createdAt").execute(new TableJsonQueryCallback() {
+				msTable.select("id", "String").parameter("__systemproperties", "__createdAt").execute(new TableJsonQueryCallback() {
 
 					@Override
 					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
@@ -2396,7 +2393,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 			fail(exception.getMessage());
 		}
 	}
-	
+
 	public void testFilterUserParameterWithSystemPropertiesIntId() throws Throwable {
 		List<EnumSet<MobileServiceSystemProperty>> allSystemProperties = SystemPropertiesTestData.AllSystemProperties;
 
@@ -2482,235 +2479,1243 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
 	// String Id Type
 
-	/*
-	 * public void testInsertWithStringIdTypeAndStringIdResponseContent() throws
-	 * Throwable { String[] testIdData =
-	 * IdTestData.concat(IdTestData.concat(IdTestData.ValidStringIds,
-	 * IdTestData.EmptyStringIds), IdTestData.InvalidStringIds);
-	 * 
-	 * for (String testId : testIdData) {
-	 * insertWithStringIdTypeAndStringIdResponseContent(testId); } }
-	 * 
-	 * private void insertWithStringIdTypeAndStringIdResponseContent(String
-	 * testId) throws Throwable { final CountDownLatch latch = new
-	 * CountDownLatch(1);
-	 * 
-	 * // Container to store callback's results and do the asserts. final
-	 * ResultsContainer container = new ResultsContainer();
-	 * 
-	 * final String tableName = "MyTableName";
-	 * 
-	 * String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
-	 * final String responseContent = "{\"id\":\"" + jsonTestId +
-	 * "\",\"String\":\"Hey\"}";
-	 * 
-	 * final StringIdType item = new StringIdType(); item.Id = "an id";
-	 * item.String = "what?";
-	 * 
-	 * runTestOnUiThread(new Runnable() {
-	 * 
-	 * @Override public void run() { MobileServiceClient client = null;
-	 * 
-	 * try { client = new MobileServiceClient(appUrl, appKey,
-	 * getInstrumentation().getTargetContext()); } catch (MalformedURLException
-	 * e) { e.printStackTrace(); }
-	 * 
-	 * // Add a filter to handle the request and create a new json // object
-	 * with an id defined client =
-	 * client.withFilter(getTestFilter(responseContent));
-	 * 
-	 * // Create get the MobileService table MobileServiceTable<StringIdType>
-	 * msTable = client.getTable(tableName, StringIdType.class);
-	 * 
-	 * // Call the insert method msTable.insert(item, new
-	 * TableOperationCallback<StringIdType>() {
-	 * 
-	 * @Override public void onCompleted(StringIdType entity, Exception
-	 * exception, ServiceFilterResponse response) { if (exception != null) {
-	 * container.setException(exception); }
-	 * 
-	 * latch.countDown(); } }); } });
-	 * 
-	 * latch.await();
-	 * 
-	 * // Asserts Exception exception = container.getException();
-	 * 
-	 * if (exception != null) { fail(exception.getMessage()); } else {
-	 * assertEquals(testId, item.Id); assertEquals("Hey", item.String); } }
-	 */
+	public void testInsertRemovesCreatedAtSerializedNameStringId() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
 
-	// Integer Id Type
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
 
-	/*
-	 * public void testInsertWithIntIdTypeAndIntIdResponseContent() throws
-	 * Throwable { long[] testIdData = IdTestData.concat(IdTestData.ValidIntIds,
-	 * IdTestData.InvalidIntIds);
-	 * 
-	 * for (long testId : testIdData) {
-	 * insertWithIntIdTypeAndIntIdResponseContent(testId); } }
-	 * 
-	 * private void insertWithIntIdTypeAndIntIdResponseContent(long testId)
-	 * throws Throwable { final CountDownLatch latch = new CountDownLatch(1);
-	 * 
-	 * // Container to store callback's results and do the asserts. final
-	 * ResultsContainer container = new ResultsContainer();
-	 * 
-	 * final String tableName = "MyTableName";
-	 * 
-	 * String stringTestId = String.valueOf(testId); final String
-	 * responseContent = "{\"id\":" + stringTestId + ",\"String\":\"Hey\"}";
-	 * 
-	 * final LongIdType item = new LongIdType(); item.Id = 0; item.String =
-	 * "what?";
-	 * 
-	 * runTestOnUiThread(new Runnable() {
-	 * 
-	 * @Override public void run() { MobileServiceClient client = null;
-	 * 
-	 * try { client = new MobileServiceClient(appUrl, appKey,
-	 * getInstrumentation().getTargetContext()); } catch (MalformedURLException
-	 * e) { e.printStackTrace(); }
-	 * 
-	 * // Add a filter to handle the request and create a new json // object
-	 * with an id defined client =
-	 * client.withFilter(getTestFilter(responseContent));
-	 * 
-	 * // Create get the MobileService table MobileServiceTable<LongIdType>
-	 * msTable = client.getTable(tableName, LongIdType.class);
-	 * 
-	 * // Call the insert method msTable.insert(item, new
-	 * TableOperationCallback<LongIdType>() {
-	 * 
-	 * @Override public void onCompleted(LongIdType entity, Exception exception,
-	 * ServiceFilterResponse response) { if (exception != null) {
-	 * container.setException(exception); }
-	 * 
-	 * latch.countDown(); } }); } });
-	 * 
-	 * latch.await();
-	 * 
-	 * // Asserts Exception exception = container.getException();
-	 * 
-	 * if (exception != null) { fail(exception.getMessage()); } else {
-	 * assertEquals(testId, item.Id); assertEquals("Hey", item.String); } }
-	 */
+		final String responseContent = "{\"id\":\"an id\"}";
 
-	// Update Tests
+		runTestOnUiThread(new Runnable() {
 
-	// String Id Type
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
 
-	/*
-	 * public void testUpdateWithStringIdTypeAndStringIdResponseContent() throws
-	 * Throwable { String[] testIdData =
-	 * IdTestData.concat(IdTestData.concat(IdTestData.ValidStringIds,
-	 * IdTestData.EmptyStringIds), IdTestData.InvalidStringIds);
-	 * 
-	 * for (String testId : testIdData) {
-	 * updateWithStringIdTypeAndStringIdResponseContent(testId); } }
-	 * 
-	 * private void updateWithStringIdTypeAndStringIdResponseContent(String
-	 * testId) throws Throwable { final CountDownLatch latch = new
-	 * CountDownLatch(1);
-	 * 
-	 * // Container to store callback's results and do the asserts. final
-	 * ResultsContainer container = new ResultsContainer();
-	 * 
-	 * final String tableName = "MyTableName";
-	 * 
-	 * String jsonTestId = testId.replace("\\", "\\\\").replace("\"", "\\\"");
-	 * final String responseContent = "{\"id\":\"" + jsonTestId +
-	 * "\",\"String\":\"Hey\"}";
-	 * 
-	 * final StringIdType item = new StringIdType(); item.Id = "an id";
-	 * item.String = "what?";
-	 * 
-	 * runTestOnUiThread(new Runnable() {
-	 * 
-	 * @Override public void run() { MobileServiceClient client = null;
-	 * 
-	 * try { client = new MobileServiceClient(appUrl, appKey,
-	 * getInstrumentation().getTargetContext()); } catch (MalformedURLException
-	 * e) { e.printStackTrace(); }
-	 * 
-	 * // Add a filter to handle the request and create a new json // object
-	 * with an id defined client =
-	 * client.withFilter(getTestFilter(responseContent));
-	 * 
-	 * // Create get the MobileService table MobileServiceTable<StringIdType>
-	 * msTable = client.getTable(tableName, StringIdType.class);
-	 * 
-	 * // Call the update method msTable.update(item, new
-	 * TableOperationCallback<StringIdType>() {
-	 * 
-	 * @Override public void onCompleted(StringIdType entity, Exception
-	 * exception, ServiceFilterResponse response) { if (exception != null) {
-	 * container.setException(exception); }
-	 * 
-	 * latch.countDown(); } }); } });
-	 * 
-	 * latch.await();
-	 * 
-	 * // Asserts Exception exception = container.getException();
-	 * 
-	 * if (exception != null) { fail(exception.getMessage()); } else {
-	 * assertEquals(testId, item.Id); assertEquals("Hey", item.String); } }
-	 */
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
 
-	// Integer Id Type
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
 
-	/*
-	 * public void testUpdateWithIntIdTypeAndIntIdResponseContent() throws
-	 * Throwable { long[] testIdData = IdTestData.concat(IdTestData.ValidIntIds,
-	 * IdTestData.InvalidIntIds);
-	 * 
-	 * for (long testId : testIdData) {
-	 * updateWithIntIdTypeAndIntIdResponseContent(testId); } }
-	 * 
-	 * private void updateWithIntIdTypeAndIntIdResponseContent(long testId)
-	 * throws Throwable { final CountDownLatch latch = new CountDownLatch(1);
-	 * 
-	 * // Container to store callback's results and do the asserts. final
-	 * ResultsContainer container = new ResultsContainer();
-	 * 
-	 * final String tableName = "MyTableName";
-	 * 
-	 * String stringTestId = String.valueOf(testId); final String
-	 * responseContent = "{\"id\":" + stringTestId + ",\"String\":\"Hey\"}";
-	 * 
-	 * final LongIdType item = new LongIdType(); item.Id = 12; item.String =
-	 * "what?";
-	 * 
-	 * runTestOnUiThread(new Runnable() {
-	 * 
-	 * @Override public void run() { MobileServiceClient client = null;
-	 * 
-	 * try { client = new MobileServiceClient(appUrl, appKey,
-	 * getInstrumentation().getTargetContext()); } catch (MalformedURLException
-	 * e) { e.printStackTrace(); }
-	 * 
-	 * // Add a filter to handle the request and create a new json // object
-	 * with an id defined client =
-	 * client.withFilter(getTestFilter(responseContent));
-	 * 
-	 * // Create get the MobileService table MobileServiceTable<LongIdType>
-	 * msTable = client.getTable(tableName, LongIdType.class);
-	 * 
-	 * // Call the update method msTable.update(item, new
-	 * TableOperationCallback<LongIdType>() {
-	 * 
-	 * @Override public void onCompleted(LongIdType entity, Exception exception,
-	 * ServiceFilterResponse response) { if (exception != null) {
-	 * container.setException(exception); }
-	 * 
-	 * latch.countDown(); } }); } });
-	 * 
-	 * latch.await();
-	 * 
-	 * // Asserts Exception exception = container.getException();
-	 * 
-	 * if (exception != null) { fail(exception.getMessage()); } else {
-	 * assertEquals(testId, item.Id); assertEquals("Hey", item.String); } }
-	 */
+				client = client.withFilter(new ServiceFilter() {
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+						String content = request.getContent();
+						JsonObject obj = new JsonParser().parse(content).getAsJsonObject();
+
+						Map<String, JsonElement> properties = new TreeMap<String, JsonElement>(String.CASE_INSENSITIVE_ORDER);
+
+						for (Entry<String, JsonElement> entry : obj.entrySet()) {
+							properties.put(entry.getKey(), entry.getValue());
+						}
+
+						assertTrue(properties.containsKey("id"));
+						assertFalse(properties.containsKey("__createdAt"));
+
+						nextServiceFilterCallback.onNext(request, responseCallback);
+					}
+				});
+
+				// Create get the MobileService table
+				MobileServiceTable<CreatedAtType> msTable = client.getTable(CreatedAtType.class);
+
+				CreatedAtType element = new CreatedAtType();
+				element.Id = "an id";
+				element.CreatedAt = new Date(2012, 0, 18);
+
+				// Call the insert method
+				msTable.insert(element, new TableOperationCallback<CreatedAtType>() {
+
+					@Override
+					public void onCompleted(CreatedAtType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();
+
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		}
+	}
+
+	public void testInsertRemovesCreatedAtPropertyNameStringId() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String responseContent = "{\"id\":\"an id\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				client = client.withFilter(new ServiceFilter() {
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+						String content = request.getContent();
+						JsonObject obj = new JsonParser().parse(content).getAsJsonObject();
+
+						Map<String, JsonElement> properties = new TreeMap<String, JsonElement>(String.CASE_INSENSITIVE_ORDER);
+
+						for (Entry<String, JsonElement> entry : obj.entrySet()) {
+							properties.put(entry.getKey(), entry.getValue());
+						}
+
+						assertTrue(properties.containsKey("id"));
+						assertFalse(properties.containsKey("__createdAt"));
+
+						nextServiceFilterCallback.onNext(request, responseCallback);
+					}
+				});
+
+				// Create get the MobileService table
+				MobileServiceTable<NamedSystemPropertiesType> msTable = client.getTable(NamedSystemPropertiesType.class);
+
+				NamedSystemPropertiesType element = new NamedSystemPropertiesType();
+				element.Id = "an id";
+				element.__createdAt = new Date(2012, 0, 18);
+
+				// Call the insert method
+				msTable.insert(element, new TableOperationCallback<NamedSystemPropertiesType>() {
+
+					@Override
+					public void onCompleted(NamedSystemPropertiesType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();
+
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		}
+	}
+
+	public void testInsertRemovesUpdatedAtSerializedNameStringId() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String responseContent = "{\"id\":\"an id\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				client = client.withFilter(new ServiceFilter() {
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+						String content = request.getContent();
+						JsonObject obj = new JsonParser().parse(content).getAsJsonObject();
+
+						Map<String, JsonElement> properties = new TreeMap<String, JsonElement>(String.CASE_INSENSITIVE_ORDER);
+
+						for (Entry<String, JsonElement> entry : obj.entrySet()) {
+							properties.put(entry.getKey(), entry.getValue());
+						}
+
+						assertTrue(properties.containsKey("id"));
+						assertFalse(properties.containsKey("__updatedAt"));
+
+						nextServiceFilterCallback.onNext(request, responseCallback);
+					}
+				});
+
+				// Create get the MobileService table
+				MobileServiceTable<UpdatedAtType> msTable = client.getTable(UpdatedAtType.class);
+
+				UpdatedAtType element = new UpdatedAtType();
+				element.Id = "an id";
+				element.UpdatedAt = new Date(2012, 0, 18);
+
+				// Call the insert method
+				msTable.insert(element, new TableOperationCallback<UpdatedAtType>() {
+
+					@Override
+					public void onCompleted(UpdatedAtType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		}
+	}
+
+	public void testInsertRemovesVersionSerializedNameStringId() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String responseContent = "{\"id\":\"an id\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				client = client.withFilter(new ServiceFilter() {
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+						String content = request.getContent();
+						JsonObject obj = new JsonParser().parse(content).getAsJsonObject();
+
+						Map<String, JsonElement> properties = new TreeMap<String, JsonElement>(String.CASE_INSENSITIVE_ORDER);
+
+						for (Entry<String, JsonElement> entry : obj.entrySet()) {
+							properties.put(entry.getKey(), entry.getValue());
+						}
+
+						assertTrue(properties.containsKey("id"));
+						assertFalse(properties.containsKey("__version"));
+
+						nextServiceFilterCallback.onNext(request, responseCallback);
+					}
+				});
+
+				// Create get the MobileService table
+				MobileServiceTable<VersionType> msTable = client.getTable(VersionType.class);
+
+				VersionType element = new VersionType();
+				element.Id = "an id";
+				element.Version = "a version";
+
+				// Call the insert method
+				msTable.insert(element, new TableOperationCallback<VersionType>() {
+
+					@Override
+					public void onCompleted(VersionType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		}
+	}
+
+	public void testInsertRemovesAllSystemSerializedNameStringId() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String responseContent = "{\"id\":\"an id\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				client = client.withFilter(new ServiceFilter() {
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+						String content = request.getContent();
+						JsonObject obj = new JsonParser().parse(content).getAsJsonObject();
+
+						Map<String, JsonElement> properties = new TreeMap<String, JsonElement>(String.CASE_INSENSITIVE_ORDER);
+
+						for (Entry<String, JsonElement> entry : obj.entrySet()) {
+							properties.put(entry.getKey(), entry.getValue());
+						}
+
+						assertTrue(properties.containsKey("id"));
+						assertFalse(properties.containsKey("__createdAt"));
+						assertFalse(properties.containsKey("__updatedAt"));
+						assertFalse(properties.containsKey("__version"));
+
+						nextServiceFilterCallback.onNext(request, responseCallback);
+					}
+				});
+
+				// Create get the MobileService table
+				MobileServiceTable<AllSystemPropertiesType> msTable = client.getTable(AllSystemPropertiesType.class);
+
+				AllSystemPropertiesType element = new AllSystemPropertiesType();
+				element.Id = "an id";
+				element.CreatedAt = new Date(2012, 0, 18);
+				element.UpdatedAt = new Date(2012, 0, 18);
+				element.Version = "a version";
+
+				// Call the insert method
+				msTable.insert(element, new TableOperationCallback<AllSystemPropertiesType>() {
+
+					@Override
+					public void onCompleted(AllSystemPropertiesType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		}
+	}
+
+	public void testInsertDoesNotRemoveNonSystemCreatedAtPropertyNameStringId() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String responseContent = "{\"id\":\"an id\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				client = client.withFilter(new ServiceFilter() {
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+						String content = request.getContent();
+						JsonObject obj = new JsonParser().parse(content).getAsJsonObject();
+
+						Map<String, JsonElement> properties = new TreeMap<String, JsonElement>(String.CASE_INSENSITIVE_ORDER);
+
+						for (Entry<String, JsonElement> entry : obj.entrySet()) {
+							properties.put(entry.getKey(), entry.getValue());
+						}
+
+						assertTrue(properties.containsKey("id"));
+						assertTrue(properties.containsKey("CreatedAt"));
+
+						nextServiceFilterCallback.onNext(request, responseCallback);
+					}
+				});
+
+				// Create get the MobileService table
+				MobileServiceTable<NotSystemPropertyCreatedAtType> msTable = client.getTable(NotSystemPropertyCreatedAtType.class);
+
+				NotSystemPropertyCreatedAtType element = new NotSystemPropertyCreatedAtType();
+				element.Id = "an id";
+				element.CreatedAt = new Date(2012, 0, 18);
+
+				// Call the insert method
+				msTable.insert(element, new TableOperationCallback<NotSystemPropertyCreatedAtType>() {
+
+					@Override
+					public void onCompleted(NotSystemPropertyCreatedAtType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();
+
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		}
+	}
+
+	public void testInsertDoesNotRemoveNonSystemUpdatedAtPropertyNameStringId() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String responseContent = "{\"id\":\"an id\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				client = client.withFilter(new ServiceFilter() {
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+						String content = request.getContent();
+						JsonObject obj = new JsonParser().parse(content).getAsJsonObject();
+
+						Map<String, JsonElement> properties = new TreeMap<String, JsonElement>(String.CASE_INSENSITIVE_ORDER);
+
+						for (Entry<String, JsonElement> entry : obj.entrySet()) {
+							properties.put(entry.getKey(), entry.getValue());
+						}
+
+						assertTrue(properties.containsKey("id"));
+						assertTrue(properties.containsKey("_UpdatedAt"));
+
+						nextServiceFilterCallback.onNext(request, responseCallback);
+					}
+				});
+
+				// Create get the MobileService table
+				MobileServiceTable<NotSystemPropertyUpdatedAtType> msTable = client.getTable(NotSystemPropertyUpdatedAtType.class);
+
+				NotSystemPropertyUpdatedAtType element = new NotSystemPropertyUpdatedAtType();
+				element.Id = "an id";
+				element._UpdatedAt = new Date(2012, 0, 18);
+
+				// Call the insert method
+				msTable.insert(element, new TableOperationCallback<NotSystemPropertyUpdatedAtType>() {
+
+					@Override
+					public void onCompleted(NotSystemPropertyUpdatedAtType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();
+
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		}
+	}
+
+	public void testInsertDoesNotRemoveNonSystemVersionPropertyNameStringId() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String responseContent = "{\"id\":\"an id\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				client = client.withFilter(new ServiceFilter() {
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+						String content = request.getContent();
+						JsonObject obj = new JsonParser().parse(content).getAsJsonObject();
+
+						Map<String, JsonElement> properties = new TreeMap<String, JsonElement>(String.CASE_INSENSITIVE_ORDER);
+
+						for (Entry<String, JsonElement> entry : obj.entrySet()) {
+							properties.put(entry.getKey(), entry.getValue());
+						}
+
+						assertTrue(properties.containsKey("id"));
+						assertTrue(properties.containsKey("version"));
+
+						nextServiceFilterCallback.onNext(request, responseCallback);
+					}
+				});
+
+				// Create get the MobileService table
+				MobileServiceTable<NotSystemPropertyVersionType> msTable = client.getTable(NotSystemPropertyVersionType.class);
+
+				NotSystemPropertyVersionType element = new NotSystemPropertyVersionType();
+				element.Id = "an id";
+				element.version = "a version";
+
+				// Call the insert method
+				msTable.insert(element, new TableOperationCallback<NotSystemPropertyVersionType>() {
+
+					@Override
+					public void onCompleted(NotSystemPropertyVersionType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();
+
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		}
+	}
+
+	//
+
+	public void testSystemPropertiesPropertySetCorrectly() throws Throwable {
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				MobileServiceTable<StringIdType> stringIdTable = client.getTable(StringIdType.class);
+				assertTrue(stringIdTable.getSystemProperties().isEmpty());
+
+				MobileServiceTable<StringType> stringTable = client.getTable(StringType.class);
+				assertTrue(stringTable.getSystemProperties().isEmpty());
+
+				MobileServiceTable<NotSystemPropertyCreatedAtType> notSystemPropertyTable = client.getTable(NotSystemPropertyCreatedAtType.class);
+				assertTrue(notSystemPropertyTable.getSystemProperties().isEmpty());
+
+				MobileServiceTable<IntegerIdNotSystemPropertyCreatedAtType> integerIdNotsystemPropertyTable = client
+						.getTable(IntegerIdNotSystemPropertyCreatedAtType.class);
+				assertTrue(integerIdNotsystemPropertyTable.getSystemProperties().isEmpty());
+
+				MobileServiceTable<NotSystemPropertyUpdatedAtType> notSystemPropertyUpdatedTable = client.getTable(NotSystemPropertyUpdatedAtType.class);
+				assertTrue(notSystemPropertyUpdatedTable.getSystemProperties().isEmpty());
+
+				MobileServiceTable<NotSystemPropertyVersionType> notSystemPropertyVersionTable = client.getTable(NotSystemPropertyVersionType.class);
+				assertTrue(notSystemPropertyVersionTable.getSystemProperties().isEmpty());
+
+				MobileServiceTable<IntegerIdWithNamedSystemPropertiesType> integerIdWithNamedSystemPropertyTable = client
+						.getTable(IntegerIdWithNamedSystemPropertiesType.class);
+				assertTrue(integerIdWithNamedSystemPropertyTable.getSystemProperties().isEmpty());
+
+				MobileServiceTable<LongIdWithNamedSystemPropertiesType> longIdWithNamedSystemPropertyTable = client
+						.getTable(LongIdWithNamedSystemPropertiesType.class);
+				assertTrue(longIdWithNamedSystemPropertyTable.getSystemProperties().isEmpty());
+
+				MobileServiceTable<CreatedAtType> createdAtTable = client.getTable(CreatedAtType.class);
+				assertTrue(createdAtTable.getSystemProperties().size() == 1
+						&& createdAtTable.getSystemProperties().contains(MobileServiceSystemProperty.CreatedAt));
+
+				MobileServiceTable<DoubleNamedSystemPropertiesType> doubleNamedCreatedAtTable = client.getTable(DoubleNamedSystemPropertiesType.class);
+				assertTrue(doubleNamedCreatedAtTable.getSystemProperties().size() == 1
+						&& doubleNamedCreatedAtTable.getSystemProperties().contains(MobileServiceSystemProperty.CreatedAt));
+
+				MobileServiceTable<NamedSystemPropertiesType> namedCreatedAtTable = client.getTable(NamedSystemPropertiesType.class);
+				assertTrue(namedCreatedAtTable.getSystemProperties().size() == 1
+						&& namedCreatedAtTable.getSystemProperties().contains(MobileServiceSystemProperty.CreatedAt));
+
+				MobileServiceTable<NamedDifferentCasingSystemPropertiesType> namedDifferentCasingCreatedAtTable = client
+						.getTable(NamedDifferentCasingSystemPropertiesType.class);
+				assertTrue(namedDifferentCasingCreatedAtTable.getSystemProperties().size() == 1
+						&& namedDifferentCasingCreatedAtTable.getSystemProperties().contains(MobileServiceSystemProperty.CreatedAt));
+
+				MobileServiceTable<UpdatedAtType> updatedAtTable = client.getTable(UpdatedAtType.class);
+				assertTrue(updatedAtTable.getSystemProperties().size() == 1
+						&& updatedAtTable.getSystemProperties().contains(MobileServiceSystemProperty.UpdatedAt));
+
+				MobileServiceTable<VersionType> versionTable = client.getTable(VersionType.class);
+				assertTrue(versionTable.getSystemProperties().size() == 1 && versionTable.getSystemProperties().contains(MobileServiceSystemProperty.Version));
+
+				MobileServiceTable<AllSystemPropertiesType> allsystemPropertiesTable = client.getTable(AllSystemPropertiesType.class);
+				assertTrue(allsystemPropertiesTable.getSystemProperties().size() == 3
+						&& allsystemPropertiesTable.getSystemProperties().contains(MobileServiceSystemProperty.Version)
+						&& allsystemPropertiesTable.getSystemProperties().contains(MobileServiceSystemProperty.CreatedAt)
+						&& allsystemPropertiesTable.getSystemProperties().contains(MobileServiceSystemProperty.UpdatedAt));
+			}
+		});
+	}
+
+	public void testLookupDeserializesCreateAtToDate() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String responseContent = "{\"id\":\"an id\",\"__createdAt\":\"2000-01-01T07:59:59.000Z\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<CreatedAtType> msTable = client.getTable(CreatedAtType.class);
+
+				// Call the insert method
+				msTable.lookUp("an id", new TableOperationCallback<CreatedAtType>() {
+
+					@Override
+					public void onCompleted(CreatedAtType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result = container.getCustomResult();
+			assertTrue(result instanceof CreatedAtType);
+
+			CreatedAtType elem = (CreatedAtType) result;
+
+			assertEquals("an id", elem.Id);
+			assertEquals(new Date(Date.UTC(100, 00, 01, 07, 59, 59)), elem.CreatedAt);
+		}
+	}
+
+	public void testLookupDeserializesCreateAtToString() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String responseContent = "{\"id\":\"an id\",\"__createdAt\":\"2000-01-01T07:59:59.000Z\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringCreatedAtType> msTable = client.getTable(StringCreatedAtType.class);
+
+				// Call the insert method
+				msTable.lookUp("an id", new TableOperationCallback<StringCreatedAtType>() {
+
+					@Override
+					public void onCompleted(StringCreatedAtType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result = container.getCustomResult();
+			assertTrue(result instanceof StringCreatedAtType);
+
+			StringCreatedAtType elem = (StringCreatedAtType) result;
+
+			assertEquals("an id", elem.Id);
+			assertEquals("2000-01-01T07:59:59.000Z", elem.CreatedAt);
+		}
+	}
+
+	public void testLookupDeserializesUpdateAtToDate() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String responseContent = "{\"id\":\"an id\",\"__updatedAt\":\"2000-01-01T07:59:59.000Z\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<UpdatedAtType> msTable = client.getTable(UpdatedAtType.class);
+
+				// Call the insert method
+				msTable.lookUp("an id", new TableOperationCallback<UpdatedAtType>() {
+
+					@Override
+					public void onCompleted(UpdatedAtType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result = container.getCustomResult();
+			assertTrue(result instanceof UpdatedAtType);
+
+			UpdatedAtType elem = (UpdatedAtType) result;
+
+			assertEquals("an id", elem.Id);
+			assertEquals(new Date(Date.UTC(100, 00, 01, 07, 59, 59)), elem.UpdatedAt);
+		}
+	}
+
+	public void testLookupDeserializesUpdateAtToString() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String responseContent = "{\"id\":\"an id\",\"__updatedAt\":\"2000-01-01T07:59:59.000Z\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<StringUpdatedAtType> msTable = client.getTable(StringUpdatedAtType.class);
+
+				// Call the insert method
+				msTable.lookUp("an id", new TableOperationCallback<StringUpdatedAtType>() {
+
+					@Override
+					public void onCompleted(StringUpdatedAtType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result = container.getCustomResult();
+			assertTrue(result instanceof StringUpdatedAtType);
+
+			StringUpdatedAtType elem = (StringUpdatedAtType) result;
+
+			assertEquals("an id", elem.Id);
+			assertEquals("2000-01-01T07:59:59.000Z", elem.UpdatedAt);
+		}
+	}
+
+	public void testLookupDeserializesVersionToString() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String responseContent = "{\"id\":\"an id\",\"__version\":\"AAAAAAAAH2o=\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				// Create get the MobileService table
+				MobileServiceTable<VersionType> msTable = client.getTable(VersionType.class);
+
+				// Call the insert method
+				msTable.lookUp("an id", new TableOperationCallback<VersionType>() {
+
+					@Override
+					public void onCompleted(VersionType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result = container.getCustomResult();
+			assertTrue(result instanceof VersionType);
+
+			VersionType elem = (VersionType) result;
+
+			assertEquals("an id", elem.Id);
+			assertEquals("AAAAAAAAH2o=", elem.Version);
+		}
+	}
+
+	public void testUpdateSetsIfMatchWithVersion() throws Throwable {
+		List<Pair<String, String>> versions = SystemPropertiesTestData.VersionsSerialize;
+
+		for (Pair<String, String> version : versions) {
+			updateSetsIfMatchWithVersion(version);
+		}
+	}
+
+	private void updateSetsIfMatchWithVersion(final Pair<String, String> version) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String responseContent = "{\"id\":\"an id\",\"__version\":\"AAAAAAAAH2o=\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(getTestFilter(responseContent));
+
+				client = client.withFilter(new ServiceFilter() {
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+						boolean hasHeaderIfMatch = false;
+
+						for (Header header : request.getHeaders()) {
+							if (header.getName().equalsIgnoreCase("If-Match")) {
+								assertTrue(header.getValue().equalsIgnoreCase(version.second));
+
+								hasHeaderIfMatch = true;
+							}
+						}
+
+						assertTrue(hasHeaderIfMatch);
+
+						nextServiceFilterCallback.onNext(request, responseCallback);
+					}
+				});
+
+				// Create get the MobileService table
+				MobileServiceTable<VersionType> msTable = client.getTable(VersionType.class);
+
+				VersionType element = new VersionType();
+				element.Id = "an id";
+				element.Version = version.first;
+
+				// Call the insert method
+				msTable.update(element, new TableOperationCallback<VersionType>() {
+
+					@Override
+					public void onCompleted(VersionType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		}
+	}
+
+	public void testUpdateSetsVersionWithETag() throws Throwable {
+		List<Pair<String, String>> versions = SystemPropertiesTestData.VersionsDeserialize;
+
+		for (Pair<String, String> version : versions) {
+			updateSetsVersionWithEtag(version);
+		}
+	}
+
+	private void updateSetsVersionWithEtag(final Pair<String, String> version) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final String responseContent = "{\"id\":\"an id\"}";
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				// Add a filter to handle the request and create a new json
+				// object with an id defined
+				client = client.withFilter(new ServiceFilter() {
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+						// Create a mock response simulating an error
+						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+						response.setStatus(new StatusLineMock(200));
+						response.setContent(responseContent);
+						response.setHeaders(new Header[] { new Header() {
+
+							@Override
+							public String getValue() {
+								return version.second;
+							}
+
+							@Override
+							public String getName() {
+								return "ETag";
+							}
+
+							@Override
+							public HeaderElement[] getElements() throws ParseException {
+								return null;
+							}
+						} });
+
+						// create a mock request to replace the existing one
+						ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
+						nextServiceFilterCallback.onNext(requestMock, responseCallback);
+					}
+				});
+
+				// Create get the MobileService table
+				MobileServiceTable<VersionType> msTable = client.getTable(VersionType.class);
+
+				VersionType element = new VersionType();
+				element.Id = "an id";
+
+				// Call the insert method
+				msTable.update(element, new TableOperationCallback<VersionType>() {
+
+					@Override
+					public void onCompleted(VersionType entity, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (entity == null) {
+							container.setException(new Exception("Expected result"));
+						} else {
+							container.setCustomResult(entity);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Object result = container.getCustomResult();
+			assertTrue(result instanceof VersionType);
+
+			VersionType elem = (VersionType) result;
+
+			assertEquals("an id", elem.Id);
+			assertEquals(version.first, elem.Version);
+		}
+
+	}
 
 	// Test Filter
 

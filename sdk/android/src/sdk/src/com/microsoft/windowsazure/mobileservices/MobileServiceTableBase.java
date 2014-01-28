@@ -75,6 +75,15 @@ abstract class MobileServiceTableBase<E> {
 	 */
     protected static final String VersionSystemPropertyName = getSystemPropertyString(MobileServiceSystemProperty.Version);
 
+    protected static final List<String> IdProperties;
+    static { 
+    	IdProperties = new ArrayList<String>();
+    	IdProperties.add("id");
+    	IdProperties.add("iD");
+    	IdProperties.add("Id");
+    	IdProperties.add("ID");
+    }
+    
 	/**
 	 * The MobileServiceClient used to invoke table operations
 	 */
@@ -775,7 +784,7 @@ abstract class MobileServiceTableBase<E> {
         String version = null;
         
         for (Entry<String,JsonElement> property : instance.entrySet()) {
-            if (property.getKey().equalsIgnoreCase(VersionSystemPropertyName)) {
+            if (property.getKey().equalsIgnoreCase(VersionSystemPropertyName) && !property.getValue().isJsonNull()) {
                 version = property.getValue().getAsString();
             }
         }
@@ -794,15 +803,15 @@ abstract class MobileServiceTableBase<E> {
         for (int i = 0; i < value.length(); i++) {
             if (value.charAt(i) == '"') {
             	if (i == 0) {
-            		value = String.format("{0}{1}", "\\", value);
+            		value = String.format("%s%s", "\\", value);
             	} else if (value.charAt(i - 1) != '\\') {
-            		value = String.format("{0}{1}{2}", value.substring(0, i), "\\", value.substring(i));
+            		value = String.format("%s%s%s", value.substring(0, i), "\\", value.substring(i));
             	}
             }
         }
 
         // All etags are quoted;
-        return String.format("\"{0}\"", value);
+        return String.format("\"%s\"", value);
     }
 
     /**
@@ -815,7 +824,7 @@ abstract class MobileServiceTableBase<E> {
         int length = etag.length();
         
         if (length > 1 && etag.charAt(0) == '\"' && etag.charAt(length - 1) == '\"') {
-            etag = etag.substring(1, length - 2);
+            etag = etag.substring(1, length - 1);
         }
 
         return etag.replace("\\\"", "\"");
@@ -870,18 +879,22 @@ abstract class MobileServiceTableBase<E> {
 	 */
 	protected <F> EnumSet<MobileServiceSystemProperty> getSystemProperties(Class<F> clazz) {
 		EnumSet<MobileServiceSystemProperty> result = EnumSet.noneOf(MobileServiceSystemProperty.class);
+
+		Class<?> idClazz = getIdPropertyClass(clazz);
 		
-		// Search for system properties annotations, regardless case
-		for (Field field : clazz.getDeclaredFields()) {
-			SerializedName serializedName = field.getAnnotation(SerializedName.class);
-			
-			if(serializedName != null) {
-				if (SystemPropertyNameToEnum.containsKey(serializedName.value())) {
-					result.add(SystemPropertyNameToEnum.get(serializedName.value()));
-				}
-			} else {
-				if (SystemPropertyNameToEnum.containsKey(field.getName())) {
-					result.add(SystemPropertyNameToEnum.get(field.getName()));
+		if (idClazz != null && !isIntegerClass(idClazz)) {
+			// Search for system properties annotations, regardless case
+			for (Field field : clazz.getDeclaredFields()) {
+				SerializedName serializedName = field.getAnnotation(SerializedName.class);
+				
+				if(serializedName != null) {
+					if (SystemPropertyNameToEnum.containsKey(serializedName.value())) {
+						result.add(SystemPropertyNameToEnum.get(serializedName.value()));
+					}
+				} else {
+					if (SystemPropertyNameToEnum.containsKey(field.getName())) {
+						result.add(SystemPropertyNameToEnum.get(field.getName()));
+					}
 				}
 			}
 		}
@@ -889,4 +902,39 @@ abstract class MobileServiceTableBase<E> {
 		// Otherwise, return empty
 		return result;
 	}
+	
+    /**
+	 * Returns the id property class defined or annotated in the entity class
+	 * @param	clazz	Target entity class
+	 * @return 			Property class
+	 */
+	protected <F> Class<?> getIdPropertyClass(Class<F> clazz) {
+		// Search for id properties annotations, regardless case
+		for (Field field : clazz.getDeclaredFields()) {
+			SerializedName serializedName = field.getAnnotation(SerializedName.class);
+			
+			if(serializedName != null) {
+				if (IdProperties.contains(serializedName.value())) {
+					return field.getType();
+				}
+			} else {
+				if (IdProperties.contains(field.getName())) {
+					return field.getType();
+				}
+			}
+		}
+		
+		return null;
+	}
+	
+    /**
+	 * Returns the id property class defined or annotated in the entity class
+	 * @param	clazz	Target entity class
+	 * @return 			Property class
+	 */
+	protected <F> boolean isIntegerClass(Class<F> clazz) {		
+		return clazz.equals(Integer.class) || clazz.equals(Long.class) || clazz.equals(int.class) || clazz.equals(long.class);
+	}
+	
+
 }
