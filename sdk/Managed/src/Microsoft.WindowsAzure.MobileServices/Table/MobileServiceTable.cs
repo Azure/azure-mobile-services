@@ -60,9 +60,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="client">
         /// The <see cref="MobileServiceClient"/> associated with this table.
         /// </param>
-        /// <param name="httpClient">
-        /// The <see cref="MobileServiceHttpClient"/> instance to use for the storage context.
-        /// </param>
         public MobileServiceTable(string tableName, MobileServiceClient client)
         {
             Debug.Assert(tableName != null);

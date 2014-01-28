@@ -24,6 +24,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="parameters">
         /// The parameters from which to create the query string.
         /// </param>
+        /// <param name="useTableAPIRules">
+        /// A boolean to indicate if query string paramters should be checked that they do not contain system added
+        /// querystring. This currently only means to check if they match oData  queries (beginn with a $)
+        /// </param>
         /// <returns>
         /// A URI query string.
         /// </returns>
