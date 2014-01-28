@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 
 using Windows.Data.Xml.Dom;
@@ -59,9 +60,28 @@ namespace Microsoft.WindowsAzure.MobileServices
         public TemplateRegistration(string channelUri, string bodyTemplate, string templateName, IEnumerable<string> tags, IEnumerable<KeyValuePair<string, string>> additionalHeaders)
             : base(channelUri, tags)
         {
-            this.TemplateName = templateName;
+            if (string.IsNullOrWhiteSpace(templateName))
+            {
+                throw new ArgumentNullException("templateName");
+            }
 
-            this.WnsHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (templateName.Equals(Registration.NativeRegistrationName))
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Resources.ConflictWithReservedName, Registration.NativeRegistrationName));
+            }
+
+            if (templateName.Contains(":") || templateName.Contains(";"))
+            {
+                throw new ArgumentException(Resources.InvalidTemplateName);
+            }
+
+            if (string.IsNullOrWhiteSpace(bodyTemplate))
+            {
+                throw new ArgumentNullException("bodyTemplate");
+            }
+
+            this.TemplateName = templateName;
+            this.WnsHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);            
             if (additionalHeaders != null)
             {
                 foreach (var item in additionalHeaders)
@@ -84,7 +104,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 catch (Exception e)
                 {
                     // TODO: Resource
-                    throw new ArgumentException("Cannot autodetect X-WNS type from bodyTemplate: provide a body template with a valid toast/tile/badge content or specify a X-WNS-Type header.", e);
+                    throw new ArgumentException("Parameter must be valid XML.", "bodyTemplate", e);
                 }
 
                 var payloadType = TemplateRegistration.DetectBodyType(xmlDocument);
@@ -97,28 +117,28 @@ namespace Microsoft.WindowsAzure.MobileServices
                     // TODO: Resource
                     throw new ArgumentException("Cannot autodetect X-WNS type from bodyTemplate: provide a body template with a valid toast/tile/badge content or specify a X-WNS-Type header.");
                 }
-            }
+            }            
 
-            this.OnValidate();
+            this.WnsHeaders = new ReadOnlyDictionary<string, string>(this.WnsHeaders);
         }
 
         /// <summary>
         /// Gets headers that should be sent to WNS with the notification
         /// </summary>
         [JsonProperty(PropertyName = "headers")]
-        public IDictionary<string, string> WnsHeaders { get; private set; }        
+        public IDictionary<string, string> WnsHeaders { get; internal set; }        
 
         /// <summary>
         /// Get templateName
         /// </summary>
         [JsonProperty(PropertyName = "templateName")]
-        public string TemplateName { get; set; }
+        public string TemplateName { get; internal set; }
 
         /// <summary>
         /// Gets bodyTemplate as string
         /// </summary>
         [JsonProperty(PropertyName = "templateBody")]
-        public string BodyTemplate { get; set; }
+        public string BodyTemplate { get; internal set; }
 
         private static string DetectBodyType(XmlDocument template)
         {
@@ -139,47 +159,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return this.TemplateName;
             }
-        }
-
-        private void OnValidate()
-        {
-            if (this.TemplateName.Contains(":"))
-            {
-                // TODO: Resource
-                throw new ArgumentException("Name must not contain a ':'.");
-            }
-
-            if (this.TemplateName.Contains(";"))
-            {
-                // TODO: Resource
-                throw new ArgumentException("Name must not contain a ';'.");
-            }
-
-            if (string.IsNullOrWhiteSpace(this.TemplateName))
-            {
-                throw new ArgumentNullException("templateName");
-            }
-
-            if (string.IsNullOrWhiteSpace(this.BodyTemplate))
-            {
-                throw new ArgumentNullException("bodyTemplate");
-            }
-
-            if (this.TemplateName.Equals(Registration.NativeRegistrationName))
-            {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Resources.ConflictWithReservedName, Registration.NativeRegistrationName));
-            }
-
-            if (this.TemplateName.Contains(":") || this.TemplateName.Contains(";"))
-            {
-                throw new ArgumentException(Resources.InvalidTemplateName);
-            }
-        }
-
-        internal override void Validate()
-        {
-            base.Validate();
-            this.OnValidate();
         }
     }
 

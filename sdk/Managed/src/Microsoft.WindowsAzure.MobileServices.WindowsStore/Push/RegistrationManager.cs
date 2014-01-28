@@ -34,8 +34,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns></returns>
         public async Task RegisterAsync<T>(T registration) where T : Registration
         {
-            registration.Validate();
-
             // if localStorage is empty or has different storage version, we need retrieve registrations and refresh local storage
             if (this.localStorageManager.IsRefreshNeeded)
             {

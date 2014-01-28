@@ -39,12 +39,23 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="channelUri">The channel uri</param>
         /// <param name="tags">The tags to register to receive notifications from</param>
         public Registration(string channelUri, IEnumerable<string> tags)
-        {            
+        {
+            if (string.IsNullOrWhiteSpace(channelUri))
+            {
+                throw new ArgumentNullException("channelUri");
+            }
+
+            if (tags != null)
+            {
+                if (tags.Any(s => s.Contains(",")))
+                {
+                    // TODO: Resource
+                    throw new ArgumentException("Tags must not contain ','.");
+                }
+            }
+
             this.ChannelUri = channelUri;
-
-            this.Tags = tags != null ? new HashSet<string>(tags) : new HashSet<string>();
-
-            this.OnValidate();
+            this.Tags = tags != null ? new HashSet<string>(tags) : new HashSet<string>();            
         }
 
         [JsonProperty(PropertyName = "platform")]
@@ -58,16 +69,16 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         /// <summary>
         /// If specified, restricts the notifications that the registration will receive to only those that
-        /// are annotated with one of the specified tags.
+        /// are annotated with one of the specified tags. Note that a tag with a comma in it will be split into two tags.
         /// </summary>
         [JsonProperty(PropertyName = "tags")]
-        public ISet<string> Tags { get; set; }        
+        public ISet<string> Tags { get; internal set; }
 
         /// <summary>
         /// The Uri of the Channel returned by the Push Notification Channel Manager.
         /// </summary>
         [JsonProperty(PropertyName = "deviceId")]
-        public string ChannelUri { get; set; }
+        public string ChannelUri { get; internal set; }
 
         /// <summary>
         /// The registration id.
@@ -87,28 +98,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return NativeRegistrationName;
             }
-        }
-
-        private void OnValidate()
-        {
-            if (string.IsNullOrWhiteSpace(this.ChannelUri))
-            {
-                throw new ArgumentNullException("channelUri");
-            }
-
-            if (this.Tags != null)
-            {
-                if (this.Tags.Any(s => s.Contains(",")))
-                {
-                    // TODO: Resource
-                    throw new InvalidDataContractException("Tags must not contain ','.");
-                }
-            }
-        }
-
-        internal virtual void Validate()
-        {
-            this.OnValidate();
-        }
+        }        
     }
 }

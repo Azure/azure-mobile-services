@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Xml.Linq;
 
@@ -96,19 +97,19 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             this.TemplateName = templateName;
 
-            this.MpnsHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            this.MpnsHeaders = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);            
             if (additionalHeaders != null)
             {
                 foreach (var item in additionalHeaders)
                 {
                     this.MpnsHeaders.Add(item.Key, item.Value);
                 }
-            }
+            }            
 
             this.BodyTemplate = bodyTemplate;
             this.DetectBodyType();
 
-            this.OnValidate();
+            this.MpnsHeaders = new ReadOnlyDictionary<string, string>(this.MpnsHeaders);
         }
         
         /// <summary>
@@ -200,47 +201,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return this.TemplateName;
             }
-        }
-
-        private void OnValidate()
-        {
-            if (this.TemplateName.Contains(":"))
-            {
-                // TODO: Resource
-                throw new ArgumentException("Name must not contain a ':'.");
-            }
-
-            if (this.TemplateName.Contains(";"))
-            {
-                // TODO: Resource
-                throw new ArgumentException("Name must not contain a ';'.");
-            }
-
-            if (string.IsNullOrWhiteSpace(this.TemplateName))
-            {
-                throw new ArgumentNullException("templateName");
-            }
-
-            if (string.IsNullOrWhiteSpace(this.BodyTemplate))
-            {
-                throw new ArgumentNullException("bodyTemplate");
-            }
-
-            if (this.TemplateName.Equals(Registration.NativeRegistrationName))
-            {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Resources.ConflictWithReservedName, Registration.NativeRegistrationName));
-            }
-
-            if (this.TemplateName.Contains(":") || this.TemplateName.Contains(";"))
-            {
-                throw new ArgumentException(Resources.InvalidTemplateName);
-            }
-        }
-
-        internal override void Validate()
-        {
-            base.Validate();
-            this.OnValidate();
         }
 
         enum TemplateRegistrationType

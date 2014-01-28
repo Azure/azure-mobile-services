@@ -40,10 +40,22 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="tags">The tags to register to receive notifications from</param>
         public Registration(string channelUri, IEnumerable<string> tags)            
         {
-            this.ChannelUri = channelUri;
-            this.Tags = tags != null ? new HashSet<string>(tags) : new HashSet<string>();
+            if (string.IsNullOrWhiteSpace(channelUri))
+            {
+                throw new ArgumentNullException("channelUri");
+            }
 
-            this.OnValidate();
+            if (tags != null)
+            {
+                if (tags.Any(s => s.Contains(",")))
+                {
+                    // TODO: Resource
+                    throw new ArgumentException("Tags must not contain ','.");
+                }
+            }
+
+            this.ChannelUri = channelUri;
+            this.Tags = tags != null ? new HashSet<string>(tags) : new HashSet<string>();            
         }
 
         [JsonProperty(PropertyName = "platform")]
@@ -57,7 +69,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         /// <summary>
         /// If specified, restricts the notifications that the registration will receive to only those that
-        /// are annotated with one of the specified tags.
+        /// are annotated with one of the specified tags. Note that a tag with a comma in it will be split into two tags.
         /// </summary>
         [JsonProperty(PropertyName = "tags")]
         public ISet<string> Tags { get; set; }
@@ -86,28 +98,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return NativeRegistrationName;
             }
-        }
-
-        private void OnValidate()
-        {
-            if (string.IsNullOrWhiteSpace(this.ChannelUri))
-            {
-                throw new ArgumentNullException("channelUri");
-            }
-
-            if (this.Tags != null)
-            {
-                if (this.Tags.Any(s => s.Contains(",")))
-                {
-                    // TODO: Resource
-                    throw new InvalidDataContractException("Tags must not contain ','.");
-                }
-            }
-        }
-
-        internal virtual void Validate()
-        {
-            this.OnValidate();
-        }
+        }       
     }
 }
