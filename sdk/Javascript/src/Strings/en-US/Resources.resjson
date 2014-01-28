@@ -13,5 +13,10 @@
     "MobileServiceLogin_LoginErrorResponse"                 : "Cannot start a login operation because login is already in progress.",
     "MobileServiceLogin_InvalidResponseFormat"              : "Invalid format of the authentication response.",
     "MobileServiceLogin_InvalidProvider"                    : "The first parameter must be the name of the autentication provider or a Microsoft Account authentication token.",
-    "MobileServiceTable_NotSingleObject"                    : "Could not get object from response {0}."
+    "MobileServiceTable_NotSingleObject"                    : "Could not get object from response {0}.",
+    "Push_ConflictWithReservedName"                         : "Template name conflicts with reserved name '{0}'.",
+    "Push_InvalidTemplateName"                              : "Template name can't contain ';' or ':'.",
+    "Push_NotSupportedXMLFormatAsBodyTemplateWin8"          : "The bodyTemplate is not in accepted XML format. The first node of the bodyTemplate should be Badge/Tile/Toast, except wns/raw template, which need to be an valid XML.",
+    "Push_BodyTemplateMustBeXml"                            : "Valid XML is required for any template without a raw header.",
+    "Push_TagNoCommas"                                      : "Tags must not contain ','."
 }
