@@ -345,7 +345,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 }
 
                 Assert.IsNotNull(exception);
-                Assert.AreEqual(exception.Response.StatusCode, HttpStatusCode.BadRequest);
+                Assert.AreEqual(exception.Response.StatusCode, HttpStatusCode.Conflict);
                 Assert.IsTrue(exception.Message.Contains("Could not insert the item because an item with that id already exists."));
             }
         }
