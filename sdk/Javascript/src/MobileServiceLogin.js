@@ -76,7 +76,8 @@ MobileServiceLogin.prototype.login = function (provider, token, useSingleSignOn,
     /// Microsoft Account authentication token.
     /// </summary>
     /// <param name="provider" type="String" mayBeNull="true">
-    /// Optional name of the authentication provider to use; one of 'facebook', 'twitter', 'google', or 'microsoftaccount'.
+    /// Optional name of the authentication provider to use; one of 'facebook', 'twitter', 'google',
+    /// 'windowsazureactivedirectory' (can also use 'aad'), or 'microsoftaccount'.
     /// </param>
     /// <param name="token" type="Object"  mayBeNull="true">
     /// Optional provider specific object with existing OAuth token to log in with or
@@ -133,6 +134,10 @@ MobileServiceLogin.prototype.login = function (provider, token, useSingleSignOn,
     }
 
     if (!_.isNull(provider)) {
+        if (provider.toLowerCase() === 'windowsazureactivedirectory') {
+            // The mobile service REST API uses '/login/aad' for Windows Azure Active Directory
+            provider = 'aad';
+        }
         this.loginWithProvider(provider, token, useSingleSignOn, callback);
     }
     else {
@@ -172,7 +177,8 @@ MobileServiceLogin.prototype.loginWithProvider = function(provider, token, useSi
     /// Log a user into a Mobile Services application given a provider name and optional token object.
     /// </summary>
     /// <param name="provider" type="String">
-    /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google', or 'microsoftaccount'.
+    /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google',
+    /// 'windowsazureactivedirectory' (can also use 'aad'), or 'microsoftaccount'.
     /// </param>
     /// <param name="token" type="Object" mayBeNull="true">
     /// Optional, provider specific object with existing OAuth token to log in with.
