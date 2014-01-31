@@ -120,7 +120,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             string uriString = MobileServiceUrlBuilder.CombinePathAndQuery(uriPath, query);
 
             MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, null, true);
-            return response.Content.ParseToJToken();
+            return response.Content.ParseToJToken(this.MobileServiceClient.SerializerSettings);
         }
 
         /// <summary>
@@ -263,7 +263,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 error = ex;                    
             }
 
-            JToken value = await ParseContent(error.Response);
+            JToken value = await this.ParseContent(error.Response);
             throw new MobileServicePreconditionFailedException(error, value);
         }        
 
@@ -447,7 +447,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             return instance;
         }
 
-        private static async Task<JToken> ParseContent(HttpResponseMessage response)
+        private async Task<JToken> ParseContent(HttpResponseMessage response)
         {
             JToken value = null;
             try
@@ -455,7 +455,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 if (response.Content != null)
                 {
                     string content = await response.Content.ReadAsStringAsync();
-                    value = content.ParseToJToken();
+                    value = content.ParseToJToken(this.MobileServiceClient.SerializerSettings);
                 }
             }
             catch { }
@@ -500,9 +500,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="response">The response to parse.</param>
         /// <returns>The parsed JToken.</returns>
-        private static JToken GetJTokenFromResponse(MobileServiceHttpResponse response)
+        private JToken GetJTokenFromResponse(MobileServiceHttpResponse response)
         {
-            JToken jtoken = response.Content.ParseToJToken();
+            JToken jtoken = response.Content.ParseToJToken(this.MobileServiceClient.SerializerSettings);
             if (response.Etag != null)
             {
                 jtoken[MobileServiceSerializer.VersionSystemPropertyString] = GetValueFromEtag(response.Etag);

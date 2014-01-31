@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
@@ -62,6 +63,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             // Make sure the table is empty
             IMobileServiceTable<T> table = GetClient().GetTable<T>();
+            table.MobileServiceClient.SerializerSettings.DateParseHandling = DateParseHandling.None;
             IEnumerable<T> results = await table.ReadAsync();
             T[] items = results.ToArray();
 
@@ -1571,7 +1573,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(expectedException.Response.StatusCode, HttpStatusCode.PreconditionFailed);
 
             string responseContent = await expectedException.Response.Content.ReadAsStringAsync();
-            JToken jtoken = responseContent.ParseToJToken();
+            JToken jtoken = responseContent.ParseToJToken(table.MobileServiceClient.SerializerSettings);
             string serverVersion = (string)jtoken["__version"];
             string stringValue = (string)jtoken["String"];
 

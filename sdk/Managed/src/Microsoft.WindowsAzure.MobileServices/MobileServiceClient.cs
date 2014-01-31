@@ -478,7 +478,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
             }
             string response = await this.InternalInvokeApiAsync(apiName, content, method, parameters);
-            return response.ParseToJToken();
+            return response.ParseToJToken(this.SerializerSettings);
         }
 
         /// <summary>
