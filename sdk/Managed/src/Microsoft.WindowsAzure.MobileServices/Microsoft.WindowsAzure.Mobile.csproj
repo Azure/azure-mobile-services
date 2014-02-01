@@ -41,6 +41,8 @@
   <ItemGroup>
     <Compile Include="Authentication\MobileServiceTokenAuthentication.cs" />
     <Compile Include="Collections\MobileServiceCollection.cs" />
+    <Compile Include="Exceptions\MobileServiceInvalidOperationException.cs" />
+    <Compile Include="Exceptions\MobileServicePreconditionFailedException.cs" />
     <Compile Include="Extensions\IDictionaryExtensions.cs" />
     <Compile Include="Extensions\MobileServiceClientExtensions.cs" />
     <Compile Include="Extensions\MobileServiceCollectionExtensions.cs" />
@@ -51,7 +53,6 @@
     <Compile Include="Authentication\MobileServiceAuthentication.cs" />
     <Compile Include="Authentication\MobileServiceAuthenticationProvider.cs" />
     <Compile Include="MobileServiceClient.cs" />
-    <Compile Include="MobileServiceInvalidOperationException.cs" />
     <Compile Include="MobileServiceUser.cs" />
     <Compile Include="Platform\IApplicationStorage.cs" />
     <Compile Include="Platform\IExpressionUtility.cs" />
@@ -59,7 +60,6 @@
     <Compile Include="Platform\IPlatformInformation.cs" />
     <Compile Include="Http\MobileServiceHttpClient.cs" />
     <Compile Include="Platform\Platform.cs" />
-    <Compile Include="MobileServicePreconditionFailedException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resources.Designer.cs">
       <AutoGen>True</AutoGen>
