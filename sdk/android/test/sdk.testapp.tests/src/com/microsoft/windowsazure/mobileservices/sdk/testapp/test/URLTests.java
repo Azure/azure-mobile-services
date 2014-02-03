@@ -63,11 +63,15 @@ public class URLTests extends InstrumentationTestCase {
 		testLoginURL(MobileServiceAuthenticationProvider.Twitter);
 		testLoginURL(MobileServiceAuthenticationProvider.MicrosoftAccount);
 		testLoginURL(MobileServiceAuthenticationProvider.Google);
+		testLoginURL(MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory);
 
 		testLoginURL("facebook");
 		testLoginURL("TWITTER");
 		testLoginURL("GOOGLE");
 		testLoginURL("MicrosoftAccount");
+		testLoginURL("windowsAZUREactiveDIRECTORY");
+		testLoginURL("AAD");
+		testLoginURL("aad");
 	}
 
 	private void testLoginURL(final Object provider) throws Throwable {
@@ -124,8 +128,13 @@ public class URLTests extends InstrumentationTestCase {
 
 		latch.await();
 
+		String normalizedProvider = provider.toString().toLowerCase(Locale.getDefault());
+		if (normalizedProvider.equals("windowsazureactivedirectory")) {
+			normalizedProvider = "aad";
+		}
+
 		// Assert
-		String expectedURL = appUrl + "login/" + provider.toString().toLowerCase(Locale.getDefault());
+		String expectedURL = appUrl + "login/" + normalizedProvider;
 		assertEquals(expectedURL, result.getRequestUrl());
 
 	}

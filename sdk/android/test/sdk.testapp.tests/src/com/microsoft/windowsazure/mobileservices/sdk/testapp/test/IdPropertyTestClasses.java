@@ -197,7 +197,6 @@ class IdTestData
     public static long[] ValidIntIds = new long[] {
         1,
         Integer.MAX_VALUE,
-        Long.MAX_VALUE
     };
 
     public static long[] InvalidIntIds = new long[] {
