@@ -67,6 +67,12 @@ class LoginManager {
 	private static final String END_URL = "login/done";
 
 	/**
+	 * The name for the Azure Active Directory authentication provider as used by the
+	 * service REST API.
+	 */
+	private static final String WINDOWS_AZURE_ACTIVE_DIRECTORY_REST_API_PATH_NAME = "aad";
+
+	/**
 	 * Token indicator for interactive authentication URL
 	 */
 	private static final String TOKEN_MARK = "#token=";
@@ -124,7 +130,7 @@ class LoginManager {
 		// Create login URL
 		String startUrl = mClient.getAppUrl().toString()
 				+ LoginManager.START_URL
-				+ provider.toString().toLowerCase(Locale.getDefault());
+				+ normalizeProvider(provider);
 		// Create the expected end URL
 		String endUrl = mClient.getAppUrl().toString() + LoginManager.END_URL;
 
@@ -196,15 +202,31 @@ class LoginManager {
 					"oAuthToken can not be null or empty");
 		}
 
+		// Create the login URL
+		String url = mClient.getAppUrl().toString() + LoginManager.START_URL
+				+ normalizeProvider(provider);
+
+		authenticateWithToken(oAuthToken, url, callback);
+	}
+
+	/**
+	 * Normalizes the provider name to match the value required in the mobile
+	 * service REST API. For example, WindowsAzureActiveDirectory needs to be sent
+	 * as /login/aad.
+	 * @param provider the name of the authentication provider.
+	 * @return the normalized provider name.
+	 */
+	private String normalizeProvider(String provider) {
 		if (provider == null || provider.length() == 0) {
 			throw new IllegalArgumentException("provider cannot be null or empty");
 		}
 
-		// Create the login URL
-		String url = mClient.getAppUrl().toString() + LoginManager.START_URL
-				+ provider.toLowerCase(Locale.getDefault());
+		provider = provider.toLowerCase(Locale.getDefault());
+		if (provider.equalsIgnoreCase(MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory.toString())) {
+			provider = WINDOWS_AZURE_ACTIVE_DIRECTORY_REST_API_PATH_NAME;
+		}
 
-		authenticateWithToken(oAuthToken, url, callback);
+		return provider;
 	}
 
 	/**
