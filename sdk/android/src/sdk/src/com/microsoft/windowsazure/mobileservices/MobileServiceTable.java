@@ -101,7 +101,7 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 
 				if (mCallback != null)
 					mCallback.onCompleted(entity, ex, response);
-			} else if (exception instanceof MobileServicePreconditionFailedException) {
+			} else if (exception instanceof MobileServicePreconditionFailedExceptionBase) {
 				MobileServicePreconditionFailedExceptionBase ex = (MobileServicePreconditionFailedExceptionBase)exception;
 				
 				E entity = null;
@@ -243,14 +243,10 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 			return;
 		}
 		
-		String idProperty = hasIdProperty(json);
+		Class<?> idClazz = getIdPropertyClass(element.getClass());
 		
-		if (idProperty != null) {
-			JsonElement idElement = json.get(idProperty);
-			
-			if (!isNumericType(idElement) && !idElement.isJsonNull()) {
+		if (idClazz != null && !isIntegerClass(idClazz)) {
 				json = removeSystemProperties(json);
-			}
 		}
 
 		mInternalTable.insert(json, parameters, new ParseResultOperationCallback(callback,

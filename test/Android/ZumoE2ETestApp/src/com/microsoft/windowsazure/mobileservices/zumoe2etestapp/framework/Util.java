@@ -20,6 +20,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -41,6 +42,7 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 
 public class Util {
+	public interface IPredicate<T> { boolean evaluate(T type); }
 
 	public final static String LogTimeFormat = "yyyy-MM-dd HH:mm:ss'.'SSS";
 	private final static Hashtable<String, String> globalTestParameters = new Hashtable<String, String>();
@@ -279,7 +281,6 @@ public class Util {
 		return false;
 	}
 	
-
 	public static String getHeaderValue(ServiceFilterResponse response, String headerName) {
 		for (Header header : response.getHeaders()) {
 			if (header.getName().equals(headerName)) {
@@ -288,5 +289,17 @@ public class Util {
 		}
 		
 		return null;
+	}	
+	
+	public static <T> List<T> filter(List<T> list, IPredicate<T> predicate) {
+	    List<T> filteredList = new ArrayList<T>();
+	    
+	    for (T element: list) {
+	        if (predicate.evaluate(element)) {
+	        	filteredList.add(element);
+	        }
+	    }
+	    
+	    return filteredList;
 	}
 }

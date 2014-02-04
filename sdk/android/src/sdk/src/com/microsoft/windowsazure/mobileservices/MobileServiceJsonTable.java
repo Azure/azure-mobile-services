@@ -127,26 +127,21 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 		}
 		
 		String url;
-		try {
-			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
-			uriBuilder.path(TABLES_URL);
-			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
-			uriBuilder.appendPath(URLEncoder.encode(id.toString(), MobileServiceClient.UTF8_ENCODING));
-			
-			parameters = addSystemProperties(mSystemProperties, parameters);
-			
-			if (parameters != null && parameters.size() > 0) {
-				for (Pair<String, String> parameter : parameters) {
-					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
-				}
+
+		Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
+		uriBuilder.path(TABLES_URL);
+		uriBuilder.appendPath(mTableName);
+		uriBuilder.appendPath(id.toString());
+		
+		parameters = addSystemProperties(mSystemProperties, parameters);
+		
+		if (parameters != null && parameters.size() > 0) {
+			for (Pair<String, String> parameter : parameters) {
+				uriBuilder.appendQueryParameter(parameter.first, parameter.second);
 			}
-			url = uriBuilder.build().toString();
-		} catch (UnsupportedEncodingException e) {
-			if (callback != null) {
-				callback.onCompleted(null, e, null);
-			}
-			return;
 		}
+		
+		url = uriBuilder.build().toString();
 
 		executeGetRecords(url, new TableJsonQueryCallback() {
 
@@ -221,27 +216,20 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 		String content = element.toString();
 
 		ServiceFilterRequest post;
-		try {
-			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
-			uriBuilder.path(TABLES_URL);
-			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
-			
-			parameters = addSystemProperties(mSystemProperties, parameters);
+		
+		Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
+		uriBuilder.path(TABLES_URL);
+		uriBuilder.appendPath(mTableName);
+		
+		parameters = addSystemProperties(mSystemProperties, parameters);
 
-			if (parameters != null && parameters.size() > 0) {
-				for (Pair<String, String> parameter : parameters) {
-					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
-				}
+		if (parameters != null && parameters.size() > 0) {
+			for (Pair<String, String> parameter : parameters) {
+				uriBuilder.appendQueryParameter(parameter.first, parameter.second);
 			}
-			post = new ServiceFilterRequestImpl(new HttpPost(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());
-			post.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
-			
-		} catch (UnsupportedEncodingException e) {
-			if (callback != null) {
-				callback.onCompleted(null, e, null);
-			}
-			return;
 		}
+		post = new ServiceFilterRequestImpl(new HttpPost(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());
+		post.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
 
 		try {
 			post.setContent(content);
@@ -328,33 +316,25 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 
 		ServiceFilterRequest patch;
 		
-		try {
-			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
-			uriBuilder.path(TABLES_URL);
-			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
-			uriBuilder.appendPath(id.toString());
-			
-			parameters = addSystemProperties(mSystemProperties, parameters);
+		Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
+		uriBuilder.path(TABLES_URL);
+		uriBuilder.appendPath(mTableName);
+		uriBuilder.appendPath(id.toString());
+		
+		parameters = addSystemProperties(mSystemProperties, parameters);
 
-			if (parameters != null && parameters.size() > 0) {
-				for (Pair<String, String> parameter : parameters) {
-					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
-				}
+		if (parameters != null && parameters.size() > 0) {
+			for (Pair<String, String> parameter : parameters) {
+				uriBuilder.appendQueryParameter(parameter.first, parameter.second);
 			}
-			
-			patch = new ServiceFilterRequestImpl(new HttpPatch(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());
-			patch.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);	
-			
-			if (version != null) {
-                patch.addHeader("If-Match", getEtagFromValue(version));
-            }
-		} catch (UnsupportedEncodingException e) {
-			if (callback != null) {
-				callback.onCompleted(null, e, null);
-			}
-			
-			return;
 		}
+		
+		patch = new ServiceFilterRequestImpl(new HttpPatch(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());
+		patch.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);	
+		
+		if (version != null) {
+            patch.addHeader("If-Match", getEtagFromValue(version));
+        }
 
 		try {
 			patch.setContent(content);

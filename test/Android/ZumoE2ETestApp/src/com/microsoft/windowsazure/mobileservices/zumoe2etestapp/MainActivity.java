@@ -77,6 +77,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.MiscTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.PushTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.QueryTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.RoundTripTests;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.SystemPropertiesTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.UpdateDeleteTests;
 
 @SuppressWarnings("deprecation")
@@ -195,6 +196,8 @@ public class MainActivity extends Activity {
 		adapter.add(new MiscTests());
 		adapter.add(new PushTests());
 		adapter.add(new CustomApiTests());
+		//// adapter.add(new StringIdTests());
+		adapter.add(new SystemPropertiesTests());
 
 		ArrayList<TestCase> allTests = new ArrayList<TestCase>();
 		ArrayList<TestCase> allUnattendedTests = new ArrayList<TestCase>();

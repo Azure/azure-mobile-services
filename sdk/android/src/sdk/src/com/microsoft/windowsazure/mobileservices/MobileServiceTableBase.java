@@ -19,9 +19,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -276,30 +274,22 @@ abstract class MobileServiceTableBase<E> {
 		}
 				
 		// Create delete request
-		ServiceFilterRequest delete;
-		
-		try {
-			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
-			uriBuilder.path(TABLES_URL);
-			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
-			uriBuilder.appendPath(getObjectId(elementOrId).toString());
-			
-			parameters = addSystemProperties(mSystemProperties, parameters);
+		ServiceFilterRequest delete;	
 
-			if (parameters != null && parameters.size() > 0) {
-				for (Pair<String, String> parameter : parameters) {
-					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
-				}
+		Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
+		uriBuilder.path(TABLES_URL);
+		uriBuilder.appendPath(mTableName);
+		uriBuilder.appendPath(getObjectId(elementOrId).toString());
+		
+		parameters = addSystemProperties(mSystemProperties, parameters);
+
+		if (parameters != null && parameters.size() > 0) {
+			for (Pair<String, String> parameter : parameters) {
+				uriBuilder.appendQueryParameter(parameter.first, parameter.second);
 			}
-			
-			delete = new ServiceFilterRequestImpl(new HttpDelete(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());			
-		} catch (UnsupportedEncodingException e) {
-			if (callback != null) {
-				callback.onCompleted(e, null);
-			}
-			
-			return;
 		}
+		
+		delete = new ServiceFilterRequestImpl(new HttpDelete(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());			
 
 		// Create AsyncTask to execute the request
 		new RequestAsyncTask(delete, mClient.createConnection()) {

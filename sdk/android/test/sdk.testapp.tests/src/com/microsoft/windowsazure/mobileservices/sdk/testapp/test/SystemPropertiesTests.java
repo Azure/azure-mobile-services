@@ -21,10 +21,11 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.EnumSet;
+import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.CountDownLatch;
@@ -2528,7 +2529,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
 				CreatedAtType element = new CreatedAtType();
 				element.Id = "an id";
-				element.CreatedAt = new Date(2012, 0, 18);
+				element.CreatedAt = new GregorianCalendar(2012, 00, 18).getTime();
 
 				// Call the insert method
 				msTable.insert(element, new TableOperationCallback<CreatedAtType>() {
@@ -2609,7 +2610,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
 				NamedSystemPropertiesType element = new NamedSystemPropertiesType();
 				element.Id = "an id";
-				element.__createdAt = new Date(2012, 0, 18);
+				element.__createdAt = new GregorianCalendar(2012, 00, 18).getTime();
 
 				// Call the insert method
 				msTable.insert(element, new TableOperationCallback<NamedSystemPropertiesType>() {
@@ -2690,7 +2691,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
 				UpdatedAtType element = new UpdatedAtType();
 				element.Id = "an id";
-				element.UpdatedAt = new Date(2012, 0, 18);
+				element.UpdatedAt = new GregorianCalendar(2012, 00, 18).getTime();
 
 				// Call the insert method
 				msTable.insert(element, new TableOperationCallback<UpdatedAtType>() {
@@ -2852,8 +2853,8 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
 				AllSystemPropertiesType element = new AllSystemPropertiesType();
 				element.Id = "an id";
-				element.CreatedAt = new Date(2012, 0, 18);
-				element.UpdatedAt = new Date(2012, 0, 18);
+				element.CreatedAt = new GregorianCalendar(2012, 00, 18).getTime();
+				element.UpdatedAt = new GregorianCalendar(2012, 00, 18).getTime();
 				element.Version = "a version";
 
 				// Call the insert method
@@ -2934,7 +2935,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
 				NotSystemPropertyCreatedAtType element = new NotSystemPropertyCreatedAtType();
 				element.Id = "an id";
-				element.CreatedAt = new Date(2012, 0, 18);
+				element.CreatedAt = new GregorianCalendar(2012, 00, 18).getTime();
 
 				// Call the insert method
 				msTable.insert(element, new TableOperationCallback<NotSystemPropertyCreatedAtType>() {
@@ -3015,7 +3016,7 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
 				NotSystemPropertyUpdatedAtType element = new NotSystemPropertyUpdatedAtType();
 				element.Id = "an id";
-				element._UpdatedAt = new Date(2012, 0, 18);
+				element._UpdatedAt = new GregorianCalendar(2012, 00, 18).getTime();
 
 				// Call the insert method
 				msTable.insert(element, new TableOperationCallback<NotSystemPropertyUpdatedAtType>() {
@@ -3262,8 +3263,11 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
 			CreatedAtType elem = (CreatedAtType) result;
 
+			GregorianCalendar calendar = new GregorianCalendar(2000, 00, 01, 07, 59, 59);
+			calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+
 			assertEquals("an id", elem.Id);
-			assertEquals(new Date(Date.UTC(100, 00, 01, 07, 59, 59)), elem.CreatedAt);
+			assertEquals(calendar.getTime(), elem.CreatedAt);
 		}
 	}
 
@@ -3390,8 +3394,11 @@ public class SystemPropertiesTests extends InstrumentationTestCase {
 
 			UpdatedAtType elem = (UpdatedAtType) result;
 
+			GregorianCalendar calendar = new GregorianCalendar(2000, 00, 01, 07, 59, 59);
+			calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+
 			assertEquals("an id", elem.Id);
-			assertEquals(new Date(Date.UTC(100, 00, 01, 07, 59, 59)), elem.UpdatedAt);
+			assertEquals(calendar.getTime(), elem.UpdatedAt);
 		}
 	}
 
