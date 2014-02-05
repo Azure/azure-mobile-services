@@ -157,15 +157,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 						} else { // Lookup result
 							JsonObject patchedJson = results.getAsJsonObject();
 							
-							if (response != null && response.getHeaders() != null) {
-								for (Header header : response.getHeaders()) {
-									if (header.getName().equalsIgnoreCase("ETag")) {
-										patchedJson.remove(VersionSystemPropertyName);
-										patchedJson.addProperty(VersionSystemPropertyName, getValueFromEtag(header.getValue()));
-										break;
-									}
-								}
-							}
+							updateVersionFromETag(response, patchedJson);
 							
 							callback.onCompleted(patchedJson, exception, response);
 						}
@@ -250,15 +242,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 						JsonObject patchedJson = patchOriginalEntityWithResponseEntity(
 								element, jsonEntity);
 						
-						if (response != null && response.getHeaders() != null) {
-							for (Header header : response.getHeaders()) {
-								if (header.getName().equalsIgnoreCase("ETag")) {
-									patchedJson.remove(VersionSystemPropertyName);
-									patchedJson.addProperty(VersionSystemPropertyName, getValueFromEtag(header.getValue()));
-									break;
-								}
-							}
-						}
+						updateVersionFromETag(response, patchedJson);
 
 						callback.onCompleted(patchedJson, exception, response);
 					} else {
@@ -356,15 +340,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 						JsonObject patchedJson = patchOriginalEntityWithResponseEntity(
 								element, jsonEntity);
 						
-						if (response != null && response.getHeaders() != null) {
-							for (Header header : response.getHeaders()) {
-								if (header.getName().equalsIgnoreCase("ETag")) {
-									patchedJson.remove(VersionSystemPropertyName);
-									patchedJson.addProperty(VersionSystemPropertyName, getValueFromEtag(header.getValue()));
-									break;
-								}
-							}
-						}
+						updateVersionFromETag(response, patchedJson);
 						
 						callback.onCompleted(patchedJson, exception, response);
 					} else if (exception != null && response != null && response.getStatus() != null && response.getStatus().getStatusCode() == 412) {
@@ -516,6 +492,27 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 					json.remove(idProperty);
 				} else {
 					throw new IllegalArgumentException("The entity to insert should not have an " + idProperty + " defined with an invalid value");
+				}
+			}
+		}
+	}
+
+	/**
+	 * Updates the Version System Property in the Json Object with the ETag information
+	 * 
+	 * @param response
+	 *            The response containing the ETag Header
+	 * 
+	 * @param json
+	 *            The JsonObject to modify
+	 */
+	private void updateVersionFromETag(ServiceFilterResponse response, JsonObject json) {
+		if (response != null && response.getHeaders() != null) {
+			for (Header header : response.getHeaders()) {
+				if (header.getName().equalsIgnoreCase("ETag")) {
+					json.remove(VersionSystemPropertyName);
+					json.addProperty(VersionSystemPropertyName, getValueFromEtag(header.getValue()));
+					break;
 				}
 			}
 		}
