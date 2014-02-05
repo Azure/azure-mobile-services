@@ -89,9 +89,9 @@ namespace Microsoft.WindowsAzure.MobileServices
             return false;
         }
 
-        public bool DeleteRegistrationByRegistrationId(Registration registration)
+        public bool DeleteRegistrationByRegistrationId(string registrationId)
         {
-            var found = registrations.FirstOrDefault(v => v.Value.RegistrationId.Equals(registration.RegistrationId));
+            var found = registrations.FirstOrDefault(v => v.Value.RegistrationId.Equals(registrationId));
             if (!found.Equals(default(KeyValuePair<string, StoredRegistrationEntry>)))
             {
                 return this.DeleteRegistrationByName(found.Key);

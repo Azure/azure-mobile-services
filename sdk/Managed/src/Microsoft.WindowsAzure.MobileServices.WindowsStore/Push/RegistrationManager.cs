@@ -110,7 +110,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             foreach (var registration in registrations)
             {
                 await this.pushHttpClient.UnregisterAsync(registration.RegistrationId);
-                this.localStorageManager.DeleteRegistrationByRegistrationId(registration);
+                this.localStorageManager.DeleteRegistrationByRegistrationId(registration.RegistrationId);
             }
 
             // clear local storage
