@@ -11,6 +11,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
@@ -20,6 +21,45 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     public class MobileServiceTableGenericTests :TestBase
     {
         #region Read Tests
+
+        [AsyncTestMethod] // this is the default buggy behavior that we've already shipped
+        public async Task ReadAsync_ModifiesStringId_IfItContainsIsoDateValue()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.SetResponseContent(@"[{
+                                        ""id"": ""2014-01-29T23:01:33.444Z"",
+                                        ""__createdAt"": ""2014-01-29T23:01:33.444Z""
+                                        }]");
+
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            IMobileServiceTable<ToDoWithSystemPropertiesType> table = service.GetTable<ToDoWithSystemPropertiesType>();
+
+            IEnumerable<ToDoWithSystemPropertiesType> results = await table.ReadAsync();
+            ToDoWithSystemPropertiesType item = results.First();
+
+            Assert.AreEqual(item.Id, "01/29/2014 23:01:33");
+            Assert.AreEqual(item.CreatedAt, DateTime.Parse("2014-01-29T23:01:33.444Z"));
+        }
+
+        [AsyncTestMethod] // user has to set the serializer setting to round trip dates in string fields correctly
+        public async Task ReadAsync_DoesNotModifyStringId_IfItContainsIsoDateValueAndSerializerIsConfiguredToNotParseDates()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.SetResponseContent(@"[{
+                                        ""id"": ""2014-01-29T23:01:33.444Z"",
+                                        ""__createdAt"": ""2014-01-29T23:01:33.444Z""
+                                        }]");
+
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            service.SerializerSettings.DateParseHandling = DateParseHandling.None;
+            IMobileServiceTable<ToDoWithSystemPropertiesType> table = service.GetTable<ToDoWithSystemPropertiesType>();
+
+            IEnumerable<ToDoWithSystemPropertiesType> results = await table.ReadAsync();
+            ToDoWithSystemPropertiesType item = results.First();
+
+            Assert.AreEqual(item.Id, "2014-01-29T23:01:33.444Z");
+            Assert.AreEqual(item.CreatedAt, DateTime.Parse("2014-01-29T23:01:33.444Z"));
+        }
 
         [AsyncTestMethod]
         public async Task ReadAsyncWithStringIdTypeAndStringIdResponseContent()

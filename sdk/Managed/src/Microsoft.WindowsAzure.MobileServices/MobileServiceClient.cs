@@ -46,11 +46,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal string applicationInstallationId;
 
         /// <summary>
-        /// Gets the <see cref="ITableStorage"/> instance for the remote Mobile Service.
-        /// </summary>
-        internal RemoteTableStorage RemoteStorage { get; private set; }
-
-        /// <summary>
         /// Gets the Uri to the Mobile Services application that is provided by
         /// the call to MobileServiceClient(...).
         /// </summary>
@@ -196,7 +191,6 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             handlers = handlers ?? EmptyHttpMessageHandlers;
             this.HttpClient = new MobileServiceHttpClient(this, handlers);
-            this.RemoteStorage = new RemoteTableStorage(this.HttpClient);
             this.Serializer = new MobileServiceSerializer();
         }
 
@@ -226,7 +220,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                         "tableName"));
             }
 
-            return new MobileServiceTable(tableName, this, this.RemoteStorage);
+            return new MobileServiceTable(tableName, this);
         }
 
         /// <summary>
@@ -242,7 +236,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public IMobileServiceTable<T> GetTable<T>()
         {
             string tableName = this.SerializerSettings.ContractResolver.ResolveTableName(typeof(T));
-            return new MobileServiceTable<T>(tableName, this, this.RemoteStorage);
+            return new MobileServiceTable<T>(tableName, this);
         }
 
         /// <summary>
@@ -321,11 +315,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             if (token == null)
             {
                 throw new ArgumentNullException("token");
-            }
-
-            if (!Enum.IsDefined(typeof(MobileServiceAuthenticationProvider), provider))
-            {
-                throw new ArgumentOutOfRangeException("provider");
             }
 
             MobileServiceTokenAuthentication auth = new MobileServiceTokenAuthentication(this, provider, token);
@@ -489,7 +478,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
             }
             string response = await this.InternalInvokeApiAsync(apiName, content, method, parameters);
-            return response.ParseToJToken();
+            return response.ParseToJToken(this.SerializerSettings);
         }
 
         /// <summary>
@@ -517,7 +506,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns></returns>
         private string CreateAPIUriString(string apiName, IDictionary<string, string> parameters = null) {
             string uriFragment = string.Format(CultureInfo.InvariantCulture, "api/{0}", apiName);
-            string queryString = MobileServiceUrlBuilder.GetQueryString(parameters);
+            string queryString = MobileServiceUrlBuilder.GetQueryString(parameters, useTableAPIRules: false);
             
             return MobileServiceUrlBuilder.CombinePathAndQuery(uriFragment, queryString);            
         }

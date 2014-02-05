@@ -224,7 +224,7 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A member can only have one system property attribute. The member &apos;{0}&apos; on type &apos;{1}&apos; has system property attributes &apos;{2}&apos; and &apos;{3}&apos;. .
+        ///   Looks up a localized string similar to A member can only have one system property attribute. The member &apos;{0}&apos; on type &apos;{1}&apos; has system property attributes &apos;{2}&apos; and &apos;{3}&apos;..
         /// </summary>
         internal static string MobileServiceContractResolver_MultipleSystemPropertyAttributes {
             get {

@@ -15,7 +15,7 @@
     /// will define the module's exports when invoked.
     /// </field>
     var $__modules__ = { };
-    var $__fileVersion__ = "1.0.11121.0";
+    var $__fileVersion__ = "1.0.20203.0";
     
     function require(name) {
         /// <summary>
@@ -288,6 +288,7 @@
                 /// </summary>
                 /// <param name="provider" type="String" mayBeNull="true">
                 /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google', 
+                /// 'windowsazureactivedirectory' (can also use 'aad')
                 /// or 'microsoftaccount'. If no provider is specified, the 'token' parameter
                 /// is considered a Microsoft Account authentication token. If a provider is specified, 
                 /// the 'token' parameter is considered a provider-specific authentication token.
@@ -473,6 +474,27 @@
         var tableRouteSeperatorName = "tables";
         var idNames = ["ID", "Id", "id", "iD"];
         
+        var MobileServiceSystemProperties = {
+            None: 0,
+            CreatedAt: 1,
+            UpdatedAt: 2,
+            Version: 4,
+            All: 0xFFFF
+        }
+        
+        var MobileServiceSystemColumns = {
+            CreatedAt: "__createdAt",
+            UpdatedAt: "__updatedAt",
+            Version: "__version"
+        }
+        
+        Platform.addToMobileServicesClientNamespace({
+            MobileServiceTable:
+                {
+                    SystemProperties: MobileServiceSystemProperties
+                }
+        });
+        
         function MobileServiceTable(tableName, client) {
             /// <summary>
             /// Initializes a new instance of the MobileServiceTable class.
@@ -501,6 +523,8 @@
                 /// </returns>
                 return client;
             };
+        
+            this.systemProperties = 0;
         }
         
         // Export the MobileServiceTable class
@@ -584,6 +608,7 @@
             }
         
             // Add any user-defined query string parameters
+            parameters = addSystemProperties(parameters, this.systemProperties, queryString);
             if (!_.isNull(parameters)) {
                 var userDefinedQueryString = _.url.getQueryString(parameters);
                 if (!_.isNullOrEmpty(queryString)) {
@@ -689,6 +714,7 @@
         
                 // Construct the URL
                 var urlFragment = _.url.combinePathSegments(tableRouteSeperatorName, this.getTableName());
+                parameters = addSystemProperties(parameters, this.systemProperties);
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
@@ -703,8 +729,7 @@
                         if (!_.isNull(error)) {
                             callback(error, null);
                         } else {
-                            var result = _.fromJson(response.responseText);
-        
+                            var result = getItemFromResponse(response);
                             result = Platform.allowPlatformToMutateOriginal(instance, result);
                             callback(null, result);
                         }
@@ -725,6 +750,9 @@
                 /// <param name="callback" type="Function">
                 /// The callback to invoke when the update is complete.
                 /// </param>
+                var version,
+                    headers = [],
+                    serverInstance;
         
                 // Account for absent optional arguments
                 if (_.isNull(callback) && (typeof parameters === 'function')) {
@@ -739,7 +767,15 @@
                     Validate.isValidParametersObject(parameters, 'parameters');
                 }
                 Validate.notNull(callback, 'callback');
-            
+        
+                if (_.isString(instance[idPropertyName])) {
+                    version = instance.__version;
+                    serverInstance = removeSystemProperties(instance);
+                } else {
+                    serverInstance = instance;
+                }
+                parameters = addSystemProperties(parameters, this.systemProperties);
+        
                 // Construct the URL
                 var urlFragment =  _.url.combinePathSegments(
                         tableRouteSeperatorName,
@@ -750,16 +786,25 @@
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
                 }
         
+                if (!_.isNullOrEmpty(version)) {
+                    headers['If-Match'] = getEtagFromVersion(version);
+                }
+        
                 // Make the request
                 this.getMobileServiceClient()._request(
                     'PATCH',
                     urlFragment,
-                    instance,
+                    serverInstance,
+                    false,
+                    headers,
                     function (error, response) {
                         if (!_.isNull(error)) {
+                            if (error.request && error.request.status === 412) {
+                                error.serverInstance = _.fromJson(error.request.responseText);
+                            }
                             callback(error, null);
                         } else {
-                            var result = _.fromJson(response.responseText);                    
+                            var result = getItemFromResponse(response);
                             result = Platform.allowPlatformToMutateOriginal(instance, result);
                             callback(null, result);
                         }
@@ -882,6 +927,8 @@
                         tableRouteSeperatorName,
                         this.getTableName(),
                         encodeURIComponent(id.toString()));
+        
+                parameters = addSystemProperties(parameters, this.systemProperties);
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
@@ -896,7 +943,7 @@
                         if (!_.isNull(error)) {
                             callback(error, null);
                         } else {
-                            var result = _.fromJson(response.responseText);
+                            var result = getItemFromResponse(response);
                             callback(null, result);
                         }
                     });
@@ -926,6 +973,7 @@
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
                 Validate.isValidId(instance[idPropertyName], 'instance.' + idPropertyName);
+                parameters = addSystemProperties(parameters, this.systemProperties);
                 if (!_.isNull(parameters)) {
                     Validate.isValidParametersObject(parameters);
                 }
@@ -985,6 +1033,78 @@
         for (; i < queryOperators.length; i++) {
             // Avoid unintended closure capture
             copyOperator(queryOperators[i]);
+        }
+        
+        // Table system properties
+        function removeSystemProperties(instance) {
+            var copy = {};
+            for(var property in instance) {
+                if (property.substr(0, 2) !== '__') {
+                    copy[property] = instance[property];
+                }
+            }
+            return copy;
+        }
+        
+        function addSystemProperties(parameters, properties, querystring) {
+            if (properties === MobileServiceSystemProperties.None || (typeof querystring === 'string' && querystring.toLowerCase().indexOf('__systemproperties') >= 0)) {
+                return parameters;
+            }
+        
+            // Initialize an object if none passed in
+            parameters = parameters || {};
+        
+            // Don't override system properties if already set
+            if(!_.isNull(parameters['__systemProperties'])) {
+                return parameters;
+            }
+        
+            if (properties === MobileServiceSystemProperties.All) {
+                parameters['__systemProperties'] = '*';
+            } else {
+                var options = [];
+                if (MobileServiceSystemProperties.CreatedAt & properties) {
+                    options.push(MobileServiceSystemColumns.CreatedAt);
+                }
+                if (MobileServiceSystemProperties.UpdatedAt & properties) {
+                    options.push(MobileServiceSystemColumns.UpdatedAt);
+                }
+                if (MobileServiceSystemProperties.Version & properties) {
+                    options.push(MobileServiceSystemColumns.Version);
+                }
+                parameters['__systemProperties'] = options.join(',');
+            }
+        
+            return parameters;
+        }
+        
+        // Add double quotes and unescape any internal quotes
+        function getItemFromResponse(response) {
+            var result = _.fromJson(response.responseText);
+            if (response.getResponseHeader) {
+                var eTag = response.getResponseHeader('ETag');
+                if (!_.isNullOrEmpty(eTag)) {
+                    result.__version = getVersionFromEtag(eTag);
+                }
+            }
+            return result;
+        }
+        
+        // Add wrapping double quotes and escape all double quotes
+        function getEtagFromVersion(version) {
+            var result = version.replace(/\"/g, '\\\"');
+            return "\"" + result + "\"";
+        }
+        
+        // Remove surrounding double quotes and unescape internal quotes
+        function getVersionFromEtag(etag) {
+            var len = etag.length,
+                result = etag;
+        
+            if (len > 1 && etag[0] === '"' && etag[len - 1] === '"') {
+                result = etag.substr(1, len - 2);
+            }
+            return result.replace(/\\\"/g, '"');
         }
     };
 
@@ -1067,7 +1187,8 @@
             /// Microsoft Account authentication token.
             /// </summary>
             /// <param name="provider" type="String" mayBeNull="true">
-            /// Optional name of the authentication provider to use; one of 'facebook', 'twitter', 'google', or 'microsoftaccount'.
+            /// Optional name of the authentication provider to use; one of 'facebook', 'twitter', 'google',
+            /// 'windowsazureactivedirectory' (can also use 'aad'), or 'microsoftaccount'.
             /// </param>
             /// <param name="token" type="Object"  mayBeNull="true">
             /// Optional provider specific object with existing OAuth token to log in with or
@@ -1124,6 +1245,10 @@
             }
         
             if (!_.isNull(provider)) {
+                if (provider.toLowerCase() === 'windowsazureactivedirectory') {
+                    // The mobile service REST API uses '/login/aad' for Windows Azure Active Directory
+                    provider = 'aad';
+                }
                 this.loginWithProvider(provider, token, useSingleSignOn, callback);
             }
             else {
@@ -1163,7 +1288,8 @@
             /// Log a user into a Mobile Services application given a provider name and optional token object.
             /// </summary>
             /// <param name="provider" type="String">
-            /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google', or 'microsoftaccount'.
+            /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google',
+            /// 'windowsazureactivedirectory' (can also use 'aad'), or 'microsoftaccount'.
             /// </param>
             /// <param name="token" type="Object" mayBeNull="true">
             /// Optional, provider specific object with existing OAuth token to log in with.
@@ -1896,7 +2022,7 @@
                     return false;
                 }
         
-                var ex = /[+"/?`\\]|[\u0000-\u001F]|[\u007F-\u009F]|^\.{1,2}$/;
+                var ex = /[+"\/?`\\]|[\u0000-\u001F]|[\u007F-\u009F]|^\.{1,2}$/;
                 if (value.match(ex) !== null) {
                     return false;
                 }
@@ -1908,7 +2034,7 @@
             }
         
             return false;
-        }
+        };
         
         exports.isString = function (value) {
             /// <summary>
@@ -2352,7 +2478,7 @@
             if (!_.isValidId(value)) {
                 throw _.format(Platform.getResourceString("Validate_InvalidId"), name || 'id');
             }
-        }
+        };
         
         exports.isDate = function (value, name) {
             /// <summary>
@@ -9586,11 +9712,11 @@
 })(this || exports);
 
 // SIG // Begin signature block
-// SIG // MIIkIAYJKoZIhvcNAQcCoIIkETCCJA0CAQExDzANBglg
+// SIG // MIIkIwYJKoZIhvcNAQcCoIIkFDCCJBACAQExDzANBglg
 // SIG // hkgBZQMEAgEFADB3BgorBgEEAYI3AgEEoGkwZzAyBgor
 // SIG // BgEEAYI3AgEeMCQCAQEEEBDgyQbOONQRoqMAEEvTUJAC
 // SIG // AQACAQACAQACAQACAQAwMTANBglghkgBZQMEAgEFAAQg
-// SIG // 8p4PN9zYuW3vgyUT0mXLxSg0v9nO14eBQJ/nA12Djo6g
+// SIG // 4rpdSvWmfoof6uMWQiIaJGlILu4j4wVBgoWIJIiamb+g
 // SIG // gg2SMIIGEDCCA/igAwIBAgITMwAAABp3u3SzB9EWuAAA
 // SIG // AAAAGjANBgkqhkiG9w0BAQsFADB+MQswCQYDVQQGEwJV
 // SIG // UzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMH
@@ -9696,7 +9822,7 @@
 // SIG // nvi/a7dLl+LrdXga7Oo3mXkYS//WsyNodeav+vyL6wuA
 // SIG // 6mk7r/ww7QRMjt/fdW1jkT3RnVZOT7+AVyKheBEyIXrv
 // SIG // QQqxP/uozKRdwaGIm1dxVk5IRcBCyZt2WwqASGv9eZ/B
-// SIG // vW1taslScxMNelDNMYIV5jCCFeICAQEwgZUwfjELMAkG
+// SIG // vW1taslScxMNelDNMYIV6TCCFeUCAQEwgZUwfjELMAkG
 // SIG // A1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAO
 // SIG // BgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29m
 // SIG // dCBDb3Jwb3JhdGlvbjEoMCYGA1UEAxMfTWljcm9zb2Z0
@@ -9704,31 +9830,31 @@
 // SIG // B9EWuAAAAAAAGjANBglghkgBZQMEAgEFAKCB1DAZBgkq
 // SIG // hkiG9w0BCQMxDAYKKwYBBAGCNwIBBDAcBgorBgEEAYI3
 // SIG // AgELMQ4wDAYKKwYBBAGCNwIBFTAvBgkqhkiG9w0BCQQx
-// SIG // IgQgtB0cn9NWHO+uTrfHO1PIZvkiA43gsGXp6mCVriKx
-// SIG // O7kwaAYKKwYBBAGCNwIBDDFaMFigPoA8AE0AaQBjAHIA
+// SIG // IgQgwiWRyVURMEsvhXQD6yxlOQRngyR56S5X+vvI6Yag
+// SIG // UP8waAYKKwYBBAGCNwIBDDFaMFigPoA8AE0AaQBjAHIA
 // SIG // bwBzAG8AZgB0ACAAVwBpAG4AZABvAHcAcwAgAEEAegB1
 // SIG // AHIAZQAgAE0AbwBiAGkAbABloRaAFGh0dHA6Ly93d3cu
-// SIG // YXNwLm5ldC8gMA0GCSqGSIb3DQEBAQUABIIBALqGMV4e
-// SIG // 6b/SbZGfPt17YaKrtx+shV09FRsJF/ox037Wuy/KK9h/
-// SIG // t0XQb7wZghQI1AvRoQXSp/AyyKamPycFiBdV1oDBWjkU
-// SIG // AoMaHQRs3sXIFgQwlZqhSjmor3ZegE54ykjNcAiB2WEI
-// SIG // iLM/Yf3aPwJTvNJyUPnLMfvKxKZyvGRY30BB2leKHXGA
-// SIG // tmjGyzoMLZpBvYtEI+eq69N4gKHoALj5ltMo3lhrcnaN
-// SIG // adHLqPreZtSiD8bw93xwTBNvqnWIcc6wLAe2WYP1TXEX
-// SIG // juNk4ujPDEBKgC7k3NkY4h/MbZs6JPjuO6Dgz5s2icpv
-// SIG // gA2PvDygr4PTTpxFJnWA69Ap3quhghNKMIITRgYKKwYB
-// SIG // BAGCNwMDATGCEzYwghMyBgkqhkiG9w0BBwKgghMjMIIT
-// SIG // HwIBAzEPMA0GCWCGSAFlAwQCAQUAMIIBPQYLKoZIhvcN
+// SIG // YXNwLm5ldC8gMA0GCSqGSIb3DQEBAQUABIIBAL03S0C9
+// SIG // xS6IpKNgGYgaQK0Eaq+kRYDohXAtlAGOqj9MO9PAyCEE
+// SIG // /U7OiL7fwoJoJ7poNdFBsEeRtvNsP70DWLbmftG7MVqs
+// SIG // /xZQp+MGqFRGLLNNuwBId3Iyv7ijAowTNWv1bjpdj1ER
+// SIG // cGcgX5WMEAxAld35BkTeo05hCJ14SwMpiq7uy0KQGqGu
+// SIG // UyOXXfqIiMH/dYpuGTphUmRAYCizFT7yVX9i99EkB9cq
+// SIG // XK0xMJITwB0fa3cDRSPMgNIQmsp5Xt7jdhAHQngGaDZP
+// SIG // eOC403n201ip6EUqX05hbNih3UA8+LDiBsBVyvfEwlYa
+// SIG // PPsRuIEoUqYB3+gXBYXhUSphwRqhghNNMIITSQYKKwYB
+// SIG // BAGCNwMDATGCEzkwghM1BgkqhkiG9w0BBwKgghMmMIIT
+// SIG // IgIBAzEPMA0GCWCGSAFlAwQCAQUAMIIBPQYLKoZIhvcN
 // SIG // AQkQAQSgggEsBIIBKDCCASQCAQEGCisGAQQBhFkKAwEw
-// SIG // MTANBglghkgBZQMEAgEFAAQg/AYutBIsZyDZvYJw/Twf
-// SIG // BDa9LuDYGwTTdh2UTDfKiRcCBlKLoczw1RgTMjAxMzEx
-// SIG // MjExODIwMDMuODk5WjAHAgEBgAIB9KCBuaSBtjCBszEL
+// SIG // MTANBglghkgBZQMEAgEFAAQgiVeD6BhDMbE+gVDIVyC/
+// SIG // khADXdiMGjyOXhiAERPF2ogCBlLel5ljKRgTMjAxNDAy
+// SIG // MDMxOTAxMDkuNjMyWjAHAgEBgAIB9KCBuaSBtjCBszEL
 // SIG // MAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24x
 // SIG // EDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jv
 // SIG // c29mdCBDb3Jwb3JhdGlvbjENMAsGA1UECxMETU9QUjEn
-// SIG // MCUGA1UECxMebkNpcGhlciBEU0UgRVNOOkY1MjgtMzc3
-// SIG // Ny04QTc2MSUwIwYDVQQDExxNaWNyb3NvZnQgVGltZS1T
-// SIG // dGFtcCBTZXJ2aWNloIIOzTCCBnEwggRZoAMCAQICCmEJ
+// SIG // MCUGA1UECxMebkNpcGhlciBEU0UgRVNOOjMxQzUtMzBC
+// SIG // QS03QzkxMSUwIwYDVQQDExxNaWNyb3NvZnQgVGltZS1T
+// SIG // dGFtcCBTZXJ2aWNloIIO0DCCBnEwggRZoAMCAQICCmEJ
 // SIG // gSoAAAAAAAIwDQYJKoZIhvcNAQELBQAwgYgxCzAJBgNV
 // SIG // BAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYD
 // SIG // VQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQg
@@ -9779,28 +9905,28 @@
 // SIG // dDJL32N79ZmKLxvHIa9Zta7cRDyXUHHXodLFVeNp3lfB
 // SIG // 0d4wwP3M5k37Db9dT+mdHhk4L7zPWAUu7w2gUDXa7wkn
 // SIG // HNWzfjUeCLraNtvTX4/edIhJEjCCBNowggPCoAMCAQIC
-// SIG // EzMAAAApl058gssgFkEAAAAAACkwDQYJKoZIhvcNAQEL
+// SIG // EzMAAAArcqou9km77NcAAAAAACswDQYJKoZIhvcNAQEL
 // SIG // BQAwfDELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hp
 // SIG // bmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoT
 // SIG // FU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEmMCQGA1UEAxMd
 // SIG // TWljcm9zb2Z0IFRpbWUtU3RhbXAgUENBIDIwMTAwHhcN
-// SIG // MTMwMzI3MjAxMzE0WhcNMTQwNjI3MjAxMzE0WjCBszEL
+// SIG // MTMwMzI3MjAxMzE1WhcNMTQwNjI3MjAxMzE1WjCBszEL
 // SIG // MAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24x
 // SIG // EDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jv
 // SIG // c29mdCBDb3Jwb3JhdGlvbjENMAsGA1UECxMETU9QUjEn
-// SIG // MCUGA1UECxMebkNpcGhlciBEU0UgRVNOOkY1MjgtMzc3
-// SIG // Ny04QTc2MSUwIwYDVQQDExxNaWNyb3NvZnQgVGltZS1T
+// SIG // MCUGA1UECxMebkNpcGhlciBEU0UgRVNOOjMxQzUtMzBC
+// SIG // QS03QzkxMSUwIwYDVQQDExxNaWNyb3NvZnQgVGltZS1T
 // SIG // dGFtcCBTZXJ2aWNlMIIBIjANBgkqhkiG9w0BAQEFAAOC
-// SIG // AQ8AMIIBCgKCAQEA6D/lswpfMZxWjEH9l+wXGrFW4vjy
-// SIG // LfQYEc6QzKdfpeu4uGc7JubRyRnNfwrbx6wjtaKQb4kt
-// SIG // x1sLgPMxVehj28+0Ld+9bd243ef6U+OLt1ojkP3eDrWi
-// SIG // O7s1ed5H9FvrcSEEaFaeqjgBgNf4rPFXKC4eZ4xTB71u
-// SIG // 6ZWYg/UyjPmYcAlg/IxwmUcs6RVydYepeSCxSRy8dWxn
-// SIG // uk9BWygdPHgiiPWbzsrTmAwH8D8pEU+UO7aMuT8cSGdc
-// SIG // f15bg56W4RqU0KAdCOD4XKg7QiGv628gNa7WOmQGIg9d
-// SIG // /6yEDc9xUNL2qewdm3BGR8EsYbDPXaAcMsHoVMhlNzWk
-// SIG // QbHOcQIDAQABo4IBGzCCARcwHQYDVR0OBBYEFC+jgoTd
-// SIG // MmQSiPUFUXZPi4o9XmgEMB8GA1UdIwQYMBaAFNVjOlyK
+// SIG // AQ8AMIIBCgKCAQEA3Z7t/Pp/HRcdiNXB0W8SSbw4GhHt
+// SIG // LWNtGfzQrsfCr4860ca9qncVZBQnAheS3S9li6d0R3eX
+// SIG // KCT4R0NqGMPybXzuf0wCRD5tRUGDbW1x7VlkmbZarrGC
+// SIG // rzvkVOpq+kH1GKrdC9XJxH4Q7D5UfeN15Q1yCASFFg22
+// SIG // aydaqGyCPaQ3HtPcFvw2xg5SqqiKDO7jtZZQLIYqvrMN
+// SIG // b/VSKlS5JEgyDVIVPSfjgN1fgs4ufYURw2KBeoV6XwR+
+// SIG // emmvk02j37DWsrZdbmZB7xO5mtltxSZwhKIHFVxrt+M0
+// SIG // OSdzyqhH8zFpBXHtfAtD1tiZEwUIh0PYD6twcRyaR4PS
+// SIG // OQxo8wIDAQABo4IBGzCCARcwHQYDVR0OBBYEFACIYILy
+// SIG // 9WDlBpejP8vw4yXLFeAVMB8GA1UdIwQYMBaAFNVjOlyK
 // SIG // MZDzQ3t8RhvFM2hahW1VMFYGA1UdHwRPME0wS6BJoEeG
 // SIG // RWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2kvY3Js
 // SIG // L3Byb2R1Y3RzL01pY1RpbVN0YVBDQV8yMDEwLTA3LTAx
@@ -9808,63 +9934,63 @@
 // SIG // Pmh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2Vy
 // SIG // dHMvTWljVGltU3RhUENBXzIwMTAtMDctMDEuY3J0MAwG
 // SIG // A1UdEwEB/wQCMAAwEwYDVR0lBAwwCgYIKwYBBQUHAwgw
-// SIG // DQYJKoZIhvcNAQELBQADggEBAHKeD7Iq5u2uNLJ1b5DA
-// SIG // vCuod4a2aaw3IdTZCIj6RoNJvL7vu2h9bhlBBLj+t5mM
-// SIG // YIGWXjkNhHmaqeWyHF6C7JJyUkk+fvNt4kD5ljt3bPyj
-// SIG // Kj6ozKzzlO2NEYTLqh1ZVR+F+20OPfYdEWeh9JJVg66P
-// SIG // dhYKK19GMvOqvPZqN4ebZYaxVQhICwf4WZnODoymhZgu
-// SIG // JOUIPAWUQDmmcA0/H+sJuWE2yW/+vP8zEJxBhPK8Y/bb
-// SIG // hlG0xLY8dNenGbMr+I+slQ4+e6kVJi59EqPeW3TEDJ0z
-// SIG // qn6iPoQUaa+QcbV3C5OEQVIgjqxls71YFHutdqlV/G47
-// SIG // r+rFCChCCUGN/G2hggN2MIICXgIBATCB46GBuaSBtjCB
+// SIG // DQYJKoZIhvcNAQELBQADggEBAAYWV+d5jEsbOPGOzJ7O
+// SIG // 1HVvnfxgluZnVZGGW2GsKzFJ8BSMZUnvetBXmjmffxan
+// SIG // rjFXwJLrqfe5KvjJ7Y9gJpoO22KE2sT2YiDI/yEYXMnu
+// SIG // mnKLr8uTzEQ/aSr1XYLGWatOklFu5CkROP10duIBC8B0
+// SIG // +1Yn3EeJuNmlHHcDNXFYJsa0K94Ho0go0+ZAE/TbaxlU
+// SIG // K67xzqmvLbPB1bbU1TkyBJ7qdw5X4kVMDZdFvBertWNk
+// SIG // k6OgaebVqhtmQU/YQhW8SibyaP89PPZi7BPR3C/rUjHX
+// SIG // wzgvqoYihQ4Yvij0OFzn6E/B8PYIcsnK12yTQMQEFd6J
+// SIG // UzKCerQnogg1o7yhggN5MIICYQIBATCB46GBuaSBtjCB
 // SIG // szELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0
 // SIG // b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1p
 // SIG // Y3Jvc29mdCBDb3Jwb3JhdGlvbjENMAsGA1UECxMETU9Q
-// SIG // UjEnMCUGA1UECxMebkNpcGhlciBEU0UgRVNOOkY1Mjgt
-// SIG // Mzc3Ny04QTc2MSUwIwYDVQQDExxNaWNyb3NvZnQgVGlt
+// SIG // UjEnMCUGA1UECxMebkNpcGhlciBEU0UgRVNOOjMxQzUt
+// SIG // MzBCQS03QzkxMSUwIwYDVQQDExxNaWNyb3NvZnQgVGlt
 // SIG // ZS1TdGFtcCBTZXJ2aWNloiUKAQEwCQYFKw4DAhoFAAMV
-// SIG // AHTC2Gy7VPUsa2m8ChJ/Qn72CouKoIHCMIG/pIG8MIG5
+// SIG // ABdKA9rBDqP5NngZ5vhFNgZYAya8oIHCMIG/pIG8MIG5
 // SIG // MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3Rv
 // SIG // bjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWlj
 // SIG // cm9zb2Z0IENvcnBvcmF0aW9uMQ0wCwYDVQQLEwRNT1BS
 // SIG // MScwJQYDVQQLEx5uQ2lwaGVyIE5UUyBFU046QjAyNy1D
 // SIG // NkY4LTFEODgxKzApBgNVBAMTIk1pY3Jvc29mdCBUaW1l
 // SIG // IFNvdXJjZSBNYXN0ZXIgQ2xvY2swDQYJKoZIhvcNAQEF
-// SIG // BQACBQDWOHlIMCIYDzIwMTMxMTIxMTIyMTI4WhgPMjAx
-// SIG // MzExMjIxMjIxMjhaMHQwOgYKKwYBBAGEWQoEATEsMCow
-// SIG // CgIFANY4eUgCAQAwBwIBAAICI54wBwIBAAICF5wwCgIF
-// SIG // ANY5ysgCAQAwNgYKKwYBBAGEWQoEAjEoMCYwDAYKKwYB
-// SIG // BAGEWQoDAaAKMAgCAQACAxbjYKEKMAgCAQACAwehIDAN
-// SIG // BgkqhkiG9w0BAQUFAAOCAQEAMTN7Th2gnogomOrWpt2/
-// SIG // qqpzYOv+C329+pGTsYfpHhTdiGRtQYoR82uWiK+0WBET
-// SIG // pV2oye62ycnoccQPM9yd8YxuR1RawTtEpqWenjc2r2/V
-// SIG // xWNEv25FckPQV2N/0rwKhpSkaCEsw7VYDHEzL4AVwB4R
-// SIG // M9iVjaCDXYFFtf6yS9NE/Iwz7Ef/OnJCDPfnrJhXRDmG
-// SIG // NLRABOC1v64OSXcfmzmmdvdFRkCv6tRNDwTbBYeGFW0s
-// SIG // uf/tKBQai+U9Toodb0sVGTZ5I4Ju8vcmkhpzpV3uT6Sy
-// SIG // Q7re1sQgdHet3+viS0Ax6F1u3Qtka+JOvZVFCNYU3D0A
-// SIG // mOCtWO8IBM3SSDGCAvUwggLxAgEBMIGTMHwxCzAJBgNV
-// SIG // BAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYD
-// SIG // VQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQg
-// SIG // Q29ycG9yYXRpb24xJjAkBgNVBAMTHU1pY3Jvc29mdCBU
-// SIG // aW1lLVN0YW1wIFBDQSAyMDEwAhMzAAAAKZdOfILLIBZB
-// SIG // AAAAAAApMA0GCWCGSAFlAwQCAQUAoIIBMjAaBgkqhkiG
-// SIG // 9w0BCQMxDQYLKoZIhvcNAQkQAQQwLwYJKoZIhvcNAQkE
-// SIG // MSIEIHxGH9XcMAAi8wxEibRneMFHp4zIeU2lBEd8WaEf
-// SIG // 7ivRMIHiBgsqhkiG9w0BCRACDDGB0jCBzzCBzDCBsQQU
-// SIG // dMLYbLtU9SxrabwKEn9CfvYKi4owgZgwgYCkfjB8MQsw
-// SIG // CQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQ
-// SIG // MA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9z
-// SIG // b2Z0IENvcnBvcmF0aW9uMSYwJAYDVQQDEx1NaWNyb3Nv
-// SIG // ZnQgVGltZS1TdGFtcCBQQ0EgMjAxMAITMwAAACmXTnyC
-// SIG // yyAWQQAAAAAAKTAWBBS8FCYKDmBpj3V5lwfBNbM7mz2W
-// SIG // kDANBgkqhkiG9w0BAQsFAASCAQBMjRKp4vYCZibc3oB4
-// SIG // UbQmXW59NMs1tWuXpVOCmz+dpB3sHheID1Xkgqw0ZK/Y
-// SIG // 5HTwUmbKBrpC7TGQ6PV2SAMiaMsDnxMJ7wlkGSVeQp1L
-// SIG // +M6RE/WhKYtXA5KReLfl9lx3VW0ZUAzveXP5UzYzjEGf
-// SIG // QZW72ZGAviWCrceTw9tHdHgYCO+M/MDiOnKE7c6/HRRO
-// SIG // 1DQ9lPYYPP2HF0ab4DtPJigv/DgUsLEbmgSWjo1pXgai
-// SIG // irsHDYIBE4pQ7XmnSI9ROZ03qczxCWqo5kSkiYcx6AbI
-// SIG // 4j45JkrhE+Tyd5OLbMGea26lquptotaNY9V0lVcoPkX5
-// SIG // CG+qju7LbH1wK7bY
+// SIG // BQACBQDWmWBdMCIYDzIwMTQwMjAzMDAyNTAxWhgPMjAx
+// SIG // NDAyMDQwMDI1MDFaMHcwPQYKKwYBBAGEWQoEATEvMC0w
+// SIG // CgIFANaZYF0CAQAwCgIBAAICDqwCAf8wBwIBAAICGEsw
+// SIG // CgIFANaasd0CAQAwNgYKKwYBBAGEWQoEAjEoMCYwDAYK
+// SIG // KwYBBAGEWQoDAaAKMAgCAQACAxbjYKEKMAgCAQACAweh
+// SIG // IDANBgkqhkiG9w0BAQUFAAOCAQEAeGtr3JlSQEEiBR8L
+// SIG // 0ITGGXoipnqjCFtl1reckap+PN9KHUukbWEeydH5a15Z
+// SIG // H/CWwYT8RyEUnQvR5o2YJVlmhBPFdfPRKaTsDX+aV+sB
+// SIG // FBc0oO3Uhi8QgBof/ip/OcpuNXyOBP1duz/Ea0Z1KP+Y
+// SIG // Wqe4iG0fA7BC0HAFPuieUTsfWOgzU93OxvLA4qXOruGv
+// SIG // FuAISYOMamKmTuUAJ7EKohmyApDYlkWtjagc2h7RQvJn
+// SIG // +VXIH2TdMUA/9JHOYoicih0MlY3PD7T+kcjXCcBovVnj
+// SIG // ZX/74A/7toXGjYmGxQQNX8Jbjto1pk9wmPiMBh7MkjK7
+// SIG // YJmQByc0GJTe2geBCTGCAvUwggLxAgEBMIGTMHwxCzAJ
+// SIG // BgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAw
+// SIG // DgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3Nv
+// SIG // ZnQgQ29ycG9yYXRpb24xJjAkBgNVBAMTHU1pY3Jvc29m
+// SIG // dCBUaW1lLVN0YW1wIFBDQSAyMDEwAhMzAAAAK3KqLvZJ
+// SIG // u+zXAAAAAAArMA0GCWCGSAFlAwQCAQUAoIIBMjAaBgkq
+// SIG // hkiG9w0BCQMxDQYLKoZIhvcNAQkQAQQwLwYJKoZIhvcN
+// SIG // AQkEMSIEIALPXP2U2glLk8gHx0JBemOxUP4XxMurUPeh
+// SIG // mGOQ0nBkMIHiBgsqhkiG9w0BCRACDDGB0jCBzzCBzDCB
+// SIG // sQQUF0oD2sEOo/k2eBnm+EU2BlgDJrwwgZgwgYCkfjB8
+// SIG // MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3Rv
+// SIG // bjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWlj
+// SIG // cm9zb2Z0IENvcnBvcmF0aW9uMSYwJAYDVQQDEx1NaWNy
+// SIG // b3NvZnQgVGltZS1TdGFtcCBQQ0EgMjAxMAITMwAAACty
+// SIG // qi72Sbvs1wAAAAAAKzAWBBSivBmcm/O/Bhu2CkE4S4mp
+// SIG // MrRQPjANBgkqhkiG9w0BAQsFAASCAQANFtnOiM9wl5By
+// SIG // 4XeKp/d3VLSzD2O1mImVStaSZRhCLr7PLqP2HgJwqm8t
+// SIG // PZIDQlJvw91u0KKYSpCa2hrFLkheC4uZbJkkPXubeDeM
+// SIG // rXs07+DZwLW+RvE3pgMIpE9MXf/gx20x1VdaV8/3T7bZ
+// SIG // l4m5sa5A1Bnig8B+zQC2GRZ0GpvVpdbngFUTFp5OsRUE
+// SIG // CCQwlkYLPCrepuB3+O6z4sLG7bPtQNEytNMMEoku/ZNk
+// SIG // HMeSzATu2t5RmBN0RneSE8e5tKB5TD1fWCYcl65Ky334
+// SIG // ZPArLwpKj9fBT+ZecWOmrbYGovMnS2jhsxj5cnlrOz2G
+// SIG // XpHWGjzynrNEVfNiqdGH
 // SIG // End signature block

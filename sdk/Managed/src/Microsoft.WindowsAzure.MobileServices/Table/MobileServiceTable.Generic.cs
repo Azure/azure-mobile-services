@@ -34,11 +34,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="client">
         /// The <see cref="MobileServiceClient"/> associated with this table.
         /// </param>
-        /// <param name="storageContext">
-        /// The <see cref="ITableStorage"/> implementation to use with this table.
-        /// </param>
-        public MobileServiceTable(string tableName, MobileServiceClient client, ITableStorage storageContext)
-            : base(tableName, client, storageContext)
+        public MobileServiceTable(string tableName, MobileServiceClient client)
+            : base(tableName, client)
         {
             this.queryProvider = new MobileServiceTableQueryProvider();
             this.SystemProperties = client.Serializer.GetSystemProperties(typeof(T));

@@ -238,6 +238,7 @@ MobileServiceClient.prototype.login = Platform.async(
         /// </summary>
         /// <param name="provider" type="String" mayBeNull="true">
         /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google', 
+        /// 'windowsazureactivedirectory' (can also use 'aad')
         /// or 'microsoftaccount'. If no provider is specified, the 'token' parameter
         /// is considered a Microsoft Account authentication token. If a provider is specified, 
         /// the 'token' parameter is considered a provider-specific authentication token.

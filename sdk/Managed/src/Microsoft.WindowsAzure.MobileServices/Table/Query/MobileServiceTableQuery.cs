@@ -145,8 +145,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             // never leak to users.
             MobileServiceTable<U> table = new MobileServiceTable<U>(
                 this.Table.TableName,
-                this.Table.MobileServiceClient,
-                this.Table.MobileServiceClient.RemoteStorage);
+                this.Table.MobileServiceClient);
 
             return this.QueryProvider.Create(table,
                                              Queryable.Select(this.Query, selector),
