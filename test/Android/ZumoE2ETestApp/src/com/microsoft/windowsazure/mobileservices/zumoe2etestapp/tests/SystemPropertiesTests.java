@@ -30,6 +30,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
 
+import android.annotation.SuppressLint;
+import android.os.AsyncTask;
+import android.os.Build;
 import android.util.Pair;
 
 import com.google.gson.JsonObject;
@@ -117,8 +120,9 @@ public class SystemPropertiesTests extends TestGroup {
 			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
 				final TestCase test = this;
 
-				new Thread(new Runnable() {
-					public void run() {
+				executeTask(new AsyncTask<Void, Void, Void>() {
+					@Override
+					protected Void doInBackground(Void... params) {
 						TestResult result = new TestResult();
 						result.setTestCase(test);
 
@@ -310,8 +314,10 @@ public class SystemPropertiesTests extends TestGroup {
 								callback.onTestComplete(test, result);
 							}
 						}
-					};
-				}).start();
+
+						return null;
+					}
+				});
 			}
 		};
 
@@ -326,8 +332,9 @@ public class SystemPropertiesTests extends TestGroup {
 			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
 				final TestCase test = this;
 
-				new Thread(new Runnable() {
-					public void run() {
+				executeTask(new AsyncTask<Void, Void, Void>() {
+					@Override
+					protected Void doInBackground(Void... params) {
 						TestResult result = new TestResult();
 						result.setTestCase(test);
 
@@ -425,8 +432,10 @@ public class SystemPropertiesTests extends TestGroup {
 								callback.onTestComplete(test, result);
 							}
 						}
-					};
-				}).start();
+
+						return null;
+					}
+				});
 			}
 		};
 
@@ -441,8 +450,9 @@ public class SystemPropertiesTests extends TestGroup {
 			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
 				final TestCase test = this;
 
-				new Thread(new Runnable() {
-					public void run() {
+				executeTask(new AsyncTask<Void, Void, Void>() {
+					@Override
+					protected Void doInBackground(Void... params) {
 						TestResult result = new TestResult();
 						result.setTestCase(test);
 
@@ -580,8 +590,10 @@ public class SystemPropertiesTests extends TestGroup {
 								callback.onTestComplete(test, result);
 							}
 						}
-					};
-				}).start();
+
+						return null;
+					}
+				});
 			}
 		};
 
@@ -596,8 +608,9 @@ public class SystemPropertiesTests extends TestGroup {
 			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
 				final TestCase test = this;
 
-				new Thread(new Runnable() {
-					public void run() {
+				executeTask(new AsyncTask<Void, Void, Void>() {
+					@Override
+					protected Void doInBackground(Void... params) {
 						TestResult result = new TestResult();
 						result.setTestCase(test);
 
@@ -646,8 +659,10 @@ public class SystemPropertiesTests extends TestGroup {
 								callback.onTestComplete(test, result);
 							}
 						}
+
+						return null;
 					};
-				}).start();
+				});
 			}
 		};
 
@@ -663,8 +678,9 @@ public class SystemPropertiesTests extends TestGroup {
 			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
 				final TestCase test = this;
 
-				new Thread(new Runnable() {
-					public void run() {
+				executeTask(new AsyncTask<Void, Void, Void>() {
+					@Override
+					protected Void doInBackground(Void... params) {
 						TestResult result = new TestResult();
 						result.setTestCase(test);
 
@@ -703,8 +719,10 @@ public class SystemPropertiesTests extends TestGroup {
 								callback.onTestComplete(test, result);
 							}
 						}
-					};
-				}).start();
+
+						return null;
+					}
+				});
 			}
 		};
 
@@ -956,6 +974,17 @@ public class SystemPropertiesTests extends TestGroup {
 
 		if (ex != null) {
 			throw ex;
+		}
+	}
+
+	@SuppressLint("NewApi")
+	private void executeTask(AsyncTask<Void, Void, Void> task) {
+		// If it's running with Honeycomb or greater, it must execute each
+		// request in a different thread
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			task.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			task.execute();
 		}
 	}
 
