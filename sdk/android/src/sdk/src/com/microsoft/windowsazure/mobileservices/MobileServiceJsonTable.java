@@ -506,7 +506,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	 * @param json
 	 *            The JsonObject to modify
 	 */
-	private void updateVersionFromETag(ServiceFilterResponse response, JsonObject json) {
+	private static void updateVersionFromETag(ServiceFilterResponse response, JsonObject json) {
 		if (response != null && response.getHeaders() != null) {
 			for (Header header : response.getHeaders()) {
 				if (header.getName().equalsIgnoreCase("ETag")) {

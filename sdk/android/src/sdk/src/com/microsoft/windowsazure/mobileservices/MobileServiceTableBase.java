@@ -470,30 +470,13 @@ abstract class MobileServiceTableBase<E> {
 					}
 					
 					return id;
-				} else if (idElement.isJsonNull()) {
-					throw new IllegalArgumentException("The entity must have a valid numeric or string id property.");
-				}
-				else {
+				} else {
 					throw new IllegalArgumentException("The entity must have a valid numeric or string id property.");
 				}
 			} else {
 				throw new IllegalArgumentException("You must specify an id property with a valid numeric or string value.");
 			}
 		}
-	}
-	
-	protected String hasIdProperty(JsonObject json) {
-		String[] idPropertyNames = new String[] { "id", "Id", "iD", "ID" };
-		
-		for (int i = 0; i < idPropertyNames.length; i++) {
-			String idProperty = idPropertyNames[i];
-			
-			if (json.has(idProperty)) {
-				return idProperty;
-			}
-		}
-		
-		return null;
 	}
 	
 	/**
@@ -744,7 +727,7 @@ abstract class MobileServiceTableBase<E> {
 	 * @param	version		Set to the value of the version system property before it is removed.
 	 * @return				The instance with the system properties removed.
 	 */
-    protected JsonObject removeSystemProperties(JsonObject instance)
+    protected static JsonObject removeSystemProperties(JsonObject instance)
     {
         boolean haveCloned = false;
         
@@ -769,7 +752,7 @@ abstract class MobileServiceTableBase<E> {
 	 * @param	instance	The instance to remove the system properties from.
 	 * @return				The value of the version system property or null if none present.
 	 */
-    protected String getVersionSystemProperty(JsonObject instance)
+    protected static String getVersionSystemProperty(JsonObject instance)
     {
         String version = null;
         
@@ -788,7 +771,7 @@ abstract class MobileServiceTableBase<E> {
 	 * @param	value	The value to create the etag from.
 	 * @return			The etag.
 	 */
-    protected String getEtagFromValue(String value) {
+    protected static String getEtagFromValue(String value) {
         // If the value has double quotes, they will need to be escaped.
         for (int i = 0; i < value.length(); i++) {
             if (value.charAt(i) == '"') {
@@ -810,7 +793,7 @@ abstract class MobileServiceTableBase<E> {
 	 * @param	etag	The etag to get the value from.
 	 * @return			The value.
 	 */
-    protected String getValueFromEtag(String etag) {
+    protected static String getValueFromEtag(String etag) {
         int length = etag.length();
         
         if (length > 1 && etag.charAt(0) == '\"' && etag.charAt(length - 1) == '\"') {
