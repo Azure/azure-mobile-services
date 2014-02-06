@@ -190,7 +190,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.applicationInstallationId = GetApplicationInstallationId();
 
             handlers = handlers ?? EmptyHttpMessageHandlers;
-            this.HttpClient = new MobileServiceHttpClient(this, handlers);
+            this.HttpClient = new MobileServiceHttpClient(handlers, this.ApplicationUri, this.applicationInstallationId, this.ApplicationKey);
             this.Serializer = new MobileServiceSerializer();
         }
 
@@ -494,7 +494,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         private async Task<string> InternalInvokeApiAsync(string apiName, string content, HttpMethod method, IDictionary<string, string> parameters = null)
         {
             method = method ?? defaultHttpMethod;
-            MobileServiceHttpResponse response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), content, false);
+            MobileServiceHttpResponse response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, false);
             return response.Content;
         }
 
@@ -528,7 +528,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public async Task<HttpResponseMessage> InvokeApiAsync(string apiName, HttpContent content, HttpMethod method, IDictionary<string, string> requestHeaders, IDictionary<string, string> parameters)
         {
             method = method ?? defaultHttpMethod;
-            HttpResponseMessage response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), content, requestHeaders);
+            HttpResponseMessage response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, requestHeaders);
             return response;
         }
 

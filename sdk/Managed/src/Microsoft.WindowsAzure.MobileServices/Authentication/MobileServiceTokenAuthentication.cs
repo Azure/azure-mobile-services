@@ -55,7 +55,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         protected override Task<string> LoginAsyncOverride()
         {
-            return client.HttpClient.RequestWithoutHandlersAsync(HttpMethod.Post, MobileServiceAuthentication.LoginAsyncUriFragment + "/" + this.ProviderName, token.ToString());
+            return client.HttpClient.RequestWithoutHandlersAsync(HttpMethod.Post, MobileServiceAuthentication.LoginAsyncUriFragment + "/" + this.ProviderName, client.CurrentUser, token.ToString());
         }
     }
 }
