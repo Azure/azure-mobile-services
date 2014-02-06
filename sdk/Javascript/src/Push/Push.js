@@ -13,16 +13,25 @@ var _ = require('Extensions');
 var Validate = require('Validate');
 var Platform = require('Platform');
 var LocalStorageManager = require('LocalStorageManager');
+var RegistrationManager = require('RegistrationManager');
+var PushHttpClient = require('PushHttpClient');
 
 exports.Push = function (mobileServicesClient) {
     this.mobileServicesClient = mobileServicesClient;
+    this.registrationManager = new RegistrationManager(
+        new PushHttpClient(mobileServicesClient),
+        new LocalStorageManager(applicationUrl));
+};
+
+Push.prototype.registerNative = function (channelUri, tags) {
+    return this.registerTemplate(channelUri, tags);
 };
 
 // {
 // platform: "wns" // {"wns"|"mpns"|"apns"|"gcm"}
 // channelUri: "" // if wns or mpns
 // tags: "tag1,tag2,tag3"
-// bodyTemplate: '<toast>
+// templateBody: '<toast>
 //      <visual lang="en-US">
 //        <binding template="ToastText01">
 //          <text id="1">$(myTextProp1)</text>
@@ -30,9 +39,9 @@ exports.Push = function (mobileServicesClient) {
 //      </visual>
 //    </toast>' // if template registration
 // templateName: "" // if template registration
-// wnsHeaders: { // if wns template registration }
+// wnsHeaders: { Key1: 'Value1', Key2: 'Value2'// if wns template registration }
 // }
-Push.prototype.register = function (channelUri, tags, template, templateName, wnsHeaders) {
+Push.prototype.registerTemplate = function (channelUri, tags, templateBody, templateName, wnsHeaders) {
     var registration = {};
 
     Validate.isString(channelUri, 'channelUri');
@@ -45,25 +54,32 @@ Push.prototype.register = function (channelUri, tags, template, templateName, wn
         registration.tags = tags;
     }
 
-    if (template) {
-        Validate.isString(template, 'template');
-        registration.template = template;
+    if (templateBody) {
+        Validate.isString(templateBody, 'templateBody');
+        registration.templateBody = templateBody;
         Validate.isString(templateName, 'templateName');
         Validate.notNullOrEmpty(templateName);
         registration.templateName = templateName;
-    }
 
-    if (wnsHeaders) {
-        Validate.isObject(wnsHeaders);
-        // TODO: wnsHeaders is object with key/value pairs?
-        registration.wnsHeaders = wnsHeaders;
-    }
+        if (wnsHeaders) {
+            Validate.isObject(wnsHeaders);
+            registration.headers = wnsHeaders;
+        }
+    }    
+    
+    return this.registrationManager.register(registration);
 };
 
-Push.prototype.unregisterNative = function() {
+Push.prototype.unregisterNative = function () {
+    return this.unregisterTemplate('$Default');
 };
 
 Push.prototype.unregisterTemplate = function(templateName) {
-
+    Validate.isNullOrEmpty(templateName);
+    return this.registrationManager.unregisterAsync(templateName);
 };
 
+Push.prototype.unregisterAllAsync = function (channelUri) {
+    Validate.isNullOrEmpty(channelUri);
+    return this.registrationManager.deleteRegistrationsForChannelAsync(channelUri);
+}

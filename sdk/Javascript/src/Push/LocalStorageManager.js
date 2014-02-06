@@ -19,60 +19,60 @@ exports.LocalStorageManager = function(applicationUri, tileId) {
 
     var name = _.format("{0}-PushContainer-{1}-{2}", Windows.ApplicationModel.Package.current.Id.Name, applicationUri, tileId);
     this.settings = Windows.Storage.ApplicationData.current.localSettings.createContainer(name, Windows.Storage.ApplicationDataCreateDisposition.always).values;
-    this.isRefreshNeeded = false;
+    this.isRefreshNeeded  = false;
     this.channelUri = null;    
     
     // TOOD: Is there a better place to put constants?
-    this.StorageVersion = "v1.0.0";
-    this.PrimaryChannelId = "$Primary";
-    this.KeyNameVersion = "Version";
-    this.KeyNameChannelUri = "ChannelUri";
-    this.KeyNameRegistrations = "Registrations";
+    this.storageVersion = "v1.0.0";
+    this.primaryChannelId = "$Primary";
+    this.keyNameVersion = "Version";
+    this.keyNameChannelUri = "ChannelUri";
+    this.keyNameRegistrations = "Registrations";
         
-    this.InitializeRegistrionInfoFromStorage();
+    this.initializeRegistrionInfoFromStorage();
 };
 
-LocalStorageManager.prototype.GetChannelUri = function() {
+LocalStorageManager.prototype.getChannelUri = function() {
     return this.channelUri;
 };
 
-LocalStorageManager.prototype.SetChannelUri = function(channelUri) {
+LocalStorageManager.prototype.setChannelUri = function(channelUri) {
     this.channelUri = channelUri;
-    this.FlushToSettings();
+    this.flushToSettings();
 };
 
-LocalStorageManager.prototype.GetRegistration = function(registrationName) {
+LocalStorageManager.prototype.getRegistration = function(registrationName) {
     return this.registrations[registrationName];
 };
 
-LocalStorageManager.prototype.DeleteRegistrationByName = function(registrationName) {
+LocalStorageManager.prototype.deleteRegistrationByName = function(registrationName) {
     if (Platform.tryRemoveSetting(registrationName, this.registrations)) {
-        this.FlushToSettings();
+        this.flushToSettings();
         return true;
     }
 
     return false;
 };
 
-LocalStorageManager.prototype.DeleteRegistrationByRegistrationId = function(registrationId) {
+LocalStorageManager.prototype.deleteRegistrationByRegistrationId = function(registrationId) {
     var returnValue = false;
     Object.keys(this.registrations.values).forEach(function (key) {
         // Delete only the first registration with matching registrationId
         if (!returnValue && (this.registrations.values[key] === registrationId)) {
-            returnValue = this.DeleteRegistrationByName(key);
+            returnValue = this.deleteRegistrationByName(key);
         }        
     });
 
     return returnValue;
 };
 
-LocalStorageManager.prototype.UpdateRegistrationByRegistrationName = function (registrationName, registrationId, channelUri) {
+LocalStorageManager.prototype.updateRegistrationByRegistrationName = function (registrationName, registrationId, channelUri) {
     var cacheReg = {};
     cacheReg.registrationName = registrationName;
     cacheReg.registrationId = registrationId;
     this.registrations[registrationName] = cacheReg;
     this.channelUri = channelUri;
-    this.FlushToSettings();
+    this.flushToSettings();
 };
 
 LocalStorageManager.prototype.UpdateRegistrationByRegistrationId = function(registrationId, registrationName, channelUri) {
@@ -86,52 +86,52 @@ LocalStorageManager.prototype.UpdateRegistrationByRegistrationId = function(regi
     });
 
     if (found) {
-        this.UpdateRegistrationByRegistrationName(found.registrationName, found.registrationId, channelUri);
+        this.updateRegistrationByRegistrationName(found.registrationName, found.registrationId, channelUri);
     } else {
-        this.UpdateRegistrationByRegistrationName(registrationName, registrationId, channelUri);
+        this.updateRegistrationByRegistrationName(registrationName, registrationId, channelUri);
     }
 };
 
 LocalStorageManager.prototype.ClearRegistrations = function() {
     this.registrations.clear();
-    this.FlushToSettings();
+    this.flushToSettings();
 };
 
 LocalStorageManager.prototype.RefreshFinished = function(refreshedChannelUri) {
-    this.SetChannelUri(refreshedChannelUri);
-    this.IsRefreshNeeded = false;
+    this.setChannelUri(refreshedChannelUri);
+    this.isRefreshNeeded  = false;
 };
 
 LocalStorageManager.prototype.FlushToSettings = function() {
-    this.storage.values[KeyNameVersion] = StorageVersion;
-    this.storage.values[KeyNameChannelUri] = this.channelUri;
+    this.storage.values[keyNameVersion] = storageVersion;
+    this.storage.values[keyNameChannelUri] = this.channelUri;
 
     var str = '';
     if (this.registrations != null) {
         str = JSON.stringify(this.registrations.values);
     }
 
-    this.storage.values[KeyNameRegistrations] = str;
+    this.storage.values[keyNameRegistrations] = str;
 };
 
 LocalStorageManager.prototype.InitializeRegistrationInfoFromStorage = function() {
     this.registrations = new Windows.Foundation.Collections.PropertySet();
 
     // Read channelUri
-    this.channelUri = readContent(this.storage, KeyNameChannelUri);
+    this.channelUri = readContent(this.storage, keyNameChannelUri);
 
     // Verify storage version
-    var version = readContent(this.storage, KeyNameVersion);
-    if (StorageVersion === version.toLowerCase()) {
-        this.IsRefreshNeeded = true;
+    var version = readContent(this.storage, keyNameVersion);
+    if (storageVersion === version.toLowerCase()) {
+        this.isRefreshNeeded  = true;
         return;
     }
 
-    this.IsRefreshNeeded = false;
+    this.isRefreshNeeded  = false;
 
     // read registrations
     var self = this;
-    var regsStr = readContent(this.storageValues, KeyNameRegistrations);
+    var regsStr = readContent(this.storageValues, keyNameRegistrations);
     var entries = JSON.parse(regsStr);
     entries.forEach(function (reg) {
         self.registrations[reg.registrationName] = reg;

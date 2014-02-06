@@ -9,91 +9,111 @@
 // Declare JSHint globals
 /*global WinJS:false, Windows:false, $__fileVersion__:false, $__version__:false */
 
-var _ = require('Extensions');
-var Validate = require('Validate');
-var Platform = require('Platform');
-
-exports.RegistrationManager = function(pushHttpClient, storageManager) {
+exports.RegistrationManager = function (pushHttpClient, storageManager) {
     this.pushHttpClient = pushHttpClient;
     this.localStorageManager = storageManager;
 };
 
-RegistrationManager.prototype.Register = function(registration) {
+RegistrationManager.prototype.register = function (registration) {
+    var firstPromise;
     // if localStorage is empty or has different storage version, we need retrieve registrations and refresh local storage
     if (this.localStorageManager.IsRefreshNeeded) {
         var refreshChannelUri = this.localStorageManager.ChannelUri || registration.ChannelUri;
-        this.GetRegistrationsForChannelAsync(refreshChannelUri);
-        this.localStorageManager.RefreshFinished(refreshChannelUri);
-    }
+        firstPromise = this.getRegistrationsForChannel(refreshChannelUri)
+            .then(function () {
+                this.localStorageManager.RefreshFinished(refreshChannelUri);
+            });
 
-    var cached = this.localStorageManager.GetRegistration(registration.Name);
-    if (cached != null) {
-        registration.RegistrationId = cached.RegistrationId;
     } else {
-        this.CreateRegistrationIdAsync(registration);
+        firstPromise = WinJS.Promise.wrap();
     }
 
-    try {
-        this.UpsertRegistration(registration);
-        return;
-    } catch(e)
-    {
-        // if we get an RegistrationGoneException (410) from service, we will recreate registration id and will try to do upsert one more time.
-        // The likely cause of this is an expired registration in local storage due to a long unused app.
-        //if (e.Response.StatusCode != HttpStatusCode.Gone) {
-        //    throw;
-        //}
-    }
+    firstPromise.then(function () { this.localStorageManager.GetRegistration(registration.templateName || '$Default'); })
+        .then(function (cached) {
+            if (cached != null) {
+                registration.RegistrationId = cached.RegistrationId;
+                return WinJS.Promise.wrap();
+            } else {
+                return this.createRegistrationId(registration);
+            }
+        })
+        .then(function () {
+            return this.upsertRegistration(registration);
+        })
+        .then(function () {
+            // dead complete function
+            return WinJS.Promise.wrap(false);
+        },
+            function (error) {
+                // if we get an RegistrationGoneException (410) from service, we will recreate registration id and will try to do upsert one more time.
+                // The likely cause of this is an expired registration in local storage due to a long unused app.
+                if (error.request.status === 410) {
+                    return true;
+                }
 
-    //// recreate registration id if we encountered a previously expired registrationId
-    this.CreateRegistrationIdAsync(registration);
-    this.UpsertRegistration(registration);
+                throw error;
+            })
+        .then(function (retry) {
+            if (retry) {
+                return this.createRegistrationId(registration);
+            }
+        })
+        .then(function (retry) {
+            if (retry) {
+                return this.upsertRegistration(registration);
+            }
+        });
 };
 
-RegistrationManager.prototype.GetRegistrationsForChannelAsync = function(channelUri) {
-    var registrations = this.pushHttpClient.ListRegistrationsAsync(channelUri);
-    var count = registrations.Count;
-    if (count == 0) {
-        this.localStorageManager.ClearRegistrations();
-    }
-
-    for (var i = 0; i < count ; i++)
-    {
-        this.localStorageManager.UpdateRegistrationByRegistrationId(registrations[i]);
-    }
+RegistrationManager.prototype.getRegistrationsForChannel = function (channelUri) {
+    return this.pushHttpClient.listRegistrations(channelUri)
+        .then(function(registrations) {
+            var count = registrations.Count;
+            if (count == 0) {
+                this.localStorageManager.clearRegistrations();
+            }
+            for (var i = 0; i < count; i++) {
+                this.localStorageManager.updateRegistrationByRegistrationId(registrations[i]);
+            }
+        });
 };
 
-RegistrationManager.prototype.UnregisterAsync = function(registrationName) {
-    Validate.notNullOrEmpty(registrationName, 'registrationName');
-
-    var cached = this.localStorageManager.GetRegistration(registrationName);
+RegistrationManager.prototype.unregister = function (registrationName) {
+    var cached = this.localStorageManager.getRegistration(registrationName);
     if (!cached) {
-        return;
+        return WinJS.Promise.wrap();
     }
 
-    this.pushHttpClient.UnregisterAsync(cached.RegistrationId);
-    this.localStorageManager.DeleteRegistrationByName(registrationName);
+    return this.pushHttpClient.unregister(cached.RegistrationId)
+        .then(function() {
+            this.localStorageManager.deleteRegistrationByName(registrationName);
+        });
 };
 
-RegistrationManager.prototype.DeleteRegistrationsForChannelAsync = function(channelUri) {
-    var registrations = this.pushHttpClient.ListRegistrationsAsync(channelUri);
-
-    registrations.forEach(function(registration) {
-        this.pushHttpClient.UnregisterAsync(registration.RegistrationId);
-        this.localStorageManager.DeleteRegistrationByRegistrationId(registration.RegistrationId);
-    });
-
-    // clear local storage
-    this.localStorageManager.ClearRegistrations();
+RegistrationManager.prototype.deleteRegistrationsForChannel = function (channelUri) {
+    this.pushHttpClient.listRegistrations(channelUri)
+        .then(function(registrations) {
+            return WinJS.Promise.join(registrations.map(function(registration) {
+                return this.pushHttpClient.unregister(registration.RegistrationId)
+                    .then(function() {
+                        this.localStorageManager.deleteRegistrationByRegistrationId(registration.RegistrationId);
+                    });
+            }));
+        })
+        .then(this.localStorageManager.clearRegistrations);
 };
 
-RegistrationManager.prototype.CreateRegistrationIdAsync = function(registration) {
-    registration.RegistrationId = this.pushHttpClient.CreateRegistrationIdAsync();
-    this.localStorageManager.UpdateRegistrationByName(registration.Name, registration);
-    return registration;
+RegistrationManager.prototype.createRegistrationId = function (registration) {
+    return this.pushHttpClient.createRegistrationId()
+        .then(function(registrationId) {
+            registration.RegistrationId = registrationId;
+            this.localStorageManager.updateRegistrationByName(registration.templateName || '$Default', registration);
+        });
 };
 
-RegistrationManager.prototype.UpsertRegistration = function(registration) {
-    this.pushHttpClient.CreateOrUpdateRegistrationAsync(registration);
-    this.localStorageManager.UpdateRegistrationByName(registration.Name, registration);
+RegistrationManager.prototype.upsertRegistration = function (registration) {
+    return this.pushHttpClient.CreateOrUpdateRegistration(registration)
+        .then(function() {
+            this.localStorageManager.UpdateRegistrationByName(registration.templateName || '$Default', registration);
+        });
 };
