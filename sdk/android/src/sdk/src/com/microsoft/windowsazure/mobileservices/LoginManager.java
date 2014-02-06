@@ -480,7 +480,7 @@ class LoginManager {
 					}
 				}
 			}
-		}.execute();
+		}.executeTask();
 	}
 
 	/**

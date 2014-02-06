@@ -794,7 +794,7 @@ public class MobileServiceClient {
 					callback.onResponse(response, mTaskException);
 				}
 			}
-		}.execute();	
+		}.executeTask();	
 	}
 
 	/**
