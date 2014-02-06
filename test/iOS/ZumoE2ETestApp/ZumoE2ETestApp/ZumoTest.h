@@ -14,6 +14,7 @@ typedef void (^ZumoTestExecution)(ZumoTest *test, UIViewController *viewControll
 @interface ZumoTest : NSObject
 {
     NSMutableArray *logs;
+    NSMutableArray *requiredFeatures;
 }
 
 @property (nonatomic, weak) id<ZumoTestCallbacks> delegate;
@@ -32,6 +33,7 @@ typedef void (^ZumoTestExecution)(ZumoTest *test, UIViewController *viewControll
 - (void)startExecutingFrom:(UIViewController *)currentViewController;
 - (void)addLog:(NSString *)text;
 - (NSArray *)getLogs;
+- (void)addRequiredFeature:(NSString *)featureName;
 
 + (NSString *)testStatusToString:(TestStatus)status;
 

@@ -68,4 +68,8 @@
     [self executeNextTest];
 }
 
+- (BOOL)haveTestsRun {
+    return _testsFailed > 0 || _testsPassed > 0;
+}
+
 @end

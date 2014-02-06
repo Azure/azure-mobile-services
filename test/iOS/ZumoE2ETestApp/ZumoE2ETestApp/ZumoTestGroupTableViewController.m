@@ -129,15 +129,23 @@
     ZumoTestHelpViewController *helpController = [[ZumoTestHelpViewController alloc] init];
     NSMutableArray *arr = [[NSMutableArray alloc] init];
     ZumoTest *test;
+    if (![[self testGroup] haveTestsRun]) {
+        UIAlertView *av = [[UIAlertView alloc] initWithTitle:@"No tests" message:@"No tests have run, no logs will be uploaded" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil];
+        [av show];
+        return;
+    }
+    
     for (test in [[self testGroup] tests]) {
-        NSString *testStatus = [ZumoTest testStatusToString:[test testStatus]];
-        NSString *testStartTime = [ZumoTestGlobals dateToString:[test startTime]];
-        [arr addObject:[NSString stringWithFormat:@"[%@] Logs for test %@ (%@)", testStartTime, [test testName], testStatus]];
-        NSString *logLine;
-        for (logLine in [test getLogs]) {
-            [arr addObject:logLine];
+        if ([test testStatus] != TSSkipped) {
+            NSString *testStatus = [ZumoTest testStatusToString:[test testStatus]];
+            NSString *testStartTime = [ZumoTestGlobals dateToString:[test startTime]];
+            [arr addObject:[NSString stringWithFormat:@"[%@] Logs for test %@ (%@)", testStartTime, [test testName], testStatus]];
+            NSString *logLine;
+            for (logLine in [test getLogs]) {
+                [arr addObject:logLine];
+            }
+            [arr addObject:[NSString stringWithFormat:@"[%@] -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-", [ZumoTestGlobals dateToString:[test endTime]]]];
         }
-        [arr addObject:[NSString stringWithFormat:@"[%@] -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-", [ZumoTestGlobals dateToString:[test endTime]]]];
     }
     
     NSString *allLogs = [arr componentsJoinedByString:@"\n"];

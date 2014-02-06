@@ -274,7 +274,6 @@ typedef enum { CPClientWins, CPServerWins, CPTwoWayMerge } ConflictPolicy;
 // Main implementation
 @implementation ZumoMiscTests
 
-static NSString *tableName = @"iOSRoundTripTable";
 static NSString *stringIdTableName = @"stringIdRoundTripTable";
 static NSString *parameterTestTableName = @"ParamsTestTable";
 
@@ -282,8 +281,10 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
     NSMutableArray *result = [[NSMutableArray alloc] init];
     [result addObject:[self createUserAgentTest]];
     [result addObject:[self createFilterWithMultipleRequestsTest]];
+    NSUInteger bypassFilterTestIndex = [result count];
     [result addObject:[self createFilterTestWhichBypassesService]];
     [result addObject:[self createFilterTestToEnsureWithFilterDoesNotChangeClient]];
+    NSUInteger parameterPassingTestIndex = [result count];
     [result addObject:[self createParameterPassingTest]];
     [result addObject:[self createOptimisticConcurrencyWithFilterTest]];
     
@@ -295,6 +296,14 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
     [result addObject:[self createOptimisticConcurrencyWithServerResolvedConflictTest:@"Update conflicts (server side) - client wins" clientWins:NO]];
     
     [result addObject:[self createSystemPropertiesTest]];
+    
+    for (NSUInteger i = 0; i < [result count]; i++) {
+        if (i != bypassFilterTestIndex && i != parameterPassingTestIndex) {
+            ZumoTest *test = [result objectAtIndex:i];
+            [test addRequiredFeature:FEATURE_STRING_ID_TABLES];
+        }
+    }
+
     return result;
 }
 
@@ -783,7 +792,7 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         FilterToCaptureHttpTraffic *filter = [[FilterToCaptureHttpTraffic alloc] init];
         MSClient *filteredClient = [client clientWithFilter:filter];
-        MSTable *table = [filteredClient tableWithName:tableName];
+        MSTable *table = [filteredClient tableWithName:stringIdTableName];
         NSDictionary *item = @{@"name":@"john doe"};
         [table insert:item completion:^(NSDictionary *inserted, NSError *error) {
             BOOL passed = NO;
@@ -791,7 +800,7 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
                 [test addLog:[NSString stringWithFormat:@"Error: %@", error]];
             } else {
                 NSNumber *itemId = inserted[@"id"];
-                MSTable *unfilteredTable = [client tableWithName:tableName];
+                MSTable *unfilteredTable = [client tableWithName:stringIdTableName];
                 [unfilteredTable deleteWithId:itemId completion:nil]; // clean-up after this test
                 NSString *userAgent = [filter userAgent];
                 if ([userAgent rangeOfString:@"objective-c"].location == NSNotFound) {
@@ -851,7 +860,7 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
         [filter setErrorToReturn:errorToReturn];
         MSClient *mockedClient = [client clientWithFilter:filter];
         [test addLog:[NSString stringWithFormat:@"Created a client with filter: %@", mockedClient.filters]];
-        MSTable *table = [client tableWithName:tableName];
+        MSTable *table = [client tableWithName:stringIdTableName];
         [table insert:@{@"string1":@"does not matter"} completion:^(NSDictionary *item, NSError *error) {
             BOOL passed = NO;
             if (error) {
@@ -875,7 +884,7 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
         [test addLog:[NSString stringWithFormat:@"Using a filter to send %d requests", numberOfRequests]];
         [filter setNumberOfRequests:numberOfRequests];
         client = [client clientWithFilter:filter];
-        MSTable *table = [client tableWithName:tableName];
+        MSTable *table = [client tableWithName:stringIdTableName];
         NSString *uuid = [[NSUUID UUID] UUIDString];
         NSDictionary *item = @{@"name":uuid};
         [table insert:item completion:^(NSDictionary *inserted, NSError *error) {
