@@ -176,7 +176,8 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	 *            The JsonObject to insert
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
-	 * @throws IllegalArgumentException   
+	 * @throws IllegalArgumentException
+	 *            if the element has an id property set with a numeric value other than default (0), or an invalid string value
 	 */
 	public void insert(final JsonObject element, TableJsonOperationCallback callback) {
 		this.insert(element, null, callback);
@@ -192,6 +193,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 * @throws IllegalArgumentException
+	 *            if the element has an id property set with a numeric value other than default (0), or an invalid string value
 	 */
 	public void insert(final JsonObject element, List<Pair<String, String>> parameters,
 			final TableJsonOperationCallback callback) {

@@ -41,14 +41,6 @@ public class SystemPropertiesTestData {
 		col = new ArrayList<MobileServiceSystemProperty>();
 		col.add(MobileServiceSystemProperty.CreatedAt);
 		col.add(MobileServiceSystemProperty.UpdatedAt);
-		col.add(MobileServiceSystemProperty.Version);
-		set = EnumSet.noneOf(MobileServiceSystemProperty.class);
-		set.addAll(col);
-		AllSystemProperties.add(set);
-
-		col = new ArrayList<MobileServiceSystemProperty>();
-		col.add(MobileServiceSystemProperty.CreatedAt);
-		col.add(MobileServiceSystemProperty.UpdatedAt);
 		set = EnumSet.noneOf(MobileServiceSystemProperty.class);
 		set.addAll(col);
 		AllSystemProperties.add(set);

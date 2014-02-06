@@ -60,7 +60,7 @@ class AllSystemPropertiesType {
 class NamedSystemPropertiesType {
 	public String Id;
 
-	Date __createdAt;
+	public Date __createdAt;
 }
 
 class NotSystemPropertyCreatedAtType {

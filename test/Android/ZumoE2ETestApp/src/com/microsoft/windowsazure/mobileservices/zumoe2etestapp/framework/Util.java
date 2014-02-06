@@ -42,7 +42,9 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
 
 public class Util {
-	public interface IPredicate<T> { boolean evaluate(T type); }
+	public interface IPredicate<T> {
+		boolean evaluate(T type);
+	}
 
 	public final static String LogTimeFormat = "yyyy-MM-dd HH:mm:ss'.'SSS";
 	private final static Hashtable<String, String> globalTestParameters = new Hashtable<String, String>();
@@ -58,24 +60,25 @@ public class Util {
 			return createSimpleRandomString(rndGen, size, ' ', 0xfffe);
 		}
 	}
+
 	public static String createSimpleRandomString(Random rndGen, int size) {
 		int minChar = ' ';
 		int maxChar = '~';
 
 		return createSimpleRandomString(rndGen, size, minChar, maxChar);
 	}
-	
+
 	public static String createSimpleRandomString(Random rndGen, int size, int minChar, int maxChar) {
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < size; i++) {
-			
+
 			int charRand;
 			char c;
 			do {
 				charRand = rndGen.nextInt(maxChar - minChar);
 				c = (char) (minChar + charRand);
 			} while (Character.isLowSurrogate(c) || Character.isHighSurrogate(c));
-			
+
 			sb.append(c);
 		}
 
@@ -139,7 +142,7 @@ public class Util {
 	public static String dateToString(Date date) {
 		return dateToString(date, "yyyy-MM-dd'T'HH:mm:ss'.'SSS'Z'");
 	}
-	
+
 	public static String dateToString(Date date, String dateFormatStr) {
 		if (date == null) {
 			return "NULL";
@@ -151,7 +154,7 @@ public class Util {
 
 		return formatted;
 	}
-	
+
 	public static boolean compare(Object o1, Object o2) {
 		if (o1 == null && o2 == null) {
 			return true;
@@ -163,20 +166,19 @@ public class Util {
 
 		return o1.equals(o2);
 	}
-	
+
 	public static TestCase createSeparatorTest(String testName) {
 		return new TestCase(testName) {
 
 			@Override
-			protected void executeTest(MobileServiceClient client,
-					TestExecutionCallback callback) {
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
 				TestResult testResult = new TestResult();
 				testResult.setTestCase(this);
 				testResult.setStatus(TestStatus.Passed);
 				callback.onTestComplete(this, testResult);
 			}
-			
-		}; 
+
+		};
 	}
 
 	public static boolean compareJson(JsonElement e1, JsonElement e2) {
@@ -245,11 +247,11 @@ public class Util {
 
 		return true;
 	}
-	
+
 	public static Date getUTCNow() {
 		return new GregorianCalendar(TimeZone.getTimeZone("utc")).getTime();
 	}
-	
+
 	public static Date getUTCDate(int year, int month, int day) {
 
 		return getUTCDate(year, month, day, 0, 0, 0);
@@ -270,36 +272,40 @@ public class Util {
 
 		return cal;
 	}
-	
+
 	public static boolean responseContainsHeader(ServiceFilterResponse response, String headerName) {
 		for (Header header : response.getHeaders()) {
 			if (header.getName().equals(headerName)) {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	public static String getHeaderValue(ServiceFilterResponse response, String headerName) {
 		for (Header header : response.getHeaders()) {
 			if (header.getName().equals(headerName)) {
 				return header.getValue();
 			}
 		}
-		
+
 		return null;
-	}	
-	
+	}
+
 	public static <T> List<T> filter(List<T> list, IPredicate<T> predicate) {
-	    List<T> filteredList = new ArrayList<T>();
-	    
-	    for (T element: list) {
-	        if (predicate.evaluate(element)) {
-	        	filteredList.add(element);
-	        }
-	    }
-	    
-	    return filteredList;
+		if (list == null) {
+			return null;
+		} else {
+			List<T> filteredList = new ArrayList<T>();
+
+			for (T element : list) {
+				if (predicate.evaluate(element)) {
+					filteredList.add(element);
+				}
+			}
+
+			return filteredList;
+		}
 	}
 }

@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 import android.annotation.SuppressLint;
@@ -36,6 +37,7 @@ import android.os.Build;
 import android.util.Pair;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.MobileServicePreconditionFailedException;
@@ -108,11 +110,8 @@ public class SystemPropertiesTests extends TestGroup {
 	}
 
 	private TestCase createTypeSystemPropertiesTest(String name) {
-		StringIdRoundTripTableElement element = new StringIdRoundTripTableElement(true);
-		element.id = "an Id";
-
-		final List<StringIdRoundTripTableElement> elements = new ArrayList<StringIdRoundTripTableElement>();
-		elements.add(element);
+		final StringIdRoundTripTableElement element = new StringIdRoundTripTableElement(true);
+		element.id = UUID.randomUUID().toString();
 
 		TestCase roundtripTest = new TestCase() {
 
@@ -130,48 +129,36 @@ public class SystemPropertiesTests extends TestGroup {
 							MobileServiceTable<StringIdRoundTripTableElement> table = client
 									.getTable(STRING_ID_TABLE_NAME, StringIdRoundTripTableElement.class);
 
-							log("Make sure table is empty");
-							List<StringIdRoundTripTableElement> existingElements = read(table);
+							log("Insert item - " + element.toString());
+							final StringIdRoundTripTableElement responseElement1 = insert(table, element);
 
-							if (existingElements != null && existingElements.size() > 0) {
-								for (StringIdRoundTripTableElement existingElement : existingElements) {
-									log("Delete item - " + existingElement.toString());
-									delete(table, existingElement);
-								}
-							}
-
-							for (StringIdRoundTripTableElement element : elements) {
-								log("Insert item - " + element.toString());
-								StringIdRoundTripTableElement responseItem = insert(table, element);
-
-								log("verify system properties are not null");
-								if (responseItem.CreatedAt == null || responseItem.UpdatedAt == null || responseItem.Version == null) {
-									throw new Exception("Insert response - System Properties are null");
-								}
-							}
-
-							List<StringIdRoundTripTableElement> responseElements;
+							log("Verify system properties are not null");
+							verifySystemProperties("Insert response", responseElement1);
 
 							log("Read table");
-							responseElements = read(table);
+							List<StringIdRoundTripTableElement> responseElements2 = read(table);
 
-							log("verify response size");
-							if (responseElements == null || responseElements.size() != elements.size()) {
-								throw new Exception("Read response - incorrect number of records");
+							List<StringIdRoundTripTableElement> filteredResponseElements = filter(responseElements2,
+									new IPredicate<StringIdRoundTripTableElement>() {
+										@Override
+										public boolean evaluate(StringIdRoundTripTableElement type) {
+											return type.id.equals(responseElement1.id);
+										}
+									});
+
+							log("Verify previously inserted item is included in the response");
+							if (filteredResponseElements == null || filteredResponseElements.size() == 0) {
+								throw new Exception("Read response - Missing previously inserted element");
 							}
 
-							log("verify system properties are not null");
-							for (StringIdRoundTripTableElement responseElement : responseElements) {
-								if (responseElement.CreatedAt == null || responseElement.UpdatedAt == null || responseElement.Version == null) {
-									throw new Exception("Read response - System Properties are null");
-								}
-							}
+							StringIdRoundTripTableElement responseElement2 = filteredResponseElements.get(0);
 
-							StringIdRoundTripTableElement firstElement = responseElements.get(0);
+							log("Verify system properties are not null");
+							verifySystemProperties("Read response", responseElement2);
 
-							final String versionFilter = firstElement.Version;
+							final String versionFilter = responseElement1.Version;
 
-							List<StringIdRoundTripTableElement> filteredVersionResponseElements = filter(responseElements,
+							List<StringIdRoundTripTableElement> filteredVersionResponseElements = filter(responseElements2,
 									new IPredicate<StringIdRoundTripTableElement>() {
 										@Override
 										public boolean evaluate(StringIdRoundTripTableElement element) {
@@ -182,12 +169,12 @@ public class SystemPropertiesTests extends TestGroup {
 							log("Filter table - Version");
 							List<StringIdRoundTripTableElement> filteredVersionElements = read(table, field("__version").eq().val(versionFilter));
 
-							log("verify response size");
+							log("Verify response size");
 							if (filteredVersionElements == null || filteredVersionElements.size() != filteredVersionResponseElements.size()) {
 								throw new Exception("Filter response - Version - incorrect number of records");
 							}
 
-							log("verify system properties are not null");
+							log("Verify system properties are not null");
 							for (StringIdRoundTripTableElement filteredVersionElement : filteredVersionElements) {
 								if (filteredVersionElement.Version == null) {
 									throw new Exception("Filter response - Version is null");
@@ -196,9 +183,9 @@ public class SystemPropertiesTests extends TestGroup {
 								}
 							}
 
-							final Date createdAtFilter = firstElement.CreatedAt;
+							final Date createdAtFilter = responseElement1.CreatedAt;
 
-							List<StringIdRoundTripTableElement> filteredCreatedAtResponseElements = filter(responseElements,
+							List<StringIdRoundTripTableElement> filteredCreatedAtResponseElements = filter(responseElements2,
 									new IPredicate<StringIdRoundTripTableElement>() {
 										@Override
 										public boolean evaluate(StringIdRoundTripTableElement element) {
@@ -223,9 +210,9 @@ public class SystemPropertiesTests extends TestGroup {
 								}
 							}
 
-							final Date updatedAtFilter = firstElement.UpdatedAt;
+							final Date updatedAtFilter = responseElement1.UpdatedAt;
 
-							List<StringIdRoundTripTableElement> filteredUpdatedAtResponseElements = filter(responseElements,
+							List<StringIdRoundTripTableElement> filteredUpdatedAtResponseElements = filter(responseElements2,
 									new IPredicate<StringIdRoundTripTableElement>() {
 										@Override
 										public boolean evaluate(StringIdRoundTripTableElement element) {
@@ -250,7 +237,7 @@ public class SystemPropertiesTests extends TestGroup {
 								}
 							}
 
-							String lookUpId = firstElement.id;
+							String lookUpId = responseElement1.id;
 
 							log("LookUp");
 							StringIdRoundTripTableElement lookUpElement = lookUp(table, lookUpId);
@@ -260,48 +247,51 @@ public class SystemPropertiesTests extends TestGroup {
 								throw new Exception("LookUp response - Element is null");
 							}
 
-							if (!compare(firstElement.id, lookUpElement.id)) {
-								throw new ExpectedValueException(firstElement.id, lookUpElement.id);
+							if (!compare(responseElement1.id, lookUpElement.id)) {
+								throw new ExpectedValueException(responseElement1.id, lookUpElement.id);
 							}
 
-							if (!compare(firstElement.Version, lookUpElement.Version)) {
-								throw new ExpectedValueException(firstElement.Version, lookUpElement.Version);
+							if (!compare(responseElement1.Version, lookUpElement.Version)) {
+								throw new ExpectedValueException(responseElement1.Version, lookUpElement.Version);
 							}
 
-							if (!compare(firstElement.CreatedAt, lookUpElement.CreatedAt)) {
-								throw new ExpectedValueException(firstElement.CreatedAt, lookUpElement.CreatedAt);
+							if (!compare(responseElement1.CreatedAt, lookUpElement.CreatedAt)) {
+								throw new ExpectedValueException(responseElement1.CreatedAt, lookUpElement.CreatedAt);
 							}
 
-							if (!compare(firstElement.UpdatedAt, lookUpElement.UpdatedAt)) {
-								throw new ExpectedValueException(firstElement.UpdatedAt, lookUpElement.UpdatedAt);
+							if (!compare(responseElement1.UpdatedAt, lookUpElement.UpdatedAt)) {
+								throw new ExpectedValueException(responseElement1.UpdatedAt, lookUpElement.UpdatedAt);
 							}
 
-							StringIdRoundTripTableElement updateElement = new StringIdRoundTripTableElement(firstElement);
+							StringIdRoundTripTableElement updateElement = new StringIdRoundTripTableElement(responseElement1);
 							updateElement.name = "Other Sample Data";
 
 							log("Update");
 							updateElement = update(table, updateElement);
 
-							log("verify element is not null");
+							log("Verify element is not null");
 							if (updateElement == null) {
 								throw new Exception("Update response - Element is null");
 							}
 
-							if (!compare(firstElement.id, updateElement.id)) {
-								throw new ExpectedValueException(firstElement.id, updateElement.id);
+							if (!compare(responseElement1.id, updateElement.id)) {
+								throw new ExpectedValueException(responseElement1.id, updateElement.id);
 							}
 
-							if (compare(firstElement.Version, updateElement.Version)) {
+							if (compare(responseElement1.Version, updateElement.Version)) {
 								throw new Exception("Update response - same Version");
 							}
 
-							if (!compare(firstElement.CreatedAt, updateElement.CreatedAt)) {
-								throw new ExpectedValueException(firstElement.CreatedAt, updateElement.CreatedAt);
+							if (!compare(responseElement1.CreatedAt, updateElement.CreatedAt)) {
+								throw new ExpectedValueException(responseElement1.CreatedAt, updateElement.CreatedAt);
 							}
 
-							if (!firstElement.UpdatedAt.before(updateElement.UpdatedAt)) {
+							if (!responseElement1.UpdatedAt.before(updateElement.UpdatedAt)) {
 								throw new Exception("Update response - incorrect UpdatedAt");
 							}
+
+							log("Delete element");
+							delete(table, responseElement1);
 
 							result.setStatus(TestStatus.Passed);
 							if (callback != null) {
@@ -342,29 +332,17 @@ public class SystemPropertiesTests extends TestGroup {
 							MobileServiceTable<StringIdRoundTripTableElement> table = client
 									.getTable(STRING_ID_TABLE_NAME, StringIdRoundTripTableElement.class);
 
-							log("Make sure table is empty");
-							List<StringIdRoundTripTableElement> existingElements = read(table);
-
-							if (existingElements != null && existingElements.size() > 0) {
-								for (StringIdRoundTripTableElement existingElement : existingElements) {
-									log("Delete item - " + existingElement.toString());
-									delete(table, existingElement);
-								}
-							}
-
 							StringIdRoundTripTableElement element1 = new StringIdRoundTripTableElement(true);
-							element1.id = "an Id 1";
+							element1.id = UUID.randomUUID().toString();
 
 							log("Insert element 1 with Type System Properties - " + element1.toString());
 							StringIdRoundTripTableElement responseElement1 = insert(table, element1);
 
 							log("Verify system properties are not null");
-							if (responseElement1.CreatedAt == null || responseElement1.UpdatedAt == null || responseElement1.Version == null) {
-								throw new Exception("Insert response - System Properties are null");
-							}
+							verifySystemProperties("Insert response", responseElement1);
 
 							StringIdRoundTripTableElement element2 = new StringIdRoundTripTableElement(true);
-							element2.id = "an Id 2";
+							element2.id = UUID.randomUUID().toString();
 
 							EnumSet<MobileServiceSystemProperty> systemProperties2 = EnumSet.noneOf(MobileServiceSystemProperty.class);
 							systemProperties2.add(MobileServiceSystemProperty.Version);
@@ -376,13 +354,7 @@ public class SystemPropertiesTests extends TestGroup {
 							StringIdRoundTripTableElement responseElement2 = insert(table, element2);
 
 							log("Verify Version|CreatedAt System Properties are not null, and UpdateAt is null or default");
-							if (responseElement2.CreatedAt == null || responseElement2.Version == null) {
-								throw new Exception("Insert response - Version|CreatedAt System Properties are null");
-							}
-
-							if (responseElement2.UpdatedAt != null) {
-								throw new Exception("Insert response - UpdateAt System Property is not null nor default");
-							}
+							verifySystemProperties("Insert response", true, false, true, responseElement2);
 
 							EnumSet<MobileServiceSystemProperty> systemProperties3 = EnumSet.noneOf(MobileServiceSystemProperty.class);
 							systemProperties3.add(MobileServiceSystemProperty.Version);
@@ -401,13 +373,7 @@ public class SystemPropertiesTests extends TestGroup {
 							StringIdRoundTripTableElement responseElement3 = responseElements3.get(0);
 
 							log("Verify Version|UpdatedAt System Properties are not null, and CreatedAt is null or default");
-							if (responseElement3.UpdatedAt == null || responseElement3.Version == null) {
-								throw new Exception("Filter response - Version|UpdatedAt System Properties are null");
-							}
-
-							if (responseElement3.CreatedAt != null) {
-								throw new Exception("Filter response - CreatedAt System Property is not null nor default");
-							}
+							verifySystemProperties("Read response", false, true, true, responseElement3);
 
 							EnumSet<MobileServiceSystemProperty> systemProperties4 = EnumSet.noneOf(MobileServiceSystemProperty.class);
 
@@ -416,10 +382,11 @@ public class SystemPropertiesTests extends TestGroup {
 							log("Lookup element2 id with No System Properties");
 							StringIdRoundTripTableElement responseElement4 = lookUp(table, element2.id);
 
-							log("Verify Version|UpdatedAt System Properties are not null, and CreatedAt is null or default");
-							if (responseElement4.CreatedAt != null || responseElement4.UpdatedAt != null || responseElement4.Version != null) {
-								throw new Exception("LookUp response - System Properties are not null nor default");
-							}
+							log("Verify Version|CreatedAt|UpdatedAt System Properties are null");
+							verifySystemProperties("Read response", false, false, false, responseElement4);
+
+							log("Delete element");
+							delete(table, responseElement1);
 
 							result.setStatus(TestStatus.Passed);
 							if (callback != null) {
@@ -460,16 +427,6 @@ public class SystemPropertiesTests extends TestGroup {
 							MobileServiceTable<StringIdRoundTripTableElement> table = client
 									.getTable(STRING_ID_TABLE_NAME, StringIdRoundTripTableElement.class);
 
-							log("Make sure table is empty");
-							List<StringIdRoundTripTableElement> existingElements = read(table);
-
-							if (existingElements != null && existingElements.size() > 0) {
-								for (StringIdRoundTripTableElement existingElement : existingElements) {
-									log("Delete item - " + existingElement.toString());
-									delete(table, existingElement);
-								}
-							}
-
 							String[] systemPropertiesKeyValue = systemProperties.split("=");
 							String key = systemPropertiesKeyValue[0];
 							String value = systemPropertiesKeyValue[1];
@@ -485,44 +442,34 @@ public class SystemPropertiesTests extends TestGroup {
 							}
 
 							StringIdRoundTripTableElement element1 = new StringIdRoundTripTableElement(true);
-							element1.id = "an Id 1";
+							element1.id = UUID.randomUUID().toString();
 
 							log("Insert element 1 with Query Parameter System Properties - " + element1.toString() + " - " + systemProperties);
-							StringIdRoundTripTableElement responseElement1 = insert(table, element1, userParameters);
+							final StringIdRoundTripTableElement responseElement1 = insert(table, element1, userParameters);
 
 							log("Verify Query Parameter System Properties");
-
-							if ((shouldHaveCreatedAt && responseElement1.CreatedAt == null) || (shouldHaveUpdatedAt && responseElement1.UpdatedAt == null)
-									|| (shouldHaveVersion && responseElement1.Version == null)) {
-								throw new Exception("Insert response - System Properties are null");
-							}
-
-							if ((!shouldHaveCreatedAt && responseElement1.CreatedAt != null) || (!shouldHaveUpdatedAt && responseElement1.UpdatedAt != null)
-									|| (!shouldHaveVersion && responseElement1.Version != null)) {
-								throw new Exception("Insert response - System Properties are not null nor default");
-							}
+							verifySystemProperties("Insert Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, responseElement1);
 
 							log("Read with Query Parameter System Properties - " + systemProperties);
 							List<StringIdRoundTripTableElement> responseElements2 = read(table, userParameters);
 
-							log("Verify response size");
-							if (responseElements2 == null || responseElements2.size() != 1) {
-								throw new Exception("Read response - incorrect number of records");
+							List<StringIdRoundTripTableElement> filteredResponseElements = filter(responseElements2,
+									new IPredicate<StringIdRoundTripTableElement>() {
+										@Override
+										public boolean evaluate(StringIdRoundTripTableElement type) {
+											return type.id.equals(responseElement1.id);
+										}
+									});
+
+							log("Verify previously inserted item is included in the response");
+							if (filteredResponseElements == null || filteredResponseElements.size() == 0) {
+								throw new Exception("Read response - Missing previously inserted element");
 							}
 
-							StringIdRoundTripTableElement responseElement2 = responseElements2.get(0);
+							StringIdRoundTripTableElement responseElement2 = filteredResponseElements.get(0);
 
 							log("Verify Query Parameter System Properties");
-
-							if ((shouldHaveCreatedAt && responseElement2.CreatedAt == null) || (shouldHaveUpdatedAt && responseElement2.UpdatedAt == null)
-									|| (shouldHaveVersion && responseElement2.Version == null)) {
-								throw new Exception("Read response - System Properties are null");
-							}
-
-							if ((!shouldHaveCreatedAt && responseElement2.CreatedAt != null) || (!shouldHaveUpdatedAt && responseElement2.UpdatedAt != null)
-									|| (!shouldHaveVersion && responseElement2.Version != null)) {
-								throw new Exception("Read response - System Properties are not null nor default");
-							}
+							verifySystemProperties("Read Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, responseElement2);
 
 							log("Filter element1 id with Query Parameter System Properties - " + systemProperties);
 							List<StringIdRoundTripTableElement> responseElements3 = read(table, field("id").eq().val(element1.id), userParameters);
@@ -535,31 +482,13 @@ public class SystemPropertiesTests extends TestGroup {
 							StringIdRoundTripTableElement responseElement3 = responseElements3.get(0);
 
 							log("Verify Query Parameter System Properties");
-
-							if ((shouldHaveCreatedAt && responseElement3.CreatedAt == null) || (shouldHaveUpdatedAt && responseElement3.UpdatedAt == null)
-									|| (shouldHaveVersion && responseElement3.Version == null)) {
-								throw new Exception("Filter response - System Properties are null");
-							}
-
-							if ((!shouldHaveCreatedAt && responseElement3.CreatedAt != null) || (!shouldHaveUpdatedAt && responseElement3.UpdatedAt != null)
-									|| (!shouldHaveVersion && responseElement3.Version != null)) {
-								throw new Exception("Filter response - System Properties are not null nor default");
-							}
+							verifySystemProperties("Filter Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, responseElement3);
 
 							log("Lookup element1 id with Query Parameter System Properties - " + systemProperties);
 							StringIdRoundTripTableElement responseElement4 = lookUp(table, element1.id, userParameters);
 
 							log("Verify Query Parameter System Properties");
-
-							if ((shouldHaveCreatedAt && responseElement4.CreatedAt == null) || (shouldHaveUpdatedAt && responseElement4.UpdatedAt == null)
-									|| (shouldHaveVersion && responseElement4.Version == null)) {
-								throw new Exception("Filter response - System Properties are null");
-							}
-
-							if ((!shouldHaveCreatedAt && responseElement4.CreatedAt != null) || (!shouldHaveUpdatedAt && responseElement4.UpdatedAt != null)
-									|| (!shouldHaveVersion && responseElement4.Version != null)) {
-								throw new Exception("Filter response - System Properties are not null nor default");
-							}
+							verifySystemProperties("Lookup Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, responseElement4);
 
 							StringIdRoundTripTableElement updateElement1 = new StringIdRoundTripTableElement(element1);
 							updateElement1.name = "Other Sample Data";
@@ -568,16 +497,10 @@ public class SystemPropertiesTests extends TestGroup {
 							StringIdRoundTripTableElement responseElement5 = update(table, updateElement1, userParameters);
 
 							log("Verify Query Parameter System Properties");
+							verifySystemProperties("Update Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, responseElement5);
 
-							if ((shouldHaveCreatedAt && responseElement5.CreatedAt == null) || (shouldHaveUpdatedAt && responseElement5.UpdatedAt == null)
-									|| (shouldHaveVersion && responseElement5.Version == null)) {
-								throw new Exception("Update response - System Properties are null");
-							}
-
-							if ((!shouldHaveCreatedAt && responseElement5.CreatedAt != null) || (!shouldHaveUpdatedAt && responseElement5.UpdatedAt != null)
-									|| (!shouldHaveVersion && responseElement5.Version != null)) {
-								throw new Exception("Update response - System Properties are not null nor default");
-							}
+							log("Delete element");
+							delete(table, responseElement1);
 
 							result.setStatus(TestStatus.Passed);
 							if (callback != null) {
@@ -614,20 +537,9 @@ public class SystemPropertiesTests extends TestGroup {
 						TestResult result = new TestResult();
 						result.setTestCase(test);
 
+						JsonObject responseJsonElement1 = null;
+
 						try {
-							MobileServiceTable<StringIdRoundTripTableElement> table = client
-									.getTable(STRING_ID_TABLE_NAME, StringIdRoundTripTableElement.class);
-
-							log("Make sure table is empty");
-							List<StringIdRoundTripTableElement> existingElements = read(table);
-
-							if (existingElements != null && existingElements.size() > 0) {
-								for (StringIdRoundTripTableElement existingElement : existingElements) {
-									log("Delete item - " + existingElement.toString());
-									delete(table, existingElement);
-								}
-							}
-
 							MobileServiceJsonTable jsonTable = client.getTable(STRING_ID_TABLE_NAME);
 
 							EnumSet<MobileServiceSystemProperty> systemProperties = EnumSet.noneOf(MobileServiceSystemProperty.class);
@@ -640,19 +552,33 @@ public class SystemPropertiesTests extends TestGroup {
 							JsonObject jsonElement1 = client.getGsonBuilder().create().toJsonTree(element1).getAsJsonObject();
 
 							log("Insert Json element 1 - " + jsonElement1.toString());
-							JsonObject responseJsonElement1 = insert(jsonTable, jsonElement1);
+							responseJsonElement1 = insert(jsonTable, jsonElement1);
 
-							responseJsonElement1.remove("__version");
-							responseJsonElement1.addProperty("__version", "random");
+							JsonObject responseJsonElement1Copy = new JsonParser().parse(responseJsonElement1.toString()).getAsJsonObject();
 
-							log("Update response Json element 1 - " + responseJsonElement1.toString());
-							update(jsonTable, responseJsonElement1);
+							responseJsonElement1Copy.remove("__version");
+							responseJsonElement1Copy.addProperty("__version", "random");
+
+							log("Update response Json element 1 copy - " + responseJsonElement1Copy.toString());
+							update(jsonTable, responseJsonElement1Copy);
 
 							result.setStatus(TestStatus.Failed);
 							if (callback != null) {
 								callback.onTestComplete(test, result);
 							}
 						} catch (Exception ex) {
+							if (ex instanceof MobileServicePreconditionFailedExceptionBase) {
+								MobileServicePreconditionFailedExceptionBase preconditionFailed = (MobileServicePreconditionFailedExceptionBase) ex;
+								JsonObject serverValue = preconditionFailed.getValue();
+
+								String serverVersion = serverValue.get("__version").getAsString();
+								String responseVersion = responseJsonElement1.get("__version").getAsString();
+
+								if (!serverVersion.equals(responseVersion)) {
+									ex = new ExpectedValueException(serverVersion, responseVersion);
+								}
+							}
+
 							result = createResultFromException(result, ex);
 
 							if (callback != null) {
@@ -684,35 +610,41 @@ public class SystemPropertiesTests extends TestGroup {
 						TestResult result = new TestResult();
 						result.setTestCase(test);
 
+						StringIdRoundTripTableElement responseElement1 = null;
+
 						try {
 							MobileServiceTable<StringIdRoundTripTableElement> table = client
 									.getTable(STRING_ID_TABLE_NAME, StringIdRoundTripTableElement.class);
 
-							log("Make sure table is empty");
-							List<StringIdRoundTripTableElement> existingElements = read(table);
-
-							if (existingElements != null && existingElements.size() > 0) {
-								for (StringIdRoundTripTableElement existingElement : existingElements) {
-									log("Delete item - " + existingElement.toString());
-									delete(table, existingElement);
-								}
-							}
-
 							StringIdRoundTripTableElement element1 = new StringIdRoundTripTableElement(true);
 
 							log("Insert element 1 - " + element1.toString());
-							StringIdRoundTripTableElement responseElement1 = insert(table, element1);
+							responseElement1 = insert(table, element1);
 
-							responseElement1.Version = "random";
+							StringIdRoundTripTableElement responseElement1Copy = new StringIdRoundTripTableElement(responseElement1);
 
-							log("Update response element 1 - " + responseElement1.toString());
-							update(table, responseElement1);
+							responseElement1Copy.Version = "random";
+
+							log("Update response element 1 copy - " + responseElement1Copy.toString());
+							update(table, responseElement1Copy);
 
 							result.setStatus(TestStatus.Failed);
 							if (callback != null) {
 								callback.onTestComplete(test, result);
 							}
 						} catch (Exception ex) {
+							if (ex instanceof MobileServicePreconditionFailedException) {
+								MobileServicePreconditionFailedException preconditionFailed = (MobileServicePreconditionFailedException) ex;
+								StringIdRoundTripTableElement serverValue = (StringIdRoundTripTableElement) preconditionFailed.getItem();
+
+								String serverVersion = serverValue.Version;
+								String responseVersion = responseElement1.Version;
+
+								if (!serverVersion.equals(responseVersion)) {
+									ex = new ExpectedValueException(serverVersion, responseVersion);
+								}
+							}
+
 							result = createResultFromException(result, ex);
 
 							if (callback != null) {
@@ -988,4 +920,38 @@ public class SystemPropertiesTests extends TestGroup {
 		}
 	}
 
+	private void verifySystemProperties(String message, StringIdRoundTripTableElement element) throws Exception {
+		verifySystemProperties(message, true, true, true, element);
+	}
+
+	private void verifySystemProperties(String message, boolean shouldHaveCreatedAt, boolean shouldHaveUpdatedAt, boolean shouldHaveVersion,
+			StringIdRoundTripTableElement element) throws Exception {
+		if ((shouldHaveCreatedAt && element.CreatedAt == null) || (!shouldHaveCreatedAt && element.CreatedAt != null)
+				|| (shouldHaveUpdatedAt && element.UpdatedAt == null) || (!shouldHaveUpdatedAt && element.UpdatedAt != null)
+				|| (shouldHaveVersion && element.Version == null) || (!shouldHaveVersion && element.Version != null)) {
+			StringBuilder builder = new StringBuilder();
+			builder.append(message);
+			builder.append(" - System Properties");
+
+			if (shouldHaveCreatedAt && element.CreatedAt == null) {
+				builder.append(" - CreatedAt is null");
+			} else if (!shouldHaveCreatedAt && element.CreatedAt != null) {
+				builder.append(" - CreatedAt is not null");
+			}
+
+			if (shouldHaveUpdatedAt && element.UpdatedAt == null) {
+				builder.append(" - UpdatedAt is null");
+			} else if (!shouldHaveUpdatedAt && element.UpdatedAt != null) {
+				builder.append(" - UpdatedAt is not null");
+			}
+
+			if (shouldHaveVersion && element.Version == null) {
+				builder.append(" - Version is null");
+			} else if (!shouldHaveVersion && element.Version != null) {
+				builder.append(" - Version is not null");
+			}
+
+			throw new Exception(builder.toString());
+		}
+	}
 }

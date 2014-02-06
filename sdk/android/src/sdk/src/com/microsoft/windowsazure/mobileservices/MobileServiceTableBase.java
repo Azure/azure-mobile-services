@@ -850,7 +850,7 @@ abstract class MobileServiceTableBase<E> {
 	 * @param	clazz	Target entity class
 	 * @return 			List of entities
 	 */
-	protected <F> EnumSet<MobileServiceSystemProperty> getSystemProperties(Class<F> clazz) {
+	protected static <F> EnumSet<MobileServiceSystemProperty> getSystemProperties(Class<F> clazz) {
 		EnumSet<MobileServiceSystemProperty> result = EnumSet.noneOf(MobileServiceSystemProperty.class);
 
 		Class<?> idClazz = getIdPropertyClass(clazz);
@@ -881,7 +881,7 @@ abstract class MobileServiceTableBase<E> {
 	 * @param	clazz	Target entity class
 	 * @return 			Property class
 	 */
-	protected <F> Class<?> getIdPropertyClass(Class<F> clazz) {
+	protected static <F> Class<?> getIdPropertyClass(Class<F> clazz) {
 		// Search for id properties annotations, regardless case
 		for (Field field : clazz.getDeclaredFields()) {
 			SerializedName serializedName = field.getAnnotation(SerializedName.class);
@@ -905,7 +905,7 @@ abstract class MobileServiceTableBase<E> {
 	 * @param	clazz	Target entity class
 	 * @return 			Property class
 	 */
-	protected <F> boolean isIntegerClass(Class<F> clazz) {		
+	protected static <F> boolean isIntegerClass(Class<F> clazz) {		
 		return clazz.equals(Integer.class) || clazz.equals(Long.class) || clazz.equals(int.class) || clazz.equals(long.class);
 	}
 	

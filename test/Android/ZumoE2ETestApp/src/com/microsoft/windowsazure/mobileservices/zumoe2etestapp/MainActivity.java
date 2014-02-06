@@ -196,7 +196,6 @@ public class MainActivity extends Activity {
 		adapter.add(new MiscTests());
 		adapter.add(new PushTests());
 		adapter.add(new CustomApiTests());
-		//// adapter.add(new StringIdTests());
 		adapter.add(new SystemPropertiesTests());
 
 		ArrayList<TestCase> allTests = new ArrayList<TestCase>();
