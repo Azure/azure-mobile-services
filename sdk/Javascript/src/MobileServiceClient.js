@@ -11,6 +11,10 @@ var Validate = require('Validate');
 var Platform = require('Platform');
 var MobileServiceTable = require('MobileServiceTable').MobileServiceTable;
 var MobileServiceLogin = require('MobileServiceLogin').MobileServiceLogin;
+var Push;
+try {
+    Push = require('Push').Push;
+} catch(e) {}
 
 function MobileServiceClient(applicationUrl, applicationKey) {
     /// <summary>
@@ -53,8 +57,8 @@ function MobileServiceClient(applicationUrl, applicationKey) {
         return new MobileServiceTable(tableName, this);
     };
     
-    if (Platform.Push) {
-        this.push = new Platform.Push(this);
+    if (Push) {
+        this.push = new Push(this);
     }
 }
 
@@ -166,6 +170,11 @@ MobileServiceClient.prototype._request = function (method, uriFragment, content,
     if (_.isNull(callback) && (typeof ignoreFilters === 'function')) {
         callback = ignoreFilters;
         ignoreFilters = false;
+    }
+    
+    if (_.isNull(callback) && (typeof content === 'function')) {
+        callback = content;
+        content = null;
     }
 
     Validate.isString(method, 'method');

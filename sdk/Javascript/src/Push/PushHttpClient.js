@@ -9,35 +9,39 @@
 // Declare JSHint globals
 /*global WinJS:false, Windows:false, $__fileVersion__:false, $__version__:false */
 
-exports.PushHttpClient = function (mobileServicesClient) {
+var _ = require('Extensions');
+var Platform = require('Platform');
+
+function PushHttpClient(mobileServicesClient) {
     this.mobileServicesClient = mobileServicesClient;
 };
 
-PushHttpClient.prototype.listRegistrationsAsync = function(channelUri) {
-    return this._request('GET', '/push/registrations?platform=wns&deviceId=' + channelUri)
-        .then(function(response) {
-            return JSON.parse(response);
+exports.PushHttpClient = PushHttpClient;
+
+PushHttpClient.prototype.listRegistrations = function (channelUri) {
+    return this._request('GET', '/push/registrations?platform=wns&deviceId=' + encodeURIComponent(channelUri))
+        .then(function (request) {
+            return JSON.parse(request.response);
         });
 };
 
-PushHttpClient.prototype.unregisterAsync = function(registrationId)
-{
+PushHttpClient.prototype.unregister = function (registrationId) {
     return this._request('DELETE', '/push/registrations/' + registrationId);
 };
 
-PushHttpClient.prototype.createRegistrationIdAsync = function() {
+PushHttpClient.prototype.createRegistrationId = function () {
     return this._request('POST', '/push/registrationIds')
-        .then(function(response) {
-            return response.headers.Location.split('/').last();
+        .then(function (response) {
+            var locationHeader = response.getResponseHeader('Location');
+            return locationHeader.slice(locationHeader.lastIndexOf('/') + 1);
         });
 };
 
-PushHttpClient.prototype.createOrUpdateRegistrationAsync = function(registration) {
+PushHttpClient.prototype.createOrUpdateRegistration = function (registration) {
     return this._request('PUT', '/push/registrations/' + registration.registrationId, registration);
 };
 
-// Actual method params:
-// function(method, uriFragment, content, ignoreFilters, headers)
-PushHttpClient.prototype._request = function() {
-    return Platform.async(this.mobileServicesClient._request);
-};
+PushHttpClient.prototype._request = Platform.async(
+    function (method, uriFragment, content, ignoreFilters, headers, callback) {
+        this.mobileServicesClient._request(method, uriFragment, content, ignoreFilters, headers, callback);
+    });

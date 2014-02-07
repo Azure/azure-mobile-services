@@ -9,71 +9,74 @@
 // Declare JSHint globals
 /*global WinJS:false, Windows:false, $__fileVersion__:false, $__version__:false */
 
-exports.RegistrationManager = function (pushHttpClient, storageManager) {
+function RegistrationManager(pushHttpClient, storageManager) {
     this.pushHttpClient = pushHttpClient;
     this.localStorageManager = storageManager;
 };
 
+exports.RegistrationManager = RegistrationManager;
+
 RegistrationManager.prototype.register = function (registration) {
     var firstPromise;
+    var self = this;
+
     // if localStorage is empty or has different storage version, we need retrieve registrations and refresh local storage
-    if (this.localStorageManager.IsRefreshNeeded) {
-        var refreshChannelUri = this.localStorageManager.ChannelUri || registration.ChannelUri;
+    if (this.localStorageManager.isRefreshNeeded) {
+        var refreshChannelUri = this.localStorageManager.channelUri || registration.deviceId;
         firstPromise = this.getRegistrationsForChannel(refreshChannelUri)
             .then(function () {
-                this.localStorageManager.RefreshFinished(refreshChannelUri);
+                self.localStorageManager.refreshFinished(refreshChannelUri);
             });
 
     } else {
         firstPromise = WinJS.Promise.wrap();
     }
 
-    firstPromise.then(function () { this.localStorageManager.GetRegistration(registration.templateName || '$Default'); })
+    return firstPromise.then(function () {
+        return self.localStorageManager.getRegistration(registration.templateName || '$Default');
+    })
         .then(function (cached) {
             if (cached != null) {
-                registration.RegistrationId = cached.RegistrationId;
+                registration.registrationId = cached.registrationId;
                 return WinJS.Promise.wrap();
             } else {
-                return this.createRegistrationId(registration);
+                return self.createRegistrationId(registration);
             }
         })
         .then(function () {
-            return this.upsertRegistration(registration);
+            return self.upsertRegistration(registration);
         })
-        .then(function () {
-            // dead complete function
-            return WinJS.Promise.wrap(false);
-        },
+        .then(
+            function () {
+                // dead complete function
+                return WinJS.Promise.wrap();
+            },
             function (error) {
                 // if we get an RegistrationGoneException (410) from service, we will recreate registration id and will try to do upsert one more time.
                 // The likely cause of this is an expired registration in local storage due to a long unused app.
                 if (error.request.status === 410) {
-                    return true;
+                    return self.createRegistrationId(registration)
+                        .then(function () {
+                            return self.upsertRegistration(registration);
+                        });
                 }
 
                 throw error;
-            })
-        .then(function (retry) {
-            if (retry) {
-                return this.createRegistrationId(registration);
             }
-        })
-        .then(function (retry) {
-            if (retry) {
-                return this.upsertRegistration(registration);
-            }
-        });
+        );
 };
 
 RegistrationManager.prototype.getRegistrationsForChannel = function (channelUri) {
+    var self = this;
     return this.pushHttpClient.listRegistrations(channelUri)
-        .then(function(registrations) {
-            var count = registrations.Count;
+        .then(function (registrations) {
+            var count = registrations.length;
             if (count == 0) {
-                this.localStorageManager.clearRegistrations();
+                self.localStorageManager.clearRegistrations();
             }
+
             for (var i = 0; i < count; i++) {
-                this.localStorageManager.updateRegistrationByRegistrationId(registrations[i]);
+                self.localStorageManager.updateRegistrationByRegistrationId(registrations[i].registrationId, registrations[i].registrationName || '$Default', channelUri);
             }
         });
 };
@@ -84,36 +87,41 @@ RegistrationManager.prototype.unregister = function (registrationName) {
         return WinJS.Promise.wrap();
     }
 
-    return this.pushHttpClient.unregister(cached.RegistrationId)
-        .then(function() {
-            this.localStorageManager.deleteRegistrationByName(registrationName);
+    var self = this;
+    return this.pushHttpClient.unregister(cached.registrationId)
+        .then(function () {
+            self.localStorageManager.deleteRegistrationByName(registrationName);
         });
 };
 
 RegistrationManager.prototype.deleteRegistrationsForChannel = function (channelUri) {
-    this.pushHttpClient.listRegistrations(channelUri)
-        .then(function(registrations) {
-            return WinJS.Promise.join(registrations.map(function(registration) {
-                return this.pushHttpClient.unregister(registration.RegistrationId)
-                    .then(function() {
-                        this.localStorageManager.deleteRegistrationByRegistrationId(registration.RegistrationId);
-                    });
-            }));
+    var self = this;
+    return this.pushHttpClient.listRegistrations(channelUri)
+        .then(function (registrations) {
+            return WinJS.Promise.join(
+                registrations.map(function (registration) {
+                    return self.pushHttpClient.unregister(registration.registrationId)
+                        .then(function () {
+                            self.localStorageManager.deleteRegistrationByRegistrationId(registration.registrationId);
+                        });
+                }));
         })
-        .then(this.localStorageManager.clearRegistrations);
+        .then(self.localStorageManager.clearRegistrations);
 };
 
 RegistrationManager.prototype.createRegistrationId = function (registration) {
+    var self = this;
     return this.pushHttpClient.createRegistrationId()
-        .then(function(registrationId) {
-            registration.RegistrationId = registrationId;
-            this.localStorageManager.updateRegistrationByName(registration.templateName || '$Default', registration);
+        .then(function (registrationId) {
+            registration.registrationId = registrationId;
+            self.localStorageManager.updateRegistrationByRegistrationName(registration.templateName || '$Default', registration.registrationId, registration.deviceId);
         });
 };
 
 RegistrationManager.prototype.upsertRegistration = function (registration) {
-    return this.pushHttpClient.CreateOrUpdateRegistration(registration)
-        .then(function() {
-            this.localStorageManager.UpdateRegistrationByName(registration.templateName || '$Default', registration);
+    var self = this;
+    return this.pushHttpClient.createOrUpdateRegistration(registration)
+        .then(function () {
+            self.localStorageManager.updateRegistrationByRegistrationName(registration.templateName || '$Default', registration.registrationId, registration.deviceId);
         });
 };

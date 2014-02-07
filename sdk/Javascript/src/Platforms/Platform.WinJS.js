@@ -11,7 +11,6 @@
 
 var _ = require('Extensions');
 var Validate = require('Validate');
-var Push = require('Push');
 
 exports.async = function async(func) {
     /// <summary>
@@ -338,5 +337,3 @@ exports.allowPlatformToMutateOriginal = function (original, updated) {
 
     return original;
 };
-
-exports.Push = Push;

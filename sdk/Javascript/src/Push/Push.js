@@ -9,19 +9,20 @@
 // Declare JSHint globals
 /*global WinJS:false, Windows:false, $__fileVersion__:false, $__version__:false */
 
-var _ = require('Extensions');
 var Validate = require('Validate');
-var Platform = require('Platform');
-var LocalStorageManager = require('LocalStorageManager');
-var RegistrationManager = require('RegistrationManager');
-var PushHttpClient = require('PushHttpClient');
+var LocalStorageManager = require('LocalStorageManager').LocalStorageManager;
+var RegistrationManager = require('RegistrationManager').RegistrationManager;
+var PushHttpClient = require('PushHttpClient').PushHttpClient;
 
-exports.Push = function (mobileServicesClient) {
-    this.mobileServicesClient = mobileServicesClient;
+function Push(mobileServicesClient, tileId) {
+    var localStorage = new LocalStorageManager(mobileServicesClient.applicationUrl, tileId);
     this.registrationManager = new RegistrationManager(
         new PushHttpClient(mobileServicesClient),
-        new LocalStorageManager(applicationUrl));
+        localStorage
+        );
 };
+
+exports.Push = Push;
 
 Push.prototype.registerNative = function (channelUri, tags) {
     return this.registerTemplate(channelUri, tags);
@@ -39,15 +40,17 @@ Push.prototype.registerNative = function (channelUri, tags) {
 //      </visual>
 //    </toast>' // if template registration
 // templateName: "" // if template registration
-// wnsHeaders: { Key1: 'Value1', Key2: 'Value2'// if wns template registration }
+// headers: { Key1: 'Value1', Key2: 'Value2'// if wns template registration }
 // }
-Push.prototype.registerTemplate = function (channelUri, tags, templateBody, templateName, wnsHeaders) {
+Push.prototype.registerTemplate = function (channelUri, tags, templateBody, templateName, headers) {
     var registration = {};
+
+    registration.platform = 'wns';
 
     Validate.isString(channelUri, 'channelUri');
     Validate.notNullOrEmpty(channelUri, 'channelUri');
 
-    registration.channelUri = channelUri;
+    registration.deviceId = channelUri;
 
     if (tags) {
         Validate.isString(tags, 'tags');
@@ -61,12 +64,12 @@ Push.prototype.registerTemplate = function (channelUri, tags, templateBody, temp
         Validate.notNullOrEmpty(templateName);
         registration.templateName = templateName;
 
-        if (wnsHeaders) {
-            Validate.isObject(wnsHeaders);
-            registration.headers = wnsHeaders;
+        if (headers) {
+            Validate.isObject(headers);
+            registration.headers = headers;
         }
-    }    
-    
+    }
+
     return this.registrationManager.register(registration);
 };
 
@@ -74,12 +77,16 @@ Push.prototype.unregisterNative = function () {
     return this.unregisterTemplate('$Default');
 };
 
-Push.prototype.unregisterTemplate = function(templateName) {
-    Validate.isNullOrEmpty(templateName);
-    return this.registrationManager.unregisterAsync(templateName);
+Push.prototype.unregisterTemplate = function (templateName) {
+    Validate.notNullOrEmpty(templateName);
+    return this.registrationManager.unregister(templateName);
 };
 
-Push.prototype.unregisterAllAsync = function (channelUri) {
-    Validate.isNullOrEmpty(channelUri);
-    return this.registrationManager.deleteRegistrationsForChannelAsync(channelUri);
-}
+Push.prototype.unregisterAll = function (channelUri) {
+    Validate.notNullOrEmpty(channelUri);
+    return this.registrationManager.deleteRegistrationsForChannel(channelUri);
+};
+
+Push.prototype.getSecondaryTile = function (tileId) {
+    return new Push(this.mobileServicesClient, tileId);
+};
