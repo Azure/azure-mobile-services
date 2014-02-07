@@ -4,7 +4,7 @@ exports.get = function(request, response) {
         features: {
             intIdTables: true,
             stringIdTables: true,
-            nhPushEnabled: false,
+            nhPushEnabled: !!(push.send),
             queryExpandSupport: false,
             usersEnabled: /\"users\"/i.test(process.env.MS_PreviewFeatures)
         }

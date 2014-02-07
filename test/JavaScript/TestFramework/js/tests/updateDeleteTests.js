@@ -93,7 +93,7 @@ function defineUpdateDeleteTestsNamespace() {
             }
 
             table.insert({ id: id, name: 'test' }).done(afterInsert('Inserted'), afterInsert('Insert error (likely expected)'));
-        }));
+        }, zumo.runtimeFeatureNames.STRING_ID_TABLES));
     });
 
     tests.push(createUpdateTest('Update item', function (test, done, table, insertedItem) {
@@ -217,7 +217,7 @@ function defineUpdateDeleteTestsNamespace() {
             }
 
             table.insert({ id: id, name: 'test' }).done(afterInsert('Inserted'), afterInsert('Insert error (likely expected)'));
-        }));
+        }, zumo.runtimeFeatureNames.STRING_ID_TABLES));
     });
 
     function createDeleteTest(testName, actionAfterInsert) {
@@ -234,7 +234,7 @@ function defineUpdateDeleteTestsNamespace() {
                 zumo.util.traceResponse(test, insertError.request);
                 done(false);
             });
-        });
+        }, zumo.runtimeFeatureNames.INT_ID_TABLES);
     }
 
     function createUpdateTest(testName, actionAfterInsert) {
@@ -251,7 +251,7 @@ function defineUpdateDeleteTestsNamespace() {
                 zumo.util.traceResponse(test, insertError.request);
                 done(false);
             });
-        });
+        }, zumo.runtimeFeatureNames.INT_ID_TABLES);
     }
 
     return {

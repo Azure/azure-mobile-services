@@ -56,7 +56,7 @@ function defineQueryTestsNamespace() {
             test.addLog('Error populating the table: ', err);
             done(false);
         });
-    });
+    }, zumo.runtimeFeatureNames.INT_ID_TABLES);
 
     tests.push(populateTableTest);
 
@@ -89,7 +89,7 @@ function defineQueryTestsNamespace() {
             test.addLog('Error populating the string id table: ', err);
             done(false);
         });
-    });
+    }, zumo.runtimeFeatureNames.STRING_ID_TABLES);
 
     tests.push(populateStringIdTableTest);
 
@@ -318,7 +318,7 @@ function defineQueryTestsNamespace() {
                 test.addLog('Got expected error: ' + JSON.stringify(err));
                 done(true);
             });
-        }));
+        }, zumo.runtimeFeatureNames.INT_ID_TABLES));
     }
 
     tests.push(createQueryTest('String id: query by id',
@@ -350,7 +350,7 @@ function defineQueryTestsNamespace() {
             test.addLog('Error retrieving the "getWhereClauseCreator" method from the server: ', err);
             done(false);
         });
-    }));
+    }, zumo.runtimeFeatureNames.INT_ID_TABLES));
 
     function OrderByClause(fieldName, isAscending) {
         this.fieldName = fieldName;
@@ -405,7 +405,7 @@ function defineQueryTestsNamespace() {
                 test.addLog('Error retrieving data: ', err);
                 done(false);
             });
-        });
+        }, zumo.runtimeFeatureNames.INT_ID_TABLES);
     }
 
     function applyOptions(filteredMovies, options) {
@@ -630,7 +630,7 @@ function defineQueryTestsNamespace() {
             } else {
                 query.read().done(successFunction, errorFunction);
             }
-        });
+        }, useStringIdTable ? zumo.runtimeFeatureNames.STRING_ID_TABLES : zumo.runtimeFeatureNames.INT_ID_TABLES);
     }
 
     return {
