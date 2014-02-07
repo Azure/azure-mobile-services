@@ -1,5 +1,18 @@
 # Windows Azure Mobile Services Change Log
 
+### Version 1.1.3
+**Managed SDK**
+- Added support for the Windows Azure Active Directory authentication in the `MobileServiceAuthenticationProvider` enumeration.
+- Also added a mapping from that name to the value used in the service REST API (`/login/aad`)
+- Fixed a issue [#213](https://github.com/WindowsAzure/azure-mobile-services/issues/213) in which SDK prevented calls to custom APIs with query string parameters starting with `$`
+
+**iOS SDK** / **Javascript SDK**
+- Added a mapping in the authentication provider from WindowsAzureActiveDirectory to the value used in the REST API (`/login/aad`)
+
+**Android SDK**
+- Added support for the Windows Azure Active Directory authentication in the `MobileServiceAuthenticationProvider` enum.
+- Also added a mapping from that name to the value used in the service REST API (`/login/aad`)
+
 ### Version 1.1.2
 **iOS SDK**
 - Supports the arm64 architecture

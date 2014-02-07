@@ -51,10 +51,19 @@ namespace Microsoft.WindowsAzure.MobileServices
         private const string RequestJsonContentType = "application/json";
 
         /// <summary>
-        /// Gets a reference to the <see cref="MobileServiceClient"/> associated 
-        /// with this table.
+        /// The URI for the Windows Azure Mobile Service.
         /// </summary>
-        private MobileServiceClient client;
+        private readonly Uri applicationUri;
+
+        /// <summary>
+        /// The installation id of the application.
+        /// </summary>
+        private readonly string installationId;
+
+        /// <summary>
+        /// The application key for the Windows Azure Mobile Service.
+        /// </summary>
+        private readonly string applicationKey;
 
         /// <summary>
         /// The user-agent header value to use with all requests.
@@ -89,18 +98,28 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Instantiates a new <see cref="MobileServiceHttpClient"/>, 
         /// which does all the request to a mobile service.
         /// </summary>
-        /// <param name="client">
-        /// The client associated with this <see cref="MobileServiceHttpClient"/>.
-        /// </param>
         /// <param name="handlers">
         /// Chain of <see cref="HttpMessageHandler" /> instances. 
         /// All but the last should be <see cref="DelegatingHandler"/>s. 
         /// </param>
-        public MobileServiceHttpClient(MobileServiceClient client, IEnumerable<HttpMessageHandler> handlers)
+        /// <param name="applicationUri">
+        /// The URI for the Windows Azure Mobile Service.
+        /// </param>
+        /// <param name="installationId">
+        /// The installation id of the application.
+        /// </param>
+        /// <param name="applicationKey">
+        /// The application key for the Windows Azure Mobile Service.
+        /// </param>
+        public MobileServiceHttpClient(IEnumerable<HttpMessageHandler> handlers, Uri applicationUri, string installationId, string applicationKey)
         {
             Debug.Assert(handlers != null);
+            Debug.Assert(applicationUri != null);
 
-            this.client = client;
+            this.applicationUri = applicationUri;
+            this.installationId = installationId;
+            this.applicationKey = applicationKey;
+
             this.httpHandler = CreatePipeline(handlers);
             this.httpClient = new HttpClient(httpHandler);
             this.httpClientSansHandlers = new HttpClient(GetDefaultHttpClientHandler());
@@ -130,9 +149,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// The content of the response as a string.
         /// </returns>
-        public async Task<string> RequestWithoutHandlersAsync(HttpMethod method, string uriPathAndQuery, string content = null)
+        public async Task<string> RequestWithoutHandlersAsync(HttpMethod method, string uriPathAndQuery, MobileServiceUser user, string content = null)
         {
-            MobileServiceHttpResponse response = await this.RequestAsync(false, method, uriPathAndQuery, content, false);
+            MobileServiceHttpResponse response = await this.RequestAsync(false, method, uriPathAndQuery, user, content, false);
             return response.Content;
         }
 
@@ -160,12 +179,13 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The response.
         /// </returns>
         public Task<MobileServiceHttpResponse> RequestAsync(HttpMethod method,
-                                                             string uriPathAndQuery, 
+                                                             string uriPathAndQuery,
+                                                             MobileServiceUser user,
                                                              string content = null,
                                                              bool ensureResponseContent = true,
                                                              IDictionary<string, string> requestHeaders = null)
         {
-            return this.RequestAsync(true, method, uriPathAndQuery, content, ensureResponseContent, requestHeaders);
+            return this.RequestAsync(true, method, uriPathAndQuery, user, content, ensureResponseContent, requestHeaders);
         }
 
         /// <summary>
@@ -195,7 +215,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         private async Task<MobileServiceHttpResponse> RequestAsync(bool UseHandlers, 
                                                         HttpMethod method, 
-                                                        string uriPathAndQuery, 
+                                                        string uriPathAndQuery,
+                                                        MobileServiceUser user,
                                                         string content = null, 
                                                         bool ensureResponseContent = true,
                                                         IDictionary<string, string> requestHeaders = null)
@@ -205,7 +226,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             // Create the request
             HttpContent httpContent = CreateHttpContent(content);
-            HttpRequestMessage request = this.CreateHttpRequestMessage(method, uriPathAndQuery, requestHeaders, httpContent);
+            HttpRequestMessage request = this.CreateHttpRequestMessage(method, uriPathAndQuery, requestHeaders, httpContent, user);
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(RequestJsonContentType));
 
             // Get the response
@@ -253,13 +274,13 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// An <see cref="HttpResponseMessage"/>.
         /// </returns>
-        public async Task<HttpResponseMessage> RequestAsync(HttpMethod method, string uriPathAndQuery, HttpContent content, IDictionary<string, string> requestHeaders)
+        public async Task<HttpResponseMessage> RequestAsync(HttpMethod method, string uriPathAndQuery, MobileServiceUser user, HttpContent content, IDictionary<string, string> requestHeaders)
         {
             Debug.Assert(method != null);
             Debug.Assert(!string.IsNullOrEmpty(uriPathAndQuery));
 
             // Create the request
-            HttpRequestMessage request = this.CreateHttpRequestMessage(method, uriPathAndQuery, requestHeaders, content);
+            HttpRequestMessage request = this.CreateHttpRequestMessage(method, uriPathAndQuery, requestHeaders, content, user);
 
             // Get the response
             HttpResponseMessage response = await this.SendRequestAsync(httpClient, request, ensureResponseContent: false);
@@ -454,7 +475,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// An <see cref="HttpRequestMessage"/> with all of the 
         /// required Mobile Service headers.
         /// </returns>
-        private HttpRequestMessage CreateHttpRequestMessage(HttpMethod method, string uriPathAndQuery, IDictionary<string, string> requestHeaders, HttpContent content)
+        private HttpRequestMessage CreateHttpRequestMessage(HttpMethod method, string uriPathAndQuery, IDictionary<string, string> requestHeaders, HttpContent content, MobileServiceUser user)
         {
             Debug.Assert(method != null);
             Debug.Assert(!string.IsNullOrEmpty(uriPathAndQuery));
@@ -462,7 +483,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             HttpRequestMessage request = new HttpRequestMessage();
 
             // Set the Uri and Http Method
-            request.RequestUri = new Uri(client.ApplicationUri, uriPathAndQuery);
+            request.RequestUri = new Uri(this.applicationUri, uriPathAndQuery);
             request.Method = method;
 
             // Add the user's headers
@@ -475,16 +496,15 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             // Set Mobile Services authentication, application, and telemetry headers
-            request.Headers.Add(RequestInstallationIdHeader, client.applicationInstallationId);
-            if (!string.IsNullOrEmpty(client.ApplicationKey))
+            request.Headers.Add(RequestInstallationIdHeader, this.installationId);
+            if (!string.IsNullOrEmpty(this.applicationKey))
             {
-                request.Headers.Add(RequestApplicationKeyHeader, client.ApplicationKey);
+                request.Headers.Add(RequestApplicationKeyHeader, this.applicationKey);
             }
 
-            if (client.CurrentUser != null &&
-                !string.IsNullOrEmpty(client.CurrentUser.MobileServiceAuthenticationToken))
+            if (user != null && !string.IsNullOrEmpty(user.MobileServiceAuthenticationToken))
             {
-                request.Headers.Add(RequestAuthenticationHeader, client.CurrentUser.MobileServiceAuthenticationToken);
+                request.Headers.Add(RequestAuthenticationHeader, user.MobileServiceAuthenticationToken);
             }
 
             // Add the content
