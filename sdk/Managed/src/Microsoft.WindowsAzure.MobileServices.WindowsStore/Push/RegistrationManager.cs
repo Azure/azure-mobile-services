@@ -83,7 +83,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             for (int i = 0; i < count; i++)
             {
-                this.localStorageManager.UpdateRegistrationByRegistrationId(registrations[i]);
+                this.localStorageManager.UpdateRegistrationByRegistrationId(registrations[i].RegistrationId, registrations[i].Name, registrations[i].ChannelUri);
             }
         }
 
@@ -120,14 +120,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         async Task<Registration> CreateRegistrationIdAsync(Registration registration)
         {
             registration.RegistrationId = await this.pushHttpClient.CreateRegistrationIdAsync();
-            this.localStorageManager.UpdateRegistrationByName(registration.Name, registration);
+            this.localStorageManager.UpdateRegistrationByName(registration.Name, registration.RegistrationId, registration.ChannelUri);
             return registration;
         }
 
         async Task UpsertRegistration<T>(T registration) where T : Registration
         {
             await this.pushHttpClient.CreateOrUpdateRegistrationAsync(registration);
-            this.localStorageManager.UpdateRegistrationByName(registration.Name, registration);
+            this.localStorageManager.UpdateRegistrationByName(registration.Name, registration.RegistrationId, registration.ChannelUri);
         }
     }
 }

@@ -9,6 +9,7 @@
 //------------------------------------------------------------------------------
 
 namespace Microsoft.WindowsAzure.MobileServices {
+    using System;
     using System.Reflection;
     
     
@@ -556,7 +557,7 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The bodyTemplate is not in accepted XML format. The first node of the bodyTemplate should be Badge/Tile/Toast, except wns/raw template, which need to be an valid XML..
+        ///   Looks up a localized string similar to The bodyTemplate is not in accepted XML format. The first node of the bodyTemplate should be Badge/Tile/Toast, except for the wns/raw template, which need to be an valid XML..
         /// </summary>
         internal static string Push_NotSupportedXMLFormatAsBodyTemplateWin8 {
             get {

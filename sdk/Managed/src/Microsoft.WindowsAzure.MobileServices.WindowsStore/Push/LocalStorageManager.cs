@@ -102,26 +102,26 @@ namespace Microsoft.WindowsAzure.MobileServices
             return false;
         }
 
-        public void UpdateRegistrationByName<T>(string registrationName, T registration) where T : Registration
+        public void UpdateRegistrationByName(string registrationName, string registrationId, string registrationChannelUri)
         {
-            StoredRegistrationEntry cacheReg = new StoredRegistrationEntry(registrationName, registration.RegistrationId);
+            StoredRegistrationEntry cacheReg = new StoredRegistrationEntry(registrationName, registrationId);
             this.registrations.AddOrUpdate(registrationName, cacheReg, (key, oldValue) => cacheReg);
 
-            this.channelUri = registration.ChannelUri;
+            this.channelUri = registrationChannelUri;
             this.Flush();
         }
 
-        public void UpdateRegistrationByRegistrationId(Registration registration)
+        public void UpdateRegistrationByRegistrationId(string registrationId, string registrationName, string registrationChannelUri)
         {
             // update registation is registartionId is in cached registartions, otherwise create new one
-            var found = registrations.FirstOrDefault(v => v.Value.RegistrationId.Equals(registration.RegistrationId));
+            var found = registrations.FirstOrDefault(v => v.Value.RegistrationId.Equals(registrationId));
             if (!found.Equals(default(KeyValuePair<string, StoredRegistrationEntry>)))
             {
-                this.UpdateRegistrationByName(found.Key, registration);
+                this.UpdateRegistrationByName(found.Key, found.Value.RegistrationId, registrationChannelUri);
             }
             else
             {
-                this.UpdateRegistrationByName(registration.Name, registration);
+                this.UpdateRegistrationByName(registrationName, registrationId, registrationChannelUri);
             }
         }
 

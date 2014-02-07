@@ -34,7 +34,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.TileId = tileId;
 
             var storageManager = new LocalStorageManager(client.ApplicationUri.Host, tileId);
-            var pushHttpClient = new PushHttpClient(client.HttpClient);
+            var pushHttpClient = new PushHttpClient(client);
             this.registrationManager = new RegistrationManager(pushHttpClient, storageManager);
 
             this.SecondaryTiles = tiles ?? new SecondaryTilesList(this);

@@ -16,28 +16,28 @@ namespace Microsoft.WindowsAzure.MobileServices
 
     internal sealed class PushHttpClient
     {
-        private readonly MobileServiceHttpClient httpClient;
+        private readonly MobileServiceClient client;
 
-        internal PushHttpClient(MobileServiceHttpClient httpClient)
+        internal PushHttpClient(MobileServiceClient client)
         {
-            this.httpClient = httpClient;
+            this.client = client;
         }
 
         public async Task<IEnumerable<Registration>> ListRegistrationsAsync(string channelUri)
         {
-            var response = await httpClient.RequestAsync(HttpMethod.Get, string.Format("/push/registrations?deviceId={0}&platform=wns", Uri.EscapeUriString(channelUri)));
+            var response = await this.client.HttpClient.RequestAsync(HttpMethod.Get, string.Format("/push/registrations?deviceId={0}&platform=wns", Uri.EscapeUriString(channelUri)), this.client.CurrentUser);
 
             return JsonConvert.DeserializeObject<IEnumerable<Registration>>(response.Content, new JsonConverter[] { new RegistrationConverter() });
         }
 
         public Task UnregisterAsync(string registrationId)
         {
-            return httpClient.RequestAsync(HttpMethod.Delete, "/push/registrations/" + registrationId, ensureResponseContent: false);
+            return this.client.HttpClient.RequestAsync(HttpMethod.Delete, "/push/registrations/" + registrationId, this.client.CurrentUser, ensureResponseContent: false);
         }
 
         public async Task<string> CreateRegistrationIdAsync()
         {
-            var response = await httpClient.RequestAsync(HttpMethod.Post, "/push/registrationids", null, null);
+            var response = await this.client.HttpClient.RequestAsync(HttpMethod.Post, "/push/registrationids", this.client.CurrentUser, null, null);
             var locationPath = response.Headers.Location.AbsolutePath;
             return locationPath.Substring(locationPath.LastIndexOf('/') + 1);
         }
@@ -45,7 +45,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public Task CreateOrUpdateRegistrationAsync(Registration registration)
         {
             var content = JsonConvert.SerializeObject(registration);
-            return httpClient.RequestAsync(HttpMethod.Put, "/push/registrations/" + registration.RegistrationId, content, ensureResponseContent: false);
+            return this.client.HttpClient.RequestAsync(HttpMethod.Put, "/push/registrations/" + registration.RegistrationId, this.client.CurrentUser, content, ensureResponseContent: false);
         }
     }
 

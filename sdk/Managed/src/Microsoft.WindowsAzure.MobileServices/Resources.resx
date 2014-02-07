@@ -277,7 +277,7 @@
     <value>Template name can't contain ";" or ":".</value>
   </data>
   <data name="Push_NotSupportedXMLFormatAsBodyTemplateWin8" xml:space="preserve">
-    <value>The bodyTemplate is not in accepted XML format. The first node of the bodyTemplate should be Badge/Tile/Toast, except wns/raw template, which need to be an valid XML.</value>
+    <value>The bodyTemplate is not in accepted XML format. The first node of the bodyTemplate should be Badge/Tile/Toast, except for the wns/raw template, which need to be an valid XML.</value>
   </data>
   <data name="Push_BodyTemplateMustBeXml" xml:space="preserve">
     <value>Valid XML is required for any template without a raw header.</value>
