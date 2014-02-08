@@ -143,6 +143,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The URI of the resource to request (relative to the Mobile Services
         /// runtime).
         /// </param>
+        /// <param name="user">
+        /// The object representing the user on behalf of whom the request will be sent.
+        /// </param>
         /// <param name="content">
         /// Optional content to send to the resource.
         /// </param>
@@ -165,6 +168,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="uriPathAndQuery">
         /// The URI of the resource to request (relative to the Mobile Services
         /// runtime).
+        /// </param>
+        /// <param name="user">
+        /// The object representing the user on behalf of whom the request will be sent.
         /// </param>
         /// <param name="content">
         /// Optional content to send to the resource.
@@ -200,6 +206,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="uriPathAndQuery">
         /// The URI of the resource to request (relative to the Mobile Services
         /// runtime).
+        /// </param>
+        /// <param name="user">
+        /// The object representing the user on behalf of whom the request will be sent.
         /// </param>
         /// <param name="content">
         /// Optional content to send to the resource.
@@ -264,6 +273,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="uriPathAndQuery">
         /// The URI of the resource to request (relative to the Mobile Services
         /// runtime).
+        /// </param>
+        /// <param name="user">
+        /// The object representing the user on behalf of whom the request will be sent.
         /// </param>
         /// <param name="content">
         /// Content to send to the resource.
@@ -470,6 +482,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </param>
         /// <param name="content">
         /// The content of the request.
+        /// </param>
+        /// <param name="user">
+        /// The object representing the user on behalf of whom the request will be sent.
         /// </param>
         /// <returns>
         /// An <see cref="HttpRequestMessage"/> with all of the 
