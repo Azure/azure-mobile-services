@@ -7,7 +7,7 @@
 /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
 
 // Declare JSHint globals
-/*global WinJS:false, Windows:false, $__fileVersion__:false, $__version__:false */
+/*global WinJS:false */
 
 function RegistrationManager(pushHttpClient, storageManager) {
     this.pushHttpClient = pushHttpClient;
@@ -16,23 +16,26 @@ function RegistrationManager(pushHttpClient, storageManager) {
 
 exports.RegistrationManager = RegistrationManager;
 
-RegistrationManager.prototype.register = function (registration) {
-    var firstPromise;
+RegistrationManager.prototype.refreshLocalStorage = function(refreshChannelUri) {
+    var refreshPromise;
     var self = this;
-
     // if localStorage is empty or has different storage version, we need retrieve registrations and refresh local storage
     if (this.localStorageManager.isRefreshNeeded) {
-        var refreshChannelUri = this.localStorageManager.channelUri || registration.deviceId;
-        firstPromise = this.getRegistrationsForChannel(refreshChannelUri)
-            .then(function () {
+        refreshPromise = this.getRegistrationsForChannel(refreshChannelUri)
+            .then(function() {
                 self.localStorageManager.refreshFinished(refreshChannelUri);
             });
 
     } else {
-        firstPromise = WinJS.Promise.wrap();
+        refreshPromise = WinJS.Promise.wrap();
     }
 
-    return firstPromise
+    return refreshPromise;
+};
+
+RegistrationManager.prototype.register = function (registration) {
+    var self = this;
+    return this.refreshLocalStorage(this.localStorageManager.channelUri || registration.deviceId)
         .then(function () {
             return self.localStorageManager.getRegistration(registration.templateName || '$Default');
         })
@@ -72,7 +75,7 @@ RegistrationManager.prototype.getRegistrationsForChannel = function (channelUri)
     return this.pushHttpClient.listRegistrations(channelUri)
         .then(function (registrations) {
             var count = registrations.length;
-            if (count == 0) {
+            if (count === 0) {
                 self.localStorageManager.clearRegistrations();
             }
 

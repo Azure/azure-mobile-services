@@ -2,12 +2,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-/// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
-/// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
-/// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
+/// <reference path='C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js' />
+/// <reference path='C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js' />
+/// <reference path='..\Generated\MobileServices.DevIntellisense.js' />
 
 // Declare JSHint globals
-/*global WinJS:false, Windows:false, $__fileVersion__:false, $__version__:false */
+/*global WinJS:false, Windows:false */
 
 var _ = require('Extensions');
 var Platform = require('Platform');
@@ -17,16 +17,16 @@ function LocalStorageManager(applicationUri, tileId) {
         tileId = '$Primary';
     }
 
-    var name = _.format("{0}-PushContainer-{1}-{2}", Windows.ApplicationModel.Package.current.id.name, applicationUri, tileId);
+    var name = _.format('{0}-PushContainer-{1}-{2}', Windows.ApplicationModel.Package.current.id.name, applicationUri, tileId);
     this.settings = Windows.Storage.ApplicationData.current.localSettings.createContainer(name, Windows.Storage.ApplicationDataCreateDisposition.always).values;
     this.isRefreshNeeded = false;
     this.channelUri = null;
 
-    this.storageVersion = "v1.0.0";
-    this.primaryChannelId = "$Primary";
-    this.keyNameVersion = "Version";
-    this.keyNameChannelUri = "ChannelUri";
-    this.keyNameRegistrations = "Registrations";
+    this.storageVersion = 'v1.0.0';
+    this.primaryChannelId = '$Primary';
+    this.keyNameVersion = 'Version';
+    this.keyNameChannelUri = 'ChannelUri';
+    this.keyNameRegistrations = 'Registrations';
 
     this.initializeRegistrationInfoFromStorage();
 };
