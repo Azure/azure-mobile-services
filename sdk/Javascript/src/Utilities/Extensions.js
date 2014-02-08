@@ -235,6 +235,17 @@ exports.isDate = function (value) {
     return !_.isNull(value) && (classOf(value) == 'date');
 };
 
+exports.isArray = function (value) {
+    /// <summary>
+    /// Determine if a value is an array.
+    /// </summary>
+    /// <param name="value" type="Object">The value to check.</param>
+    /// <returns type="boolean">
+    /// True if the value is an array, false othwerise.
+    /// </returns>
+    return !_.isNull(value) && (classOf(value) == 'array');
+};
+
 exports.toJson = function (value) {
     /// <summary>
     /// Convert an object into JSON format.

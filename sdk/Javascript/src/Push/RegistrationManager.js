@@ -32,9 +32,10 @@ RegistrationManager.prototype.register = function (registration) {
         firstPromise = WinJS.Promise.wrap();
     }
 
-    return firstPromise.then(function () {
-        return self.localStorageManager.getRegistration(registration.templateName || '$Default');
-    })
+    return firstPromise
+        .then(function () {
+            return self.localStorageManager.getRegistration(registration.templateName || '$Default');
+        })
         .then(function (cached) {
             if (cached != null) {
                 registration.registrationId = cached.registrationId;
@@ -106,7 +107,9 @@ RegistrationManager.prototype.deleteRegistrationsForChannel = function (channelU
                         });
                 }));
         })
-        .then(self.localStorageManager.clearRegistrations);
+        .then(function() {
+            self.localStorageManager.clearRegistrations();
+        });
 };
 
 RegistrationManager.prototype.createRegistrationId = function (registration) {

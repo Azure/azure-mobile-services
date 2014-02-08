@@ -24,39 +24,29 @@ function Push(mobileServicesClient, tileId) {
 
 exports.Push = Push;
 
+/// <summary>
+/// Register for native notification
+/// </summary>
+/// <param name="channelUri">The channelUri to register</param>
+/// <param name="tags">Array containing the tags for this registeration</param>
+/// <returns>Promise that will complete when the registration is completed</returns>
 Push.prototype.registerNative = function (channelUri, tags) {
-    return this.registerTemplate(channelUri, tags);
+    var registration = makeCoreRegistration(channelUri, tags);
+    return this.registrationManager.register(registration);
 };
 
-// {
-// platform: "wns" // {"wns"|"mpns"|"apns"|"gcm"}
-// channelUri: "" // if wns or mpns
-// tags: "tag1,tag2,tag3"
-// templateBody: '<toast>
-//      <visual lang="en-US">
-//        <binding template="ToastText01">
-//          <text id="1">$(myTextProp1)</text>
-//        </binding>
-//      </visual>
-//    </toast>' // if template registration
-// templateName: "" // if template registration
-// headers: { Key1: 'Value1', Key2: 'Value2'// if wns template registration }
-// }
-Push.prototype.registerTemplate = function (channelUri, tags, templateBody, templateName, headers) {
-    var registration = {};
-
-    registration.platform = 'wns';
-
-    Validate.isString(channelUri, 'channelUri');
-    Validate.notNullOrEmpty(channelUri, 'channelUri');
-
-    registration.deviceId = channelUri;
-
-    if (tags) {
-        Validate.isString(tags, 'tags');
-        registration.tags = tags;
-    }
-
+/// <summary>
+/// Register for template notification
+/// </summary>
+/// <param name="channelUri">The channelUri to register</param>
+/// <param name="templateBody">The xml body to register</param>
+/// <param name="templateName">The name of the template</param>
+/// <param name="headers">Object containing key/value pairs for the template to provide to WNS. X-WNS-Type is required. Example: { 'X-WNS-Type' : 'wns/toast' }</param>
+/// <param name="tags">Array containing the tags for this registeration</param>
+/// <returns>Promise that will complete when the template registration is completed</returns>
+Push.prototype.registerTemplate = function (channelUri, templateBody, templateName, headers, tags) {
+    var registration = makeCoreRegistration(channelUri, tags);
+    
     if (templateBody) {
         Validate.isString(templateBody, 'templateBody');
         registration.templateBody = templateBody;
@@ -73,15 +63,29 @@ Push.prototype.registerTemplate = function (channelUri, tags, templateBody, temp
     return this.registrationManager.register(registration);
 };
 
+/// <summary>
+/// Unregister for native notification
+/// </summary>
+/// <returns>Promise that will complete when the unregister is completed</returns>
 Push.prototype.unregisterNative = function () {
     return this.unregisterTemplate('$Default');
 };
 
+/// <summary>
+/// Unregister for template notification
+/// </summary>
+/// <param name="templateName">The name of the template</param>
+/// <returns>Promise that will complete when the unregister is completed</returns>
 Push.prototype.unregisterTemplate = function (templateName) {
     Validate.notNullOrEmpty(templateName);
     return this.registrationManager.unregister(templateName);
 };
 
+/// <summary>
+/// Unregister all notifications for a specfic channelUri
+/// </summary>
+/// <param name="channelUri">The channelUri to unregister</param>
+/// <returns>Promise that will complete when the unregistration of all registrations at the channelUri is completed</returns>
 Push.prototype.unregisterAll = function (channelUri) {
     Validate.notNullOrEmpty(channelUri);
     return this.registrationManager.deleteRegistrationsForChannel(channelUri);
@@ -90,3 +94,21 @@ Push.prototype.unregisterAll = function (channelUri) {
 Push.prototype.getSecondaryTile = function (tileId) {
     return new Push(this.mobileServicesClient, tileId);
 };
+
+function makeCoreRegistration(channelUri, tags) {
+    var registration = {};
+
+    registration.platform = 'wns';
+
+    Validate.isString(channelUri, 'channelUri');
+    Validate.notNullOrEmpty(channelUri, 'channelUri');
+
+    registration.deviceId = channelUri;
+
+    if (tags) {
+        Validate.isArray(tags, 'tags');
+        registration.tags = tags;
+    }
+
+    return registration;
+}

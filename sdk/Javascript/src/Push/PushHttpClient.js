@@ -26,7 +26,7 @@ PushHttpClient.prototype.listRegistrations = function (channelUri) {
 };
 
 PushHttpClient.prototype.unregister = function (registrationId) {
-    return this._request('DELETE', '/push/registrations/' + registrationId);
+    return this._request('DELETE', '/push/registrations/' + encodeURIComponent(registrationId));
 };
 
 PushHttpClient.prototype.createRegistrationId = function () {
@@ -38,7 +38,7 @@ PushHttpClient.prototype.createRegistrationId = function () {
 };
 
 PushHttpClient.prototype.createOrUpdateRegistration = function (registration) {
-    return this._request('PUT', '/push/registrations/' + registration.registrationId, registration);
+    return this._request('PUT', '/push/registrations/' + encodeURIComponent(registration.registrationId), registration);
 };
 
 PushHttpClient.prototype._request = Platform.async(

@@ -140,7 +140,7 @@ exports.isInteger = function (value, name) {
 
     if (parseInt(value, 10) !== parseFloat(value)) {
         throw _.format(
-            Platform.getResourceString("Validate_TypeCheck_Error"),
+            Platform.getResourceString("Validate_TypeCheckError"),
             name || 'Value',
             'number',
             typeof value);
@@ -179,6 +179,24 @@ exports.isObject = function (value, name) {
             Platform.getResourceString("Validate_TypeCheckError"),
             name || 'Value',
             'object',
+            typeof value);
+    }
+};
+
+exports.isArray = function (value, name) {
+    /// <summary>
+    /// Ensure the value is an Array.
+    /// </summary>
+    /// <param name="value" mayBeNull="true">The value to check.</param>
+    /// <param name="name" mayBeNull="true" optional="true" type="String">
+    /// Optional name of the value to throw.
+    /// </param>
+
+    if (!_.isArray(value)) {
+        throw _.format(
+            Platform.getResourceString("Validate_TypeCheckError"),
+            name || 'Value',
+            'array',
             typeof value);
     }
 };
