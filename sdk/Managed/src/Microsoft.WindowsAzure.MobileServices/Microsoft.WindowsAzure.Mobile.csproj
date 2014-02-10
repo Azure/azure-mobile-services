@@ -72,7 +72,7 @@
     <Compile Include="Table\Query\Linq\MemberInfoKey.cs" />
     <Compile Include="Table\Query\Linq\MobileServiceTableQuery.cs" />
     <Compile Include="Table\Query\Linq\MobileServiceTableQueryProvider.cs" />
-    <Compile Include="Table\Query\Linq\MobileServiceTableQueryProviderTranslator.cs" />
+    <Compile Include="Table\Query\Linq\MobileServiceTableQueryTranslator.cs" />
     <Compile Include="Table\Serialization\UpdatedAtAttribute.cs" />
     <Compile Include="Table\Serialization\CreatedAtAttribute.cs" />
     <Compile Include="Table\Serialization\VersionAttribute.cs" />
