@@ -12,7 +12,7 @@
 function RegistrationManager(pushHttpClient, storageManager) {
     this.pushHttpClient = pushHttpClient;
     this.localStorageManager = storageManager;
-};
+}
 
 exports.RegistrationManager = RegistrationManager;
 
@@ -40,7 +40,7 @@ RegistrationManager.prototype.register = function (registration) {
             return self.localStorageManager.getRegistration(registration.templateName || '$Default');
         })
         .then(function (cached) {
-            if (cached != null) {
+            if (cached !== null) {
                 registration.registrationId = cached.registrationId;
                 return WinJS.Promise.wrap();
             } else {

@@ -29,7 +29,7 @@ function LocalStorageManager(applicationUri, tileId) {
     this.keyNameRegistrations = 'Registrations';
 
     this.initializeRegistrationInfoFromStorage();
-};
+}
 
 exports.LocalStorageManager = LocalStorageManager;
 
@@ -129,7 +129,7 @@ LocalStorageManager.prototype.flushToSettings = function () {
     this.settings.insert(this.keyNameChannelUri, this.channelUri);
 
     var str = '';
-    if (this.registrations != null) {
+    if (this.registrations !== null) {
         str = JSON.stringify(this.registrations);
     }
 

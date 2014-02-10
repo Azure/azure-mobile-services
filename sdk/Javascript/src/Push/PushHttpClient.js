@@ -11,7 +11,7 @@ var Platform = require('Platform');
 
 function PushHttpClient(mobileServicesClient) {
     this.mobileServicesClient = mobileServicesClient;
-};
+}
 
 exports.PushHttpClient = PushHttpClient;
 

@@ -17,7 +17,7 @@ function Push(mobileServicesClient, tileId) {
         new PushHttpClient(mobileServicesClient),
         localStorage
         );
-};
+}
 
 exports.Push = Push;
 
