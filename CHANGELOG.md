@@ -10,6 +10,8 @@
 - Added a mapping in the authentication provider from WindowsAzureActiveDirectory to the value used in the REST API (`/login/aad`)
 
 **Android SDK**
+- Support for optimistic concurrency (version / ETag) validation
+- Support for `__createdAt` / `__updatedAt` table columns
 - Added support for the Windows Azure Active Directory authentication in the `MobileServiceAuthenticationProvider` enum.
 - Also added a mapping from that name to the value used in the service REST API (`/login/aad`)
 
