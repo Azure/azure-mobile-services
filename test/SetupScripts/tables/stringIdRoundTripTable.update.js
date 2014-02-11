@@ -19,6 +19,10 @@ function update(item, user, request) {
             } else if (policy === 'server' || policy === 'serverwins') {
                 request.respond(statusCodes.OK, serverItem);
             } else {
+                if (serverItem.complex) {
+                    serverItem.complex = JSON.parse(serverItem.complex);
+                }
+                
                 request.respond(statusCodes.PRECONDITION_FAILED, serverItem);
             }
         }

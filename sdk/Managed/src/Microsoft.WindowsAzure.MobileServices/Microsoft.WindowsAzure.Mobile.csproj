@@ -67,6 +67,12 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Table\MobileServiceSystemProperties.cs" />
+    <Compile Include="Table\Query\Linq\FilterBuildingExpressionVisitor.cs" />
+    <Compile Include="Table\Query\Linq\IMobileServiceTableQuery.cs" />
+    <Compile Include="Table\Query\Linq\MemberInfoKey.cs" />
+    <Compile Include="Table\Query\Linq\MobileServiceTableQuery.cs" />
+    <Compile Include="Table\Query\Linq\MobileServiceTableQueryProvider.cs" />
+    <Compile Include="Table\Query\Linq\MobileServiceTableQueryTranslator.cs" />
     <Compile Include="Table\Serialization\UpdatedAtAttribute.cs" />
     <Compile Include="Table\Serialization\CreatedAtAttribute.cs" />
     <Compile Include="Table\Serialization\VersionAttribute.cs" />
@@ -76,14 +82,8 @@
     <Compile Include="Table\MobileServiceTable.cs" />
     <Compile Include="Table\MobileServiceTable.Generic.cs" />
     <Compile Include="MobileServiceUrlBuilder.cs" />
-    <Compile Include="Table\Query\FilterBuildingExpressionVisitor.cs" />
-    <Compile Include="Table\Query\IMobileServiceTableQuery.cs" />
     <Compile Include="Table\Query\ITotalCountProvider.cs" />
-    <Compile Include="Table\Query\MemberInfoKey.cs" />
-    <Compile Include="Table\Query\MobileServiceTableQuery.cs" />
     <Compile Include="Table\Query\MobileServiceTableQueryDescription.cs" />
-    <Compile Include="Table\Query\MobileServiceTableQueryProvider.cs" />
-    <Compile Include="Table\Query\MobileServiceTableQueryTranslator.cs" />
     <Compile Include="Table\Query\TotalCountEnumerable.cs" />
     <Compile Include="Table\Query\TotalCountList.cs" />
     <Compile Include="Table\Serialization\DataTableAttribute.cs" />
