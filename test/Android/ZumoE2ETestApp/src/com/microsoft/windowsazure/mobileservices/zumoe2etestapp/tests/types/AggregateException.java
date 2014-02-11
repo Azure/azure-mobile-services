@@ -19,50 +19,39 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types;
 
-import java.util.Random;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
-import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
+public class AggregateException extends Exception {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3507943118377161658L;
 
-public class ComplexType {
+	private List<Exception> mAggregatedExceptions = Collections.synchronizedList(new ArrayList<Exception>());
 
-	public String name;
-
-	public Integer age;
-
-	public ComplexType() {
-
+	public AggregateException() {
+		super();
 	}
 
-	public ComplexType(Random r) {
-		name = Util.createSimpleRandomString(r, 10);
-		age = r.nextInt(80);
+	public AggregateException(String detailMessage) {
+		super(detailMessage);
 	}
 
-	public ComplexType(ComplexType other) {
-		name = String.valueOf(other.name);
-		age = Integer.valueOf(other.age);
+	public AggregateException(Throwable throwable) {
+		super(throwable);
 	}
 
-	@Override
-	public String toString() {
-		return String.format("ComplexType[Name=%s},Age=%s]", name, age);
+	public AggregateException(String detailMessage, Throwable throwable) {
+		super(detailMessage, throwable);
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (o == null)
-			return false;
+	public void addException(Exception exception) {
+		mAggregatedExceptions.add(exception);
+	}
 
-		if (!(o instanceof ComplexType))
-			return false;
-
-		ComplexType element = (ComplexType) o;
-
-		if (!Util.compare(element.name, name))
-			return false;
-		if (!Util.compare(element.age, age))
-			return false;
-
-		return true;
+	public List<Exception> getAggregatedExceptions() {
+		return mAggregatedExceptions;
 	}
 }

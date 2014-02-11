@@ -19,7 +19,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
 */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
-import java.security.InvalidParameterException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -182,10 +181,10 @@ public class RoundTripTests extends TestGroup {
 
 		this.addTest(createSimpleTypedRoundTripTestWithException(
 				"(Neg) Long: more than max allowed", maxAllowedValue + 1,
-				Long.class, InvalidParameterException.class));
+				Long.class, IllegalArgumentException.class));
 		this.addTest(createSimpleTypedRoundTripTestWithException(
 				"(Neg) Long: less than min allowed", minAllowedValue - 1,
-				Long.class, InvalidParameterException.class));
+				Long.class, IllegalArgumentException.class));
 
 		this.addTest(createSimpleTypedRoundTripTest(
 				"Enum (with JSON converter): simple value", EnumType.Second,
@@ -229,7 +228,7 @@ public class RoundTripTests extends TestGroup {
 		element1.id = 1;
 		this.addTest(createSimpleTypedRoundTripTestWithException(
 				"(Neg) Insert item with non-default id", element1,
-				InvalidParameterException.class, false));
+				IllegalArgumentException.class, false));
 
 		// untyped tests
 		this.addTest(createSimpleUntypedRoundTripTest("Untyped String: Empty",
@@ -341,13 +340,13 @@ public class RoundTripTests extends TestGroup {
 
 		this.addTest(createSimpleUntypedRoundTripTestWithException(
 				"(Neg) Insert item with non-default 'id' property",
-				"{\"id\":1,\"value\":2}", InvalidParameterException.class));
+				"{\"id\":1,\"value\":2}", IllegalArgumentException.class));
 		this.addTest(createSimpleUntypedRoundTripTestWithException(
 				"(Neg) Insert item with non-default 'ID' property",
-				"{\"ID\":1,\"value\":2}", InvalidParameterException.class));
+				"{\"ID\":1,\"value\":2}", IllegalArgumentException.class));
 		this.addTest(createSimpleUntypedRoundTripTestWithException(
 				"(Neg) Insert item with non-default 'Id' property",
-				"{\"Id\":1,\"value\":2}", InvalidParameterException.class));
+				"{\"Id\":1,\"value\":2}", IllegalArgumentException.class));
 
 	}
 

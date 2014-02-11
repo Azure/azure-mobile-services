@@ -229,23 +229,23 @@ public final class MobileServiceQuery<E> {
 
 			}
 		}
+		
+		List<Pair<String, String>> parameters = this.mTable.addSystemProperties(this.mTable.getSystemProperties(), this.mUserDefinedParameters);
+		
+		for (Pair<String, String> parameter : parameters) {
+			if (parameter.first != null) {
+				sb.append("&");
 
-		if (!this.mUserDefinedParameters.isEmpty()) {
-			for (Pair<String, String> parameter : this.mUserDefinedParameters) {
-				if (parameter.first != null) {
-					sb.append("&");
+				String key = parameter.first;
+				String value = parameter.second;
+				if (value == null)
+					value = "null";
 
-					String key = parameter.first;
-					String value = parameter.second;
-					if (value == null)
-						value = "null";
-
-					sb.append(URLEncoder.encode(key,
-							MobileServiceClient.UTF8_ENCODING));
-					sb.append("=");
-					sb.append(URLEncoder.encode(value,
-							MobileServiceClient.UTF8_ENCODING));
-				}
+				sb.append(URLEncoder.encode(key,
+						MobileServiceClient.UTF8_ENCODING));
+				sb.append("=");
+				sb.append(URLEncoder.encode(value,
+						MobileServiceClient.UTF8_ENCODING));
 			}
 		}
 

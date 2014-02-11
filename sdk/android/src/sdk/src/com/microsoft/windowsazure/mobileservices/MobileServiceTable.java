@@ -24,7 +24,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices;
 
 import java.lang.reflect.Field;
-import java.security.InvalidParameterException;
+import java.util.EnumSet;
 import java.util.List;
 
 import android.util.Pair;
@@ -85,8 +85,7 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 		}
 
 		@Override
-		public void onCompleted(JsonObject jsonEntity, Exception exception,
-				ServiceFilterResponse response) {
+		public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
 			if (exception == null && jsonEntity != null) {
 				E entity = null;
 				Exception ex = null;
@@ -102,6 +101,23 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 
 				if (mCallback != null)
 					mCallback.onCompleted(entity, ex, response);
+			} else if (exception instanceof MobileServicePreconditionFailedExceptionBase) {
+				MobileServicePreconditionFailedExceptionBase ex = (MobileServicePreconditionFailedExceptionBase)exception;
+				
+				E entity = null;
+				
+				try {
+					entity = parseResults(ex.getValue()).get(0);
+					
+					if (entity != null && mOriginalEntity != null) {
+						copyFields(entity, mOriginalEntity);
+						entity = mOriginalEntity;
+					}
+				} catch (Exception e) {
+				}
+				
+				if (mCallback != null)
+					mCallback.onCompleted(null, new MobileServicePreconditionFailedException(ex, entity), response);					
 			} else {
 				if (mCallback != null)
 					mCallback.onCompleted(null, exception, response);
@@ -118,12 +134,23 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 	 * @param client
 	 *            The MobileServiceClient used to invoke table operations
 	 */
-	public MobileServiceTable(String name, MobileServiceClient client,
-			Class<E> clazz) {
-
+	public MobileServiceTable(String name, MobileServiceClient client, Class<E> clazz) {
 		initialize(name, client);
+		
 		mInternalTable = new MobileServiceJsonTable(name, client);
 		mClazz = clazz;
+		
+		mSystemProperties = getSystemProperties(clazz);
+		mInternalTable.setSystemProperties(mSystemProperties);			
+	}
+	
+	public EnumSet<MobileServiceSystemProperty> getSystemProperties() {
+		return mInternalTable.getSystemProperties();
+	}
+
+	public void setSystemProperties(EnumSet<MobileServiceSystemProperty> systemProperties) {
+		this.mSystemProperties = systemProperties;
+		this.mInternalTable.setSystemProperties(systemProperties);
 	}
 
 	/**
@@ -208,12 +235,18 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 		JsonObject json = null;
 		try {
 			json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
-		} catch (InvalidParameterException e) {
+		} catch (IllegalArgumentException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}
 
 			return;
+		}
+		
+		Class<?> idClazz = getIdPropertyClass(element.getClass());
+		
+		if (idClazz != null && !isIntegerClass(idClazz)) {
+				json = removeSystemProperties(json);
 		}
 
 		mInternalTable.insert(json, parameters, new ParseResultOperationCallback(callback,
@@ -250,7 +283,7 @@ MobileServiceTableBase<TableQueryCallback<E>> {
 		
 		try {
 			json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
-		} catch (InvalidParameterException e) {
+		} catch (IllegalArgumentException e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}

@@ -19,7 +19,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices;
 
-import java.security.InvalidParameterException;
 import java.util.Date;
 import java.util.Locale;
 
@@ -113,8 +112,7 @@ public class MobileServiceQueryOperations {
 	 */
 	public static MobileServiceQuery<?> field(String fieldName) {
 		if (fieldName == null || fieldName.trim().length() == 0) {
-			throw new InvalidParameterException(
-					"fieldName cannot be null or empty");
+			throw new IllegalArgumentException("fieldName cannot be null or empty");
 		}
 
 		MobileServiceQuery<Object> query = new MobileServiceQuery<Object>();
