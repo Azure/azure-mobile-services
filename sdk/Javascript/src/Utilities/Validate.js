@@ -192,7 +192,7 @@ exports.isArray = function (value, name) {
     /// Optional name of the value to throw.
     /// </param>
 
-    if (!_.isArray(value)) {
+    if (!Array.isArray(value)) {
         throw _.format(
             Platform.getResourceString("Validate_TypeCheckError"),
             name || 'Value',

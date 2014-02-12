@@ -48,13 +48,13 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Extension method to get a Push object made from an existing MobileServiceClient.
+        /// Extension method to get a <see cref="Push"/> object made from an existing <see cref="MobileServiceClient"/>.
         /// </summary>
         /// <param name="client">
-        /// The MobileServiceClient to create with.
+        /// The <see cref="MobileServiceClient"/> to create with.
         /// </param>
         /// <returns>
-        /// The Push object used for registering for notifications.
+        /// The <see cref="Push"/> object used for registering for notifications.
         /// </returns>
         public static Push GetPush(this MobileServiceClient client)
         {

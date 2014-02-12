@@ -85,13 +85,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         [JsonProperty(PropertyName = "registrationId")]
         public string RegistrationId { get; internal set; }
 
-        /// <summary>        
-        /// Helper method hinting to Json.Net that RegistrationId should not be serialized when sending Registration to service.
-        /// Would be Internal, but Json.Net only respects this property if it is public.
-        /// </summary>
-        /// <returns>false</returns>
-        public bool ShouldSerializeRegistrationId() { return false; }
-
         internal virtual string Name
         {
             get

@@ -32,7 +32,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         public Task UnregisterAsync(string registrationId)
         {
-            return this.client.HttpClient.RequestAsync(HttpMethod.Delete, "/push/registrations/" + registrationId, this.client.CurrentUser, ensureResponseContent: false);
+            return this.client.HttpClient.RequestAsync(HttpMethod.Delete, string.Format("/push/registrations/{0}", Uri.EscapeUriString(registrationId)), this.client.CurrentUser, ensureResponseContent: false);
         }
 
         public async Task<string> CreateRegistrationIdAsync()
@@ -44,8 +44,13 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         public Task CreateOrUpdateRegistrationAsync(Registration registration)
         {
+            var regId = registration.RegistrationId;
+
+            // This ensures RegistrationId is not serialized and sent to service.
+            registration.RegistrationId = null;
+
             var content = JsonConvert.SerializeObject(registration);
-            return this.client.HttpClient.RequestAsync(HttpMethod.Put, "/push/registrations/" + registration.RegistrationId, this.client.CurrentUser, content, ensureResponseContent: false);
+            return this.client.HttpClient.RequestAsync(HttpMethod.Put, string.Format("/push/registrations/{0}", Uri.EscapeUriString(regId)), this.client.CurrentUser, content, ensureResponseContent: false);
         }
     }
 

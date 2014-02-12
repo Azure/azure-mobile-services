@@ -29,10 +29,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// If local storage has this name, we will call update.
         /// If update failed with 404(not found), we will create a new one.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="registration"></param>
         /// <returns></returns>
-        public async Task RegisterAsync<T>(T registration) where T : Registration
+        public async Task RegisterAsync(Registration registration)
         {
             // if localStorage is empty or has different storage version, we need retrieve registrations and refresh local storage
             if (this.localStorageManager.IsRefreshNeeded)

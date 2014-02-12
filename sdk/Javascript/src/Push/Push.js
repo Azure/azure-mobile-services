@@ -69,7 +69,7 @@ Push.prototype.unregisterNative = function () {
     /// </summary>
     /// <returns>Promise that will complete when the unregister is completed</returns>
     
-    return this.unregisterTemplate('$Default');
+    return this.unregisterTemplate(RegistrationManager.nativeRegistrationName);
 };
 
 Push.prototype.unregisterTemplate = function (templateName) {

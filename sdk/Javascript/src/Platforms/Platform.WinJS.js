@@ -80,14 +80,6 @@ exports.addToMobileServicesClientNamespace = function (declarations) {
     }
 };
 
-exports.tryRemoveSetting = function removeSettings(name, values) {
-    if (values[name]) {
-        values.remove(name);
-        return true;
-    }
-    return false;
-};
-
 exports.readSetting = function readSetting(name) {
     /// <summary>
     /// Read a setting from a global configuration store.

@@ -18,7 +18,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     ///     ChannelUri: the latest channelUri used for creation.
     ///     Registrations: {registartionName1}:{registartionId1};{registartionName2}:{registartionId2}
     ///  
-    /// When create/delete is called, channelUri will be udpate.
+    /// When create/delete is called, channelUri will be udpated.
     /// When create/update/get/delete registations, registartions value will be updated.
     /// </summary>
     internal class LocalStorageManager

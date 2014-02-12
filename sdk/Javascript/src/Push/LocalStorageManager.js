@@ -13,20 +13,20 @@ var _ = require('Extensions');
 var Platform = require('Platform');
 
 function LocalStorageManager(applicationUri, tileId) {
-    if (!tileId) {
-        tileId = '$Primary';
-    }
-
-    var name = _.format('{0}-PushContainer-{1}-{2}', Windows.ApplicationModel.Package.current.id.name, applicationUri, tileId);
-    this.settings = Windows.Storage.ApplicationData.current.localSettings.createContainer(name, Windows.Storage.ApplicationDataCreateDisposition.always).values;
-    this.isRefreshNeeded = false;
-    this.channelUri = null;
-
     this.storageVersion = 'v1.0.0';
     this.primaryChannelId = '$Primary';
     this.keyNameVersion = 'Version';
     this.keyNameChannelUri = 'ChannelUri';
     this.keyNameRegistrations = 'Registrations';
+    
+    if (!tileId) {
+        tileId = this.primaryChannelId;
+    }
+
+    var name = _.format('{0}-PushContainer-{1}-{2}', Windows.ApplicationModel.Package.current.id.name, applicationUri, tileId);
+    this.settings = Windows.Storage.ApplicationData.current.localSettings.createContainer(name, Windows.Storage.ApplicationDataCreateDisposition.always).values;
+    this.isRefreshNeeded = false;
+    this.channelUri = null;    
 
     this.initializeRegistrationInfoFromStorage();
 }
@@ -47,7 +47,7 @@ LocalStorageManager.prototype.getRegistration = function (registrationName) {
 };
 
 LocalStorageManager.prototype.deleteRegistrationByName = function (registrationName) {
-    if (Platform.tryRemoveSetting(registrationName, this.registrations)) {
+    if (tryRemoveSetting(registrationName, this.registrations)) {
         this.flushToSettings();
         return true;
     }
@@ -170,3 +170,11 @@ function readContent(propertySet, key) {
     }
     return '';
 }
+
+function tryRemoveSetting(name, values) {
+    if (values[name]) {
+        values.remove(name);
+        return true;
+    }
+    return false;
+};

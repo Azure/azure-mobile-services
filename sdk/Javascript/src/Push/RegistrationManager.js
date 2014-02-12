@@ -16,12 +16,24 @@ function RegistrationManager(pushHttpClient, storageManager) {
 
 exports.RegistrationManager = RegistrationManager;
 
+RegistrationManager.nativeRegistrationName = '$Default';
+
 RegistrationManager.prototype.refreshLocalStorage = function(refreshChannelUri) {
     var refreshPromise;
     var self = this;
     // if localStorage is empty or has different storage version, we need retrieve registrations and refresh local storage
     if (this.localStorageManager.isRefreshNeeded) {
-        refreshPromise = this.getRegistrationsForChannel(refreshChannelUri)
+        refreshPromise = this.this.pushHttpClient.listRegistrations(refreshChannelUri)
+            .then(function (registrations) {
+                var count = registrations.length;
+                if (count === 0) {
+                    self.localStorageManager.clearRegistrations();
+                }
+
+                for (var i = 0; i < count; i++) {
+                    self.localStorageManager.updateRegistrationByRegistrationId(registrations[i].registrationId, registrations[i].registrationName || RegistrationManager.nativeRegistrationName, refreshChannelUri);
+                }
+            })
             .then(function() {
                 self.localStorageManager.refreshFinished(refreshChannelUri);
             });
@@ -37,7 +49,7 @@ RegistrationManager.prototype.register = function (registration) {
     var self = this;
     return this.refreshLocalStorage(this.localStorageManager.channelUri || registration.deviceId)
         .then(function () {
-            return self.localStorageManager.getRegistration(registration.templateName || '$Default');
+            return self.localStorageManager.getRegistration(registration.templateName || RegistrationManager.nativeRegistrationName);
         })
         .then(function (cached) {
             if (cached !== null) {
@@ -68,21 +80,6 @@ RegistrationManager.prototype.register = function (registration) {
                 throw error;
             }
         );
-};
-
-RegistrationManager.prototype.getRegistrationsForChannel = function (channelUri) {
-    var self = this;
-    return this.pushHttpClient.listRegistrations(channelUri)
-        .then(function (registrations) {
-            var count = registrations.length;
-            if (count === 0) {
-                self.localStorageManager.clearRegistrations();
-            }
-
-            for (var i = 0; i < count; i++) {
-                self.localStorageManager.updateRegistrationByRegistrationId(registrations[i].registrationId, registrations[i].registrationName || '$Default', channelUri);
-            }
-        });
 };
 
 RegistrationManager.prototype.unregister = function (registrationName) {
@@ -120,7 +117,7 @@ RegistrationManager.prototype.createRegistrationId = function (registration) {
     return this.pushHttpClient.createRegistrationId()
         .then(function (registrationId) {
             registration.registrationId = registrationId;
-            self.localStorageManager.updateRegistrationByRegistrationName(registration.templateName || '$Default', registration.registrationId, registration.deviceId);
+            self.localStorageManager.updateRegistrationByRegistrationName(registration.templateName || RegistrationManager.nativeRegistrationName, registration.registrationId, registration.deviceId);
         });
 };
 
@@ -128,6 +125,6 @@ RegistrationManager.prototype.upsertRegistration = function (registration) {
     var self = this;
     return this.pushHttpClient.createOrUpdateRegistration(registration)
         .then(function () {
-            self.localStorageManager.updateRegistrationByRegistrationName(registration.templateName || '$Default', registration.registrationId, registration.deviceId);
+            self.localStorageManager.updateRegistrationByRegistrationName(registration.templateName || RegistrationManager.nativeRegistrationName, registration.registrationId, registration.deviceId);
         });
 };
