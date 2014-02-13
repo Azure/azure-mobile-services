@@ -24,5 +24,6 @@
 
 - (void)addTest:(ZumoTest *)test;
 - (void)startExecutingFrom:(UIViewController *)viewController;
+- (BOOL)haveTestsRun;
 
 @end

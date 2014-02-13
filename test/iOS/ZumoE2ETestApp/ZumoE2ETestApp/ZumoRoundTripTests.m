@@ -15,26 +15,23 @@ static NSString *stringIdTableName = @"stringIdRoundTripTable";
 typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } RoundTripTestColumnType;
 
 + (NSArray *)createTests {
-    ZumoTest *firstTest = [ZumoTest createTestWithName:@"Setup dynamic schema" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+    NSMutableArray *result = [[NSMutableArray alloc] init];
+
+    NSUInteger startOfIntIdTests = [result count];
+    [result addObject:[ZumoTest createTestWithName:@"Setup dynamic schema" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client tableWithName:tableName];
         NSDictionary *item = @{@"string1":@"test", @"date1": [ZumoTestGlobals createDateWithYear:2011 month:11 day:11], @"bool1": [NSNumber numberWithBool:NO], @"number": [NSNumber numberWithInt:-1], @"longnum":[NSNumber numberWithLongLong:0LL], @"intnum":[NSNumber numberWithInt:0], @"setindex":@"setindex"};
         [table insert:item completion:^(NSDictionary *inserted, NSError *err) {
             if (err) {
-                [test addLog:@"Error inserting data to create schema"];
-                [test addLog:@"Error inserting data to create schema"];
-                [test setTestStatus:TSFailed];
+                [test addLog:[NSString stringWithFormat:@"Error inserting data to create schema: %@", err]];
                 completion(NO);
             } else {
                 [test addLog:@"Inserted item to create schema"];
-                [test setTestStatus:TSPassed];
                 completion(YES);
             }
         }];
-    }];
-    
-    NSMutableArray *result = [[NSMutableArray alloc] init];
-    [result addObject:firstTest];
+    }]];
     
     [result addObject:[self createRoundTripForType:RTTString withValue:@"" andName:@"Round trip empty string"]];
     NSString *simpleString = [NSString stringWithFormat:@"%c%c%c%c%c",
@@ -172,6 +169,10 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
         }]];
     }
 
+    NSUInteger endOfIntIdTests = [result count];
+    NSUInteger startOfStringIdTests = [result count];
+
+    // Start of tests for tables with string ids
     [result addObject:[ZumoTest createTestWithName:@"Setup string id dynamic schema" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client tableWithName:stringIdTableName];
@@ -243,6 +244,18 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
         }]];
     }
 
+    NSUInteger endOfStringIdTests = [result count];
+
+    for (NSUInteger i = startOfIntIdTests; i < endOfIntIdTests; i++) {
+        ZumoTest *test = [result objectAtIndex:i];
+        [test addRequiredFeature:@"intIdTables"];
+    }
+    
+    for (NSUInteger i = startOfStringIdTests; i < endOfStringIdTests; i++) {
+        ZumoTest *test = [result objectAtIndex:i];
+        [test addRequiredFeature:@"stringIdTables"];
+    }
+
     return result;
 }
 
@@ -296,6 +309,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
                         [test addLog:err];
                     }
                     completion(NO);
+                    return;
                 }
 
                 [test addLog:@"Items compare successfully"];

@@ -151,7 +151,8 @@ static NSString *stringIdQueryTestsTableName = @"stringIdMovies";
                 completion(passed);
             }];
         }];
-        
+
+        [negativeLookupTest addRequiredFeature:@"intIdTables"];
         [result addObject:negativeLookupTest];
     }
     
@@ -206,6 +207,7 @@ static NSString *stringIdQueryTestsTableName = @"stringIdMovies";
                 completion(passed);
             }];
         }];
+        [negTest addRequiredFeature:@"intIdTables"];
         [result addObject:negTest];
     }
     
@@ -229,6 +231,8 @@ static NSString *stringIdQueryTestsTableName = @"stringIdMovies";
             }
         }];
     }];
+    
+    [result addRequiredFeature:@"intIdTables"];
     
     return result;
 }
@@ -254,7 +258,7 @@ static NSString *stringIdQueryTestsTableName = @"stringIdMovies";
                 completion(YES);
                 return;
             } else {
-                [test addLog:[NSString stringWithFormat:@"Already inserted %zd items, waiting for insertionn to complete", (ssize_t)totalCount]];
+                [test addLog:[NSString stringWithFormat:@"Already inserted %zd items, waiting for insertion to complete", (ssize_t)totalCount]];
                 [NSThread sleepForTimeInterval: 5];
                 [self isAllDataPopulated:table test:test expectCount:expectCount retryTimes:retryTimes completion:completion];
             }
@@ -291,6 +295,8 @@ static NSString *stringIdQueryTestsTableName = @"stringIdMovies";
         }];
     }];
     
+    [result addRequiredFeature:@"stringIdTables"];
+    
     return result;
 }
 
@@ -323,6 +329,7 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
         }];
     }];
     
+    [result addRequiredFeature:@"intIdTables"];
     return result;
 }
 
@@ -479,6 +486,7 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
         }
     }];
     
+    [result addRequiredFeature:(useStringIdTable ? @"stringIdTables" : @"intIdTables")];
     return result;
 }
 

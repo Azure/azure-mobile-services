@@ -47,6 +47,8 @@ function getTestDisplayColor(test) {
         return 'Lime';
     } else if (test.status == zumo.TSRunning) {
         return 'Gray';
+    } else if (test.status == zumo.TSSkipped) {
+        return 'Blue';
     } else {
         return 'White';
     }
@@ -83,15 +85,14 @@ document.getElementById('btnRunTests').onclick = function (evt) {
                     else {
                         btnRunAllUnattendedTests.textContent = "Passed";
                     }
-
                 }
             }
 
             if (showAlerts) {
                 testPlatform.alert(logs);
             }
-
         }
+
         var updateTest = function (test, index) {
             var tblTests = document.getElementById('tblTestsBody');
             var tr = tblTests.childNodes[index];
@@ -146,19 +147,22 @@ function uploadLogs(url, logs, allTests, done) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
+            var continuation = function () {
+                if (done) {
+                    done();
+                }
+                document.getElementById('btnSendLogs').textContent = xhr.responseText;
+                if (!testPlatform.IsHTMLApplication) {
+                    Windows.Storage.KnownFolders.picturesLibrary.createFileAsync("done.txt", Windows.Storage.CreationCollisionOption.replaceExisting).then(function (file) {
+                        Windows.Storage.FileIO.writeTextAsync(file, xhr.responseText);
+                    });
+                }
+            };
             if (showAlerts) {
-                testPlatform.alert(xhr.responseText);
+                testPlatform.alert(xhr.responseText, continuation);
+            } else {
+                continuation();
             }
-            if (done) {
-                done();
-            }
-            document.getElementById('btnSendLogs').textContent = xhr.responseText;
-            if (!testPlatform.IsHTMLApplication) {
-                Windows.Storage.KnownFolders.picturesLibrary.createFileAsync("done.txt", Windows.Storage.CreationCollisionOption.replaceExisting).then(function (file) {
-                    Windows.Storage.FileIO.writeTextAsync(file, xhr.responseText);
-                });
-            }
-           
         }
     }
 
