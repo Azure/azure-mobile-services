@@ -9,7 +9,7 @@ else
   azure mobile api create $1 public —-permissions *=public
   azure mobile api create $1 shared —-permissions *=admin
   azure mobile api create $1 movieFinder —-permissions *=application
-  azure mobile api create $1 runtimeInfo —-permissions GET=application,POST=admin
+  azure mobile api create $1 runtimeInfo —-permissions GET=public,POST=admin
 
   azure mobile script upload $1 api/admin.js -f admin.js
   azure mobile script upload $1 api/application -f application.js

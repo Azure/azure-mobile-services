@@ -14,7 +14,7 @@ call azure mobile api create %1 user  --permissions *=user
 call azure mobile api create %1 public --permissions *=public
 call azure mobile api create %1 shared --permissions *=admin
 call azure mobile api create %1 movieFinder --permissions *=application
-call azure mobile api create %1 runtimeInfo --permissions GET=application,POST=admin
+call azure mobile api create %1 runtimeInfo --permissions GET=public,POST=admin
 
 call azure mobile script upload %1 api/admin.js -f admin.js
 call azure mobile script upload %1 api/application.js -f application.js
