@@ -14,14 +14,14 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// </summary>
     internal class RegistrationManager
     {
-        readonly PushHttpClient pushHttpClient;
-        readonly LocalStorageManager localStorageManager;
+        readonly internal PushHttpClient PushHttpClient;
+        readonly internal LocalStorageManager LocalStorageManager;
 
         public RegistrationManager(PushHttpClient pushHttpClient, LocalStorageManager storageManager)
         {
-            this.pushHttpClient = pushHttpClient;
+            this.PushHttpClient = pushHttpClient;
 
-            this.localStorageManager = storageManager;
+            this.LocalStorageManager = storageManager;
         }
 
         /// <summary>
@@ -34,14 +34,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         public async Task RegisterAsync(Registration registration)
         {
             // if localStorage is empty or has different storage version, we need retrieve registrations and refresh local storage
-            if (this.localStorageManager.IsRefreshNeeded)
+            if (this.LocalStorageManager.IsRefreshNeeded)
             {
-                string refreshChannelUri = string.IsNullOrEmpty(this.localStorageManager.ChannelUri) ? registration.ChannelUri : this.localStorageManager.ChannelUri;
-                await this.GetRegistrationsForChannelAsync(refreshChannelUri);
-                this.localStorageManager.RefreshFinished(refreshChannelUri);
+                string refreshChannelUri = string.IsNullOrEmpty(this.LocalStorageManager.ChannelUri) ? registration.ChannelUri : this.LocalStorageManager.ChannelUri;
+                await this.RefreshRegistrationsForChannelAsync(refreshChannelUri);
+                this.LocalStorageManager.RefreshFinished(refreshChannelUri);
             }
 
-            var cached = this.localStorageManager.GetRegistration(registration.Name);
+            var cached = this.LocalStorageManager.GetRegistration(registration.Name);
             if (cached != null)
             {
                 registration.RegistrationId = cached.RegistrationId;
@@ -71,18 +71,18 @@ namespace Microsoft.WindowsAzure.MobileServices
             await this.UpsertRegistration(registration);
         }
 
-        public async Task GetRegistrationsForChannelAsync(string channelUri)
+        public async Task RefreshRegistrationsForChannelAsync(string channelUri)
         {
-            List<Registration> registrations = new List<Registration>(await this.pushHttpClient.ListRegistrationsAsync(channelUri));
+            List<Registration> registrations = new List<Registration>(await this.PushHttpClient.ListRegistrationsAsync(channelUri));
             var count = registrations.Count;
             if (count == 0)
             {
-                this.localStorageManager.ClearRegistrations();
+                this.LocalStorageManager.ClearRegistrations();
             }
 
             for (int i = 0; i < count; i++)
             {
-                this.localStorageManager.UpdateRegistrationByRegistrationId(registrations[i].RegistrationId, registrations[i].Name, registrations[i].ChannelUri);
+                this.LocalStorageManager.UpdateRegistrationByRegistrationId(registrations[i].RegistrationId, registrations[i].Name, registrations[i].ChannelUri);
             }
         }
 
@@ -93,40 +93,40 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("registrationName");
             }
 
-            var cached = this.localStorageManager.GetRegistration(registrationName);
+            var cached = this.LocalStorageManager.GetRegistration(registrationName);
             if (cached == null)
             {
                 return;
             }
 
-            await this.pushHttpClient.UnregisterAsync(cached.RegistrationId);
-            this.localStorageManager.DeleteRegistrationByName(registrationName);
+            await this.PushHttpClient.UnregisterAsync(cached.RegistrationId);
+            this.LocalStorageManager.DeleteRegistrationByName(registrationName);
         }
 
         public async Task DeleteRegistrationsForChannelAsync(string channelUri)
         {
-            List<Registration> registrations = new List<Registration>(await this.pushHttpClient.ListRegistrationsAsync(channelUri));
+            List<Registration> registrations = new List<Registration>(await this.PushHttpClient.ListRegistrationsAsync(channelUri));
             foreach (var registration in registrations)
             {
-                await this.pushHttpClient.UnregisterAsync(registration.RegistrationId);
-                this.localStorageManager.DeleteRegistrationByRegistrationId(registration.RegistrationId);
+                await this.PushHttpClient.UnregisterAsync(registration.RegistrationId);
+                this.LocalStorageManager.DeleteRegistrationByRegistrationId(registration.RegistrationId);
             }
 
             // clear local storage
-            this.localStorageManager.ClearRegistrations();
+            this.LocalStorageManager.ClearRegistrations();
         }
 
         async Task<Registration> CreateRegistrationIdAsync(Registration registration)
         {
-            registration.RegistrationId = await this.pushHttpClient.CreateRegistrationIdAsync();
-            this.localStorageManager.UpdateRegistrationByName(registration.Name, registration.RegistrationId, registration.ChannelUri);
+            registration.RegistrationId = await this.PushHttpClient.CreateRegistrationIdAsync();
+            this.LocalStorageManager.UpdateRegistrationByName(registration.Name, registration.RegistrationId, registration.ChannelUri);
             return registration;
         }
 
-        async Task UpsertRegistration<T>(T registration) where T : Registration
+        async Task UpsertRegistration(Registration registration)
         {
-            await this.pushHttpClient.CreateOrUpdateRegistrationAsync(registration);
-            this.localStorageManager.UpdateRegistrationByName(registration.Name, registration.RegistrationId, registration.ChannelUri);
+            await this.PushHttpClient.CreateOrUpdateRegistrationAsync(registration);
+            this.LocalStorageManager.UpdateRegistrationByName(registration.Name, registration.RegistrationId, registration.ChannelUri);
         }
     }
 }

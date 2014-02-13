@@ -20,6 +20,8 @@ namespace Microsoft.WindowsAzure.MobileServices
     {
         internal const string NativeRegistrationName = "$Default";
 
+        internal const string PlatformConstant = "mpns";
+
         internal Registration()
         {
         }
@@ -62,7 +64,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             get
             {
-                return "mpns";
+                return PlatformConstant;
             }
         }
 

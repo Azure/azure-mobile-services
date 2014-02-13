@@ -25,7 +25,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         public async Task<IEnumerable<Registration>> ListRegistrationsAsync(string channelUri)
         {
-            var response = await this.client.HttpClient.RequestAsync(HttpMethod.Get, string.Format("/push/registrations?deviceId={0}&platform=wns", Uri.EscapeUriString(channelUri)), this.client.CurrentUser);
+            var response = await this.client.HttpClient.RequestAsync(HttpMethod.Get, string.Format("/push/registrations?deviceId={0}&platform={1}", Uri.EscapeUriString(channelUri), Uri.EscapeUriString(Registration.PlatformConstant)), this.client.CurrentUser);
 
             return JsonConvert.DeserializeObject<IEnumerable<Registration>>(response.Content, new JsonConverter[] { new RegistrationConverter() });
         }
@@ -42,15 +42,18 @@ namespace Microsoft.WindowsAzure.MobileServices
             return locationPath.Substring(locationPath.LastIndexOf('/') + 1);
         }
 
-        public Task CreateOrUpdateRegistrationAsync(Registration registration)
+        public async Task CreateOrUpdateRegistrationAsync(Registration registration)
         {
             var regId = registration.RegistrationId;
 
-            // This ensures RegistrationId is not serialized and sent to service.
+            // Ensures RegistrationId is not serialized and sent to service.
             registration.RegistrationId = null;
 
             var content = JsonConvert.SerializeObject(registration);
-            return this.client.HttpClient.RequestAsync(HttpMethod.Put, string.Format("/push/registrations/{0}", Uri.EscapeUriString(regId)), this.client.CurrentUser, content, ensureResponseContent: false);
+            await this.client.HttpClient.RequestAsync(HttpMethod.Put, string.Format("/push/registrations/{0}", Uri.EscapeUriString(regId)), this.client.CurrentUser, content, ensureResponseContent: false);
+            
+            // Ensure local storage is updated properly
+            registration.RegistrationId = regId;
         }
     }
 

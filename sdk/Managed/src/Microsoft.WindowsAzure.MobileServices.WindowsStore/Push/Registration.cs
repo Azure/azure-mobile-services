@@ -20,6 +20,8 @@ namespace Microsoft.WindowsAzure.MobileServices
     {
         internal const string NativeRegistrationName = "$Default";
 
+        internal const string PlatformConstant = "wns";
+
         internal Registration()
         {
         }
@@ -62,7 +64,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             get
             {
-                return "wns";
+                return PlatformConstant;
             }
         }
 
@@ -77,7 +79,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The Uri of the Channel returned by the Push Notification Channel Manager.
         /// </summary>
         [JsonProperty(PropertyName = "deviceId")]
-        public string ChannelUri { get; internal set; }
+        public string ChannelUri { get; set; }
 
         /// <summary>
         /// The registration id.

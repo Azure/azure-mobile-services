@@ -16,7 +16,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// </summary>
     public sealed class Push
     {
-        private readonly RegistrationManager registrationManager;
+        internal readonly RegistrationManager RegistrationManager;
 
         internal Push(MobileServiceClient client)
             : this(client, string.Empty, null)
@@ -35,7 +35,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             var storageManager = new LocalStorageManager(client.ApplicationUri.Host, tileId);
             var pushHttpClient = new PushHttpClient(client);
-            this.registrationManager = new RegistrationManager(pushHttpClient, storageManager);
+            this.RegistrationManager = new RegistrationManager(pushHttpClient, storageManager);
 
             this.SecondaryTiles = tiles ?? new SecondaryTilesList(this);
         }
@@ -76,7 +76,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             var registration = new Registration(channelUri, tags);
-            return registrationManager.RegisterAsync(registration);
+            return this.RegistrationManager.RegisterAsync(registration);
         }
 
         /// <summary>
@@ -146,8 +146,8 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("templateName");
             }
 
-            var registration = new TemplateRegistration(channelUri, xmlTemplate, templateName, tags, null);
-            return this.registrationManager.RegisterAsync(registration);
+            var registration = new TemplateRegistration(channelUri, xmlTemplate, templateName, tags);
+            return this.RegistrationManager.RegisterAsync(registration);
 
         }
 
@@ -167,7 +167,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>Task that completes when unregister is complete</returns>
         public Task UnregisterTemplateAsync(string templateName)
         {
-            return this.registrationManager.UnregisterAsync(templateName);
+            return this.RegistrationManager.UnregisterAsync(templateName);
         }
 
         /// <summary>
@@ -182,7 +182,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("channelUri");
             }
 
-            return this.registrationManager.DeleteRegistrationsForChannelAsync(channelUri);
+            return this.RegistrationManager.DeleteRegistrationsForChannelAsync(channelUri);
         }
 
         /// <summary>
@@ -202,7 +202,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("registration.ChannelUri");
             }
 
-            return this.registrationManager.RegisterAsync(registration);
+            return this.RegistrationManager.RegisterAsync(registration);
         }
 
         /// <summary>

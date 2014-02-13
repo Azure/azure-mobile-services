@@ -49,7 +49,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.InitializeRegistrationInfoFromStorage();
         }
 
-        public bool IsRefreshNeeded { get; private set; }
+        public bool IsRefreshNeeded { get; internal set; }
 
         public string ChannelUri
         {
@@ -78,26 +78,21 @@ namespace Microsoft.WindowsAzure.MobileServices
             return null;
         }
 
-        public bool DeleteRegistrationByName(string registrationName)
+        public void DeleteRegistrationByName(string registrationName)
         {
             if (this.registrations.Remove(registrationName))
             {
                 this.Flush();
-                return true;
             }
-
-            return false;
         }
 
-        public bool DeleteRegistrationByRegistrationId(string registrationId)
+        public void DeleteRegistrationByRegistrationId(string registrationId)
         {
             var found = registrations.FirstOrDefault(v => v.Value.RegistrationId.Equals(registrationId));
             if (!found.Equals(default(KeyValuePair<string, StoredRegistrationEntry>)))
             {
-                return this.DeleteRegistrationByName(found.Key);
+                this.DeleteRegistrationByName(found.Key);
             }
-
-            return false;
         }
 
         public void UpdateRegistrationByName(string registrationName, string registrationId, string registrationChannelUri)
@@ -135,7 +130,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.IsRefreshNeeded = false;
         }
 
-        internal static string ReadContent(IDictionary<string, object> values, string key)
+        private static string ReadContent(IDictionary<string, object> values, string key)
         {
             if (values.ContainsKey(key))
             {
@@ -145,7 +140,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             return string.Empty;
         }
 
-        internal static void SetContent(IDictionary<string, object> values, string key, string value)
+        private static void SetContent(IDictionary<string, object> values, string key, string value)
         {
             if (values.ContainsKey(key))
             {

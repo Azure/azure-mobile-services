@@ -93,6 +93,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore.Test\Functional\Push.Test.cs">
+      <Link>Functional\Push.Test.cs</Link>
+    </Compile>
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore.Test\UI\GroupDescription.cs">
       <Link>UI\GroupDescription.cs</Link>
     </Compile>
@@ -102,6 +105,7 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Functional\PushHelper.cs" />
     <Compile Include="LocalizedStrings.cs" />
     <Compile Include="PlatformTests\LoginTests.cs" />
     <Compile Include="MainPage.xaml.cs">
