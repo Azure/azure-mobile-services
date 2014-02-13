@@ -23,7 +23,7 @@ RegistrationManager.prototype.refreshLocalStorage = function(refreshChannelUri) 
     var self = this;
     // if localStorage is empty or has different storage version, we need retrieve registrations and refresh local storage
     if (this.localStorageManager.isRefreshNeeded) {
-        refreshPromise = this.this.pushHttpClient.listRegistrations(refreshChannelUri)
+        refreshPromise = this.pushHttpClient.listRegistrations(refreshChannelUri)
             .then(function (registrations) {
                 var count = registrations.length;
                 if (count === 0) {
