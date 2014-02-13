@@ -81,6 +81,12 @@ function defineRoundTripTestsNamespace() {
     tests.push(createNegativeRoundTripTest('(Neg) Insert item with \'Id\' property (value = 1)', { Id: 1, string1: 'hello' }));
     tests.push(createNegativeRoundTripTest('(Neg) Insert item with \'ID\' property (value = 1)', { ID: 1, string1: 'hello' }));
 
+    for (var i = 0; i < tests.length; i++) {
+        tests[i].addRequiredFeature(zumo.runtimeFeatureNames.INT_ID_TABLES);
+    }
+
+    var firstStringIdTestIndex = tests.length;
+
     tests.push(new zumo.Test('Setup string id dynamic schema', function (test, done) {
         var table = zumo.getClient().getTable(stringIdTableName);
         var item = {
@@ -114,6 +120,10 @@ function defineRoundTripTestsNamespace() {
     invalidIds.forEach(function (id) {
         tests.push(createNegativeRoundTripTest('(Neg) String id - insert with invalid id: ' + (id.length > 30 ? (id.substring(0, 30) + '...') : id), { id: id, name: 'hello' }));
     });
+
+    for (var i = firstStringIdTestIndex; i < tests.length; i++) {
+        tests[i].addRequiredFeature(zumo.runtimeFeatureNames.STRING_ID_TABLES);
+    }
 
     var currentIEVersion = zumo.getIEBrowserVersion(); // get IE8 version ...
     function dateReviver(key, value) {

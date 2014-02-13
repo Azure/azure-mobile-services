@@ -17,7 +17,7 @@ function defineMiscTestsNamespace() {
         var filtered = client.withFilter(function (request, next, callback) {
             throw "This is an error";
         });
-        var table = client.getTable(roundTripTableName);
+        var table = client.getTable(stringIdTableName);
         table.take(1).read().done(function (items) {
             test.addLog('Retrieved data successfully: ', items);
             done(true);
@@ -25,7 +25,7 @@ function defineMiscTestsNamespace() {
             test.addLog('Unexpected error: ', err);
             done(false);
         });
-    }));
+    }, zumo.runtimeFeatureNames.STRING_ID_TABLES));
 
     var createLoggingFilter = function () {
         var filter = function (request, next, callback) {
@@ -114,13 +114,13 @@ function defineMiscTestsNamespace() {
             sendRequest(0);
         };
         var filtered = client.withFilter(filter);
-        var table = filtered.getTable(roundTripTableName);
+        var table = filtered.getTable(stringIdTableName);
         var randomValue = Math.floor(Math.random() * 0x100000000).toString(16);
-        var item = { string1: randomValue };
+        var item = { name: randomValue };
         table.insert(item).done(function () {
-            table.where({ string1: randomValue }).select('string1').read().done(function (results) {
+            table.where({ name: randomValue }).select('name').read().done(function (results) {
                 var expectedResult = [];
-                for (i = 0; i < numberOfRequests; i++) expectedResult.push({ string1: randomValue });
+                for (i = 0; i < numberOfRequests; i++) expectedResult.push({ name: randomValue });
                 var errors = [];
                 if (zumo.util.compare(expectedResult, results, errors)) {
                     done(true);
@@ -139,7 +139,7 @@ function defineMiscTestsNamespace() {
             test.addLog('Error on insert: ', err);
             done(false);
         });
-    }));
+    }, zumo.runtimeFeatureNames.STRING_ID_TABLES));
 
     tests.push(new zumo.Test('Passing additional parameters in CRUD operations', function (test, done) {
         var client = zumo.getClient();
@@ -307,7 +307,7 @@ function defineMiscTestsNamespace() {
                 });
             }, errFunction);
         }, errFunction);
-    }));
+    }, zumo.runtimeFeatureNames.STRING_ID_TABLES));
 
     function createFilterCaptureTest(successfulRequest) {
         var testName = 'Filter can be used to trace request / ' + (successfulRequest ? 'successful' : 'error') + ' response'
@@ -315,8 +315,8 @@ function defineMiscTestsNamespace() {
             var client = zumo.getClient();
             var filter = createLoggingFilter();
             var filtered = client.withFilter(filter);
-            var table = filtered.getTable(roundTripTableName);
-            var item = { string1: 'hello world' };
+            var table = filtered.getTable(stringIdTableName);
+            var item = { name: 'hello world' };
             if (!successfulRequest) {
                 item.unsupported = { arr: [1, 3, 4] };
             }
@@ -405,7 +405,7 @@ function defineMiscTestsNamespace() {
 
                 done(true);
             });
-        });
+        }, zumo.runtimeFeatureNames.STRING_ID_TABLES);
     }
 
     function createBypassingFilter(statusCode, body) {

@@ -9,6 +9,10 @@ typedef void (^ZumoHttpRequestCompletion)(NSHTTPURLResponse *response, NSData *r
 
 extern NSString *const RUNTIME_VERSION_KEY;
 extern NSString *const CLIENT_VERSION_KEY;
+extern NSString *const RUNTIME_FEATURES_KEY;
+
+extern NSString *const FEATURE_STRING_ID_TABLES;
+extern NSString *const FEATURE_INT_ID_TABLES;
 
 @protocol PushNotificationReceiver <NSObject>
 

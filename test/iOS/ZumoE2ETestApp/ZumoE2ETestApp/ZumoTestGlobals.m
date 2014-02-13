@@ -9,6 +9,9 @@ NSString *const UserDefaultApplicationKey = @"ZumoE2ETest_AppKey";
 NSString *const UserDefaultUploadLogsUrl = @"ZumoE2ETest_UploadLogUrl";
 NSString *const RUNTIME_VERSION_KEY = @"client-version";
 NSString *const CLIENT_VERSION_KEY = @"server-version";
+NSString *const RUNTIME_FEATURES_KEY = @"runtime-features";
+NSString *const FEATURE_STRING_ID_TABLES = @"stringIdTables";
+NSString *const FEATURE_INT_ID_TABLES = @"intIdTables";
 
 @implementation ZumoTestGlobals
 

@@ -10,8 +10,28 @@
 /// <reference path="miscTests.js" />
 /// <reference path="pushTests.js" />
 /// <reference path="apiTests.js" />
+/// <reference path="../../../ZumoE2ETestAppJs/ZumoE2ETestAppJs/js/MobileServices.js" />
 
 (function () {
+    var setupGroup = new zumo.Group('Tests setup', [
+        new zumo.Test('Identify enabled runtime features', function (test, done) {
+            var client = zumo.getClient();
+            client.invokeApi('runtimeInfo', {
+                method: 'GET'
+            }).done(function (response) {
+                var runtimeInfo = response.result;
+                test.addLog('Runtime features: ', runtimeInfo);
+                var features = runtimeInfo.features;
+                zumo.util.globalTestParams[zumo.constants.RUNTIME_FEATURES_KEY] = features;
+                done(true);
+            }, function (err) {
+                test.addLog('Error retrieving runtime info: ', err);
+                done(false);
+            });
+        })
+    ]);
+    zumo.testGroups.push(setupGroup);
+
     zumo.testGroups.push(new zumo.Group(zumo.tests.roundTrip.name, zumo.tests.roundTrip.tests));
     zumo.testGroups.push(new zumo.Group(zumo.tests.query.name, zumo.tests.query.tests));
     //Add addistional Win JS scenario if user run WinJS application

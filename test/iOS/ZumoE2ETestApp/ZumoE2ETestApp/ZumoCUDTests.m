@@ -25,7 +25,7 @@ static NSString *stringIdTableName = @"stringIdRoundTripTable";
         for (int i = 0; i < 2; i++) {
             BOOL useDeleteWithId = i == 0;
             NSString *testName = [NSString stringWithFormat:@"[string id] Delete (%@), id = %@", useDeleteWithId ? @"by id" : @"by object", validId];
-            [result addObject:[ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+            ZumoTest *test = [ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
                 NSString *itemId;
                 if ([validId isEqualToString:@"random number"]) {
                     itemId = [NSString stringWithFormat:@"%d", rand()];
@@ -54,7 +54,9 @@ static NSString *stringIdTableName = @"stringIdRoundTripTable";
                         [table delete:@{@"id":itemId,@"name":@"unused"} completion:deleteCompletion];
                     }
                 }];
-            }]];
+            }];
+            [test addRequiredFeature:FEATURE_STRING_ID_TABLES];
+            [result addObject:test];
         }
     }
 
@@ -64,7 +66,7 @@ static NSString *stringIdTableName = @"stringIdRoundTripTable";
     
     for (NSString *validId in validStringIds) {
         NSString *testName = [@"[string id] Update with id = " stringByAppendingString:validId];
-        [result addObject:[ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+        ZumoTest *test = [ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
             NSString *itemId;
             if ([validId isEqualToString:@"random number"]) {
                 itemId = [NSString stringWithFormat:@"%d", rand()];
@@ -104,7 +106,9 @@ static NSString *stringIdTableName = @"stringIdRoundTripTable";
                     }];
                 }];
             }];
-        }]];
+        }];
+        [test addRequiredFeature:FEATURE_STRING_ID_TABLES];
+        [result addObject:test];
     }
     
     return result;
@@ -186,7 +190,7 @@ typedef enum { UpdateUsingObject, NegUpdateObjectInvalidId, NegUpdateObjectNoId 
             }
         }];
     }];
-    
+    [result addRequiredFeature:FEATURE_INT_ID_TABLES];
     return result;
 }
 
@@ -314,6 +318,7 @@ typedef enum { DeleteUsingId, DeleteUsingObject, NegDeleteUsingInvalidId, NegDel
             }
         }];
     }];
+    [result addRequiredFeature:FEATURE_INT_ID_TABLES];
     
     return result;
 }

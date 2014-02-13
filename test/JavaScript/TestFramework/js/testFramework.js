@@ -11,18 +11,40 @@ function createZumoNamespace() {
     var TSFailed = 1;
     var TSNotRun = 2;
     var TSRunning = 3;
+    var TSSkipped = 4;
     var AllTestsGroupName = "All tests";
     var AllTestsUnattendedGroupName = AllTestsGroupName + ' (unattended)';
     var ClientVersionKey = 'client-version';
     var ServerVersionKey = 'server-version';
+    var RuntimeFeaturesKey = 'runtime-features';
 
-
-    function ZumoTest(name, execution) {
+    function ZumoTest(name, execution, requiredRuntimeFeatures) {
+        /// <summary>
+        /// Creates a new test object.
+        /// </summary>
+        /// <param name="name" type="String">The name of the test.</param>
+        /// <param name="execution" type="function(test, done)">The function to be called when the
+        ///   test needs to be executed. The function is passed two parameters: the test itself, and
+        ///   a callback function to be called when the test is done. The callback function should be
+        ///   passed <code>true</code> if the test passed; <code>false</code> if the test failed, or
+        ///   <code>null</code> if the test should be skipped.</param>
+        /// <param name="requiredRuntimeFeatures" optional="true">Any runtime features required for this
+        ///   test to run. Can be a single feature name, or an array of feature names.</param>
         this.name = name;
         this.execution = execution;
         this.status = TSNotRun;
         this.canRunUnattended = true;
         this.logs = [];
+        this.requiredFeatures = [];
+        if (requiredRuntimeFeatures) {
+            if (typeof requiredRuntimeFeatures === 'string') {
+                requiredRuntimeFeatures = [requiredRuntimeFeatures];
+            }
+            var that = this;
+            requiredRuntimeFeatures.forEach(function (feature) {
+                that.requiredFeatures.push(feature);
+            });
+        }
     }
 
     ZumoTest.prototype.addFullLog = function (text, args) {
@@ -48,6 +70,38 @@ function createZumoNamespace() {
         var now = new Date();
         text = '[' + dateToString(now) + '] ' + text;
         return text;
+    }
+
+    ZumoTest.prototype.shouldBeSkipped = function () {
+        /// <summary>
+        /// Determines whether this test should be skipped, given the features enabled in the runtime.
+        /// </summary>
+        /// <remarks>
+        /// If the test client does not have any runtime information, the test will not be skipped;
+        ///   if the runtime info is present, then if there are any required features in the test which are
+        ///   not enabled in the runtime, the test will be skipped.
+        /// </remarks>
+        /// <returns><code>true</code> if the test should be skipped; <code>false</code> otherwise.</returns>
+        var runtimeFeatures = zumo.util.globalTestParams[zumo.constants.RUNTIME_FEATURES_KEY];
+        if (!runtimeFeatures) {
+            return false;
+        }
+        for (var i = 0; i < this.requiredFeatures.length; i++) {
+            var isEnabled = runtimeFeatures[this.requiredFeatures[i]];
+            if (!isEnabled) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    ZumoTest.prototype.addRequiredFeature = function (featureName) {
+        /// <summary>
+        /// Determines that this test can only run if the runtime with which
+        /// the client is talking to has the given feature enabled.
+        /// </summary>
+        /// <param name="featureName" type="String">The name of the feature required by this test.</param>
+        this.requiredFeatures.push(featureName);
     }
 
     ZumoTest.prototype.addLog = function (text, args) {
@@ -90,6 +144,8 @@ function createZumoNamespace() {
                 return 'not run';
             case TSRunning:
                 return 'running';
+            case TSSkipped:
+                return 'skipped';
             default:
                 return 'unknown';
         }
@@ -99,15 +155,21 @@ function createZumoNamespace() {
         return this.displayText() + '\n' + this.logs.join('\n');
     }
 
-    // testDone is a function which will be called (with a bool indicating
-    //    pass or fail) when the test is done
+    // testDone is a function which will be called (with a boolean value indicating
+    //    pass or fail) when the test is done. If the value is null (or undefined),
+    //    the test is considered to be skipped.
     ZumoTest.prototype.runTest = function (testDone) {
         var that = this;
         that.startTime = new Date();
-        this.execution(this, function (passed) {
+        if (that.shouldBeSkipped()) {
             that.endTime = new Date();
-            testDone(passed)
-        });
+            testDone(null);
+        } else {
+            that.execution(this, function (passed) {
+                that.endTime = new Date();
+                testDone(passed)
+            });
+        }
     }
 
     ZumoTest.prototype.reset = function () {
@@ -125,23 +187,28 @@ function createZumoNamespace() {
     }
 
     ZumoTestGroup.prototype.addTest = function (test) {
+        /// <summary>
+        /// Adds a new test to this group.
+        /// </summary>
+        /// <param name="test" type="zumo.Test">The test to be added.</param>
         this.tests.push(test);
     }
 
     // testStarted: function(test, testIndex)
     // testDone: function(test, testIndex)
-    // groupDone: function(testsPassed, testsFailed)
+    // groupDone: function(testsPassed, testsFailed, testsSkipped)
     ZumoTestGroup.prototype.runTests = function (testStarted, testDone, groupDone) {
         var group = this;
         var passed = 0;
         var failed = 0;
+        var skipped = 0;
         this.startTime = new Date();
         var that = this;
         var runNextTest = function (index) {
             if (index === group.tests.length) {
                 that.endTime = new Date();
                 if (groupDone) {
-                    groupDone(passed, failed);
+                    groupDone(passed, failed, skipped);
                 }
             } else {
                 var testToRun = group.tests[index];
@@ -153,18 +220,24 @@ function createZumoNamespace() {
                 testToRun.status = TSRunning;
                 try {
                     testToRun.runTest(function (result) {
-                        testToRun.status = result ? TSPassed : TSFailed;
-                        if (result) {
-                            passed++;
+                        var isSkipped = result === null || result === undefined;
+                        if (isSkipped) {
+                            testToRun.status = TSSkipped;
+                            skipped++;
                         } else {
-                            failed++;
+                            testToRun.status = result ? TSPassed : TSFailed;
+                            if (result) {
+                                passed++;
+                            } else {
+                                failed++;
+                            }
                         }
 
                         if (testDone) {
                             testDone(testToRun, index);
                         }
 
-                        testToRun.addLog('Test ' + (result ? 'passed' : 'failed'));
+                        testToRun.addLog('Test ' + testToRun.statusText());
                         runNextTest(index + 1);
                     });
                 } catch (ex) {
@@ -188,9 +261,11 @@ function createZumoNamespace() {
         lines.push('[' + dateToString(this.startTime) + '] Tests for group \'' + this.name + '\'');
         lines.push('----------------------------');
         this.tests.forEach(function (test) {
-            lines.push('[' + dateToString(test.startTime) + '] Logs for test ' + test.name + ' (' + test.statusText() + ')');
-            lines.push(test.getLogs());
-            lines.push('[' + dateToString(test.endTime) + '] -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-');
+            if (test.status !== TSSkipped) {
+                lines.push('[' + dateToString(test.startTime) + '] Logs for test ' + test.name + ' (' + test.statusText() + ')');
+                lines.push(test.getLogs());
+                lines.push('[' + dateToString(test.endTime) + '] -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-');
+            }
         });
 
         return lines.join('\n');
@@ -212,10 +287,9 @@ function createZumoNamespace() {
                 client = new WindowsAzure.MobileServiceClient(appUrl, appKey);
                 return true;
             } else {
-                testPlatform.alert('Please enter valid application URL and key', 'Error');
-                // Use userdefine alert() method to deal with validation information
-                //new Windows.UI.Popups.MessageDialog('Please enter valid application URL and key', 'Error').showAsync();
-                return false;
+                testPlatform.alert('Please enter valid application URL and key', 'Error', function () {
+                    return false;
+                });
             }
         } else {
             return true;
@@ -429,11 +503,17 @@ function createZumoNamespace() {
         TSFailed: TSFailed,
         TSNotRun: TSNotRun,
         TSRunning: TSRunning,
+        TSSkipped: TSSkipped,
         AllTestsGroupName: AllTestsGroupName,
         AllTestsUnattendedGroupName: AllTestsUnattendedGroupName,
         constants: {
             CLIENT_VERSION_KEY: ClientVersionKey,
-            SERVER_VERSION_KEY: ServerVersionKey
+            SERVER_VERSION_KEY: ServerVersionKey,
+            RUNTIME_FEATURES_KEY: RuntimeFeaturesKey
+        },
+        runtimeFeatureNames: {
+            INT_ID_TABLES: 'intIdTables',
+            STRING_ID_TABLES: 'stringIdTables'
         },
         Test: ZumoTest,
         Group: ZumoTestGroup,
