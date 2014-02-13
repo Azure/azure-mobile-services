@@ -309,6 +309,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
                         [test addLog:err];
                     }
                     completion(NO);
+                    return;
                 }
 
                 [test addLog:@"Items compare successfully"];
