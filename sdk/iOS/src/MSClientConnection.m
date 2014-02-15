@@ -26,7 +26,7 @@ NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
 // |NSURLConnectionDataDelegate| and surfaces success and error blocks. It
 // is used only by the |MSClientConnection|.
 @interface MSConnectionDelegate : NSObject <NSURLConnectionDataDelegate>
-		
+
 @property (nonatomic, strong)               MSClient *client;
 @property (nonatomic, strong)               NSData *data;
 @property (nonatomic, strong)               NSHTTPURLResponse *response;
@@ -37,11 +37,11 @@ NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
 
 @end
 
-
 #pragma mark * MSClientConnection Implementation
 
-
 @implementation MSClientConnection
+
+static NSOperationQueue *delegateQueue;
 
 @synthesize client = client_;
 @synthesize request = request_;
@@ -161,7 +161,17 @@ NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
         MSConnectionDelegate *delegate = [[MSConnectionDelegate alloc]
                                           initWithClient:client
                                               completion:completion];
-        [NSURLConnection connectionWithRequest:request delegate:delegate];
+        
+        if (!delegateQueue) {
+            delegateQueue = [[NSOperationQueue alloc] init];
+        }
+        NSURLConnection *connection = [[NSURLConnection alloc]
+                                             initWithRequest:request
+                                                    delegate:delegate
+                                            startImmediately:NO];
+        [connection setDelegateQueue:delegateQueue];
+        [connection start];
+        
     }
     else {
         
@@ -233,8 +243,6 @@ NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
     
     return mutableRequest;
 }
-
-
 
 
 @end
