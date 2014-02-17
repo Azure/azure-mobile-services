@@ -72,8 +72,7 @@ function definePushTestsNamespace() {
             var runtimeFeatures = zumo.util.globalTestParams[zumo.constants.RUNTIME_FEATURES_KEY];
             if (runtimeFeatures[zumo.runtimeFeatureNames.NHPushEnabled]) {
                 var tags = ["tag1", "tag2"];
-                //zumo.getClient().push.registerNative(channel.uri, tags);
-                zumo.getClient().push.registerNative(channel.uri);
+                zumo.getClient().push.registerNative(channel.uri, tags);
             }
             pushChannel = channel;
             done(true);
