@@ -513,7 +513,8 @@ function createZumoNamespace() {
         },
         runtimeFeatureNames: {
             INT_ID_TABLES: 'intIdTables',
-            STRING_ID_TABLES: 'stringIdTables'
+            STRING_ID_TABLES: 'stringIdTables',
+            NHPushEnabled: 'nhPushEnabled'
         },
         Test: ZumoTest,
         Group: ZumoTestGroup,

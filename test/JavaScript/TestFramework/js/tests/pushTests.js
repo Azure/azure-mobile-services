@@ -69,6 +69,12 @@ function definePushTestsNamespace() {
         pushManager.createPushNotificationChannelForApplicationAsync().done(function (channel) {
             test.addLog('Created push channel: ', { uri: channel.uri, expirationTime: channel.expirationTime });
             channel.onpushnotificationreceived = onPushNotificationReceived;
+            var runtimeFeatures = zumo.util.globalTestParams[zumo.constants.RUNTIME_FEATURES_KEY];
+            if (runtimeFeatures[zumo.runtimeFeatureNames.NHPushEnabled]) {
+                var tags = ["tag1", "tag2"];
+                //zumo.getClient().push.registerNative(channel.uri, tags);
+                zumo.getClient().push.registerNative(channel.uri);
+            }
             pushChannel = channel;
             done(true);
         }, function (error) {
@@ -150,6 +156,10 @@ function definePushTestsNamespace() {
 
     tests.push(new zumo.Test('Unregister push channel', function (test, done) {
         if (pushChannel) {
+            var runtimeFeatures = zumo.util.globalTestParams[zumo.constants.RUNTIME_FEATURES_KEY];
+            if (runtimeFeatures[zumo.runtimeFeatureNames.NHPushEnabled]) {
+                zumo.getClient().push.unregisterNative();
+            }
             pushChannel.close();
             done(true);
         } else {
@@ -169,14 +179,19 @@ function definePushTestsNamespace() {
         testName += payloadString.length < 15 ? payloadString : (payloadString.substring(0, 15) + "...");
 
         var expectedNotificationType;
+        var notificatonType;
         if (wnsMethod.indexOf('Badge') >= 0) {
             expectedNotificationType = pushNotifications.PushNotificationType.badge;
+            notificatonType='badge';
         } else if (wnsMethod.indexOf('Raw') >= 0) {
             expectedNotificationType = pushNotifications.PushNotificationType.raw;
+            notificatonType = 'raw';
         } else if (wnsMethod.indexOf('Tile') >= 0) {
             expectedNotificationType = pushNotifications.PushNotificationType.tile;
+            notificatonType = 'tile';
         } else if (wnsMethod.indexOf('Toast') >= 0) {
             expectedNotificationType = pushNotifications.PushNotificationType.toast;
+            notificatonType = 'toast';
         } else {
             throw "Unknown wnsMethod";
         }
@@ -188,24 +203,30 @@ function definePushTestsNamespace() {
         return new zumo.Test(testName, function (test, done) {
             test.addLog('Test for method ', wnsMethod, ' with payload ', payload);
             var client = zumo.getClient();
+            var runtimeFeatures = zumo.util.globalTestParams[zumo.constants.RUNTIME_FEATURES_KEY];
             var table = client.getTable(tableName);
             var item = {
                 method: wnsMethod,
                 channelUri: pushChannel.uri,
-                payload: payload
+                payload: payload,
+                xmlPayload: expectedPushPayload,
+                usingNH: runtimeFeatures[zumo.runtimeFeatureNames.NHPushEnabled],
+                nhNotificationType: notificatonType
             };
             table.insert(item).done(function (inserted) {
                 if (inserted.response) {
                     delete inserted.response.channel;
                 }
                 test.addLog('Push request: ', inserted);
-                waitForNotification(10000, function (notification) {
+                waitForNotification(15000, function (notification) {
                     if (notification) {
                         test.addLog('Notification received: ', notification);
                         if (notification.type !== expectedNotificationType) {
                             test.addLog('Error, notification type (', notification.type, ') is not the expected (', expectedNotificationType, ')');
                             done(false);
                         } else {
+                            var xmlTag = "<?xml version=\"1.0\"?>";
+                            notification.content=notification.content.replace(xmlTag, "");
                             if (notification.content !== expectedPushPayload) {
                                 test.addLog('Error, notification payload (', notification.content, ') is not the expected (', expectedPushPayload, ')');
                                 done(false);
