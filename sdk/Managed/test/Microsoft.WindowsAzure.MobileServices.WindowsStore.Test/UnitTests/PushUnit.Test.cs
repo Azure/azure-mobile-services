@@ -19,6 +19,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             try
             {
                 var registration = new TemplateRegistration("uri", "junkBodyTemplate", "testName");
+                Assert.Fail("Expected templateBody that is not XML to throw ArgumentException");
             }
             catch (ArgumentException e)
             {
@@ -35,6 +36,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     "uri",
                     "<foo><visual><binding template=\"ToastText01\"><text id=\"1\">$(message)</text></binding></visual></foo>", 
                     "testName");
+                Assert.Fail("Expected templateBody with unexpected first XML node to throw ArgumentException");
             }
             catch (ArgumentException e)
             {
