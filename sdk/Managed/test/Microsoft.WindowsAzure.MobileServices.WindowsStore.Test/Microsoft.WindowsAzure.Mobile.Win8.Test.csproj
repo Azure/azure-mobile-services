@@ -139,6 +139,7 @@
       <DependentUpon>TestPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="UnitTests\Collections\IncrementalLoadingMobileServiceCollection.Test.cs" />
+    <Compile Include="UnitTests\PushUnit.Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
