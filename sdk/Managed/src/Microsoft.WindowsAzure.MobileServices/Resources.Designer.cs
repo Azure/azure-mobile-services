@@ -519,5 +519,59 @@ namespace Microsoft.WindowsAzure.MobileServices {
                 return ResourceManager.GetString("Platform_InstantiationFailed", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Valid XML is required for any template without a raw header..
+        /// </summary>
+        internal static string Push_BodyTemplateMustBeXml {
+            get {
+                return ResourceManager.GetString("Push_BodyTemplateMustBeXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to XML must contain an XML node of Element type..
+        /// </summary>
+        internal static string Push_BodyTemplateMustContainElement {
+            get {
+                return ResourceManager.GetString("Push_BodyTemplateMustContainElement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template name conflicts with reserved name &apos;{0}&apos;..
+        /// </summary>
+        internal static string Push_ConflictWithReservedName {
+            get {
+                return ResourceManager.GetString("Push_ConflictWithReservedName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template name can&apos;t contain &quot;;&quot; or &quot;:&quot;..
+        /// </summary>
+        internal static string Push_InvalidTemplateName {
+            get {
+                return ResourceManager.GetString("Push_InvalidTemplateName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The bodyTemplate is not in accepted XML format. The first node of the bodyTemplate should be Badge/Tile/Toast, except for the wns/raw template, which need to be an valid XML..
+        /// </summary>
+        internal static string Push_NotSupportedXMLFormatAsBodyTemplateWin8 {
+            get {
+                return ResourceManager.GetString("Push_NotSupportedXMLFormatAsBodyTemplateWin8", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tags must not contain &apos;,&apos;..
+        /// </summary>
+        internal static string Push_TagNoCommas {
+            get {
+                return ResourceManager.GetString("Push_TagNoCommas", resourceCulture);
+            }
+        }
     }
 }

@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using System;
 using System.Threading.Tasks;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -46,6 +45,20 @@ namespace Microsoft.WindowsAzure.MobileServices
             MobileServiceUIAuthentication auth = new MobileServiceUIAuthentication(client, provider);
 
             return auth.LoginAsync();
+        }
+
+        /// <summary>
+        /// Extension method to get a <see cref="Push"/> object made from an existing <see cref="MobileServiceClient"/>.
+        /// </summary>
+        /// <param name="client">
+        /// The <see cref="MobileServiceClient"/> to create with.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Push"/> object used for registering for notifications.
+        /// </returns>
+        public static Push GetPush(this MobileServiceClient client)
+        {
+            return new Push(client);
         }
     }
 }

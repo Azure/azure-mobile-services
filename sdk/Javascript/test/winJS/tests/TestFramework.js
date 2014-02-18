@@ -344,7 +344,7 @@ global.$getClient = function () {
     global.$assert.isTrue(
         global.$harness.settings.custom.MobileServiceRuntimeUrl,
         '$getClient should only be called from functional tests!');
-    return new WindowsAzure.MobileServiceClient(global.$harness.settings.custom.MobileServiceRuntimeUrl);
+    return new WindowsAzure.MobileServiceClient(global.$harness.settings.custom.MobileServiceRuntimeUrl, global.$harness.settings.custom.MobileServiceRuntimeKey);
 };
 
 global.$chain = function () {

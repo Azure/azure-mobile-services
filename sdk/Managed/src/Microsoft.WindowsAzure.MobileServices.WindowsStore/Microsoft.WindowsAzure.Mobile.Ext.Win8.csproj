@@ -26,7 +26,7 @@
     <DefineConstants>DEBUG;TRACE;NETFX_CORE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <DocumentationFile>$(OutputPath)\Microsoft.WindowsAzure.Mobile.Ext.xml</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -50,6 +50,13 @@
     <Compile Include="Authentication\AuthenticationBroker.cs" />
     <Compile Include="Platform\PlatformInformation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Push\LocalStorageManager.cs" />
+    <Compile Include="Push\Push.cs" />
+    <Compile Include="Push\PushHttpClient.cs" />
+    <Compile Include="Push\Registration.cs" />
+    <Compile Include="Push\RegistrationManager.cs" />
+    <Compile Include="Push\StoredRegistrationEntry.cs" />
+    <Compile Include="Push\TemplateRegistration.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.Mobile.csproj">
