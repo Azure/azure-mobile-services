@@ -165,7 +165,6 @@ function definePushTestsNamespace() {
             test.addLog('Error, push channel needs to be registered.');
             done(false);
         }
-
         pushChannel = null;
     }));
 
