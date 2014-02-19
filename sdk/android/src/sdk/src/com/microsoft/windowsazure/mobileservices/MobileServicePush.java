@@ -247,13 +247,15 @@ public class MobileServicePush {
 		final CountDownLatch latch = new CountDownLatch(1);
 		final ResultContainer<String> resultContainer = new ResultContainer<String>();
 
-		String filter = "platform='" + mPnsSpecificRegistrationFactory.getPlatform() + "'";
-		String resource = "/registrations/?" + filter;
+		String resource = "/registrations/";
 
 		List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
+		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("platform", mPnsSpecificRegistrationFactory.getPlatform()));
+		parameters.add(new Pair<String, String>("deviceId", pnsHandle));
 		requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
 
-		mClient.invokeApiInternal(resource, null, "GET", requestHeaders, null, MobileServiceClient.PNS_API_URL, new ServiceFilterResponseCallback() {
+		mClient.invokeApiInternal(resource, null, "GET", requestHeaders, parameters, MobileServiceClient.PNS_API_URL, new ServiceFilterResponseCallback() {
 
 			@Override
 			public void onResponse(ServiceFilterResponse response, Exception exception) {
@@ -267,9 +269,10 @@ public class MobileServicePush {
 				latch.countDown();
 			}
 		});
-
+		
 		latch.await();
-
+		
+		
 		Exception ex = resultContainer.getException();
 		if (ex != null) {
 			throw ex;
@@ -409,6 +412,7 @@ public class MobileServicePush {
 		byte[] content = body.getBytes(MobileServiceClient.UTF8_ENCODING);
 
 		List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
+		
 		requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
 
 		mClient.invokeApiInternal(resource, content, "PUT", requestHeaders, null, MobileServiceClient.PNS_API_URL, new ServiceFilterResponseCallback() {

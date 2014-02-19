@@ -63,10 +63,6 @@ public abstract class Registration {
 	@SerializedName("registrationId")
 	protected String mRegistrationId;
 
-	@Expose
-	@SerializedName("deviceId")
-	private String mDeviceId = "";
-
 	/**
 	 * The expiration time
 	 */

@@ -44,7 +44,7 @@ public class GcmNativeRegistration extends Registration {
 	 * The PNS specific identifier
 	 */
 	@Expose
-	@SerializedName("GcmRegistrationId")
+	@SerializedName("deviceId")
 	protected String mPNSHandle;
 
 	/**

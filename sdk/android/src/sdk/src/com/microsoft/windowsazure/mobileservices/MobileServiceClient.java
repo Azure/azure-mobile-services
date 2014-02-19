@@ -124,7 +124,7 @@ public class MobileServiceClient {
 	/**
 	 * PNS API Url
 	 */
-	static final String PNS_API_URL = "push/";
+	static final String PNS_API_URL = "push";
 	
 	/**
 	 * Google account type
