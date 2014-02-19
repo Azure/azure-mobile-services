@@ -1,5 +1,12 @@
 # Windows Azure Mobile Services Change Log
 
+### Version 1.1.4
+**Managed SDK**
+- Added support for Windows Azure Notification Hub integration.
+
+**Javascript SDK**
+- Added support for Windows Azure Notification Hub integration.
+
 ### Version 1.1.3
 **Managed SDK**
 - Added support for the Windows Azure Active Directory authentication in the `MobileServiceAuthenticationProvider` enumeration.
