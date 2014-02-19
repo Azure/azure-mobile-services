@@ -5,7 +5,7 @@
 - Added support for Windows Azure Notification Hub integration.
 
 **Javascript SDK**
-- Added support for Windows Azure Notification Hub integration.
+- Added support for Windows Azure Notification Hub integration for WinJS.
 
 ### Version 1.1.3
 **Managed SDK**
