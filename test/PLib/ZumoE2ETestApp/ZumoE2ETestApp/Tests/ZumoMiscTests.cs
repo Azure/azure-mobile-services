@@ -420,7 +420,7 @@ namespace ZumoE2ETestApp.Tests
                 }
                 else
                 {
-                    var temp = await untyped.ReadAsync("$filter=id gt 1", dict);
+                    var temp = await untyped.ReadAsync("$filter=id ge 1", dict);
                     actualParameters = JObject.Parse(temp[0]["parameters"].Value<string>());
                 }
 

@@ -7,23 +7,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Microsoft.WindowsAzure.MobileServices;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Windows.Networking.PushNotifications;
 using ZumoE2ETestApp.Framework;
+using System.Net.Http;
 
 namespace ZumoE2ETestApp.Tests
 {
     internal static class ZumoPushTests
     {
+        private static string pushChannelUri;
         private static PushNotificationChannel pushChannel;
         private static Queue<PushNotificationReceivedEventArgs> pushesReceived = new Queue<PushNotificationReceivedEventArgs>();
+        const string imageUrl = "http://zumotestserver.azurewebsites.net/content/zumo2.png";
+        const string wideImageUrl = "http://zumotestserver.azurewebsites.net/content/zumo1.png";
 
         public static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Push tests");
-            const string imageUrl = "http://zumotestserver.azurewebsites.net/content/zumo2.png";
-            const string wideImageUrl = "http://zumotestserver.azurewebsites.net/content/zumo1.png";
             result.AddTest(CreateRegisterChannelTest());
             result.AddTest(CreateToastPushTest("sendToastText01", "hello world"));
             result.AddTest(CreateToastPushTest("sendToastImageAndText03", "ts-iat3-1", "ts-iat3-2", null, imageUrl, "zumo"));
@@ -34,7 +37,7 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateRawPushTest("foobaráéíóú"));
             result.AddTest(CreateTilePushTest("TileWideImageAndText02", new[] { "tl-wiat2-1", "tl-wiat2-2" }, new[] { wideImageUrl }, new[] { "zumowide" }));
             result.AddTest(CreateTilePushTest("TileWideImageCollection",
-                new string[0], 
+                new string[0],
                 new[] { wideImageUrl, imageUrl, imageUrl, imageUrl, imageUrl },
                 new[] { "zumowide", "zumo", "zumo", "zumo", "zumo" }));
             result.AddTest(CreateTilePushTest("TileWideText02",
@@ -46,8 +49,14 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateTilePushTest("TileSquareBlock",
                 new[] { "24", "aliquam" },
                 new string[0], new string[0]));
-
             result.AddTest(CreateUnregisterChannelTest());
+            result.AddTest(CreateTemplateRegisterChannelTest());
+            result.AddTest(CreateTemplateToastPushTest("sendToastText01", "World News in French!"));
+            result.AddTest(CreateUnregisterTemplateChannelTest(ZumoTestGlobals.NHToastTemplateName));
+            result.AddTest(CreateTemplateTileRegisterChannelTest());
+            result.AddTest(CreateTemplateTilePushTest("TileWideImageAndText02", new[] { "tl-wiat2-1", "World News in French!" }, new[] { wideImageUrl }, new[] { "zumowide" }));
+            result.AddTest(CreateUnregisterTemplateChannelTest(ZumoTestGlobals.NHTileTemplateName));
+
             return result;
         }
 
@@ -55,7 +64,7 @@ namespace ZumoE2ETestApp.Tests
         {
             XElement expected = new XElement("raw", new XText(rawData));
             JToken payload = rawData;
-            return CreatePushTest("sendRaw", payload, expected);
+            return CreatePushTest("sendRaw", "raw", payload, expected);
         }
 
         private static ZumoTest CreateTilePushTest(string template, string[] texts, string[] imageUrls, string[] imageAlts)
@@ -69,31 +78,44 @@ namespace ZumoE2ETestApp.Tests
             {
                 throw new ArgumentException("No nulls allowed in the arrays");
             }
-
-            XElement binding = new XElement("binding", new XAttribute("template", template));
             var payload = new JObject();
-
             for (int i = 0; i < imageAlts.Length; i++)
             {
                 payload.Add("image" + (i + 1) + "src", imageUrls[i]);
                 payload.Add("image" + (i + 1) + "alt", imageAlts[i]);
-                binding.Add(new XElement("image",
-                    new XAttribute("id", (i + 1)),
-                    new XAttribute("src", imageUrls[i]),
-                    new XAttribute("alt", imageAlts[i])));
             }
 
             for (int i = 0; i < texts.Length; i++)
             {
                 payload.Add("text" + (i + 1), texts[i]);
+            }
+
+            XElement expected = BuildXmlTilePayload(template, texts, imageUrls, imageAlts);
+
+            return CreatePushTest("send" + template, "tile", payload, expected);
+        }
+
+        private static XElement BuildXmlTilePayload(string template, string[] texts, string[] imageUrls, string[] imageAlts)
+        {
+            XElement binding = new XElement("binding", new XAttribute("template", template));
+
+            for (int i = 0; i < imageAlts.Length; i++)
+            {
+                binding.Add(new XElement("image",
+                new XAttribute("id", (i + 1)),
+                new XAttribute("src", imageUrls[i]),
+                new XAttribute("alt", imageAlts[i])));
+            }
+
+            for (int i = 0; i < texts.Length; i++)
+            {
                 binding.Add(new XElement("text", new XAttribute("id", (i + 1)), new XText(texts[i])));
             }
 
-            XElement expected = new XElement("tile",
+            XElement xmlPayload = new XElement("tile",
                 new XElement("visual",
                     binding));
-
-            return CreatePushTest("send" + template, payload, expected);
+            return xmlPayload;
         }
 
         private static ZumoTest CreateToastPushTest(string wnsMethod, string text1, string text2 = null, string text3 = null, string imageUrl = null, string imageAlt = null)
@@ -104,6 +126,14 @@ namespace ZumoE2ETestApp.Tests
             AddIfNotNull(payload, "text3", text3);
             AddIfNotNull(payload, "image1src", imageUrl);
             AddIfNotNull(payload, "image1alt", imageAlt);
+
+            XElement expectedResult = BuildXmlToastPayload(wnsMethod, text1, text2, text3, imageUrl, imageAlt);
+
+            return CreatePushTest(wnsMethod, "toast", payload, expectedResult);
+        }
+
+        private static XElement BuildXmlToastPayload(string wnsMethod, string text1, string text2 = null, string text3 = null, string imageUrl = null, string imageAlt = null)
+        {
             XElement binding = new XElement("binding", new XAttribute("template", wnsMethod.Substring("send".Length)));
             if (imageUrl != null)
             {
@@ -125,11 +155,50 @@ namespace ZumoE2ETestApp.Tests
                 binding.Add(new XElement("text", new XAttribute("id", 3), new XText(text3)));
             }
 
+            XElement xmlPayload = new XElement("toast",
+                new XElement("visual",
+                    binding));
+            return xmlPayload;
+        }
+
+        private static ZumoTest CreateTemplateToastPushTest(string wnsMethod, string text1)
+        {
+            var payload = new JObject();
+            payload.Add("text1", text1);
+            XElement binding = new XElement("binding", new XAttribute("template", wnsMethod.Substring("send".Length)));
+            binding.Add(new XElement("text", new XAttribute("id", 1), new XText(text1)));
             XElement expectedResult = new XElement("toast",
                 new XElement("visual",
                     binding));
-            
-            return CreatePushTest(wnsMethod, payload, expectedResult);
+            return CreatePushTest(wnsMethod, "template", payload, expectedResult, true);
+        }
+
+        private static ZumoTest CreateTemplateTilePushTest(string template, string[] texts, string[] imageUrls, string[] imageAlts)
+        {
+            if (imageAlts.Length != imageAlts.Length)
+            {
+                throw new ArgumentException("Size of 'imageUrls' and 'imageAlts' arrays must be the same");
+            }
+
+            if (texts.Any(t => t == null) || imageAlts.Any(i => i == null) || imageUrls.Any(i => i == null))
+            {
+                throw new ArgumentException("No nulls allowed in the arrays");
+            }
+            var payload = new JObject();
+            for (int i = 0; i < imageAlts.Length; i++)
+            {
+                payload.Add("image" + (i + 1) + "src", imageUrls[i]);
+                payload.Add("image" + (i + 1) + "alt", imageAlts[i]);
+            }
+
+            for (int i = 0; i < texts.Length; i++)
+            {
+                payload.Add("text" + (i + 1), texts[i]);
+            }
+
+            XElement expected = BuildXmlTilePayload(template, texts, imageUrls, imageAlts);
+
+            return CreatePushTest("send" + template, "template", payload, expected, true);
         }
 
         private static ZumoTest CreateBadgePushTest(object badgeValue, int? version = null)
@@ -159,8 +228,9 @@ namespace ZumoE2ETestApp.Tests
             XElement expected = new XElement("badge",
                 new XAttribute("value", badgeValue),
                 new XAttribute("version", version.HasValue ? version.GetValueOrDefault() : 1));
+            string xmlPayload = expected.ToString();
 
-            return CreatePushTest("sendBadge", badge, expected);
+            return CreatePushTest("sendBadge", "badge", badge, expected);
         }
 
         private static void AddIfNotNull(JObject obj, string name, string value)
@@ -171,21 +241,32 @@ namespace ZumoE2ETestApp.Tests
             }
         }
 
-        private static ZumoTest CreatePushTest(string wnsMethod, JToken payload, XElement expectedResult)
+        private static ZumoTest CreatePushTest(string wnsMethod, string nhNotificationType, JToken payload, XElement expectedResult, bool isNH = false)
         {
             string testName = "Test for " + wnsMethod + ": ";
             string payloadString = payload.ToString(Formatting.None);
             testName += payloadString.Length < 15 ? payloadString : (payloadString.Substring(0, 15) + "...");
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
+                VerifyNH(isNH);
                 test.AddLog("Test for method {0}, with payload {1}", wnsMethod, payload);
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable(ZumoTestGlobals.PushTestTableName);
+
+                // Workaround for multiple registration bug
+                ZumoPushTests.pushesReceived.Clear();
+
                 PushWatcher watcher = new PushWatcher();
                 var item = new JObject();
                 item.Add("method", wnsMethod);
-                item.Add("channelUri", pushChannel.Uri);
+                item.Add("channelUri", pushChannelUri);
                 item.Add("payload", payload);
+                item.Add("xmlPayload", expectedResult.ToString());
+                if (ZumoTestGlobals.UseNotificationHub)
+                {
+                    item.Add("usingNH", true);
+                    item.Add("nhNotificationType", nhNotificationType);
+                }
                 var pushResult = await table.InsertAsync(item);
                 test.AddLog("Push result: {0}", pushResult);
                 var notificationResult = await watcher.WaitForPush(TimeSpan.FromSeconds(10));
@@ -243,6 +324,53 @@ namespace ZumoE2ETestApp.Tests
             {
                 ZumoPushTests.pushChannel = await PushNotificationChannelManager.CreatePushNotificationChannelForApplicationAsync();
                 test.AddLog("Registered the channel; uri = {0}", pushChannel.Uri);
+                if (ZumoTestGlobals.UseNotificationHub)
+                {
+                    var client = ZumoTestGlobals.Instance.Client;
+                    var push = client.GetPush();
+                    //var template = String.Format(@"<toast><visual><binding template=""ToastText01""><text id=""1"">$(News_{0})</text></binding></visual></toast>", "French");
+                    //await push.RegisterTemplateAsync(ZumoPushTests.pushChannel.Uri, template, "newsTemplate", "tag1 tag2".Split());
+                    await push.RegisterNativeAsync(ZumoPushTests.pushChannel.Uri, "tag1 tag2".Split());
+                    pushChannelUri = null;
+                    test.AddLog("Registered with NH");
+                }
+                else
+                {
+                    pushChannelUri = pushChannel.Uri;
+                }
+
+                pushChannel.PushNotificationReceived += pushChannel_PushNotificationReceived;
+                return true;
+            });
+        }
+
+        private static ZumoTest CreateTemplateRegisterChannelTest()
+        {
+            return new ZumoTest("Template Toast Register push channel", async delegate(ZumoTest test)
+            {
+                VerifyNH();
+                var client = ZumoTestGlobals.Instance.Client;
+                var push = client.GetPush();
+                var toastTemplate = BuildXmlToastPayload("sendToastText01", "$(News_French)");
+                await push.RegisterTemplateAsync(ZumoPushTests.pushChannel.Uri, ZumoTestGlobals.NHW8ToastTemplate, ZumoTestGlobals.NHToastTemplateName, "World French".Split());
+                pushChannelUri = null;
+                test.AddLog("Registered Toast template with NH");
+                pushChannel.PushNotificationReceived += pushChannel_PushNotificationReceived;
+                return true;
+            });
+        }
+
+        private static ZumoTest CreateTemplateTileRegisterChannelTest()
+        {
+            return new ZumoTest("Template Tile Register push channel", async delegate(ZumoTest test)
+            {
+                VerifyNH();
+                var client = ZumoTestGlobals.Instance.Client;
+                var push = client.GetPush();
+                var tileTemplate = BuildXmlTilePayload("TileWideImageAndText02", new[] { "$(News_French)", "tl-wiat2-2" }, new[] { wideImageUrl }, new[] { "zumowide" });
+                await push.RegisterTemplateAsync(ZumoPushTests.pushChannel.Uri, ZumoTestGlobals.NHW8TileTemplate, ZumoTestGlobals.NHTileTemplateName, "World French".Split());
+                pushChannelUri = null;
+                test.AddLog("Registered  Tile template with NH");
                 pushChannel.PushNotificationReceived += pushChannel_PushNotificationReceived;
                 return true;
             });
@@ -250,18 +378,49 @@ namespace ZumoE2ETestApp.Tests
 
         private static ZumoTest CreateUnregisterChannelTest()
         {
-            return new ZumoTest("Unregister push channel", delegate(ZumoTest test)
+            return new ZumoTest("Unregister push channel", async delegate(ZumoTest test)
             {
-                pushChannel.Close();
+                if (ZumoTestGlobals.UseNotificationHub)
+                {
+                    var client = ZumoTestGlobals.Instance.Client;
+                    var push = client.GetPush();
+                    await push.UnregisterNativeAsync();
+                }
+                else
+                {
+                    pushChannel.Close();
+                }
                 TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
                 tcs.SetResult(true);
-                return tcs.Task;
+                return await tcs.Task;
+            });
+        }
+
+        private static ZumoTest CreateUnregisterTemplateChannelTest(string templateName)
+        {
+            return new ZumoTest("Unregister push channel", async delegate(ZumoTest test)
+            {
+                VerifyNH();
+                var client = ZumoTestGlobals.Instance.Client;
+                var push = client.GetPush();
+                await push.UnregisterTemplateAsync(templateName);
+                TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+                tcs.SetResult(true);
+                return await tcs.Task;
             });
         }
 
         static void pushChannel_PushNotificationReceived(PushNotificationChannel sender, PushNotificationReceivedEventArgs args)
         {
             pushesReceived.Enqueue(args);
+        }
+
+        private static void VerifyNH(bool isNH = true)
+        {
+            if (!ZumoTestGlobals.UseNotificationHub && isNH)
+            {
+                throw new SkipException("Only supported for Notification Hub Push");
+            }
         }
 
         class PushWatcher

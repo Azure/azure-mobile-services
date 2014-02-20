@@ -43,7 +43,6 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateSimpleTypedRoundTripTest("Date: now", RoundTripTestType.Date, Util.TrimSubMilliseconds(DateTime.Now)));
             result.AddTest(CreateSimpleTypedRoundTripTest("Date: now (UTC)", RoundTripTestType.Date, Util.TrimSubMilliseconds(DateTime.UtcNow)));
             result.AddTest(CreateSimpleTypedRoundTripTest("Date: null", RoundTripTestType.Date, null));
-            result.AddTest(CreateSimpleTypedRoundTripTest("Date: min date", RoundTripTestType.Date, DateTime.MinValue));
             result.AddTest(CreateSimpleTypedRoundTripTest("Date: specific date, before unix 0", RoundTripTestType.Date, new DateTime(1901, 1, 1)));
             result.AddTest(CreateSimpleTypedRoundTripTest("Date: specific date, after unix 0", RoundTripTestType.Date, new DateTime(2000, 12, 31)));
 
@@ -206,7 +205,6 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped Date: now", "date1", Util.TrimSubMilliseconds(DateTime.Now)));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped Date: now (UTC)", "date1", Util.TrimSubMilliseconds(DateTime.UtcNow)));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped Date: null", "date1", null));
-            result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped Date: min date", "date1", DateTime.MinValue));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped Date: specific date, before unix 0", "date1", new DateTime(1901, 1, 1)));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped Date: specific date, after unix 0", "date1", new DateTime(2000, 12, 31)));
 
@@ -292,25 +290,28 @@ namespace ZumoE2ETestApp.Tests
             return new ZumoTest("Setup dynamic schema", async delegate(ZumoTest test)
             {
                 var client = ZumoTestGlobals.Instance.Client;
-                var table = client.GetTable<RoundTripTableItem>();
                 Random rndGen = new Random(1);
                 try
                 {
-                    RoundTripTableItem item = new RoundTripTableItem
+                    if (!ZumoTestGlobals.UseNetRuntime)
                     {
-                        Bool1 = true,
-                        ComplexType1 = new ComplexType[] { new ComplexType(rndGen) },
-                        ComplexType2 = new ComplexType2(rndGen),
-                        Date1 = DateTime.Now,
-                        Double1 = 123.456,
-                        EnumType = EnumType.First,
-                        Int1 = 1,
-                        Long1 = 1,
-                        String1 = "hello",
-                    };
+                        var table = client.GetTable<RoundTripTableItem>();
+                        RoundTripTableItem item = new RoundTripTableItem
+                        {
+                            Bool1 = true,
+                            ComplexType1 = new ComplexType[] { new ComplexType(rndGen) },
+                            ComplexType2 = new ComplexType2(rndGen),
+                            Date1 = DateTime.Now,
+                            Double1 = 123.456,
+                            EnumType = EnumType.First,
+                            Int1 = 1,
+                            Long1 = 1,
+                            String1 = "hello",
+                        };
 
-                    await table.InsertAsync(item);
-                    test.AddLog("Inserted item to create schema on the int id table");
+                        await table.InsertAsync(item);
+                        test.AddLog("Inserted item to create schema on the int id table");
+                    }
 
                     var table2 = client.GetTable<StringIdRoundTripTableItem>();
                     var item2 = new StringIdRoundTripTableItem { Bool = true, Name = "hello", Number = 1.23, ComplexType = "a b c".Split(), Date = DateTime.UtcNow };

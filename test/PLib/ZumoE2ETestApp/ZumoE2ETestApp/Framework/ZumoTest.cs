@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZumoE2ETestApp.Tests;
 
 namespace ZumoE2ETestApp.Framework
 {
@@ -79,7 +80,7 @@ namespace ZumoE2ETestApp.Framework
             return this.logs;
         }
 
-        public async Task<bool> Run()
+        public async Task Run()
         {
             this.Status = TestStatus.Running;
             if (this.TestStatusChanged != null)
@@ -87,18 +88,21 @@ namespace ZumoE2ETestApp.Framework
                 this.TestStatusChanged(this, new TestStatusChangedEventArgs(this.Status));
             }
 
-            bool passed;
             try
             {
                 this.StartTime = DateTime.UtcNow;
-                passed = await this.execution(this);
+                bool passed = await this.execution(this);
                 this.Status = passed ? TestStatus.Passed : TestStatus.Failed;
                 this.AddLog("Test {0}", this.Status);
+            }
+            catch (SkipException skipEx)
+            {
+                this.AddLog("Test skipped with message: {0}", skipEx.Message);
+                this.Status = TestStatus.Skipped;
             }
             catch (Exception ex)
             {
                 this.AddLog("Test failed with exception: {0}", ex);
-                passed = false;
                 this.Status = TestStatus.Failed;
             }
 
@@ -108,8 +112,6 @@ namespace ZumoE2ETestApp.Framework
             {
                 this.TestStatusChanged(this, new TestStatusChangedEventArgs(this.Status));
             }
-
-            return passed;
         }
     }
 }

@@ -26,6 +26,9 @@ namespace ZumoE2ETestApp.Tests.Types
         [JsonProperty(PropertyName = "bool")]
         public bool? Bool { get; set; }
 
+        [JsonProperty(PropertyName = "integer")]
+        public int Integer { get; set; }
+
         [JsonProperty(PropertyName = "number")]
         public double Number { get; set; }
 
@@ -38,6 +41,7 @@ namespace ZumoE2ETestApp.Tests.Types
             this.Name = Util.CreateSimpleRandomString(rndGen, 5);
             this.Date = new DateTime(rndGen.Next(1980, 2000), rndGen.Next(1, 12), rndGen.Next(1, 25), rndGen.Next(0, 24), rndGen.Next(0, 60), rndGen.Next(0, 60), DateTimeKind.Utc);
             this.Bool = rndGen.Next(2) == 0;
+            this.Integer = rndGen.Next();
             this.Number = rndGen.Next(10000) * rndGen.NextDouble();
             this.ComplexType = Enumerable.Range(0, rndGen.Next(3, 5)).Select(_ => Util.CreateSimpleRandomString(rndGen, 10)).ToArray();
         }
@@ -55,6 +59,7 @@ namespace ZumoE2ETestApp.Tests.Types
                 Id = this.Id,
                 Bool = this.Bool,
                 Date = this.Date,
+                Integer = this.Integer,
                 Number = this.Number,
                 Name = this.Name,
             };
@@ -76,6 +81,7 @@ namespace ZumoE2ETestApp.Tests.Types
             if (!Util.CompareArrays(this.ComplexType, other.ComplexType)) return false;
             if (this.Date.HasValue != other.Date.HasValue) return false;
             if (this.Date.HasValue && !this.Date.Value.ToUniversalTime().Equals(other.Date.Value.ToUniversalTime())) return false;
+            if (this.Integer != other.Integer) return false;
             if (Math.Abs(this.Number - other.Number) > acceptableDifference) return false;
             if (this.Name != other.Name) return false;
             return true;
@@ -84,10 +90,11 @@ namespace ZumoE2ETestApp.Tests.Types
         public override string ToString()
         {
             return string.Format(CultureInfo.InvariantCulture,
-                "StringIdRoundTripTableItem[Bool={0},ComplexType={1},Date1={2},Number={3},Name={4}]",
+                "StringIdRoundTripTableItem[Bool={0},ComplexType={1},Date1={2},Integer={3},Number={4},Name={5}]",
                 Bool.HasValue ? Bool.Value.ToString() : "<<NULL>>",
                 Util.ArrayToString(ComplexType),
                 Date.HasValue ? Date.Value.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fff") : "<<NULL>>",
+                Integer,
                 Number,
                 Name);
         }
@@ -103,6 +110,7 @@ namespace ZumoE2ETestApp.Tests.Types
                 result ^= this.Date.Value.ToUniversalTime().GetHashCode();
             }
 
+            result ^= this.Integer.GetHashCode();
             result ^= this.Number.GetHashCode();
 
             if (this.Name != null)

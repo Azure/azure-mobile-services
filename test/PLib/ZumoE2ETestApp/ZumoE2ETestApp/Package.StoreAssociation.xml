@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <StoreAssociation xmlns="http://schemas.microsoft.com/appx/2010/storeassociation">
-  <Publisher>CN=ADEAF8A7-89BC-443A-AD64-12C7A75AE7EB</Publisher>
-  <NamespacePrefix>36229carlosff</NamespacePrefix>
-  <PublisherDisplayName>carlosff</PublisherDisplayName>
+  <Publisher>CN=14ABB054-BC31-4778-93EA-443B0BBA8A8A</Publisher>
+  <NamespacePrefix>34997jrcooke2001</NamespacePrefix>
+  <PublisherDisplayName>jrcooke2001</PublisherDisplayName>
   <GeneratePackageHash>http://www.w3.org/2001/04/xmlenc#sha256</GeneratePackageHash>
   <SupportedLocales>
     <Language Code="af" InMinimumRequirementSet="false" />
@@ -349,19 +349,18 @@
     <Language Code="zu-za" InMinimumRequirementSet="false" />
   </SupportedLocales>
   <ProductReservedInfo>
-    <MainPackageIdentityName>36229carlosff.ZumoE2ETestApp</MainPackageIdentityName>
+    <MainPackageIdentityName>34997jrcooke2001.jcooketestnet020703</MainPackageIdentityName>
     <ReservedNames>
-      <ReservedName>ZumoE2ETestApp</ReservedName>
+      <ReservedName>jcooketestnet020703</ReservedName>
     </ReservedNames>
   </ProductReservedInfo>
   <AccountPackageIdentityNames>
-    <MainPackageIdentityName>36229carlosff.carlos20130909</MainPackageIdentityName>
-    <MainPackageIdentityName>36229carlosff.CarlosSSOLive</MainPackageIdentityName>
-    <MainPackageIdentityName>36229carlosff.carlostest1024</MainPackageIdentityName>
-    <MainPackageIdentityName>36229carlosff.carlostest1029</MainPackageIdentityName>
-    <MainPackageIdentityName>36229carlosff.MicrosoftAuthTest</MainPackageIdentityName>
-    <MainPackageIdentityName>36229carlosff.QuickOperationsMathGame</MainPackageIdentityName>
-    <MainPackageIdentityName>36229carlosff.zumotestblu</MainPackageIdentityName>
+    <MainPackageIdentityName>34997jrcooke2001.JCookeZumoTest</MainPackageIdentityName>
+    <MainPackageIdentityName>34997jrcooke2001.JCookeE2ETest</MainPackageIdentityName>
+    <MainPackageIdentityName>34997jrcooke2001.JCookeTestCh</MainPackageIdentityName>
+    <MainPackageIdentityName>34997jrcooke2001.JCookeTestNet</MainPackageIdentityName>
+    <MainPackageIdentityName>34997jrcooke2001.JCookeTodo</MainPackageIdentityName>
+    <MainPackageIdentityName>34997jrcooke2001.MeetWhere</MainPackageIdentityName>
   </AccountPackageIdentityNames>
-  <PackageInfoList LandingUrl="https://appdev.microsoft.com:443/StorePortals/Developer/Catalog/ReleaseAnchor/a8638a53-27c2-4c2e-a11c-7285a02d0ef0" />
+  <PackageInfoList LandingUrl="https://appdev.microsoft.com:443/StorePortals/Developer/Catalog/ReleaseAnchor/9f1f8479-067a-4880-9f49-705772d0ac82" />
 </StoreAssociation>

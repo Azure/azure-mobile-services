@@ -68,7 +68,7 @@ namespace ZumoE2ETestApp.Tests
                 {
                     result.AddTest(CreateLogoutTest());
                     result.AddTest(CreateClientSideLoginTest(provider));
-                    result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, true));
+                    result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, userIsAuthenticated: true, usingSingeSignOnOrToken: true));
                 }
             }
 
@@ -99,7 +99,7 @@ namespace ZumoE2ETestApp.Tests
 
                 result.AddTest(CreateLogoutTest());
                 result.AddTest(CreateLoginTest(provider, true));
-                result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, true));
+                result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, userIsAuthenticated: true, usingSingeSignOnOrToken: true));
             }
 
             result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("Now we'll continue running the tests, but you *should not be prompted for the username or password anymore*."));
@@ -113,7 +113,7 @@ namespace ZumoE2ETestApp.Tests
 
                 result.AddTest(CreateLogoutTest());
                 result.AddTest(CreateLoginTest(provider, true));
-                result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, true));
+                result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, userIsAuthenticated: true, usingSingeSignOnOrToken: true));
             }
 
             result.AddTest(ZumoTestCommon.CreateYesNoTest("Were you prompted for the username in any of the providers?", false));
@@ -136,6 +136,16 @@ namespace ZumoE2ETestApp.Tests
             string testName = string.Format("Login with {0}{1}", provider, useSingleSignOn ? " (using single sign-on)" : "");
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime && provider == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory)
+                {
+                    throw new SkipException("AAD not currently supported for .NET Runtime");
+                }
+
+                if (ZumoTestGlobals.UseNetRuntime && useSingleSignOn)
+                {
+                    throw new SkipException("SSO not currently supported for .NET Runtime");
+                }
+
                 var client = ZumoTestGlobals.Instance.Client;
                 var user = await client.LoginAsync(provider, useSingleSignOn);
                 test.AddLog("Logged in as {0}", user.UserId);
@@ -176,6 +186,11 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Login via token with Live SDK", async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime)
+                {
+                    throw new SkipException("Microsoft via Live SDK in not currently supported for .NET Runtime");
+                }
+
                 var client = ZumoTestGlobals.Instance.Client;
 #if !WINDOWS_PHONE
                 var uri = client.ApplicationUri.ToString();
@@ -223,6 +238,11 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Login via token for " + provider, async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime)
+                {
+                    throw new SkipException("Microsoft via Live SDK in not currently supported for .NET Runtime");
+                }
+
                 var client = ZumoTestGlobals.Instance.Client;
                 var lastIdentity = lastUserIdentityObject;
                 if (lastIdentity == null)
@@ -254,17 +274,31 @@ namespace ZumoE2ETestApp.Tests
             });
         }
 
-        private static ZumoTest CreateCRUDTest(string tableName, string providerName, TablePermission tableType, bool userIsAuthenticated)
+        private static ZumoTest CreateCRUDTest(string tableName, string providerName, TablePermission tableType, bool userIsAuthenticated, bool usingSingeSignOnOrToken = false)
         {
             string testName = string.Format(CultureInfo.InvariantCulture, "CRUD, {0}, table with {1} permissions",
                 userIsAuthenticated ? ("auth by " + providerName) : "unauthenticated", tableType);
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime && providerName == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory.ToString())
+                {
+                    throw new SkipException("AAD not currently supported for .NET Runtime");
+                }
+                if (ZumoTestGlobals.UseNetRuntime && providerName == "Microsoft via Live SDK")
+                {
+                    throw new SkipException("Microsoft via Live SDK in not currently supported for .NET Runtime");
+                }
+
+                if (ZumoTestGlobals.UseNetRuntime && usingSingeSignOnOrToken)
+                {
+                    throw new SkipException("SSO not currently supported for .NET Runtime");
+                }
+
                 var client = ZumoTestGlobals.Instance.Client;
                 var currentUser = client.CurrentUser;
                 var table = client.GetTable(tableName);
-                var crudShouldWork = tableType == TablePermission.Public || 
-                    tableType == TablePermission.Application || 
+                var crudShouldWork = tableType == TablePermission.Public ||
+                    tableType == TablePermission.Application ||
                     (tableType == TablePermission.User && userIsAuthenticated);
                 var item = new JObject();
                 item.Add("name", "John Doe");
@@ -278,6 +312,8 @@ namespace ZumoE2ETestApp.Tests
                 {
                     var inserted = await table.InsertAsync(item, queryParameters);
                     item = (JObject)inserted;
+                    Util.CamelCaseProps(item);
+
                     test.AddLog("Inserted item: {0}", item);
                     id = item["id"].Value<int>();
                     if (tableType == TablePermission.User)
@@ -388,7 +424,15 @@ namespace ZumoE2ETestApp.Tests
                 ex = null;
                 try
                 {
-                    var items = await table.ReadAsync("$filter=id eq " + id, queryParameters);
+                    JToken items = null;
+                    if (ZumoTestGlobals.UseNetRuntime)
+                    {
+                        items = await table.ReadAsync("$filter=Id eq '" + id + "'", queryParameters);
+                    }
+                    else
+                    {
+                        items = await table.ReadAsync("$filter=id eq " + id, queryParameters);
+                    }
                     test.AddLog("Retrieved items via Read: {0}", items);
                     if (((JArray)items).Count != 1)
                     {
@@ -468,7 +512,7 @@ namespace ZumoE2ETestApp.Tests
                 }
                 else
                 {
-                    if (exception.Response.StatusCode == HttpStatusCode.Unauthorized)
+                    if (exception.Response.StatusCode == HttpStatusCode.Forbidden)
                     {
                         test.AddLog("Expected exception thrown, with expected status code.");
                         return true;

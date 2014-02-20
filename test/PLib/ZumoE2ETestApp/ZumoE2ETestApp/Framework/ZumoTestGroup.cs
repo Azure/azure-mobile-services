@@ -27,6 +27,7 @@ namespace ZumoE2ETestApp.Framework
         private bool runningTests;
         private int testsPassed;
         private int testsFailed;
+        private int testsSkipped;
         private List<ZumoTest> tests;
 
         public IEnumerable<ZumoTest> AllTests
@@ -39,6 +40,7 @@ namespace ZumoE2ETestApp.Framework
             this.Name = name;
             this.testsFailed = 0;
             this.testsPassed = 0;
+            this.testsSkipped = 0;
             this.tests = new List<ZumoTest>();
             this.runningTests = false;
         }
@@ -57,6 +59,7 @@ namespace ZumoE2ETestApp.Framework
         {
             this.testsFailed = 0;
             this.testsPassed = 0;
+            this.testsSkipped = 0;
             this.tests.Clear();
             this.runningTests = false;
         }
@@ -64,16 +67,24 @@ namespace ZumoE2ETestApp.Framework
         public List<string> GetLogs()
         {
             List<string> result = new List<string>();
-            result.Add(string.Format("[{0}] Tests for group '{1}'", 
-                this.StartTime.ToString(ZumoTest.TimestampFormat, CultureInfo.InvariantCulture), 
+            result.Add(string.Format("[{0}] Tests for group '{1}'",
+                this.StartTime.ToString(ZumoTest.TimestampFormat, CultureInfo.InvariantCulture),
                 this.Name));
-            result.Add(string.Format(CultureInfo.InvariantCulture, "Passed: {0}; Failed: {1}", this.testsPassed, this.testsFailed));
+            if (testsSkipped == 0)
+            {
+                result.Add(string.Format(CultureInfo.InvariantCulture, "Passed: {0}; Failed: {1}", this.testsPassed, this.testsFailed));
+            }
+            else
+            {
+                result.Add(string.Format(CultureInfo.InvariantCulture, "Passed: {0}; Failed: {1}; Skipped: {2}", this.testsPassed, this.testsFailed, this.testsSkipped));
+            }
+
             result.Add("----------------------------");
             foreach (var test in this.tests)
             {
                 result.Add(string.Format(CultureInfo.InvariantCulture, "[{0}] Logs for test {1} ({2})",
                     test.StartTime.ToString(ZumoTest.TimestampFormat, CultureInfo.InvariantCulture),
-                    test.Name, 
+                    test.Name,
                     test.Status));
                 result.AddRange(test.GetLogs());
                 result.Add(string.Format("[{0}] -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-",
@@ -86,8 +97,12 @@ namespace ZumoE2ETestApp.Framework
             return result;
         }
 
+        private bool shouldStop = false;
+
         public async Task Run(bool unattendedOnly = false)
         {
+            this.shouldStop = false;
+
             if (this.runningTests)
             {
                 throw new InvalidOperationException("This group is already running");
@@ -104,6 +119,11 @@ namespace ZumoE2ETestApp.Framework
 
             foreach (ZumoTest test in this.tests)
             {
+                if (shouldStop)
+                {
+                    break;
+                }
+
                 if (!test.CanRunUnattended && unattendedOnly)
                 {
                     continue;
@@ -114,20 +134,26 @@ namespace ZumoE2ETestApp.Framework
                     this.TestStarted(test, new EventArgs());
                 }
 
-                bool passed = await test.Run();
+                await test.Run();
 
                 if (this.TestFinished != null)
                 {
                     this.TestFinished(test, new ZumoTestEventArgs { TestStatus = test.Status });
                 }
 
-                if (passed)
+                switch (test.Status)
                 {
-                    testsPassed++;
-                }
-                else
-                {
-                    testsFailed++;
+                    case TestStatus.Failed:
+                        testsFailed++;
+                        break;
+                    case TestStatus.Passed:
+                        testsPassed++;
+                        break;
+                    case TestStatus.Skipped:
+                        testsSkipped++;
+                        break;
+                    default:
+                        throw new InvalidOperationException("Status out of range: " + test.Status.ToString());
                 }
             }
 
@@ -138,11 +164,17 @@ namespace ZumoE2ETestApp.Framework
                 this.TestGroupFinished(this, new ZumoTestGroupEventArgs
                 {
                     TestsFailed = this.testsFailed,
-                    TestsPassed = this.testsPassed
+                    TestsPassed = this.testsPassed,
+                    TestsSkipped = this.testsSkipped,
                 });
             }
 
             this.runningTests = false;
+        }
+
+        internal void Stop()
+        {
+            this.shouldStop = true;
         }
     }
 }

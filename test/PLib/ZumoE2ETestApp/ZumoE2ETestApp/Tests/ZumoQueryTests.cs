@@ -12,6 +12,7 @@ using Newtonsoft.Json.Linq;
 using ZumoE2ETestApp.Framework;
 using ZumoE2ETestApp.Tests.Types;
 using ZumoE2ETestApp.UIElements;
+using Newtonsoft.Json;
 
 namespace ZumoE2ETestApp.Tests
 {
@@ -76,8 +77,15 @@ namespace ZumoE2ETestApp.Tests
                 m => m.Title.Substring(m.Title.Length - 1) == "r"));
             result.AddTest(CreateQueryTestStringId("String: Substring (2 parameters), length - Movies which end with 'r'",
                 m => m.Title.Substring(m.Title.Length - 1, 1) == "r"));
-            result.AddTest(CreateQueryTestStringId("String: Replace - Movies ending with either 'Part 2' or 'Part II'",
-                m => m.Title.Replace("II", "2").EndsWith("Part 2")));
+
+            if (!ZumoTestGlobals.UseNetRuntime)
+            {
+                // The OData library in .NET does not support replace?
+                // Tracked by https://wagit/AzureMobile/ZumoNetRuntime/issues/10
+                result.AddTest(CreateQueryTestStringId("String: Replace - Movies ending with either 'Part 2' or 'Part II'",
+                    m => m.Title.Replace("II", "2").EndsWith("Part 2")));
+            }
+
             result.AddTest(CreateQueryTestStringId("String: Concat - Movies rated 'PG' or 'PG-13' from the 2000s",
                 m => m.Year >= 2000 && string.Concat(m.MPAARating, "-13").StartsWith("PG-13")));
 
@@ -169,11 +177,10 @@ namespace ZumoE2ETestApp.Tests
                 null, 10, 10, new[] { new OrderByClause("Title", true) }, null, true));
             result.AddTest(CreateQueryTestIntId("Skip, take, filter includeTotalCount - movies 11-20 which won a best picture award, ordered by year",
                 m => m.BestPictureWinner == true, 10, 10, new[] { new OrderByClause("Year", false) }, null, true));
-
             result.AddTest(CreateQueryTestStringId("Get all using large $top - 500", null, 500));
             result.AddTest(CreateQueryTestStringId("Skip all using large skip - 500", null, null, 500));
             result.AddTest(CreateQueryTestStringId("Get first ($top) - 10", null, 10));
-            result.AddTest(CreateQueryTestStringId("Get last ($skip) - 10", null, null, ZumoQueryTestData.AllMovies.Length - 10));
+            result.AddTest(CreateQueryTestStringId("Get last ($skip) - 10", null, null, ZumoQueryTestData.AllStringIdMovies().Length - 10));
             result.AddTest(CreateQueryTestStringId("Skip, take, includeTotalCount - movies 11-20, ordered by title",
                 null, 10, 10, new[] { new OrderByClause("Title", true) }, null, true));
             result.AddTest(CreateQueryTestStringId("Skip, take, filter includeTotalCount - movies 11-20 which won a best picture award, ordered by year",
@@ -230,6 +237,11 @@ namespace ZumoE2ETestApp.Tests
                 int id = i;
                 result.AddTest(new ZumoTest("(Neg) Invalid id for lookup: " + i, async delegate(ZumoTest test)
                 {
+                    if (ZumoTestGlobals.UseNetRuntime)
+                    {
+                        throw new SkipException("Int id not supported for .NET Runtime");
+                    }
+
                     var table = ZumoTestGlobals.Instance.Client.GetTable<Movie>();
                     try
                     {
@@ -252,7 +264,7 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(new ZumoTest("ToCollection - displaying movies on a ListBox", async delegate(ZumoTest test)
             {
                 var client = ZumoTestGlobals.Instance.Client;
-                var table = client.GetTable<Movie>();
+                var table = client.GetTable<StringIdMovie>();
                 var query = from m in table
                             where m.Year > 1980
                             orderby m.ReleaseDate descending
@@ -284,6 +296,11 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Populate movies table, if necessary", new TestExecution(async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime)
+                {
+                    throw new SkipException("Int id not supported for .NET Runtime");
+                }
+
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable<AllMovies>();
                 AllMovies allMovies = new AllMovies
@@ -321,7 +338,7 @@ namespace ZumoE2ETestApp.Tests
                 var table = client.GetTable<AllStringIdMovies>();
                 AllStringIdMovies allMovies = new AllStringIdMovies
                 {
-                    Movies = new StringIdMovie[ZumoQueryTestData.AllMovies.Length]
+                    Movies = new StringIdMovie[ZumoQueryTestData.AllStringIdMovies().Length]
                 };
                 for (int i = 0; i < allMovies.Movies.Length; i++)
                 {
@@ -395,11 +412,17 @@ namespace ZumoE2ETestApp.Tests
             string name, Expression<Func<MovieType, bool>> whereClause,
             int? top = null, int? skip = null, OrderByClause[] orderBy = null,
             Expression<Func<MovieType, string>> selectExpression = null, bool? includeTotalCount = null,
-            string odataExpression = null, bool useStringIdTable = false) where MovieType : class, IMovie
+            string odataExpression = null, bool useStringIdTable = false)
+            where MovieType : class, IMovie
             where TExpectedException : Exception
         {
             return new ZumoTest(name, async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime && typeof(MovieType) == typeof(Movie))
+                {
+                    throw new SkipException("Int id not supported for .NET Runtime");
+                }
+
                 try
                 {
                     var table = ZumoTestGlobals.Instance.Client.GetTable<MovieType>();
@@ -470,7 +493,16 @@ namespace ZumoE2ETestApp.Tests
                     {
                         test.AddLog("Using the OData query directly");
                         JToken result = await table.ReadAsync(odataExpression);
-                        readMovies = result.ToObject<IEnumerable<MovieType>>();
+                        if (ZumoTestGlobals.UseNetRuntime)
+                        {
+                            var serializer = new JsonSerializer();
+                            serializer.Converters.Add(new MobileServiceIsoDateTimeConverter());
+                            readMovies = result.ToObject<IEnumerable<MovieType>>(serializer);
+                        }
+                        else
+                        {
+                            readMovies = result.ToObject<IEnumerable<MovieType>>();
+                        }
                     }
 
                     long actualTotalCount = -1;
@@ -480,6 +512,11 @@ namespace ZumoE2ETestApp.Tests
                         actualTotalCount = totalCountProvider.TotalCount;
                     }
 
+                    if (ZumoTestGlobals.UseNetRuntime && top.HasValue && top.Value == 1001)
+                    {
+                        test.AddLog("NetRuntime throttles and does not throw");
+                        return readMovies.Count() == 100;
+                    }
                     IEnumerable<MovieType> expectedData;
                     if (useStringIdTable)
                     {
@@ -492,7 +529,7 @@ namespace ZumoE2ETestApp.Tests
                     }
                     else
                     {
-                        expectedData = ZumoQueryTestData.AllMovies.Select(s => (MovieType)(IMovie)s);
+                        expectedData = ZumoQueryTestData.AllStringIdMovies().Select(s => (MovieType)(IMovie)s);
                     }
 
                     if (whereClause != null)

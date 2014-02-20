@@ -116,8 +116,10 @@ namespace ZumoE2ETestApp
                 {
                     await this.RunTestGroup(testGroup);
                     int passed = testGroup.AllTests.Count(t => t.Status == TestStatus.Passed);
-                    string message = string.Format(CultureInfo.InvariantCulture, "Passed {0} of {1} tests", passed, testGroup.AllTests.Count());
-                    if (passed == testGroup.AllTests.Count())
+                    int failed = testGroup.AllTests.Count(t => t.Status == TestStatus.Failed);
+                    int skipped = testGroup.AllTests.Count(t => t.Status == TestStatus.Skipped);
+                    string message = string.Format(CultureInfo.InvariantCulture, "Passed {0} of {1} tests (skipped {2})", passed, (passed + failed), skipped);
+                    if (failed == 0)
                     {
                         if (testGroup.Name == TestStore.AllTestsGroupName)
                         {
@@ -151,13 +153,26 @@ namespace ZumoE2ETestApp
                 ZumoTestGroup testGroup = allTests[selectedIndex];
                 await this.RunTestGroup(testGroup);
                 int passed = testGroup.AllTests.Count(t => t.Status == TestStatus.Passed);
-                string message = string.Format(CultureInfo.InvariantCulture, "Passed {0} of {1} tests", passed, testGroup.AllTests.Count());
+                int failed = testGroup.AllTests.Count(t => t.Status == TestStatus.Failed);
+                int skipped = testGroup.AllTests.Count(t => t.Status == TestStatus.Skipped);
+                string message = string.Format(CultureInfo.InvariantCulture, "Passed {0} of {1} tests (skipped {2})", passed, (passed + failed), skipped);
                 await Util.MessageBox(message, "Test group finished");
             }
             else
             {
                 await Util.MessageBox("Please select a test group.", "Error");
             }
+
+            var tb = (ToggleButton)sender;
+            if (!tb.IsChecked.HasValue || tb.IsChecked.Value)
+            {
+                tb.IsChecked = false;
+            }
+        }
+
+        private void btnRunTests_Unchecked_1(object sender, RoutedEventArgs e)
+        {
+            this.StopTestGroup();
         }
 
         private async Task<bool> InitializeClient()
@@ -168,7 +183,7 @@ namespace ZumoE2ETestApp
             string error = null;
             try
             {
-                ZumoTestGlobals.Instance.InitializeClient(appUrl, appKey);
+                await ZumoTestGlobals.Instance.InitializeClient(appUrl, appKey);
             }
             catch (Exception ex)
             {
@@ -201,8 +216,12 @@ namespace ZumoE2ETestApp
             }
         }
 
+        private ZumoTestGroup currentTestGroup;
+
         private async Task RunTestGroup(ZumoTestGroup testGroup)
         {
+            this.currentTestGroup = testGroup;
+            await ZumoTestGlobals.InitializeFeaturesEnabled();
             var clientInitialized = await InitializeClient();
             if (!clientInitialized)
             {
@@ -232,6 +251,11 @@ namespace ZumoE2ETestApp
                 StorageFile logsUploadedFile = await storageFolder.CreateFileAsync(ZumoTestGlobals.LogsLocationFile, CreationCollisionOption.ReplaceExisting);
                 await FileIO.WriteTextAsync(logsUploadedFile, logsUploadedURL);
             }
+        }
+
+        private void StopTestGroup()
+        {
+            currentTestGroup.Stop();
         }
 
         private void btnResetTests_Click_1(object sender, RoutedEventArgs e)
