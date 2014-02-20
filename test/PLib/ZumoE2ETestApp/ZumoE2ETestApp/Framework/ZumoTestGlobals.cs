@@ -41,6 +41,8 @@ namespace ZumoE2ETestApp.Framework
 
         public static string NHToastTemplateName = "newsToastTemplate";
         public static string NHTileTemplateName = "newsTileTemplate";
+        public static string NHBadgeTemplateName = "newsBadgeTemplate";
+        public static string NHRawTemplateName = "newsRawTemplate";
 
         public MobileServiceClient Client { get; private set; }
         public Dictionary<string, object> GlobalTestParams { get; private set; }
