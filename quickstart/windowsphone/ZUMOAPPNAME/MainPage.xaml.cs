@@ -62,6 +62,7 @@ namespace ZUMOAPPNAME
             }
 
             ListItems.ItemsSource = items;
+            this.ButtonSave.IsEnabled = true;
         }
 
         private async void UpdateCheckedTodoItem(TodoItem item)
