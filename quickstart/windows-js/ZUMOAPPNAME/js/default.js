@@ -24,7 +24,18 @@
                 "ZUMOAPPKEY"
             );
 
-            var todoTable = client.getTable('TodoItem');
+            // The WinStore/JavaScript client by default caches the responses to GET requests;
+            // since we want the 'Refresh' button to always retrieve the latest data from the
+            // service, we'll add this header to force it to always go back to the service.
+            var noCachingFilter = function (request, next, callback) {
+                if (request.type === 'GET' && !request.headers['If-Modified-Since']) {
+                    request.headers['If-Modified-Since'] = 'Mon, 27 Mar 1972 00:00:00 GMT';
+                }
+                next(request, callback);
+            };
+
+            var todoTable = client.withFilter(noCachingFilter).getTable('TodoItem');
+
             var todoItems = new WinJS.Binding.List();
 
             var insertTodoItem = function (todoItem) {
