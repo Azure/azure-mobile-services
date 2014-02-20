@@ -202,9 +202,14 @@ function definePushTestsNamespace() {
             channel.onpushnotificationreceived = onPushNotificationReceived;
             var tags = ["World", "French"];
             var templateBody = '<badge value="$(News_Badge)" version="1" />'
-            zumo.getClient().push.registerTemplate(channel.uri, templateBody, 'newsBadgeTemplate', { 'X-WNS-Type': 'wns/badge' }, tags);
-            pushChannel = channel;
-            done(true);
+            zumo.getClient().push.registerTemplate(channel.uri, templateBody, 'newsBadgeTemplate', { 'X-WNS-Type': 'wns/badge' }, tags).done(function () {
+                test.addLog('success: ');
+                pushChannel = channel;
+                done(true);
+            }, function (error) {
+                test.addLog('Error creating push channel: ', error);
+                done(false);
+            });
         }, function (error) {
             test.addLog('Error creating push channel: ', error);
             done(false);
