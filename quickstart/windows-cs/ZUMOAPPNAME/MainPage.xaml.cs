@@ -70,6 +70,7 @@ namespace ZUMOAPPNAME
             else
             {
                 ListItems.ItemsSource = items;
+                this.ButtonSave.IsEnabled = true;
             }
         }
 
