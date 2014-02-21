@@ -267,6 +267,11 @@ namespace ZumoE2ETestApp.Tests
             testName += payloadString.Length < 15 ? payloadString : (payloadString.Substring(0, 15) + "...");
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime)
+                {
+                    throw new SkipException("String id not supported for .NET Runtime");
+                }
+                
                 VerifyNH(isNH);
                 test.AddLog("Test for method {0}, with payload {1}", wnsMethod, payload);
                 var client = ZumoTestGlobals.Instance.Client;
