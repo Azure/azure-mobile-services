@@ -39,10 +39,11 @@ namespace ZumoE2ETestApp.Framework
         internal const string TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff";
         private TestExecution execution;
         private List<string> logs;
+        private List<string> requiredFeatures;
 
         public event EventHandler<TestStatusChangedEventArgs> TestStatusChanged;
 
-        public ZumoTest(string name, TestExecution execution)
+        public ZumoTest(string name, TestExecution execution, string requiredRuntimeFeature = null)
         {
             this.Name = name;
             this.Data = new Dictionary<string, object>();
@@ -50,6 +51,11 @@ namespace ZumoE2ETestApp.Framework
             this.logs = new List<string>();
             this.execution = execution;
             this.Status = TestStatus.NotRun;
+            this.requiredFeatures = new List<string>();
+            if (requiredRuntimeFeature != null)
+            {
+                this.requiredFeatures.Add(requiredRuntimeFeature);
+            }
         }
 
         public void AddLog(string text, params object[] args)
@@ -80,6 +86,31 @@ namespace ZumoE2ETestApp.Framework
             return this.logs;
         }
 
+        public bool ShouldBeSkipped()
+        {
+            if (ZumoTestGlobals.UseNetRuntime)
+            {
+                if ( this.requiredFeatures.Count > 0)
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                if (!ZumoTestGlobals.UseNotificationHub && this.requiredFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.Notification_Hub))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public void AddRequiredFeature(string requiredFeature)
+        {
+            this.requiredFeatures.Add(requiredFeature);
+        }
+
         public async Task Run()
         {
             this.Status = TestStatus.Running;
@@ -91,14 +122,17 @@ namespace ZumoE2ETestApp.Framework
             try
             {
                 this.StartTime = DateTime.UtcNow;
-                bool passed = await this.execution(this);
-                this.Status = passed ? TestStatus.Passed : TestStatus.Failed;
-                this.AddLog("Test {0}", this.Status);
-            }
-            catch (SkipException skipEx)
-            {
-                this.AddLog("Test skipped with message: {0}", skipEx.Message);
-                this.Status = TestStatus.Skipped;
+                if (this.ShouldBeSkipped())
+                {
+                    this.AddLog("Test skipped.");
+                    this.Status = TestStatus.Skipped;
+                }
+                else
+                {
+                    bool passed = await this.execution(this);
+                    this.Status = passed ? TestStatus.Passed : TestStatus.Failed;
+                    this.AddLog("Test {0}", this.Status);
+                }
             }
             catch (Exception ex)
             {

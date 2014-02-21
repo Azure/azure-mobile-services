@@ -267,12 +267,6 @@ namespace ZumoE2ETestApp.Tests
             testName += payloadString.Length < 15 ? payloadString : (payloadString.Substring(0, 15) + "...");
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.UseNetRuntime)
-                {
-                    throw new SkipException("String id not supported for .NET Runtime");
-                }
-                
-                VerifyNH(isNH);
                 test.AddLog("Test for method {0}, with payload {1}", wnsMethod, payload);
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable(ZumoTestGlobals.PushTestTableName);
@@ -346,7 +340,7 @@ namespace ZumoE2ETestApp.Tests
                     await Task.Delay(5000); // leave some time between pushes
                     return passed;
                 }
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.Notification_Hub);
         }
 
         private static ZumoTest CreateRegisterChannelTest()
@@ -377,7 +371,6 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Template " + nhNotificationType + "Register push channel", async delegate(ZumoTest test)
             {
-                VerifyNH();
                 var client = ZumoTestGlobals.Instance.Client;
                 var push = client.GetPush();
                 TemplateRegistration reg = null;
@@ -435,7 +428,6 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Unregister push channel", async delegate(ZumoTest test)
             {
-                VerifyNH();
                 var client = ZumoTestGlobals.Instance.Client;
                 var push = client.GetPush();
                 await push.UnregisterTemplateAsync(templateName);
@@ -448,14 +440,6 @@ namespace ZumoE2ETestApp.Tests
         static void pushChannel_PushNotificationReceived(PushNotificationChannel sender, PushNotificationReceivedEventArgs args)
         {
             pushesReceived.Enqueue(args);
-        }
-
-        private static void VerifyNH(bool isNH = true)
-        {
-            if (!ZumoTestGlobals.UseNotificationHub && isNH)
-            {
-                throw new SkipException("Only supported for Notification Hub Push");
-            }
         }
 
         class PushWatcher

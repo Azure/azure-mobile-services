@@ -136,21 +136,11 @@ namespace ZumoE2ETestApp.Tests
             string testName = string.Format("Login with {0}{1}", provider, useSingleSignOn ? " (using single sign-on)" : "");
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.UseNetRuntime && provider == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory)
-                {
-                    throw new SkipException("AAD not currently supported for .NET Runtime");
-                }
-
-                if (ZumoTestGlobals.UseNetRuntime && useSingleSignOn)
-                {
-                    throw new SkipException("SSO not currently supported for .NET Runtime");
-                }
-
                 var client = ZumoTestGlobals.Instance.Client;
                 var user = await client.LoginAsync(provider, useSingleSignOn);
                 test.AddLog("Logged in as {0}", user.UserId);
                 return true;
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.Live_AAD_SSO_Login);
         }
 #else
         internal static ZumoTest CreateLoginTest(MobileServiceAuthenticationProvider provider)
@@ -186,11 +176,6 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Login via token with Live SDK", async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.UseNetRuntime)
-                {
-                    throw new SkipException("Microsoft via Live SDK in not currently supported for .NET Runtime");
-                }
-
                 var client = ZumoTestGlobals.Instance.Client;
 #if !WINDOWS_PHONE
                 var uri = client.ApplicationUri.ToString();
@@ -230,7 +215,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Login failed.");
                     return false;
                 }
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.Live_AAD_SSO_Login);
         }
 #endif
 
@@ -238,11 +223,6 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Login via token for " + provider, async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.UseNetRuntime)
-                {
-                    throw new SkipException("Microsoft via Live SDK in not currently supported for .NET Runtime");
-                }
-
                 var client = ZumoTestGlobals.Instance.Client;
                 var lastIdentity = lastUserIdentityObject;
                 if (lastIdentity == null)
@@ -271,7 +251,7 @@ namespace ZumoE2ETestApp.Tests
                 var user = await client.LoginAsync(provider, token);
                 test.AddLog("Logged in as {0}", user.UserId);
                 return true;
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.Live_AAD_SSO_Login);
         }
 
         private static ZumoTest CreateCRUDTest(string tableName, string providerName, TablePermission tableType, bool userIsAuthenticated, bool usingSingeSignOnOrToken = false)
@@ -280,25 +260,6 @@ namespace ZumoE2ETestApp.Tests
                 userIsAuthenticated ? ("auth by " + providerName) : "unauthenticated", tableType);
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.UseNetRuntime)
-                {
-                    throw new SkipException("Int id not supported for .NET Runtime");
-                }
-
-                if (ZumoTestGlobals.UseNetRuntime && providerName == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory.ToString())
-                {
-                    throw new SkipException("AAD not currently supported for .NET Runtime");
-                }
-                if (ZumoTestGlobals.UseNetRuntime && providerName == "Microsoft via Live SDK")
-                {
-                    throw new SkipException("Microsoft via Live SDK in not currently supported for .NET Runtime");
-                }
-
-                if (ZumoTestGlobals.UseNetRuntime && usingSingeSignOnOrToken)
-                {
-                    throw new SkipException("SSO not currently supported for .NET Runtime");
-                }
-
                 var client = ZumoTestGlobals.Instance.Client;
                 var currentUser = client.CurrentUser;
                 var table = client.GetTable(tableName);
@@ -472,7 +433,7 @@ namespace ZumoE2ETestApp.Tests
                 }
 
                 return true;
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.Live_AAD_SSO_Login);
         }
 
         private static string NameOrScreenName(string providerName, JObject identities)

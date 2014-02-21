@@ -96,11 +96,6 @@ namespace ZumoE2ETestApp.Tests
             string testName = "Typed overload - " + testType;
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.UseNetRuntime)
-                {
-                    throw new SkipException("Int id not supported for .NET Runtime");
-                }
-
                 var client = ZumoTestGlobals.Instance.Client;
                 var apiName = MovieFinderApiName;
                 var testResult = true;
@@ -201,7 +196,7 @@ namespace ZumoE2ETestApp.Tests
                 }
 
                 return testResult;
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLE);
         }
 
         private static ZumoTest CreateHttpContentApiTest(DataFormat inputFormat, DataFormat outputFormat, Random seedGenerator)

@@ -237,11 +237,6 @@ namespace ZumoE2ETestApp.Tests
                 int id = i;
                 result.AddTest(new ZumoTest("(Neg) Invalid id for lookup: " + i, async delegate(ZumoTest test)
                 {
-                    if (ZumoTestGlobals.UseNetRuntime)
-                    {
-                        throw new SkipException("Int id not supported for .NET Runtime");
-                    }
-
                     var table = ZumoTestGlobals.Instance.Client.GetTable<Movie>();
                     try
                     {
@@ -254,7 +249,7 @@ namespace ZumoE2ETestApp.Tests
                         test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                         return true;
                     }
-                }));
+                }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLE));
             }
 
 #if !WINDOWS_PHONE
@@ -263,10 +258,6 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(statusTest);
             result.AddTest(new ZumoTest("ToCollection - displaying movies on a ListBox", async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.UseNetRuntime)
-                {
-                    throw new SkipException("String id not supported for .NET Runtime");
-                }
 
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable<StringIdMovie>();
@@ -286,7 +277,7 @@ namespace ZumoE2ETestApp.Tests
                     await newPage.Display();
                 }
                 return true;
-            })
+            }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLE)
             {
                 CanRunUnattended = false
             });
@@ -301,11 +292,6 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Populate movies table, if necessary", new TestExecution(async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.UseNetRuntime)
-                {
-                    throw new SkipException("Int id not supported for .NET Runtime");
-                }
-
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable<AllMovies>();
                 AllMovies allMovies = new AllMovies
@@ -332,18 +318,13 @@ namespace ZumoE2ETestApp.Tests
 
                 test.AddLog("Result of populating table: Time out. Not populate enough data.");
                 return false;
-            }));
+            }), ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLE);
         }
 
         internal static ZumoTest CreatePopulateStringIdTableTest()
         {
             return new ZumoTest("Populate [string id] movies table, if necessary", new TestExecution(async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.UseNetRuntime)
-                {
-                    throw new SkipException("String id not supported for .NET Runtime");
-                }
-
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable<AllStringIdMovies>();
                 AllStringIdMovies allMovies = new AllStringIdMovies
@@ -374,7 +355,7 @@ namespace ZumoE2ETestApp.Tests
 
                 test.AddLog("Result of populating [string id] table: Time out. Not populate enough data.");
                 return false;
-            }));
+            }), ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLE);
         }
 
         class OrderByClause
@@ -428,11 +409,6 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest(name, async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.UseNetRuntime && typeof(MovieType) == typeof(Movie))
-                {
-                    throw new SkipException("String not supported for .NET Runtime");
-                }
-
                 try
                 {
                     var table = ZumoTestGlobals.Instance.Client.GetTable<MovieType>();
@@ -619,7 +595,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                     return true;
                 }
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLE);
         }
 
         private static IMobileServiceTableQuery<MovieType> ApplyOrdering<MovieType>(IMobileServiceTableQuery<MovieType> query, OrderByClause[] orderBy)

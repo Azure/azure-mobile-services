@@ -118,7 +118,6 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tests\ExceptionTypeWhichWillNeverBeThrown.cs" />
-    <Compile Include="Tests\SkipException.cs" />
     <Compile Include="Tests\TestStore.cs" />
     <Compile Include="Tests\Types\ICloneableItem.cs" />
     <Compile Include="Tests\Types\StringIdRoundTripTableItem.cs" />
