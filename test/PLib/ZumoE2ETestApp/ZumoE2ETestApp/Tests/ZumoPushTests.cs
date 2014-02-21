@@ -50,16 +50,16 @@ namespace ZumoE2ETestApp.Tests
                 new[] { "24", "aliquam" },
                 new string[0], new string[0]));
             result.AddTest(CreateUnregisterChannelTest());
-            result.AddTest(CreateTemplateRegisterChannelTest());
+            result.AddTest(CreateRegisterTemplateChannelTest("Toast"));
             result.AddTest(CreateTemplateToastPushTest("sendToastText01", "World News in French!"));
             result.AddTest(CreateUnregisterTemplateChannelTest(ZumoTestGlobals.NHToastTemplateName));
-            result.AddTest(CreateTemplateTileRegisterChannelTest());
+            result.AddTest(CreateRegisterTemplateChannelTest("Tile"));
             result.AddTest(CreateTemplateTilePushTest("TileWideImageAndText02", new[] { "tl-wiat2-1", "World News in French!" }, new[] { wideImageUrl }, new[] { "zumowide" }));
             result.AddTest(CreateUnregisterTemplateChannelTest(ZumoTestGlobals.NHTileTemplateName));
-            result.AddTest(CreateTemplateBadgeRegisterChannelTest());
+            result.AddTest(CreateRegisterTemplateChannelTest("Badge"));
             result.AddTest(CreateTemplateBadgePushTest("10"));
             result.AddTest(CreateUnregisterTemplateChannelTest(ZumoTestGlobals.NHBadgeTemplateName));
-            result.AddTest(CreateTemplateRawRegisterChannelTest());
+            result.AddTest(CreateRegisterTemplateChannelTest("Raw"));
             result.AddTest(CreateTemplateRawPushTest("World News in French!"));
             result.AddTest(CreateUnregisterTemplateChannelTest(ZumoTestGlobals.NHRawTemplateName));
 
@@ -82,6 +82,24 @@ namespace ZumoE2ETestApp.Tests
 
         private static ZumoTest CreateTilePushTest(string template, string[] texts, string[] imageUrls, string[] imageAlts)
         {
+            var payload = BuildTilPayload(template, texts, imageUrls, imageAlts);
+
+            XElement expected = BuildXmlTilePayload(template, texts, imageUrls, imageAlts);
+
+            return CreatePushTest("send" + template, "tile", payload, expected);
+        }
+
+        private static ZumoTest CreateTemplateTilePushTest(string template, string[] texts, string[] imageUrls, string[] imageAlts)
+        {
+            var payload = BuildTilPayload(template, texts, imageUrls, imageAlts);
+
+            XElement expected = BuildXmlTilePayload(template, texts, imageUrls, imageAlts);
+
+            return CreatePushTest("send" + template, "template", payload, expected, true);
+        }
+
+        private static JObject BuildTilPayload(string template, string[] texts, string[] imageUrls, string[] imageAlts)
+        {
             if (imageAlts.Length != imageAlts.Length)
             {
                 throw new ArgumentException("Size of 'imageUrls' and 'imageAlts' arrays must be the same");
@@ -103,9 +121,7 @@ namespace ZumoE2ETestApp.Tests
                 payload.Add("text" + (i + 1), texts[i]);
             }
 
-            XElement expected = BuildXmlTilePayload(template, texts, imageUrls, imageAlts);
-
-            return CreatePushTest("send" + template, "tile", payload, expected);
+            return payload;
         }
 
         private static XElement BuildXmlTilePayload(string template, string[] texts, string[] imageUrls, string[] imageAlts)
@@ -145,6 +161,15 @@ namespace ZumoE2ETestApp.Tests
             return CreatePushTest(wnsMethod, "toast", payload, expectedResult);
         }
 
+        private static ZumoTest CreateTemplateToastPushTest(string wnsMethod, string text1)
+        {
+            var payload = new JObject();
+            payload.Add("text1", text1);
+            XElement expectedResult = BuildXmlToastPayload(wnsMethod, text1);
+
+            return CreatePushTest(wnsMethod, "template", payload, expectedResult, true);
+        }
+
         private static XElement BuildXmlToastPayload(string wnsMethod, string text1, string text2 = null, string text3 = null, string imageUrl = null, string imageAlt = null)
         {
             XElement binding = new XElement("binding", new XAttribute("template", wnsMethod.Substring("send".Length)));
@@ -174,79 +199,25 @@ namespace ZumoE2ETestApp.Tests
             return xmlPayload;
         }
 
-        private static ZumoTest CreateTemplateToastPushTest(string wnsMethod, string text1)
-        {
-            var payload = new JObject();
-            payload.Add("text1", text1);
-            XElement binding = new XElement("binding", new XAttribute("template", wnsMethod.Substring("send".Length)));
-            binding.Add(new XElement("text", new XAttribute("id", 1), new XText(text1)));
-            XElement expectedResult = new XElement("toast",
-                new XElement("visual",
-                    binding));
-            return CreatePushTest(wnsMethod, "template", payload, expectedResult, true);
-        }
-
-        private static ZumoTest CreateTemplateTilePushTest(string template, string[] texts, string[] imageUrls, string[] imageAlts)
-        {
-            if (imageAlts.Length != imageAlts.Length)
-            {
-                throw new ArgumentException("Size of 'imageUrls' and 'imageAlts' arrays must be the same");
-            }
-
-            if (texts.Any(t => t == null) || imageAlts.Any(i => i == null) || imageUrls.Any(i => i == null))
-            {
-                throw new ArgumentException("No nulls allowed in the arrays");
-            }
-            var payload = new JObject();
-            for (int i = 0; i < imageAlts.Length; i++)
-            {
-                payload.Add("image" + (i + 1) + "src", imageUrls[i]);
-                payload.Add("image" + (i + 1) + "alt", imageAlts[i]);
-            }
-
-            for (int i = 0; i < texts.Length; i++)
-            {
-                payload.Add("text" + (i + 1), texts[i]);
-            }
-
-            XElement expected = BuildXmlTilePayload(template, texts, imageUrls, imageAlts);
-
-            return CreatePushTest("send" + template, "template", payload, expected, true);
-        }
-
         private static ZumoTest CreateBadgePushTest(object badgeValue, int? version = null)
         {
-            JToken badge;
-            if (badgeValue is int)
-            {
-                badge = new JValue((int)badgeValue);
-            }
-            else if (badgeValue is string)
-            {
-                badge = new JValue((string)badgeValue);
-            }
-            else
-            {
-                throw new ArgumentException("Invalid badge value: " + badgeValue);
-            }
+            var badge = BuildBadgePayload(badgeValue, version);
 
-            if (version.HasValue)
-            {
-                var payload = new JObject();
-                payload.Add("value", badge);
-                payload.Add("version", version.Value);
-                badge = payload;
-            }
-
-            XElement expected = new XElement("badge",
-                new XAttribute("value", badgeValue),
-                new XAttribute("version", version.HasValue ? version.GetValueOrDefault() : 1));
-            string xmlPayload = expected.ToString();
+            XElement expected = BuildBadgeXmlPayload(badgeValue, version);
 
             return CreatePushTest("sendBadge", "badge", badge, expected);
         }
 
-        private static XElement BuildBadgeXmlPayload(object badgeValue, int? version = null)
+        private static ZumoTest CreateTemplateBadgePushTest(object badgeValue, int? version = null)
+        {
+            var badge = BuildBadgePayload(badgeValue, version);
+
+            XElement expected = BuildBadgeXmlPayload(badgeValue, version);
+
+            return CreatePushTest("sendBadge", "template", badge, expected);
+        }
+
+        private static JToken BuildBadgePayload(object badgeValue, int? version = null)
         {
             JToken badge;
             if (badgeValue is int)
@@ -270,39 +241,15 @@ namespace ZumoE2ETestApp.Tests
                 badge = payload;
             }
 
+            return badge;
+        }
+
+        private static XElement BuildBadgeXmlPayload(object badgeValue, int? version = null)
+        {
             XElement xmlPayload = new XElement("badge",
                 new XAttribute("value", badgeValue),
                 new XAttribute("version", version.HasValue ? version.GetValueOrDefault() : 1));
             return xmlPayload;
-        }
-
-        private static ZumoTest CreateTemplateBadgePushTest(object badgeValue, int? version = null)
-        {
-            JToken badge;
-            if (badgeValue is int)
-            {
-                badge = new JValue((int)badgeValue);
-            }
-            else if (badgeValue is string)
-            {
-                badge = new JValue((string)badgeValue);
-            }
-            else
-            {
-                throw new ArgumentException("Invalid badge value: " + badgeValue);
-            }
-
-            if (version.HasValue)
-            {
-                var payload = new JObject();
-                payload.Add("value", badge);
-                payload.Add("version", version.Value);
-                badge = payload;
-            }
-
-            XElement expected = BuildBadgeXmlPayload(badgeValue);
-
-            return CreatePushTest("sendBadge", "template", badge, expected);
         }
 
         private static void AddIfNotNull(JObject obj, string name, string value)
@@ -407,8 +354,6 @@ namespace ZumoE2ETestApp.Tests
                 {
                     var client = ZumoTestGlobals.Instance.Client;
                     var push = client.GetPush();
-                    //var template = String.Format(@"<toast><visual><binding template=""ToastText01""><text id=""1"">$(News_{0})</text></binding></visual></toast>", "French");
-                    //await push.RegisterTemplateAsync(ZumoPushTests.pushChannel.Uri, template, "newsTemplate", "tag1 tag2".Split());
                     await push.RegisterNativeAsync(ZumoPushTests.pushChannel.Uri, "tag1 tag2".Split());
                     pushChannelUri = null;
                     test.AddLog("Registered with NH");
@@ -423,68 +368,39 @@ namespace ZumoE2ETestApp.Tests
             });
         }
 
-        private static ZumoTest CreateTemplateRegisterChannelTest()
+        private static ZumoTest CreateRegisterTemplateChannelTest(string nhNotificationType)
         {
-            return new ZumoTest("Template Toast Register push channel", async delegate(ZumoTest test)
+            return new ZumoTest("Template " + nhNotificationType + "Register push channel", async delegate(ZumoTest test)
             {
                 VerifyNH();
                 var client = ZumoTestGlobals.Instance.Client;
                 var push = client.GetPush();
-                var toastTemplate = BuildXmlToastPayload("sendToastText01", "$(News_French)");
-                await push.RegisterTemplateAsync(ZumoPushTests.pushChannel.Uri, ZumoTestGlobals.NHW8ToastTemplate, ZumoTestGlobals.NHToastTemplateName, "World French".Split());
-                pushChannelUri = null;
-                test.AddLog("Registered Toast template with NH");
-                pushChannel.PushNotificationReceived += pushChannel_PushNotificationReceived;
-                return true;
-            });
-        }
+                TemplateRegistration reg = null;
+                switch (nhNotificationType.ToLower())
+                {
+                    case "toast":
+                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, ZumoTestGlobals.NHW8ToastTemplate, ZumoTestGlobals.NHToastTemplateName, "World French".Split());
+                        break;
+                    case "raw":
+                        var rawTemplate = "<raw>$(News_French)</raw>";
+                        IDictionary<string, string> wnsHeaders = new Dictionary<string, string>();
+                        wnsHeaders.Add("X-WNS-Type", "wns/raw");
+                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, rawTemplate, ZumoTestGlobals.NHRawTemplateName, "World French".Split(), wnsHeaders);
+                        break;
+                    case "badge":
+                        var badgeTemplate = BuildBadgeXmlPayload("$(News_Badge)");
+                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, badgeTemplate.ToString(), ZumoTestGlobals.NHBadgeTemplateName, "World French".Split());
+                        break;
+                    case "tile":
+                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, ZumoTestGlobals.NHW8TileTemplate, ZumoTestGlobals.NHTileTemplateName, "World French".Split());
+                        break;
+                    default:
+                        throw new Exception("Template type" + nhNotificationType + "is not supported.");
+                }
 
-        private static ZumoTest CreateTemplateRawRegisterChannelTest()
-        {
-            return new ZumoTest("Template Raw Register push channel", async delegate(ZumoTest test)
-            {
-                VerifyNH();
-                var client = ZumoTestGlobals.Instance.Client;
-                var push = client.GetPush();
-                var rawTemplate = "<raw>$(News_French)</raw>";
-                IDictionary<string, string> wnsHeaders = new Dictionary<string, string>();
-                wnsHeaders.Add("X-WNS-Type", "wns/raw");
-                var reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, rawTemplate, ZumoTestGlobals.NHRawTemplateName, "World French".Split(), wnsHeaders);
                 await push.RegisterAsync(reg);
                 pushChannelUri = null;
-                test.AddLog("Registered raw template with NH");
-                pushChannel.PushNotificationReceived += pushChannel_PushNotificationReceived;
-                return true;
-            });
-        }
-
-        private static ZumoTest CreateTemplateBadgeRegisterChannelTest()
-        {
-            return new ZumoTest("Template Badge Register push channel", async delegate(ZumoTest test)
-            {
-                VerifyNH();
-                var client = ZumoTestGlobals.Instance.Client;
-                var push = client.GetPush();
-                var badgeTemplate = BuildBadgeXmlPayload("$(News_Badge)");
-                await push.RegisterTemplateAsync(ZumoPushTests.pushChannel.Uri, badgeTemplate.ToString(), ZumoTestGlobals.NHBadgeTemplateName, "World French".Split());
-                pushChannelUri = null;
-                test.AddLog("Registered Toast template with NH");
-                pushChannel.PushNotificationReceived += pushChannel_PushNotificationReceived;
-                return true;
-            });
-        }
-        
-        private static ZumoTest CreateTemplateTileRegisterChannelTest()
-        {
-            return new ZumoTest("Template Tile Register push channel", async delegate(ZumoTest test)
-            {
-                VerifyNH();
-                var client = ZumoTestGlobals.Instance.Client;
-                var push = client.GetPush();
-                var tileTemplate = BuildXmlTilePayload("TileWideImageAndText02", new[] { "$(News_French)", "tl-wiat2-2" }, new[] { wideImageUrl }, new[] { "zumowide" });
-                await push.RegisterTemplateAsync(ZumoPushTests.pushChannel.Uri, ZumoTestGlobals.NHW8TileTemplate, ZumoTestGlobals.NHTileTemplateName, "World French".Split());
-                pushChannelUri = null;
-                test.AddLog("Registered  Tile template with NH");
+                test.AddLog("Registered " + nhNotificationType + " template with NH");
                 pushChannel.PushNotificationReceived += pushChannel_PushNotificationReceived;
                 return true;
             });
