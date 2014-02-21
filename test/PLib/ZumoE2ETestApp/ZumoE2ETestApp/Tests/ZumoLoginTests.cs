@@ -280,6 +280,11 @@ namespace ZumoE2ETestApp.Tests
                 userIsAuthenticated ? ("auth by " + providerName) : "unauthenticated", tableType);
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime)
+                {
+                    throw new SkipException("Int id not supported for .NET Runtime");
+                }
+
                 if (ZumoTestGlobals.UseNetRuntime && providerName == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory.ToString())
                 {
                     throw new SkipException("AAD not currently supported for .NET Runtime");

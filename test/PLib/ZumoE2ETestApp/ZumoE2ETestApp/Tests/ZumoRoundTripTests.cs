@@ -119,6 +119,11 @@ namespace ZumoE2ETestApp.Tests
             {
                 var id = differentIds[name];
                 result.AddTest(new ZumoTest("String id - " + name + " id on insert", async delegate(ZumoTest test) {
+                    if (ZumoTestGlobals.UseNetRuntime)
+                    {
+                        throw new SkipException("String id not supported for .NET Runtime");
+                    }
+
                     var item = new StringIdRoundTripTableItem(rndGen);
                     var itemId = id;
                     if (itemId != null)
@@ -169,6 +174,11 @@ namespace ZumoE2ETestApp.Tests
             {
                 result.AddTest(new ZumoTest("(Neg) string id - insert with invalid id: " + (id.Length > 30 ? (id.Substring(0, 30) + "...") : id), async delegate(ZumoTest test)
                 {
+                    if (ZumoTestGlobals.UseNetRuntime)
+                    {
+                        throw new SkipException("String id not supported for .NET Runtime");
+                    }
+
                     var client = ZumoTestGlobals.Instance.Client;
                     var table = client.GetTable<StringIdRoundTripTableItem>();
                     var item = new StringIdRoundTripTableItem { Id = id, Name = "should not work" };
@@ -289,29 +299,30 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Setup dynamic schema", async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime)
+                {
+                    throw new SkipException("Int id not supported for .NET Runtime");
+                }
+
                 var client = ZumoTestGlobals.Instance.Client;
                 Random rndGen = new Random(1);
                 try
                 {
-                    if (!ZumoTestGlobals.UseNetRuntime)
+                    var table = client.GetTable<RoundTripTableItem>();
+                    RoundTripTableItem item = new RoundTripTableItem
                     {
-                        var table = client.GetTable<RoundTripTableItem>();
-                        RoundTripTableItem item = new RoundTripTableItem
-                        {
-                            Bool1 = true,
-                            ComplexType1 = new ComplexType[] { new ComplexType(rndGen) },
-                            ComplexType2 = new ComplexType2(rndGen),
-                            Date1 = DateTime.Now,
-                            Double1 = 123.456,
-                            EnumType = EnumType.First,
-                            Int1 = 1,
-                            Long1 = 1,
-                            String1 = "hello",
-                        };
-
-                        await table.InsertAsync(item);
-                        test.AddLog("Inserted item to create schema on the int id table");
-                    }
+                        Bool1 = true,
+                        ComplexType1 = new ComplexType[] { new ComplexType(rndGen) },
+                        ComplexType2 = new ComplexType2(rndGen),
+                        Date1 = DateTime.Now,
+                        Double1 = 123.456,
+                        EnumType = EnumType.First,
+                        Int1 = 1,
+                        Long1 = 1,
+                        String1 = "hello",
+                    };
+                    await table.InsertAsync(item);
+                    test.AddLog("Inserted item to create schema on the int id table");
 
                     var table2 = client.GetTable<StringIdRoundTripTableItem>();
                     var item2 = new StringIdRoundTripTableItem { Bool = true, Name = "hello", Number = 1.23, ComplexType = "a b c".Split(), Date = DateTime.UtcNow };
@@ -400,6 +411,11 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime)
+                {
+                    throw new SkipException(useStringIdTable ? "String" : "Int" + " id not supported for .NET Runtime");
+                }
+
                 var item = JObject.Parse(templateItem.ToString()); // prevent outer object from being captured and reused
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable(useStringIdTable ? ZumoTestGlobals.StringIdRoundTripTableName : ZumoTestGlobals.RoundTripTableName);
@@ -509,6 +525,11 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime)
+                {
+                    throw new SkipException("Int id not supported for .NET Runtime");
+                }
+
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable<RoundTripTableItem>();
                 var item = new RoundTripTableItem();

@@ -29,6 +29,11 @@ namespace ZumoE2ETestApp.Tests
 
             result.AddTest(new ZumoTest("Validate that filter can bypass service", async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime)
+                {
+                    throw new SkipException("String id not supported for .NET Runtime");
+                }
+
                 string json = "{'id':1,'name':'John Doe','age':33}".Replace('\'', '\"');
                 var client = new MobileServiceClient(
                     ZumoTestGlobals.Instance.Client.ApplicationUri,
@@ -88,6 +93,11 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("System properties in " + (useTypedTable ? "" : "un") + "typed tables", async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime)
+                {
+                    throw new SkipException("String id not supported for .NET Runtime");
+                }
+
                 var client = ZumoTestGlobals.Instance.Client;
                 var typedTable = client.GetTable<VersionedType>();
                 var untypedTable = client.GetTable(ZumoTestGlobals.StringIdRoundTripTableName);
@@ -202,6 +212,11 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime)
+                {
+                    throw new SkipException("String id not supported for .NET Runtime");
+                }
+
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable<VersionedType>();
                 DateTime now = DateTime.UtcNow;
@@ -276,6 +291,11 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime)
+                {
+                    throw new SkipException("String id not supported for .NET Runtime");
+                }
+
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable<VersionedType>();
                 DateTime now = DateTime.UtcNow;
@@ -336,6 +356,11 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Parameter passing test - " + (useTypedTable ? "typed" : "untyped") + " tables", async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime)
+                {
+                    throw new SkipException("Int id not supported for .NET Runtime");
+                }
+
                 var client = ZumoTestGlobals.Instance.Client;
                 var typed = client.GetTable<ParamsTestTableItem>();
                 var untyped = client.GetTable(ZumoTestGlobals.ParamsTestTableName);
@@ -491,6 +516,11 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Validation User-Agent header", async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime)
+                {
+                    throw new SkipException("Int id not supported for .NET Runtime");
+                }
+
                 var handler = new HandlerToCaptureHttpTraffic();
                 MobileServiceClient client = new MobileServiceClient(
                     ZumoTestGlobals.Instance.Client.ApplicationUri,
@@ -556,6 +586,11 @@ namespace ZumoE2ETestApp.Tests
             string testName = string.Format(CultureInfo.InvariantCulture, "Filter which maps one requests to many - {0} client", typed ? "typed" : "untyped");
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime)
+                {
+                    throw new SkipException("String id not supported for .NET Runtime");
+                }
+
                 var client = ZumoTestGlobals.Instance.Client;
                 int numberOfRequests = new Random().Next(2, 5);
                 var handler = new HandlerWithMultipleRequests(test, numberOfRequests);

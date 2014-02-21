@@ -263,6 +263,11 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(statusTest);
             result.AddTest(new ZumoTest("ToCollection - displaying movies on a ListBox", async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime)
+                {
+                    throw new SkipException("String id not supported for .NET Runtime");
+                }
+
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable<StringIdMovie>();
                 var query = from m in table
@@ -334,6 +339,11 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Populate [string id] movies table, if necessary", new TestExecution(async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.UseNetRuntime)
+                {
+                    throw new SkipException("String id not supported for .NET Runtime");
+                }
+
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable<AllStringIdMovies>();
                 AllStringIdMovies allMovies = new AllStringIdMovies
@@ -420,7 +430,7 @@ namespace ZumoE2ETestApp.Tests
             {
                 if (ZumoTestGlobals.UseNetRuntime && typeof(MovieType) == typeof(Movie))
                 {
-                    throw new SkipException("Int id not supported for .NET Runtime");
+                    throw new SkipException("String not supported for .NET Runtime");
                 }
 
                 try

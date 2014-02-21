@@ -158,6 +158,9 @@
     <Compile Include="..\ZumoE2ETestApp\Tests\ZumoTestCommon.cs">
       <Link>Tests\ZumoTestCommon.cs</Link>
     </Compile>
+    <Compile Include="..\ZumoE2ETestApp\Tests\SkipException.cs" />
+      <Link>Tests\SkipException.cs</Link>
+    </Compile>
     <Compile Include="..\ZumoE2ETestApp\UIElements\AppInfoRepository.cs">
       <Link>UIElements\AppInfoRepository.cs</Link>
     </Compile>
