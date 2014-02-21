@@ -12,3 +12,7 @@ map.txt
 sdk/android/src/notifications-handler/libs/google-play-services.jar
 sdk/android/src/sdk/libs/gson-2.2.2.jar
 sdk/android/test/sdk.testapp.tests/libs/gson-2.2.2.jar
+*.mdf
+*.ldf
+obj
+*.csproj.user
