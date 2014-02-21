@@ -105,12 +105,7 @@ namespace ZumoE2ETestApp.Framework
 
             return false;
         }
-
-        public void AddRequiredFeature(string requiredFeature)
-        {
-            this.requiredFeatures.Add(requiredFeature);
-        }
-
+        
         public async Task Run()
         {
             this.Status = TestStatus.Running;
