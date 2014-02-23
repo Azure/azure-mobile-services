@@ -94,7 +94,6 @@ function definePushTestsNamespace() {
         });
     }
 
-
     function UnRegisterTemplateForPush(templateName, test) {
         return new WinJS.Promise(function (complete) {
             if (pushChannel) {
@@ -147,7 +146,6 @@ function definePushTestsNamespace() {
             done(result);
         }).done();
     }));
-
 
     tests.push(new zumo.Test('Register Template Raw push channel', function (test, done) {
         var templateBody = '<raw>$(News_French)</raw>';
@@ -297,7 +295,6 @@ function definePushTestsNamespace() {
         }
         pushChannel = null;
     }));
-
 
     function createPushTest(wnsMethod, payload, expectedPushPayload, templatePush) {
         /// <param name="wnsMethod" type="String">The method on the WNS module</param>

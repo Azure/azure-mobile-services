@@ -67,12 +67,6 @@
     <Language Code="el" InMinimumRequirementSet="true" />
     <Language Code="el-gr" InMinimumRequirementSet="true" />
     <Language Code="en" InMinimumRequirementSet="true" />
-    <Language Code="en-011" InMinimumRequirementSet="true" />
-    <Language Code="en-014" InMinimumRequirementSet="true" />
-    <Language Code="en-018" InMinimumRequirementSet="true" />
-    <Language Code="en-021" InMinimumRequirementSet="true" />
-    <Language Code="en-029" InMinimumRequirementSet="true" />
-    <Language Code="en-053" InMinimumRequirementSet="true" />
     <Language Code="en-au" InMinimumRequirementSet="true" />
     <Language Code="en-bz" InMinimumRequirementSet="true" />
     <Language Code="en-ca" InMinimumRequirementSet="true" />
@@ -94,8 +88,6 @@
     <Language Code="en-vn" InMinimumRequirementSet="true" />
     <Language Code="en-za" InMinimumRequirementSet="true" />
     <Language Code="es" InMinimumRequirementSet="true" />
-    <Language Code="es-019" InMinimumRequirementSet="true" />
-    <Language Code="es-419" InMinimumRequirementSet="true" />
     <Language Code="es-ar" InMinimumRequirementSet="true" />
     <Language Code="es-bo" InMinimumRequirementSet="true" />
     <Language Code="es-cl" InMinimumRequirementSet="true" />
@@ -128,11 +120,7 @@
     <Language Code="fil-latn" InMinimumRequirementSet="false" />
     <Language Code="fil-ph" InMinimumRequirementSet="false" />
     <Language Code="fr" InMinimumRequirementSet="true" />
-    <Language Code="fr-011" InMinimumRequirementSet="true" />
     <Language Code="fr-015" InMinimumRequirementSet="true" />
-    <Language Code="fr-021" InMinimumRequirementSet="true" />
-    <Language Code="fr-029" InMinimumRequirementSet="true" />
-    <Language Code="fr-155" InMinimumRequirementSet="true" />
     <Language Code="fr-be" InMinimumRequirementSet="true" />
     <Language Code="fr-ca" InMinimumRequirementSet="true" />
     <Language Code="fr-cd" InMinimumRequirementSet="true" />
@@ -349,21 +337,18 @@
     <Language Code="zu-za" InMinimumRequirementSet="false" />
   </SupportedLocales>
   <ProductReservedInfo>
-    <MainPackageIdentityName>10805zumoTestUser.zumotestblu5</MainPackageIdentityName>
+    <MainPackageIdentityName>10805zumoTestUser.zumotestblu2</MainPackageIdentityName>
     <ReservedNames>
-      <ReservedName>zumotestblu5</ReservedName>
+      <ReservedName>zumotestblu2</ReservedName>
     </ReservedNames>
   </ProductReservedInfo>
   <AccountPackageIdentityNames>
-    <MainPackageIdentityName>10805zumoTestUser.e2eappautomation3</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.ExistingAppBluCurrent</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.ExistingAppBluNext</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.ExistingAppBluPreview</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.ExistingAppDB3Current</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.ExistingAppDB3Next</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.ExistingAppDB3Preview</MainPackageIdentityName>
-    <MainPackageIdentityName>10805zumoTestUser.existingappnhtest1</MainPackageIdentityName>
-    <MainPackageIdentityName>10805zumoTestUser.OGFApp-Net</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.OGFExistingAppBluTC</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.ProdBayZumo</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.ProdBluZumo</MainPackageIdentityName>
@@ -372,21 +357,18 @@
     <MainPackageIdentityName>10805zumoTestUser.StageBayZumo</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.StageBluZumo</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.StageDB3Zumo</MainPackageIdentityName>
-    <MainPackageIdentityName>10805zumoTestUser.TestE2EAppCurrentRedeploy1</MainPackageIdentityName>
-    <MainPackageIdentityName>10805zumoTestUser.TestE2EAppNextRedeploy1</MainPackageIdentityName>
-    <MainPackageIdentityName>10805zumoTestUser.teste2eapppreview1</MainPackageIdentityName>
-    <MainPackageIdentityName>10805zumoTestUser.teste2eapppreviewredeploy1</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.ws---fullscaletest</MainPackageIdentityName>
-    <MainPackageIdentityName>10805zumoTestUser.ZumoNHTest1</MainPackageIdentityName>
+    <MainPackageIdentityName>10805zumoTestUser.ZumoAuthTestEnv</MainPackageIdentityName>
+    <MainPackageIdentityName>10805zumoTestUser.zumotestbay3</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.zumotestblu1</MainPackageIdentityName>
-    <MainPackageIdentityName>10805zumoTestUser.zumotestblu2</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.zumotestblu3</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.zumotestblu4</MainPackageIdentityName>
+    <MainPackageIdentityName>10805zumoTestUser.zumotestblu5</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.zumotestdb1</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.zumotestdb2</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.zumotestdb3</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.zumotestdb4</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.zumotestdb5</MainPackageIdentityName>
   </AccountPackageIdentityNames>
-  <PackageInfoList LandingUrl="https://appdev.microsoft.com:443/StorePortals/Developer/Catalog/ReleaseAnchor/07a6ab6f-dcca-4850-a603-1d0172ead150" />
+  <PackageInfoList LandingUrl="https://appdev.microsoft.com:443/StorePortals/Developer/Catalog/ReleaseAnchor/debcddac-702d-4618-92ec-99493d2b5bdf" />
 </StoreAssociation>

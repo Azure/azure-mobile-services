@@ -52,7 +52,7 @@ function insert(item, user, request) {
 			"News_English": "World News in English!",
 			"News_French": "World News in French!",
 			"News_Mandarin": "World News in Mandarin!",
-            "News_Badge": "10"
+			"News_Badge": "10"
 			}
 			push.send('World',templateNotification,options);
 		}
