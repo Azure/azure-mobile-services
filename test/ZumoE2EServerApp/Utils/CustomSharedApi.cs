@@ -46,12 +46,7 @@ namespace ZumoE2EServerApp.Utils
                 outputHeaders.Add(reqHeader.Key, reqHeader.Value);
             }
 
-            //          if (req.Content != null)
-            //         {
-            //                var txt = await req.Content.ReadAsStringAsync();
-            output.Body = body; // JsonConvert.DeserializeObject(txt);
-            //       }
-
+            output.Body = body;
             output.User = new NodeUser(user);
 
             string outputS = "";
@@ -74,11 +69,6 @@ namespace ZumoE2EServerApp.Utils
                         .Replace("]", "__]__");
                     break;
             }
-
-            //if (string.IsNullOrEmpty(output.Body))
-            //{
-            //    output.Body = null;
-            //}
 
             var resp = req.CreateResponse((HttpStatusCode)status, output);
             foreach (var h in outputHeaders)
@@ -107,51 +97,9 @@ namespace ZumoE2EServerApp.Utils
             if (value == null) return "null";
             var type = value.GetType();
             var result = "";
-            // TODO: Fix this
-            //var i = 0;
-            //switch (type) {
-            //    case typeof(String):
-            //    case typeof(Boolean):
-            //    case typeof(:
-            //        return value.toString();
-            //    case "function":
-            //    case "object":
-            //        if (Object.prototype.toString.call( value ) === "[object Array]") {
-            //            result = result + "<array>";
-            //            for (i = 0; i < value.length; i++) {
-            //                result = result + "<item>" + jsToXml(value[i]) + "</item>";
-            //            }
-            //            result = result + "</array>";
-            //        } else {
-            //            var k;
-            //            var keys = [];
-            //            for (k in value) {
-            //                if (value.hasOwnProperty(k)) {
-            //                    if (typeof value[k] !== "function") {
-            //                        keys.push(k);
-            //                    }
-            //                }
-            //            }
-            //            keys.sort();
-            //            for (i = 0; i < keys.length; i++) {
-            //                k = keys[i];
-            //                result = result + "<" + k + ">" + jsToXml(value[k]) + "</" + k + ">";
-            //            }
-            //        }
-            //}
             return result;
         }
-
-
-
-
     }
-
-    //public  class TestUser
-    //  {
-    //      [JsonProperty(PropertyName = "name")]
-    //      public string Name { get; set; }
-    //  }
 
     class NodeUser
     {

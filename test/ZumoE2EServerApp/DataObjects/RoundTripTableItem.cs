@@ -28,7 +28,6 @@ namespace ZumoE2EServerApp.DataObjects
         // Enum, with converter
         public EnumType EnumType { get; set; }
 
-        //[IgnoreDataMember]
         public string ComplexType1S { get; set; }
 
         public string ComplexType2S { get; set; }
@@ -57,12 +56,6 @@ namespace ZumoE2EServerApp.DataObjects
         // Enum, with converter
         [JsonConverter(typeof(EnumTypeConverter<EnumType>))]
         public EnumType EnumType { get; set; }
-
-        //[JsonProperty(PropertyName = "complexType1")]
-        //public ComplexType[] ComplexType1 { get; set; }
-
-        //[JsonProperty(PropertyName = "complexType2")]
-        //public ComplexType2 ComplexType2 { get; set; }
 
         [JsonIgnore]
         public string ComplexType1S { get; set; }

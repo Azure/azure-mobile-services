@@ -20,9 +20,7 @@ namespace ZumoE2EServerApp.DataObjects
 
     public class AllStringIdMovies
     {
-        //        [JsonProperty(PropertyName = "status")]
         public string Status { get; set; }
-        //      [JsonProperty(PropertyName = "movies")]
         public StringIdMovie[] Movies { get; set; }
     }
 }
