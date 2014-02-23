@@ -349,9 +349,9 @@
     <Language Code="zu-za" InMinimumRequirementSet="false" />
   </SupportedLocales>
   <ProductReservedInfo>
-    <MainPackageIdentityName>10805zumoTestUser.existingappnhtest1</MainPackageIdentityName>
+    <MainPackageIdentityName>10805zumoTestUser.zumotestblu5</MainPackageIdentityName>
     <ReservedNames>
-      <ReservedName>existingappnhtest1</ReservedName>
+      <ReservedName>zumotestblu5</ReservedName>
     </ReservedNames>
   </ProductReservedInfo>
   <AccountPackageIdentityNames>
@@ -362,6 +362,7 @@
     <MainPackageIdentityName>10805zumoTestUser.ExistingAppDB3Current</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.ExistingAppDB3Next</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.ExistingAppDB3Preview</MainPackageIdentityName>
+    <MainPackageIdentityName>10805zumoTestUser.existingappnhtest1</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.OGFApp-Net</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.OGFExistingAppBluTC</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.ProdBayZumo</MainPackageIdentityName>
@@ -381,12 +382,11 @@
     <MainPackageIdentityName>10805zumoTestUser.zumotestblu2</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.zumotestblu3</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.zumotestblu4</MainPackageIdentityName>
-    <MainPackageIdentityName>10805zumoTestUser.zumotestblu5</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.zumotestdb1</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.zumotestdb2</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.zumotestdb3</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.zumotestdb4</MainPackageIdentityName>
     <MainPackageIdentityName>10805zumoTestUser.zumotestdb5</MainPackageIdentityName>
   </AccountPackageIdentityNames>
-  <PackageInfoList LandingUrl="https://appdev.microsoft.com:443/StorePortals/Developer/Catalog/ReleaseAnchor/02b019ed-58d5-4979-8ac1-dc4aee3e4f13" />
+  <PackageInfoList LandingUrl="https://appdev.microsoft.com:443/StorePortals/Developer/Catalog/ReleaseAnchor/07a6ab6f-dcca-4850-a603-1d0172ead150" />
 </StoreAssociation>
