@@ -161,7 +161,7 @@ namespace ZumoE2ETestApp.Tests
                     await table.DeleteAsync(retrieved);
                     test.AddLog("Removed the inserted item");
                     return true;
-                }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLE));
+                }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES));
             }
 
             var invalidIds = new string[] { ".", "..", "control\u0010characters", "large id " + new string('*', 260) };
@@ -183,7 +183,7 @@ namespace ZumoE2ETestApp.Tests
                         test.AddLog("Caught expected exception: {0}", ex);
                         return true;
                     }
-                }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLE));
+                }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES));
             }
 
             // Untyped overloads
@@ -321,7 +321,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Error setting up the dynamic schema: {0}", ex);
                     return false;
                 }
-            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLE);
+            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
         }
 
         private static JObject JObjectFromValue(string propertyName, object propertyValue)
@@ -477,7 +477,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                     return true;
                 }
-            }, useStringIdTable ? ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLE : ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLE);
+            }, useStringIdTable ? ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES : ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES);
         }
 
         enum RoundTripTestType
@@ -601,7 +601,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                     return true;
                 }
-            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLE);
+            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES);
         }
     }
 }

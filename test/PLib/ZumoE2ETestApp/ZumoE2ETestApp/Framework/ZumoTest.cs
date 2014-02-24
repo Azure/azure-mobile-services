@@ -39,11 +39,11 @@ namespace ZumoE2ETestApp.Framework
         internal const string TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff";
         private TestExecution execution;
         private List<string> logs;
-        private List<string> requiredFeatures;
+        private List<string> runtimeFeatures;
 
         public event EventHandler<TestStatusChangedEventArgs> TestStatusChanged;
 
-        public ZumoTest(string name, TestExecution execution, string requiredRuntimeFeature = null)
+        public ZumoTest(string name, TestExecution execution, params string[] requiredRuntimeFeatures)
         {
             this.Name = name;
             this.Data = new Dictionary<string, object>();
@@ -51,10 +51,13 @@ namespace ZumoE2ETestApp.Framework
             this.logs = new List<string>();
             this.execution = execution;
             this.Status = TestStatus.NotRun;
-            this.requiredFeatures = new List<string>();
-            if (requiredRuntimeFeature != null)
+            this.runtimeFeatures = ZumoTestGlobals.EnvRuntimeFeatures;
+            if (requiredRuntimeFeatures.Length > 0)
             {
-                this.requiredFeatures.Add(requiredRuntimeFeature);
+                foreach (string requiredRuntimeFeature in requiredRuntimeFeatures)
+                {
+                    this.runtimeFeatures.Add(requiredRuntimeFeature);
+                }
             }
         }
 
@@ -88,19 +91,16 @@ namespace ZumoE2ETestApp.Framework
 
         public bool ShouldBeSkipped()
         {
-            if (ZumoTestGlobals.UseNetRuntime)
+            if (runtimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED)
+                && runtimeFeatures.Count > 1)
             {
-                if ( this.requiredFeatures.Count > 0)
-                {
-                    return true;
-                }
+                return true;
             }
-            else
+            
+            if (!runtimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED)
+                && runtimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED))
             {
-                if (!ZumoTestGlobals.UseNotificationHub && this.requiredFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.Notification_Hub))
-                {
-                    return true;
-                }
+                return true;
             }
 
             return false;
@@ -119,7 +119,7 @@ namespace ZumoE2ETestApp.Framework
                 this.StartTime = DateTime.UtcNow;
                 if (this.ShouldBeSkipped())
                 {
-                    this.AddLog("Test skipped.");
+                    this.AddLog("Test skipped, missing required runtime features [{0}].", runtimeFeatures.ToArray());
                     this.Status = TestStatus.Skipped;
                 }
                 else

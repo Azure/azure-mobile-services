@@ -280,7 +280,7 @@ namespace ZumoE2ETestApp.Tests
                 item.Add("channelUri", pushChannelUri);
                 item.Add("payload", payload);
                 item.Add("xmlPayload", expectedResult.ToString());
-                if (ZumoTestGlobals.UseNotificationHub)
+                if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED))
                 {
                     item.Add("usingNH", true);
                     item.Add("nhNotificationType", nhNotificationType);
@@ -340,7 +340,7 @@ namespace ZumoE2ETestApp.Tests
                     await Task.Delay(5000); // leave some time between pushes
                     return passed;
                 }
-            }, ZumoTestGlobals.RuntimeFeatureNames.Notification_Hub);
+            }, ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
         }
 
         private static ZumoTest CreateRegisterChannelTest()
@@ -348,18 +348,19 @@ namespace ZumoE2ETestApp.Tests
             return new ZumoTest("Register push channel", async delegate(ZumoTest test)
             {
                 ZumoPushTests.pushChannel = await PushNotificationChannelManager.CreatePushNotificationChannelForApplicationAsync();
-                test.AddLog("Registered the channel; uri = {0}", pushChannel.Uri);
-                if (ZumoTestGlobals.UseNotificationHub)
+                test.AddLog("Register the channel; uri = {0}", pushChannel.Uri);
+                if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED))
                 {
                     var client = ZumoTestGlobals.Instance.Client;
                     var push = client.GetPush();
                     await push.RegisterNativeAsync(ZumoPushTests.pushChannel.Uri, "tag1 tag2".Split());
                     pushChannelUri = null;
-                    test.AddLog("Registered with NH");
+                    test.AddLog("RegisterNative with NH succeeded.");
                 }
                 else
                 {
                     pushChannelUri = pushChannel.Uri;
+                    test.AddLog("Register succeeded.");
                 }
 
                 pushChannel.PushNotificationReceived += pushChannel_PushNotificationReceived;
@@ -377,7 +378,8 @@ namespace ZumoE2ETestApp.Tests
                 switch (nhNotificationType.ToLower())
                 {
                     case "toast":
-                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, ZumoTestGlobals.NHW8ToastTemplate, ZumoTestGlobals.NHToastTemplateName, "World French".Split());
+                        var toastTemplate = BuildXmlToastPayload("sendToastText01", "$(News_French)");
+                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, toastTemplate.ToString(), ZumoTestGlobals.NHToastTemplateName, "World French".Split());
                         break;
                     case "raw":
                         var rawTemplate = "<raw>$(News_French)</raw>";
@@ -390,7 +392,8 @@ namespace ZumoE2ETestApp.Tests
                         reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, badgeTemplate.ToString(), ZumoTestGlobals.NHBadgeTemplateName, "World French".Split());
                         break;
                     case "tile":
-                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, ZumoTestGlobals.NHW8TileTemplate, ZumoTestGlobals.NHTileTemplateName, "World French".Split());
+                        var tileTemplate = BuildXmlTilePayload("TileWideImageAndText02", new[] { "tl-wiat2-1", "$(News_French)" }, new[] { wideImageUrl }, new[] { "zumowide" });
+                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, tileTemplate.ToString(), ZumoTestGlobals.NHTileTemplateName, "World French".Split());
                         break;
                     default:
                         throw new Exception("Template type" + nhNotificationType + "is not supported.");
@@ -398,7 +401,7 @@ namespace ZumoE2ETestApp.Tests
 
                 await push.RegisterAsync(reg);
                 pushChannelUri = null;
-                test.AddLog("Registered " + nhNotificationType + " template with NH");
+                test.AddLog("Registered " + nhNotificationType + " template with NH succeeded.");
                 pushChannel.PushNotificationReceived += pushChannel_PushNotificationReceived;
                 return true;
             });
@@ -408,15 +411,17 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Unregister push channel", async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.UseNotificationHub)
+                if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED))
                 {
                     var client = ZumoTestGlobals.Instance.Client;
                     var push = client.GetPush();
                     await push.UnregisterNativeAsync();
+                    test.AddLog("Unregister NH push channel succeeded.");
                 }
                 else
                 {
                     pushChannel.Close();
+                    test.AddLog("Unregister push channel succeeded.");
                 }
                 TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
                 tcs.SetResult(true);
@@ -426,11 +431,12 @@ namespace ZumoE2ETestApp.Tests
 
         private static ZumoTest CreateUnregisterTemplateChannelTest(string templateName)
         {
-            return new ZumoTest("Unregister push channel", async delegate(ZumoTest test)
+            return new ZumoTest("Unregister " + templateName + " push channel", async delegate(ZumoTest test)
             {
                 var client = ZumoTestGlobals.Instance.Client;
                 var push = client.GetPush();
                 await push.UnregisterTemplateAsync(templateName);
+                test.AddLog("Unregister " + templateName + " push channel succeeded.");
                 TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
                 tcs.SetResult(true);
                 return await tcs.Task;

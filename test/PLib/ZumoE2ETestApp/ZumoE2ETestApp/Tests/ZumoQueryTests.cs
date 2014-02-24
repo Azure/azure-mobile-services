@@ -78,7 +78,7 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateQueryTestStringId("String: Substring (2 parameters), length - Movies which end with 'r'",
                 m => m.Title.Substring(m.Title.Length - 1, 1) == "r"));
 
-            if (!ZumoTestGlobals.UseNetRuntime)
+            if (!ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED))
             {
                 // The OData library in .NET does not support replace?
                 // Tracked by https://wagit/AzureMobile/ZumoNetRuntime/issues/10
@@ -249,7 +249,7 @@ namespace ZumoE2ETestApp.Tests
                         test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                         return true;
                     }
-                }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLE));
+                }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES));
             }
 
 #if !WINDOWS_PHONE
@@ -258,7 +258,6 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(statusTest);
             result.AddTest(new ZumoTest("ToCollection - displaying movies on a ListBox", async delegate(ZumoTest test)
             {
-
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable<StringIdMovie>();
                 var query = from m in table
@@ -277,7 +276,7 @@ namespace ZumoE2ETestApp.Tests
                     await newPage.Display();
                 }
                 return true;
-            }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLE)
+            }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES)
             {
                 CanRunUnattended = false
             });
@@ -318,7 +317,7 @@ namespace ZumoE2ETestApp.Tests
 
                 test.AddLog("Result of populating table: Time out. Not populate enough data.");
                 return false;
-            }), ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLE);
+            }), ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES);
         }
 
         internal static ZumoTest CreatePopulateStringIdTableTest()
@@ -355,7 +354,7 @@ namespace ZumoE2ETestApp.Tests
 
                 test.AddLog("Result of populating [string id] table: Time out. Not populate enough data.");
                 return false;
-            }), ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLE);
+            }), ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
         }
 
         class OrderByClause
@@ -479,7 +478,7 @@ namespace ZumoE2ETestApp.Tests
                     {
                         test.AddLog("Using the OData query directly");
                         JToken result = await table.ReadAsync(odataExpression);
-                        if (ZumoTestGlobals.UseNetRuntime)
+                        if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED))
                         {
                             var serializer = new JsonSerializer();
                             serializer.Converters.Add(new MobileServiceIsoDateTimeConverter());
@@ -498,7 +497,7 @@ namespace ZumoE2ETestApp.Tests
                         actualTotalCount = totalCountProvider.TotalCount;
                     }
 
-                    if (ZumoTestGlobals.UseNetRuntime && top.HasValue && top.Value == 1001)
+                    if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED) && top.HasValue && top.Value == 1001)
                     {
                         test.AddLog("NetRuntime throttles and does not throw");
                         return readMovies.Count() == 100;
@@ -595,7 +594,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                     return true;
                 }
-            }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLE);
+            }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
         }
 
         private static IMobileServiceTableQuery<MovieType> ApplyOrdering<MovieType>(IMobileServiceTableQuery<MovieType> query, OrderByClause[] orderBy)

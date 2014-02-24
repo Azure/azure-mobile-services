@@ -31,8 +31,6 @@ namespace ZumoE2ETestApp.Framework
         public static bool ShowAlerts = true;
         public const string LogsLocationFile = "done.txt";
 
-        public static bool UseNotificationHub = false;
-        public static bool UseNetRuntime = false;
         public static string NHW8ToastTemplate = String.Format(@"<toast><visual><binding template=""ToastText01""><text id=""1"">$(News_{0})</text></binding></visual></toast>", "French");
         public static string NHW8TileTemplate = String.Format(@"<tile><visual><binding template=""TileWideImageAndText02"">" +
                                             @"<image id=""1"" src=""http://zumotestserver.azurewebsites.net/content/zumo1.png"" alt=""zumowide"" />" +
@@ -43,6 +41,19 @@ namespace ZumoE2ETestApp.Framework
         public static string NHTileTemplateName = "newsTileTemplate";
         public static string NHBadgeTemplateName = "newsBadgeTemplate";
         public static string NHRawTemplateName = "newsRawTemplate";
+
+        public static class RuntimeFeatureNames
+        {
+            public static string AAD_LOGIN = "AAD_LOGIN";
+            public static string SSO_LOGIN = "SSO_LOGIN";
+            public static string LIVE_LOGIN = "LIVE_LOGIN";
+            public static string INT_ID_TABLES = "INT_ID_TABLES";
+            public static string STRING_ID_TABLES = "STRING_ID_TABLES";
+            public static string NET_RUNTIME_ENABLED = "NET_RUNTIME_ENABLED";
+            public static string NOTIFICATION_HUB_ENABLED = "NOTIFICATION_HUB_ENABLED";
+        }
+
+        public static List<string> EnvRuntimeFeatures = new List<string>();
 
         public MobileServiceClient Client { get; private set; }
         public Dictionary<string, object> GlobalTestParams { get; private set; }
@@ -83,9 +94,16 @@ namespace ZumoE2ETestApp.Framework
             {
                 try
                 {
-                    var response = await client.InvokeApiAsync("getfeaturesenabled", HttpMethod.Get, null);
-                    UseNotificationHub = response.ToString().Contains("nhPushEnabled");
-                    UseNetRuntime = response.ToString().Contains("netRuntimeEnabled");
+                    var response = await client.InvokeApiAsync("runtimeInfo", HttpMethod.Get, null);
+                    if (!response.ToString().Contains("node.js"))
+                    {
+                        EnvRuntimeFeatures.Add(RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED);
+                    }
+
+                    if (response.ToString().Contains("\"nhPushEnabled\": true"))
+                    {
+                        EnvRuntimeFeatures.Add(RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED);
+                    }
                 }
                 catch (Exception ex)
                 {

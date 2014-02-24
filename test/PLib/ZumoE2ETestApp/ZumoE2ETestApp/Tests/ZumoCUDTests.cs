@@ -165,7 +165,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Error, refresh didn't happen successfully");
                     return false;
                 }
-            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLE));
+            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES));
 
             result.AddTest(new ZumoTest("Refresh item without id does not send request", async delegate(ZumoTest test)
             {
@@ -285,7 +285,7 @@ namespace ZumoE2ETestApp.Tests
                             return true;
                         }
                 }
-            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLE);
+            }, (typeof(TItemType) == typeof(RoundTripTableItem) ? ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES));
         }
 
         private static bool Validate404Response(ZumoTest test, MobileServiceInvalidOperationException msioe)
@@ -363,7 +363,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                     return true;
                 }
-            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLE);
+            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES);
         }
 
         private static ZumoTest CreateUntypedUpdateTest(
