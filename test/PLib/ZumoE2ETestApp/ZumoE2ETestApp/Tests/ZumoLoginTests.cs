@@ -97,6 +97,12 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("We'll log in again; you may or may not be asked for password in the next few moments."));
             foreach (MobileServiceAuthenticationProvider provider in Enum.GetValues(typeof(MobileServiceAuthenticationProvider)))
             {
+                if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED))
+                {
+                    // SSO not currently supported for .NET runtime
+                    continue;
+                }
+
                 if (provider == MobileServiceAuthenticationProvider.MicrosoftAccount)
                 {
                     // Known issue - SSO with MS account will not work if Live SDK is also used
@@ -104,13 +110,19 @@ namespace ZumoE2ETestApp.Tests
                 }
 
                 result.AddTest(CreateLogoutTest());
-                result.AddTest(CreateSsoLoginTest(provider));
+                result.AddTest(CreateLoginTest(provider, true));
                 result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, userIsAuthenticated: true, usingSingeSignOnOrToken: true));
             }
 
             result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("Now we'll continue running the tests, but you *should not be prompted for the username or password anymore*."));
             foreach (MobileServiceAuthenticationProvider provider in Enum.GetValues(typeof(MobileServiceAuthenticationProvider)))
             {
+                if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED))
+                {
+                    // SSO not currently supported for .NET runtime
+                    continue;
+                }
+
                 if (provider == MobileServiceAuthenticationProvider.MicrosoftAccount)
                 {
                     // Known issue - SSO with MS account will not work if Live SDK is also used
@@ -118,7 +130,7 @@ namespace ZumoE2ETestApp.Tests
                 }
 
                 result.AddTest(CreateLogoutTest());
-                result.AddTest(CreateSsoLoginTest(provider));
+                result.AddTest(CreateLoginTest(provider, true));
                 result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, userIsAuthenticated: true, usingSingeSignOnOrToken: true));
             }
 
@@ -137,29 +149,18 @@ namespace ZumoE2ETestApp.Tests
         }
 
 #if !WINDOWS_PHONE
-        internal static ZumoTest CreateLoginTest(MobileServiceAuthenticationProvider provider)
+        internal static ZumoTest CreateLoginTest(MobileServiceAuthenticationProvider provider, bool useSingleSignOn = false)
         {
-            string testName = string.Format("Login with {0}", provider);
+            string testName = string.Format("Login with {0}{1}", provider, useSingleSignOn ? " (using single sign-on)" : "");
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
                 var client = ZumoTestGlobals.Instance.Client;
-                var user = await client.LoginAsync(provider, false);
+                var user = await client.LoginAsync(provider, useSingleSignOn);
                 test.AddLog("Logged in as {0}", user.UserId);
                 return true;
             });
         }
 
-        internal static ZumoTest CreateSsoLoginTest(MobileServiceAuthenticationProvider provider)
-        {
-            string testName = string.Format("Login with {0} using single sign-on", provider);
-            return new ZumoTest(testName, async delegate(ZumoTest test)
-            {
-                var client = ZumoTestGlobals.Instance.Client;
-                var user = await client.LoginAsync(provider, true);
-                test.AddLog("Logged in as {0}", user.UserId);
-                return true;
-            }, ZumoTestGlobals.RuntimeFeatureNames.SSO_LOGIN);
-        }
 #else
         internal static ZumoTest CreateLoginTest(MobileServiceAuthenticationProvider provider)
         {

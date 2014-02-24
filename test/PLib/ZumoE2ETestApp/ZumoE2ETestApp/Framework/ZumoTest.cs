@@ -105,7 +105,13 @@ namespace ZumoE2ETestApp.Framework
 
             return false;
         }
-        
+
+        public string WhySkipped()
+        {
+            var ret = string.Join(",", runtimeFeatures);
+            return ret;
+        }
+
         public async Task Run()
         {
             this.Status = TestStatus.Running;
@@ -119,7 +125,7 @@ namespace ZumoE2ETestApp.Framework
                 this.StartTime = DateTime.UtcNow;
                 if (this.ShouldBeSkipped())
                 {
-                    this.AddLog("Test skipped, missing required runtime features [{0}].", runtimeFeatures.ToArray());
+                    this.AddLog("Test skipped, missing required runtime features [{0}].", WhySkipped());
                     this.Status = TestStatus.Skipped;
                 }
                 else
