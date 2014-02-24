@@ -117,7 +117,7 @@ function definePushTestsNamespace() {
         var templateBody = '<toast><visual><binding template="ToastText01"><text id="1">$(News_French)</text></binding></visual></toast>';
         var wnsHeaders = { 'X-WNS-Type': 'wns/toast' };
         var tags = ["World", "French"];
-        RegisterTemplateForPush(templateBody, toastTemplateName, wnsHeaders, test).done(function (result) {
+        RegisterTemplateForPush(templateBody, toastTemplateName, wnsHeaders, tags, test).done(function (result) {
             done(result);
         });
     }));
@@ -151,7 +151,7 @@ function definePushTestsNamespace() {
         var templateBody = '<raw>$(News_English)</raw>';
         var wnsHeaders = { 'X-WNS-Type': 'wns/raw' };
         var tags = ["World", "English"];
-        RegisterTemplateForPush(templateBody, "newsRawTemplate", wnsHeaders, tages, test).done(function (result) {
+        RegisterTemplateForPush(templateBody, "newsRawTemplate", wnsHeaders, tags, test).done(function (result) {
             done(result);
         });
     }));
@@ -280,7 +280,7 @@ function definePushTestsNamespace() {
             var runtimeFeatures = zumo.util.globalTestParams[zumo.constants.RUNTIME_FEATURES_KEY];
             if (runtimeFeatures[zumo.runtimeFeatureNames.NH_PUSH_ENABLED]) {
                 zumo.getClient().push.unregisterNative().done(function () {
-                    test.addLog('Unregistered with NH: ', templateName);
+                    test.addLog('Unregistered with NH: ');
                     done(true);
                 }, function (error) {
                     test.addLog('Failed to unregister with NH: ', error);
