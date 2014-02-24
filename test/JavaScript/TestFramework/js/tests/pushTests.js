@@ -72,19 +72,18 @@ function definePushTestsNamespace() {
         waitForPush();
     }
 
-    function RegisterTemplateForPush(templateBody, templateName, wnsHeaders, test) {
+    function RegisterTemplateForPush(templateBody, templateName, wnsHeaders, tags, test) {
         return new WinJS.Promise(function (complete) {
             var pushManager = Windows.Networking.PushNotifications.PushNotificationChannelManager;
             pushManager.createPushNotificationChannelForApplicationAsync().done(function (channel) {
                 test.addLog('Created push channel: ', { uri: channel.uri, expirationTime: channel.expirationTime });
                 channel.onpushnotificationreceived = onPushNotificationReceived;
-                var tags = ["World", "French"];
                 zumo.getClient().push.registerTemplate(channel.uri, templateBody, templateName, wnsHeaders, tags).done(function () {
-                    test.addLog('success: ');
+                    test.addLog('success: Registered template', templateName);
                     pushChannel = channel;
                     complete(true);
                 }, function (error) {
-                    test.addLog('Error creating push channel: ', error);
+                    test.addLog('Error regsitering template push channel: ', error);
                     complete(false);
                 });
             }, function (error) {
@@ -117,6 +116,7 @@ function definePushTestsNamespace() {
     tests.push(new zumo.Test('Register Template toast push channel', function (test, done) {
         var templateBody = '<toast><visual><binding template="ToastText01"><text id="1">$(News_French)</text></binding></visual></toast>';
         var wnsHeaders = { 'X-WNS-Type': 'wns/toast' };
+        var tags = ["World", "French"];
         RegisterTemplateForPush(templateBody, toastTemplateName, wnsHeaders, test).done(function (result) {
             done(result);
         });
@@ -131,15 +131,16 @@ function definePushTestsNamespace() {
     }));
 
     tests.push(new zumo.Test('Register Template tile push channel', function (test, done) {
-        var templateBody = '<tile><visual><binding template="TileWideImageAndText02"><image id="1" src="' + wideImageUrl + '" alt="zumowide"/><text id="1">$(News_French)</text><text id="2">tl-wiat2-2</text></binding></visual></tile>';
+        var templateBody = '<tile><visual><binding template="TileWideImageAndText02"><image id="1" src="' + wideImageUrl + '" alt="zumowide"/><text id="1">$(News_Mandarin)</text><text id="2">tl-wiat2-2</text></binding></visual></tile>';
         var wnsHeaders = { 'X-WNS-Type': 'wns/tile' };
-        RegisterTemplateForPush(templateBody, "newsTileTemplate", wnsHeaders, test).done(function (result) {
+        var tags = ["World", "Mandarin"];
+        RegisterTemplateForPush(templateBody, "newsTileTemplate", wnsHeaders, tags, test).done(function (result) {
             done(result);
         });
     }));
     tests.push(createPushTest('sendTileWideImageAndText02',
         { text1: 'tl-wiat2-1', text2: 'tl-wiat2-2', image1src: wideImageUrl, image1alt: 'zumowide' },
-        '<tile><visual><binding template="TileWideImageAndText02"><image id="1" src="' + wideImageUrl + '" alt="zumowide"/><text id="1">Nouvelles du monde en français!</text><text id="2">tl-wiat2-2</text></binding></visual></tile>', true));
+        '<tile><visual><binding template="TileWideImageAndText02"><image id="1" src="' + wideImageUrl + '" alt="zumowide"/><text id="1">在普通话的世界新闻 ！</text><text id="2">tl-wiat2-2</text></binding></visual></tile>', true));
     tests.push(new zumo.Test('Unregister Tile Template push channel', function (test, done) {
         UnRegisterTemplateForPush(tileTemplateName, test).done(function (result) {
             done(result);
@@ -147,13 +148,14 @@ function definePushTestsNamespace() {
     }));
 
     tests.push(new zumo.Test('Register Template Raw push channel', function (test, done) {
-        var templateBody = '<raw>$(News_French)</raw>';
+        var templateBody = '<raw>$(News_English)</raw>';
         var wnsHeaders = { 'X-WNS-Type': 'wns/raw' };
-        RegisterTemplateForPush(templateBody, "newsRawTemplate", wnsHeaders, test).done(function (result) {
+        var tags = ["World", "English"];
+        RegisterTemplateForPush(templateBody, "newsRawTemplate", wnsHeaders, tages, test).done(function (result) {
             done(result);
         });
     }));
-    tests.push(createPushTest('sendRaw', 'Nouvelles du monde en français!', '<raw>Nouvelles du monde en français!</raw>', true));
+    tests.push(createPushTest('sendRaw', 'Nouvelles du monde en français!', '<raw>World News in English!</raw>', true));
     tests.push(new zumo.Test('Unregister Raw Template push channel', function (test, done) {
         UnRegisterTemplateForPush(rawTemplateName, test).done(function (result) {
             done(result);
@@ -163,7 +165,8 @@ function definePushTestsNamespace() {
     tests.push(new zumo.Test('Register Template Badge push channel', function (test, done) {
         var templateBody = '<badge value="$(News_Badge)" version="1" />';
         var wnsHeaders = { 'X-WNS-Type': 'wns/badge' };
-        RegisterTemplateForPush(templateBody, "newsBadgeTemplate", wnsHeaders, test).done(function (result) {
+        var tags = ["World", "Badge"];
+        RegisterTemplateForPush(templateBody, "newsBadgeTemplate", wnsHeaders, tags, test).done(function (result) {
             done(result);
         });
     }));
