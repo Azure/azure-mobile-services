@@ -45,13 +45,7 @@
 
     if (item.usingNH) {
         if (item.nhNotificationType == 'template') {
-            var templateNotification = {
-                "News_English": "World News in English!",
-                "News_French": "Nouvelles du monde en français!",
-                "News_Mandarin": "在普通话的世界新闻 ！",
-                "News_Badge": "10"
-            }
-            push.send('World', templateNotification, options);
+            push.send('World', item.templateNotification, options);
         }
         else {
             var wnsType = 'wns/' + item.nhNotificationType;

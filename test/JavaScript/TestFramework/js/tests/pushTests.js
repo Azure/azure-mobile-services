@@ -12,6 +12,12 @@ function definePushTestsNamespace() {
     var tileTemplateName = 'newsTileTemplate';
     var badgeTemplateName = 'newsBadgeTemplate';
     var rawTemplateName = 'newsRawTemplate';
+    var templateNotification = {
+        "News_English": "World News in English!",
+        "News_French": "Nouvelles du monde en français!",
+        "News_Mandarin": "在普通话的世界新闻 ！",
+        "News_Badge": "10"
+    }
 
     var pushChannel;
     var pushNotifications = Windows.Networking.PushNotifications;
@@ -122,7 +128,7 @@ function definePushTestsNamespace() {
         });
     }));
     tests.push(createPushTest('sendToastText01',
-        { text1: 'Nouvelles du monde en français!' },
+        { text1: 'This is not used in template tests' },
         '<toast><visual><binding template="ToastText01"><text id="1">Nouvelles du monde en français!</text></binding></visual></toast>', true));
     tests.push(new zumo.Test('Unregister Toast Template push channel', function (test, done) {
         UnRegisterTemplateForPush(toastTemplateName, test).done(function (result) {
@@ -139,7 +145,7 @@ function definePushTestsNamespace() {
         });
     }));
     tests.push(createPushTest('sendTileWideImageAndText02',
-        { text1: 'tl-wiat2-1', text2: 'tl-wiat2-2', image1src: wideImageUrl, image1alt: 'zumowide' },
+        { text1: 'This is not used in template tests' },
         '<tile><visual><binding template="TileWideImageAndText02"><image id="1" src="' + wideImageUrl + '" alt="zumowide"/><text id="1">在普通话的世界新闻 ！</text><text id="2">tl-wiat2-2</text></binding></visual></tile>', true));
     tests.push(new zumo.Test('Unregister Tile Template push channel', function (test, done) {
         UnRegisterTemplateForPush(tileTemplateName, test).done(function (result) {
@@ -155,7 +161,7 @@ function definePushTestsNamespace() {
             done(result);
         });
     }));
-    tests.push(createPushTest('sendRaw', 'Nouvelles du monde en français!', '<raw>World News in English!</raw>', true));
+    tests.push(createPushTest('sendRaw', 'This is not used in template tests', '<raw>World News in English!</raw>', true));
     tests.push(new zumo.Test('Unregister Raw Template push channel', function (test, done) {
         UnRegisterTemplateForPush(rawTemplateName, test).done(function (result) {
             done(result);
@@ -343,7 +349,8 @@ function definePushTestsNamespace() {
                 payload: payload,
                 xmlPayload: expectedPushPayload,
                 usingNH: runtimeFeatures[zumo.runtimeFeatureNames.NH_PUSH_ENABLED],
-                nhNotificationType: notificatonType
+                nhNotificationType: notificatonType,
+                templateNotification: templateNotification
             };
             table.insert(item).done(function (inserted) {
                 if (inserted.response) {
