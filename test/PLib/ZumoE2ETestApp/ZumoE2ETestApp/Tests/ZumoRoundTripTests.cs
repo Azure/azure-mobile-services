@@ -293,21 +293,25 @@ namespace ZumoE2ETestApp.Tests
                 Random rndGen = new Random(1);
                 try
                 {
-                    var table = client.GetTable<RoundTripTableItem>();
-                    RoundTripTableItem item = new RoundTripTableItem
+                    if (!ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED))
                     {
-                        Bool1 = true,
-                        ComplexType1 = new ComplexType[] { new ComplexType(rndGen) },
-                        ComplexType2 = new ComplexType2(rndGen),
-                        Date1 = DateTime.Now,
-                        Double1 = 123.456,
-                        EnumType = EnumType.First,
-                        Int1 = 1,
-                        Long1 = 1,
-                        String1 = "hello",
-                    };
-                    await table.InsertAsync(item);
-                    test.AddLog("Inserted item to create schema on the int id table");
+                        var table = client.GetTable<RoundTripTableItem>();
+                        RoundTripTableItem item = new RoundTripTableItem
+                        {
+                            Bool1 = true,
+                            ComplexType1 = new ComplexType[] { new ComplexType(rndGen) },
+                            ComplexType2 = new ComplexType2(rndGen),
+                            Date1 = DateTime.Now,
+                            Double1 = 123.456,
+                            EnumType = EnumType.First,
+                            Int1 = 1,
+                            Long1 = 1,
+                            String1 = "hello",
+                        };
+
+                        await table.InsertAsync(item);
+                        test.AddLog("Inserted item to create schema on the int id table");
+                    }
 
                     var table2 = client.GetTable<StringIdRoundTripTableItem>();
                     var item2 = new StringIdRoundTripTableItem { Bool = true, Name = "hello", Number = 1.23, ComplexType = "a b c".Split(), Date = DateTime.UtcNow };

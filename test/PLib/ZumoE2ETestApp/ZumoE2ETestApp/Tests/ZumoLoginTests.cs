@@ -61,7 +61,7 @@ namespace ZumoE2ETestApp.Tests
                 }
                 result.AddTest(CreateLogoutTest());
 #if !WINDOWS_PHONE
-                result.AddTest(CreateLoginTest(provider));
+                result.AddTest(CreateLoginTest(provider, false));
 #else
                 result.AddTest(CreateLoginTest(provider));
 #endif
