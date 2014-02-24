@@ -122,8 +122,8 @@ function definePushTestsNamespace() {
         });
     }));
     tests.push(createPushTest('sendToastText01',
-        { text1: 'World News in French!' },
-        '<toast><visual><binding template="ToastText01"><text id="1">World News in French!</text></binding></visual></toast>', true));
+        { text1: 'Nouvelles du monde en français!' },
+        '<toast><visual><binding template="ToastText01"><text id="1">Nouvelles du monde en français!</text></binding></visual></toast>', true));
     tests.push(new zumo.Test('Unregister Toast Template push channel', function (test, done) {
         UnRegisterTemplateForPush(toastTemplateName, test).done(function (result) {
             done(result);
@@ -139,7 +139,7 @@ function definePushTestsNamespace() {
     }));
     tests.push(createPushTest('sendTileWideImageAndText02',
         { text1: 'tl-wiat2-1', text2: 'tl-wiat2-2', image1src: wideImageUrl, image1alt: 'zumowide' },
-        '<tile><visual><binding template="TileWideImageAndText02"><image id="1" src="' + wideImageUrl + '" alt="zumowide"/><text id="1">World News in French!</text><text id="2">tl-wiat2-2</text></binding></visual></tile>', true));
+        '<tile><visual><binding template="TileWideImageAndText02"><image id="1" src="' + wideImageUrl + '" alt="zumowide"/><text id="1">Nouvelles du monde en français!</text><text id="2">tl-wiat2-2</text></binding></visual></tile>', true));
     tests.push(new zumo.Test('Unregister Tile Template push channel', function (test, done) {
         UnRegisterTemplateForPush(tileTemplateName, test).done(function (result) {
             done(result);
@@ -153,7 +153,7 @@ function definePushTestsNamespace() {
             done(result);
         });
     }));
-    tests.push(createPushTest('sendRaw', 'World News in French!', '<raw>World News in French!</raw>', true));
+    tests.push(createPushTest('sendRaw', 'Nouvelles du monde en français!', '<raw>Nouvelles du monde en français!</raw>', true));
     tests.push(new zumo.Test('Unregister Raw Template push channel', function (test, done) {
         UnRegisterTemplateForPush(rawTemplateName, test).done(function (result) {
             done(result);
