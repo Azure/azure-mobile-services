@@ -51,12 +51,15 @@ namespace ZumoE2ETestApp.Framework
             this.logs = new List<string>();
             this.execution = execution;
             this.Status = TestStatus.NotRun;
-            this.runtimeFeatures = ZumoTestGlobals.EnvRuntimeFeatures;
+            this.runtimeFeatures = new List<string>();
             if (requiredRuntimeFeatures.Length > 0)
             {
                 foreach (string requiredRuntimeFeature in requiredRuntimeFeatures)
                 {
-                    this.runtimeFeatures.Add(requiredRuntimeFeature);
+                    if (requiredRuntimeFeature != null)
+                    {
+                        this.runtimeFeatures.Add(requiredRuntimeFeature);
+                    }
                 }
             }
         }
@@ -91,14 +94,14 @@ namespace ZumoE2ETestApp.Framework
 
         public bool ShouldBeSkipped()
         {
-            if (runtimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED)
+            if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED)
                 && runtimeFeatures.Count > 1)
             {
                 return true;
             }
-            
-            if (!runtimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED)
-                && runtimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED))
+
+            if (!ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED)
+               && runtimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED))
             {
                 return true;
             }

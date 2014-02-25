@@ -48,7 +48,7 @@ namespace ZumoE2ETestApp.Tests
             };
 
 #if !WINDOWS_PHONE
-            result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("In the next few tests you will be prompted for username / password four times."));
+            result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("In the next few tests you will be prompted for username / password five times."));
 #endif
 
             foreach (MobileServiceAuthenticationProvider provider in Util.EnumGetValues(typeof(MobileServiceAuthenticationProvider)))
@@ -497,7 +497,7 @@ namespace ZumoE2ETestApp.Tests
                 }
                 else
                 {
-                    if (exception.Response.StatusCode == HttpStatusCode.Forbidden)
+                    if (exception.Response.StatusCode == HttpStatusCode.Unauthorized)
                     {
                         test.AddLog("Expected exception thrown, with expected status code.");
                         return true;

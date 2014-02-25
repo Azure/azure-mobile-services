@@ -514,7 +514,7 @@ namespace ZumoE2ETestApp.Tests
                     }
                     else
                     {
-                        expectedData = ZumoQueryTestData.AllStringIdMovies().Select(s => (MovieType)(IMovie)s);
+                        expectedData = ZumoQueryTestData.AllMovies.Select(s => (MovieType)(IMovie)s);
                     }
 
                     if (whereClause != null)

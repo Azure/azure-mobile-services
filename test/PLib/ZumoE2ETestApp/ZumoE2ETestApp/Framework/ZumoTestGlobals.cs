@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace ZumoE2ETestApp.Framework
 {
@@ -31,16 +32,32 @@ namespace ZumoE2ETestApp.Framework
         public static bool ShowAlerts = true;
         public const string LogsLocationFile = "done.txt";
 
-        public static string NHW8ToastTemplate = String.Format(@"<toast><visual><binding template=""ToastText01""><text id=""1"">$(News_{0})</text></binding></visual></toast>", "French");
+        public static string NHW8ToastTemplate = String.Format(@"<toast><visual><binding template=""ToastText01""><text id=""1"">$(News_{0})</text></binding></visual></toast>", "English");
         public static string NHW8TileTemplate = String.Format(@"<tile><visual><binding template=""TileWideImageAndText02"">" +
                                             @"<image id=""1"" src=""http://zumotestserver.azurewebsites.net/content/zumo1.png"" alt=""zumowide"" />" +
-                                            @"<text id=""1"">tl-wiat2-1</text><text id=""2"">$(News_{0})</text></binding></visual></tile>", "French");
-        public static string NHWp8Template = String.Format("<?xml version=\"1.0\" encoding=\"utf-8\"?><wp:Notification xmlns:wp=\"WPNotification\"><wp:Toast><wp:Text1>$(News_{0})</wp:Text1></wp:Toast></wp:Notification>", "French");
+                                            @"<text id=""1"">tl-wiat2-1</text><text id=""2"">$(News_{0})</text></binding></visual></tile>", "Mandarin");
+        public static string NHWp8RawTemplate = String.Format("<?xml version=\"1.0\" encoding=\"utf-8\"?><wp:Notification xmlns:wp=\"WPNotification\"><wp:Toast><wp:Text1>$(News_{0})</wp:Text1></wp:Toast></wp:Notification>", "French");
+        public static string NHWp8ToastTemplate = String.Format("<?xml version=\"1.0\" encoding=\"utf-8\"?><wp:Notification xmlns:wp=\"WPNotification\"><wp:Toast><wp:Text1>$(News_{0})</wp:Text1></wp:Toast></wp:Notification>", "English");
+        public static string NHWp8TileTemplate = @"<?xml version=""1.0"" encoding=""utf-8""?>
+                                                    <wp:Notification xmlns:wp=""WPNotification"">
+                                                       <wp:Tile>
+                                                          <wp:BackgroundImage>http://zumotestserver.azurewebsites.net/content/zumo2.png</wp:BackgroundImage>
+                                                          <wp:Count>count</wp:Count>
+                                                          <wp:Title>$(News_Mandarin)</wp:Title>
+                                                       </wp:Tile>
+                                                    </wp:Notification>";
 
         public static string NHToastTemplateName = "newsToastTemplate";
         public static string NHTileTemplateName = "newsTileTemplate";
         public static string NHBadgeTemplateName = "newsBadgeTemplate";
         public static string NHRawTemplateName = "newsRawTemplate";
+        public static JObject TemplateNotification = new JObject()
+        {
+            {"News_English", "World News in English!"},
+            {"News_French", "Nouvelles du monde en français!"},
+            {"News_Mandarin", "在普通话的世界新闻！"},
+            {"News_Badge", "10"}
+        };
 
         public static class RuntimeFeatureNames
         {
@@ -83,8 +100,6 @@ namespace ZumoE2ETestApp.Framework
 
                 this.Client = new MobileServiceClient(appUrl, appKey);
             }
-
-            await InitializeFeaturesEnabled();
         }
 
         public async static Task InitializeFeaturesEnabled()

@@ -162,12 +162,6 @@ namespace ZumoE2ETestApp
             {
                 await Util.MessageBox("Please select a test group.", "Error");
             }
-
-            var tb = (ToggleButton)sender;
-            if (!tb.IsChecked.HasValue || tb.IsChecked.Value)
-            {
-                tb.IsChecked = false;
-            }
         }
 
         private void btnRunTests_Unchecked_1(object sender, RoutedEventArgs e)
@@ -221,8 +215,8 @@ namespace ZumoE2ETestApp
         private async Task RunTestGroup(ZumoTestGroup testGroup)
         {
             this.currentTestGroup = testGroup;
-            await ZumoTestGlobals.InitializeFeaturesEnabled();
             var clientInitialized = await InitializeClient();
+            await ZumoTestGlobals.InitializeFeaturesEnabled();
             if (!clientInitialized)
             {
                 return;
