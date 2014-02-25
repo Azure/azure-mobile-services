@@ -40,7 +40,7 @@
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Enter some text below and click Save to insert a new TodoItem item into your database" TextWrapping="Wrap" Margin="12"/>
             <TextBox Grid.Row="1" Grid.Column="0" Name="TodoInput" Text="" />
-            <Button Grid.Row ="1" Grid.Column="1" Name="ButtonSave" Click="ButtonSave_Click">Save</Button>
+            <Button Grid.Row ="1" Grid.Column="1" Name="ButtonSave" Click="ButtonSave_Click" IsEnabled="False">Save</Button>
             <TextBlock Grid.Row="2" Grid.ColumnSpan="2" Text="Click refresh below to load the unfinished TodoItems from your database. Use the checkbox to complete and update your TodoItems" TextWrapping="Wrap" Margin="12" />
             <Button Grid.Row="3" Grid.ColumnSpan="2" Name="ButtonRefresh" Click="ButtonRefresh_Click">Refresh</Button>
             <phone:LongListSelector Grid.Row="4" Grid.ColumnSpan="2" Name="ListItems">

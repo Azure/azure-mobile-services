@@ -325,6 +325,14 @@ $testGroup('Extensions.js',
         $assert.isNull(Extensions.tryParseIsoDateString("1999-02-12T00:00:00"));
         $assert.isNull(Extensions.tryParseIsoDateString("1999-02-12T00:00"));
         $assert.isNull(Extensions.tryParseIsoDateString('rasfoaksdfasdf'));
+
+        // Verify different formats for seconds and milliseconds
+        var milliseconds = { "": 0, ".1": 100, ".22": 220, ".333": 333 };
+        for (var millisecondString in milliseconds) {
+            date = new Date(Date.UTC(2013, 1, 23, 15, 26, 37, milliseconds[millisecondString]));
+            var dateString = "2013-02-23T15:26:37" + millisecondString + "Z";
+            $assert.areEqual(date.valueOf(), Extensions.tryParseIsoDateString(dateString).valueOf());
+        }
     }),
 
     $test('createError')

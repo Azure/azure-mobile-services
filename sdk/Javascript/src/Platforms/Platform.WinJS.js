@@ -283,7 +283,7 @@ exports.tryParseIsoDateString = function (text) {
     Validate.isString(text);
 
     // Check against a lenient regex
-    if (/^(\d{4})-(\d{2})-(\d{2})T(\d{2})\:(\d{2})\:(\d{2})(\.(\d{3}))?Z$/.test(text)) {
+    if (/^(\d{4})-(\d{2})-(\d{2})T(\d{2})\:(\d{2})\:(\d{2})(\.(\d{1,3}))?Z$/.test(text)) {
         // Try and parse - it will return NaN if invalid
         var ticks = Date.parse(text);
         if (!isNaN(ticks)) {

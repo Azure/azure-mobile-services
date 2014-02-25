@@ -35,7 +35,7 @@
 
                     <StackPanel Orientation="Horizontal" Margin="72,0,0,0">
                         <TextBox Name="TextInput" Margin="5" MinWidth="300"></TextBox>
-                        <Button Name="ButtonSave" Click="ButtonSave_Click">Save</Button>
+                        <Button Name="ButtonSave" Click="ButtonSave_Click" IsEnabled="False">Save</Button>
                     </StackPanel>
 
                 </StackPanel>
