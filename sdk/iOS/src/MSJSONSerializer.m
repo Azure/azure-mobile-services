@@ -469,8 +469,13 @@ static NSArray *allIdKeys;
         }
     }
     else if ([item isKindOfClass:[NSString class]]) {
-        NSDateFormatter *formatter =
-        [MSNaiveISODateFormatter naiveISODateFormatter];
+        NSDateFormatter *formatter;
+        if ([item rangeOfString:@"."].location == NSNotFound) {
+            formatter = [MSNaiveISODateFormatter naiveISODateNoFractionalSecondsFormatter];
+        } else {
+            formatter = [MSNaiveISODateFormatter naiveISODateFormatter];
+        }
+        
         NSDate *date = [formatter dateFromString:item];
         postDeserializedItem = (date) ? date : item;
     }
