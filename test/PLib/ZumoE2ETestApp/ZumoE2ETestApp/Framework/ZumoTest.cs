@@ -94,14 +94,14 @@ namespace ZumoE2ETestApp.Framework
 
         public bool ShouldBeSkipped()
         {
-            if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED)
+            if (ZumoTestGlobals.NetRuntimeEnabled
                 && runtimeFeatures.Count > 1)
             {
                 return true;
             }
 
-            if (!ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED)
-               && runtimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED))
+            if (!ZumoTestGlobals.NHPushEnabled
+               && runtimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED))
             {
                 return true;
             }

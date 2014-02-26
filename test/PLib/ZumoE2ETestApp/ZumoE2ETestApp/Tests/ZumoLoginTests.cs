@@ -53,12 +53,6 @@ namespace ZumoE2ETestApp.Tests
 
             foreach (MobileServiceAuthenticationProvider provider in Util.EnumGetValues(typeof(MobileServiceAuthenticationProvider)))
             {
-                if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED)
-                    && provider == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory)
-                {
-                    // AAD not currently supported for .NET runtime
-                    continue;
-                }
                 result.AddTest(CreateLogoutTest());
 #if !WINDOWS_PHONE
                 result.AddTest(CreateLoginTest(provider, false));
@@ -97,12 +91,6 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("We'll log in again; you may or may not be asked for password in the next few moments."));
             foreach (MobileServiceAuthenticationProvider provider in Enum.GetValues(typeof(MobileServiceAuthenticationProvider)))
             {
-                if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED))
-                {
-                    // SSO not currently supported for .NET runtime
-                    continue;
-                }
-
                 if (provider == MobileServiceAuthenticationProvider.MicrosoftAccount)
                 {
                     // Known issue - SSO with MS account will not work if Live SDK is also used
@@ -117,12 +105,6 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("Now we'll continue running the tests, but you *should not be prompted for the username or password anymore*."));
             foreach (MobileServiceAuthenticationProvider provider in Enum.GetValues(typeof(MobileServiceAuthenticationProvider)))
             {
-                if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED))
-                {
-                    // SSO not currently supported for .NET runtime
-                    continue;
-                }
-
                 if (provider == MobileServiceAuthenticationProvider.MicrosoftAccount)
                 {
                     // Known issue - SSO with MS account will not work if Live SDK is also used
@@ -158,7 +140,8 @@ namespace ZumoE2ETestApp.Tests
                 var user = await client.LoginAsync(provider, useSingleSignOn);
                 test.AddLog("Logged in as {0}", user.UserId);
                 return true;
-            });
+            }, provider == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory ?  ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN : null,
+               useSingleSignOn ? ZumoTestGlobals.RuntimeFeatureNames.SSO_LOGIN : null);
         }
 
 #else
@@ -171,7 +154,7 @@ namespace ZumoE2ETestApp.Tests
                 var user = await client.LoginAsync(provider);
                 test.AddLog("Logged in as {0}", user.UserId);
                 return true;
-            });
+            }, provider == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory ? ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN : null);
         }
 #endif
 
@@ -270,7 +253,7 @@ namespace ZumoE2ETestApp.Tests
                 var user = await client.LoginAsync(provider, token);
                 test.AddLog("Logged in as {0}", user.UserId);
                 return true;
-            }, ZumoTestGlobals.RuntimeFeatureNames.LIVE_LOGIN);
+            });
         }
 
         private static ZumoTest CreateCRUDTest(string tableName, string providerName, TablePermission tableType, bool userIsAuthenticated, bool usingSingeSignOnOrToken = false)
@@ -410,7 +393,7 @@ namespace ZumoE2ETestApp.Tests
                 try
                 {
                     JToken items = null;
-                    if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED))
+                    if (ZumoTestGlobals.NetRuntimeEnabled)
                     {
                         items = await table.ReadAsync("$filter=Id eq '" + id + "'", queryParameters);
                     }

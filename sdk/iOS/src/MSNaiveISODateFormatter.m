@@ -7,7 +7,8 @@
 
 #pragma mark * DateTime Format
 
-NSString *const format = @"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+NSString *const formatDate = @"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+NSString *const formatDateNoFractionalSeconds = @"yyyy-MM-dd'T'HH:mm:ss'Z'";
 
 
 #pragma mark * MSDateFormatter Implementation
@@ -17,6 +18,7 @@ NSString *const format = @"yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
 
 static MSNaiveISODateFormatter *staticDateFormatterSingleton;
+static MSNaiveISODateFormatter *staticDateNoFractionalSecondsFormatterSingleton;
 
 
 #pragma mark * Public Static Singleton Constructor
@@ -25,17 +27,25 @@ static MSNaiveISODateFormatter *staticDateFormatterSingleton;
 +(MSNaiveISODateFormatter *) naiveISODateFormatter
 {
     if (staticDateFormatterSingleton == nil) {
-        staticDateFormatterSingleton = [[MSNaiveISODateFormatter alloc] init];
+        staticDateFormatterSingleton = [[MSNaiveISODateFormatter alloc] initWithFormat:formatDate];
     }
     
     return  staticDateFormatterSingleton;
 }
 
++(MSNaiveISODateFormatter *)naiveISODateNoFractionalSecondsFormatter
+{
+    if (staticDateNoFractionalSecondsFormatterSingleton == nil) {
+        staticDateNoFractionalSecondsFormatterSingleton = [[MSNaiveISODateFormatter alloc] initWithFormat:formatDateNoFractionalSeconds];
+    }
+    
+    return  staticDateNoFractionalSecondsFormatterSingleton;
+}
 
 #pragma mark * Public Initializer Methods
 
 
--(id) init
+-(id) initWithFormat:(NSString *)format
 {
     self = [super init];
     if (self) {

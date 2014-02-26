@@ -83,18 +83,14 @@ namespace ZumoE2ETestApp.Tests
         private static ZumoTest CreateTilePushTest(string template, string[] texts, string[] imageUrls, string[] imageAlts)
         {
             var payload = BuildTilPayload(template, texts, imageUrls, imageAlts);
-
             XElement expected = BuildXmlTilePayload(template, texts, imageUrls, imageAlts);
-
             return CreatePushTest("send" + template, "tile", payload, expected);
         }
 
         private static ZumoTest CreateTemplateTilePushTest(string template, string[] texts, string[] imageUrls, string[] imageAlts)
         {
             var payload = BuildTilPayload(template, texts, imageUrls, imageAlts);
-
             XElement expected = BuildXmlTilePayload(template, texts, imageUrls, imageAlts);
-
             return CreatePushTest("send" + template, "template", payload, expected, true);
         }
 
@@ -278,7 +274,7 @@ namespace ZumoE2ETestApp.Tests
                 item.Add("payload", payload);
                 item.Add("xmlPayload", expectedResult.ToString());
                 item.Add("templateNotification", ZumoTestGlobals.TemplateNotification);
-                if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED))
+                if (ZumoTestGlobals.NHPushEnabled)
                 {
                     item.Add("usingNH", true);
                     item.Add("nhNotificationType", nhNotificationType);
@@ -338,7 +334,7 @@ namespace ZumoE2ETestApp.Tests
                     await Task.Delay(5000); // leave some time between pushes
                     return passed;
                 }
-            }, templatePush ? ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
+            }, templatePush ? ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
         }
 
         private static ZumoTest CreateRegisterChannelTest()
@@ -347,7 +343,7 @@ namespace ZumoE2ETestApp.Tests
             {
                 ZumoPushTests.pushChannel = await PushNotificationChannelManager.CreatePushNotificationChannelForApplicationAsync();
                 test.AddLog("Register the channel; uri = {0}", pushChannel.Uri);
-                if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED))
+                if (ZumoTestGlobals.NHPushEnabled)
                 {
                     var client = ZumoTestGlobals.Instance.Client;
                     var push = client.GetPush();
@@ -402,14 +398,14 @@ namespace ZumoE2ETestApp.Tests
                 test.AddLog("Registered " + nhNotificationType + " template with NH succeeded.");
                 pushChannel.PushNotificationReceived += pushChannel_PushNotificationReceived;
                 return true;
-            }, ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED);
+            }, ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED);
         }
 
         private static ZumoTest CreateUnregisterChannelTest()
         {
             return new ZumoTest("Unregister push channel", async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED))
+                if (ZumoTestGlobals.NHPushEnabled)
                 {
                     var client = ZumoTestGlobals.Instance.Client;
                     var push = client.GetPush();
@@ -438,7 +434,7 @@ namespace ZumoE2ETestApp.Tests
                 TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
                 tcs.SetResult(true);
                 return await tcs.Task;
-            }, ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED);
+            }, ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED);
         }
 
         static void pushChannel_PushNotificationReceived(PushNotificationChannel sender, PushNotificationReceivedEventArgs args)

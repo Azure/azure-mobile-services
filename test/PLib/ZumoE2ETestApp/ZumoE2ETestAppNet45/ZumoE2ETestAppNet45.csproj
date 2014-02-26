@@ -159,6 +159,9 @@
     <Compile Include="..\ZumoE2ETestApp\Tests\ZumoRoundTripTests.cs">
       <Link>Tests\ZumoRoundTripTests.cs</Link>
     </Compile>
+    <Compile Include="..\ZumoE2ETestApp\Tests\ZumoSetupTests.cs">
+      <Link>Tests\ZumoSetupTests.cs</Link>
+    </Compile>
     <Compile Include="..\ZumoE2ETestApp\Tests\ZumoTestCommon.cs">
       <Link>Tests\ZumoTestCommon.cs</Link>
     </Compile>

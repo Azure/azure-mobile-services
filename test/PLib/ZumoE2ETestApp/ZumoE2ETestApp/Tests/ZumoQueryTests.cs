@@ -78,13 +78,10 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateQueryTestStringId("String: Substring (2 parameters), length - Movies which end with 'r'",
                 m => m.Title.Substring(m.Title.Length - 1, 1) == "r"));
 
-            if (!ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED))
-            {
                 // The OData library in .NET does not support replace?
                 // Tracked by https://wagit/AzureMobile/ZumoNetRuntime/issues/10
-                result.AddTest(CreateQueryTestStringId("String: Replace - Movies ending with either 'Part 2' or 'Part II'",
-                    m => m.Title.Replace("II", "2").EndsWith("Part 2")));
-            }
+            result.AddTest(CreateQueryTestStringId("String: Replace - Movies ending with either 'Part 2' or 'Part II'",
+                m => m.Title.Replace("II", "2").EndsWith("Part 2")));
 
             result.AddTest(CreateQueryTestStringId("String: Concat - Movies rated 'PG' or 'PG-13' from the 2000s",
                 m => m.Year >= 2000 && string.Concat(m.MPAARating, "-13").StartsWith("PG-13")));
@@ -478,7 +475,7 @@ namespace ZumoE2ETestApp.Tests
                     {
                         test.AddLog("Using the OData query directly");
                         JToken result = await table.ReadAsync(odataExpression);
-                        if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED))
+                        if (ZumoTestGlobals.NetRuntimeEnabled)
                         {
                             var serializer = new JsonSerializer();
                             serializer.Converters.Add(new MobileServiceIsoDateTimeConverter());
@@ -497,7 +494,7 @@ namespace ZumoE2ETestApp.Tests
                         actualTotalCount = totalCountProvider.TotalCount;
                     }
 
-                    if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED) && top.HasValue && top.Value == 1001)
+                    if (ZumoTestGlobals.NetRuntimeEnabled && top.HasValue && top.Value == 1001)
                     {
                         test.AddLog("NetRuntime throttles and does not throw");
                         return readMovies.Count() == 100;
@@ -594,7 +591,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                     return true;
                 }
-            }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
+            }, typeof(MovieType) == typeof(Movie) ? ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
         }
 
         private static IMobileServiceTableQuery<MovieType> ApplyOrdering<MovieType>(IMobileServiceTableQuery<MovieType> query, OrderByClause[] orderBy)

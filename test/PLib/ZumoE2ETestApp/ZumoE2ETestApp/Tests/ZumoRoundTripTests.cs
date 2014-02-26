@@ -293,7 +293,7 @@ namespace ZumoE2ETestApp.Tests
                 Random rndGen = new Random(1);
                 try
                 {
-                    if (!ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NET_RUNTIME_ENABLED))
+                    if (!ZumoTestGlobals.NetRuntimeEnabled)
                     {
                         var table = client.GetTable<RoundTripTableItem>();
                         RoundTripTableItem item = new RoundTripTableItem

@@ -107,7 +107,7 @@ namespace ZumoE2ETestAppWP8.Tests
                 item.Add("method", methodName);
                 item.Add("channelUri", ZumoWP8PushTests.pushChannel.ChannelUri.AbsoluteUri);
                 item.Add("templateNotification", ZumoTestGlobals.TemplateNotification);
-                if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED))
+                if (ZumoTestGlobals.NHPushEnabled)
                 {
                     item.Add("usingNH", true);
                 }
@@ -136,7 +136,7 @@ namespace ZumoE2ETestAppWP8.Tests
                 var response = await table.InsertAsync(item);
                 test.AddLog("Response to (virtual) insert for push: {0}", response);
                 return true;
-            }, templatePush ? ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES)
+            }, templatePush ? ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES)
             {
                 CanRunUnattended = false
             };
@@ -153,7 +153,7 @@ namespace ZumoE2ETestAppWP8.Tests
                 item.Add("method", "sendToast");
                 item.Add("channelUri", ZumoWP8PushTests.pushChannel.ChannelUri.AbsoluteUri);
                 item.Add("templateNotification", ZumoTestGlobals.TemplateNotification);
-                if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED))
+                if (ZumoTestGlobals.NHPushEnabled)
                 {
                     item.Add("usingNH", true);
                 }
@@ -210,7 +210,7 @@ namespace ZumoE2ETestAppWP8.Tests
                     test.AddLog("Did not receive notification on time");
                     return false;
                 }
-            }, templatePush ? ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
+            }, templatePush ? ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
         }
 
         private async static Task<IDictionary<string, string>> WaitForToastNotification(TimeSpan maximumWait)
@@ -243,7 +243,7 @@ namespace ZumoE2ETestAppWP8.Tests
                 item.Add("channelUri", ZumoWP8PushTests.pushChannel.ChannelUri.AbsoluteUri);
                 item.Add("payload", rawText);
                 item.Add("templateNotification", ZumoTestGlobals.TemplateNotification);
-                if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED))
+                if (ZumoTestGlobals.NHPushEnabled)
                 {
                     item.Add("usingNH", true);
                 }
@@ -286,7 +286,7 @@ namespace ZumoE2ETestAppWP8.Tests
                     test.AddLog("Did not receive the notification on time");
                     return false;
                 }
-            }, templatePush ? ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
+            }, templatePush ? ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
         }
 
         private async static Task<HttpNotification> WaitForHttpNotification(TimeSpan maximumWait)
@@ -312,7 +312,7 @@ namespace ZumoE2ETestAppWP8.Tests
         {
             return new ZumoTest("Unregister push channel", async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED))
+                if (ZumoTestGlobals.NHPushEnabled)
                 {
                     var client = ZumoTestGlobals.Instance.Client;
                     var push = client.GetPush();
@@ -341,7 +341,7 @@ namespace ZumoE2ETestAppWP8.Tests
                 TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
                 tcs.SetResult(true);
                 return await tcs.Task;
-            }, unRegisterTemplate ? ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED : null);
+            }, unRegisterTemplate ? ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED : null);
         }
 
         private static ZumoTest CreateRegisterChannelTest(bool registerTemplate = false, string templateType = null)
@@ -389,39 +389,32 @@ namespace ZumoE2ETestAppWP8.Tests
                 await WaitForChannelUriAssignment(test, pushChannel, maxWait);
 
 
-                if (ZumoTestGlobals.EnvRuntimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED))
+                if (ZumoTestGlobals.NHPushEnabled)
                 {
                     var zumoPush = ZumoTestGlobals.Instance.Client.GetPush();
+                    TemplateRegistration reg = null;
                     if (registerTemplate)
                     {
                         switch (templateType)
                         {
                             case "toast":
-                                await zumoPush.RegisterTemplateAsync(pushChannel.ChannelUri.ToString(), ZumoTestGlobals.NHWp8ToastTemplate, ZumoTestGlobals.NHToastTemplateName, "World English".Split());
-                                pushChannel.ChannelUriUpdated += new EventHandler<NotificationChannelUriEventArgs>(async (o, args) =>
-                                {
-                                    await zumoPush.RegisterTemplateAsync(pushChannel.ChannelUri.ToString(), ZumoTestGlobals.NHWp8ToastTemplate, "wp8" + ZumoTestGlobals.NHToastTemplateName, "World English".Split());
-                                });
+                                reg = new TemplateRegistration(pushChannel.ChannelUri.ToString(), ZumoTestGlobals.NHWp8ToastTemplate, ZumoTestGlobals.NHToastTemplateName, "World English".Split());
                                 break;
                             case "tile":
-                                await zumoPush.RegisterTemplateAsync(pushChannel.ChannelUri.ToString(), ZumoTestGlobals.NHWp8TileTemplate, "wp8" + ZumoTestGlobals.NHTileTemplateName, "World Mandarin".Split());
-                                pushChannel.ChannelUriUpdated += new EventHandler<NotificationChannelUriEventArgs>(async (o, args) =>
-                                {
-                                    await zumoPush.RegisterTemplateAsync(pushChannel.ChannelUri.ToString(), ZumoTestGlobals.NHWp8TileTemplate, "wp8" + ZumoTestGlobals.NHTileTemplateName, "World Mandarin".Split());
-                                });
+                                reg = new TemplateRegistration(pushChannel.ChannelUri.ToString(), ZumoTestGlobals.NHWp8TileTemplate, "wp8" + ZumoTestGlobals.NHTileTemplateName, "World Mandarin".Split());
                                 break;
                             case "raw":
                                 IDictionary<string, string> wp8Headers = new Dictionary<string, string>();
                                 wp8Headers.Add("X-NotificationClass", "3");
-                                var reg = new TemplateRegistration(pushChannel.ChannelUri.ToString(), ZumoTestGlobals.NHWp8RawTemplate, "wp8" + ZumoTestGlobals.NHRawTemplateName, "World French".Split(), wp8Headers);
-                                await zumoPush.RegisterAsync(reg);
-                                pushChannel.ChannelUriUpdated += new EventHandler<NotificationChannelUriEventArgs>(async (o, args) =>
-                                {
-                                    await zumoPush.RegisterAsync(reg);
-                                });
+                                reg = new TemplateRegistration(pushChannel.ChannelUri.ToString(), ZumoTestGlobals.NHWp8RawTemplate, "wp8" + ZumoTestGlobals.NHRawTemplateName, "World French".Split(), wp8Headers);
                                 break;
-
                         }
+
+                        await zumoPush.RegisterAsync(reg);
+                        pushChannel.ChannelUriUpdated += new EventHandler<NotificationChannelUriEventArgs>(async (o, args) =>
+                        {
+                            await zumoPush.RegisterAsync(reg);
+                        });
 
                         test.AddLog("Registered to Notification hub");
                     }
@@ -432,7 +425,7 @@ namespace ZumoE2ETestAppWP8.Tests
                         {
                             await zumoPush.RegisterNativeAsync(args.ChannelUri.ToString(), "tag1 tag2".Split());
                         });
-                        test.AddLog("Registered channel uri");
+                        test.AddLog("Registered with NH");
                     }
                 }
                 pushChannel.HttpNotificationReceived += pushChannel_HttpNotificationReceived;
@@ -448,7 +441,7 @@ namespace ZumoE2ETestAppWP8.Tests
                 {
                     return true;
                 }
-            }, registerTemplate ? ZumoTestGlobals.RuntimeFeatureNames.NOTIFICATION_HUB_ENABLED : null);
+            }, registerTemplate ? ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED : null);
         }
 
         static async Task WaitForChannelUriAssignment(ZumoTest test, HttpNotificationChannel pushChannel, TimeSpan maxWait)
