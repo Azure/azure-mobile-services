@@ -17,7 +17,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// </summary>
     internal class AuthenticationBroker
     {
-        static private TaskCompletionSource<string> PendingLoginTask;
+        static private TaskCompletionSource<string> pendingLoginTask;
 
         /// <summary>
         /// Begins a server-side authentication flow by navigating the 
@@ -49,6 +49,11 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         public void AuthenticationComplete(WebAuthenticationResult result)
         {
+            if (pendingLoginTask == null)
+            {
+                throw new InvalidOperationException(Resources.IAuthenticationBroker_NoLoginInProgress);
+            }
+
             if (result.ResponseStatus != WebAuthenticationStatus.Success)
             {
                 string message;
@@ -62,12 +67,15 @@ namespace Microsoft.WindowsAzure.MobileServices
                                             Resources.IAuthenticationBroker_AuthenticationFailed,
                                             result.ResponseErrorDetail);
                 }
-
-                PendingLoginTask.SetException(new InvalidOperationException(message));
+                pendingLoginTask.SetException(new InvalidOperationException(message));                
             }
-            
-            string tokenString = GetTokenStringFromResult(result);
-            PendingLoginTask.SetResult(tokenString);
+            else
+            {
+                string tokenString = GetTokenStringFromResult(result);
+                pendingLoginTask.SetResult(tokenString);
+            }
+
+            pendingLoginTask = null;            
         }
 
         /// <summary>
@@ -96,7 +104,12 @@ namespace Microsoft.WindowsAzure.MobileServices
             Debug.Assert(startUrl != null);
             Debug.Assert(endUrl != null);
 
-            PendingLoginTask = new TaskCompletionSource<string>();
+            if (pendingLoginTask != null)
+            {
+                throw new InvalidOperationException(Resources.IAuthenticationBroker_LoginInProgress);
+            }
+
+            pendingLoginTask = new TaskCompletionSource<string>();
 
             if (useSingleSignOn)
             {
@@ -109,7 +122,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 WebAuthenticationBroker.AuthenticateAndContinue(startUrl, endUrl, null, WebAuthenticationOptions.None);
             }
 
-            return PendingLoginTask.Task;
+            return pendingLoginTask.Task;
         }
 
         /// <summary>
