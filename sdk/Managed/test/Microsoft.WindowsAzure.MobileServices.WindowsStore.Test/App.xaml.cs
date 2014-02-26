@@ -16,6 +16,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     /// </summary>
     public sealed partial class App : Application
     {
+        public static MobileServiceClient LoginMobileService;
+
         /// <summary>
         /// Gets the test harness used by the application.
         /// </summary>

@@ -8,3 +8,4 @@ packages/*
 !packages/Microsoft.Bcl.Build.1.0.10/tools/Microsoft.Bcl.Build.targets
 !packages/Microsoft.Bcl.Build.1.0.10/tools/Microsoft.Bcl.Build.Tasks.dll
 .nuget/nuget.exe
+src/*/Strings/*
