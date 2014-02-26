@@ -107,7 +107,7 @@ namespace ZumoE2ETestAppWP8.Tests
                 item.Add("method", methodName);
                 item.Add("channelUri", ZumoWP8PushTests.pushChannel.ChannelUri.AbsoluteUri);
                 item.Add("templateNotification", ZumoTestGlobals.TemplateNotification);
-                if (ZumoTestGlobals.NHPushEnabled)
+                if (ZumoTestGlobals.RuntimeFeatures[ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED])
                 {
                     item.Add("usingNH", true);
                 }
@@ -153,7 +153,7 @@ namespace ZumoE2ETestAppWP8.Tests
                 item.Add("method", "sendToast");
                 item.Add("channelUri", ZumoWP8PushTests.pushChannel.ChannelUri.AbsoluteUri);
                 item.Add("templateNotification", ZumoTestGlobals.TemplateNotification);
-                if (ZumoTestGlobals.NHPushEnabled)
+                if (ZumoTestGlobals.RuntimeFeatures[ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED])
                 {
                     item.Add("usingNH", true);
                 }
@@ -243,7 +243,7 @@ namespace ZumoE2ETestAppWP8.Tests
                 item.Add("channelUri", ZumoWP8PushTests.pushChannel.ChannelUri.AbsoluteUri);
                 item.Add("payload", rawText);
                 item.Add("templateNotification", ZumoTestGlobals.TemplateNotification);
-                if (ZumoTestGlobals.NHPushEnabled)
+                if (ZumoTestGlobals.RuntimeFeatures[ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED])
                 {
                     item.Add("usingNH", true);
                 }
@@ -312,7 +312,7 @@ namespace ZumoE2ETestAppWP8.Tests
         {
             return new ZumoTest("Unregister push channel", async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.NHPushEnabled)
+                if (!ZumoTestGlobals.RuntimeFeatures[ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED])
                 {
                     var client = ZumoTestGlobals.Instance.Client;
                     var push = client.GetPush();
@@ -389,7 +389,7 @@ namespace ZumoE2ETestAppWP8.Tests
                 await WaitForChannelUriAssignment(test, pushChannel, maxWait);
 
 
-                if (ZumoTestGlobals.NHPushEnabled)
+                if (!ZumoTestGlobals.RuntimeFeatures[ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED])
                 {
                     var zumoPush = ZumoTestGlobals.Instance.Client.GetPush();
                     TemplateRegistration reg = null;
@@ -398,7 +398,7 @@ namespace ZumoE2ETestAppWP8.Tests
                         switch (templateType)
                         {
                             case "toast":
-                                reg = new TemplateRegistration(pushChannel.ChannelUri.ToString(), ZumoTestGlobals.NHWp8ToastTemplate, ZumoTestGlobals.NHToastTemplateName, "World English".Split());
+                                reg = new TemplateRegistration(pushChannel.ChannelUri.ToString(), ZumoTestGlobals.NHWp8ToastTemplate, "wp8" + ZumoTestGlobals.NHToastTemplateName, "World English".Split());
                                 break;
                             case "tile":
                                 reg = new TemplateRegistration(pushChannel.ChannelUri.ToString(), ZumoTestGlobals.NHWp8TileTemplate, "wp8" + ZumoTestGlobals.NHTileTemplateName, "World Mandarin".Split());

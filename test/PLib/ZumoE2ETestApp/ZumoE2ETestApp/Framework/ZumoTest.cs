@@ -94,18 +94,17 @@ namespace ZumoE2ETestApp.Framework
 
         public bool ShouldBeSkipped()
         {
-            if (ZumoTestGlobals.NetRuntimeEnabled
-                && runtimeFeatures.Count > 1)
+            if (runtimeFeatures.Count > 0)
             {
-                return true;
+                foreach(var requiredFeature in this.runtimeFeatures)
+                {
+                    var isEnabled = ZumoTestGlobals.RuntimeFeatures[requiredFeature];
+                    if (!isEnabled)
+                    {
+                        return true;
+                    }
+                }
             }
-
-            if (!ZumoTestGlobals.NHPushEnabled
-               && runtimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED))
-            {
-                return true;
-            }
-
             return false;
         }
 

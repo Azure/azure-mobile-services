@@ -64,12 +64,10 @@ namespace ZumoE2ETestApp.Framework
             public static string LIVE_LOGIN = "liveSDKLogin";
             public static string INT_ID_TABLES = "intIdTables";
             public static string STRING_ID_TABLES = "stringIdTables";
-            public static string NET_RUNTIME_ENABLED = "netRuntimeEnabled";
             public static string NH_PUSH_ENABLED = "nhPushEnabled";
         }
 
-        public static Dictionary<string, object> RuntimeFeatures = new Dictionary<string, object>();
-        public static bool NHPushEnabled = false;
+        public static Dictionary<string, bool> RuntimeFeatures = new Dictionary<string, bool>();
         public static bool NetRuntimeEnabled = false;
 
         public MobileServiceClient Client { get; private set; }
@@ -85,7 +83,7 @@ namespace ZumoE2ETestApp.Framework
             get { return instance; }
         }
 
-        public async Task InitializeClient(string appUrl, string appKey)
+        public void InitializeClient(string appUrl, string appKey)
         {
             bool needsUpdate = this.Client == null ||
                 (this.Client.ApplicationUri.ToString() != appUrl) ||
@@ -99,32 +97,6 @@ namespace ZumoE2ETestApp.Framework
                 }
 
                 this.Client = new MobileServiceClient(appUrl, appKey);
-            }
-        }
-
-        public async static Task InitializeFeaturesEnabled()
-        {
-            var client = ZumoTestGlobals.Instance.Client;
-            if (client != null)
-            {
-                try
-                {
-                    var response = await client.InvokeApiAsync<Dictionary<string, object>>("runtimeInfo", HttpMethod.Get, null);
-                    RuntimeFeatures = JsonConvert.DeserializeObject<Dictionary<string, object>>(JsonConvert.SerializeObject(response["features"]));
-                    NHPushEnabled = Convert.ToBoolean(RuntimeFeatures[RuntimeFeatureNames.NH_PUSH_ENABLED]);
-                    if (response["runtime"].ToString().Contains("node.js"))
-                    {
-                        NetRuntimeEnabled = false;
-                    }
-                    else
-                    {
-                        NetRuntimeEnabled = true;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine(ex.Message);
-                }
             }
         }
     }

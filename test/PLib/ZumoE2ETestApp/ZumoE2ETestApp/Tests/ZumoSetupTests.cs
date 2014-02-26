@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.WindowsAzure.MobileServices;
+﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using ZumoE2ETestApp.Framework;
-using ZumoE2ETestApp.Tests.Types;
-using System.Net;
+using System;
+using System.Collections.Generic;
 using System.Net.Http;
+using ZumoE2ETestApp.Framework;
 
 namespace ZumoE2ETestApp.Tests
 {
@@ -16,7 +11,7 @@ namespace ZumoE2ETestApp.Tests
     {
         public static ZumoTestGroup CreateTests()
         {
-            ZumoTestGroup result = new ZumoTestGroup("Test Setup tests");
+            ZumoTestGroup result = new ZumoTestGroup("Tests Setup");
             result.AddTest(CreateSetupTest());
 
             return result;
@@ -27,14 +22,25 @@ namespace ZumoE2ETestApp.Tests
             return new ZumoTest("Identify enabled runtime features", async delegate(ZumoTest test)
                 {
                     var client = ZumoTestGlobals.Instance.Client;
-                    JToken apiResult = null;
-
-                    apiResult = await client.InvokeApiAsync("runtimeInfo", HttpMethod.Get, null);
-                    var runtimeInfo = apiResult;
-
-                    test.AddLog("Got runtime features:");
-                    test.AddLog(runtimeInfo.ToString());
-                    return true;
+                    JToken apiResult = await client.InvokeApiAsync("runtimeInfo", HttpMethod.Get, null);
+                    try
+                    {
+                        ZumoTestGlobals.RuntimeFeatures = JsonConvert.DeserializeObject<Dictionary<string, bool>>(JsonConvert.SerializeObject(apiResult["features"]));
+                        if (apiResult["runtime"].ToString().Contains("node.js"))
+                        {
+                            ZumoTestGlobals.NetRuntimeEnabled = false;
+                        }
+                        else
+                        {
+                            ZumoTestGlobals.NetRuntimeEnabled = true;
+                        }
+                        return true;
+                    }
+                    catch (Exception ex)
+                    {
+                        test.AddLog(ex.Message);
+                        return false;
+                    }
                 });
         }
     }

@@ -183,8 +183,7 @@ namespace ZumoE2ETestAppWP8
             string error = null;
             try
             {
-                await ZumoTestGlobals.Instance.InitializeClient(appUrl, appKey);
-                await ZumoTestGlobals.InitializeFeaturesEnabled();
+                ZumoTestGlobals.Instance.InitializeClient(appUrl, appKey);
             }
             catch (Exception ex)
             {
