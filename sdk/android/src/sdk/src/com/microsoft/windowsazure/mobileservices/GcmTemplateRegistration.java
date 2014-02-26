@@ -39,7 +39,7 @@ public class GcmTemplateRegistration extends TemplateRegistration {
 	 * The PNS specific identifier
 	 */
 	@Expose
-	@SerializedName("GcmRegistrationId")
+	@SerializedName("deviceId")
 	protected String mPNSHandle;
 
 	/**

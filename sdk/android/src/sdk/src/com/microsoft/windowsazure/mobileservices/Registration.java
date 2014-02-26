@@ -32,7 +32,6 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -220,13 +219,13 @@ public abstract class Registration {
 	 * 
 	 * @throws JSONException
 	 */
-	JSONObject getRegistrationInformation() throws JSONException {
-		JSONObject regInfo = new JSONObject();
-		regInfo.put(REGISTRATIONID_JSON_PROPERTY, getRegistrationId());
-		regInfo.put(REGISTRATION_NAME_JSON_PROPERTY, getName());
-
-		return regInfo;
-	}
+//	JSONObject getRegistrationInformation() throws JSONException {
+//		JSONObject regInfo = new JSONObject();
+//		regInfo.put(REGISTRATIONID_JSON_PROPERTY, getRegistrationId());
+//		regInfo.put(REGISTRATION_NAME_JSON_PROPERTY, getName());
+//
+//		return regInfo;
+//	}
 
 	private static boolean isNullOrWhiteSpace(String str) {
 		return str == null || str.trim().equals("");

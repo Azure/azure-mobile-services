@@ -50,7 +50,12 @@ public final class PnsSpecificRegistrationFactory {
 	 * Creates native registration according the PNS supported on device
 	 */
 	public Registration createNativeRegistration() {
-		return mIsAmazonDevice ? new AdmNativeRegistration() : new GcmNativeRegistration();
+		Registration registration = mIsAmazonDevice ? new AdmNativeRegistration() : new GcmNativeRegistration();
+		
+		registration.setName(Registration.DEFAULT_REGISTRATION_NAME);
+		
+		return registration;
+		
 	}
 
 	/**
@@ -71,7 +76,11 @@ public final class PnsSpecificRegistrationFactory {
 		builder = builder.excludeFieldsWithoutExposeAnnotation();
 		Gson gson = builder.create();
 		Class<? extends Registration> clazz = mIsAmazonDevice ? AdmNativeRegistration.class : GcmNativeRegistration.class;
-		return gson.fromJson(registrationJson, clazz);
+		Registration registration = gson.fromJson(registrationJson, clazz);
+
+		registration.setName(Registration.DEFAULT_REGISTRATION_NAME);
+		
+		return registration;
 	}
 
 	/**

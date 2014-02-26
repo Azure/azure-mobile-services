@@ -23,11 +23,13 @@ See the Apache Version 2.0 License for specific language governing permissions a
 
 package com.microsoft.windowsazure.mobileservices;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.http.Header;
 import org.apache.http.protocol.HTTP;
@@ -37,7 +39,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
@@ -132,17 +133,27 @@ public class MobileServicePush {
 	 * @return The created registration
 	 * @throws Exception
 	 */
-	public Registration register(String pnsHandle, String... tags) throws Exception {
+	public void register(String pnsHandle, String[] tags, final RegistrationCallback callback) {
 		if (isNullOrWhiteSpace(pnsHandle)) {
-			throw new IllegalArgumentException("pnsHandle");
+			callback.onRegister(null, new IllegalArgumentException("pnsHandle"));
+			return;
 		}
 
 		Registration registration = mPnsSpecificRegistrationFactory.createNativeRegistration();
 		registration.setPNSHandle(pnsHandle);
-		registration.setName(Registration.DEFAULT_REGISTRATION_NAME);
 		registration.addTags(tags);
 
-		return registerInternal(registration);
+		registerInternal(registration, new RegisterInternalCallback() {
+
+			@Override
+			public void onRegister(Registration registration, Exception exception) {
+				callback.onRegister(registration, exception);
+
+				return;
+
+			}
+
+		});
 	}
 
 	/**
@@ -156,20 +167,23 @@ public class MobileServicePush {
 	 *            The template body
 	 * @param tags
 	 *            The tags to use in the registration
-	 * @return The created registration
-	 * @throws Exception
+	 * @param callback
+	 *            The operation callback
 	 */
-	public TemplateRegistration registerTemplate(String pnsHandle, String templateName, String template, String... tags) throws Exception {
+	public void registerTemplate(String pnsHandle, String templateName, String template, String[] tags, final TemplateRegistrationCallback callback) {
 		if (isNullOrWhiteSpace(pnsHandle)) {
-			throw new IllegalArgumentException("pnsHandle");
+			callback.onRegister(null, new IllegalArgumentException("pnsHandle"));
+			return;
 		}
 
 		if (isNullOrWhiteSpace(templateName)) {
-			throw new IllegalArgumentException("templateName");
+			callback.onRegister(null, new IllegalArgumentException("templateName"));
+			return;
 		}
 
 		if (isNullOrWhiteSpace(template)) {
-			throw new IllegalArgumentException("template");
+			callback.onRegister(null, new IllegalArgumentException("template"));
+			return;
 		}
 
 		TemplateRegistration registration = mPnsSpecificRegistrationFactory.createTemplateRegistration();
@@ -178,16 +192,34 @@ public class MobileServicePush {
 		registration.setBodyTemplate(template);
 		registration.addTags(tags);
 
-		return (TemplateRegistration) registerInternal(registration);
+		registerInternal(registration, new RegisterInternalCallback() {
+
+			@Override
+			public void onRegister(Registration registration, Exception exception) {
+				callback.onRegister((TemplateRegistration) registration, exception);
+
+				return;
+			}
+		});
 	}
 
 	/**
 	 * Unregisters the client for native notifications
 	 * 
-	 * @throws Exception
+	 * @param callback
+	 *            The operation callback
 	 */
-	public void unregister() throws Exception {
-		unregisterInternal(Registration.DEFAULT_REGISTRATION_NAME);
+	public void unregister(final UnregisterCallback callback) {
+		unregisterInternal(Registration.DEFAULT_REGISTRATION_NAME, new UnregisterInternalCallback() {
+
+			@Override
+			public void onUnregister(String registrationId, Exception exception) {
+				callback.onUnregister(exception);
+
+				return;
+			}
+
+		});
 	}
 
 	/**
@@ -195,14 +227,25 @@ public class MobileServicePush {
 	 * 
 	 * @param templateName
 	 *            The template name
-	 * @throws Exception
+	 * @param callback
+	 *            The operation callback
+	 * 
 	 */
-	public void unregisterTemplate(String templateName) throws Exception {
+	public void unregisterTemplate(String templateName, final UnregisterTemplateCallback callback) {
 		if (isNullOrWhiteSpace(templateName)) {
-			throw new IllegalArgumentException("templateName");
+			callback.onUnregister(new IllegalArgumentException("templateName"));
+			return;
 		}
 
-		unregisterInternal(templateName);
+		unregisterInternal(templateName, new UnregisterInternalCallback() {
+
+			@Override
+			public void onUnregister(String registrationId, Exception exception) {
+				callback.onUnregister(exception);
+
+				return;
+			}
+		});
 	}
 
 	/**
@@ -210,26 +253,75 @@ public class MobileServicePush {
 	 * 
 	 * @param pnsHandle
 	 *            PNS specific identifier
-	 * @throws Exception
+	 * @param callback
+	 *            The operation callback
 	 */
-	public void unregisterAll(String pnsHandle) throws Exception {
-		refreshRegistrationInformation(pnsHandle);
+	public void unregisterAll(String pnsHandle, final UnregisterAllCallback callback) {
+		getFullRegistrationInformation(pnsHandle, new GetFullRegistrationInformationCallback() {
 
-		Set<String> keys = mSharedPreferences.getAll().keySet();
+			@Override
+			public void onCompleted(ArrayList<Registration> registrations, Exception exception) {
 
-		for (String key : keys) {
-			if (key.startsWith(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY)) {
-				String registrationName = key.substring((STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY).length());
-				String registrationId = mSharedPreferences.getString(key, "");
+				if (exception != null) {
+					callback.onUnregister(exception);
+					return;
+				}
 
-				deleteRegistrationInternal(registrationName, registrationId);
+				final SyncState state = new SyncState();
+				
+				state.size = registrations.size();
+				
+				final CopyOnWriteArrayList<String> concurrentArray = new CopyOnWriteArrayList<String>();
+
+				final Object syncObject = new Object();
+
+				if (state.size == 0) {
+					
+					removeAllRegistrationsId();
+					callback.onUnregister(null);
+					return;
+				}
+					
+				for (Registration registration : registrations) {
+					deleteRegistrationInternal(registration.getName(), registration.getRegistrationId(), new DeleteRegistrationInternalCallback() {
+
+						@Override
+						public void onDelete(String registrationId, Exception exception) {
+							
+							concurrentArray.add(registrationId);
+
+							if (exception != null) {
+								synchronized (syncObject) {
+									if (!state.alreadyReturn) {
+										callback.onUnregister(exception);
+										state.alreadyReturn = true;
+										return;
+									}
+								}
+							}
+
+							if (concurrentArray.size() == state.size && !state.alreadyReturn) {
+								removeAllRegistrationsId();
+								callback.onUnregister(null);
+								
+								return;
+							}
+						}
+					});
+				}
 			}
-		}
+		});
 	}
 
-	private void refreshRegistrationInformation(String pnsHandle) throws Exception {
+	private class SyncState {
+		public boolean alreadyReturn;
+		public int size;
+	}
+
+	private void refreshRegistrationInformation(String pnsHandle, final RefreshRegistrationInformationCallback callback) {
 		if (isNullOrWhiteSpace(pnsHandle)) {
-			throw new IllegalArgumentException("pnsHandle");
+			callback.onRefresh(new IllegalArgumentException("pnsHandle"));
+			return;
 		}
 
 		// delete old registration information
@@ -244,9 +336,6 @@ public class MobileServicePush {
 		editor.commit();
 
 		// get existing registrations
-		final CountDownLatch latch = new CountDownLatch(1);
-		final ResultContainer<String> resultContainer = new ResultContainer<String>();
-
 		String resource = "/registrations/";
 
 		List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
@@ -260,52 +349,98 @@ public class MobileServicePush {
 			@Override
 			public void onResponse(ServiceFilterResponse response, Exception exception) {
 				if (exception != null) {
-					resultContainer.setException(exception);
+					callback.onRefresh(exception);
+
+					return;
 				} else {
 
-					resultContainer.setItem(response.getContent());
-				}
+					JsonArray registrations = new JsonParser().parse(response.getContent()).getAsJsonArray();
 
-				latch.countDown();
+					for (JsonElement registrationJson : registrations) {
+						Registration registration = null;
+						if (registrationJson.getAsJsonObject().has("templateName")) {
+							registration = mPnsSpecificRegistrationFactory.parseTemplateRegistration(registrationJson.getAsJsonObject());
+						} else {
+							registration = mPnsSpecificRegistrationFactory.parseNativeRegistration(registrationJson.getAsJsonObject());
+						}
+
+						try {
+							storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
+						} catch (Exception e) {
+							callback.onRefresh(exception);
+
+							return;
+						}
+					}
+
+					mIsRefreshNeeded = false;
+
+					callback.onRefresh(null);
+
+					return;
+				}
 			}
 		});
-		
-		latch.await();
-		
-		
-		Exception ex = resultContainer.getException();
-		if (ex != null) {
-			throw ex;
-		}
-
-		String response = resultContainer.getItem();
-
-		JsonArray registrations = new JsonParser().parse(response).getAsJsonArray();
-
-		for (JsonElement registrationJson : registrations) {
-			Registration registration = null;
-			if (registrationJson.getAsJsonObject().has("templateName")) {
-				registration = mPnsSpecificRegistrationFactory.parseTemplateRegistration(registrationJson.getAsJsonObject());
-			} else {
-				registration = mPnsSpecificRegistrationFactory.parseNativeRegistration(registrationJson.getAsJsonObject());
-			}
-
-			storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
-		}
-
-		mIsRefreshNeeded = false;
 	}
 
+	private void getFullRegistrationInformation(String pnsHandle, final GetFullRegistrationInformationCallback callback) {
+		if (isNullOrWhiteSpace(pnsHandle)) {
+			callback.onCompleted(null, new IllegalArgumentException("pnsHandle"));
+			return;
+		}
+
+		// get existing registrations
+		String resource = "/registrations/";
+
+		List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
+		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("platform", mPnsSpecificRegistrationFactory.getPlatform()));
+		parameters.add(new Pair<String, String>("deviceId", pnsHandle));
+		requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
+
+		mClient.invokeApiInternal(resource, null, "GET", requestHeaders, parameters, MobileServiceClient.PNS_API_URL, new ServiceFilterResponseCallback() {
+
+			@Override
+			public void onResponse(ServiceFilterResponse response, Exception exception) {
+				if (exception != null) {
+					callback.onCompleted(null, exception);
+
+					return;
+				} else {
+
+					ArrayList<Registration> registrationsList = new ArrayList<Registration>();
+					
+					JsonArray registrations = new JsonParser().parse(response.getContent()).getAsJsonArray();
+
+					for (JsonElement registrationJson : registrations) {
+						Registration registration = null;
+						if (registrationJson.getAsJsonObject().has("templateName")) {
+							registration = mPnsSpecificRegistrationFactory.parseTemplateRegistration(registrationJson.getAsJsonObject());
+						} else {
+							registration = mPnsSpecificRegistrationFactory.parseNativeRegistration(registrationJson.getAsJsonObject());
+						}
+
+						registrationsList.add(registration);
+					}
+
+					callback.onCompleted(registrationsList, null);
+
+					return;
+				}
+			}
+		});
+	}
+	
 	/**
 	 * Creates a new registration in the server. If it exists, updates its
 	 * information
 	 * 
 	 * @param registration
 	 *            The registration to create
-	 * @return The created registration
-	 * @throws Exception
+	 * @param callback
+	 *            The operation callback
 	 */
-	private Registration registerInternal(Registration registration) throws Exception {
+	private void registerInternal(final Registration registration, final RegisterInternalCallback callback) {
 
 		if (mIsRefreshNeeded) {
 			String pNSHandle = mSharedPreferences.getString(STORAGE_PREFIX + PNS_HANDLE_KEY, "");
@@ -314,27 +449,163 @@ public class MobileServicePush {
 				pNSHandle = registration.getPNSHandle();
 			}
 
-			refreshRegistrationInformation(pNSHandle);
-		}
+			refreshRegistrationInformation(pNSHandle, new RefreshRegistrationInformationCallback() {
 
-		String registrationId = retrieveRegistrationId(registration.getName());
-		if (isNullOrWhiteSpace(registrationId)) {
-			registrationId = createRegistrationId();
-		}
+				@Override
+				public void onRefresh(Exception exception) {
+					if (exception != null) {
+						callback.onRegister(registration, exception);
 
-		registration.setRegistrationId(registrationId);
+						return;
+
+					} else {
+						createRegistrationId(registration, new CreateRegistrationIdCallback() {
+							@Override
+							public void onCreate(final String registrationId, Exception exception) {
+								if (exception != null) {
+									callback.onRegister(registration, exception);
+
+									return;
+								} else {
+									callback.onRegister(registration, null);
+
+									return;
+								}
+							}
+						});
+					}
+				}
+
+			});
+		} else {
+			createRegistrationId(registration, new CreateRegistrationIdCallback() {
+				@Override
+				public void onCreate(final String registrationId, Exception exception) {
+					if (exception != null) {
+						callback.onRegister(registration, exception);
+
+						return;
+					} else {
+						callback.onRegister(registration, null);
+
+						return;
+					}
+				}
+			});
+		}
+	}
+
+	private void createRegistrationId(final Registration registration, final CreateRegistrationIdCallback callback) {
+
+		String registrationId = null;
 
 		try {
-			return upsertRegistrationInternal(registration);
-		} catch (RegistrationGoneException e) {
-			// if we get an RegistrationGoneException (410) from service, we
-			// will recreate registration id and will try to do upsert one more
-			// time.
+			registrationId = retrieveRegistrationId(registration.getName());
+		} catch (Exception e) {
+			callback.onCreate(null, e);
+			return;
 		}
 
-		registrationId = createRegistrationId();
+		if (isNullOrWhiteSpace(registrationId)) {
+			createRegistrationId(new CreateRegistrationIdCallback() {
+				@Override
+				public void onCreate(final String registrationId, Exception exception) {
+					if (exception != null) {
+						callback.onCreate(null, exception);
+
+						return;
+					} else {
+						setRegistrationId(registration, registrationId, new SetRegistrationIdCallback() {
+
+							@Override
+							public void onSet(String registrationId, Exception exception) {
+								callback.onCreate(registrationId, exception);
+
+								return;
+							}
+
+						});
+					}
+				}
+
+			});
+		} else {
+			setRegistrationId(registration, registrationId, new SetRegistrationIdCallback() {
+
+				@Override
+				public void onSet(String registrationId, Exception exception) {
+					callback.onCreate(registrationId, exception);
+
+					return;
+				}
+
+			});
+		}
+	}
+
+	private void setRegistrationId(final Registration registration, final String registrationId, final SetRegistrationIdCallback callback) {
 		registration.setRegistrationId(registrationId);
-		return upsertRegistrationInternal(registration);
+
+		upsertRegistrationInternal(registration, new UpsertRegistrationInternalCallback() {
+
+			@Override
+			public void onUpsert(final Registration registration, Exception exception) {
+
+				if (exception == null) {
+					
+					try {
+						storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						callback.onSet(registrationId, e);
+						return;
+					}
+
+					callback.onSet(registrationId, null);
+					
+					return;
+				} else if (exception instanceof RegistrationGoneException) {
+					// if we get an RegistrationGoneException (410) from
+					// service, we
+					// will recreate registration id and will try to do
+					// upsert one more
+					// time.
+					createRegistrationId(new CreateRegistrationIdCallback() {
+
+						@Override
+						public void onCreate(final String registrationId, Exception exception) {
+							if (exception != null) {
+								callback.onSet(registrationId, exception);
+
+								return;
+							} else {
+								registration.setRegistrationId(registrationId);
+								upsertRegistrationInternal(registration, new UpsertRegistrationInternalCallback() {
+
+									@Override
+									public void onUpsert(Registration registration, Exception exception) {
+										if (exception != null) {
+											callback.onSet(registrationId, exception);
+
+											return;
+										} else {
+											callback.onSet(registrationId, null);
+
+											return;
+										}
+
+									}
+								});
+							}
+						}
+					});
+				} else {
+					callback.onSet(registrationId, exception);
+
+					return;
+				}
+			}
+		});
 	}
 
 	/**
@@ -342,19 +613,44 @@ public class MobileServicePush {
 	 * 
 	 * @param registrationName
 	 *            The registration name
-	 * @throws Exception
+	 * @param callback
+	 *            The operation callback
 	 */
-	private void unregisterInternal(String registrationName) throws Exception {
-		String registrationId = retrieveRegistrationId(registrationName);
+	private void unregisterInternal(String registrationName, final UnregisterInternalCallback callback) {
+		String registrationId = null;
+		try {
+			registrationId = retrieveRegistrationId(registrationName);
+		} catch (Exception e) {
+			callback.onUnregister(null, e);
+			return;
+		}
 
 		if (!isNullOrWhiteSpace(registrationId)) {
-			deleteRegistrationInternal(registrationName, registrationId);
+			deleteRegistrationInternal(registrationName, registrationId, new DeleteRegistrationInternalCallback() {
+
+				@Override
+				public void onDelete(String registrationId, Exception exception) {
+					if (exception != null) {
+						callback.onUnregister(registrationId, exception);
+
+						return;
+					} else {
+						callback.onUnregister(registrationId, null);
+
+						return;
+					}
+
+				}
+			});
+		} 
+		else
+		{
+			callback.onUnregister(null, null);
+			return;
 		}
 	}
 
-	private String createRegistrationId() throws Exception {
-		final CountDownLatch latch = new CountDownLatch(1);
-		final ResultContainer<String> location = new ResultContainer<String>();
+	private void createRegistrationId(final CreateRegistrationIdCallback callback) {
 
 		String resource = "/registrationids/";
 		mClient.invokeApiInternal(resource, null, "POST", null, null, MobileServiceClient.PNS_API_URL, new ServiceFilterResponseCallback() {
@@ -362,31 +658,33 @@ public class MobileServicePush {
 			@Override
 			public void onResponse(ServiceFilterResponse response, Exception exception) {
 				if (exception != null) {
-					location.setException(exception);
+					callback.onCreate(null, exception);
+
+					return;
 				} else {
 					for (Header header : response.getHeaders()) {
 						if (header.getName().equalsIgnoreCase(NEW_REGISTRATION_LOCATION_HEADER)) {
-							location.setItem(header.getValue());
+
+							URI regIdUri = null;
+							try {
+								regIdUri = new URI(header.getValue());
+							} catch (URISyntaxException e) {
+								callback.onCreate(null, e);
+
+								return;
+							}
+
+							String[] pathFragments = regIdUri.getPath().split("/");
+							String result = pathFragments[pathFragments.length - 1];
+
+							callback.onCreate(result, null);
+
+							return;
 						}
 					}
 				}
-
-				latch.countDown();
 			}
 		});
-
-		latch.await();
-
-		Exception ex = location.getException();
-		if (ex != null) {
-			throw ex;
-		}
-
-		URI regIdUri = new URI(location.getItem());
-		String[] pathFragments = regIdUri.getPath().split("/");
-		String result = pathFragments[pathFragments.length - 1];
-
-		return result;
 	}
 
 	/**
@@ -394,12 +692,10 @@ public class MobileServicePush {
 	 * 
 	 * @param registration
 	 *            The registration to update
-	 * @return The updated registration
-	 * @throws Exception
+	 * @param callback
+	 *            The operation callback
 	 */
-	private Registration upsertRegistrationInternal(Registration registration) throws Exception {
-		final CountDownLatch latch = new CountDownLatch(1);
-		final ResultContainer<String> responseContainer = new ResultContainer<String>();
+	private void upsertRegistrationInternal(final Registration registration, final UpsertRegistrationInternalCallback callback) {
 
 		GsonBuilder gsonBuilder = new GsonBuilder();
 		gsonBuilder = gsonBuilder.excludeFieldsWithoutExposeAnnotation();
@@ -409,10 +705,17 @@ public class MobileServicePush {
 		String resource = registration.getURI();
 		JsonElement json = gson.toJsonTree(registration);
 		String body = json.toString();
-		byte[] content = body.getBytes(MobileServiceClient.UTF8_ENCODING);
+		byte[] content = null;
+
+		try {
+			content = body.getBytes(MobileServiceClient.UTF8_ENCODING);
+		} catch (UnsupportedEncodingException e) {
+			callback.onUpsert(registration, e);
+			return;
+		}
 
 		List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
-		
+
 		requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
 
 		mClient.invokeApiInternal(resource, content, "PUT", requestHeaders, null, MobileServiceClient.PNS_API_URL, new ServiceFilterResponseCallback() {
@@ -424,33 +727,31 @@ public class MobileServicePush {
 						exception = new RegistrationGoneException(exception);
 					}
 
-					responseContainer.setException(exception);
-				}
+					callback.onUpsert(registration, exception);
 
-				latch.countDown();
+					return;
+				} else {
+					callback.onUpsert(registration, null);
+
+					return;
+				}
 			}
 		});
-
-		latch.await();
-
-		Exception ex = responseContainer.getException();
-		if (ex != null) {
-			throw ex;
-		}
-
-		return registration;
 	}
 
 	/**
 	 * Deletes a registration and removes it from local storage
 	 * 
-	 * @param regInfo
-	 *            The reginfo JSON object
-	 * @throws Exception
+	 * @param registrationName
+	 *            The registration Name
+	 * 
+	 * @param registrationId
+	 *            The registration Id
+	 * 
+	 * @param callback
+	 *            The operation callback
 	 */
-	private void deleteRegistrationInternal(String registrationName, String registrationId) throws Exception {
-		final CountDownLatch latch = new CountDownLatch(1);
-		final ResultContainer<String> responseContainer = new ResultContainer<String>();
+	private void deleteRegistrationInternal(final String registrationName, final String registrationId, final DeleteRegistrationInternalCallback callback) {
 
 		String resource = "/registrations/" + registrationId;
 
@@ -458,22 +759,19 @@ public class MobileServicePush {
 
 			@Override
 			public void onResponse(ServiceFilterResponse response, Exception exception) {
-				if (exception != null) {
-					responseContainer.setException(exception);
-				}
 
-				latch.countDown();
+				removeRegistrationId(registrationName);
+				
+				if (exception != null) {
+					callback.onDelete(registrationId, exception);
+					return;
+				}
+				
+				callback.onDelete(registrationId, null);
+				return;
+			
 			}
 		});
-
-		latch.await();
-
-		removeRegistrationId(registrationName);
-
-		Exception ex = responseContainer.getException();
-		if (ex != null) {
-			throw ex;
-		}
 	}
 
 	/**
@@ -519,7 +817,7 @@ public class MobileServicePush {
 	 *            storage
 	 * @throws Exception
 	 */
-	private void removeRegistrationId(String registrationName) throws Exception {
+	private void removeRegistrationId(String registrationName) {
 		Editor editor = mSharedPreferences.edit();
 
 		editor.remove(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + registrationName);
@@ -527,6 +825,20 @@ public class MobileServicePush {
 		editor.commit();
 	}
 
+	public void removeAllRegistrationsId() {
+		
+		Editor editor = mSharedPreferences.edit();
+		
+		Set<String> keys = mSharedPreferences.getAll().keySet();
+
+		for (String key : keys) {
+			if (key.startsWith(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY)) {
+				editor.remove(key);
+			}
+		}
+
+		editor.commit();
+	}
 	private void verifyStorageVersion() {
 		String currentStorageVersion = mSharedPreferences.getString(STORAGE_PREFIX + STORAGE_VERSION_KEY, "");
 
