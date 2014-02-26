@@ -5,7 +5,6 @@
 using Microsoft.WindowsAzure.Mobile.Service;
 using System;
 using System.Data.Entity;
-using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -32,14 +31,14 @@ namespace ZumoE2EServerApp.Controllers
         }
 
         [Route("api/movieFinder/moviesOnSameYear")]
-        public Task<MovieResult> fetchMoviesSameYear([FromBody]  StringIdMovie movie)
+        public Task<MovieResult> fetchMoviesSameYear(StringIdMovie movie)
         {
             var orderBy = GetQueryValue("orderby", "Title");
             return getMovie("Year", movie.Year, orderBy);
         }
 
         [Route("api/movieFinder/moviesWithSameDuration")]
-        public Task<MovieResult> fetchMoviesSameDuration([FromBody]  StringIdMovie movie)
+        public Task<MovieResult> fetchMoviesSameDuration(StringIdMovie movie)
         {
             var orderBy = GetQueryValue("orderby", "Title");
             return getMovie("Duration", movie.Duration, orderBy);
@@ -47,12 +46,12 @@ namespace ZumoE2EServerApp.Controllers
 
         private async Task<MovieResult> getMovie(string field, object value, string orderBy = null)
         {
-            SDKClientTestContext context = new SDKClientTestContext(Services.Settings.Name);            
+            SDKClientTestContext context = new SDKClientTestContext(Services.Settings.Name);
             var Movies = context.Movies;
 
-            Debug.WriteLine("table: " + "Movies");
-            Debug.WriteLine("Field: " + field + ", value: " + value);
-            Debug.WriteLine("OrderBy: " + (orderBy == null ? "<null>" : orderBy));
+            Services.Log.Debug("table: " + "Movies");
+            Services.Log.Debug("Field: " + field + ", value: " + value);
+            Services.Log.Debug("OrderBy: " + (orderBy == null ? "<null>" : orderBy));
             IQueryable<StringIdMovie> t2 = Movies.Where(p => true);
             t2 = Where(t2, field, value);
             if (orderBy != null)
@@ -61,7 +60,7 @@ namespace ZumoE2EServerApp.Controllers
             }
 
             var results = await t2.ToListAsync();
-            return new MovieResult() { movies = results.ToArray() };
+            return new MovieResult() { Movies = results.ToArray() };
         }
 
         private string GetQueryValue(string key, string defaultValue)
@@ -110,12 +109,7 @@ namespace ZumoE2EServerApp.Controllers
 
         public class MovieResult
         {
-            public StringIdMovie[] movies { get; set; }
+            public StringIdMovie[] Movies { get; set; }
         }
-
-        //class ErrorResult
-        //{
-        //    public Exception error { get; set; }
-        //}
     }
 }

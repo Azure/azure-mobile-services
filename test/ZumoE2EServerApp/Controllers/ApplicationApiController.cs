@@ -17,31 +17,31 @@ namespace ZumoE2EServerApp.Controllers
         [Route("api/application")]
         public Task<HttpResponseMessage> Get(JToken body)
         {
-            return CustomSharedApi.handleRequest(this.Request, this.User, body);
+            return CustomSharedApi.handleRequest(this.Request, (ServiceUser)this.User, body);
         }
 
         [Route("api/application")]
         public Task<HttpResponseMessage> Post(JToken body)
         {
-            return CustomSharedApi.handleRequest(this.Request, this.User, body);
+            return CustomSharedApi.handleRequest(this.Request, (ServiceUser)this.User, body);
         }
 
         [Route("api/application")]
         public Task<HttpResponseMessage> Put(JToken body)
         {
-            return CustomSharedApi.handleRequest(this.Request, this.User, body);
+            return CustomSharedApi.handleRequest(this.Request, (ServiceUser)this.User, body);
         }
 
         [Route("api/application")]
         public Task<HttpResponseMessage> Delete(JToken body)
         {
-            return CustomSharedApi.handleRequest(this.Request, this.User, body);
+            return CustomSharedApi.handleRequest(this.Request, (ServiceUser)this.User, body);
         }
 
         [Route("api/application")]
         public Task<HttpResponseMessage> Patch(JToken body)
         {
-            return CustomSharedApi.handleRequest(this.Request, this.User, body);
+            return CustomSharedApi.handleRequest(this.Request, (ServiceUser)this.User, body);
         }
     }
 }

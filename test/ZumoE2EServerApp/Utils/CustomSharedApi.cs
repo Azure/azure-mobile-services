@@ -9,21 +9,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Security.Principal;
 using System.Threading.Tasks;
 
 namespace ZumoE2EServerApp.Utils
 {
     public static class CustomSharedApi
     {
-        public static async Task<HttpResponseMessage> handleRequest(
+        internal static Task<HttpResponseMessage> handleRequest(
             HttpRequestMessage req,
-            IPrincipal principal,
+            ServiceUser user,
             JToken body = null)
         {
-            await Task.Delay(0);
-            ServiceUser user = (ServiceUser)principal;
-
             var query = req.GetQueryNameValuePairs();
 
             var format = GetQueryParamOrDefault(query, "format", "json");
@@ -78,7 +74,8 @@ namespace ZumoE2EServerApp.Utils
                     resp.Headers.Add(h.Key, h.Value);
                 }
             }
-            return resp;
+
+            return Task.FromResult(resp);
         }
 
         private static string GetQueryParamOrDefault(IEnumerable<KeyValuePair<string, string>> query, string key, string def)

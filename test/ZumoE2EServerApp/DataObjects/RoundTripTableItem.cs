@@ -28,9 +28,17 @@ namespace ZumoE2EServerApp.DataObjects
         // Enum, with converter
         public EnumType EnumType { get; set; }
 
-        public string ComplexType1S { get; set; }
+        public string ComplexType1Serialized { get; set; }
 
-        public string ComplexType2S { get; set; }
+        public string ComplexType2Serialized { get; set; }
+
+        public byte[] Version { get; set; }
+
+        public DateTimeOffset? CreatedAt { get; set; }
+
+        public DateTimeOffset? UpdatedAt { get; set; }
+
+        public bool Deleted { get; set; }
     }
 
     public class RoundTripTableItemFakeStringId : ITableData
@@ -57,36 +65,9 @@ namespace ZumoE2EServerApp.DataObjects
         [JsonConverter(typeof(EnumTypeConverter<EnumType>))]
         public EnumType EnumType { get; set; }
 
-        [JsonIgnore]
-        public string ComplexType1S { get; set; }
+        public ComplexType[] ComplexType1 { get; set;}
 
-        [JsonIgnore]
-        public string ComplexType2S { get; set; }
-
-        public ComplexType[] ComplexType1
-        {
-            get
-            {
-                return (this.ComplexType1S == null ? null : JsonConvert.DeserializeObject<ComplexType[]>(this.ComplexType1S));
-            }
-            set
-            {
-                this.ComplexType1S = JsonConvert.SerializeObject(value);
-            }
-        }
-
-        [JsonProperty(PropertyName = "ComplexTYPE2")]
-        public ComplexType2 ComplexType2
-        {
-            get
-            {
-                return (this.ComplexType2S == null ? null : JsonConvert.DeserializeObject<ComplexType2>(this.ComplexType2S));
-            }
-            set
-            {
-                this.ComplexType2S = JsonConvert.SerializeObject(value);
-            }
-        }
+        public ComplexType2 ComplexType2 { get ; set;}
 
         public byte[] Version { get; set; }
 
@@ -99,7 +80,7 @@ namespace ZumoE2EServerApp.DataObjects
 
     public class ComplexType2
     {
-        [JsonProperty(PropertyName="Name")]
+        [JsonProperty(PropertyName = "Name")]
         public string Name { get; set; }
 
         [JsonProperty(PropertyName = "Age")]

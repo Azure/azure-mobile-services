@@ -3,6 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using Microsoft.WindowsAzure.Mobile.Service;
+using Microsoft.WindowsAzure.Mobile.Service.Config;
 using Newtonsoft.Json.Linq;
 using System.Web.Http;
 
@@ -18,7 +19,7 @@ namespace ZumoE2EServerApp.Controllers
             return new JObject(
                 new JProperty("runtime", new JObject(
                     new JProperty("type", ".NET"),
-                    new JProperty("version", this.Services.Settings["MOBILESERVICESDOTNET_EXTENSION_VERSION"])
+                    new JProperty("version", this.Services.Settings[ServiceSettingsKeys.SiteExtensionVersion])
                 )),
                 new JProperty("features", new JObject(
                     new JProperty("intIdTables", false),

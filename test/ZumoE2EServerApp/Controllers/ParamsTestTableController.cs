@@ -16,59 +16,53 @@ namespace ZumoE2EServerApp.Controllers
 {
     public class ParamsTestTableController : TableController<ParamsTestTableEntity>
     {
-        public IQueryable<ParamsTestTableEntity> GetAllNoDB()
+        public Task<IQueryable<ParamsTestTableEntity>> GetAllNoDB()
         {
-            var parameters = this.Request.GetQueryNameValuePairs();
-            var id = GetQueryParamOrDefault(parameters, "id", "1");
-            var ps = NewMethod(parameters);
-            var retEnt = new ParamsTestTableEntity() { Id = int.Parse(id), Parameters = ps };
-            return new ParamsTestTableEntity[] { retEnt }.AsQueryable();
+            var retEnt = MainProcessor();
+            return Task.FromResult(new ParamsTestTableEntity[] { retEnt }.AsQueryable());
         }
 
         public Task<ParamsTestTableEntity> GetNoDB(string id)
         {
-            return MainProcessor(id);
+            return Task.FromResult(MainProcessor(id));
         }
 
         public Task<ParamsTestTableEntity> PatchNoDB(string id, Delta<ParamsTestTableEntity> patch)
         {
-            return MainProcessor(id);
+            return Task.FromResult(MainProcessor(id));
         }
 
         public Task<ParamsTestTableEntity> PostNoDB(ParamsTestTableEntity item)
         {
-            return MainProcessor("1");
+            return Task.FromResult(MainProcessor());
         }
 
         public Task<ParamsTestTableEntity> DeleteNoDB(string id)
         {
-            return MainProcessor(id);
+            return Task.FromResult(MainProcessor(id));
         }
 
-        private Task<ParamsTestTableEntity> MainProcessor(string id)
+        private ParamsTestTableEntity MainProcessor(string id = null)
         {
             var parameters = this.Request.GetQueryNameValuePairs();
-            var ps = NewMethod(parameters);
-            var retEnt = new ParamsTestTableEntity() { Id = int.Parse(id), Parameters = ps };
-            return Task.FromResult(retEnt);
-        }
-
-        private static string NewMethod(IEnumerable<KeyValuePair<string, string>> parameters)
-        {
-            JObject ps = new JObject();
-            foreach (var kvp in parameters)
+            if (id == null)
             {
-                ps[kvp.Key] = kvp.Value;
+                var val = parameters.FirstOrDefault(p => p.Key == "id");
+                id = (val.Key == "id") ? val.Value : "1";
             }
 
-            var ps2 = JsonConvert.SerializeObject(ps);
-            return ps2;
-        }
+            JObject parametersJObj = new JObject();
+            foreach (var kvp in parameters)
+            {
+                parametersJObj[kvp.Key] = kvp.Value;
+            }
 
-        private static string GetQueryParamOrDefault(IEnumerable<KeyValuePair<string, string>> query, string key, string def)
-        {
-            var val = query.FirstOrDefault(p => p.Key == key);
-            return (val.Key == key) ? val.Value : def;
+            var retEnt = new ParamsTestTableEntity()
+            {
+                Id = int.Parse(id),
+                Parameters = JsonConvert.SerializeObject(parametersJObj)
+            };
+            return retEnt;
         }
     }
 }

@@ -9,27 +9,39 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ZumoE2EServerApp.DataObjects
 {
+    public class W8JSRoundTripTableItemForDB
+    {
+        public string W8JSRoundTripTableItemForDBId { get; set; }
+
+        public string String1 { get; set; }
+
+        public DateTimeOffset? Date1 { get; set; }
+
+        public bool? Bool1 { get; set; }
+
+        public double? Number { get; set; }
+
+        public string ComplexTypeSerialized { get; set; }
+
+        public byte[] Version { get; set; }
+
+        public DateTimeOffset? CreatedAt { get; set; }
+
+        public DateTimeOffset? UpdatedAt { get; set; }
+
+        public bool Deleted { get; set; }
+    }
+
     public class W8JSRoundTripTableItem : EntityData
     {
         public string String1 { get; set; }
+
         public DateTimeOffset? Date1 { get; set; }
+
         public bool? Bool1 { get; set; }
+
         public double? Number { get; set; }
 
-        [NotMapped]
         public string[] ComplexType { get; set; }
-
-        [JsonIgnore]
-        public string ComplexTypeS
-        {
-            get
-            {
-                return (this.ComplexType == null ? null : JsonConvert.SerializeObject(this.ComplexType));
-            }
-            set
-            {
-                this.ComplexType = value == null ? null : JsonConvert.DeserializeObject<string[]>(value);
-            }
-        }
     }
 }

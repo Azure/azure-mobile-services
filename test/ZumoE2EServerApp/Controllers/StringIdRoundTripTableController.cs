@@ -3,15 +3,14 @@
 // ----------------------------------------------------------------------------
 
 using Microsoft.WindowsAzure.Mobile.Service;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.OData;
 using ZumoE2EServerApp.DataObjects;
 using ZumoE2EServerApp.Models;
+using ZumoE2EServerApp.Utils;
 
 namespace ZumoE2EServerApp.Tables
 {
@@ -21,32 +20,21 @@ namespace ZumoE2EServerApp.Tables
         {
             base.Initialize(controllerContext);
             SDKClientTestContext context = new SDKClientTestContext(Services.Settings.Name);
-            this.DomainManager = new EntityDomainManager<StringIdRoundTripTableItem>(context, Request, Services);
+            this.DomainManager = new StringIdRoundTripDomainManager(context, Request, Services);
         }
 
-        public IEnumerable<StringIdRoundTripTableItem> GetAllRoundTrips()
+        public IQueryable<StringIdRoundTripTableItem> GetAllRoundTrips()
         {
-            return Query().ToArray();
+            return Query();
         }
 
-        public  HttpResponseMessage GetRoundTrip(string id)
+        public SingleResult<StringIdRoundTripTableItem> GetRoundTrip(string id)
         {
-            var item = Lookup(id).Queryable.FirstOrDefault();
-            if (item != null)
-            {
-                return this.Request.CreateResponse(HttpStatusCode.OK, item);
-            }
-            else
-            {
-                return this.Request.CreateResponse(HttpStatusCode.NotFound);
-            }
+            return Lookup(id);
         }
 
         public Task<StringIdRoundTripTableItem> PatchRoundTrip(string id, Delta<StringIdRoundTripTableItem> patch)
         {
-            patch.FixShiftedProps(p => p.ComplexType, p => p.ComplexTypeS)
-                .FixShiftedProps(p => p.Complex, p => p.ComplexS);
-
             return UpdateAsync(id, patch);
         }
 

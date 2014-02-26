@@ -3,9 +3,9 @@
 // ----------------------------------------------------------------------------
 
 using Microsoft.WindowsAzure.Mobile.Service;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web.Http;
 using System.Web.Http.Controllers;
 using System.Web.Http.OData;
 using ZumoE2EServerApp.DataObjects;
@@ -23,21 +23,20 @@ namespace ZumoE2EServerApp.Controllers
             this.DomainManager = new W8RoundTripDomainManager(context, Request, Services);
         }
 
-        public IEnumerable<RoundTripTableItemFakeStringId> GetAllRoundTrips()
+        public IQueryable<RoundTripTableItemFakeStringId> GetAllRoundTrips()
         {
-            return Query().ToArray();
+            return Query();
         }
 
+//        public SingleResult<RoundTripTableItemFakeStringId> GetRoundTrip(int id)
         public RoundTripTableItemFakeStringId GetRoundTrip(int id)
         {
-            var r = Lookup(id.ToString()).Queryable.FirstOrDefault();
-            return r;
+//            return Lookup(id.ToString());
+            return Lookup(id.ToString()).Queryable.FirstOrDefault();
         }
 
         public Task<RoundTripTableItemFakeStringId> PatchRoundTrip(int id, Delta<RoundTripTableItemFakeStringId> patch)
         {
-            patch.FixShiftedProps(p => p.ComplexType1, p => p.ComplexType1S).
-                FixShiftedProps(p => p.ComplexType2, p => p.ComplexType2S);
             return UpdateAsync(id.ToString(), patch);
         }
 

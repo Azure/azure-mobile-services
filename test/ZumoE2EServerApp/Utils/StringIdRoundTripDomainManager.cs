@@ -9,9 +9,9 @@ using ZumoE2EServerApp.Models;
 
 namespace ZumoE2EServerApp.Utils
 {
-    internal class W8RoundTripDomainManager : ComplexTypeDomainManager<RoundTripTableItemFakeStringId, RoundTripTableItem, int>
+    internal class StringIdRoundTripDomainManager : ComplexTypeDomainManager<StringIdRoundTripTableItem, StringIdRoundTripTableItemForDB, string>
     {
-        public W8RoundTripDomainManager(SDKClientTestContext context, HttpRequestMessage request, ApiServices services)
+        public StringIdRoundTripDomainManager(SDKClientTestContext context, HttpRequestMessage request, ApiServices services)
             : base(context, request, services)
         {
         }

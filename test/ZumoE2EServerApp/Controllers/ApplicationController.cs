@@ -15,17 +15,17 @@ namespace ZumoE2EServerApp.Controllers
     [RequiresAuthorization(AuthorizationLevel.Application)]
     public class ApplicationController : PublicController
     {
-        public override IQueryable<TestUser> GetAllTestUser()
+        public override Task<IQueryable<TestUser>> GetAllTestUser()
         {
             return base.GetAllTestUser();
         }
 
-        public override SingleResult<TestUser> GetTestUser(string id)
+        public override Task<SingleResult<TestUser>> GetTestUser(string id)
         {
             return base.GetTestUser(id);
         }
 
-        public override Task<IHttpActionResult> PatchTestUser(string id, Delta<TestUser> patch)
+        public override Task<HttpResponseMessage> PatchTestUser(string id, Delta<TestUser> patch)
         {
             return base.PatchTestUser(id, patch);
         }

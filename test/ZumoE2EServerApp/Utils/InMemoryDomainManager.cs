@@ -13,30 +13,40 @@ using System.Web.Http.OData.Query;
 
 namespace ZumoE2EServerApp.Utils
 {
-    // Note: This is not thread safe, but should be good enough for running simple tests.
-    public class InMemoryDomainManager<TData> : IDomainManager<TData> where TData : class, ITableData
+    internal class InMemoryDomainManager<TData> : IDomainManager<TData> where TData : class, ITableData
     {
         private static List<TData> store;
+        private static object lockObj = new object();
         private static int counter = 1;
-        private bool isSingleThreaded;
 
-        public InMemoryDomainManager(bool isSingleThreaded, List<TData> initial = null)
+        public InMemoryDomainManager(List<TData> initial = null)
         {
-            this.isSingleThreaded = isSingleThreaded;
             if (store == null)
             {
-                store = (initial != null ? initial : new List<TData>());
+                lock (lockObj)
+                {
+                    if (store == null)
+                    {
+                        store = (initial != null ? initial : new List<TData>());
+                    }
+                }
             }
         }
 
         public IQueryable<TData> Query()
         {
-            return store.AsQueryable();
+            lock (lockObj)
+            {
+                return store.AsQueryable();
+            }
         }
 
         public SingleResult<TData> Lookup(string id)
         {
-            return SingleResult.Create(store.Where(p => p.Id == id).AsQueryable());
+            lock (lockObj)
+            {
+                return SingleResult.Create(store.Where(p => p.Id == id).AsQueryable());
+            }
         }
 
         public Task<IEnumerable<TData>> QueryAsync(ODataQueryOptions query)
@@ -49,75 +59,43 @@ namespace ZumoE2EServerApp.Utils
             throw new NotImplementedException();
         }
 
-        public async Task<TData> InsertAsync(TData data)
+        public Task<TData> InsertAsync(TData data)
         {
-            data.Id = counter.ToString();
-            counter++;
-            AddWorker(data);
-            await Task.Delay(0);
-            return data;
-        }
-
-        public async Task<TData> UpdateAsync(string id, Delta<TData> patch)
-        {
-            TData item = GetItem(id);
-            patch.Patch(item);
-            await Task.Delay(0);
-            return item;
-        }
-
-        private static TData GetItem(string id)
-        {
-            TData item;
-            item = store.FirstOrDefault(p => p.Id == id);
-            return item;
-        }
-
-        public async Task<TData> ReplaceAsync(string id, TData data)
-        {
-            await DeleteAsync(id);
-            data.Id = id;
-            AddWorker(data);
-            await Task.Delay(0);
-            return data;
-        }
-
-        public async Task<bool> DeleteAsync(string id)
-        {
-            bool ret = false;
-            var item = GetItem(id);
-            if (item != null)
+            lock (lockObj)
             {
-                RemoveWorker(item);
-                ret = true;
-            }
-            await Task.Delay(0);
-            return ret;
-        }
-
-        private void AddWorker(TData data)
-        {
-            if (isSingleThreaded)
-            {
-                // Not threadsafe
+                data.Id = (counter++).ToString();
                 store.Add(data);
-            }
-            else
-            {
-                // Don't actually add.
+                return Task.FromResult(data);
             }
         }
 
-        private void RemoveWorker(TData data)
+        public Task<TData> UpdateAsync(string id, Delta<TData> patch)
         {
-            if (isSingleThreaded)
+            lock (lockObj)
             {
-                // Not threadsafe
-                store.Remove(data);
+                TData data = store.First(p => p.Id == id);
+                patch.Patch(data);
+                return Task.FromResult(data);
             }
-            else
+        }
+
+        public Task<TData> ReplaceAsync(string id, TData data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> DeleteAsync(string id)
+        {
+            lock (lockObj)
             {
-                // Don't actually add.
+                bool ret = false;
+                var data = store.FirstOrDefault(p => p.Id == id);
+                if (data != null)
+                {
+                    store.Remove(data);
+                    ret = true;
+                }
+                return Task.FromResult(ret);
             }
         }
     }
