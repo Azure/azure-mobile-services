@@ -9,7 +9,7 @@ using ZumoE2EServerApp.Models;
 
 namespace ZumoE2EServerApp.Utils
 {
-    public class W8JSRoundTripDomainManager : ComplexTypeDomainManager<W8JSRoundTripTableItem, W8JSRoundTripTableItemForDB, string>
+    internal class W8JSRoundTripDomainManager : ComplexTypeDomainManager<W8JSRoundTripTableItem, W8JSRoundTripTableItemForDB, string>
     {
         public W8JSRoundTripDomainManager(SDKClientTestContext context, HttpRequestMessage request, ApiServices services)
             : base(context, request, services)
