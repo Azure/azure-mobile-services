@@ -1,4 +1,4 @@
-function insert(item, user, request) {
+﻿function insert(item, user, request) {
     var method = item.method;
     if (!method) {
         request.respond(400, { error: 'request must have a \'method\' member' });
@@ -6,9 +6,7 @@ function insert(item, user, request) {
     }
 
     var channelUri = item.channelUri;
-    var usingNH = item.usingNH;
-    var nhNotificationType = item.nhNotificationType;
-    if (!usingNH) {
+    if (!item.usingNH) {
         if (!channelUri) {
             request.respond(400, { error: 'request must have a \'channelUri\' member' });
             return;
@@ -26,7 +24,7 @@ function insert(item, user, request) {
         return;
     }
     var nhPayload = '<?xml version="1.0" encoding="utf-8"?>' + item.xmlPayload;
-    if (nhNotificationType == 'raw') {
+    if (item.nhNotificationType == 'raw') {
         nhPayload = payload;
     }
 
@@ -45,23 +43,16 @@ function insert(item, user, request) {
         error: errorFunction
     };
 
-    if (usingNH) {
-		if(nhNotificationType=='template')
-		{
-			var templateNotification = {
-			"News_English": "World News in English!",
-			"News_French": "World News in French!",
-			"News_Mandarin": "World News in Mandarin!"
-			}
-			push.send('World',templateNotification,options);
-		}
-		else
-		{
-			var wnsType = 'wns/' + nhNotificationType;
-			push.wns.send("tag1",
+    if (item.usingNH) {
+        if (item.nhNotificationType == 'template') {
+            push.send('World', item.templateNotification, options);
+        }
+        else {
+            var wnsType = 'wns/' + item.nhNotificationType;
+            push.wns.send("tag1",
 			nhPayload,
 			wnsType, options);
-		}
+        }
     }
     else {
         var wnsFunction = push.wns[method];

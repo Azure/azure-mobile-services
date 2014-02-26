@@ -14,5 +14,6 @@
 
 // A singleton instance of the MSNaiveISODateFormatter.
 +(MSNaiveISODateFormatter *)naiveISODateFormatter;
++(MSNaiveISODateFormatter *)naiveISODateNoFractionalSecondsFormatter;
 
 @end

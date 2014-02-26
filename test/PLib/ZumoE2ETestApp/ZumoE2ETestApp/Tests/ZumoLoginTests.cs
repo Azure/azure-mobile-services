@@ -48,7 +48,7 @@ namespace ZumoE2ETestApp.Tests
             };
 
 #if !WINDOWS_PHONE
-            result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("In the next few tests you will be prompted for username / password four times."));
+            result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("In the next few tests you will be prompted for username / password five times."));
 #endif
 
             foreach (MobileServiceAuthenticationProvider provider in Util.EnumGetValues(typeof(MobileServiceAuthenticationProvider)))
@@ -136,22 +136,14 @@ namespace ZumoE2ETestApp.Tests
             string testName = string.Format("Login with {0}{1}", provider, useSingleSignOn ? " (using single sign-on)" : "");
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.UseNetRuntime && provider == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory)
-                {
-                    throw new SkipException("AAD not currently supported for .NET Runtime");
-                }
-
-                if (ZumoTestGlobals.UseNetRuntime && useSingleSignOn)
-                {
-                    throw new SkipException("SSO not currently supported for .NET Runtime");
-                }
-
                 var client = ZumoTestGlobals.Instance.Client;
                 var user = await client.LoginAsync(provider, useSingleSignOn);
                 test.AddLog("Logged in as {0}", user.UserId);
                 return true;
-            });
+            }, provider == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory ?  ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN : null,
+               useSingleSignOn ? ZumoTestGlobals.RuntimeFeatureNames.SSO_LOGIN : null);
         }
+
 #else
         internal static ZumoTest CreateLoginTest(MobileServiceAuthenticationProvider provider)
         {
@@ -162,7 +154,7 @@ namespace ZumoE2ETestApp.Tests
                 var user = await client.LoginAsync(provider);
                 test.AddLog("Logged in as {0}", user.UserId);
                 return true;
-            });
+            }, provider == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory ? ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN : null);
         }
 #endif
 
@@ -186,11 +178,6 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Login via token with Live SDK", async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.UseNetRuntime)
-                {
-                    throw new SkipException("Microsoft via Live SDK in not currently supported for .NET Runtime");
-                }
-
                 var client = ZumoTestGlobals.Instance.Client;
 #if !WINDOWS_PHONE
                 var uri = client.ApplicationUri.ToString();
@@ -230,7 +217,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Login failed.");
                     return false;
                 }
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.LIVE_LOGIN);
         }
 #endif
 
@@ -238,11 +225,6 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Login via token for " + provider, async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.UseNetRuntime)
-                {
-                    throw new SkipException("Microsoft via Live SDK in not currently supported for .NET Runtime");
-                }
-
                 var client = ZumoTestGlobals.Instance.Client;
                 var lastIdentity = lastUserIdentityObject;
                 if (lastIdentity == null)
@@ -280,20 +262,6 @@ namespace ZumoE2ETestApp.Tests
                 userIsAuthenticated ? ("auth by " + providerName) : "unauthenticated", tableType);
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.UseNetRuntime && providerName == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory.ToString())
-                {
-                    throw new SkipException("AAD not currently supported for .NET Runtime");
-                }
-                if (ZumoTestGlobals.UseNetRuntime && providerName == "Microsoft via Live SDK")
-                {
-                    throw new SkipException("Microsoft via Live SDK in not currently supported for .NET Runtime");
-                }
-
-                if (ZumoTestGlobals.UseNetRuntime && usingSingeSignOnOrToken)
-                {
-                    throw new SkipException("SSO not currently supported for .NET Runtime");
-                }
-
                 var client = ZumoTestGlobals.Instance.Client;
                 var currentUser = client.CurrentUser;
                 var table = client.GetTable(tableName);
@@ -425,7 +393,7 @@ namespace ZumoE2ETestApp.Tests
                 try
                 {
                     JToken items = null;
-                    if (ZumoTestGlobals.UseNetRuntime)
+                    if (ZumoTestGlobals.NetRuntimeEnabled)
                     {
                         items = await table.ReadAsync("$filter=Id eq '" + id + "'", queryParameters);
                     }
@@ -467,7 +435,7 @@ namespace ZumoE2ETestApp.Tests
                 }
 
                 return true;
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.LIVE_LOGIN, ZumoTestGlobals.RuntimeFeatureNames.SSO_LOGIN, ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
         }
 
         private static string NameOrScreenName(string providerName, JObject identities)
@@ -512,7 +480,7 @@ namespace ZumoE2ETestApp.Tests
                 }
                 else
                 {
-                    if (exception.Response.StatusCode == HttpStatusCode.Forbidden)
+                    if (exception.Response.StatusCode == HttpStatusCode.Unauthorized)
                     {
                         test.AddLog("Expected exception thrown, with expected status code.");
                         return true;

@@ -196,7 +196,7 @@ namespace ZumoE2ETestApp.Tests
                 }
 
                 return testResult;
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES);
         }
 
         private static ZumoTest CreateHttpContentApiTest(DataFormat inputFormat, DataFormat outputFormat, Random seedGenerator)

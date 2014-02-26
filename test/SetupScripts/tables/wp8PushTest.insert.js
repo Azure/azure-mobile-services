@@ -1,4 +1,4 @@
-function insert(item, user, request) {
+﻿function insert(item, user, request) {
     var method = item.method;
     if (!method) {
         request.respond(400, { error: 'request must have a \'method\' member' });
@@ -37,23 +37,17 @@ function insert(item, user, request) {
     var mpnsFunction = push.mpns[method];
     if (mpnsFunction) {
         if (item.usingNH) {
-			if(item.templatePush)
-			{
-				var templateNotification = {
-					"News_English": "World News in English!",
-					"News_French": "World News in French!",
-					"News_Mandarin": "World News in Mandarin!"
-				}
-				push.send('World',templateNotification,options);
-			}
-			else{
-				mpnsFunction("tag1", payload, options);
-			}		            
+            if (item.templatePush) {
+                push.send('World', item.templateNotification, options);
+            }
+            else {
+                mpnsFunction("tag1", payload, options);
+            }
         }
-		else {
-			mpnsFunction(channelUri, payload, options);
-		}
-	}
+        else {
+            mpnsFunction(channelUri, payload, options);
+        }
+    }
     else {
         request.respond(400, { error: 'method not supported: ' + method });
     }

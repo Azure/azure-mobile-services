@@ -52,7 +52,7 @@ namespace ZumoE2ETestApp.Tests
                 {
                     return true;
                 }
-            }));
+            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES));
 
             result.AddTest(CreateUserAgentValidationTest());
             result.AddTest(CreateParameterPassingTest(true));
@@ -195,7 +195,7 @@ namespace ZumoE2ETestApp.Tests
                 await untypedTable.DeleteAsync(new JObject(new JProperty("id", id)));
                 await untypedTable.DeleteAsync(new JObject(new JProperty("id", otherId)));
                 return true;
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
         }
 
         private static ZumoTest CreateOptimisticConcurrencyTest(string testName, Func<VersionedType, VersionedType, VersionedType> mergingPolicy)
@@ -269,7 +269,7 @@ namespace ZumoE2ETestApp.Tests
                 }
 
                 return true;
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES);
         }
 
         private static ZumoTest CreateOptimisticConcurrencyWithServerConflictsTest(string testName, bool clientWins)
@@ -329,7 +329,7 @@ namespace ZumoE2ETestApp.Tests
                 await table.DeleteAsync(item);
                 test.AddLog("...done");
                 return true;
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES);
         }
 
         private static ZumoTest CreateParameterPassingTest(bool useTypedTable)
@@ -461,7 +461,7 @@ namespace ZumoE2ETestApp.Tests
                 testPassed = testPassed && ValidateParameters(test, "delete", expectedParameters, actualParameters);
 
                 return testPassed;
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES);
         }
 
         private static bool ValidateParameters(ZumoTest test, string operation, JObject expected, JObject actual)
@@ -548,7 +548,7 @@ namespace ZumoE2ETestApp.Tests
                 dumpAndValidateHeaders("Delete");
 
                 return true;
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES);
         }
 
         private static ZumoTest CreateFilterTestWithMultipleRequests(bool typed)
@@ -607,7 +607,7 @@ namespace ZumoE2ETestApp.Tests
 
                 test.AddLog("Cleanup: removed added items.");
                 return passed;
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES);
         }
 
         class HandlerWhichThrows : DelegatingHandler

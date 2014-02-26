@@ -39,10 +39,11 @@ namespace ZumoE2ETestApp.Framework
         internal const string TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff";
         private TestExecution execution;
         private List<string> logs;
+        private List<string> runtimeFeatures;
 
         public event EventHandler<TestStatusChangedEventArgs> TestStatusChanged;
 
-        public ZumoTest(string name, TestExecution execution)
+        public ZumoTest(string name, TestExecution execution, params string[] requiredRuntimeFeatures)
         {
             this.Name = name;
             this.Data = new Dictionary<string, object>();
@@ -50,6 +51,17 @@ namespace ZumoE2ETestApp.Framework
             this.logs = new List<string>();
             this.execution = execution;
             this.Status = TestStatus.NotRun;
+            this.runtimeFeatures = new List<string>();
+            if (requiredRuntimeFeatures.Length > 0)
+            {
+                foreach (string requiredRuntimeFeature in requiredRuntimeFeatures)
+                {
+                    if (requiredRuntimeFeature != null)
+                    {
+                        this.runtimeFeatures.Add(requiredRuntimeFeature);
+                    }
+                }
+            }
         }
 
         public void AddLog(string text, params object[] args)
@@ -80,6 +92,29 @@ namespace ZumoE2ETestApp.Framework
             return this.logs;
         }
 
+        public bool ShouldBeSkipped()
+        {
+            if (ZumoTestGlobals.NetRuntimeEnabled
+                && runtimeFeatures.Count > 1)
+            {
+                return true;
+            }
+
+            if (!ZumoTestGlobals.NHPushEnabled
+               && runtimeFeatures.Contains(ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public string WhySkipped()
+        {
+            var ret = string.Join(",", runtimeFeatures);
+            return ret;
+        }
+
         public async Task Run()
         {
             this.Status = TestStatus.Running;
@@ -91,14 +126,17 @@ namespace ZumoE2ETestApp.Framework
             try
             {
                 this.StartTime = DateTime.UtcNow;
-                bool passed = await this.execution(this);
-                this.Status = passed ? TestStatus.Passed : TestStatus.Failed;
-                this.AddLog("Test {0}", this.Status);
-            }
-            catch (SkipException skipEx)
-            {
-                this.AddLog("Test skipped with message: {0}", skipEx.Message);
-                this.Status = TestStatus.Skipped;
+                if (this.ShouldBeSkipped())
+                {
+                    this.AddLog("Test skipped, missing required runtime features [{0}].", WhySkipped());
+                    this.Status = TestStatus.Skipped;
+                }
+                else
+                {
+                    bool passed = await this.execution(this);
+                    this.Status = passed ? TestStatus.Passed : TestStatus.Failed;
+                    this.AddLog("Test {0}", this.Status);
+                }
             }
             catch (Exception ex)
             {

@@ -517,6 +517,36 @@
     STAssertTrue(dateParts.second == 29, @"second was: %d", dateParts.second);
 }
 
+-(void)testItemFromDataReturnsNewItemWithNoFractionalSecondsDates
+{
+    NSString* stringData = @"{\"id\":5,\"date\":\"1999-12-03T15:44:29Z\"}";
+    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    
+    NSError *error = nil;
+    id newItem = [serializer itemFromData:data
+                         withOriginalItem:nil
+                         ensureDictionary:YES
+                                  orError:&error];
+    
+    STAssertNotNil(newItem, @"item was nil after deserializing item.");
+    STAssertNil(error, @"error was not nil after deserializing item.");
+    
+    NSDate *date = [newItem objectForKey:@"date"];
+    STAssertNotNil(date, @"date was nil after deserializing item.");
+    
+    NSCalendar *gregorian = [[NSCalendar alloc]
+                             initWithCalendarIdentifier:NSGregorianCalendar];
+    [gregorian setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+    NSDateComponents *dateParts =
+    [gregorian components:(NSYearCalendarUnit |
+                           NSHourCalendarUnit |
+                           NSSecondCalendarUnit)
+                 fromDate:date];
+    
+    STAssertTrue(dateParts.year == 1999, @"year was: %d", dateParts.year);
+    STAssertTrue(dateParts.hour == 15, @"hour was: %d", dateParts.hour);
+    STAssertTrue(dateParts.second == 29, @"second was: %d", dateParts.second);
+}
 
 -(void)testItemFromDataReturnsErrorIfReadFails
 {
