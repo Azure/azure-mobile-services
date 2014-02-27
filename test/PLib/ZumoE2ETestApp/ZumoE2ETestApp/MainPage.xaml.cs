@@ -178,6 +178,7 @@ namespace ZumoE2ETestApp
             try
             {
                 ZumoTestGlobals.Instance.InitializeClient(appUrl, appKey);
+                await ZumoTestGlobals.InitializeFeaturesEnabled();
             }
             catch (Exception ex)
             {
@@ -216,7 +217,6 @@ namespace ZumoE2ETestApp
         {
             this.currentTestGroup = testGroup;
             var clientInitialized = await InitializeClient();
-            //await ZumoTestGlobals.InitializeFeaturesEnabled();
             if (!clientInitialized)
             {
                 return;

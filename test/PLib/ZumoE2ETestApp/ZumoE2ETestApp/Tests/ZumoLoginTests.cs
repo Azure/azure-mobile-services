@@ -435,7 +435,9 @@ namespace ZumoE2ETestApp.Tests
                 }
 
                 return true;
-            }, ZumoTestGlobals.RuntimeFeatureNames.LIVE_LOGIN, ZumoTestGlobals.RuntimeFeatureNames.SSO_LOGIN, ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
+            }, providerName == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory.ToString() ? ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN : null,
+               usingSingeSignOnOrToken ? ZumoTestGlobals.RuntimeFeatureNames.SSO_LOGIN : null,
+               ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES);
         }
 
         private static string NameOrScreenName(string providerName, JObject identities)

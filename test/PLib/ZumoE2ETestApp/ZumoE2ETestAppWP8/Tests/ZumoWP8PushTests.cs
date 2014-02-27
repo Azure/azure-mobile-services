@@ -389,7 +389,7 @@ namespace ZumoE2ETestAppWP8.Tests
                 await WaitForChannelUriAssignment(test, pushChannel, maxWait);
 
 
-                if (!ZumoTestGlobals.RuntimeFeatures[ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED])
+                if (ZumoTestGlobals.RuntimeFeatures[ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED])
                 {
                     var zumoPush = ZumoTestGlobals.Instance.Client.GetPush();
                     TemplateRegistration reg = null;
@@ -404,6 +404,7 @@ namespace ZumoE2ETestAppWP8.Tests
                                 reg = new TemplateRegistration(pushChannel.ChannelUri.ToString(), ZumoTestGlobals.NHWp8TileTemplate, "wp8" + ZumoTestGlobals.NHTileTemplateName, "World Mandarin".Split());
                                 break;
                             case "raw":
+                            default:
                                 IDictionary<string, string> wp8Headers = new Dictionary<string, string>();
                                 wp8Headers.Add("X-NotificationClass", "3");
                                 reg = new TemplateRegistration(pushChannel.ChannelUri.ToString(), ZumoTestGlobals.NHWp8RawTemplate, "wp8" + ZumoTestGlobals.NHRawTemplateName, "World French".Split(), wp8Headers);
