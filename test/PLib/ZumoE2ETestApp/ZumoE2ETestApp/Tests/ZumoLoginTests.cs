@@ -48,7 +48,7 @@ namespace ZumoE2ETestApp.Tests
             };
 
 #if !WINDOWS_PHONE
-            result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("In the next few tests you will be prompted for username / password four times."));
+            result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("In the next few tests you will be prompted for username / password five times."));
 #endif
 
             foreach (MobileServiceAuthenticationProvider provider in Util.EnumGetValues(typeof(MobileServiceAuthenticationProvider)))
@@ -68,7 +68,7 @@ namespace ZumoE2ETestApp.Tests
                 {
                     result.AddTest(CreateLogoutTest());
                     result.AddTest(CreateClientSideLoginTest(provider));
-                    result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, true));
+                    result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, userIsAuthenticated: true, usingSingeSignOnOrToken: true));
                 }
             }
 
@@ -99,7 +99,7 @@ namespace ZumoE2ETestApp.Tests
 
                 result.AddTest(CreateLogoutTest());
                 result.AddTest(CreateLoginTest(provider, true));
-                result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, true));
+                result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, userIsAuthenticated: true, usingSingeSignOnOrToken: true));
             }
 
             result.AddTest(ZumoTestCommon.CreateTestWithSingleAlert("Now we'll continue running the tests, but you *should not be prompted for the username or password anymore*."));
@@ -113,7 +113,7 @@ namespace ZumoE2ETestApp.Tests
 
                 result.AddTest(CreateLogoutTest());
                 result.AddTest(CreateLoginTest(provider, true));
-                result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, true));
+                result.AddTest(CreateCRUDTest(TableUserPermission, provider.ToString(), TablePermission.User, userIsAuthenticated: true, usingSingeSignOnOrToken: true));
             }
 
             result.AddTest(ZumoTestCommon.CreateYesNoTest("Were you prompted for the username in any of the providers?", false));
@@ -140,8 +140,10 @@ namespace ZumoE2ETestApp.Tests
                 var user = await client.LoginAsync(provider, useSingleSignOn);
                 test.AddLog("Logged in as {0}", user.UserId);
                 return true;
-            });
+            }, provider == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory ?  ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN : null,
+               useSingleSignOn ? ZumoTestGlobals.RuntimeFeatureNames.SSO_LOGIN : null);
         }
+
 #else
         internal static ZumoTest CreateLoginTest(MobileServiceAuthenticationProvider provider)
         {
@@ -152,7 +154,7 @@ namespace ZumoE2ETestApp.Tests
                 var user = await client.LoginAsync(provider);
                 test.AddLog("Logged in as {0}", user.UserId);
                 return true;
-            });
+            }, provider == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory ? ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN : null);
         }
 #endif
 
@@ -215,7 +217,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Login failed.");
                     return false;
                 }
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.LIVE_LOGIN);
         }
 #endif
 
@@ -254,7 +256,7 @@ namespace ZumoE2ETestApp.Tests
             });
         }
 
-        private static ZumoTest CreateCRUDTest(string tableName, string providerName, TablePermission tableType, bool userIsAuthenticated)
+        private static ZumoTest CreateCRUDTest(string tableName, string providerName, TablePermission tableType, bool userIsAuthenticated, bool usingSingeSignOnOrToken = false)
         {
             string testName = string.Format(CultureInfo.InvariantCulture, "CRUD, {0}, table with {1} permissions",
                 userIsAuthenticated ? ("auth by " + providerName) : "unauthenticated", tableType);
@@ -263,8 +265,8 @@ namespace ZumoE2ETestApp.Tests
                 var client = ZumoTestGlobals.Instance.Client;
                 var currentUser = client.CurrentUser;
                 var table = client.GetTable(tableName);
-                var crudShouldWork = tableType == TablePermission.Public || 
-                    tableType == TablePermission.Application || 
+                var crudShouldWork = tableType == TablePermission.Public ||
+                    tableType == TablePermission.Application ||
                     (tableType == TablePermission.User && userIsAuthenticated);
                 var item = new JObject();
                 item.Add("name", "John Doe");
@@ -278,6 +280,8 @@ namespace ZumoE2ETestApp.Tests
                 {
                     var inserted = await table.InsertAsync(item, queryParameters);
                     item = (JObject)inserted;
+                    Util.CamelCaseProps(item);
+
                     test.AddLog("Inserted item: {0}", item);
                     id = item["id"].Value<int>();
                     if (tableType == TablePermission.User)
@@ -388,7 +392,15 @@ namespace ZumoE2ETestApp.Tests
                 ex = null;
                 try
                 {
-                    var items = await table.ReadAsync("$filter=id eq " + id, queryParameters);
+                    JToken items = null;
+                    if (ZumoTestGlobals.NetRuntimeEnabled)
+                    {
+                        items = await table.ReadAsync("$filter=Id eq '" + id + "'", queryParameters);
+                    }
+                    else
+                    {
+                        items = await table.ReadAsync("$filter=id eq " + id, queryParameters);
+                    }
                     test.AddLog("Retrieved items via Read: {0}", items);
                     if (((JArray)items).Count != 1)
                     {
@@ -423,7 +435,7 @@ namespace ZumoE2ETestApp.Tests
                 }
 
                 return true;
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.LIVE_LOGIN, ZumoTestGlobals.RuntimeFeatureNames.SSO_LOGIN, ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
         }
 
         private static string NameOrScreenName(string providerName, JObject identities)

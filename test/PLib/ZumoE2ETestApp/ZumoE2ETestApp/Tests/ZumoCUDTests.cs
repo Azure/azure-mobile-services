@@ -4,8 +4,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices;
@@ -18,9 +21,14 @@ namespace ZumoE2ETestApp.Tests
 {
     internal static class ZumoCUDTests
     {
+        private static string idName;
+
         internal static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Update / delete tests");
+
+            // Assume the same for both types.
+            idName = Util.GetSerializedId<StringIdRoundTripTableItem>();
 
             DateTime now = DateTime.UtcNow;
             int seed = now.Year * 10000 + now.Month * 100 + now.Day;
@@ -42,6 +50,11 @@ namespace ZumoE2ETestApp.Tests
                 "[string id] Update typed item, setting values to null",
                 new StringIdRoundTripTableItem(rndGen),
                 new StringIdRoundTripTableItem(rndGen) { Name = null, Bool = null, ComplexType = null, Date = null }));
+            result.AddTest(CreateTypedUpdateTest(
+                "Update typed item, setting values to 0",
+                new StringIdRoundTripTableItem(rndGen),
+                new StringIdRoundTripTableItem(rndGen) { Integer = 0, Number = 0.0 }));
+
             result.AddTest(CreateTypedUpdateTest<StringIdRoundTripTableItem, MobileServiceInvalidOperationException>("(Neg) Update typed item, non-existing item id",
                 new StringIdRoundTripTableItem(rndGen), new StringIdRoundTripTableItem(rndGen) { Id = "does not exist" }, false));
             result.AddTest(CreateTypedUpdateTest<StringIdRoundTripTableItem, ArgumentException>("(Neg) Update typed item, id = null",
@@ -80,11 +93,11 @@ namespace ZumoE2ETestApp.Tests
             toUpdate["int1"] = nullValue;
             result.AddTest(CreateUntypedUpdateTest("Update untyped item, setting values to null", toInsertJsonString, toUpdate.ToString()));
 
-            toUpdate["id"] = 1000000000;
+            toUpdate[idName] = 1000000000;
             result.AddTest(CreateUntypedUpdateTest<MobileServiceInvalidOperationException>("(Neg) Update untyped item, non-existing item id",
                 toInsertJsonString, toUpdate.ToString(), false));
 
-            toUpdate["id"] = 0;
+            toUpdate[idName] = 0;
             result.AddTest(CreateUntypedUpdateTest<ArgumentException>("(Neg) Update typed item, id = 0",
                 toInsertJsonString, toUpdateJsonString, false));
 
@@ -99,11 +112,11 @@ namespace ZumoE2ETestApp.Tests
             toUpdate["complex"] = nullValue;
             result.AddTest(CreateUntypedUpdateTest("[string id] Update untyped item, setting values to null", toInsertJsonString, toUpdate.ToString(), true));
 
-            toUpdate["id"] = Guid.NewGuid().ToString();
+            toUpdate[idName] = Guid.NewGuid().ToString();
             result.AddTest(CreateUntypedUpdateTest<MobileServiceInvalidOperationException>("(Neg) [string id] Update untyped item, non-existing item id",
                 toInsertJsonString, toUpdate.ToString(), false, true));
 
-            toUpdate["id"] = nullValue;
+            toUpdate[idName] = nullValue;
             result.AddTest(CreateUntypedUpdateTest<InvalidOperationException>("(Neg) [string id] Update typed item, id = null",
                 toInsertJsonString, toUpdateJsonString, false, true));
 
@@ -152,7 +165,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Error, refresh didn't happen successfully");
                     return false;
                 }
-            }));
+            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES));
 
             result.AddTest(new ZumoTest("Refresh item without id does not send request", async delegate(ZumoTest test)
             {
@@ -272,7 +285,7 @@ namespace ZumoE2ETestApp.Tests
                             return true;
                         }
                 }
-            });
+            }, (typeof(TItemType) == typeof(RoundTripTableItem) ? ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES));
         }
 
         private static bool Validate404Response(ZumoTest test, MobileServiceInvalidOperationException msioe)
@@ -350,7 +363,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                     return true;
                 }
-            });
+            }, (typeof(TRoundTripType) == typeof(RoundTripTableItem) ? ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES));
         }
 
         private static ZumoTest CreateUntypedUpdateTest(
@@ -367,6 +380,8 @@ namespace ZumoE2ETestApp.Tests
             {
                 var itemToInsert = JObject.Parse(itemToInsertJson);
                 var itemToUpdate = JObject.Parse(itemToUpdateJson);
+                Util.CamelCaseProps(itemToUpdate);
+
                 var client = ZumoTestGlobals.Instance.Client;
                 var table = client.GetTable(useStringIdTable ? ZumoTestGlobals.StringIdRoundTripTableName : ZumoTestGlobals.RoundTripTableName);
                 try

@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ZumoE2ETestApp.Tests;
 
 namespace ZumoE2ETestApp.Framework
 {
@@ -38,10 +39,11 @@ namespace ZumoE2ETestApp.Framework
         internal const string TimestampFormat = "yyyy-MM-dd HH:mm:ss.fff";
         private TestExecution execution;
         private List<string> logs;
+        private List<string> runtimeFeatures;
 
         public event EventHandler<TestStatusChangedEventArgs> TestStatusChanged;
 
-        public ZumoTest(string name, TestExecution execution)
+        public ZumoTest(string name, TestExecution execution, params string[] requiredRuntimeFeatures)
         {
             this.Name = name;
             this.Data = new Dictionary<string, object>();
@@ -49,6 +51,17 @@ namespace ZumoE2ETestApp.Framework
             this.logs = new List<string>();
             this.execution = execution;
             this.Status = TestStatus.NotRun;
+            this.runtimeFeatures = new List<string>();
+            if (requiredRuntimeFeatures.Length > 0)
+            {
+                foreach (string requiredRuntimeFeature in requiredRuntimeFeatures)
+                {
+                    if (requiredRuntimeFeature != null)
+                    {
+                        this.runtimeFeatures.Add(requiredRuntimeFeature);
+                    }
+                }
+            }
         }
 
         public void AddLog(string text, params object[] args)
@@ -79,7 +92,29 @@ namespace ZumoE2ETestApp.Framework
             return this.logs;
         }
 
-        public async Task<bool> Run()
+        public bool ShouldBeSkipped()
+        {
+            if (runtimeFeatures.Count > 0)
+            {
+                foreach(var requiredFeature in this.runtimeFeatures)
+                {
+                    var isEnabled = ZumoTestGlobals.RuntimeFeatures[requiredFeature];
+                    if (!isEnabled)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        public string WhySkipped()
+        {
+            var ret = string.Join(",", runtimeFeatures);
+            return ret;
+        }
+
+        public async Task Run()
         {
             this.Status = TestStatus.Running;
             if (this.TestStatusChanged != null)
@@ -87,18 +122,24 @@ namespace ZumoE2ETestApp.Framework
                 this.TestStatusChanged(this, new TestStatusChangedEventArgs(this.Status));
             }
 
-            bool passed;
             try
             {
                 this.StartTime = DateTime.UtcNow;
-                passed = await this.execution(this);
-                this.Status = passed ? TestStatus.Passed : TestStatus.Failed;
-                this.AddLog("Test {0}", this.Status);
+                if (this.ShouldBeSkipped())
+                {
+                    this.AddLog("Test skipped, missing required runtime features [{0}].", WhySkipped());
+                    this.Status = TestStatus.Skipped;
+                }
+                else
+                {
+                    bool passed = await this.execution(this);
+                    this.Status = passed ? TestStatus.Passed : TestStatus.Failed;
+                    this.AddLog("Test {0}", this.Status);
+                }
             }
             catch (Exception ex)
             {
                 this.AddLog("Test failed with exception: {0}", ex);
-                passed = false;
                 this.Status = TestStatus.Failed;
             }
 
@@ -108,8 +149,6 @@ namespace ZumoE2ETestApp.Framework
             {
                 this.TestStatusChanged(this, new TestStatusChangedEventArgs(this.Status));
             }
-
-            return passed;
         }
     }
 }

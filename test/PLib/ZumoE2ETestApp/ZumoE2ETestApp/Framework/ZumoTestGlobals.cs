@@ -2,9 +2,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
+using Microsoft.WindowsAzure.MobileServices;
 using System;
 using System.Collections.Generic;
-using Microsoft.WindowsAzure.MobileServices;
+using System.Net.Http;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Linq;
 
 namespace ZumoE2ETestApp.Framework
 {
@@ -23,12 +28,48 @@ namespace ZumoE2ETestApp.Framework
 
         public const string ClientVersionKeyName = "clientVersion";
         public const string RuntimeVersionKeyName = "x-zumo-version";
-        
+
         private static ZumoTestGlobals instance = new ZumoTestGlobals();
 
         public static bool ShowAlerts = true;
         public const string LogsLocationFile = "done.txt";
-        
+
+        public static string NHWp8RawTemplate = String.Format("<?xml version=\"1.0\" encoding=\"utf-8\"?><wp:Notification xmlns:wp=\"WPNotification\"><wp:Toast><wp:Text1>$(News_{0})</wp:Text1></wp:Toast></wp:Notification>", "French");
+        public static string NHWp8ToastTemplate = String.Format("<?xml version=\"1.0\" encoding=\"utf-8\"?><wp:Notification xmlns:wp=\"WPNotification\"><wp:Toast><wp:Text1>$(News_{0})</wp:Text1></wp:Toast></wp:Notification>", "English");
+        public static string NHWp8TileTemplate = @"<?xml version=""1.0"" encoding=""utf-8""?>
+                                                    <wp:Notification xmlns:wp=""WPNotification"">
+                                                       <wp:Tile>
+                                                          <wp:BackgroundImage>http://zumotestserver.azurewebsites.net/content/zumo2.png</wp:BackgroundImage>
+                                                          <wp:Count>count</wp:Count>
+                                                          <wp:Title>$(News_Mandarin)</wp:Title>
+                                                       </wp:Tile>
+                                                    </wp:Notification>";
+
+        public static string NHToastTemplateName = "newsToastTemplate";
+        public static string NHTileTemplateName = "newsTileTemplate";
+        public static string NHBadgeTemplateName = "newsBadgeTemplate";
+        public static string NHRawTemplateName = "newsRawTemplate";
+        public static JObject TemplateNotification = new JObject()
+        {
+            {"News_English", "World News in English!"},
+            {"News_French", "Nouvelles du monde en français!"},
+            {"News_Mandarin", "在普通话的世界新闻！"},
+            {"News_Badge", "10"}
+        };
+
+        public static class RuntimeFeatureNames
+        {
+            public static string AAD_LOGIN = "azureActiveDictionaryLogin";
+            public static string SSO_LOGIN = "singleSignOnLogin";
+            public static string LIVE_LOGIN = "liveSDKLogin";
+            public static string INT_ID_TABLES = "intIdTables";
+            public static string STRING_ID_TABLES = "stringIdTables";
+            public static string NH_PUSH_ENABLED = "nhPushEnabled";
+        }
+
+        public static Dictionary<string, bool> RuntimeFeatures = new Dictionary<string, bool>();
+        public static bool NetRuntimeEnabled = false;
+
         public MobileServiceClient Client { get; private set; }
         public Dictionary<string, object> GlobalTestParams { get; private set; }
 
