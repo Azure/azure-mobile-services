@@ -88,14 +88,9 @@ namespace ZumoE2ETestApp.Framework
             return this.logs;
         }
 
-        public async Task<bool> ShouldBeSkipped()
+        public async Task<string> GetUnsupportedFeaturesAsync()
         {
-            return !string.IsNullOrEmpty(await WhySkipped());
-        }
-
-        public async Task<string> WhySkipped()
-        {
-            List<string> missingFeatures = new List<string>();
+            List<string> unsupportedFeatures = new List<string>();
             if (runtimeFeatures.Count > 0)
             {
                 foreach (var requiredFeature in this.runtimeFeatures)
@@ -104,16 +99,16 @@ namespace ZumoE2ETestApp.Framework
                     if (!(await ZumoTestGlobals.Instance.GetRuntimeFeatures(this)).TryGetValue(requiredFeature, out isEnabled))
                     {
                         // Not in the list.
-                        AddLog("WARNING: Feature '" + requiredFeature + "' is not found in dictionary");
+                        AddLog("Warning: Status of feature '{0}' is not provided by the runtime", requiredFeature);
                     }
                     else if (!isEnabled)
                     {
-                        missingFeatures.Add(requiredFeature);
+                        unsupportedFeatures.Add(requiredFeature);
                     }
                 }
             }
 
-            return string.Join(",", missingFeatures);
+            return string.Join(",", unsupportedFeatures);
         }
 
         public async Task Run()
@@ -127,9 +122,10 @@ namespace ZumoE2ETestApp.Framework
             try
             {
                 this.StartTime = DateTime.UtcNow;
-                if (await this.ShouldBeSkipped())
+                string unsupportedFeatures = await GetUnsupportedFeaturesAsync();
+                if (!string.IsNullOrEmpty(unsupportedFeatures))
                 {
-                    this.AddLog("Test skipped, missing required runtime features [{0}].", await WhySkipped());
+                    this.AddLog("Test skipped, missing required runtime features [{0}].", unsupportedFeatures);
                     this.Status = TestStatus.Skipped;
                 }
                 else

@@ -475,7 +475,7 @@ namespace ZumoE2ETestApp.Tests
                     {
                         test.AddLog("Using the OData query directly");
                         JToken result = await table.ReadAsync(odataExpression);
-                        if (ZumoTestGlobals.NetRuntimeEnabled)
+                        if (ZumoTestGlobals.Instance.IsNetRuntime)
                         {
                             var serializer = new JsonSerializer();
                             serializer.Converters.Add(new MobileServiceIsoDateTimeConverter());
@@ -494,7 +494,7 @@ namespace ZumoE2ETestApp.Tests
                         actualTotalCount = totalCountProvider.TotalCount;
                     }
 
-                    if (ZumoTestGlobals.NetRuntimeEnabled && top.HasValue && top.Value == 1001)
+                    if (ZumoTestGlobals.Instance.IsNetRuntime && top.HasValue && top.Value == 1001)
                     {
                         test.AddLog("NetRuntime throttles and does not throw");
                         return readMovies.Count() == 100;

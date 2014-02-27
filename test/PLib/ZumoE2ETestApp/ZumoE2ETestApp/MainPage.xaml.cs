@@ -149,6 +149,7 @@ namespace ZumoE2ETestApp
 
         private async void btnRunTests_Click_1(object sender, RoutedEventArgs e)
         {
+            btnRunTests.Content = "Cancel Run";
             int selectedIndex = this.lstTestGroups.SelectedIndex;
             if (selectedIndex >= 0)
             {
@@ -174,6 +175,7 @@ namespace ZumoE2ETestApp
 
         private void btnRunTests_Unchecked_1(object sender, RoutedEventArgs e)
         {
+            btnRunTests.Content = "Run Tests";
             this.StopTestGroup();
         }
 

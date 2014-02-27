@@ -5,6 +5,8 @@
 using Microsoft.WindowsAzure.Mobile.Service;
 using Microsoft.WindowsAzure.Mobile.Service.Config;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Diagnostics;
 using System.Web.Http;
 
 namespace ZumoE2EServerApp.Controllers
@@ -17,7 +19,23 @@ namespace ZumoE2EServerApp.Controllers
         public JObject GetFeatures()
         {
             string version;
-            this.Services.Settings.TryGetValue(ServiceSettingsKeys.SiteExtensionVersion, out version);
+            if (!this.Services.Settings.TryGetValue(ServiceSettingsKeys.SiteExtensionVersion, out version))
+            {
+                // Get here if the site ext. version is missing. That should never happen when deployed,
+                // but is expected whe running locally. If local, try to get the version info 
+                // from the dll directly.
+                try
+                {
+                    var assemblyLocation = typeof(ApiServices).Assembly.Location;
+                    var assemblyVersion = FileVersionInfo.GetVersionInfo(assemblyLocation);
+                    version = assemblyVersion.FileVersion + " : " + assemblyVersion.ProductVersion;
+                }
+                catch (Exception)
+                {
+                    version = "unknown";
+                }
+            }
+
             return new JObject(
                 new JProperty("runtime", new JObject(
                     new JProperty("type", ".NET"),
@@ -31,7 +49,7 @@ namespace ZumoE2EServerApp.Controllers
                     new JProperty("usersEnabled", false),
                     new JProperty("liveSDKLogin", false),
                     new JProperty("singleSignOnLogin", false),
-                    new JProperty("azureActiveDictionaryLogin", false)
+                    new JProperty("azureActiveDirectoryLogin", false)
                 ))
             );
         }
