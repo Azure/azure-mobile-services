@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZumoE2ETestAppWP8", "ZumoE2
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZumoE2ETestAppNet45", "ZumoE2ETestAppNet45\ZumoE2ETestAppNet45.csproj", "{504B8436-CB5B-4337-A290-A2105D605A27}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZumoE2EServerApp", "..\..\ZumoE2EServerApp\ZumoE2EServerApp.csproj", "{74BCC6A6-0BF1-4FF6-B63F-63E59FC0DE3A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +81,16 @@ Global
 		{504B8436-CB5B-4337-A290-A2105D605A27}.Release|ARM.ActiveCfg = Release|Any CPU
 		{504B8436-CB5B-4337-A290-A2105D605A27}.Release|x64.ActiveCfg = Release|Any CPU
 		{504B8436-CB5B-4337-A290-A2105D605A27}.Release|x86.ActiveCfg = Release|Any CPU
+		{74BCC6A6-0BF1-4FF6-B63F-63E59FC0DE3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74BCC6A6-0BF1-4FF6-B63F-63E59FC0DE3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74BCC6A6-0BF1-4FF6-B63F-63E59FC0DE3A}.Debug|ARM.ActiveCfg = Debug|Any CPU
+		{74BCC6A6-0BF1-4FF6-B63F-63E59FC0DE3A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{74BCC6A6-0BF1-4FF6-B63F-63E59FC0DE3A}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{74BCC6A6-0BF1-4FF6-B63F-63E59FC0DE3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74BCC6A6-0BF1-4FF6-B63F-63E59FC0DE3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74BCC6A6-0BF1-4FF6-B63F-63E59FC0DE3A}.Release|ARM.ActiveCfg = Release|Any CPU
+		{74BCC6A6-0BF1-4FF6-B63F-63E59FC0DE3A}.Release|x64.ActiveCfg = Release|Any CPU
+		{74BCC6A6-0BF1-4FF6-B63F-63E59FC0DE3A}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
