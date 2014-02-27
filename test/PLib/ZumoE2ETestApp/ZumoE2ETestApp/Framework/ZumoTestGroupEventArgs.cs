@@ -14,5 +14,6 @@ namespace ZumoE2ETestApp.Framework
     {
         public int TestsPassed { get; set; }
         public int TestsFailed { get; set; }
+        public int TestsSkipped { get; set; }
     }
 }
