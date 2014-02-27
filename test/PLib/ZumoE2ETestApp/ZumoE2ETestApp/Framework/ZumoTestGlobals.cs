@@ -99,5 +99,40 @@ namespace ZumoE2ETestApp.Framework
                 this.Client = new MobileServiceClient(appUrl, appKey);
             }
         }
+
+        public async static Task InitializeFeaturesEnabled()
+        {
+            var client = ZumoTestGlobals.Instance.Client;
+            if (client != null)
+            {
+                try
+                {
+                    var response = await client.InvokeApiAsync<Dictionary<string, object>>("runtimeInfo", HttpMethod.Get, null);
+                    RuntimeFeatures = JsonConvert.DeserializeObject<Dictionary<string, bool>>(JsonConvert.SerializeObject(response["features"]));
+                    if (response["runtime"].ToString().Contains("node.js"))
+                    {
+                        NetRuntimeEnabled = false;
+                        RuntimeFeatures.Add(RuntimeFeatureNames.AAD_LOGIN, true);
+                        RuntimeFeatures.Add(RuntimeFeatureNames.SSO_LOGIN, true);
+                        RuntimeFeatures.Add(RuntimeFeatureNames.LIVE_LOGIN, true);
+                    }
+                    else
+                    {
+                        NetRuntimeEnabled = true;
+                        RuntimeFeatures.Add(RuntimeFeatureNames.AAD_LOGIN, false);
+                        RuntimeFeatures.Add(RuntimeFeatureNames.SSO_LOGIN, false);
+                        RuntimeFeatures.Add(RuntimeFeatureNames.LIVE_LOGIN, false);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(ex.Message);
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException("Mobile service client is not initialized.");
+            }
+        }
     }
 }

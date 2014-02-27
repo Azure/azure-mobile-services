@@ -22,18 +22,10 @@ namespace ZumoE2ETestApp.Tests
             return new ZumoTest("Identify enabled runtime features", async delegate(ZumoTest test)
                 {
                     var client = ZumoTestGlobals.Instance.Client;
-                    JToken apiResult = await client.InvokeApiAsync("runtimeInfo", HttpMethod.Get, null);
                     try
                     {
-                        ZumoTestGlobals.RuntimeFeatures = JsonConvert.DeserializeObject<Dictionary<string, bool>>(JsonConvert.SerializeObject(apiResult["features"]));
-                        if (apiResult["runtime"].ToString().Contains("node.js"))
-                        {
-                            ZumoTestGlobals.NetRuntimeEnabled = false;
-                        }
-                        else
-                        {
-                            ZumoTestGlobals.NetRuntimeEnabled = true;
-                        }
+                        JToken apiResult = await client.InvokeApiAsync("runtimeInfo", HttpMethod.Get, null);
+                        test.AddLog("Got runtime features.");
                         return true;
                     }
                     catch (Exception ex)
