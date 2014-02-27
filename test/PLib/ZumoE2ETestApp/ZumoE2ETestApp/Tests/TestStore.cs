@@ -19,7 +19,6 @@ namespace ZumoE2ETestApp.Tests
         {
             List<ZumoTestGroup> result = new List<ZumoTestGroup>
             {
-                ZumoSetupTests.CreateTests(),
 #if !NET45
                 ZumoLoginTests.CreateTests(),
 #endif

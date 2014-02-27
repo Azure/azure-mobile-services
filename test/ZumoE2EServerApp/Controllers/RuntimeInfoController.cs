@@ -16,17 +16,22 @@ namespace ZumoE2EServerApp.Controllers
         [Route("api/runtimeInfo")]
         public JObject GetFeatures()
         {
+            string version;
+            this.Services.Settings.TryGetValue(ServiceSettingsKeys.SiteExtensionVersion, out version);
             return new JObject(
                 new JProperty("runtime", new JObject(
                     new JProperty("type", ".NET"),
-                    new JProperty("version", this.Services.Settings[ServiceSettingsKeys.SiteExtensionVersion])
+                    new JProperty("version", version)
                 )),
                 new JProperty("features", new JObject(
                     new JProperty("intIdTables", false),
                     new JProperty("stringIdTables", true),
                     new JProperty("nhPushEnabled", true),
                     new JProperty("queryExpandSupport", true),
-                    new JProperty("usersEnabled", false)
+                    new JProperty("usersEnabled", false),
+                    new JProperty("liveSDKLogin", false),
+                    new JProperty("singleSignOnLogin", false),
+                    new JProperty("azureActiveDictionaryLogin", false)
                 ))
             );
         }

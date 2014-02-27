@@ -274,7 +274,7 @@ namespace ZumoE2ETestApp.Tests
                 item.Add("payload", payload);
                 item.Add("xmlPayload", expectedResult.ToString());
                 item.Add("templateNotification", ZumoTestGlobals.TemplateNotification);
-                if (ZumoTestGlobals.RuntimeFeatures[ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED])
+                if (ZumoTestGlobals.IsNhPushEnabled)
                 {
                     item.Add("usingNH", true);
                     item.Add("nhNotificationType", nhNotificationType);
@@ -343,7 +343,7 @@ namespace ZumoE2ETestApp.Tests
             {
                 ZumoPushTests.pushChannel = await PushNotificationChannelManager.CreatePushNotificationChannelForApplicationAsync();
                 test.AddLog("Register the channel; uri = {0}", pushChannel.Uri);
-                if (ZumoTestGlobals.RuntimeFeatures[ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED])
+                if (ZumoTestGlobals.IsNhPushEnabled)
                 {
                     var client = ZumoTestGlobals.Instance.Client;
                     var push = client.GetPush();
@@ -405,7 +405,7 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Unregister push channel", async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.RuntimeFeatures[ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED])
+                if (ZumoTestGlobals.IsNhPushEnabled)
                 {
                     var client = ZumoTestGlobals.Instance.Client;
                     var push = client.GetPush();

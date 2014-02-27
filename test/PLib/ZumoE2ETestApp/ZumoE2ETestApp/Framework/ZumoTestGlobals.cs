@@ -67,8 +67,33 @@ namespace ZumoE2ETestApp.Framework
             public static string NH_PUSH_ENABLED = "nhPushEnabled";
         }
 
-        public static Dictionary<string, bool> RuntimeFeatures = new Dictionary<string, bool>();
-        public static bool NetRuntimeEnabled = false;
+        private Dictionary<string, bool> runtimeFeatures;
+        public async Task<Dictionary<string, bool>> GetRuntimeFeatures(ZumoTest test)
+        {
+            if (runtimeFeatures == null)
+            {
+                try
+                {
+                    JToken apiResult = await Client.InvokeApiAsync("runtimeInfo", HttpMethod.Get, null);
+                    runtimeFeatures = JsonConvert.DeserializeObject<Dictionary<string, bool>>(JsonConvert.SerializeObject(apiResult["features"]));
+                    netRuntimeEnabled = !(apiResult["runtime"].ToString().Contains("node.js"));
+                    isNhPushEnabled = runtimeFeatures[ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED];
+                }
+                catch (Exception ex)
+                {
+                    test.AddLog(ex.Message);
+                }
+            }
+
+            return runtimeFeatures;
+        }
+
+        private bool netRuntimeEnabled = false;
+        public static bool NetRuntimeEnabled { get { return Instance.netRuntimeEnabled; } }
+
+        private bool isNhPushEnabled;
+
+        public static bool IsNhPushEnabled { get { return Instance.netRuntimeEnabled; } }
 
         public MobileServiceClient Client { get; private set; }
         public Dictionary<string, object> GlobalTestParams { get; private set; }
@@ -81,6 +106,11 @@ namespace ZumoE2ETestApp.Framework
         public static ZumoTestGlobals Instance
         {
             get { return instance; }
+        }
+
+        public static void ResetInstance()
+        {
+            instance = new ZumoTestGlobals();
         }
 
         public void InitializeClient(string appUrl, string appKey)

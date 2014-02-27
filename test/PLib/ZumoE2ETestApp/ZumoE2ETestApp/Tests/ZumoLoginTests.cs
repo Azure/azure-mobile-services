@@ -140,7 +140,7 @@ namespace ZumoE2ETestApp.Tests
                 var user = await client.LoginAsync(provider, useSingleSignOn);
                 test.AddLog("Logged in as {0}", user.UserId);
                 return true;
-            }, provider == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory ?  ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN : null,
+            }, provider == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory ? ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN : null,
                useSingleSignOn ? ZumoTestGlobals.RuntimeFeatureNames.SSO_LOGIN : null);
         }
 
@@ -253,11 +253,23 @@ namespace ZumoE2ETestApp.Tests
                 var user = await client.LoginAsync(provider, token);
                 test.AddLog("Logged in as {0}", user.UserId);
                 return true;
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.LIVE_LOGIN, ZumoTestGlobals.RuntimeFeatureNames.SSO_LOGIN);
         }
 
         private static ZumoTest CreateCRUDTest(string tableName, string providerName, TablePermission tableType, bool userIsAuthenticated, bool usingSingeSignOnOrToken = false)
         {
+            List<string> requiredRuntimeReatures = new List<string>() { ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES };
+            if (providerName == MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory.ToString())
+            {
+                requiredRuntimeReatures.Add(ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN);
+            }
+
+            if (usingSingeSignOnOrToken || providerName == "Microsoft via Live SDK")
+            {
+                requiredRuntimeReatures.Add(ZumoTestGlobals.RuntimeFeatureNames.LIVE_LOGIN);
+                requiredRuntimeReatures.Add(ZumoTestGlobals.RuntimeFeatureNames.SSO_LOGIN);
+            }
+
             string testName = string.Format(CultureInfo.InvariantCulture, "CRUD, {0}, table with {1} permissions",
                 userIsAuthenticated ? ("auth by " + providerName) : "unauthenticated", tableType);
             return new ZumoTest(testName, async delegate(ZumoTest test)
@@ -435,7 +447,7 @@ namespace ZumoE2ETestApp.Tests
                 }
 
                 return true;
-            }, ZumoTestGlobals.RuntimeFeatureNames.LIVE_LOGIN, ZumoTestGlobals.RuntimeFeatureNames.SSO_LOGIN, ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
+            }, requiredRuntimeReatures.ToArray());
         }
 
         private static string NameOrScreenName(string providerName, JObject identities)
@@ -480,7 +492,8 @@ namespace ZumoE2ETestApp.Tests
                 }
                 else
                 {
-                    if (exception.Response.StatusCode == HttpStatusCode.Unauthorized)
+                    if (exception.Response.StatusCode == HttpStatusCode.Unauthorized ||
+                        exception.Response.StatusCode == HttpStatusCode.Forbidden)
                     {
                         test.AddLog("Expected exception thrown, with expected status code.");
                         return true;

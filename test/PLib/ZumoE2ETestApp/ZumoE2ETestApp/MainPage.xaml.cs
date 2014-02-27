@@ -54,6 +54,7 @@ namespace ZumoE2ETestApp
 
         private async void btnSaveAppInfo_Click_1(object sender, RoutedEventArgs e)
         {
+            ZumoTestGlobals.ResetInstance();
             SavedAppInfo appInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
             string appUrl = this.txtAppUrl.Text;
             string appKey = this.txtAppKey.Text;
@@ -78,6 +79,7 @@ namespace ZumoE2ETestApp
 
         private async void btnLoadAppInfo_Click_1(object sender, RoutedEventArgs e)
         {
+            ZumoTestGlobals.ResetInstance();
             SavedAppInfo savedAppInfo = await AppInfoRepository.Instance.GetSavedAppInfo();
             if (savedAppInfo.MobileServices.Count == 0)
             {
@@ -162,6 +164,12 @@ namespace ZumoE2ETestApp
             {
                 await Util.MessageBox("Please select a test group.", "Error");
             }
+
+            var tb = (ToggleButton)sender;
+            if (!tb.IsChecked.HasValue || tb.IsChecked.Value)
+            {
+                tb.IsChecked = false;
+            }
         }
 
         private void btnRunTests_Unchecked_1(object sender, RoutedEventArgs e)
@@ -216,7 +224,6 @@ namespace ZumoE2ETestApp
         {
             this.currentTestGroup = testGroup;
             var clientInitialized = await InitializeClient();
-            //await ZumoTestGlobals.InitializeFeaturesEnabled();
             if (!clientInitialized)
             {
                 return;

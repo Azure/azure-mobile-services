@@ -134,7 +134,6 @@
     <Compile Include="Tests\ZumoQueryTestData.cs" />
     <Compile Include="Tests\ZumoQueryTests.cs" />
     <Compile Include="Tests\ZumoRoundTripTests.cs" />
-    <Compile Include="Tests\ZumoSetupTests.cs" />
     <Compile Include="Tests\ZumoTestCommon.cs" />
     <Compile Include="UIElements\AppInfoRepository.cs" />
     <Compile Include="UIElements\InputDialog.xaml.cs">
