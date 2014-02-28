@@ -6,7 +6,10 @@ exports.get = function(request, response) {
             stringIdTables: true,
             nhPushEnabled: !!(request.service.push.send),
             queryExpandSupport: false,
-            usersEnabled: /\"users\"/i.test(process.env.MS_PreviewFeatures)
+            usersEnabled: /\"users\"/i.test(process.env.MS_PreviewFeatures),
+            liveSDKLogin: true,
+            azureActiveDirectoryLogin: true,
+            singleSignOnLogin: true
         }
     });
 };

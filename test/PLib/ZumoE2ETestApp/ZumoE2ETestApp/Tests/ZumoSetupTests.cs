@@ -1,8 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
+﻿using System.Collections.Generic;
 using ZumoE2ETestApp.Framework;
 
 namespace ZumoE2ETestApp.Tests
@@ -21,24 +17,17 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Identify enabled runtime features", async delegate(ZumoTest test)
                 {
-                    var client = ZumoTestGlobals.Instance.Client;
-                    JToken apiResult = await client.InvokeApiAsync("runtimeInfo", HttpMethod.Get, null);
-                    try
+                    // Start clean.
+                    Dictionary<string, bool> runtimeFeatures = await ZumoTestGlobals.Instance.GetRuntimeFeatures(test);
+                    if (runtimeFeatures.Count > 0)
                     {
-                        ZumoTestGlobals.RuntimeFeatures = JsonConvert.DeserializeObject<Dictionary<string, bool>>(JsonConvert.SerializeObject(apiResult["features"]));
-                        if (apiResult["runtime"].ToString().Contains("node.js"))
-                        {
-                            ZumoTestGlobals.NetRuntimeEnabled = false;
-                        }
-                        else
-                        {
-                            ZumoTestGlobals.NetRuntimeEnabled = true;
-                        }
+                        test.AddLog("Runtime: {0}", ZumoTestGlobals.Instance.RuntimeType);
+                        test.AddLog("Version: {0}", ZumoTestGlobals.Instance.RuntimeVersion);
                         return true;
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        test.AddLog(ex.Message);
+                        test.AddLog("Could not load the runtime information");
                         return false;
                     }
                 });
