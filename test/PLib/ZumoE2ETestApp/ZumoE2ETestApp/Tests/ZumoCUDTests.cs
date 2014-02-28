@@ -26,6 +26,7 @@ namespace ZumoE2ETestApp.Tests
         internal static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Update / delete tests");
+            result.AddTest(ZumoSetupTests.CreateSetupTest());
 
             // Assume the same for both types.
             idName = Util.GetSerializedId<StringIdRoundTripTableItem>();

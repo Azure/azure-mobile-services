@@ -30,6 +30,7 @@ namespace ZumoE2ETestApp.Tests
         public static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Login tests");
+            result.AddTest(ZumoSetupTests.CreateSetupTest());
             result.AddTest(CreateLogoutTest());
             result.AddTest(CreateCRUDTest(TablePublicPermission, null, TablePermission.Public, false));
             result.AddTest(CreateCRUDTest(TableApplicationPermission, null, TablePermission.Application, false));

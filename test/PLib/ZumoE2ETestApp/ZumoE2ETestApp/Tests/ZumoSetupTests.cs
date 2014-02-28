@@ -17,7 +17,7 @@ namespace ZumoE2ETestApp.Tests
             return result;
         }
 
-        private static ZumoTest CreateSetupTest()
+        public static ZumoTest CreateSetupTest()
         {
             return new ZumoTest("Identify enabled runtime features", async delegate(ZumoTest test)
                 {
@@ -29,10 +29,16 @@ namespace ZumoE2ETestApp.Tests
                         if (apiResult["runtime"].ToString().Contains("node.js"))
                         {
                             ZumoTestGlobals.NetRuntimeEnabled = false;
+                            ZumoTestGlobals.RuntimeFeatures.Add(ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN, true);
+                            ZumoTestGlobals.RuntimeFeatures.Add(ZumoTestGlobals.RuntimeFeatureNames.SSO_LOGIN, true);
+                            ZumoTestGlobals.RuntimeFeatures.Add(ZumoTestGlobals.RuntimeFeatureNames.LIVE_LOGIN, true);
                         }
                         else
                         {
                             ZumoTestGlobals.NetRuntimeEnabled = true;
+                            ZumoTestGlobals.RuntimeFeatures.Add(ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN, false);
+                            ZumoTestGlobals.RuntimeFeatures.Add(ZumoTestGlobals.RuntimeFeatureNames.SSO_LOGIN, false);
+                            ZumoTestGlobals.RuntimeFeatures.Add(ZumoTestGlobals.RuntimeFeatureNames.LIVE_LOGIN, false);
                         }
                         return true;
                     }

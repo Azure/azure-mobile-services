@@ -27,6 +27,7 @@ namespace ZumoE2ETestApp.Tests
         public static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Push tests");
+            result.AddTest(ZumoSetupTests.CreateSetupTest());
             result.AddTest(CreateRegisterChannelTest());
             result.AddTest(CreateToastPushTest("sendToastText01", "hello world"));
             result.AddTest(CreateToastPushTest("sendToastImageAndText03", "ts-iat3-1", "ts-iat3-2", null, imageUrl, "zumo"));

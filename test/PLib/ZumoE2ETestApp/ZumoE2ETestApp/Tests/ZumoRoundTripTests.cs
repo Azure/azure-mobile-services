@@ -19,6 +19,7 @@ namespace ZumoE2ETestApp.Tests
         public static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Round trip tests");
+            result.AddTest(ZumoSetupTests.CreateSetupTest());
             result.AddTest(CreateSetupSchemaTest());
 
             DateTime now = DateTime.UtcNow;

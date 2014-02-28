@@ -31,6 +31,7 @@ namespace ZumoE2ETestAppWP8.Tests
         public static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Push tests");
+            result.AddTest(ZumoSetupTests.CreateSetupTest());
             result.AddTest(CreateRegisterChannelTest());
             result.AddTest(CreateToastPushTest("first text", "second text"));
             result.AddTest(CreateToastPushTest("ãéìôü ÇñÑ", "الكتاب على الطاولة"));
@@ -388,8 +389,7 @@ namespace ZumoE2ETestAppWP8.Tests
                 TimeSpan maxWait = TimeSpan.FromSeconds(30);
                 await WaitForChannelUriAssignment(test, pushChannel, maxWait);
 
-
-                if (!ZumoTestGlobals.RuntimeFeatures[ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED])
+                if (ZumoTestGlobals.RuntimeFeatures[ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED])
                 {
                     var zumoPush = ZumoTestGlobals.Instance.Client.GetPush();
                     TemplateRegistration reg = null;
@@ -415,8 +415,6 @@ namespace ZumoE2ETestAppWP8.Tests
                         {
                             await zumoPush.RegisterAsync(reg);
                         });
-
-                        test.AddLog("Registered to Notification hub");
                     }
                     else
                     {
@@ -425,8 +423,8 @@ namespace ZumoE2ETestAppWP8.Tests
                         {
                             await zumoPush.RegisterNativeAsync(args.ChannelUri.ToString(), "tag1 tag2".Split());
                         });
-                        test.AddLog("Registered with NH");
                     }
+                    test.AddLog("Registered with NH");
                 }
                 pushChannel.HttpNotificationReceived += pushChannel_HttpNotificationReceived;
                 pushChannel.ShellToastNotificationReceived += pushChannel_ShellToastNotificationReceived;

@@ -21,6 +21,7 @@ namespace ZumoE2ETestApp.Tests
         internal static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Query tests");
+            result.AddTest(ZumoSetupTests.CreateSetupTest());
             result.AddTest(CreatePopulateTableTest());
             result.AddTest(CreatePopulateStringIdTableTest());
 
