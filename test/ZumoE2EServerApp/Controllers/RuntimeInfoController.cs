@@ -8,6 +8,8 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
 using System.Web.Http;
+using System.Linq;
+using System.Reflection;
 
 namespace ZumoE2EServerApp.Controllers
 {
@@ -26,9 +28,11 @@ namespace ZumoE2EServerApp.Controllers
                 // from the dll directly.
                 try
                 {
-                    var assemblyLocation = typeof(ApiServices).Assembly.Location;
-                    var assemblyVersion = FileVersionInfo.GetVersionInfo(assemblyLocation);
-                    version = assemblyVersion.FileVersion + " : " + assemblyVersion.ProductVersion;
+                    var afva = typeof(ApiServices).Assembly.CustomAttributes.FirstOrDefault(p => p.AttributeType == typeof(AssemblyFileVersionAttribute));
+                    if (afva != null)
+                    {
+                        version = afva.ConstructorArguments[0].Value as string;
+                    }
                 }
                 catch (Exception)
                 {

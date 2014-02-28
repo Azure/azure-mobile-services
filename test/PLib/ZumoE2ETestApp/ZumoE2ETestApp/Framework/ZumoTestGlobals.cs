@@ -57,8 +57,8 @@ namespace ZumoE2ETestApp.Framework
                 try
                 {
                     JToken apiResult = await Client.InvokeApiAsync("runtimeInfo", HttpMethod.Get, null);
-                    runtimeFeatures = JsonConvert.DeserializeObject<Dictionary<string, bool>>(JsonConvert.SerializeObject(apiResult["features"]));
-                    var runtimeInfo = JsonConvert.DeserializeObject<Dictionary<string, string>>(JsonConvert.SerializeObject(apiResult["runtime"]));
+                    runtimeFeatures = apiResult["features"].ToObject<Dictionary<string, bool>>();
+                    var runtimeInfo = apiResult["runtime"].ToObject<Dictionary<string, string>>();
                     RuntimeType = runtimeInfo["type"];
                     RuntimeVersion = runtimeInfo["version"];
 
@@ -68,6 +68,20 @@ namespace ZumoE2ETestApp.Framework
                 catch (Exception ex)
                 {
                     test.AddLog(ex.Message);
+                }
+
+                if (runtimeFeatures.Count > 0)
+                {
+                    test.AddLog("Runtime: {0}", ZumoTestGlobals.Instance.RuntimeType);
+                    test.AddLog("Version: {0}", ZumoTestGlobals.Instance.RuntimeVersion);
+                    foreach (var entry in runtimeFeatures)
+                    {
+                        test.AddLog("Runtime feature: {0} : {1}", entry.Key, entry.Value);
+                    }
+                }
+                else
+                {
+                    test.AddLog("Could not load the runtime information");
                 }
             }
 

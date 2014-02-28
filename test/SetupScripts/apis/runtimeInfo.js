@@ -7,9 +7,9 @@ exports.get = function(request, response) {
             nhPushEnabled: !!(request.service.push.send),
             queryExpandSupport: false,
             usersEnabled: /\"users\"/i.test(process.env.MS_PreviewFeatures),
-            liveSDKLogin: false,
-            azureActiveDirectoryLogin: false,
-            singleSignOnLogin: false
+            liveSDKLogin: true,
+            azureActiveDirectoryLogin: true,
+            singleSignOnLogin: true
         }
     });
 };
