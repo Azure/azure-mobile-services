@@ -98,6 +98,9 @@
     <Compile Include="..\ZumoE2ETestApp\Framework\Util.cs">
       <Link>Framework\Util.cs</Link>
     </Compile>
+    <Compile Include="..\ZumoE2ETestApp\Framework\ZumoPushGlobals.cs">
+      <Link>Framework\ZumoPushGlobals.cs</Link>
+    </Compile>
     <Compile Include="..\ZumoE2ETestApp\Framework\ZumoTest.cs">
       <Link>Framework\ZumoTest.cs</Link>
     </Compile>
