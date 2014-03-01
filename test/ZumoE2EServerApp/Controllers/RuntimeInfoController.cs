@@ -3,6 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using Microsoft.WindowsAzure.Mobile.Service;
+using Microsoft.WindowsAzure.Mobile.Service.Security;
 using Microsoft.WindowsAzure.Mobile.Service.Config;
 using Newtonsoft.Json.Linq;
 using System;
@@ -13,6 +14,7 @@ using System.Reflection;
 
 namespace ZumoE2EServerApp.Controllers
 {
+    [RequiresAuthorization(AuthorizationLevel.Anonymous)]
     public class RuntimeInfoController : ApiController
     {
         public ApiServices Services { get; set; }
