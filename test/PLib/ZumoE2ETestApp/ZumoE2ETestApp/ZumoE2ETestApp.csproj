@@ -108,6 +108,7 @@
     </Compile>
     <Compile Include="Framework\TestStatus.cs" />
     <Compile Include="Framework\Util.cs" />
+    <Compile Include="Framework\ZumoPushGlobals.cs" />
     <Compile Include="Framework\ZumoTest.cs" />
     <Compile Include="Framework\ZumoTestEventArgs.cs" />
     <Compile Include="Framework\ZumoTestGlobals.cs" />
