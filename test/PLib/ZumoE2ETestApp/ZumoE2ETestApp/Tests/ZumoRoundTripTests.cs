@@ -19,7 +19,6 @@ namespace ZumoE2ETestApp.Tests
         public static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Round trip tests");
-            result.AddTest(ZumoSetupTests.CreateSetupTest());
             result.AddTest(CreateSetupSchemaTest());
 
             DateTime now = DateTime.UtcNow;
@@ -294,7 +293,7 @@ namespace ZumoE2ETestApp.Tests
                 Random rndGen = new Random(1);
                 try
                 {
-                    if (!ZumoTestGlobals.NetRuntimeEnabled)
+                    if (!ZumoTestGlobals.Instance.IsNetRuntime)
                     {
                         var table = client.GetTable<RoundTripTableItem>();
                         RoundTripTableItem item = new RoundTripTableItem

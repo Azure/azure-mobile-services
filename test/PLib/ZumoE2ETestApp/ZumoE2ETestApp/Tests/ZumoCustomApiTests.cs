@@ -43,7 +43,6 @@ namespace ZumoE2ETestApp.Tests
         internal static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Custom API tests");
-            result.AddTest(ZumoSetupTests.CreateSetupTest());
 
             DateTime now = DateTime.UtcNow;
             int seed = now.Year * 10000 + now.Month * 100 + now.Day;

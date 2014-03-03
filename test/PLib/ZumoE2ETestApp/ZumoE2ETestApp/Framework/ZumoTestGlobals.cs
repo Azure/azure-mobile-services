@@ -34,32 +34,9 @@ namespace ZumoE2ETestApp.Framework
         public static bool ShowAlerts = true;
         public const string LogsLocationFile = "done.txt";
 
-        public static string NHWp8RawTemplate = String.Format("<?xml version=\"1.0\" encoding=\"utf-8\"?><wp:Notification xmlns:wp=\"WPNotification\"><wp:Toast><wp:Text1>$(News_{0})</wp:Text1></wp:Toast></wp:Notification>", "French");
-        public static string NHWp8ToastTemplate = String.Format("<?xml version=\"1.0\" encoding=\"utf-8\"?><wp:Notification xmlns:wp=\"WPNotification\"><wp:Toast><wp:Text1>$(News_{0})</wp:Text1></wp:Toast></wp:Notification>", "English");
-        public static string NHWp8TileTemplate = @"<?xml version=""1.0"" encoding=""utf-8""?>
-                                                    <wp:Notification xmlns:wp=""WPNotification"">
-                                                       <wp:Tile>
-                                                          <wp:BackgroundImage>http://zumotestserver.azurewebsites.net/content/zumo2.png</wp:BackgroundImage>
-                                                          <wp:Count>count</wp:Count>
-                                                          <wp:Title>$(News_Mandarin)</wp:Title>
-                                                       </wp:Tile>
-                                                    </wp:Notification>";
-
-        public static string NHToastTemplateName = "newsToastTemplate";
-        public static string NHTileTemplateName = "newsTileTemplate";
-        public static string NHBadgeTemplateName = "newsBadgeTemplate";
-        public static string NHRawTemplateName = "newsRawTemplate";
-        public static JObject TemplateNotification = new JObject()
-        {
-            {"News_English", "World News in English!"},
-            {"News_French", "Nouvelles du monde en français!"},
-            {"News_Mandarin", "在普通话的世界新闻！"},
-            {"News_Badge", "10"}
-        };
-
         public static class RuntimeFeatureNames
         {
-            public static string AAD_LOGIN = "azureActiveDictionaryLogin";
+            public static string AAD_LOGIN = "azureActiveDirectoryLogin";
             public static string SSO_LOGIN = "singleSignOnLogin";
             public static string LIVE_LOGIN = "liveSDKLogin";
             public static string INT_ID_TABLES = "intIdTables";
@@ -67,8 +44,56 @@ namespace ZumoE2ETestApp.Framework
             public static string NH_PUSH_ENABLED = "nhPushEnabled";
         }
 
-        public static Dictionary<string, bool> RuntimeFeatures = new Dictionary<string, bool>();
-        public static bool NetRuntimeEnabled = false;
+        private Dictionary<string, bool> runtimeFeatures;
+        public async Task<Dictionary<string, bool>> GetRuntimeFeatures(ZumoTest test)
+        {
+            if (runtimeFeatures == null)
+            {
+                RuntimeType = "unknown";
+                RuntimeVersion = "unknown";
+                IsNetRuntime = false;
+                IsNHPushEnabled = false;
+
+                try
+                {
+                    JToken apiResult = await Client.InvokeApiAsync("runtimeInfo", HttpMethod.Get, null);
+                    runtimeFeatures = apiResult["features"].ToObject<Dictionary<string, bool>>();
+                    var runtimeInfo = apiResult["runtime"].ToObject<Dictionary<string, string>>();
+                    RuntimeType = runtimeInfo["type"];
+                    RuntimeVersion = runtimeInfo["version"];
+
+                    IsNetRuntime = RuntimeType.Equals(".NET");
+                    IsNHPushEnabled = runtimeFeatures[ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED];
+                }
+                catch (Exception ex)
+                {
+                    test.AddLog(ex.Message);
+                }
+
+                if (runtimeFeatures.Count > 0)
+                {
+                    test.AddLog("Runtime: {0}", ZumoTestGlobals.Instance.RuntimeType);
+                    test.AddLog("Version: {0}", ZumoTestGlobals.Instance.RuntimeVersion);
+                    foreach (var entry in runtimeFeatures)
+                    {
+                        test.AddLog("Runtime feature: {0} : {1}", entry.Key, entry.Value);
+                    }
+                }
+                else
+                {
+                    test.AddLog("Could not load the runtime information");
+                }
+            }
+
+            return runtimeFeatures;
+        }
+
+        public string RuntimeType { get; private set; }
+
+        public string RuntimeVersion { get; private set; }
+        public bool IsNetRuntime { get; private set; }
+
+        public bool IsNHPushEnabled { get; private set; }
 
         public MobileServiceClient Client { get; private set; }
         public Dictionary<string, object> GlobalTestParams { get; private set; }
@@ -81,6 +106,11 @@ namespace ZumoE2ETestApp.Framework
         public static ZumoTestGlobals Instance
         {
             get { return instance; }
+        }
+
+        public static void ResetInstance()
+        {
+            instance = new ZumoTestGlobals();
         }
 
         public void InitializeClient(string appUrl, string appKey)
@@ -97,6 +127,7 @@ namespace ZumoE2ETestApp.Framework
                 }
 
                 this.Client = new MobileServiceClient(appUrl, appKey);
+                this.runtimeFeatures = null;
             }
         }
     }

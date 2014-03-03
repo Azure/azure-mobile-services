@@ -27,7 +27,6 @@ namespace ZumoE2ETestApp.Tests
         public static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Push tests");
-            result.AddTest(ZumoSetupTests.CreateSetupTest());
             result.AddTest(CreateRegisterChannelTest());
             result.AddTest(CreateToastPushTest("sendToastText01", "hello world"));
             result.AddTest(CreateToastPushTest("sendToastImageAndText03", "ts-iat3-1", "ts-iat3-2", null, imageUrl, "zumo"));
@@ -53,16 +52,16 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateUnregisterChannelTest());
             result.AddTest(CreateRegisterTemplateChannelTest("Toast"));
             result.AddTest(CreateTemplateToastPushTest("sendToastText01", "World News in English!"));
-            result.AddTest(CreateUnregisterTemplateChannelTest(ZumoTestGlobals.NHToastTemplateName));
+            result.AddTest(CreateUnregisterTemplateChannelTest(ZumoPushTestGlobals.NHToastTemplateName));
             result.AddTest(CreateRegisterTemplateChannelTest("Tile"));
             result.AddTest(CreateTemplateTilePushTest("TileWideImageAndText02", new[] { "tl-wiat2-1", "在普通话的世界新闻！" }, new[] { wideImageUrl }, new[] { "zumowide" }));
-            result.AddTest(CreateUnregisterTemplateChannelTest(ZumoTestGlobals.NHTileTemplateName));
+            result.AddTest(CreateUnregisterTemplateChannelTest(ZumoPushTestGlobals.NHTileTemplateName));
             result.AddTest(CreateRegisterTemplateChannelTest("Badge"));
             result.AddTest(CreateTemplateBadgePushTest("10"));
-            result.AddTest(CreateUnregisterTemplateChannelTest(ZumoTestGlobals.NHBadgeTemplateName));
+            result.AddTest(CreateUnregisterTemplateChannelTest(ZumoPushTestGlobals.NHBadgeTemplateName));
             result.AddTest(CreateRegisterTemplateChannelTest("Raw"));
             result.AddTest(CreateTemplateRawPushTest("Nouvelles du monde en français!"));
-            result.AddTest(CreateUnregisterTemplateChannelTest(ZumoTestGlobals.NHRawTemplateName));
+            result.AddTest(CreateUnregisterTemplateChannelTest(ZumoPushTestGlobals.NHRawTemplateName));
 
             return result;
         }
@@ -274,8 +273,8 @@ namespace ZumoE2ETestApp.Tests
                 item.Add("channelUri", pushChannelUri);
                 item.Add("payload", payload);
                 item.Add("xmlPayload", expectedResult.ToString());
-                item.Add("templateNotification", ZumoTestGlobals.TemplateNotification);
-                if (ZumoTestGlobals.RuntimeFeatures[ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED])
+                item.Add("templateNotification", ZumoPushTestGlobals.TemplateNotification);
+                if (ZumoTestGlobals.Instance.IsNHPushEnabled)
                 {
                     item.Add("usingNH", true);
                     item.Add("nhNotificationType", nhNotificationType);
@@ -344,7 +343,7 @@ namespace ZumoE2ETestApp.Tests
             {
                 ZumoPushTests.pushChannel = await PushNotificationChannelManager.CreatePushNotificationChannelForApplicationAsync();
                 test.AddLog("Register the channel; uri = {0}", pushChannel.Uri);
-                if (ZumoTestGlobals.RuntimeFeatures[ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED])
+                if (ZumoTestGlobals.Instance.IsNHPushEnabled)
                 {
                     var client = ZumoTestGlobals.Instance.Client;
                     var push = client.GetPush();
@@ -374,21 +373,21 @@ namespace ZumoE2ETestApp.Tests
                 {
                     case "toast":
                         var toastTemplate = BuildXmlToastPayload("sendToastText01", "$(News_English)");
-                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, toastTemplate.ToString(), ZumoTestGlobals.NHToastTemplateName, "World English".Split());
+                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, toastTemplate.ToString(), ZumoPushTestGlobals.NHToastTemplateName, "World English".Split());
                         break;
                     case "raw":
                         var rawTemplate = "<raw>$(News_French)</raw>";
                         IDictionary<string, string> wnsHeaders = new Dictionary<string, string>();
                         wnsHeaders.Add("X-WNS-Type", "wns/raw");
-                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, rawTemplate, ZumoTestGlobals.NHRawTemplateName, "World Mandarin".Split(), wnsHeaders);
+                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, rawTemplate, ZumoPushTestGlobals.NHRawTemplateName, "World Mandarin".Split(), wnsHeaders);
                         break;
                     case "badge":
                         var badgeTemplate = BuildBadgeXmlPayload("$(News_Badge)");
-                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, badgeTemplate.ToString(), ZumoTestGlobals.NHBadgeTemplateName, "World Badge".Split());
+                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, badgeTemplate.ToString(), ZumoPushTestGlobals.NHBadgeTemplateName, "World Badge".Split());
                         break;
                     case "tile":
                         var tileTemplate = BuildXmlTilePayload("TileWideImageAndText02", new[] { "tl-wiat2-1", "$(News_Mandarin)" }, new[] { wideImageUrl }, new[] { "zumowide" });
-                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, tileTemplate.ToString(), ZumoTestGlobals.NHTileTemplateName, "World Mandarin".Split());
+                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, tileTemplate.ToString(), ZumoPushTestGlobals.NHTileTemplateName, "World Mandarin".Split());
                         break;
                     default:
                         throw new Exception("Template type" + nhNotificationType + "is not supported.");
@@ -406,7 +405,7 @@ namespace ZumoE2ETestApp.Tests
         {
             return new ZumoTest("Unregister push channel", async delegate(ZumoTest test)
             {
-                if (ZumoTestGlobals.RuntimeFeatures[ZumoTestGlobals.RuntimeFeatureNames.NH_PUSH_ENABLED])
+                if (ZumoTestGlobals.Instance.IsNHPushEnabled)
                 {
                     var client = ZumoTestGlobals.Instance.Client;
                     var push = client.GetPush();

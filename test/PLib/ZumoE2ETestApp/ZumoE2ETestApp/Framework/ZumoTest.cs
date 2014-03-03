@@ -4,12 +4,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using ZumoE2ETestApp.Tests;
 
 namespace ZumoE2ETestApp.Framework
 {
@@ -92,26 +88,27 @@ namespace ZumoE2ETestApp.Framework
             return this.logs;
         }
 
-        public bool ShouldBeSkipped()
+        public async Task<string> GetUnsupportedFeaturesAsync()
         {
+            List<string> unsupportedFeatures = new List<string>();
             if (runtimeFeatures.Count > 0)
             {
-                foreach(var requiredFeature in this.runtimeFeatures)
+                foreach (var requiredFeature in this.runtimeFeatures)
                 {
-                    var isEnabled = ZumoTestGlobals.RuntimeFeatures[requiredFeature];
-                    if (!isEnabled)
+                    bool isEnabled;
+                    if (!(await ZumoTestGlobals.Instance.GetRuntimeFeatures(this)).TryGetValue(requiredFeature, out isEnabled))
                     {
-                        return true;
+                        // Not in the list.
+                        AddLog("Warning: Status of feature '{0}' is not provided by the runtime", requiredFeature);
+                    }
+                    else if (!isEnabled)
+                    {
+                        unsupportedFeatures.Add(requiredFeature);
                     }
                 }
             }
-            return false;
-        }
 
-        public string WhySkipped()
-        {
-            var ret = string.Join(",", runtimeFeatures);
-            return ret;
+            return string.Join(",", unsupportedFeatures);
         }
 
         public async Task Run()
@@ -125,9 +122,10 @@ namespace ZumoE2ETestApp.Framework
             try
             {
                 this.StartTime = DateTime.UtcNow;
-                if (this.ShouldBeSkipped())
+                string unsupportedFeatures = await GetUnsupportedFeaturesAsync();
+                if (!string.IsNullOrEmpty(unsupportedFeatures))
                 {
-                    this.AddLog("Test skipped, missing required runtime features [{0}].", WhySkipped());
+                    this.AddLog("Test skipped, missing required runtime features [{0}].", unsupportedFeatures);
                     this.Status = TestStatus.Skipped;
                 }
                 else

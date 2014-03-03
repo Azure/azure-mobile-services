@@ -18,10 +18,11 @@ namespace ZumoE2ETestApp.Tests
 {
     internal static class ZumoQueryTests
     {
+        private const int VeryLargeTopValue = 1001;
+
         internal static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Query tests");
-            result.AddTest(ZumoSetupTests.CreateSetupTest());
             result.AddTest(CreatePopulateTableTest());
             result.AddTest(CreatePopulateStringIdTableTest());
 
@@ -222,8 +223,8 @@ namespace ZumoE2ETestApp.Tests
                 odataQueryExpression: "$filter=((Year ge 1980) and (Year le 1989))&$top=3&$skip=2&$orderby=Title asc"));
 
             // Negative tests
-            result.AddTest(CreateQueryTest<Movie, MobileServiceInvalidOperationException>("[Int id] (Neg) Very large top value", m => m.Year > 2000, 1001));
-            result.AddTest(CreateQueryTest<StringIdMovie, MobileServiceInvalidOperationException>("[String id] (Neg) Very large top value", m => m.Year > 2000, 1001));
+            result.AddTest(CreateQueryTest<Movie, MobileServiceInvalidOperationException>("[Int id] (Neg) Very large top value", m => m.Year > 2000, VeryLargeTopValue));
+            result.AddTest(CreateQueryTest<StringIdMovie, MobileServiceInvalidOperationException>("[String id] (Neg) Very large top value", m => m.Year > 2000, VeryLargeTopValue));
             result.AddTest(CreateQueryTest<Movie, NotSupportedException>("[Int id] (Neg) Unsupported predicate: unsupported arithmetic",
                 m => Math.Sqrt(m.Year) > 43));
             result.AddTest(CreateQueryTest<StringIdMovie, NotSupportedException>("[String id] (Neg) Unsupported predicate: unsupported arithmetic",
@@ -476,7 +477,7 @@ namespace ZumoE2ETestApp.Tests
                     {
                         test.AddLog("Using the OData query directly");
                         JToken result = await table.ReadAsync(odataExpression);
-                        if (ZumoTestGlobals.NetRuntimeEnabled)
+                        if (ZumoTestGlobals.Instance.IsNetRuntime)
                         {
                             var serializer = new JsonSerializer();
                             serializer.Converters.Add(new MobileServiceIsoDateTimeConverter());
@@ -495,11 +496,12 @@ namespace ZumoE2ETestApp.Tests
                         actualTotalCount = totalCountProvider.TotalCount;
                     }
 
-                    if (ZumoTestGlobals.NetRuntimeEnabled && top.HasValue && top.Value == 1001)
+                    if (ZumoTestGlobals.Instance.IsNetRuntime && top.HasValue && top.Value == VeryLargeTopValue)
                     {
-                        test.AddLog("NetRuntime throttles and does not throw");
+                        test.AddLog("NetRuntime throttles to 100 and does not throw");
                         return readMovies.Count() == 100;
                     }
+
                     IEnumerable<MovieType> expectedData;
                     if (useStringIdTable)
                     {

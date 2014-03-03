@@ -1,8 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
+﻿using System.Collections.Generic;
 using ZumoE2ETestApp.Framework;
 
 namespace ZumoE2ETestApp.Tests
@@ -17,34 +13,21 @@ namespace ZumoE2ETestApp.Tests
             return result;
         }
 
-        public static ZumoTest CreateSetupTest()
+        private static ZumoTest CreateSetupTest()
         {
             return new ZumoTest("Identify enabled runtime features", async delegate(ZumoTest test)
                 {
-                    var client = ZumoTestGlobals.Instance.Client;
-                    JToken apiResult = await client.InvokeApiAsync("runtimeInfo", HttpMethod.Get, null);
-                    try
+                    // Start clean.
+                    Dictionary<string, bool> runtimeFeatures = await ZumoTestGlobals.Instance.GetRuntimeFeatures(test);
+                    if (runtimeFeatures.Count > 0)
                     {
-                        ZumoTestGlobals.RuntimeFeatures = JsonConvert.DeserializeObject<Dictionary<string, bool>>(JsonConvert.SerializeObject(apiResult["features"]));
-                        if (apiResult["runtime"].ToString().Contains("node.js"))
-                        {
-                            ZumoTestGlobals.NetRuntimeEnabled = false;
-                            ZumoTestGlobals.RuntimeFeatures.Add(ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN, true);
-                            ZumoTestGlobals.RuntimeFeatures.Add(ZumoTestGlobals.RuntimeFeatureNames.SSO_LOGIN, true);
-                            ZumoTestGlobals.RuntimeFeatures.Add(ZumoTestGlobals.RuntimeFeatureNames.LIVE_LOGIN, true);
-                        }
-                        else
-                        {
-                            ZumoTestGlobals.NetRuntimeEnabled = true;
-                            ZumoTestGlobals.RuntimeFeatures.Add(ZumoTestGlobals.RuntimeFeatureNames.AAD_LOGIN, false);
-                            ZumoTestGlobals.RuntimeFeatures.Add(ZumoTestGlobals.RuntimeFeatureNames.SSO_LOGIN, false);
-                            ZumoTestGlobals.RuntimeFeatures.Add(ZumoTestGlobals.RuntimeFeatureNames.LIVE_LOGIN, false);
-                        }
+                        test.AddLog("Runtime: {0}", ZumoTestGlobals.Instance.RuntimeType);
+                        test.AddLog("Version: {0}", ZumoTestGlobals.Instance.RuntimeVersion);
                         return true;
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        test.AddLog(ex.Message);
+                        test.AddLog("Could not load the runtime information");
                         return false;
                     }
                 });

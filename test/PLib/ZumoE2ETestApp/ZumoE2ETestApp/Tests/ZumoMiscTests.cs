@@ -23,7 +23,6 @@ namespace ZumoE2ETestApp.Tests
         public static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Misc tests");
-            result.AddTest(ZumoSetupTests.CreateSetupTest());
             
             result.AddTest(CreateFilterTestWithMultipleRequests(true));
             result.AddTest(CreateFilterTestWithMultipleRequests(false));
