@@ -219,7 +219,9 @@ namespace ZumoE2ETestAppWP8
                     else
                     {
                         int passed = this.currentGroup.AllTests.Count(t => t.Status == TestStatus.Passed);
-                        string message = string.Format(CultureInfo.InvariantCulture, "Passed {0} of {1} tests", passed, this.currentGroup.AllTests.Count());
+                        int skipped = this.currentGroup.AllTests.Count(t => t.Status == TestStatus.Skipped);
+                        int failed = this.currentGroup.AllTests.Count(t => t.Status == TestStatus.Failed);
+                        string message = string.Format(CultureInfo.InvariantCulture, "Passed {0} of {1} tests (Skipped {2})", passed, (passed + failed), skipped);
                         MessageBox.Show(message, "Test group finished", MessageBoxButton.OK);
                     }
                 }
