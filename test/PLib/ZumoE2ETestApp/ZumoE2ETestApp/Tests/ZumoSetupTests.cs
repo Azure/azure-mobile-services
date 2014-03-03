@@ -3,7 +3,7 @@ using ZumoE2ETestApp.Framework;
 
 namespace ZumoE2ETestApp.Tests
 {
-    public static class ZumoSetupTests
+    internal static class ZumoSetupTests
     {
         public static ZumoTestGroup CreateTests()
         {
