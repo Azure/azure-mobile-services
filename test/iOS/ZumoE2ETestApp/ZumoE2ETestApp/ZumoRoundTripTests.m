@@ -1,4 +1,4 @@
-// ----------------------------------------------------------------------------
+﻿// ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
@@ -180,6 +180,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
         @{
           @"name":@"a string",
           @"number":@123.45,
+	  @"integer":@12345,
           @"bool":@YES,
           @"date1":[NSDate date],
           @"complex":@[@"array with", @"string elements"]
@@ -209,6 +210,7 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
     NSDictionary *templateItem = @{
                                    @"name":@"ãéìôü ÇñÑ - الكتاب على الطاولة - 这本书在桌子上 - ⒈①Ⅻㄨㄩ 啊阿鼾齄 丂丄狚狛 狜狝﨨﨩 ˊˋ˙–〇 㐀㐁䶴䶵 - 本は机の上に - הספר הוא על השולחן",
                                    @"number":@123.456,
+				   @"integer":@12345,
                                    @"bool":@YES,
                                    @"date1":[NSDate date],
                                    @"complex":@[@"abc",@"def",@"ghi"]
