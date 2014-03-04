@@ -435,7 +435,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                     return true;
                 }
-            });
+            }, useStringIdTable ? ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES : ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES);
         }
     }
 }

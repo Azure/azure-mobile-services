@@ -22,8 +22,8 @@ namespace ZumoE2EServerApp.Controllers
             {
                 var templateMessage = new TemplatePushMessage();
                 templateMessage.Add("News_English", "World News in English!");
-                templateMessage.Add("News_French", "World News in French!");
-                templateMessage.Add("News_Mandarin", "World News in Mandarin!");
+                templateMessage.Add("News_French", "Nouvelles du monde en français!");
+                templateMessage.Add("News_Mandarin", "在普通话的世界新闻！");
                 templateMessage.Add("News_Badge", "10");
                 message = templateMessage;
                 tag = "World";

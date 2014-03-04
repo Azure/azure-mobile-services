@@ -594,7 +594,10 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                     return true;
                 }
-            }, typeof(MovieType) == typeof(Movie) ? ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
+            }, typeof(MovieType) == typeof(Movie) ? ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES,
+                // The OData library in .NET does not support replace?
+                // Tracked by https://wagit/AzureMobile/ZumoNetRuntime/issues/10
+               typeof(MovieType) == typeof(StringIdMovie) && name.Contains("Replace") ? ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES : null);
         }
 
         private static IMobileServiceTableQuery<MovieType> ApplyOrdering<MovieType>(IMobileServiceTableQuery<MovieType> query, OrderByClause[] orderBy)
