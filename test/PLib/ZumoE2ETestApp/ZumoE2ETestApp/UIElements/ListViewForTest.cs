@@ -65,6 +65,9 @@ namespace ZumoE2ETestApp.UIElements
                     case TestStatus.Passed:
                         color = Colors.Green;
                         break;
+                    case TestStatus.Skipped:
+                        color = Colors.Blue;
+                        break;
                     case TestStatus.Running:
                         color = Colors.Gray;
                         break;
