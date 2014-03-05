@@ -139,28 +139,34 @@ LocalStorageManager.prototype.flushToSettings = function () {
 LocalStorageManager.prototype.initializeRegistrationInfoFromStorage = function () {
     this.registrations = new Windows.Foundation.Collections.PropertySet();
 
-    // Read channelUri
-    this.channelUri = readContent(this.settings, this.keyNameChannelUri);
+    try {
+        // Read channelUri
+        this.channelUri = readContent(this.settings, this.keyNameChannelUri);
 
-    // Verify this.storage version
-    var version = readContent(this.settings, this.keyNameVersion);
-    if (this.storageVersion !== version.toLowerCase()) {
-        this.isRefreshNeeded = true;
-        return;
-    }
+        // Verify this.storage version
+        var version = readContent(this.settings, this.keyNameVersion);
+        if (this.storageVersion !== version.toLowerCase()) {
+            this.isRefreshNeeded = true;
+            return;
+        }
 
-    this.isRefreshNeeded = false;
+        this.isRefreshNeeded = false;
 
-    // read registrations
-    var regsStr = readContent(this.settings, this.keyNameRegistrations);
-    if (regsStr) {
-        var entries = JSON.parse(regsStr);
+        // read registrations
+        var regsStr = readContent(this.settings, this.keyNameRegistrations);
+        if (regsStr) {
+            var entries = JSON.parse(regsStr);
 
-        for (var reg in entries) {
-            if (entries.hasOwnProperty(reg)) {
-                this.registrations.insert(reg, entries[reg]);
+            for (var reg in entries) {
+                if (entries.hasOwnProperty(reg)) {
+                    this.registrations.insert(reg, entries[reg]);
+                }
             }
         }
+    } catch (err) {
+        // It is possible that local storage is corrupted by users, bugs or other issues.
+        // If this occurs, force a full refresh.
+        this.isRefreshNeeded = true;
     }
 };
 
