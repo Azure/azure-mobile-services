@@ -593,7 +593,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                     return true;
                 }
-            }, typeof(MovieType) == typeof(Movie) ? ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES)
+            }, typeof(MovieType) == typeof(Movie) ? ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
         }
 
         private static IMobileServiceTableQuery<MovieType> ApplyOrdering<MovieType>(IMobileServiceTableQuery<MovieType> query, OrderByClause[] orderBy)
