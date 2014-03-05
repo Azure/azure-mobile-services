@@ -1054,6 +1054,8 @@ public class MobileServiceClient {
 	
 	/**
 	 * Gets the AndroidHttpClientFactory
+	 * 
+	 *  @return
 	 */
 	public AndroidHttpClientFactory getAndroidHttpClientFactory() {
 		return mAndroidHttpClientFactory;

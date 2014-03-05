@@ -38,7 +38,7 @@ public class GcmNativeRegistration extends Registration {
 
 	@Expose
 	@SerializedName("platform")
-	private String mPlatform = "gcm";
+	private String mPlatform = GCM_PLATFORM;
 
 	/**
 	 * The PNS specific identifier

@@ -34,9 +34,7 @@ import com.microsoft.windowsazure.mobileservices.Registration;
 import com.microsoft.windowsazure.mobileservices.RegistrationCallback;
 import com.microsoft.windowsazure.mobileservices.TemplateRegistration;
 import com.microsoft.windowsazure.mobileservices.TemplateRegistrationCallback;
-import com.microsoft.windowsazure.mobileservices.UnregisterAllCallback;
 import com.microsoft.windowsazure.mobileservices.UnregisterCallback;
-import com.microsoft.windowsazure.mobileservices.UnregisterTemplateCallback;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.MainActivity;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
@@ -93,13 +91,13 @@ public class EnhancedPushTests extends TestGroup {
 		hub.registerTemplate(gcmId, templateName, template, tags, callback);
 	}
 
-	private void unregisterTemplate(TestCase test, MobileServicePush hub, String templateName, final UnregisterTemplateCallback callback) {
+	private void unregisterTemplate(TestCase test, MobileServicePush hub, String templateName, final UnregisterCallback callback) {
 		test.log("UnregisterTemplate with templateName = " + templateName);
 
 		hub.unregisterTemplate(templateName, callback);
 	}
 
-	private void unregisterAll(TestCase test, MobileServicePush hub, String gcmId, final UnregisterAllCallback callback) {
+	private void unregisterAll(TestCase test, MobileServicePush hub, String gcmId, final UnregisterCallback callback) {
 		test.log("Unregister Native");
 		hub.unregisterAll(gcmId, callback);
 	}
@@ -459,7 +457,7 @@ public class EnhancedPushTests extends TestGroup {
 								result.setStatus(TestStatus.Failed);
 							}
 
-							unregisterTemplate(that, MobileServicePush, templateName, new UnregisterTemplateCallback() {
+							unregisterTemplate(that, MobileServicePush, templateName, new UnregisterCallback() {
 
 								@Override
 								public void onUnregister(Exception exception) {
@@ -538,7 +536,7 @@ public class EnhancedPushTests extends TestGroup {
 										result.setStatus(TestStatus.Failed);
 									}
 
-									unregisterTemplate(that, MobileServicePush, templateName, new UnregisterTemplateCallback() {
+									unregisterTemplate(that, MobileServicePush, templateName, new UnregisterCallback() {
 
 										@Override
 										public void onUnregister(Exception exception) {
@@ -607,7 +605,7 @@ public class EnhancedPushTests extends TestGroup {
 										result.setStatus(TestStatus.Failed);
 									}
 
-									unregisterTemplate(that, MobileServicePush, templateName1, new UnregisterTemplateCallback() {
+									unregisterTemplate(that, MobileServicePush, templateName1, new UnregisterCallback() {
 
 										@Override
 										public void onUnregister(Exception exception) {
@@ -616,7 +614,7 @@ public class EnhancedPushTests extends TestGroup {
 												return;
 											}
 
-											unregisterTemplate(that, MobileServicePush, templateName2, new UnregisterTemplateCallback() {
+											unregisterTemplate(that, MobileServicePush, templateName2, new UnregisterCallback() {
 
 												@Override
 												public void onUnregister(Exception exception) {
@@ -676,7 +674,7 @@ public class EnhancedPushTests extends TestGroup {
 								return;
 							}
 
-							unregisterTemplate(that, MobileServicePush, templateName, new UnregisterTemplateCallback() {
+							unregisterTemplate(that, MobileServicePush, templateName, new UnregisterCallback() {
 
 								@Override
 								public void onUnregister(Exception exception) {
@@ -698,7 +696,7 @@ public class EnhancedPushTests extends TestGroup {
 												result.setStatus(TestStatus.Failed);
 											}
 
-											unregisterTemplate(that, MobileServicePush, templateName, new UnregisterTemplateCallback() {
+											unregisterTemplate(that, MobileServicePush, templateName, new UnregisterCallback() {
 
 												@Override
 												public void onUnregister(Exception exception) {
@@ -1019,7 +1017,7 @@ public class EnhancedPushTests extends TestGroup {
 					result.setStatus(TestStatus.Passed);
 					result.setTestCase(this);
 
-					unregisterTemplate(this, MobileServicePush, templateName, new UnregisterTemplateCallback() {
+					unregisterTemplate(this, MobileServicePush, templateName, new UnregisterCallback() {
 
 						@Override
 						public void onUnregister(Exception exception) {
@@ -1067,7 +1065,7 @@ public class EnhancedPushTests extends TestGroup {
 							}
 
 							final String registrationId = templateRegistration.getRegistrationId();
-							unregisterTemplate(that, MobileServicePush, templateName, new UnregisterTemplateCallback() {
+							unregisterTemplate(that, MobileServicePush, templateName, new UnregisterCallback() {
 
 								@Override
 								public void onUnregister(Exception exception) {
@@ -1078,7 +1076,7 @@ public class EnhancedPushTests extends TestGroup {
 
 									addUnexistingTemplateRegistration(templateName, registrationId);
 
-									unregisterTemplate(that, MobileServicePush, templateName, new UnregisterTemplateCallback() {
+									unregisterTemplate(that, MobileServicePush, templateName, new UnregisterCallback() {
 
 										@Override
 										public void onUnregister(Exception exception) {
@@ -1126,7 +1124,7 @@ public class EnhancedPushTests extends TestGroup {
 
 					final String gcmId = UUID.randomUUID().toString();
 
-					unregisterAll(that, MobileServicePush, gcmId, new UnregisterAllCallback() {
+					unregisterAll(that, MobileServicePush, gcmId, new UnregisterCallback() {
 
 						@Override
 						public void onUnregister(Exception exception) {
@@ -1155,7 +1153,7 @@ public class EnhancedPushTests extends TestGroup {
 												return;
 											}
 
-											unregisterAll(that, MobileServicePush, gcmId, new UnregisterAllCallback() {
+											unregisterAll(that, MobileServicePush, gcmId, new UnregisterCallback() {
 
 												@Override
 												public void onUnregister(Exception exception) {
@@ -1217,7 +1215,7 @@ public class EnhancedPushTests extends TestGroup {
 
 					final String gcmId = UUID.randomUUID().toString();
 
-					unregisterAll(that, MobileServicePush, gcmId, new UnregisterAllCallback() {
+					unregisterAll(that, MobileServicePush, gcmId, new UnregisterCallback() {
 
 						@Override
 						public void onUnregister(Exception exception) {
@@ -1246,7 +1244,7 @@ public class EnhancedPushTests extends TestGroup {
 
 											final String registrationId = templateRegistration.getRegistrationId();
 
-											unregisterAll(that, MobileServicePush, gcmId, new UnregisterAllCallback() {
+											unregisterAll(that, MobileServicePush, gcmId, new UnregisterCallback() {
 
 												@Override
 												public void onUnregister(Exception exception) {
@@ -1257,7 +1255,7 @@ public class EnhancedPushTests extends TestGroup {
 
 													addUnexistingTemplateRegistration(templateName, registrationId);
 
-													unregisterTemplate(that, MobileServicePush, templateName, new UnregisterTemplateCallback() {
+													unregisterTemplate(that, MobileServicePush, templateName, new UnregisterCallback() {
 
 														@Override
 														public void onUnregister(Exception exception) {
@@ -1310,7 +1308,7 @@ public class EnhancedPushTests extends TestGroup {
 
 					final String gcmId = UUID.randomUUID().toString();
 
-					unregisterAll(that, MobileServicePush, gcmId, new UnregisterAllCallback() {
+					unregisterAll(that, MobileServicePush, gcmId, new UnregisterCallback() {
 
 						@Override
 						public void onUnregister(Exception exception) {

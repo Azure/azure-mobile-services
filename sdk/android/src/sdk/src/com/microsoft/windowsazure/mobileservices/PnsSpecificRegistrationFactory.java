@@ -31,7 +31,7 @@ import com.google.gson.JsonObject;
  * Represents a factory which creates Registrations according the PNS supported
  * on device, and also provides some PNS specific utility methods
  */
-public final class PnsSpecificRegistrationFactory {
+final class PnsSpecificRegistrationFactory {
 
 	/**
 	 * If it is Amazon device

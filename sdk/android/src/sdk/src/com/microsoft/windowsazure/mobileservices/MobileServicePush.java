@@ -94,7 +94,10 @@ public class MobileServicePush {
 	 * Factory which creates Registrations according the PNS supported on device
 	 */
 	private PnsSpecificRegistrationFactory mPnsSpecificRegistrationFactory;
-
+	
+	/**
+	 * Flag to signal the need of refreshing local storage
+	 */
 	private boolean mIsRefreshNeeded = false;
 
 	/**
@@ -231,7 +234,7 @@ public class MobileServicePush {
 	 *            The operation callback
 	 * 
 	 */
-	public void unregisterTemplate(String templateName, final UnregisterTemplateCallback callback) {
+	public void unregisterTemplate(String templateName, final UnregisterCallback callback) {
 		if (isNullOrWhiteSpace(templateName)) {
 			callback.onUnregister(new IllegalArgumentException("templateName"));
 			return;
@@ -256,7 +259,7 @@ public class MobileServicePush {
 	 * @param callback
 	 *            The operation callback
 	 */
-	public void unregisterAll(String pnsHandle, final UnregisterAllCallback callback) {
+	public void unregisterAll(String pnsHandle, final UnregisterCallback callback) {
 		getFullRegistrationInformation(pnsHandle, new GetFullRegistrationInformationCallback() {
 
 			@Override

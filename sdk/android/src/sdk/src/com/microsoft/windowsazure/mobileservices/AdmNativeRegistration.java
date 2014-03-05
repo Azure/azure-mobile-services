@@ -38,7 +38,7 @@ public class AdmNativeRegistration extends Registration {
 
 	@Expose
 	@SerializedName("platform")
-	private String mPlatform = "adm";
+	private String mPlatform = ADM_PLATFORM;
 
 	/**
 	 * The PNS specific identifier
