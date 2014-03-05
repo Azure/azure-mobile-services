@@ -20,12 +20,7 @@ namespace ZumoE2EServerApp.Controllers
             string tag = null;
             if (item.NHNotificationType == "template")
             {
-                var templateMessage = new TemplatePushMessage();
-                templateMessage.Add("News_English", "World News in English!");
-                templateMessage.Add("News_French", "Nouvelles du monde en français!");
-                templateMessage.Add("News_Mandarin", "在普通话的世界新闻！");
-                templateMessage.Add("News_Badge", "10");
-                message = templateMessage;
+                message = item.TemplateNotification.ToObject<TemplatePushMessage>();
                 tag = "World";
             }
             else
