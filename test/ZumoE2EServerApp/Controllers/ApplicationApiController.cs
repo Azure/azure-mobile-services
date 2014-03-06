@@ -15,33 +15,33 @@ namespace ZumoE2EServerApp.Controllers
     public class ApplicationApiController : ApiController
     {
         [Route("api/application")]
-        public Task<HttpResponseMessage> Get(JToken body)
+        public Task<HttpResponseMessage> Get()
         {
-            return CustomSharedApi.handleRequest(this.Request, (ServiceUser)this.User, body);
+            return CustomSharedApi.handleRequest(this.Request, (ServiceUser)this.User);
         }
 
         [Route("api/application")]
-        public Task<HttpResponseMessage> Post(JToken body)
+        public Task<HttpResponseMessage> Post()
         {
-            return CustomSharedApi.handleRequest(this.Request, (ServiceUser)this.User, body);
+            return CustomSharedApi.handleRequest(this.Request, (ServiceUser)this.User);
         }
 
         [Route("api/application")]
-        public Task<HttpResponseMessage> Put(JToken body)
+        public Task<HttpResponseMessage> Put()
         {
-            return CustomSharedApi.handleRequest(this.Request, (ServiceUser)this.User, body);
+            return CustomSharedApi.handleRequest(this.Request, (ServiceUser)this.User);
         }
 
         [Route("api/application")]
-        public Task<HttpResponseMessage> Delete(JToken body)
+        public Task<HttpResponseMessage> Delete()
         {
-            return CustomSharedApi.handleRequest(this.Request, (ServiceUser)this.User, body);
+            return CustomSharedApi.handleRequest(this.Request, (ServiceUser)this.User);
         }
 
         [Route("api/application")]
-        public Task<HttpResponseMessage> Patch(JToken body)
+        public Task<HttpResponseMessage> Patch()
         {
-            return CustomSharedApi.handleRequest(this.Request, (ServiceUser)this.User, body);
+            return CustomSharedApi.handleRequest(this.Request, (ServiceUser)this.User);
         }
     }
 }
