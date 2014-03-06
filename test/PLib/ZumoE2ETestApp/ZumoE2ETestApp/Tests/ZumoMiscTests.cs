@@ -269,7 +269,7 @@ namespace ZumoE2ETestApp.Tests
                 }
 
                 return true;
-            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES);
+            }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
         }
 
         private static ZumoTest CreateOptimisticConcurrencyWithServerConflictsTest(string testName, bool clientWins)
@@ -329,7 +329,7 @@ namespace ZumoE2ETestApp.Tests
                 await table.DeleteAsync(item);
                 test.AddLog("...done");
                 return true;
-            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES);
+            }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
         }
 
         private static ZumoTest CreateParameterPassingTest(bool useTypedTable)
