@@ -81,7 +81,6 @@ namespace ZumoE2ETestApp.Tests
                 m => m.Title.Substring(m.Title.Length - 1, 1) == "r"));
 
                 // The OData library in .NET does not support replace?
-                // Tracked by https://wagit/AzureMobile/ZumoNetRuntime/issues/10
             result.AddTest(CreateQueryTestStringId("String: Replace - Movies ending with either 'Part 2' or 'Part II'",
                 m => m.Title.Replace("II", "2").EndsWith("Part 2")));
 

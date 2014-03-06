@@ -3,6 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using Microsoft.WindowsAzure.Mobile.Service;
+using Newtonsoft.Json.Linq;
 
 namespace ZumoE2EServerApp.DataObjects
 {
@@ -12,5 +13,6 @@ namespace ZumoE2EServerApp.DataObjects
         public string Payload { get; set; }
         public string XmlPayload { get; set; }
         public string PushResponse { get; set; }
+        public JToken TemplateNotification { get; set; }
     }
 }
