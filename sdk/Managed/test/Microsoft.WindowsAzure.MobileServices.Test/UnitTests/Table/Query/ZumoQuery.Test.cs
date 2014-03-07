@@ -865,7 +865,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                from p in table
                where p.Updated == DateTime.MinValue
                select p);
-            Assert.AreEqual(query.Filter, "(Updated eq datetime'0001-01-01T08:00:00.000Z')");
+            string minDateAsODataString = DateTime.MinValue.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffK", CultureInfo.InvariantCulture);
+            Assert.AreEqual(query.Filter, "(Updated eq datetime'" + minDateAsODataString + "')");
 
             query = Compile<Product, Product>(table =>
                 from p in table
