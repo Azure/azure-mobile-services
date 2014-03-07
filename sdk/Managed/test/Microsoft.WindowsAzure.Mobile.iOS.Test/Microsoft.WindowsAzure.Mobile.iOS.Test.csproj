@@ -68,33 +68,6 @@
     <CodesignKey>iPhone Developer</CodesignKey>
     <DefineConstants>XAMARIN</DefineConstants>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Ad-Hoc|iPhone' ">
-    <DebugType>none</DebugType>
-    <Optimize>True</Optimize>
-    <OutputPath>bin\iPhone\Ad-Hoc</OutputPath>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>False</ConsolePause>
-    <CodesignKey>iPhone Distribution</CodesignKey>
-    <BuildIpa>True</BuildIpa>
-    <DefineConstants>XAMARIN</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'AppStore|iPhone' ">
-    <DebugType>none</DebugType>
-    <Optimize>True</Optimize>
-    <OutputPath>bin\iPhone\AppStore</OutputPath>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <ConsolePause>False</ConsolePause>
-    <CodesignKey>iPhone Distribution</CodesignKey>
-    <DefineConstants>XAMARIN</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Ad-Hoc|iPhoneSimulator'">
-    <DefineConstants>XAMARIN</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'AppStore|iPhoneSimulator'">
-    <DefineConstants>XAMARIN</DefineConstants>
-  </PropertyGroup>
   <ItemGroup>
     <Compile Include="UI\LoginViewController.cs" />
     <Compile Include="Main.cs" />
@@ -128,17 +101,17 @@
       <Project>{a871b137-83a8-4e9b-913d-30ee0288e161}</Project>
       <Name>Microsoft.WindowsAzure.Mobile.Ext.iOS</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.Mobile.Xamarin\Microsoft.WindowsAzure.Mobile.Xamarin.csproj">
-      <Project>{b350b243-b88e-4453-a052-3a30571e3d6e}</Project>
-      <Name>Microsoft.WindowsAzure.Mobile.Xamarin</Name>
+    <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.Mobile.csproj">
+      <Project>{75557793-e36e-4190-8714-5bd2665859fb}</Project>
+      <Name>Microsoft.WindowsAzure.Mobile</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices.Test.Xamarin\Microsoft.WindowsAzure.Mobile.Test.Xamarin.csproj">
-      <Project>{bb39ba5e-1a43-481c-b37b-41bc627eb604}</Project>
-      <Name>Microsoft.WindowsAzure.Mobile.Test.Xamarin</Name>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices.TestFramework\Microsoft.WindowsAzure.Mobile.TestFramework.csproj">
+      <Project>{a2500bd2-a9a2-4085-9978-dee3675b02dd}</Project>
+      <Name>Microsoft.WindowsAzure.Mobile.TestFramework</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices.TestFramework.Xamarin\Microsoft.WindowsAzure.Mobile.TestFramework.Xamarin.csproj">
-      <Project>{caa8ad4e-f150-4573-92a8-d34bb4634359}</Project>
-      <Name>Microsoft.WindowsAzure.Mobile.TestFramework.Xamarin</Name>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices.Test\Microsoft.WindowsAzure.Mobile.Test.csproj">
+      <Project>{d8bbc92a-b213-463b-911d-3a106f91d5f9}</Project>
+      <Name>Microsoft.WindowsAzure.Mobile.Test</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.MonoTouch.CSharp.targets" />

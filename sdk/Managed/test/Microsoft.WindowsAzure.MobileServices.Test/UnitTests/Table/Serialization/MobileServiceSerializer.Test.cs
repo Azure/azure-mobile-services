@@ -1111,7 +1111,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             }
         }
 
-        [TestMethod]
+        [Tag("notXamarin")]
+        [TestMethod]        
         public void FloatSerialization()
         {
             List<Tuple<FloatType, string>> testCases = new List<Tuple<FloatType, string>>() {
