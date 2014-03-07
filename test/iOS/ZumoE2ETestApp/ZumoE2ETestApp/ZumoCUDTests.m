@@ -10,6 +10,7 @@
 @implementation ZumoCUDTests
 
 static NSString *tableName = @"iosRoundTripTable";
+static NSString *stringIdTableName = @"stringIdRoundTripTable";
 
 + (NSArray *)createTests {
     NSMutableArray *result = [[NSMutableArray alloc] init];
@@ -19,9 +20,96 @@ static NSString *tableName = @"iosRoundTripTable";
     [result addObject:[self createDeleteTestWithName:@"(Neg) Delete with object and non-existent id" andType:NegDeleteObjectInvalidId]];
     [result addObject:[self createDeleteTestWithName:@"(Neg) Delete with object without 'id' field" andType:NegDeleteObjectNoId]];
     
+    NSArray *validStringIds = @[@"iOS with space", @"random number", @"iOS non-english ãéìôü ÇñÑالكتاب على الطاولة这本书在桌子上הספר הוא על השולחן"];
+    for (NSString *validId in validStringIds) {
+        for (int i = 0; i < 2; i++) {
+            BOOL useDeleteWithId = i == 0;
+            NSString *testName = [NSString stringWithFormat:@"[string id] Delete (%@), id = %@", useDeleteWithId ? @"by id" : @"by object", validId];
+            ZumoTest *test = [ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+                NSString *itemId;
+                if ([validId isEqualToString:@"random number"]) {
+                    itemId = [NSString stringWithFormat:@"%d", rand()];
+                } else {
+                    itemId = validId;
+                }
+                [test addLog:[@"Using id = " stringByAppendingString:itemId]];
+                MSClient *client = [[ZumoTestGlobals sharedInstance] client];
+                MSTable *table = [client tableWithName:stringIdTableName];
+                [table insert:@{@"id":itemId,@"name":@"unused"} completion:^(NSDictionary *item, NSError *error) {
+                    // it's fine if the insert failed (possible if the item already existed.
+                    
+                    [test addLog:@"Calling delete"];
+                    MSDeleteBlock deleteCompletion = ^(id deletedItemId, NSError *error) {
+                        if (error) {
+                            [test addLog:[NSString stringWithFormat:@"Error calling delete: %@", error]];
+                            completion(NO);
+                        } else {
+                            [test addLog:[NSString stringWithFormat:@"Delete succeeded for item: %@", deletedItemId]];
+                            completion(YES);
+                        }
+                    };
+                    if (useDeleteWithId) {
+                        [table deleteWithId:itemId completion:deleteCompletion];
+                    } else {
+                        [table delete:@{@"id":itemId,@"name":@"unused"} completion:deleteCompletion];
+                    }
+                }];
+            }];
+            [test addRequiredFeature:FEATURE_STRING_ID_TABLES];
+            [result addObject:test];
+        }
+    }
+
     [result addObject:[self createUpdateTestWithName:@"Update item" andType:UpdateUsingObject]];
     [result addObject:[self createUpdateTestWithName:@"(Neg) Update with non-existing id" andType:NegUpdateObjectInvalidId]];
     [result addObject:[self createUpdateTestWithName:@"(Neg) Update with no id" andType:NegUpdateObjectNoId]];
+    
+    for (NSString *validId in validStringIds) {
+        NSString *testName = [@"[string id] Update with id = " stringByAppendingString:validId];
+        ZumoTest *test = [ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+            NSString *itemId;
+            if ([validId isEqualToString:@"random number"]) {
+                itemId = [NSString stringWithFormat:@"%d", rand()];
+            } else {
+                itemId = validId;
+            }
+            [test addLog:[@"Using id = " stringByAppendingString:itemId]];
+            MSClient *client = [[ZumoTestGlobals sharedInstance] client];
+            MSTable *table = [client tableWithName:stringIdTableName];
+            [table insert:@{@"id":itemId,@"name":@"unused"} completion:^(NSDictionary *item, NSError *error) {
+                // it's fine if the insert failed (possible if the item already existed.
+                NSDictionary *toUpdate = @{@"id":itemId,@"name":@"another value"};
+                [table update:toUpdate completion:^(NSDictionary *updated, NSError *error) {
+                    BOOL testPassed;
+                    if (error) {
+                        [test addLog:[NSString stringWithFormat:@"Error calling delete: %@", error]];
+                        testPassed = NO;
+                    } else {
+                        [test addLog:[NSString stringWithFormat:@"Updated: %@", updated]];
+                        NSMutableArray *errors = [[NSMutableArray alloc] init];
+                        if ([ZumoTestGlobals compareObjects:toUpdate with:updated log:errors]) {
+                            [test addLog:@"Object compared successfully"];
+                            testPassed = YES;
+                        } else {
+                            [test addLog:@"Error comparing the objects:"];
+                            for (NSString *err in errors) {
+                                [test addLog:err];
+                            }
+                            testPassed = NO;
+                        }
+                    }
+                    
+                    [test addLog:@"Cleanup: deleting the item"];
+                    [table deleteWithId:itemId completion:^(id itemId, NSError *error) {
+                        [test addLog:[@"Delete " stringByAppendingString:(error ? @"failed" : @"succeeded")]];
+                        completion(testPassed);
+                    }];
+                }];
+            }];
+        }];
+        [test addRequiredFeature:FEATURE_STRING_ID_TABLES];
+        [result addObject:test];
+    }
     
     return result;
 }
@@ -102,7 +190,7 @@ typedef enum { UpdateUsingObject, NegUpdateObjectInvalidId, NegUpdateObjectNoId 
             }
         }];
     }];
-    
+    [result addRequiredFeature:FEATURE_INT_ID_TABLES];
     return result;
 }
 
@@ -230,6 +318,7 @@ typedef enum { DeleteUsingId, DeleteUsingObject, NegDeleteUsingInvalidId, NegDel
             }
         }];
     }];
+    [result addRequiredFeature:FEATURE_INT_ID_TABLES];
     
     return result;
 }

@@ -80,6 +80,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     provider = MobileServiceAuthenticationProvider.Google;
                     testName = "Google Login";
                 }
+                else if (buttonClicked.Name.Contains("AzureActiveDirectory"))
+                {
+                    provider = MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory;
+                    testName = "Azure Active Directory Login";
+                }
 
                 bool useProviderStringOverload = UseProviderStringOverloadCheckBox.IsChecked.Value;
 

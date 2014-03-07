@@ -1,10 +1,15 @@
 ﻿# Windows Azure Mobile Services
 
-With Windows Azure Mobile Services you can add a scalable backend to your connected client applications in minutes. To learn more, visit our [Developer Center](http://www.windowsazure.com/en-us/develop/mobile).
+With Windows Azure Mobile Services you can add a scalable backend to your connected client applications in minutes.
+To learn more, visit our [Developer Center](http://www.windowsazure.com/en-us/develop/mobile).
 
 ## Getting Started
 
-If you are new to Mobile Services, you can get started by following our tutorials for connecting your Mobile Services cloud backend to [Windows Store apps](https://www.windowsazure.com/en-us/develop/mobile/tutorials/get-started/), [iOS apps](https://www.windowsazure.com/en-us/develop/mobile/tutorials/get-started-ios/), and [Android apps](https://www.windowsazure.com/en-us/develop/mobile/tutorials/get-started-android/).
+If you are new to Mobile Services, you can get started by following our tutorials for connecting your Mobile
+Services cloud backend to [Windows Store apps](https://www.windowsazure.com/en-us/develop/mobile/tutorials/get-started/),
+[Windows Phone 8 apps](https://www.windowsazure.com/en-us/develop/mobile/tutorials/get-started-wp8/),
+[iOS apps](https://www.windowsazure.com/en-us/develop/mobile/tutorials/get-started-ios/),
+and [Android apps](https://www.windowsazure.com/en-us/develop/mobile/tutorials/get-started-android/).
 
 ## Download Source Code
 
@@ -13,9 +18,15 @@ To get the source code of our SDKs and samples via **git** just type:
     git clone https://github.com/WindowsAzure/azure-mobile-services.git
     cd ./azure-mobile-services/
 
+## Change log
+
+see [Change Log](CHANGELOG.md)
+
 ## Managed Windows 8 and Windows Phone 8 Client SDK
 
-Our managed portable library for Windows 8 and Windows Phone 8 Client SDK makes it incredibly easy to use Mobile Services from your Windows Store and Windows Phone 8 applications. The [Windows Azure Mobile Services SDK](http://nuget.org/packages/WindowsAzure.MobileServices/) is available as a Nuget package or you can download the source using the instructions above. The managed portable library also supports the Windows Phone 7.5 and .NET 4.5 platforms.
+Our managed portable library for Windows 8 and Windows Phone 8 Client SDK makes it incredibly easy to use Mobile Services from your Windows Store
+and Windows Phone 8 applications. The [Windows Azure Mobile Services SDK](http://nuget.org/packages/WindowsAzure.MobileServices/) is available 
+as a Nuget package or you can download the source using the instructions above. The managed portable library also supports the full .NET 4.5 platform.
 
 ### Prerequisites
 
@@ -23,14 +34,18 @@ The SDK requires Visual Studio 2012 RTM.
 
 ###Building and Referencing the SDK
 
-The managed portable library solution includes a core portable assembly and platform-specific assemblies for each of the supported platforms: Windows 8, Windows Phone 8, Windows Phone 7.5 and .NET 4.5. The core portable platform project is ```Microsoft.WindowsAzure.Mobile```. The platform-specific assembly projects are named using a ```Microsoft.WindowsAzure.Mobile.Ext.<Platform>``` convention. The Windows Phone 8 and Windows Phone 7.5 platforms also include ```Microsoft.WindowsAzure.Mobile.UI.<Platform>``` projects that contain UI components. To build the Managed Portable Libray:
+The managed portable library solution includes a core portable assembly and platform-specific assemblies for each of the supported platforms: Windows 8,
+Windows Phone 8 and .NET 4.5. The core portable platform project is ```Microsoft.WindowsAzure.Mobile```. The platform-specific assembly projects are
+named using a ```Microsoft.WindowsAzure.Mobile.Ext.<Platform>``` convention. The Windows Phone 8 platform also
+include a ```Microsoft.WindowsAzure.Mobile.UI.<Platform>``` project that contain UI components. To build the Managed Portable Libray:
 
 1. Open the ```sdk\Managed\Microsoft.WindowsAzure.Mobile.Managed.sln``` solution file in Visual Studio 2012.
 2. Press F6 to build the solution.
 
 ### Running the Tests
 
-The managed portable library ```Microsoft.WindowsAzure.Mobile.Managed.sln``` has a test application for each of the supported platforms: Windows 8, Windows Phone 8, Windows Phone 7.5 and .NET 4.5.
+The managed portable library ```Microsoft.WindowsAzure.Mobile.Managed.sln``` has a test application for each of the supported platforms: Windows 8,
+Windows Phone 8 and .NET 4.5.
 
 1. Open the ```sdk\Managed\Microsoft.WindowsAzure.Mobile.Managed.sln``` solution file in Visual Studio 2012.
 2. Right-click on the test project for a given platform in the Solution Explorer and select ```Set as StartUp Project```.

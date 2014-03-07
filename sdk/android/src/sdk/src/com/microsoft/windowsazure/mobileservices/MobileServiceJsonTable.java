@@ -21,9 +21,9 @@ package com.microsoft.windowsazure.mobileservices;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.security.InvalidParameterException;
 import java.util.List;
 
+import org.apache.http.Header;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.protocol.HTTP;
@@ -76,6 +76,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 				url += "?$filter=" + filtersUrl + query.getRowSetModifiers();
 			} else {
 				String rowSetModifiers = query.getRowSetModifiers();
+				
 				if (rowSetModifiers.length() > 0) {
 					url += "?" + query.getRowSetModifiers().substring(1);
 				}
@@ -114,26 +115,33 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	 *            Callback to invoke after the operation is completed
 	 */
 	public void lookUp(Object id, List<Pair<String, String>> parameters, final TableJsonOperationCallback callback) {
-		// Create request URL	
-		String url;
-		try {
-			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
-			uriBuilder.path(TABLES_URL);
-			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
-			uriBuilder.appendPath(URLEncoder.encode(id.toString(), MobileServiceClient.UTF8_ENCODING));
-			
-			if (parameters != null && parameters.size() > 0) {
-				for (Pair<String, String> parameter : parameters) {
-					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
-				}
-			}
-			url = uriBuilder.build().toString();
-		} catch (UnsupportedEncodingException e) {
+		// Create request URL
+		try {	
+			validateId(id);
+		} catch (Exception e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}
+				
 			return;
 		}
+		
+		String url;
+
+		Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
+		uriBuilder.path(TABLES_URL);
+		uriBuilder.appendPath(mTableName);
+		uriBuilder.appendPath(id.toString());
+		
+		parameters = addSystemProperties(mSystemProperties, parameters);
+		
+		if (parameters != null && parameters.size() > 0) {
+			for (Pair<String, String> parameter : parameters) {
+				uriBuilder.appendQueryParameter(parameter.first, parameter.second);
+			}
+		}
+		
+		url = uriBuilder.build().toString();
 
 		executeGetRecords(url, new TableJsonQueryCallback() {
 
@@ -145,12 +153,13 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 						if (results.isJsonArray()) { // empty result
 							callback.onCompleted(
 									null,
-									new MobileServiceException(
-											"A record with the specified Id cannot be found"),
-											response);
+									new MobileServiceException("A record with the specified Id cannot be found"),response);
 						} else { // Lookup result
-							callback.onCompleted(results.getAsJsonObject(),
-									exception, response);
+							JsonObject patchedJson = results.getAsJsonObject();
+							
+							updateVersionFromETag(response, patchedJson);
+							
+							callback.onCompleted(patchedJson, exception, response);
 						}
 					} else {
 						callback.onCompleted(null, exception, response);
@@ -161,37 +170,14 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	}
 
 	/**
-	 * Removes the Id property from a JsonObject
-	 * 
-	 * @param json
-	 *            The JsonObject to modify
-	 */
-	private void removeIdFromJson(final JsonObject json) {
-		// Remove id property if exists
-		String[] idPropertyNames = new String[] { "id", "Id", "iD", "ID" };
-		for (int i = 0; i < 4; i++) {
-			String idProperty = idPropertyNames[i];
-			if (json.has(idProperty)) {
-				JsonElement idElement = json.get(idProperty);
-				if(isValidTypeId(idElement) && idElement.getAsInt() != 0) {
-					throw new InvalidParameterException(
-							"The entity to insert should not have "
-									+ idProperty + " property defined");
-				}
-
-				json.remove(idProperty);
-			}
-		}
-	}
-
-	/**
 	 * Inserts a JsonObject into a Mobile Service table
 	 * 
 	 * @param element
 	 *            The JsonObject to insert
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
-	 * @throws InvalidParameterException   
+	 * @throws IllegalArgumentException
+	 *            if the element has an id property set with a numeric value other than default (0), or an invalid string value
 	 */
 	public void insert(final JsonObject element, TableJsonOperationCallback callback) {
 		this.insert(element, null, callback);
@@ -206,14 +192,15 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	 * 			  A list of user-defined parameters and values to include in the request URI query string
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
-	 * @throws InvalidParameterException
+	 * @throws IllegalArgumentException
+	 *            if the element has an id property set with a numeric value other than default (0), or an invalid string value
 	 */
 	public void insert(final JsonObject element, List<Pair<String, String>> parameters,
 			final TableJsonOperationCallback callback) {
 
 		try {
-			removeIdFromJson(element);
-		} catch (InvalidParameterException e) {
+			validateIdOnInsert(element);
+		} catch (Exception e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}
@@ -223,25 +210,20 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 		String content = element.toString();
 
 		ServiceFilterRequest post;
-		try {
-			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
-			uriBuilder.path(TABLES_URL);
-			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
+		
+		Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
+		uriBuilder.path(TABLES_URL);
+		uriBuilder.appendPath(mTableName);
+		
+		parameters = addSystemProperties(mSystemProperties, parameters);
 
-			if (parameters != null && parameters.size() > 0) {
-				for (Pair<String, String> parameter : parameters) {
-					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
-				}
+		if (parameters != null && parameters.size() > 0) {
+			for (Pair<String, String> parameter : parameters) {
+				uriBuilder.appendQueryParameter(parameter.first, parameter.second);
 			}
-			post = new ServiceFilterRequestImpl(new HttpPost(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());
-			post.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
-			
-		} catch (UnsupportedEncodingException e) {
-			if (callback != null) {
-				callback.onCompleted(null, e, null);
-			}
-			return;
 		}
+		post = new ServiceFilterRequestImpl(new HttpPost(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());
+		post.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
 
 		try {
 			post.setContent(content);
@@ -261,6 +243,8 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 					if (exception == null && jsonEntity != null) {
 						JsonObject patchedJson = patchOriginalEntityWithResponseEntity(
 								element, jsonEntity);
+						
+						updateVersionFromETag(response, patchedJson);
 
 						callback.onCompleted(patchedJson, exception, response);
 					} else {
@@ -294,46 +278,49 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
-	public void update(final JsonObject element,
-			final List<Pair<String, String>> parameters,
-			final TableJsonOperationCallback callback) {
-
-		try {
-			updateIdProperty(element);
-
-			if (!element.has("id") || element.get("id").getAsInt() == 0) {
-				throw new IllegalArgumentException("You must specify an id property with a valid value for updating an object.");
-			}
+	public void update(final JsonObject element, List<Pair<String, String>> parameters, final TableJsonOperationCallback callback) {
+		Object id = null;		
+		String version = null;
+		String content = null;
+		
+		try {			
+			id = validateId(element);
 		} catch (Exception e) {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}
+			
 			return;
 		}
-
-		String content = element.toString();
+		
+		if (!isNumericType(id)) {
+			version = getVersionSystemProperty(element);
+			content = removeSystemProperties(element).toString();
+		} else {
+			content = element.toString();
+		}
 
 		ServiceFilterRequest patch;
-		try {
-			Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
-			uriBuilder.path(TABLES_URL);
-			uriBuilder.appendPath(URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING));
-			uriBuilder.appendPath(Integer.valueOf(getObjectId(element)).toString());
+		
+		Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
+		uriBuilder.path(TABLES_URL);
+		uriBuilder.appendPath(mTableName);
+		uriBuilder.appendPath(id.toString());
+		
+		parameters = addSystemProperties(mSystemProperties, parameters);
 
-			if (parameters != null && parameters.size() > 0) {
-				for (Pair<String, String> parameter : parameters) {
-					uriBuilder.appendQueryParameter(parameter.first, parameter.second);
-				}
+		if (parameters != null && parameters.size() > 0) {
+			for (Pair<String, String> parameter : parameters) {
+				uriBuilder.appendQueryParameter(parameter.first, parameter.second);
 			}
-			patch = new ServiceFilterRequestImpl(new HttpPatch(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());
-			patch.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
-			
-		} catch (UnsupportedEncodingException e) {
-			if (callback != null) {
-				callback.onCompleted(null, e, null);
-			}
-			return;
 		}
+		
+		patch = new ServiceFilterRequestImpl(new HttpPatch(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());
+		patch.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);	
+		
+		if (version != null) {
+            patch.addHeader("If-Match", getEtagFromValue(version));
+        }
 
 		try {
 			patch.setContent(content);
@@ -341,6 +328,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 			if (callback != null) {
 				callback.onCompleted(null, e, null);
 			}
+			
 			return;
 		}
 
@@ -353,7 +341,20 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 					if (exception == null && jsonEntity != null) {
 						JsonObject patchedJson = patchOriginalEntityWithResponseEntity(
 								element, jsonEntity);
+						
+						updateVersionFromETag(response, patchedJson);
+						
 						callback.onCompleted(patchedJson, exception, response);
+					} else if (exception != null && response != null && response.getStatus() != null && response.getStatus().getStatusCode() == 412) {
+						String content = response.getContent();
+						
+						JsonObject serverEntity = null;
+						
+						if (content != null) {
+							serverEntity = new JsonParser().parse(content).getAsJsonObject();
+						}
+						
+						callback.onCompleted(jsonEntity, new MobileServicePreconditionFailedExceptionBase(exception, serverEntity), response);
 					} else {
 						callback.onCompleted(jsonEntity, exception, response);
 					}
@@ -457,5 +458,65 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 				}
 			}
 		}.execute();
+	}
+	
+	/**
+	 * Validates the Id property from a JsonObject on an Insert Action
+	 * 
+	 * @param json
+	 *            The JsonObject to modify
+	 */
+	private void validateIdOnInsert(final JsonObject json) {
+		// Remove id property if exists
+		String[] idPropertyNames = new String[] { "id", "Id", "iD", "ID" };
+		
+		for (int i = 0; i < 4; i++) {
+			String idProperty = idPropertyNames[i];
+			
+			if (json.has(idProperty)) {
+				JsonElement idElement = json.get(idProperty);
+				
+				if(isStringType(idElement)) {
+					String id = getStringValue(idElement);
+					
+					if (!isValidStringId(id)) {
+						throw new IllegalArgumentException("The entity to insert has an invalid string value on " + idProperty + " property.");
+					}
+				} else if (isNumericType(idElement)) {
+					long id = getNumericValue(idElement);
+					
+					if (!isDefaultNumericId(id)) {
+						throw new IllegalArgumentException("The entity to insert should not have a numeric " + idProperty + " property defined.");
+					}
+					
+					json.remove(idProperty);
+				} else if (idElement.isJsonNull()) {
+					json.remove(idProperty);
+				} else {
+					throw new IllegalArgumentException("The entity to insert should not have an " + idProperty + " defined with an invalid value");
+				}
+			}
+		}
+	}
+
+	/**
+	 * Updates the Version System Property in the Json Object with the ETag information
+	 * 
+	 * @param response
+	 *            The response containing the ETag Header
+	 * 
+	 * @param json
+	 *            The JsonObject to modify
+	 */
+	private static void updateVersionFromETag(ServiceFilterResponse response, JsonObject json) {
+		if (response != null && response.getHeaders() != null) {
+			for (Header header : response.getHeaders()) {
+				if (header.getName().equalsIgnoreCase("ETag")) {
+					json.remove(VersionSystemPropertyName);
+					json.addProperty(VersionSystemPropertyName, getValueFromEtag(header.getValue()));
+					break;
+				}
+			}
+		}
 	}
 }

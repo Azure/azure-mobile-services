@@ -6,9 +6,13 @@ function createPlatformSpecificFunctions() {
 
     var alertFunction;
     if (typeof alert === 'undefined') {
-        alertFunction = function (text) {
+        alertFunction = function (text, done) {
             var dialog = new Windows.UI.Popups.MessageDialog(text);
-            dialog.showAsync();
+            dialog.showAsync().done(function () {
+                if (typeof done === 'function') {
+                    done();
+                }
+            });
         }
     }
 

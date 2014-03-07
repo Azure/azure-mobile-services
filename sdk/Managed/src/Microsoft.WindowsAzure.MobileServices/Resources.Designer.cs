@@ -188,6 +188,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to incrementally load more items of type &apos;{0}&apos;. See the inner exception for details..
+        /// </summary>
+        internal static string MobileServiceCollection_IncrementalLoadingFailed {
+            get {
+                return ResourceManager.GetString("MobileServiceCollection_IncrementalLoadingFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Loading of more items already in process..
         /// </summary>
         internal static string MobileServiceCollection_LoadInProcess {
@@ -215,7 +224,7 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A member can only have one system property attribute. The member &apos;{0}&apos; on type &apos;{1}&apos; has system property attributes &apos;{2}&apos; and &apos;{3}&apos;. .
+        ///   Looks up a localized string similar to A member can only have one system property attribute. The member &apos;{0}&apos; on type &apos;{1}&apos; has system property attributes &apos;{2}&apos; and &apos;{3}&apos;..
         /// </summary>
         internal static string MobileServiceContractResolver_MultipleSystemPropertyAttributes {
             get {
@@ -323,7 +332,7 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The string id &apos;{0}&apos; is invalid. An id must not contain any control characters or the characters &quot;,+,?,\,/`..
+        ///   Looks up a localized string similar to The string id &apos;{0}&apos; is invalid. An id must not contain any control characters or the characters &quot;,+,?,\,/,`..
         /// </summary>
         internal static string MobileServiceSerializer_InvalidStringId {
             get {
@@ -508,6 +517,60 @@ namespace Microsoft.WindowsAzure.MobileServices {
         internal static string Platform_InstantiationFailed {
             get {
                 return ResourceManager.GetString("Platform_InstantiationFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Valid XML is required for any template without a raw header..
+        /// </summary>
+        internal static string Push_BodyTemplateMustBeXml {
+            get {
+                return ResourceManager.GetString("Push_BodyTemplateMustBeXml", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to XML must contain an XML node of Element type..
+        /// </summary>
+        internal static string Push_BodyTemplateMustContainElement {
+            get {
+                return ResourceManager.GetString("Push_BodyTemplateMustContainElement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template name conflicts with reserved name &apos;{0}&apos;..
+        /// </summary>
+        internal static string Push_ConflictWithReservedName {
+            get {
+                return ResourceManager.GetString("Push_ConflictWithReservedName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Template name can&apos;t contain &quot;;&quot; or &quot;:&quot;..
+        /// </summary>
+        internal static string Push_InvalidTemplateName {
+            get {
+                return ResourceManager.GetString("Push_InvalidTemplateName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The bodyTemplate is not in accepted XML format. The first node of the bodyTemplate should be Badge/Tile/Toast, except for the wns/raw template, which need to be an valid XML..
+        /// </summary>
+        internal static string Push_NotSupportedXMLFormatAsBodyTemplateWin8 {
+            get {
+                return ResourceManager.GetString("Push_NotSupportedXMLFormatAsBodyTemplateWin8", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Tags must not contain &apos;,&apos;..
+        /// </summary>
+        internal static string Push_TagNoCommas {
+            get {
+                return ResourceManager.GetString("Push_TagNoCommas", resourceCulture);
             }
         }
     }

@@ -63,7 +63,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// via the DataContractAttribute, DataTableAttribute and/or the JsonObjectAttribute.
         /// </summary>
         private readonly Dictionary<Type, string> tableNameCache = new Dictionary<Type, string>();
-
+        
         /// <summary>
         /// Indicates if the property names should be camel-cased when serialized
         /// out into JSON.
@@ -358,7 +358,8 @@ namespace Microsoft.WindowsAzure.MobileServices
             IList<JsonProperty> properties = base.CreateProperties(type, memberSerialization);
 
             // If this type is for a known table, ensure that it has an id.
-            if (this.tableNameCache.ContainsKey(type))
+            TypeInfo typeInfo = type.GetTypeInfo();
+            if (this.tableNameCache.ContainsKey(type) || this.tableNameCache.Keys.Any(t => t.GetTypeInfo().IsAssignableFrom(typeInfo)))
             {
                 // Filter out properties that are not read/write
                 properties = properties.Where(p => p.Writable).ToList();
@@ -371,7 +372,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 Dictionary<JsonProperty, MemberInfo> memberInfoCache = new Dictionary<JsonProperty, MemberInfo>();
                 foreach (KeyValuePair<MemberInfo, JsonProperty> pair in jsonPropertyCache)
                 {
-                    if (pair.Key.DeclaringType.GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
+                    if (pair.Key.DeclaringType.GetTypeInfo().IsAssignableFrom(typeInfo))
                     {
                         memberInfoCache.Add(pair.Value, pair.Key);
                     }
@@ -482,7 +483,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Given a <see cref="MobileServiceSystemProperty"/> enum value, returns the string value with the 
+        /// Given a <see cref="MobileServiceSystemProperties"/> enum value, returns the string value with the 
         /// correct casing and system property prefix.
         /// </summary>
         /// <param name="systemProperty">The system property.</param>

@@ -108,6 +108,7 @@
     </Compile>
     <Compile Include="Framework\TestStatus.cs" />
     <Compile Include="Framework\Util.cs" />
+    <Compile Include="Framework\ZumoPushGlobals.cs" />
     <Compile Include="Framework\ZumoTest.cs" />
     <Compile Include="Framework\ZumoTestEventArgs.cs" />
     <Compile Include="Framework\ZumoTestGlobals.cs" />
@@ -119,8 +120,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Tests\ExceptionTypeWhichWillNeverBeThrown.cs" />
     <Compile Include="Tests\TestStore.cs" />
+    <Compile Include="Tests\Types\ICloneableItem.cs" />
+    <Compile Include="Tests\Types\StringIdRoundTripTableItem.cs" />
     <Compile Include="Tests\Types\Movie.cs" />
     <Compile Include="Tests\Types\RoundTripTableItem.cs" />
+    <Compile Include="Tests\Types\VersionedType.cs" />
     <Compile Include="Tests\ZumoCUDTests.cs" />
     <Compile Include="Tests\ZumoCustomApiTests.cs">
       <SubType>Code</SubType>
@@ -131,6 +135,7 @@
     <Compile Include="Tests\ZumoQueryTestData.cs" />
     <Compile Include="Tests\ZumoQueryTests.cs" />
     <Compile Include="Tests\ZumoRoundTripTests.cs" />
+    <Compile Include="Tests\ZumoSetupTests.cs" />
     <Compile Include="Tests\ZumoTestCommon.cs" />
     <Compile Include="UIElements\AppInfoRepository.cs" />
     <Compile Include="UIElements\InputDialog.xaml.cs">
@@ -200,30 +205,19 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\LiveSDK.5.5\WindowsXAML\Microsoft.Live.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Threading.Tasks">
-      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.16\lib\win8\Microsoft.Threading.Tasks.dll</HintPath>
+    <Reference Include="Microsoft.WindowsAzure.Mobile">
+      <HintPath>..\packages\WindowsAzure.MobileServices.1.1.4\lib\netcore45\Microsoft.WindowsAzure.Mobile.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Threading.Tasks.Extensions">
-      <HintPath>..\packages\Microsoft.Bcl.Async.1.0.16\lib\win8\Microsoft.Threading.Tasks.Extensions.dll</HintPath>
+    <Reference Include="Microsoft.WindowsAzure.Mobile.Ext">
+      <HintPath>..\packages\WindowsAzure.MobileServices.1.1.4\lib\netcore45\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Mobile, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\WindowsAzure.MobileServices.1.0.3\lib\netcore45\Microsoft.WindowsAzure.Mobile.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.WindowsAzure.Mobile.Ext, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\WindowsAzure.MobileServices.1.0.3\lib\netcore45\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\netcore45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="System.Net.Http.Extensions, Version=2.2.15.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="System.Net.Http.Extensions">
       <HintPath>..\packages\Microsoft.Net.Http.2.2.15\lib\win8\System.Net.Http.Extensions.dll</HintPath>
     </Reference>
-    <Reference Include="System.Net.Http.Primitives, Version=4.2.15.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="System.Net.Http.Primitives">
       <HintPath>..\packages\Microsoft.Net.Http.2.2.15\lib\win8\System.Net.Http.Primitives.dll</HintPath>
     </Reference>
   </ItemGroup>

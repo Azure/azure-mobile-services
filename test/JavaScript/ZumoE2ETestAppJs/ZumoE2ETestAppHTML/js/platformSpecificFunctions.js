@@ -6,8 +6,11 @@ function createPlatformSpecificFunctions() {
 
     var alertFunction;
 
-    alertFunction = function (text) {
+    alertFunction = function (text, done) {
         window.alert(text);
+        if (done) {
+            done();
+        }
     }
 
     var saveAppInfo = function (lastAppUrl, lastAppKey, lastUploadLogUrl) {

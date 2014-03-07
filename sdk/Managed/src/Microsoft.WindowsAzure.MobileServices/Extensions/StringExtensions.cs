@@ -3,6 +3,8 @@
 // ----------------------------------------------------------------------------
 
 using System;
+using System.IO;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -14,10 +16,23 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// If the response is null or empty, null will be returned.
         /// </summary>
         /// <param name="response">The response to parse.</param>
+        /// <param name="settings">The serializer settings used for parsing the response.</param>
         /// <returns>A JToken containing the response or null.</returns>
-        public static JToken ParseToJToken(this string response)
+        public static JToken ParseToJToken(this string response, MobileServiceJsonSerializerSettings settings)
         {
-            return !string.IsNullOrEmpty(response) ? JToken.Parse(response) : null;
+            if (String.IsNullOrEmpty(response))
+            {
+                return null;
+            }
+            using (var reader = new JsonTextReader(new StringReader(response)))
+            {
+                reader.DateParseHandling = settings.DateParseHandling;
+                reader.DateTimeZoneHandling = settings.DateTimeZoneHandling;
+                reader.FloatParseHandling = settings.FloatParseHandling;
+                reader.Culture = settings.Culture;
+
+                return JToken.Load(reader);
+            }
         }
     }
 }

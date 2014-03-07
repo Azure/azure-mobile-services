@@ -145,6 +145,7 @@ exports.Reporter = reporter;
 global.$showTestSetupUI = function () {
     var setupFlyout = document.getElementById('setupFlyout');
     var txtRuntimeUri = document.getElementById('txtRuntimeUri');
+    var txtRuntimeKey = document.getElementById('txtRuntimeKey');
     var txtTags = document.getElementById('txtTags');
     var btnStartTests = document.getElementById('btnStartTests');
     var testResults = document.getElementById('testResults');
@@ -164,6 +165,7 @@ global.$showTestSetupUI = function () {
 
         // Fill the UI with the latest values
         txtRuntimeUri.value = $harness.settings.custom.MobileServiceRuntimeUrl || '';
+        txtRuntimeKey.value = $harness.settings.custom.MobileServiceRuntimeKey || '';
         txtTags.value = $harness.settings.tagExpression || '';
 
         show();
@@ -171,6 +173,7 @@ global.$showTestSetupUI = function () {
             window.onclick = null;
 
             $harness.settings.custom.MobileServiceRuntimeUrl = txtRuntimeUri.value;
+            $harness.settings.custom.MobileServiceRuntimeKey = txtRuntimeKey.value;
             $harness.settings.tagExpression = txtTags.value;
             setupFlyout.winControl.hide();
             $run();

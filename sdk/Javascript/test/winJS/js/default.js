@@ -20,6 +20,7 @@
                     $harness.settings.tagExpression = '';
                     $harness.settings.breakOnStart = harnessArgs.BreakOnStart;
                     $harness.settings.custom.MobileServiceRuntimeUrl = harnessArgs.RuntimeUri;
+                    $harness.settings.custom.MobileServiceRuntimeKey = harnessArgs.RuntimeKey;
                 }
             }
 

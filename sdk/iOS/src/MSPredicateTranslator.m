@@ -579,7 +579,8 @@ static NSDictionary *staticFunctionInfoLookup;
     // to properly format it
     const char *cType = [number objCType];
     
-    if (strcmp(@encode(BOOL), cType) == 0) {
+    // 64-bit [NSNumber numberWithBool:] returns 'c' (char) and don't match the BOOL encode of 'B'
+    if (strcmp(@encode(BOOL), cType) == 0 || strcmp(@encode(char), cType) == 0) {
         result = [number boolValue] ? trueConstant : falseConstant;
     }
     else if(strcmp(@encode(int), cType) == 0) {
@@ -592,12 +593,12 @@ static NSDictionary *staticFunctionInfoLookup;
     else if(strcmp(@encode(float), cType) == 0) {
         result = [NSString stringWithFormat:floatConstant, [number floatValue]];
     }
-    else if(strcmp(@encode(long), cType) == 0) {
-        result = [NSString stringWithFormat:longConstant, [number longValue]];
-    } 
     else if(strcmp(@encode(long long), cType) == 0) {
         result = [NSString stringWithFormat:longLongConstant, [number longLongValue]];
     }
+    else if(strcmp(@encode(long), cType) == 0) {
+        result = [NSString stringWithFormat:longConstant, [number longValue]];
+    } 
 
     return result;
 }

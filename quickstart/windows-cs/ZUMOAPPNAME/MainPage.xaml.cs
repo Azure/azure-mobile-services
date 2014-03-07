@@ -20,7 +20,7 @@ namespace ZUMOAPPNAME
 {
     public class TodoItem
     {
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         [JsonProperty(PropertyName = "text")]
         public string Text { get; set; }
@@ -70,6 +70,7 @@ namespace ZUMOAPPNAME
             else
             {
                 ListItems.ItemsSource = items;
+                this.ButtonSave.IsEnabled = true;
             }
         }
 

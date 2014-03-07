@@ -238,7 +238,7 @@
     <value>All message handlers except the last must be of the type '{0}'</value>
   </data>
   <data name="MobileServiceContractResolver_MultipleSystemPropertyAttributes" xml:space="preserve">
-    <value>A member can only have one system property attribute. The member '{0}' on type '{1}' has system property attributes '{2}' and '{3}'. </value>
+    <value>A member can only have one system property attribute. The member '{0}' on type '{1}' has system property attributes '{2}' and '{3}'.</value>
   </data>
   <data name="MobileServiceCollection_LoadInProcess" xml:space="preserve">
     <value>Loading of more items already in process.</value>
@@ -259,12 +259,33 @@
     <value>The type '{0}' has an integer id member and therefore can not have any members with the system property attribute '{1}'.</value>
   </data>
   <data name="MobileServiceSerializer_InvalidStringId" xml:space="preserve">
-    <value>The string id '{0}' is invalid. An id must not contain any control characters or the characters ",+,?,\,/`.</value>
+    <value>The string id '{0}' is invalid. An id must not contain any control characters or the characters ",+,?,\,/,`.</value>
   </data>
   <data name="MobileServiceSerializer_NullOrEmptyStringId" xml:space="preserve">
     <value>The id can not be null or an empty string.</value>
   </data>
   <data name="MobileServiceSerializer_IdTypeMismatch" xml:space="preserve">
     <value>You might be affected by Mobile Services latest changes to support string Ids. For more details: http://go.microsoft.com/fwlink/?LinkId=330396</value>
+  </data>
+  <data name="MobileServiceCollection_IncrementalLoadingFailed" xml:space="preserve">
+    <value>Failed to incrementally load more items of type '{0}'. See the inner exception for details.</value>
+  </data>
+  <data name="Push_ConflictWithReservedName" xml:space="preserve">
+    <value>Template name conflicts with reserved name '{0}'.</value>
+  </data>
+  <data name="Push_InvalidTemplateName" xml:space="preserve">
+    <value>Template name can't contain ";" or ":".</value>
+  </data>
+  <data name="Push_NotSupportedXMLFormatAsBodyTemplateWin8" xml:space="preserve">
+    <value>The bodyTemplate is not in accepted XML format. The first node of the bodyTemplate should be Badge/Tile/Toast, except for the wns/raw template, which need to be an valid XML.</value>
+  </data>
+  <data name="Push_BodyTemplateMustBeXml" xml:space="preserve">
+    <value>Valid XML is required for any template without a raw header.</value>
+  </data>
+  <data name="Push_BodyTemplateMustContainElement" xml:space="preserve">
+    <value>XML must contain an XML node of Element type.</value>
+  </data>
+  <data name="Push_TagNoCommas" xml:space="preserve">
+    <value>Tags must not contain ','.</value>
   </data>
 </root>

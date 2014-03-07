@@ -40,15 +40,15 @@
 
 @implementation ZumoLoginTests
 
-NSDictionary *lastUserIdentityObject;
+static NSString *lastUserIdentityObjectKey = @"lastUserIdentityObject";
 
 + (NSArray *)createTests {
     NSMutableArray *result = [[NSMutableArray alloc] init];
     [result addObject:[self createClearAuthCookiesTest]];
     [result addObject:[self createLogoutTest]];
-    [result addObject:[self createCRUDTestForProvider:nil forTable:@"iosApplication" ofType:ZumoTableApplication andAuthenticated:NO]];
-    [result addObject:[self createCRUDTestForProvider:nil forTable:@"iosAuthenticated" ofType:ZumoTableAuthenticated andAuthenticated:NO]];
-    [result addObject:[self createCRUDTestForProvider:nil forTable:@"iosAdmin" ofType:ZumoTableAdminScripts andAuthenticated:NO]];
+    [result addObject:[self createCRUDTestForProvider:nil forTable:@"application" ofType:ZumoTableApplication andAuthenticated:NO]];
+    [result addObject:[self createCRUDTestForProvider:nil forTable:@"authenticated" ofType:ZumoTableAuthenticated andAuthenticated:NO]];
+    [result addObject:[self createCRUDTestForProvider:nil forTable:@"admin" ofType:ZumoTableAdminScripts andAuthenticated:NO]];
     
     int indexOfLastUnattendedTest = [result count];
     
@@ -62,15 +62,15 @@ NSDictionary *lastUserIdentityObject;
             [result addObject:[self createLogoutTest]];
             [result addObject:[self createSleepTest:3]];
             [result addObject:[self createLoginTestForProvider:provider usingSimplifiedMode:useSimplified]];
-            [result addObject:[self createCRUDTestForProvider:provider forTable:@"iosApplication" ofType:ZumoTableApplication andAuthenticated:YES]];
-            [result addObject:[self createCRUDTestForProvider:provider forTable:@"iosAuthenticated" ofType:ZumoTableAuthenticated andAuthenticated:YES]];
-            [result addObject:[self createCRUDTestForProvider:provider forTable:@"iosAdmin" ofType:ZumoTableAdminScripts andAuthenticated:YES]];
+            [result addObject:[self createCRUDTestForProvider:provider forTable:@"application" ofType:ZumoTableApplication andAuthenticated:YES]];
+            [result addObject:[self createCRUDTestForProvider:provider forTable:@"authenticated" ofType:ZumoTableAuthenticated andAuthenticated:YES]];
+            [result addObject:[self createCRUDTestForProvider:provider forTable:@"admin" ofType:ZumoTableAdminScripts andAuthenticated:YES]];
             
             if ([providersWithRecycledTokenSupport containsObject:provider]) {
                 [result addObject:[self createLogoutTest]];
                 [result addObject:[self createSleepTest:1]];
                 [result addObject:[self createClientSideLoginWithProvider:provider]];
-                [result addObject:[self createCRUDTestForProvider:provider forTable:@"iosAuthenticated" ofType:ZumoTableAuthenticated andAuthenticated:YES]];
+                [result addObject:[self createCRUDTestForProvider:provider forTable:@"authenticated" ofType:ZumoTableAuthenticated andAuthenticated:YES]];
             }
         }
     }
@@ -126,13 +126,13 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
     ZumoTest *result = [ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client tableWithName:tableName];
-        [table insert:@{@"foo":@"bar"} completion:^(NSDictionary *inserted, NSError *insertError) {
+        [table insert:@{@"name":@"john"} completion:^(NSDictionary *inserted, NSError *insertError) {
             if (![self validateCRUDResultForTest:test andOperation:@"Insert" andError:insertError andExpected:crudShouldWork]) {
                 completion(NO);
                 return;
             }
             
-            NSDictionary *toUpdate = crudShouldWork ? inserted : @{@"foo":@"bar",@"id":[NSNumber numberWithInt:1]};
+            NSDictionary *toUpdate = crudShouldWork ? inserted : @{@"name":@"jane",@"id":[NSNumber numberWithInt:1]};
             [table update:toUpdate completion:^(NSDictionary *updated, NSError *updateError) {
                 if (![self validateCRUDResultForTest:test andOperation:@"Update" andError:updateError andExpected:crudShouldWork]) {
                     completion(NO);
@@ -147,7 +147,27 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
                     }
                     
                     if (!readError && tableType == ZumoTableAuthenticated) {
-                        lastUserIdentityObject = read[@"Identities"];
+                        id serverIdentities = [read objectForKey:@"Identities"];
+                        NSDictionary *identities;
+                        if ([serverIdentities isKindOfClass:[NSString class]]) {
+                            NSString *identitiesJson = serverIdentities;
+                            NSData *identitiesData = [identitiesJson dataUsingEncoding:NSUTF8StringEncoding];
+                            NSError *jsonError;
+                            identities = [NSJSONSerialization JSONObjectWithData:identitiesData options:0 error:&jsonError];
+                            if (jsonError) {
+                                [test addLog:[NSString stringWithFormat:@"Identities value is not a valid JSON object: %@", jsonError]];
+                                completion(NO);
+                                return;
+                            }
+                        } else if ([serverIdentities isKindOfClass:[NSDictionary class]]) {
+                            // it's already a dictionary
+                            identities = serverIdentities;
+                        } else {
+                            [test addLog:@"Server identities is not a dictionary of values"];
+                            completion(NO);
+                            return;
+                        }
+                        [[[ZumoTestGlobals sharedInstance] globalTestParameters] setObject:identities forKey:lastUserIdentityObjectKey];
                     }
                     
                     [table deleteWithId:itemId completion:^(NSNumber *deletedId, NSError *deleteError) {
@@ -189,7 +209,7 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
 
 + (ZumoTest *)createClientSideLoginWithProvider:(NSString *)provider {
     return [ZumoTest createTestWithName:[NSString stringWithFormat:@"Login via token for %@", provider] andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
-        NSDictionary *lastIdentity = lastUserIdentityObject;
+        NSDictionary *lastIdentity = [[[ZumoTestGlobals sharedInstance] globalTestParameters] objectForKey:lastUserIdentityObjectKey];
         if (!lastIdentity) {
             [test addLog:@"Last identity is null. Cannot run this test."];
             [test setTestStatus:TSFailed];
@@ -197,10 +217,10 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
             return;
         }
         
-        lastUserIdentityObject = nil;
+        [[[ZumoTestGlobals sharedInstance] globalTestParameters] removeObjectForKey:lastUserIdentityObjectKey];
         
         [test addLog:[NSString stringWithFormat:@"Last user identity object: %@", lastIdentity]];
-        NSDictionary *providerIdentity = lastIdentity[provider];
+        NSDictionary *providerIdentity = [lastIdentity objectForKey:provider];
         if (!providerIdentity) {
             [test addLog:@"Don't have identity for specified provider. Cannot run this test."];
             [test setTestStatus:TSFailed];
@@ -209,7 +229,7 @@ typedef enum { ZumoTableUnauthenticated, ZumoTableApplication, ZumoTableAuthenti
         }
 
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        NSDictionary *token = @{@"access_token": providerIdentity[@"accessToken"]};
+        NSDictionary *token = @{@"access_token": [providerIdentity objectForKey:@"accessToken"]};
         [client loginWithProvider:provider token:token completion:^(MSUser *user, NSError *error) {
             if (error) {
                 [test addLog:[NSString stringWithFormat:@"Error logging in: %@", error]];

@@ -79,6 +79,7 @@
         callCompletionIfAllDone();
     };
     
+    provider = [self normalizeProvider:provider];
     loginController = [self loginViewControllerWithProvider:provider
                                                  completion:loginCompletion];
     
@@ -96,6 +97,7 @@
 -(MSLoginController *) loginViewControllerWithProvider:(NSString *)provider
                                             completion:(MSClientLoginBlock)completion
 {
+    provider = [self normalizeProvider:provider];
     return [[MSLoginController alloc] initWithClient:self.client
                                             provider:provider
                                           completion:completion];
@@ -107,6 +109,7 @@
 {
     // Create the request
     NSError *error = nil;
+    provider = [self normalizeProvider:provider];
     NSURLRequest *request = [self requestForProvider:provider
                                             andToken:token
                                              orError:&error];
@@ -171,6 +174,16 @@
 
 #pragma mark * Private Methods
 
+-(NSString *) normalizeProvider:(NSString *)provider {
+    // Windows Azure Active Directory can be specified either in
+    // full or with the 'aad' abbreviation. The service REST API
+    // expects 'aad' only.
+    if ([[provider lowercaseString] isEqualToString:@"windowsazureactivedirectory"]) {
+        return @"aad";
+    } else {
+        return provider;
+    }
+}
 
 -(NSURLRequest *) requestForProvider:(NSString *)provider
                             andToken:(NSDictionary *)token
@@ -186,7 +199,7 @@
                              [NSString stringWithFormat:@"login/%@", provider]];
         request = [NSMutableURLRequest requestWithURL:URL];
         request.HTTPMethod = @"POST";
-        request.HTTPBody =requestBody;
+        request.HTTPBody = requestBody;
     }
     
     return request;

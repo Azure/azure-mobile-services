@@ -40,68 +40,72 @@
 
 @implementation ZumoQueryTests
 
-static NSString *queryTestsTableName = @"iosMovies";
+static NSString *queryTestsTableName = @"intIdMovies";
+static NSString *stringIdQueryTestsTableName = @"stringIdMovies";
 
 + (NSArray *)createTests {
     NSMutableArray *result = [[NSMutableArray alloc] init];
     
     [result addObject:[self createPopulateTest]];
+    [result addObject:[self createPopulateStringIdTableTest]];
+
+    [self addQueryTestToGroup:result name:@"GreaterThan and LessThan - Movies from the 90s" predicate:[NSPredicate predicateWithFormat:@"(Year > 1989) and (Year < 2000)"]];
 
     // Numeric fields
-    [result addObject:[self createQueryTestWithName:@"GreaterThan and LessThan - Movies from the 90s" andPredicate:[NSPredicate predicateWithFormat:@"(Year > 1989) and (Year < 2000)"]]];
-    [result addObject:[self createQueryTestWithName:@"GreaterEqual and LessEqual - Movies from the 90s" andPredicate:[NSPredicate predicateWithFormat:@"(Year >= 1990) and (Year <= 1999)"]]];
-    [result addObject:[self createQueryTestWithName:@"Compound statement - OR of ANDs - Movies from the 30s and 50s" andPredicate:[NSPredicate predicateWithFormat:@"((Year >= 1930) && (Year < 1940)) || ((Year >= 1950) && (Year < 1960))"]]];
-    [result addObject:[self createQueryTestWithName:@"Division, equal and different - Movies from the year 2000 with rating other than R" andPredicate:[NSPredicate predicateWithFormat:@"((Year / 1000.0) = 2) and (MPAARating != 'R')"]]];
-    [result addObject:[self createQueryTestWithName:@"Addition, subtraction, relational, AND - Movies from the 1980s which last less than 2 hours" andPredicate:[NSPredicate predicateWithFormat:@"((Year - 1900) >= 80) and (Year + 10 < 2000) and (Duration < 120)"]]];
+    [self addQueryTestToGroup:result name:@"GreaterThan and LessThan - Movies from the 90s" predicate:[NSPredicate predicateWithFormat:@"(Year > 1989) and (Year < 2000)"]];
+    [self addQueryTestToGroup:result name:@"GreaterEqual and LessEqual - Movies from the 90s" predicate:[NSPredicate predicateWithFormat:@"(Year >= 1990) and (Year <= 1999)"]];
+    [self addQueryTestToGroup:result name:@"Compound statement - OR of ANDs - Movies from the 30s and 50s" predicate:[NSPredicate predicateWithFormat:@"((Year >= 1930) && (Year < 1940)) || ((Year >= 1950) && (Year < 1960))"]];
+    [self addQueryTestToGroup:result name:@"Division, equal and different - Movies from the year 2000 with rating other than R" predicate:[NSPredicate predicateWithFormat:@"((Year / 1000.0) = 2) and (MPAARating != 'R')"]];
+    [self addQueryTestToGroup:result name:@"Addition, subtraction, relational, AND - Movies from the 1980s which last less than 2 hours" predicate:[NSPredicate predicateWithFormat:@"((Year - 1900) >= 80) and (Year + 10 < 2000) and (Duration < 120)"]];
     
     // String functions
-    [result addObject:[self createQueryTestWithName:@"StartsWith - Movies which starts with 'The'" andPredicate:[NSPredicate predicateWithFormat:@"Title BEGINSWITH %@", @"The"] andTop:@100 andSkip:nil]];
-    [result addObject:[self createQueryTestWithName:@"StartsWith, case insensitive - Movies which start with 'the'" andPredicate:[NSPredicate predicateWithFormat:@"Title BEGINSWITH[c] %@", @"the"] andTop:@100 andSkip:nil]];
-    [result addObject:[self createQueryTestWithName:@"EndsWith, case insensitive - Movies which end with 'r'" andPredicate:[NSPredicate predicateWithFormat:@"Title ENDSWITH[c] 'r'"]]];
-    [result addObject:[self createQueryTestWithName:@"Contains - Movies which contain the word 'one', case insensitive" andPredicate:[NSPredicate predicateWithFormat:@"Title CONTAINS[c] %@", @"one"]]];
-    [result addObject:[self createQueryTestWithName:@"Contains (non-ASCII) - Movies containing the 'é' character" andPredicate:[NSPredicate predicateWithFormat:@"Title CONTAINS[c] 'é'"]]];
+    [self addQueryTestToGroup:result name:@"StartsWith - Movies which starts with 'The'" predicate:[NSPredicate predicateWithFormat:@"Title BEGINSWITH %@", @"The"] top:@100 skip:nil];
+    [self addQueryTestToGroup:result name:@"StartsWith, case insensitive - Movies which start with 'the'" predicate:[NSPredicate predicateWithFormat:@"Title BEGINSWITH[c] %@", @"the"] top:@100 skip:nil];
+    [self addQueryTestToGroup:result name:@"EndsWith, case insensitive - Movies which end with 'r'" predicate:[NSPredicate predicateWithFormat:@"Title ENDSWITH[c] 'r'"]];
+    [self addQueryTestToGroup:result name:@"Contains - Movies which contain the word 'one', case insensitive" predicate:[NSPredicate predicateWithFormat:@"Title CONTAINS[c] %@", @"one"]];
+    [self addQueryTestToGroup:result name:@"Contains (non-ASCII) - Movies containing the 'é' character" predicate:[NSPredicate predicateWithFormat:@"Title CONTAINS[c] 'é'"]];
     
     // String fields
-    [result addObject:[self createQueryTestWithName:@"Equals - Movies since 1980 with rating PG-13" andPredicate:[NSPredicate predicateWithFormat:@"MPAARating = 'PG-13' and Year >= 1980"] andTop:@100 andSkip:nil]];
-    [result addObject:[self createQueryTestWithName:@"Comparison to nil - Movies since 1980 without a MPAA rating" andPredicate:[NSPredicate predicateWithFormat:@"MPAARating = %@ and Year >= 1980", nil]]];
-    [result addObject:[self createQueryTestWithName:@"Comparison to nil (not NULL) - Movies before 1970 with a MPAA rating" andPredicate:[NSPredicate predicateWithFormat:@"MPAARating <> %@ and Year < 1970", nil]]];
-    
+    [self addQueryTestToGroup:result name:@"Equals - Movies since 1980 with rating PG-13" predicate:[NSPredicate predicateWithFormat:@"MPAARating = 'PG-13' and Year >= 1980"] top:@100 skip:nil];
+    [self addQueryTestToGroup:result name:@"Comparison to nil - Movies since 1980 without a MPAA rating" predicate:[NSPredicate predicateWithFormat:@"MPAARating = %@ and Year >= 1980", nil]];
+    [self addQueryTestToGroup:result name:@"Comparison to nil (not NULL) - Movies before 1970 with a MPAA rating" predicate:[NSPredicate predicateWithFormat:@"MPAARating <> %@ and Year < 1970", nil]];
+
     // Numeric functions
-    [result addObject:[self createQueryTestWithName:@"Floor - Movies which last more than 3 hours" andPredicate:[NSPredicate predicateWithFormat:@"floor(Duration / 60.0) >= 3"]]];
-    [result addObject:[self createQueryTestWithName:@"Ceiling - Best picture winners which last at most 2 hours" andPredicate:[NSPredicate predicateWithFormat:@"BestPictureWinner = TRUE and ceiling(Duration / 60.0) = 2"]]];
+    [self addQueryTestToGroup:result name:@"Floor - Movies which last more than 3 hours" predicate:[NSPredicate predicateWithFormat:@"floor(Duration / 60.0) >= 3"]];
+    [self addQueryTestToGroup:result name:@"Ceiling - Best picture winners which last at most 2 hours" predicate:[NSPredicate predicateWithFormat:@"BestPictureWinner = TRUE and ceiling(Duration / 60.0) = 2"]];
     
     // Constant predicates
-    [result addObject:[self createQueryTestWithName:@"TRUEPREDICATE - First 10 movies" andPredicate:[NSPredicate predicateWithFormat:@"TRUEPREDICATE"] andTop:@10 andSkip:nil]];
-    [result addObject:[self createQueryTestWithName:@"FALSEPREDICATE - No movies" andPredicate:[NSPredicate predicateWithFormat:@"FALSEPREDICATE"]]];
+    [self addQueryTestToGroup:result name:@"TRUEPREDICATE - First 10 movies" predicate:[NSPredicate predicateWithFormat:@"TRUEPREDICATE"] top:@10 skip:nil];
+    [self addQueryTestToGroup:result name:@"FALSEPREDICATE - No movies" predicate:[NSPredicate predicateWithFormat:@"FALSEPREDICATE"]];
 
     // Date fields
-    [result addObject:[self createQueryTestWithName:@"Date: Greater than, less than - Movies with release date in the 70s" andPredicate:[NSPredicate predicateWithFormat:@"ReleaseDate > %@ and ReleaseDate < %@", [ZumoTestGlobals createDateWithYear:1969 month:12 day:31], [ZumoTestGlobals createDateWithYear:1980 month:1 day:1]]]];
-    [result addObject:[self createQueryTestWithName:@"Date: Greater or equal, less or equal - Movies with release date in the 80s" andPredicate:[NSPredicate predicateWithFormat:@"ReleaseDate >= %@ and ReleaseDate <= %@", [ZumoTestGlobals createDateWithYear:1980 month:1 day:1], [ZumoTestGlobals createDateWithYear:1989 month:12 day:31]]]];
-    [result addObject:[self createQueryTestWithName:@"Date: Equal - Movies released on 1994-10-14 (Shawshank Redemption / Pulp Fiction)" andPredicate:[NSPredicate predicateWithFormat:@"ReleaseDate = %@", [ZumoTestGlobals createDateWithYear:1994 month:10 day:14]]]];
-    
+    [self addQueryTestToGroup:result name:@"Date: Greater than, less than - Movies with release date in the 70s" predicate:[NSPredicate predicateWithFormat:@"ReleaseDate > %@ and ReleaseDate < %@", [ZumoTestGlobals createDateWithYear:1969 month:12 day:31], [ZumoTestGlobals createDateWithYear:1980 month:1 day:1]]];
+    [self addQueryTestToGroup:result name:@"Date: Greater or equal, less or equal - Movies with release date in the 80s" predicate:[NSPredicate predicateWithFormat:@"ReleaseDate >= %@ and ReleaseDate <= %@", [ZumoTestGlobals createDateWithYear:1980 month:1 day:1], [ZumoTestGlobals createDateWithYear:1989 month:12 day:31]]];
+    [self addQueryTestToGroup:result name:@"Date: Equal - Movies released on 1994-10-14 (Shawshank Redemption / Pulp Fiction)" predicate:[NSPredicate predicateWithFormat:@"ReleaseDate = %@", [ZumoTestGlobals createDateWithYear:1994 month:10 day:14]]];
+
     // Bool fields
-    [result addObject:[self createQueryTestWithName:@"Bool: equal to TRUE - Best picture winners before 1950" andPredicate:[NSPredicate predicateWithFormat:@"BestPictureWinner = TRUE and Year < 1950"]]];
-    [result addObject:[self createQueryTestWithName:@"Bool: equal to FALSE - Best picture winners after 2000" andPredicate:[NSPredicate predicateWithFormat:@"not(BestPictureWinner = FALSE) and Year >= 2000"]]];
-    [result addObject:[self createQueryTestWithName:@"Bool: not equal to FALSE - Best picture winners after 2000" andPredicate:[NSPredicate predicateWithFormat:@"BestPictureWinner != FALSE and Year >= 2000"]]];
+    [self addQueryTestToGroup:result name:@"Bool: equal to TRUE - Best picture winners before 1950" predicate:[NSPredicate predicateWithFormat:@"BestPictureWinner = TRUE and Year < 1950"]];
+    [self addQueryTestToGroup:result name:@"Bool: equal to FALSE - Best picture winners after 2000" predicate:[NSPredicate predicateWithFormat:@"not(BestPictureWinner = FALSE) and Year >= 2000"]];
+    [self addQueryTestToGroup:result name:@"Bool: not equal to FALSE - Best picture winners after 2000" predicate:[NSPredicate predicateWithFormat:@"BestPictureWinner != FALSE and Year >= 2000"]];
     
     // Predicate with substitution variables
-    [result addObject:[self createQueryTestWithName:@"IN - Movies from the even years in the 2000s with rating PG, PG-13 or R" andPredicate:[NSPredicate predicateWithFormat:@"Year IN %@ and MPAARating IN %@", @[@2000, @2002, @2004, @2006, @2008], @[@"R", @"PG", @"PG-13"]] andTop:@100 andSkip:nil]];
-    [result addObject:[self createQueryTestWithName:@"BETWEEN - Movies from the 1960s" andPredicate:[NSPredicate predicateWithFormat:@"Year BETWEEN %@", @[@1960, @1970]]]];
-    [result addObject:[self createQueryTestWithName:@"%K, %d substitution - Movies from 2000 rated PG-13" andPredicate:[NSPredicate predicateWithFormat:@"%K >= %d and %K = %@", @"Year", @2000, @"MPAARating", @"PG-13"]]];
+    [self addQueryTestToGroup:result name:@"IN - Movies from the even years in the 2000s with rating PG, PG-13 or R" predicate:[NSPredicate predicateWithFormat:@"Year IN %@ and MPAARating IN %@", @[@2000, @2002, @2004, @2006, @2008], @[@"R", @"PG", @"PG-13"]] top:@100 skip:nil];
+    [self addQueryTestToGroup:result name:@"BETWEEN - Movies from the 1960s" predicate:[NSPredicate predicateWithFormat:@"Year BETWEEN %@", @[@1960, @1970]]];
+    [self addQueryTestToGroup:result name:@"%K, %d substitution - Movies from 2000 rated PG-13" predicate:[NSPredicate predicateWithFormat:@"%K >= %d and %K = %@", @"Year", @2000, @"MPAARating", @"PG-13"]];
 
     // Top and skip
-    [result addObject:[self createQueryTestWithName:@"Get all using large $top - fetchLimit = 500" andPredicate:nil andTop:@500 andSkip:nil]];
-    [result addObject:[self createQueryTestWithName:@"Skip all using large $skip - fetchOffset = 500" andPredicate:nil andTop:nil andSkip:@500]];
-    [result addObject:[self createQueryTestWithName:@"Skip, take and includeTotalCount - Movies 11-20, ordered by title" andPredicate:nil andTop:@10 andSkip:@10 andOrderBy:[NSArray arrayWithObject:[OrderByClause ascending:@"Title"]] andIncludeTotalCount:YES]];
-    [result addObject:[self createQueryTestWithName:@"Skip, take and includeTotalCount with predicate - Movies 11-20 which won the best picture award, ordered by release date" andPredicate:[NSPredicate predicateWithFormat:@"BestPictureWinner = TRUE"] andTop:@10 andSkip:@10 andOrderBy:[NSArray arrayWithObject:[OrderByClause descending:@"Year"]] andIncludeTotalCount:YES]];
+    [self addQueryTestToGroup:result name:@"Get all using large $top - fetchLimit = 500" predicate:nil top:@500 skip:nil];
+    [self addQueryTestToGroup:result name:@"Skip all using large $skip - fetchOffset = 500" predicate:nil top:nil skip:@500];
+    [self addQueryTestToGroup:result name:@"Skip, take and includeTotalCount - Movies 11-20, ordered by title" predicate:nil top:@10 skip:@10 orderBy:@[[OrderByClause ascending:@"Title"]] includeTotalCount:YES selectFields:nil];
+    [self addQueryTestToGroup:result name:@"Skip, take and includeTotalCount with predicate - Movies 11-20 which won the best picture award, ordered by release date" predicate:[NSPredicate predicateWithFormat:@"BestPictureWinner = TRUE"] top:@10 skip:@10 orderBy:[NSArray arrayWithObject:[OrderByClause descending:@"Year"]] includeTotalCount:YES selectFields:nil];
     
     // Order by
-    [result addObject:[self createQueryTestWithName:@"Order by date and string - 50 movies, ordered by release date, then title" andPredicate:nil andTop:@50 andSkip:nil andOrderBy:[NSArray arrayWithObjects:[OrderByClause descending:@"ReleaseDate"], [OrderByClause ascending:@"Title"], nil]]];
-    [result addObject:[self createQueryTestWithName:@"Order by number - 30 shorter movies since 1970" andPredicate:[NSPredicate predicateWithFormat:@"Year >= 1970"] andTop:@30 andSkip:nil andOrderBy:[NSArray arrayWithObjects:[OrderByClause ascending:@"Duration"], [OrderByClause ascending:@"Title"], nil] andIncludeTotalCount:YES]];
+    [self addQueryTestToGroup:result name:@"Order by date and string - 50 movies, ordered by release date, then title" predicate:nil top:@50 skip:nil orderBy:@[[OrderByClause descending:@"ReleaseDate"], [OrderByClause ascending:@"Title"]] includeTotalCount:NO selectFields:nil];
+    [self addQueryTestToGroup:result name:@"Order by number - 30 shorter movies since 1970" predicate:[NSPredicate predicateWithFormat:@"Year >= 1970"] top:@30 skip:nil orderBy:[NSArray arrayWithObjects:[OrderByClause ascending:@"Duration"], [OrderByClause ascending:@"Title"], nil] includeTotalCount:YES selectFields:nil];
     
     // Select
-    [result addObject:[self createQueryTestWithName:@"Select single field - Title of movies since 2000" andPredicate:[NSPredicate predicateWithFormat:@"Year >= 2000"] andTop:@200 andSkip:nil andOrderBy:nil andIncludeTotalCount:NO andSelectFields:[NSArray arrayWithObject:@"Title"]]];
-    [result addObject:[self createQueryTestWithName:@"Select multiple fields - Title, BestPictureWinner, Duration, ordered by release date, movies from the 1990" andPredicate:[NSPredicate predicateWithFormat:@"Year >= 1990 and Year < 2000"] andTop:@300 andSkip:nil andOrderBy:[NSArray arrayWithObject:[OrderByClause ascending:@"Title"]] andIncludeTotalCount:NO andSelectFields:[NSArray arrayWithObjects:@"Title", @"BestPictureWinner", @"Duration", nil]]];
+    [self addQueryTestToGroup:result name:@"Select single field - Title of movies since 2000" predicate:[NSPredicate predicateWithFormat:@"Year >= 2000"] top:@200 skip:nil orderBy:nil includeTotalCount:NO selectFields:@[@"Title"]];
+    [self addQueryTestToGroup:result name:@"Select multiple fields - Title, BestPictureWinner, Duration, ordered by release date, movies from the 1990" predicate:[NSPredicate predicateWithFormat:@"Year >= 1990 and Year < 2000"] top:@300 skip:nil orderBy:@[[OrderByClause ascending:@"Title"]] includeTotalCount:NO selectFields:@[@"Title", @"BestPictureWinner", @"Duration"]];
     
     for (int i = -1; i <= 0; i++) {
         ZumoTest *negativeLookupTest = [ZumoTest createTestWithName:[NSString stringWithFormat:@"(Neg) MSTable readWithId:%d", i] andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
@@ -147,7 +151,8 @@ static NSString *queryTestsTableName = @"iosMovies";
                 completion(passed);
             }];
         }];
-        
+
+        [negativeLookupTest addRequiredFeature:@"intIdTables"];
         [result addObject:negativeLookupTest];
     }
     
@@ -202,6 +207,7 @@ static NSString *queryTestsTableName = @"iosMovies";
                 completion(passed);
             }];
         }];
+        [negTest addRequiredFeature:@"intIdTables"];
         [result addObject:negTest];
     }
     
@@ -213,6 +219,7 @@ static NSString *queryTestsTableName = @"iosMovies";
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         NSArray *movies = [ZumoQueryTestData getMovies];
         NSDictionary *item = @{@"movies" : movies};
+        
         MSTable *table = [client tableWithName:queryTestsTableName];
         [table insert:item completion:^(NSDictionary *item, NSError *error) {
             if (error) {
@@ -220,15 +227,79 @@ static NSString *queryTestsTableName = @"iosMovies";
                 [test setTestStatus:TSFailed];
                 completion(NO);
             } else {
-                [test addLog:@"Table is populated and ready for query tests"];
-                [test setTestStatus:TSPassed];
-                completion(YES);
+                [self isAllDataPopulated:table test:test expectCount:[movies count] retryTimes:20 completion:completion];
             }
         }];
     }];
     
+    [result addRequiredFeature:@"intIdTables"];
+    
     return result;
 }
+
++ (void)isAllDataPopulated:(MSTable *)table test:(ZumoTest *)test expectCount:(NSInteger)expectCount retryTimes:(NSInteger)retryTimes completion:(ZumoTestCompletion)completion {
+    MSQuery *query = [table query];
+    query.includeTotalCount = YES;
+    query.fetchLimit = 0;
+    
+    if(retryTimes-- == 0)
+    {
+        [test addLog:@"Error populate table: Time out. Not populate enough data."];
+        [test setTestStatus:TSFailed];
+        completion(NO);
+        return;
+    }
+    
+    [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        if (!error) {
+            if (totalCount == expectCount){
+                [test addLog:@"Table is populated and ready for query tests"];
+                [test setTestStatus:TSPassed];
+                completion(YES);
+                return;
+            } else {
+                [test addLog:[NSString stringWithFormat:@"Already inserted %zd items, waiting for insertion to complete", (ssize_t)totalCount]];
+                [NSThread sleepForTimeInterval: 5];
+                [self isAllDataPopulated:table test:test expectCount:expectCount retryTimes:retryTimes completion:completion];
+            }
+        } else {
+            [test addLog:[NSString stringWithFormat:@"Error querying table: %@", error]];
+            [test setTestStatus:TSFailed];
+            completion(NO);
+			return;
+        }
+    }];
+}
+
++ (ZumoTest *)createPopulateStringIdTableTest {
+    ZumoTest *result = [ZumoTest createTestWithName:@"Populate table with string ids, if necessary, for query tests" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+        MSClient *client = [[ZumoTestGlobals sharedInstance] client];
+        NSArray *movies = [ZumoQueryTestData getMovies];
+        NSMutableArray *stringIdMovies = [[NSMutableArray alloc] init];
+        for (int i = 0; i < [movies count]; i++) {
+            NSMutableDictionary *strIdMovie = [NSMutableDictionary dictionaryWithDictionary:[movies objectAtIndex:i]];
+            NSString *movieId = [NSString stringWithFormat:@"Movie %03d", i];
+            [strIdMovie setValue:movieId forKey:@"id"];
+            [stringIdMovies addObject:strIdMovie];
+        }
+        NSDictionary *item = @{@"movies" : stringIdMovies};
+        MSTable *table = [client tableWithName:stringIdQueryTestsTableName];
+        [table insert:item completion:^(NSDictionary *item, NSError *error) {
+            if (error) {
+                [test addLog:[NSString stringWithFormat:@"Error populating table: %@", error]];
+                [test setTestStatus:TSFailed];
+                completion(NO);
+            } else {
+                [self isAllDataPopulated:table test:test expectCount:[movies count] retryTimes:20 completion:completion];
+            }
+        }];
+    }];
+    
+    [result addRequiredFeature:@"stringIdTables"];
+    
+    return result;
+}
+
 
 typedef void (^ActionQuery)(MSQuery *query);
 typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
@@ -258,29 +329,29 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
         }];
     }];
     
+    [result addRequiredFeature:@"intIdTables"];
     return result;
 }
 
-+ (ZumoTest *)createQueryTestWithName:(NSString *)name andPredicate:(NSPredicate *)predicate {
-    return [self createQueryTestWithName:name andPredicate:predicate andTop:nil andSkip:nil andOrderBy:nil andIncludeTotalCount:NO];
++ (void)addQueryTestToGroup:(NSMutableArray *)testGroup name:(NSString *)name predicate:(NSPredicate *)predicate {
+    [self addQueryTestToGroup:testGroup name:name predicate:predicate top:nil skip:nil orderBy:nil includeTotalCount:NO selectFields:nil];
 }
 
-+ (ZumoTest *)createQueryTestWithName:(NSString *)name andPredicate:(NSPredicate *)predicate andTop:(NSNumber *)top andSkip:(NSNumber *)skip {
-    return [self createQueryTestWithName:name andPredicate:predicate andTop:top andSkip:skip andOrderBy:nil andIncludeTotalCount:NO];
++ (void)addQueryTestToGroup:(NSMutableArray *)testGroup name:(NSString *)name predicate:(NSPredicate *)predicate top:(NSNumber *)top skip:(NSNumber *)skip {
+    [self addQueryTestToGroup:testGroup name:name predicate:predicate top:top skip:skip orderBy:nil includeTotalCount:NO selectFields:nil];
 }
 
-+ (ZumoTest *)createQueryTestWithName:(NSString *)name andPredicate:(NSPredicate *)predicate andTop:(NSNumber *)top andSkip:(NSNumber *)skip andOrderBy:(NSArray *)orderByClauses {
-    return [self createQueryTestWithName:name andPredicate:predicate andTop:top andSkip:skip andOrderBy:orderByClauses andIncludeTotalCount:NO];
++ (void)addQueryTestToGroup:(NSMutableArray *)testGroup name:(NSString *)name predicate:(NSPredicate *)predicate top:(NSNumber *)top skip:(NSNumber *)skip orderBy:(NSArray *)orderByClauses includeTotalCount:(BOOL)includeTotalCount selectFields:(NSArray *)selectFields {
+    [testGroup addObject:[self createQueryTestWithName:name andPredicate:predicate andTop:top andSkip:skip andOrderBy:orderByClauses andIncludeTotalCount:includeTotalCount andSelectFields:selectFields useStringIdTable:NO]];
+    [testGroup addObject:[self createQueryTestWithName:name andPredicate:predicate andTop:top andSkip:skip andOrderBy:orderByClauses andIncludeTotalCount:includeTotalCount andSelectFields:selectFields useStringIdTable:YES]];
 }
 
-+ (ZumoTest *)createQueryTestWithName:(NSString *)name andPredicate:(NSPredicate *)predicate andTop:(NSNumber *)top andSkip:(NSNumber *)skip andOrderBy:(NSArray *)orderByClauses andIncludeTotalCount:(BOOL)includeTotalCount {
-    return [self createQueryTestWithName:name andPredicate:predicate andTop:top andSkip:skip andOrderBy:orderByClauses andIncludeTotalCount:includeTotalCount andSelectFields:nil];
-}
++ (ZumoTest *)createQueryTestWithName:(NSString *)name andPredicate:(NSPredicate *)predicate andTop:(NSNumber *)top andSkip:(NSNumber *)skip andOrderBy:(NSArray *)orderByClauses andIncludeTotalCount:(BOOL)includeTotalCount andSelectFields:(NSArray *)selectFields useStringIdTable:(BOOL)useStringIdTable {
+    NSString *testName = [NSString stringWithFormat:@"[%@ id] %@", useStringIdTable ? @"string" : @"int", name];
+    ZumoTest *result = [ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
 
-+ (ZumoTest *)createQueryTestWithName:(NSString *)name andPredicate:(NSPredicate *)predicate andTop:(NSNumber *)top andSkip:(NSNumber *)skip andOrderBy:(NSArray *)orderByClauses andIncludeTotalCount:(BOOL)includeTotalCount andSelectFields:(NSArray *)selectFields {
-    ZumoTest *result = [ZumoTest createTestWithName:name andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-        MSTable *table = [client tableWithName:queryTestsTableName];
+        MSTable *table = [client tableWithName:useStringIdTable ? stringIdQueryTestsTableName : queryTestsTableName];
         NSArray *allItems = [ZumoQueryTestData getMovies];
         if (!top && !skip && !orderByClauses && !includeTotalCount && !selectFields) {
             // use simple readWithPredicate
@@ -415,6 +486,7 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
         }
     }];
     
+    [result addRequiredFeature:(useStringIdTable ? @"stringIdTables" : @"intIdTables")];
     return result;
 }
 
@@ -429,13 +501,13 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
     } else {
         BOOL allItemsEqual = YES;
         for (int i = 0; i < actualCount; i++) {
-            NSDictionary *expectedItem = expectedItems[i];
-            NSDictionary *actualItem = actualItems[i];
+            NSDictionary *expectedItem = [expectedItems objectAtIndex:i];
+            NSDictionary *actualItem = [actualItems objectAtIndex:i];
             BOOL allValuesEqual = YES;
             for (NSString *key in [expectedItem keyEnumerator]) {
                 if ([key isEqualToString:@"id"]) continue; // don't care about id
-                id expectedValue = expectedItem[key];
-                id actualValue = actualItem[key];
+                id expectedValue = [expectedItem objectForKey:key];
+                id actualValue = [actualItem objectForKey:key];
                 if (![expectedValue isEqual:actualValue]) {
                     allValuesEqual = NO;
                     [test addLog:[NSString stringWithFormat:@"Error comparing field %@ of item %d: expected - %@, actual - %@", key, i, expectedValue, actualValue]];

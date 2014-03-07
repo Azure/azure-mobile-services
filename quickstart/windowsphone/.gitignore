@@ -1,3 +1,5 @@
 bin/
 obj/
 *.suo
+packages/*
+.nuget/Nuget.exe

@@ -10,13 +10,14 @@ function defineMiscTestsNamespace() {
     var i;
     var roundTripTableName = 'w8jsRoundTripTable';
     var paramsTableName = 'ParamsTestTable';
+    var stringIdTableName = 'stringIdRoundTripTable';
 
     tests.push(new zumo.Test('Filter does not modify client', function (test, done) {
         var client = zumo.getClient();
         var filtered = client.withFilter(function (request, next, callback) {
             throw "This is an error";
         });
-        var table = client.getTable(roundTripTableName);
+        var table = client.getTable(stringIdTableName);
         table.take(1).read().done(function (items) {
             test.addLog('Retrieved data successfully: ', items);
             done(true);
@@ -24,7 +25,7 @@ function defineMiscTestsNamespace() {
             test.addLog('Unexpected error: ', err);
             done(false);
         });
-    }));
+    }, zumo.runtimeFeatureNames.STRING_ID_TABLES));
 
     var createLoggingFilter = function () {
         var filter = function (request, next, callback) {
@@ -45,7 +46,7 @@ function defineMiscTestsNamespace() {
             next(request, function (error, response) {
                 filter.error = error;
                 filter.response = response;
-                if (!error && response) {
+                if (!error && response && response.getResponseHeader) { // IE9 not support response.getResponseHeader
                     var serverVersion = response.getResponseHeader('x-zumo-version');
                     if (serverVersion) {
                         zumo.util.globalTestParams[zumo.constants.SERVER_VERSION_KEY] = serverVersion;
@@ -113,13 +114,13 @@ function defineMiscTestsNamespace() {
             sendRequest(0);
         };
         var filtered = client.withFilter(filter);
-        var table = filtered.getTable(roundTripTableName);
+        var table = filtered.getTable(stringIdTableName);
         var randomValue = Math.floor(Math.random() * 0x100000000).toString(16);
-        var item = { string1: randomValue };
+        var item = { name: randomValue };
         table.insert(item).done(function () {
-            table.where({ string1: randomValue }).select('string1').read().done(function (results) {
+            table.where({ name: randomValue }).select('name').read().done(function (results) {
                 var expectedResult = [];
-                for (i = 0; i < numberOfRequests; i++) expectedResult.push({ string1: randomValue });
+                for (i = 0; i < numberOfRequests; i++) expectedResult.push({ name: randomValue });
                 var errors = [];
                 if (zumo.util.compare(expectedResult, results, errors)) {
                     done(true);
@@ -138,7 +139,7 @@ function defineMiscTestsNamespace() {
             test.addLog('Error on insert: ', err);
             done(false);
         });
-    }));
+    }, zumo.runtimeFeatureNames.STRING_ID_TABLES));
 
     tests.push(new zumo.Test('Passing additional parameters in CRUD operations', function (test, done) {
         var client = zumo.getClient();
@@ -213,14 +214,109 @@ function defineMiscTestsNamespace() {
         }, handleError('insert'));
     }));
 
+    tests.push(new zumo.Test('Using filters to access optimistic concurrency features', function (test, done) {
+        var client = zumo.getClient();
+
+        var ocFilter = function (req, next, callback) {
+            var url = req.url;
+            url = addSystemProperties(url);
+            req.url = url;
+
+            removeSystemPropertiesFromBody(req);
+            next(req, function (error, response) {
+                if (response && response.getResponseHeader) {
+                    var etag = response.getResponseHeader('ETag');
+                    if (etag) {
+                        if (etag.substring(0, 1) === '\"') {
+                            etag = etag.substring(1);
+                        }
+                        if (etag.substring(etag.length - 1) === '\"') {
+                            etag = etag.substring(0, etag.length - 1);
+                        }
+                        var body = JSON.parse(response.responseText);
+                        body['__version'] = etag;
+                        response.responseText = JSON.stringify(body);
+                    }
+                }
+
+                callback(error, response);
+            });
+
+            function addSystemProperties(url) {
+                var queryIndex = url.indexOf('?');
+                var query, urlNoQuery;
+                if (queryIndex >= 0) {
+                    urlNoQuery = url.substring(0, queryIndex);
+                    query = url.substring(queryIndex + 1) + '&';
+                } else {
+                    urlNoQuery = url;
+                    query = '';
+                }
+                query = query + '__systemProperties=*';
+                return urlNoQuery + '?' + query;
+            }
+
+            function removeSystemPropertiesFromBody(request) {
+                var method = request.type;
+                var data = request.data;
+                if (method === 'PATCH' || method === 'PUT') {
+                    var body = JSON.parse(data);
+                    if (typeof body === 'object') {
+                        var toRemove = [];
+                        for (var k in body) {
+                            if (k.indexOf('__') === 0) {
+                                toRemove.push(k);
+                                if (k === '__version') {
+                                    var etag = '\"' + body[k] + '\"';
+                                    req.headers['If-Match'] = etag;
+                                }
+                            }
+                        }
+
+                        if (toRemove.length) {
+                            for (var i = 0; i < toRemove.length; i++) {
+                                delete body[toRemove[i]];
+                            }
+                            req.data = JSON.stringify(body);
+                        }
+                    }
+                }
+            }
+        };
+
+        client = client.withFilter(ocFilter);
+        var table = client.getTable(stringIdTableName);
+
+        var errFunction = function (err) {
+            test.addLog('Error: ', err);
+            done(false);
+        };
+        table.insert({ name: 'John Doe', number: 123 }).done(function (inserted) {
+            test.addLog('Inserted: ', inserted);
+            inserted.name = 'Jane Roe';
+            table.update(inserted).done(function (updated) {
+                test.addLog('Updated: ', updated);
+                test.addLog('Now updating with incorrect version');
+                updated['__version'] = 'incorrect';
+                table.update(updated).done(function (updated2) {
+                    test.addLog('Updated again (should not happen): ', updated2);
+                    done(false);
+                }, function (err) {
+                    test.addLog('Got (expected) error: ', err);
+                    done(true);
+                });
+            }, errFunction);
+        }, errFunction);
+    }, zumo.runtimeFeatureNames.STRING_ID_TABLES));
+
     function createFilterCaptureTest(successfulRequest) {
         var testName = 'Filter can be used to trace request / ' + (successfulRequest ? 'successful' : 'error') + ' response'
         return new zumo.Test(testName, function (test, done) {
             var client = zumo.getClient();
             var filter = createLoggingFilter();
             var filtered = client.withFilter(filter);
-            var table = filtered.getTable(roundTripTableName);
-            var item = { string1: 'hello world' };
+            var table = filtered.getTable(stringIdTableName);
+            var item = { name: 'hello world' };
             if (!successfulRequest) {
                 item.unsupported = { arr: [1, 3, 4] };
             }
@@ -309,7 +405,7 @@ function defineMiscTestsNamespace() {
 
                 done(true);
             });
-        });
+        }, zumo.runtimeFeatureNames.STRING_ID_TABLES);
     }
 
     function createBypassingFilter(statusCode, body) {

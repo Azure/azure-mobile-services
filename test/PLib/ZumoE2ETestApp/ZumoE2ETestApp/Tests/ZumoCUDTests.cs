@@ -4,11 +4,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using ZumoE2ETestApp.Framework;
 using ZumoE2ETestApp.Tests.Types;
@@ -17,9 +21,14 @@ namespace ZumoE2ETestApp.Tests
 {
     internal static class ZumoCUDTests
     {
+        private static string idName;
+
         internal static ZumoTestGroup CreateTests()
         {
             ZumoTestGroup result = new ZumoTestGroup("Update / delete tests");
+
+            // Assume the same for both types.
+            idName = Util.GetSerializedId<StringIdRoundTripTableItem>();
 
             DateTime now = DateTime.UtcNow;
             int seed = now.Year * 10000 + now.Month * 100 + now.Day;
@@ -30,10 +39,26 @@ namespace ZumoE2ETestApp.Tests
                 "Update typed item, setting values to null",
                 new RoundTripTableItem(rndGen),
                 new RoundTripTableItem(rndGen) { Bool1 = null, ComplexType2 = null, Int1 = null, String1 = null, ComplexType1 = null }));
-            result.AddTest(CreateTypedUpdateTest<MobileServiceInvalidOperationException>("(Neg) Update typed item, non-existing item id",
+            result.AddTest(CreateTypedUpdateTest<RoundTripTableItem, MobileServiceInvalidOperationException>("(Neg) Update typed item, non-existing item id",
                 new RoundTripTableItem(rndGen), new RoundTripTableItem(rndGen) { Id = 1000000000 }, false));
-            result.AddTest(CreateTypedUpdateTest<ArgumentException>("(Neg) Update typed item, id = 0",
+            result.AddTest(CreateTypedUpdateTest<RoundTripTableItem, ArgumentException>("(Neg) Update typed item, id = 0",
                 new RoundTripTableItem(rndGen), new RoundTripTableItem(rndGen) { Id = 0 }, false));
+
+            result.AddTest(CreateTypedUpdateTest("[string id] Update typed item",
+                new StringIdRoundTripTableItem(rndGen), new StringIdRoundTripTableItem(rndGen)));
+            result.AddTest(CreateTypedUpdateTest(
+                "[string id] Update typed item, setting values to null",
+                new StringIdRoundTripTableItem(rndGen),
+                new StringIdRoundTripTableItem(rndGen) { Name = null, Bool = null, ComplexType = null, Date = null }));
+            result.AddTest(CreateTypedUpdateTest(
+                "Update typed item, setting values to 0",
+                new StringIdRoundTripTableItem(rndGen),
+                new StringIdRoundTripTableItem(rndGen) { Integer = 0, Number = 0.0 }));
+
+            result.AddTest(CreateTypedUpdateTest<StringIdRoundTripTableItem, MobileServiceInvalidOperationException>("(Neg) Update typed item, non-existing item id",
+                new StringIdRoundTripTableItem(rndGen), new StringIdRoundTripTableItem(rndGen) { Id = "does not exist" }, false));
+            result.AddTest(CreateTypedUpdateTest<StringIdRoundTripTableItem, ArgumentException>("(Neg) Update typed item, id = null",
+                new StringIdRoundTripTableItem(rndGen), new StringIdRoundTripTableItem(rndGen) { Id = null }, false));
 
             string toInsertJsonString = @"{
                 ""string1"":""hello"",
@@ -68,20 +93,45 @@ namespace ZumoE2ETestApp.Tests
             toUpdate["int1"] = nullValue;
             result.AddTest(CreateUntypedUpdateTest("Update untyped item, setting values to null", toInsertJsonString, toUpdate.ToString()));
 
-            toUpdate["id"] = 1000000000;
+            toUpdate[idName] = 1000000000;
             result.AddTest(CreateUntypedUpdateTest<MobileServiceInvalidOperationException>("(Neg) Update untyped item, non-existing item id",
                 toInsertJsonString, toUpdate.ToString(), false));
 
-            toUpdate["id"] = 0;
+            toUpdate[idName] = 0;
             result.AddTest(CreateUntypedUpdateTest<ArgumentException>("(Neg) Update typed item, id = 0",
                 toInsertJsonString, toUpdateJsonString, false));
 
+            toInsertJsonString = JsonConvert.SerializeObject(new StringIdRoundTripTableItem(rndGen) { Id = null });
+            toUpdateJsonString = JsonConvert.SerializeObject(new StringIdRoundTripTableItem(rndGen) { Id = null });
+            result.AddTest(CreateUntypedUpdateTest("[string id] Update untyped item", toInsertJsonString, toUpdateJsonString, true));
+            toUpdate = JObject.Parse(toUpdateJsonString);
+            toUpdate["name"] = nullValue;
+            toUpdate["number"] = nullValue;
+            toUpdate["date1"] = nullValue;
+            toUpdate["bool"] = nullValue;
+            toUpdate["complex"] = nullValue;
+            result.AddTest(CreateUntypedUpdateTest("[string id] Update untyped item, setting values to null", toInsertJsonString, toUpdate.ToString(), true));
+
+            toUpdate[idName] = Guid.NewGuid().ToString();
+            result.AddTest(CreateUntypedUpdateTest<MobileServiceInvalidOperationException>("(Neg) [string id] Update untyped item, non-existing item id",
+                toInsertJsonString, toUpdate.ToString(), false, true));
+
+            toUpdate[idName] = nullValue;
+            result.AddTest(CreateUntypedUpdateTest<InvalidOperationException>("(Neg) [string id] Update typed item, id = null",
+                toInsertJsonString, toUpdateJsonString, false, true));
+
             // Delete tests
-            result.AddTest(CreateDeleteTest("Delete typed item", true, DeleteTestType.ValidDelete));
-            result.AddTest(CreateDeleteTest("(Neg) Delete typed item with non-existing id", true, DeleteTestType.NonExistingId));
-            result.AddTest(CreateDeleteTest("Delete untyped item", false, DeleteTestType.ValidDelete));
-            result.AddTest(CreateDeleteTest("(Neg) Delete untyped item with non-existing id", false, DeleteTestType.NonExistingId));
-            result.AddTest(CreateDeleteTest("(Neg) Delete untyped item without id field", false, DeleteTestType.NoIdField));
+            result.AddTest(CreateDeleteTest<RoundTripTableItem>("Delete typed item", true, DeleteTestType.ValidDelete));
+            result.AddTest(CreateDeleteTest<RoundTripTableItem>("(Neg) Delete typed item with non-existing id", true, DeleteTestType.NonExistingId));
+            result.AddTest(CreateDeleteTest<RoundTripTableItem>("Delete untyped item", false, DeleteTestType.ValidDelete));
+            result.AddTest(CreateDeleteTest<RoundTripTableItem>("(Neg) Delete untyped item with non-existing id", false, DeleteTestType.NonExistingId));
+            result.AddTest(CreateDeleteTest<RoundTripTableItem>("(Neg) Delete untyped item without id field", false, DeleteTestType.NoIdField));
+
+            result.AddTest(CreateDeleteTest<StringIdRoundTripTableItem>("[string id] Delete typed item", true, DeleteTestType.ValidDelete));
+            result.AddTest(CreateDeleteTest<StringIdRoundTripTableItem>("(Neg) [string id] Delete typed item with non-existing id", true, DeleteTestType.NonExistingId));
+            result.AddTest(CreateDeleteTest<StringIdRoundTripTableItem>("[string id] Delete untyped item", false, DeleteTestType.ValidDelete));
+            result.AddTest(CreateDeleteTest<StringIdRoundTripTableItem>("(Neg) [string id] Delete untyped item with non-existing id", false, DeleteTestType.NonExistingId));
+            result.AddTest(CreateDeleteTest<StringIdRoundTripTableItem>("(Neg) [string id] Delete untyped item without id field", false, DeleteTestType.NoIdField));
 
             result.AddTest(new ZumoTest("Refresh - updating item with server modifications", async delegate(ZumoTest test)
             {
@@ -115,7 +165,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Error, refresh didn't happen successfully");
                     return false;
                 }
-            }));
+            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES));
 
             result.AddTest(new ZumoTest("Refresh item without id does not send request", async delegate(ZumoTest test)
             {
@@ -144,7 +194,7 @@ namespace ZumoE2ETestApp.Tests
 
         enum DeleteTestType { ValidDelete, NonExistingId, NoIdField }
 
-        private static ZumoTest CreateDeleteTest(string testName, bool useTypedTable, DeleteTestType testType)
+        private static ZumoTest CreateDeleteTest<TItemType>(string testName, bool useTypedTable, DeleteTestType testType) where TItemType : ICloneableItem<TItemType>
         {
             if (useTypedTable && testType == DeleteTestType.NoIdField)
             {
@@ -154,17 +204,25 @@ namespace ZumoE2ETestApp.Tests
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
                 var client = ZumoTestGlobals.Instance.Client;
-                var typedTable = client.GetTable<RoundTripTableItem>();
-                var untypedTable = client.GetTable(ZumoTestGlobals.RoundTripTableName);
-                RoundTripTableItem itemToInsert = new RoundTripTableItem
+                var typedTable = client.GetTable<TItemType>();
+                var useStringIdTable = typeof(TItemType) == typeof(StringIdRoundTripTableItem);
+                var untypedTable = client.GetTable(
+                    useStringIdTable ? 
+                    ZumoTestGlobals.StringIdRoundTripTableName : 
+                    ZumoTestGlobals.RoundTripTableName);
+                TItemType itemToInsert;
+                if (useStringIdTable)
                 {
-                    String1 = "hello",
-                    Bool1 = true,
-                    Int1 = 123,
-                };
+                    itemToInsert = (TItemType)(object)new StringIdRoundTripTableItem { Name = "will be deleted", Number = 123 };
+                }
+                else
+                {
+                    itemToInsert = (TItemType)(object)new RoundTripTableItem { String1 = "will be deleted", Int1 = 123 };
+                }
+
                 await typedTable.InsertAsync(itemToInsert);
                 test.AddLog("Inserted item to be deleted");
-                int id = itemToInsert.Id;
+                object id = itemToInsert.Id;
                 switch (testType)
                 {
                     case DeleteTestType.ValidDelete:
@@ -192,14 +250,15 @@ namespace ZumoE2ETestApp.Tests
                     case DeleteTestType.NonExistingId:
                         try
                         {
+                            object nonExistingId = useStringIdTable ? (object)Guid.NewGuid().ToString() : (object)1000000000;
                             if (useTypedTable)
                             {
-                                itemToInsert.Id = 1000000000;
+                                itemToInsert.Id = nonExistingId;
                                 await typedTable.DeleteAsync(itemToInsert);
                             }
                             else
                             {
-                                JObject jo = new JObject(new JProperty("id", 1000000000));
+                                JObject jo = new JObject(new JProperty("id", nonExistingId));
                                 await untypedTable.DeleteAsync(jo);
                             }
 
@@ -217,7 +276,7 @@ namespace ZumoE2ETestApp.Tests
                             JObject jo = new JObject(new JProperty("Name", "hello"));
                             await untypedTable.DeleteAsync(jo);
 
-                            test.AddLog("Error, deleting item with non-existing id should fail, but succeeded");
+                            test.AddLog("Error, deleting item without an id should fail, but succeeded");
                             return false;
                         }
                         catch (ArgumentException ex)
@@ -226,7 +285,7 @@ namespace ZumoE2ETestApp.Tests
                             return true;
                         }
                 }
-            });
+            }, (typeof(TItemType) == typeof(RoundTripTableItem) ? ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES));
         }
 
         private static bool Validate404Response(ZumoTest test, MobileServiceInvalidOperationException msioe)
@@ -245,20 +304,21 @@ namespace ZumoE2ETestApp.Tests
             }
         }
 
-        private static ZumoTest CreateTypedUpdateTest(
-            string testName, RoundTripTableItem itemToInsert, RoundTripTableItem itemToUpdate)
+        private static ZumoTest CreateTypedUpdateTest<TRoundTripType>(
+            string testName, TRoundTripType itemToInsert, TRoundTripType itemToUpdate) where TRoundTripType : ICloneableItem<TRoundTripType>
         {
-            return CreateTypedUpdateTest<ExceptionTypeWhichWillNeverBeThrown>(testName, itemToInsert, itemToUpdate);
+            return CreateTypedUpdateTest<TRoundTripType, ExceptionTypeWhichWillNeverBeThrown>(testName, itemToInsert, itemToUpdate);
         }
 
-        private static ZumoTest CreateTypedUpdateTest<TExpectedException>(
-            string testName, RoundTripTableItem itemToInsert, RoundTripTableItem itemToUpdate, bool setUpdatedId = true)
+        private static ZumoTest CreateTypedUpdateTest<TRoundTripType, TExpectedException>(
+            string testName, TRoundTripType itemToInsert, TRoundTripType itemToUpdate, bool setUpdatedId = true)
             where TExpectedException : Exception
+            where TRoundTripType : ICloneableItem<TRoundTripType>
         {
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
                 var client = ZumoTestGlobals.Instance.Client;
-                var table = client.GetTable<RoundTripTableItem>();
+                var table = client.GetTable<TRoundTripType>();
                 var toInsert = itemToInsert.Clone();
                 var toUpdate = itemToUpdate.Clone();
                 try
@@ -303,34 +363,38 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                     return true;
                 }
-            });
+            }, (typeof(TRoundTripType) == typeof(RoundTripTableItem) ? ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES : ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES));
         }
 
         private static ZumoTest CreateUntypedUpdateTest(
-            string testName, string itemToInsert, string itemToUpdate)
+            string testName, string itemToInsert, string itemToUpdate, bool useStringIdTable = false)
         {
-            return CreateUntypedUpdateTest<ExceptionTypeWhichWillNeverBeThrown>(testName, itemToInsert, itemToUpdate);
+            return CreateUntypedUpdateTest<ExceptionTypeWhichWillNeverBeThrown>(testName, itemToInsert, itemToUpdate, true, useStringIdTable);
         }
 
         private static ZumoTest CreateUntypedUpdateTest<TExpectedException>(
-            string testName, string itemToInsertJson, string itemToUpdateJson, bool setUpdatedId = true)
+            string testName, string itemToInsertJson, string itemToUpdateJson, bool setUpdatedId = true, bool useStringIdTable = false)
             where TExpectedException : Exception
         {
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
                 var itemToInsert = JObject.Parse(itemToInsertJson);
                 var itemToUpdate = JObject.Parse(itemToUpdateJson);
+                Util.CamelCaseProps(itemToUpdate);
+
                 var client = ZumoTestGlobals.Instance.Client;
-                var table = client.GetTable(ZumoTestGlobals.RoundTripTableName);
+                var table = client.GetTable(useStringIdTable ? ZumoTestGlobals.StringIdRoundTripTableName : ZumoTestGlobals.RoundTripTableName);
                 try
                 {
                     var inserted = await table.InsertAsync(itemToInsert);
-                    int id = (int)inserted["id"].Value<int>();
+                    object id = useStringIdTable ?
+                        (object)(string)inserted["id"] : 
+                        (object)(int)inserted["id"];
                     test.AddLog("Inserted item with id {0}", id);
 
                     if (setUpdatedId)
                     {
-                        itemToUpdate["id"] = id;
+                        itemToUpdate["id"] = new JValue(id);
                     }
 
                     var expectedItem = JObject.Parse(itemToUpdate.ToString());
@@ -371,7 +435,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                     return true;
                 }
-            });
+            }, useStringIdTable ? ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES : ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES);
         }
     }
 }

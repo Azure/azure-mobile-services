@@ -15,7 +15,7 @@
     /// will define the module's exports when invoked.
     /// </field>
     var $__modules__ = { };
-    var $__fileVersion__ = "1.0.11024.0";
+    var $__fileVersion__ = "1.0.20218.0";
     
     function require(name) {
         /// <summary>
@@ -61,6 +61,10 @@
         var Platform = require('Platform');
         var MobileServiceTable = require('MobileServiceTable').MobileServiceTable;
         var MobileServiceLogin = require('MobileServiceLogin').MobileServiceLogin;
+        var Push;
+        try {
+            Push = require('Push').Push;
+        } catch(e) {}
         
         function MobileServiceClient(applicationUrl, applicationKey) {
             /// <summary>
@@ -102,6 +106,10 @@
                 Validate.notNullOrEmpty(tableName, 'tableName');
                 return new MobileServiceTable(tableName, this);
             };
+            
+            if (Push) {
+                this.push = new Push(this);
+            }
         }
         
         // Export the MobileServiceClient class
@@ -213,6 +221,11 @@
                 callback = ignoreFilters;
                 ignoreFilters = false;
             }
+            
+            if (_.isNull(callback) && (typeof content === 'function')) {
+                callback = content;
+                content = null;
+            }
         
             Validate.isString(method, 'method');
             Validate.notNullOrEmpty(method, 'method');
@@ -288,6 +301,7 @@
                 /// </summary>
                 /// <param name="provider" type="String" mayBeNull="true">
                 /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google', 
+                /// 'windowsazureactivedirectory' (can also use 'aad')
                 /// or 'microsoftaccount'. If no provider is specified, the 'token' parameter
                 /// is considered a Microsoft Account authentication token. If a provider is specified, 
                 /// the 'token' parameter is considered a provider-specific authentication token.
@@ -473,6 +487,27 @@
         var tableRouteSeperatorName = "tables";
         var idNames = ["ID", "Id", "id", "iD"];
         
+        var MobileServiceSystemProperties = {
+            None: 0,
+            CreatedAt: 1,
+            UpdatedAt: 2,
+            Version: 4,
+            All: 0xFFFF
+        }
+        
+        var MobileServiceSystemColumns = {
+            CreatedAt: "__createdAt",
+            UpdatedAt: "__updatedAt",
+            Version: "__version"
+        }
+        
+        Platform.addToMobileServicesClientNamespace({
+            MobileServiceTable:
+                {
+                    SystemProperties: MobileServiceSystemProperties
+                }
+        });
+        
         function MobileServiceTable(tableName, client) {
             /// <summary>
             /// Initializes a new instance of the MobileServiceTable class.
@@ -501,6 +536,8 @@
                 /// </returns>
                 return client;
             };
+        
+            this.systemProperties = 0;
         }
         
         // Export the MobileServiceTable class
@@ -584,6 +621,7 @@
             }
         
             // Add any user-defined query string parameters
+            parameters = addSystemProperties(parameters, this.systemProperties, queryString);
             if (!_.isNull(parameters)) {
                 var userDefinedQueryString = _.url.getQueryString(parameters);
                 if (!_.isNullOrEmpty(queryString)) {
@@ -665,16 +703,31 @@
                 }
                 Validate.notNull(callback, 'callback');
         
-                for (var i in idNames) {            
-                    if (!_.isNullOrZero(instance[idNames[i]])) {
-                        throw _.format(
-                            Platform.getResourceString("MobileServiceTable_InsertIdAlreadySet"),
-                            idPropertyName);
+                // Integer Ids can not have any Id set
+                for (var i in idNames) {
+                    var id = instance[idNames[i]];
+        
+                    if (!_.isNullOrZero(id)) {
+                        if (_.isString(id)) {
+                            // String Id's are allowed iif using 'id'
+                            if (idNames[i] !== idPropertyName) {
+                                throw _.format(
+                                    Platform.getResourceString("MobileServiceTable_InsertIdAlreadySet"),
+                                    idPropertyName);
+                            } else {
+                                Validate.isValidId(id, idPropertyName);
+                            }
+                        } else {
+                            throw _.format(
+                                Platform.getResourceString("MobileServiceTable_InsertIdAlreadySet"),
+                                idPropertyName);
+                        }
                     }
                 }
         
                 // Construct the URL
                 var urlFragment = _.url.combinePathSegments(tableRouteSeperatorName, this.getTableName());
+                parameters = addSystemProperties(parameters, this.systemProperties);
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
@@ -689,8 +742,7 @@
                         if (!_.isNull(error)) {
                             callback(error, null);
                         } else {
-                            var result = _.fromJson(response.responseText);
-        
+                            var result = getItemFromResponse(response);
                             result = Platform.allowPlatformToMutateOriginal(instance, result);
                             callback(null, result);
                         }
@@ -711,6 +763,9 @@
                 /// <param name="callback" type="Function">
                 /// The callback to invoke when the update is complete.
                 /// </param>
+                var version,
+                    headers = [],
+                    serverInstance;
         
                 // Account for absent optional arguments
                 if (_.isNull(callback) && (typeof parameters === 'function')) {
@@ -720,32 +775,49 @@
         
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
-                Validate.notNullOrZero(instance[idPropertyName], 'instance.' + idPropertyName);
+                Validate.isValidId(instance[idPropertyName], 'instance.' + idPropertyName);
                 if (!_.isNull(parameters)) {
                     Validate.isValidParametersObject(parameters, 'parameters');
                 }
                 Validate.notNull(callback, 'callback');
-            
+        
+                if (_.isString(instance[idPropertyName])) {
+                    version = instance.__version;
+                    serverInstance = removeSystemProperties(instance);
+                } else {
+                    serverInstance = instance;
+                }
+                parameters = addSystemProperties(parameters, this.systemProperties);
+        
                 // Construct the URL
                 var urlFragment =  _.url.combinePathSegments(
                         tableRouteSeperatorName,
                         this.getTableName(),
-                        instance[idPropertyName].toString());
+                        encodeURIComponent(instance[idPropertyName].toString()));
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
+                }
+        
+                if (!_.isNullOrEmpty(version)) {
+                    headers['If-Match'] = getEtagFromVersion(version);
                 }
         
                 // Make the request
                 this.getMobileServiceClient()._request(
                     'PATCH',
                     urlFragment,
-                    instance,
+                    serverInstance,
+                    false,
+                    headers,
                     function (error, response) {
                         if (!_.isNull(error)) {
+                            if (error.request && error.request.status === 412) {
+                                error.serverInstance = _.fromJson(error.request.responseText);
+                            }
                             callback(error, null);
                         } else {
-                            var result = _.fromJson(response.responseText);                    
+                            var result = getItemFromResponse(response);
                             result = Platform.allowPlatformToMutateOriginal(instance, result);
                             callback(null, result);
                         }
@@ -776,9 +848,13 @@
         
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
-                if (_.isNullOrZero(instance[idPropertyName]))
+                if (!_.isValidId(instance[idPropertyName], idPropertyName))
                 {
-                    callback(null, instance);
+                    if (typeof instance[idPropertyName] === 'string' && instance[idPropertyName] !== '') {
+                        throw _.format(Platform.getResourceString("Validate_InvalidId"), idPropertyName);
+                    } else {
+                        callback(null, instance);
+                    }
                     return;
                 }
         
@@ -788,11 +864,16 @@
                 Validate.notNull(callback, 'callback');
         
                 // Construct the URL
-        
                 var urlFragment = _.url.combinePathSegments(
                         tableRouteSeperatorName,
                         this.getTableName());
-                urlFragment = _.url.combinePathAndQuery(urlFragment, "?$filter=id eq " + instance[idPropertyName].toString());
+        
+                if (typeof instance[idPropertyName] === 'string') {
+                    var id = encodeURIComponent(instance[idPropertyName]).replace(/\'/g, '%27%27');
+                    urlFragment = _.url.combinePathAndQuery(urlFragment, "?$filter=id eq '" + id + "'");
+                } else {
+                    urlFragment = _.url.combinePathAndQuery(urlFragment, "?$filter=id eq " + encodeURIComponent(instance[idPropertyName].toString()));
+                }
         
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
@@ -814,9 +895,10 @@
                             }
         
                             if (!result) {
-                                throw _.format(
+                                var message =_.format(
                                     Platform.getResourceString("MobileServiceTable_NotSingleObject"),
                                     idPropertyName);
+                                callback(_.createError(message), null);
                             }
         
                             result = Platform.allowPlatformToMutateOriginal(instance, result);
@@ -847,7 +929,7 @@
                 }
         
                 // Validate the arguments
-                Validate.notNullOrZero(id, idPropertyName);
+                Validate.isValidId(id, idPropertyName);
                 if (!_.isNull(parameters)) {
                     Validate.isValidParametersObject(parameters);
                 }
@@ -857,7 +939,9 @@
                 var urlFragment = _.url.combinePathSegments(
                         tableRouteSeperatorName,
                         this.getTableName(),
-                        id.toString());
+                        encodeURIComponent(id.toString()));
+        
+                parameters = addSystemProperties(parameters, this.systemProperties);
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
@@ -872,7 +956,7 @@
                         if (!_.isNull(error)) {
                             callback(error, null);
                         } else {
-                            var result = _.fromJson(response.responseText);
+                            var result = getItemFromResponse(response);
                             callback(null, result);
                         }
                     });
@@ -901,7 +985,8 @@
         
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
-                Validate.notNullOrZero(instance[idPropertyName], 'instance.' + idPropertyName);
+                Validate.isValidId(instance[idPropertyName], 'instance.' + idPropertyName);
+                parameters = addSystemProperties(parameters, this.systemProperties);
                 if (!_.isNull(parameters)) {
                     Validate.isValidParametersObject(parameters);
                 }
@@ -911,7 +996,7 @@
                 var urlFragment =  _.url.combinePathSegments(
                         tableRouteSeperatorName,
                         this.getTableName(),
-                        instance[idPropertyName].toString());
+                        encodeURIComponent(instance[idPropertyName].toString()));
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
@@ -961,6 +1046,78 @@
         for (; i < queryOperators.length; i++) {
             // Avoid unintended closure capture
             copyOperator(queryOperators[i]);
+        }
+        
+        // Table system properties
+        function removeSystemProperties(instance) {
+            var copy = {};
+            for(var property in instance) {
+                if (property.substr(0, 2) !== '__') {
+                    copy[property] = instance[property];
+                }
+            }
+            return copy;
+        }
+        
+        function addSystemProperties(parameters, properties, querystring) {
+            if (properties === MobileServiceSystemProperties.None || (typeof querystring === 'string' && querystring.toLowerCase().indexOf('__systemproperties') >= 0)) {
+                return parameters;
+            }
+        
+            // Initialize an object if none passed in
+            parameters = parameters || {};
+        
+            // Don't override system properties if already set
+            if(!_.isNull(parameters['__systemProperties'])) {
+                return parameters;
+            }
+        
+            if (properties === MobileServiceSystemProperties.All) {
+                parameters['__systemProperties'] = '*';
+            } else {
+                var options = [];
+                if (MobileServiceSystemProperties.CreatedAt & properties) {
+                    options.push(MobileServiceSystemColumns.CreatedAt);
+                }
+                if (MobileServiceSystemProperties.UpdatedAt & properties) {
+                    options.push(MobileServiceSystemColumns.UpdatedAt);
+                }
+                if (MobileServiceSystemProperties.Version & properties) {
+                    options.push(MobileServiceSystemColumns.Version);
+                }
+                parameters['__systemProperties'] = options.join(',');
+            }
+        
+            return parameters;
+        }
+        
+        // Add double quotes and unescape any internal quotes
+        function getItemFromResponse(response) {
+            var result = _.fromJson(response.responseText);
+            if (response.getResponseHeader) {
+                var eTag = response.getResponseHeader('ETag');
+                if (!_.isNullOrEmpty(eTag)) {
+                    result.__version = getVersionFromEtag(eTag);
+                }
+            }
+            return result;
+        }
+        
+        // Add wrapping double quotes and escape all double quotes
+        function getEtagFromVersion(version) {
+            var result = version.replace(/\"/g, '\\\"');
+            return "\"" + result + "\"";
+        }
+        
+        // Remove surrounding double quotes and unescape internal quotes
+        function getVersionFromEtag(etag) {
+            var len = etag.length,
+                result = etag;
+        
+            if (len > 1 && etag[0] === '"' && etag[len - 1] === '"') {
+                result = etag.substr(1, len - 2);
+            }
+            return result.replace(/\\\"/g, '"');
         }
     };
 
@@ -1043,7 +1200,8 @@
             /// Microsoft Account authentication token.
             /// </summary>
             /// <param name="provider" type="String" mayBeNull="true">
-            /// Optional name of the authentication provider to use; one of 'facebook', 'twitter', 'google', or 'microsoftaccount'.
+            /// Optional name of the authentication provider to use; one of 'facebook', 'twitter', 'google',
+            /// 'windowsazureactivedirectory' (can also use 'aad'), or 'microsoftaccount'.
             /// </param>
             /// <param name="token" type="Object"  mayBeNull="true">
             /// Optional provider specific object with existing OAuth token to log in with or
@@ -1100,6 +1258,10 @@
             }
         
             if (!_.isNull(provider)) {
+                if (provider.toLowerCase() === 'windowsazureactivedirectory') {
+                    // The mobile service REST API uses '/login/aad' for Windows Azure Active Directory
+                    provider = 'aad';
+                }
                 this.loginWithProvider(provider, token, useSingleSignOn, callback);
             }
             else {
@@ -1139,7 +1301,8 @@
             /// Log a user into a Mobile Services application given a provider name and optional token object.
             /// </summary>
             /// <param name="provider" type="String">
-            /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google', or 'microsoftaccount'.
+            /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google',
+            /// 'windowsazureactivedirectory' (can also use 'aad'), or 'microsoftaccount'.
             /// </param>
             /// <param name="token" type="Object" mayBeNull="true">
             /// Optional, provider specific object with existing OAuth token to log in with.
@@ -1195,26 +1358,6 @@
                 loginWithLoginControl(this, provider, useSingleSignOn, callback);
             }
         };
-        
-        function isValidProvider(provider) {
-            /// <summary>
-            /// Determines that the given string is one of the known providers.
-            /// </summary>
-            /// <param name="provider" type="String">
-            /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google', or 'microsoftaccount'.
-            /// </param>
-            /// <returns>
-            /// True if the given provider is valid, and false otherwise.
-            /// </returns>
-        
-            for (var i = 0, j = authenticationProviders.length; i < j; i++) {
-                if (authenticationProviders[i] === provider) {
-                    return true;
-                }
-            }
-        
-            return false;
-        }
         
         function onLoginComplete(error, token, client, callback) {
             /// <summary>
@@ -1382,6 +1525,489 @@
                 login._loginState.cancelCallback = platformResult.cancelCallback;
             }
         }
+    };
+
+    $__modules__.Push = function (exports) {
+        // ----------------------------------------------------------------------------
+        // Copyright (c) Microsoft Corporation. All rights reserved.
+        // ----------------------------------------------------------------------------
+        
+        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
+        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
+        /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
+        
+        var Validate = require('Validate');
+        var LocalStorageManager = require('LocalStorageManager').LocalStorageManager;
+        var RegistrationManager = require('RegistrationManager').RegistrationManager;
+        var PushHttpClient = require('PushHttpClient').PushHttpClient;
+        
+        function Push(mobileServicesClient, tileId) {
+            var localStorage = new LocalStorageManager(mobileServicesClient.applicationUrl, tileId);
+            this.registrationManager = new RegistrationManager(
+                new PushHttpClient(mobileServicesClient),
+                localStorage
+                );
+        }
+        
+        exports.Push = Push;
+        
+        Push.prototype.registerNative = function (channelUri, tags) {
+            /// <summary>
+            /// Register for native notification
+            /// </summary>
+            /// <param name="channelUri">The channelUri to register</param>
+            /// <param name="tags">Array containing the tags for this registeration</param>
+            /// <returns>Promise that will complete when the registration is completed</returns>
+            
+            var registration = makeCoreRegistration(channelUri, tags);
+            return this.registrationManager.register(registration);
+        };
+        
+        
+        Push.prototype.registerTemplate = function (channelUri, templateBody, templateName, headers, tags) {
+            /// <summary>
+            /// Register for template notification
+            /// </summary>
+            /// <param name="channelUri">The channelUri to register</param>
+            /// <param name="templateBody">The xml body to register</param>
+            /// <param name="templateName">The name of the template</param>
+            /// <param name="headers">Object containing key/value pairs for the template to provide to WNS. X-WNS-Type is required. Example: { 'X-WNS-Type' : 'wns/toast' }</param>
+            /// <param name="tags">Array containing the tags for this registeration</param>
+            /// <returns>Promise that will complete when the template registration is completed</returns>
+            
+            var registration = makeCoreRegistration(channelUri, tags);
+            
+            if (templateBody) {
+                Validate.isString(templateBody, 'templateBody');
+                registration.templateBody = templateBody;
+                Validate.isString(templateName, 'templateName');
+                Validate.notNullOrEmpty(templateName);
+                registration.templateName = templateName;
+        
+                if (headers) {
+                    Validate.isObject(headers);
+                    registration.headers = headers;
+                }
+            }
+        
+            return this.registrationManager.register(registration);
+        };
+        
+        Push.prototype.unregisterNative = function () {
+            /// <summary>
+            /// Unregister for native notification
+            /// </summary>
+            /// <returns>Promise that will complete when the unregister is completed</returns>
+            
+            return this.unregisterTemplate(RegistrationManager.nativeRegistrationName);
+        };
+        
+        Push.prototype.unregisterTemplate = function (templateName) {
+            /// <summary>
+            /// Unregister for template notification
+            /// </summary>
+            /// <param name="templateName">The name of the template</param>
+            /// <returns>Promise that will complete when the unregister is completed</returns>
+            
+            Validate.notNullOrEmpty(templateName);
+            return this.registrationManager.unregister(templateName);
+        };
+        
+        Push.prototype.unregisterAll = function (channelUri) {
+            /// <summary>
+            /// Unregister all notifications for a specfic channelUri
+            /// </summary>
+            /// <param name="channelUri">The channelUri to unregister</param>
+            /// <returns>Promise that will complete when the unregistration of all registrations at the channelUri is completed</returns>
+            
+            Validate.notNullOrEmpty(channelUri);
+            return this.registrationManager.deleteRegistrationsForChannel(channelUri);
+        };
+        
+        Push.prototype.getSecondaryTile = function (tileId) {
+            return new Push(this.mobileServicesClient, tileId);
+        };
+        
+        function makeCoreRegistration(channelUri, tags) {
+            var registration = {};
+        
+            registration.platform = 'wns';
+        
+            Validate.isString(channelUri, 'channelUri');
+            Validate.notNullOrEmpty(channelUri, 'channelUri');
+        
+            registration.deviceId = channelUri;
+        
+            if (tags) {
+                Validate.isArray(tags, 'tags');
+                registration.tags = tags;
+            }
+        
+            return registration;
+        }
+    };
+
+    $__modules__.RegistrationManager = function (exports) {
+        // ----------------------------------------------------------------------------
+        // Copyright (c) Microsoft Corporation. All rights reserved.
+        // ----------------------------------------------------------------------------
+        
+        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
+        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
+        /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
+        
+        // Declare JSHint globals
+        /*global WinJS:false */
+        
+        function RegistrationManager(pushHttpClient, storageManager) {
+            this.pushHttpClient = pushHttpClient;
+            this.localStorageManager = storageManager;
+        }
+        
+        exports.RegistrationManager = RegistrationManager;
+        
+        RegistrationManager.nativeRegistrationName = '$Default';
+        
+        RegistrationManager.prototype.refreshLocalStorage = function(refreshChannelUri) {
+            var refreshPromise;
+            var self = this;
+            // if localStorage is empty or has different storage version, we need retrieve registrations and refresh local storage
+            if (this.localStorageManager.isRefreshNeeded) {
+                refreshPromise = this.pushHttpClient.listRegistrations(refreshChannelUri)
+                    .then(function (registrations) {
+                        var count = registrations.length;
+                        if (count === 0) {
+                            self.localStorageManager.clearRegistrations();
+                        }
+        
+                        for (var i = 0; i < count; i++) {
+                            self.localStorageManager.updateRegistrationByRegistrationId(registrations[i].registrationId, registrations[i].registrationName || RegistrationManager.nativeRegistrationName, refreshChannelUri);
+                        }
+                    })
+                    .then(function() {
+                        self.localStorageManager.refreshFinished(refreshChannelUri);
+                    });
+        
+            } else {
+                refreshPromise = WinJS.Promise.wrap();
+            }
+        
+            return refreshPromise;
+        };
+        
+        RegistrationManager.prototype.register = function (registration) {
+            var self = this;
+            return this.refreshLocalStorage(this.localStorageManager.channelUri || registration.deviceId)
+                .then(function () {
+                    return self.localStorageManager.getRegistration(registration.templateName || RegistrationManager.nativeRegistrationName);
+                })
+                .then(function (cached) {
+                    if (cached !== null) {
+                        registration.registrationId = cached.registrationId;
+                        return WinJS.Promise.wrap();
+                    } else {
+                        return self.createRegistrationId(registration);
+                    }
+                })
+                .then(function () {
+                    return self.upsertRegistration(registration);
+                })
+                .then(
+                    function () {
+                        // dead complete function
+                        return WinJS.Promise.wrap();
+                    },
+                    function (error) {
+                        // if we get an RegistrationGoneException (410) from service, we will recreate registration id and will try to do upsert one more time.
+                        // The likely cause of this is an expired registration in local storage due to a long unused app.
+                        if (error.request.status === 410) {
+                            return self.createRegistrationId(registration)
+                                .then(function () {
+                                    return self.upsertRegistration(registration);
+                                });
+                        }
+        
+                        throw error;
+                    }
+                );
+        };
+        
+        RegistrationManager.prototype.unregister = function (registrationName) {
+            var cached = this.localStorageManager.getRegistration(registrationName);
+            if (!cached) {
+                return WinJS.Promise.wrap();
+            }
+        
+            var self = this;
+            return this.pushHttpClient.unregister(cached.registrationId)
+                .then(function () {
+                    self.localStorageManager.deleteRegistrationByName(registrationName);
+                });
+        };
+        
+        RegistrationManager.prototype.deleteRegistrationsForChannel = function (channelUri) {
+            var self = this;
+            return this.pushHttpClient.listRegistrations(channelUri)
+                .then(function (registrations) {
+                    return WinJS.Promise.join(
+                        registrations.map(function (registration) {
+                            return self.pushHttpClient.unregister(registration.registrationId)
+                                .then(function () {
+                                    self.localStorageManager.deleteRegistrationByRegistrationId(registration.registrationId);
+                                });
+                        }));
+                })
+                .then(function() {
+                    self.localStorageManager.clearRegistrations();
+                });
+        };
+        
+        RegistrationManager.prototype.createRegistrationId = function (registration) {
+            var self = this;
+            return this.pushHttpClient.createRegistrationId()
+                .then(function (registrationId) {
+                    registration.registrationId = registrationId;
+                    self.localStorageManager.updateRegistrationByRegistrationName(registration.templateName || RegistrationManager.nativeRegistrationName, registration.registrationId, registration.deviceId);
+                });
+        };
+        
+        RegistrationManager.prototype.upsertRegistration = function (registration) {
+            var self = this;
+            return this.pushHttpClient.createOrUpdateRegistration(registration)
+                .then(function () {
+                    self.localStorageManager.updateRegistrationByRegistrationName(registration.templateName || RegistrationManager.nativeRegistrationName, registration.registrationId, registration.deviceId);
+                });
+        };
+    };
+
+    $__modules__.LocalStorageManager = function (exports) {
+        // ----------------------------------------------------------------------------
+        // Copyright (c) Microsoft Corporation. All rights reserved.
+        // ----------------------------------------------------------------------------
+        
+        /// <reference path='C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js' />
+        /// <reference path='C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js' />
+        /// <reference path='..\Generated\MobileServices.DevIntellisense.js' />
+        
+        // Declare JSHint globals
+        /*global WinJS:false, Windows:false */
+        
+        var _ = require('Extensions');
+        var Platform = require('Platform');
+        
+        function LocalStorageManager(applicationUri, tileId) {
+            this.storageVersion = 'v1.0.0';
+            this.primaryChannelId = '$Primary';
+            this.keyNameVersion = 'Version';
+            this.keyNameChannelUri = 'ChannelUri';
+            this.keyNameRegistrations = 'Registrations';
+            
+            if (!tileId) {
+                tileId = this.primaryChannelId;
+            }
+        
+            var name = _.format('{0}-PushContainer-{1}-{2}', Windows.ApplicationModel.Package.current.id.name, applicationUri, tileId);
+            this.settings = Windows.Storage.ApplicationData.current.localSettings.createContainer(name, Windows.Storage.ApplicationDataCreateDisposition.always).values;
+            this.isRefreshNeeded = false;
+            this.channelUri = null;    
+        
+            this.initializeRegistrationInfoFromStorage();
+        }
+        
+        exports.LocalStorageManager = LocalStorageManager;
+        
+        LocalStorageManager.prototype.getChannelUri = function () {
+            return this.channelUri;
+        };
+        
+        LocalStorageManager.prototype.setChannelUri = function (channelUri) {
+            this.channelUri = channelUri;
+            this.flushToSettings();
+        };
+        
+        LocalStorageManager.prototype.getRegistration = function (registrationName) {
+            return this.readRegistration(registrationName);
+        };
+        
+        LocalStorageManager.prototype.deleteRegistrationByName = function (registrationName) {
+            if (tryRemoveSetting(registrationName, this.registrations)) {
+                this.flushToSettings();
+                return true;
+            }
+        
+            return false;
+        };
+        
+        LocalStorageManager.prototype.deleteRegistrationByRegistrationId = function (registrationId) {
+            var registration = this.getFirstRegistrationByRegistrationId(registrationId);
+        
+            if (registration) {
+                this.deleteRegistrationByName(registration.registrationName);
+                return true;
+            }
+        
+            return false;
+        };
+        
+        LocalStorageManager.prototype.getFirstRegistrationByRegistrationId = function (registrationId) {
+            var returnValue = null;
+            for (var regName in this.registrations) {
+                if (this.registrations.hasOwnProperty(regName)) {
+                    // Update only the first registration with matching registrationId
+                    var registration = this.readRegistration(regName);
+                    if (!returnValue && registration && (registration.registrationId === registrationId)) {
+                        returnValue = registration;
+                    }
+                }
+            }
+        
+            return returnValue;
+        };
+        
+        LocalStorageManager.prototype.updateRegistrationByRegistrationName = function (registrationName, registrationId, channelUri) {
+            var cacheReg = {};
+            cacheReg.registrationName = registrationName;
+            cacheReg.registrationId = registrationId;
+            this.writeRegistration(registrationName, cacheReg);
+            this.channelUri = channelUri;
+            this.flushToSettings();
+        };
+        
+        LocalStorageManager.prototype.writeRegistration = function (registrationName, cacheReg) {
+            var cachedRegForPropertySet = JSON.stringify(cacheReg);
+            this.registrations.insert(registrationName, cachedRegForPropertySet);
+        };
+        
+        LocalStorageManager.prototype.readRegistration = function (registrationName) {
+            if (this.registrations.hasKey(registrationName)) {
+                var cachedRegFromPropertySet = this.registrations[registrationName];
+                return JSON.parse(cachedRegFromPropertySet);
+            } else {
+                return null;
+            }
+        };
+        
+        LocalStorageManager.prototype.updateRegistrationByRegistrationId = function (registrationId, registrationName, channelUri) {
+            var registration = this.getFirstRegistrationByRegistrationId(registrationId);
+        
+            if (registration) {
+                this.updateRegistrationByRegistrationName(registration.registrationName, registration.registrationId, channelUri);
+            } else {
+                this.updateRegistrationByRegistrationName(registrationName, registrationId, channelUri);
+            }
+        };
+        
+        LocalStorageManager.prototype.clearRegistrations = function () {
+            this.registrations.clear();
+            this.flushToSettings();
+        };
+        
+        LocalStorageManager.prototype.refreshFinished = function (refreshedChannelUri) {
+            this.setChannelUri(refreshedChannelUri);
+            this.isRefreshNeeded = false;
+        };
+        
+        LocalStorageManager.prototype.flushToSettings = function () {
+            this.settings.insert(this.keyNameVersion, this.storageVersion);
+            this.settings.insert(this.keyNameChannelUri, this.channelUri);
+        
+            var str = '';
+            if (this.registrations !== null) {
+                str = JSON.stringify(this.registrations);
+            }
+        
+            this.settings.insert(this.keyNameRegistrations, str);
+        };
+        
+        LocalStorageManager.prototype.initializeRegistrationInfoFromStorage = function () {
+            this.registrations = new Windows.Foundation.Collections.PropertySet();
+        
+            // Read channelUri
+            this.channelUri = readContent(this.settings, this.keyNameChannelUri);
+        
+            // Verify this.storage version
+            var version = readContent(this.settings, this.keyNameVersion);
+            if (this.storageVersion !== version.toLowerCase()) {
+                this.isRefreshNeeded = true;
+                return;
+            }
+        
+            this.isRefreshNeeded = false;
+        
+            // read registrations
+            var regsStr = readContent(this.settings, this.keyNameRegistrations);
+            if (regsStr) {
+                var entries = JSON.parse(regsStr);
+        
+                for (var reg in entries) {
+                    if (entries.hasOwnProperty(reg)) {
+                        this.registrations.insert(reg, entries[reg]);
+                    }
+                }
+            }
+        };
+        
+        function readContent(propertySet, key) {
+            if (propertySet.hasKey(key)) {
+                return propertySet[key];
+            }
+            return '';
+        }
+        
+        function tryRemoveSetting(name, values) {
+            if (values[name]) {
+                values.remove(name);
+                return true;
+            }
+            return false;
+        };
+    };
+
+    $__modules__.PushHttpClient = function (exports) {
+        // ----------------------------------------------------------------------------
+        // Copyright (c) Microsoft Corporation. All rights reserved.
+        // ----------------------------------------------------------------------------
+        
+        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
+        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
+        /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
+        
+        var _ = require('Extensions');
+        var Platform = require('Platform');
+        var noCacheHeader = { 'If-Modified-Since': 'Mon, 27 Mar 1972 00:00:00 GMT' };
+        function PushHttpClient(mobileServicesClient) {
+            this.mobileServicesClient = mobileServicesClient;
+        }
+        
+        exports.PushHttpClient = PushHttpClient;
+        
+        PushHttpClient.prototype.listRegistrations = function (channelUri) {
+            return this._request('GET', '/push/registrations?platform=wns&deviceId=' + encodeURIComponent(channelUri), null, null, noCacheHeader)
+                .then(function (request) {
+                    return JSON.parse(request.response);
+                });
+        };
+        
+        PushHttpClient.prototype.unregister = function (registrationId) {
+            return this._request('DELETE', '/push/registrations/' + encodeURIComponent(registrationId), null, null, noCacheHeader);
+        };
+        
+        PushHttpClient.prototype.createRegistrationId = function () {
+            return this._request('POST', '/push/registrationIds', null, null, noCacheHeader)
+                .then(function (response) {
+                    var locationHeader = response.getResponseHeader('Location');
+                    return locationHeader.slice(locationHeader.lastIndexOf('/') + 1);
+                });
+        };
+        
+        PushHttpClient.prototype.createOrUpdateRegistration = function (registration) {
+            return this._request('PUT', '/push/registrations/' + encodeURIComponent(registration.registrationId), registration, null, noCacheHeader);
+        };
+        
+        PushHttpClient.prototype._request = Platform.async(
+            function (method, uriFragment, content, ignoreFilters, headers, callback) {
+                this.mobileServicesClient._request(method, uriFragment, content, ignoreFilters, headers, callback);
+            });
     };
 
     $__modules__.Platform = function (exports) {
@@ -1752,16 +2378,16 @@
         exports.isNullOrZero = function (value) {
             /// <summary>
             /// Gets a value indicating whether the provided value is null (or
-            /// undefined) or zero.
+            /// undefined) or zero / empty string
             /// </summary>
             /// <param name="value" type="Object" mayBeNull="true">
             /// The value to check.
             /// </param>
             /// <returns type="Boolean">
-            /// A value indicating whether the provided value is null (or undefined) or zero.
+            /// A value indicating whether the provided value is null (or undefined) or zero or empty string.
             /// </returns>
         
-            return value === null || value === undefined || value === 0;
+            return value === null || value === undefined || value === 0 || value === '';
         };
         
         exports.isNullOrEmpty = function (value) {
@@ -1872,6 +2498,38 @@
             /// </returns>
         
             return _.isNull(value) || (typeof value === 'object' && !_.isDate(value));
+        };
+        
+        exports.isValidId = function (value) {
+            /// <summary>
+            /// Determine if a value is an acceptable id for use by the mobile service
+            /// </summary>
+            /// <param name="value" type="Object">The value to check.</param>
+            /// <returns type="boolean">
+            /// True if the value is a string or number, meeting all criteria, or false othwerise.
+            /// </returns>
+            if (_.isNullOrZero(value)) {
+                return false;
+            }
+        
+            if (_.isString(value)) {
+                // Strings must contain at least one non whitespace character
+                if (value.length === 0 || value.length > 255 || value.trim().length === 0) {
+                    return false;
+                }
+        
+                var ex = /[+"\/?`\\]|[\u0000-\u001F]|[\u007F-\u009F]|^\.{1,2}$/;
+                if (value.match(ex) !== null) {
+                    return false;
+                }
+        
+                return true;
+        
+            } else if (_.isNumber(value)) {
+                return value > 0;
+            }
+        
+            return false;
         };
         
         exports.isString = function (value) {
@@ -2292,7 +2950,7 @@
         
         exports.notNullOrZero = function (value, name) {
             /// <summary>
-            /// Ensure the value is not null, undefined, or empty.
+            /// Ensure the value is not null, undefined, zero, or empty.
             /// </summary>
             /// <param name="value" mayBeNull="true">The value to check.</param>
             /// <param name="name" mayBeNull="true" optional="true" type="String">
@@ -2301,6 +2959,20 @@
         
             if (_.isNullOrZero(value)) {
                 throw _.format(Platform.getResourceString("Validate_NotNullOrEmptyError"), name || 'Value');
+            }
+        };
+        
+        exports.isValidId = function (value, name) {
+            /// <summary>
+            /// Ensure the value is a valid id for mobile services.
+            /// </summary>
+            /// <param name="value" mayBeNull="true">The value to check.</param>
+            /// <param name="name" mayBeNull="true" optional="true" type="String">
+            /// Optional name of the value to throw.
+            /// </param>
+        
+            if (!_.isValidId(value)) {
+                throw _.format(Platform.getResourceString("Validate_InvalidId"), name || 'id');
             }
         };
         
@@ -2379,7 +3051,7 @@
         
             if (parseInt(value, 10) !== parseFloat(value)) {
                 throw _.format(
-                    Platform.getResourceString("Validate_TypeCheck_Error"),
+                    Platform.getResourceString("Validate_TypeCheckError"),
                     name || 'Value',
                     'number',
                     typeof value);
@@ -2418,6 +3090,24 @@
                     Platform.getResourceString("Validate_TypeCheckError"),
                     name || 'Value',
                     'object',
+                    typeof value);
+            }
+        };
+        
+        exports.isArray = function (value, name) {
+            /// <summary>
+            /// Ensure the value is an Array.
+            /// </summary>
+            /// <param name="value" mayBeNull="true">The value to check.</param>
+            /// <param name="name" mayBeNull="true" optional="true" type="String">
+            /// Optional name of the value to throw.
+            /// </param>
+        
+            if (!Array.isArray(value)) {
+                throw _.format(
+                    Platform.getResourceString("Validate_TypeCheckError"),
+                    name || 'Value',
+                    'array',
                     typeof value);
             }
         };
@@ -9536,11 +10226,11 @@
 })(this || exports);
 
 // SIG // Begin signature block
-// SIG // MIIkHwYJKoZIhvcNAQcCoIIkEDCCJAwCAQExDzANBglg
+// SIG // MIIkIwYJKoZIhvcNAQcCoIIkFDCCJBACAQExDzANBglg
 // SIG // hkgBZQMEAgEFADB3BgorBgEEAYI3AgEEoGkwZzAyBgor
 // SIG // BgEEAYI3AgEeMCQCAQEEEBDgyQbOONQRoqMAEEvTUJAC
 // SIG // AQACAQACAQACAQACAQAwMTANBglghkgBZQMEAgEFAAQg
-// SIG // 2X5JRkUngY9zfP+M4VLTJY6uUKPCTwYL4mohuYw0kA2g
+// SIG // pyPZtNRO7z9tswLXwySXnaLqkbSd/YgObbYTj6wBUeag
 // SIG // gg2SMIIGEDCCA/igAwIBAgITMwAAABp3u3SzB9EWuAAA
 // SIG // AAAAGjANBgkqhkiG9w0BAQsFADB+MQswCQYDVQQGEwJV
 // SIG // UzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMH
@@ -9646,7 +10336,7 @@
 // SIG // nvi/a7dLl+LrdXga7Oo3mXkYS//WsyNodeav+vyL6wuA
 // SIG // 6mk7r/ww7QRMjt/fdW1jkT3RnVZOT7+AVyKheBEyIXrv
 // SIG // QQqxP/uozKRdwaGIm1dxVk5IRcBCyZt2WwqASGv9eZ/B
-// SIG // vW1taslScxMNelDNMYIV5TCCFeECAQEwgZUwfjELMAkG
+// SIG // vW1taslScxMNelDNMYIV6TCCFeUCAQEwgZUwfjELMAkG
 // SIG // A1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAO
 // SIG // BgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29m
 // SIG // dCBDb3Jwb3JhdGlvbjEoMCYGA1UEAxMfTWljcm9zb2Z0
@@ -9654,31 +10344,31 @@
 // SIG // B9EWuAAAAAAAGjANBglghkgBZQMEAgEFAKCB1DAZBgkq
 // SIG // hkiG9w0BCQMxDAYKKwYBBAGCNwIBBDAcBgorBgEEAYI3
 // SIG // AgELMQ4wDAYKKwYBBAGCNwIBFTAvBgkqhkiG9w0BCQQx
-// SIG // IgQgdmOzGCEhiBULs7InzbGPj/QI6e1+mdMcJSOEJnnf
-// SIG // FnkwaAYKKwYBBAGCNwIBDDFaMFigPoA8AE0AaQBjAHIA
+// SIG // IgQgu+JdPTuVOFAwzWSR82Oc0ptDRXHPWqMx8nTV1kG7
+// SIG // bNgwaAYKKwYBBAGCNwIBDDFaMFigPoA8AE0AaQBjAHIA
 // SIG // bwBzAG8AZgB0ACAAVwBpAG4AZABvAHcAcwAgAEEAegB1
 // SIG // AHIAZQAgAE0AbwBiAGkAbABloRaAFGh0dHA6Ly93d3cu
-// SIG // YXNwLm5ldC8gMA0GCSqGSIb3DQEBAQUABIIBAKdA69Ca
-// SIG // y7fhromxAmnUVWSRN5+n/f+3g90ffQYYMqPvCuowiUkr
-// SIG // 5FiZAtFeEYKDD3qjPYfQoI4JybLhOKC/50L66mayXGuK
-// SIG // Ou73LTJxKK8J8aU0D452dCKCX2EnsPUdeziexzoyoC+C
-// SIG // +fglUhRlR2yTHnd3UKtFErJf9e1ai7ntHHvACbKppaFe
-// SIG // 0d8BBB9DDn+EOsBdMe97wYRmBVLoJhf9kiehGZBfrdUW
-// SIG // r0hdGdaWdhUnOyxOz9XHyLHKrxYVb8RxSZReAT5RAxuj
-// SIG // cABqv1eUgCxaiHjNIFCd2yvkXip5PSKCUgyY2WvN0ymF
-// SIG // aNgFH4NZb7xptnDGHV5lkJQUHm+hghNJMIITRQYKKwYB
-// SIG // BAGCNwMDATGCEzUwghMxBgkqhkiG9w0BBwKgghMiMIIT
-// SIG // HgIBAzEPMA0GCWCGSAFlAwQCAQUAMIIBPQYLKoZIhvcN
+// SIG // YXNwLm5ldC8gMA0GCSqGSIb3DQEBAQUABIIBAMFVZESx
+// SIG // ipIvpi1Ei9zbRAAMIHmxMO2rk6dodKL1eCJVG7XyiIPy
+// SIG // a3MgJDShEKUYvXhRwrSYBBVBR2cMHWuj8uxdZUIxdoLJ
+// SIG // fpN1ZxTzrvmjoRfxnFdcE//EJcXyCEhhFFtZvI+dtNdO
+// SIG // MU9n8eowDBmrlTBywLbQvT7KXY53FYTwgSluSRavgKnY
+// SIG // aHQ83xy4VMJds3HjlqNBlZFNVuRva4G7Exm+Bup5f1/L
+// SIG // 6J8KGciFYCQDlXTwkSZYuqjO2TppVVbLk+70sC49Tehr
+// SIG // tZPZSlV4ytWPNqv921eK7v8GMcLkP5j74lsExb0pfQ9o
+// SIG // +G5stZUnPPl9QdhENhAXtkN11WKhghNNMIITSQYKKwYB
+// SIG // BAGCNwMDATGCEzkwghM1BgkqhkiG9w0BBwKgghMmMIIT
+// SIG // IgIBAzEPMA0GCWCGSAFlAwQCAQUAMIIBPQYLKoZIhvcN
 // SIG // AQkQAQSgggEsBIIBKDCCASQCAQEGCisGAQQBhFkKAwEw
-// SIG // MTANBglghkgBZQMEAgEFAAQgr0u+aigy6brxRpE0tXeU
-// SIG // onl9dbtCd4qMPMteXhQzFd4CBlJpOp6MGBgTMjAxMzEw
-// SIG // MjQxOTEzNDQuODczWjAHAgEBgAIB9KCBuaSBtjCBszEL
+// SIG // MTANBglghkgBZQMEAgEFAAQgRilGGSYhf5ON5g1WNvDs
+// SIG // 2DfFKDMBjRgEY904n2vsIGUCBlLelNG94RgTMjAxNDAy
+// SIG // MTgyMTAwMzYuNTMxWjAHAgEBgAIB9KCBuaSBtjCBszEL
 // SIG // MAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24x
 // SIG // EDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jv
 // SIG // c29mdCBDb3Jwb3JhdGlvbjENMAsGA1UECxMETU9QUjEn
-// SIG // MCUGA1UECxMebkNpcGhlciBEU0UgRVNOOkI4RUMtMzBB
-// SIG // NC03MTQ0MSUwIwYDVQQDExxNaWNyb3NvZnQgVGltZS1T
-// SIG // dGFtcCBTZXJ2aWNloIIOzDCCBnEwggRZoAMCAQICCmEJ
+// SIG // MCUGA1UECxMebkNpcGhlciBEU0UgRVNOOkY1MjgtMzc3
+// SIG // Ny04QTc2MSUwIwYDVQQDExxNaWNyb3NvZnQgVGltZS1T
+// SIG // dGFtcCBTZXJ2aWNloIIO0DCCBnEwggRZoAMCAQICCmEJ
 // SIG // gSoAAAAAAAIwDQYJKoZIhvcNAQELBQAwgYgxCzAJBgNV
 // SIG // BAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYD
 // SIG // VQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQg
@@ -9729,7 +10419,7 @@
 // SIG // dDJL32N79ZmKLxvHIa9Zta7cRDyXUHHXodLFVeNp3lfB
 // SIG // 0d4wwP3M5k37Db9dT+mdHhk4L7zPWAUu7w2gUDXa7wkn
 // SIG // HNWzfjUeCLraNtvTX4/edIhJEjCCBNowggPCoAMCAQIC
-// SIG // EzMAAAAqn0sjX8+w8J0AAAAAACowDQYJKoZIhvcNAQEL
+// SIG // EzMAAAApl058gssgFkEAAAAAACkwDQYJKoZIhvcNAQEL
 // SIG // BQAwfDELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hp
 // SIG // bmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoT
 // SIG // FU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEmMCQGA1UEAxMd
@@ -9738,19 +10428,19 @@
 // SIG // MAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24x
 // SIG // EDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jv
 // SIG // c29mdCBDb3Jwb3JhdGlvbjENMAsGA1UECxMETU9QUjEn
-// SIG // MCUGA1UECxMebkNpcGhlciBEU0UgRVNOOkI4RUMtMzBB
-// SIG // NC03MTQ0MSUwIwYDVQQDExxNaWNyb3NvZnQgVGltZS1T
+// SIG // MCUGA1UECxMebkNpcGhlciBEU0UgRVNOOkY1MjgtMzc3
+// SIG // Ny04QTc2MSUwIwYDVQQDExxNaWNyb3NvZnQgVGltZS1T
 // SIG // dGFtcCBTZXJ2aWNlMIIBIjANBgkqhkiG9w0BAQEFAAOC
-// SIG // AQ8AMIIBCgKCAQEAlaRZZnaociUB0gF+DzpPU8d5KYbD
-// SIG // WvmXw14bzrHpXXiOqgdMB/75xXfnkMAYFGlXVg0mCbsm
-// SIG // 8b2D3LRIxwqmWf3GE76Dsu5Zl2NAwO/WaDSDozdJwNex
-// SIG // pXRPvAJgIVSGpJetY5ggLMc+qtdA02EEfcU9XevlK/AM
-// SIG // X7s8ZK3B6zSy8N7rXA4IRk+v6m5gkYYUjNRl4Hgz+Z/9
-// SIG // x0GWTtPrKHs7gTXljK0s5zSX0tQf0tW78w2m5O4vpFal
-// SIG // BuHT4SYlMIS6SV3HzmxT4aPxPUp3EK4HwRoV6VVc8EA2
-// SIG // Wo4oTskS+o2wDCUZL7TkE0YDS4MgiVvivgOieC/7RNb/
-// SIG // oL+3zQIDAQABo4IBGzCCARcwHQYDVR0OBBYEFGuZfkZT
-// SIG // ePHMBIfKTUbhPeLJnPWBMB8GA1UdIwQYMBaAFNVjOlyK
+// SIG // AQ8AMIIBCgKCAQEA6D/lswpfMZxWjEH9l+wXGrFW4vjy
+// SIG // LfQYEc6QzKdfpeu4uGc7JubRyRnNfwrbx6wjtaKQb4kt
+// SIG // x1sLgPMxVehj28+0Ld+9bd243ef6U+OLt1ojkP3eDrWi
+// SIG // O7s1ed5H9FvrcSEEaFaeqjgBgNf4rPFXKC4eZ4xTB71u
+// SIG // 6ZWYg/UyjPmYcAlg/IxwmUcs6RVydYepeSCxSRy8dWxn
+// SIG // uk9BWygdPHgiiPWbzsrTmAwH8D8pEU+UO7aMuT8cSGdc
+// SIG // f15bg56W4RqU0KAdCOD4XKg7QiGv628gNa7WOmQGIg9d
+// SIG // /6yEDc9xUNL2qewdm3BGR8EsYbDPXaAcMsHoVMhlNzWk
+// SIG // QbHOcQIDAQABo4IBGzCCARcwHQYDVR0OBBYEFC+jgoTd
+// SIG // MmQSiPUFUXZPi4o9XmgEMB8GA1UdIwQYMBaAFNVjOlyK
 // SIG // MZDzQ3t8RhvFM2hahW1VMFYGA1UdHwRPME0wS6BJoEeG
 // SIG // RWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2kvY3Js
 // SIG // L3Byb2R1Y3RzL01pY1RpbVN0YVBDQV8yMDEwLTA3LTAx
@@ -9758,63 +10448,63 @@
 // SIG // Pmh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2Vy
 // SIG // dHMvTWljVGltU3RhUENBXzIwMTAtMDctMDEuY3J0MAwG
 // SIG // A1UdEwEB/wQCMAAwEwYDVR0lBAwwCgYIKwYBBQUHAwgw
-// SIG // DQYJKoZIhvcNAQELBQADggEBACdktJCxYu8hQjL6uqz0
-// SIG // kQWHWLZMYZmP9oOE4eadaXCRH2u29wUgc09eFOt86XGJ
-// SIG // cvJfiHp7FC4uvZC5jLpG4ZEq85rnjkqc03FmWRI8nnR/
-// SIG // W+9K5nJSiV1EclPOcX1LxEKgSqNL5YXp16YN+EbB+zP/
-// SIG // H449XEIh9ecTczicSLPghNWfFDUTmbyTSQhwxb66HsL5
-// SIG // 51mAj9o8PPtL5U29Z3nMvLANCc5ABpCCle3eEe1tmsIE
-// SIG // fw0voonmhfgDHM2fEDKFfMw0fIyTrZWY4ByIdO9DkyG+
-// SIG // zv4EgZyftqgTUPd0XVAhh9uwyz8OSNspha7L3C5kb2IV
-// SIG // VZ17xsQSFSJXiXqhggN1MIICXQIBATCB46GBuaSBtjCB
+// SIG // DQYJKoZIhvcNAQELBQADggEBAHKeD7Iq5u2uNLJ1b5DA
+// SIG // vCuod4a2aaw3IdTZCIj6RoNJvL7vu2h9bhlBBLj+t5mM
+// SIG // YIGWXjkNhHmaqeWyHF6C7JJyUkk+fvNt4kD5ljt3bPyj
+// SIG // Kj6ozKzzlO2NEYTLqh1ZVR+F+20OPfYdEWeh9JJVg66P
+// SIG // dhYKK19GMvOqvPZqN4ebZYaxVQhICwf4WZnODoymhZgu
+// SIG // JOUIPAWUQDmmcA0/H+sJuWE2yW/+vP8zEJxBhPK8Y/bb
+// SIG // hlG0xLY8dNenGbMr+I+slQ4+e6kVJi59EqPeW3TEDJ0z
+// SIG // qn6iPoQUaa+QcbV3C5OEQVIgjqxls71YFHutdqlV/G47
+// SIG // r+rFCChCCUGN/G2hggN5MIICYQIBATCB46GBuaSBtjCB
 // SIG // szELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0
 // SIG // b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1p
 // SIG // Y3Jvc29mdCBDb3Jwb3JhdGlvbjENMAsGA1UECxMETU9Q
-// SIG // UjEnMCUGA1UECxMebkNpcGhlciBEU0UgRVNOOkI4RUMt
-// SIG // MzBBNC03MTQ0MSUwIwYDVQQDExxNaWNyb3NvZnQgVGlt
+// SIG // UjEnMCUGA1UECxMebkNpcGhlciBEU0UgRVNOOkY1Mjgt
+// SIG // Mzc3Ny04QTc2MSUwIwYDVQQDExxNaWNyb3NvZnQgVGlt
 // SIG // ZS1TdGFtcCBTZXJ2aWNloiUKAQEwCQYFKw4DAhoFAAMV
-// SIG // ACR9gnjggRJbdX7kuDwZ8tl7PP3ioIHCMIG/pIG8MIG5
+// SIG // AHTC2Gy7VPUsa2m8ChJ/Qn72CouKoIHCMIG/pIG8MIG5
 // SIG // MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3Rv
 // SIG // bjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWlj
 // SIG // cm9zb2Z0IENvcnBvcmF0aW9uMQ0wCwYDVQQLEwRNT1BS
 // SIG // MScwJQYDVQQLEx5uQ2lwaGVyIE5UUyBFU046QjAyNy1D
 // SIG // NkY4LTFEODgxKzApBgNVBAMTIk1pY3Jvc29mdCBUaW1l
 // SIG // IFNvdXJjZSBNYXN0ZXIgQ2xvY2swDQYJKoZIhvcNAQEF
-// SIG // BQACBQDWE7kwMCIYDzIwMTMxMDI0MTUyMDE2WhgPMjAx
-// SIG // MzEwMjUxNTIwMTZaMHMwOQYKKwYBBAGEWQoEATErMCkw
-// SIG // CgIFANYTuTACAQAwBgIBAAIBBTAHAgEAAgIXuDAKAgUA
-// SIG // 1hUKsAIBADA2BgorBgEEAYRZCgQCMSgwJjAMBgorBgEE
-// SIG // AYRZCgMBoAowCAIBAAIDFuNgoQowCAIBAAIDB6EgMA0G
-// SIG // CSqGSIb3DQEBBQUAA4IBAQAFyekPkfHCokoDVxi/mw//
-// SIG // diLgI8hMZizTzoqC8MmAfy4+sRqdpis9rwcTSYIuVXcM
-// SIG // U5AoB4ksvu470OCN3QzB6nKpKGW26vkj88vu5EB6BuyR
-// SIG // IAQJIRBWZS96VJjyTv1LmsrRVOW17HSFUs/Ckc7dhX5z
-// SIG // MtCXnVW8e23TH65rcRnBeA90xAlefdNbr3TPxheyvwGG
-// SIG // DlgyMykicKR+G82pBkadegC1rtZlLLsP//OQkgcZSd8f
-// SIG // r3bFUjHF5v42bmZLkF5qeEDQvx72z2CbUaZWItReHUYY
-// SIG // gGl8/22ncC94Wcv0EDUOWhZWtUMW58vnLp6lxQqmGC5J
-// SIG // VmFEmdEV1igSMYIC9TCCAvECAQEwgZMwfDELMAkGA1UE
-// SIG // BhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAOBgNV
-// SIG // BAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29mdCBD
-// SIG // b3Jwb3JhdGlvbjEmMCQGA1UEAxMdTWljcm9zb2Z0IFRp
-// SIG // bWUtU3RhbXAgUENBIDIwMTACEzMAAAAqn0sjX8+w8J0A
-// SIG // AAAAACowDQYJYIZIAWUDBAIBBQCgggEyMBoGCSqGSIb3
-// SIG // DQEJAzENBgsqhkiG9w0BCRABBDAvBgkqhkiG9w0BCQQx
-// SIG // IgQgrwBOWsSGrw1P9Aczs58ByaExxfsKqXfmbjz2D9eG
-// SIG // 5ZIwgeIGCyqGSIb3DQEJEAIMMYHSMIHPMIHMMIGxBBQk
-// SIG // fYJ44IESW3V+5Lg8GfLZezz94jCBmDCBgKR+MHwxCzAJ
+// SIG // BQACBQDWri90MCIYDzIwMTQwMjE4MTkxMzU2WhgPMjAx
+// SIG // NDAyMTkxOTEzNTZaMHcwPQYKKwYBBAGEWQoEATEvMC0w
+// SIG // CgIFANauL3QCAQAwCgIBAAICBzICAf8wBwIBAAICF+Qw
+// SIG // CgIFANavgPQCAQAwNgYKKwYBBAGEWQoEAjEoMCYwDAYK
+// SIG // KwYBBAGEWQoDAaAKMAgCAQACAxbjYKEKMAgCAQACAweh
+// SIG // IDANBgkqhkiG9w0BAQUFAAOCAQEAOA0fcBV7x8+jJJlE
+// SIG // xoeNZR0J8AbzaiIhjMtwsXrMXf1MQy8bEU/75gfa58ZG
+// SIG // fU8AVRcZ6iFhIvvBz3BFLQ/OQBFUZsCDtwR8qDBWBxhA
+// SIG // stDKBrwJUCwpT/A3ec3rZG/I8mwGdpyQ9KvLf7TsX3iT
+// SIG // vO9PVINf0UxNF/j9zIqDz/ijG/wK8dMChxhPLfx+EVta
+// SIG // 1rUibWszvyktMaVBs7I1AJfvBP6Ddkk29N/SxiFIWa0p
+// SIG // flp8wHO+2/GRGgjWq1XTRlOMPLyh0tdh32LIKp60QAJp
+// SIG // JHaU3y5aXQoW7sW3yMnkvsYp64pEtnxYdCytXKbUuRpp
+// SIG // Oms4x1RHT8LW40akVTGCAvUwggLxAgEBMIGTMHwxCzAJ
 // SIG // BgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAw
 // SIG // DgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3Nv
 // SIG // ZnQgQ29ycG9yYXRpb24xJjAkBgNVBAMTHU1pY3Jvc29m
-// SIG // dCBUaW1lLVN0YW1wIFBDQSAyMDEwAhMzAAAAKp9LI1/P
-// SIG // sPCdAAAAAAAqMBYEFPrhUZRkUgz4O0j2m8Ja9aUHr4D/
-// SIG // MA0GCSqGSIb3DQEBCwUABIIBAIxKjtrFqdWh44NERIDb
-// SIG // JDhfvid3lCnX8oVXHe8o6rTI2tmIv8PJpCrIGRvyGWDe
-// SIG // elTBBrE6wdbnOJx/8gG1tCpg2q+1OTDneSj237VnM+uT
-// SIG // ezi/ovnz26dQ+mCi9T+au0D/rIBHgHihwGhwCpLSjjIh
-// SIG // Rpv5C0Dsi4Zgw5YQWYK6WXd79oP2Uyr8bZMFB7Za7932
-// SIG // t+ONJYnV2lY9aT1AVy4isVKKA1n3qz5a+2vjH+PNmDDb
-// SIG // 6uFNtRddO5oqvO1Xszd6b7MqEcHqFDL44BEnnXxn22DY
-// SIG // Nk9voPuWGWdWYCjKh4CNcWueRGmh16EEW5Bb+JMojRrx
-// SIG // ieIfDE1T7LUbeWU=
+// SIG // dCBUaW1lLVN0YW1wIFBDQSAyMDEwAhMzAAAAKZdOfILL
+// SIG // IBZBAAAAAAApMA0GCWCGSAFlAwQCAQUAoIIBMjAaBgkq
+// SIG // hkiG9w0BCQMxDQYLKoZIhvcNAQkQAQQwLwYJKoZIhvcN
+// SIG // AQkEMSIEIOR/os2Tu4iZ7suBAApa5WXg5hw2huMKSYL/
+// SIG // 5rHZ7AL1MIHiBgsqhkiG9w0BCRACDDGB0jCBzzCBzDCB
+// SIG // sQQUdMLYbLtU9SxrabwKEn9CfvYKi4owgZgwgYCkfjB8
+// SIG // MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3Rv
+// SIG // bjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWlj
+// SIG // cm9zb2Z0IENvcnBvcmF0aW9uMSYwJAYDVQQDEx1NaWNy
+// SIG // b3NvZnQgVGltZS1TdGFtcCBQQ0EgMjAxMAITMwAAACmX
+// SIG // TnyCyyAWQQAAAAAAKTAWBBTTaXmG+R101u6VU8OdjBcc
+// SIG // hM9waDANBgkqhkiG9w0BAQsFAASCAQBbWS86bImNbV/q
+// SIG // a0Iff5wIl/BXzcD6d7IcwrPrS3rktbYeMK1Ott+QqqpT
+// SIG // Sb+Jk3SVBvqrcPG4DkLOK+76zufnkU5FKPu/d6PZPuV+
+// SIG // /9dCoWw/U9JR8HmiJyAlkyzS1Eak+rjSaDhQ88rSLi9u
+// SIG // gww2Ldih0Tew5QXdOHrdzsfdyB7aFhfiZ8uNjZaTWagP
+// SIG // Nc3K/FhFibi0DKJu1PCjAwF2DQotzqsstvAOcFiFEbGa
+// SIG // CdIWWnNAyg7aWMkv5GA35ox3a6mAK1Cxkm8imCViYYXg
+// SIG // dbhMECLWiF/G7aa44O3WEZ2aXwObBvXKbEQYDlv4RPHF
+// SIG // Ve3sQS9xJjwRqgtexJ9U
 // SIG // End signature block

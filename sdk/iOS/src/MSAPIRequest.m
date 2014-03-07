@@ -75,7 +75,8 @@
     if (body) {
         data = [client.serializer dataFromItem:body
                                      idAllowed:YES
-                              ensureDictionary:YES
+                              ensureDictionary:NO
+                        removeSystemProperties:NO
                                        orError:&error];
     }
 

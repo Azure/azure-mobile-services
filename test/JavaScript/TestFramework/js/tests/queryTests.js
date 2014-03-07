@@ -8,8 +8,33 @@ function defineQueryTestsNamespace() {
     var tests = [];
     var serverSideTests = [];
     var i;
-    var tableName = 'w8jsMovies';
+    var tableName = 'intIdMovies';
     var tableNameForServerSideFilterTest = 'w8jsServerQueryMovies';
+    var stringIdMoviesTableName = 'stringIdMovies';
+
+    function isAllDataPopulated(test, table, expectCount, success, error) {
+        var retryTimes = 20;
+        function checkDataCount() {
+            table.take(0).includeTotalCount().read().done(function (results) {
+                var totalCount = results.totalCount;
+                if (totalCount === expectCount) {
+                    success();
+                } else {
+                    if (retryTimes-- > 0) {
+                        test.addLog('Already inserted ' + totalCount + ' items, waiting for insertion to complete');
+                        setTimeout(checkDataCount, 5000);
+                    } else {
+                        error();
+                    }
+                }
+            }, function (err) {
+                test.addLog('Error querying data: ' + JSON.stringify(err));
+                error();
+            });
+        }
+
+        checkDataCount();
+    }
 
     var populateTableTest = new zumo.Test('Populate table, if necessary', function (test, done) {
         test.addLog('Populating the table');
@@ -20,16 +45,53 @@ function defineQueryTestsNamespace() {
         var table = client.getTable(tableName);
         table.insert(item).done(function (readItem) {
             var status = readItem ? readItem.status : (item.status || 'no status');
-            test.addLog('status: ' + JSON.stringify(status));
-            done(true);
+            isAllDataPopulated(test, table, item.movies.length, function () {
+                test.addLog('status: ' + JSON.stringify(status));
+                done(true);
+            }, function () {
+                test.addLog('Error populating the table: Time out. Not populate enough data.');
+                done(false);
+            });
         }, function (err) {
-            test.addLog('Error populating the table: ' + JSON.stringify(err));
+            test.addLog('Error populating the table: ', err);
             done(false);
         });
-    });
+    }, zumo.runtimeFeatureNames.INT_ID_TABLES);
 
     tests.push(populateTableTest);
-    serverSideTests.push(populateTableTest);
+
+    var populateStringIdTableTest = new zumo.Test('Populate string id table, if necessary', function (test, done) {
+        test.addLog('Populating the string id table');
+        var item = {
+            movies: zumo.tests.getQueryTestData()
+        };
+        item.movies.forEach(function (movie, index) {
+            var strIndex = index.toString();
+            var id = 'Movie ';
+            for (var i = strIndex.length; i < 3; i++) {
+                id = id + '0';
+            }
+
+            movie.id = id + strIndex;
+        });
+        var client = zumo.getClient();
+        var table = client.getTable(stringIdMoviesTableName);
+        table.insert(item).done(function (readItem) {
+            var status = readItem ? readItem.status : (item.status || 'no status');
+            isAllDataPopulated(test, table, item.movies.length, function () {
+                test.addLog('status: ' + JSON.stringify(status));
+                done(true);
+            }, function () {
+                test.addLog('Error populating the string id table: Time out. Not populate enough data.');
+                done(false);
+            });
+        }, function (err) {
+            test.addLog('Error populating the string id table: ', err);
+            done(false);
+        });
+    }, zumo.runtimeFeatureNames.STRING_ID_TABLES);
+
+    tests.push(populateStringIdTableTest);
 
     // For server-side filtering tests, we will create a function to add the tests;
     // We'll then compare with the function which we expect from the client, to make
@@ -39,7 +101,8 @@ function defineQueryTestsNamespace() {
     var getWhereClauseSwitchBody = '';
 
     function addQueryTest(testName, getQueryFunction, filter, options) {
-        tests.push(createQueryTest(testName, getQueryFunction, filter, options));
+        tests.push(createQueryTest(testName, getQueryFunction, filter, options, false));
+        tests.push(createQueryTest('String id: ' + testName, getQueryFunction, filter, options, true));
         options = options || {};
 
         if (!getQueryFunction || !filter || typeof getQueryFunction === 'string') {
@@ -119,9 +182,6 @@ function defineQueryTestsNamespace() {
     addQueryTest('String.substring, length - movies which end with "r"',
         function (table) { return table.where(function () { return this.Title.substring(this.Title.length - 1, 1) === 'r'; }); },
         function (item) { return /r$/.test(item.Title); });
-    addQueryTest('String.substring (2 parameters) - movies with "father" starting at position 7',
-        function (table) { return table.where(function () { return this.Title.substring(7, 13) === 'father'; }); },
-        function (item) { var result = item.Title.substring(7, 13) === 'father'; return result; }, { debug: true });
     addQueryTest('String.substr - movies with "father" starting at position 7',
         function (table) { return table.where(function () { return this.Title.substr(7, 6) === 'father'; }); },
         function (item) { var result = item.Title.substr(7, 6) === 'father'; return result; }, { debug: true });
@@ -194,7 +254,7 @@ function defineQueryTestsNamespace() {
     addQueryTest('Get all using large $top: take(500)', null, null, { top: 500 });
     addQueryTest('Skip all using large skip: skip(500)', null, null, { skip: 500 });
     addQueryTest('Get first ($top) - 10', null, null, { top: 10 });
-    addQueryTest('Get last ($skip) - 10', null, null, { skip: zumo.tests.getQueryTestData().length - 10 });
+    addQueryTest('Get last ($skip) - 10', null, null, { skip: zumo.tests.getQueryTestData().length - 10, sortFields: [new OrderByClause('id', true)] });
     addQueryTest('Skip, take and includeTotalCount: movies 11-20, ordered by title', null, null,
         { top: 10, skip: 10, includeTotalCount: true, sortFields: [new OrderByClause('Title', true)] });
     addQueryTest('Skip, take and includeTotalCount with filter: movies 11-20, which won the best picture, ordered by release date',
@@ -258,8 +318,12 @@ function defineQueryTestsNamespace() {
                 test.addLog('Got expected error: ' + JSON.stringify(err));
                 done(true);
             });
-        }));
+        }, zumo.runtimeFeatureNames.INT_ID_TABLES));
     }
+
+    tests.push(createQueryTest('String id: query by id',
+        function (table) { return table.where(function () { return this.id.indexOf('Movie 12') === 0; }); },
+        function (item, index) { return index >= 120 && index <= 129; }, {}, true));
 
     // Now that all server-side tests have been added, will add one test to validate the server-side script
     var getWhereClauseCreator = getWhereClauseCreatorHeader + getWhereClauseSwitchBody + getWhereClauseCreatorFooter;
@@ -270,21 +334,23 @@ function defineQueryTestsNamespace() {
         var table = client.getTable(tableNameForServerSideFilterTest);
         table.read({ testName: 'getWhereClauseCreator' }).done(function (results) {
             var actualGetWhereClauseCreator = results[0].code;
-            if (getWhereClauseCreator === actualGetWhereClauseCreator) {
+            var clientFunction = getWhereClauseCreator.replace(/\r\n/g, '\n');
+            var serverFunction = actualGetWhereClauseCreator.replace(/\r\n/g, '\n');
+            if (clientFunction === serverFunction) {
                 test.addLog('Function matches');
                 done(true);
             } else {
                 test.addLog('Error, functions do not match. Expected:');
-                test.addLog(getWhereClauseCreator);
+                test.addFullLog(getWhereClauseCreator);
                 test.addLog('Actual:');
-                test.addLog(actualGetWhereClauseCreator);
+                test.addFullLog(actualGetWhereClauseCreator);
                 done(false);
             }
         }, function (err) {
             test.addLog('Error retrieving the "getWhereClauseCreator" method from the server: ', err);
             done(false);
         });
-    }));
+    }, zumo.runtimeFeatureNames.INT_ID_TABLES));
 
     function OrderByClause(fieldName, isAscending) {
         this.fieldName = fieldName;
@@ -339,7 +405,7 @@ function defineQueryTestsNamespace() {
                 test.addLog('Error retrieving data: ', err);
                 done(false);
             });
-        });
+        }, zumo.runtimeFeatureNames.INT_ID_TABLES);
     }
 
     function applyOptions(filteredMovies, options) {
@@ -394,18 +460,7 @@ function defineQueryTestsNamespace() {
         return filteredMovies;
     }
 
-    // options structure:
-    // {
-    //   top (number): number of elements to 'take'
-    //   skip (number): number of elements to 'skip'
-    //   includeTotalCount (boolean): whether to request a total could (wrapped response)
-    //   sortFields (array of OrderByClause): fields to sort the data by
-    //   selectFields (array of string): fields to retrieve
-    //   debug (boolean): whether to log more information than normal
-    //   isNegativeClientValidation (boolean): if an exception should be thrown before the request is sent the server
-    //   isNegativeServerValidation (boolean): if the error callback should be returned by the server
-    // }
-    function createQueryTest(testName, getQueryFunction, filter, options) {
+    function createQueryTest(testName, getQueryFunction, filter, options, useStringIdTable) {
         /// <param name="testName" type="String">Name of the test to be created.</param>
         /// <param name="getQueryFunction" optional="true" type="function or String">Either a function which takes a
         ///    table object and returns a query, or a String with the OData query to be sent to the server.</param>
@@ -428,6 +483,7 @@ function defineQueryTestsNamespace() {
             var readODataQuery = null;
             var exception = null;
             options = options || {};
+            useStringIdTable = !!useStringIdTable;
             var top = options.top;
             var skip = options.skip;
             var sortFields = options.sortFields;
@@ -440,7 +496,7 @@ function defineQueryTestsNamespace() {
             try {
                 var client = zumo.getClient();
                 var allMovies = zumo.tests.getQueryTestData();
-                var table = client.getTable(tableName);
+                var table = useStringIdTable ? client.getTable(stringIdMoviesTableName) : client.getTable(tableName);
 
                 if (getQueryFunction) {
                     if (typeof getQueryFunction === 'string') {
@@ -574,7 +630,7 @@ function defineQueryTestsNamespace() {
             } else {
                 query.read().done(successFunction, errorFunction);
             }
-        });
+        }, useStringIdTable ? zumo.runtimeFeatureNames.STRING_ID_TABLES : zumo.runtimeFeatureNames.INT_ID_TABLES);
     }
 
     return {

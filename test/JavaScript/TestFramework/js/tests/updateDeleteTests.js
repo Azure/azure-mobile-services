@@ -9,6 +9,7 @@ function defineUpdateDeleteTestsNamespace() {
     var tests = [];
     var i;
     var tableName = 'w8jsRoundTripTable';
+    var stringIdTableName = 'stringIdRoundTripTable';
 
     tests.push(createDeleteTest('Delete item', function (test, done, table, id) {
         table.del({ id: id }).done(function () {
@@ -70,8 +71,34 @@ function defineUpdateDeleteTestsNamespace() {
         });
     }));
 
+    var ids = ['with space', '1234567', 'non-english ãéìôü ÇñÑالكتاب على الطاولة这本书在桌子上הספר הוא על השולחן'];
+    ids.forEach(function (id) {
+        tests.push(new zumo.Test('[string id] Delete, id = ' + id, function (test, done) {
+            var client = zumo.getClient();
+            var table = client.getTable(stringIdTableName);
+
+            function afterInsert(place) {
+                // insert will either have failed (item already exists) or succeeded (item didn't exist);
+                // in either case we'll be able to delete it.
+                return function (obj) {
+                    test.addLog(place + ': ', obj);
+                    table.del({ id: id }).done(function () {
+                        test.addLog('Delete succeeded');
+                        done(true);
+                    }, function (err) {
+                        test.addLog('Error calling delete: ', err);
+                        done(false);
+                    });
+                }
+            }
+
+            table.insert({ id: id, name: 'test' }).done(afterInsert('Inserted'), afterInsert('Insert error (likely expected)'));
+        }, zumo.runtimeFeatureNames.STRING_ID_TABLES));
+    });
+
     tests.push(createUpdateTest('Update item', function (test, done, table, insertedItem) {
-        var newNumber = 999;
+        var newNumber = Math.floor(Math.random() * 10000);
+        test.addLog('New number: ', newNumber);
         table.update({ id: insertedItem.id, number: newNumber }).done(function (item) {
             if (item.number === newNumber) {
                 test.addLog('Updated number seems correct. Will retrieve it again to guarantee');
@@ -81,9 +108,8 @@ function defineUpdateDeleteTestsNamespace() {
                         test.addLog('Retrieved item is correct.');
                         done(true);
                     } else {
-                        var error;
-                        for (error in errors) {
-                            test.addLog(error);
+                        for (var i = 0; i < errors.length; i++) {
+                            test.addLog(errors[i]);
                         }
                         test.addLog('Retrieved item is not the expected one: ' + JSON.stringify(newItem));
                         done(false);
@@ -146,6 +172,62 @@ function defineUpdateDeleteTestsNamespace() {
         });
     }));
 
+    ids.forEach(function (id) {
+        tests.push(new zumo.Test('[string id] Update, id = ' + id, function (test, done) {
+            var client = zumo.getClient();
+            var table = client.getTable(stringIdTableName);
+            var originalNumber = Math.floor(Math.random() * 10000);
+            var updatedNumber = Math.floor(Math.random() * 10000);
+
+            function afterDelete(callbackName, testResult) {
+                return function (obj) {
+                    test.addLog('In delete ' + callbackName + ' callback, arg = ', obj);
+                    done(testResult);
+                }
+            }
+
+            function afterInsert(place) {
+                // insert will either have failed (item already exists) or succeeded (item didn't exist);
+                // in either case we'll be able to delete it.
+                return function (obj) {
+                    test.addLog(place + ': ', obj);
+                    table.lookup(id).done(function (retrieved) {
+                        test.addLog('Retrieved item: ', retrieved);
+                        var toUpdate = { id: id, name: 'test2', number: updatedNumber };
+                        table.update({ id: id, name: 'test2', number: updatedNumber }).done(function (updated) {
+                            test.addLog('Updated: ', updated);
+                            table.lookup(id).done(function (item) {
+                                var errors = [];
+                                var testResult = true;
+                                if (zumo.util.compare(toUpdate, item, errors)) {
+                                    test.addLog('Item was updated successfully');
+                                } else {
+                                    testResult = false;
+                                    test.addLog('Error during update:');
+                                    errors.forEach(function (error) {
+                                        test.addLog(error);
+                                    });
+                                }
+                                table.del({ id: id }).done(afterDelete('success', testResult), afterDelete('error', testResult));
+                            }, function (err) {
+                                test.addLog('Error calling lookup: ', err);
+                                done(false);
+                            });
+                        }, function (err) {
+                            test.addLog('Error calling update: ', err);
+                            done(false);
+                        });
+                    }, function (err) {
+                        test.addLog('Error calling lookup: ', err);
+                        done(false);
+                    });
+                }
+            }
+
+            table.insert({ id: id, name: 'test', number: originalNumber }).done(afterInsert('Inserted'), afterInsert('Insert error (likely expected)'));
+        }, zumo.runtimeFeatureNames.STRING_ID_TABLES));
+    });
+
     function createDeleteTest(testName, actionAfterInsert) {
         // actionAfterInsert: function(test, done, table, insertedItemId)
         return new zumo.Test(testName, function (test, done) {
@@ -160,7 +242,7 @@ function defineUpdateDeleteTestsNamespace() {
                 zumo.util.traceResponse(test, insertError.request);
                 done(false);
             });
-        });
+        }, zumo.runtimeFeatureNames.INT_ID_TABLES);
     }
 
     function createUpdateTest(testName, actionAfterInsert) {
@@ -168,16 +250,34 @@ function defineUpdateDeleteTestsNamespace() {
         return new zumo.Test(testName, function (test, done) {
             var client = zumo.getClient();
             var table = client.getTable(tableName);
-            table.insert({ string1: 'test', number: 123 }).done(function (inserted) {
+            var number = Math.floor(Math.random() * 10000);
+            test.addLog('Number: ', number);
+            table.insert({ string1: 'test', number: number }).done(function (inserted) {
                 var id = inserted.id;
                 test.addLog('Inserted item to be updated, with id = ' + id);
-                actionAfterInsert(test, done, table, inserted);
+                table.lookup(id).done(function (retrieved) {
+                    test.addLog('Retrieved the item: ', retrieved);
+                    var errors = [];
+                    if (zumo.util.compare({ string1: 'test', number: number }, retrieved, errors)) {
+                        actionAfterInsert(test, done, table, inserted);
+                    } else {
+                        test.addLog('Error retrieving the item:')
+                        for (var i = 0; i < errors.length; i++) {
+                            test.addLog(errors[i]);
+                        }
+                        done(false);
+                    }
+                }, function (lookupError) {
+                    test.addLog('Error retrieving item: ' + JSON.stringify(lookupError));
+                    zumo.util.traceResponse(test, lookupError.request);
+                    done(false);
+                });
             }, function (insertError) {
                 test.addLog('Error inserting item: ' + JSON.stringify(insertError));
                 zumo.util.traceResponse(test, insertError.request);
                 done(false);
             });
-        });
+        }, zumo.runtimeFeatureNames.INT_ID_TABLES);
     }
 
     return {

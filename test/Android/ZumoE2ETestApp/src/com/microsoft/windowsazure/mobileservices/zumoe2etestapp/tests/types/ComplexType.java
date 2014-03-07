@@ -30,12 +30,17 @@ public class ComplexType {
 	public Integer age;
 
 	public ComplexType() {
-		
+
 	}
-	
+
 	public ComplexType(Random r) {
 		name = Util.createSimpleRandomString(r, 10);
 		age = r.nextInt(80);
+	}
+
+	public ComplexType(ComplexType other) {
+		name = String.valueOf(other.name);
+		age = Integer.valueOf(other.age);
 	}
 
 	@Override

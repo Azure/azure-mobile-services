@@ -44,7 +44,7 @@ function createQueryTestData() {
         Year: 1966,
         Duration: 161,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1967, 11, 28)),
+        ReleaseDate: new Date(Date.UTC(1967, 11, 29)),
         BestPictureWinner: false
     });
     movies.push({
@@ -52,7 +52,7 @@ function createQueryTestData() {
         Year: 1957,
         Duration: 96,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1957, 2, 31)),
+        ReleaseDate: new Date(Date.UTC(1957, 3, 10)),
         BestPictureWinner: false
     });
     movies.push({
@@ -140,7 +140,7 @@ function createQueryTestData() {
         Year: 1954,
         Duration: 141,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1956, 10, 18)),
+        ReleaseDate: new Date(Date.UTC(1956, 10, 19)),
         BestPictureWinner: false
     });
     movies.push({
@@ -180,7 +180,7 @@ function createQueryTestData() {
         Year: 1968,
         Duration: 175,
         MPAARating: "PG-13",
-        ReleaseDate: new Date(Date.UTC(1968, 11, 20)),
+        ReleaseDate: new Date(Date.UTC(1968, 11, 21)),
         BestPictureWinner: false
     });
     movies.push({
@@ -204,7 +204,7 @@ function createQueryTestData() {
         Year: 1942,
         Duration: 102,
         MPAARating: "PG",
-        ReleaseDate: new Date(Date.UTC(1943, 0, 22)),
+        ReleaseDate: new Date(Date.UTC(1943, 0, 23)),
         BestPictureWinner: true
     });
     movies.push({
@@ -236,7 +236,7 @@ function createQueryTestData() {
         Year: 1960,
         Duration: 109,
         MPAARating: "TV-14",
-        ReleaseDate: new Date(Date.UTC(1960, 8, 07)),
+        ReleaseDate: new Date(Date.UTC(1960, 8, 8)),
         BestPictureWinner: false
     });
     movies.push({
@@ -260,7 +260,7 @@ function createQueryTestData() {
         Year: 1950,
         Duration: 110,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1950, 7, 24)),
+        ReleaseDate: new Date(Date.UTC(1950, 7, 25)),
         BestPictureWinner: false
     });
     movies.push({
@@ -308,7 +308,7 @@ function createQueryTestData() {
         Year: 1964,
         Duration: 95,
         MPAARating: "PG",
-        ReleaseDate: new Date(Date.UTC(1964, 0, 28)),
+        ReleaseDate: new Date(Date.UTC(1964, 0, 29)),
         BestPictureWinner: false
     });
     movies.push({
@@ -332,7 +332,7 @@ function createQueryTestData() {
         Year: 1959,
         Duration: 136,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1959, 8, 25)),
+        ReleaseDate: new Date(Date.UTC(1959, 8, 26)),
         BestPictureWinner: false
     });
     movies.push({
@@ -340,7 +340,7 @@ function createQueryTestData() {
         Year: 1931,
         Duration: 87,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1931, 2, 06)),
+        ReleaseDate: new Date(Date.UTC(1931, 2, 7)),
         BestPictureWinner: false
     });
     movies.push({
@@ -356,7 +356,7 @@ function createQueryTestData() {
         Year: 1941,
         Duration: 119,
         MPAARating: "PG",
-        ReleaseDate: new Date(Date.UTC(1941, 8, 04)),
+        ReleaseDate: new Date(Date.UTC(1941, 8, 5)),
         BestPictureWinner: false
     });
     movies.push({
@@ -364,7 +364,7 @@ function createQueryTestData() {
         Year: 1936,
         Duration: 87,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1936, 1, 24)),
+        ReleaseDate: new Date(Date.UTC(1936, 1, 25)),
         BestPictureWinner: false
     });
     movies.push({
@@ -380,7 +380,7 @@ function createQueryTestData() {
         Year: 1958,
         Duration: 129,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1958, 6, 20)),
+        ReleaseDate: new Date(Date.UTC(1958, 6, 21)),
         BestPictureWinner: false
     });
     movies.push({
@@ -444,7 +444,7 @@ function createQueryTestData() {
         Year: 1957,
         Duration: 88,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1957, 9, 24)),
+        ReleaseDate: new Date(Date.UTC(1957, 9, 25)),
         BestPictureWinner: false
     });
     movies.push({
@@ -460,7 +460,7 @@ function createQueryTestData() {
         Year: 1944,
         Duration: 107,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1944, 3, 23)),
+        ReleaseDate: new Date(Date.UTC(1944, 3, 24)),
         BestPictureWinner: false
     });
     movies.push({
@@ -532,7 +532,7 @@ function createQueryTestData() {
         Year: 1962,
         Duration: 227,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1963, 0, 29)),
+        ReleaseDate: new Date(Date.UTC(1963, 0, 30)),
         BestPictureWinner: true
     });
     movies.push({
@@ -540,7 +540,7 @@ function createQueryTestData() {
         Year: 1962,
         Duration: 129,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1963, 2, 15)),
+        ReleaseDate: new Date(Date.UTC(1963, 2, 16)),
         BestPictureWinner: false
     });
     movies.push({
@@ -556,7 +556,7 @@ function createQueryTestData() {
         Year: 1940,
         Duration: 125,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1941, 2, 06)),
+        ReleaseDate: new Date(Date.UTC(1941, 2, 7)),
         BestPictureWinner: false
     });
     movies.push({
@@ -588,7 +588,7 @@ function createQueryTestData() {
         Year: 1949,
         Duration: 93,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1949, 7, 30)),
+        ReleaseDate: new Date(Date.UTC(1949, 7, 31)),
         BestPictureWinner: false
     });
     movies.push({
@@ -596,7 +596,7 @@ function createQueryTestData() {
         Year: 1948,
         Duration: 126,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1948, 0, 23)),
+        ReleaseDate: new Date(Date.UTC(1948, 0, 24)),
         BestPictureWinner: false
     });
     movies.push({
@@ -684,7 +684,7 @@ function createQueryTestData() {
         Year: 1952,
         Duration: 103,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1952, 3, 10)),
+        ReleaseDate: new Date(Date.UTC(1952, 3, 11)),
         BestPictureWinner: false
     });
     movies.push({
@@ -700,7 +700,7 @@ function createQueryTestData() {
         Year: 1959,
         Duration: 120,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1959, 2, 28)),
+        ReleaseDate: new Date(Date.UTC(1959, 2, 29)),
         BestPictureWinner: false
     });
     movies.push({
@@ -716,7 +716,7 @@ function createQueryTestData() {
         Year: 1927,
         Duration: 114,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1927, 2, 12)),
+        ReleaseDate: new Date(Date.UTC(1927, 2, 13)),
         BestPictureWinner: false
     });
     movies.push({
@@ -724,7 +724,7 @@ function createQueryTestData() {
         Year: 1950,
         Duration: 88,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1951, 11, 25)),
+        ReleaseDate: new Date(Date.UTC(1951, 11, 26)),
         BestPictureWinner: false
     });
     movies.push({
@@ -732,7 +732,7 @@ function createQueryTestData() {
         Year: 1948,
         Duration: 93,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1949, 11, 12)),
+        ReleaseDate: new Date(Date.UTC(1949, 11, 13)),
         BestPictureWinner: false
     });
     movies.push({
@@ -740,7 +740,7 @@ function createQueryTestData() {
         Year: 1968,
         Duration: 141,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1968, 3, 05)),
+        ReleaseDate: new Date(Date.UTC(1968, 3, 6)),
         BestPictureWinner: false
     });
     movies.push({
@@ -756,7 +756,7 @@ function createQueryTestData() {
         Year: 1950,
         Duration: 138,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1951, 0, 14)),
+        ReleaseDate: new Date(Date.UTC(1951, 0, 15)),
         BestPictureWinner: true
     });
     movies.push({
@@ -764,7 +764,7 @@ function createQueryTestData() {
         Year: 1960,
         Duration: 125,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1960, 8, 15)),
+        ReleaseDate: new Date(Date.UTC(1960, 8, 16)),
         BestPictureWinner: true
     });
     movies.push({
@@ -796,7 +796,7 @@ function createQueryTestData() {
         Year: 1957,
         Duration: 161,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1957, 11, 13)),
+        ReleaseDate: new Date(Date.UTC(1957, 11, 14)),
         BestPictureWinner: true
     });
     movies.push({
@@ -812,7 +812,7 @@ function createQueryTestData() {
         Year: 1957,
         Duration: 116,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1958, 1, 05)),
+        ReleaseDate: new Date(Date.UTC(1958, 1, 6)),
         BestPictureWinner: false
     });
     movies.push({
@@ -860,7 +860,7 @@ function createQueryTestData() {
         Year: 1939,
         Duration: 129,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1939, 9, 18)),
+        ReleaseDate: new Date(Date.UTC(1939, 9, 19)),
         BestPictureWinner: false
     });
     movies.push({
@@ -868,7 +868,7 @@ function createQueryTestData() {
         Year: 1961,
         Duration: 75,
         MPAARating: "TV-MA",
-        ReleaseDate: new Date(Date.UTC(1961, 8, 12)),
+        ReleaseDate: new Date(Date.UTC(1961, 8, 13)),
         BestPictureWinner: false
     });
     movies.push({
@@ -876,7 +876,7 @@ function createQueryTestData() {
         Year: 1963,
         Duration: 172,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1963, 6, 03)),
+        ReleaseDate: new Date(Date.UTC(1963, 6, 4)),
         BestPictureWinner: false
     });
     movies.push({
@@ -884,7 +884,7 @@ function createQueryTestData() {
         Year: 1965,
         Duration: 132,
         MPAARating: "R",
-        ReleaseDate: new Date(Date.UTC(1967, 4, 09)),
+        ReleaseDate: new Date(Date.UTC(1967, 4, 10)),
         BestPictureWinner: false
     });
     movies.push({
@@ -908,7 +908,7 @@ function createQueryTestData() {
         Year: 1954,
         Duration: 108,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1954, 5, 23)),
+        ReleaseDate: new Date(Date.UTC(1954, 5, 24)),
         BestPictureWinner: true
     });
     movies.push({
@@ -924,7 +924,7 @@ function createQueryTestData() {
         Year: 1957,
         Duration: 96,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1958, 9, 12)),
+        ReleaseDate: new Date(Date.UTC(1958, 9, 13)),
         BestPictureWinner: false
     });
     movies.push({
@@ -940,7 +940,7 @@ function createQueryTestData() {
         Year: 1941,
         Duration: 100,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1941, 9, 17)),
+        ReleaseDate: new Date(Date.UTC(1941, 9, 18)),
         BestPictureWinner: false
     });
     movies.push({
@@ -956,7 +956,7 @@ function createQueryTestData() {
         Year: 1926,
         Duration: 75,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1927, 1, 23)),
+        ReleaseDate: new Date(Date.UTC(1927, 1, 24)),
         BestPictureWinner: false
     });
     movies.push({
@@ -972,7 +972,7 @@ function createQueryTestData() {
         Year: 1940,
         Duration: 130,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1940, 3, 11)),
+        ReleaseDate: new Date(Date.UTC(1940, 3, 12)),
         BestPictureWinner: true
     });
     movies.push({
@@ -996,7 +996,7 @@ function createQueryTestData() {
         Year: 1957,
         Duration: 91,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1959, 5, 21)),
+        ReleaseDate: new Date(Date.UTC(1959, 5, 22)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1012,7 +1012,7 @@ function createQueryTestData() {
         Year: 1921,
         Duration: 68,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1921, 1, 05)),
+        ReleaseDate: new Date(Date.UTC(1921, 1, 6)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1028,7 +1028,7 @@ function createQueryTestData() {
         Year: 1958,
         Duration: 108,
         MPAARating: "PG-13",
-        ReleaseDate: new Date(Date.UTC(1958, 5, 07)),
+        ReleaseDate: new Date(Date.UTC(1958, 5, 8)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1060,7 +1060,7 @@ function createQueryTestData() {
         Year: 1967,
         Duration: 126,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1967, 9, 31)),
+        ReleaseDate: new Date(Date.UTC(1967, 10, 1)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1076,7 +1076,7 @@ function createQueryTestData() {
         Year: 1925,
         Duration: 72,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1924, 11, 31)),
+        ReleaseDate: new Date(Date.UTC(1925, 5, 26)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1084,7 +1084,7 @@ function createQueryTestData() {
         Year: 1951,
         Duration: 101,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1951, 5, 29)),
+        ReleaseDate: new Date(Date.UTC(1951, 5, 30)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1092,7 +1092,7 @@ function createQueryTestData() {
         Year: 1934,
         Duration: 105,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1934, 1, 22)),
+        ReleaseDate: new Date(Date.UTC(1934, 1, 23)),
         BestPictureWinner: true
     });
     movies.push({
@@ -1140,7 +1140,7 @@ function createQueryTestData() {
         Year: 1952,
         Duration: 85,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1952, 6, 29)),
+        ReleaseDate: new Date(Date.UTC(1952, 6, 30)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1164,7 +1164,7 @@ function createQueryTestData() {
         Year: 1969,
         Duration: 110,
         MPAARating: "PG",
-        ReleaseDate: new Date(Date.UTC(1969, 9, 23)),
+        ReleaseDate: new Date(Date.UTC(1969, 9, 24)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1172,7 +1172,7 @@ function createQueryTestData() {
         Year: 1939,
         Duration: 101,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1939, 7, 24)),
+        ReleaseDate: new Date(Date.UTC(1939, 7, 25)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1220,7 +1220,7 @@ function createQueryTestData() {
         Year: 1946,
         Duration: 101,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1946, 8, 05)),
+        ReleaseDate: new Date(Date.UTC(1946, 8, 6)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1236,7 +1236,7 @@ function createQueryTestData() {
         Year: 1939,
         Duration: 238,
         MPAARating: "G",
-        ReleaseDate: new Date(Date.UTC(1940, 0, 16)),
+        ReleaseDate: new Date(Date.UTC(1940, 0, 17)),
         BestPictureWinner: true
     });
     movies.push({
@@ -1260,7 +1260,7 @@ function createQueryTestData() {
         Year: 1940,
         Duration: 129,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1940, 2, 14)),
+        ReleaseDate: new Date(Date.UTC(1940, 2, 15)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1316,7 +1316,7 @@ function createQueryTestData() {
         Year: 1946,
         Duration: 114,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1946, 7, 30)),
+        ReleaseDate: new Date(Date.UTC(1946, 7, 31)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1324,7 +1324,7 @@ function createQueryTestData() {
         Year: 1954,
         Duration: 105,
         MPAARating: "PG",
-        ReleaseDate: new Date(Date.UTC(1954, 4, 28)),
+        ReleaseDate: new Date(Date.UTC(1954, 4, 29)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1332,7 +1332,7 @@ function createQueryTestData() {
         Year: 1959,
         Duration: 212,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1960, 2, 29)),
+        ReleaseDate: new Date(Date.UTC(1960, 2, 30)),
         BestPictureWinner: true
     });
     movies.push({
@@ -1372,7 +1372,7 @@ function createQueryTestData() {
         Year: 1955,
         Duration: 93,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1955, 10, 23)),
+        ReleaseDate: new Date(Date.UTC(1955, 10, 24)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1452,7 +1452,7 @@ function createQueryTestData() {
         Year: 1959,
         Duration: 99,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1959, 10, 15)),
+        ReleaseDate: new Date(Date.UTC(1959, 10, 16)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1460,7 +1460,7 @@ function createQueryTestData() {
         Year: 1966,
         Duration: 83,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1967, 2, 15)),
+        ReleaseDate: new Date(Date.UTC(1967, 2, 16)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1468,7 +1468,7 @@ function createQueryTestData() {
         Year: 1967,
         Duration: 106,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1967, 11, 21)),
+        ReleaseDate: new Date(Date.UTC(1967, 11, 22)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1484,7 +1484,7 @@ function createQueryTestData() {
         Year: 1956,
         Duration: 85,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1956, 5, 05)),
+        ReleaseDate: new Date(Date.UTC(1956, 5, 6)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1532,7 +1532,7 @@ function createQueryTestData() {
         Year: 1966,
         Duration: 131,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1966, 5, 21)),
+        ReleaseDate: new Date(Date.UTC(1966, 5, 22)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1540,7 +1540,7 @@ function createQueryTestData() {
         Year: 1954,
         Duration: 108,
         MPAARating: "PG",
-        ReleaseDate: new Date(Date.UTC(1956, 6, 15)),
+        ReleaseDate: new Date(Date.UTC(1956, 6, 16)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1548,7 +1548,7 @@ function createQueryTestData() {
         Year: 1962,
         Duration: 126,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1962, 9, 23)),
+        ReleaseDate: new Date(Date.UTC(1962, 9, 24)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1556,7 +1556,7 @@ function createQueryTestData() {
         Year: 1961,
         Duration: 134,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1961, 8, 24)),
+        ReleaseDate: new Date(Date.UTC(1961, 8, 25)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1572,7 +1572,7 @@ function createQueryTestData() {
         Year: 1969,
         Duration: 145,
         MPAARating: "R",
-        ReleaseDate: new Date(Date.UTC(1969, 5, 17)),
+        ReleaseDate: new Date(Date.UTC(1969, 5, 18)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1588,7 +1588,7 @@ function createQueryTestData() {
         Year: 1959,
         Duration: 160,
         MPAARating: "TV-PG",
-        ReleaseDate: new Date(Date.UTC(1959, 7, 31)),
+        ReleaseDate: new Date(Date.UTC(1959, 8, 1)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1596,7 +1596,7 @@ function createQueryTestData() {
         Year: 1953,
         Duration: 120,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1953, 7, 09)),
+        ReleaseDate: new Date(Date.UTC(1953, 7, 10)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1620,7 +1620,7 @@ function createQueryTestData() {
         Year: 1948,
         Duration: 80,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1948, 7, 27)),
+        ReleaseDate: new Date(Date.UTC(1948, 7, 28)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1636,7 +1636,7 @@ function createQueryTestData() {
         Year: 1962,
         Duration: 123,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1962, 3, 21)),
+        ReleaseDate: new Date(Date.UTC(1962, 3, 22)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1668,7 +1668,7 @@ function createQueryTestData() {
         Year: 1953,
         Duration: 118,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1953, 8, 01)),
+        ReleaseDate: new Date(Date.UTC(1953, 8, 2)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1724,7 +1724,7 @@ function createQueryTestData() {
         Year: 1964,
         Duration: 99,
         MPAARating: "R",
-        ReleaseDate: new Date(Date.UTC(1967, 0, 17)),
+        ReleaseDate: new Date(Date.UTC(1967, 0, 18)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1732,7 +1732,7 @@ function createQueryTestData() {
         Year: 1951,
         Duration: 125,
         MPAARating: "PG",
-        ReleaseDate: new Date(Date.UTC(1951, 10, 30)),
+        ReleaseDate: new Date(Date.UTC(1951, 11, 1)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1772,7 +1772,7 @@ function createQueryTestData() {
         Year: 1968,
         Duration: 136,
         MPAARating: "R",
-        ReleaseDate: new Date(Date.UTC(1968, 5, 11)),
+        ReleaseDate: new Date(Date.UTC(1968, 5, 12)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1780,7 +1780,7 @@ function createQueryTestData() {
         Year: 1950,
         Duration: 104,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1950, 9, 12)),
+        ReleaseDate: new Date(Date.UTC(1950, 9, 13)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1788,7 +1788,7 @@ function createQueryTestData() {
         Year: 1984,
         Duration: 117,
         MPAARating: "PG",
-        ReleaseDate: new Date(Date.UTC(1984, 3, 11)),
+        ReleaseDate: new Date(Date.UTC(1984, 2, 11)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1804,7 +1804,7 @@ function createQueryTestData() {
         Year: 1930,
         Duration: 133,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1930, 7, 23)),
+        ReleaseDate: new Date(Date.UTC(1930, 7, 24)),
         BestPictureWinner: true
     });
     movies.push({
@@ -1828,7 +1828,7 @@ function createQueryTestData() {
         Year: 1925,
         Duration: 66,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1925, 11, 23)),
+        ReleaseDate: new Date(Date.UTC(1925, 11, 24)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1844,7 +1844,7 @@ function createQueryTestData() {
         Year: 1922,
         Duration: 81,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1929, 5, 02)),
+        ReleaseDate: new Date(Date.UTC(1929, 5, 3)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1876,7 +1876,7 @@ function createQueryTestData() {
         Year: 1938,
         Duration: 102,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1938, 1, 17)),
+        ReleaseDate: new Date(Date.UTC(1938, 1, 18)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1884,7 +1884,7 @@ function createQueryTestData() {
         Year: 1943,
         Duration: 108,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1943, 0, 14)),
+        ReleaseDate: new Date(Date.UTC(1943, 0, 15)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1948,7 +1948,7 @@ function createQueryTestData() {
         Year: 1967,
         Duration: 109,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1967, 9, 13)),
+        ReleaseDate: new Date(Date.UTC(1967, 9, 14)),
         BestPictureWinner: true
     });
     movies.push({
@@ -1964,7 +1964,7 @@ function createQueryTestData() {
         Year: 1944,
         Duration: 118,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1944, 8, 22)),
+        ReleaseDate: new Date(Date.UTC(1944, 8, 23)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1972,7 +1972,7 @@ function createQueryTestData() {
         Year: 1956,
         Duration: 119,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1956, 2, 12)),
+        ReleaseDate: new Date(Date.UTC(1956, 2, 13)),
         BestPictureWinner: false
     });
     movies.push({
@@ -1988,7 +1988,7 @@ function createQueryTestData() {
         Year: 1959,
         Duration: 141,
         MPAARating: null,
-        ReleaseDate: new Date(Date.UTC(1959, 3, 03)),
+        ReleaseDate: new Date(Date.UTC(1959, 3, 4)),
         BestPictureWinner: false
     });
 

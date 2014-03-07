@@ -82,7 +82,7 @@ namespace ZumoE2ETestApp.Tests
             }
 
 
-            result.AddTest(ZumoQueryTests.CreatePopulateTableTest());
+            result.AddTest(ZumoQueryTests.CreatePopulateStringIdTableTest());
             foreach (TypedTestType testType in Util.EnumGetValues(typeof(TypedTestType)))
             {
                 result.AddTest(CreateTypedApiTest(rndGen, testType));
@@ -105,23 +105,23 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Test with seed = {0}", seed);
                     Random rndGen = new Random(seed);
 
-                    Movie[] expectedResult = null;
-                    AllMovies actualResult = null;
-                    Movie inputTemplate = ZumoQueryTestData.AllMovies[rndGen.Next(ZumoQueryTestData.AllMovies.Length)];
+                    StringIdMovie[] expectedResult = null;
+                    AllStringIdMovies actualResult = null;
+                    StringIdMovie inputTemplate = ZumoQueryTestData.AllStringIdMovies()[rndGen.Next(ZumoQueryTestData.AllStringIdMovies().Length)];
                     test.AddLog("Using movie '{0}' as template", inputTemplate.Title);
                     string apiUrl;
                     switch (testType)
                     {
                         case TypedTestType.GetByTitle:
                             apiUrl = apiName + "/title/" + inputTemplate.Title;
-                            expectedResult = new Movie[] { inputTemplate };
-                            actualResult = await client.InvokeApiAsync<AllMovies>(apiUrl, HttpMethod.Get, null);
+                            expectedResult = new StringIdMovie[] { inputTemplate };
+                            actualResult = await client.InvokeApiAsync<AllStringIdMovies>(apiUrl, HttpMethod.Get, null);
                             break;
                         case TypedTestType.GetByDate:
                             var releaseDate = inputTemplate.ReleaseDate;
                             apiUrl = apiName + "/date/" + releaseDate.Year + "/" + releaseDate.Month + "/" + releaseDate.Day;
-                            expectedResult = ZumoQueryTestData.AllMovies.Where(m => m.ReleaseDate == releaseDate).ToArray();
-                            actualResult = await client.InvokeApiAsync<AllMovies>(apiUrl, HttpMethod.Get, null);
+                            expectedResult = ZumoQueryTestData.AllStringIdMovies().Where(m => m.ReleaseDate == releaseDate).ToArray();
+                            actualResult = await client.InvokeApiAsync<AllStringIdMovies>(apiUrl, HttpMethod.Get, null);
                             break;
                         case TypedTestType.PostByDuration:
                         case TypedTestType.PostByYear:
@@ -143,7 +143,7 @@ namespace ZumoE2ETestApp.Tests
                                 null :
                                 new Dictionary<string, string> { { "orderBy", orderBy } };
 
-                            Func<Movie, bool> predicate;
+                            Func<StringIdMovie, bool> predicate;
                             if (testType == TypedTestType.PostByYear)
                             {
                                 predicate = m => m.Year == inputTemplate.Year;
@@ -157,14 +157,14 @@ namespace ZumoE2ETestApp.Tests
 
                             if (queryParams == null)
                             {
-                                actualResult = await client.InvokeApiAsync<Movie, AllMovies>(apiUrl, inputTemplate);
+                                actualResult = await client.InvokeApiAsync<StringIdMovie, AllStringIdMovies>(apiUrl, inputTemplate);
                             }
                             else
                             {
-                                actualResult = await client.InvokeApiAsync<Movie, AllMovies>(apiUrl, inputTemplate, HttpMethod.Post, queryParams);
+                                actualResult = await client.InvokeApiAsync<StringIdMovie, AllStringIdMovies>(apiUrl, inputTemplate, HttpMethod.Post, queryParams);
                             }
 
-                            expectedResult = ZumoQueryTestData.AllMovies.Where(predicate).ToArray();
+                            expectedResult = ZumoQueryTestData.AllStringIdMovies().Where(predicate).ToArray();
                             if (orderBy == null || orderBy == "Title")
                             {
                                 Array.Sort(expectedResult, (m1, m2) => m1.Title.CompareTo(m2.Title));
@@ -196,7 +196,7 @@ namespace ZumoE2ETestApp.Tests
                 }
 
                 return testResult;
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
         }
 
         private static ZumoTest CreateHttpContentApiTest(DataFormat inputFormat, DataFormat outputFormat, Random seedGenerator)

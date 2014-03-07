@@ -16,7 +16,7 @@
 typedef void (^MSItemBlock)(NSDictionary *item, NSError *error);
 
 /// Callback for deletes. If there was an error, the *error* will be non-nil.
-typedef void (^MSDeleteBlock)(NSNumber *itemId, NSError *error);
+typedef void (^MSDeleteBlock)(id itemId, NSError *error);
 
 /// Callback for reads. If there was an error, the *error* will be non-nil. If
 /// there was not an error, then the *items* array will always be non-nil
@@ -28,6 +28,17 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
                                  NSInteger totalCount,
                                  NSError *error);
 
+typedef NS_OPTIONS(NSUInteger, MSSystemProperties) {
+    MSSystemPropertyNone        = 0,
+    MSSystemPropertyCreatedAt   = 1 << 0,
+    MSSystemPropertyUpdatedAt   = 1 << 1,
+    MSSystemPropertyVersion     = 1 << 2,
+    MSSystemPropertyAll         = 0xFFFF
+};
+
+extern NSString *const MSSystemColumnCreatedAt;
+extern NSString *const MSSystemColumnUpdatedAt;
+extern NSString *const MSSystemColumnVersion;
 
 #pragma mark * MSTable Public Interface
 
@@ -51,6 +62,7 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
 /// The client associated with this table.
 @property (nonatomic, strong, readonly)         MSClient *client;
 
+@property (nonatomic) MSSystemProperties systemProperties;
 ///@}
 
 #pragma mark * Public Initializers
@@ -103,12 +115,12 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
 
 /// Sends a request to the Windows Azure Mobile Service to delete the item
 /// with the given id in from table.
--(void)deleteWithId:(NSNumber *)itemId completion:(MSDeleteBlock)completion;
+-(void)deleteWithId:(id)itemId completion:(MSDeleteBlock)completion;
 
 /// Sends a request to the Windows Azure Mobile Service to delete the item
 /// with the given id in from table. Addtional user-defined parameters are
 /// sent in the request query string.
--(void)deleteWithId:(NSNumber *)itemId
+-(void)deleteWithId:(id)itemId
          parameters:(NSDictionary *)parameters
          completion:(MSDeleteBlock)completion;
 
@@ -121,12 +133,12 @@ typedef void (^MSReadQueryBlock)(NSArray *items,
 
 /// Sends a request to the Windows Azure Mobile Service to return the item
 /// with the given id from the table.
--(void)readWithId:(NSNumber *)itemId completion:(MSItemBlock)completion;
+-(void)readWithId:(id)itemId completion:(MSItemBlock)completion;
 
 /// Sends a request to the Windows Azure Mobile Service to return the item
 /// with the given id from the table. Addtional user-defined parameters are
 /// sent in the request query string.
--(void)readWithId:(NSNumber *)itemId
+-(void)readWithId:(id)itemId
        parameters:(NSDictionary *)parameters
        completion:(MSItemBlock)completion;
 

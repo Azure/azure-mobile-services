@@ -11,6 +11,10 @@ var Validate = require('Validate');
 var Platform = require('Platform');
 var MobileServiceTable = require('MobileServiceTable').MobileServiceTable;
 var MobileServiceLogin = require('MobileServiceLogin').MobileServiceLogin;
+var Push;
+try {
+    Push = require('Push').Push;
+} catch(e) {}
 
 function MobileServiceClient(applicationUrl, applicationKey) {
     /// <summary>
@@ -52,6 +56,10 @@ function MobileServiceClient(applicationUrl, applicationKey) {
         Validate.notNullOrEmpty(tableName, 'tableName');
         return new MobileServiceTable(tableName, this);
     };
+    
+    if (Push) {
+        this.push = new Push(this);
+    }
 }
 
 // Export the MobileServiceClient class
@@ -163,6 +171,11 @@ MobileServiceClient.prototype._request = function (method, uriFragment, content,
         callback = ignoreFilters;
         ignoreFilters = false;
     }
+    
+    if (_.isNull(callback) && (typeof content === 'function')) {
+        callback = content;
+        content = null;
+    }
 
     Validate.isString(method, 'method');
     Validate.notNullOrEmpty(method, 'method');
@@ -238,6 +251,7 @@ MobileServiceClient.prototype.login = Platform.async(
         /// </summary>
         /// <param name="provider" type="String" mayBeNull="true">
         /// Name of the authentication provider to use; one of 'facebook', 'twitter', 'google', 
+        /// 'windowsazureactivedirectory' (can also use 'aad')
         /// or 'microsoftaccount'. If no provider is specified, the 'token' parameter
         /// is considered a Microsoft Account authentication token. If a provider is specified, 
         /// the 'token' parameter is considered a provider-specific authentication token.

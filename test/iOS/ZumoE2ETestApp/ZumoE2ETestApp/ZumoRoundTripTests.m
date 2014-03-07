@@ -1,4 +1,4 @@
-// ----------------------------------------------------------------------------
+﻿// ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
@@ -10,30 +10,28 @@
 @implementation ZumoRoundTripTests
 
 static NSString *tableName = @"iosRoundTripTable";
+static NSString *stringIdTableName = @"stringIdRoundTripTable";
 
 typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } RoundTripTestColumnType;
 
 + (NSArray *)createTests {
-    ZumoTest *firstTest = [ZumoTest createTestWithName:@"Setup dynamic schema" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+    NSMutableArray *result = [[NSMutableArray alloc] init];
+
+    NSUInteger startOfIntIdTests = [result count];
+    [result addObject:[ZumoTest createTestWithName:@"Setup dynamic schema" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         MSClient *client = [[ZumoTestGlobals sharedInstance] client];
         MSTable *table = [client tableWithName:tableName];
         NSDictionary *item = @{@"string1":@"test", @"date1": [ZumoTestGlobals createDateWithYear:2011 month:11 day:11], @"bool1": [NSNumber numberWithBool:NO], @"number": [NSNumber numberWithInt:-1], @"longnum":[NSNumber numberWithLongLong:0LL], @"intnum":[NSNumber numberWithInt:0], @"setindex":@"setindex"};
         [table insert:item completion:^(NSDictionary *inserted, NSError *err) {
             if (err) {
-                [test addLog:@"Error inserting data to create schema"];
-                [test addLog:@"Error inserting data to create schema"];
-                [test setTestStatus:TSFailed];
+                [test addLog:[NSString stringWithFormat:@"Error inserting data to create schema: %@", err]];
                 completion(NO);
             } else {
                 [test addLog:@"Inserted item to create schema"];
-                [test setTestStatus:TSPassed];
                 completion(YES);
             }
         }];
-    }];
-    
-    NSMutableArray *result = [[NSMutableArray alloc] init];
-    [result addObject:firstTest];
+    }]];
     
     [result addObject:[self createRoundTripForType:RTTString withValue:@"" andName:@"Round trip empty string"]];
     NSString *simpleString = [NSString stringWithFormat:@"%c%c%c%c%c",
@@ -58,6 +56,8 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
     // Date scenarios
     [result addObject:[self createRoundTripForType:RTTDate withValue:[NSDate date] andName:@"Round trip current date"]];
     [result addObject:[self createRoundTripForType:RTTDate withValue:[ZumoTestGlobals createDateWithYear:2012 month:12 day:12] andName:@"Round trip specific date"]];
+    [result addObject:[self createRoundTripForType:RTTDate withValue:[ZumoTestGlobals createDateWithYear:1970 month:1 day:1] andName:@"Round trip unix zero date"]];
+    [result addObject:[self createRoundTripForType:RTTDate withValue:[NSDate dateWithTimeIntervalSince1970:-1] andName:@"Round trip before unix zero date"]];
     [result addObject:[self createRoundTripForType:RTTDate withValue:[NSNull null] andName:@"Round trip null date"]];
     
     // Bool scenarios
@@ -168,8 +168,167 @@ typedef enum { RTTString, RTTDouble, RTTBool, RTTInt, RTT8ByteLong, RTTDate } Ro
 
         }]];
     }
+
+    NSUInteger endOfIntIdTests = [result count];
+    NSUInteger startOfStringIdTests = [result count];
+
+    // Start of tests for tables with string ids
+    [result addObject:[ZumoTest createTestWithName:@"Setup string id dynamic schema" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+        MSClient *client = [[ZumoTestGlobals sharedInstance] client];
+        MSTable *table = [client tableWithName:stringIdTableName];
+        NSDictionary *item =
+        @{
+          @"name":@"a string",
+          @"number":@123.45,
+	  @"integer":@12345,
+          @"bool":@YES,
+          @"date1":[NSDate date],
+          @"complex":@[@"array with", @"string elements"]
+          };
+        [table insert:item completion:^(NSDictionary *inserted, NSError *error) {
+            if (error) {
+                [test addLog:[NSString stringWithFormat:@"Error: %@", error]];
+                completion(NO);
+            } else {
+                [test addLog:@"Setup the dynamic schema"];
+                [table delete:inserted completion:^(id itemId, NSError *error) {
+                    [test addLog:@"Deleted the item (clean-up)"];
+                    completion(YES);
+                }];
+            }
+        }];
+    }]];
     
+    NSDictionary *validStringIds = @{
+                                @"no id": @"",
+                                @"ascii": @"id",
+                                @"latin": @"ãéìôü ÇñÑ",
+                                @"arabic": @"الكتاب على الطاولة",
+                                @"chinese": @"这本书在桌子上",
+                                @"hebrew": @"הספר הוא על השולחן"
+                                };
+    NSDictionary *templateItem = @{
+                                   @"name":@"ãéìôü ÇñÑ - الكتاب على الطاولة - 这本书在桌子上 - ⒈①Ⅻㄨㄩ 啊阿鼾齄 丂丄狚狛 狜狝﨨﨩 ˊˋ˙–〇 㐀㐁䶴䶵 - 本は机の上に - הספר הוא על השולחן",
+                                   @"number":@123.456,
+				   @"integer":@12345,
+                                   @"bool":@YES,
+                                   @"date1":[NSDate date],
+                                   @"complex":@[@"abc",@"def",@"ghi"]
+                                   };
+    for (NSString *key in [validStringIds allKeys]) {
+        NSString *testName = [@"String id - insert, id type = " stringByAppendingString:key];
+        NSString *testId = [validStringIds objectForKey:key];
+        NSMutableDictionary *item = [[NSMutableDictionary alloc] initWithDictionary:templateItem];
+        if ([testId length] > 0) {
+            NSString *uniqueId = [[NSUUID UUID] UUIDString];
+            uniqueId = [@"-" stringByAppendingString:uniqueId];
+            [item setValue:[testId stringByAppendingString:uniqueId] forKey:@"id"];
+        }
+        [result addObject:[self createStringIdRoundTripTestWithName:testName item:item]];
+    }
+    
+    NSArray *invalidStringIds = @[@".",@"..",@"control\tcharacters",[@"large id - " stringByPaddingToLength:260 withString:@"*" startingAtIndex:0]];
+    for (NSString *badId in invalidStringIds) {
+        NSString *testName = [@"(Neg) String id - invalid id: " stringByAppendingString:badId];
+        [result addObject:[ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+            MSClient *client = [[ZumoTestGlobals sharedInstance] client];
+            MSTable *table = [client tableWithName:stringIdTableName];
+            NSDictionary *item = @{@"id":badId,@"name":@"unused"};
+            [table insert:item completion:^(NSDictionary *item, NSError *error) {
+                if (error) {
+                    [test addLog:@"Ok, got expected error"];
+                    completion(YES);
+                } else {
+                    [test addLog:[NSString stringWithFormat:@"Error, insert should not have succeeded. Inserted item: %@", item]];
+                    completion(NO);
+                }
+            }];
+        }]];
+    }
+
+    NSUInteger endOfStringIdTests = [result count];
+
+    for (NSUInteger i = startOfIntIdTests; i < endOfIntIdTests; i++) {
+        ZumoTest *test = [result objectAtIndex:i];
+        [test addRequiredFeature:@"intIdTables"];
+    }
+    
+    for (NSUInteger i = startOfStringIdTests; i < endOfStringIdTests; i++) {
+        ZumoTest *test = [result objectAtIndex:i];
+        [test addRequiredFeature:@"stringIdTables"];
+    }
+
     return result;
+}
+
++ (ZumoTest *)createStringIdRoundTripTestWithName:(NSString *)testName item:(NSDictionary *)item {
+    return [ZumoTest createTestWithName:testName andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
+        MSClient *client = [[ZumoTestGlobals sharedInstance] client];
+        MSTable *table = [client tableWithName:stringIdTableName];
+        NSString *itemId = [item objectForKey:@"id"];
+        BOOL hadId = itemId != nil;
+        [table insert:item completion:^(NSDictionary *inserted, NSError *error) {
+            if (error) {
+                [test addLog:[NSString stringWithFormat:@"Error inserting: %@", error]];
+                completion(NO);
+                return;
+            }
+            
+            [test addLog:[NSString stringWithFormat:@"Inserted item: %@", inserted]];
+            id newId = [inserted objectForKey:@"id"];
+            if (!newId) {
+                [test addLog:@"Error, inserted item does not have an 'id' property"];
+                completion(NO);
+                return;
+            }
+            
+            if (![newId isKindOfClass:[NSString class]]) {
+                [test addLog:@"Error, id should be a string"];
+                completion(NO);
+                return;
+            }
+
+            if (hadId) {
+                if (![newId isEqualToString:itemId]) {
+                    [test addLog:[NSString stringWithFormat:@"Error, id passed to insert (%@) is not the same as the one returned by the server (%@)", itemId, newId]];
+                    completion(NO);
+                    return;
+                }
+            }
+            
+            [table readWithId:newId completion:^(NSDictionary *retrieved, NSError *error) {
+                if (error) {
+                    [test addLog:[NSString stringWithFormat:@"Error retrieving: %@", error]];
+                    completion(NO);
+                    return;
+                }
+
+                [test addLog:[NSString stringWithFormat:@"Retrieved item: %@", inserted]];
+                NSMutableArray *errors = [[NSMutableArray alloc] init];
+                if (![ZumoTestGlobals compareObjects:item with:retrieved log:errors]) {
+                    [test addLog:@"Error comparing objects:"];
+                    for (NSString *err in errors) {
+                        [test addLog:err];
+                    }
+                    completion(NO);
+                    return;
+                }
+
+                [test addLog:@"Items compare successfully"];
+                [test addLog:@"Now trying to insert an item with an existing id (should fail)"];
+                NSDictionary *badItem = @{@"id":newId,@"name":@"unused"};
+                [table insert:badItem completion:^(NSDictionary *item, NSError *error) {
+                    if (error) {
+                        [test addLog:@"Ok, got expected error"];
+                        completion(YES);
+                    } else {
+                        [test addLog:[NSString stringWithFormat:@"Error, insert should not have succeeded. Inserted item: %@", item]];
+                        completion(NO);
+                    }
+                }];
+            }];
+        }];
+    }];
 }
 
 + (ZumoTest *)createRoundTripForType:(RoundTripTestColumnType)type withValue:(id)value andName:(NSString *)testName {

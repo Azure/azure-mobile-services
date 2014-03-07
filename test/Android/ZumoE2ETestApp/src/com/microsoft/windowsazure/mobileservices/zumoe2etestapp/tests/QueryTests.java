@@ -527,7 +527,7 @@ public class QueryTests extends TestGroup {
 				}
 			};
 
-			test.setExpectedExceptionClass(MobileServiceException.class);
+			test.setExpectedExceptionClass(IllegalArgumentException.class);
 			test.setName("(Neg) Invalid Lookup - ID: " + id);
 			this.addTest(test);
 		}

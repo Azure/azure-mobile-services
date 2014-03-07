@@ -1,0 +1,9 @@
+﻿{
+    "routes": {
+        "GET": { "permission": "public" },
+        "POST": { "permission": "admin" },
+        "DELETE": { "permission": "admin" },
+        "PUT": { "permission": "admin" },
+        "PATCH": { "permission": "admin" }
+    }
+}

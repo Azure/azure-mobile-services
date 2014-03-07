@@ -22,22 +22,22 @@ namespace Microsoft.WindowsAzure.MobileServices
 {
     /// <summary>
     /// An asynchronous data source that implements ISupportIncrementalLoading and 
-    /// can wrap the results of a Mobile
-    /// Services query in a way that's easily consumed by Xaml collection
-    /// controls like ListView, GridView or ListBox.
+    /// can wrap the results of a Mobile Services query in a way that's easily 
+    /// consumed by Xaml collection controls like ListView, GridView or ListBox.
     /// </summary>
     /// <typeparam name="TTable">Data source element type.</typeparam>
-    /// <typeparam name="TCol">Type of elements ending up in the collection.</typeparam>
-    /// <remarks>
-    /// This currently handles asynchronously loading the data,
-    /// notifying the controls and paging.
+    /// <typeparam name="TCollection">Type of elements ending up in the collection.</typeparam>
+    /// <remarks>S
+    /// Currently handles asynchronously loading the data, notifying the controls and paging.
+    /// Use the <see cref="MobileServiceIncrementalLoadingCollection{T}"/> class if the table and 
+    /// collection items are of the same type.
     /// </remarks>
-    public class MobileServiceIncrementalLoadingCollection<TTable, TCol> : 
-        MobileServiceCollection<TTable, TCol>,
+    public class MobileServiceIncrementalLoadingCollection<TTable, TCollection> : 
+        MobileServiceCollection<TTable, TCollection>,
         ISupportIncrementalLoading
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection'2{TTable,TCol}"/>
+        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection{TTable, TCollection}"/>
         /// class.
         /// </summary>
         /// <param name="query">
@@ -47,11 +47,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// A selector function to provide client side projections.
         /// </param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification="Overridable method is only used for change notifications")]
-        public MobileServiceIncrementalLoadingCollection(IMobileServiceTableQuery<TTable> query, Func<IEnumerable<TTable>, IEnumerable<TCol>> selector)
-            :base(query, selector, 1) { }
+        public MobileServiceIncrementalLoadingCollection(IMobileServiceTableQuery<TTable> query, Func<IEnumerable<TTable>, IEnumerable<TCollection>> selector)
+            :base(query, selector, 1) 
+        {
+            this.ThrowExceptionsFromLoading = true;
+        }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection'2{TTable,TCol}"/>
+        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection{TTable, TCollection}"/>
         /// class.
         /// </summary>
         /// <param name="query">
@@ -60,21 +63,19 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="selector">
         /// A selector function to provide client side projections.
         /// </param>
-        public MobileServiceIncrementalLoadingCollection(IMobileServiceTableQuery<TTable> query, Func<TTable, TCol> selector)
+        public MobileServiceIncrementalLoadingCollection(IMobileServiceTableQuery<TTable> query, Func<TTable, TCollection> selector)
             : this(query, ie => ie.Select(selector)) { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection'2{TTable,TCol}"/>
-        /// class. This constructior should be used in cases where TTable and TCol are the same type.
+        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection{TTable, TCollection}"/>
+        /// class. This constructior should be used in cases where TTable and TCollection are the same type.
         /// </summary>
         /// <param name="query">
         /// The data source's query which provides the data.
         /// </param>
         public MobileServiceIncrementalLoadingCollection(IMobileServiceTableQuery<TTable> query)
-            : this(query, ie => ie.Cast<TCol>()) { }
+            : this(query, ie => ie.Cast<TCollection>()) { }
         
-        #region ISupportIncrementalLoading
-
         /// <summary>
         /// Indicates if more items can be requested by the control.
         /// </summary>
@@ -82,6 +83,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         { 
             get { return this.HasMoreItems; }
         }
+
+        /// <summary>
+        /// Indicates if the exceptions from loading more data should be
+        /// thrown or not.
+        /// </summary>
+        protected bool ThrowExceptionsFromLoading { get; set; }
 
         /// <summary>
         /// Explicit implementation of ISupportIncrementalLoading.LoadMoreItemsAsync 
@@ -97,16 +104,22 @@ namespace Microsoft.WindowsAzure.MobileServices
             // we pass the count argument to override the pageSize
             return AsyncInfo.Run(async (c) => 
             {
+                int results = 0;
                 try
                 {
-                    int results = await base.LoadMoreItemsAsync(c, (int)count);
-                    return new LoadMoreItemsResult() { Count = (uint)results };
+                    results = await base.LoadMoreItemsAsync(c, (int)count);   
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     OnExceptionOccurred(e);
-                    throw;
+
+                    if (this.ThrowExceptionsFromLoading)
+                    {
+                        throw;
+                    }
                 }
+
+                return new LoadMoreItemsResult() { Count = (uint)results };
             });
         }
 
@@ -114,11 +127,33 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Provided to allow users to handle exceptions resulting from calls to 
         /// LoadMoreItemsAsync performed by controls.
         /// </summary>
-        /// <param name="e">The exception.</param>
-        protected virtual void OnExceptionOccurred(Exception e)
+        /// <param name="exception">The exception.</param>
+        protected virtual void OnExceptionOccurred(Exception exception)
+        {
+            // Do nothing
+        }
+    }
+
+    /// <summary>
+    /// An asynchronous data source that implements ISupportIncrementalLoading and 
+    /// can wrap the results of a Mobile Services query in a way that's easily 
+    /// consumed by Xaml collection controls like ListView, GridView or ListBox.
+    /// </summary>
+    /// <typeparam name="T">Data source and collection element type.</typeparam>
+    /// <remarks>
+    /// Handles asynchronously loading the data, notifying the controls and paging.
+    /// </remarks>
+    public class MobileServiceIncrementalLoadingCollection<T> : MobileServiceIncrementalLoadingCollection<T, T>
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="T:IncrementalLoadingMobileServiceCollection{T}"/> class.
+        /// </summary>
+        /// <param name="query">
+        /// The data source's query, which provides the data.
+        /// </param>
+        public MobileServiceIncrementalLoadingCollection(IMobileServiceTableQuery<T> query)
+            : base(query, (Func<IEnumerable<T>, IEnumerable<T>>)(t => t))
         {
         }
-
-        #endregion
     }
 }

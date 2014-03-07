@@ -107,9 +107,6 @@
     </Content>
     <Content Include="default.html" />
     <Content Include="js\platformSpecificFunctions.js" />
-    <None Include="lib\MobileServices.intellisense.js" />
-    <Content Include="lib\MobileServices.Web.js" />
-    <Content Include="lib\MobileServices.Web.min.js" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -123,7 +120,6 @@
       <DependentUpon>Web.config</DependentUpon>
     </None>
   </ItemGroup>
-  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

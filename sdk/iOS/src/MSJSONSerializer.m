@@ -15,10 +15,9 @@ NSString *const resultsKey = @"results";
 NSString *const countKey = @"count";
 NSString *const errorKey = @"error";
 NSString *const descriptionKey = @"description";
-
+NSString *const stringIdPattern = @"[+?`""/\\\\]|[\\u0000-\\u001F]|[\\u007F-\\u009F]|^\\.{1,2}$";
 
 #pragma mark * MSJSONSerializer Implementation
-
 
 @implementation MSJSONSerializer
 
@@ -26,7 +25,6 @@ static MSJSONSerializer *staticJSONSerializerSingleton;
 static NSArray *allIdKeys;
 
 #pragma mark * Public Static Singleton Constructor
-
 
 +(id <MSSerializer>) JSONSerializer
 {
@@ -47,12 +45,11 @@ static NSArray *allIdKeys;
 }
 
 # pragma mark * MSSerializer Protocol Implementation
-
-
--(NSData *) dataFromItem:(id)item
-               idAllowed:(BOOL)idAllowed
-        ensureDictionary:(BOOL)ensureDictionary
-                 orError:(NSError **)error
+-(NSData *)dataFromItem:(id)item
+              idAllowed:(BOOL)idAllowed
+       ensureDictionary:(BOOL)ensureDictionary
+ removeSystemProperties:(BOOL)removeSystemProperties
+                orError:(NSError **)error;
 {
     NSData *data = nil;
     NSError *localError = nil;
@@ -61,28 +58,38 @@ static NSArray *allIdKeys;
     if (!item) {
         localError = [self errorForNilItem];
     }
-    else {
-        
-        // Ensure that the item doesn't already have an id if
-        // an id is not allowed
-        if (!idAllowed) {
+    else if (ensureDictionary && ![item isKindOfClass:[NSDictionary class]]) {
+        localError = [self errorForInvalidItem];
+    }
+    else if (!idAllowed) {
+        // Determine if an id (any case) exists and if so throw an error if
+        // it is not a string id or it is not a default value
+        for (id key in MSJSONSerializer.AllIdKeys) {
+            id itemId = [item objectForKey:key];
             
-            // Make sure this is a dictionary before trying to get the id
-            if (ensureDictionary &&
-                ![item isKindOfClass:[NSDictionary class]]) {
-                localError = [self errorForInvalidItem];
+            if (itemId == nil || itemId == [NSNull null]) {
+                continue;
             }
-            else {
-                
-                // Then get the value of the id key; if it exists,
-                // this is an error; look for all id's regardless of case
-                for (id key in MSJSONSerializer.AllIdKeys) {
-                    id itemId = [item objectForKey:key];
-                    if (itemId && [itemId longLongValue] != 0) {
-                        localError = [self errorForExistingItemId];
-                        break;
+            else if ([itemId isKindOfClass:[NSString class]]) {
+                // Allow empty string for any id
+                if ([itemId length] != 0 ) {
+                    if([key isEqualToString:idKey]) {
+                        // Valid string ids are allowed for 'id' only
+                        [self stringFromItemId:itemId orError:&localError];
+                    }
+                    else {
+                        localError = [self errorForInvalidItemId];
                     }
                 }
+            }
+            else if ([itemId isKindOfClass:[NSNumber class]]) {
+                // Only a default value, 0, can be used for int ids
+                if ([itemId longLongValue] != 0) {
+                    localError = [self errorForExistingItemId];
+                }
+            }
+            else {
+                localError = [self errorForInvalidItemId];
             }
         }
     }
@@ -90,16 +97,23 @@ static NSArray *allIdKeys;
     if (!localError)
     {
         // Convert any NSDate instances into strings formatted with the date.
-        item = [self preSerializeItem:item];
+        if (removeSystemProperties) {
+            id itemIdField = nil;
+            if([item isKindOfClass:[NSDictionary class]]) {
+                itemIdField = [item objectForKey:idKey];
+            }
+            removeSystemProperties = [itemIdField isKindOfClass:[NSString class]];
+        }
+        
+        item = [self preSerializeItem:item RemoveSystemProperties:removeSystemProperties];
 
         // ... then make sure the |NSJSONSerializer| can serialize it, otherwise
         // the |NSJSONSerializer| will throw an exception, which we don't
         // want--we'd rather return an error.
         if (![NSJSONSerialization isValidJSONObject:item]) {
             localError = [self errorForInvalidItem];
-        }
-        else {
             
+        } else {
             // If there is still an error serializing, |dataWithJSONObject|
             // will ensure that data the error is set and data is nil.
             data = [NSJSONSerialization dataWithJSONObject:item
@@ -115,39 +129,29 @@ static NSArray *allIdKeys;
     return data;
 }
 
--(NSNumber *) itemIdFromItem:(NSDictionary *)item orError:(NSError **)error
+-(id) itemIdFromItem:(NSDictionary *)item orError:(NSError **)error
 {
-    NSNumber *itemId = nil;
+    id itemId = nil;
     NSError *localError = nil;
     
     // Ensure there is an item
     if (!item) {
         localError = [self errorForNilItem];
     }
+    else if (![item isKindOfClass:[NSDictionary class]]) {
+        localError = [self errorForInvalidItem];
+    }
     else {
-        if (![item isKindOfClass:[NSDictionary class]]) {
-            localError = [self errorForInvalidItem];
+        // Then get the value of the id key, which must be present or else
+        // it is an error.
+        itemId = [item objectForKey:idKey];
+        if (!itemId) {
+            localError = [self errorForMissingItemId];
         }
-        else {
-            
-            // Then get the value of the id key, which must be present or else
-            // it is an error.
-            itemId = [item objectForKey:idKey];
-            if (!itemId) {
-                localError = [self errorForMissingItemId];
-            }
-            else if(![itemId isKindOfClass:[NSNumber class]]) {
-                
-                // The id was there, but it wasn't a number--this is also an
-                // error.
-                localError = [self errorForInvalidItemId];
-                itemId = nil;
-            }
-            else if([itemId longLongValue] == 0)
-            {
-                localError = [self errorForInvalidItemId];
-                itemId = nil;
-            }
+        else if (![itemId isKindOfClass:[NSNumber class]] &&
+                 ![itemId isKindOfClass:[NSString class]]) {
+            localError = [self errorForInvalidItemId];
+            itemId = nil;
         }
     }
     
@@ -155,9 +159,8 @@ static NSArray *allIdKeys;
         *error = localError;
     }
 
-    return itemId;;
+    return itemId;
 }
-
 
 -(NSString *) stringFromItemId:(id)itemId orError:(NSError **)error
 {
@@ -168,29 +171,42 @@ static NSArray *allIdKeys;
     if (!itemId) {
         localError = [self errorForExpectedItemId];
     }
-    else if(![itemId isKindOfClass:[NSNumber class]]) {
-        
-        // The id was there, but it wasn't a number--this is also an
-        // error.
-        localError = [self errorForInvalidItemId];
-    }
-    else {
+    else if([itemId isKindOfClass:[NSNumber class]]) {
         long long itemIdValue = [itemId longLongValue];
-        if(itemIdValue == 0)
-        {
+        if(itemIdValue == 0) {
+            // id can't be a default value
             localError = [self errorForInvalidItemId];
         }
-        else
-        {
-            // Convert the id into a string
+        else {
             idAsString = [NSString stringWithFormat:@"%lld",itemIdValue];
         }
+    }
+    else if ([itemId isKindOfClass:[NSString class]]) {
+        idAsString = itemId;
+        NSString *trimmedId = [idAsString stringByTrimmingCharactersInSet:
+                                [NSCharacterSet whitespaceCharacterSet]];
+        
+        if(idAsString.length == 0 || idAsString.length > 255 || trimmedId.length == 0) {
+            localError = [self errorForInvalidItemId];
+        } else {
+            NSRegularExpression *regEx = [NSRegularExpression regularExpressionWithPattern:stringIdPattern
+                                                                                   options:NSRegularExpressionCaseInsensitive
+                                                                                     error:&localError];
+            if ([regEx firstMatchInString:idAsString options:0 range:NSMakeRange(0, idAsString.length)]) {
+                localError = [self errorForInvalidItemId];
+            }
+        }        
+    }
+    else {
+        // The id was there, but it wasn't a number or string
+        localError = [self errorForInvalidItemId];
     }
     
     if (localError && error) {
         *error = localError;
+        idAsString = nil;
     }
-    
+
     return idAsString;
 }
 
@@ -334,7 +350,6 @@ static NSArray *allIdKeys;
                       NSNotFound != [MIMEType rangeOfString:@"JSON"
                                                     options:NSCaseInsensitiveSearch].location;
         if (isJson) {
-        
             id JSONObject = [NSJSONSerialization JSONObjectWithData:data
                                     options: NSJSONReadingMutableContainers |
                                              NSJSONReadingAllowFragments
@@ -393,24 +408,31 @@ static NSArray *allIdKeys;
 
 #pragma mark * Private Pre/Post Serialization Methods
 
-
--(id) preSerializeItem:(id)item
+-(id) preSerializeItem:(id)item RemoveSystemProperties:(BOOL)removeSystemProperties
 {
     id preSerializedItem = nil;
     
     if ([item isKindOfClass:[NSDictionary class]]) {
         preSerializedItem = [item mutableCopy];
+        
+        if(removeSystemProperties) {
+            NSSet *systemProperties = [preSerializedItem keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+                return [[key substringToIndex:2] isEqualToString:@"__"];
+            }];
+            [preSerializedItem removeObjectsForKeys:[systemProperties allObjects]];
+        }
+        
         for (NSString *key in [preSerializedItem allKeys]) {
             id value = [preSerializedItem valueForKey:key];
-            id preSerializedValue = [self preSerializeItem:value];
+            id preSerializedValue = [self preSerializeItem:value RemoveSystemProperties:NO];
             [preSerializedItem setObject:preSerializedValue forKey:key];
         }
     }
     else if([item isKindOfClass:[NSArray class]]) {
         preSerializedItem = [item mutableCopy];
         for (NSInteger i = 0; i < [preSerializedItem count]; i++) {
-            id value = [preSerializedItem objectAtIndex:i];
-            id preSerializedValue = [self preSerializeItem:value];
+            id value = [preSerializedItem objectAtIndex	:i];
+            id preSerializedValue = [self preSerializeItem:value RemoveSystemProperties:NO];
             [preSerializedItem setObject:preSerializedValue atIndex:i];
         }
     }
@@ -447,8 +469,13 @@ static NSArray *allIdKeys;
         }
     }
     else if ([item isKindOfClass:[NSString class]]) {
-        NSDateFormatter *formatter =
-        [MSNaiveISODateFormatter naiveISODateFormatter];
+        NSDateFormatter *formatter;
+        if ([item rangeOfString:@"."].location == NSNotFound) {
+            formatter = [MSNaiveISODateFormatter naiveISODateNoFractionalSecondsFormatter];
+        } else {
+            formatter = [MSNaiveISODateFormatter naiveISODateFormatter];
+        }
+        
         NSDate *date = [formatter dateFromString:item];
         postDeserializedItem = (date) ? date : item;
     }

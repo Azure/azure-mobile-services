@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using Microsoft.WindowsAzure.MobileServices;
 using Newtonsoft.Json.Linq;
 using ZumoE2ETestApp.Framework;
@@ -42,7 +43,6 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateSimpleTypedRoundTripTest("Date: now", RoundTripTestType.Date, Util.TrimSubMilliseconds(DateTime.Now)));
             result.AddTest(CreateSimpleTypedRoundTripTest("Date: now (UTC)", RoundTripTestType.Date, Util.TrimSubMilliseconds(DateTime.UtcNow)));
             result.AddTest(CreateSimpleTypedRoundTripTest("Date: null", RoundTripTestType.Date, null));
-            result.AddTest(CreateSimpleTypedRoundTripTest("Date: min date", RoundTripTestType.Date, DateTime.MinValue));
             result.AddTest(CreateSimpleTypedRoundTripTest("Date: specific date, before unix 0", RoundTripTestType.Date, new DateTime(1901, 1, 1)));
             result.AddTest(CreateSimpleTypedRoundTripTest("Date: specific date, after unix 0", RoundTripTestType.Date, new DateTime(2000, 12, 31)));
 
@@ -104,7 +104,89 @@ namespace ZumoE2ETestApp.Tests
                 CreateSimpleTypedRoundTripTest<ArgumentException>(
                     "(Neg) Insert item with non-default id", RoundTripTestType.Id, 1));
 
-            // Untyped table
+            var uniqueId = Environment.TickCount.ToString(CultureInfo.InvariantCulture);
+            var differentIds = new Dictionary<string, string>
+            {
+                { "none", null },
+                { "ascii", "myid" },
+                { "latin", "ãéìôü ÇñÑ" },
+                { "arabic", "الكتاب على الطاولة" },
+                { "chinese", "这本书在桌子上" },
+                { "hebrew", "הספר הוא על השולחן" }
+            };
+
+            foreach (var name in differentIds.Keys)
+            {
+                var id = differentIds[name];
+                result.AddTest(new ZumoTest("String id - " + name + " id on insert", async delegate(ZumoTest test) {
+                    var item = new StringIdRoundTripTableItem(rndGen);
+                    var itemId = id;
+                    if (itemId != null)
+                    {
+                        itemId = itemId + "-" + Guid.NewGuid().ToString();
+                    }
+
+                    item.Id = itemId;
+                    var client = ZumoTestGlobals.Instance.Client;
+                    var table = client.GetTable<StringIdRoundTripTableItem>();
+                    await table.InsertAsync(item);
+                    test.AddLog("Inserted item with id = {0}", item.Id);
+                    if (id != null && itemId != item.Id)
+                    {
+                        test.AddLog("Error, id passed to insert is not the same ({0}) as the id returned by the server ({1})", id, item.Id);
+                        return false;
+                    }
+
+                    var retrieved = await table.LookupAsync(item.Id);
+                    test.AddLog("Retrieved item: {0}", retrieved);
+                    if (!item.Equals(retrieved))
+                    {
+                        test.AddLog("Error, round-tripped item is different");
+                        return false;
+                    }
+
+                    test.AddLog("Now trying to insert an item with an existing id (should fail)");
+                    try
+                    {
+                        await table.InsertAsync(new StringIdRoundTripTableItem { Id = retrieved.Id, Name = "should not work" });
+                        test.AddLog("Error, insertion succeeded but it should have failed");
+                        return false;
+                    }
+                    catch (MobileServiceInvalidOperationException e)
+                    {
+                        test.AddLog("Caught expected exception: {0}", e);
+                    }
+
+                    test.AddLog("Cleaning up...");
+                    await table.DeleteAsync(retrieved);
+                    test.AddLog("Removed the inserted item");
+                    return true;
+                }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES));
+            }
+
+            var invalidIds = new string[] { ".", "..", "control\u0010characters", "large id " + new string('*', 260) };
+            foreach (var id in invalidIds)
+            {
+                result.AddTest(new ZumoTest("(Neg) string id - insert with invalid id: " + (id.Length > 30 ? (id.Substring(0, 30) + "...") : id), async delegate(ZumoTest test)
+                {
+                    var client = ZumoTestGlobals.Instance.Client;
+                    var table = client.GetTable<StringIdRoundTripTableItem>();
+                    var item = new StringIdRoundTripTableItem { Id = id, Name = "should not work" };
+                    try
+                    {
+                        await table.InsertAsync(item);
+                        test.AddLog("Error, insert operation should have failed. Inserted id = {0}", item.Id);
+                        return false;
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        test.AddLog("Caught expected exception: {0}", ex);
+                        return true;
+                    }
+                }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES));
+            }
+
+            // Untyped overloads
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped String: Empty", "string1", ""));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped String: null", "string1", null));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped String: random value",
@@ -123,7 +205,6 @@ namespace ZumoE2ETestApp.Tests
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped Date: now", "date1", Util.TrimSubMilliseconds(DateTime.Now)));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped Date: now (UTC)", "date1", Util.TrimSubMilliseconds(DateTime.UtcNow)));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped Date: null", "date1", null));
-            result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped Date: min date", "date1", DateTime.MinValue));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped Date: specific date, before unix 0", "date1", new DateTime(1901, 1, 1)));
             result.AddTest(CreateSimpleUntypedRoundTripTest("Untyped Date: specific date, after unix 0", "date1", new DateTime(2000, 12, 31)));
 
@@ -161,11 +242,45 @@ namespace ZumoE2ETestApp.Tests
                 JObject.Parse(@"{""complexType1"":[{""Name"":""Scooby"",""Age"":10}, null, {""Name"":""Shaggy"",""Age"":19}]}")));
 
             result.AddTest(CreateSimpleUntypedRoundTripTest<ArgumentException>("(Neg) Insert item with non-default 'id' property",
-                JObject.Parse("{\"id\":1,\"value\":2}")));
+                JObject.Parse("{\"id\":1,\"value\":2}"), false));
             result.AddTest(CreateSimpleUntypedRoundTripTest<ArgumentException>("(Neg) Insert item with non-default 'ID' property",
-                JObject.Parse("{\"ID\":1,\"value\":2}")));
+                JObject.Parse("{\"ID\":1,\"value\":2}"), false));
             result.AddTest(CreateSimpleUntypedRoundTripTest<ArgumentException>("(Neg) Insert item with non-default 'Id' property",
-                JObject.Parse("{\"Id\":1,\"value\":2}")));
+                JObject.Parse("{\"Id\":1,\"value\":2}"), false));
+
+            uniqueId = (Environment.TickCount + 1).ToString(CultureInfo.InvariantCulture);
+
+            var obj = new StringIdRoundTripTableItem(rndGen);
+            var properties = new Dictionary<string, object>
+            {
+                { "name", obj.Name },
+                { "date1", obj.Date },
+                { "bool", obj.Bool },
+                { "number", obj.Number },
+                { "complex", obj.ComplexType },
+            };
+            foreach (var name in differentIds.Keys)
+            {
+                foreach (var property in properties.Keys)
+                {
+                    var testName = "String id (untyped) - " + name + " id on insert - " + property;
+                    var item = JObjectFromValue(property, properties[property]);
+                    var id = differentIds[name];
+                    if (id != null)
+                    {
+                        item.Add("id", id + "-" + property + "-" + Guid.NewGuid().ToString());
+                    }
+
+                    result.AddTest(CreateSimpleUntypedRoundTripTest(testName, item, true));
+                }
+            }
+
+            foreach (var id in invalidIds)
+            {
+                var testName = "(Neg) [string id] Insert item with invalid 'id' property: " + (id.Length > 30 ? (id.Substring(0, 30) + "...") : id);
+                JObject jo = new JObject(new JProperty("id", id), new JProperty("name", "should not work"));
+                result.AddTest(CreateSimpleUntypedRoundTripTest<InvalidOperationException>(testName, jo, true));
+            }
 
             return result;
         }
@@ -175,25 +290,34 @@ namespace ZumoE2ETestApp.Tests
             return new ZumoTest("Setup dynamic schema", async delegate(ZumoTest test)
             {
                 var client = ZumoTestGlobals.Instance.Client;
-                var table = client.GetTable<RoundTripTableItem>();
                 Random rndGen = new Random(1);
                 try
                 {
-                    RoundTripTableItem item = new RoundTripTableItem
+                    if (!ZumoTestGlobals.Instance.IsNetRuntime)
                     {
-                        Bool1 = true,
-                        ComplexType1 = new ComplexType[] { new ComplexType(rndGen) },
-                        ComplexType2 = new ComplexType2(rndGen),
-                        Date1 = DateTime.Now,
-                        Double1 = 123.456,
-                        EnumType = EnumType.First,
-                        Int1 = 1,
-                        Long1 = 1,
-                        String1 = "hello",
-                    };
+                        var table = client.GetTable<RoundTripTableItem>();
+                        RoundTripTableItem item = new RoundTripTableItem
+                        {
+                            Bool1 = true,
+                            ComplexType1 = new ComplexType[] { new ComplexType(rndGen) },
+                            ComplexType2 = new ComplexType2(rndGen),
+                            Date1 = DateTime.Now,
+                            Double1 = 123.456,
+                            EnumType = EnumType.First,
+                            Int1 = 1,
+                            Long1 = 1,
+                            String1 = "hello",
+                        };
 
-                    await table.InsertAsync(item);
-                    test.AddLog("Inserted item to create schema");
+                        await table.InsertAsync(item);
+                        test.AddLog("Inserted item to create schema on the int id table");
+                    }
+
+                    var table2 = client.GetTable<StringIdRoundTripTableItem>();
+                    var item2 = new StringIdRoundTripTableItem { Bool = true, Name = "hello", Number = 1.23, ComplexType = "a b c".Split(), Date = DateTime.UtcNow };
+                    await table2.InsertAsync(item2);
+                    test.AddLog("Inserted item to create schema on the string id table");
+
                     return true;
                 }
                 catch (Exception ex)
@@ -201,10 +325,10 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Error setting up the dynamic schema: {0}", ex);
                     return false;
                 }
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES);
         }
 
-        private static ZumoTest CreateSimpleUntypedRoundTripTest(string testName, string propertyName, object propertyValue)
+        private static JObject JObjectFromValue(string propertyName, object propertyValue)
         {
             var item = new JObject();
             if (propertyValue == null)
@@ -221,7 +345,7 @@ namespace ZumoE2ETestApp.Tests
                 else if (propType == typeof(DateTime))
                 {
                     item.Add(
-                        propertyName, 
+                        propertyName,
                         ((DateTime)propertyValue).ToUniversalTime().ToString(
                             "yyyy-MM-ddTHH:mm:ss.fffZ", CultureInfo.InvariantCulture));
                 }
@@ -241,40 +365,76 @@ namespace ZumoE2ETestApp.Tests
                 {
                     item.Add(propertyName, (double)propertyValue);
                 }
+                else if (propType == typeof(string[]))
+                {
+                    var ja = new JArray();
+                    foreach (var value in (string[])propertyValue)
+                    {
+                        ja.Add(value);
+                    }
+
+                    item.Add(propertyName, ja);
+                }
                 else
                 {
                     throw new ArgumentException("Don't know how to create test for type " + propType.FullName);
                 }
             }
 
-            return CreateSimpleUntypedRoundTripTest<ExceptionTypeWhichWillNeverBeThrown>(testName, item);
+            return item;
         }
 
-        private static ZumoTest CreateSimpleUntypedRoundTripTest(string testName, JObject item)
+        private static ZumoTest CreateSimpleUntypedRoundTripTest(string testName, string propertyName, object propertyValue, bool useStringIdTable = false)
         {
-            return CreateSimpleUntypedRoundTripTest<ExceptionTypeWhichWillNeverBeThrown>(testName, item);
+            var item = JObjectFromValue(propertyName, propertyValue);
+            return CreateSimpleUntypedRoundTripTest<ExceptionTypeWhichWillNeverBeThrown>(testName, item, useStringIdTable);
         }
 
-        private static ZumoTest CreateSimpleUntypedRoundTripTest<TExpectedException>(string testName, JObject templateItem)
+        private static ZumoTest CreateSimpleUntypedRoundTripTest(string testName, JObject item, bool useStringIdTable = false)
+        {
+            return CreateSimpleUntypedRoundTripTest<ExceptionTypeWhichWillNeverBeThrown>(testName, item, useStringIdTable);
+        }
+
+        private static ZumoTest CreateSimpleUntypedRoundTripTest<TExpectedException>(string testName, JObject templateItem, bool useStringIdTable)
             where TExpectedException : Exception
         {
             return new ZumoTest(testName, async delegate(ZumoTest test)
             {
                 var item = JObject.Parse(templateItem.ToString()); // prevent outer object from being captured and reused
                 var client = ZumoTestGlobals.Instance.Client;
-                var table = client.GetTable(ZumoTestGlobals.RoundTripTableName);
+                var table = client.GetTable(useStringIdTable ? ZumoTestGlobals.StringIdRoundTripTableName : ZumoTestGlobals.RoundTripTableName);
 
                 try
                 {
                     string originalItem = item == null ? "null" : item.ToString();
 
                     var inserted = await table.InsertAsync(item);
-                    int id = inserted["id"].Value<int>();
-                    test.AddLog("Inserted item, id = {0}", id);
-                    if (id <= 0)
+                    object id;
+                    if (!useStringIdTable)
                     {
-                        test.AddLog("Error, insert didn't succeed (id == 0)");
-                        return false;
+                        int intId = inserted["id"].Value<int>();
+                        test.AddLog("Inserted item, id = {0}", intId);
+                        if (intId <= 0)
+                        {
+                            test.AddLog("Error, insert didn't succeed (id == 0)");
+                            return false;
+                        }
+
+                        id = intId;
+                    }
+                    else
+                    {
+                        var originalId = item["id"];
+                        bool hadId = originalId != null && originalId.Type != JTokenType.Null;
+                        var originalStringId = (string)originalId;
+                        string newId = (string)inserted["id"];
+                        if (hadId && newId != originalStringId)
+                        {
+                            test.AddLog("Error, insert changed the item id!");
+                            return false;
+                        }
+
+                        id = newId;
                     }
 
                     JToken roundTripped = await table.LookupAsync(id);
@@ -287,6 +447,7 @@ namespace ZumoE2ETestApp.Tests
                     test.AddLog("Retrieved the item from the service");
 
                     List<string> errors = new List<string>();
+                    bool testResult;
                     if (!Util.CompareJson(item, roundTripped, errors))
                     {
                         foreach (var error in errors)
@@ -295,27 +456,32 @@ namespace ZumoE2ETestApp.Tests
                         }
 
                         test.AddLog("Round-tripped item is different! Expected: {0}; actual: {1}", originalItem, roundTripped);
-                        return false;
+                        testResult = false;
                     }
                     else
                     {
                         if (typeof(TExpectedException) == typeof(ExceptionTypeWhichWillNeverBeThrown))
                         {
-                            return true;
+                            testResult = true;
                         }
                         else
                         {
                             test.AddLog("Error, test should have failed with {0}, but succeeded.", typeof(TExpectedException).FullName);
-                            return false;
+                            testResult = false;
                         }
                     }
+
+                    test.AddLog("Cleaning up...");
+                    await table.DeleteAsync(new JObject(new JProperty("id", id)));
+                    test.AddLog("Item deleted");
+                    return testResult;
                 }
                 catch (TExpectedException ex)
                 {
                     test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                     return true;
                 }
-            });
+            }, useStringIdTable ? ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES : ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES);
         }
 
         enum RoundTripTestType
@@ -395,10 +561,11 @@ namespace ZumoE2ETestApp.Tests
 
                     RoundTripTableItem roundTripped = await table.LookupAsync(item.Id);
                     test.AddLog("Retrieved the item from the service");
+                    bool testResult;
                     if (!originalItem.Equals(roundTripped))
                     {
                         test.AddLog("Round-tripped item is different! Expected: {0}; actual: {1}", originalItem, roundTripped);
-                        return false;
+                        testResult = false;
                     }
 
                     if (type == RoundTripTestType.String && item.String1 != null && item.String1.Length < 50)
@@ -413,26 +580,32 @@ namespace ZumoE2ETestApp.Tests
                         else
                         {
                             test.AddLog("Round-tripped (queried) item is different! Expected: {0}; actual: {1}", originalItem, lastItem);
-                            return false;
+                            testResult = false;
                         }
                     }
 
                     if (typeof(TExpectedException) == typeof(ExceptionTypeWhichWillNeverBeThrown))
                     {
-                        return true;
+                        testResult = true;
                     }
                     else
                     {
                         test.AddLog("Error, test should have failed with {0}, but succeeded.", typeof(TExpectedException).FullName);
-                        return false;
+                        testResult = false;
                     }
+
+                    test.AddLog("Cleaning up...");
+                    await table.DeleteAsync(roundTripped);
+                    test.AddLog("Item deleted");
+
+                    return testResult;
                 }
                 catch (TExpectedException ex)
                 {
                     test.AddLog("Caught expected exception - {0}: {1}", ex.GetType().FullName, ex.Message);
                     return true;
                 }
-            });
+            }, ZumoTestGlobals.RuntimeFeatureNames.INT_ID_TABLES);
         }
     }
 }
