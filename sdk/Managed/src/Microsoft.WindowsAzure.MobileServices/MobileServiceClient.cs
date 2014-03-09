@@ -85,6 +85,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
+        /// Specifies whether or not &quot;&quot; or string.Empty are treated as null for IDs when you call InsertAsync().
+        /// </summary>
+        public bool TreatEmptyIdsAsNullOnInsert { get; set; }
+
+        /// <summary>
         /// Gets the serializer that is used with the table.
         /// </summary>
         internal MobileServiceSerializer Serializer { get; private set; }
@@ -192,6 +197,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             handlers = handlers ?? EmptyHttpMessageHandlers;
             this.HttpClient = new MobileServiceHttpClient(handlers, this.ApplicationUri, this.applicationInstallationId, this.ApplicationKey);
             this.Serializer = new MobileServiceSerializer();
+            TreatEmptyIdsAsNullOnInsert = false;
         }
 
         /// <summary>
