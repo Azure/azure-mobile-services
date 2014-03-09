@@ -41,6 +41,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
         public static string[] EmptyStringIds = new string[] {
             "",
+            string.Empty,
+            null
         };
 
         public static string[] InvalidStringIds = (new string[] {
