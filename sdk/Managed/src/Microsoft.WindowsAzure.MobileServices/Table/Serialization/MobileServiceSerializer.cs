@@ -43,7 +43,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// A regex for validating string ids
         /// </summary>
-        private static Regex stringIdValidationRegex = new Regex(@"([\u0000-\u001F]|[\u007F-\u009F]|[""\+\?\\\/\`]|^\.{1,2}$)");
+        internal static Regex StringIdValidationRegex = new Regex(@"([\u0000-\u001F]|[\u007F-\u009F]|[""\+\?\\\/\`]|^\.{1,2}$)");
 
         /// <summary>
         /// The long type.
@@ -110,14 +110,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             id = null;
 
-            if (ignoreCase)
-            {
-                gotId = instance.TryGetValue(IdPropertyName, StringComparison.OrdinalIgnoreCase, out idToken);
-            }
-            else
-            {
-                gotId = instance.TryGetValue(IdPropertyName, out idToken);
-            }
+            gotId = ignoreCase ? instance.TryGetValue(IdPropertyName, StringComparison.OrdinalIgnoreCase, out idToken) : instance.TryGetValue(IdPropertyName, out idToken);
 
             if (gotId)
             {
@@ -206,7 +199,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             if (id is string)
             {
-                EnsureValidStringId(id, allowDefault);
+                CheckForValidStringId(id as string, allowDefault);
             }
             if (IsIntegerId(id))
             {
@@ -242,22 +235,23 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
-        public static void EnsureValidStringId(object id, bool allowDefault = false)
+        public static void CheckForValidStringId(string id, bool allowDefault = false)
         {
-            string stringId = (string)id;
-            if (stringId.Length > MaxStringIdLength)
+            if (id.Length > MaxStringIdLength)
             {
                 throw new InvalidOperationException(
                     string.Format(Resources.MobileServiceSerializer_StringIdTooLong,
-                        stringId,
+                        id,
                         MaxStringIdLength));
             }
-            else if (stringIdValidationRegex.IsMatch(stringId))
+
+            if (StringIdValidationRegex.IsMatch(id))
             {
                 throw new InvalidOperationException(
-                    string.Format(Resources.MobileServiceSerializer_InvalidStringId, stringId));
+                    string.Format(Resources.MobileServiceSerializer_InvalidStringId, id));
             }
-            else if (!allowDefault && stringId.Length == 0)
+
+            if (!allowDefault && id.Length == 0)
             {
                 throw new InvalidOperationException(Resources.MobileServiceSerializer_NullOrEmptyStringId);
             }
@@ -309,20 +303,6 @@ namespace Microsoft.WindowsAzure.MobileServices
                          typeof(T).FullName));
             }
 
-        }
-
-        /// <summary>
-        /// Sets the instance's id property value to the default id value.
-        /// </summary>
-        /// <param name="instance">
-        /// The instance on which to clear the id property.
-        /// </param>
-        public static void SetIdToDefault(JObject instance)
-        {
-            if (instance != null)
-            {
-                instance[MobileServiceSerializer.IdPropertyName] = null;
-            }
         }
 
         /// <summary>
@@ -395,12 +375,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         public static bool IsDefaultId(object id)
         {
             return id == null ||
-                   object.Equals(id, 0L) ||
-                   object.Equals(id, 0) ||
-                   (id is string && string.IsNullOrEmpty((string)id)) ||
-                   object.Equals(id, 0.0) ||
-                   object.Equals(id, 0.0F) ||
-                   object.Equals(id, 0.0M);
+                   Equals(id, 0L) ||
+                   Equals(id, 0) ||
+                   (id is string && string.IsNullOrWhiteSpace((string)id)) ||
+                   Equals(id, 0.0) ||
+                   Equals(id, 0.0F) ||
+                   Equals(id, 0.0M);
         }
 
         /// <summary>
@@ -422,6 +402,20 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 JsonProperty idProperty = this.SerializerSettings.ContractResolver.ResolveIdProperty(instance.GetType());
                 idProperty.ValueProvider.SetValue(instance, null);
+            }
+        }
+
+        /// <summary>
+        /// Sets the instance's id property value to the default id value.
+        /// </summary>
+        /// <param name="instance">
+        /// The instance on which to clear the id property.
+        /// </param>
+        public static void SetIdToDefault(JObject instance)
+        {
+            if (instance != null)
+            {
+                instance[IdPropertyName] = null;
             }
         }
 

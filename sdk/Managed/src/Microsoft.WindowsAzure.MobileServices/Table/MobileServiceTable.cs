@@ -65,9 +65,9 @@ namespace Microsoft.WindowsAzure.MobileServices
             Debug.Assert(tableName != null);
             Debug.Assert(client != null);
 
-            this.TableName = tableName;
-            this.MobileServiceClient = client;
-            this.SystemProperties = MobileServiceSystemProperties.None;
+            TableName = tableName;
+            MobileServiceClient = client;
+            SystemProperties = MobileServiceSystemProperties.None;
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public Task<JToken> ReadAsync(string query)
         {
-            return this.ReadAsync(query, null);
+            return ReadAsync(query, null);
         }
 
         /// <summary>
@@ -99,10 +99,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public async Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters)
         {
-            parameters = AddSystemProperties(this.SystemProperties, parameters);
+            parameters = AddSystemProperties(SystemProperties, parameters);
 
-            string uriPath = MobileServiceUrlBuilder.CombinePaths(TableRouteSeparatorName, this.TableName);
-            string parametersString = MobileServiceUrlBuilder.GetQueryString(parameters);
+            var uriPath = MobileServiceUrlBuilder.CombinePaths(TableRouteSeparatorName, TableName);
+            var parametersString = MobileServiceUrlBuilder.GetQueryString(parameters);
 
             // Concatenate the query and the user-defined query string parameters
             if (!string.IsNullOrEmpty(parametersString))
@@ -117,10 +117,10 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
             }
 
-            string uriString = MobileServiceUrlBuilder.CombinePathAndQuery(uriPath, query);
+            var uriString = MobileServiceUrlBuilder.CombinePathAndQuery(uriPath, query);
 
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true);
-            return response.Content.ParseToJToken(this.MobileServiceClient.SerializerSettings);
+            var response = await MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, MobileServiceClient.CurrentUser);
+            return response.Content.ParseToJToken(MobileServiceClient.SerializerSettings);
         }
 
         /// <summary>
@@ -134,7 +134,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public Task<JToken> InsertAsync(JObject instance)
         {
-            return this.InsertAsync(instance, null);
+            return InsertAsync(instance, null);
         }
 
         /// <summary>
@@ -157,38 +157,73 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("instance");
             }
 
-            // Make sure the instance doesn't have an int id set for an insertion
-            object id = MobileServiceSerializer.GetId(instance, true, true);
-            bool isStringIdOrDefaultIntId = id is string || MobileServiceSerializer.IsDefaultId(id);
-            if (!isStringIdOrDefaultIntId)
-            {
-                throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            Resources.MobileServiceTable_InsertWithExistingId,
-                           MobileServiceSerializer.IdPropertyName),
-                            "instance");
-            }
+            CheckForProperIdCasing(instance);
 
-            // If there is an id, it is either a default int or a string id
+            JToken id;
+            // RWM: We're using this because instance.Property("id").Type always returns JTokenType.Property
+            instance.TryGetValue("id", StringComparison.Ordinal, out id);
             if (id != null)
             {
-                // Make sure only proper casing is allowed
-                if (MobileServiceSerializer.GetId(instance, ignoreCase: false, allowDefault: true) == null)
+                // RWM: Resist the urge to refactor this into a reusable function. Each table operation has unique validation logic.
+                switch (id.Type)
                 {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            Resources.MobileServiceSerializer_IdCasingIncorrect,
-                            MobileServiceSerializer.IdPropertyName),
-                            "instance");
+                    case JTokenType.String:
+                        var stringResult = id.Value<string>();
+                        // RWM: Deal with the null case explicitly, because the default MobileServiceClient behavior does not 
+                        //      consider empties as null, which could short-circuit the null check in string.IsNullOrWhiteSpace() otherwise.
+                        if (stringResult == null || (string.IsNullOrWhiteSpace(stringResult) && MobileServiceClient.TreatEmptyIdsAsNullOnInsert))
+                        {
+                            instance.Remove("id");
+                            break;
+                        }
+                        // RWM: If we haven't removed the ID, validate it.
+                        if (stringResult.Length > MobileServiceSerializer.MaxStringIdLength)
+                        {
+                            throw new InvalidOperationException(
+                                string.Format(Resources.MobileServiceSerializer_StringIdTooLong,
+                                id, 
+                                MobileServiceSerializer.MaxStringIdLength));
+                        }
+                        if (MobileServiceSerializer.StringIdValidationRegex.IsMatch(stringResult))
+                        {
+                            throw new InvalidOperationException(
+                                string.Format(Resources.MobileServiceSerializer_InvalidStringId,
+                                id));
+                        }
+                        break;
+                    case JTokenType.Float:
+                    case JTokenType.Integer:
+                        // RWM: May be better to cast the value to a data type that encompasses more numbers than long.
+                        var numberResult = id.Value<long>();
+                        if (numberResult > 0)
+                        {
+                            // RWM: Shouldn't be setting Integer IDs for Inserts. Warn the user.
+                            throw GetArgumentException(Resources.MobileServiceTable_InsertWithExistingId,
+                                    MobileServiceSerializer.IdPropertyName);
+                        }
+                        if (numberResult == 0)
+                        {
+                            instance.Remove("id");
+                        }
+                        if (numberResult < 0)
+                        {
+                            // RWM: Can't use negative IDs. Warn the user.
+                            throw GetArgumentException(Resources.MobileServiceSerializer_InvalidIntegerId,
+                                    MobileServiceSerializer.IdPropertyName);
+                        }
+                        break;
+                    case JTokenType.Null:
+                        // RWM: We have an ID token but no value. Remove the token.
+                        instance.Remove("id");
+                        break;
                 }
             }
 
-            parameters = AddSystemProperties(this.SystemProperties, parameters);
+            parameters = AddSystemProperties(SystemProperties, parameters);
 
-            string uriString = GetUri(this.TableName, null, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, instance.ToString(Formatting.None), true);
+            var uriString = GetUri(TableName, null, parameters);
+            var payload = instance.ToString(Formatting.None);
+            var response = await MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, MobileServiceClient.CurrentUser, payload);
             return GetJTokenFromResponse(response);
         }
 
@@ -203,7 +238,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public Task<JToken> UpdateAsync(JObject instance)
         {
-            return this.UpdateAsync(instance, null);
+            return UpdateAsync(instance, null);
         }
 
         /// <summary>
@@ -224,32 +259,32 @@ namespace Microsoft.WindowsAzure.MobileServices
             if (instance == null)
             {
                 throw new ArgumentNullException("instance");
-            }            
-            
-            MobileServiceInvalidOperationException error = null;
+            }
+           
+            MobileServiceInvalidOperationException error;
+            string version = null;
 
             object id = MobileServiceSerializer.GetId(instance);
-            string version = null;
             if (!MobileServiceSerializer.IsIntegerId(id))
             {
                 instance = RemoveSystemProperties(instance, out version);
             }
-            parameters = AddSystemProperties(this.SystemProperties, parameters);
+
+            parameters = AddSystemProperties(SystemProperties, parameters);
 
             try
             {
                 Dictionary<string, string> headers = null;
 
                 string content = instance.ToString(Formatting.None);
-                string uriString = GetUri(this.TableName, id, parameters);
+                string uriString = GetUri(TableName, id, parameters);
 
                 if (version != null)
                 {
-                    headers = new Dictionary<string, string>();
-                    headers.Add("If-Match", GetEtagFromValue(version));
+                    headers = new Dictionary<string, string> {{"If-Match", GetEtagFromValue(version)}};
                 }
 
-                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(patchHttpMethod, uriString, this.MobileServiceClient.CurrentUser, content, true, headers);
+                var response = await MobileServiceClient.HttpClient.RequestAsync(patchHttpMethod, uriString, MobileServiceClient.CurrentUser, content, true, headers);
                 return GetJTokenFromResponse(response);
             }
             catch (MobileServiceInvalidOperationException ex)
@@ -263,7 +298,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 error = ex;                    
             }
 
-            JToken value = await this.ParseContent(error.Response);
+            var value = await ParseContent(error.Response);
             throw new MobileServicePreconditionFailedException(error, value);
         }        
 
@@ -278,7 +313,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public Task<JToken> DeleteAsync(JObject instance)
         {
-            return this.DeleteAsync(instance, null);
+            return DeleteAsync(instance, null);
         }
 
         /// <summary>
@@ -301,11 +336,66 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("instance");
             }
 
-            object id = MobileServiceSerializer.GetId(instance);
-            parameters = AddSystemProperties(this.SystemProperties, parameters);
+            CheckForProperIdCasing(instance);
 
-            string uriString = GetUri(this.TableName, id, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false);
+            JToken id;
+            // RWM: We're using this because instance.Property("id").Type always returns JTokenType.Property
+            instance.TryGetValue("id", StringComparison.Ordinal, out id);
+            if (id != null)
+            {
+                switch (id.Type)
+                {
+                    case JTokenType.String:
+                        var stringResult = id.Value<string>();
+                        if (string.IsNullOrWhiteSpace(stringResult))
+                        {
+                            throw new InvalidOperationException(Resources.MobileServiceSerializer_NullOrEmptyStringId);
+                        }
+                        if (stringResult.Length > MobileServiceSerializer.MaxStringIdLength)
+                        {
+                            throw new InvalidOperationException(
+                                string.Format(Resources.MobileServiceSerializer_StringIdTooLong,
+                                id, 
+                                MobileServiceSerializer.MaxStringIdLength));
+                        }
+                        if (MobileServiceSerializer.StringIdValidationRegex.IsMatch(stringResult))
+                        {
+                            throw new InvalidOperationException(
+                                string.Format(Resources.MobileServiceSerializer_InvalidStringId,
+                                id));
+                        }
+                        break;
+                    case JTokenType.Float:
+                    case JTokenType.Integer:
+                        // RWM: May be better to cast the value to a data type that encompasses more numbers than long.
+                        var numberResult = id.Value<long>();
+                        if (numberResult <= 0)
+                        {
+                            // RWM: Can't use negative IDs. Warn the user.
+                            throw GetArgumentException(Resources.MobileServiceSerializer_InvalidIntegerId,
+                                numberResult.ToString());
+                        }
+                        break;
+                    case JTokenType.Null:
+                        // RWM: We have an ID token but no value. Warn the user.
+                        throw GetArgumentException(Resources.MobileServiceTable_DeleteWithoutId,
+                            MobileServiceSerializer.IdPropertyName);
+                    default:
+                        // RWM: ID type is unsupported. Warn the user. Might not be the right string resource.
+                        throw GetArgumentException(Resources.MobileServiceSerializer_IdTypeMismatch,
+                            MobileServiceSerializer.IdPropertyName);
+                }
+            }
+            else
+            {
+                throw GetArgumentException(Resources.MobileServiceSerializer_IdNotFound,
+                            MobileServiceSerializer.IdPropertyName);
+            }
+
+            parameters = AddSystemProperties(SystemProperties, parameters);
+
+            var uriString = GetUri(TableName, id, parameters);
+            var response = await MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, MobileServiceClient.CurrentUser, null, false);
             return GetJTokenFromResponse(response);
         }
 
@@ -320,7 +410,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public Task<JToken> LookupAsync(object id)
         {
-            return this.LookupAsync(id, null);
+            return LookupAsync(id, null);
         }
 
         /// <summary>
@@ -340,10 +430,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             MobileServiceSerializer.EnsureValidId(id);
 
-            parameters = AddSystemProperties(this.SystemProperties, parameters);
+            parameters = AddSystemProperties(SystemProperties, parameters);
 
-            string uriString = GetUri(this.TableName, id, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true);
+            var uriString = GetUri(TableName, id, parameters);
+            var response = await MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, MobileServiceClient.CurrentUser);
             return GetJTokenFromResponse(response);
         }
 
@@ -378,6 +468,61 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
+        /// Checks an instance of <see cref="JObject"/> to make sure the ID value has is in the proper casing.
+        /// </summary>
+        /// <param name="instance">The JObject instance to check.</param>
+        /// <exception cref="ArgumentException">Thrown if the ID property is "ID" or "Id".</exception>
+        private static void CheckForProperIdCasing(JObject instance)
+        {
+            // RWM: No need for complex lookups here: there are only 4 permutations of "ID", and only one works.
+            if (instance.Property("ID") != null || instance.Property("Id") != null || instance.Property("iD") != null)
+            {
+                throw GetArgumentException(Resources.MobileServiceSerializer_IdCasingIncorrect, MobileServiceSerializer.IdPropertyName);
+            }
+        }
+
+        /// <summary>
+        /// Gets a valid etag from a string value. Etags are surrounded
+        /// by double quotes and any internal quotes must be escaped with a 
+        /// '\'.
+        /// </summary>
+        /// <param name="value">The value to create the etag from.</param>
+        /// <returns>
+        /// The etag.
+        /// </returns>
+        private static string GetEtagFromValue(string value)
+        {
+            // If the value has double quotes, they will need to be escaped.
+            for (int i = 0; i < value.Length; i++)
+            {
+                if (value[i] == '"' && (i == 0 || value[i - 1] != '\\'))
+                {
+                    value = value.Insert(i, "\\");
+                }
+            }
+
+            // All etags are quoted;
+            return string.Format("\"{0}\"", value);
+        }
+
+        /// <summary>
+        /// Parses the response content into a JToken and adds the version system property
+        /// if the ETag was returned from the server.
+        /// </summary>
+        /// <param name="response">The response to parse.</param>
+        /// <returns>The parsed JToken.</returns>
+        private JToken GetJTokenFromResponse(MobileServiceHttpResponse response)
+        {
+            var jtoken = response.Content.ParseToJToken(MobileServiceClient.SerializerSettings);
+            if (response.Etag != null)
+            {
+                jtoken[MobileServiceSerializer.VersionSystemPropertyString] = GetValueFromEtag(response.Etag);
+            }
+
+            return jtoken;
+        }
+
+        /// <summary>
         /// Gets the system properties header value from the <see cref="MobileServiceSystemProperties"/>.
         /// </summary>
         /// <param name="properties">The system properties to set in the system properties header.</param>
@@ -406,6 +551,73 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             string systemPropertiesString = string.Join(",", systemProperties);
             return systemPropertiesString;
+        }
+
+        /// <summary>
+        /// Returns a URI for the table, optional id and parameters.
+        /// </summary>
+        /// <param name="tableName">
+        /// The name of the table.
+        /// </param>
+        /// <param name="id">
+        /// The id of the instance.
+        /// </param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.
+        /// </param>
+        /// <returns>
+        /// A URI string.
+        /// </returns>
+        private static string GetUri(string tableName, object id = null, IDictionary<string, string> parameters = null)
+        {
+            Debug.Assert(!string.IsNullOrEmpty(tableName));
+
+            string uriPath = MobileServiceUrlBuilder.CombinePaths(TableRouteSeparatorName, tableName);
+            if (id != null)
+            {
+                string idString = Uri.EscapeDataString(string.Format(CultureInfo.InvariantCulture, "{0}", id));
+                uriPath = MobileServiceUrlBuilder.CombinePaths(uriPath, idString);
+            }
+
+            string queryString = MobileServiceUrlBuilder.GetQueryString(parameters);
+
+            return MobileServiceUrlBuilder.CombinePathAndQuery(uriPath, queryString);
+        }
+
+        /// <summary>
+        /// Gets a value from an etag. Etags are surrounded
+        /// by double quotes and any internal quotes must be escaped with a 
+        /// '\'.
+        /// </summary>
+        /// <param name="etag">The etag to get the value from.</param>
+        /// <returns>
+        /// The value.
+        /// </returns>
+        private static string GetValueFromEtag(string etag)
+        {
+            int length = etag.Length;
+            if (length > 1 && etag[0] == '\"' && etag[length - 1] == '\"')
+            {
+                etag = etag.Substring(1, length - 2);
+            }
+
+            return etag.Replace("\\\"", "\"");
+        }
+
+        private async Task<JToken> ParseContent(HttpResponseMessage response)
+        {
+            JToken value = null;
+            try
+            {
+                if (response.Content != null)
+                {
+                    string content = await response.Content.ReadAsStringAsync();
+                    value = content.ParseToJToken(this.MobileServiceClient.SerializerSettings);
+                }
+            }
+            catch { }
+            return value;
         }
 
         /// <summary>
@@ -447,112 +659,17 @@ namespace Microsoft.WindowsAzure.MobileServices
             return instance;
         }
 
-        private async Task<JToken> ParseContent(HttpResponseMessage response)
-        {
-            JToken value = null;
-            try
-            {
-                if (response.Content != null)
-                {
-                    string content = await response.Content.ReadAsStringAsync();
-                    value = content.ParseToJToken(this.MobileServiceClient.SerializerSettings);
-                }
-            }
-            catch { }
-            return value;
-        }
-
         /// <summary>
-        /// Returns a URI for the table, optional id and parameters.
+        /// Creates a new ArgumentException for a given resource string and argument name.
         /// </summary>
-        /// <param name="tableName">
-        /// The name of the table.
-        /// </param>
-        /// <param name="id">
-        /// The id of the instance.
-        /// </param>
-        /// <param name="parameters">
-        /// A dictionary of user-defined parameters and values to include in 
-        /// the request URI query string.
-        /// </param>
-        /// <returns>
-        /// A URI string.
-        /// </returns>
-        private static string GetUri(string tableName, object id = null, IDictionary<string, string> parameters = null)
+        /// <param name="resource"></param>
+        /// <param name="argumentName"></param>
+        /// <returns></returns>
+        private static ArgumentException GetArgumentException(string resource, string argumentName)
         {
-            Debug.Assert(!string.IsNullOrEmpty(tableName));
-
-            string uriPath = MobileServiceUrlBuilder.CombinePaths(TableRouteSeparatorName, tableName);
-            if (id != null)
-            {
-                string idString = Uri.EscapeDataString(string.Format(CultureInfo.InvariantCulture, "{0}", id));
-                uriPath = MobileServiceUrlBuilder.CombinePaths(uriPath, idString);
-            }
-
-            string queryString = MobileServiceUrlBuilder.GetQueryString(parameters);
-
-            return MobileServiceUrlBuilder.CombinePathAndQuery(uriPath, queryString);
+            var message = string.Format(CultureInfo.InvariantCulture, resource, argumentName);
+            return new ArgumentException(message, "instance");
         }
 
-        /// <summary>
-        /// Parses the response content into a JToken and adds the version system property
-        /// if the ETag was returned from the server.
-        /// </summary>
-        /// <param name="response">The response to parse.</param>
-        /// <returns>The parsed JToken.</returns>
-        private JToken GetJTokenFromResponse(MobileServiceHttpResponse response)
-        {
-            JToken jtoken = response.Content.ParseToJToken(this.MobileServiceClient.SerializerSettings);
-            if (response.Etag != null)
-            {
-                jtoken[MobileServiceSerializer.VersionSystemPropertyString] = GetValueFromEtag(response.Etag);
-            }
-
-            return jtoken;
-        }
-
-        /// <summary>
-        /// Gets a valid etag from a string value. Etags are surrounded
-        /// by double quotes and any internal quotes must be escaped with a 
-        /// '\'.
-        /// </summary>
-        /// <param name="value">The value to create the etag from.</param>
-        /// <returns>
-        /// The etag.
-        /// </returns>
-        private static string GetEtagFromValue(string value)
-        {
-            // If the value has double quotes, they will need to be escaped.
-            for (int i = 0; i < value.Length; i++)
-            {
-                if (value[i] == '"' && (i == 0 || value[i - 1] != '\\'))
-                {
-                    value = value.Insert(i, "\\");
-                }
-            }
-
-            // All etags are quoted;
-            return string.Format("\"{0}\"", value);
-        }
-
-        /// <summary>
-        /// Gets a value from an etag. Etags are surrounded
-        /// by double quotes and any internal quotes must be escaped with a 
-        /// '\'.
-        /// </summary>
-        /// <param name="etag">The etag to get the value from.</param>
-        /// <returns>
-        /// The value.
-        /// </returns>
-        private static string GetValueFromEtag(string etag)
-        {
-            int length = etag.Length;
-            if (length > 1 && etag[0] == '\"' && etag[length - 1] == '\"')
-            {
-                etag = etag.Substring(1, length - 2);
-            }
-
-            return etag.Replace("\\\"", "\"");
-        }
     }
 }
