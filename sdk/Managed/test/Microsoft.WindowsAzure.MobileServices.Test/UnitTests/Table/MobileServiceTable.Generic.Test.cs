@@ -19,41 +19,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 {
     [Tag("unit")]
     [Tag("table")]
-    public class MobileServiceTableGenericTests :TestBase
+    [Tag("table-generic")]
+    public class MobileServiceTableGenericTests : MobileServiceTableTestBase
     {
-
-        #region Test Object Creation
-
-        /// <summary>
-        /// Gets the object typically used as the "response" object, with a String payload of "Hey".
-        /// </summary>
-        /// <param name="testId">The ID to test, in the form of a string.</param>
-        /// <returns>A JObject to test against.</returns>
-        /// <remarks>
-        /// RWM: If the "Hey", "what?" payloads are attempting to mimic a conversation, whomever wrote these tests wrote them backwards.
-        /// </remarks>
-        private JObject GetHeyObject(string testId)
-        {
-            var response = new JObject();
-            response["id"] = testId == null ? testId : testId.Replace("\\", "\\\\").Replace("\"", "\\\"");
-            response["String"] = "Hey";
-            return response;
-        }
-
-        /// <summary>
-        /// Gets the object array typically used as the "response" object, with a String payload of "Hey".
-        /// </summary>
-        /// <param name="testId">The ID to test, in the form of a string.</param>
-        /// <returns>A JObject to test against.</returns>
-        /// <remarks>
-        /// RWM: If the "Hey", "what?" payloads are attempting to mimic a conversation, whomever wrote these tests wrote them backwards.
-        /// </remarks>
-        private JArray GetHeyObjectArray(string testId)
-        {
-            return new JArray { GetHeyObject(testId) };
-        }
-
-        #endregion
 
         #region Read Tests
 
@@ -103,8 +71,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task ReadAsyncWithStringIdTypeAndStringIdResponseContent()
         {
             var testIdData = IdTestData.ValidStringIds.Concat(
-                                  IdTestData.EmptyStringIds.Where(c => c != null)).Concat(
-                                  IdTestData.InvalidStringIds).ToArray();
+                             IdTestData.EmptyStringIds).Concat(
+                             IdTestData.InvalidStringIds).ToArray();
 
             foreach (var testId in testIdData)
             {
@@ -114,11 +82,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
                 var table = service.GetTable<StringIdType>();
 
-                IEnumerable<StringIdType> results = await table.ReadAsync();
-                StringIdType[] items = results.ToArray();
+                var results = await table.ReadAsync();
+                var items = results.ToArray();
 
                 Assert.AreEqual(1, items.Count());
-                Assert.AreEqual(testId.Replace("\\", "\\\\").Replace("\"", "\\\""), items[0].Id);
+                Assert.AreEqual(GetEscapedTestId(testId), items[0].Id);
                 Assert.AreEqual("Hey", items[0].String);
             }
         }
@@ -190,22 +158,23 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task ReadAsyncWithStringIdTypeAndStringIdFilter()
         {
-            string[] testIdData = IdTestData.ValidStringIds.Concat(
-                                  IdTestData.EmptyStringIds.Where(c => c != null)).Concat(
-                                  IdTestData.InvalidStringIds).ToArray();
+            //RWM: Nulls are excluded here because the OData URL format for nulls is different.
+            var testIdData = IdTestData.ValidStringIds.Concat(
+                             IdTestData.EmptyStringIds.Where(c => c != null)).Concat(
+                             IdTestData.InvalidStringIds).ToArray();
 
-            foreach (string testId in testIdData)
+            foreach (var testId in testIdData)
             {
-                var stringTestId = testId.Replace("\\", "\\\\").Replace("\"", "\\\"");
+                var stringTestId = GetEscapedTestId(testId);
                 var hijack = new TestHttpHandler();
                 hijack.SetResponseContent(GetHeyObjectArray(testId).ToString());
                 
                 var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
                 var table = service.GetTable<StringIdType>();
 
-                List<StringIdType> items = await table.Where(t => t.Id == stringTestId).ToListAsync();
-                string idForOdataQuery = Uri.EscapeDataString(stringTestId.Replace("'", "''"));
-                Uri expectedUri = new Uri(string.Format("http://www.test.com/tables/StringIdType?$filter=(id eq '{0}')", idForOdataQuery));
+                var items = await table.Where(t => t.Id == stringTestId).ToListAsync();
+                var idForOdataQuery = Uri.EscapeDataString(stringTestId.Replace("'", "''"));
+                var expectedUri = new Uri(string.Format("http://www.test.com/tables/StringIdType?$filter=(id eq '{0}')", idForOdataQuery));
 
                 Assert.AreEqual(1, items.Count());
                 Assert.AreEqual(stringTestId, items[0].Id);
@@ -217,14 +186,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task ReadAsyncWithStringIdTypeAndNullIdFilter()
         {
-            TestHttpHandler hijack = new TestHttpHandler();
-            hijack.SetResponseContent("[{\"id\":null,\"String\":\"Hey\"}]");
+            var hijack = new TestHttpHandler();
+            hijack.SetResponseContent(GetHeyObjectArray(null).ToString());
 
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
-            IMobileServiceTable<StringIdType> table = service.GetTable<StringIdType>();
+            var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            var table = service.GetTable<StringIdType>();
 
-            List<StringIdType> items = await table.Where(t => t.Id == null).ToListAsync();
-            Uri expectedUri = new Uri("http://www.test.com/tables/StringIdType?$filter=(id eq null)");
+            var items = await table.Where(t => t.Id == null).ToListAsync();
+            var expectedUri = new Uri("http://www.test.com/tables/StringIdType?$filter=(id eq null)");
 
             Assert.AreEqual(1, items.Count());
             Assert.AreEqual(null, items[0].Id);
@@ -236,8 +205,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task ReadAsyncWithStringIdTypeAndStringIdProjection()
         {
             var testIdData = IdTestData.ValidStringIds.Concat(
-                                  IdTestData.EmptyStringIds.Where(c => c != null)).Concat(
-                                  IdTestData.InvalidStringIds).ToArray();
+                             IdTestData.EmptyStringIds).Concat(
+                             IdTestData.InvalidStringIds).ToArray();
 
             foreach (var testId in testIdData)
             {
@@ -251,7 +220,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 var expectedUri = new Uri("http://www.test.com/tables/StringIdType?$select=id,String");
 
                 Assert.AreEqual(1, items.Count());
-                Assert.AreEqual(testId.Replace("\\", "\\\\").Replace("\"", "\\\""), items[0].Id);
+                Assert.AreEqual(GetEscapedTestId(testId), items[0].Id);
                 Assert.AreEqual("Hey", items[0].Message);
                 Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
             }
@@ -261,15 +230,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task ReadAsyncWithStringIdTypeAndNullIdProjection()
         {
-            TestHttpHandler hijack = new TestHttpHandler();
-            hijack.SetResponseContent("[{\"id\":null,\"String\":\"Hey\"}]");
+            var hijack = new TestHttpHandler();
+            hijack.SetResponseContent(GetHeyObjectArray(null).ToString());
 
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            var table = service.GetTable<StringIdType>();
 
-            IMobileServiceTable<StringIdType> table = service.GetTable<StringIdType>();
-
-            var items = await table.Select(s => new { Id = s.Id, Message = s.String }).ToListAsync();
-            Uri expectedUri = new Uri("http://www.test.com/tables/StringIdType?$select=id,String");
+            var items = await table.Select(s => new { s.Id, Message = s.String }).ToListAsync();
+            var expectedUri = new Uri("http://www.test.com/tables/StringIdType?$select=id,String");
 
             Assert.AreEqual(1, items.Count());
             Assert.AreEqual(null, items[0].Id);
@@ -281,15 +249,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task ReadAsyncWithStringIdTypeAndNoIdProjection()
         {
-            TestHttpHandler hijack = new TestHttpHandler();
+            var hijack = new TestHttpHandler();
             hijack.SetResponseContent("[{\"String\":\"Hey\"}]");
 
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
-
-            IMobileServiceTable<StringIdType> table = service.GetTable<StringIdType>();
+            var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            var table = service.GetTable<StringIdType>();
 
             var items = await table.Select(s => new { s.Id, Message = s.String }).ToListAsync();
-            Uri expectedUri = new Uri("http://www.test.com/tables/StringIdType?$select=id,String");
+            var expectedUri = new Uri("http://www.test.com/tables/StringIdType?$select=id,String");
 
             Assert.AreEqual(1, items.Count());
             Assert.AreEqual(null, items[0].Id);
@@ -301,9 +268,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task ReadAsyncWithStringIdTypeAndOrderByAscending()
         {
-            string[] testIdData = IdTestData.ValidStringIds.Concat(
-                                  IdTestData.EmptyStringIds.Where(c => c != null)).Concat(
-                                  IdTestData.InvalidStringIds).ToArray();
+            var testIdData = IdTestData.ValidStringIds.Concat(
+                             IdTestData.EmptyStringIds).Concat(
+                             IdTestData.InvalidStringIds).ToArray();
 
             foreach (string testId in testIdData)
             {
@@ -313,12 +280,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
                 var table = service.GetTable<StringIdType>();
 
-                Debug.WriteLine(testId);
                 var items = await table.OrderBy(s => s.Id).ToListAsync();
                 var expectedUri = new Uri("http://www.test.com/tables/StringIdType?$orderby=id");
 
                 Assert.AreEqual(1, items.Count());
-                Assert.AreEqual(testId.Replace("\\", "\\\\").Replace("\"", "\\\""), items[0].Id);
+                Assert.AreEqual(GetEscapedTestId(testId), items[0].Id);
                 Assert.AreEqual("Hey", items[0].String);
                 Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
             }
@@ -328,11 +294,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task ReadAsyncWithStringIdTypeAndOrderByDescending()
         {
-            string[] testIdData = IdTestData.ValidStringIds.Concat(
+            var testIdData = IdTestData.ValidStringIds.Concat(
                                   IdTestData.EmptyStringIds.Where(c => c != null)).Concat(
                                   IdTestData.InvalidStringIds).ToArray();
 
-            foreach (string testId in testIdData)
+            foreach (var testId in testIdData)
             {
                 var hijack = new TestHttpHandler();
                 hijack.SetResponseContent(GetHeyObjectArray(testId).ToString());
@@ -344,7 +310,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 var expectedUri = new Uri("http://www.test.com/tables/StringIdType?$orderby=id desc");
 
                 Assert.AreEqual(1, items.Count());
-                Assert.AreEqual(testId.Replace("\\", "\\\\").Replace("\"", "\\\""), items[0].Id);
+                Assert.AreEqual(GetEscapedTestId(testId), items[0].Id);
                 Assert.AreEqual("Hey", items[0].String);
                 Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
             }
@@ -401,14 +367,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task ReadAsyncWithIntIdTypeAndNullIdResponseContent()
         {
-            TestHttpHandler hijack = new TestHttpHandler();
-            hijack.SetResponseContent("[{\"id\":null,\"String\":\"Hey\"}]");
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            var hijack = new TestHttpHandler();
+            hijack.SetResponseContent(GetHeyObjectArray(null).ToString());
 
-            IMobileServiceTable<LongIdType> table = service.GetTable<LongIdType>();
+            var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            var table = service.GetTable<LongIdType>();
 
-            IEnumerable<LongIdType> results = await table.ReadAsync();
-            LongIdType[] items = results.ToArray();
+            var results = await table.ReadAsync();
+            var items = results.ToArray();
 
             Assert.AreEqual(1, items.Count());
             Assert.AreEqual(0L, items[0].Id);
@@ -419,14 +385,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task ReadAsyncWithIntIdTypeAndNoIdResponseContent()
         {
-            TestHttpHandler hijack = new TestHttpHandler();
+            var hijack = new TestHttpHandler();
             hijack.SetResponseContent("[{\"String\":\"Hey\"}]");
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
 
-            IMobileServiceTable<LongIdType> table = service.GetTable<LongIdType>();
+            var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            var table = service.GetTable<LongIdType>();
 
-            IEnumerable<LongIdType> results = await table.ReadAsync();
-            LongIdType[] items = results.ToArray();
+            var results = await table.ReadAsync();
+            var items = results.ToArray();
 
             Assert.AreEqual(1, items.Count());
             Assert.AreEqual(0L, items[0].Id);
@@ -437,22 +403,23 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task ReadAsyncWithIntIdTypeAndStringIdResponseContent()
         {
-            string[] testIdData = IdTestData.ValidStringIds.Concat(
-                                  IdTestData.EmptyStringIds).ToArray();
+            //RWM: Don't test for NULL here because that is a valid Int ID.
+            var testIdData = IdTestData.ValidStringIds.Concat(
+                             IdTestData.EmptyStringIds.Where(c => c != null)).ToArray();
 
-            foreach (string testId in testIdData)
+            foreach (var testId in testIdData)
             {
-                TestHttpHandler hijack = new TestHttpHandler();
-                hijack.SetResponseContent("[{\"id\":\"" + testId + "\",\"String\":\"Hey\"}]");
-                IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+                var hijack = new TestHttpHandler();
+                hijack.SetResponseContent(GetHeyObjectArray(testId).ToString());
 
-                IMobileServiceTable<LongIdType> table = service.GetTable<LongIdType>();
+                var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+                var table = service.GetTable<LongIdType>();
 
                 Exception exception = null;
                 try
                 {
-                    IEnumerable<LongIdType> results = await table.ReadAsync();
-                    LongIdType[] items = results.ToArray();
+                   var results = await table.ReadAsync();
+                   var items = results.ToArray();
                 }
                 catch (Exception e)
                 {
@@ -468,16 +435,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task ReadAsyncWithIntIdTypeAndIntIdFilter()
         {
-            long[] testIdData = IdTestData.ValidIntIds.Concat(
+            var testIdData = IdTestData.ValidIntIds.Concat(
                                 IdTestData.InvalidIntIds).ToArray();
 
-            foreach (long testId in testIdData)
+            foreach (var testId in testIdData)
             {
                 TestHttpHandler hijack = new TestHttpHandler();
                 hijack.SetResponseContent("[{\"id\":" + testId + ",\"String\":\"Hey\"}]");
 
                 IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
-
                 IMobileServiceTable<LongIdType> table = service.GetTable<LongIdType>();
 
                 List<LongIdType> items = await table.Where(t => t.Id == testId).ToListAsync();
@@ -493,15 +459,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task ReadAsyncWithIntIdTypeAndNullIdFilter()
         {
-            TestHttpHandler hijack = new TestHttpHandler();
-            hijack.SetResponseContent("[{\"id\":null,\"String\":\"Hey\"}]");
+            var hijack = new TestHttpHandler();
+            hijack.SetResponseContent(GetHeyObjectArray(null).ToString());
 
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            var table = service.GetTable<LongIdType>();
 
-            IMobileServiceTable<LongIdType> table = service.GetTable<LongIdType>();
-
-            List<LongIdType> items = await table.Where(t => t.Id == null).ToListAsync();
-            Uri expectedUri = new Uri("http://www.test.com/tables/LongIdType?$filter=(id eq null)");
+            var items = await table.Where(t => t.Id == null).ToListAsync();
+            var expectedUri = new Uri("http://www.test.com/tables/LongIdType?$filter=(id eq null)");
 
             Assert.AreEqual(1, items.Count());
             Assert.AreEqual(0L, items[0].Id);
@@ -512,20 +477,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task ReadAsyncWithIntIdTypeAndIntIdProjection()
         {
-            long[] testIdData = IdTestData.ValidIntIds.Concat(
-                                IdTestData.InvalidIntIds).ToArray();
+            var testIdData = IdTestData.ValidIntIds.Concat(
+                             IdTestData.InvalidIntIds).ToArray();
 
             foreach (long testId in testIdData)
             {
-                TestHttpHandler hijack = new TestHttpHandler();
+                var hijack = new TestHttpHandler();
                 hijack.SetResponseContent("[{\"id\":" + testId + ",\"String\":\"Hey\"}]");
 
-                IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
-
-                IMobileServiceTable<LongIdType> table = service.GetTable<LongIdType>();
+                var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+                var table = service.GetTable<LongIdType>();
 
                 var items = await table.Select(s => new { Id = s.Id, Message = s.String }).ToListAsync();
-                Uri expectedUri = new Uri("http://www.test.com/tables/LongIdType?$select=id,String");
+                var expectedUri = new Uri("http://www.test.com/tables/LongIdType?$select=id,String");
 
                 Assert.AreEqual(1, items.Count());
                 Assert.AreEqual(testId, items[0].Id);
@@ -538,15 +502,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task ReadAsyncWithIntIdTypeAndNullIdProjection()
         {
-            TestHttpHandler hijack = new TestHttpHandler();
-            hijack.SetResponseContent("[{\"id\":null,\"String\":\"Hey\"}]");
+            var hijack = new TestHttpHandler();
+            hijack.SetResponseContent(GetHeyObjectArray(null).ToString());
 
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            var table = service.GetTable<LongIdType>();
 
-            IMobileServiceTable<LongIdType> table = service.GetTable<LongIdType>();
-
-            var items = await table.Select(s => new { Id = s.Id, Message = s.String }).ToListAsync();
-            Uri expectedUri = new Uri("http://www.test.com/tables/LongIdType?$select=id,String");
+            var items = await table.Select(s => new { s.Id, Message = s.String }).ToListAsync();
+            var expectedUri = new Uri("http://www.test.com/tables/LongIdType?$select=id,String");
 
             Assert.AreEqual(1, items.Count());
             Assert.AreEqual(0L, items[0].Id);
@@ -558,15 +521,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task ReadAsyncWithIntIdTypeAndNoIdProjection()
         {
-            TestHttpHandler hijack = new TestHttpHandler();
+            var hijack = new TestHttpHandler();
             hijack.SetResponseContent("[{\"String\":\"Hey\"}]");
 
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            var table = service.GetTable<LongIdType>();
 
-            IMobileServiceTable<LongIdType> table = service.GetTable<LongIdType>();
-
-            var items = await table.Select(s => new { Id = s.Id, Message = s.String }).ToListAsync();
-            Uri expectedUri = new Uri("http://www.test.com/tables/LongIdType?$select=id,String");
+            var items = await table.Select(s => new { s.Id, Message = s.String }).ToListAsync();
+            var expectedUri = new Uri("http://www.test.com/tables/LongIdType?$select=id,String");
 
             Assert.AreEqual(1, items.Count());
             Assert.AreEqual(0L, items[0].Id);
@@ -899,21 +861,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task LookupAsyncWithIntIdTypeAndStringIdResponseContent()
         {
-            string[] testIdData = IdTestData.ValidStringIds.Concat(
-                                  IdTestData.EmptyStringIds).ToArray();
+            // RWM: Don't use NULL here because that is a valid int ID.
+            var testIdData = IdTestData.ValidStringIds.Concat(
+                             IdTestData.EmptyStringIds.Where(c => c != null)).ToArray();
 
-            foreach (string testId in testIdData)
+            foreach (var testId in testIdData)
             {
-                TestHttpHandler hijack = new TestHttpHandler();
-                hijack.SetResponseContent("{\"id\":\"" + testId + "\",\"String\":\"Hey\"}");
-                IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+                var hijack = new TestHttpHandler();
+                hijack.SetResponseContent(GetHeyObject(testId).ToString());
 
-                IMobileServiceTable<LongIdType> table = service.GetTable<LongIdType>();
+                var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+                var table = service.GetTable<LongIdType>();
 
                 Exception exception = null;
                 try
                 {
-                    LongIdType item = await table.LookupAsync(10);
+                    var item = await table.LookupAsync(10);
                 }
                 catch (Exception e)
                 {
@@ -3089,6 +3052,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
         #endregion System Properties Tests
 
+        #region Version Tests
+
         [AsyncTestMethod]
         public async Task VersionSystemPropertySetsIfMatchHeader()
         {
@@ -3156,6 +3121,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 Assert.AreEqual(item.Version, testcase.Item1);
             }
         }
+
+        #endregion
 
         #region ETag Tests
 
