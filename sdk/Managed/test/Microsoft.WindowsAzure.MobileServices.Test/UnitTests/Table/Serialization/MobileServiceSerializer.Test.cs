@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json;
@@ -16,6 +17,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     public class MobileServiceSerializerTests : TestBase
     {
         MobileServiceSerializer defaultSerializer;
+        static readonly string MinDateTimeSerializedToJson;
+
+        static MobileServiceSerializerTests()
+        {
+            var settings = new JsonSerializerSettings();
+            settings.DateFormatHandling = DateFormatHandling.IsoDateFormat;
+            settings.DateFormatString = "yyyy-MM-dd'T'HH:mm:ss.fff'Z'";
+            MinDateTimeSerializedToJson = JsonConvert.SerializeObject(default(DateTime).ToUniversalTime(), settings);
+        }
 
         MobileServiceSerializer DefaultSerializer
         {
@@ -1935,18 +1945,39 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             }
         }
 
+        private static string ExpectedDateTimeSerialization(DateTime dt)
+        {
+            DateTime utc = dt.ToUniversalTime();
+            return "\"" + utc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffK", CultureInfo.InvariantCulture) + "\"";
+        }
+
+        private static string ExpectedDateTimeOffsetSerialization(DateTimeOffset dto)
+        {
+            DateTime utc = dto.ToUniversalTime().UtcDateTime;
+            return "\"" + utc.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffK", CultureInfo.InvariantCulture) + "\"";
+        }
+
         [TestMethod]
         public void DateTimeSerialization()
         {
-            List<Tuple<DateTimeType, string>> testCases = new List<Tuple<DateTimeType, string>>() {
-                new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime() }, "{\"DateTime\":\"0001-01-01T08:00:00.000Z\"}"),
-                new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime(1999, 12, 31, 23, 59, 59) }, "{\"DateTime\":\"2000-01-01T07:59:59.000Z\"}"),
-                new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime(2005, 3, 14, 12, 34, 16, DateTimeKind.Local) }, "{\"DateTime\":\"2005-03-14T20:34:16.000Z\"}"),
-                new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime(2005, 4, 14, 12, 34, 16, DateTimeKind.Unspecified) }, "{\"DateTime\":\"2005-04-14T19:34:16.000Z\"}"),
-                new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime(2005, 3, 14, 12, 34, 16, DateTimeKind.Local) }, "{\"DateTime\":\"2005-03-14T20:34:16.000Z\"}"),
-                new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime(2005, 5, 14, 12, 34, 16, DateTimeKind.Utc) }, "{\"DateTime\":\"2005-05-14T12:34:16.000Z\"}"),
-                new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime(2012, 2, 29, 12, 0, 0, DateTimeKind.Utc) }, "{\"DateTime\":\"2012-02-29T12:00:00.000Z\"}"), // Leap Day
+            List<DateTime> dates = new List<DateTime>
+            {
+                new DateTime(1999, 12, 31, 23, 59, 59),
+                new DateTime(2005, 3, 14, 12, 34, 16, DateTimeKind.Local),
+                new DateTime(2005, 4, 14, 12, 34, 16, DateTimeKind.Unspecified),
+                new DateTime(2005, 3, 14, 12, 34, 16, DateTimeKind.Local),
+                new DateTime(2005, 5, 14, 12, 34, 16, DateTimeKind.Utc),
+                new DateTime(2012, 2, 29, 12, 0, 0, DateTimeKind.Utc)
             };
+            List<Tuple<DateTimeType, string>> testCases = new List<Tuple<DateTimeType, string>>
+            {
+                new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime() }, "{\"DateTime\":" + MinDateTimeSerializedToJson + "}"),
+            };
+            foreach (var date in dates) {
+                testCases.Add(new Tuple<DateTimeType,string>(
+                    new DateTimeType { DateTime = date },
+                    "{\"DateTime\":" + ExpectedDateTimeSerialization(date) + "}"));
+            }
 
             // Need to ensure that the type is registered as a table to force the id property check
             DefaultSerializer.SerializerSettings.ContractResolver.ResolveTableName(typeof(DateTimeType));
@@ -1965,17 +1996,28 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [TestMethod]
         public void DateTimeDeserialization()
         {
-            List<Tuple<DateTimeType, string>> testCases = new List<Tuple<DateTimeType, string>>() {
+            List<Tuple<DateTimeType, string>> testCases = new List<Tuple<DateTimeType, string>>()
+            {
                 new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime() }, "{}"),
                 new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime() }, "{\"DateTime\":null}"),
-                new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime() }, "{\"DateTime\":\"0001-01-01T08:00:00.000Z\"}"),
-                new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime(1999, 12, 31, 23, 59, 59) }, "{\"DateTime\":\"2000-01-01T07:59:59.000Z\"}"),
-                new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime(2005, 3, 14, 12, 34, 16, DateTimeKind.Local).ToLocalTime() }, "{\"DateTime\":\"2005-03-14T20:34:16.000Z\"}"),
-                new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime(2005, 4, 14, 12, 34, 16, DateTimeKind.Unspecified) }, "{\"DateTime\":\"2005-04-14T19:34:16.000Z\"}"),
-                new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime(2005, 3, 14, 12, 34, 16, DateTimeKind.Local) }, "{\"DateTime\":\"2005-03-14T20:34:16.000Z\"}"),
-                new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime(2005, 5, 14, 12, 34, 16, DateTimeKind.Utc).ToLocalTime() }, "{\"DateTime\":\"2005-05-14T12:34:16.000Z\"}"),
-                new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime(2012, 2, 29, 12, 0, 0, DateTimeKind.Utc).ToLocalTime() }, "{\"DateTime\":\"2012-02-29T12:00:00.000Z\"}"), // Leap Day
+                new Tuple<DateTimeType, string>(new DateTimeType() { DateTime = new DateTime() }, "{\"DateTime\":" + MinDateTimeSerializedToJson + "}")
             };
+
+            List<DateTime> dates = new List<DateTime>
+            {
+                new DateTime(1999, 12, 31, 23, 59, 59),
+                new DateTime(2005, 3, 14, 12, 34, 16, DateTimeKind.Local).ToLocalTime(),
+                new DateTime(2005, 4, 14, 12, 34, 16, DateTimeKind.Unspecified),
+                new DateTime(2005, 3, 14, 12, 34, 16, DateTimeKind.Local),
+                new DateTime(2005, 5, 14, 12, 34, 16, DateTimeKind.Utc).ToLocalTime(),
+                new DateTime(2012, 2, 29, 12, 0, 0, DateTimeKind.Utc).ToLocalTime() // leap day
+            };
+
+            foreach (var date in dates) {
+                testCases.Add(new Tuple<DateTimeType,string>(
+                    new DateTimeType { DateTime = date },
+                    "{\"DateTime\":" + ExpectedDateTimeSerialization(date) + "}"));
+            }
 
             // Need to ensure that the type is registered as a table to force the id property check
             DefaultSerializer.SerializerSettings.ContractResolver.ResolveTableName(typeof(DateTimeType));
@@ -1988,7 +2030,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 DateTimeType actual = new DateTimeType();
                 DefaultSerializer.Deserialize(input, actual);
 
-                Assert.AreEqual(actual.DateTime, expected.DateTime);
+                Assert.AreEqual(actual.DateTime.ToUniversalTime(), expected.DateTime.ToUniversalTime());
 
                 if (testCase.Item2 != "{}")
                 {
@@ -1997,16 +2039,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     DefaultSerializer.Deserialize(input, actual);
                 }
 
-                Assert.AreEqual(actual.DateTime, expected.DateTime);
+                Assert.AreEqual(actual.DateTime.ToUniversalTime(), expected.DateTime.ToUniversalTime());
 
                 JArray json = JToken.Parse("[" + testCase.Item2 + "]") as JArray;
                 actual = DefaultSerializer.Deserialize<DateTimeType>(json).FirstOrDefault();
 
-                Assert.AreEqual(actual.DateTime, expected.DateTime);
+                Assert.AreEqual(actual.DateTime.ToUniversalTime(), expected.DateTime.ToUniversalTime());
 
                 actual = (DateTimeType)DefaultSerializer.Deserialize<DateTimeType>(input);
 
-                Assert.AreEqual(actual.DateTime, expected.DateTime);
+                Assert.AreEqual(actual.DateTime.ToUniversalTime(), expected.DateTime.ToUniversalTime());
             }
         }
 
@@ -2045,17 +2087,28 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [TestMethod]
+        [Tag("foo")]
         public void DateTimeOffsetSerialization()
         {
-            List<Tuple<DateTimeOffsetType, string>> testCases = new List<Tuple<DateTimeOffsetType, string>>() {
-                new Tuple<DateTimeOffsetType, string>(new DateTimeOffsetType() { DateTimeOffset = new DateTimeOffset() }, "{\"DateTimeOffset\":\"0001-01-01T00:00:00.000Z\"}"),
-                new Tuple<DateTimeOffsetType, string>(new DateTimeOffsetType() { DateTimeOffset = new DateTimeOffset(new DateTime(1999, 12, 31, 23, 59, 59)) }, "{\"DateTimeOffset\":\"2000-01-01T07:59:59.000Z\"}"),
-                new Tuple<DateTimeOffsetType, string>(new DateTimeOffsetType() { DateTimeOffset = new DateTimeOffset(new DateTime(2005, 3, 14, 12, 34, 16, DateTimeKind.Local)) }, "{\"DateTimeOffset\":\"2005-03-14T20:34:16.000Z\"}"),
-                new Tuple<DateTimeOffsetType, string>(new DateTimeOffsetType() { DateTimeOffset = new DateTimeOffset(new DateTime(2005, 4, 14, 12, 34, 16, DateTimeKind.Unspecified)) }, "{\"DateTimeOffset\":\"2005-04-14T19:34:16.000Z\"}"),
-                new Tuple<DateTimeOffsetType, string>(new DateTimeOffsetType() { DateTimeOffset = new DateTimeOffset(new DateTime(2005, 3, 14, 12, 34, 16, DateTimeKind.Local)) }, "{\"DateTimeOffset\":\"2005-03-14T20:34:16.000Z\"}"),
-                new Tuple<DateTimeOffsetType, string>(new DateTimeOffsetType() { DateTimeOffset = new DateTimeOffset(new DateTime(2005, 5, 14, 12, 34, 16, DateTimeKind.Utc)) }, "{\"DateTimeOffset\":\"2005-05-14T12:34:16.000Z\"}"),
-                new Tuple<DateTimeOffsetType, string>(new DateTimeOffsetType() { DateTimeOffset = new DateTimeOffset(new DateTime(2012, 2, 29, 12, 0, 0, DateTimeKind.Utc)) }, "{\"DateTimeOffset\":\"2012-02-29T12:00:00.000Z\"}"), // Leap Day
+            List<Tuple<DateTimeOffsetType, string>> testCases = new List<Tuple<DateTimeOffsetType, string>>();
+
+            List<DateTimeOffset> dates = new List<DateTimeOffset>
+            {
+                new DateTimeOffset(),
+                new DateTimeOffset(new DateTime(1999, 12, 31, 23, 59, 59)),
+                new DateTimeOffset(new DateTime(2005, 3, 14, 12, 34, 16, DateTimeKind.Local)),
+                new DateTimeOffset(new DateTime(2005, 4, 14, 12, 34, 16, DateTimeKind.Unspecified)),
+                new DateTimeOffset(new DateTime(2005, 3, 14, 12, 34, 16, DateTimeKind.Local)),
+                new DateTimeOffset(new DateTime(2005, 5, 14, 12, 34, 16, DateTimeKind.Utc)),
+                new DateTimeOffset(new DateTime(2012, 2, 29, 12, 0, 0, DateTimeKind.Utc)), // leap day
             };
+
+            foreach (var date in dates)
+            {
+                testCases.Add(new Tuple<DateTimeOffsetType,string>(
+                    new DateTimeOffsetType { DateTimeOffset = date },
+                    "{\"DateTimeOffset\":" + ExpectedDateTimeOffsetSerialization(date) + "}"));
+            }
 
             // Need to ensure that the type is registered as a table to force the id property check
             DefaultSerializer.SerializerSettings.ContractResolver.ResolveTableName(typeof(DateTimeOffsetType));
@@ -2074,16 +2127,28 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [TestMethod]
         public void DateTimeOffsetDeserialization()
         {
-            List<Tuple<DateTimeOffsetType, string>> testCases = new List<Tuple<DateTimeOffsetType, string>>() {
+            List<Tuple<DateTimeOffsetType, string>> testCases = new List<Tuple<DateTimeOffsetType, string>>()
+            {
                 new Tuple<DateTimeOffsetType, string>(new DateTimeOffsetType() { DateTimeOffset = new DateTimeOffset() }, "{}"),
                 new Tuple<DateTimeOffsetType, string>(new DateTimeOffsetType() { DateTimeOffset = new DateTimeOffset() }, "{\"DateTimeOffset\":null}"),
-                new Tuple<DateTimeOffsetType, string>(new DateTimeOffsetType() { DateTimeOffset = new DateTimeOffset(new DateTime(1999, 12, 31, 23, 59, 59)).ToLocalTime() }, "{\"DateTimeOffset\":\"2000-01-01T07:59:59.000Z\"}"),
-                new Tuple<DateTimeOffsetType, string>(new DateTimeOffsetType() { DateTimeOffset = new DateTimeOffset(new DateTime(2005, 3, 14, 12, 34, 16, DateTimeKind.Local)).ToLocalTime() }, "{\"DateTimeOffset\":\"2005-03-14T20:34:16.000Z\"}"),
-                new Tuple<DateTimeOffsetType, string>(new DateTimeOffsetType() { DateTimeOffset = new DateTimeOffset(new DateTime(2005, 4, 14, 12, 34, 16, DateTimeKind.Unspecified)).ToLocalTime() }, "{\"DateTimeOffset\":\"2005-04-14T19:34:16.000Z\"}"),
-                new Tuple<DateTimeOffsetType, string>(new DateTimeOffsetType() { DateTimeOffset = new DateTimeOffset(new DateTime(2005, 3, 14, 12, 34, 16, DateTimeKind.Local)).ToLocalTime() }, "{\"DateTimeOffset\":\"2005-03-14T20:34:16.000Z\"}"),
-                new Tuple<DateTimeOffsetType, string>(new DateTimeOffsetType() { DateTimeOffset = new DateTimeOffset(new DateTime(2005, 5, 14, 12, 34, 16, DateTimeKind.Utc)).ToLocalTime() }, "{\"DateTimeOffset\":\"2005-05-14T12:34:16.000Z\"}"),
-                new Tuple<DateTimeOffsetType, string>(new DateTimeOffsetType() { DateTimeOffset = new DateTimeOffset(new DateTime(2012, 2, 29, 12, 0, 0, DateTimeKind.Utc)).ToLocalTime() }, "{\"DateTimeOffset\":\"2012-02-29T12:00:00.000Z\"}"), // Leap Day
             };
+
+            List<DateTimeOffset> dates = new List<DateTimeOffset>
+            {
+                new DateTimeOffset(new DateTime(1999, 12, 31, 23, 59, 59)).ToLocalTime(),
+                new DateTimeOffset(new DateTime(2005, 3, 14, 12, 34, 16, DateTimeKind.Local)).ToLocalTime(),
+                new DateTimeOffset(new DateTime(2005, 4, 14, 12, 34, 16, DateTimeKind.Unspecified)).ToLocalTime(),
+                new DateTimeOffset(new DateTime(2005, 3, 14, 12, 34, 16, DateTimeKind.Local)).ToLocalTime(),
+                new DateTimeOffset(new DateTime(2005, 5, 14, 12, 34, 16, DateTimeKind.Utc)).ToLocalTime(),
+                new DateTimeOffset(new DateTime(2012, 2, 29, 12, 0, 0, DateTimeKind.Utc)).ToLocalTime(), // leap day
+            };
+
+            foreach (var date in dates)
+            {
+                testCases.Add(new Tuple<DateTimeOffsetType,string>(
+                    new DateTimeOffsetType { DateTimeOffset = date },
+                    "{\"DateTimeOffset\":" + ExpectedDateTimeOffsetSerialization(date) + "}"));
+            }
 
             // Need to ensure that the type is registered as a table to force the id property check
             DefaultSerializer.SerializerSettings.ContractResolver.ResolveTableName(typeof(DateTimeOffsetType));
@@ -2096,7 +2161,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 DateTimeOffsetType actual = new DateTimeOffsetType();
                 DefaultSerializer.Deserialize(input, actual);
 
-                Assert.AreEqual(actual.DateTimeOffset, expected.DateTimeOffset);
+                Assert.AreEqual(actual.DateTimeOffset.ToLocalTime(), expected.DateTimeOffset.ToLocalTime());
+                Assert.AreEqual(actual.DateTimeOffset.ToUniversalTime(), expected.DateTimeOffset.ToUniversalTime());
 
                 if (testCase.Item2 != "{}")
                 {
@@ -2105,16 +2171,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     DefaultSerializer.Deserialize(input, actual);
                 }
 
-                Assert.AreEqual(actual.DateTimeOffset, expected.DateTimeOffset);
+                Assert.AreEqual(actual.DateTimeOffset.ToUniversalTime(), expected.DateTimeOffset.ToUniversalTime());
 
                 JArray json = JToken.Parse("[" + testCase.Item2 + "]") as JArray;
                 actual = DefaultSerializer.Deserialize<DateTimeOffsetType>(json).FirstOrDefault();
 
-                Assert.AreEqual(actual.DateTimeOffset, expected.DateTimeOffset);
+                Assert.AreEqual(actual.DateTimeOffset.ToUniversalTime(), expected.DateTimeOffset.ToUniversalTime());
 
                 actual = (DateTimeOffsetType)DefaultSerializer.Deserialize<DateTimeOffsetType>(input);
 
-                Assert.AreEqual(actual.DateTimeOffset, expected.DateTimeOffset);
+                Assert.AreEqual(actual.DateTimeOffset.ToUniversalTime(), expected.DateTimeOffset.ToUniversalTime());
             }
         }
 
@@ -3552,11 +3618,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             List<Tuple<CreatedAtType, string>> testCases = new List<Tuple<CreatedAtType, string>>
             {
                 new Tuple<CreatedAtType, string>(
-                    new CreatedAtType { CreatedAt = new DateTime(2012, 1, 5, 12, 0, 0) },
-                    "{\"__createdAt\":\"2012-01-05T20:00:00.000Z\"}"),
+                    new CreatedAtType { CreatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc) },
+                    "{\"__createdAt\":\"2012-01-05T12:00:00.000Z\"}"),
                 new Tuple<CreatedAtType, string>(
                     new CreatedAtType { CreatedAt = default(DateTime) },
-                    "{\"__createdAt\":\"0001-01-01T08:00:00.000Z\"}"),
+                    "{\"__createdAt\":" + MinDateTimeSerializedToJson + "}"),
             };
 
             DefaultSerializer.SerializerSettings.ContractResolver.ResolveTableName(typeof(CreatedAtType));
@@ -3576,8 +3642,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public void CreatedAtTypeDeserialization()
         {
             List<Tuple<CreatedAtType, string>> testCases = new List<Tuple<CreatedAtType, string>>() {
-                new Tuple<CreatedAtType, string>(new CreatedAtType { CreatedAt = default(DateTime) }, "{\"__createdAt\":\"0001-01-01T08:00:00.000Z\"}"),
-                new Tuple<CreatedAtType, string>(new CreatedAtType { CreatedAt = new DateTime(2012, 1, 5, 12, 0, 0) }, "{\"__createdAt\":\"2012-01-05T20:00:00.000Z\"}"),
+                new Tuple<CreatedAtType, string>(new CreatedAtType { CreatedAt = default(DateTime) }, "{\"__createdAt\":" + MinDateTimeSerializedToJson + "}"),
+                new Tuple<CreatedAtType, string>(new CreatedAtType { CreatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc) }, "{\"__createdAt\":\"2012-01-05T12:00:00.000Z\"}"),
             };
 
             // Need to ensure that the type is registered as a table to force the id property check
@@ -3591,7 +3657,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 CreatedAtType actual = new CreatedAtType();
                 DefaultSerializer.Deserialize(input, actual);
 
-                Assert.AreEqual(actual.CreatedAt, expected.CreatedAt);
+                Assert.AreEqual(actual.CreatedAt.ToUniversalTime(), expected.CreatedAt.ToUniversalTime());
             }
         }
 
@@ -3601,11 +3667,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             List<Tuple<UpdatedAtType, string>> testCases = new List<Tuple<UpdatedAtType, string>>
             {
                 new Tuple<UpdatedAtType, string>(
-                    new UpdatedAtType { UpdatedAt = new DateTime(2012, 1, 5, 12, 0, 0) },
-                    "{\"__updatedAt\":\"2012-01-05T20:00:00.000Z\"}"),
+                    new UpdatedAtType { UpdatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc) },
+                    "{\"__updatedAt\":\"2012-01-05T12:00:00.000Z\"}"),
                 new Tuple<UpdatedAtType, string>(
                     new UpdatedAtType { UpdatedAt = default(DateTime) },
-                    "{\"__updatedAt\":\"0001-01-01T08:00:00.000Z\"}"),
+                    "{\"__updatedAt\":" + MinDateTimeSerializedToJson + "}"),
             };
 
             DefaultSerializer.SerializerSettings.ContractResolver.ResolveTableName(typeof(UpdatedAtType));
@@ -3625,8 +3691,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public void UpdatedAtTypeDeserialization()
         {
             List<Tuple<UpdatedAtType, string>> testCases = new List<Tuple<UpdatedAtType, string>>() {
-                new Tuple<UpdatedAtType, string>(new UpdatedAtType { UpdatedAt = default(DateTime) }, "{\"__updatedAt\":\"0001-01-01T08:00:00.000Z\"}"),
-                new Tuple<UpdatedAtType, string>(new UpdatedAtType { UpdatedAt = new DateTime(2012, 1, 5, 12, 0, 0) }, "{\"__updatedAt\":\"2012-01-05T20:00:00.000Z\"}"),
+                new Tuple<UpdatedAtType, string>(new UpdatedAtType { UpdatedAt = default(DateTime) }, "{\"__updatedAt\":" + MinDateTimeSerializedToJson + "}"),
+                new Tuple<UpdatedAtType, string>(new UpdatedAtType { UpdatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc) }, "{\"__updatedAt\":\"2012-01-05T12:00:00.000Z\"}"),
             };
 
             // Need to ensure that the type is registered as a table to force the id property check
@@ -3640,7 +3706,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 UpdatedAtType actual = new UpdatedAtType();
                 DefaultSerializer.Deserialize(input, actual);
 
-                Assert.AreEqual(actual.UpdatedAt, expected.UpdatedAt);
+                Assert.AreEqual(actual.UpdatedAt.ToUniversalTime(), expected.UpdatedAt.ToUniversalTime());
             }
         }
 
@@ -3723,11 +3789,14 @@ You might be affected by Mobile Services latest changes to support string Ids. F
         {
             List<Tuple<AllSystemPropertiesType, string>> testCases = new List<Tuple<AllSystemPropertiesType, string>>
             {
-                new Tuple<AllSystemPropertiesType, string>(new AllSystemPropertiesType { UpdatedAt = new DateTime(2012, 1, 5, 12, 0, 0),
-                                                                                         CreatedAt = new DateTime(2012, 1, 5, 12, 0, 0), 
+                new Tuple<AllSystemPropertiesType, string>(new AllSystemPropertiesType { UpdatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc),
+                                                                                         CreatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc), 
                                                                                          Version = "0x0004F" }, 
-                                                                                         "{\"__createdAt\":\"2012-01-05T20:00:00.000Z\",\"__updatedAt\":\"2012-01-05T20:00:00.000Z\",\"__version\":\"0x0004F\"}"),
-                new Tuple<AllSystemPropertiesType, string>(new AllSystemPropertiesType { Version = null }, "{\"__createdAt\":\"0001-01-01T08:00:00.000Z\",\"__updatedAt\":\"0001-01-01T08:00:00.000Z\",\"__version\":null}"),
+                                                                                         "{\"__createdAt\":\"2012-01-05T12:00:00.000Z\",\"__updatedAt\":\"2012-01-05T12:00:00.000Z\",\"__version\":\"0x0004F\"}"),
+                new Tuple<AllSystemPropertiesType, string>(
+                    new AllSystemPropertiesType { Version = null }, 
+                    "{\"__createdAt\":MIN_DATE,\"__updatedAt\":MIN_DATE,\"__version\":null}".Replace("MIN_DATE", MinDateTimeSerializedToJson)
+                ),
             };
 
             DefaultSerializer.SerializerSettings.ContractResolver.ResolveTableName(typeof(AllSystemPropertiesType));
@@ -3748,11 +3817,13 @@ You might be affected by Mobile Services latest changes to support string Ids. F
         {
             List<Tuple<AllSystemPropertiesType, string>> testCases = new List<Tuple<AllSystemPropertiesType, string>>
             {
-                new Tuple<AllSystemPropertiesType, string>(new AllSystemPropertiesType { UpdatedAt = new DateTime(2012, 1, 5, 12, 0, 0),
-                                                                                         CreatedAt = new DateTime(2012, 1, 5, 12, 0, 0), 
+                new Tuple<AllSystemPropertiesType, string>(new AllSystemPropertiesType { UpdatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc),
+                                                                                         CreatedAt = new DateTime(2012, 1, 5, 12, 0, 0, DateTimeKind.Utc), 
                                                                                          Version = "0x0004F" }, 
-                                                                                         "{\"__createdAt\":\"2012-01-05T20:00:00.000Z\",\"__updatedAt\":\"2012-01-05T20:00:00.000Z\",\"__version\":\"0x0004F\"}"),
-                new Tuple<AllSystemPropertiesType, string>(new AllSystemPropertiesType { Version = null }, "{\"__createdAt\":\"0001-01-01T08:00:00.000Z\",\"__updatedAt\":\"0001-01-01T08:00:00.000Z\",\"__version\":null}"),
+                                                                                         "{\"__createdAt\":\"2012-01-05T12:00:00.000Z\",\"__updatedAt\":\"2012-01-05T12:00:00.000Z\",\"__version\":\"0x0004F\"}"),
+                new Tuple<AllSystemPropertiesType, string>(
+                    new AllSystemPropertiesType { Version = null }, 
+                    "{\"__createdAt\":MIN_DATE,\"__updatedAt\":MIN_DATE,\"__version\":null}".Replace("MIN_DATE", MinDateTimeSerializedToJson)),
             };
 
             // Need to ensure that the type is registered as a table to force the id property check
@@ -3766,8 +3837,8 @@ You might be affected by Mobile Services latest changes to support string Ids. F
                 AllSystemPropertiesType actual = new AllSystemPropertiesType();
                 DefaultSerializer.Deserialize(input, actual);
 
-                Assert.AreEqual(actual.CreatedAt, expected.CreatedAt);
-                Assert.AreEqual(actual.UpdatedAt, expected.UpdatedAt);
+                Assert.AreEqual(actual.CreatedAt.ToUniversalTime(), expected.CreatedAt.ToUniversalTime());
+                Assert.AreEqual(actual.UpdatedAt.ToUniversalTime(), expected.UpdatedAt.ToUniversalTime());
                 Assert.AreEqual(actual.Version, expected.Version);
             }
         }
