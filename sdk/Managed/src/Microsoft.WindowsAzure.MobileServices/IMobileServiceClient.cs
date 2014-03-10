@@ -235,5 +235,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Gets or sets the settings used for serialization.
         /// </summary>
         MobileServiceJsonSerializerSettings SerializerSettings { get; set; }
+
+        /// <summary>
+        /// Specifies whether or not &quot;&quot; or string.Empty are treated as null for IDs when you call InsertAsync().
+        /// </summary>
+        bool TreatEmptyIdsAsNullOnInsert { get; set; }
+
     }
 }

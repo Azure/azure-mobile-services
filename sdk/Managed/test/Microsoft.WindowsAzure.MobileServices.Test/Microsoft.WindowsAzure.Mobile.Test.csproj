@@ -86,6 +86,7 @@
     <Compile Include="UnitTests\MobileServiceUser.Test.cs" />
     <Compile Include="UnitTests\MobileServiceUrlBuilder.Test.cs" />
     <Compile Include="UnitTests\Table\MobileServiceTable.Generic.Test.cs" />
+    <Compile Include="UnitTests\Table\MobileServiceTableTestBase.cs" />
     <Compile Include="UnitTests\Table\Query\MemberInfoKey.Test.cs" />
     <Compile Include="UnitTests\Table\Query\ZumoQuery.Test.cs" />
     <Compile Include="UnitTests\Table\Serialization\MobileServiceIsoDateTimeConverter.Test.cs" />

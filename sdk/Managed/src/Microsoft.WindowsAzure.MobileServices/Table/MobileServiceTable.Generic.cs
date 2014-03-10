@@ -307,7 +307,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
             if (id is string)
             {
-                MobileServiceSerializer.EnsureValidStringId(id, allowDefault: true);
+                MobileServiceSerializer.CheckForValidStringId(id as string, true);
             }
 
             // Get the latest version of this element
