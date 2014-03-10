@@ -158,7 +158,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             // Make sure the instance doesn't have an int id set for an insertion
-            object id = MobileServiceSerializer.GetId(instance, true, true);
+            object id = MobileServiceSerializer.GetId(instance, ignoreCase: false, allowDefault: true);
             bool isStringIdOrDefaultIntId = id is string || MobileServiceSerializer.IsDefaultId(id);
             if (!isStringIdOrDefaultIntId)
             {
@@ -168,21 +168,6 @@ namespace Microsoft.WindowsAzure.MobileServices
                             Resources.MobileServiceTable_InsertWithExistingId,
                            MobileServiceSerializer.IdPropertyName),
                             "instance");
-            }
-
-            // If there is an id, it is either a default int or a string id
-            if (id != null)
-            {
-                // Make sure only proper casing is allowed
-                if (MobileServiceSerializer.GetId(instance, ignoreCase: false, allowDefault: true) == null)
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            Resources.MobileServiceSerializer_IdCasingIncorrect,
-                            MobileServiceSerializer.IdPropertyName),
-                            "instance");
-                }
             }
 
             parameters = AddSystemProperties(this.SystemProperties, parameters);
