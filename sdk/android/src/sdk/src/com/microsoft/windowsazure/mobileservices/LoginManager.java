@@ -30,12 +30,15 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.protocol.HTTP;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
+import android.util.DisplayMetrics;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.EditText;
@@ -274,6 +277,12 @@ class LoginManager {
 			}
 		});
 		wv.getSettings().setJavaScriptEnabled(true);
+		
+		DisplayMetrics displaymetrics = new DisplayMetrics();
+		((Activity)context).getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+		int webViewHeight = displaymetrics.heightPixels;
+		
+		wv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, webViewHeight));
 
 		wv.requestFocus(View.FOCUS_DOWN);
 		wv.setOnTouchListener(new View.OnTouchListener() {
