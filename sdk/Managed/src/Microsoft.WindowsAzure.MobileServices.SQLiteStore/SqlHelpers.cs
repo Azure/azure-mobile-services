@@ -16,9 +16,14 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
     {
         static readonly DateTime epoch = new DateTime(1970, 1, 1);
 
-        public static object SerializeValue(JValue value)
+        public static object SerializeValue(JValue value, bool allowNull)
         {
-            string columnType = SqlHelpers.GetColumnType(value.Type);
+            string columnType = SqlHelpers.GetColumnType(value.Type, allowNull);
+            return SerializeValue(value, columnType);
+        }
+
+        public static object SerializeValue(JValue value, string columnType)
+        {
             if (columnType == SqlColumnType.Text)
             {
                 return value.Value != null ? value.Value.ToString() : null;
@@ -104,7 +109,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             throw new NotImplementedException();
         }
 
-        public static string GetColumnType(JTokenType type)
+        public static string GetColumnType(JTokenType type, bool allowNull)
         {
             switch (type)
             {
@@ -117,12 +122,17 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 case JTokenType.String:
                 case JTokenType.Guid:
                     return SqlColumnType.Text;
+                case JTokenType.Null:
+                    if (allowNull)
+                    {
+                        return null;
+                    }
+                    throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, WindowsAzure.MobileServices.SQLiteStore.Properties.Resources.SQLiteStore_JTokenNotSupported, type));
                 case JTokenType.Array:
                 case JTokenType.Bytes:
                 case JTokenType.Comment:
                 case JTokenType.Constructor:
                 case JTokenType.None:
-                case JTokenType.Null:
                 case JTokenType.Object:
                 case JTokenType.Property:
                 case JTokenType.Raw:

@@ -120,6 +120,9 @@
   <data name="Platform_AssemblyNotFound" xml:space="preserve">
     <value>A Windows Azure Mobile Services assembly for the current platform was not found. Ensure that the current project references both {0} and the following platform-specific assembly: {1}.</value>
   </data>
+  <data name="SQLiteStore_ColumnNotDefined" xml:space="preserve">
+    <value>Column with name '{0}' is not defined on table '{1}'.</value>
+  </data>
   <data name="SQLiteStore_InvalidIdentifier" xml:space="preserve">
     <value>'{0}' is not a valid identifier. Identifiers must be under 128 characters in length, start with a letter or underscore, and can contain only alpha-numeric and underscore characters.</value>
   </data>
@@ -128,5 +131,8 @@
   </data>
   <data name="SQLiteStore_QueryExecutionFailed" xml:space="preserve">
     <value>Query execution failed.</value>
+  </data>
+  <data name="SQLiteStore_TableNotDefined" xml:space="preserve">
+    <value>Table with name '{0}' is not defined.</value>
   </data>
 </root>

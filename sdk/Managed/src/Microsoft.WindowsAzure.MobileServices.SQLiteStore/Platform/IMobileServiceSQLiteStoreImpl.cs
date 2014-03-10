@@ -14,7 +14,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 {
     internal interface IMobileServiceSQLiteStoreImpl: IDisposable
     {
-        Task CreateTableFromObject(string tableName, IEnumerable<JProperty> columns);
+        Task CreateTableFromObject(string tableName, IEnumerable<ColumnDefinition> columns);
         void ExecuteNonQuery(string sql, IDictionary<string, object> parameters = null);
         IList<JObject> ExecuteQuery(TableDefinition table, string sql, IDictionary<string, object> parameters = null);
         object DeserializeValue(ColumnDefinition column, object value);

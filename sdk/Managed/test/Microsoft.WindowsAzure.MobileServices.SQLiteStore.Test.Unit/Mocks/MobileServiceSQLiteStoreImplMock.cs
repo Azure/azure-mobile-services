@@ -9,12 +9,12 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit.Mocks
 {
     class MobileServiceSQLiteStoreImplMock: IMobileServiceSQLiteStoreImpl
     {
-        public Action<string, IEnumerable<JProperty>> CreateTableFromObjectFunc { get; set; }
+        public Action<string, IEnumerable<ColumnDefinition>> CreateTableFromObjectFunc { get; set; }
         public Action<string, IDictionary<string, object>> ExecuteNonQueryFunc { get; set; }
         public Func<TableDefinition, string, IDictionary<string, object>, IList<JObject>> ExecuteQueryFunc { get; set; }
         public Func<ColumnDefinition, object, object> DeserializeValueFunc { get; set; }
 
-        public Task CreateTableFromObject(string tableName, IEnumerable<JProperty> columns)
+        public Task CreateTableFromObject(string tableName, IEnumerable<ColumnDefinition> columns)
         {
             this.CreateTableFromObjectFunc(tableName, columns);
             return Task.FromResult(0);

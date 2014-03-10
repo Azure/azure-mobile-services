@@ -99,6 +99,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             // delete the row
             using (MobileServiceSQLiteStore store = new MobileServiceSQLiteStore(TestDbName))
             {
+                DefineTestTable(store);
                 await store.InitializeAsync();
                 var query = MobileServiceTableQueryDescription.Parse(TestTable, "$filter=__createdAt gt 1");
                 await store.DeleteAsync(query);
@@ -122,6 +123,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             // delete the row
             using (MobileServiceSQLiteStore store = new MobileServiceSQLiteStore(TestDbName))
             {
+                DefineTestTable(store);
                 await store.InitializeAsync();
                 await store.DeleteAsync(TestTable, "abc");
             }
@@ -132,6 +134,25 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         }
 
         [AsyncTestMethod]
+        public async Task UpsertAsync_InsertsTheRow_WhenItemHasNullValue()
+        {
+            await PrepareTodoTable();
+
+            // insert a row and make sure it is inserted
+            using (MobileServiceSQLiteStore store = new MobileServiceSQLiteStore(TestDbName))
+            {
+                DefineTestTable(store);
+                await store.UpsertAsync(TestTable, new JObject() 
+                { 
+                    { "id", "abc" }, 
+                    { "__createdAt", null } 
+                });
+            }
+            long count = TestUtilities.CountRows(TestDbName, TestTable);
+            Assert.AreEqual(count, 1L);
+        }
+
+        [AsyncTestMethod]
         public async Task UpsertAsync_InsertsTheRow_WhenItDoesNotExist()
         {
             await PrepareTodoTable();            
@@ -139,6 +160,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             // insert a row and make sure it is inserted
             using (MobileServiceSQLiteStore store = new MobileServiceSQLiteStore(TestDbName))
             {
+                DefineTestTable(store);
                 await store.UpsertAsync(TestTable, new JObject() 
                 { 
                     { "id", "abc" }, 
@@ -157,6 +179,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             // insert a row and make sure it is inserted
             using (MobileServiceSQLiteStore store = new MobileServiceSQLiteStore(TestDbName))
             {
+                DefineTestTable(store);
+
                 await store.UpsertAsync(TestTable, new JObject() 
                 { 
                     { "id", "abc" }, 

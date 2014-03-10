@@ -22,9 +22,64 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         private const string TestTable = "stringId_test_table";
 
         [AsyncTestMethod]
+        public async Task ReadAsync_RoundTripsDate()
+        {
+            string tableName = "itemWithDate";
+
+            ResetDatabase(tableName);
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable(tableName, new JObject()
+            {
+                { "id", String.Empty},
+                { "date", DateTime.Now }
+            });
+
+            var hijack = new TestHttpHandler();
+            IMobileServiceClient service = await CreateClient(hijack, store);
+            IMobileServiceSyncTable table = service.GetSyncTable(tableName);
+
+            DateTime theDate = new DateTime(2014, 3, 10, 0, 0, 0, DateTimeKind.Utc);
+            JObject inserted = await table.InsertAsync(new JObject() { { "date",  theDate} });
+            
+            Assert.AreEqual(inserted["date"].Value<DateTime>(), theDate);
+
+            JObject rehydrated = await table.LookupAsync(inserted["id"].Value<string>());
+
+            Assert.AreEqual(rehydrated["date"].Value<DateTime>(), theDate);
+        }
+
+        [AsyncTestMethod]
+        public async Task DefineTable_IgnoresColumn_IfCaseIsDifferentButNameIsSame()
+        {
+            string tableName = "itemWithDate";
+
+            ResetDatabase(tableName);
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable(tableName, new JObject()
+            {
+                { "id", String.Empty},
+                { "date", DateTime.Now }
+            });
+
+            var hijack = new TestHttpHandler();
+            await CreateClient(hijack, store);
+
+            store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable(tableName, new JObject()
+            {
+                { "id", String.Empty},
+                { "DaTE", DateTime.Now } // the casing of date is different here
+            });
+            hijack = new TestHttpHandler();
+            await CreateClient(hijack, store);
+        }
+
+        [AsyncTestMethod]
         public async Task Insert_ThenPush_ThenPull_ThenRead_ThenUpdate_ThenRefresh_ThenDelete_ThenLookup_ThenPurge_ThenRead()
         {
-            ResetDatabase();
+            ResetDatabase(TestTable);
 
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"b\",\"String\":\"Hey\"}"); // insert response
@@ -117,9 +172,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             return service;
         }
 
-        private static void ResetDatabase()
+        private static void ResetDatabase(string testTableName)
         {
-            TestUtilities.DropTestTable(TestDbName, TestTable);
+            TestUtilities.DropTestTable(TestDbName, testTableName);
             TestUtilities.DropTestTable(TestDbName, LocalSystemTables.OperationQueue);
             TestUtilities.DropTestTable(TestDbName, LocalSystemTables.SyncErrors);
         }

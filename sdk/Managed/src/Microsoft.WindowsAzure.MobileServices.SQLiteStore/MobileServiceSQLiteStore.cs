@@ -63,9 +63,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             }
 
             var tableDefinition = (from property in item.Properties()
-                                   let columnType = SqlHelpers.GetColumnType(property.Value.Type)
+                                   let columnType = SqlHelpers.GetColumnType(property.Value.Type, allowNull: false)
                                    select new ColumnDefinition(columnType, property))
-                                  .ToDictionary(p => p.Definition.Name);
+                                  .ToDictionary(p => p.Definition.Name, StringComparer.OrdinalIgnoreCase);
 
             this.tables.Add(tableName, new TableDefinition(tableDefinition));
         }
@@ -74,7 +74,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         {
             foreach (KeyValuePair<string, TableDefinition> table in this.tables)
             {
-                await this.innerStore.CreateTableFromObject(table.Key, table.Value.Values.Select(v => v.Definition));
+                await this.innerStore.CreateTableFromObject(table.Key, table.Value.Values.Select(v => v));
             }
         }
 
@@ -104,21 +104,36 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
         public Task UpsertAsync(string tableName, JObject item)
         {
+            TableDefinition table;
+            if (!this.tables.TryGetValue(tableName, out table))
+            {
+                throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_TableNotDefined, tableName));
+            }
+
             var sql = new StringBuilder();
             sql.AppendFormat("INSERT OR REPLACE INTO {0} (", SqlHelpers.FormatTableName(tableName));
             string separator = String.Empty;
             var columns = item.Properties().ToList();
+
             foreach (JProperty column in columns)
             {
                 sql.AppendFormat("{0}{1}", separator, SqlHelpers.FormatMember(column.Name));
                 separator = ", ";
             }
             sql.AppendFormat(") VALUES (");
+            
             separator = String.Empty;
+            ColumnDefinition columnDefinition;
+
             foreach (JProperty column in columns)
             {
+                if (!table.TryGetValue(column.Name, out columnDefinition))
+                {
+                    throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_ColumnNotDefined, column.Name, tableName));
+                }
+
                 //TODO: Use parameterized queries
-                object value = SqlHelpers.SerializeValue(column.Value.Value<JValue>());
+                object value = SqlHelpers.SerializeValue(column.Value.Value<JValue>(), columnDefinition.SqlType);
                 if (value is string)
                 {
                     value = "'" + value + "'";

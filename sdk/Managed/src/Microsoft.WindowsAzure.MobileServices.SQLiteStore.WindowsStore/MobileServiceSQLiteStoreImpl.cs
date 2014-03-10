@@ -25,21 +25,25 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             this.connection.Dispose();
         }
 
-        public Task CreateTableFromObject(string tableName, IEnumerable<JProperty> columns)
+        public Task CreateTableFromObject(string tableName, IEnumerable<ColumnDefinition> columns)
         {
             String tblSql = string.Format("CREATE TABLE IF NOT EXISTS {0} ({1} PRIMARY KEY)", SqlHelpers.FormatTableName(tableName), SqlHelpers.FormatMember(SystemProperties.Id));
             ExecuteNonQuery(tblSql);
             
             string infoSql = string.Format("PRAGMA table_info({0});", SqlHelpers.FormatTableName(tableName));
-            IDictionary<string, JObject> existingColumns = this.ExecuteQuery((TableDefinition)null, infoSql).ToDictionary(c => c.Value<string>("name"));
+            IDictionary<string, JObject> existingColumns = this.ExecuteQuery((TableDefinition)null, infoSql)
+                                                               .ToDictionary(c => c.Value<string>("name"), StringComparer.OrdinalIgnoreCase);
 
             var columnsToCreate = from c in columns // new column name
-                                  where !existingColumns.ContainsKey(c.Name) // that does not exist in existing columns
+                                  where !existingColumns.ContainsKey(c.Definition.Name) // that does not exist in existing columns
                                   select c;
 
-            foreach (JProperty column in columnsToCreate)
+            foreach (ColumnDefinition column in columnsToCreate)
             {
-                string createSql = string.Format("ALTER TABLE {0} ADD COLUMN {1} {2}", SqlHelpers.FormatTableName(tableName), SqlHelpers.FormatMember(column.Name), SqlHelpers.GetColumnType(column.Value.Type));
+                string createSql = string.Format("ALTER TABLE {0} ADD COLUMN {1} {2}", 
+                                                 SqlHelpers.FormatTableName(tableName), 
+                                                 SqlHelpers.FormatMember(column.Definition.Name), 
+                                                 column.SqlType);
                 ExecuteNonQuery(createSql);
             }
 

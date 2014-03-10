@@ -71,6 +71,15 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Column with name &apos;{0}&apos; is not defined on table &apos;{1}&apos;..
+        /// </summary>
+        internal static string SQLiteStore_ColumnNotDefined {
+            get {
+                return ResourceManager.GetString("SQLiteStore_ColumnNotDefined", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid identifier. Identifiers must be under 128 characters in length, start with a letter or underscore, and can contain only alpha-numeric and underscore characters..
         /// </summary>
         internal static string SQLiteStore_InvalidIdentifier {
@@ -94,6 +103,15 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Properties {
         internal static string SQLiteStore_QueryExecutionFailed {
             get {
                 return ResourceManager.GetString("SQLiteStore_QueryExecutionFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Table with name &apos;{0}&apos; is not defined..
+        /// </summary>
+        internal static string SQLiteStore_TableNotDefined {
+            get {
+                return ResourceManager.GetString("SQLiteStore_TableNotDefined", resourceCulture);
             }
         }
     }
