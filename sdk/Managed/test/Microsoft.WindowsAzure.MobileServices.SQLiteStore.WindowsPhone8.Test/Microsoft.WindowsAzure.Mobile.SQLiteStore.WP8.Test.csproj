@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\SQLitePCL.3.8.2.0\build\wp8\SQLitePCL.props" Condition="Exists('..\..\packages\SQLitePCL.3.8.2.0\build\wp8\SQLitePCL.props')" />
+  <Import Project="..\..\packages\SQLitePCL.3.8.3.1\build\wp8\SQLitePCL.props" Condition="Exists('..\..\packages\SQLitePCL.3.8.3.1\build\wp8\SQLitePCL.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -170,13 +170,17 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.MobileServices.SQLiteStore.WindowsPhone8\Microsoft.WindowsAzure.Mobile.SQLiteStore.Ext.WP8.csproj">
-      <Project>{153A453C-FE37-4F19-A1AC-4DE77B6FBC01}</Project>
-      <Name>Microsoft.WindowsAzure.Mobile.SQLiteStore.Ext.WP8</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.MobileServices.SQLiteStore\Microsoft.WindowsAzure.Mobile.SQLiteStore.csproj">
       <Project>{4C20D49A-FE5E-4D9C-98B9-8125450074F5}</Project>
       <Name>Microsoft.WindowsAzure.Mobile.SQLiteStore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.MobileServices.WindowsPhone8.UI\Microsoft.WindowsAzure.Mobile.UI.WP8.csproj">
+      <Project>{B1CCA4C2-DEDF-43AF-B54D-067C5AC6A391}</Project>
+      <Name>Microsoft.WindowsAzure.Mobile.UI.WP8</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.MobileServices.WindowsPhone8\Microsoft.WindowsAzure.Mobile.Ext.WP8.csproj">
+      <Project>{EB3834A2-3C20-4F39-BEE9-87DFCAB81670}</Project>
+      <Name>Microsoft.WindowsAzure.Mobile.Ext.WP8</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.Mobile.csproj">
       <Project>{75557793-E36E-4190-8714-5BD2665859FB}</Project>
@@ -195,11 +199,13 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\packages\Newtonsoft.Json.5.0.8\lib\portable-net45+wp80+win8\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="SQLitePCL">
-      <HintPath>..\..\packages\SQLitePCL.3.8.2.0\lib\wp8\SQLitePCL.dll</HintPath>
+    <Reference Include="SQLitePCL, Version=3.8.3.1, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\SQLitePCL.3.8.3.1\lib\wp8\SQLitePCL.dll</HintPath>
     </Reference>
-    <Reference Include="SQLitePCL.Ext.WindowsPhone8.RuntimeProxy">
-      <HintPath>..\..\packages\SQLitePCL.3.8.2.0\lib\wp8\SQLitePCL.Ext.WindowsPhone8.RuntimeProxy.winmd</HintPath>
+    <Reference Include="SQLitePCL.Ext.WindowsPhone8.RuntimeProxy, Version=255.255.255.255, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\SQLitePCL.3.8.3.1\lib\wp8\SQLitePCL.Ext.WindowsPhone8.RuntimeProxy.winmd</HintPath>
     </Reference>
     <Reference Include="System.Net.Http, Version=1.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -238,5 +244,5 @@
     <Error Condition="!Exists('..\..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
     <Error Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
   </Target>
-  <Import Project="..\..\packages\SQLitePCL.3.8.2.0\build\wp8\SQLitePCL.targets" Condition="Exists('..\..\packages\SQLitePCL.3.8.2.0\build\wp8\SQLitePCL.targets')" />
+  <Import Project="..\..\packages\SQLitePCL.3.8.3.1\build\wp8\SQLitePCL.targets" Condition="Exists('..\..\packages\SQLitePCL.3.8.3.1\build\wp8\SQLitePCL.targets')" />
 </Project>

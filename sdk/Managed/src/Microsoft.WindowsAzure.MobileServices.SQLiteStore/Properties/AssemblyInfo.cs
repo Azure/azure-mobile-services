@@ -30,4 +30,5 @@ using System.Runtime.InteropServices;
 [assembly: InternalsVisibleTo("Microsoft.WindowsAzure.Mobile.SQLiteStore.Win8.Test")]
 [assembly: InternalsVisibleTo("Microsoft.WindowsAzure.Mobile.SQLiteStore.WP8.Test")]
 [assembly: InternalsVisibleTo("Microsoft.WindowsAzure.Mobile.SQLiteStore.Net45.Test")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 #endif

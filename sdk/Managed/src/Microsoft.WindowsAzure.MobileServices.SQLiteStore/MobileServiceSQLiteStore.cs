@@ -10,18 +10,21 @@ using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
 using Microsoft.WindowsAzure.MobileServices.Sync;
 using Newtonsoft.Json.Linq;
+using SQLitePCL;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 {
-    public sealed class MobileServiceSQLiteStore: IMobileServiceLocalStore
+    public class MobileServiceSQLiteStore: IMobileServiceLocalStore
     {
         private Dictionary<string, TableDefinition> tables = new Dictionary<string, TableDefinition>();
 
-        private IMobileServiceSQLiteStoreImpl innerStore;
+        private SQLiteConnection connection;
 
-        internal MobileServiceSQLiteStore(IMobileServiceSQLiteStoreImpl innerStore)
+        protected MobileServiceSQLiteStore() { }
+
+        public MobileServiceSQLiteStore(string fileName)
         {
-            this.innerStore = innerStore;
+            this.connection = new SQLiteConnection(fileName);
 
             this.DefineTable(LocalSystemTables.OperationQueue, new JObject()
             {
@@ -42,10 +45,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 { "item", String.Empty },
                 { "rawResult", String.Empty }
             });
-        }
-
-        public MobileServiceSQLiteStore(string fileName): this(Platform.Instance.GetSyncStoreImpl(fileName))
-        {            
         }
 
         public void DefineTable(string tableName, JObject item)
@@ -70,12 +69,14 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             this.tables.Add(tableName, new TableDefinition(tableDefinition));
         }
 
-        public async Task InitializeAsync()
+        public Task InitializeAsync()
         {
             foreach (KeyValuePair<string, TableDefinition> table in this.tables)
             {
-                await this.innerStore.CreateTableFromObject(table.Key, table.Value.Values.Select(v => v));
+                this.CreateTableFromObject(table.Key, table.Value.Values.Select(v => v));
             }
+
+            return Task.FromResult(0);
         }
 
         public Task<JToken> ReadAsync(MobileServiceTableQueryDescription query)
@@ -139,7 +140,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 separator = ", ";
             }
             sql.Append(")");
-            this.innerStore.ExecuteNonQuery(sql.ToString());
+            this.ExecuteNonQuery(sql.ToString());
             return Task.FromResult(0);
         }        
 
@@ -148,7 +149,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             var formatter = new SqlFormatter(query);
             string sql = formatter.FormatDelete();
 
-            this.innerStore.ExecuteNonQuery(sql, formatter.Parameters);
+            this.ExecuteNonQuery(sql, formatter.Parameters);
 
             return Task.FromResult(0);
         }
@@ -163,7 +164,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 //TODO: {"@id", id} string binding is broken as of now. https://sqlitepcl.codeplex.com/workitem/2
             };
 
-            this.innerStore.ExecuteNonQuery(sql, parameters);
+            this.ExecuteNonQuery(sql, parameters);
             return Task.FromResult(0);
         }
 
@@ -183,13 +184,13 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
         private void Vacuum()
         {
-            this.innerStore.ExecuteNonQuery("VACUUM;"); //TODO: This fails
+            this.ExecuteNonQuery("VACUUM;"); //TODO: This fails
         }
         
         private IList<JObject> ExecuteQuery(string tableName, string sql, IDictionary<string, object> parameters = null)
         {
             TableDefinition table = GetTable(tableName);
-            return this.innerStore.ExecuteQuery(table, sql, parameters);
+            return this.ExecuteQuery(table, sql, parameters);
         }
 
         private TableDefinition GetTable(string tableName)
@@ -202,9 +203,129 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             return table;
         }
 
+        internal virtual void CreateTableFromObject(string tableName, IEnumerable<ColumnDefinition> columns)
+        {
+            String tblSql = string.Format("CREATE TABLE IF NOT EXISTS {0} ({1} PRIMARY KEY)", SqlHelpers.FormatTableName(tableName), SqlHelpers.FormatMember(SystemProperties.Id));
+            this.ExecuteNonQuery(tblSql);
+
+            string infoSql = string.Format("PRAGMA table_info({0});", SqlHelpers.FormatTableName(tableName));
+            IDictionary<string, JObject> existingColumns = this.ExecuteQuery((TableDefinition)null, infoSql)
+                                                               .ToDictionary(c => c.Value<string>("name"), StringComparer.OrdinalIgnoreCase);
+
+            var columnsToCreate = from c in columns // new column name
+                                  where !existingColumns.ContainsKey(c.Definition.Name) // that does not exist in existing columns
+                                  select c;
+
+            foreach (ColumnDefinition column in columnsToCreate)
+            {
+                string createSql = string.Format("ALTER TABLE {0} ADD COLUMN {1} {2}",
+                                                 SqlHelpers.FormatTableName(tableName),
+                                                 SqlHelpers.FormatMember(column.Definition.Name),
+                                                 column.SqlType);
+                this.ExecuteNonQuery(createSql);
+            }
+
+            // NOTE: In SQLite you cannot drop columns, only add them.
+        }
+
+        private void ExecuteNonQuery(string sql, IDictionary<string, object> parameters = null)
+        {
+            parameters = parameters ?? new Dictionary<string, object>();
+
+            using (ISQLiteStatement statement = this.connection.Prepare(sql))
+            {
+                foreach (KeyValuePair<string, object> parameter in parameters)
+                {
+                    statement.Bind(parameter.Key, parameter.Value);
+                }
+
+                SQLiteResult result = statement.Step();
+                ValidateResult(result);
+            }
+        }
+
+        private IList<JObject> ExecuteQuery(TableDefinition table, string sql, IDictionary<string, object> parameters = null)
+        {
+            table = table ?? new TableDefinition();
+            parameters = parameters ?? new Dictionary<string, object>();
+
+            var rows = new List<JObject>();
+            using (ISQLiteStatement statement = this.connection.Prepare(sql))
+            {
+                foreach (KeyValuePair<string, object> parameter in parameters)
+                {
+                    statement.Bind(parameter.Key, parameter.Value);
+                }
+
+                SQLiteResult result;
+                while ((result = statement.Step()) == SQLiteResult.ROW)
+                {
+                    var row = ReadRow(table, statement);
+                    rows.Add(row);
+                }
+
+                ValidateResult(result);
+            }
+
+            return rows;
+        }
+
+        private object DeserializeValue(ColumnDefinition column, object value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+
+            string sqlType = column.SqlType;
+            JTokenType jsonType = column.Definition.Value.Type;
+            if (sqlType == SqlColumnType.Integer)
+            {
+                return SqlHelpers.ParseInteger(jsonType, value);
+            }
+            if (sqlType == SqlColumnType.Real)
+            {
+                return SqlHelpers.ParseReal(jsonType, value);
+            }
+            if (sqlType == SqlColumnType.Text)
+            {
+                return SqlHelpers.ParseText(jsonType, value);
+            }
+            return value;
+        }
+
+        private static void ValidateResult(SQLiteResult result)
+        {
+            if (result != SQLiteResult.DONE)
+            {
+                throw new SQLiteException(Properties.Resources.SQLiteStore_QueryExecutionFailed);
+            }
+        }
+
+        private JObject ReadRow(TableDefinition table, ISQLiteStatement statement)
+        {
+            var row = new JObject();
+            int i = 0;
+            string name = statement.ColumnName(i);
+            while (name != null)
+            {
+                object value = statement[i];
+
+                ColumnDefinition column;
+                if (table.TryGetValue(name, out column))
+                {
+                    value = this.DeserializeValue(column, value);
+                }
+                row[name] = new JValue(value);
+
+                name = statement.ColumnName(++i);
+            }
+            return row;
+        }          
+
         public void Dispose()
         {
-            this.innerStore.Dispose();
+            this.connection.Dispose();
         }        
     }
 }

@@ -17,4 +17,4 @@ sdk/android/test/sdk.testapp.tests/libs/gson-2.2.2.jar
 obj
 *.csproj.user
 test/ZumoE2EServerApp/Properties/PublishProfiles/
-sdk/Managed/src/Microsoft.WindowsAzure.MobileServices.SQLiteStore.Net45/sqlite3.dll
+sdk/Managed/test/Microsoft.WindowsAzure.MobileServices.SQLiteStore.Net45.Test/sqlite3.dll

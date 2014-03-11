@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\packages\SQLitePCL.3.8.2.0\build\netcore45\SQLitePCL.props" Condition="Exists('..\..\packages\SQLitePCL.3.8.2.0\build\netcore45\SQLitePCL.props')" />
+  <Import Project="..\..\packages\SQLitePCL.3.8.3.1\build\netcore45\SQLitePCL.props" Condition="Exists('..\..\packages\SQLitePCL.3.8.3.1\build\netcore45\SQLitePCL.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -103,10 +103,6 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.MobileServices.SQLiteStore.WindowsStore\Microsoft.WindowsAzure.Mobile.SQLiteStore.Ext.Win8.csproj">
-      <Project>{38b43c6b-4f02-4f29-8cd0-abc60b764cff}</Project>
-      <Name>Microsoft.WindowsAzure.Mobile.SQLiteStore.Ext.Win8</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.MobileServices.SQLiteStore\Microsoft.WindowsAzure.Mobile.SQLiteStore.csproj">
       <Project>{4c20d49a-fe5e-4d9c-98b9-8125450074f5}</Project>
       <Name>Microsoft.WindowsAzure.Mobile.SQLiteStore</Name>
@@ -180,9 +176,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\packages\Newtonsoft.Json.5.0.8\lib\netcore45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="SQLitePCL, Version=3.8.2.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="SQLitePCL, Version=3.8.3.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\SQLitePCL.3.8.2.0\lib\netcore45\SQLitePCL.dll</HintPath>
+      <HintPath>..\..\packages\SQLitePCL.3.8.3.1\lib\netcore45\SQLitePCL.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http.Extensions, Version=2.2.15.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -211,7 +207,7 @@
     <Error Condition="!Exists('..\..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />
     <Error Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.10\tools\Microsoft.Bcl.Build.targets')" Text="The build restored NuGet packages. Build the project again to include these packages in the build. For more information, see http://go.microsoft.com/fwlink/?LinkID=317568." HelpKeyword="BCLBUILD2002" />
   </Target>
-  <Import Project="..\..\packages\SQLitePCL.3.8.2.0\build\netcore45\SQLitePCL.targets" Condition="Exists('..\..\packages\SQLitePCL.3.8.2.0\build\netcore45\SQLitePCL.targets')" />
+  <Import Project="..\..\packages\SQLitePCL.3.8.3.1\build\netcore45\SQLitePCL.targets" Condition="Exists('..\..\packages\SQLitePCL.3.8.3.1\build\netcore45\SQLitePCL.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
