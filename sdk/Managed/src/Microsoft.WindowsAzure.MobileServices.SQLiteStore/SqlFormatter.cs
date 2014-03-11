@@ -420,14 +420,34 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
         private QueryNode FormatFloorFunction(FunctionCallNode nodeIn)
         {
-            // cast to integer to drop the decimal place
-            var cast = new ConvertNode(nodeIn.Arguments[0], typeof(int));
-            return cast.Accept(this);
+            // CASE WHEN x >= 0 THEN CAST(id AS INTEGER) // for +ve values cast to integer to drop the decimal places
+            //      WHEN CAST(id AS INTEGER) = id THEN id // for integers just return them as they are
+            //      ELSE CAST(id - 1.0 AS INTEGER) // for -ve values cast to integer rounds up close to zero
+            // END
+
+            var whenXisPositive = new BinaryOperatorNode(BinaryOperatorKind.GreaterThanOrEqual, nodeIn.Arguments[0], new ConstantNode(0));
+            var castToInt = new ConvertNode(nodeIn.Arguments[0], typeof(int));
+            var whenXIsInteger = new BinaryOperatorNode(BinaryOperatorKind.Equal, castToInt, nodeIn.Arguments[0]);
+            var subtractOne = new BinaryOperatorNode(BinaryOperatorKind.Subtract, nodeIn.Arguments[0], new ConstantNode(1));
+            var subtractOneThenCast = new ConvertNode(subtractOne, typeof(int));
+
+            this.sql.Append("(CASE WHEN ");
+            whenXisPositive.Accept(this);
+            this.sql.Append(" THEN ");
+            castToInt.Accept(this);
+            this.sql.Append(" WHEN ");
+            whenXIsInteger.Accept(this);
+            this.sql.Append(" THEN ");
+            nodeIn.Arguments[0].Accept(this);
+            this.sql.Append(" ELSE ");
+            subtractOneThenCast.Accept(this);
+            this.sql.Append(" END)");
+            return nodeIn;
         }
 
         private QueryNode FormatDateFunction(string formatSting, FunctionCallNode nodeIn)
         {
-            // CAST(strftime('%d', datetime([__createdAt], 'unixepoch')) as integer)
+            // CAST(strftime('%d', datetime([__createdAt], 'unixepoch')) AS INTEGER)
             this.sql.AppendFormat("CAST(strftime('{0}', datetime(", formatSting);
             nodeIn.Arguments[0].Accept(this);
             this.sql.Append(", 'unixepoch')) AS INTEGER)");

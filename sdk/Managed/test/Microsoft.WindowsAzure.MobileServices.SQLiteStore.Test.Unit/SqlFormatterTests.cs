@@ -19,9 +19,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
         {
             string odata = "$filter=floor(weight) gt 5&$orderby=price asc&$select=name";
 
-            string expectedSql = "SELECT [name] FROM [test] WHERE (CAST([weight] AS INTEGER) > @p1) ORDER BY [price]";
+            string expectedSql = "SELECT [name] FROM [test] WHERE ((CASE WHEN ([weight] >= @p1) THEN CAST([weight] AS INTEGER) WHEN (CAST([weight] AS INTEGER) = [weight]) THEN [weight] ELSE CAST(([weight] - @p2) AS INTEGER) END) > @p3) ORDER BY [price]";
 
-            TestSqlFormatting(f => f.FormatSelect, odata, expectedSql, 5L);
+            TestSqlFormatting(f => f.FormatSelect, odata, expectedSql, 0L, 1L, 5L);
         }
 
         [TestMethod]
@@ -29,9 +29,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
         {
             string odata = "$filter=ceiling(weight) gt 5&$orderby=price asc&$select=name";
 
-            string expectedSql = "SELECT [name] FROM [test] WHERE (CAST([weight] AS INTEGER) + (CASE WHEN [weight] = CAST([weight] AS INTEGER) THEN 0 ELSE 1 END) > @p1) ORDER BY [price]";
+            string expectedSql = "SELECT [name] FROM [test] WHERE ((CASE WHEN ([weight] >= @p1) THEN CAST([weight] AS INTEGER) WHEN (CAST([weight] AS INTEGER) = [weight]) THEN [weight] ELSE CAST(([weight] - @p2) AS INTEGER) END) + (CASE WHEN [weight] = (CASE WHEN ([weight] >= @p3) THEN CAST([weight] AS INTEGER) WHEN (CAST([weight] AS INTEGER) = [weight]) THEN [weight] ELSE CAST(([weight] - @p4) AS INTEGER) END) THEN 0 ELSE 1 END) > @p5) ORDER BY [price]";
 
-            TestSqlFormatting(f => f.FormatSelect, odata, expectedSql, 5L);
+            TestSqlFormatting(f => f.FormatSelect, odata, expectedSql, 0L, 1L, 0L, 1L, 5L);
         }
 
         [TestMethod]
