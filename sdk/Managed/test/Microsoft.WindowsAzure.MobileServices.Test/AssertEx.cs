@@ -16,6 +16,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     /// </summary>
     public static class AssertEx
     {
+        public static TException Throws<TException>(Action action) where TException : Exception
+        {
+            return Throws<TException>(() => Task.Run(action)).Result;
+        }
+
         public static async Task<TException> Throws<TException>(Func<Task> action) where TException: Exception
         {
             TException thrown = null;

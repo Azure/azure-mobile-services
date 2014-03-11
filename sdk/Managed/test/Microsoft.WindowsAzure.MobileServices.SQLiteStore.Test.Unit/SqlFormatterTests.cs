@@ -12,7 +12,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
     [TestClass]
     public class SqlFormatterTests
     {
-        private static readonly DateTime epoch = new DateTime(1970, 1, 1);
+        private static readonly DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         [TestMethod]
         public void FormatSelect_Math_Floor()

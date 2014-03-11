@@ -135,4 +135,7 @@
   <data name="SQLiteStore_TableNotDefined" xml:space="preserve">
     <value>Table with name '{0}' is not defined.</value>
   </data>
+  <data name="SQLiteStore_ValueTypeNotSupported" xml:space="preserve">
+    <value>Value of type '{0}' is not supported.</value>
+  </data>
 </root>

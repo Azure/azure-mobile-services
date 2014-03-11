@@ -114,5 +114,14 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Properties {
                 return ResourceManager.GetString("SQLiteStore_TableNotDefined", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Value of type &apos;{0}&apos; is not supported..
+        /// </summary>
+        internal static string SQLiteStore_ValueTypeNotSupported {
+            get {
+                return ResourceManager.GetString("SQLiteStore_ValueTypeNotSupported", resourceCulture);
+            }
+        }
     }
 }

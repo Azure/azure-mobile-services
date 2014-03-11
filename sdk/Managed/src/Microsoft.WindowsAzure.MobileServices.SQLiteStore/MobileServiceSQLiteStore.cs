@@ -104,11 +104,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
         public Task UpsertAsync(string tableName, JObject item)
         {
-            TableDefinition table;
-            if (!this.tables.TryGetValue(tableName, out table))
-            {
-                throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_TableNotDefined, tableName));
-            }
+            TableDefinition table = GetTable(tableName);
 
             var sql = new StringBuilder();
             sql.AppendFormat("INSERT OR REPLACE INTO {0} (", SqlHelpers.FormatTableName(tableName));
@@ -145,7 +141,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             sql.Append(")");
             this.innerStore.ExecuteNonQuery(sql.ToString());
             return Task.FromResult(0);
-        }
+        }        
 
         public Task DeleteAsync(MobileServiceTableQueryDescription query)
         {
@@ -192,9 +188,18 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         
         private IList<JObject> ExecuteQuery(string tableName, string sql, IDictionary<string, object> parameters = null)
         {
-            TableDefinition table;
-            this.tables.TryGetValue(tableName, out table);
+            TableDefinition table = GetTable(tableName);
             return this.innerStore.ExecuteQuery(table, sql, parameters);
+        }
+
+        private TableDefinition GetTable(string tableName)
+        {
+            TableDefinition table;
+            if (!this.tables.TryGetValue(tableName, out table))
+            {
+                throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_TableNotDefined, tableName));
+            }
+            return table;
         }
 
         public void Dispose()

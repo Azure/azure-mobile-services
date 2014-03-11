@@ -18,9 +18,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 {
    public class SQLiteStoreTests: TestBase
     {
+       private static readonly DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
        private const string TestDbName = "test.db";
        private const string TestTable = "todo";
-       private static readonly DateTime testDate = DateTime.Parse("2014-02-11 14:52:19");
+       private static readonly DateTime testDate = DateTime.Parse("2014-02-11 14:52:19").ToUniversalTime();
 
         [AsyncTestMethod]
         public async Task InitializeAsync_InitializesTheStore()
@@ -29,7 +31,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             store.DefineTable(TestTable, new JObject()
             {
                 {"id", String.Empty },
-                {"__createdAt", DateTime.Now}
+                {"__createdAt", DateTime.UtcNow}
             });
             await store.InitializeAsync();
         }
@@ -39,7 +41,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         {
             await PrepareTodoTable();
 
-            long date = 1392130339;
+            long date = (long)(testDate - epoch).TotalSeconds;
 
             // insert a row and make sure it is inserted
             TestUtilities.ExecuteNonQuery(TestDbName, "INSERT INTO todo (id, __createdAt) VALUES ('abc', " + date + ")");

@@ -14,7 +14,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 {
     internal class SqlHelpers
     {
-        static readonly DateTime epoch = new DateTime(1970, 1, 1);
+        static readonly DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         public static object SerializeValue(JValue value, bool allowNull)
         {
@@ -38,7 +38,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 if (value.Value is DateTime)
                 {
                     var date = (DateTime)value.Value;
-                    return (date - epoch).TotalSeconds;
+                    if (date.Kind == DateTimeKind.Unspecified)
+                    {
+                        date = DateTime.SpecifyKind(date, DateTimeKind.Utc);
+                    }
+                    return (date.ToUniversalTime() - epoch).TotalSeconds;
                 }
                 return Convert.ToSingle(value.Value);
             }
@@ -97,21 +101,21 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             if (type == typeof(bool) ||
                 type == typeof(int))
             {
-                return "INTEGER";
+                return SqlColumnType.Integer;
             }
             else if (type == typeof(DateTime) ||
                      type == typeof(float) || 
                      type == typeof(double))
             {
-                return "REAL";
+                return SqlColumnType.Real;
             }
             else if (type == typeof(string) ||
                     type == typeof(Guid))
             {
-                return "TEXT";
+                return SqlColumnType.Text;
             }
 
-            throw new NotImplementedException();
+            throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, WindowsAzure.MobileServices.SQLiteStore.Properties.Resources.SQLiteStore_ValueTypeNotSupported, type.Name));
         }
 
         public static string GetColumnType(JTokenType type, bool allowNull)
