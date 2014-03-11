@@ -97,5 +97,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             var ex = AssertEx.Throws<InvalidOperationException>(() => this.operation.Validate(tableOperation));
             Assert.AreEqual("Delete operation on the item is already in the queue.", ex.Message);
         }
+
+        [TestMethod]
+        public void Serialize_Succeeds_DeleteHasItem()
+        {
+            var serializedItem = "{\"id\":\"abc\",\"text\":\"example\"}";
+            this.operation.Item = JObject.Parse(serializedItem);
+
+            var serializedOperation = this.operation.Serialize();
+
+            // Check delete successfully overrides keeping an item
+            Assert.AreEqual(serializedOperation["kind"], 2);
+            Assert.AreEqual(serializedOperation["item"], serializedItem);
+        }
     }
 }

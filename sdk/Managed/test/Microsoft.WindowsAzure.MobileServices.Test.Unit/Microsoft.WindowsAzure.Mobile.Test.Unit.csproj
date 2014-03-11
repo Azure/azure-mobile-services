@@ -70,6 +70,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Table\Query\MobileServiceTableQueryDescriptionTests.cs" />
     <Compile Include="Table\Sync\Queue\Operations\DeleteOperationTests.cs" />
+    <Compile Include="Table\Sync\Queue\Operations\MobileServiceTableOperationTests.cs" />
     <Compile Include="Table\Sync\Queue\Operations\UpdateOperationTests.cs" />
     <Compile Include="Table\Sync\Queue\Operations\InsertOperationTests.cs" />
     <Compile Include="Threading\AsyncLockDictionaryTests.cs" />
