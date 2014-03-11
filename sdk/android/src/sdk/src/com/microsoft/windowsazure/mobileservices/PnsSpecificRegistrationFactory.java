@@ -34,23 +34,17 @@ import com.google.gson.JsonObject;
 final class PnsSpecificRegistrationFactory {
 
 	/**
-	 * If it is Amazon device
-	 */
-	private boolean mIsAmazonDevice;
-
-	/**
 	 * Creates a new instance of PnsSpecificRegistrationFactory
 	 */
 	PnsSpecificRegistrationFactory() {
-		// https://developer.amazon.com/public/solutions/devices/kindle-fire/specifications/01-device-and-feature-specifications
-		mIsAmazonDevice = android.os.Build.MANUFACTURER.compareToIgnoreCase("Amazon") == 0;
+		
 	}
 
 	/**
 	 * Creates native registration according the PNS supported on device
 	 */
 	public Registration createNativeRegistration() {
-		Registration registration = mIsAmazonDevice ? new AdmNativeRegistration() : new GcmNativeRegistration();
+		Registration registration = new GcmNativeRegistration();
 		
 		registration.setName(Registration.DEFAULT_REGISTRATION_NAME);
 		
@@ -62,7 +56,7 @@ final class PnsSpecificRegistrationFactory {
 	 * Creates template registration according the PNS supported on device
 	 */
 	public TemplateRegistration createTemplateRegistration() {
-		return mIsAmazonDevice ? new AdmTemplateRegistration() : new GcmTemplateRegistration();
+		return new GcmTemplateRegistration();
 	}
 
 	/**
@@ -75,7 +69,7 @@ final class PnsSpecificRegistrationFactory {
 		GsonBuilder builder = new GsonBuilder();
 		builder = builder.excludeFieldsWithoutExposeAnnotation();
 		Gson gson = builder.create();
-		Class<? extends Registration> clazz = mIsAmazonDevice ? AdmNativeRegistration.class : GcmNativeRegistration.class;
+		Class<? extends Registration> clazz = GcmNativeRegistration.class;
 		Registration registration = gson.fromJson(registrationJson, clazz);
 
 		registration.setName(Registration.DEFAULT_REGISTRATION_NAME);
@@ -93,7 +87,7 @@ final class PnsSpecificRegistrationFactory {
 		GsonBuilder builder = new GsonBuilder();
 		builder = builder.excludeFieldsWithoutExposeAnnotation();
 		Gson gson = builder.create();
-		Class<? extends TemplateRegistration> clazz = mIsAmazonDevice ? AdmTemplateRegistration.class : GcmTemplateRegistration.class;
+		Class<? extends TemplateRegistration> clazz = GcmTemplateRegistration.class;
 		return gson.fromJson(registrationJson, clazz);
 	}
 
@@ -101,6 +95,6 @@ final class PnsSpecificRegistrationFactory {
 	 * Returns PNS handle field name according the PNS supported on device
 	 */
 	public String getPlatform() {
-		return mIsAmazonDevice ? AdmNativeRegistration.ADM_PLATFORM : GcmNativeRegistration.GCM_PLATFORM;
+		return GcmNativeRegistration.GCM_PLATFORM;
 	}
 }
