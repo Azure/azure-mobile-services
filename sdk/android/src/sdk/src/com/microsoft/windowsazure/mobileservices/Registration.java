@@ -23,15 +23,9 @@ See the Apache Version 2.0 License for specific language governing permissions a
 
 package com.microsoft.windowsazure.mobileservices;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 
-import org.json.JSONException;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -140,35 +134,6 @@ public abstract class Registration {
 	}
 
 	/**
-	 * Parses an UTC date string into a Date object
-	 * 
-	 * @param dateString
-	 *            The date string to parse
-	 * @return The Date object
-	 * @throws ParseException
-	 */
-	private static Date UTCDateStringToDate(String dateString) throws ParseException {
-		// Change Z to +00:00 to adapt the string to a format
-		// that can be parsed in Java
-		String s = dateString.replace("Z", "+00:00");
-		try {
-			// Remove the ":" character to adapt the string to a
-			// format that can be parsed in Java
-			s = s.substring(0, 26) + s.substring(27);
-		} catch (IndexOutOfBoundsException e) {
-			throw new ParseException("The 'updated' value has an invalid format", 26);
-		}
-
-		// Parse the well-formatted date string
-		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'.'SSSZ", Locale.getDefault());
-		dateFormat.setTimeZone(TimeZone.getDefault());
-		Date date = dateFormat.parse(s);
-
-		return date;
-
-	}
-
-	/**
 	 * Gets the PNS specific identifier
 	 */
 	public abstract String getPNSHandle();
@@ -177,15 +142,6 @@ public abstract class Registration {
 	 * Sets the PNS specific identifier
 	 */
 	protected abstract void setPNSHandle(String pNSHandle);
-
-	/**
-	 * Gets the expiration time
-	 * 
-	 * @throws ParseException
-	 */
-	public Date getExpirationTime() throws ParseException {
-		return UTCDateStringToDate(mExpirationTime);
-	}
 
 	/**
 	 * Gets the expiration time string
@@ -207,25 +163,12 @@ public abstract class Registration {
 	void addTags(String[] tags) {
 		if (tags != null) {
 			for (String tag : tags) {
-				if (!isNullOrWhiteSpace(tag)) {
+				if (!isNullOrWhiteSpace(tag) && !tag.contains(",")) {
 					mTags.add(tag);
 				}
 			}
 		}
 	}
-
-	/**
-	 * Gets the registration information JSON object
-	 * 
-	 * @throws JSONException
-	 */
-//	JSONObject getRegistrationInformation() throws JSONException {
-//		JSONObject regInfo = new JSONObject();
-//		regInfo.put(REGISTRATIONID_JSON_PROPERTY, getRegistrationId());
-//		regInfo.put(REGISTRATION_NAME_JSON_PROPERTY, getName());
-//
-//		return regInfo;
-//	}
 
 	private static boolean isNullOrWhiteSpace(String str) {
 		return str == null || str.trim().equals("");

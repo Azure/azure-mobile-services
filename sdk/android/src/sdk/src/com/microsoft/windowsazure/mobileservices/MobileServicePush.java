@@ -94,7 +94,7 @@ public class MobileServicePush {
 	 * Factory which creates Registrations according the PNS supported on device
 	 */
 	private PnsSpecificRegistrationFactory mPnsSpecificRegistrationFactory;
-	
+
 	/**
 	 * Flag to signal the need of refreshing local storage
 	 */
@@ -271,26 +271,26 @@ public class MobileServicePush {
 				}
 
 				final SyncState state = new SyncState();
-				
+
 				state.size = registrations.size();
-				
+
 				final CopyOnWriteArrayList<String> concurrentArray = new CopyOnWriteArrayList<String>();
 
 				final Object syncObject = new Object();
 
 				if (state.size == 0) {
-					
+
 					removeAllRegistrationsId();
 					callback.onUnregister(null);
 					return;
 				}
-					
+
 				for (Registration registration : registrations) {
 					deleteRegistrationInternal(registration.getName(), registration.getRegistrationId(), new DeleteRegistrationInternalCallback() {
 
 						@Override
 						public void onDelete(String registrationId, Exception exception) {
-							
+
 							concurrentArray.add(registrationId);
 
 							if (exception != null) {
@@ -306,7 +306,7 @@ public class MobileServicePush {
 							if (concurrentArray.size() == state.size && !state.alreadyReturn) {
 								removeAllRegistrationsId();
 								callback.onUnregister(null);
-								
+
 								return;
 							}
 						}
@@ -338,34 +338,16 @@ public class MobileServicePush {
 
 		editor.commit();
 
-		// get existing registrations
-		String resource = "/registrations/";
-
-		List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
-		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
-		parameters.add(new Pair<String, String>("platform", mPnsSpecificRegistrationFactory.getPlatform()));
-		parameters.add(new Pair<String, String>("deviceId", pnsHandle));
-		requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
-
-		mClient.invokeApiInternal(resource, null, "GET", requestHeaders, parameters, MobileServiceClient.PNS_API_URL, new ServiceFilterResponseCallback() {
+		getFullRegistrationInformation(pnsHandle, new GetFullRegistrationInformationCallback() {
 
 			@Override
-			public void onResponse(ServiceFilterResponse response, Exception exception) {
+			public void onCompleted(ArrayList<Registration> registrations, Exception exception) {
 				if (exception != null) {
 					callback.onRefresh(exception);
 
 					return;
 				} else {
-
-					JsonArray registrations = new JsonParser().parse(response.getContent()).getAsJsonArray();
-
-					for (JsonElement registrationJson : registrations) {
-						Registration registration = null;
-						if (registrationJson.getAsJsonObject().has("templateName")) {
-							registration = mPnsSpecificRegistrationFactory.parseTemplateRegistration(registrationJson.getAsJsonObject());
-						} else {
-							registration = mPnsSpecificRegistrationFactory.parseNativeRegistration(registrationJson.getAsJsonObject());
-						}
+					for (Registration registration : registrations) {
 
 						try {
 							storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
@@ -412,7 +394,7 @@ public class MobileServicePush {
 				} else {
 
 					ArrayList<Registration> registrationsList = new ArrayList<Registration>();
-					
+
 					JsonArray registrations = new JsonParser().parse(response.getContent()).getAsJsonArray();
 
 					for (JsonElement registrationJson : registrations) {
@@ -433,7 +415,7 @@ public class MobileServicePush {
 			}
 		});
 	}
-	
+
 	/**
 	 * Creates a new registration in the server. If it exists, updates its
 	 * information
@@ -555,7 +537,7 @@ public class MobileServicePush {
 			public void onUpsert(final Registration registration, Exception exception) {
 
 				if (exception == null) {
-					
+
 					try {
 						storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
 					} catch (Exception e) {
@@ -565,7 +547,7 @@ public class MobileServicePush {
 					}
 
 					callback.onSet(registrationId, null);
-					
+
 					return;
 				} else if (exception instanceof RegistrationGoneException) {
 					// if we get an RegistrationGoneException (410) from
@@ -573,6 +555,8 @@ public class MobileServicePush {
 					// will recreate registration id and will try to do
 					// upsert one more
 					// time.
+					// This can occur if the backing NotificationHub is changed
+					// or if the registration expires.
 					createRegistrationId(new CreateRegistrationIdCallback() {
 
 						@Override
@@ -645,9 +629,7 @@ public class MobileServicePush {
 
 				}
 			});
-		} 
-		else
-		{
+		} else {
 			callback.onUnregister(null, null);
 			return;
 		}
@@ -764,15 +746,15 @@ public class MobileServicePush {
 			public void onResponse(ServiceFilterResponse response, Exception exception) {
 
 				removeRegistrationId(registrationName);
-				
+
 				if (exception != null) {
 					callback.onDelete(registrationId, exception);
 					return;
 				}
-				
+
 				callback.onDelete(registrationId, null);
 				return;
-			
+
 			}
 		});
 	}
@@ -829,9 +811,9 @@ public class MobileServicePush {
 	}
 
 	public void removeAllRegistrationsId() {
-		
+
 		Editor editor = mSharedPreferences.edit();
-		
+
 		Set<String> keys = mSharedPreferences.getAll().keySet();
 
 		for (String key : keys) {
@@ -842,6 +824,7 @@ public class MobileServicePush {
 
 		editor.commit();
 	}
+
 	private void verifyStorageVersion() {
 		String currentStorageVersion = mSharedPreferences.getString(STORAGE_PREFIX + STORAGE_VERSION_KEY, "");
 
