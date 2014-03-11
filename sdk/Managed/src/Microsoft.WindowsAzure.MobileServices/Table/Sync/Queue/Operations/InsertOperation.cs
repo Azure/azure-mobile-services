@@ -2,12 +2,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
@@ -32,10 +30,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public override void Validate(MobileServiceTableOperation newOperation)
         {
-            if (newOperation.ItemId != this.ItemId)
-            {
-                return;
-            }
+            Debug.Assert(newOperation.ItemId == this.ItemId);
 
             if (newOperation is InsertOperation)
             {
@@ -43,21 +38,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }            
         }
 
-        public override void Collapse(MobileServiceTableOperation other)
+        public override void Collapse(MobileServiceTableOperation newOperation)
         {
-            if (other.ItemId != this.ItemId)
-            {
-                return;
-            }
+            Debug.Assert(newOperation.ItemId == this.ItemId);
 
-            if (other is DeleteOperation)
+            if (newOperation is DeleteOperation)
             {
                 this.Cancel();
-                other.Cancel();
+                newOperation.Cancel();
             }
-            if (other is UpdateOperation)
+            else if (newOperation is UpdateOperation)
             {
-                other.Cancel();
+                newOperation.Cancel();
             }
         }
 

@@ -202,6 +202,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
+        ///  This is for unit testing only
+        /// </summary>
+        protected MobileServiceClient()
+        {
+
+        }
+
+        /// <summary>
         /// Returns a <see cref="IMobileServiceTable"/> instance, which provides 
         /// untyped data operations for that table.
         /// </summary>

@@ -36,4 +36,5 @@ using System.Runtime.InteropServices;
 [assembly: InternalsVisibleTo("Microsoft.WindowsAzure.Mobile.WP8.Test")]
 [assembly: InternalsVisibleTo("Microsoft.WindowsAzure.Mobile.WP75.Test")]
 [assembly: InternalsVisibleTo("Microsoft.WindowsAzure.Mobile.Net45.Vb.Test")]
+[assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 #endif

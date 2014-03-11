@@ -137,7 +137,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will complete when the insert finishes.
         /// </returns>
-        public Task<JToken> InsertAsync(JObject instance)
+        public virtual Task<JToken> InsertAsync(JObject instance)
         {
             return this.InsertAsync(instance, null);
         }
@@ -196,7 +196,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will complete when the update finishes.
         /// </returns>
-        public Task<JToken> UpdateAsync(JObject instance)
+        public virtual Task<JToken> UpdateAsync(JObject instance)
         {
             return this.UpdateAsync(instance, null);
         }
@@ -276,7 +276,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will complete when the delete finishes.
         /// </returns>
-        public Task<JToken> DeleteAsync(JObject instance)
+        public virtual Task<JToken> DeleteAsync(JObject instance)
         {
             return this.DeleteAsync(instance, null);
         }
