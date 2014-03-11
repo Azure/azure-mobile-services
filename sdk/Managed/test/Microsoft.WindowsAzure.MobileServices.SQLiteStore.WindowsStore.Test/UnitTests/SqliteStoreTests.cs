@@ -134,22 +134,40 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         }
 
         [AsyncTestMethod]
-        public async Task UpsertAsync_InsertsTheRow_WhenItemHasNullValue()
+        public async Task UpsertAsync_InsertsTheRow_WhenItemHasNullValues()
         {
-            await PrepareTodoTable();
+            TestUtilities.DropTestTable(TestDbName, TestTable);
 
             // insert a row and make sure it is inserted
             using (MobileServiceSQLiteStore store = new MobileServiceSQLiteStore(TestDbName))
             {
-                DefineTestTable(store);
-                await store.UpsertAsync(TestTable, new JObject() 
+                store.DefineTable(TestTable, new JObject()
+                {
+                    { "id", String.Empty },
+                    { "dob", DateTime.UtcNow },
+                    { "age", 0},
+                    { "weight", 3.5 },
+                    { "code", Guid.NewGuid() },   
+                    { "__version", String.Empty }
+                });
+
+                await store.InitializeAsync();
+
+                var inserted = new JObject() 
                 { 
                     { "id", "abc" }, 
-                    { "__createdAt", null } 
-                });
+                    { "dob", null },
+                    { "age", null },
+                    { "weight", null },
+                    { "code", null }, 
+                    { "__version", null }
+                };
+                await store.UpsertAsync(TestTable, inserted);
+
+                JObject read = await store.LookupAsync(TestTable, "abc");
+
+                Assert.AreEqual(inserted.ToString(), read.ToString());
             }
-            long count = TestUtilities.CountRows(TestDbName, TestTable);
-            Assert.AreEqual(count, 1L);
         }
 
         [AsyncTestMethod]

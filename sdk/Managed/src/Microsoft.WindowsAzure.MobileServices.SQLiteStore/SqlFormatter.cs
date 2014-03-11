@@ -30,13 +30,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
             if (this.query.Selection.Any())
             {
-                string separator = String.Empty;
-                foreach (string column in this.query.Selection)
-                {
-                    string member = SqlHelpers.FormatMember(column);
-                    command.AppendFormat("{0}{1}", separator, member);
-                    separator = ", ";
-                }
+                string columnNames = String.Join(", ", this.query.Selection.Select(c => SqlHelpers.FormatMember(c)));
+                command.Append(columnNames);
             }
             else
             {

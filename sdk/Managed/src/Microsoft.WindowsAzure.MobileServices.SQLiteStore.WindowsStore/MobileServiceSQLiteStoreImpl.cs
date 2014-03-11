@@ -96,6 +96,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
         public object DeserializeValue(ColumnDefinition column, object value)
         {
+            if (value == null)
+            {
+                return null;
+            }
+
             string sqlType = column.SqlType;
             JTokenType jsonType = column.Definition.Value.Type;
             if (sqlType == SqlColumnType.Integer)

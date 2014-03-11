@@ -112,17 +112,14 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
             var sql = new StringBuilder();
             sql.AppendFormat("INSERT OR REPLACE INTO {0} (", SqlHelpers.FormatTableName(tableName));
-            string separator = String.Empty;
             var columns = item.Properties().ToList();
 
-            foreach (JProperty column in columns)
-            {
-                sql.AppendFormat("{0}{1}", separator, SqlHelpers.FormatMember(column.Name));
-                separator = ", ";
-            }
+            string columnNames = String.Join(", ", columns.Select(c => SqlHelpers.FormatMember(c.Name)));
+            sql.Append(columnNames);
+            
             sql.AppendFormat(") VALUES (");
             
-            separator = String.Empty;
+            string separator = String.Empty;
             ColumnDefinition columnDefinition;
 
             foreach (JProperty column in columns)

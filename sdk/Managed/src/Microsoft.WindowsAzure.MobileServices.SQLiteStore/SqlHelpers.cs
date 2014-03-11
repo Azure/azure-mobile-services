@@ -24,9 +24,14 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
         public static object SerializeValue(JValue value, string columnType)
         {
+            if (value.Value == null)
+            {
+                return null;
+            }
+
             if (columnType == SqlColumnType.Text)
             {
-                return value.Value != null ? value.Value.ToString() : null;
+                return value.Value.ToString();
             }
             if (columnType == SqlColumnType.Real)
             {
