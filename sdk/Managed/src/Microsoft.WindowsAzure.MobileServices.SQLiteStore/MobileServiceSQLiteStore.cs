@@ -119,6 +119,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             string separator = String.Empty;
             ColumnDefinition columnDefinition;
 
+            var parameters = new Dictionary<string, object>();
+
             foreach (JProperty column in columns)
             {
                 if (!table.TryGetValue(column.Name, out columnDefinition))
@@ -126,21 +128,14 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                     throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_ColumnNotDefined, column.Name, tableName));
                 }
 
-                //TODO: Use parameterized queries
                 object value = SqlHelpers.SerializeValue(column.Value.Value<JValue>(), columnDefinition.SqlType);
-                if (value is string)
-                {
-                    value = "'" + value + "'";
-                }
-                else if (value == null)
-                {
-                    value = "NULL";
-                }
-                sql.AppendFormat("{0}{1}", separator, value);
+                string paramName = "@p" + (parameters.Count + 1);
+                parameters.Add(paramName, value);
+                sql.AppendFormat("{0}{1}", separator, paramName);
                 separator = ", ";
             }
             sql.Append(")");
-            this.ExecuteNonQuery(sql.ToString());
+            this.ExecuteNonQuery(sql.ToString(), parameters);
             return Task.FromResult(0);
         }        
 
@@ -156,12 +151,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
         public Task DeleteAsync(string tableName, string id)
         {
-            //string sql = string.Format("DELETE FROM {0} WHERE id = @id", tableName);
-            string sql = string.Format("DELETE FROM {0} WHERE {1} = '{2}'", SqlHelpers.FormatTableName(tableName), SystemProperties.Id, id);
+            string sql = string.Format("DELETE FROM {0} WHERE {1} = @id", SqlHelpers.FormatTableName(tableName), SystemProperties.Id);
 
             var parameters = new Dictionary<string, object>
             {
-                //TODO: {"@id", id} string binding is broken as of now. https://sqlitepcl.codeplex.com/workitem/2
+                {"@id", id}
             };
 
             this.ExecuteNonQuery(sql, parameters);
@@ -170,11 +164,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
         public Task<JObject> LookupAsync(string tableName, string id)
         {
-            //string sql = string.Format("SELECT * FROM {0} WHERE id = @id'", tableName);
-            string sql = string.Format("SELECT * FROM {0} WHERE {1} = '{2}'", SqlHelpers.FormatTableName(tableName), SystemProperties.Id, id);
+            string sql = string.Format("SELECT * FROM {0} WHERE {1} = @id", SqlHelpers.FormatTableName(tableName), SystemProperties.Id);
             var parameters = new Dictionary<string, object>
             {
-                //TODO: {"@id", id} string binding is broken as of now. https://sqlitepcl.codeplex.com/workitem/2
+                {"@id", id}
             };
 
             IList<JObject> results = this.ExecuteQuery(tableName, sql, parameters);
@@ -182,11 +175,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             return Task.FromResult(results.FirstOrDefault());
         }
 
-        private void Vacuum()
-        {
-            this.ExecuteNonQuery("VACUUM;"); //TODO: This fails
-        }
-        
         private IList<JObject> ExecuteQuery(string tableName, string sql, IDictionary<string, object> parameters = null)
         {
             TableDefinition table = GetTable(tableName);
@@ -325,7 +313,16 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
         public void Dispose()
         {
-            this.connection.Dispose();
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this.connection.Dispose();
+            }
         }        
     }
 }

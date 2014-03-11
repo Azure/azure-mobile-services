@@ -230,7 +230,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                     { "id", "abc" },
                     { "bool", true },
                     { "int", 45 },
-                    { "float", 123.45 },
+                    { "double", 123.45d },
                     { "guid", Guid.NewGuid() },
                     { "date", testDate }
                 };
@@ -249,7 +249,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                Assert.AreEqual(item.ToString(), item2.ToString());
 
                // change the item
-               item["float"] = 111.222f;
+               item["double"] = 111.222d;
 
                // upsert the item
                await store.UpsertAsync(TestTable, item);
@@ -258,7 +258,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                JObject item3 = await store.LookupAsync(TestTable, "abc");
 
                // make sure the float was updated
-               Assert.AreEqual(item3.Value<float>("float"), 111.222f);
+               Assert.AreEqual(item3.Value<double>("double"), 111.222d);
 
                // make sure the item is same as updated item
                Assert.AreEqual(item.ToString(), item3.ToString());

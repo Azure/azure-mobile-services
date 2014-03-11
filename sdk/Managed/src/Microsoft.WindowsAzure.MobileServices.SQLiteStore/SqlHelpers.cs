@@ -44,7 +44,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                     }
                     return (date.ToUniversalTime() - epoch).TotalSeconds;
                 }
-                return Convert.ToSingle(value.Value);
+                return Convert.ToDouble(value.Value);
             }
             if (columnType == SqlColumnType.Integer)
             {

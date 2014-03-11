@@ -41,7 +41,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
 
             string expectedSql = "SELECT [name] FROM [test] WHERE (ROUND([weight], 0) > @p1) ORDER BY [price]";
 
-            TestSqlFormatting(f => f.FormatSelect, odata, expectedSql, (float)5.3);
+            TestSqlFormatting(f => f.FormatSelect, odata, expectedSql, (double)5.3);
         }
 
         [TestMethod]
