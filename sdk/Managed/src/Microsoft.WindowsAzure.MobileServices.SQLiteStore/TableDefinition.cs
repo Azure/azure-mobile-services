@@ -16,7 +16,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         {
         }
 
-        public TableDefinition(IDictionary<string, ColumnDefinition> definition): base(definition)
+        public TableDefinition(IDictionary<string, ColumnDefinition> definition): base(definition, StringComparer.OrdinalIgnoreCase)
         {
         }
     }

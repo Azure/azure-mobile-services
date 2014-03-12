@@ -21,8 +21,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
             {
                 new JProperty("id", String.Empty),
                 new JProperty("PublicField", String.Empty),
-                new JProperty("PublicProperty", String.Empty),
-                new JProperty("__version", String.Empty)
+                new JProperty("PublicProperty", String.Empty)
             };
             await TestDefineTable<PocoType>("PocoType", columns);
         }
@@ -34,8 +33,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
             {
                 new JProperty("id", String.Empty),
                 new JProperty("String", String.Empty),
-                new JProperty("__updatedAt", default(DateTime)),
-                new JProperty("__createdAt", default(DateTime)),
+                new JProperty("__createdAt", default(DateTime).ToUniversalTime()),
+                new JProperty("__updatedAt", default(DateTime).ToUniversalTime()),
                 new JProperty("__version", String.Empty)
             };
 
@@ -53,9 +52,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
                     {
                         if (tableName == testTableName)
                         {
-                            var propertyStrings = properties.Select(p => p.Definition.ToString()).ToList();
+                            var expectedProperties = columns.Select(c => c.ToString()).ToList();
+                            var actualProperties = properties.Select(p => p.Definition.ToString()).ToList();
                             defined = true;
-                            CollectionAssert.AreEquivalent(columns.Select(c => c.ToString()).ToList(), propertyStrings);
+                            CollectionAssert.AreEquivalent(expectedProperties, actualProperties);
                         }
                     });
 

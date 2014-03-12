@@ -96,7 +96,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 Task pullTask = table.PullAsync(null, cancellationToken: cts.Token);
                 cts.Cancel();
 
-                await ThrowsAsync<TaskCanceledException>(() => pullTask);
+                var ex = await ThrowsAsync<Exception>(() => pullTask);
+
+                Assert.IsTrue(ex is OperationCanceledException || ex is TaskCanceledException);
 
                 Assert.AreEqual(pullTask.Status, TaskStatus.Canceled);
             }

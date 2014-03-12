@@ -21,21 +21,17 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
     {
         public static void DefineTable<T>(this MobileServiceSQLiteStore store)
         {
-            var resolver = new MobileServiceContractResolver();
+            var settings = new MobileServiceJsonSerializerSettings();
 
-            string tableName = resolver.ResolveTableName(typeof(T));
-            JsonContract contract = resolver.ResolveContract(typeof(T));
+            string tableName = settings.ContractResolver.ResolveTableName(typeof(T));
+            JsonContract contract = settings.ContractResolver.ResolveContract(typeof(T));
 
             // create an empty object
             object theObject = contract.DefaultCreator();
             // set default values so serialized version can be used to infer types
             SetDefaultValues<T>(theObject);
 
-            string json = JsonConvert.SerializeObject(theObject, new JsonSerializerSettings() 
-            { 
-                ContractResolver = resolver,
-                NullValueHandling = NullValueHandling.Include 
-            });
+            string json = JsonConvert.SerializeObject(theObject, settings);
             
             // read the serialized object
             JObject item = JObject.Parse(json);

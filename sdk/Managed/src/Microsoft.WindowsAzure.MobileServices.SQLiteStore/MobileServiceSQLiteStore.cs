@@ -16,7 +16,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 {
     public class MobileServiceSQLiteStore: IMobileServiceLocalStore
     {
-        private Dictionary<string, TableDefinition> tables = new Dictionary<string, TableDefinition>();
+        private Dictionary<string, TableDefinition> tables = new Dictionary<string, TableDefinition>(StringComparer.OrdinalIgnoreCase);
 
         private SQLiteConnection connection;
 
@@ -53,12 +53,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             if (item[SystemProperties.Id] == null)
             {
                 item[SystemProperties.Id] = String.Empty;
-            }
-
-            // add version if it is not defined
-            if (item[SystemProperties.Version] == null)
-            {
-                item[SystemProperties.Version] = String.Empty;
             }
 
             var tableDefinition = (from property in item.Properties()

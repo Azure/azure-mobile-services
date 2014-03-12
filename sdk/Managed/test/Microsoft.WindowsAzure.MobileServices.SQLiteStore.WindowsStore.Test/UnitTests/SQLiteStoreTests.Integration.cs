@@ -56,24 +56,54 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             ResetDatabase(tableName);
 
-            var store = new MobileServiceSQLiteStore(TestDbName);
-            store.DefineTable(tableName, new JObject()
+            using (var store = new MobileServiceSQLiteStore(TestDbName))
             {
-                { "id", String.Empty},
-                { "date", DateTime.Now }
-            });
+                store.DefineTable(tableName, new JObject()
+                {
+                    { "id", String.Empty},
+                    { "date", DateTime.Now }
+                });
 
-            var hijack = new TestHttpHandler();
-            await CreateClient(hijack, store);
+                var hijack = new TestHttpHandler();
+                await CreateClient(hijack, store);
+            }
 
-            store = new MobileServiceSQLiteStore(TestDbName);
-            store.DefineTable(tableName, new JObject()
+            using (var store = new MobileServiceSQLiteStore(TestDbName))
             {
-                { "id", String.Empty},
-                { "DaTE", DateTime.Now } // the casing of date is different here
-            });
-            hijack = new TestHttpHandler();
-            await CreateClient(hijack, store);
+                store.DefineTable(tableName, new JObject()
+                {
+                    { "id", String.Empty},
+                    { "DaTE", DateTime.Now } // the casing of date is different here
+                });
+
+                var hijack = new TestHttpHandler();
+                await CreateClient(hijack, store);
+            }
+        }
+
+        [AsyncTestMethod]
+        public async Task Upsert_Succeeds_IfCaseIsDifferentButNameIsSame()
+        {
+            string tableName = "itemWithDate";
+
+            ResetDatabase(tableName);
+
+            using (var store = new MobileServiceSQLiteStore(TestDbName))
+            {
+                store.DefineTable(tableName, new JObject()
+                {
+                    { "id", String.Empty},
+                    { "date", DateTime.Now }
+                });
+
+                await store.InitializeAsync();
+
+                await store.UpsertAsync("ITEMwithDATE", new JObject()
+                {
+                    { "ID", Guid.NewGuid() },
+                    {"dATE", DateTime.UtcNow }
+                });
+            }
         }
 
         [AsyncTestMethod]
