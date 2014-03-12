@@ -23,7 +23,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         }
 
         [TestMethod]
-        public async Task ExecuteAsync_UpdateGoesToTable()
+        public async Task ExecuteAsync_UpdatesItemOnTable()
         {
             var client = new Mock<MobileServiceClient>(MockBehavior.Strict);
 
@@ -46,7 +46,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         }
 
         [TestMethod]
-        public async Task ExecuteLocalAsync_UpsertsOnStore()
+        public async Task ExecuteLocalAsync_UpsertsItemOnStore()
         {
             var store = new Mock<IMobileServiceLocalStore>();
             var item = JObject.Parse("{\"id\":\"abc\",\"Text\":\"Example\"}");
@@ -90,7 +90,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         }
 
         [TestMethod]
-        public void Collapse_Succeeds_WithUpdateOperation()
+        public void Collapse_CancelsNewOperation_WithUpdateOperation()
         {
             var tableOperation = new UpdateOperation("test", "abc");
             this.operation.Collapse(tableOperation);
@@ -99,7 +99,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         }
 
         [TestMethod]
-        public void Collapse_Succeeds_WithDeleteOperation()
+        public void Collapse_CancelsExistingOperation_WithDeleteOperation()
         {
             var tableOperation = new DeleteOperation("test", "abc");
             this.operation.Collapse(tableOperation);

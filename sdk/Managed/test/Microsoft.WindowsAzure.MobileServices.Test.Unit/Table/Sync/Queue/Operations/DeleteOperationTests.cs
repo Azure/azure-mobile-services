@@ -23,7 +23,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         }
 
         [TestMethod]
-        public async Task ExecuteAsync_DeleteGoesToTable()
+        public async Task ExecuteAsync_DeletesItemOnTable()
         {
             var client = new Mock<MobileServiceClient>(MockBehavior.Strict);
 
@@ -46,17 +46,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         }
 
         [TestMethod]
-        public async Task ExecuteLocalAsync_DeletesOnStore()
+        public async Task ExecuteLocalAsync_DeletesItemOnStore()
         {
             var store = new Mock<IMobileServiceLocalStore>();
-            try 
-            {
-                await this.operation.ExecuteLocalAsync(store.Object, null);
-            }
-            catch 
-            {
-                Assert.Fail("ExecuteLocalAsync should have succeeded");
-            }
+            await this.operation.ExecuteLocalAsync(store.Object, null);
             store.Verify(s => s.DeleteAsync("test", "abc"), Times.Once());
         }
 
