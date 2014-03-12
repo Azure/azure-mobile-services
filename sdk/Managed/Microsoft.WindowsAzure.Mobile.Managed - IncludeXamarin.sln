@@ -35,13 +35,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobi
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Microsoft.WindowsAzure.Mobile.Net45.Vb.Test", "test\Microsoft.WindowsAzure.Mobile.Net45.Vb.Test\Microsoft.WindowsAzure.Mobile.Net45.Vb.Test.vbproj", "{D3C7CD26-984A-46D1-8618-8363199F1573}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Ext.Android", "src\Microsoft.WindowsAzure.Mobile.Ext.Android\Microsoft.WindowsAzure.Mobile.Ext.Android.csproj", "{0F77566D-014F-4D09-B783-D4E701627D15}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Android.Test", "test\Microsoft.WindowsAzure.MobileServices.Android.Test\Microsoft.WindowsAzure.Mobile.Android.Test.csproj", "{36A77431-95A0-4AA7-924A-A8F6C6C631C6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Ext.iOS", "src\Microsoft.WindowsAzure.Mobile.Ext.iOS\Microsoft.WindowsAzure.Mobile.Ext.iOS.csproj", "{A871B137-83A8-4E9B-913D-30EE0288E161}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.iOS.Test", "test\Microsoft.WindowsAzure.MobileServices.iOS.Test\Microsoft.WindowsAzure.Mobile.iOS.Test.csproj", "{977A5F48-B0F3-4860-AA1A-5B3081ED7D98}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Android.Test", "test\Microsoft.WindowsAzure.Mobile.Android.Test\Microsoft.WindowsAzure.Mobile.Android.Test.csproj", "{36A77431-95A0-4AA7-924A-A8F6C6C631C6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Ext.iOS", "src\Microsoft.WindowsAzure.MobileServices.iOS\Microsoft.WindowsAzure.Mobile.Ext.iOS.csproj", "{A871B137-83A8-4E9B-913D-30EE0288E161}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.iOS.Test", "test\Microsoft.WindowsAzure.Mobile.iOS.Test\Microsoft.WindowsAzure.Mobile.iOS.Test.csproj", "{977A5F48-B0F3-4860-AA1A-5B3081ED7D98}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Ext.Android", "src\Microsoft.WindowsAzure.MobileServices.Android\Microsoft.WindowsAzure.Mobile.Ext.Android.csproj", "{0F77566D-014F-4D09-B783-D4E701627D15}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

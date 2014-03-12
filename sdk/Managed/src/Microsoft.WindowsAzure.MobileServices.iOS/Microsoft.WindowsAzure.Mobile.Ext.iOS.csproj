@@ -46,7 +46,7 @@
     <Compile Include="..\..\..\managed\src\Microsoft.WindowsAzure.MobileServices.WindowsStore\Platform\ExpressionUtility.cs">
       <Link>Platform\ExpressionUtility.cs</Link>
     </Compile>
-    <Compile Include="..\Microsoft.WindowsAzure.Mobile.Ext.Android\ExpressionUtility\ExpressionVisitor.cs">
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.Android\ExpressionUtility\ExpressionVisitor.cs">
       <Link>ExpressionUtility\ExpressionVisitor.cs</Link>
     </Compile>
     <Compile Include="Authentication\MobileServiceUIAuthentication.cs" />

@@ -84,7 +84,7 @@
     <AndroidResource Include="Resources\Values\Strings.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.Mobile.Ext.Android\Microsoft.WindowsAzure.Mobile.Ext.Android.csproj">
+    <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.MobileServices.Android\Microsoft.WindowsAzure.Mobile.Ext.Android.csproj">
       <Project>{0f77566d-014f-4d09-b783-d4e701627d15}</Project>
       <Name>Microsoft.WindowsAzure.Mobile.Ext.Android</Name>
     </ProjectReference>

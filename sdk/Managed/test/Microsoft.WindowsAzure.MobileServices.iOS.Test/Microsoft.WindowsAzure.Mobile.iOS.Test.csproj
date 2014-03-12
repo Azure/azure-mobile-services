@@ -109,7 +109,7 @@
     <BundleResource Include="Resources\Default-568h%402x.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\Microsoft.WindowsAzure.Mobile.Ext.iOS.csproj">
+    <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.MobileServices.iOS\Microsoft.WindowsAzure.Mobile.Ext.iOS.csproj">
       <Project>{a871b137-83a8-4e9b-913d-30ee0288e161}</Project>
       <Name>Microsoft.WindowsAzure.Mobile.Ext.iOS</Name>
     </ProjectReference>
