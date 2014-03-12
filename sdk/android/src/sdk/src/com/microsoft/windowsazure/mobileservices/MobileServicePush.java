@@ -281,6 +281,9 @@ public class MobileServicePush {
 				if (state.size == 0) {
 
 					removeAllRegistrationsId();
+					
+					mIsRefreshNeeded = false;
+					
 					callback.onUnregister(null);
 					return;
 				}
@@ -305,6 +308,9 @@ public class MobileServicePush {
 
 							if (concurrentArray.size() == state.size && !state.alreadyReturn) {
 								removeAllRegistrationsId();
+								
+								mIsRefreshNeeded = false;
+								
 								callback.onUnregister(null);
 
 								return;
@@ -440,44 +446,24 @@ public class MobileServicePush {
 				public void onRefresh(Exception exception) {
 					if (exception != null) {
 						callback.onRegister(registration, exception);
-
-						return;
-
 					} else {
-						createRegistrationId(registration, new CreateRegistrationIdCallback() {
-							@Override
-							public void onCreate(final String registrationId, Exception exception) {
-								if (exception != null) {
-									callback.onRegister(registration, exception);
-
-									return;
-								} else {
-									callback.onRegister(registration, null);
-
-									return;
-								}
-							}
-						});
+						createRegistrationId(registration, callback);
 					}
 				}
 
 			});
 		} else {
-			createRegistrationId(registration, new CreateRegistrationIdCallback() {
-				@Override
-				public void onCreate(final String registrationId, Exception exception) {
-					if (exception != null) {
-						callback.onRegister(registration, exception);
-
-						return;
-					} else {
-						callback.onRegister(registration, null);
-
-						return;
-					}
-				}
-			});
+			createRegistrationId(registration, callback);
 		}
+	}
+
+	private void createRegistrationId(final Registration registration, final RegisterInternalCallback callback) {
+		createRegistrationId(registration, new CreateRegistrationIdCallback() {
+			@Override
+			public void onCreate(final String registrationId, Exception exception) {
+				callback.onRegister(registration, exception);
+			}
+		});
 	}
 
 	private void createRegistrationId(final Registration registration, final CreateRegistrationIdCallback callback) {
@@ -541,7 +527,6 @@ public class MobileServicePush {
 					try {
 						storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
 					} catch (Exception e) {
-						// TODO Auto-generated catch block
 						callback.onSet(registrationId, e);
 						return;
 					}
@@ -557,6 +542,14 @@ public class MobileServicePush {
 					// time.
 					// This can occur if the backing NotificationHub is changed
 					// or if the registration expires.
+
+					try {
+						removeRegistrationId(registration.getName());
+					} catch (Exception e) {
+						callback.onSet(registrationId, e);
+						return;
+					}
+
 					createRegistrationId(new CreateRegistrationIdCallback() {
 
 						@Override
@@ -576,6 +569,13 @@ public class MobileServicePush {
 
 											return;
 										} else {
+											try {
+												storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
+											} catch (Exception e) {
+												callback.onSet(registrationId, e);
+												return;
+											}
+
 											callback.onSet(registrationId, null);
 
 											return;
@@ -744,8 +744,12 @@ public class MobileServicePush {
 
 			@Override
 			public void onResponse(ServiceFilterResponse response, Exception exception) {
-
-				removeRegistrationId(registrationName);
+				try {
+					removeRegistrationId(registrationName);
+				} catch (Exception e) {
+					callback.onDelete(registrationId, e);
+					return;
+				}
 
 				if (exception != null) {
 					callback.onDelete(registrationId, exception);
@@ -810,8 +814,7 @@ public class MobileServicePush {
 		editor.commit();
 	}
 
-	public void removeAllRegistrationsId() {
-
+	private void removeAllRegistrationsId() {
 		Editor editor = mSharedPreferences.edit();
 
 		Set<String> keys = mSharedPreferences.getAll().keySet();
