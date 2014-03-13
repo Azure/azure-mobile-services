@@ -3,6 +3,9 @@ using System.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
+    /// <summary>
+    /// Provides access to platform specific functionality for the current client platform.
+    /// </summary>
     public class CurrentPlatform : IPlatform
     {
         /// <summary>

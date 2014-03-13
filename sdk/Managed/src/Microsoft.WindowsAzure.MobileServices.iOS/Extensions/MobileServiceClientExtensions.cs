@@ -9,6 +9,9 @@ using MonoTouch.UIKit;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
+    /// <summary>
+    /// Extension methods for UI-based login.
+    /// </summary>
     public static class MobileServiceClientExtensions
     {
         /// <summary>

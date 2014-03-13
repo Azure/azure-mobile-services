@@ -5,13 +5,19 @@ using Android.Content;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
+    /// <summary>
+    /// Extension methods for UI-based login.
+    /// </summary>
     public static class MobileServiceClientExtensions
     {
         /// <summary>
         /// Log a user into a Mobile Services application given a provider name.
         /// </summary>
-        /// <param name="barButtonItem" type="MonoTouch.UIKit.UIBarButtonItem">
-        /// UIBarButtonItem used to display a popover from on iPad.
+        /// <param name="client" type="Microsoft.WindowsAzure.MobileServices.IMobileServiceClient">
+        /// The MobileServiceClient instance to login with
+        /// </param>
+        /// <param name="context" type="Android.Content.Context">
+        /// The Context to display the Login UI in.
         /// </param>
         /// <param name="provider" type="MobileServiceAuthenticationProvider">
         /// Authentication provider to use.
@@ -27,8 +33,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Log a user into a Mobile Services application given a provider name.
         /// </summary>
-        /// <param name="barButtonItem" type="MonoTouch.UIKit.UIBarButtonItem">
-        /// UIBarButtonItem used to display a popover from on iPad.
+        /// <param name="client" type="Microsoft.WindowsAzure.MobileServices.IMobileServiceClient">
+        /// The MobileServiceClient instance to login with
+        /// </param>
+        /// <param name="context" type="Android.Content.Context">
+        /// The Context to display the Login UI in.
         /// </param>
         /// <param name="provider" type="string">
         /// The name of the authentication provider to use.
