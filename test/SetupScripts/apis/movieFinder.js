@@ -19,7 +19,7 @@ function replyWithError(response) {
     }
 }
 function getMovie(req, res, field, value) {
-    var table = req.service.tables.getTable('intIdMovies');
+    var table = req.service.tables.getTable('stringIdMovies');
     console.log('table: ', table);
     var filter = {};
     filter[field] = value;
@@ -32,7 +32,7 @@ function getMovie(req, res, field, value) {
 }
 function fetchMoviesSameYear(req, res) {
     var movie = req.body;
-    var table = req.service.tables.getTable('intIdMovies');
+    var table = req.service.tables.getTable('stringIdMovies');
     var orderBy = req.query.orderBy || 'Title';
     table.where({ Year: movie.Year }).orderBy(orderBy).read({
         success: function(results) {
@@ -42,7 +42,7 @@ function fetchMoviesSameYear(req, res) {
 }
 function fetchMoviesSameDuration(req, res) {
     var movie = req.body;
-    var table = req.service.tables.getTable('intIdMovies');
+    var table = req.service.tables.getTable('stringIdMovies');
     var orderBy = req.query.orderBy || 'Title';
     table.where({ Duration: movie.Duration }).orderBy(orderBy).read({
         success: function(results) {
