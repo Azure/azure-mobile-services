@@ -1,5 +1,5 @@
-id: azure-mobile-services
-version: 1.1.0
+﻿id: azure-mobile-services
+version: 1.1.5
 name: Azure Mobile Services
 publisher: Microsoft
 publisher-url: http://www.windowsazure.com/en-us/develop/mobile/
@@ -12,15 +12,27 @@ icons:
   - azure-mobile-services_128x128.png
 libraries:
   ios: 
-    - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Release\Microsoft.WindowsAzure.Mobile.dll
-    - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Release\Microsoft.WindowsAzure.Mobile.Ext.dll
-    - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Release\Xamarin.Auth.iOS.dll
-    - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.iOS\bin\iPhone\Release\Newtonsoft.Json.dll
+    - ..\..\bin\Release\Managed\iOS\Microsoft.WindowsAzure.Mobile.dll
+    - ..\..\bin\Release\Managed\iOS\Microsoft.WindowsAzure.Mobile.Ext.dll
+    - ..\..\bin\Release\Managed\iOS\Xamarin.Auth.iOS.dll
+    - ..\..\bin\Release\Managed\iOS\Newtonsoft.Json.dll
+    - ..\..\bin\Release\Managed\iOS\System.Net.Http.dll
+    - ..\..\bin\Release\Managed\iOS\System.Net.Http.Extensions.dll
+    - ..\..\bin\Release\Managed\iOS\System.Net.Http.Primitives.dll
   android:
-    - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.Android\bin\Release\Microsoft.WindowsAzure.Mobile.dll
-    - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.Android\bin\Release\Microsoft.WindowsAzure.Mobile.Ext.dll
-    - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.Android\bin\Release\Xamarin.Auth.Android.dll
-    - ..\sdk\Managed\src\Microsoft.WindowsAzure.Mobile.Ext.Android\bin\Release\Newtonsoft.Json.dll
+    - ..\..\bin\Release\Managed\Android\Microsoft.WindowsAzure.Mobile.dll
+    - ..\..\bin\Release\Managed\Android\Microsoft.WindowsAzure.Mobile.Ext.dll
+    - ..\..\bin\Release\Managed\Android\Xamarin.Auth.Android.dll
+    - ..\..\bin\Release\Managed\Android\Newtonsoft.Json.dll
+    - ..\..\bin\Release\Managed\Android\System.Net.Http.dll
+    - ..\..\bin\Release\Managed\Android\System.Net.Http.Extensions.dll
+    - ..\..\bin\Release\Managed\Android\System.Net.Http.Primitives.dll
+  mobile:
+    - ..\..\bin\Release\Managed\Android\Microsoft.WindowsAzure.Mobile.dll
+    - ..\..\bin\Release\Managed\Android\Newtonsoft.Json.dll
+    - ..\..\bin\Release\Managed\Android\System.Net.Http.dll
+    - ..\..\bin\Release\Managed\Android\System.Net.Http.Extensions.dll
+    - ..\..\bin\Release\Managed\Android\System.Net.Http.Primitives.dll
 samples:
   - name: Android Sample
     path: samples\androidsample.sln
