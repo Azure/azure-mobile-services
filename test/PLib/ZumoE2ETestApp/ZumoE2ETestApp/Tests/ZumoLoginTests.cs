@@ -46,6 +46,7 @@ namespace ZumoE2ETestApp.Tests
                 { MobileServiceAuthenticationProvider.Google, false },   // Known bug - Drop login via Google token until Google client flow is reintroduced
                 { MobileServiceAuthenticationProvider.MicrosoftAccount, false },
                 { MobileServiceAuthenticationProvider.Twitter, false },
+                { MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory, false }
             };
 
 #if !WINDOWS_PHONE
