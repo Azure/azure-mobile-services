@@ -53,7 +53,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
                         if (tableName == testTableName)
                         {
                             var expectedProperties = columns.Select(c => c.ToString()).ToList();
-                            var actualProperties = properties.Select(p => p.Definition.ToString()).ToList();
+                            var actualProperties = properties.Select(p => p.Property.ToString()).ToList();
                             defined = true;
                             CollectionAssert.AreEquivalent(expectedProperties, actualProperties);
                         }

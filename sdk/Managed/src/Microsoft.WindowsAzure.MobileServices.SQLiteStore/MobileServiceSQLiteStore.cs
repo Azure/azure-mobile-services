@@ -58,7 +58,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             var tableDefinition = (from property in item.Properties()
                                    let columnType = SqlHelpers.GetColumnType(property.Value.Type, allowNull: false)
                                    select new ColumnDefinition(columnType, property))
-                                  .ToDictionary(p => p.Definition.Name, StringComparer.OrdinalIgnoreCase);
+                                  .ToDictionary(p => p.Property.Name, StringComparer.OrdinalIgnoreCase);
 
             this.tables.Add(tableName, new TableDefinition(tableDefinition));
         }
@@ -122,7 +122,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                     throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_ColumnNotDefined, column.Name, tableName));
                 }
 
-                object value = SqlHelpers.SerializeValue(column.Value.Value<JValue>(), columnDefinition.SqlType);
+                object value = SqlHelpers.SerializeValue(column.Value.Value<JValue>(), columnDefinition.SqlType, columnDefinition.Property.Value.Type);
                 string paramName = "@p" + (parameters.Count + 1);
                 parameters.Add(paramName, value);
                 sql.AppendFormat("{0}{1}", separator, paramName);
@@ -195,14 +195,14 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                                                                .ToDictionary(c => c.Value<string>("name"), StringComparer.OrdinalIgnoreCase);
 
             var columnsToCreate = from c in columns // new column name
-                                  where !existingColumns.ContainsKey(c.Definition.Name) // that does not exist in existing columns
+                                  where !existingColumns.ContainsKey(c.Property.Name) // that does not exist in existing columns
                                   select c;
 
             foreach (ColumnDefinition column in columnsToCreate)
             {
                 string createSql = string.Format("ALTER TABLE {0} ADD COLUMN {1} {2}",
                                                  SqlHelpers.FormatTableName(tableName),
-                                                 SqlHelpers.FormatMember(column.Definition.Name),
+                                                 SqlHelpers.FormatMember(column.Property.Name),
                                                  column.SqlType);
                 this.ExecuteNonQuery(createSql);
             }
@@ -260,7 +260,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             }
 
             string sqlType = column.SqlType;
-            JTokenType jsonType = column.Definition.Value.Type;
+            JTokenType jsonType = column.Property.Value.Type;
             if (sqlType == SqlColumnType.Integer)
             {
                 return SqlHelpers.ParseInteger(jsonType, value);

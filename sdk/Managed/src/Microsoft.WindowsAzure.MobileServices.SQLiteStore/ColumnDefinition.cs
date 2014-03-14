@@ -15,12 +15,12 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
     {
         public string SqlType { get; private set; }
 
-        public JProperty Definition { get; private set; }
+        public JProperty Property { get; private set; }
 
-        public ColumnDefinition(string sqlType, JProperty definition)
+        public ColumnDefinition(string sqlType, JProperty property)
         {
             this.SqlType = sqlType;
-            this.Definition = definition;
+            this.Property = property;
         }
     }
 }

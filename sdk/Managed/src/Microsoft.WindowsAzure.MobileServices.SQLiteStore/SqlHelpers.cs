@@ -19,25 +19,25 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         public static object SerializeValue(JValue value, bool allowNull)
         {
             string columnType = SqlHelpers.GetColumnType(value.Type, allowNull);
-            return SerializeValue(value, columnType);
+            return SerializeValue(value, columnType, value.Type);
         }
 
-        public static object SerializeValue(JValue value, string columnType)
+        public static object SerializeValue(JValue value, string sqlType, JTokenType columnType)
         {
             if (value.Value == null)
             {
                 return null;
             }
 
-            if (columnType == SqlColumnType.Text)
+            if (sqlType == SqlColumnType.Text)
             {
                 return value.Value.ToString();
             }
-            if (columnType == SqlColumnType.Real)
+            if (sqlType == SqlColumnType.Real)
             {
-                if (value.Value is DateTime)
+                if (columnType == JTokenType.Date)
                 {
-                    var date = (DateTime)value.Value;
+                    var date = value.Value<DateTime>();
                     if (date.Kind == DateTimeKind.Unspecified)
                     {
                         date = DateTime.SpecifyKind(date, DateTimeKind.Utc);
@@ -46,9 +46,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 }
                 return Convert.ToDouble(value.Value);
             }
-            if (columnType == SqlColumnType.Integer)
+            if (sqlType == SqlColumnType.Integer)
             {
-                return Convert.ToInt64(value.Value);
+                return value.Value<long>();
             }
             return value.ToString();
         }

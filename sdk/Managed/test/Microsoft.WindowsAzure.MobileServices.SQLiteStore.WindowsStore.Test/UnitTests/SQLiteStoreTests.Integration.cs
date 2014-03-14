@@ -50,6 +50,31 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         }
 
         [AsyncTestMethod]
+        public async Task ReadAsync_RoundTripsDate_Generic()
+        {
+            string tableName = "NotSystemPropertyCreatedAtType";
+
+            ResetDatabase(tableName);
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable<NotSystemPropertyCreatedAtType>();
+
+            var hijack = new TestHttpHandler();
+            IMobileServiceClient service = await CreateClient(hijack, store);
+            IMobileServiceSyncTable<NotSystemPropertyCreatedAtType> table = service.GetSyncTable<NotSystemPropertyCreatedAtType>();
+
+            DateTime theDate = new DateTime(2014, 3, 10, 0, 0, 0, DateTimeKind.Utc);
+            var inserted = new NotSystemPropertyCreatedAtType() { CreatedAt = theDate };
+            await table.InsertAsync(inserted);
+
+            Assert.AreEqual(inserted.CreatedAt.ToUniversalTime(), theDate);
+
+            NotSystemPropertyCreatedAtType rehydrated = await table.LookupAsync(inserted.Id);
+
+            Assert.AreEqual(rehydrated.CreatedAt.ToUniversalTime(), theDate);
+        }
+
+        [AsyncTestMethod]
         public async Task DefineTable_IgnoresColumn_IfCaseIsDifferentButNameIsSame()
         {
             string tableName = "itemWithDate";
