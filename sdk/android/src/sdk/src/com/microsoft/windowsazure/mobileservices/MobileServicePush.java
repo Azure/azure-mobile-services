@@ -192,7 +192,7 @@ public class MobileServicePush {
 		TemplateRegistration registration = mPnsSpecificRegistrationFactory.createTemplateRegistration();
 		registration.setPNSHandle(pnsHandle);
 		registration.setName(templateName);
-		registration.setBodyTemplate(template);
+		registration.setTemplateBody(template);
 		registration.addTags(tags);
 
 		registerInternal(registration, new RegisterInternalCallback() {

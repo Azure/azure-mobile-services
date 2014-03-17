@@ -33,7 +33,7 @@ public class GcmTemplateRegistration extends TemplateRegistration {
 
 	@Expose
 	@SerializedName("platform")
-	private String mPlatform = "gcm";
+	protected String mPlatform = "gcm";
 
 	/**
 	 * The PNS specific identifier

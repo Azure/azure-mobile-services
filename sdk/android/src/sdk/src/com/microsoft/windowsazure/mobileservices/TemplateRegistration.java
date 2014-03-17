@@ -35,8 +35,8 @@ public abstract class TemplateRegistration extends Registration {
 	 * The template body
 	 */
 	@Expose
-	@SerializedName("bodyTemplate")
-	private String mBodyTemplate;
+	@SerializedName("templateBody")
+	protected String mTemplateBody;
 
 	/**
 	 * The registration name
@@ -55,15 +55,15 @@ public abstract class TemplateRegistration extends Registration {
 	/**
 	 * Gets the template body
 	 */
-	public String getBodyTemplate() {
-		return mBodyTemplate;
+	public String getTemplateBody() {
+		return mTemplateBody;
 	}
 
 	/**
 	 * Sets the template body
 	 */
-	void setBodyTemplate(String bodyTemplate) {
-		mBodyTemplate = bodyTemplate;
+	void setTemplateBody(String templateBody) {
+		mTemplateBody = templateBody;
 	}
 
 	/**

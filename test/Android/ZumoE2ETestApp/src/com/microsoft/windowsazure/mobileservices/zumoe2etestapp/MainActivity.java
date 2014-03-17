@@ -172,6 +172,7 @@ public class MainActivity extends Activity {
 		});
 
 		PushTests.mainActivity = this;
+		EnhancedPushTests.mainActivity = this;
 		
 		refreshTestGroupsAndLog();
 	}
