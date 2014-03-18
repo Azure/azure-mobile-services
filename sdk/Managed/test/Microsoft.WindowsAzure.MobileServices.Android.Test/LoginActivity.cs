@@ -47,6 +47,9 @@ namespace Microsoft.WindowsAzure.Mobile.Android.Test
                 editor.Commit();
             }
 
+            App.Harness.Settings.Custom["MobileServiceRuntimeUrl"] = this.uriText.Text;
+            App.Harness.Settings.Custom["MobileServiceRuntimeKey"] = this.keyText.Text;
+
             if (!string.IsNullOrEmpty(App.Harness.Settings.TagExpression))
             {
                 App.Harness.Settings.TagExpression += " - notXamarin";
