@@ -15,8 +15,7 @@ libraries:
     - ..\..\bin\Release\Managed\iOS\Microsoft.WindowsAzure.Mobile.dll
     - ..\..\bin\Release\Managed\iOS\Microsoft.WindowsAzure.Mobile.Ext.dll
     - ..\..\bin\Release\Managed\iOS\Xamarin.Auth.iOS.dll
-    - ..\..\bin\Release\Managed\iOS\Newtonsoft.Json.dll
-    - ..\..\bin\Release\Managed\iOS\System.Net.Http.dll
+    - ..\..\bin\Release\Managed\iOS\Newtonsoft.Json.dll    
     - ..\..\bin\Release\Managed\iOS\System.Net.Http.Extensions.dll
     - ..\..\bin\Release\Managed\iOS\System.Net.Http.Primitives.dll
   android:
@@ -24,15 +23,11 @@ libraries:
     - ..\..\bin\Release\Managed\Android\Microsoft.WindowsAzure.Mobile.Ext.dll
     - ..\..\bin\Release\Managed\Android\Xamarin.Auth.Android.dll
     - ..\..\bin\Release\Managed\Android\Newtonsoft.Json.dll
-    - ..\..\bin\Release\Managed\Android\System.Net.Http.dll
     - ..\..\bin\Release\Managed\Android\System.Net.Http.Extensions.dll
     - ..\..\bin\Release\Managed\Android\System.Net.Http.Primitives.dll
   mobile:
-    - ..\..\bin\Release\Managed\Android\Microsoft.WindowsAzure.Mobile.dll
-    - ..\..\bin\Release\Managed\Android\Newtonsoft.Json.dll
-    - ..\..\bin\Release\Managed\Android\System.Net.Http.dll
-    - ..\..\bin\Release\Managed\Android\System.Net.Http.Extensions.dll
-    - ..\..\bin\Release\Managed\Android\System.Net.Http.Primitives.dll
+    - ..\..\bin\Release\Managed\Portable\Microsoft.WindowsAzure.Mobile.dll
+    - ..\..\bin\Release\Managed\Portable\Newtonsoft.Json.dll
 samples:
   - name: Android Sample
     path: samples\androidsample.sln
