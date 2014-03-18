@@ -191,7 +191,6 @@ public class EnhancedPushTests extends TestGroup {
 	}
 
 	private TestCase createRegisterNativeTestCase(String name, final String gcmId, final String[] tags) {
-
 		TestCase register = new TestCase() {
 
 			@Override
@@ -212,8 +211,8 @@ public class EnhancedPushTests extends TestGroup {
 							if (exception != null) {
 								callback.onTestComplete(that, createResultFromException(exception));
 								return;
-
 							}
+
 							if (!matchTags(tags, reg.getTags())) {
 								result.setStatus(TestStatus.Failed);
 							}
@@ -225,7 +224,6 @@ public class EnhancedPushTests extends TestGroup {
 									if (exception != null) {
 										callback.onTestComplete(that, createResultFromException(exception));
 										return;
-
 									}
 
 									callback.onTestComplete(that, result);
@@ -234,7 +232,6 @@ public class EnhancedPushTests extends TestGroup {
 
 							});
 						}
-
 					});
 
 				} catch (Exception e) {
@@ -306,20 +303,18 @@ public class EnhancedPushTests extends TestGroup {
 											callback.onTestComplete(that, result);
 											return;
 										}
-
 									});
-
 								}
 							});
 						}
 					});
-
 				} catch (Exception e) {
 					callback.onTestComplete(this, createResultFromException(e));
 					return;
 				}
 			}
 		};
+
 		register.setName(name);
 
 		return register;
@@ -397,6 +392,7 @@ public class EnhancedPushTests extends TestGroup {
 				}
 			}
 		};
+
 		register.setName(name);
 
 		return register;
@@ -428,12 +424,12 @@ public class EnhancedPushTests extends TestGroup {
 							callback.onTestComplete(that, result);
 						}
 					});
-
 				} catch (Exception e) {
 					callback.onTestComplete(this, createResultFromException(e));
 				}
 			}
 		};
+
 		register.setName(name);
 		register.setExpectedExceptionClass(IllegalArgumentException.class);
 
@@ -491,19 +487,16 @@ public class EnhancedPushTests extends TestGroup {
 									callback.onTestComplete(that, result);
 									return;
 								}
-
 							});
-
 						}
-
 					});
-
 				} catch (Exception e) {
 					callback.onTestComplete(this, createResultFromException(e));
 					return;
 				}
 			}
 		};
+
 		register.setName(name);
 
 		return register;
@@ -570,20 +563,18 @@ public class EnhancedPushTests extends TestGroup {
 											callback.onTestComplete(that, result);
 											return;
 										}
-
 									});
 								}
 							});
-
 						}
 					});
-
 				} catch (Exception e) {
 					callback.onTestComplete(this, createResultFromException(e));
 					return;
 				}
 			}
 		};
+
 		register.setName(name);
 
 		return register;
@@ -648,10 +639,8 @@ public class EnhancedPushTests extends TestGroup {
 													callback.onTestComplete(that, result);
 													return;
 												}
-
 											});
 										}
-
 									});
 								}
 							});
@@ -660,13 +649,13 @@ public class EnhancedPushTests extends TestGroup {
 
 					callback.onTestComplete(this, result);
 					return;
-
 				} catch (Exception e) {
 					callback.onTestComplete(this, createResultFromException(e));
 					return;
 				}
 			}
 		};
+
 		register.setName(name);
 
 		return register;
@@ -736,16 +725,15 @@ public class EnhancedPushTests extends TestGroup {
 									});
 								}
 							});
-
 						}
 					});
-
 				} catch (Exception e) {
 					callback.onTestComplete(this, createResultFromException(e));
 					return;
 				}
 			}
 		};
+
 		register.setName(name);
 
 		return register;
@@ -776,13 +764,13 @@ public class EnhancedPushTests extends TestGroup {
 							return;
 						}
 					});
-
 				} catch (Exception e) {
 					callback.onTestComplete(this, createResultFromException(e));
 					return;
 				}
 			}
 		};
+
 		register.setName(name);
 		register.setExpectedExceptionClass(IllegalArgumentException.class);
 
@@ -814,13 +802,13 @@ public class EnhancedPushTests extends TestGroup {
 							return;
 						}
 					});
-
 				} catch (Exception e) {
 					callback.onTestComplete(this, createResultFromException(e));
 					return;
 				}
 			}
 		};
+
 		register.setName(name);
 		register.setExpectedExceptionClass(IllegalArgumentException.class);
 
@@ -849,16 +837,17 @@ public class EnhancedPushTests extends TestGroup {
 										callback.onTestComplete(that, createResultFromException(exception));
 										return;
 									}
+
 									callback.onTestComplete(that, result);
 									return;
 								}
 							});
-
 				} catch (Exception e) {
 					callback.onTestComplete(this, createResultFromException(e));
 				}
 			}
 		};
+
 		register.setName(name);
 		register.setExpectedExceptionClass(IllegalArgumentException.class);
 
@@ -910,6 +899,7 @@ public class EnhancedPushTests extends TestGroup {
 				}
 			}
 		};
+
 		register.setName(name);
 		register.setExpectedExceptionClass(IllegalArgumentException.class);
 
@@ -942,15 +932,14 @@ public class EnhancedPushTests extends TestGroup {
 							callback.onTestComplete(that, result);
 							return;
 						}
-
 					});
-
 				} catch (Exception e) {
 					callback.onTestComplete(this, createResultFromException(e));
 					return;
 				}
 			}
 		};
+
 		register.setName(name);
 
 		return register;
@@ -1002,23 +991,22 @@ public class EnhancedPushTests extends TestGroup {
 												callback.onTestComplete(that, createResultFromException(exception));
 												return;
 											}
+
 											callback.onTestComplete(that, result);
 											return;
 										}
-
 									});
-
 								}
 							});
 						}
 					});
-
 				} catch (Exception e) {
 					callback.onTestComplete(this, createResultFromException(e));
 					return;
 				}
 			}
 		};
+
 		register.setName(name);
 		register.setExpectedExceptionClass(MobileServiceException.class);
 
@@ -1052,13 +1040,13 @@ public class EnhancedPushTests extends TestGroup {
 							return;
 						}
 					});
-
 				} catch (Exception e) {
 					callback.onTestComplete(this, createResultFromException(e));
 					return;
 				}
 			}
 		};
+
 		register.setName(name);
 
 		return register;
@@ -1116,13 +1104,13 @@ public class EnhancedPushTests extends TestGroup {
 							});
 						}
 					});
-
 				} catch (Exception e) {
 					callback.onTestComplete(this, createResultFromException(e));
 					return;
 				}
 			}
 		};
+
 		register.setName(name);
 		register.setExpectedExceptionClass(MobileServiceException.class);
 
@@ -1200,9 +1188,7 @@ public class EnhancedPushTests extends TestGroup {
 														}
 													});
 												}
-
 											});
-
 										}
 									});
 								}
@@ -1215,6 +1201,7 @@ public class EnhancedPushTests extends TestGroup {
 				}
 			}
 		};
+
 		register.setName(name);
 		register.setExpectedExceptionClass(MobileServiceException.class);
 
@@ -1290,16 +1277,12 @@ public class EnhancedPushTests extends TestGroup {
 															return;
 														}
 													});
-
 												}
 											});
-
 										}
 									});
-
 								}
 							});
-
 						}
 					});
 				} catch (Exception e) {
@@ -1308,6 +1291,7 @@ public class EnhancedPushTests extends TestGroup {
 				}
 			}
 		};
+
 		register.setName(name);
 		register.setExpectedExceptionClass(MobileServiceException.class);
 
@@ -1412,7 +1396,6 @@ public class EnhancedPushTests extends TestGroup {
 						}
 
 						GCMMessageManager.instance.clearPushMessages();
-
 						MobileServiceJsonTable table = client.getTable(tableName);
 						JsonObject item = new JsonObject();
 						item.addProperty("method", "send");
@@ -1458,6 +1441,7 @@ public class EnhancedPushTests extends TestGroup {
 											String key = entry.getKey();
 											String value = entry.getValue().getAsString();
 											String intentExtra = intent.getStringExtra(key);
+
 											if (value.equals(intentExtra)) {
 												testCase.log("Retrieved correct value for key " + key);
 											} else {
@@ -1474,7 +1458,6 @@ public class EnhancedPushTests extends TestGroup {
 					}
 				});
 			}
-
 		};
 
 		return result;
@@ -1517,7 +1500,6 @@ public class EnhancedPushTests extends TestGroup {
 								}
 
 								GCMMessageManager.instance.clearPushMessages();
-
 								MobileServiceJsonTable table = client.getTable(tableName);
 								JsonObject item = new JsonObject();
 								item.addProperty("method", "send");
@@ -1589,7 +1571,6 @@ public class EnhancedPushTests extends TestGroup {
 						}
 
 						GCMMessageManager.instance.clearPushMessages();
-
 						MobileServiceJsonTable table = client.getTable(tableName);
 						JsonObject item = new JsonObject();
 						item.addProperty("method", "send");
@@ -1636,6 +1617,7 @@ public class EnhancedPushTests extends TestGroup {
 											String key = entry.getKey();
 											String value = entry.getValue().getAsString();
 											String intentExtra = intent.getStringExtra(key);
+
 											if (value.equals(intentExtra)) {
 												testCase.log("Retrieved correct value for key " + key);
 											} else {
@@ -1683,7 +1665,6 @@ public class EnhancedPushTests extends TestGroup {
 								}
 
 								GCMMessageManager.instance.clearPushMessages();
-
 								MobileServiceJsonTable table = client.getTable(tableName);
 								JsonObject item = new JsonObject();
 								item.addProperty("method", "send");
@@ -1751,7 +1732,6 @@ public class EnhancedPushTests extends TestGroup {
 				testResult.setTestCase(this);
 				callback.onTestComplete(this, testResult);
 			}
-
 		};
 
 		return testCase;
@@ -1770,6 +1750,7 @@ public class EnhancedPushTests extends TestGroup {
 				String registrationId = GCMRegistrar.getRegistrationId(mainActivity);
 				EnhancedPushTests.registrationId = registrationId;
 				log("Registration ID: " + EnhancedPushTests.registrationId);
+
 				if ("".equals(registrationId)) {
 					GCMRegistrar.register(mainActivity, mainActivity.getGCMSenderId());
 					log("Called GCMRegistrar.register");
@@ -1835,8 +1816,7 @@ public class EnhancedPushTests extends TestGroup {
 		String template = "{'data':{'user':'$(fullName)'}}".replace('\'', '\"');
 		String expectedPayload = "{'user':'John Doe'}".replace('\'', '\"');
 
-		this.addTest(createTemplatePushTest("Template Notification Roundtrip - Register", "tag4", templateNotification, "template1", template,
-				expectedPayload));
+		this.addTest(createTemplatePushTest("Template Notification Roundtrip - Register", "tag4", templateNotification, "template1", template, expectedPayload));
 
 		this.addTest(createTemplatePushUnregisterTest("Template Notification Roundtrip - Unregister", "tag5", templateNotification, "template1", template));
 
