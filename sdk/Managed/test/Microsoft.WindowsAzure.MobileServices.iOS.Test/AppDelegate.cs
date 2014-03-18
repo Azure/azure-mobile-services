@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+﻿using System.Reflection;
 using Microsoft.WindowsAzure.MobileServices;
 using Microsoft.WindowsAzure.MobileServices.Test;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 
-namespace Microsoft.WindowsAzure.Mobile.Test
+namespace Microsoft.WindowsAzure.Mobile.iOS.Test
 {
 	[Register("AppDelegate")]
 	public partial class AppDelegate : UIApplicationDelegate

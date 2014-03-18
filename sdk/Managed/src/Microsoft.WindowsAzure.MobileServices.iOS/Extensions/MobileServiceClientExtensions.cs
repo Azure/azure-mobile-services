@@ -17,6 +17,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Log a user into a Mobile Services application given a provider name.
         /// </summary>
+        /// <param name="client" type="Microsoft.WindowsAzure.MobileServices.IMobileServiceClient">
+        /// The MobileServiceClient instance to login with
+        /// </param>
         /// <param name="viewController" type="MonoTouch.UIKit.UIViewController">
         /// UIViewController used to display modal login UI on iPhone/iPods.
         /// </param>
@@ -34,6 +37,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Log a user into a Mobile Services application given a provider name.
         /// </summary>
+        /// <param name="client" type="Microsoft.WindowsAzure.MobileServices.IMobileServiceClient">
+        /// The MobileServiceClient instance to login with
+        /// </param>
         /// <param name="viewController" type="MonoTouch.UIKit.UIViewController">
         /// UIViewController used to display modal login UI on iPhone/iPods.
         /// </param>
@@ -51,6 +57,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Log a user into a Mobile Services application given a provider name.
         /// </summary>
+        /// <param name="client" type="Microsoft.WindowsAzure.MobileServices.IMobileServiceClient">
+        /// The MobileServiceClient instance to login with
+        /// </param>
         /// <param name="rectangle" type="System.Drawing.RectangleF">
         /// The area in <paramref name="view"/> to anchor to.
         /// </param>
@@ -71,6 +80,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Log a user into a Mobile Services application given a provider name.
         /// </summary>
+        /// <param name="client" type="Microsoft.WindowsAzure.MobileServices.IMobileServiceClient">
+        /// The MobileServiceClient instance to login with
+        /// </param>
         /// <param name="rectangle" type="System.Drawing.RectangleF">
         /// The area in <paramref name="view"/> to anchor to.
         /// </param>
@@ -91,6 +103,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Log a user into a Mobile Services application given a provider name.
         /// </summary>
+        /// <param name="client" type="Microsoft.WindowsAzure.MobileServices.IMobileServiceClient">
+        /// The MobileServiceClient instance to login with
+        /// </param>
         /// <param name="barButtonItem" type="MonoTouch.UIKit.UIBarButtonItem">
         /// UIBarButtonItem used to display a popover from on iPad.
         /// </param>
@@ -108,6 +123,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Log a user into a Mobile Services application given a provider name.
         /// </summary>
+        /// <param name="client" type="Microsoft.WindowsAzure.MobileServices.IMobileServiceClient">
+        /// The MobileServiceClient instance to login with
+        /// </param>
         /// <param name="barButtonItem" type="MonoTouch.UIKit.UIBarButtonItem">
         /// UIBarButtonItem used to display a popover from on iPad.
         /// </param>

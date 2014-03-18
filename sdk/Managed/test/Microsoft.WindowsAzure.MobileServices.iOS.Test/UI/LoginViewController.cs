@@ -1,10 +1,8 @@
-﻿using System;
-using System.Linq;
-using MonoTouch.Dialog;
+﻿using MonoTouch.Dialog;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 
-namespace Microsoft.WindowsAzure.Mobile.Test
+namespace Microsoft.WindowsAzure.Mobile.iOS.Test
 {
     class LoginViewController
         : DialogViewController

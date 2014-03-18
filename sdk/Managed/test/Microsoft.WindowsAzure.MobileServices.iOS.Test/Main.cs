@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using MonoTouch.UIKit;
 
-using MonoTouch.Foundation;
-using MonoTouch.UIKit;
-
-namespace Microsoft.WindowsAzure.MobileServices.Test
+namespace Microsoft.WindowsAzure.Mobile.iOS.Test
 {
 	public class Application
 	{

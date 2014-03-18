@@ -1,10 +1,9 @@
 using System;
-using System.Linq;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
-using MonoTouch.UIKit;
 using MonoTouch.Dialog;
+using MonoTouch.UIKit;
 
-namespace Microsoft.WindowsAzure.Mobile.Test
+namespace Microsoft.WindowsAzure.Mobile.iOS.Test
 {
     public class TestViewController
         : DialogViewController
