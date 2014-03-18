@@ -46,6 +46,7 @@ namespace ZumoE2ETestApp.Tests
                 { MobileServiceAuthenticationProvider.Google, false },   // Known bug - Drop login via Google token until Google client flow is reintroduced
                 { MobileServiceAuthenticationProvider.MicrosoftAccount, false },
                 { MobileServiceAuthenticationProvider.Twitter, false },
+                { MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory, false }
             };
 
 #if !WINDOWS_PHONE
@@ -74,7 +75,7 @@ namespace ZumoE2ETestApp.Tests
             }
 
 #if !WINDOWS_PHONE
-            result.AddTest(ZumoTestCommon.CreateYesNoTest("Were you prompted for username / password four times?", true));
+            result.AddTest(ZumoTestCommon.CreateYesNoTest("Were you prompted for username / password five times?", true));
 #endif
 
             result.AddTest(CreateLogoutTest());
