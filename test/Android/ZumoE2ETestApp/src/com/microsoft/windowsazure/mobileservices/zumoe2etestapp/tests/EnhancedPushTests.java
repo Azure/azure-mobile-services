@@ -19,6 +19,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -805,7 +806,8 @@ public class EnhancedPushTests extends TestGroup {
 			@Override
 			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
 				final TestCase test = this;
-				client.getPush().register(registrationId, new String[] { tag }, new RegistrationCallback() {
+				String[] tags = tag != null ? new String[] { tag } : null;
+				client.getPush().register(registrationId, tags, new RegistrationCallback() {
 
 					@Override
 					public void onRegister(Registration registration, Exception exception) {
@@ -819,11 +821,9 @@ public class EnhancedPushTests extends TestGroup {
 						JsonObject item = new JsonObject();
 						item.addProperty("method", "send");
 						item.addProperty("tag", tag);
-
 						JsonObject sentPayload = new JsonObject();
 						sentPayload.add("data", payload);
 						item.add("payload", sentPayload);
-
 						item.addProperty("usingNH", true);
 
 						table.insert(item, new TableJsonOperationCallback() {
@@ -835,79 +835,11 @@ public class EnhancedPushTests extends TestGroup {
 									return;
 								}
 
-								log("OnCompleted: " + jsonObject.toString());
-								GCMMessageManager.instance.waitForPushMessage(5000, GCMMessageHelper.getPushCallback(test, payload, callback));
-							}
-						});
-					}
-				});
-			}
-		};
-
-		return result;
-	}
-
-	private TestCase createNativePushUnregisterTest(String testName, final String tag, String jsonPayload) {
-		final JsonElement orginalPayload = new JsonParser().parse(jsonPayload);
-
-		JsonObject newPayload;
-		if (orginalPayload.isJsonObject()) {
-			newPayload = orginalPayload.getAsJsonObject();
-		} else {
-			newPayload = new JsonObject();
-			newPayload.add("message", orginalPayload);
-		}
-
-		final JsonObject payload = newPayload;
-
-		TestCase result = new TestCase(testName) {
-
-			@Override
-			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
-				final TestCase test = this;
-				client.getPush().register(registrationId, new String[] { tag }, new RegistrationCallback() {
-
-					@Override
-					public void onRegister(Registration registration, Exception exception) {
-						if (exception != null) {
-							callback.onTestComplete(test, createResultFromException(exception));
-							return;
-						}
-
-						client.getPush().unregister(new UnregisterCallback() {
-
-							@Override
-							public void onUnregister(Exception exception) {
-								if (exception != null) {
-									callback.onTestComplete(test, createResultFromException(exception));
-									return;
-								}
-
-								GCMMessageManager.instance.clearPushMessages();
-								MobileServiceJsonTable table = client.getTable(tableName);
-								JsonObject item = new JsonObject();
-								item.addProperty("method", "send");
-								item.addProperty("tag", tag);
-
-								JsonObject sentPayload = new JsonObject();
-								sentPayload.add("data", payload);
-								item.add("payload", sentPayload);
-
-								item.addProperty("usingNH", true);
-
-								table.insert(item, new TableJsonOperationCallback() {
-
-									@Override
-									public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
-										if (exception != null) {
-											callback.onTestComplete(test, createResultFromException(exception));
-											return;
-										}
-
-										log("OnCompleted: " + jsonObject.toString());
-										GCMMessageManager.instance.waitForPushMessage(5000, GCMMessageHelper.getNegativePushCallback(test, callback));
-									}
-								});
+								test.log("OnCompleted: " + jsonObject.toString());
+								TestExecutionCallback nativeUnregisterTestExecutionCallback = getNativeUnregisterTestExecutionCallback(client, tag, payload,
+										callback);
+								GCMMessageManager.instance.waitForPushMessage(5000,
+										GCMMessageHelper.getPushCallback(test, payload, nativeUnregisterTestExecutionCallback));
 							}
 						});
 					}
@@ -925,7 +857,8 @@ public class EnhancedPushTests extends TestGroup {
 			@Override
 			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
 				final TestCase test = this;
-				client.getPush().registerTemplate(registrationId, templateName, template, new String[] { tag }, new TemplateRegistrationCallback() {
+				String[] tags = tag != null ? new String[] { tag } : null;
+				client.getPush().registerTemplate(registrationId, templateName, template, tags, new TemplateRegistrationCallback() {
 
 					@Override
 					public void onRegister(TemplateRegistration registration, Exception exception) {
@@ -939,12 +872,9 @@ public class EnhancedPushTests extends TestGroup {
 						JsonObject item = new JsonObject();
 						item.addProperty("method", "send");
 						item.addProperty("tag", tag);
-
 						item.addProperty("payload", "not used");
-
 						item.addProperty("templatePush", true);
 						item.addProperty("templateNotification", templateNotification);
-
 						item.addProperty("usingNH", true);
 
 						table.insert(item, new TableJsonOperationCallback() {
@@ -957,68 +887,10 @@ public class EnhancedPushTests extends TestGroup {
 								}
 
 								log("OnCompleted: " + jsonObject.toString());
-								GCMMessageManager.instance.waitForPushMessage(5000, GCMMessageHelper.getPushCallback(test, expectedPayload, callback));
-							}
-						});
-					}
-				});
-			}
-		};
-
-		return result;
-	}
-
-	private TestCase createTemplatePushUnregisterTest(String testName, final String tag, final String templateNotification, final String templateName,
-			final String template) {
-		TestCase result = new TestCase(testName) {
-
-			@Override
-			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
-				final TestCase test = this;
-				client.getPush().registerTemplate(registrationId, templateName, template, new String[] { tag }, new TemplateRegistrationCallback() {
-
-					@Override
-					public void onRegister(TemplateRegistration registration, Exception exception) {
-						if (exception != null) {
-							callback.onTestComplete(test, createResultFromException(exception));
-							return;
-						}
-
-						client.getPush().unregisterTemplate(templateName, new UnregisterCallback() {
-
-							@Override
-							public void onUnregister(Exception exception) {
-								if (exception != null) {
-									callback.onTestComplete(test, createResultFromException(exception));
-									return;
-								}
-
-								GCMMessageManager.instance.clearPushMessages();
-								MobileServiceJsonTable table = client.getTable(tableName);
-								JsonObject item = new JsonObject();
-								item.addProperty("method", "send");
-								item.addProperty("tag", tag);
-
-								item.addProperty("payload", "not used");
-
-								item.addProperty("templatePush", true);
-								item.addProperty("templateNotification", templateNotification);
-
-								item.addProperty("usingNH", true);
-
-								table.insert(item, new TableJsonOperationCallback() {
-
-									@Override
-									public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
-										if (exception != null) {
-											callback.onTestComplete(test, createResultFromException(exception));
-											return;
-										}
-
-										log("OnCompleted: " + jsonObject.toString());
-										GCMMessageManager.instance.waitForPushMessage(5000, GCMMessageHelper.getNegativePushCallback(test, callback));
-									}
-								});
+								TestExecutionCallback nativeUnregisterTestExecutionCallback = getTemplateUnregisterTestExecutionCallback(client, tag,
+										templateName, template, templateNotification, callback);
+								GCMMessageManager.instance.waitForPushMessage(5000,
+										GCMMessageHelper.getPushCallback(test, expectedPayload, nativeUnregisterTestExecutionCallback));
 							}
 						});
 					}
@@ -1075,14 +947,150 @@ public class EnhancedPushTests extends TestGroup {
 		return testCase;
 	}
 
+	private TestExecutionCallback getNativeUnregisterTestExecutionCallback(final MobileServiceClient client, final String tag, final JsonObject payload,
+			final TestExecutionCallback callback) {
+		return new TestExecutionCallback() {
+
+			@Override
+			public void onTestStart(TestCase test) {
+				return;
+			}
+
+			@Override
+			public void onTestGroupComplete(TestGroup group, List<TestResult> results) {
+				return;
+			}
+
+			@Override
+			public void onTestComplete(TestCase test, TestResult result) {
+				if (result.getStatus() == TestStatus.Failed) {
+					callback.onTestComplete(test, result);
+				} else {
+					nativeUnregisterTestExecution(client, test, tag, payload, callback);
+				}
+			}
+		};
+	}
+
+	private void nativeUnregisterTestExecution(final MobileServiceClient client, final TestCase test, final String tag, final JsonObject payload,
+			final TestExecutionCallback callback) {
+		client.getPush().unregister(new UnregisterCallback() {
+
+			@Override
+			public void onUnregister(Exception exception) {
+				if (exception != null) {
+					callback.onTestComplete(test, test.createResultFromException(exception));
+					return;
+				}
+
+				GCMMessageManager.instance.clearPushMessages();
+				MobileServiceJsonTable table = client.getTable(tableName);
+				JsonObject item = new JsonObject();
+				item.addProperty("method", "send");
+				item.addProperty("tag", tag);
+
+				JsonObject sentPayload = new JsonObject();
+				sentPayload.add("data", payload);
+				item.add("payload", sentPayload);
+
+				item.addProperty("usingNH", true);
+
+				table.insert(item, new TableJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							callback.onTestComplete(test, test.createResultFromException(exception));
+							return;
+						}
+
+						test.log("OnCompleted: " + jsonObject.toString());
+						GCMMessageManager.instance.waitForPushMessage(5000, GCMMessageHelper.getNegativePushCallback(test, callback));
+					}
+				});
+			}
+		});
+	}
+
+	private TestExecutionCallback getTemplateUnregisterTestExecutionCallback(final MobileServiceClient client, final String tag, final String templateName,
+			final String template, final String templateNotification, final TestExecutionCallback callback) {
+		return new TestExecutionCallback() {
+
+			@Override
+			public void onTestStart(TestCase test) {
+				return;
+			}
+
+			@Override
+			public void onTestGroupComplete(TestGroup group, List<TestResult> results) {
+				return;
+			}
+
+			@Override
+			public void onTestComplete(TestCase test, TestResult result) {
+				if (result.getStatus() == TestStatus.Failed) {
+					callback.onTestComplete(test, result);
+				} else {
+					templateUnregisterTestExecution(client, test, tag, templateName, template, templateNotification, callback);
+				}
+			}
+		};
+	}
+
+	private void templateUnregisterTestExecution(final MobileServiceClient client, final TestCase test, final String tag, final String templateName,
+			final String template, final String templateNotification, final TestExecutionCallback callback) {
+		client.getPush().registerTemplate(registrationId, templateName, template, new String[] { tag }, new TemplateRegistrationCallback() {
+
+			@Override
+			public void onRegister(TemplateRegistration registration, Exception exception) {
+				if (exception != null) {
+					callback.onTestComplete(test, test.createResultFromException(exception));
+					return;
+				}
+
+				client.getPush().unregisterTemplate(templateName, new UnregisterCallback() {
+
+					@Override
+					public void onUnregister(Exception exception) {
+						if (exception != null) {
+							callback.onTestComplete(test, test.createResultFromException(exception));
+							return;
+						}
+
+						GCMMessageManager.instance.clearPushMessages();
+						MobileServiceJsonTable table = client.getTable(tableName);
+						JsonObject item = new JsonObject();
+						item.addProperty("method", "send");
+						item.addProperty("tag", tag);
+
+						item.addProperty("payload", "not used");
+
+						item.addProperty("templatePush", true);
+						item.addProperty("templateNotification", templateNotification);
+
+						item.addProperty("usingNH", true);
+
+						table.insert(item, new TableJsonOperationCallback() {
+
+							@Override
+							public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
+								if (exception != null) {
+									callback.onTestComplete(test, test.createResultFromException(exception));
+									return;
+								}
+
+								test.log("OnCompleted: " + jsonObject.toString());
+								GCMMessageManager.instance.waitForPushMessage(5000, GCMMessageHelper.getNegativePushCallback(test, callback));
+							}
+						});
+					}
+				});
+			}
+		});
+	}
+
 	public EnhancedPushTests() {
 		super("Enhanced Push tests");
-
-		String[] manyTags = new String[60];
-
-		for (int i = 0; i < 60; i++) {
-			manyTags[i] = "tagNum" + (i + 1);
-		}
 
 		// Notification Roundtrip Tests
 
@@ -1094,16 +1102,15 @@ public class EnhancedPushTests extends TestGroup {
 		json = "{'name':'John Doe','age':'33'}".replace('\'', '\"');
 		this.addTest(createNativePushTest("Native Notification Roundtrip - Complex payload", "tag2", json));
 
-		json = "{'message':'Unregister'}".replace('\'', '\"');
-		this.addTest(createNativePushUnregisterTest("Native Notification Roundtrip - Unregister", "tag3", json));
+		this.addTest(createNativePushTest("Native Notification Roundtrip - No Tag", null, json));
 
 		String templateNotification = "{'fullName':'John Doe'}".replace('\'', '\"');
 		String template = "{'data':{'user':'$(fullName)'}}".replace('\'', '\"');
 		String expectedPayload = "{'user':'John Doe'}".replace('\'', '\"');
 
-		this.addTest(createTemplatePushTest("Template Notification Roundtrip - Register", "tag4", templateNotification, "template1", template, expectedPayload));
+		this.addTest(createTemplatePushTest("Template Notification Roundtrip - Tag", "tag4", templateNotification, "template1", template, expectedPayload));
 
-		this.addTest(createTemplatePushUnregisterTest("Template Notification Roundtrip - Unregister", "tag5", templateNotification, "template1", template));
+		this.addTest(createTemplatePushTest("Template Notification Roundtrip - No Tag", null, templateNotification, "template1", template, expectedPayload));
 
 		this.addTest(createGCMUnregisterTest());
 

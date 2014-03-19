@@ -9,12 +9,7 @@ function insert(item, user, request) {
     var tag = item.tag;
     
     var usingNH = item.usingNH;
-    if (usingNH) {
-        if (!tag) {
-            request.respond(400, { error: 'request must have a \'tag\' member' });
-            return;
-        }
-    } else {
+    if (!usingNH) {
         if (!registrationId) {
             request.respond(400, { error: 'request must have a \'registrationId\' member' });
             return;
