@@ -19,6 +19,8 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 import junit.framework.Assert;
@@ -327,6 +329,9 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 			String registrationId1 = "registrationId1";
 			String registrationId2 = "registrationId2";
 
+			String[] tags1 = new String[] { "tag1" };
+			final String[] tags2 = new String[] { "tag2" };
+
 			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
 
 			MobileServiceClient registrationclient = client.withFilter(getUpsertTestFilter(registrationId1));
@@ -338,7 +343,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 			forceRefreshSync(registrationPush, handle);
 			forceRefreshSync(reRegistrationPush, handle);
 
-			registrationPush.register(handle, new String[] { "tag1" }, new RegistrationCallback() {
+			registrationPush.register(handle, tags1, new RegistrationCallback() {
 
 				@Override
 				public void onRegister(Registration registration, Exception exception) {
@@ -347,7 +352,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
 						latch.countDown();
 					} else {
-						reRegistrationPush.register(handle, new String[] { "tag1" }, new RegistrationCallback() {
+						reRegistrationPush.register(handle, tags2, new RegistrationCallback() {
 
 							@Override
 							public void onRegister(Registration registration, Exception exception) {
@@ -356,6 +361,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 								} else {
 									container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY
 											+ DEFAULT_REGISTRATION_NAME, null);
+									container.tags = registration.getTags();
 								}
 
 								latch.countDown();
@@ -374,6 +380,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 				fail(exception.getMessage());
 			} else {
 				Assert.assertEquals(registrationId2, container.storedRegistrationId);
+				Assert.assertTrue(matchTags(tags2, container.tags));
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -394,6 +401,12 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 			String registrationId1 = "registrationId1";
 			String registrationId2 = "registrationId2";
 
+			String[] tags1 = new String[] { "tag1" };
+			final String[] tags2 = new String[] { "tag2" };
+
+			String templateBody1 = "\"data\"={\"text\"=\"$message1\"}";
+			final String templateBody2 = "\"data\"={\"text\"=\"$message2\"}";
+
 			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
 
 			MobileServiceClient registrationclient = client.withFilter(getUpsertTestFilter(registrationId1));
@@ -405,7 +418,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 			forceRefreshSync(registrationPush, handle);
 			forceRefreshSync(reRegistrationPush, handle);
 
-			registrationPush.registerTemplate(handle, templateName, "{ }", new String[] { "tag1" }, new TemplateRegistrationCallback() {
+			registrationPush.registerTemplate(handle, templateName, templateBody1, tags1, new TemplateRegistrationCallback() {
 
 				@Override
 				public void onRegister(TemplateRegistration registration, Exception exception) {
@@ -414,7 +427,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 
 						latch.countDown();
 					} else {
-						reRegistrationPush.registerTemplate(handle, templateName, "{ }", new String[] { "tag1" }, new TemplateRegistrationCallback() {
+						reRegistrationPush.registerTemplate(handle, templateName, templateBody2, tags2, new TemplateRegistrationCallback() {
 
 							@Override
 							public void onRegister(TemplateRegistration registration, Exception exception) {
@@ -423,6 +436,8 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 								} else {
 									container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName,
 											null);
+									container.tags = registration.getTags();
+									container.templateBody = registration.getTemplateBody();
 								}
 
 								latch.countDown();
@@ -441,6 +456,8 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 				fail(exception.getMessage());
 			} else {
 				Assert.assertEquals(registrationId2, container.storedRegistrationId);
+				Assert.assertTrue(matchTags(tags2, container.tags));
+				Assert.assertEquals(templateBody2, container.templateBody);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -578,6 +595,140 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 		}
 	}
 
+	public void testRegisterNativeEmptyGcmRegistrationId() throws Throwable {
+		try {
+			final CountDownLatch latch = new CountDownLatch(1);
+			final Container container = new Container();
+
+			Context context = getInstrumentation().getTargetContext();
+
+			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+			client.getPush().register("", new String[] { "tag1" }, new RegistrationCallback() {
+
+				@Override
+				public void onRegister(Registration registration, Exception exception) {
+					if (exception != null) {
+						container.exception = exception;
+					}
+
+					latch.countDown();
+				}
+			});
+
+			latch.await();
+
+			// Asserts
+			Exception exception = container.exception;
+
+			if (!(exception instanceof IllegalArgumentException)) {
+				fail("Expected Exception IllegalArgumentException");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void testRegisterTemplateEmptyGcmRegistrationId() throws Throwable {
+		try {
+			final CountDownLatch latch = new CountDownLatch(1);
+			final Container container = new Container();
+
+			Context context = getInstrumentation().getTargetContext();
+
+			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+			client.getPush().registerTemplate("", "template1", "{\"data\"={\"text\"=\"$message\"}}", new String[] { "tag1" },
+					new TemplateRegistrationCallback() {
+
+						@Override
+						public void onRegister(TemplateRegistration registration, Exception exception) {
+							if (exception != null) {
+								container.exception = exception;
+							}
+
+							latch.countDown();
+						}
+					});
+
+			latch.await();
+
+			// Asserts
+			Exception exception = container.exception;
+
+			if (!(exception instanceof IllegalArgumentException)) {
+				fail("Expected Exception IllegalArgumentException");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void testRegisterTemplateEmptyTemplateName() throws Throwable {
+		try {
+			final CountDownLatch latch = new CountDownLatch(1);
+			final Container container = new Container();
+
+			Context context = getInstrumentation().getTargetContext();
+
+			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+			client.getPush().registerTemplate(UUID.randomUUID().toString(), "", "{\"data\"={\"text\"=\"$message\"}}", new String[] { "tag1" },
+					new TemplateRegistrationCallback() {
+
+						@Override
+						public void onRegister(TemplateRegistration registration, Exception exception) {
+							if (exception != null) {
+								container.exception = exception;
+							}
+
+							latch.countDown();
+						}
+					});
+
+			latch.await();
+
+			// Asserts
+			Exception exception = container.exception;
+
+			if (!(exception instanceof IllegalArgumentException)) {
+				fail("Expected Exception IllegalArgumentException");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void testRegisterTemplateEmptyTemplateBody() throws Throwable {
+		try {
+			final CountDownLatch latch = new CountDownLatch(1);
+			final Container container = new Container();
+
+			Context context = getInstrumentation().getTargetContext();
+
+			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+			client.getPush().registerTemplate(UUID.randomUUID().toString(), "template1", "", new String[] { "tag1" }, new TemplateRegistrationCallback() {
+
+				@Override
+				public void onRegister(TemplateRegistration registration, Exception exception) {
+					if (exception != null) {
+						container.exception = exception;
+					}
+
+					latch.countDown();
+				}
+			});
+
+			latch.await();
+
+			// Asserts
+			Exception exception = container.exception;
+
+			if (!(exception instanceof IllegalArgumentException)) {
+				fail("Expected Exception IllegalArgumentException");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	private static void forceRefreshSync(MobileServicePush push, String handle) throws InterruptedException {
 		final CountDownLatch unregisterLatch = new CountDownLatch(1);
 
@@ -591,6 +742,22 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 		});
 
 		unregisterLatch.await();
+	}
+
+	private static boolean matchTags(final String[] tags, List<String> regTags) {
+		if (tags == null || regTags == null) {
+			return (tags == null && regTags == null) || (tags == null && regTags.size() == 0) || (regTags == null && tags.length == 0);
+		} else if (regTags.size() != tags.length) {
+			return false;
+		} else {
+			for (String tag : tags) {
+				if (!regTags.contains(tag)) {
+					return false;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	// Test Filter
@@ -703,6 +870,9 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 	private class Container {
 		public String storedRegistrationId;
 		public String registrationId;
+
+		public List<String> tags;
+		public String templateBody;
 
 		public String unregister;
 
