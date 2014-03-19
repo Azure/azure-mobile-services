@@ -24,7 +24,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug</OutputPath>
-    <DefineConstants>DEBUG;</DefineConstants>
+    <DefineConstants>DEBUG;PLATFORM_ANDROID</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AndroidLinkMode>None</AndroidLinkMode>
@@ -39,6 +39,7 @@
     <ConsolePause>false</ConsolePause>
     <AndroidUseSharedRuntime>false</AndroidUseSharedRuntime>
     <DocumentationFile>bin\Release\Microsoft.WindowsAzure.Mobile.Ext.xml</DocumentationFile>
+    <DefineConstants>PLATFORM_ANDROID</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -57,9 +58,6 @@
     <Reference Include="System.Xml" />
     <Reference Include="System.Core" />
     <Reference Include="Mono.Android" />
-    <Reference Include="Xamarin.Auth.Android">
-      <HintPath>..\..\Components\xamarin.auth-1.2.2\lib\android\Xamarin.Auth.Android.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\..\managed\src\Microsoft.WindowsAzure.MobileServices.WindowsStore\ExpressionUtility\PartialEvaluator.cs">
@@ -70,6 +68,90 @@
     </Compile>
     <Compile Include="..\..\..\managed\src\Microsoft.WindowsAzure.MobileServices.WindowsStore\Platform\ExpressionUtility.cs">
       <Link>Platform\ExpressionUtility.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth.Android\ActivityEx.cs">
+      <Link>Auth\Android\ActivityEx.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth.Android\ActivityStateRepository.cs">
+      <Link>Auth\Android\ActivityStateRepository.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth.Android\AndroidAccountStore.cs">
+      <Link>Auth\Android\AndroidAccountStore.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth.Android\FormAuthenticatorActivity.cs">
+      <Link>Auth\Android\FormAuthenticatorActivity.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth.Android\WebAuthenticatorActivity.cs">
+      <Link>Auth\Android\WebAuthenticatorActivity.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\Account.cs">
+      <Link>Auth\Account.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\AccountStore.cs">
+      <Link>Auth\AccountStore.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\Authenticator.cs">
+      <Link>Auth\Authenticator.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\AuthException.cs">
+      <Link>Auth\AuthException.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\ExceptionEx.cs">
+      <Link>Auth\ExceptionEx.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\FormAuthenticator.cs">
+      <Link>Auth\FormAuthenticator.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\OAuth1.cs">
+      <Link>Auth\OAuth1.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\OAuth1Authenticator.cs">
+      <Link>Auth\OAuth1Authenticator.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\OAuth1Request.cs">
+      <Link>Auth\OAuth1Request.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\OAuth2Authenticator.cs">
+      <Link>Auth\OAuth2Authenticator.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\OAuth2Request.cs">
+      <Link>Auth\OAuth2Request.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\Request.cs">
+      <Link>Auth\Request.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\Response.cs">
+      <Link>Auth\Response.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\System.Json\JavaScriptReader.cs">
+      <Link>Auth\Json\JavaScriptReader.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\System.Json\JsonArray.cs">
+      <Link>Auth\Json\JsonArray.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\System.Json\JsonObject.cs">
+      <Link>Auth\Json\JsonObject.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\System.Json\JsonPrimitive.cs">
+      <Link>Auth\Json\JsonPrimitive.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\System.Json\JsonType.cs">
+      <Link>Auth\Json\JsonType.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\System.Json\JsonValue.cs">
+      <Link>Auth\Json\JsonValue.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\WebAuthenticator.cs">
+      <Link>Auth\WebAuthenticator.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\WebEx.cs">
+      <Link>Auth\WebEx.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\WebRedirectAuthenticator.cs">
+      <Link>Auth\WebRedirectAuthenticator.cs</Link>
+    </Compile>
+    <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\WebUtilities.cs">
+      <Link>Auth\WebUtilities.cs</Link>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Authentication\MobileServiceUIAuthentication.cs" />
@@ -84,12 +166,6 @@
       <Project>{75557793-e36e-4190-8714-5bd2665859fb}</Project>
       <Name>Microsoft.WindowsAzure.Mobile</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <XamarinComponentReference Include="xamarin.auth">
-      <Visible>False</Visible>
-      <Version>1.2.2</Version>
-    </XamarinComponentReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -1,4 +1,5 @@
-﻿using MonoTouch.Dialog;
+﻿using Microsoft.WindowsAzure.MobileServices;
+using MonoTouch.Dialog;
 using MonoTouch.Foundation;
 using MonoTouch.UIKit;
 
@@ -27,7 +28,14 @@ namespace Microsoft.WindowsAzure.Mobile.iOS.Test
                 },
 
                 new Section {
-                    new StringElement ("Run Tests", RunTests)
+                    new StringElement ("Run Tests", RunTests)                    
+                },
+
+                new Section{
+                    new StringElement("Login with Microsoft", () => Login(MobileServiceAuthenticationProvider.MicrosoftAccount)),
+                    new StringElement("Login with Facebook", () => Login(MobileServiceAuthenticationProvider.Facebook)),
+                    new StringElement("Login with Twitter", () => Login(MobileServiceAuthenticationProvider.Twitter)),
+                    new StringElement("Login with Google", () => Login(MobileServiceAuthenticationProvider.Google))
                 }
             };
         }
@@ -61,6 +69,14 @@ namespace Microsoft.WindowsAzure.Mobile.iOS.Test
             }
 
             NavigationController.PushViewController (new HarnessViewController(), true);
+        }
+
+        private async void Login(MobileServiceAuthenticationProvider provider)
+        {
+            var client = new MobileServiceClient(this.uriEntry.Value, this.keyEntry.Value);
+            var user = await client.LoginAsync(this, provider);
+            var alert = new UIAlertView("Welcome", "Your userId is: " + user.UserId, null, "OK");
+            alert.Show();
         }
     }
 }

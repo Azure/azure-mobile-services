@@ -60,14 +60,17 @@ namespace Microsoft.WindowsAzure.Mobile.Android.Test
 		public partial class Id
 		{
 			
-			// aapt resource value: 0x7f050007
-			public const int Description = 2131034119;
+			// aapt resource value: 0x7f050008
+			public const int Description = 2131034120;
 			
 			// aapt resource value: 0x7f050001
 			public const int List = 2131034113;
 			
-			// aapt resource value: 0x7f050008
-			public const int Log = 2131034120;
+			// aapt resource value: 0x7f050009
+			public const int Log = 2131034121;
+			
+			// aapt resource value: 0x7f050007
+			public const int Login = 2131034119;
 			
 			// aapt resource value: 0x7f050000
 			public const int RunStatus = 2131034112;
@@ -130,6 +133,9 @@ namespace Microsoft.WindowsAzure.Mobile.Android.Test
 			
 			// aapt resource value: 0x7f040004
 			public const int ApplicationName = 2130968580;
+			
+			// aapt resource value: 0x7f040005
+			public const int Login = 2130968581;
 			
 			// aapt resource value: 0x7f040001
 			public const int MobileServiceKey = 2130968577;

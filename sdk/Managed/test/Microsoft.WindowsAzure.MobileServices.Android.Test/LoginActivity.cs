@@ -5,6 +5,7 @@ using Android.Content;
 using Android.OS;
 using Android.Preferences;
 using Android.Widget;
+using Microsoft.WindowsAzure.MobileServices;
 
 namespace Microsoft.WindowsAzure.Mobile.Android.Test
 {
@@ -34,6 +35,7 @@ namespace Microsoft.WindowsAzure.Mobile.Android.Test
             this.tagsText.Text = prefs.GetString (TagsKey, null);
 
             FindViewById<Button> (Resource.Id.RunTests).Click += OnClickRunTests;
+            FindViewById<Button>(Resource.Id.Login).Click += OnClickLogin;
         }
 
         private void OnClickRunTests (object sender, EventArgs eventArgs)
@@ -63,6 +65,13 @@ namespace Microsoft.WindowsAzure.Mobile.Android.Test
 
             Intent intent = new Intent (this, typeof (HarnessActivity));
             StartActivity (intent);
+        }
+
+        private async void OnClickLogin(object sender, EventArgs eventArgs)
+        {
+            var client = new MobileServiceClient(this.uriText.Text, this.keyText.Text);
+            var user = await client.LoginAsync(this, MobileServiceAuthenticationProvider.MicrosoftAccount);
+            System.Diagnostics.Debug.WriteLine(user.UserId);
         }
     }
 }

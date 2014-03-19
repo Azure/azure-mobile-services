@@ -25,4 +25,9 @@
         p1:layout_width="fill_parent"
         p1:layout_height="wrap_content"
         p1:id="@+id/RunTests" />
+    <Button
+        p1:text="@string/Login"
+        p1:layout_width="fill_parent"
+        p1:layout_height="wrap_content"
+        p1:id="@+id/Login" />
 </LinearLayout>

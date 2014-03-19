@@ -5,4 +5,5 @@
 	<string name="Tags">Tags</string>
 	<string name="RunTests">Run Tests</string>
 	<string name="ApplicationName">Microsoft.WindowsAzure.Mobile.Android.Test</string>
+  <string name="Login">Login</string>
 </resources>
