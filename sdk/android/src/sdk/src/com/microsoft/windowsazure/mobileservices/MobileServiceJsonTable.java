@@ -393,7 +393,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 					}
 				}
 			}
-		}.execute();
+		}.executeTask();
 	}
 
 	/**
@@ -457,7 +457,7 @@ MobileServiceTableBase<TableJsonQueryCallback> {
 					}
 				}
 			}
-		}.execute();
+		}.executeTask();
 	}
 	
 	/**

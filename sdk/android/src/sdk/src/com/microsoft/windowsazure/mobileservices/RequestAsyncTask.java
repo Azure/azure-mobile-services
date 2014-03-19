@@ -23,13 +23,14 @@ See the Apache Version 2.0 License for specific language governing permissions a
 
 package com.microsoft.windowsazure.mobileservices;
 
+import android.annotation.SuppressLint;
 import android.os.AsyncTask;
+import android.os.Build;
 
 /**
  * Default implementation for performing requests using AsyncTask
  */
-abstract class RequestAsyncTask extends
-		AsyncTask<Void, Void, ServiceFilterResponse> {
+abstract class RequestAsyncTask extends AsyncTask<Void, Void, ServiceFilterResponse> {
 	/**
 	 * Error message
 	 */
@@ -65,10 +66,20 @@ abstract class RequestAsyncTask extends
 	 * @param connection
 	 *            Connection to use
 	 */
-	public RequestAsyncTask(ServiceFilterRequest request,
-			MobileServiceConnection connection) {
+	public RequestAsyncTask(ServiceFilterRequest request, MobileServiceConnection connection) {
 		mRequest = request;
 		mConnection = connection;
+	}
+
+	@SuppressLint("NewApi")
+	public void executeTask() {
+		// If it's running with Honeycomb or greater, it must execute each
+		// request in a different thread
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			this.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		} else {
+			this.execute();
+		}
 	}
 
 	@Override
@@ -77,8 +88,7 @@ abstract class RequestAsyncTask extends
 		mConnection.start(mRequest, new ServiceFilterResponseCallback() {
 
 			@Override
-			public void onResponse(ServiceFilterResponse response,
-					Exception exception) {
+			public void onResponse(ServiceFilterResponse response, Exception exception) {
 				mTaskResponse = response;
 				mTaskException = exception;
 			}
@@ -86,4 +96,5 @@ abstract class RequestAsyncTask extends
 
 		return mTaskResponse;
 	}
+
 }
