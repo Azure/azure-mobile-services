@@ -22,33 +22,24 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             return SerializeValue(value, columnType, value.Type);
         }
 
-        public static object SerializeValue(JValue value, string sqlType, JTokenType columnType)
+        public static object SerializeValue(JToken value, string sqlType, JTokenType columnType)
         {
-            if (value.Value == null)
+            if (value == null || value.Type == JTokenType.Null)
             {
                 return null;
             }
 
             if (sqlType == SqlColumnType.Text)
             {
-                return value.Value.ToString();
+                return SerializeAsText(value, columnType);
             }
             if (sqlType == SqlColumnType.Real)
             {
-                if (columnType == JTokenType.Date)
-                {
-                    var date = value.Value<DateTime>();
-                    if (date.Kind == DateTimeKind.Unspecified)
-                    {
-                        date = DateTime.SpecifyKind(date, DateTimeKind.Utc);
-                    }
-                    return (date.ToUniversalTime() - epoch).TotalSeconds;
-                }
-                return Convert.ToDouble(value.Value);
+                return SerializeAsReal(value, columnType);
             }
             if (sqlType == SqlColumnType.Integer)
             {
-                return value.Value<long>();
+                return SerializeAsInteger(value, columnType);
             }
             return value.ToString();
         }
@@ -65,17 +56,51 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             return string.Format("[{0}]", memberName);
         }
 
-        public static object ParseText(JTokenType type, object value)
+        private static object SerializeAsInteger(JToken value, JTokenType columnType)
+        {
+            return value.Value<long>();
+        }
+
+        private static object SerializeAsReal(JToken value, JTokenType columnType)
+        {
+            if (columnType == JTokenType.Date)
+            {
+                var date = value.Value<DateTime>();
+                if (date.Kind == DateTimeKind.Unspecified)
+                {
+                    date = DateTime.SpecifyKind(date, DateTimeKind.Utc);
+                }
+                return (date.ToUniversalTime() - epoch).TotalSeconds;
+            }
+            return value.Value<double>();
+        }
+
+        private static object SerializeAsText(JToken value, JTokenType columnType)
+        {
+            return value.ToString();
+        }
+
+        public static JToken ParseText(JTokenType type, object value)
         {
             string strValue = value as string;
-            if (value != null && type == JTokenType.Guid)
+            if (value == null)
+            {
+                return strValue;
+            }
+
+            if (type == JTokenType.Guid)
             {
                 return Guid.Parse(strValue);
             }
+            if (type == JTokenType.Array || type == JTokenType.Object)
+            {
+                return JToken.Parse(strValue);
+            }
+
             return strValue;
         }
 
-        public static object ParseReal(JTokenType type, object value)
+        public static JToken ParseReal(JTokenType type, object value)
         {
             double dblValue = (value as double?).GetValueOrDefault();
             if (type == JTokenType.Date)
@@ -85,7 +110,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             return dblValue;
         }
 
-        public static object ParseInteger(JTokenType type, object value)
+        public static JToken ParseInteger(JTokenType type, object value)
         {
             long longValue = (value as long?).GetValueOrDefault();
             if (type == JTokenType.Boolean)
@@ -130,6 +155,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                     return SqlColumnType.Real;
                 case JTokenType.String:
                 case JTokenType.Guid:
+                case JTokenType.Array:
+                case JTokenType.Object:
                     return SqlColumnType.Text;
                 case JTokenType.Null:
                     if (allowNull)
@@ -137,12 +164,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                         return null;
                     }
                     throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, WindowsAzure.MobileServices.SQLiteStore.Properties.Resources.SQLiteStore_JTokenNotSupported, type));
-                case JTokenType.Array:
                 case JTokenType.Bytes:
                 case JTokenType.Comment:
                 case JTokenType.Constructor:
                 case JTokenType.None:
-                case JTokenType.Object:
                 case JTokenType.Property:
                 case JTokenType.Raw:
                 case JTokenType.TimeSpan:

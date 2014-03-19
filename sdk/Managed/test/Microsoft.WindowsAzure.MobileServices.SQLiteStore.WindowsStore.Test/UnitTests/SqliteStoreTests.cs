@@ -150,6 +150,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                     { "age", 0},
                     { "weight", 3.5 },
                     { "code", Guid.NewGuid() },   
+                    { "options", new JObject(){} },  
+                    { "friends", new JArray(){} },  
                     { "__version", String.Empty }
                 });
 
@@ -162,6 +164,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                     { "age", null },
                     { "weight", null },
                     { "code", null }, 
+                    { "options", null },  
+                    { "friends", null },  
                     { "__version", null }
                 };
                 await store.UpsertAsync(TestTable, inserted);
@@ -225,46 +229,48 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
            using (MobileServiceSQLiteStore store = new MobileServiceSQLiteStore(TestDbName))
            {
                // define item with all type of supported fields
-               var item = new JObject()
+               var originalItem = new JObject()
                 {
                     { "id", "abc" },
                     { "bool", true },
                     { "int", 45 },
                     { "double", 123.45d },
                     { "guid", Guid.NewGuid() },
-                    { "date", testDate }
+                    { "date", testDate },
+                    { "options", new JObject(){ {"class", "A"} } },  
+                    { "friends", new JArray(){ "Eric", "Jeff" } }
                 };
-               store.DefineTable(TestTable, item);
+               store.DefineTable(TestTable, originalItem);
 
                // create the table
                await store.InitializeAsync();
 
                // first add an item
-               await store.UpsertAsync(TestTable, item);
+               await store.UpsertAsync(TestTable, originalItem);
 
                // read the item back
-               JObject item2 = await store.LookupAsync(TestTable, "abc");
+               JObject itemRead = await store.LookupAsync(TestTable, "abc");
 
                // make sure everything was persisted the same
-               Assert.AreEqual(item.ToString(), item2.ToString());
+               Assert.AreEqual(originalItem.ToString(), itemRead.ToString());
 
                // change the item
-               item["double"] = 111.222d;
+               originalItem["double"] = 111.222d;
 
                // upsert the item
-               await store.UpsertAsync(TestTable, item);
+               await store.UpsertAsync(TestTable, originalItem);
 
                // read the updated item
-               JObject item3 = await store.LookupAsync(TestTable, "abc");
+               JObject updatedItem = await store.LookupAsync(TestTable, "abc");
 
                // make sure the float was updated
-               Assert.AreEqual(item3.Value<double>("double"), 111.222d);
+               Assert.AreEqual(updatedItem.Value<double>("double"), 111.222d);
 
                // make sure the item is same as updated item
-               Assert.AreEqual(item.ToString(), item3.ToString());
+               Assert.AreEqual(originalItem.ToString(), updatedItem.ToString());
 
                // make sure item is not same as its initial state
-               Assert.AreNotEqual(item.ToString(), item2.ToString());
+               Assert.AreNotEqual(originalItem.ToString(), itemRead.ToString());
 
                // now delete the item
                await store.DeleteAsync(TestTable, "abc");

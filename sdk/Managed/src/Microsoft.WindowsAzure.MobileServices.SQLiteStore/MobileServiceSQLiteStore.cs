@@ -122,7 +122,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                     throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_ColumnNotDefined, column.Name, tableName));
                 }
 
-                object value = SqlHelpers.SerializeValue(column.Value.Value<JValue>(), columnDefinition.SqlType, columnDefinition.Property.Value.Type);
+                object value = SqlHelpers.SerializeValue(column.Value, columnDefinition.SqlType, columnDefinition.Property.Value.Type);
                 string paramName = "@p" + (parameters.Count + 1);
                 parameters.Add(paramName, value);
                 sql.AppendFormat("{0}{1}", separator, paramName);
@@ -252,7 +252,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             return rows;
         }
 
-        private object DeserializeValue(ColumnDefinition column, object value)
+        private JToken DeserializeValue(ColumnDefinition column, object value)
         {
             if (value == null)
             {
@@ -273,7 +273,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             {
                 return SqlHelpers.ParseText(jsonType, value);
             }
-            return value;
+            
+            return null;
         }
 
         private static void ValidateResult(SQLiteResult result)
@@ -296,9 +297,13 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 ColumnDefinition column;
                 if (table.TryGetValue(name, out column))
                 {
-                    value = this.DeserializeValue(column, value);
+                    JToken jVal = this.DeserializeValue(column, value);
+                    row[name] = jVal;
                 }
-                row[name] = new JValue(value);
+                else
+                {
+                    row[name] = value == null ? null : JToken.FromObject(value);
+                }
 
                 name = statement.ColumnName(++i);
             }
