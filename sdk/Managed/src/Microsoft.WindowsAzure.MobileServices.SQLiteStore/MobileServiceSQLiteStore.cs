@@ -39,7 +39,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             this.DefineTable(LocalSystemTables.SyncErrors, new JObject()
             {
                 { SystemProperties.Id, String.Empty },
-                { "status", 0 },
+                { "httpStatus", 0 },
                 { "operationKind", 0 },
                 { "tableName", String.Empty },
                 { "item", String.Empty },

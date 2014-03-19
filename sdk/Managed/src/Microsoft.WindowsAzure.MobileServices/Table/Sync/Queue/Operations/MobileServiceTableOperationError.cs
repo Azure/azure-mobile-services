@@ -21,7 +21,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <summary>
         /// A unique identifier for the error.
         /// </summary>
-        public string Id { get; private set; }
+        internal string Id { get; private set; }
 
         /// <summary>
         /// Indicates whether error is handled.
@@ -91,7 +91,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 { "httpStatus", this.Status.HasValue ? (int?)this.Status.Value: null },
                 { "operationKind", (int)this.OperationKind },
                 { "tableName", this.TableName },
-                { "item", this.Item },
+                { "item", this.Item.ToString(Formatting.None) },
                 { "rawResult", this.RawResult }
             };
         }
@@ -105,11 +105,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
             MobileServiceTableOperationKind operation = (MobileServiceTableOperationKind)obj.Value<int>("operationKind");
             var tableName = obj.Value<string>("tableName");
-            JToken item = obj.Value<string>("item");
+            string itemStr = obj.Value<string>("item");
+            JObject item = itemStr == null ? null : JObject.Parse(itemStr);
             string rawResult = obj.Value<string>("rawResult");
             JToken result = rawResult.ParseToJToken(settings);
             string id = obj.Value<string>("id");
-            return new MobileServiceTableOperationError(status, operation, tableName, item as JObject, rawResult, result) { Id = id };
+            return new MobileServiceTableOperationError(status, operation, tableName, item, rawResult, result) { Id = id };
         }
     }
 }

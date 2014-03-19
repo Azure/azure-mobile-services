@@ -13,6 +13,9 @@ using Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test;
 using Newtonsoft.Json.Linq;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Microsoft.WindowsAzure.MobileServices.Test;
+using System.Net.Http;
+using System.Net;
+using Newtonsoft.Json;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 {
@@ -129,6 +132,49 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                     {"dATE", DateTime.UtcNow }
                 });
             }
+        }
+
+        [AsyncTestMethod]
+        public async Task PushAsync_SavesErrorInStore_WhenConflictOccurs()
+        {
+            ResetDatabase(TestTable);
+
+            var hijack = new TestHttpHandler();
+            string conflictResult = "{\"id\":\"b\",\"String\":\"Hey\",\"__version\":\"def\"}";
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.PreconditionFailed) { Content = new StringContent(conflictResult) });
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable<ToDoWithSystemPropertiesType>();
+
+            IMobileServiceClient service = await CreateClient(hijack, store);
+            IMobileServiceSyncTable<ToDoWithSystemPropertiesType> table = service.GetSyncTable<ToDoWithSystemPropertiesType>();
+
+            // first insert an item
+            var updatedItem = new ToDoWithSystemPropertiesType() { Id = "b", String = "Hey", Version = "abc" };
+            await table.UpdateAsync(updatedItem);
+            
+            // then push it to server
+            var ex = await ThrowsAsync<MobileServicePushFailedException>(service.SyncContext.PushAsync);
+
+            Assert.IsNotNull(ex.PushResult);
+            Assert.AreEqual(ex.PushResult.Status, MobileServicePushStatus.Complete);
+            Assert.AreEqual(ex.PushResult.Errors.Count(), 1);
+            MobileServiceTableOperationError error = ex.PushResult.Errors.FirstOrDefault();
+            Assert.IsNotNull(error);
+            Assert.AreEqual(error.Handled, false);
+            Assert.AreEqual(error.OperationKind, MobileServiceTableOperationKind.Update);
+            Assert.AreEqual(error.RawResult, conflictResult);
+            Assert.AreEqual(error.TableName, TestTable);
+            Assert.AreEqual(error.Status, HttpStatusCode.PreconditionFailed);
+
+            var errorItem = error.Item.ToObject<ToDoWithSystemPropertiesType>(JsonSerializer.Create(service.SerializerSettings));
+            Assert.AreEqual(errorItem.Id, updatedItem.Id);
+            Assert.AreEqual(errorItem.String, updatedItem.String);
+            Assert.AreEqual(errorItem.Version, updatedItem.Version);
+            Assert.AreEqual(errorItem.CreatedAt, updatedItem.CreatedAt);
+            Assert.AreEqual(errorItem.UpdatedAt, updatedItem.UpdatedAt);
+
+            Assert.AreEqual(error.Result.ToString(Formatting.None), conflictResult);
         }
 
         [AsyncTestMethod]
