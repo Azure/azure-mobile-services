@@ -21,7 +21,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\iPhone\Debug</OutputPath>
-    <DefineConstants>DEBUG;PLATFORM_IOS</DefineConstants>
+    <DefineConstants>DEBUG;__IOS__;__MOBILE__;PLATFORM_IOS;XAMARIN_AUTH_INTERNAL</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
@@ -37,7 +37,7 @@
     <ConsolePause>false</ConsolePause>
     <CodesignKey>iPhone Developer</CodesignKey>
     <DocumentationFile>bin\iPhone\Release\Microsoft.WindowsAzure.Mobile.Ext.xml</DocumentationFile>
-    <DefineConstants>PLATFORM_IOS</DefineConstants>
+    <DefineConstants>__IOS__;__MOBILE__;PLATFORM_IOS;XAMARIN_AUTH_INTERNAL</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\..\..\managed\src\Microsoft.WindowsAzure.MobileServices.WindowsStore\ExpressionUtility\PartialEvaluator.cs">
