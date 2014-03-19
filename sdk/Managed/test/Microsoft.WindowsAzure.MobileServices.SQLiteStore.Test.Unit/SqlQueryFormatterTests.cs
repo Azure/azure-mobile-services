@@ -10,7 +10,7 @@ using Microsoft.WindowsAzure.MobileServices.Query;
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
 {
     [TestClass]
-    public class SqlFormatterTests
+    public class SqlQueryFormatterTests
     {
         private static readonly DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
@@ -224,10 +224,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
             TestSqlFormatting(f => f.FormatDelete, odata, expectedSql, "john", 7L);
         }
 
-        private static void TestSqlFormatting(Func<SqlFormatter, Func<string>> action, string odata, string expectedSql, params object[] parameters)
+        private static void TestSqlFormatting(Func<SqlQueryFormatter, Func<string>> action, string odata, string expectedSql, params object[] parameters)
         {
             var query = MobileServiceTableQueryDescription.Parse("test", odata);
-            var formatter = new SqlFormatter(query);
+            var formatter = new SqlQueryFormatter(query);
 
             string sql = action(formatter)();
 

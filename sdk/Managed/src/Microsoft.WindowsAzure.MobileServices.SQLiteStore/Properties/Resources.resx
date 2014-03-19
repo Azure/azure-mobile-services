@@ -130,7 +130,7 @@
     <value>Property of type '{0}' is not supported.</value>
   </data>
   <data name="SQLiteStore_QueryExecutionFailed" xml:space="preserve">
-    <value>Query execution failed.</value>
+    <value>Query execution failed with result: '{0}'.</value>
   </data>
   <data name="SQLiteStore_TableNotDefined" xml:space="preserve">
     <value>Table with name '{0}' is not defined.</value>

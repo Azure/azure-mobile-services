@@ -48,7 +48,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             long count = TestUtilities.CountRows(TestDbName, TestTable);
             Assert.AreEqual(count, 1L);
 
-            // delete the row
             using (MobileServiceSQLiteStore store = new MobileServiceSQLiteStore(TestDbName))
             {
                 DefineTestTable(store);
@@ -71,7 +70,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             long count = TestUtilities.CountRows(TestDbName, TestTable);
             Assert.AreEqual(count, 3L);
 
-            // delete the row
             using (MobileServiceSQLiteStore store = new MobileServiceSQLiteStore(TestDbName))
             {
                 DefineTestTable(store);

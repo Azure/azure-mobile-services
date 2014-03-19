@@ -12,14 +12,14 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 {
-    internal class SqlFormatter: QueryNodeVisitor<QueryNode>
+    internal class SqlQueryFormatter: QueryNodeVisitor<QueryNode>
     {
         private MobileServiceTableQueryDescription query;
         private StringBuilder sql;
         
         public IDictionary<string, object> Parameters { get; private set; }
 
-        public SqlFormatter(MobileServiceTableQueryDescription query)
+        public SqlQueryFormatter(MobileServiceTableQueryDescription query)
         {
             this.query = query;
         }
@@ -61,7 +61,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             delQuery.Selection.Add(SystemProperties.Id);
             delQuery.IncludeTotalCount = false;
             
-            var formatter = new SqlFormatter(delQuery);
+            var formatter = new SqlQueryFormatter(delQuery);
             string selectIdQuery = formatter.FormatSelect();
             string idMemberName = SqlHelpers.FormatMember(SystemProperties.Id);
             string tableName = SqlHelpers.FormatTableName(delQuery.TableName);
