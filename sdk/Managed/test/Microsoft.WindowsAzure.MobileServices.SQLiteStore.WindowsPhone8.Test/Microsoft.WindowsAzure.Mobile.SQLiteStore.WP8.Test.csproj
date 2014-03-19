@@ -94,20 +94,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.SQLiteStore.WindowsStore.Test\TestUtilities.cs">
-      <Link>TestUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.SQLiteStore.WindowsStore.Test\UI\GroupDescription.cs">
       <Link>UI\GroupDescription.cs</Link>
     </Compile>
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.SQLiteStore.WindowsStore.Test\UI\TestDescription.cs">
       <Link>UI\TestDescription.cs</Link>
-    </Compile>
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.SQLiteStore.WindowsStore.Test\UnitTests\SQLiteStoreTests.cs">
-      <Link>UnitTests\SQLiteStoreTests.cs</Link>
-    </Compile>
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.SQLiteStore.WindowsStore.Test\UnitTests\SQLiteStoreTests.Integration.cs">
-      <Link>UnitTests\SQLiteStoreTests.Integration.cs</Link>
     </Compile>
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
@@ -186,6 +177,10 @@
       <Project>{75557793-E36E-4190-8714-5BD2665859FB}</Project>
       <Name>Microsoft.WindowsAzure.Mobile</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test\Microsoft.WindowsAzure.Mobile.SQLiteStore.Test.csproj">
+      <Project>{CD5D8A3A-5631-41BF-8161-8A2A7F892B71}</Project>
+      <Name>Microsoft.WindowsAzure.Mobile.SQLiteStore.Test</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices.TestFramework\Microsoft.WindowsAzure.Mobile.TestFramework.csproj">
       <Project>{A2500BD2-A9A2-4085-9978-DEE3675B02DD}</Project>
       <Name>Microsoft.WindowsAzure.Mobile.TestFramework</Name>
@@ -222,6 +217,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="PlatformTests\" />
+    <Folder Include="UnitTests\" />
   </ItemGroup>
   <ItemGroup>
     <SDKReference Include="SQLite.WP80, Version=3.8.3.1">

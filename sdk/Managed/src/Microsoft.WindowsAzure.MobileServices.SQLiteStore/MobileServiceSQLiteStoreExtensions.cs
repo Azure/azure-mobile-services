@@ -22,7 +22,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         public static void DefineTable<T>(this MobileServiceSQLiteStore store)
         {
             var settings = new MobileServiceJsonSerializerSettings();
+            DefineTable<T>(store, settings);
+        }
 
+        public static void DefineTable<T>(this MobileServiceSQLiteStore store, MobileServiceJsonSerializerSettings settings)
+        {
             string tableName = settings.ContractResolver.ResolveTableName(typeof(T));
             JsonContract contract = settings.ContractResolver.ResolveContract(typeof(T));
 
