@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Microsoft.WindowsAzure.MobileServices.Threading
@@ -15,19 +16,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Threading
     /// </summary>
     internal class ActionBlock
     {
-        private object syncRoot = new object();
-        private Task lastTask;
+        AsyncLock theLock;
 
         public ActionBlock()
         {
-            lastTask = Task.FromResult(0);
+            theLock = new AsyncLock();
         }
 
-        public void Post(Func<Task> action)
+        public async Task Post(Func<Task> action, CancellationToken cancellationToken)
         {
-            lock (syncRoot)
+            using (await theLock.Acquire(cancellationToken))
             {
-                this.lastTask = this.lastTask.ContinueWith(_ => action());
+                await action(); 
             }
         }
     }

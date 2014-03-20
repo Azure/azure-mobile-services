@@ -77,15 +77,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task PullAsync_Cancels_WhenCancellationTokenIsCancelled()
         {
-            var hijack = new TestHttpHandler();
-            hijack.AddResponseContent("[{\"id\":\"def\",\"String\":\"World\"}]"); // remote item
-
             var store = new MobileServiceLocalStoreMock();
 
             var handler = new MobileServiceSyncHandlerMock();
             handler.TableOperationAction = op => Task.Delay(TimeSpan.MaxValue); // long slow operation
 
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
             await service.SyncContext.InitializeAsync(store, handler);
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
@@ -98,8 +95,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
                 var ex = await ThrowsAsync<Exception>(() => pullTask);
 
-                Assert.IsTrue(ex is OperationCanceledException || ex is TaskCanceledException);
-
+                Assert.IsTrue((ex is OperationCanceledException || ex is TaskCanceledException));
                 Assert.AreEqual(pullTask.Status, TaskStatus.Canceled);
             }
         }

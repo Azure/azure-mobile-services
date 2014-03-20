@@ -154,7 +154,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             // let us not burden the server to calculate the count when we don't need it for pull
             queryDescription.IncludeTotalCount = false;
             var pull = new PullAction(table, this, queryDescription, this.opQueue, this.Store, cancellationToken);
-            this.syncQueue.Post(pull.ExecuteAsync);
+            Task discard = this.syncQueue.Post(pull.ExecuteAsync, cancellationToken);
 
             await pull.CompletionTask;
         }
@@ -165,7 +165,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             var queryDescription = MobileServiceTableQueryDescription.Parse(table.TableName, query);
             var purge = new PurgeAction(table, queryDescription, this, this.opQueue, this.Store, cancellationToken);
-            this.syncQueue.Post(purge.ExecuteAsync);
+            Task discard = this.syncQueue.Post(purge.ExecuteAsync, cancellationToken);
 
             await purge.CompletionTask;
         }
@@ -180,7 +180,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             using (await this.syncOpQueueLock.Acquire(cancellationToken))
             {                
                 await this.opQueue.EnqueueAsync(bookmark);
-                this.syncQueue.Post(push.ExecuteAsync);
+                Task discard = this.syncQueue.Post(push.ExecuteAsync, cancellationToken);
             }
 
             await push.CompletionTask;
@@ -189,7 +189,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public async Task DeferTableActionAsync(TableAction action)
         {
             await this.PushAsync(action.CancellationToken);
-            this.syncQueue.Post(action.ExecuteAsync);
+            Task discard = this.syncQueue.Post(action.ExecuteAsync, action.CancellationToken);
         }
 
         private async Task EnsureInitializedAsync()

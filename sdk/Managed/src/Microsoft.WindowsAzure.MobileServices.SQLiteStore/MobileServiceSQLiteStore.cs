@@ -14,6 +14,9 @@ using SQLitePCL;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 {
+    /// <summary>
+    /// SQLite based implementation of <see cref="IMobileServiceLocalStore"/>
+    /// </summary>
     public class MobileServiceSQLiteStore: IMobileServiceLocalStore
     {
         private Dictionary<string, TableDefinition> tables = new Dictionary<string, TableDefinition>(StringComparer.OrdinalIgnoreCase);
@@ -22,6 +25,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
         protected MobileServiceSQLiteStore() { }
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="MObileServiceSQLiteStore"/>
+        /// </summary>
+        /// <param name="fileName">Name of the local SQLite database file.</param>
         public MobileServiceSQLiteStore(string fileName)
         {
             this.connection = new SQLiteConnection(fileName);

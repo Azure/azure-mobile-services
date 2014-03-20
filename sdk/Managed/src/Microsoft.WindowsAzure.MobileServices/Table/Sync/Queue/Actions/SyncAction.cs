@@ -29,6 +29,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.Store = store;
             this.TaskSource = new TaskCompletionSource<object>();
             this.CancellationToken = cancellationToken;
+
+            cancellationToken.Register(() =>
+            {
+                TaskSource.TrySetCanceled();
+            });
         }
 
         public abstract Task ExecuteAsync();
