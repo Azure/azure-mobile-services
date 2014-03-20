@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +14,9 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
+    /// <summary>
+    /// Executes all the table operations that are triggered by a Push
+    /// </summary>
     internal class OperationBatch
     {
         /// <summary>
@@ -20,16 +24,20 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// </summary>
         public List<Exception> HandlerErrors { get; private set; }
 
-        public MobileServicePushStatus? Status { get; private set; }        
+        /// <summary>
+        /// Status that returns the reson of abort.
+        /// </summary>
+        public MobileServicePushStatus? AbortReason { get; private set; }        
 
+        /// <summary>
+        /// Instance of <see cref="IMobileServiceSyncHandler"/> that is used to execute batch operations.
+        /// </summary>
         public IMobileServiceSyncHandler SyncHandler { get; private set; }
 
+        /// <summary>
+        /// Local store that operations and date are read from
+        /// </summary>
         public IMobileServiceLocalStore Store { get; private set; }
-
-        public bool IsAborted 
-        { 
-            get { return this.Status.HasValue; } 
-        }
 
         public OperationBatch(IMobileServiceSyncHandler syncHandler, IMobileServiceLocalStore store)
         {
@@ -38,41 +46,72 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.Store = store;
         }
 
-        public void Abort(MobileServicePushStatus status)
+        /// <summary>
+        /// Changes the status of the operation batch to aborted with the specified reason.
+        /// </summary>
+        /// <param name="reason">Status value that respresents the reason of abort.</param>
+        public void Abort(MobileServicePushStatus reason)
         {
-            this.Status = status;
+            Debug.Assert(reason != MobileServicePushStatus.Complete);
+
+            this.AbortReason = reason;
         }
 
+        /// <summary>
+        /// Adds a sync error to local store for this batch
+        /// </summary>
+        /// <param name="error">The sync error that occurred.</param>
         public Task AddSyncErrorAsync(MobileServiceTableOperationError error)
         {
             return this.Store.UpsertAsync(LocalSystemTables.SyncErrors, error.Serialize());
         }
 
+        /// <summary>
+        /// Loads all the sync errors in local store that are recorded for this batch.
+        /// </summary>
+        /// <param name="serializerSettings">the serializer settings to use for reading the errors.</param>
+        /// <returns>List of sync errors.</returns>
         public async Task<IList<MobileServiceTableOperationError>> LoadSyncErrorsAsync(MobileServiceJsonSerializerSettings serializerSettings)
         {
             var errors = new List<MobileServiceTableOperationError>();
 
             JToken result = await this.Store.ReadAsync(new MobileServiceTableQueryDescription(LocalSystemTables.SyncErrors));
-            if (result is JArray)
+
+            var objError = result as JObject;
+            if (objError != null)
+            {
+                errors.Add(MobileServiceTableOperationError.Deserialize(objError, serializerSettings));
+
+            }
+            else if (result is JArray)
             {
                 foreach (JObject error in result)
                 {
                     errors.Add(MobileServiceTableOperationError.Deserialize(error, serializerSettings));
                 }
-            }
+            }            
 
             return errors;
         }
 
+        /// <summary>
+        /// Checks if there are any unhandled sync or handler errors recorded for this batch.
+        /// </summary>
+        /// <param name="syncErrors">List of all handled and unhandled sync errors.</param>
+        /// <returns>True if there are handler errors or unhandled sync errors, False otherwise.</returns>
         public bool HasErrors(IEnumerable<MobileServiceTableOperationError> syncErrors)
         {
             // unhandled sync errors or handler errors
             return syncErrors.Any(e => !e.Handled) || this.HandlerErrors.Any();    
         }
 
+        /// <summary>
+        /// Deletes all the sync errors reocorded for this batch.
+        /// </summary>
+        /// <param name="syncErrors">Instance of sync errors.</param>
         public async Task DeleteErrorsAsync(IEnumerable<MobileServiceTableOperationError> syncErrors)
         {
-            MobileServiceSyncStoreException toThrow = null;
+            MobileServiceLocalStoreException toThrow = null;
 
             foreach (MobileServiceTableOperationError error in syncErrors)
             {
@@ -83,7 +122,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 catch (Exception ex)
                 {
 
-                    toThrow = new MobileServiceSyncStoreException(Resources.SyncStore_FailedToDeleteError, ex);
+                    toThrow = new MobileServiceLocalStoreException(Resources.SyncStore_FailedToDeleteError, ex);
                 }
             }
 

@@ -53,7 +53,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         /// <summary>
         /// Returns a <see cref="IMobileServiceSyncTable"/> instance, which provides
-        /// untyped data operations for local table.
+        /// untyped data operations for a local table.
         /// </summary>
         /// <param name="tableName">The name of the table.</param>
         /// <returns>The table.</returns>
@@ -73,7 +73,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         /// <summary>
         /// Returns a <see cref="IMobileServiceTable{T}"/> instance, which provides 
-        /// strongly typed data operations for local table.
+        /// strongly typed data operations for a local table.
         /// </summary>
         /// <typeparam name="T">
         /// The type of the instances in the table.

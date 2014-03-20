@@ -30,7 +30,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             long ignore;
 
             JToken remoteResults = await this.Table.ReadAsync(this.Query.ToQueryString());
-            var remoteItems = MobileServiceTableQueryProvider.GetResponseSequence(remoteResults, totalCount: out ignore);
+            JArray remoteItems = MobileServiceTableQueryProvider.GetResponseSequence(remoteResults, totalCount: out ignore);
 
             this.CancellationToken.ThrowIfCancellationRequested();
 

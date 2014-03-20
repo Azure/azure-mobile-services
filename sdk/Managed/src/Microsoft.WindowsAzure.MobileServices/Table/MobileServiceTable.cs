@@ -97,12 +97,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will return with results when the query finishes.
         /// </returns>
-        public Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters)
-        {
-            return this.ReadAsync(query, parameters, this.MobileServiceClient.CurrentUser);
-        }
-
-        public async Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters, MobileServiceUser user)
+        public async Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters)
         {
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
@@ -124,7 +119,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             string uriString = MobileServiceUrlBuilder.CombinePathAndQuery(uriPath, query);
 
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, user, null, true);
+            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true);
             return response.Content.ParseToJToken(this.MobileServiceClient.SerializerSettings);
         }
 
@@ -155,12 +150,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will complete when the insert finishes.
         /// </returns>
-        public Task<JToken> InsertAsync(JObject instance, IDictionary<string, string> parameters)
-        {
-            return this.InsertAsync(instance, parameters, this.MobileServiceClient.CurrentUser);
-        }
-
-        public async Task<JToken> InsertAsync(JObject instance, IDictionary<string, string> parameters, MobileServiceUser user)
+        public async Task<JToken> InsertAsync(JObject instance, IDictionary<string, string> parameters)
         {
             if (instance == null)
             {
@@ -183,7 +173,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
             string uriString = GetUri(this.TableName, null, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, user, instance.ToString(Formatting.None), true);
+            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, instance.ToString(Formatting.None), true);
             return GetJTokenFromResponse(response);
         }
 
@@ -214,12 +204,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will complete when the update finishes.
         /// </returns>
-        public Task<JToken> UpdateAsync(JObject instance, IDictionary<string, string> parameters)
-        {
-            return this.UpdateAsync(instance, parameters, this.MobileServiceClient.CurrentUser);
-        }   
-     
-        public async Task<JToken> UpdateAsync(JObject instance, IDictionary<string, string> parameters, MobileServiceUser user)
+        public async Task<JToken> UpdateAsync(JObject instance, IDictionary<string, string> parameters)
         {
             if (instance == null)
             {
@@ -249,7 +234,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     headers.Add("If-Match", GetEtagFromValue(version));
                 }
 
-                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(patchHttpMethod, uriString, user, content, true, headers);
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(patchHttpMethod, uriString, this.MobileServiceClient.CurrentUser, content, true, headers);
                 return GetJTokenFromResponse(response);
             }
             catch (MobileServiceInvalidOperationException ex)
@@ -265,8 +250,8 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             Tuple<string, JToken> responseContent = await this.ParseContent(error.Response);
             throw new MobileServicePreconditionFailedException(error, responseContent.Item2);
-        }
-
+        }   
+     
         /// <summary>
         /// Deletes an <paramref name="instance"/> from the table.
         /// </summary>
@@ -294,12 +279,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will complete when the delete finishes.
         /// </returns>
-        public Task<JToken> DeleteAsync(JObject instance, IDictionary<string, string> parameters)
-        {
-            return this.DeleteAsync(instance, parameters, this.MobileServiceClient.CurrentUser);
-        }
-
-        public async Task<JToken> DeleteAsync(JObject instance, IDictionary<string, string> parameters, MobileServiceUser user)
+        public async Task<JToken> DeleteAsync(JObject instance, IDictionary<string, string> parameters)
         {
             if (instance == null)
             {
@@ -310,7 +290,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
             string uriString = GetUri(this.TableName, id, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, user, null, false);
+            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false);
             return GetJTokenFromResponse(response);
         }
 
@@ -341,19 +321,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will return with a result when the lookup finishes.
         /// </returns>
-        public Task<JToken> LookupAsync(object id, IDictionary<string, string> parameters)
-        {
-            return this.LookupAsync(id, parameters, this.MobileServiceClient.CurrentUser);
-        }
-
-        public async Task<JToken> LookupAsync(object id, IDictionary<string, string> parameters, MobileServiceUser user)
+        public async Task<JToken> LookupAsync(object id, IDictionary<string, string> parameters)
         {
             MobileServiceSerializer.EnsureValidId(id);
 
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
             string uriString = GetUri(this.TableName, id, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, user, null, true);
+            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true);
             return GetJTokenFromResponse(response);
         }
 
@@ -418,6 +393,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             return systemPropertiesString;
         }       
 
+        /// <summary>
+        /// Parses body of the <paramref name="response"/> as JToken
+        /// </summary>
+        /// <param name="response">The http response message.</param>
+        /// <returns>A pair of raw response and parsed JToken</returns>
         internal async Task<Tuple<string, JToken>> ParseContent(HttpResponseMessage response)
         {
             string content = null;

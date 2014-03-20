@@ -43,7 +43,7 @@
     <Compile Include="Collections\MobileServiceCollection.cs" />
     <Compile Include="Exceptions\MobileServiceInvalidOperationException.cs" />
     <Compile Include="Exceptions\MobileServicePreconditionFailedException.cs" />
-    <Compile Include="Exceptions\MobileServiceSyncStoreException.cs" />
+    <Compile Include="Exceptions\MobileServiceLocalStoreException.cs" />
     <Compile Include="Exceptions\MobileServiceODataException.cs" />
     <Compile Include="Extensions\ExceptionExtensions.cs" />
     <Compile Include="Extensions\IDictionaryExtensions.cs" />

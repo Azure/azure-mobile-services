@@ -32,7 +32,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             Debug.Assert(client != null);
 
             this.MobileServiceClient = client;
-            this.syncContext = client.SyncContext as MobileServiceSyncContext;
+            this.syncContext = (MobileServiceSyncContext)client.SyncContext;
             this.remoteTable = client.GetTable(tableName) as MobileServiceTable;
             this.remoteTable.SystemProperties = MobileServiceSystemProperties.Version;
         }
@@ -57,8 +57,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             object id = MobileServiceSerializer.GetId(instance, ignoreCase: false, allowDefault: true);
             if (id == null)
             {
+                id = Guid.NewGuid().ToString();
                 instance = (JObject)instance.DeepClone();
-                instance[MobileServiceSerializer.IdPropertyName] = (string)(id = Guid.NewGuid().ToString());
+                instance[MobileServiceSerializer.IdPropertyName] = (string)id;
             }
             else
             {
@@ -88,8 +89,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public Task<JObject> LookupAsync(string id)
         {
-            EnsureIdIsString(id);
-
             return this.syncContext.LookupAsync(this.remoteTable, id);
         }
 

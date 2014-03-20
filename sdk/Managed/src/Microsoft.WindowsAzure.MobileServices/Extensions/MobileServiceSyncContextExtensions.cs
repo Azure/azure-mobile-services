@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +17,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     public static class MobileServiceSyncContextExtensions
     {
         /// <summary>
-        /// Pushes all pending operations up to the remote table.
+        /// Replays all pending local operations against the remote tables.
         /// </summary>
         public static Task PushAsync(this IMobileServiceSyncContext context)
         {

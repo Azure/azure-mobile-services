@@ -38,6 +38,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         /// <summary>
         /// A node that represents conversion from one type to another.
         /// </summary>
-        Convert
+        Convert = 5
     }
 }

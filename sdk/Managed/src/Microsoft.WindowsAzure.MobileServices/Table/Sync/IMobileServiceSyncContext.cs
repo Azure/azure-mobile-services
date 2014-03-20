@@ -39,7 +39,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <summary>
         /// Returns the no. of pending operations that are not yet pushed to remote table.
         /// </summary>
-        /// <returns>A task that returns the no. of pending operations against the remote table.</returns>
+        /// <returns>A task that returns the number of pending operations against the remote table.</returns>
         int PendingOperations { get; }
 
         /// <summary>

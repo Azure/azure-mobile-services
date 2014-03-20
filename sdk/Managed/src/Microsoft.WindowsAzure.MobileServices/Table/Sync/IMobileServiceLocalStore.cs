@@ -31,7 +31,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         Task<JToken> ReadAsync(MobileServiceTableQueryDescription query);
 
         /// <summary>
-        /// Updates or insertes data in local table.
+        /// Updates or inserts data in local table.
         /// </summary>
         /// <param name="tableName">Name of the local table.</param>
         /// <param name="item">Item to be inserted.</param>

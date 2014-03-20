@@ -45,7 +45,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         /// <summary>
         /// Refresh the current instance with the latest values from the
-        /// table.
+        /// local table.
         /// </summary>
         /// <param name="instance">
         /// The instance to refresh.
@@ -97,9 +97,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// An OData query that determines which items to 
         /// pull from the remote table.
         /// </param>
-        /// <param name="purgeLocal">
-        /// To control whether to delete local items that match the query and are not returned from remote table.
-        /// </param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
         /// </param>
         /// <returns>
@@ -113,7 +110,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <param name="query">An OData query that determines which items to delete.</param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
         /// </param>
-        /// <returns>A task taht completes when purge operation has finished.</returns>
+        /// <returns>A task that completes when purge operation has finished.</returns>
         Task PurgeAsync<U>(IMobileServiceTableQuery<U> query, CancellationToken cancellationToken);
 
         /// <summary>

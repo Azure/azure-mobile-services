@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -55,7 +59,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// Deletes all the items in local table
         /// </summary>
         /// <param name="table">The instance of table to execute pull on.</param>
-        /// <returns>A task taht completes when purge operation has finished.</returns>
+        /// <returns>A task that completes when purge operation has finished.</returns>
         public static Task PurgeAsync(this IMobileServiceSyncTable table)
         {
             return table.PurgeAsync(String.Empty);
@@ -66,7 +70,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// </summary>
         /// <param name="table">The instance of table to execute pull on.</param>
         /// <param name="query">An OData query that determines which items to delete.</param>
-        /// <returns>A task taht completes when purge operation has finished.</returns>
+        /// <returns>A task that completes when purge operation has finished.</returns>
         public static Task PurgeAsync(this IMobileServiceSyncTable table, string query)
         {
             return table.PurgeAsync(query, CancellationToken.None);
@@ -78,7 +82,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// </summary>
         /// <param name="table">The instance of table to execute pull on.</param>
         /// <param name="query">An OData query that determines which items to delete.</param>
-        /// <returns>A task taht completes when purge operation has finished.</returns>
+        /// <returns>A task that completes when purge operation has finished.</returns>
         public static Task PurgeAsync<T, U>(this IMobileServiceSyncTable<T> table, IMobileServiceTableQuery<U> query)
         {
             return table.PurgeAsync(query, CancellationToken.None);

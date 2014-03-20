@@ -101,7 +101,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <param name="query">An OData query that determines which items to delete.</param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
         /// </param>
-        /// <returns>A task taht completes when purge operation has finished.</returns>
+        /// <returns>A task that completes when purge operation has finished.</returns>
         Task PurgeAsync(string query, CancellationToken cancellationToken);
     }
 }

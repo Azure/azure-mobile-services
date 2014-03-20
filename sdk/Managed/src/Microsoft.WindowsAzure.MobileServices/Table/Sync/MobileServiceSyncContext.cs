@@ -86,7 +86,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
                 this.syncQueue = new ActionBlock();
                 await this.Store.InitializeAsync();
-                this.opQueue = await OperationQueue.LoadAsync(this.Store, client);
+                this.opQueue = await OperationQueue.LoadAsync(this.Store, this.client);
 
                 this.initializeTask.SetResult(null);
             }
@@ -211,7 +211,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             // take slowest lock first and quickest last in order to avoid blocking quick operations for long time            
             using (await this.opQueue.LockItemAsync(operation.ItemId, CancellationToken.None))  // prevent any inflight operation on the same item
-            using (await this.opQueue.LockTableAsync(operation.TableName, CancellationToken.None)) // prevent interferance with any in-progress pull/flush action
+            using (await this.opQueue.LockTableAsync(operation.TableName, CancellationToken.None)) // prevent interferance with any in-progress pull/purge action
             using (await this.storeQueueLock.WriterLockAsync()) // prevent any other operation from interleaving between store and queue insert
             {
                 MobileServiceTableOperation existing;
@@ -226,7 +226,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 }
                 catch (Exception ex)
                 {
-                    throw new MobileServiceSyncStoreException(Resources.SyncStore_OperationFailed, ex);
+                    throw new MobileServiceLocalStoreException(Resources.SyncStore_OperationFailed, ex);
                 }
 
                 if (existing != null)
@@ -249,6 +249,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public void Dispose()
         {
             this.syncOpQueueLock.Dispose();
+            if (this._store != null)
+            {
+                this._store.Dispose();
+            }
         }
     }
 }

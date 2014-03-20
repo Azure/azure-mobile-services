@@ -51,7 +51,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     batch.HandlerErrors.Add(ex);
                 }
 
-                if (batch.IsAborted)
+                if (batch.AbortReason.HasValue)
                 {
                     break;
                 }
@@ -69,7 +69,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 await this.OperationQueue.DequeueAsync();
             }
 
-            MobileServicePushStatus batchStatus = batch.Status.GetValueOrDefault(MobileServicePushStatus.Complete);
+            MobileServicePushStatus batchStatus = batch.AbortReason.GetValueOrDefault(MobileServicePushStatus.Complete);
             IEnumerable<MobileServiceTableOperationError> syncErrors = Enumerable.Empty<MobileServiceTableOperationError>();
             try
             {
@@ -78,7 +78,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             catch (Exception ex)
             {
 
-                batch.HandlerErrors.Add(new MobileServiceSyncStoreException(Resources.SyncStore_FailedToLoadError, ex));
+                batch.HandlerErrors.Add(new MobileServiceLocalStoreException(Resources.SyncStore_FailedToLoadError, ex));
             }
 
             var result = new MobileServicePushCompletionResult(syncErrors, batchStatus);
@@ -98,10 +98,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 }
             }
 
-            if (batch.IsAborted || batch.HasErrors(syncErrors))
+            if (batch.AbortReason.HasValue || batch.HasErrors(syncErrors))
             {
                 List<MobileServiceTableOperationError> unhandledSyncErrors = syncErrors.Where(e=>!e.Handled).ToList();
-                Exception inner = batch.HandlerErrors.Count == 1 ? batch.HandlerErrors[0] : batch.HandlerErrors.Any() ? new AggregateException(batch.HandlerErrors) : null;
+                
+                Exception inner;
+                if (batch.HandlerErrors.Count == 1)
+                {
+                    inner = batch.HandlerErrors[0];
+                }
+                else
+                {
+                    inner = batch.HandlerErrors.Any() ? new AggregateException(batch.HandlerErrors) : null;
+                }
 
                 // create a new result with only unhandled errors
                 result = new MobileServicePushCompletionResult(unhandledSyncErrors, batchStatus);
@@ -142,7 +151,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 }
                 catch (Exception ex)
                 {
-                    if (AbortBatch(batch, ex))
+                    if (TryAbortBatch(batch, ex))
                     {
                         // there is no error to save in sync error and no result to capture
                         // this operation will be executed again next time the push happens
@@ -165,7 +174,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                         catch (Exception ex)
                         {
                             batch.Abort(MobileServicePushStatus.CancelledBySyncStoreError);
-                            throw new MobileServiceSyncStoreException(Resources.SyncStore_FailedToUpsertItem, ex);
+                            throw new MobileServiceLocalStoreException(Resources.SyncStore_FailedToUpsertItem, ex);
                         }
                     }
                 }
@@ -204,12 +213,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 catch (Exception ex)
                 {
                     batch.Abort(MobileServicePushStatus.CancelledBySyncStoreError);
-                    throw new MobileServiceSyncStoreException(Resources.SyncStore_FailedToReadItem, ex);
+                    throw new MobileServiceLocalStoreException(Resources.SyncStore_FailedToReadItem, ex);
                 }
             }
         }
 
-        private bool AbortBatch(OperationBatch batch, Exception ex)
+        private bool TryAbortBatch(OperationBatch batch, Exception ex)
         {
             if (ex.IsNetworkError())
             {                

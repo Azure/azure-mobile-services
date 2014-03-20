@@ -20,16 +20,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// </summary>
     internal sealed class OperationQueue: IDisposable
     {
-        private AsyncLockDictionary tableLocks = new AsyncLockDictionary();
-        private AsyncLockDictionary itemLocks = new AsyncLockDictionary();
-        private Dictionary<string, MobileServiceTableOperation> idOpMap = new Dictionary<string, MobileServiceTableOperation>();
-        private Queue<MobileServiceTableOperation> queue = new Queue<MobileServiceTableOperation>();
-        private AsyncLock storeQueueLock = new AsyncLock();
-        private IMobileServiceLocalStore store;
+        private readonly AsyncLockDictionary tableLocks = new AsyncLockDictionary();
+        private readonly AsyncLockDictionary itemLocks = new AsyncLockDictionary();
+        private readonly Dictionary<string, MobileServiceTableOperation> idOpMap = new Dictionary<string, MobileServiceTableOperation>();        
+        private readonly AsyncLock storeQueueLock = new AsyncLock();
+        private readonly IMobileServiceLocalStore store;
+        private Queue<MobileServiceTableOperation> queue;
         private long sequenceId;
 
         public OperationQueue(IMobileServiceLocalStore store)
         {
+            this.queue = new Queue<MobileServiceTableOperation>();
             this.store = store;
         }
 
@@ -78,7 +79,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 }
                 catch (Exception ex)
                 {
-                    throw new MobileServiceSyncStoreException(Resources.SyncStore_FailedToDeleteOperation, ex);
+                    throw new MobileServiceLocalStoreException(Resources.SyncStore_FailedToDeleteOperation, ex);
                 }
                 return op;
             }
@@ -147,7 +148,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     unorderedOps.Add(op);
                 }
 
-                opQueue.queue = new Queue<MobileServiceTableOperation>(unorderedOps.OrderBy(o => o.CreatedAt).ThenBy(o => o.Sequence));
+                IOrderedEnumerable<MobileServiceTableOperation> orderedOps = unorderedOps.OrderBy(o => o.CreatedAt)
+                                                                                         .ThenBy(o => o.Sequence);
+                opQueue.queue = new Queue<MobileServiceTableOperation>(orderedOps);
             }
 
             return opQueue;

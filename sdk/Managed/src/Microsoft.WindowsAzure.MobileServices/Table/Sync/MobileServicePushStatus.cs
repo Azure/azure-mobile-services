@@ -41,8 +41,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         CancelledByToken = 4,
 
         /// <summary>
-        /// Push failed to other reason.
+        /// Push failed due to an internal error.
         /// </summary>
-        UnknownError = Int32.MaxValue
+        InternalError = Int32.MaxValue
     }
 }

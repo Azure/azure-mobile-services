@@ -18,7 +18,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <summary>
         /// Result of push operation
         /// </summary>
-        public MobileServicePushCompletionResult PushResult { get; set; }
+        public MobileServicePushCompletionResult PushResult { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of <see cref="MobileServicePushFailedException"/>

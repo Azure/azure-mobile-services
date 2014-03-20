@@ -15,19 +15,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
     /// Represents the structural elements of a Mobile Services query over the
     /// subset of OData it uses.
     /// </summary>
-    /// <remarks>
-    /// Our LINQ OData Provider will effectively compile expression trees into
-    /// MobileServiceTableQueryDescription instances which can be passed to a
-    /// MobileServiceCollectionView and evaluated on the server.  We don't
-    /// compile the expression all the way down to a single Uri fragment
-    /// because we'll need to re-evaluate the query with different Skip/Top
-    /// values for paging and data virtualization.
-    /// </remarks>
+    /*
+     * Our LINQ OData Provider will effectively compile expression trees into
+     * MobileServiceTableQueryDescription instances which can be passed to a
+     * MobileServiceCollectionView and evaluated on the server.  We don't
+     * compile the expression all the way down to a single Uri fragment
+     * because we'll need to re-evaluate the query with different Skip/Top
+     * values for paging and data virtualization.
+    */
     public sealed class MobileServiceTableQueryDescription
     {
         /// <summary>
         /// Initializes a new instance of the
-        /// MobileServiceTableQueryDescription class.
+        /// <see cref="MobileServiceTableQueryDescription"/> class.
         /// </summary>
         public MobileServiceTableQueryDescription(string tableName)
         {
@@ -45,7 +45,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         public string TableName { get; private set; }
 
         /// <summary>
-        /// Gets of sets the query's filter expression.
+        /// Gets or sets the query's filter expression.
         /// </summary>
         public QueryNode Filter { get; set; }
 
@@ -56,10 +56,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         public IList<string> Selection { get; private set; }
 
         /// <summary>
-        /// Gets a list of (field, direction) pairs that specify the ordering
-        /// constraints imposed on the query.  The direction element is true
-        /// if the field should be ordered in ascending order and false if
-        /// descending.
+        /// Gets a list of expressions that specify the ordering
+        /// constraints imposed on the query.
         /// </summary>
         public IList<OrderByNode> Ordering { get; private set; }
 

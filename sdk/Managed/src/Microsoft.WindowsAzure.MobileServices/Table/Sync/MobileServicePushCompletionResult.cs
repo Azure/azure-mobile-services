@@ -13,7 +13,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     public class MobileServicePushCompletionResult
     {
         /// <summary>
-        /// Error caused by executing operation against remote table.
+        /// Errors caused by executing operation against remote table.
         /// </summary>
         public IEnumerable<MobileServiceTableOperationError> Errors { get; private set; }
 
