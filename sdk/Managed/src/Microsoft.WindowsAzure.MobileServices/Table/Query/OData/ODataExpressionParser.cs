@@ -249,7 +249,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 			else 
 			{
 				// if it is a function it should begin with a '('
-				this.ParseError(Resources.ODataExpressionParser_OpenParanExpected.FormatInvariant(errorPos), errorPos);
+				this.ParseError(Resources.ODataExpressionParser_OpenParenExpected.FormatInvariant(errorPos), errorPos);
 			}
 
 			return new FunctionCallNode(functionName, args);
@@ -303,12 +303,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
 		private IList<QueryNode> ParseArgumentList () 
 		{
-			this.ValidateToken(QueryTokenKind.OpenParen, Resources.ODataExpressionParser_OpenParanExpected);
+			this.ValidateToken(QueryTokenKind.OpenParen, Resources.ODataExpressionParser_OpenParenExpected);
 			this.lexer.NextToken();
 			
 			IList<QueryNode> args = this.lexer.Token.Kind != QueryTokenKind.CloseParen ? this.ParseArguments() : new List<QueryNode>();
 			
-			this.ValidateToken(QueryTokenKind.CloseParen, Resources.ODataExpressionParser_CloseParanOrCommaExpected);
+			this.ValidateToken(QueryTokenKind.CloseParen, Resources.ODataExpressionParser_CloseParenOrCommaExpected);
 			this.lexer.NextToken();
 			return args;
 		}
@@ -417,10 +417,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
 		private QueryNode ParseParenExpression () 
 		{
-			this.ValidateToken(QueryTokenKind.OpenParen, Resources.ODataExpressionParser_OpenParanExpected);
+			this.ValidateToken(QueryTokenKind.OpenParen, Resources.ODataExpressionParser_OpenParenExpected);
 			this.lexer.NextToken();
 			QueryNode e = this.ParseExpression();
-			this.ValidateToken(QueryTokenKind.CloseParen, Resources.ODataExpressionParser_CloseParanOrOperatorExpected);
+			this.ValidateToken(QueryTokenKind.CloseParen, Resources.ODataExpressionParser_CloseParenOrOperatorExpected);
 			this.lexer.NextToken();
 			return e;
 		}

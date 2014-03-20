@@ -88,7 +88,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         private void TestDeleteValidateThrows(MobileServiceTableOperation tableOperation)
         {
             var ex = AssertEx.Throws<InvalidOperationException>(() => this.operation.Validate(tableOperation));
-            Assert.AreEqual("Delete operation on the item is already in the queue.", ex.Message);
+            Assert.AreEqual("A delete operation on the item is already in the queue.", ex.Message);
         }
 
         [TestMethod]

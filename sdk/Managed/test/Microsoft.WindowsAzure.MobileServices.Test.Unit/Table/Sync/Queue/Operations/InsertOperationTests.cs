@@ -73,7 +73,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         {
             var tableOperation = new InsertOperation("test", "abc");
             var ex = AssertEx.Throws<InvalidOperationException>(() => this.operation.Validate(tableOperation));
-            Assert.AreEqual("Insert operation on the item is already in the queue.", ex.Message);
+            Assert.AreEqual("An insert operation on the item is already in the queue.", ex.Message);
         }
 
         [TestMethod]
