@@ -37,7 +37,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         Task InitializeAsync(IMobileServiceLocalStore store, IMobileServiceSyncHandler handler);
 
         /// <summary>
-        /// Returns the no. of pending operations that are not yet pushed to remote table.
+        /// Returns the number of pending operations that are not yet pushed to remote table.
         /// </summary>
         /// <returns>A task that returns the number of pending operations against the remote table.</returns>
         int PendingOperations { get; }

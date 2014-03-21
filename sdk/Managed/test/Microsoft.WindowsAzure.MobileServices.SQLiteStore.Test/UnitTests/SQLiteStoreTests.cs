@@ -292,10 +292,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
                 await store.InitializeAsync();                
             }
-
-            // rows should be zero now
-            long count = TestUtilities.CountRows(TestDbName, TestTable);
-            Assert.AreEqual(count, 0L);
         }
 
         public static void DefineTestTable(MobileServiceSQLiteStore store)

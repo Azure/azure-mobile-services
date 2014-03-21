@@ -27,7 +27,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.queryProvider = new MobileServiceTableQueryProvider(this);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "It does not appear nested when used via the async pattern.")]
         public Task<IEnumerable<T>> ReadAsync()
         {
             return ReadAsync(CreateQuery());
@@ -141,7 +140,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return this.queryProvider.Create(this.remoteTable, new T[0].AsQueryable(), new Dictionary<string, string>(), false);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Part of the LINQ query pattern.")]
         public IMobileServiceTableQuery<T> Where(Expression<Func<T, bool>> predicate)
         {
             return CreateQuery().Where(predicate);
@@ -193,13 +191,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return this.CreateQuery().IncludeTotalCount();
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Not nested when used via async pattern.")]
         public Task<IEnumerable<T>> ToEnumerableAsync()
         {
             return this.ReadAsync();
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Not nested when used via async pattern.")]
         public async Task<List<T>> ToListAsync()
         {
             return new TotalCountList<T>(await this.ReadAsync());

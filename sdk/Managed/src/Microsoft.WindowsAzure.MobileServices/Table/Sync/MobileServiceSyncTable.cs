@@ -33,7 +33,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             this.MobileServiceClient = client;
             this.syncContext = (MobileServiceSyncContext)client.SyncContext;
-            this.remoteTable = client.GetTable(tableName) as MobileServiceTable;
+            this.remoteTable = (MobileServiceTable)client.GetTable(tableName);
             this.remoteTable.SystemProperties = MobileServiceSystemProperties.Version;
         }
 

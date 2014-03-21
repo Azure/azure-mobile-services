@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.WindowsAzure.MobileServices.Query;
+using Microsoft.WindowsAzure.MobileServices.Test;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
 {
@@ -22,6 +23,15 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
             string expectedSql = "SELECT [name] FROM [test] WHERE ((CASE WHEN ([weight] >= @p1) THEN CAST([weight] AS INTEGER) WHEN (CAST([weight] AS INTEGER) = [weight]) THEN [weight] ELSE CAST(([weight] - @p2) AS INTEGER) END) > @p3) ORDER BY [price]";
 
             TestSqlFormatting(f => f.FormatSelect, odata, expectedSql, 0L, 1L, 5L);
+        }
+
+        [TestMethod]
+        public void FormatSelect_InvalidQuery()
+        {
+            string odata = "$filter=(2 ! ??)";
+            var ex = AssertEx.Throws<MobileServiceODataException>(() => MobileServiceTableQueryDescription.Parse("test", odata));
+            Assert.AreEqual("The specified odata query has syntax errors.", ex.Message);
+            Assert.AreEqual(3, ex.ErrorPosition);
         }
 
         [TestMethod]
@@ -228,7 +238,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
         {
             var query = MobileServiceTableQueryDescription.Parse("test", odata);
             var formatter = new SqlQueryFormatter(query);
-
             string sql = action(formatter)();
 
             Assert.AreEqual(expectedSql, sql);

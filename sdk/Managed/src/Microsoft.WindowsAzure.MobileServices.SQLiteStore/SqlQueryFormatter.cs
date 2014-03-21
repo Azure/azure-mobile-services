@@ -369,6 +369,12 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 this.sql.Append(", ");
                 nodeIn.Arguments[1].Accept(this);
                 this.sql.Append(" + 1");  // need to add 1 since SQL is 1 based, but OData is zero based
+
+                if (nodeIn.Arguments.Count > 2)
+                {
+                    this.sql.Append(", ");
+                    nodeIn.Arguments[2].Accept(this);
+                }
             }
             this.sql.Append(")");
             return nodeIn;
@@ -460,7 +466,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             {
                 this.sql.Append("NOT(");
             }
-            QueryNode operand = nodeIn.Accept(this);
+            QueryNode operand = nodeIn.Operand.Accept(this);
             this.sql.Append(")");
 
             if (operand != nodeIn.Operand)
