@@ -12,20 +12,20 @@ icons:
   - azure-mobile-services_128x128.png
 libraries:
   ios: 
-    - ..\..\bin\Signed\Managed\iOS\Microsoft.WindowsAzure.Mobile.dll
-    - ..\..\bin\Signed\Managed\iOS\Microsoft.WindowsAzure.Mobile.Ext.dll    
-    - ..\..\bin\Signed\Managed\iOS\Newtonsoft.Json.dll    
-    - ..\..\bin\Signed\Managed\iOS\System.Net.Http.Extensions.dll
-    - ..\..\bin\Signed\Managed\iOS\System.Net.Http.Primitives.dll
+    - ..\..\bin\Signed\Release\Managed\iOS\Microsoft.WindowsAzure.Mobile.dll
+    - ..\..\bin\Signed\Release\Managed\iOS\Microsoft.WindowsAzure.Mobile.Ext.dll    
+    - ..\..\bin\Signed\Release\Managed\iOS\Newtonsoft.Json.dll    
+    - ..\..\bin\Signed\Release\Managed\iOS\System.Net.Http.Extensions.dll
+    - ..\..\bin\Signed\Release\Managed\iOS\System.Net.Http.Primitives.dll
   android:
-    - ..\..\bin\Signed\Managed\Android\Microsoft.WindowsAzure.Mobile.dll
-    - ..\..\bin\Signed\Managed\Android\Microsoft.WindowsAzure.Mobile.Ext.dll    
-    - ..\..\bin\Signed\Managed\Android\Newtonsoft.Json.dll
-    - ..\..\bin\Signed\Managed\Android\System.Net.Http.Extensions.dll
-    - ..\..\bin\Signed\Managed\Android\System.Net.Http.Primitives.dll
+    - ..\..\bin\Signed\Release\Managed\Android\Microsoft.WindowsAzure.Mobile.dll
+    - ..\..\bin\Signed\Release\Managed\Android\Microsoft.WindowsAzure.Mobile.Ext.dll    
+    - ..\..\bin\Signed\Release\Managed\Android\Newtonsoft.Json.dll
+    - ..\..\bin\Signed\Release\Managed\Android\System.Net.Http.Extensions.dll
+    - ..\..\bin\Signed\Release\Managed\Android\System.Net.Http.Primitives.dll
   mobile:
-    - ..\..\bin\Signed\Managed\Portable\Microsoft.WindowsAzure.Mobile.dll
-    - ..\..\bin\Signed\Managed\Portable\Newtonsoft.Json.dll
+    - ..\..\bin\Signed\Release\Managed\Portable\Microsoft.WindowsAzure.Mobile.dll
+    - ..\..\bin\Signed\Release\Managed\Portable\Newtonsoft.Json.dll
 samples:
   - name: Android Sample
     path: samples\androidsample.sln
