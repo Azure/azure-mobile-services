@@ -71,7 +71,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             }
 
             // add id if it is not defined
-            if (item[SystemProperties.Id] == null)
+            JToken ignored;
+            if (!item.TryGetValue(SystemProperties.Id, StringComparison.OrdinalIgnoreCase, out ignored))
             {
                 item[SystemProperties.Id] = String.Empty;
             }

@@ -31,15 +31,7 @@ namespace System
             {
                 return null;
             }
-            using (var reader = new JsonTextReader(new StringReader(content)))
-            {
-                reader.DateParseHandling = settings.DateParseHandling;
-                reader.DateTimeZoneHandling = settings.DateTimeZoneHandling;
-                reader.FloatParseHandling = settings.FloatParseHandling;
-                reader.Culture = settings.Culture;
-
-                return JToken.Load(reader);
-            }
+            return JsonConvert.DeserializeObject<JToken>(content, settings);            
         }
     }
 }

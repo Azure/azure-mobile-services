@@ -123,6 +123,9 @@
   <data name="SQLiteStore_ColumnNotDefined" xml:space="preserve">
     <value>Column with name '{0}' is not defined on table '{1}'.</value>
   </data>
+  <data name="SQLiteStore_DefineTableTNotAnObject" xml:space="preserve">
+    <value>The generic type T is not an object.</value>
+  </data>
   <data name="SQLiteStore_InvalidIdentifier" xml:space="preserve">
     <value>'{0}' is not a valid identifier. Identifiers must be under 128 characters in length, start with a letter or underscore, and can contain only alpha-numeric and underscore characters.</value>
   </data>

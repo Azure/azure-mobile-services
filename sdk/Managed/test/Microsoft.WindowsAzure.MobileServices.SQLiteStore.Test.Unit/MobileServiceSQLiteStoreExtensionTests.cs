@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.WindowsAzure.MobileServices.Test;
 using Moq;
 using Moq.Protected;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
@@ -19,7 +20,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
         {
             var columns = new[]
             {
-                new JProperty("id", String.Empty),
+                new JProperty("id", 0),
                 new JProperty("PublicField", String.Empty),
                 new JProperty("PublicProperty", String.Empty)
             };
@@ -41,6 +42,19 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
             await TestDefineTable<ToDoWithSystemPropertiesType>("stringId_test_table", columns);
         }
 
+        [TestMethod]
+        public async Task DefineTable_Succeeds_WithComplexType()
+        {
+            var columns = new[]
+            {
+                new JProperty("id", 0),
+                new JProperty("Name", String.Empty),
+                new JProperty("Child", new JObject())
+            };
+
+            await TestDefineTable<ComplexType>("ComplexType", columns);
+        }
+
         private static async Task TestDefineTable<T>(string testTableName, JProperty[] columns)
         {
             bool defined = false;
@@ -52,8 +66,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
                     {
                         if (tableName == testTableName)
                         {
-                            var expectedProperties = columns.Select(c => c.ToString()).ToList();
-                            var actualProperties = properties.Select(p => p.Property.ToString()).ToList();
+                            var expectedProperties = columns.Select(c => c.Value.ToString(Formatting.None)).ToList();
+                            var actualProperties = properties.Select(p => p.Property.Value.ToString(Formatting.None)).ToList();
                             defined = true;
                             CollectionAssert.AreEquivalent(expectedProperties, actualProperties);
                         }

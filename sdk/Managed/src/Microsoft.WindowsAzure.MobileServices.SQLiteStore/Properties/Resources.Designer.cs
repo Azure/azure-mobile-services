@@ -80,6 +80,15 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The generic type T is not an object..
+        /// </summary>
+        internal static string SQLiteStore_DefineTableTNotAnObject {
+            get {
+                return ResourceManager.GetString("SQLiteStore_DefineTableTNotAnObject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &apos;{0}&apos; is not a valid identifier. Identifiers must be under 128 characters in length, start with a letter or underscore, and can contain only alpha-numeric and underscore characters..
         /// </summary>
         internal static string SQLiteStore_InvalidIdentifier {

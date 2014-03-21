@@ -28,36 +28,50 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         public static void DefineTable<T>(this MobileServiceSQLiteStore store, MobileServiceJsonSerializerSettings settings)
         {
             string tableName = settings.ContractResolver.ResolveTableName(typeof(T));
-            JsonContract contract = settings.ContractResolver.ResolveContract(typeof(T));
+            var contract = settings.ContractResolver.ResolveContract(typeof(T)) as JsonObjectContract;
+            if (contract == null)
+            {
+                throw new ArgumentException(Properties.Resources.SQLiteStore_DefineTableTNotAnObject);
+            }
 
             // create an empty object
             object theObject = contract.DefaultCreator();
-            // set default values so serialized version can be used to infer types
-            SetDefaultValues<T>(theObject);
-
             string json = JsonConvert.SerializeObject(theObject, settings);
-            
-            // read the serialized object
-            JObject item = JObject.Parse(json);
+            JObject item = JsonConvert.DeserializeObject<JObject>(json, settings);
+
+            //// set default values so serialized version can be used to infer types
+            SetDefaultId<T>(settings, item);
+            SetNullValues(contract, item);
+
             store.DefineTable(tableName, item);
         }
 
-        private static void SetDefaultValues<T>(object theObject)
+        private static void SetDefaultId<T>(MobileServiceJsonSerializerSettings settings, JObject item)
         {
-            TypeInfo typeInfo = typeof(T).GetTypeInfo();
-
-            foreach (MemberInfo member in typeInfo.DeclaredMembers)
+            JsonProperty idProperty = settings.ContractResolver.ResolveIdProperty(typeof(T));
+            if (idProperty.PropertyType == typeof(long) || idProperty.PropertyType == typeof(int))
             {
-                var property = member as PropertyInfo;
-                if (property != null && property.PropertyType == typeof(string) && property.CanWrite)
+                item[SystemProperties.Id] = 0;
+            }
+            else
+            {
+                item[SystemProperties.Id] = String.Empty;
+            }
+        }
+
+        private static void SetNullValues(JsonObjectContract contract, JObject item)
+        {
+            IEnumerable<JProperty> nullProperties = item.Properties().Where(p => p.Value.Type == JTokenType.Null);
+            foreach (JProperty itemProperty in nullProperties)
+            {
+                JsonProperty contractProperty = contract.Properties[itemProperty.Name];
+                if (contractProperty.PropertyType == typeof(string))
                 {
-                    property.SetValue(theObject, String.Empty);
-                    continue;
+                    item[itemProperty.Name] = String.Empty;
                 }
-                var field = member as FieldInfo;
-                if (field != null && field.FieldType == typeof(string))
+                else
                 {
-                    field.SetValue(theObject, String.Empty);
+                    item[itemProperty.Name] = new JObject();
                 }
             }
         }
