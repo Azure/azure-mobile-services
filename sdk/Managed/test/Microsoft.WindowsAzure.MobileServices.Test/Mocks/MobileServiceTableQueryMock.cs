@@ -107,14 +107,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
         public IQueryable<T> Query
         {
-            get
-            {
-                throw new NotImplementedException();
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
+            get { return Enumerable.Empty<T>().AsQueryable(); }
+            set {  }
         }
     }
 }

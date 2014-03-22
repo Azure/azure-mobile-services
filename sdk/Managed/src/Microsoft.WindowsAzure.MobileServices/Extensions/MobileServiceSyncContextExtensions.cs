@@ -27,6 +27,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <summary>
         /// Initializes the sync context.
         /// </summary>
+        /// <param name="context">An instance of <see cref="IMobileServiceSyncContext"/>.</param>
         /// <param name="store">An instance of <see cref="IMobileServiceLocalStore"/>.</param>
         public static Task InitializeAsync(this IMobileServiceSyncContext context, IMobileServiceLocalStore store)
         {
