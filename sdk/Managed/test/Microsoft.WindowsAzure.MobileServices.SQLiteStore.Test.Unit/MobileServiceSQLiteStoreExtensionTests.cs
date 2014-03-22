@@ -55,6 +55,21 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
             await TestDefineTable<ComplexType>("ComplexType", columns);
         }
 
+        [TestMethod]
+        public async Task DefineTable_Succeeds_WithDerivedType()
+        {
+            var columns = new[]
+            {
+                new JProperty("id", 0),
+                new JProperty("DerivedPublicField", String.Empty),
+                new JProperty("PublicField", String.Empty),
+                new JProperty("DerivedPublicProperty", String.Empty),
+                new JProperty("PublicProperty", String.Empty),
+            };
+
+            await TestDefineTable<PocoDerivedPocoType>("PocoDerivedPocoType", columns);
+        }
+
         private static async Task TestDefineTable<T>(string testTableName, JProperty[] columns)
         {
             bool defined = false;
@@ -66,8 +81,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
                     {
                         if (tableName == testTableName)
                         {
-                            var expectedProperties = columns.Select(c => c.Value.ToString(Formatting.None)).ToList();
-                            var actualProperties = properties.Select(p => p.Property.Value.ToString(Formatting.None)).ToList();
+                            var expectedProperties = columns.Select(c => c.ToString(Formatting.None)).ToList();
+                            var actualProperties = properties.Select(p => p.Property.ToString(Formatting.None)).ToList();
                             defined = true;
                             CollectionAssert.AreEquivalent(expectedProperties, actualProperties);
                         }

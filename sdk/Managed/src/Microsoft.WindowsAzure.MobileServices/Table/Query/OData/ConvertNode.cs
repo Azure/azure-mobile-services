@@ -37,7 +37,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
          /// <summary>
         /// Initializes an instance of <see cref="ConvertNode"/>
         /// </summary>
-        /// <param name="QueryNode">The node to convert.</param>
+        /// <param name="source">The node to convert.</param>
         /// <param name="targetType">The type to convert the node to</param>
         public ConvertNode(QueryNode source, Type targetType)
         {
