@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="MobileServiceUri">Mobile Service URI</string>
+	<string name="MobileServiceKey">Mobile Service Key</string>
+	<string name="Tags">Tags</string>
+	<string name="RunTests">Run Tests</string>
+	<string name="ApplicationName">Microsoft.WindowsAzure.Mobile.Android.Test</string>
+  <string name="Login">Login</string>
+</resources>
