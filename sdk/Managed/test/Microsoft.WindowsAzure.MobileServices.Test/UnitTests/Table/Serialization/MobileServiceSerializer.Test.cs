@@ -1285,7 +1285,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     actualError = e;
                 }
 
-                Assert.AreEqual(actualError.Message, "Value was either too large or too small for a Double.");
+                Assert.Contains(actualError.Message, "is not a valid number. Path 'Float'");
             }
         }
 
@@ -1443,7 +1443,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     actualError = e;
                 }
 
-                Assert.AreEqual(actualError.Message, "Value was either too large or too small for a Double.");
+                Assert.Contains(actualError.Message, "is not a valid number. Path 'Double'");
             }
         }
 
@@ -2389,7 +2389,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     actualError = e;
                 }
 
-                Assert.AreEqual(actualError.Message, "Value was either too large or too small for a Double.");
+                Assert.Contains(actualError.Message, "is not a valid number. Path 'Nullable'");
             }
         }
 
