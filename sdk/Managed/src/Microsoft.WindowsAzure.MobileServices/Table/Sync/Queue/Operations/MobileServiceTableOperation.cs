@@ -5,6 +5,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,12 +18,20 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
     internal abstract class MobileServiceTableOperation: IMobileServiceTableOperation
     {
+        // --- Persisted properties -- //
         public string Id { get; private set; }
+        public abstract MobileServiceTableOperationKind Kind { get; }
+        public string TableName { get; private set; }
         public string ItemId { get; private set; }
+        public JObject Item { get; set; }
         public DateTime CreatedAt { get; private set; }
         public long Sequence { get; set; }
+
+        // --- Non persisted properties -- //
         public MobileServiceTable Table { get; set; }
         public JToken Result { get; set; }
+        public string RawResult { get; set; }
+        public HttpStatusCode? StatusCode { get; private set; }
         public bool IsCancelled { get; private set; }
         public virtual bool WriteResultToStore
         {
@@ -31,11 +41,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         protected virtual bool SerializeItemToQueue
         {
             get { return false; }
-        }
-
-        public string TableName { get; private set; }
-        public abstract MobileServiceTableOperationKind Kind { get; }
-        public JObject Item { get; set; }          
+        }        
 
         protected MobileServiceTableOperation(string tableName, string itemId)
         {
@@ -45,11 +51,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.ItemId = itemId;
         }
 
-        public async Task<JToken> ExecuteAsync()
+        public async Task ExecuteAsync()
         {
+            this.Result = null;
+            this.RawResult = null;
+            this.StatusCode = null;
+
             if (this.IsCancelled)
             {
-                return null;
+                return;
             }
 
             if (this.Item == null)
@@ -57,8 +67,34 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 throw new MobileServiceInvalidOperationException(Resources.MobileServiceTableOperation_ItemNotFound, request: null, response: null);
             }
 
-            this.Result = await OnExecuteAsync();
-            return this.Result;
+
+            ExceptionDispatchInfo edi = null;
+            MobileServiceInvalidOperationException iox = null;
+
+            try
+            {
+                this.Result = await OnExecuteAsync();
+            }
+            catch (MobileServiceInvalidOperationException ex)
+            {
+                iox = ex;
+                edi = ExceptionDispatchInfo.Capture(ex);
+            }               
+         
+            if (iox != null)
+            {
+                // if the operation was not successful and we have an error that can give us jtoken result, then take it.
+                Tuple<string, JToken> content = await this.Table.ParseContent(iox.Response);
+                if (iox.Response != null)
+                {
+                    this.StatusCode = iox.Response.StatusCode;
+                }
+
+                this.RawResult = content.Item1;
+                this.Result = content.Item2;
+
+                edi.Throw();
+            }
         }
         protected abstract Task<JToken> OnExecuteAsync();
 

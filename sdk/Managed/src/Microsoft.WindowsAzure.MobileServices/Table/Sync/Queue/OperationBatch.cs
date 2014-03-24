@@ -20,9 +20,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     internal class OperationBatch
     {
         /// <summary>
-        /// Errors while processing queue operations
+        /// Errors while interacting with store or calling push complete on handler
         /// </summary>
-        public List<Exception> HandlerErrors { get; private set; }
+        public List<Exception> OtherErrors { get; private set; }
 
         /// <summary>
         /// Status that returns the reson of abort.
@@ -41,7 +41,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public OperationBatch(IMobileServiceSyncHandler syncHandler, IMobileServiceLocalStore store)
         {
-            this.HandlerErrors = new List<Exception>();
+            this.OtherErrors = new List<Exception>();
             this.SyncHandler = syncHandler;
             this.Store = store;
         }
@@ -76,14 +76,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             var errors = new List<MobileServiceTableOperationError>();
 
             JToken result = await this.Store.ReadAsync(new MobileServiceTableQueryDescription(LocalSystemTables.SyncErrors));
-
-            var objError = result as JObject;
-            if (objError != null)
-            {
-                errors.Add(MobileServiceTableOperationError.Deserialize(objError, serializerSettings));
-
-            }
-            else if (result is JArray)
+            if (result is JArray)
             {
                 foreach (JObject error in result)
                 {
@@ -102,28 +95,24 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public bool HasErrors(IEnumerable<MobileServiceTableOperationError> syncErrors)
         {
             // unhandled sync errors or handler errors
-            return syncErrors.Any(e => !e.Handled) || this.HandlerErrors.Any();    
+            return syncErrors.Any(e => !e.Handled) || this.OtherErrors.Any();    
         }
 
         /// <summary>
-        /// Deletes all the sync errors reocorded for this batch.
+        /// Deletes all the sync errors from local database
         /// </summary>
-        /// <param name="syncErrors">Instance of sync errors.</param>
-        public async Task DeleteErrorsAsync(IEnumerable<MobileServiceTableOperationError> syncErrors)
+        public async Task DeleteErrorsAsync()
         {
             MobileServiceLocalStoreException toThrow = null;
 
-            foreach (MobileServiceTableOperationError error in syncErrors)
+            try
             {
-                try
-                {
-                    await this.Store.DeleteAsync(LocalSystemTables.SyncErrors, error.Id);
-                }
-                catch (Exception ex)
-                {
+                await this.Store.DeleteAsync(new MobileServiceTableQueryDescription(LocalSystemTables.SyncErrors));
+            }
+            catch (Exception ex)
+            {
 
-                    toThrow = new MobileServiceLocalStoreException(Resources.SyncStore_FailedToDeleteError, ex);
-                }
+                toThrow = new MobileServiceLocalStoreException(Resources.SyncStore_FailedToDeleteError, ex);
             }
 
             if (toThrow != null)

@@ -18,7 +18,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// <summary>
     /// Queue of all operations i.e. Push, Pull, Insert, Update, Delete
     /// </summary>
-    internal sealed class OperationQueue: IDisposable
+    internal class OperationQueue: IDisposable
     {
         private readonly AsyncLockDictionary tableLocks = new AsyncLockDictionary();
         private readonly AsyncLockDictionary itemLocks = new AsyncLockDictionary();
@@ -34,7 +34,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.store = store;
         }
 
-        public MobileServiceTableOperation Peek()
+        public virtual MobileServiceTableOperation Peek()
         {
             lock (this.queue)
             {
@@ -60,7 +60,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
         }
 
-        public async Task<MobileServiceTableOperation> DequeueAsync()
+        public virtual async Task<MobileServiceTableOperation> DequeueAsync()
         {
             using (await this.storeQueueLock.Acquire(CancellationToken.None))
             {
@@ -158,7 +158,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public void Dispose()
         {
-            this.storeQueueLock.Dispose();
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                this.storeQueueLock.Dispose();
+            }
         }
     }
 }

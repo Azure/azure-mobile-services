@@ -42,14 +42,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             // keep taking out operations and executing them until queue is empty or operation finds the bookmark or batch is aborted 
             while (operation != null && operation != this.bookmark)
             {
-                try
-                {
-                    await this.ExecuteOperationAsync(operation, batch);
-                }
-                catch (Exception ex)
-                {
-                    batch.HandlerErrors.Add(ex);
-                }
+                await this.ExecuteOperationAsync(operation, batch);
 
                 if (batch.AbortReason.HasValue)
                 {
@@ -78,24 +71,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             catch (Exception ex)
             {
 
-                batch.HandlerErrors.Add(new MobileServiceLocalStoreException(Resources.SyncStore_FailedToLoadError, ex));
+                batch.OtherErrors.Add(new MobileServiceLocalStoreException(Resources.SyncStore_FailedToLoadError, ex));
             }
 
             var result = new MobileServicePushCompletionResult(syncErrors, batchStatus);
 
-            if (syncErrors != null)
+            try
             {
-                try
-                {
-                    await batch.SyncHandler.OnPushCompleteAsync(result);
+                await batch.SyncHandler.OnPushCompleteAsync(result);
 
-                    // now that we've successfully given the errors to user, we can delete them from store
-                    await batch.DeleteErrorsAsync(syncErrors);
-                }
-                catch (Exception ex)
-                {
-                    batch.HandlerErrors.Add(ex);
-                }
+                // now that we've successfully given the errors to user, we can delete them from store
+                await batch.DeleteErrorsAsync();
+            }
+            catch (Exception ex)
+            {
+                batch.OtherErrors.Add(ex);
             }
 
             if (batch.AbortReason.HasValue || batch.HasErrors(syncErrors))
@@ -103,13 +93,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 List<MobileServiceTableOperationError> unhandledSyncErrors = syncErrors.Where(e=>!e.Handled).ToList();
                 
                 Exception inner;
-                if (batch.HandlerErrors.Count == 1)
+                if (batch.OtherErrors.Count == 1)
                 {
-                    inner = batch.HandlerErrors[0];
+                    inner = batch.OtherErrors[0];
                 }
                 else
                 {
-                    inner = batch.HandlerErrors.Any() ? new AggregateException(batch.HandlerErrors) : null;
+                    inner = batch.OtherErrors.Any() ? new AggregateException(batch.OtherErrors) : null;
                 }
 
                 // create a new result with only unhandled errors
@@ -159,7 +149,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     }
 
                     error = ex;
-                }
+                }                
 
                 if (error == null)
                 {
@@ -180,22 +170,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 }
                 else
                 {
-                    HttpStatusCode? status = null;
-                    Tuple<string, JToken> content = null;
-                    // if the operation was not successful and we have an error that can give us jtoken result, then take it.
-                    if (error is MobileServiceInvalidOperationException)
-                    {
-                        var msIOEx = (MobileServiceInvalidOperationException)error;
-                        content = await operation.Table.ParseContent(msIOEx.Response);
-                        if (msIOEx.Response != null)
-                        {
-                            status = msIOEx.Response.StatusCode;
-                        }
-                    }
-
-                    string rawResult = content != null ? content.Item1 : null;
-                    JToken result = content != null ? content.Item2 : null;
-                    var syncError = new MobileServiceTableOperationError(status, operation.Kind, operation.TableName, operation.Item, rawResult, result);
+                    var syncError = new MobileServiceTableOperationError(operation.StatusCode, operation.Kind, operation.TableName, operation.Item, operation.RawResult, operation.Result);
                     await batch.AddSyncErrorAsync(syncError);
                 }
             }
