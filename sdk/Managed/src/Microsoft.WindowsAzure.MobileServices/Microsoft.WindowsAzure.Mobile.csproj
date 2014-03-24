@@ -141,7 +141,7 @@
     <Compile Include="Table\Sync\Queue\OperationQueue.cs" />
     <Compile Include="Table\Sync\Queue\Operations\MobileServiceTableOperation.cs" />
     <Compile Include="Table\Sync\Queue\Actions\PushAction.cs" />
-    <Compile Include="Table\Sync\MobileServicePushFailedException.cs" />
+    <Compile Include="Exceptions\MobileServicePushFailedException.cs" />
     <Compile Include="Table\Sync\LocalSystemTables.cs" />
     <Compile Include="Threading\ActionBlock.cs" />
     <Compile Include="Threading\AsyncLock.cs" />
