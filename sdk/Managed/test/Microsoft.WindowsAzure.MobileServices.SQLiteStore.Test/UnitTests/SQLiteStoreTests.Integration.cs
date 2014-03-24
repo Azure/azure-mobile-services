@@ -178,6 +178,89 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         }
 
         [AsyncTestMethod]
+        public async Task Insert_AllTypes_ThenRead_ThenPush_ThenLookup()
+        {
+            ResetDatabase("AllBaseTypesWithAllSystemPropertiesType");
+
+            var hijack = new TestHttpHandler();
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable<AllBaseTypesWithAllSystemPropertiesType>();            
+
+            IMobileServiceClient service = await CreateClient(hijack, store);
+            IMobileServiceSyncTable<AllBaseTypesWithAllSystemPropertiesType> table = service.GetSyncTable<AllBaseTypesWithAllSystemPropertiesType>();
+
+            // first insert an item
+            var inserted = new AllBaseTypesWithAllSystemPropertiesType()
+            {
+                Id = "abc",
+                Bool = true,
+                Byte  = 11,
+                SByte = -11,
+                UShort = 22,
+                Short = -22,
+                UInt = 33,
+                Int = -33,
+                ULong = 44,
+                Long = -44,
+                Float = 55.66f,
+                Double = 66.77,
+                Decimal = 77.88M,
+                String = "EightyEight",
+                Char = '9',
+                DateTime = new DateTime(2010,10,10, 10, 10, 10, DateTimeKind.Utc),
+                DateTimeOffset = new DateTimeOffset(2011,11,11,11,11,11, 11, TimeSpan.Zero),
+                Nullable = 12.13,
+                Uri = new Uri("http://example.com"),
+                Enum1 = Enum1.Enum1Value2,
+                Enum2 = Enum2.Enum2Value2,
+                Enum3 = Enum3.Enum3Value2,
+                Enum4 = Enum4.Enum4Value2,
+                Enum5 = Enum5.Enum5Value2,
+                Enum6 = Enum6.Enum6Value2                
+            };
+
+            await table.InsertAsync(inserted);
+
+            IList<AllBaseTypesWithAllSystemPropertiesType> records = await table.ToListAsync();
+            Assert.AreEqual(records.Count, 1);
+
+            Assert.AreEqual(records.First(), inserted);
+
+            // now push
+            hijack.AddResponseContent(@"
+{""id"":""abc"",
+""bool"":true,
+""byte"":11,
+""sByte"":-11,
+""uShort"":22,
+""short"":-22,
+""uInt"":33,
+""int"":-33,
+""uLong"":44,
+""long"":-44,
+""float"":55.66,
+""double"":66.77,
+""decimal"":77.88,
+""string"":""EightyEight"",
+""char"":""9"",
+""dateTime"":""2010-10-10T10:10:10.000Z"",
+""dateTimeOffset"":""2011-11-11T11:11:11.011Z"",
+""nullable"":12.13,
+""uri"":""http://example.com/"",
+""enum1"":""Enum1Value2"",
+""enum2"":""Enum2Value2"",
+""enum3"":""Enum3Value2"",
+""enum4"":""Enum4Value2"",
+""enum5"":""Enum5Value2"",
+""enum6"":""Enum6Value2"",
+""__version"":""XYZ""}");
+            await service.SyncContext.PushAsync();
+            AllBaseTypesWithAllSystemPropertiesType lookedUp = await table.LookupAsync("abc");
+            inserted.Version = "XYZ";
+            Assert.AreEqual(inserted, lookedUp);
+        }
+
+        [AsyncTestMethod]
         public async Task Insert_ThenPush_ThenPull_ThenRead_ThenUpdate_ThenRefresh_ThenDelete_ThenLookup_ThenPurge_ThenRead()
         {
             ResetDatabase(TestTable);

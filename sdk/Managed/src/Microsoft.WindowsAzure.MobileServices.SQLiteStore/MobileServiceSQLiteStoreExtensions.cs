@@ -35,18 +35,43 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             }
 
             // create an empty object
-            object theObject = contract.DefaultCreator();
-            string json = JsonConvert.SerializeObject(theObject, settings);
-            JObject item = JsonConvert.DeserializeObject<JObject>(json, settings);
+            object theObject = contract.DefaultCreator();            
+            SetEnumDefault(contract, theObject);
+
+            JObject item = ConvertToJObject(settings, theObject);
 
             //// set default values so serialized version can be used to infer types
-            SetDefaultId<T>(settings, item);
-            SetNullValues(contract, item);
+            SetIdDefault<T>(settings, item);
+            SetNullDefault(contract, item);            
 
             store.DefineTable(tableName, item);
         }
 
-        private static void SetDefaultId<T>(MobileServiceJsonSerializerSettings settings, JObject item)
+        private static void SetEnumDefault(JsonObjectContract contract, object theObject)
+        {
+            foreach (JsonProperty contractProperty in contract.Properties)
+            {
+                if (contractProperty.PropertyType.GetTypeInfo().IsEnum)
+                {
+                    object firstValue = Enum.GetValues(contractProperty.PropertyType)
+                                            .Cast<object>()
+                                            .FirstOrDefault();
+                    if (firstValue != null)
+                    {
+                        contractProperty.ValueProvider.SetValue(theObject, firstValue);
+                    }
+                }
+            }
+        }
+
+        private static JObject ConvertToJObject(MobileServiceJsonSerializerSettings settings, object theObject)
+        {
+            string json = JsonConvert.SerializeObject(theObject, settings);
+            JObject item = JsonConvert.DeserializeObject<JObject>(json, settings);
+            return item;
+        }
+
+        private static void SetIdDefault<T>(MobileServiceJsonSerializerSettings settings, JObject item)
         {
             JsonProperty idProperty = settings.ContractResolver.ResolveIdProperty(typeof(T));
             if (idProperty.PropertyType == typeof(long) || idProperty.PropertyType == typeof(int))
@@ -59,13 +84,12 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             }
         }
 
-        private static void SetNullValues(JsonObjectContract contract, JObject item)
+        private static void SetNullDefault(JsonObjectContract contract, JObject item)
         {
-            IEnumerable<JProperty> nullProperties = item.Properties().Where(p => p.Value.Type == JTokenType.Null);
-            foreach (JProperty itemProperty in nullProperties)
+            foreach (JProperty itemProperty in item.Properties().Where(i => i.Value.Type == JTokenType.Null))
             {
                 JsonProperty contractProperty = contract.Properties[itemProperty.Name];
-                if (contractProperty.PropertyType == typeof(string))
+                if (contractProperty.PropertyType == typeof(string) || contractProperty.PropertyType == typeof(Uri))
                 {
                     item[itemProperty.Name] = String.Empty;
                 }
