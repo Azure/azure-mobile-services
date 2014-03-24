@@ -40,13 +40,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         }
 
         [TestMethod]
-        public async Task ExecuteAsync_Throws_WhenItemIsNull()
-        {
-            var ex = await AssertEx.Throws<MobileServiceInvalidOperationException>(() => this.operation.ExecuteAsync());
-            Assert.AreEqual("Operation must have an item associated with it.", ex.Message);
-        }
-
-        [TestMethod]
         public async Task ExecuteLocalAsync_UpsertsItemOnStore()
         {
             var store = new Mock<IMobileServiceLocalStore>();

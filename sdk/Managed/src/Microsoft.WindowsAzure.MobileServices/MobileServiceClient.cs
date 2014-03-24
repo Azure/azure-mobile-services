@@ -93,7 +93,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Gets the serializer that is used with the table.
         /// </summary>
-        internal MobileServiceSerializer Serializer { get; private set; }
+        internal MobileServiceSerializer Serializer { get; set; }
 
         /// <summary>
         /// Gets the <see cref="MobileServiceHttpClient"/> associated with this client.

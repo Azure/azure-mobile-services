@@ -30,8 +30,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         // --- Non persisted properties -- //
         public MobileServiceTable Table { get; set; }
         public JToken Result { get; set; }
-        public string RawResult { get; set; }
-        public HttpStatusCode? StatusCode { get; private set; }
+        public string ErrorRawResult { get; internal set; }
+        public HttpStatusCode? ErrorStatusCode { get; internal set; }
         public bool IsCancelled { get; private set; }
         public virtual bool WriteResultToStore
         {
@@ -52,11 +52,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         }
 
         public async Task ExecuteAsync()
-        {
-            this.Result = null;
-            this.RawResult = null;
-            this.StatusCode = null;
-
+        {            
             if (this.IsCancelled)
             {
                 return;
@@ -67,6 +63,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 throw new MobileServiceInvalidOperationException(Resources.MobileServiceTableOperation_ItemNotFound, request: null, response: null);
             }
 
+            string lastVerison = this.Result == null ? null : (string)this.Result[MobileServiceSerializer.VersionSystemPropertyString];
+            if (lastVerison != null)
+            {
+                this.Item[MobileServiceSerializer.VersionSystemPropertyString] = lastVerison;
+            }
+
+            this.Result = null;
+            this.ErrorRawResult = null;
+            this.ErrorStatusCode = null;
 
             ExceptionDispatchInfo edi = null;
             MobileServiceInvalidOperationException iox = null;
@@ -87,10 +92,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 Tuple<string, JToken> content = await this.Table.ParseContent(iox.Response);
                 if (iox.Response != null)
                 {
-                    this.StatusCode = iox.Response.StatusCode;
+                    this.ErrorStatusCode = iox.Response.StatusCode;
                 }
 
-                this.RawResult = content.Item1;
+                this.ErrorRawResult = content.Item1;
                 this.Result = content.Item2;
 
                 edi.Throw();

@@ -170,7 +170,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 }
                 else
                 {
-                    var syncError = new MobileServiceTableOperationError(operation.StatusCode, operation.Kind, operation.TableName, operation.Item, operation.RawResult, operation.Result);
+                    var syncError = new MobileServiceTableOperationError(operation.ErrorStatusCode, operation.Kind, operation.TableName, operation.Item, operation.ErrorRawResult, operation.Result);
                     await batch.AddSyncErrorAsync(syncError);
                 }
             }
