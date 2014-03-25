@@ -128,7 +128,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
                 Exception error = null;
 
-                await LoadOperationItem(operation, batch);
+                await this.LoadOperationItem(operation, batch);
 
                 if (this.CancellationToken.IsCancellationRequested)
                 {
@@ -151,15 +151,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     error = ex;
                 }                
 
-                if (error == null)
+                // save the result if ExecuteTableOperation did not throw
+                if (error == null && operation.WriteResultToStore)
                 {
                     JObject obj = operation.Result as JObject;  // store can only upsert jobjects
-                    if (obj != null && operation.WriteResultToStore)
+                    if (obj != null)
                     {
                         obj = MobileServiceSyncTable.RemoveSystemPropertiesKeepVersion(obj);
                         try
                         {
-                            await operation.Table.MobileServiceClient.SyncContext.Store.UpsertAsync(operation.TableName, obj);
+                            await this.Store.UpsertAsync(operation.TableName, obj);
                         }
                         catch (Exception ex)
                         {
@@ -168,7 +169,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                         }
                     }
                 }
-                else
+                else if (error != null)
                 {
                     var syncError = new MobileServiceTableOperationError(operation.ErrorStatusCode, operation.Kind, operation.TableName, operation.Item, operation.ErrorRawResult, operation.Result);
                     await batch.AddSyncErrorAsync(syncError);
@@ -176,14 +177,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
         }
 
-        private static async Task LoadOperationItem(MobileServiceTableOperation operation, OperationBatch batch)
+        private async Task LoadOperationItem(MobileServiceTableOperation operation, OperationBatch batch)
         {
             // only read the item from store if it is not in the operation already
             if (operation.Item == null)
             {
                 try
                 {
-                    operation.Item = await batch.Store.LookupAsync(operation.TableName, operation.ItemId) as JObject;
+                    operation.Item = await this.Store.LookupAsync(operation.TableName, operation.ItemId) as JObject;
                 }
                 catch (Exception ex)
                 {

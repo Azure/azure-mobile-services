@@ -29,9 +29,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         JObject Item { get; set; }
 
         /// <summary>
-        /// Result returned by the server.
+        /// The result returned by the server.
         /// </summary>
-        JToken Result { get; set; }
+        JToken Result { get; }
 
         /// <summary>
         /// Executes the operation against remote table.

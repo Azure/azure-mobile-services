@@ -29,13 +29,28 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         // --- Non persisted properties -- //
         public MobileServiceTable Table { get; set; }
-        public JToken Result { get; set; }
+        public JToken Result { get; internal set; }
         public string ErrorRawResult { get; internal set; }
         public HttpStatusCode? ErrorStatusCode { get; internal set; }
         public bool IsCancelled { get; private set; }
-        public virtual bool WriteResultToStore
+        protected virtual bool CanWriteResultToStore
         {
             get { return true; }
+        }
+
+        public bool WriteResultToStore
+        {
+            get
+            {
+                       // operation wants result to be written
+                return this.CanWriteResultToStore &&
+                       // there is a result
+                       this.Result is JObject &&
+                       // result is from successful run or precondition failed
+                       (this.ErrorStatusCode == null || this.ErrorStatusCode == HttpStatusCode.PreconditionFailed) && 
+                       // result has an id
+                       ((string)this.Result[MobileServiceSerializer.IdPropertyName]) != null;
+            }
         }
 
         protected virtual bool SerializeItemToQueue

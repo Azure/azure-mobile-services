@@ -8,6 +8,7 @@ using Moq;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
+using System.Net;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Operations
 {
@@ -20,6 +21,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         public void Initialize()
         {
             this.operation = new DeleteOperation("test", "abc");
+        }
+
+        [TestMethod]
+        public void WriteResultToStore_IsFalse()
+        {
+            // if there is object with id
+            this.operation.Result = new JObject() { { "id", "abc" } };
+            Assert.IsFalse(this.operation.WriteResultToStore);
+
+            // if the status is precondition failed
+            this.operation.ErrorStatusCode = HttpStatusCode.PreconditionFailed;
+            Assert.IsFalse(this.operation.WriteResultToStore);
         }
 
         [TestMethod]

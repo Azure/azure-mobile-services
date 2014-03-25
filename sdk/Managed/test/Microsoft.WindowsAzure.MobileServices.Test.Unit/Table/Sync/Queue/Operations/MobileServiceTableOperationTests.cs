@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
+using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -28,6 +29,49 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             client.Object.Serializer = new MobileServiceSerializer();
             this.table = new Mock<MobileServiceTable>("test", client.Object);
             operation.Object.Table = this.table.Object;
+        }
+
+        [TestMethod]
+        public void WriteResultToStore_IsTrue_WhenResultHasIdAndStatusIsNullOrPreConditionFailed()
+        {
+            TestWriteResultToStore(id: "abc", status: (HttpStatusCode?)null, canWrite: true, willWrite: true);
+            TestWriteResultToStore(id: "abc", status: (HttpStatusCode?)HttpStatusCode.PreconditionFailed, canWrite: true, willWrite: true);
+        }
+
+        [TestMethod]
+        public void WriteResultToStore_IsFalse_WhenResultDoesNotHaveIdOrCanWriteIsFalse()
+        {
+            TestWriteResultToStore(id: (string)null, status: (HttpStatusCode?)null, canWrite: true, willWrite: false );
+            TestWriteResultToStore(id: (string)null, status: (HttpStatusCode?)HttpStatusCode.PreconditionFailed, canWrite: true, willWrite: false );
+            TestWriteResultToStore(id: "abc", status: (HttpStatusCode?)null, canWrite: false, willWrite: false);
+            TestWriteResultToStore(id: "abc", status: (HttpStatusCode?)HttpStatusCode.PreconditionFailed, canWrite: false, willWrite: false);
+        }
+
+        [TestMethod]
+        public void WriteResultToStore_IsFalse_WhenResultIsNull()
+        {
+            Assert.AreEqual(this.operation.Object.WriteResultToStore, false);
+        }
+
+        [TestMethod]
+        public void WriteResultToStore_IsFalse_WhenStatusCodeIsNot412()
+        {
+            var allStaus = Enum.GetValues(typeof(HttpStatusCode))
+                               .Cast<HttpStatusCode>()
+                               .Where(s => s != HttpStatusCode.PreconditionFailed);
+
+            foreach (var status in allStaus)
+            {
+                TestWriteResultToStore(id: "abc", status: status, canWrite: true, willWrite: false);
+            }
+        }
+
+        private void TestWriteResultToStore(HttpStatusCode? status, string id, bool canWrite, bool willWrite)
+        {
+            this.operation.Object.Result = new JObject() { { "id", id } };
+            this.operation.Object.ErrorStatusCode = status;
+            this.operation.Protected().SetupGet<bool>("CanWriteResultToStore").Returns(canWrite);
+            Assert.AreEqual(this.operation.Object.WriteResultToStore, willWrite);
         }
 
         [TestMethod]

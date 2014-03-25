@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,17 +33,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         }
 
         [TestMethod]
-        public async Task PushAbort_AbortsThePush()
+        public async Task AbortPush_AbortsThePush()
         {
             var op = new InsertOperation("abc", "abc") { Item = new JObject() }; // putting an item so it won't load it
             var peek = new Queue<MobileServiceTableOperation>(new[] { op, null });
             // picks up the operation
             this.opQueue.Setup(q => q.Peek()).Returns(() => peek.Dequeue());
             // executes the operation via handler
-            this.handler.Setup(h => h.ExecuteTableOperationAsync(op)).Callback<IMobileServiceTableOperation>(o =>
-            {
-                o.AbortPush();
-            });
+            this.handler.Setup(h => h.ExecuteTableOperationAsync(op))
+                        .Callback<IMobileServiceTableOperation>(o =>
+                        {
+                            o.AbortPush();
+                        });
             
             // loads sync errors
             string syncError = @"[]";
@@ -73,14 +75,75 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         [TestMethod]
         public async Task ExecuteAsync_DeletesTheErrors()
         {
-            var op = new InsertOperation("abc", "abc") { Item = new JObject() }; // putting an item so it won't load it
-            var peek = new Queue<MobileServiceTableOperation>(new[]{ op, null });
+            var op = new InsertOperation("table", "id") { Item = new JObject() }; // putting an item so it won't load it
+            await this.TestExecuteAsync(op);
+        }
+
+        [TestMethod]
+        public async Task ExecuteAsync_LoadsTheItem_IfItIsNotPresent()
+        {
+            var op = new InsertOperation("table", "id");
+            this.store.Setup(s => s.LookupAsync("table", "id")).Returns(Task.FromResult(new JObject()));
+            await this.TestExecuteAsync(op);
+        }
+
+        [TestMethod]
+        public async Task ExecuteAsync_SavesTheResult_IfPresentAndStatusIsEmpty()
+        {
+            await TestResultSave(status: null, resultId: "id", saved: true);
+        }
+
+        [TestMethod]
+        public async Task ExecuteAsync_SavesTheResult_IfPresentAndStatusIs412()
+        {
+            await TestResultSave(status: HttpStatusCode.PreconditionFailed, resultId: "id", saved: true);
+        }
+
+        [TestMethod]
+        public async Task ExecuteAsync_DoesNotSaveTheResult_IfPresentAndStatusIsNotEmptyOr412()
+        {
+            var allStaus = Enum.GetValues(typeof(HttpStatusCode))
+                               .Cast<HttpStatusCode>()
+                               .Where(s => s != HttpStatusCode.PreconditionFailed);
+
+            foreach (var status in allStaus)
+            {
+                this.action = new PushAction(this.opQueue.Object, this.store.Object, this.handler.Object, new MobileServiceJsonSerializerSettings(), CancellationToken.None, this.bookmark);
+                await TestResultSave(status: status, resultId: "id", saved: false);
+            }
+        }
+
+        [TestMethod]
+        public async Task ExecuteAsync_DoesNotSaveTheResult_IfPresentButResultDoesNotHaveId()
+        {
+            this.action = new PushAction(this.opQueue.Object, this.store.Object, this.handler.Object, new MobileServiceJsonSerializerSettings(), CancellationToken.None, this.bookmark);
+            await TestResultSave(status: null, resultId: null, saved: false);
+        }
+
+        private async Task TestResultSave(HttpStatusCode? status, string resultId, bool saved)
+        {
+            var op = new InsertOperation("table", "id")
+            {
+                Item = new JObject(),
+                Result = new JObject() {{"id", resultId}},
+                ErrorStatusCode = status
+            };
+            if (saved)
+            {
+                this.store.Setup(s => s.UpsertAsync("table", (JObject)op.Result)).Returns(Task.FromResult(0));
+            }
+            await this.TestExecuteAsync(op);
+        }
+
+        private async Task TestExecuteAsync(InsertOperation op)
+        {
+            var peek = new Queue<MobileServiceTableOperation>(new[] { op, null });
             // picks up the operation
-            this.opQueue.Setup(q => q.Peek()).Returns(() => peek.Dequeue());            
+            this.opQueue.Setup(q => q.Peek()).Returns(() => peek.Dequeue());
             // executes the operation via handler
             this.handler.Setup(h => h.ExecuteTableOperationAsync(op)).Returns(Task.FromResult(0));
             // removes the operation from queue
-            this.opQueue.Setup(q => q.DequeueAsync()).Returns(Task.FromResult<MobileServiceTableOperation>(null)); 
+            this.opQueue.Setup(q => q.DequeueAsync()).Returns(Task.FromResult<MobileServiceTableOperation>(null));
             // loads sync errors
             string syncError = @"[]";
             this.store.Setup(s => s.ReadAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == LocalSystemTables.SyncErrors))).Returns(Task.FromResult(JToken.Parse(syncError)));
