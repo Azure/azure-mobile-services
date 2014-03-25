@@ -205,6 +205,14 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\LiveSDK.5.5\WindowsXAML\Microsoft.Live.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.WindowsAzure.Mobile, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\WindowsAzure.MobileServices.1.1.5\lib\netcore45\Microsoft.WindowsAzure.Mobile.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAzure.Mobile.Ext, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\WindowsAzure.MobileServices.1.1.5\lib\netcore45\Microsoft.WindowsAzure.Mobile.Ext.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.1\lib\netcore45\Newtonsoft.Json.dll</HintPath>
