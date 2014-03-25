@@ -536,7 +536,7 @@ exports.createError = function (exceptionOrMessage, request) {
             // Try to pull out an error message from the response before
             // defaulting to the status
             var isText = false;
-            if (typeof request.getResponseHeader !== 'undefined') {
+            if (request.getResponseHeader) {
                 isText = request.getResponseHeader('Content-Type').toLowerCase().indexOf("text") >= 0;
             }
 

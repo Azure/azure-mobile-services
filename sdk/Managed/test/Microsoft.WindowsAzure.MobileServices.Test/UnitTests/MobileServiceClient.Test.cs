@@ -614,5 +614,27 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 Assert.AreEqual(e.Message, "message");
             }
         }
+
+        [AsyncTestMethod]
+        public async Task InvokeCustomAPI_ErrorStringAndNoContentType()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+
+            hijack.Response = new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
+            hijack.Response.Content = new StringContent("message", Encoding.UTF8, null);
+            hijack.Response.Content.Headers.ContentType = null;
+
+            MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            try
+            {
+                await service.InvokeApiAsync("testapi");
+                Assert.Fail("Invoke API should have thrown");
+            }
+            catch (Exception e)
+            {
+                Assert.AreEqual(e.Message, "The request could not be completed.  (Bad Request)");
+            }
+        }
     }
 }

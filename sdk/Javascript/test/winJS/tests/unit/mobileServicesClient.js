@@ -161,6 +161,23 @@ $testGroup('MobileServiceClient.js',
         });
     }),
 
+    $test('CustomAPI - error as text without content type')
+    .description('Verify the custom API error messages')
+    .check(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.type, 'POST');
+            $assert.areEqual(req.url, 'http://www.test.com/api/checkins/post');
+            callback(null, { status: 400, responseText: 'bad robot' });
+        });
+        client.invokeApi("checkins/post").done(function (response) {
+            $assert.fail("api call failed");
+        },
+        function (error) {
+            $assert.areEqual(error.message, "Unexpected failure.");
+        });
+    }),
+
     $test('CustomAPI - just api name')
     .description('Verify the custom API url formatting')
     .check(function () {

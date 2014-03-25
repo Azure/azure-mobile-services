@@ -444,7 +444,10 @@ namespace Microsoft.WindowsAzure.MobileServices
                             }
                         }
                     }
-                    else if (response.Content.Headers.ContentType.MediaType.Contains("text")) {
+                    else if (response.Content.Headers.ContentType != null &&
+                                response.Content.Headers.ContentType.MediaType != null && 
+                                response.Content.Headers.ContentType.MediaType.Contains("text"))
+                    {
                         message = responseContent;
                     }
                 }

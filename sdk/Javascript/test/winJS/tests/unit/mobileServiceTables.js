@@ -977,7 +977,7 @@ $testGroup('MobileServiceTables.js',
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.microsoft.com", "123456abcdefg");
         client = client.withFilter(function (req, next, callback) {
-            callback(null, { status: 200, responseText: '<html><body>I am a webpage</bpdy></html>', getResponseHeader: function () { return 'text/html'; } });
+            callback(null, { status: 200, responseText: '<html><body>I am a webpage</body></html>', getResponseHeader: function () { return 'text/html'; } });
         });
 
         var table = client.getTable('books');
