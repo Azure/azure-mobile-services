@@ -976,6 +976,10 @@ $testGroup('MobileServiceTables.js',
     .description('Verify error is handled correctly when we receive invalid json')
     .checkAsync(function () {
         var client = new WindowsAzure.MobileServiceClient("http://www.microsoft.com", "123456abcdefg");
+        client = client.withFilter(function (req, next, callback) {
+            callback(null, { status: 200, responseText: '<html><body>I am a webpage</bpdy></html>', getResponseHeader: function () { return 'text/html'; } });
+        });
+
         var table = client.getTable('books');
         return table.insert({ 'State': 'CA' }).then(function (results) {
             $assert.fail("Should have failed");

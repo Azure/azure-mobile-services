@@ -535,17 +535,30 @@ exports.createError = function (exceptionOrMessage, request) {
         } else {
             // Try to pull out an error message from the response before
             // defaulting to the status
+            var isText = false;
+            if (typeof request.getResponseHeader !== 'undefined') {
+                isText = request.getResponseHeader('Content-Type').toLowerCase().indexOf("text") >= 0;
+            }
+
             try {
                 var response = JSON.parse(request.responseText);
-                error.message =
-                    response.error ||
-                    response.description ||
-                    request.statusText ||
-                    Platform.getResourceString("Extensions_DefaultErrorMessage");
+                if (typeof response === 'string') {
+                    error.message = response;
+                } else {
+                    error.message =
+                        response.error ||
+                        response.description ||
+                        request.statusText ||
+                        Platform.getResourceString("Extensions_DefaultErrorMessage");
+                }
             } catch (ex) {
-                error.message =
-                    request.statusText ||
-                    Platform.getResourceString("Extensions_DefaultErrorMessage");
+                if (isText) {
+                    error.message = request.responseText;
+                } else {
+                    error.message =
+                        request.statusText ||
+                        Platform.getResourceString("Extensions_DefaultErrorMessage");
+                }
             }
         }
     } else if (_.isString(exceptionOrMessage) && !_.isNullOrEmpty(exceptionOrMessage)) {
