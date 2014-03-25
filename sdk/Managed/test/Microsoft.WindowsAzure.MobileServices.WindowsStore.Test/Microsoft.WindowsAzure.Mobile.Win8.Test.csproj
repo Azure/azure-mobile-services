@@ -16,7 +16,8 @@
     <PackageCertificateKeyFile>Microsoft.WindowsAzure.Mobile.Win8.Test_TemporaryKey.pfx</PackageCertificateKeyFile>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
-    <PackageCertificateThumbprint>2FCC506A2DC4282F55D9EEE504107696B661355D</PackageCertificateThumbprint>
+    <PackageCertificateThumbprint>2288BD0C745CA2E8C2CAD8DEB93F656C57B1C763</PackageCertificateThumbprint>
+    <AppxAutoIncrementPackageRevision>False</AppxAutoIncrementPackageRevision>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
