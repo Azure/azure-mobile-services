@@ -107,6 +107,11 @@ public class MobileServiceClient {
 	private AndroidHttpClientFactory mAndroidHttpClientFactory;
 	
 	/**
+	 * MobileServicePush used for push notifications
+	 */
+	private MobileServicePush mPush;
+	
+	/**
 	 * UTF-8 encoding
 	 */
 	public static final String UTF8_ENCODING = "UTF-8";
@@ -115,6 +120,11 @@ public class MobileServiceClient {
 	 * Custom API Url
 	 */
 	private static final String CUSTOM_API_URL = "api/";
+	
+	/**
+	 * PNS API Url
+	 */
+	static final String PNS_API_URL = "push";
 	
 	/**
 	 * Google account type
@@ -379,7 +389,6 @@ public class MobileServiceClient {
 		loginWithGoogleAccount(activity, account, GOOGLE_USER_INFO_SCOPE, callback);
 	}
 	
-
 	/**
 	 * Invokes Windows Azure Mobile Service authentication using a
 	 * the Google account registered in the device
@@ -723,6 +732,28 @@ public class MobileServiceClient {
 			List<Pair<String, String>> requestHeaders, 
 			List<Pair<String, String>> parameters, 
 			final ServiceFilterResponseCallback callback) {
+	
+		invokeApiInternal(apiName, content, httpMethod, requestHeaders, parameters, CUSTOM_API_URL, callback);
+	}
+	
+	/**
+	 * 
+	 * @param apiName The API name
+	 * @param content The byte array to send as the request body
+	 * @param httpMethod The HTTP Method used to invoke the API
+	 * @param requestHeaders The extra headers to send in the request
+	 * @param parameters The query string parameters sent in the request
+	 * @param apiBaseURL The base URL for api requests
+	 * @param callback The callback to invoke after the API execution
+	 */
+	void invokeApiInternal(
+			String apiName, 
+			byte[] content, 
+			String httpMethod, 
+			List<Pair<String, String>> requestHeaders, 
+			List<Pair<String, String>> parameters,
+			String apiBaseURL,
+			final ServiceFilterResponseCallback callback) {
 		
 		if (apiName == null || apiName.trim().equals("")) {
 			if (callback != null) {
@@ -739,7 +770,7 @@ public class MobileServiceClient {
 		}
 		
 		Uri.Builder uriBuilder = Uri.parse(getAppUrl().toString()).buildUpon();
-		uriBuilder.path(CUSTOM_API_URL + apiName);
+		uriBuilder.path(apiBaseURL + apiName);
 		
 		if (parameters != null && parameters.size() > 0) {
 			for (Pair<String, String> parameter : parameters) {
@@ -794,7 +825,7 @@ public class MobileServiceClient {
 					callback.onResponse(response, mTaskException);
 				}
 			}
-		}.execute();	
+		}.executeTask();	
 	}
 
 	/**
@@ -962,6 +993,7 @@ public class MobileServiceClient {
 		mContext = context;
 		mGsonBuilder = gsonBuiler;
 		mAndroidHttpClientFactory = androidHttpClientFactory;
+		mPush = new MobileServicePush(this, context);
 	}
 
 	/**
@@ -1022,6 +1054,8 @@ public class MobileServiceClient {
 	
 	/**
 	 * Gets the AndroidHttpClientFactory
+	 * 
+	 *  @return
 	 */
 	public AndroidHttpClientFactory getAndroidHttpClientFactory() {
 		return mAndroidHttpClientFactory;
@@ -1032,5 +1066,12 @@ public class MobileServiceClient {
 	 */
 	public void setAndroidHttpClientFactory(AndroidHttpClientFactory mAndroidHttpClientFactory) {
 		this.mAndroidHttpClientFactory = mAndroidHttpClientFactory;
+	}
+	
+	/**
+	 * Gets the MobileServicePush used for push notifications
+	 */
+	public MobileServicePush getPush() {
+		return mPush;
 	}
 }

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:p1="http://schemas.android.com/apk/res/android"
+    p1:orientation="vertical"
+    p1:minWidth="25px"
+    p1:minHeight="25px"
+    p1:layout_width="fill_parent"
+    p1:layout_height="fill_parent">
+    <EditText
+        p1:layout_width="fill_parent"
+        p1:layout_height="wrap_content"
+        p1:id="@+id/ServiceUri"
+        p1:hint="@string/MobileServiceUri" />
+    <EditText
+        p1:layout_width="fill_parent"
+        p1:layout_height="wrap_content"
+        p1:id="@+id/ServiceKey"
+        p1:hint="@string/MobileServiceKey" />
+    <EditText
+        p1:layout_width="fill_parent"
+        p1:layout_height="wrap_content"
+        p1:id="@+id/ServiceTags"
+        p1:hint="@string/Tags" />
+    <Button
+        p1:text="@string/RunTests"
+        p1:layout_width="fill_parent"
+        p1:layout_height="wrap_content"
+        p1:id="@+id/RunTests" />
+    <Button
+        p1:text="@string/Login"
+        p1:layout_width="fill_parent"
+        p1:layout_height="wrap_content"
+        p1:id="@+id/Login" />
+</LinearLayout>

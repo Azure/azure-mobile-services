@@ -72,6 +72,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestRe
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestStatus;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.CustomApiTests;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.EnhancedPushTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.LoginTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.MiscTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.PushTests;
@@ -171,6 +172,7 @@ public class MainActivity extends Activity {
 		});
 
 		PushTests.mainActivity = this;
+		EnhancedPushTests.mainActivity = this;
 		
 		refreshTestGroupsAndLog();
 	}
@@ -197,6 +199,7 @@ public class MainActivity extends Activity {
 		adapter.add(new PushTests());
 		adapter.add(new CustomApiTests());
 		adapter.add(new SystemPropertiesTests());
+		adapter.add(new EnhancedPushTests());
 
 		ArrayList<TestCase> allTests = new ArrayList<TestCase>();
 		ArrayList<TestCase> allUnattendedTests = new ArrayList<TestCase>();

@@ -25,17 +25,19 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
 
 public class GCMMessageManager {
 	static {
 		instance = new GCMMessageManager();
 	}
-	
+
 	public final static GCMMessageManager instance;
 
 	private List<GCMRegistrationMessage> registrationMessages;
 	private List<Intent> pushMessages;
-	
+
 	private GCMMessageManager() {
 		pushMessages = new ArrayList<Intent>();
 		registrationMessages = new ArrayList<GCMRegistrationMessage>();
@@ -44,7 +46,7 @@ public class GCMMessageManager {
 	public synchronized void newRegistrationMessage(boolean isError, String value) {
 		registrationMessages.add(new GCMRegistrationMessage(value, isError));
 	}
-	
+
 	public synchronized void newPushMessage(Intent intent) {
 		pushMessages.add(intent);
 	}
@@ -55,22 +57,33 @@ public class GCMMessageManager {
 			registrationMessages.remove(0);
 			callback.registrationMessageReceived(message.isError, message.value);
 		} else {
+			Looper looper = Looper.myLooper();
+			if (looper == null) {
+				looper = Looper.getMainLooper();
+			}
+
+			final Handler handler = new Handler(looper);
+
 			TimerTask task = new TimerTask() {
 
 				@Override
 				public void run() {
-					if (!registrationMessages.isEmpty()) {
-						GCMRegistrationMessage message = registrationMessages.get(0);
-						registrationMessages.remove(0);
-						callback.registrationMessageReceived(message.isError, message.value);
-					} else {
-						callback.timeoutElapsed();
-					}
-					
+					handler.post(new Runnable() {
+
+						@Override
+						public void run() {
+							if (!registrationMessages.isEmpty()) {
+								GCMRegistrationMessage message = registrationMessages.get(0);
+								registrationMessages.remove(0);
+								callback.registrationMessageReceived(message.isError, message.value);
+							} else {
+								callback.timeoutElapsed();
+							}
+						}
+					});
 				}
-				
 			};
-			
+
 			Timer timer = new Timer();
 			timer.schedule(task, milliseconds);
 		}
@@ -82,24 +95,43 @@ public class GCMMessageManager {
 			pushMessages.remove(0);
 			callback.pushMessageReceived(message);
 		} else {
+			Looper looper = Looper.myLooper();
+			if (looper == null) {
+				looper = Looper.getMainLooper();
+			}
+
+			final Handler handler = new Handler(looper);
+
 			TimerTask task = new TimerTask() {
 
 				@Override
 				public void run() {
-					if (!pushMessages.isEmpty()) {
-						Intent message = pushMessages.get(0);
-						pushMessages.remove(0);
-						callback.pushMessageReceived(message);
-					} else {
-						callback.timeoutElapsed();
-					}
-					
+					handler.post(new Runnable() {
+
+						@Override
+						public void run() {
+							if (!pushMessages.isEmpty()) {
+								Intent message = pushMessages.get(0);
+								pushMessages.remove(0);
+								callback.pushMessageReceived(message);
+							} else {
+								callback.timeoutElapsed();
+							}
+						}
+					});
 				}
-				
 			};
-			
+
 			Timer timer = new Timer();
 			timer.schedule(task, milliseconds);
 		}
+	}
+
+	public void clearRegistrationMessages() {
+		registrationMessages.clear();
+	}
+
+	public void clearPushMessages() {
+		pushMessages.clear();
 	}
 }

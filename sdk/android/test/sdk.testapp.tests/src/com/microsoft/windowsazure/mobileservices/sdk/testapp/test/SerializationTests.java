@@ -346,6 +346,7 @@ public class SerializationTests extends InstrumentationTestCase {
 		assertEquals("{\"date\":\"2013-01-22T14:30:40.000Z\"}", container.getRequestContent());
 	}
 
+	@SuppressWarnings("deprecation")
 	public void testDateDeserializationShouldReturnExpectedEntity() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 

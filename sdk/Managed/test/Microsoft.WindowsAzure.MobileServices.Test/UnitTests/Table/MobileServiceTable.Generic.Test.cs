@@ -2923,7 +2923,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             TestHttpHandler hijack = new TestHttpHandler();
 
-            hijack.SetResponseContent("[{\"id\":\"an id\",\"__createdAt\":\"2000-01-01T07:59:59.000Z\"}]");
+            hijack.SetResponseContent("[{\"id\":\"an id\",\"__createdAt\":\"1999-12-31T23:59:59.000Z\"}]");
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
 
             IMobileServiceTable<CreatedAtType> table = service.GetTable<CreatedAtType>();
@@ -2933,9 +2933,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.AreEqual(1, items.Count());
             Assert.AreEqual("an id", items[0].Id);
-            Assert.AreEqual(new DateTime(1999, 12, 31, 23, 59, 59), items[0].CreatedAt);
+            Assert.AreEqual(new DateTime(1999, 12, 31, 23, 59, 59, DateTimeKind.Utc).ToLocalTime(), items[0].CreatedAt);
 
-            hijack.SetResponseContent("[{\"id\":\"an id\",\"__createdAt\":\"2000-01-01T07:59:59.000Z\"}]");
+            hijack.SetResponseContent("[{\"id\":\"an id\",\"__createdAt\":\"1999-12-31T23:59:59.000Z\"}]");
             IMobileServiceTable<StringCreatedAtType> stringTable = service.GetTable<StringCreatedAtType>();
 
             IEnumerable<StringCreatedAtType> stringResults = await stringTable.ReadAsync();
@@ -2943,7 +2943,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.AreEqual(1, stringItems.Count());
             Assert.AreEqual("an id", stringItems[0].Id);
-            Assert.AreEqual("01/01/2000 07:59:59", stringItems[0].CreatedAt);
+
+            // TODO: culture-specific, may fail in other formats
+            Assert.AreEqual("12/31/1999 23:59:59", stringItems[0].CreatedAt);
         }
 
         [AsyncTestMethod]
@@ -2951,7 +2953,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             TestHttpHandler hijack = new TestHttpHandler();
 
-            hijack.SetResponseContent("[{\"id\":\"an id\",\"__updatedAt\":\"2000-01-01T07:59:59.000Z\"}]");
+            hijack.SetResponseContent("[{\"id\":\"an id\",\"__updatedAt\":\"1999-12-31T23:59:59.000Z\"}]");
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
 
             IMobileServiceTable<UpdatedAtType> table = service.GetTable<UpdatedAtType>();
@@ -2961,9 +2963,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.AreEqual(1, items.Count());
             Assert.AreEqual("an id", items[0].Id);
-            Assert.AreEqual(new DateTime(1999, 12, 31, 23, 59, 59), items[0].UpdatedAt);
+            Assert.AreEqual(new DateTime(1999, 12, 31, 23, 59, 59, DateTimeKind.Utc).ToLocalTime(), items[0].UpdatedAt);
 
-            hijack.SetResponseContent("[{\"id\":\"an id\",\"__updatedAt\":\"2000-01-01T07:59:59.000Z\"}]");
+            hijack.SetResponseContent("[{\"id\":\"an id\",\"__updatedAt\":\"1999-12-31T23:59:59.000Z\"}]");
             IMobileServiceTable<StringUpdatedAtType> stringTable = service.GetTable<StringUpdatedAtType>();
 
             IEnumerable<StringUpdatedAtType> stringResults = await stringTable.ReadAsync();
@@ -2971,7 +2973,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.AreEqual(1, stringItems.Count());
             Assert.AreEqual("an id", stringItems[0].Id);
-            Assert.AreEqual("01/01/2000 07:59:59", stringItems[0].UpdatedAt);
+
+            // TODO: culture-specific, may fail in other formats
+            Assert.AreEqual("12/31/1999 23:59:59", stringItems[0].UpdatedAt);
         }
 
         [AsyncTestMethod]
@@ -2994,6 +2998,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
         #endregion System Properties Tests
 
+        // This test fails on mono because there is already header validation that prevents the invalid etag values this test uses.
+        // If Xamarin ever updates to use the BCL implementation of HttpClient (instead of their own) this tag can be removed.
+        [Tag("notXamarin")]
         [AsyncTestMethod]
         public async Task VersionSystemPropertySetsIfMatchHeader()
         {
@@ -3031,6 +3038,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             }
         }
 
+        // This test fails on mono because there is already header validation that prevents the invalid etag values this test uses.
+        // If Xamarin ever updates to use the BCL implementation of HttpClient (instead of their own) this tag can be removed.
+        [Tag("notXamarin")]
         [AsyncTestMethod]
         public async Task VersionSystemPropertySetFromEtagHeader()
         {

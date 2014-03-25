@@ -1,0 +1,6 @@
+*.xam
+xpkg
+*.suo
+bin
+obj
+lib

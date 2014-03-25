@@ -299,7 +299,7 @@ abstract class MobileServiceTableBase<E> {
 					callback.onCompleted(mTaskException, result);
 				}
 			}
-		}.execute();
+		}.executeTask();
 	}
 
 	/**

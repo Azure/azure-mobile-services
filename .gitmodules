@@ -4,3 +4,6 @@
 [submodule "sdk/Javascript/src/External/queryjs"]
 	path = sdk/Javascript/src/External/queryjs
 	url = https://github.com/WindowsAzure/queryjs.git
+[submodule "sdk/Managed/src/External/Xamarin.Auth"]
+	path = sdk/Managed/src/External/Xamarin.Auth
+	url = https://github.com/xamarin/Xamarin.Auth.git

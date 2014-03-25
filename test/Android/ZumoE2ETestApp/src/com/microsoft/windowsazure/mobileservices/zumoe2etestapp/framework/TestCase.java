@@ -36,13 +36,13 @@ public abstract class TestCase {
 	private TestStatus mStatus;
 
 	private boolean mCanRunUnattended;
-	
+
 	private StringBuilder mTestLog;
 
 	private Date mStartTime;
-	
+
 	private Date mEndTime;
-	
+
 	public TestCase(String name) {
 		mEnabled = false;
 		mCanRunUnattended = true;
@@ -50,7 +50,7 @@ public abstract class TestCase {
 		mTestLog = new StringBuilder();
 		mName = name;
 	}
-	
+
 	public TestCase() {
 		this(null);
 	}
@@ -66,7 +66,7 @@ public abstract class TestCase {
 	public String getLog() {
 		return mTestLog.toString();
 	}
-	
+
 	public void clearLog() {
 		mTestLog = new StringBuilder();
 	}
@@ -74,7 +74,7 @@ public abstract class TestCase {
 	public Date getStartTime() {
 		return mStartTime;
 	}
-	
+
 	public Date getEndTime() {
 		return mEndTime;
 	}
@@ -128,11 +128,10 @@ public abstract class TestCase {
 				}
 
 				@Override
-				public void onTestGroupComplete(TestGroup group,
-						List<TestResult> results) {
-					// This will never be called					
+				public void onTestGroupComplete(TestGroup group, List<TestResult> results) {
+					// This will never be called
 				}
-				
+
 			});
 		} catch (Exception e) {
 			this.mEndTime = new Date();
@@ -141,7 +140,7 @@ public abstract class TestCase {
 			for (int i = 0; i < stackTrace.length; i++) {
 				log("  " + stackTrace[i].toString());
 			}
-			
+
 			TestResult result;
 			if (e.getClass() != this.getExpectedExceptionClass()) {
 				result = createResultFromException(e);
@@ -153,7 +152,7 @@ public abstract class TestCase {
 				result.setTestCase(this);
 				mStatus = result.getStatus();
 			}
-			
+
 			if (callback != null)
 				callback.onTestComplete(this, result);
 		}
@@ -161,11 +160,11 @@ public abstract class TestCase {
 
 	protected abstract void executeTest(MobileServiceClient client, TestExecutionCallback callback);
 
-	protected TestResult createResultFromException(Exception e) {
+	public TestResult createResultFromException(Exception e) {
 		return createResultFromException(new TestResult(), e);
 	}
 
-	protected TestResult createResultFromException(TestResult result, Exception e) {
+	public TestResult createResultFromException(TestResult result, Exception e) {
 		result.setException(e);
 		result.setTestCase(this);
 
