@@ -76,7 +76,17 @@ function defineRoundTripTestsNamespace() {
     tests.push(createRoundTripTest('Complex type (array): array with null elements', 'complexType',
         [{ Name: 'Scooby Doo', Age: 10 }, null, { Name: 'Shaggy', Age: 19 }]));
 
-    tests.push(createNegativeRoundTripTest('(Neg) Insert item with \'id\' property (value = 0)', { id: 0, string1: 'hello' }));
+    tests.push(new zumo.Test('Insert item with \'id\' property (value = 0)', function (test, done) {
+        var objectToInsert = { id: 0, string1: 'hello' };
+        var table = zumo.getClient().getTable(tableName);
+        table.insert(objectToInsert).done(function () {
+            test.addLog('Insertion of object succeeded: ', JSON.stringify(objectToInsert));
+            done(true);
+        }, function (err) {
+            test.addLog('Insertion failed, error: ' + JSON.stringify(err));
+            done(false);
+        });
+    }));
     tests.push(createNegativeRoundTripTest('(Neg) Insert item with \'id\' property (value = 1)', { id: 1, string1: 'hello' }));
     tests.push(createNegativeRoundTripTest('(Neg) Insert item with \'Id\' property (value = 1)', { Id: 1, string1: 'hello' }));
     tests.push(createNegativeRoundTripTest('(Neg) Insert item with \'ID\' property (value = 1)', { ID: 1, string1: 'hello' }));
