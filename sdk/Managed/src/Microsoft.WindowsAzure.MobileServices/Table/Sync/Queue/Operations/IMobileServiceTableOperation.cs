@@ -37,5 +37,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// Executes the operation against remote table.
         /// </summary>
         Task ExecuteAsync();
+
+        /// <summary>
+        /// Abort the parent push operation.
+        /// </summary>
+        void AbortPush();
     }
 }

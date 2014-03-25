@@ -45,6 +45,7 @@
     <Compile Include="Exceptions\MobileServicePreconditionFailedException.cs" />
     <Compile Include="Exceptions\MobileServiceLocalStoreException.cs" />
     <Compile Include="Exceptions\MobileServiceODataException.cs" />
+    <Compile Include="Exceptions\MobileServicePushAbortException.cs" />
     <Compile Include="Extensions\ExceptionExtensions.cs" />
     <Compile Include="Extensions\IDictionaryExtensions.cs" />
     <Compile Include="Extensions\MobileServiceClientExtensions.cs" />

@@ -51,6 +51,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.ItemId = itemId;
         }
 
+        public void AbortPush()
+        {
+            this.Reset();
+            throw new MobileServicePushAbortException();
+        }
+
         public async Task ExecuteAsync()
         {            
             if (this.IsCancelled)
@@ -69,9 +75,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 this.Item[MobileServiceSerializer.VersionSystemPropertyString] = lastVerison;
             }
 
-            this.Result = null;
-            this.ErrorRawResult = null;
-            this.ErrorStatusCode = null;
+            this.Reset();
 
             ExceptionDispatchInfo edi = null;
             MobileServiceInvalidOperationException iox = null;
@@ -100,6 +104,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
                 edi.Throw();
             }
+        }
+
+        private void Reset()
+        {
+            this.Result = null;
+            this.ErrorRawResult = null;
+            this.ErrorStatusCode = null;
         }
         protected abstract Task<JToken> OnExecuteAsync();
 

@@ -203,6 +203,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 batch.Abort(MobileServicePushStatus.CancelledByAuthenticationError);
             }
+            else if (ex is MobileServicePushAbortException)
+            {
+                batch.Abort(MobileServicePushStatus.CancelledByOperation);
+            }
             else
             {
                 return false; // not a known exception that should abort the batch

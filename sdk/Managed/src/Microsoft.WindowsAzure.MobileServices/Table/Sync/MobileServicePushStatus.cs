@@ -41,6 +41,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         CancelledByToken = 4,
 
         /// <summary>
+        /// Push was aborted by <see cref="IMobileServiceTableOperation"/>.
+        /// </summary>
+        CancelledByOperation = 5,
+
+        /// <summary>
         /// Push failed due to an internal error.
         /// </summary>
         InternalError = Int32.MaxValue
