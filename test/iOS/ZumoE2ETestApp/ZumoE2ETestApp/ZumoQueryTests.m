@@ -490,6 +490,20 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
     return result;
 }
 
++ (NSDictionary *)lowercaseKeysForDictionary:(NSDictionary *)item {
+    NSMutableDictionary *newItem = [[NSMutableDictionary alloc] init];
+    for (NSString *key in [newItem keyEnumerator]) {
+        [newItem setValue:[item objectForKey:key] forKey:[key lowercaseString]];
+    }
+    return newItem;
+}
+
++ (BOOL)shouldNormalizeDictionaryKeys {
+    NSDictionary *runtimeFeatures = [[[ZumoTestGlobals sharedInstance] globalTestParameters] objectForKey:RUNTIME_FEATURES_KEY];
+    NSNumber *runtimeCamelCasesPropertyNames = [runtimeFeatures objectForKey:@"alwaysCamelCaseProperties"];
+    return (runtimeCamelCasesPropertyNames && [runtimeCamelCasesPropertyNames boolValue]);
+}
+
 + (BOOL)compareExpectedArray:(NSArray *)expectedItems withActual:(NSArray *)actualItems forTest:(__weak ZumoTest *)test {
     BOOL result = NO;
     int actualCount = [actualItems count];
@@ -503,6 +517,10 @@ typedef BOOL (^QueryValidation)(ZumoTest *test, NSError *error);
         for (int i = 0; i < actualCount; i++) {
             NSDictionary *expectedItem = [expectedItems objectAtIndex:i];
             NSDictionary *actualItem = [actualItems objectAtIndex:i];
+            if ([self shouldNormalizeDictionaryKeys]) {
+                expectedItem = [self lowercaseKeysForDictionary:expectedItem];
+                actualItem = [self lowercaseKeysForDictionary:actualItem];
+            }
             BOOL allValuesEqual = YES;
             for (NSString *key in [expectedItem keyEnumerator]) {
                 if ([key isEqualToString:@"id"]) continue; // don't care about id
