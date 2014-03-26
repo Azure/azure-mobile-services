@@ -42,7 +42,6 @@ import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.http.MobileServiceConnection;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponseCallback;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -394,6 +393,7 @@ public class MobileServicePush {
         parameters.add(new Pair<String, String>("deviceId", pnsHandle));
         requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
 
+        /*
         mClient.invokeApiInternal(resource, null, "GET", requestHeaders, parameters, MobileServiceClient.PNS_API_URL, new ServiceFilterResponseCallback() {
 
             @Override
@@ -425,6 +425,7 @@ public class MobileServicePush {
                 }
             }
         });
+        */
     }
 
     /**
@@ -643,6 +644,7 @@ public class MobileServicePush {
     private void createRegistrationId(final CreateRegistrationIdCallback callback) {
 
         String resource = "/registrationids/";
+        /*
         mClient.invokeApiInternal(resource, null, "POST", null, null, MobileServiceClient.PNS_API_URL, new ServiceFilterResponseCallback() {
 
             @Override
@@ -675,6 +677,7 @@ public class MobileServicePush {
                 }
             }
         });
+        */
     }
 
     /**
@@ -708,6 +711,7 @@ public class MobileServicePush {
 
         requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
 
+        /*
         mClient.invokeApiInternal(resource, content, "PUT", requestHeaders, null, MobileServiceClient.PNS_API_URL, new ServiceFilterResponseCallback() {
 
             @Override
@@ -727,6 +731,7 @@ public class MobileServicePush {
                 }
             }
         });
+        */
     }
 
     /**
@@ -745,6 +750,7 @@ public class MobileServicePush {
 
         String resource = "/registrations/" + registrationId;
 
+        /*
         mClient.invokeApiInternal(resource, null, "DELETE", null, null, MobileServiceClient.PNS_API_URL, new ServiceFilterResponseCallback() {
 
             @Override
@@ -766,6 +772,7 @@ public class MobileServicePush {
 
             }
         });
+        */
     }
 
     /**

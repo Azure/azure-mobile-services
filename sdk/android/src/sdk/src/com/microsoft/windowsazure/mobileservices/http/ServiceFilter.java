@@ -23,6 +23,8 @@ See the Apache Version 2.0 License for specific language governing permissions a
 
 package com.microsoft.windowsazure.mobileservices.http;
 
+import com.google.common.util.concurrent.ListenableFuture;
+
 
 /**
  * The service filter can be used to manipulate requests and responses in the
@@ -40,6 +42,6 @@ public interface ServiceFilter {
      * @param responseCallback
      *            The callback to invoke once the request is executed
      */
-    public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback, ServiceFilterResponseCallback responseCallback);
-    //public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback);
+    //public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback, ServiceFilterResponseCallback responseCallback);
+    public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback);
 }

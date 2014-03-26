@@ -26,6 +26,8 @@ package com.microsoft.windowsazure.mobileservices.http;
 import org.apache.http.Header;
 import org.apache.http.protocol.HTTP;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.windowsazure.mobileservices.MobileServiceApplication;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
@@ -91,19 +93,19 @@ public class MobileServiceConnection {
      * @param responseCallback
      *            Callback to invoke after the request is executed
      */
-    public void start(final ServiceFilterRequest request, ServiceFilterResponseCallback responseCallback) {
+    public ListenableFuture<ServiceFilterResponse> start(final ServiceFilterRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("Request can not be null");
         }
-
+        
         ServiceFilter filter = mClient.getServiceFilter();
         // Set the request's headers
         configureHeadersOnRequest(request);
-        filter.handleRequest(request, new NextServiceFilterCallback() {
+        return filter.handleRequest(request, new NextServiceFilterCallback() {
 
             @Override
-            public void onNext(ServiceFilterRequest request, ServiceFilterResponseCallback responseCallback) {
-
+            public ListenableFuture<ServiceFilterResponse> onNext(ServiceFilterRequest request) {
+                SettableFuture<ServiceFilterResponse> future = SettableFuture.create();
                 ServiceFilterResponse response = null;
 
                 try {
@@ -114,27 +116,36 @@ public class MobileServiceConnection {
                     if (statusCode < 200 || statusCode >= 300) {
                         String responseContent = response.getContent();
                         if (responseContent != null && responseContent.trim() != "") {
-                            throw new MobileServiceException(responseContent);
+                            throw new MobileServiceException(responseContent, response);
                         } else {
-                            throw new MobileServiceException(String.format("{'code': %d}", statusCode));
+                            throw new MobileServiceException(String.format("{'code': %d}", statusCode), response);
                         }
                     }
-
-                } catch (Exception e) {
+                    
+                    future.set(response);
+                } catch (MobileServiceException e) {
                     // Something went wrong, call onResponse with exception
                     // method
+                    /*
                     if (responseCallback != null) {
                         responseCallback.onResponse(response, new MobileServiceException("Error while processing request.", e));
                         return;
                     }
+                    */
+                    future.setException(e);
+                } catch (Exception e) {
+                    future.setException(new MobileServiceException("Error while processing request.", e, response));
                 }
 
+                return future;
                 // Call onResponse method
+                /*
                 if (responseCallback != null) {
                     responseCallback.onResponse(response, null);
                 }
+                */
             }
-        }, responseCallback);
+        });
     }
 
     /**

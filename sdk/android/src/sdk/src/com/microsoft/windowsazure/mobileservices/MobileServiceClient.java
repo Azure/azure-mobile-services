@@ -73,7 +73,6 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequestImpl;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.notifications.MobileServicePush;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
@@ -821,6 +820,24 @@ public class MobileServiceClient {
         }
         
         final SettableFuture<JsonElement> future = SettableFuture.create();
+        ListenableFuture<ServiceFilterResponse> internalFuture = invokeApi(apiName, content, httpMethod, requestHeaders, parameters);
+        
+        Futures.addCallback(internalFuture, new FutureCallback<ServiceFilterResponse>() {
+            @Override
+            public void onFailure(Throwable e) {
+                future.setException(e);
+            }
+            
+            @Override
+            public void onSuccess(ServiceFilterResponse response) {
+                String content = response.getContent();
+                JsonElement json = new JsonParser().parse(content);
+                future.set(json);
+            }
+        });
+                
+        
+        /*
         invokeApi(apiName, content, httpMethod, requestHeaders, parameters, new ServiceFilterResponseCallback() {
 
             @Override
@@ -833,20 +850,9 @@ public class MobileServiceClient {
                 } else {
                     future.setException(exception);
                 }
-                /*
-                if (callback != null) {
-                    if (exception == null) {
-                        String content = response.getContent();
-                        JsonElement json = new JsonParser().parse(content);
-
-                        callback.onCompleted(json, null, response);
-                    } else {
-                        callback.onCompleted(null, exception, response);
-                    }
-                }
-                */
             }
         });
+        */
         
         return future;
     }
@@ -866,8 +872,8 @@ public class MobileServiceClient {
      * @param callback
      *            The callback to invoke after the API execution
      */
-    public void invokeApi(String apiName, byte[] content, String httpMethod, List<Pair<String, String>> requestHeaders, List<Pair<String, String>> parameters, ServiceFilterResponseCallback callback) {
-        invokeApiInternal(apiName, content, httpMethod, requestHeaders, parameters, CUSTOM_API_URL, callback);
+    public ListenableFuture<ServiceFilterResponse> invokeApi(String apiName, byte[] content, String httpMethod, List<Pair<String, String>> requestHeaders, List<Pair<String, String>> parameters) {
+        return invokeApiInternal(apiName, content, httpMethod, requestHeaders, parameters, CUSTOM_API_URL);
     }
 
     /**
@@ -887,20 +893,17 @@ public class MobileServiceClient {
      * @param callback
      *            The callback to invoke after the API execution
      */
-    public void invokeApiInternal(String apiName, byte[] content, String httpMethod, List<Pair<String, String>> requestHeaders, List<Pair<String, String>> parameters, String apiBaseURL, final ServiceFilterResponseCallback callback) {
-
+    public ListenableFuture<ServiceFilterResponse> invokeApiInternal(String apiName, byte[] content, String httpMethod, List<Pair<String, String>> requestHeaders, List<Pair<String, String>> parameters, String apiBaseURL) {
+        final SettableFuture<ServiceFilterResponse> future = SettableFuture.create();
+        
         if (apiName == null || apiName.trim().equals("")) {
-            if (callback != null) {
-                callback.onResponse(null, new IllegalArgumentException("apiName cannot be null"));
-            }
-            return;
+            future.setException(new IllegalArgumentException("apiName cannot be null"));
+            return future;
         }
 
         if (httpMethod == null || httpMethod.trim().equals("")) {
-            if (callback != null) {
-                callback.onResponse(null, new IllegalArgumentException("httpMethod cannot be null"));
-            }
-            return;
+            future.setException(new IllegalArgumentException("httpMethod cannot be null"));
+            return future;
         }
 
         Uri.Builder uriBuilder = Uri.parse(getAppUrl().toString()).buildUpon();
@@ -926,10 +929,8 @@ public class MobileServiceClient {
         } else if (httpMethod.equalsIgnoreCase(HttpDelete.METHOD_NAME)) {
             request = new ServiceFilterRequestImpl(new HttpDelete(url), getAndroidHttpClientFactory());
         } else {
-            if (callback != null) {
-                callback.onResponse(null, new IllegalArgumentException("httpMethod not supported"));
-            }
-            return;
+            future.setException(new IllegalArgumentException("httpMethod not supported"));
+            return future;
         }
 
         if (requestHeaders != null && requestHeaders.size() > 0) {
@@ -942,10 +943,8 @@ public class MobileServiceClient {
             try {
                 request.setContent(content);
             } catch (Exception e) {
-                if (callback != null) {
-                    callback.onResponse(null, e);
-                }
-                return;
+                future.setException(e);
+                return future;
             }
         }
 
@@ -955,11 +954,15 @@ public class MobileServiceClient {
         new RequestAsyncTask(request, conn) {
             @Override
             protected void onPostExecute(ServiceFilterResponse response) {
-                if (callback != null) {
-                    callback.onResponse(response, mTaskException);
+                if (mTaskException != null) {
+                    future.setException(mTaskException);
+                } else {
+                    future.set(response);
                 }
             }
         }.executeTask();
+        
+        return future;
     }
 
     /**
@@ -1013,6 +1016,30 @@ public class MobileServiceClient {
             final ServiceFilter oldServiceFilter = mServiceFilter;
             final ServiceFilter newServiceFilter = serviceFilter;
 
+            newClient.mServiceFilter = new ServiceFilter() {
+                // Create a filter that after executing the new ServiceFilter
+                // executes the existing filter
+                ServiceFilter externalServiceFilter = newServiceFilter;
+                ServiceFilter internalServiceFilter = oldServiceFilter;
+
+                @Override
+                public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, final NextServiceFilterCallback nextServiceFilterCallback) {
+
+                    // Executes new ServiceFilter
+                    return externalServiceFilter.handleRequest(request, new NextServiceFilterCallback() {
+
+                        @Override
+                        public ListenableFuture<ServiceFilterResponse> onNext(ServiceFilterRequest request) {
+                            // Execute existing ServiceFilter
+                            return internalServiceFilter.handleRequest(request, nextServiceFilterCallback);
+                        }
+                    });
+
+                }
+            };
+
+            
+            /*
             // Composed service filter
             newClient.mServiceFilter = new ServiceFilter() {
                 // Create a filter that after executing the new ServiceFilter
@@ -1036,6 +1063,7 @@ public class MobileServiceClient {
 
                 }
             };
+            */
         }
 
         return newClient;
@@ -1050,13 +1078,23 @@ public class MobileServiceClient {
     public ServiceFilter getServiceFilter() {
         if (mServiceFilter == null) {
             return new ServiceFilter() {
+                
+                @Override
+                public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+                    return nextServiceFilterCallback.onNext(request);
+                }
+            };
+            
+            
+            /*
+            return new ServiceFilter() {
 
                 @Override
                 public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
                         ServiceFilterResponseCallback responseCallback) {
                     nextServiceFilterCallback.onNext(request, responseCallback);
                 }
-            };
+            };*/
         } else {
             return mServiceFilter;
         }

@@ -39,6 +39,6 @@ public interface NextServiceFilterCallback {
      *            The ServiceFilterResponseCallback to invoke when the response
      *            is obtained
      */
-    public void onNext(ServiceFilterRequest request, ServiceFilterResponseCallback responseCallback);
-    //public ListenableFuture<ServiceFilterResponse> onNext(ServiceFilterRequest request);
+    //public void onNext(ServiceFilterRequest request, ServiceFilterResponseCallback responseCallback);
+    public ListenableFuture<ServiceFilterResponse> onNext(ServiceFilterRequest request);
 }

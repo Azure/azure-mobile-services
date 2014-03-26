@@ -41,7 +41,7 @@ public abstract class RequestAsyncTask extends AsyncTask<Void, Void, ServiceFilt
     /**
      * Task response
      */
-    private ServiceFilterResponse mTaskResponse = null;
+    //private ServiceFilterResponse mTaskResponse = null;
 
     /**
      * Connection to use for the request
@@ -87,6 +87,7 @@ public abstract class RequestAsyncTask extends AsyncTask<Void, Void, ServiceFilt
     @Override
     protected ServiceFilterResponse doInBackground(Void... params) {
         // Call start method that executes the request
+        /*
         mConnection.start(mRequest, new ServiceFilterResponseCallback() {
 
             @Override
@@ -95,8 +96,20 @@ public abstract class RequestAsyncTask extends AsyncTask<Void, Void, ServiceFilt
                 mTaskException = new MobileServiceException(exception, response);
             }
         });
-
-        return mTaskResponse;
+        */
+        ServiceFilterResponse response = null;
+        try {
+            response = mConnection.start(mRequest).get();
+            return response;
+        } catch (Exception e) {
+            if (e.getCause() instanceof MobileServiceException) {
+                mTaskException = (MobileServiceException)e.getCause();
+            } else {
+                mTaskException = new MobileServiceException(e, null);
+            }
+        }
+        
+        return response;
     }
 
 }
