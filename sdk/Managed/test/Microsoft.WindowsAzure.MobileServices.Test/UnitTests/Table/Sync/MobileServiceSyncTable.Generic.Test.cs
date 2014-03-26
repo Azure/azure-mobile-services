@@ -80,7 +80,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var store = new MobileServiceLocalStoreMock();
 
             var handler = new MobileServiceSyncHandlerMock();
-            handler.TableOperationAction = op => Task.Delay(TimeSpan.MaxValue); // long slow operation
+            handler.TableOperationAction = op => Task.Delay(TimeSpan.MaxValue).ContinueWith<JObject>(t => null); // long slow operation
 
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
             await service.SyncContext.InitializeAsync(store, handler);
@@ -541,7 +541,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var item1 = new StringIdType() { Id = "an id", String = "what?" };
             var item2 = new StringIdType() { Id = "two", String = "this" };
             int executed = 0;
-            hijack.SetResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"}]");
+            hijack.SetResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
             hijack.OnSendingRequest = req =>
             {
                 ++executed;
@@ -610,7 +610,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             var operationHandler = new MobileServiceSyncHandlerMock();
 
-            hijack.SetResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"}]");
+            hijack.SetResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), operationHandler);
 

@@ -59,7 +59,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 id = Guid.NewGuid().ToString();
                 instance = (JObject)instance.DeepClone();
-                instance[MobileServiceSerializer.IdPropertyName] = (string)id;
+                instance[MobileServiceSystemColumns.Id] = (string)id;
             }
             else
             {
@@ -99,7 +99,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             instance = MobileServiceSerializer.RemoveSystemProperties(instance, out version);
             if (version != null)
             {
-                instance[MobileServiceSerializer.VersionSystemPropertyString] = version;
+                instance[MobileServiceSystemColumns.Version] = version;
             }
             return instance;
         }
@@ -125,7 +125,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                      string.Format(
                         CultureInfo.InvariantCulture,
                         Resources.MobileServiceSyncTable_IdMustBeString,
-                        MobileServiceSerializer.IdPropertyName),
+                        MobileServiceSystemColumns.Id),
                      "instance");
             }
             return strId;

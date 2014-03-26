@@ -101,7 +101,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             HttpStatusCode? status = null;
             if (obj["httpStatus"] != null)
             {
-                status = (HttpStatusCode)obj.Value<int>("httpStatus");
+                status = (HttpStatusCode?)obj.Value<int?>("httpStatus");
             }
             MobileServiceTableOperationKind operation = (MobileServiceTableOperationKind)obj.Value<int>("operationKind");
             var tableName = obj.Value<string>("tableName");

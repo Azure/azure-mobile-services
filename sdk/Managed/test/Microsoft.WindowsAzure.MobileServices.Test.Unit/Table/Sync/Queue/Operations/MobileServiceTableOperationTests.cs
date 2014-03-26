@@ -29,50 +29,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             client.Object.Serializer = new MobileServiceSerializer();
             this.table = new Mock<MobileServiceTable>("test", client.Object);
             operation.Object.Table = this.table.Object;
-        }
-
-        [TestMethod]
-        public void WriteResultToStore_IsTrue_WhenResultHasIdAndStatusIsNullOrPreConditionFailed()
-        {
-            TestWriteResultToStore(id: "abc", status: (HttpStatusCode?)null, canWrite: true, willWrite: true);
-            TestWriteResultToStore(id: "abc", status: (HttpStatusCode?)HttpStatusCode.PreconditionFailed, canWrite: true, willWrite: true);
-        }
-
-        [TestMethod]
-        public void WriteResultToStore_IsFalse_WhenResultDoesNotHaveIdOrCanWriteIsFalse()
-        {
-            TestWriteResultToStore(id: (string)null, status: (HttpStatusCode?)null, canWrite: true, willWrite: false );
-            TestWriteResultToStore(id: (string)null, status: (HttpStatusCode?)HttpStatusCode.PreconditionFailed, canWrite: true, willWrite: false );
-            TestWriteResultToStore(id: "abc", status: (HttpStatusCode?)null, canWrite: false, willWrite: false);
-            TestWriteResultToStore(id: "abc", status: (HttpStatusCode?)HttpStatusCode.PreconditionFailed, canWrite: false, willWrite: false);
-        }
-
-        [TestMethod]
-        public void WriteResultToStore_IsFalse_WhenResultIsNull()
-        {
-            Assert.AreEqual(this.operation.Object.WriteResultToStore, false);
-        }
-
-        [TestMethod]
-        public void WriteResultToStore_IsFalse_WhenStatusCodeIsNot412()
-        {
-            var allStaus = Enum.GetValues(typeof(HttpStatusCode))
-                               .Cast<HttpStatusCode>()
-                               .Where(s => s != HttpStatusCode.PreconditionFailed);
-
-            foreach (var status in allStaus)
-            {
-                TestWriteResultToStore(id: "abc", status: status, canWrite: true, willWrite: false);
-            }
-        }
-
-        private void TestWriteResultToStore(HttpStatusCode? status, string id, bool canWrite, bool willWrite)
-        {
-            this.operation.Object.Result = new JObject() { { "id", id } };
-            this.operation.Object.ErrorStatusCode = status;
-            this.operation.Protected().SetupGet<bool>("CanWriteResultToStore").Returns(canWrite);
-            Assert.AreEqual(this.operation.Object.WriteResultToStore, willWrite);
-        }
+        }        
 
         [TestMethod]
         public async Task ExecuteAsync_Throws_WhenItemIsNull()
@@ -89,83 +46,29 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         }
 
         [TestMethod]
-        public async Task ExecuteAsync_CopiesVersion_WhenResultHasVersion()
+        public async Task ExecuteAsync_Throws_WhenResultIsNotJObject()
         {
             this.operation.Protected()
                           .Setup<Task<JToken>>("OnExecuteAsync")
-                          .Returns(Task.FromResult<JToken>(new JObject()));
+                          .Returns(Task.FromResult<JToken>(new JArray()));
 
-            this.operation.Object.Result = new JObject() {{"__version", "abc"}};
-            this.operation.Object.ErrorRawResult = "some result";
-            this.operation.Object.ErrorStatusCode = HttpStatusCode.Accepted;
             this.operation.Object.Item = new JObject();
 
-            await this.operation.Object.ExecuteAsync();
-
-            Assert.AreEqual(this.operation.Object.Item["__version"], "abc");
+            var ex = await AssertEx.Throws<MobileServiceInvalidOperationException>(() => this.operation.Object.ExecuteAsync());
+            Assert.AreEqual("Mobile Service table operation returned an unexpected response.", ex.Message);
         }
 
         [TestMethod]
-        public async Task ExecuteAsync_DoesNotCopyVersion_WhenResultDoesNotHaveVersion()
+        public async Task ExecuteAsync_DoesNotThrow_WhenResultIsNull()
         {
             this.operation.Protected()
                           .Setup<Task<JToken>>("OnExecuteAsync")
-                          .Returns(Task.FromResult<JToken>(new JObject()));
-
-            this.operation.Object.Result = new JObject();
-            this.operation.Object.ErrorRawResult = "some result";
-            this.operation.Object.ErrorStatusCode = HttpStatusCode.Accepted;
-            this.operation.Object.Item = new JObject();
-
-            await this.operation.Object.ExecuteAsync();
-
-            Assert.AreEqual(this.operation.Object.Item.Properties().Count(), 0);
-        }
-
-        [TestMethod]
-        public async Task ExecuteAsync_ResetsTheResultAndStatus()
-        {
-            var secondResult = new JObject();
-            this.operation.Protected()
-                          .Setup<Task<JToken>>("OnExecuteAsync")
-                          .Returns(Task.FromResult<JToken>(secondResult));
-
-            this.operation.Object.Result = new JObject();
-            this.operation.Object.ErrorRawResult = "some result";
-            this.operation.Object.ErrorStatusCode = HttpStatusCode.Accepted;
-            this.operation.Object.Item = new JObject();
-
-            await this.operation.Object.ExecuteAsync();
-
-            Assert.AreEqual(this.operation.Object.Result, secondResult);
-            Assert.IsNull(this.operation.Object.ErrorRawResult);
-            Assert.IsNull(this.operation.Object.ErrorStatusCode);
-        }
-
-        [TestMethod]
-        public async Task ExecuteAsync_ParsesResult_IfOperationFails()
-        {            
-            var result = new JObject() 
-            {
-                {"id", "abc"},
-                {"__version", "aaaaa"}
-            };
-            var ex = new MobileServiceInvalidOperationException("", null, new HttpResponseMessage(HttpStatusCode.Conflict) 
-                                                                        { 
-                                                                            Content = new StringContent(result.ToString())
-                                                                        });
-            this.operation.Protected()
-                          .Setup<Task<JToken>>("OnExecuteAsync")
-                          .Throws(ex);
+                          .Returns(Task.FromResult<JToken>(null));
 
             this.operation.Object.Item = new JObject();
 
-            var thrown = await AssertEx.Throws<MobileServiceInvalidOperationException>(() => this.operation.Object.ExecuteAsync());
-            
-            Assert.AreEqual(thrown, ex);
-            Assert.AreEqual(operation.Object.ErrorStatusCode, thrown.Response.StatusCode);
-            Assert.AreEqual(operation.Object.Result.ToString(), result.ToString());
-            Assert.AreEqual(operation.Object.ErrorRawResult, result.ToString());
+            JObject result = await this.operation.Object.ExecuteAsync();
+            Assert.IsNull(result);
         }
 
         [TestMethod]

@@ -538,7 +538,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             string query = string.Format(
                 CultureInfo.InvariantCulture,
                 "$filter=({0} eq {1})",
-                MobileServiceSerializer.IdPropertyName,
+                MobileServiceSystemColumns.Id,
                 ODataExpressionVisitor.ToODataConstant(id));
 
             // Send the query

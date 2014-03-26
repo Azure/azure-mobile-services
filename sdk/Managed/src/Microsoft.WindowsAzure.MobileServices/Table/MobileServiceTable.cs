@@ -166,7 +166,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                         string.Format(
                             CultureInfo.InvariantCulture,
                             Resources.MobileServiceTable_InsertWithExistingId,
-                           MobileServiceSerializer.IdPropertyName),
+                           MobileServiceSystemColumns.Id),
                             "instance");
             }
 
@@ -249,7 +249,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             Tuple<string, JToken> responseContent = await this.ParseContent(error.Response);
-            throw new MobileServicePreconditionFailedException(error, responseContent.Item2);
+            throw new MobileServicePreconditionFailedException(error, responseContent.Item2.ValidItemOrNull());
         }   
      
         /// <summary>
@@ -400,6 +400,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>A pair of raw response and parsed JToken</returns>
         internal async Task<Tuple<string, JToken>> ParseContent(HttpResponseMessage response)
         {
+            return await ParseContent(response, this.MobileServiceClient.SerializerSettings);
+        }
+
+        internal static async Task<Tuple<string, JToken>> ParseContent(HttpResponseMessage response, JsonSerializerSettings serializerSettings)
+        {
             string content = null;
             JToken value = null;
             try
@@ -407,7 +412,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 if (response.Content != null)
                 {
                     content = await response.Content.ReadAsStringAsync();
-                    value = content.ParseToJToken(this.MobileServiceClient.SerializerSettings);
+                    value = content.ParseToJToken(serializerSettings);
                 }
             }
             catch { }
@@ -457,7 +462,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             JToken jtoken = response.Content.ParseToJToken(this.MobileServiceClient.SerializerSettings);
             if (response.Etag != null)
             {
-                jtoken[MobileServiceSerializer.VersionSystemPropertyString] = GetValueFromEtag(response.Etag);
+                jtoken[MobileServiceSystemColumns.Version] = GetValueFromEtag(response.Etag);
             }
 
             return jtoken;

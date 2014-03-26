@@ -1,15 +1,20 @@
-﻿using System;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Sync;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
 {
     class MobileServiceSyncHandlerMock: MobileServiceSyncHandler
     {
-        public Func<IMobileServiceTableOperation, Task> TableOperationAction { get; set; }
+        public Func<IMobileServiceTableOperation, Task<JObject>> TableOperationAction { get; set; }
         public Func<MobileServicePushCompletionResult, Task> PushCompleteAction { get; set; }
 
         public MobileServicePushCompletionResult PushCompletionResult { get; set; }
@@ -27,7 +32,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             }
         }
 
-        public override Task ExecuteTableOperationAsync(IMobileServiceTableOperation operation)
+        public override Task<JObject> ExecuteTableOperationAsync(IMobileServiceTableOperation operation)
         {
             if (TableOperationAction != null)
             {

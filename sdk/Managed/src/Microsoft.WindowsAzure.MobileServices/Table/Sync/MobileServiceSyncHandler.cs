@@ -4,6 +4,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
@@ -27,7 +28,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// </summary>
         /// <param name="operation">Instance of <see cref="IMobileServiceTableOperation"/> that represents a remote table operation.</param>
         /// <returns>Task that completes when operation has been executed and errors have been handled.</returns>
-        public virtual Task ExecuteTableOperationAsync(IMobileServiceTableOperation operation)
+        public virtual Task<JObject> ExecuteTableOperationAsync(IMobileServiceTableOperation operation)
         {
             return operation.ExecuteAsync();
         }

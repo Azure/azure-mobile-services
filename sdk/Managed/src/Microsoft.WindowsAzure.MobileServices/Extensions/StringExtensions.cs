@@ -25,7 +25,7 @@ namespace System
         /// <param name="content">The content to parse.</param>
         /// <param name="settings">The serializer settings used for parsing the content.</param>
         /// <returns>A JToken containing the content or null.</returns>
-        public static JToken ParseToJToken(this string content, MobileServiceJsonSerializerSettings settings)
+        public static JToken ParseToJToken(this string content, JsonSerializerSettings settings)
         {
             if (String.IsNullOrEmpty(content))
             {

@@ -135,9 +135,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     return;
                 }
 
+                JObject result = null;
                 try
                 {
-                    await batch.SyncHandler.ExecuteTableOperationAsync(operation);
+                    result = await batch.SyncHandler.ExecuteTableOperationAsync(operation);                    
                 }
                 catch (Exception ex)
                 {
@@ -152,26 +153,32 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 }                
 
                 // save the result if ExecuteTableOperation did not throw
-                if (error == null && operation.WriteResultToStore)
+                if (error == null && result.IsValidItem() && operation.CanWriteResultToStore)
                 {
-                    JObject obj = operation.Result as JObject;  // store can only upsert jobjects
-                    if (obj != null)
+                    result = MobileServiceSyncTable.RemoveSystemPropertiesKeepVersion(result);
+                    try
                     {
-                        obj = MobileServiceSyncTable.RemoveSystemPropertiesKeepVersion(obj);
-                        try
-                        {
-                            await this.Store.UpsertAsync(operation.TableName, obj);
-                        }
-                        catch (Exception ex)
-                        {
-                            batch.Abort(MobileServicePushStatus.CancelledBySyncStoreError);
-                            throw new MobileServiceLocalStoreException(Resources.SyncStore_FailedToUpsertItem, ex);
-                        }
+                        await this.Store.UpsertAsync(operation.TableName, result);
+                    }
+                    catch (Exception ex)
+                    {
+                        batch.Abort(MobileServicePushStatus.CancelledBySyncStoreError);
+                        throw new MobileServiceLocalStoreException(Resources.SyncStore_FailedToUpsertItem, ex);
                     }
                 }
                 else if (error != null)
                 {
-                    var syncError = new MobileServiceTableOperationError(operation.ErrorStatusCode, operation.Kind, operation.TableName, operation.Item, operation.ErrorRawResult, operation.Result);
+                    HttpStatusCode? statusCode = null;
+                    string rawResult = null;
+                    var iox = error as MobileServiceInvalidOperationException;
+                    if (iox != null && iox.Response != null)
+                    {
+                        statusCode = iox.Response.StatusCode;
+                        Tuple<string, JToken> content = await MobileServiceTable.ParseContent(iox.Response, this.serializerSettings);
+                        rawResult = content.Item1;
+                        result = content.Item2.ValidItemOrNull();
+                    }
+                    var syncError = new MobileServiceTableOperationError(statusCode, operation.Kind, operation.TableName, operation.Item, rawResult, result);
                     await batch.AddSyncErrorAsync(syncError);
                 }
             }

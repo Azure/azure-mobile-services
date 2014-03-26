@@ -29,28 +29,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         // --- Non persisted properties -- //
         public MobileServiceTable Table { get; set; }
-        public JToken Result { get; internal set; }
-        public string ErrorRawResult { get; internal set; }
-        public HttpStatusCode? ErrorStatusCode { get; internal set; }
+        
         public bool IsCancelled { get; private set; }
-        protected virtual bool CanWriteResultToStore
+        public virtual bool CanWriteResultToStore
         {
             get { return true; }
-        }
-
-        public bool WriteResultToStore
-        {
-            get
-            {
-                       // operation wants result to be written
-                return this.CanWriteResultToStore &&
-                       // there is a result
-                       this.Result is JObject &&
-                       // result is from successful run or precondition failed
-                       (this.ErrorStatusCode == null || this.ErrorStatusCode == HttpStatusCode.PreconditionFailed) && 
-                       // result has an id
-                       ((string)this.Result[MobileServiceSerializer.IdPropertyName]) != null;
-            }
         }
 
         protected virtual bool SerializeItemToQueue
@@ -68,15 +51,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public void AbortPush()
         {
-            this.Reset();
             throw new MobileServicePushAbortException();
         }
 
-        public async Task ExecuteAsync()
+        public async Task<JObject> ExecuteAsync()
         {            
             if (this.IsCancelled)
             {
-                return;
+                return null;
             }
 
             if (this.Item == null)
@@ -84,49 +66,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 throw new MobileServiceInvalidOperationException(Resources.MobileServiceTableOperation_ItemNotFound, request: null, response: null);
             }
 
-            string lastVerison = this.Result == null ? null : (string)this.Result[MobileServiceSerializer.VersionSystemPropertyString];
-            if (lastVerison != null)
+            JToken response = await OnExecuteAsync();
+            var result = response as JObject;
+            if (response != null && result == null)
             {
-                this.Item[MobileServiceSerializer.VersionSystemPropertyString] = lastVerison;
+                throw new MobileServiceInvalidOperationException(Resources.MobileServiceTableOperation_ResultNotJObject, request: null, response: null);
             }
 
-            this.Reset();
-
-            ExceptionDispatchInfo edi = null;
-            MobileServiceInvalidOperationException iox = null;
-
-            try
-            {
-                this.Result = await OnExecuteAsync();
-            }
-            catch (MobileServiceInvalidOperationException ex)
-            {
-                iox = ex;
-                edi = ExceptionDispatchInfo.Capture(ex);
-            }               
-         
-            if (iox != null)
-            {
-                // if the operation was not successful and we have an error that can give us jtoken result, then take it.
-                Tuple<string, JToken> content = await this.Table.ParseContent(iox.Response);
-                if (iox.Response != null)
-                {
-                    this.ErrorStatusCode = iox.Response.StatusCode;
-                }
-
-                this.ErrorRawResult = content.Item1;
-                this.Result = content.Item2;
-
-                edi.Throw();
-            }
+            return result;
         }
 
-        private void Reset()
-        {
-            this.Result = null;
-            this.ErrorRawResult = null;
-            this.ErrorStatusCode = null;
-        }
         protected abstract Task<JToken> OnExecuteAsync();
 
         internal void Cancel()

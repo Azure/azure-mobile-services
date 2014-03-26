@@ -16,7 +16,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             get { return MobileServiceTableOperationKind.Delete; }
         }
 
-        protected override bool CanWriteResultToStore
+        public override bool CanWriteResultToStore
         {
             get { return false; } // delete result should not be written to store, otherwise we're adding back the item that user deleted
         }

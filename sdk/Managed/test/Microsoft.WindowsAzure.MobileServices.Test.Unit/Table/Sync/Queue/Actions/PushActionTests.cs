@@ -1,7 +1,12 @@
-﻿using System;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -69,14 +74,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             var ex = await AssertEx.Throws<MobileServicePushFailedException>(async () => await action.CompletionTask);
             Assert.AreEqual(ex.PushResult.Status, MobileServicePushStatus.CancelledByOperation);
             Assert.AreEqual(ex.PushResult.Errors.Count(), 0);
-            Assert.IsNull(op.Result, "Result should be reset");
         }
 
         [TestMethod]
         public async Task ExecuteAsync_DeletesTheErrors()
         {
             var op = new InsertOperation("table", "id") { Item = new JObject() }; // putting an item so it won't load it
-            await this.TestExecuteAsync(op);
+            await this.TestExecuteAsync(op, null, null);
         }
 
         [TestMethod]
@@ -84,64 +88,71 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         {
             var op = new InsertOperation("table", "id");
             this.store.Setup(s => s.LookupAsync("table", "id")).Returns(Task.FromResult(new JObject()));
-            await this.TestExecuteAsync(op);
+            await this.TestExecuteAsync(op, null, null);
         }
 
         [TestMethod]
-        public async Task ExecuteAsync_SavesTheResult_IfPresentAndStatusIsEmpty()
+        public async Task ExecuteAsync_SavesTheResult_IfExecuteTableOperationDoesNotThrow()
         {
-            await TestResultSave(status: null, resultId: "id", saved: true);
+            var op = new InsertOperation("table", "id") { Item = new JObject() };
+            await TestResultSave(op, status: null, resultId: "id", saved: true);
         }
 
         [TestMethod]
-        public async Task ExecuteAsync_SavesTheResult_IfPresentAndStatusIs412()
+        public async Task ExecuteAsync_DoesNotSaveTheResult_IfOperationDoesNotWriteToStore()
         {
-            await TestResultSave(status: HttpStatusCode.PreconditionFailed, resultId: "id", saved: true);
+            var op = new DeleteOperation("table", "id") { Item = new JObject() };
+            Assert.IsFalse(op.CanWriteResultToStore);
+            await TestResultSave(op, status: null, resultId: "id", saved: false);
         }
 
         [TestMethod]
-        public async Task ExecuteAsync_DoesNotSaveTheResult_IfPresentAndStatusIsNotEmptyOr412()
+        public async Task ExecuteAsync_DoesNotSaveTheResult_IfExecuteTableOperationThrows()
         {
-            var allStaus = Enum.GetValues(typeof(HttpStatusCode))
-                               .Cast<HttpStatusCode>()
-                               .Where(s => s != HttpStatusCode.PreconditionFailed);
-
-            foreach (var status in allStaus)
-            {
-                this.action = new PushAction(this.opQueue.Object, this.store.Object, this.handler.Object, new MobileServiceJsonSerializerSettings(), CancellationToken.None, this.bookmark);
-                await TestResultSave(status: status, resultId: "id", saved: false);
-            }
+            this.store.Setup(s => s.UpsertAsync(LocalSystemTables.SyncErrors, It.IsAny<JObject>())).Returns(Task.FromResult(0));
+            var op = new InsertOperation("table", "id") { Item = new JObject() };
+            await TestResultSave(op, status: HttpStatusCode.PreconditionFailed, resultId: "id", saved: false);
         }
 
         [TestMethod]
         public async Task ExecuteAsync_DoesNotSaveTheResult_IfPresentButResultDoesNotHaveId()
         {
             this.action = new PushAction(this.opQueue.Object, this.store.Object, this.handler.Object, new MobileServiceJsonSerializerSettings(), CancellationToken.None, this.bookmark);
-            await TestResultSave(status: null, resultId: null, saved: false);
+            var op = new InsertOperation("table", "id") { Item = new JObject() };
+            await TestResultSave(op, status: null, resultId: null, saved: false);
         }
 
-        private async Task TestResultSave(HttpStatusCode? status, string resultId, bool saved)
+        private async Task TestResultSave(MobileServiceTableOperation op, HttpStatusCode? status, string resultId, bool saved)
         {
-            var op = new InsertOperation("table", "id")
-            {
-                Item = new JObject(),
-                Result = new JObject() {{"id", resultId}},
-                ErrorStatusCode = status
-            };
+            var result = new JObject() { { "id", resultId } };
             if (saved)
             {
-                this.store.Setup(s => s.UpsertAsync("table", (JObject)op.Result)).Returns(Task.FromResult(0));
+                this.store.Setup(s => s.UpsertAsync("table", It.Is<JObject>(o => o.ToString() == result.ToString())))
+                          .Returns(Task.FromResult(0));
             }
-            await this.TestExecuteAsync(op);
+            await this.TestExecuteAsync(op, result, status);
         }
 
-        private async Task TestExecuteAsync(InsertOperation op)
+        private async Task TestExecuteAsync(MobileServiceTableOperation op, JObject result, HttpStatusCode? errorCode)
         {
             var peek = new Queue<MobileServiceTableOperation>(new[] { op, null });
             // picks up the operation
             this.opQueue.Setup(q => q.Peek()).Returns(() => peek.Dequeue());
             // executes the operation via handler
-            this.handler.Setup(h => h.ExecuteTableOperationAsync(op)).Returns(Task.FromResult(0));
+            if (errorCode == null)
+            {
+                this.handler.Setup(h => h.ExecuteTableOperationAsync(op)).Returns(Task.FromResult(result));
+            }
+            else
+            {
+                this.handler.Setup(h => h.ExecuteTableOperationAsync(op))
+                            .Throws(new MobileServiceInvalidOperationException("", 
+                                                                               null, 
+                                                                               new HttpResponseMessage(errorCode.Value) 
+                                                                               { 
+                                                                                   Content = new StringContent(result.ToString()) 
+                                                                               }));
+            }
             // removes the operation from queue
             this.opQueue.Setup(q => q.DequeueAsync()).Returns(Task.FromResult<MobileServiceTableOperation>(null));
             // loads sync errors
@@ -149,10 +160,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             this.store.Setup(s => s.ReadAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == LocalSystemTables.SyncErrors))).Returns(Task.FromResult(JToken.Parse(syncError)));
             // calls push complete
             this.handler.Setup(h => h.OnPushCompleteAsync(It.IsAny<MobileServicePushCompletionResult>())).Returns(Task.FromResult(0))
-                        .Callback<MobileServicePushCompletionResult>(result =>
+                        .Callback<MobileServicePushCompletionResult>(r =>
                         {
-                            Assert.AreEqual(result.Status, MobileServicePushStatus.Complete);
-                            Assert.AreEqual(result.Errors.Count(), 0);
+                            Assert.AreEqual(r.Status, MobileServicePushStatus.Complete);
+                            Assert.AreEqual(r.Errors.Count(), 0);
                         });
             // deletes the errors
             this.store.Setup(s => s.DeleteAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == LocalSystemTables.SyncErrors))).Returns(Task.FromResult(0));

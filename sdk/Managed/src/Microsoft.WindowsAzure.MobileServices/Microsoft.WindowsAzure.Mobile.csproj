@@ -48,6 +48,7 @@
     <Compile Include="Exceptions\MobileServicePushAbortException.cs" />
     <Compile Include="Extensions\ExceptionExtensions.cs" />
     <Compile Include="Extensions\IDictionaryExtensions.cs" />
+    <Compile Include="Extensions\JTokenExtensions.cs" />
     <Compile Include="Extensions\MobileServiceClientExtensions.cs" />
     <Compile Include="Extensions\MobileServiceCollectionExtensions.cs" />
     <Compile Include="Extensions\MobileServiceSyncContextExtensions.cs" />
@@ -72,6 +73,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Table\MobileServiceSystemColumns.cs" />
     <Compile Include="Table\Query\Linq\FilterBuildingExpressionVisitor.cs" />
     <Compile Include="Table\Query\Linq\IMobileServiceTableQuery.cs" />
     <Compile Include="Table\Query\Linq\MemberInfoKey.cs" />

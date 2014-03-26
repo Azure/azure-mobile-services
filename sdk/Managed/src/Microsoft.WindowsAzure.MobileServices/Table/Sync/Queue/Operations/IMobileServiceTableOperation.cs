@@ -29,14 +29,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         JObject Item { get; set; }
 
         /// <summary>
-        /// The result returned by the server.
-        /// </summary>
-        JToken Result { get; }
-
-        /// <summary>
         /// Executes the operation against remote table.
         /// </summary>
-        Task ExecuteAsync();
+        Task<JObject> ExecuteAsync();
 
         /// <summary>
         /// Abort the parent push operation.

@@ -381,4 +381,7 @@
   <data name="MobileServiceTable_ItemNotFoundInStore" xml:space="preserve">
     <value>Item not found in local store.</value>
   </data>
+  <data name="MobileServiceTableOperation_ResultNotJObject" xml:space="preserve">
+    <value>Mobile Service table operation returned an unexpected response.</value>
+  </data>
 </root>

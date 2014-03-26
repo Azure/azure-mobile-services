@@ -26,13 +26,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestMethod]
         public void WriteResultToStore_IsFalse()
         {
-            // if there is object with id
-            this.operation.Result = new JObject() { { "id", "abc" } };
-            Assert.IsFalse(this.operation.WriteResultToStore);
-
-            // if the status is precondition failed
-            this.operation.ErrorStatusCode = HttpStatusCode.PreconditionFailed;
-            Assert.IsFalse(this.operation.WriteResultToStore);
+            Assert.IsFalse(this.operation.CanWriteResultToStore);
         }
 
         [TestMethod]

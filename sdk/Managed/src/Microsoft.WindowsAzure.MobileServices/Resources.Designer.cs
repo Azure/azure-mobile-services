@@ -449,6 +449,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Mobile Service table operation returned an unexpected response..
+        /// </summary>
+        internal static string MobileServiceTableOperation_ResultNotJObject {
+            get {
+                return ResourceManager.GetString("MobileServiceTableOperation_ResultNotJObject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unrecognized query parameter &apos;{0}&apos;..
         /// </summary>
         internal static string MobileServiceTableQueryDescription_UnrecognizedQueryParameter {

@@ -23,7 +23,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// A method that is called to execute a single table operation against remote table.
         /// </summary>
         /// <param name="operation">Instance of <see cref="IMobileServiceTableOperation"/> that represents a remote table operation.</param>
-        /// <returns>Task that completes when operation has been executed and errors, if any, have been handled.</returns>
-        Task ExecuteTableOperationAsync(IMobileServiceTableOperation operation);
+        /// <returns>Task that returns the server version of the item.</returns>
+        Task<JObject> ExecuteTableOperationAsync(IMobileServiceTableOperation operation);
     }
 }

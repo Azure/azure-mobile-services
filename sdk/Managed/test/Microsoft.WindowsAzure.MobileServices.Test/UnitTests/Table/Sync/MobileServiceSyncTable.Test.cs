@@ -37,8 +37,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             // create a new service to test that operations are loaded from store
             hijack = new TestHttpHandler();
-            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"}]");
-            hijack.AddResponseContent("[{\"id\":\"def\",\"String\":\"What\"}]");            
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
+            hijack.AddResponseContent("{\"id\":\"def\",\"String\":\"What\"}");            
             service = new MobileServiceClient("http://www.test.com", "secret...", hijack);            
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -51,7 +51,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             // create yet another service to make sure the old items were purged from queue
             hijack = new TestHttpHandler();
-            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"}]");
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
             service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
             Assert.AreEqual(hijack.Requests.Count, 0);
