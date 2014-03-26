@@ -31,57 +31,55 @@ import android.preference.PreferenceManager;
  */
 public final class MobileServiceApplication {
 
-	/**
-	 * Name of the key in the config setting that stores the installation ID
-	 */
-	private static final String INSTALLATION_ID_KEY = "applicationInstallationId";
+    /**
+     * Name of the key in the config setting that stores the installation ID
+     */
+    private static final String INSTALLATION_ID_KEY = "applicationInstallationId";
 
-	/**
-	 * The ID used to identify this installation of the application to provide
-	 * telemetry data. It will either be retrieved from local settings or
-	 * generated fresh.
-	 */
-	private static String mInstallationId = null;
+    /**
+     * The ID used to identify this installation of the application to provide
+     * telemetry data. It will either be retrieved from local settings or
+     * generated fresh.
+     */
+    private static String mInstallationId = null;
 
-	/**
-	 * Gets the ID used to identify this installation of the application to
-	 * provide telemetry data. It will either be retrieved from local settings
-	 * or generated fresh.
-	 * 
-	 * @param context
-	 *            The context used to manage the application preferences
-	 * @return The Installation ID
-	 */
-	public static String getInstallationId(Context context) {
-		
-		//if the device is an emulator, return a fixed installation id
-		if (isEmulator()) {
-			return "00000000-0000-0000-0000-000000000000";
-		}
-		
-		SharedPreferences preferences = PreferenceManager
-				.getDefaultSharedPreferences(context.getApplicationContext());
+    /**
+     * Gets the ID used to identify this installation of the application to
+     * provide telemetry data. It will either be retrieved from local settings
+     * or generated fresh.
+     * 
+     * @param context
+     *            The context used to manage the application preferences
+     * @return The Installation ID
+     */
+    public static String getInstallationId(Context context) {
 
-		if (mInstallationId == null) {
-			String val = preferences.getString(INSTALLATION_ID_KEY, null);
-			mInstallationId = val;
+        // if the device is an emulator, return a fixed installation id
+        if (isEmulator()) {
+            return "00000000-0000-0000-0000-000000000000";
+        }
 
-			// Generate a new AppInstallationId if we failed to find one
-			if (mInstallationId == null) {
-				mInstallationId = UUID.randomUUID().toString();
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
 
-				Editor preferencesEditor = preferences.edit();
-				preferencesEditor.putString(INSTALLATION_ID_KEY,
-						mInstallationId);
-				preferencesEditor.commit();
-			}
-		}
+        if (mInstallationId == null) {
+            String val = preferences.getString(INSTALLATION_ID_KEY, null);
+            mInstallationId = val;
 
-		return mInstallationId;
+            // Generate a new AppInstallationId if we failed to find one
+            if (mInstallationId == null) {
+                mInstallationId = UUID.randomUUID().toString();
 
-	}
+                Editor preferencesEditor = preferences.edit();
+                preferencesEditor.putString(INSTALLATION_ID_KEY, mInstallationId);
+                preferencesEditor.commit();
+            }
+        }
 
-	private static boolean isEmulator() {
-		return "google_sdk".equals(android.os.Build.PRODUCT) || "sdk".equals(android.os.Build.PRODUCT);
-	}
+        return mInstallationId;
+
+    }
+
+    private static boolean isEmulator() {
+        return "google_sdk".equals(android.os.Build.PRODUCT) || "sdk".equals(android.os.Build.PRODUCT);
+    }
 }
