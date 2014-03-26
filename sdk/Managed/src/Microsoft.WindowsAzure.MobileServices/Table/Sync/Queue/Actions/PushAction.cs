@@ -33,10 +33,90 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public override async Task ExecuteAsync()
         {
             var batch = new OperationBatch(this.syncHandler, this.Store);
+            List<MobileServiceTableOperationError> syncErrors = new List<MobileServiceTableOperationError>();
+            MobileServicePushStatus batchStatus = MobileServicePushStatus.InternalError;
 
+            try
+            {
+                batchStatus = await ExecuteBatchAsync(batch, syncErrors);
+            }
+            catch (Exception ex)
+            {
+                batch.OtherErrors.Add(ex);
+            }
+
+            await FinalizePush(batch, batchStatus, syncErrors);
+        }
+
+        private async Task<MobileServicePushStatus> ExecuteBatchAsync(OperationBatch batch, List<MobileServiceTableOperationError> syncErrors)
+        {
             // when cancellation is requested, abort the batch
             this.CancellationToken.Register(() => batch.Abort(MobileServicePushStatus.CancelledByToken));
 
+            try
+            {
+                await ExecuteAllOperationsAsync(batch);
+            }
+            catch (Exception ex)
+            {
+                batch.OtherErrors.Add(ex);
+            }
+
+            MobileServicePushStatus batchStatus = batch.AbortReason.GetValueOrDefault(MobileServicePushStatus.Complete);
+            try
+            {
+                syncErrors.AddRange(await batch.LoadSyncErrorsAsync(this.serializerSettings));
+            }
+            catch (Exception ex)
+            {
+
+                batch.OtherErrors.Add(new MobileServiceLocalStoreException(Resources.SyncStore_FailedToLoadError, ex));
+            }
+            return batchStatus;
+        }
+
+        private async Task FinalizePush(OperationBatch batch, MobileServicePushStatus batchStatus, IEnumerable<MobileServiceTableOperationError> syncErrors)
+        {
+            var result = new MobileServicePushCompletionResult(syncErrors, batchStatus);
+
+            try
+            {
+                await batch.SyncHandler.OnPushCompleteAsync(result);
+
+                // now that we've successfully given the errors to user, we can delete them from store
+                await batch.DeleteErrorsAsync();
+            }
+            catch (Exception ex)
+            {
+                batch.OtherErrors.Add(ex);
+            }
+
+            if (batchStatus != MobileServicePushStatus.Complete || batch.HasErrors(syncErrors))
+            {
+                List<MobileServiceTableOperationError> unhandledSyncErrors = syncErrors.Where(e => !e.Handled).ToList();
+
+                Exception inner;
+                if (batch.OtherErrors.Count == 1)
+                {
+                    inner = batch.OtherErrors[0];
+                }
+                else
+                {
+                    inner = batch.OtherErrors.Any() ? new AggregateException(batch.OtherErrors) : null;
+                }
+
+                // create a new result with only unhandled errors
+                result = new MobileServicePushCompletionResult(unhandledSyncErrors, batchStatus);
+                this.TaskSource.TrySetException(new MobileServicePushFailedException(result, inner));
+            }
+            else
+            {
+                this.TaskSource.SetResult(0);
+            }
+        }
+
+        private async Task ExecuteAllOperationsAsync(OperationBatch batch)
+        {
             MobileServiceTableOperation operation = this.OperationQueue.Peek();
 
             // keep taking out operations and executing them until queue is empty or operation finds the bookmark or batch is aborted 
@@ -60,55 +140,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             if (operation == this.bookmark)
             {
                 await this.OperationQueue.DequeueAsync();
-            }
-
-            MobileServicePushStatus batchStatus = batch.AbortReason.GetValueOrDefault(MobileServicePushStatus.Complete);
-            IEnumerable<MobileServiceTableOperationError> syncErrors = Enumerable.Empty<MobileServiceTableOperationError>();
-            try
-            {
-                syncErrors = await batch.LoadSyncErrorsAsync(this.serializerSettings);
-            }
-            catch (Exception ex)
-            {
-
-                batch.OtherErrors.Add(new MobileServiceLocalStoreException(Resources.SyncStore_FailedToLoadError, ex));
-            }
-
-            var result = new MobileServicePushCompletionResult(syncErrors, batchStatus);
-
-            try
-            {
-                await batch.SyncHandler.OnPushCompleteAsync(result);
-
-                // now that we've successfully given the errors to user, we can delete them from store
-                await batch.DeleteErrorsAsync();
-            }
-            catch (Exception ex)
-            {
-                batch.OtherErrors.Add(ex);
-            }
-
-            if (batch.AbortReason.HasValue || batch.HasErrors(syncErrors))
-            {
-                List<MobileServiceTableOperationError> unhandledSyncErrors = syncErrors.Where(e=>!e.Handled).ToList();
-                
-                Exception inner;
-                if (batch.OtherErrors.Count == 1)
-                {
-                    inner = batch.OtherErrors[0];
-                }
-                else
-                {
-                    inner = batch.OtherErrors.Any() ? new AggregateException(batch.OtherErrors) : null;
-                }
-
-                // create a new result with only unhandled errors
-                result = new MobileServicePushCompletionResult(unhandledSyncErrors, batchStatus);
-                this.TaskSource.TrySetException(new MobileServicePushFailedException(result, inner));
-            }
-            else
-            {
-                this.TaskSource.SetResult(0);
             }
         }
 
