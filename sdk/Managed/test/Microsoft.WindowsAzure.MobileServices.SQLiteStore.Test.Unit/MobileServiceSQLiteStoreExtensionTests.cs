@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.WindowsAzure.MobileServices.Test;
 using Moq;
-using Moq.Protected;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 

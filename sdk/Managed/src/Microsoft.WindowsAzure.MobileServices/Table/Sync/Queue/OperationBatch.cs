@@ -63,7 +63,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <param name="error">The sync error that occurred.</param>
         public Task AddSyncErrorAsync(MobileServiceTableOperationError error)
         {
-            return this.Store.UpsertAsync(LocalSystemTables.SyncErrors, error.Serialize());
+            return this.Store.UpsertAsync(MobileServiceLocalSystemTables.SyncErrors, error.Serialize());
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             var errors = new List<MobileServiceTableOperationError>();
 
-            JToken result = await this.Store.ReadAsync(new MobileServiceTableQueryDescription(LocalSystemTables.SyncErrors));
+            JToken result = await this.Store.ReadAsync(new MobileServiceTableQueryDescription(MobileServiceLocalSystemTables.SyncErrors));
             if (result is JArray)
             {
                 foreach (JObject error in result)
@@ -107,7 +107,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             try
             {
-                await this.Store.DeleteAsync(new MobileServiceTableQueryDescription(LocalSystemTables.SyncErrors));
+                await this.Store.DeleteAsync(new MobileServiceTableQueryDescription(MobileServiceLocalSystemTables.SyncErrors));
             }
             catch (Exception ex)
             {

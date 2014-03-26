@@ -359,8 +359,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         private static void ResetDatabase(string testTableName)
         {
             TestUtilities.DropTestTable(TestDbName, testTableName);
-            TestUtilities.DropTestTable(TestDbName, LocalSystemTables.OperationQueue);
-            TestUtilities.DropTestTable(TestDbName, LocalSystemTables.SyncErrors);
+            TestUtilities.DropTestTable(TestDbName, MobileServiceLocalSystemTables.OperationQueue);
+            TestUtilities.DropTestTable(TestDbName, MobileServiceLocalSystemTables.SyncErrors);
         }
     }
 }

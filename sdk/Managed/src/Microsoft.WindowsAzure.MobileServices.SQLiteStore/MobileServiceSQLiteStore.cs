@@ -33,9 +33,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         {
             this.connection = new SQLiteConnection(fileName);
 
-            this.DefineTable(LocalSystemTables.OperationQueue, new JObject()
+            this.DefineTable(MobileServiceLocalSystemTables.OperationQueue, new JObject()
             {
-                { SystemProperties.Id, String.Empty },
+                { MobileServiceSystemColumns.Id, String.Empty },
                 { "kind", 0 },
                 { "tableName", String.Empty },
                 { "item", String.Empty },
@@ -43,9 +43,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 { "__createdAt", DateTime.Now },
                 { "sequence", 0 }
             });
-            this.DefineTable(LocalSystemTables.SyncErrors, new JObject()
+            this.DefineTable(MobileServiceLocalSystemTables.SyncErrors, new JObject()
             {
-                { SystemProperties.Id, String.Empty },
+                { MobileServiceSystemColumns.Id, String.Empty },
                 { "httpStatus", 0 },
                 { "operationKind", 0 },
                 { "tableName", String.Empty },
@@ -72,9 +72,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
             // add id if it is not defined
             JToken ignored;
-            if (!item.TryGetValue(SystemProperties.Id, StringComparison.OrdinalIgnoreCase, out ignored))
+            if (!item.TryGetValue(MobileServiceSystemColumns.Id, StringComparison.OrdinalIgnoreCase, out ignored))
             {
-                item[SystemProperties.Id] = String.Empty;
+                item[MobileServiceSystemColumns.Id] = String.Empty;
             }
 
             var tableDefinition = (from property in item.Properties()
@@ -218,7 +218,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 throw new ArgumentNullException("id");
             }
 
-            string sql = string.Format("DELETE FROM {0} WHERE {1} = @id", SqlHelpers.FormatTableName(tableName), SystemProperties.Id);
+            string sql = string.Format("DELETE FROM {0} WHERE {1} = @id", SqlHelpers.FormatTableName(tableName), MobileServiceSystemColumns.Id);
 
             var parameters = new Dictionary<string, object>
             {
@@ -246,7 +246,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 throw new ArgumentNullException("id");
             }
 
-            string sql = string.Format("SELECT * FROM {0} WHERE {1} = @id", SqlHelpers.FormatTableName(tableName), SystemProperties.Id);
+            string sql = string.Format("SELECT * FROM {0} WHERE {1} = @id", SqlHelpers.FormatTableName(tableName), MobileServiceSystemColumns.Id);
             var parameters = new Dictionary<string, object>
             {
                 {"@id", id}
@@ -269,7 +269,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
         internal virtual void CreateTableFromObject(string tableName, IEnumerable<ColumnDefinition> columns)
         {
-            String tblSql = string.Format("CREATE TABLE IF NOT EXISTS {0} ({1} PRIMARY KEY)", SqlHelpers.FormatTableName(tableName), SqlHelpers.FormatMember(SystemProperties.Id));
+            String tblSql = string.Format("CREATE TABLE IF NOT EXISTS {0} ({1} PRIMARY KEY)", SqlHelpers.FormatTableName(tableName), SqlHelpers.FormatMember(MobileServiceSystemColumns.Id));
             this.ExecuteNonQuery(tblSql);
 
             string infoSql = string.Format("PRAGMA table_info({0});", SqlHelpers.FormatTableName(tableName));

@@ -53,7 +53,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             
             // loads sync errors
             string syncError = @"[]";
-            this.store.Setup(s => s.ReadAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == LocalSystemTables.SyncErrors))).Returns(Task.FromResult(JToken.Parse(syncError)));
+            this.store.Setup(s => s.ReadAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == MobileServiceLocalSystemTables.SyncErrors))).Returns(Task.FromResult(JToken.Parse(syncError)));
             // calls push complete
             this.handler.Setup(h => h.OnPushCompleteAsync(It.IsAny<MobileServicePushCompletionResult>())).Returns(Task.FromResult(0))
                         .Callback<MobileServicePushCompletionResult>(result =>
@@ -63,7 +63,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
                         });
             
             // deletes the errors
-            this.store.Setup(s => s.DeleteAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == LocalSystemTables.SyncErrors))).Returns(Task.FromResult(0));
+            this.store.Setup(s => s.DeleteAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == MobileServiceLocalSystemTables.SyncErrors))).Returns(Task.FromResult(0));
 
             await this.action.ExecuteAsync();
 
@@ -109,7 +109,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         [TestMethod]
         public async Task ExecuteAsync_DoesNotSaveTheResult_IfExecuteTableOperationThrows()
         {
-            this.store.Setup(s => s.UpsertAsync(LocalSystemTables.SyncErrors, It.IsAny<JObject>())).Returns(Task.FromResult(0));
+            this.store.Setup(s => s.UpsertAsync(MobileServiceLocalSystemTables.SyncErrors, It.IsAny<JObject>())).Returns(Task.FromResult(0));
             var op = new InsertOperation("table", "id") { Item = new JObject() };
             await TestResultSave(op, status: HttpStatusCode.PreconditionFailed, resultId: "id", saved: false);
         }
@@ -157,7 +157,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             this.opQueue.Setup(q => q.DequeueAsync()).Returns(Task.FromResult<MobileServiceTableOperation>(null));
             // loads sync errors
             string syncError = @"[]";
-            this.store.Setup(s => s.ReadAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == LocalSystemTables.SyncErrors))).Returns(Task.FromResult(JToken.Parse(syncError)));
+            this.store.Setup(s => s.ReadAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == MobileServiceLocalSystemTables.SyncErrors))).Returns(Task.FromResult(JToken.Parse(syncError)));
             // calls push complete
             this.handler.Setup(h => h.OnPushCompleteAsync(It.IsAny<MobileServicePushCompletionResult>())).Returns(Task.FromResult(0))
                         .Callback<MobileServicePushCompletionResult>(r =>
@@ -166,7 +166,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
                             Assert.AreEqual(r.Errors.Count(), 0);
                         });
             // deletes the errors
-            this.store.Setup(s => s.DeleteAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == LocalSystemTables.SyncErrors))).Returns(Task.FromResult(0));
+            this.store.Setup(s => s.DeleteAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == MobileServiceLocalSystemTables.SyncErrors))).Returns(Task.FromResult(0));
 
             await this.action.ExecuteAsync();
 

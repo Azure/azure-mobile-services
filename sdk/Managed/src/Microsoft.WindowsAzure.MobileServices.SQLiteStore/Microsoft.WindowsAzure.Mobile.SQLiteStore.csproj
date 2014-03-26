@@ -54,7 +54,6 @@
     <Compile Include="SqlColumnType.cs" />
     <Compile Include="SqlQueryFormatter.cs" />
     <Compile Include="SqlHelpers.cs" />
-    <Compile Include="SystemProperties.cs" />
     <Compile Include="ColumnDefinition.cs" />
     <Compile Include="TableDefinition.cs" />
   </ItemGroup>

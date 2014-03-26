@@ -13,7 +13,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// <summary>
     /// Names of tables in local store that are reserved by sync framework
     /// </summary>
-    public static class LocalSystemTables
+    public static class MobileServiceLocalSystemTables
     {
         /// <summary>
         /// Table that stores operation queue items

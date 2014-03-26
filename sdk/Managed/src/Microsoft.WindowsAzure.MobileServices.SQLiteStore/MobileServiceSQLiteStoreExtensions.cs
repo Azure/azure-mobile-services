@@ -76,11 +76,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             JsonProperty idProperty = settings.ContractResolver.ResolveIdProperty(typeof(T));
             if (idProperty.PropertyType == typeof(long) || idProperty.PropertyType == typeof(int))
             {
-                item[SystemProperties.Id] = 0;
+                item[MobileServiceSystemColumns.Id] = 0;
             }
             else
             {
-                item[SystemProperties.Id] = String.Empty;
+                item[MobileServiceSystemColumns.Id] = String.Empty;
             }
         }
 

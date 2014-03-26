@@ -75,7 +75,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 }
                 try
                 {
-                    await this.store.DeleteAsync(LocalSystemTables.OperationQueue, op.Id);
+                    await this.store.DeleteAsync(MobileServiceLocalSystemTables.OperationQueue, op.Id);
                 }
                 catch (Exception ex)
                 {
@@ -111,7 +111,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 if (!isBookmark)
                 {
                     op.Sequence = this.sequenceId++;
-                    await this.store.UpsertAsync(LocalSystemTables.OperationQueue, op.Serialize());
+                    await this.store.UpsertAsync(MobileServiceLocalSystemTables.OperationQueue, op.Serialize());
                 }
 
                 lock (this.queue)
@@ -127,14 +127,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public async Task DeleteAsync(MobileServiceTableOperation op)
         {
-            await this.store.DeleteAsync(LocalSystemTables.OperationQueue, op.Id);
+            await this.store.DeleteAsync(MobileServiceLocalSystemTables.OperationQueue, op.Id);
         }
 
         public static async Task<OperationQueue> LoadAsync(IMobileServiceLocalStore store, MobileServiceClient client)
         {
             var opQueue = new OperationQueue(store);
 
-            JToken result = await store.ReadAsync(new MobileServiceTableQueryDescription(LocalSystemTables.OperationQueue));
+            JToken result = await store.ReadAsync(new MobileServiceTableQueryDescription(MobileServiceLocalSystemTables.OperationQueue));
             if (result is JArray)
             {
                 var unorderedOps = new List<MobileServiceTableOperation>();

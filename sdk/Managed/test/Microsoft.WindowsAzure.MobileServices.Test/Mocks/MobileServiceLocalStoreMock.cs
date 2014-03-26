@@ -35,7 +35,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
         public Task<JToken> ReadAsync(MobileServiceTableQueryDescription query)
         {
-            if (query.TableName == LocalSystemTables.OperationQueue || query.TableName == LocalSystemTables.SyncErrors)
+            if (query.TableName == MobileServiceLocalSystemTables.OperationQueue || query.TableName == MobileServiceLocalSystemTables.SyncErrors)
             {
                 // we don't query the queue specially, we just need all records
                 return Task.FromResult<JToken>(new JArray(GetTable(query.TableName).Values.ToArray()));

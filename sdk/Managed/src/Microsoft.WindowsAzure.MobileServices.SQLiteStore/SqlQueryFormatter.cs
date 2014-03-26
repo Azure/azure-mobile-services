@@ -58,12 +58,12 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             var delQuery = this.query.Clone(); // create a copy to avoid modifying the original
 
             delQuery.Selection.Clear();
-            delQuery.Selection.Add(SystemProperties.Id);
+            delQuery.Selection.Add(MobileServiceSystemColumns.Id);
             delQuery.IncludeTotalCount = false;
             
             var formatter = new SqlQueryFormatter(delQuery);
             string selectIdQuery = formatter.FormatSelect();
-            string idMemberName = SqlHelpers.FormatMember(SystemProperties.Id);
+            string idMemberName = SqlHelpers.FormatMember(MobileServiceSystemColumns.Id);
             string tableName = SqlHelpers.FormatTableName(delQuery.TableName);
             string command = string.Format("DELETE FROM {0} WHERE {1} IN ({2})", tableName, idMemberName, selectIdQuery);
             this.Parameters = formatter.Parameters;
