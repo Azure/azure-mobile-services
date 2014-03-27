@@ -235,7 +235,7 @@ function defineRoundTripTestsNamespace() {
         });
     }
 
-    function createPositiveRoundTripTest(testName, objectToInsert) {
+    function createInvalidIdRoundTripTest(testName, objectToInsert) {
         return new zumo.Test(testName, function (test, done) {
             var table = zumo.getClient().getTable(tableName);
             table.insert(objectToInsert).done(function (itemInserted) {
