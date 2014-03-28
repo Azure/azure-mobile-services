@@ -183,6 +183,29 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task PullAsync_Throws_WhenPushThrows()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.NotFound)); // for push
+
+            var store = new MobileServiceLocalStoreMock();
+
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            // insert an item but don't push
+            IMobileServiceSyncTable table = service.GetSyncTable("someTable");
+            await table.InsertAsync(new JObject() { { "id", "abc" } });
+            Assert.AreEqual(store.Tables[table.TableName].Count, 1); // item is inserted
+
+            // this should trigger a push
+            var ex = await ThrowsAsync<MobileServicePushFailedException>(() => table.PullAsync(null, cancellationToken: CancellationToken.None));
+
+            Assert.AreEqual(ex.PushResult.Errors.Count(), 1);
+            Assert.AreEqual(hijack.Requests.Count, 1); // 1 for push 
+        }
+
+        [AsyncTestMethod]
         public async Task PullAsync_Throws_WhenSelectClauseIsSpecified()
         {
             var store = new MobileServiceLocalStoreMock();

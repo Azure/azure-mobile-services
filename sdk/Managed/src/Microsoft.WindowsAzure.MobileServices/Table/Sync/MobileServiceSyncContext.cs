@@ -188,8 +188,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public async Task DeferTableActionAsync(TableAction action)
         {
-            await this.PushAsync(action.CancellationToken);
-            Task discard = this.syncQueue.Post(action.ExecuteAsync, action.CancellationToken);
+            try
+            {
+                await this.PushAsync(action.CancellationToken);
+            }
+            finally
+            {
+                Task discard = this.syncQueue.Post(action.ExecuteAsync, action.CancellationToken);
+            }
         }
 
         private async Task EnsureInitializedAsync()

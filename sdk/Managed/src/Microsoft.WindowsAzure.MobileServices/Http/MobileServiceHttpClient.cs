@@ -400,7 +400,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             Debug.Assert(response != null);
             Debug.Assert(!response.IsSuccessStatusCode);
 
-            string responseContent = await response.Content.ReadAsStringAsync();
+            string responseContent = response.Content == null ? null: await response.Content.ReadAsStringAsync();
 
             // Create either an invalid response or connection failed message
             // (check the status code first because some status codes will

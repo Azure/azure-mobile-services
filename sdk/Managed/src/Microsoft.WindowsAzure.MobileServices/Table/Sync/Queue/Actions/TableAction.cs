@@ -58,7 +58,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             catch (Exception ex)
             {
                 this.TaskSource.TrySetException(ex);
-                throw;
+                return;
             }
             this.TaskSource.SetResult(0);
         }
