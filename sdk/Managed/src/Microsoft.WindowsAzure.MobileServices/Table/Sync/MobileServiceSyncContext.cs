@@ -64,6 +64,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public MobileServiceSyncContext(MobileServiceClient client)
         {
+            if (client == null)
+            {
+                throw new ArgumentNullException("client");
+            }
+
             this.client = client;
         }
 
@@ -77,6 +82,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public async Task InitializeAsync(IMobileServiceLocalStore store, IMobileServiceSyncHandler handler)
         {
+            if (store == null)
+            {
+                throw new ArgumentNullException("store");
+            }
+            if (handler == null)
+            {
+                throw new ArgumentNullException("handler");
+            }
+
             this.initializeTask = new TaskCompletionSource<object>();
 
             using (await this.storeQueueLock.WriterLockAsync())
