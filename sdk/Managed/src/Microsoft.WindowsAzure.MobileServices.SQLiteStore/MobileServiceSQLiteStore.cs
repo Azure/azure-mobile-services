@@ -20,7 +20,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
     public class MobileServiceSQLiteStore: IMobileServiceLocalStore
     {
         private Dictionary<string, TableDefinition> tables = new Dictionary<string, TableDefinition>(StringComparer.OrdinalIgnoreCase);
-
+        private bool initialized;
         private SQLiteConnection connection;
 
         protected MobileServiceSQLiteStore() { }
@@ -31,6 +31,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         /// <param name="fileName">Name of the local SQLite database file.</param>
         public MobileServiceSQLiteStore(string fileName)
         {
+            if (fileName == null)
+            {
+                throw new ArgumentNullException("fileName");
+            }
+
             this.connection = new SQLiteConnection(fileName);
 
             this.DefineTable(MobileServiceLocalSystemTables.OperationQueue, new JObject()
@@ -70,6 +75,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 throw new ArgumentNullException("item");
             }
 
+            if (this.initialized)
+            {
+                throw new InvalidOperationException(Properties.Resources.SQLiteStore_DefineAfterInitialize);
+            }
+
             // add id if it is not defined
             JToken ignored;
             if (!item.TryGetValue(MobileServiceSystemColumns.Id, StringComparison.OrdinalIgnoreCase, out ignored))
@@ -91,11 +101,17 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         /// <returns>Task that completes when initialization is complete.</returns>
         public Task InitializeAsync()
         {
+            if (initialized)
+            {
+                throw new InvalidOperationException(Properties.Resources.SQLiteStore_StoreAlreadyInitialized);
+            }
+
             foreach (KeyValuePair<string, TableDefinition> table in this.tables)
             {
                 this.CreateTableFromObject(table.Key, table.Value.Values);
             }
 
+            this.initialized = true;
             return Task.FromResult(0);
         }
 
@@ -110,6 +126,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             {
                 throw new ArgumentNullException("query");
             }
+
+            this.EnsureInitialized();
 
             var formatter = new SqlQueryFormatter(query);
             string sql = formatter.FormatSelect();
@@ -149,6 +167,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             {
                 throw new ArgumentNullException("item");
             }
+
+            this.EnsureInitialized();
 
             TableDefinition table = GetTable(tableName);
             
@@ -193,6 +213,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 throw new ArgumentNullException("query");
             }
 
+            this.EnsureInitialized();
+
             var formatter = new SqlQueryFormatter(query);
             string sql = formatter.FormatDelete();
 
@@ -217,6 +239,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             {
                 throw new ArgumentNullException("id");
             }
+
+            this.EnsureInitialized();
 
             string sql = string.Format("DELETE FROM {0} WHERE {1} = @id", SqlHelpers.FormatTableName(tableName), MobileServiceSystemColumns.Id);
 
@@ -245,6 +269,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             {
                 throw new ArgumentNullException("id");
             }
+
+            this.EnsureInitialized();
 
             string sql = string.Format("SELECT * FROM {0} WHERE {1} = @id", SqlHelpers.FormatTableName(tableName), MobileServiceSystemColumns.Id);
             var parameters = new Dictionary<string, object>
@@ -395,7 +421,15 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 name = statement.ColumnName(++i);
             }
             return row;
-        }          
+        }
+
+        private void EnsureInitialized()
+        {
+            if (!this.initialized)
+            {
+                throw new InvalidOperationException(Properties.Resources.SQLiteStore_StoreNotInitialized);
+            }
+        }
 
         public void Dispose()
         {

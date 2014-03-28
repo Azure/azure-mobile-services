@@ -267,12 +267,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"b\",\"String\":\"Hey\"}"); // insert response
-            hijack.AddResponseContent("[{\"id\":\"b\",\"String\":\"Hey\"},{\"id\":\"a\",\"String\":\"World\"}]"); // pull response
+            hijack.AddResponseContent("[{\"id\":\"b\",\"String\":\"Hey\"},{\"id\":\"a\",\"String\":\"World\"}]"); // pull response            
 
-            var store = new MobileServiceSQLiteStore(TestDbName);
-            store.DefineTable<ToDoWithStringId>();
-
-            IMobileServiceClient service = await CreateClient(hijack, store);
+            IMobileServiceClient service = await CreateTodoClient(hijack);
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
 
             // first insert an item
@@ -302,7 +299,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             Assert.AreEqual(hijack.Requests.Count, 2);
 
             // recreating the client from state in the store
-            service = await CreateClient(hijack, store);
+            service = await CreateTodoClient(hijack);
             table = service.GetSyncTable<ToDoWithStringId>();
 
             // update the second record
@@ -336,7 +333,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             Assert.AreEqual(first.String, items[0].String);
 
             // recreating the client from state in the store
-            service = await CreateClient(hijack, store);
+            service = await CreateTodoClient(hijack);
             table = service.GetSyncTable<ToDoWithStringId>();
 
             // now purge the remaining records
@@ -347,6 +344,13 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             // There shouldn't be anything remaining
             Assert.AreEqual(remaining.Count(), 0);
+        }
+
+        private static async Task<IMobileServiceClient> CreateTodoClient(TestHttpHandler hijack)
+        {
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable<ToDoWithStringId>();
+            return await CreateClient(hijack, store);
         }
 
         private static async Task<IMobileServiceClient> CreateClient(TestHttpHandler hijack, MobileServiceSQLiteStore store)

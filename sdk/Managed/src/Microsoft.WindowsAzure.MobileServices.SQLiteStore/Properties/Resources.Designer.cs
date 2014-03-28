@@ -80,6 +80,15 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cannot define a table after the store has been initialized..
+        /// </summary>
+        internal static string SQLiteStore_DefineAfterInitialize {
+            get {
+                return ResourceManager.GetString("SQLiteStore_DefineAfterInitialize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The generic type T is not an object..
         /// </summary>
         internal static string SQLiteStore_DefineTableTNotAnObject {
@@ -112,6 +121,24 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Properties {
         internal static string SQLiteStore_QueryExecutionFailed {
             get {
                 return ResourceManager.GetString("SQLiteStore_QueryExecutionFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The store is already initialized..
+        /// </summary>
+        internal static string SQLiteStore_StoreAlreadyInitialized {
+            get {
+                return ResourceManager.GetString("SQLiteStore_StoreAlreadyInitialized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The store must be initialized before it can be used..
+        /// </summary>
+        internal static string SQLiteStore_StoreNotInitialized {
+            get {
+                return ResourceManager.GetString("SQLiteStore_StoreNotInitialized", resourceCulture);
             }
         }
         
