@@ -189,7 +189,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     result = MobileServiceSyncTable.RemoveSystemPropertiesKeepVersion(result);
                     try
                     {
-                        await this.Store.UpsertAsync(operation.TableName, result);
+                        await this.Store.UpsertAsync(operation.TableName, result, fromServer: true);
                     }
                     catch (Exception ex)
                     {

@@ -49,7 +49,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             foreach (JObject item in items)
             {
-                await this.Store.UpsertAsync(this.Table.TableName, item);
+                await this.Store.UpsertAsync(this.Table.TableName, item, fromServer: true);
             }
         }
     }

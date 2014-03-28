@@ -63,7 +63,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <param name="error">The sync error that occurred.</param>
         public Task AddSyncErrorAsync(MobileServiceTableOperationError error)
         {
-            return this.Store.UpsertAsync(MobileServiceLocalSystemTables.SyncErrors, error.Serialize());
+            return this.Store.UpsertAsync(MobileServiceLocalSystemTables.SyncErrors, error.Serialize(), fromServer: false);
         }
 
         /// <summary>

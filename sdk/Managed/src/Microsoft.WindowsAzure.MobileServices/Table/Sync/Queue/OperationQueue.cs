@@ -111,7 +111,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 if (!isBookmark)
                 {
                     op.Sequence = this.sequenceId++;
-                    await this.store.UpsertAsync(MobileServiceLocalSystemTables.OperationQueue, op.Serialize());
+                    await this.store.UpsertAsync(MobileServiceLocalSystemTables.OperationQueue, op.Serialize(), fromServer: false);
                 }
 
                 lock (this.queue)

@@ -109,7 +109,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         [TestMethod]
         public async Task ExecuteAsync_DoesNotSaveTheResult_IfExecuteTableOperationThrows()
         {
-            this.store.Setup(s => s.UpsertAsync(MobileServiceLocalSystemTables.SyncErrors, It.IsAny<JObject>())).Returns(Task.FromResult(0));
+            this.store.Setup(s => s.UpsertAsync(MobileServiceLocalSystemTables.SyncErrors, It.IsAny<JObject>(), false)).Returns(Task.FromResult(0));
             var op = new InsertOperation("table", "id") { Item = new JObject() };
             await TestResultSave(op, status: HttpStatusCode.PreconditionFailed, resultId: "id", saved: false);
         }
@@ -127,7 +127,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             var result = new JObject() { { "id", resultId } };
             if (saved)
             {
-                this.store.Setup(s => s.UpsertAsync("table", It.Is<JObject>(o => o.ToString() == result.ToString())))
+                this.store.Setup(s => s.UpsertAsync("table", It.Is<JObject>(o => o.ToString() == result.ToString()), true))
                           .Returns(Task.FromResult(0));
             }
             await this.TestExecuteAsync(op, result, status);

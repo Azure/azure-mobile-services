@@ -335,7 +335,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         {
             foreach (JObject item in items)
             {
-                await store.UpsertAsync(tableName, item);
+                await store.UpsertAsync(tableName, item, fromServer: false);
             }
         }
     }

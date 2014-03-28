@@ -71,7 +71,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Column with name &apos;{0}&apos; is not defined on table &apos;{1}&apos;..
+        ///   Looks up a localized string similar to Column with name &apos;{0}&apos; is not defined on the local table &apos;{1}&apos;..
         /// </summary>
         internal static string SQLiteStore_ColumnNotDefined {
             get {

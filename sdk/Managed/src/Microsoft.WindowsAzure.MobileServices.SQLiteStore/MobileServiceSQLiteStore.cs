@@ -156,8 +156,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         /// </summary>
         /// <param name="tableName">Name of the local table.</param>
         /// <param name="item">The item to insert or update.</param>
+        /// <param name="fromServer"><code>true</code> if the call is made based on data coming from the server e.g. in a pull operation; <code>false</code> if the call is made by the client, such as insert or update calls on an <see cref="IMobileServiceSyncTable"/>.</param>
         /// <returns>A task that completes when upsert has been performed.</returns>
-        public Task UpsertAsync(string tableName, JObject item)
+        public Task UpsertAsync(string tableName, JObject item, bool fromServer)
         {
             if (tableName == null)
             {
@@ -171,8 +172,19 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             this.EnsureInitialized();
 
             TableDefinition table = GetTable(tableName);
-            
-            IList<JProperty> columns = item.Properties().ToList();
+
+            var properties = item.Properties();
+            if (fromServer)
+            {
+                properties = properties.Where(p => table.ContainsKey(p.Name));                
+            }
+
+            if (!properties.Any())
+            {
+                return Task.FromResult(0); // no query to execute if there are no columns in the item
+            }
+
+            IList<JProperty> columns = properties.ToList();
             string columnNames = String.Join(", ", columns.Select(c => SqlHelpers.FormatMember(c.Name)));
 
             var sql = new StringBuilder();
@@ -187,7 +199,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             {
                 if (!table.TryGetValue(column.Name, out columnDefinition))
                 {
-                    throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_ColumnNotDefined, column.Name, tableName));
+                   throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_ColumnNotDefined, column.Name, tableName));
                 }
 
                 object value = SqlHelpers.SerializeValue(column.Value, columnDefinition.SqlType, columnDefinition.Property.Value.Type);

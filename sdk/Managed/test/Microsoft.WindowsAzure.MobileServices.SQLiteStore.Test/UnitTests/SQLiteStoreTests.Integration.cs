@@ -158,7 +158,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                 {
                     { "ID", Guid.NewGuid() },
                     {"dATE", DateTime.UtcNow }
-                });
+                }, fromServer: false);
             }
         }
 

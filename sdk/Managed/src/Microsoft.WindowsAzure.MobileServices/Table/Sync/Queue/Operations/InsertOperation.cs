@@ -55,7 +55,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public override Task ExecuteLocalAsync(IMobileServiceLocalStore store, JObject item)
         {
-            return store.UpsertAsync(this.TableName, item);
+            return store.UpsertAsync(this.TableName, item, fromServer: false);
         }
     }
 }

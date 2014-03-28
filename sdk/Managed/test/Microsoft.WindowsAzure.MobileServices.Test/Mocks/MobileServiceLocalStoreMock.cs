@@ -63,7 +63,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             return Task.FromResult(0);
         }
 
-        public Task UpsertAsync(string tableName, JObject item)
+        public Task UpsertAsync(string tableName, JObject item, bool fromServer)
         {
             MockTable table = GetTable(tableName);
             table[item.Value<string>("id")] = item;
