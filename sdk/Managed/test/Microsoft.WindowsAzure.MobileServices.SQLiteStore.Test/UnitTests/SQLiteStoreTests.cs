@@ -44,7 +44,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             var ex = await ThrowsAsync<InvalidOperationException>(() => store.InitializeAsync());
 
-            Assert.AreEqual(ex.Message, "Store is already initialized.");
+            Assert.AreEqual(ex.Message, "The store is already initialized.");
         }
 
         [AsyncTestMethod]
@@ -53,7 +53,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             var store = new MobileServiceSQLiteStore(TestDbName);
             await store.InitializeAsync();
             var ex = Throws<InvalidOperationException>(()=> store.DefineTable(TestTable, new JObject()));
-            Assert.AreEqual(ex.Message, "Cannot define table after store has been initialized.");
+            Assert.AreEqual(ex.Message, "Cannot define a table after the store has been initialized.");
         }
 
         [TestMethod]
@@ -337,7 +337,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         {
             var store = new MobileServiceSQLiteStore(TestDbName);
             var ex = Throws<InvalidOperationException>(() => storeAction(store));
-            Assert.AreEqual(ex.Message, "Store must be initialized before it can be used.");
+            Assert.AreEqual(ex.Message, "The store must be initialized before it can be used.");
         }
 
         private static async Task PrepareTodoTable()
