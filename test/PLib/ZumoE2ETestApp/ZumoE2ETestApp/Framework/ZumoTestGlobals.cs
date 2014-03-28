@@ -19,6 +19,7 @@ namespace ZumoE2ETestApp.Framework
         public const string StringIdRoundTripTableName = "stringIdRoundTripTable";
         public const string MoviesTableName = "intIdMovies";
         public const string StringIdMoviesTableName = "stringIdMovies";
+
 #if !WINDOWS_PHONE
         public const string PushTestTableName = "w8PushTest";
 #else

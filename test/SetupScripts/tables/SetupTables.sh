@@ -7,6 +7,9 @@ if [ "$1" = "" ]; then
 else
   azure mobile table create $1 stringIdRoundTripTable
   azure mobile table create $1 stringIdMovies
+  azure mobile table create $1 offlineReady
+  azure mobile table create $1 offlineReadyNoVersion
+  azure mobile table update --deleteColumn __version --quiet $1 offlineReadyNoVersion
   azure mobile table create --integerId $1 public
   azure mobile table create --integerId $1 admin
   azure mobile table create --integerId $1 application

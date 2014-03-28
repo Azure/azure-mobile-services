@@ -32,7 +32,8 @@ namespace ZumoE2ETestApp.Tests
                 ZumoWP8PushTests.CreateTests(),
 #endif
 #if NETFX_CORE                
-                ZumoPushTests.CreateTests()
+                ZumoPushTests.CreateTests(),
+                ZumoOfflineTests.CreateTests(),
 #endif
             };
 
