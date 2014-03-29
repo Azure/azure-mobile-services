@@ -25,13 +25,13 @@ var MobileServiceSystemProperties = {
     UpdatedAt: 2,
     Version: 4,
     All: 0xFFFF
-}
+};
 
 var MobileServiceSystemColumns = {
     CreatedAt: "__createdAt",
     UpdatedAt: "__updatedAt",
     Version: "__version"
-}
+};
 
 Platform.addToMobileServicesClientNamespace({
     MobileServiceTable:
