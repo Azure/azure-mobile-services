@@ -89,6 +89,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public DateTime DateTime { get; set; }
         public DateTimeOffset DateTimeOffset { get; set; }
         public double? Nullable { get; set; }
+        public DateTime? NullableDateTime { get; set; }
         public Uri Uri { get; set; }
         public Enum1 Enum1 { get; set; }
         public Enum2 Enum2 { get; set; }

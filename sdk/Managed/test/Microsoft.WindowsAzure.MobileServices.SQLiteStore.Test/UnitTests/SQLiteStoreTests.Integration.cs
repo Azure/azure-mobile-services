@@ -76,7 +76,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             Assert.AreEqual(rehydrated.CreatedAt.ToUniversalTime(), theDate);
         }
-
+        
         [AsyncTestMethod]
         public async Task DefineTable_IgnoresColumn_IfCaseIsDifferentButNameIsSame()
         {
@@ -210,6 +210,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                 DateTime = new DateTime(2010,10,10, 10, 10, 10, DateTimeKind.Utc),
                 DateTimeOffset = new DateTimeOffset(2011,11,11,11,11,11, 11, TimeSpan.Zero),
                 Nullable = 12.13,
+                NullableDateTime = new DateTime(2014,12,14, 14, 14, 14, DateTimeKind.Utc),
                 Uri = new Uri("http://example.com"),
                 Enum1 = Enum1.Enum1Value2,
                 Enum2 = Enum2.Enum2Value2,
@@ -245,6 +246,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 ""char"":""9"",
 ""dateTime"":""2010-10-10T10:10:10.000Z"",
 ""dateTimeOffset"":""2011-11-11T11:11:11.011Z"",
+""nullableDateTime"":""2010-10-10T10:10:10.000Z"",
 ""nullable"":12.13,
 ""uri"":""http://example.com/"",
 ""enum1"":""Enum1Value2"",
