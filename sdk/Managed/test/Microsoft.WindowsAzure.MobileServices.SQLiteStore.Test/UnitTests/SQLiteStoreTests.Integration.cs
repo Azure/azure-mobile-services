@@ -92,7 +92,12 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             IMobileServiceClient service = await CreateClient(hijack, store);
             var table = service.GetSyncTable<ToDoWithSystemPropertiesType>();
 
-            var inserted = new ToDoWithSystemPropertiesType() { Id ="123", Version = "abc", String = "def" };
+            var inserted = new ToDoWithSystemPropertiesType() 
+            { 
+                Id ="123", 
+                Version = "abc", 
+                String = "def" 
+            };
             await table.InsertAsync(inserted);
 
             Assert.AreEqual(inserted.Version, "abc");
@@ -102,8 +107,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             ToDoWithSystemPropertiesType rehydrated = await table.LookupAsync(inserted.Id);
 
             Assert.AreEqual(rehydrated.Version, "xyz");
-        }
 
+            string expectedRequestContent = @"{""id"":""123"",""String"":""def""}";
+            // version should not be sent with insert request
+            Assert.AreEqual(hijack.RequestContents[0], expectedRequestContent);
+        }
 
         [AsyncTestMethod]
         public async Task DefineTable_IgnoresColumn_IfCaseIsDifferentButNameIsSame()
