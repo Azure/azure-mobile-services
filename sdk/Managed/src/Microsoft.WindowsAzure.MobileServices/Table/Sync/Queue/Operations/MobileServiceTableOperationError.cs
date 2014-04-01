@@ -46,7 +46,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <summary>
         /// Response of the table operation.
         /// </summary>
-        public JToken Result { get; private set; }
+        public JObject Result { get; private set; }
 
         /// <summary>
         /// Raw response of the table operation.
@@ -72,7 +72,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                                                 string tableName, 
                                                 JObject item,
                                                 string rawResult,
-                                                JToken result)
+                                                JObject result)
         {
             this.Id = Guid.NewGuid().ToString();
             this.Status = status;
@@ -108,7 +108,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             string itemStr = obj.Value<string>("item");
             JObject item = itemStr == null ? null : JObject.Parse(itemStr);
             string rawResult = obj.Value<string>("rawResult");
-            JToken result = rawResult.ParseToJToken(settings);
+            var result = rawResult.ParseToJToken(settings) as JObject;
             string id = obj.Value<string>("id");
             return new MobileServiceTableOperationError(status, operation, tableName, item, rawResult, result) { Id = id };
         }
