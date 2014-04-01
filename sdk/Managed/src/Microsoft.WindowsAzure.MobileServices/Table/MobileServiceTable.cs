@@ -51,6 +51,30 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         public MobileServiceSystemProperties SystemProperties { get; set; }
 
+        private Dictionary<string, string> requestHeaders;
+
+        /// <summary>
+        /// Additional headers to be sent with all table requests to the server
+        /// </summary>
+        public void AddRequestHeader(string header, string value)
+        {
+            if (String.IsNullOrEmpty(header)) 
+            {
+                throw new ArgumentNullException("header");
+            }
+            if (String.IsNullOrEmpty(value))
+            {
+                throw new ArgumentNullException("value");
+            }
+
+            if (this.requestHeaders == null)
+            {
+                this.requestHeaders = new Dictionary<string, string>();
+            }
+
+            this.requestHeaders.Add(header, value);
+        }
+
         /// <summary>
         /// Initializes a new instance of the MobileServiceTable class.
         /// </summary>
@@ -79,7 +103,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will return with results when the query finishes.
         /// </returns>
-        public Task<JToken> ReadAsync(string query)
+        public virtual Task<JToken> ReadAsync(string query)
         {
             return this.ReadAsync(query, null);
         }
@@ -119,7 +143,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             string uriString = MobileServiceUrlBuilder.CombinePathAndQuery(uriPath, query);
 
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true);
+            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, this.requestHeaders);
             return response.Content.ParseToJToken(this.MobileServiceClient.SerializerSettings);
         }
 
@@ -173,7 +197,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
             string uriString = GetUri(this.TableName, null, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, instance.ToString(Formatting.None), true);
+            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, instance.ToString(Formatting.None), true, this.requestHeaders);
             return GetJTokenFromResponse(response);
         }
 
@@ -228,9 +252,14 @@ namespace Microsoft.WindowsAzure.MobileServices
                 string content = instance.ToString(Formatting.None);
                 string uriString = GetUri(this.TableName, id, parameters);
 
+                headers = this.requestHeaders;
+
                 if (!String.IsNullOrEmpty(version))
                 {
-                    headers = new Dictionary<string, string>();
+                    if (headers == null)
+                    {
+                        headers = new Dictionary<string, string>();
+                    }
                     headers.Add("If-Match", GetEtagFromValue(version));
                 }
 
@@ -290,7 +319,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
             string uriString = GetUri(this.TableName, id, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false);
+            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false, this.requestHeaders);
             return GetJTokenFromResponse(response);
         }
 
@@ -328,7 +357,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
             string uriString = GetUri(this.TableName, id, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true);
+            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, this.requestHeaders);
             return GetJTokenFromResponse(response);
         }
 

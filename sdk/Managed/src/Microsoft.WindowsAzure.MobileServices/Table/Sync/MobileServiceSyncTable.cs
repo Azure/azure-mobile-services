@@ -35,6 +35,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.syncContext = (MobileServiceSyncContext)client.SyncContext;
             this.remoteTable = (MobileServiceTable)client.GetTable(tableName);
             this.remoteTable.SystemProperties = MobileServiceSystemProperties.Version;
+            this.remoteTable.AddRequestHeader(MobileServiceHttpClient.ZumoFeaturesHeader, MobileServiceFeatures.Offline);
         }
 
         public Task<JToken> ReadAsync(string query)

@@ -60,6 +60,7 @@
     <Compile Include="Authentication\MobileServiceAuthentication.cs" />
     <Compile Include="Authentication\MobileServiceAuthenticationProvider.cs" />
     <Compile Include="MobileServiceClient.cs" />
+    <Compile Include="MobileServiceFeatures.cs" />
     <Compile Include="MobileServiceUser.cs" />
     <Compile Include="Platform\IApplicationStorage.cs" />
     <Compile Include="Platform\IExpressionUtility.cs" />

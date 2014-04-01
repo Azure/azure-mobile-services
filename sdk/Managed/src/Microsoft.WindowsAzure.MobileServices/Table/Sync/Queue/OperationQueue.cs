@@ -85,7 +85,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
         }
 
-        public Task<IDisposable> LockTableAsync(string name, CancellationToken cancellationToken)
+        public virtual Task<IDisposable> LockTableAsync(string name, CancellationToken cancellationToken)
         {
             return this.tableLocks.Acquire(name, cancellationToken);
         }
@@ -145,6 +145,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     var op = MobileServiceTableOperation.Deserialize(obj);
                     op.Table = client.GetTable(op.TableName) as MobileServiceTable;
                     op.Table.SystemProperties = MobileServiceSystemProperties.Version;
+                    op.Table.AddRequestHeader(MobileServiceHttpClient.ZumoFeaturesHeader, MobileServiceFeatures.Offline);
                     unorderedOps.Add(op);
                 }
 

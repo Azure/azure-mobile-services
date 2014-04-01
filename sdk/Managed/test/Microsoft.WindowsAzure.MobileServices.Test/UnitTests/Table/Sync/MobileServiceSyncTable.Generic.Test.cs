@@ -183,6 +183,30 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task PullAsync_TriggersPush_FeatureHeaderInOperation()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}"); // for insert
+            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
+
+            var store = new MobileServiceLocalStoreMock();
+            store.ReadResponses.Enqueue("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
+
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            // insert an item but don't push
+            IMobileServiceSyncTable table1 = service.GetSyncTable("someTable");
+            await table1.InsertAsync(new JObject() { { "id", "abc" } });
+
+            // this should trigger a push
+            await table1.PullAsync(null, cancellationToken: CancellationToken.None);
+
+            Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(), "OL");
+            Assert.AreEqual(hijack.Requests[1].Headers.GetValues("X-ZUMO-FEATURES").First(), "OL");
+        }
+
+        [AsyncTestMethod]
         public async Task PullAsync_Throws_WhenPushThrows()
         {
             var hijack = new TestHttpHandler();

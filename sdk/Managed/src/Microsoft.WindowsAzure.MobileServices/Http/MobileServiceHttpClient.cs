@@ -20,6 +20,11 @@ namespace Microsoft.WindowsAzure.MobileServices
     internal class MobileServiceHttpClient : IDisposable
     {
         /// <summary>
+        /// Name of the header to indicate the feature(s) initiating the remote server call
+        /// </summary>
+        internal const string ZumoFeaturesHeader = "X-ZUMO-FEATURES";
+
+        /// <summary>
         /// Name of the Installation ID header included on each request.
         /// </summary>
         private const string RequestInstallationIdHeader = "X-ZUMO-INSTALLATION-ID";

@@ -38,6 +38,7 @@
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
     <None Include="packages.config" />
+    <Compile Include="UnitTests\Table\Sync\MobileServiceSyncContext.Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssertEx.cs" />
