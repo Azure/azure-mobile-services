@@ -74,9 +74,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
-            JObject item1 = new JObject() { { "id", "abc" } }, item2 = new JObject() { { "id", "def" } };
+            JObject item1 = new JObject() { { "id", "abc" } };
             await table.InsertAsync(item1);
-            await table.InsertAsync(item2);
             await service.SyncContext.PushAsync();
 
             Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(), "OL");
@@ -91,9 +90,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
-            JObject item1 = new JObject() { { "id", "abc" } }, item2 = new JObject() { { "id", "def" } };
+            JObject item1 = new JObject() { { "id", "abc" } };
             await table.InsertAsync(item1);
-            await table.InsertAsync(item2);
 
             // create a new service to test that operations are loaded from store
             hijack = new TestHttpHandler();
