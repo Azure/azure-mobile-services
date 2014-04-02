@@ -235,51 +235,19 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("instance");
             }
 
-            MobileServiceInvalidOperationException error = null;
-
             object id = MobileServiceSerializer.GetId(instance);
-            string version = null;
-            if (!MobileServiceSerializer.IsIntegerId(id))
-            {
-                instance = MobileServiceSerializer.RemoveSystemProperties(instance, out version);
-            }
-            parameters = AddSystemProperties(this.SystemProperties, parameters);
+            Dictionary<string, string> headers = StripSystemPropertiesAndAddVersionHeader(ref instance, ref parameters, id);
 
-            try
-            {
-                Dictionary<string, string> headers = null;
 
+            return await this.TransformConflictToPreconditionFailedException(async () =>
+            {
                 string content = instance.ToString(Formatting.None);
                 string uriString = GetUri(this.TableName, id, parameters);
 
-                headers = this.requestHeaders;
-
-                if (!String.IsNullOrEmpty(version))
-                {
-                    if (headers == null)
-                    {
-                        headers = new Dictionary<string, string>();
-                    }
-                    headers.Add("If-Match", GetEtagFromValue(version));
-                }
-
                 MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(patchHttpMethod, uriString, this.MobileServiceClient.CurrentUser, content, true, headers);
                 return GetJTokenFromResponse(response);
-            }
-            catch (MobileServiceInvalidOperationException ex)
-            {
-                if (ex.Response != null &&
-                    ex.Response.StatusCode != HttpStatusCode.PreconditionFailed)
-                {
-                    throw;
-                }
-
-                error = ex;
-            }
-
-            Tuple<string, JToken> responseContent = await this.ParseContent(error.Response);
-            throw new MobileServicePreconditionFailedException(error, responseContent.Item2.ValidItemOrNull());
-        }   
+            });            
+        }  
      
         /// <summary>
         /// Deletes an <paramref name="instance"/> from the table.
@@ -315,12 +283,14 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("instance");
             }
 
-            object id = MobileServiceSerializer.GetId(instance);
-            parameters = AddSystemProperties(this.SystemProperties, parameters);
-
-            string uriString = GetUri(this.TableName, id, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false, this.requestHeaders);
-            return GetJTokenFromResponse(response);
+            return await TransformConflictToPreconditionFailedException(async () =>
+            {
+                object id = MobileServiceSerializer.GetId(instance);
+                Dictionary<string, string> headers = StripSystemPropertiesAndAddVersionHeader(ref instance, ref parameters, id);
+                string uriString = GetUri(this.TableName, id, parameters);
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false, headers);
+                return GetJTokenFromResponse(response);
+            });
         }
 
         /// <summary>
@@ -496,6 +466,64 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return jtoken;
         }
+
+        /// <summary>
+        /// Executes a request and transforms a 412 precondition failed response to <see cref="MobileServicePreconditionFailedException"/>.
+        /// </summary>
+        private async Task<JToken> TransformConflictToPreconditionFailedException(Func<Task<JToken>> action)
+        {
+            MobileServiceInvalidOperationException error = null;
+
+            try
+            {
+                return await action();
+            }
+            catch (MobileServiceInvalidOperationException ex)
+            {
+                if (ex.Response != null &&
+                    ex.Response.StatusCode != HttpStatusCode.PreconditionFailed)
+                {
+                    throw;
+                }
+
+                error = ex;
+            }
+
+            Tuple<string, JToken> responseContent = await this.ParseContent(error.Response);
+            throw new MobileServicePreconditionFailedException(error, responseContent.Item2.ValidItemOrNull());
+        }
+
+        /// <summary>
+        /// if id is of type string then it strips the system properties and adds version header.
+        /// </summary>
+        /// <returns>The header collection with if-match header.</returns>
+        private Dictionary<string, string> StripSystemPropertiesAndAddVersionHeader(ref JObject instance, ref IDictionary<string, string> parameters, object id)
+        {
+            string version = null;
+            if (!MobileServiceSerializer.IsIntegerId(id))
+            {
+                instance = MobileServiceSerializer.RemoveSystemProperties(instance, out version);
+            }
+            parameters = AddSystemProperties(this.SystemProperties, parameters);
+            Dictionary<string, string> headers = AddIfMatchHeader(version, this.requestHeaders);
+            return headers;
+        }
+
+        /// <summary>
+        /// Adds If-Match header to request if version is non-null.
+        /// </summary>
+        private static Dictionary<string, string> AddIfMatchHeader(string version, Dictionary<string, string> headers)
+        {
+            if (!String.IsNullOrEmpty(version))
+            {
+                if (headers == null)
+                {
+                    headers = new Dictionary<string, string>();
+                }
+                headers.Add("If-Match", GetEtagFromValue(version));
+            }
+            return headers;
+        } 
 
         /// <summary>
         /// Gets a valid etag from a string value. Etags are surrounded
