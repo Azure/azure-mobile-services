@@ -251,9 +251,6 @@ namespace ZumoE2ETestApp.Tests
             }
 
 #if !WINDOWS_PHONE
-            var statusTest = ZumoTestCommon.CreateTestWithSingleAlert("The next test will show a dialog with certain movies. Please validate that movie titles and release years are shown correctly in the list.");
-            statusTest.CanRunUnattended = false;
-            result.AddTest(statusTest);
             result.AddTest(new ZumoTest("ToCollection - displaying movies on a ListBox", async delegate(ZumoTest test)
             {
                 var client = ZumoTestGlobals.Instance.Client;
@@ -266,21 +263,41 @@ namespace ZumoE2ETestApp.Tests
                                 Date = m.ReleaseDate.ToUniversalTime().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
                                 Title = m.Title
                             };
+                query = query.Take(50);
+                var expectedItems = ZumoQueryTestData.AllMovies
+                    .Where(m => m.Year > 1980)
+                    .OrderByDescending(m => m.ReleaseDate)
+                    .Select(m => string.Format(
+                        "{0} - {1}",
+                        m.ReleaseDate.ToUniversalTime().ToString("yyyy-MM-dd", CultureInfo.InvariantCulture),
+                        m.Title))
+                    .Take(50)
+                    .ToList();
                 var newPage = new MoviesDisplayControl();
                 var collection = await query.ToCollectionAsync();
                 newPage.SetMoviesSource(collection);
-                if (ZumoTestGlobals.ShowAlerts)
+
+                test.AddLog("Displaying the movie display control with the bound collection");
+                await newPage.Display();
+                test.AddLog("Dialog displayed, verifying that the items displayed are correct...");
+                var pageItems = newPage.ItemsAsString;
+                List<string> errors = new List<string>();
+                if (Util.CompareArrays(expectedItems.ToArray(), pageItems.ToArray(), errors))
                 {
-                    await newPage.Display();
+                    test.AddLog("Movies were displayed correctly.");
+                    return true;
                 }
-                return true;
-            }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES)
-            {
-                CanRunUnattended = false
-            });
-            var validationTest = ZumoTestCommon.CreateYesNoTest("Were the movies displayed correctly?", true);
-            validationTest.CanRunUnattended = false;
-            result.AddTest(validationTest);
+                else
+                {
+                    test.AddLog("Error comparing the movies:");
+                    foreach (var error in errors)
+                    {
+                        test.AddLog("  {0}", error);
+                    }
+
+                    return false;
+                }
+            }, ZumoTestGlobals.RuntimeFeatureNames.STRING_ID_TABLES));
 #endif
             return result;
         }

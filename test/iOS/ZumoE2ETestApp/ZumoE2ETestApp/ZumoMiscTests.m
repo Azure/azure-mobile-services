@@ -861,7 +861,7 @@ static NSString *parameterTestTableName = @"ParamsTestTable";
         MSClient *mockedClient = [client clientWithFilter:filter];
         [test addLog:[NSString stringWithFormat:@"Created a client with filter: %@", mockedClient.filters]];
         MSTable *table = [client tableWithName:stringIdTableName];
-        [table insert:@{@"string1":@"does not matter"} completion:^(NSDictionary *item, NSError *error) {
+        [table insert:@{@"name":@"does not matter"} completion:^(NSDictionary *item, NSError *error) {
             BOOL passed = NO;
             if (error) {
                 [test addLog:[NSString stringWithFormat:@"Error during insert: %@", error]];

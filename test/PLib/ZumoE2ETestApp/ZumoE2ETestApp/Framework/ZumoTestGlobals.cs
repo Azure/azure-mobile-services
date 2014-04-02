@@ -31,7 +31,13 @@ namespace ZumoE2ETestApp.Framework
 
         private static ZumoTestGlobals instance = new ZumoTestGlobals();
 
-        public static bool ShowAlerts = true;
+        private static bool showAlerts = true;
+        public static bool ShowAlerts
+        {
+            get { return showAlerts; }
+            set { showAlerts = value; }
+        }
+
         public const string LogsLocationFile = "done.txt";
 
         public static class RuntimeFeatureNames

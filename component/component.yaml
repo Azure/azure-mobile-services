@@ -1,0 +1,47 @@
+﻿id: azure-mobile-services
+version: 1.1.5
+name: Azure Mobile Services
+publisher: Microsoft
+publisher-url: http://www.windowsazure.com/en-us/develop/mobile/
+summary: Store data in the cloud, authenticate users, and send push notifications.
+license: LICENSE.md
+details: Details.md
+getting-started: GettingStarted.md
+icons:
+  - azure-mobile-services_512x512.png
+  - azure-mobile-services_128x128.png
+libraries:
+  ios: 
+    - ..\..\bin\Signed\Release\Managed\iOS\Microsoft.WindowsAzure.Mobile.dll
+    - ..\..\bin\Signed\Release\Managed\iOS\Microsoft.WindowsAzure.Mobile.Ext.dll    
+    - ..\..\bin\Signed\Release\Managed\iOS\Newtonsoft.Json.dll    
+    - ..\..\bin\Signed\Release\Managed\iOS\System.Net.Http.Extensions.dll
+    - ..\..\bin\Signed\Release\Managed\iOS\System.Net.Http.Primitives.dll
+  android:
+    - ..\..\bin\Signed\Release\Managed\Android\Microsoft.WindowsAzure.Mobile.dll
+    - ..\..\bin\Signed\Release\Managed\Android\Microsoft.WindowsAzure.Mobile.Ext.dll    
+    - ..\..\bin\Signed\Release\Managed\Android\Newtonsoft.Json.dll
+    - ..\..\bin\Signed\Release\Managed\Android\System.Net.Http.Extensions.dll
+    - ..\..\bin\Signed\Release\Managed\Android\System.Net.Http.Primitives.dll
+  mobile:
+    - ..\..\bin\Signed\Release\Managed\Portable\Microsoft.WindowsAzure.Mobile.dll
+    - ..\..\bin\Signed\Release\Managed\Portable\Newtonsoft.Json.dll
+samples:
+  - name: Android Sample
+    path: samples\androidsample.sln
+  - name: iOS Sample
+    path: samples\iOSsample.sln
+screenshots:
+  - screenshots/WAMS-New.PNG
+  - screenshots/WAMS-SQLdb1.png
+  - screenshots/WAMS-SQLdb2.png
+  - screenshots/WAMS-userauth.png
+  - screenshots/WAMS-push1.png
+  - screenshots/WAMS-push2.png
+  - screenshots/WAMS-Create.png
+  - screenshots/WAMS-Script1.png
+  - screenshots/WAMS-Script2.png
+  - screenshots/WAMS-Scheduler2.png
+  - screenshots/WAMS-Keys.png
+  - screenshots/WAMS-EmptyData.png
+  - screenshots/WAMS-DataPermissions.png
