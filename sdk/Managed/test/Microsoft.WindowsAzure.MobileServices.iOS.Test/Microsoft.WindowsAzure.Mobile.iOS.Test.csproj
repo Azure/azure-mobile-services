@@ -10,7 +10,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Microsoft.WindowsAzure.Mobile.iOS.Test</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
-    <AssemblyName>MicrosoftWindowsAzureMobileiOSTest</AssemblyName>
+    <AssemblyName>Microsoft.WindowsAzure.Mobile.iOS.Test</AssemblyName>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
