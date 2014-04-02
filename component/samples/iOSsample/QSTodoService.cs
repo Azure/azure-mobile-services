@@ -7,8 +7,7 @@ using Microsoft.WindowsAzure.MobileServices;
 namespace iOSsample
 {
 	public class QSTodoService : DelegatingHandler
-	{
-		static QSTodoService instance = new QSTodoService ();
+	{		
         const string applicationURL = @"MOBILE SERVICE URL";
 		const string applicationKey = @"APPLICATION KEY";
 		MobileServiceClient client;
@@ -17,7 +16,7 @@ namespace iOSsample
 
 		public event Action<bool> BusyUpdate;
 
-		QSTodoService ()
+		public QSTodoService ()
 		{
 			CurrentPlatform.Init ();
 
@@ -27,13 +26,7 @@ namespace iOSsample
 			// Create an MSTable instance to allow us to work with the TodoItem table
 			todoTable = client.GetTable <ToDoItem> ();
 		}
-
-		public static QSTodoService DefaultService {
-			get {
-				return instance;
-			}
-		}
-
+     
 		public List<ToDoItem> Items { get; private set;}
 
 		async public Task<List<ToDoItem>> RefreshDataAsync ()
