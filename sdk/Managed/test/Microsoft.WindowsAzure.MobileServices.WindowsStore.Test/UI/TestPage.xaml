@@ -74,44 +74,6 @@
                                 <StackPanel Orientation="Vertical" />
                             </ItemsPanelTemplate>
                         </GroupStyle.Panel>
-                        <GroupStyle.ContainerStyle>
-                            <Style TargetType="GroupItem">
-                                <Setter Property="IsTabStop" Value="False" />
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="GroupItem">
-                                            <Border
-                                              Background="{TemplateBinding Background}"
-                                              BorderBrush="{TemplateBinding BorderBrush}"
-                                              BorderThickness="{TemplateBinding BorderThickness}"
-                                              HorizontalAlignment="Stretch">
-                                                <Grid HorizontalAlignment="Stretch">
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="Auto" />
-                                                        <RowDefinition Height="*" />
-                                                    </Grid.RowDefinitions>
-                                                    <ContentControl x:Name="HeaderContent"
-                                                        Content="{TemplateBinding Content}"
-                                                        ContentTransitions="{TemplateBinding ContentTransitions}"
-                                                        ContentTemplate="{TemplateBinding ContentTemplate}"
-                                                        Margin="{TemplateBinding Padding}"
-                                                        HorizontalAlignment="Stretch"
-                                                        HorizontalContentAlignment="Stretch"
-                                                        TabIndex="0"
-                                                        IsTabStop="False" />
-                                                    <ItemsControl x:Name="ItemsControl"
-                                                      Grid.Row="1"
-                                                      ItemsSource="{Binding GroupItems}"
-                                                      IsTabStop="False"
-                                                      TabNavigation="Once"
-                                                      TabIndex="1" />
-                                                </Grid>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </GroupStyle.ContainerStyle>
                     </GroupStyle>
                 </ListView.GroupStyle>
                 <ListView.Template>

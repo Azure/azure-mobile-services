@@ -113,7 +113,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                                                             .FirstOrDefault() as DataTableAttribute;
                 if (dataTableAttribute != null)
                 {
-                    if (!string.IsNullOrWhiteSpace(dataTableAttribute.Name))
+                    if (!string.IsNullOrEmpty(dataTableAttribute.Name))
                     {
                         name = dataTableAttribute.Name;
                     }
@@ -219,7 +219,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             if (this.CamelCasePropertyNames)
             {
-                if (!string.IsNullOrEmpty(propertyName) && char.IsUpper(propertyName[0]))
+                if (!string.IsNullOrWhiteSpace(propertyName) && char.IsUpper(propertyName[0]))
                 {
                     string original = propertyName;
                     propertyName = char.ToLower(propertyName[0]).ToString();
