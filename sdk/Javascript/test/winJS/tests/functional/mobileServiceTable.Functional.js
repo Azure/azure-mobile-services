@@ -1079,5 +1079,46 @@ $testGroup('Mobile Service Table Tests')
             }, function (item) {
                 $assert.areNotEqual(item.__version, correctVersion);
             });
+        }),
+
+        $test('DeleteAsyncWithWithMergeConflict')
+        .description('test delete with conflict')
+        .tag('SystemProperties')
+        .checkAsync(function () {
+            var client = $getClient(),
+                table = client.getTable('StringIdJavascriptTable'),
+                savedVersion,
+                correctVersion;
+
+            table.systemProperties = WindowsAzure.MobileServiceTable.SystemProperties.All;
+
+            return $chain(function () {
+                return emptyTable(table);
+            }, function () {
+                return table.insert({ id: 'an id', String: 'a value' });
+            }, function (item) {
+                savedVersion = item.__version;
+
+                item.String = 'Hello!';
+                return table.update(item);
+            }, function (item) {
+                $assert.areNotEqual(item.__version, savedVersion);
+
+                item.String = 'But Wait!';
+                correctVersion = item.__version;
+                item.__version = savedVersion;
+
+                return table.del(item).then(function (item) {
+                    $assert.fail('Should have failed');
+                }, function (error) {
+                    $assert.areEqual(412, error.request.status);
+                    $assert.contains(error.message, "Precondition Failed");
+                    $assert.areEqual(error.serverInstance.__version, correctVersion);
+                    $assert.areEqual(error.serverInstance.String, 'Hello!');
+
+                    item.__version = correctVersion;
+                    return table.del(item);
+                });
+            });
         })
     );
