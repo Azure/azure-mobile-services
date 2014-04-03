@@ -28,9 +28,9 @@ libraries:
     - ..\..\bin\Signed\Release\Managed\Portable\Newtonsoft.Json.dll
 samples:
   - name: Android Sample
-    path: samples\androidsample.sln
+    path: samples\androidsample\androidsample.sln
   - name: iOS Sample
-    path: samples\iOSsample.sln
+    path: samples\iOSsample\iOSsample.sln
 screenshots:
   - screenshots/WAMS-New.PNG
   - screenshots/WAMS-SQLdb1.png
