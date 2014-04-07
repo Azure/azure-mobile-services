@@ -596,7 +596,11 @@ public class MobileServiceClient {
 				
 		JsonElement json = null;
 		if (body != null) {
-			json = getGsonBuilder().create().toJsonTree(body);
+			if (body instanceof JsonElement) {
+				json = (JsonElement)body;
+			} else {
+				json = getGsonBuilder().create().toJsonTree(body);
+			}
 		}
 		
 		invokeApi(apiName, json, httpMethod, parameters, new ApiJsonOperationCallback() {
