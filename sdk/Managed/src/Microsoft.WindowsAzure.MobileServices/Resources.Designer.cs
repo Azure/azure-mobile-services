@@ -152,6 +152,24 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Authentication is already in progress..
+        /// </summary>
+        internal static string IAuthenticationBroker_LoginInProgress {
+            get {
+                return ResourceManager.GetString("IAuthenticationBroker_LoginInProgress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Authentication has not been started..
+        /// </summary>
+        internal static string IAuthenticationBroker_NoLoginInProgress {
+            get {
+                return ResourceManager.GetString("IAuthenticationBroker_NoLoginInProgress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to {0} cannot be null, empty or only whitespace..
         /// </summary>
         internal static string MobileServiceClient_EmptyArgument {

@@ -288,6 +288,12 @@
   <data name="Push_TagNoCommas" xml:space="preserve">
     <value>Tags must not contain ','.</value>
   </data>
+  <data name="IAuthenticationBroker_LoginInProgress" xml:space="preserve">
+    <value>Authentication is already in progress.</value>
+  </data>
+  <data name="IAuthenticationBroker_NoLoginInProgress" xml:space="preserve">
+    <value>Authentication has not been started.</value>
+  </data>
   <data name="MobileServiceSyncTable_IdMustBeString" xml:space="preserve">
     <value>The id must be of type string.</value>
   </data>

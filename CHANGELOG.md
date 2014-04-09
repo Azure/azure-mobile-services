@@ -1,5 +1,24 @@
 # Windows Azure Mobile Services Change Log
 
+### Version 1.2.1
+**Managed SDK**
+- Added support for Windows Phone 8.1, requires using Visual Studio 2013 Update 2 RC
+
+### Version 1.1.5
+**Managed SDK**
+- Added support for Xamarin (iOS / Android)
+- Clean-up id validation on insert operations
+
+**Javascript SDK**
+- Fix issue [#218](https://github.com/WindowsAzure/azure-mobile-services/issues/218) in which some dates coming from the mobile services with the .NET runtime weren't parsed correctly
+- [WinJS only] Fix race condition on notification hub integration initialization when storage was corrupted
+
+**iOS SDK**
+- - Fix issue [#218](https://github.com/WindowsAzure/azure-mobile-services/issues/218) in which some dates coming from the mobile services with the .NET runtime weren't parsed correctly
+
+**Android SDK**
+- Added support for Windows Azure Notification Hub integration
+
 ### Version 1.1.4
 **Managed SDK**
 - Added support for Windows Azure Notification Hub integration.

@@ -20,7 +20,16 @@ namespace iOSsample
 		{
 			base.ViewDidLoad ();
 
-			todoService = QSTodoService.DefaultService;
+			try
+			{
+				todoService = new QSTodoService();
+			}
+			catch (UriFormatException e)
+			{
+				var alert = new UIAlertView("Error", "Please make sure you update the applicationURL and applicationKey to match the mobile service you have created.", null, "OK");
+				alert.Show();
+				return;		        
+			}
 
 			todoService.BusyUpdate += (bool busy) => {
 				if (busy)

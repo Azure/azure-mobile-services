@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest">
+  <Identity Name="90d8932d-7158-463d-9db4-2cbce122d372" Publisher="CN=phvannor" Version="1.0.0.0" />
+  <Properties>
+    <DisplayName>Microsoft.WindowsAzure.Mobile.WP81.Test</DisplayName>
+    <PublisherDisplayName>phvannor</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+  <Prerequisites>
+    <OSMinVersion>6.3.0</OSMinVersion>
+    <OSMaxVersionTested>6.3.0</OSMaxVersionTested>
+  </Prerequisites>
+  <mp:PhoneIdentity PhoneProductId="90d8932d-7158-463d-9db4-2cbce122d372" PhonePublisherId="00000000-0000-0000-0000-000000000000" />
+  <Resources>
+    <Resource Language="x-generate" />
+  </Resources>
+  <Applications>
+    <Application Id="x90d8932dy7158y463dy9db4y2cbce122d372x" Executable="$targetnametoken$.exe" EntryPoint="Microsoft.WindowsAzure.MobileServices.WindowsStore.Test.App">
+      <m2:VisualElements DisplayName="Microsoft.WindowsAzure.Mobile.WP81.Test" Square150x150Logo="Assets\Logo.png" Square30x30Logo="Assets\SmallLogo.png" Description="Windows Azure Mobile Services Test App" ForegroundText="light" BackgroundColor="#464646">
+        <m2:DefaultTile Wide310x150Logo="Assets\WideLogo.png">
+        </m2:DefaultTile>
+        <m2:SplashScreen Image="Assets\SplashScreen.png" />
+      </m2:VisualElements>
+    </Application>
+  </Applications>
+  <Capabilities>
+    <Capability Name="internetClient" />
+  </Capabilities>
+</Package>
