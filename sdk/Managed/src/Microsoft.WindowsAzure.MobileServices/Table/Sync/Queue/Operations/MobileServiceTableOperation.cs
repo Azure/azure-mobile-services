@@ -27,6 +27,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public DateTime CreatedAt { get; private set; }
         public long Sequence { get; set; }
 
+        IMobileServiceTable IMobileServiceTableOperation.Table 
+        {
+            get { return this.Table; }
+        }
+
         // --- Non persisted properties -- //
         public MobileServiceTable Table { get; set; }
         

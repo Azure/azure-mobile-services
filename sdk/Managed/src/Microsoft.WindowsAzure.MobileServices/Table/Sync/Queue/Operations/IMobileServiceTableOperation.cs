@@ -19,9 +19,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         MobileServiceTableOperationKind Kind { get; }
 
         /// <summary>
-        /// Name of the table the operation will be executed against.
+        /// The table that the operation will be executed against.
         /// </summary>
-        string TableName { get; }
+        IMobileServiceTable Table { get; }
 
         /// <summary>
         /// The item associated with the operation.
