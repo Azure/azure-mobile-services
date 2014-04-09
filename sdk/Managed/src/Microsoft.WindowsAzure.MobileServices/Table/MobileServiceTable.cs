@@ -516,11 +516,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             if (!String.IsNullOrEmpty(version))
             {
-                if (headers == null)
-                {
-                    headers = new Dictionary<string, string>();
-                }
-                headers.Add("If-Match", GetEtagFromValue(version));
+                headers = headers == null ? new Dictionary<string, string>() : new Dictionary<string, string>(headers);
+                headers["If-Match"] = GetEtagFromValue(version);
             }
             return headers;
         } 

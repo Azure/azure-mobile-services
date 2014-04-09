@@ -107,19 +107,56 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task PushAsync_ReplaysStoredErrors_IfTheyAreInStore()
         {
-            var hijack = new TestHttpHandler();
-            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.Conflict) { Content = new StringContent("[{\"id\":\"abc\",\"String\":\"Hey\"}]") });
+            var error = new MobileServiceTableOperationError(HttpStatusCode.PreconditionFailed,
+                                                            MobileServiceTableOperationKind.Update,
+                                                            "test",
+                                                            new JObject(),
+                                                            "{}",
+                                                            new JObject());
+            var store = new MobileServiceLocalStoreMock();
+            await store.UpsertAsync(MobileServiceLocalSystemTables.SyncErrors, error.Serialize(), fromServer: false);
 
+            var hijack = new TestHttpHandler();
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
-            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            var ex = await ThrowsAsync<MobileServicePushFailedException>(service.SyncContext.PushAsync);
+        }
+
+        [AsyncTestMethod]
+        public async Task PushAsync_Succeeds_WithClientWinsPolicy()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.PreconditionFailed) 
+            {
+                Content = new StringContent("{\"id\":\"abc\",\"__version\":\"Hey\"}") 
+            });
+            hijack.AddResponseContent(@"{""id"": ""abc""}");
+
+            var handler = new MobileServiceSyncHandlerMock();
+            handler.TableOperationAction = async op =>
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    try
+                    {
+                        return await op.ExecuteAsync();
+                    }
+                    catch (MobileServicePreconditionFailedException ex)
+                    {
+                        op.Item[MobileServiceSystemColumns.Version] = ex.Value[MobileServiceSystemColumns.Version];
+                    }
+                }
+                return null;
+            };
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), handler);
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
 
-            await table.InsertAsync(new JObject() { { "id", "abc" } });
+            await table.UpdateAsync(new JObject() { { "id", "abc" }, {"__version", "Wow"} });
 
-            Assert.AreEqual(hijack.Requests.Count, 0);
-
-            var ex = await ThrowsAsync<MobileServicePushFailedException>(service.SyncContext.PushAsync);
+            await service.SyncContext.PushAsync();
         }
     }
 }
