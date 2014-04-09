@@ -139,6 +139,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                    this.Enum5 == other.Enum5 &&
                    this.Enum6 == other.Enum6;
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 
     public class AllSystemPropertiesType
