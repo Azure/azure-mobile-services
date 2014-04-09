@@ -10,7 +10,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace Microsoft.WindowsAzure.MobileServices
+namespace Microsoft.WindowsAzure.MobileServices.Query
 {
     /// <summary>
     /// Represents a query that can be evaluated against a Mobile Services
@@ -53,10 +53,6 @@ namespace Microsoft.WindowsAzure.MobileServices
                                          IDictionary<string, string> parameters,
                                          bool includeTotalCount)
         {
-            if (table == null)
-            {
-                throw new ArgumentNullException("table");
-            }
             if (table == null)
             {
                 throw new ArgumentNullException("table");

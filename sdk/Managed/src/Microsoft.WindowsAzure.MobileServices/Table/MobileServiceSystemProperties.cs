@@ -17,7 +17,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// No system properties
         /// </summary>
         None = 0x0,
-
+        
         /// <summary>
         /// The __createdAt system property
         /// </summary>

@@ -157,7 +157,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new InvalidOperationException(
                     string.Format(CultureInfo.InvariantCulture,
                         Resources.MobileServiceContractResolver_MemberNotFound,
-                        MobileServiceSerializer.IdPropertyName,
+                        MobileServiceSystemColumns.Id,
                         type.FullName));
             }
 
@@ -460,7 +460,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new InvalidOperationException(
                     string.Format(CultureInfo.InvariantCulture,
                     Resources.MobileServiceContractResolver_SamePropertyName,
-                    MobileServiceSerializer.IdPropertyName,
+                    MobileServiceSystemColumns.Id,
                     type.FullName));
             }
 
@@ -469,12 +469,12 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new InvalidOperationException(
                     string.Format(CultureInfo.InvariantCulture,
                     Resources.MobileServiceContractResolver_MemberNotFound,
-                    MobileServiceSerializer.IdPropertyName,
+                    MobileServiceSystemColumns.Id,
                     type.FullName));
             }
 
             JsonProperty idProperty = idProperties[0];
-            idProperty.PropertyName = MobileServiceSerializer.IdPropertyName;
+            idProperty.PropertyName = MobileServiceSystemColumns.Id;
             idProperty.NullValueHandling = NullValueHandling.Ignore;
             idProperty.DefaultValueHandling = DefaultValueHandling.Ignore;
             this.idPropertyCache[type] = idProperty;

@@ -27,20 +27,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal const string SystemPropertyPrefix = "__";
 
         /// <summary>
-        /// The version system property as a string with the prefix.
-        /// </summary>
-        internal static readonly string VersionSystemPropertyString = String.Format("{0}{1}", MobileServiceSerializer.SystemPropertyPrefix, MobileServiceSystemProperties.Version.ToString()).ToLowerInvariant();
-
-        /// <summary>
-        /// The name of the reserved Mobile Services id member.
-        /// </summary>
-        /// <remarks>
-        /// Note: This value is used by other areas like serialiation to find
-        /// the name of the reserved id member.
-        /// </remarks>
-        internal const string IdPropertyName = "id";
-
-        /// <summary>
         /// A regex for validating string ids
         /// </summary>
         private static Regex stringIdValidationRegex = new Regex(@"([\u0000-\u001F]|[\u007F-\u009F]|[""\+\?\\\/\`]|^\.{1,2}$)");
@@ -112,11 +98,11 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             if (ignoreCase)
             {
-                gotId = instance.TryGetValue(IdPropertyName, StringComparison.OrdinalIgnoreCase, out idToken);
+                gotId = instance.TryGetValue(MobileServiceSystemColumns.Id, StringComparison.OrdinalIgnoreCase, out idToken);
             }
             else
             {
-                gotId = instance.TryGetValue(IdPropertyName, out idToken);
+                gotId = instance.TryGetValue(MobileServiceSystemColumns.Id, out idToken);
             }
 
             if (gotId)
@@ -165,7 +151,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     string.Format(
                         CultureInfo.InvariantCulture,
                         Resources.MobileServiceSerializer_IdCasingIncorrect,
-                        IdPropertyName),
+                        MobileServiceSystemColumns.Id),
                      "instance");
             }
 
@@ -179,11 +165,50 @@ namespace Microsoft.WindowsAzure.MobileServices
                        string.Format(
                            CultureInfo.InvariantCulture,
                            Resources.MobileServiceSerializer_IdNotFound,
-                           IdPropertyName),
+                           MobileServiceSystemColumns.Id),
                        "instance");
             }
 
             return id;
+        }
+
+        /// <summary>
+        /// Removes all system properties (name start with '__') from the instance
+        /// if the instance is determined to have a string id and therefore be for table that
+        /// supports system properties.
+        /// </summary>
+        /// <param name="instance">The instance to remove the system properties from.</param>
+        /// <param name="version">Set to the value of the version system property before it is removed.</param>
+        /// <returns>
+        /// The instance with the system properties removed.
+        /// </returns>
+        public static JObject RemoveSystemProperties(JObject instance, out string version)
+        {
+            version = null;
+
+            bool haveCloned = false;
+            foreach (JProperty property in instance.Properties())
+            {
+                if (property.Name.StartsWith(MobileServiceSerializer.SystemPropertyPrefix))
+                {
+                    // We don't want to alter the original jtoken passed in by the caller
+                    // so if we find a system property to remove, we have to clone first
+                    if (!haveCloned)
+                    {
+                        instance = instance.DeepClone() as JObject;
+                        haveCloned = true;
+                    }
+
+                    if (String.Equals(property.Name, MobileServiceSystemColumns.Version, StringComparison.OrdinalIgnoreCase))
+                    {
+                        version = (string)instance[property.Name];
+                    }
+
+                    instance.Remove(property.Name);
+                }
+            }
+
+            return instance;
         }
 
         /// <summary>
@@ -321,7 +346,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             if (instance != null)
             {
-                instance[MobileServiceSerializer.IdPropertyName] = null;
+                instance[MobileServiceSystemColumns.Id] = null;
             }
         }
 

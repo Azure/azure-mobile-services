@@ -9,36 +9,34 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace Microsoft.WindowsAzure.MobileServices
+namespace Microsoft.WindowsAzure.MobileServices.Query
 {
     /// <summary>
     /// Represents the structural elements of a Mobile Services query over the
     /// subset of OData it uses.
     /// </summary>
-    /// <remarks>
-    /// Our LINQ OData Provider will effectively compile expression trees into
-    /// MobileServiceTableQueryDescription instances which can be passed to a
-    /// MobileServiceCollectionView and evaluated on the server.  We don't
-    /// compile the expression all the way down to a single Uri fragment
-    /// because we'll need to re-evaluate the query with different Skip/Top
-    /// values for paging and data virtualization.
-    /// </remarks>
-    internal class MobileServiceTableQueryDescription
+    /*
+     * Our LINQ OData Provider will effectively compile expression trees into
+     * MobileServiceTableQueryDescription instances which can be passed to a
+     * MobileServiceCollectionView and evaluated on the server.  We don't
+     * compile the expression all the way down to a single Uri fragment
+     * because we'll need to re-evaluate the query with different Skip/Top
+     * values for paging and data virtualization.
+    */
+    public sealed class MobileServiceTableQueryDescription
     {
         /// <summary>
         /// Initializes a new instance of the
-        /// MobileServiceTableQueryDescription class.
+        /// <see cref="MobileServiceTableQueryDescription"/> class.
         /// </summary>
-        public MobileServiceTableQueryDescription(string tableName, bool includeTotalCount)
+        public MobileServiceTableQueryDescription(string tableName)
         {
             Debug.Assert(tableName != null, "tableName cannot be null");
 
             this.TableName = tableName;
-            this.IncludeTotalCount = includeTotalCount;
-
             this.Selection = new List<string>();
             this.Projections = new List<Delegate>();
-            this.Ordering = new List<KeyValuePair<string, bool>>();
+            this.Ordering = new List<OrderByNode>();
         }
 
         /// <summary>
@@ -47,23 +45,21 @@ namespace Microsoft.WindowsAzure.MobileServices
         public string TableName { get; private set; }
 
         /// <summary>
-        /// Gets of sets the query's filter expression.
+        /// Gets or sets the query's filter expression.
         /// </summary>
-        public string Filter { get; set; }
+        public QueryNode Filter { get; set; }
 
         /// <summary>
         /// Gets a list of fields that should be selected from the items in
         /// the table.
         /// </summary>
-        public List<string> Selection { get; private set; }
+        public IList<string> Selection { get; private set; }
 
         /// <summary>
-        /// Gets a list of (field, direction) pairs that specify the ordering
-        /// constraints imposed on the query.  The direction element is true
-        /// if the field should be ordered in ascending order and false if
-        /// descending.
+        /// Gets a list of expressions that specify the ordering
+        /// constraints imposed on the query.
         /// </summary>
-        public List<KeyValuePair<string, bool>> Ordering { get; private set; }
+        public IList<OrderByNode> Ordering { get; private set; }
 
         /// <summary>
         /// Gets or sets the number of elements to skip.
@@ -79,20 +75,40 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Gets a collection of projections that should be applied to each element of
         /// the query.
         /// </summary>
-        public List<Delegate> Projections { get; private set; }
+        internal List<Delegate> Projections { get; private set; }
 
         /// <summary>
         /// Gets or sets the type of the argument to the projection (i.e., the
         /// type that should be deserialized).
         /// </summary>
-        public Type ProjectionArgumentType { get; set; }
+        internal Type ProjectionArgumentType { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the query should request
         /// the total count for all the records that would have been returned
         /// if the server didn't impose a data cap.
         /// </summary>
-        public bool IncludeTotalCount { get; private set; }
+        public bool IncludeTotalCount { get; set; }
+
+        /// <summary>
+        /// Creates a copy of <see cref="MobileServiceTableQueryDescription"/>
+        /// </summary>
+        /// <returns>The cloned query</returns>
+        public MobileServiceTableQueryDescription Clone()
+        {
+            var clone = new MobileServiceTableQueryDescription(this.TableName);
+            
+            clone.Filter = this.Filter;
+            clone.Selection = this.Selection.ToList();
+            clone.Ordering = this.Ordering.ToList();
+            clone.Projections = this.Projections.ToList();
+            clone.ProjectionArgumentType = this.ProjectionArgumentType;
+            clone.Skip = this.Skip;
+            clone.Top = this.Top;
+            clone.IncludeTotalCount = this.IncludeTotalCount;
+
+            return clone;
+        }
 
         /// <summary>
         /// Convert the query structure into the standard OData URI protocol
@@ -107,69 +123,134 @@ namespace Microsoft.WindowsAzure.MobileServices
             StringBuilder text = new StringBuilder();
             
             // Add the filter
-            if (!string.IsNullOrEmpty(this.Filter))
+            if (this.Filter != null)
             {
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$filter={1}", separator, this.Filter);
-                separator = '&';
+                string filterStr = ODataExpressionVisitor.ToODataString(this.Filter);
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$filter={1}", separator, filterStr);
+                separator = '&';                
             }
 
             // Add the ordering
             if (this.Ordering.Count > 0)
             {
-                IEnumerable<string> orderings = this.Ordering.Select(
-                    f => f.Value ? f.Key : f.Key + " desc");
-                text.AppendFormat(
-                    CultureInfo.InvariantCulture, 
-                    "{0}$orderby={1}",
-                    separator,
-                    string.Join(",", orderings));
+                IEnumerable<string> orderings = this.Ordering
+                                                    .Select(o => {
+                                                        var exprVisitor = new ODataExpressionVisitor();
+                                                        o.Expression.Accept(exprVisitor);
+                                                        string result = exprVisitor.Expression.ToString();
+
+                                                        if (o.Direction == OrderByDirection.Descending)
+                                                        {
+                                                            result += " desc";
+                                                        }
+                                                        return result;
+                                                    });
+
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$orderby={1}", separator, string.Join(",", orderings));
                 separator = '&';
             }
 
             // Skip any elements
             if (this.Skip.HasValue && this.Skip >= 0)
             {
-                text.AppendFormat(
-                    CultureInfo.InvariantCulture,
-                    "{0}$skip={1}",
-                    separator,
-                    this.Skip);
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$skip={1}", separator, this.Skip);
                 separator = '&';
             }
 
             // Take the desired number of elements
             if (this.Top.HasValue && this.Top >= 0)
             {
-                text.AppendFormat(
-                    CultureInfo.InvariantCulture,
-                    "{0}$top={1}",
-                    separator,
-                    this.Top);
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$top={1}", separator, this.Top);
                 separator = '&';
             }
 
             // Add the selection
             if (this.Selection.Count > 0)
             {
-                text.AppendFormat(
-                    CultureInfo.InvariantCulture,
-                    "{0}$select={1}",
-                    separator,
-                    string.Join(",", this.Selection));
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$select={1}", separator, string.Join(",", this.Selection));
                 separator = '&';
             }
 
             // Add the total count
             if (this.IncludeTotalCount)
             {
-                text.AppendFormat(
-                    CultureInfo.InvariantCulture,
-                    "{0}$inlinecount=allpages",
-                    separator);
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$inlinecount=allpages", separator);
                 separator = '&';
             }
 
             return text.ToString();
         }
+
+        /// <summary>
+        /// Parses a OData query and creates a <see cref="MobileServiceTableQueryDescription"/> instance
+        /// </summary>
+        /// <param name="tableName">The name of table for the query.</param>
+        /// <param name="query">The odata query string</param>
+        /// <returns>An instance of <see cref="MobileServiceTableQueryDescription"/></returns>
+        public static MobileServiceTableQueryDescription Parse(string tableName, string query)
+        {
+            query = query ?? String.Empty;
+            bool includeTotalCount = false;
+            int? top = null;
+            int? skip = null;
+            string[] selection = null;
+            QueryNode filter = null;
+            IList<OrderByNode> orderings = null;
+
+            char[] separator = new[] { '=' };
+            var parameters = query.Split('&').Select(part => part.Split(separator, 2));
+
+            foreach (string[] parameter in parameters)
+            {
+                string key = parameter[0];
+                string value = parameter.Length > 1 ? parameter[1] : String.Empty;
+                if (String.IsNullOrEmpty(key))
+                {
+                    continue;
+                }
+
+                switch (key)
+                {
+                    case "$filter":
+                        filter = ODataExpressionParser.ParseFilter(value);
+                        break;
+                    case "$orderby":
+                        orderings = ODataExpressionParser.ParseOrderBy(value);
+                        break;
+                    case "$skip":
+                        skip = Int32.Parse(value);
+                        break;
+                    case "$top":
+                        top = Int32.Parse(value);
+                        break;
+                    case "$select":
+                        selection = value.Split(',');
+                        break;
+                    case "$inlinecount":
+                        includeTotalCount = "allpages".Equals(value);
+                        break;
+                    default:
+                        throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Resources.MobileServiceTableQueryDescription_UnrecognizedQueryParameter, key), "query");
+                }
+            }
+
+            var queryDescription = new MobileServiceTableQueryDescription(tableName) 
+            { 
+                IncludeTotalCount = includeTotalCount,
+                Skip = skip,
+                Top = top
+            };
+            if (selection != null)
+            {
+                ((List<string>)queryDescription.Selection).AddRange(selection);
+            }
+            if (orderings != null)
+            {
+                ((List<OrderByNode>)queryDescription.Ordering).AddRange(orderings);
+            }
+            queryDescription.Filter = filter;
+
+            return queryDescription;
+        }        
     }
 }

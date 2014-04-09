@@ -41,7 +41,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceClient client = new MobileServiceClient("http://www.test.com", null, hijack);
             IMobileServiceTable<DateExample> table = client.GetTable<DateExample>();
 
-            hijack.Response.StatusCode = HttpStatusCode.OK;
+            hijack.Response = new HttpResponseMessage(HttpStatusCode.OK);
             hijack.SetResponseContent("[]");
 
             // Verify a full UTC date
@@ -64,7 +64,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceClient client = new MobileServiceClient("http://www.test.com", null, hijack);
             IMobileServiceTable<DateOffsetExample> table = client.GetTable<DateOffsetExample>();
 
-            hijack.Response.StatusCode = HttpStatusCode.OK;
+            hijack.Response = new HttpResponseMessage(HttpStatusCode.OK);
             hijack.SetResponseContent("[]");
 
             DateTimeOffset date = new DateTimeOffset(

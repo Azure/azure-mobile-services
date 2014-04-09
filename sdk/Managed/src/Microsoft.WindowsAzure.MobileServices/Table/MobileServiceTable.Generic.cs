@@ -10,6 +10,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Query;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -120,7 +121,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             if (!this.hasIntegerId)
             {
                 string unused;
-                value = RemoveSystemProperties(value, out unused);
+                value = MobileServiceSerializer.RemoveSystemProperties(value, out unused);
             } 
             JToken insertedValue = await this.InsertAsync(value, parameters);
             serializer.Deserialize<T>(insertedValue, instance);
@@ -163,25 +164,10 @@ namespace Microsoft.WindowsAzure.MobileServices
             MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
             JObject value = serializer.Serialize(instance) as JObject;
 
-            JToken updatedValue = null;
-            try
-            {
-                updatedValue = await this.UpdateAsync(value, parameters);
-            }
-            catch (MobileServicePreconditionFailedException ex)
-            {
-                T item = default(T);
-                try
-                {
-                    item = serializer.Deserialize<T>(ex.Value);
-                }
-                catch { }
-
-                throw new MobileServicePreconditionFailedException<T>(ex, item);
-            }
+            JToken updatedValue = await TransformPreconditionFailedException(serializer, () =>this.UpdateAsync(value, parameters));
 
             serializer.Deserialize<T>(updatedValue, instance);
-        }
+        }        
 
         /// <summary>
         /// Deletes an instance from the table.
@@ -219,7 +205,8 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
             JObject value = serializer.Serialize(instance) as JObject;
-            await this.DeleteAsync(value, parameters);
+
+            await this.TransformPreconditionFailedException(serializer, () => this.DeleteAsync(value, parameters));
 
             // Clear the instance id since it's no longer associated with that
             // id on the server (note that reflection is goodly enough to turn
@@ -517,6 +504,28 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
+        /// Transforms the <see cref="MobileServicePreconditionFailedException"/> to to a <see cref="MobileServicePreconditionFailedException{T}"/>.
+        /// </summary>
+        private async Task<JToken> TransformPreconditionFailedException(MobileServiceSerializer serializer, Func<Task<JToken>> action)
+        {
+            try
+            {
+                return await action();
+            }
+            catch (MobileServicePreconditionFailedException ex)
+            {
+                T item = default(T);
+                try
+                {
+                    item = serializer.Deserialize<T>(ex.Value);
+                }
+                catch { }
+
+                throw new MobileServicePreconditionFailedException<T>(ex, item);
+            }
+        }
+
+        /// <summary>
         /// Get an element from a table by its id.
         /// </summary>
         /// <param name="id">
@@ -537,12 +546,17 @@ namespace Microsoft.WindowsAzure.MobileServices
             string query = string.Format(
                 CultureInfo.InvariantCulture,
                 "$filter=({0} eq {1})",
-                MobileServiceSerializer.IdPropertyName,
-                FilterBuildingExpressionVisitor.ToODataConstant(id));
+                MobileServiceSystemColumns.Id,
+                ODataExpressionVisitor.ToODataConstant(id));
 
             // Send the query
             JToken response = await this.ReadAsync(query, parameters);
 
+            return GetSingleValue(response);
+        }
+
+        private static JObject GetSingleValue(JToken response)
+        {
             // Get the first element in the response
             JObject jobject = response as JObject;
             if (jobject == null)

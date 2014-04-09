@@ -20,6 +20,11 @@ namespace Microsoft.WindowsAzure.MobileServices
     internal class MobileServiceHttpClient : IDisposable
     {
         /// <summary>
+        /// Name of the header to indicate the feature(s) initiating the remote server call
+        /// </summary>
+        internal const string ZumoFeaturesHeader = "X-ZUMO-FEATURES";
+
+        /// <summary>
         /// Name of the Installation ID header included on each request.
         /// </summary>
         private const string RequestInstallationIdHeader = "X-ZUMO-INSTALLATION-ID";
@@ -400,7 +405,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             Debug.Assert(response != null);
             Debug.Assert(!response.IsSuccessStatusCode);
 
-            string responseContent = await response.Content.ReadAsStringAsync();
+            string responseContent = response.Content == null ? null: await response.Content.ReadAsStringAsync();
 
             // Create either an invalid response or connection failed message
             // (check the status code first because some status codes will

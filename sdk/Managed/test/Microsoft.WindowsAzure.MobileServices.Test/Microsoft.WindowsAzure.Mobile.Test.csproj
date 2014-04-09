@@ -38,10 +38,14 @@
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
     <None Include="packages.config" />
+    <Compile Include="UnitTests\Table\Sync\MobileServiceSyncContext.Test.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AssertEx.cs" />
     <Compile Include="FunctionalTests\DataSourceTest.cs" />
     <Compile Include="FunctionalTests\Table\MobileServiceTableTest.cs" />
+    <Compile Include="Mocks\MobileServiceSyncHandlerMock.cs" />
+    <Compile Include="Mocks\MobileServiceLocalStoreMock.cs" />
     <Compile Include="Mocks\MobileServiceTableQueryMock.cs" />
     <Compile Include="SerializationTypes\ComplexType.cs" />
     <Compile Include="SerializationTypes\ConverterType.cs" />
@@ -92,6 +96,8 @@
     <Compile Include="UnitTests\Table\Serialization\MobileServiceContractResolver.Test.cs" />
     <Compile Include="UnitTests\Table\Serialization\MobileServiceSerializer.Test.cs" />
     <Compile Include="UnitTests\Table\Serialization\MobileServicePrecisionCheckConverter.Test.cs" />
+    <Compile Include="UnitTests\Table\Sync\MobileServiceSyncTable.Generic.Test.cs" />
+    <Compile Include="UnitTests\Table\Sync\MobileServiceSyncTable.Test.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.Mobile.csproj">

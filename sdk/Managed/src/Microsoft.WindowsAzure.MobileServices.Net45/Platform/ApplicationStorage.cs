@@ -60,13 +60,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 using (IsolatedStorageFile isoStore = IsolatedStorageFile.GetStore(IsolatedStorageScope.Assembly | IsolatedStorageScope.User, null, null))
                 {
-                    using (IsolatedStorageFileStream fileStream = isoStore.OpenFile(name, FileMode.OpenOrCreate, FileAccess.Read))
+                    IsolatedStorageFileStream fileStream = isoStore.OpenFile(name, FileMode.OpenOrCreate, FileAccess.Read);
+                    using (var reader = new StreamReader(fileStream))
                     {
-                        using (var reader = new StreamReader(fileStream))
-                        {
-                            value = reader.ReadToEnd();
-                            return value != null;
-                        }
+                        value = reader.ReadToEnd();
+                        return value != null;
                     }
                 }
             }
@@ -102,12 +100,10 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 using (IsolatedStorageFile isoStore = IsolatedStorageFile.GetStore(IsolatedStorageScope.Assembly | IsolatedStorageScope.User, null, null))
                 {
-                    using (IsolatedStorageFileStream fileStream = isoStore.OpenFile(name, FileMode.OpenOrCreate, FileAccess.Write))
+                    IsolatedStorageFileStream fileStream = isoStore.OpenFile(name, FileMode.OpenOrCreate, FileAccess.Write);
+                    using (var writer = new StreamWriter(fileStream))
                     {
-                        using (var writer = new StreamWriter(fileStream))
-                        {
-                            writer.WriteLine(value.ToString());
-                        }
+                        writer.WriteLine(value.ToString());
                     }
                 }
             }
