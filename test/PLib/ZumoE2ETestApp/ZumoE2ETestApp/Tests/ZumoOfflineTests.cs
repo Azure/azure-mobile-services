@@ -600,7 +600,7 @@ namespace ZumoE2ETestApp.Tests
                         if (serverItem == null)
                         {
                             test.AddLog("Item not returned in the exception, trying to retrieve it from the server");
-                            serverItem = (JObject)(await client.GetTable(operation.TableName).LookupAsync((string)operation.Item["id"]));
+                            serverItem = (JObject)(await client.GetTable(operation.Table.TableName).LookupAsync((string)operation.Item["id"]));
                         }
 
                         var typedClientItem = operation.Item.ToObject<T>();
