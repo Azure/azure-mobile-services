@@ -1,7 +1,2 @@
 packages/*
-!packages/Microsoft.Bcl.Build.1.0.8/
-packages/Microsoft.Bcl.Build.1.0.8/License.rtf
-packages/Microsoft.Bcl.Build.1.0.8/content/
-packages/Microsoft.Bcl.Build.1.0.8/tools/*.ps1
-packages/Microsoft.Bcl.Build.1.0.8/Microsoft.Bcl.Build.1.0.8*
 .nuget/NuGet.exe

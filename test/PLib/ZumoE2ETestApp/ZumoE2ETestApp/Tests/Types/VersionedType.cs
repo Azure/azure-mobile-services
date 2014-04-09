@@ -26,11 +26,13 @@ namespace ZumoE2ETestApp.Tests.Types
         public DateTime UpdatedAt { get; set; }
 
         public VersionedType() { }
+
         public VersionedType(Random rndGen)
         {
             this.Name = Util.CreateSimpleRandomString(rndGen, 20);
             this.Number = rndGen.Next(10000);
         }
+
         private VersionedType(VersionedType other)
         {
             this.Id = other.Id;
