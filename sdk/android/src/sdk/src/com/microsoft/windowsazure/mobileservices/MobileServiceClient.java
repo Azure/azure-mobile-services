@@ -970,10 +970,6 @@ public class MobileServiceClient {
 			throw new IllegalArgumentException("Invalid Application URL");
 		}
 
-		if (appKey == null || appKey.toString().trim().length() == 0) {
-			throw new IllegalArgumentException("Invalid Application Key");
-		}
-
 		if (context == null) {
 			throw new IllegalArgumentException("Context cannot be null");
 		}
