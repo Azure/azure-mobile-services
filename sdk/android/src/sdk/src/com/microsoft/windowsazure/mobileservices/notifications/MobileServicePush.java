@@ -30,10 +30,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.http.Header;
 import org.apache.http.protocol.HTTP;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -140,27 +145,35 @@ public class MobileServicePush {
      * @return The created registration
      * @throws Exception
      */
-    public void register(String pnsHandle, String[] tags, final RegistrationCallback callback) {
-        if (isNullOrWhiteSpace(pnsHandle)) {
-            callback.onRegister(null, new IllegalArgumentException("pnsHandle"));
-            return;
+    public ListenableFuture<Registration> register(String pnsHandle, String[] tags) {
+        
+    	final SettableFuture<Registration> resultFuture = SettableFuture.create();
+        
+    	if (isNullOrWhiteSpace(pnsHandle)) {
+    		resultFuture.setException(new IllegalArgumentException("pnsHandle"));
+            return resultFuture;
         }
 
-        Registration registration = mPnsSpecificRegistrationFactory.createNativeRegistration();
+        final Registration registration = mPnsSpecificRegistrationFactory.createNativeRegistration();
         registration.setPNSHandle(pnsHandle);
         registration.addTags(tags);
 
-        registerInternal(registration, new RegisterInternalCallback() {
-
+        ListenableFuture<String> registerInternalFuture = registerInternal(registration);
+        
+        Futures.addCallback(registerInternalFuture, new FutureCallback<String>()
+		{ 
             @Override
-            public void onRegister(Registration registration, Exception exception) {
-                callback.onRegister(registration, exception);
-
-                return;
-
+            public void onFailure(Throwable exception) {
+            	resultFuture.setException(exception);
+            }       
+            
+            @Override
+            public void onSuccess(String v) {
+            	resultFuture.set(registration);
             }
-
-        });
+		});
+        
+        return resultFuture;
     }
 
     /**
@@ -176,57 +189,60 @@ public class MobileServicePush {
      *            The tags to use in the registration
      * @param callback
      *            The operation callback
+     * @return 
      */
-    public void registerTemplate(String pnsHandle, String templateName, String template, String[] tags, final TemplateRegistrationCallback callback) {
-        if (isNullOrWhiteSpace(pnsHandle)) {
-            callback.onRegister(null, new IllegalArgumentException("pnsHandle"));
-            return;
+    public ListenableFuture<TemplateRegistration> registerTemplate(String pnsHandle, String templateName, String template, String[] tags) {
+        
+    	final SettableFuture<TemplateRegistration> resultFuture = SettableFuture.create();
+    	
+    	if (isNullOrWhiteSpace(pnsHandle)) {
+    		resultFuture.setException(new IllegalArgumentException("pnsHandle"));
+            return resultFuture;
         }
 
         if (isNullOrWhiteSpace(templateName)) {
-            callback.onRegister(null, new IllegalArgumentException("templateName"));
-            return;
+        	resultFuture.setException(new IllegalArgumentException("templateName"));
+            return resultFuture;
         }
 
         if (isNullOrWhiteSpace(template)) {
-            callback.onRegister(null, new IllegalArgumentException("template"));
-            return;
+        	resultFuture.setException(new IllegalArgumentException("template"));
+            return resultFuture;
         }
 
-        TemplateRegistration registration = mPnsSpecificRegistrationFactory.createTemplateRegistration();
+        final TemplateRegistration registration = mPnsSpecificRegistrationFactory.createTemplateRegistration();
         registration.setPNSHandle(pnsHandle);
         registration.setName(templateName);
         registration.setTemplateBody(template);
         registration.addTags(tags);
 
-        registerInternal(registration, new RegisterInternalCallback() {
-
+        ListenableFuture<String> registerInternalFuture = registerInternal(registration);
+        
+        Futures.addCallback(registerInternalFuture, new FutureCallback<String>()
+		{ 
             @Override
-            public void onRegister(Registration registration, Exception exception) {
-                callback.onRegister((TemplateRegistration) registration, exception);
-
-                return;
+            public void onFailure(Throwable exception) {
+            	resultFuture.setException(exception);
+            }       
+            
+            @Override
+            public void onSuccess(String v) {
+            	resultFuture.set(registration);
             }
-        });
+		});
+        
+        return resultFuture;
     }
-
+    
     /**
      * Unregisters the client for native notifications
      * 
      * @param callback
      *            The operation callback
+     * @throws Exception 
      */
-    public void unregister(final UnregisterCallback callback) {
-        unregisterInternal(Registration.DEFAULT_REGISTRATION_NAME, new UnregisterInternalCallback() {
-
-            @Override
-            public void onUnregister(String registrationId, Exception exception) {
-                callback.onUnregister(exception);
-
-                return;
-            }
-
-        });
+    public ListenableFuture<Void> unregister() {
+        return unregisterInternal(Registration.DEFAULT_REGISTRATION_NAME);
     }
 
     /**
@@ -238,23 +254,14 @@ public class MobileServicePush {
      *            The operation callback
      * 
      */
-    public void unregisterTemplate(String templateName, final UnregisterCallback callback) {
+    public ListenableFuture<Void> unregisterTemplate(String templateName) {
         if (isNullOrWhiteSpace(templateName)) {
-            callback.onUnregister(new IllegalArgumentException("templateName"));
-            return;
+            throw new IllegalArgumentException("templateName");
         }
 
-        unregisterInternal(templateName, new UnregisterInternalCallback() {
-
-            @Override
-            public void onUnregister(String registrationId, Exception exception) {
-                callback.onUnregister(exception);
-
-                return;
-            }
-        });
+        return unregisterInternal(templateName);
     }
-
+    
     /**
      * Unregisters the client for all notifications
      * 
@@ -262,79 +269,125 @@ public class MobileServicePush {
      *            PNS specific identifier
      * @param callback
      *            The operation callback
+     * @throws ExecutionException 
+     * @throws InterruptedException 
      */
-    public void unregisterAll(String pnsHandle, final UnregisterCallback callback) {
-        getFullRegistrationInformation(pnsHandle, new GetFullRegistrationInformationCallback() {
-
+    public ListenableFuture<Void> unregisterAll(String pnsHandle) {
+        
+    	final SettableFuture<Void> resultFuture = SettableFuture.create();
+    	
+    	ListenableFuture<ArrayList<Registration>> fullRegistrationInformationFuture = 
+    			getFullRegistrationInformation(pnsHandle);
+		
+        Futures.addCallback(fullRegistrationInformationFuture, new FutureCallback<ArrayList<Registration>>()
+		{ 
             @Override
-            public void onCompleted(ArrayList<Registration> registrations, Exception exception) {
-
-                if (exception != null) {
-                    callback.onUnregister(exception);
-                    return;
-                }
-
-                final SyncState state = new SyncState();
-
-                state.size = registrations.size();
-
-                final CopyOnWriteArrayList<String> concurrentArray = new CopyOnWriteArrayList<String>();
-
-                final Object syncObject = new Object();
-
-                if (state.size == 0) {
-
-                    removeAllRegistrationsId();
-
-                    mIsRefreshNeeded = false;
-
-                    callback.onUnregister(null);
-                    return;
-                }
-
-                for (Registration registration : registrations) {
-                    deleteRegistrationInternal(registration.getName(), registration.getRegistrationId(), new DeleteRegistrationInternalCallback() {
-
-                        @Override
-                        public void onDelete(String registrationId, Exception exception) {
-
-                            concurrentArray.add(registrationId);
-
-                            if (exception != null) {
-                                synchronized (syncObject) {
-                                    if (!state.alreadyReturn) {
-                                        callback.onUnregister(exception);
-                                        state.alreadyReturn = true;
-                                        return;
-                                    }
-                                }
-                            }
-
-                            if (concurrentArray.size() == state.size && !state.alreadyReturn) {
-                                removeAllRegistrationsId();
-
-                                mIsRefreshNeeded = false;
-
-                                callback.onUnregister(null);
-
-                                return;
-                            }
-                        }
-                    });
-                }
+            public void onFailure(Throwable exception) {
+            	resultFuture.setException(exception);
+            }       
+            
+            @Override
+            public void onSuccess(ArrayList<Registration> registrations) {
+            	
+            	ListenableFuture<Void> unregisterAllInternalFuture = 
+            			unregisterAllInternal(registrations);
+            	
+            	Futures.addCallback(unregisterAllInternalFuture, new FutureCallback<Void>()
+    			{ 
+    	            @Override
+    	            public void onFailure(Throwable exception) {
+    	            	resultFuture.setException(exception);
+    	            }       
+    	            
+    	            @Override
+    	            public void onSuccess(Void v) {
+    	            	resultFuture.set(null);
+    	            }
+    			});
             }
-        });
-    }
+		});
+        
+        return resultFuture;
+    }           
+                
+    private ListenableFuture<Void> unregisterAllInternal(ArrayList<Registration> registrations)
+    {
+    	final SettableFuture<Void> resultFuture = SettableFuture.create();
+    	
+		final SyncState state = new SyncState();
+				
+		state.size = registrations.size();
+		
+		final CopyOnWriteArrayList<String> concurrentArray = new CopyOnWriteArrayList<String>();
+		
+		final Object syncObject = new Object();
+		
+		if (state.size == 0) {
+		
+		    removeAllRegistrationsId();
+		
+		    mIsRefreshNeeded = false;
+		
+		    resultFuture.set(null);
+		    
+		    return resultFuture;
+		}
 
+		
+    	for (final Registration registration : registrations) {
+	    	
+	    	ListenableFuture<Void> serviceFilterFuture = deleteRegistrationInternal(registration.getName(), registration.getRegistrationId());
+	        
+	        Futures.addCallback(serviceFilterFuture, new FutureCallback<Void>()
+			{    
+	            @Override
+	            public void onFailure(Throwable exception) {
+	            	
+	            	if (exception != null) {
+	                    synchronized (syncObject) {
+	                        if (!state.alreadyReturn) {
+	                            state.alreadyReturn = true;
+	                            
+	                            resultFuture.setException(exception);
+	                            
+	                            return;
+	                        }
+	                    }
+	                }
+	            }
+	       
+	            @Override
+	            public void onSuccess(Void v) {
+	            	concurrentArray.add(registration.getRegistrationId());
+
+	            	if (concurrentArray.size() == state.size && !state.alreadyReturn) {
+	                    removeAllRegistrationsId();
+	
+	                    mIsRefreshNeeded = false;
+
+		                resultFuture.set(null);
+		                
+		                return;
+	                }
+	            }
+	        });
+    	}
+    	
+    	return resultFuture;
+    }
+    
     private class SyncState {
         public boolean alreadyReturn;
         public int size;
     }
 
-    private void refreshRegistrationInformation(String pnsHandle, final RefreshRegistrationInformationCallback callback) {
+    private ListenableFuture<Void> refreshRegistrationInformation(String pnsHandle) {
+    	
+    	final SettableFuture<Void> resultFuture = SettableFuture.create();
+    	
         if (isNullOrWhiteSpace(pnsHandle)) {
-            callback.onRefresh(new IllegalArgumentException("pnsHandle"));
-            return;
+        	resultFuture.setException(new IllegalArgumentException("pnsHandle"));
+            return resultFuture;
         }
 
         // delete old registration information
@@ -348,40 +401,44 @@ public class MobileServicePush {
 
         editor.commit();
 
-        getFullRegistrationInformation(pnsHandle, new GetFullRegistrationInformationCallback() {
+        ListenableFuture<ArrayList<Registration>> getFullRegistrationInformationFuture = getFullRegistrationInformation(pnsHandle);
 
+        Futures.addCallback(getFullRegistrationInformationFuture, new FutureCallback<ArrayList<Registration>>()
+        {	
+        	@Override
+            public void onFailure(Throwable exception) {
+        		resultFuture.setException(exception);
+            }
+       
             @Override
-            public void onCompleted(ArrayList<Registration> registrations, Exception exception) {
-                if (exception != null) {
-                    callback.onRefresh(exception);
+            public void onSuccess(ArrayList<Registration> registrations) {
+                for (Registration registration : registrations) {
 
-                    return;
-                } else {
-                    for (Registration registration : registrations) {
+                    try {
+                        storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
+                    } catch (Exception e) {
+                    	resultFuture.setException(e);
 
-                        try {
-                            storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
-                        } catch (Exception e) {
-                            callback.onRefresh(exception);
-
-                            return;
-                        }
+                        return;
                     }
-
-                    mIsRefreshNeeded = false;
-
-                    callback.onRefresh(null);
-
-                    return;
                 }
+
+                mIsRefreshNeeded = false;
+    	
+    	        resultFuture.set(null);
             }
         });
+        
+        return resultFuture;
     }
-
-    private void getFullRegistrationInformation(String pnsHandle, final GetFullRegistrationInformationCallback callback) {
+            
+    private ListenableFuture<ArrayList<Registration>> getFullRegistrationInformation(String pnsHandle)
+    {
+    	final SettableFuture<ArrayList<Registration>> resultFuture = SettableFuture.create();
+        
         if (isNullOrWhiteSpace(pnsHandle)) {
-            callback.onCompleted(null, new IllegalArgumentException("pnsHandle"));
-            return;
+        	resultFuture.setException(new IllegalArgumentException("pnsHandle"));
+            return resultFuture;
         }
 
         // get existing registrations
@@ -393,41 +450,39 @@ public class MobileServicePush {
         parameters.add(new Pair<String, String>("deviceId", pnsHandle));
         requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
 
-        /*
-        mClient.invokeApiInternal(resource, null, "GET", requestHeaders, parameters, MobileServiceClient.PNS_API_URL, new ServiceFilterResponseCallback() {
-
+        ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mClient.invokeApiInternal(resource, null, "GET", requestHeaders, parameters, MobileServiceClient.PNS_API_URL);
+            
+        Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>()
+		{    
             @Override
-            public void onResponse(ServiceFilterResponse response, Exception exception) {
-                if (exception != null) {
-                    callback.onCompleted(null, exception);
-
-                    return;
-                } else {
-
+            public void onFailure(Throwable exception) {
+             	resultFuture.setException(exception);
+            }
+       
+            @Override
+            public void onSuccess(ServiceFilterResponse response) {
                     ArrayList<Registration> registrationsList = new ArrayList<Registration>();
-
-                    JsonArray registrations = new JsonParser().parse(response.getContent()).getAsJsonArray();
-
-                    for (JsonElement registrationJson : registrations) {
-                        Registration registration = null;
-                        if (registrationJson.getAsJsonObject().has("templateName")) {
-                            registration = mPnsSpecificRegistrationFactory.parseTemplateRegistration(registrationJson.getAsJsonObject());
-                        } else {
-                            registration = mPnsSpecificRegistrationFactory.parseNativeRegistration(registrationJson.getAsJsonObject());
-                        }
-
-                        registrationsList.add(registration);
-                    }
-
-                    callback.onCompleted(registrationsList, null);
-
-                    return;
-                }
+    	
+    	        JsonArray registrations = new JsonParser().parse(response.getContent()).getAsJsonArray();
+    	
+    	        for (JsonElement registrationJson : registrations) {
+    	            Registration registration = null;
+    	            if (registrationJson.getAsJsonObject().has("templateName")) {
+    	                registration = mPnsSpecificRegistrationFactory.parseTemplateRegistration(registrationJson.getAsJsonObject());
+    	            } else {
+    	                registration = mPnsSpecificRegistrationFactory.parseNativeRegistration(registrationJson.getAsJsonObject());
+    	            }
+    	
+    	            registrationsList.add(registration);
+    	        }
+    	
+    	        resultFuture.set(registrationsList);
             }
         });
-        */
+        
+        return resultFuture;
     }
-
+    
     /**
      * Creates a new registration in the server. If it exists, updates its
      * information
@@ -437,8 +492,10 @@ public class MobileServicePush {
      * @param callback
      *            The operation callback
      */
-    private void registerInternal(final Registration registration, final RegisterInternalCallback callback) {
+    private ListenableFuture<String> registerInternal(final Registration registration) {
 
+    	final SettableFuture<String> resultFuture = SettableFuture.create();
+    	
         if (mIsRefreshNeeded) {
             String pNSHandle = mSharedPreferences.getString(STORAGE_PREFIX + PNS_HANDLE_KEY, "");
 
@@ -446,102 +503,79 @@ public class MobileServicePush {
                 pNSHandle = registration.getPNSHandle();
             }
 
-            refreshRegistrationInformation(pNSHandle, new RefreshRegistrationInformationCallback() {
-
-                @Override
-                public void onRefresh(Exception exception) {
-                    if (exception != null) {
-                        callback.onRegister(registration, exception);
-                    } else {
-                        createRegistrationId(registration, callback);
-                    }
-                }
-
+            ListenableFuture<Void> refreshRegistrationInformationFuture = refreshRegistrationInformation(pNSHandle);
+            
+            Futures.addCallback(refreshRegistrationInformationFuture, new FutureCallback<Void>() {
+            	
+            	 @Override
+                 public void onFailure(Throwable exception) {
+                  	resultFuture.setException(exception);
+                 }
+            
+                 @Override
+                 public void onSuccess(Void v) {
+         	        resultFuture.set(registration.getRegistrationId());
+                 }
             });
+            
+            return resultFuture;
+            
         } else {
-            createRegistrationId(registration, callback);
+            return createRegistrationId(registration);
         }
     }
 
-    private void createRegistrationId(final Registration registration, final RegisterInternalCallback callback) {
-        createRegistrationId(registration, new CreateRegistrationIdCallback() {
-            @Override
-            public void onCreate(final String registrationId, Exception exception) {
-                callback.onRegister(registration, exception);
-            }
-        });
-    }
-
-    private void createRegistrationId(final Registration registration, final CreateRegistrationIdCallback callback) {
+    private ListenableFuture<String> createRegistrationId(final Registration registration) {
 
         String registrationId = null;
 
+        final SettableFuture<String> resultFuture = SettableFuture.create();
+        
         try {
             registrationId = retrieveRegistrationId(registration.getName());
         } catch (Exception e) {
-            callback.onCreate(null, e);
-            return;
+        	resultFuture.setException(e);
+            return resultFuture;
         }
 
         if (isNullOrWhiteSpace(registrationId)) {
-            createRegistrationId(new CreateRegistrationIdCallback() {
+             
+        	ListenableFuture<String> createRegistrationIdFuture = createRegistrationId();
+        	
+        	Futures.addCallback(createRegistrationIdFuture, new FutureCallback<String>() {
+        		
                 @Override
-                public void onCreate(final String registrationId, Exception exception) {
-                    if (exception != null) {
-                        callback.onCreate(null, exception);
-
-                        return;
-                    } else {
-                        setRegistrationId(registration, registrationId, new SetRegistrationIdCallback() {
-
-                            @Override
-                            public void onSet(String registrationId, Exception exception) {
-                                callback.onCreate(registrationId, exception);
-
-                                return;
-                            }
-
-                        });
-                    }
+                public void onFailure(Throwable exception) {
+            		resultFuture.setException(exception);
+                }           
+                @Override
+                public void onSuccess(String registrationId) {
+                    setRegistrationId(registration, registrationId);
+                    resultFuture.set(registrationId);    
                 }
-
             });
+        	
+        	return resultFuture;
         } else {
-            setRegistrationId(registration, registrationId, new SetRegistrationIdCallback() {
-
-                @Override
-                public void onSet(String registrationId, Exception exception) {
-                    callback.onCreate(registrationId, exception);
-
-                    return;
-                }
-
-            });
+            return setRegistrationId(registration, registrationId);
         }
     }
 
-    private void setRegistrationId(final Registration registration, final String registrationId, final SetRegistrationIdCallback callback) {
+    private ListenableFuture<String> setRegistrationId(final Registration registration, final String registrationId) {
         registration.setRegistrationId(registrationId);
 
-        upsertRegistrationInternal(registration, new UpsertRegistrationInternalCallback() {
-
+        final SettableFuture<String> resultFuture = SettableFuture.create();
+    	
+        ListenableFuture<Void> upsertRegistrationInternalFuture = upsertRegistrationInternal(registration);
+        
+        Futures.addCallback(upsertRegistrationInternalFuture, new FutureCallback<Void>()
+		{    
             @Override
-            public void onUpsert(final Registration registration, Exception exception) {
-
-                if (exception == null) {
-
-                    try {
-                        storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
-                    } catch (Exception e) {
-                        callback.onSet(registrationId, e);
-                        return;
-                    }
-
-                    callback.onSet(registrationId, null);
-
-                    return;
-                } else if (exception instanceof RegistrationGoneException) {
-                    // if we get an RegistrationGoneException (410) from
+            public void onFailure(Throwable exception) {
+            	
+            	if (exception instanceof RegistrationGoneException){
+            		
+            		// if we get an RegistrationGoneException (410) from
                     // service, we
                     // will recreate registration id and will try to do
                     // upsert one more
@@ -552,55 +586,68 @@ public class MobileServicePush {
                     try {
                         removeRegistrationId(registration.getName());
                     } catch (Exception e) {
-                        callback.onSet(registrationId, e);
+                    	resultFuture.setException(e);
                         return;
                     }
+                    
+                    ListenableFuture<String> createRegistrationIdFuture = createRegistrationId();
+                    
+                	Futures.addCallback(createRegistrationIdFuture, new FutureCallback<String>()
+					{    
+					    @Override
+					    public void onFailure(Throwable exception) {
+					    	resultFuture.setException(exception);
+					    }
+					    
+					    @Override
+					    public void onSuccess(final String registrationId) {
+					    	registration.setRegistrationId(registrationId);
+					    	
+				    		ListenableFuture<Void> upsertRegistrationInternalFuture2 = upsertRegistrationInternal(registration);
 
-                    createRegistrationId(new CreateRegistrationIdCallback() {
+				    		Futures.addCallback(upsertRegistrationInternalFuture2, new FutureCallback<Void>()
+				    		{    
+	    			            @Override
+	    			            public void onFailure(Throwable exception) {
+	    			            }
+	    			            
+	    			            public void onSuccess(Void v) {
 
-                        @Override
-                        public void onCreate(final String registrationId, Exception exception) {
-                            if (exception != null) {
-                                callback.onSet(registrationId, exception);
+	    			                try {
+	    			                    storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
+	    			                } catch (Exception exception) {
+	    			                	resultFuture.setException(exception);
+	    			                    return;
+	    			                }
+	    			    	        resultFuture.set(registrationId);
+	    			            }
+				    		});
+                	
+					    }
+					});
+                              
+            	}
+            	else {
+            		resultFuture.setException(exception);
+            	}
+        	}
+       
+            @Override
+            public void onSuccess(Void v) {
 
-                                return;
-                            } else {
-                                registration.setRegistrationId(registrationId);
-                                upsertRegistrationInternal(registration, new UpsertRegistrationInternalCallback() {
-
-                                    @Override
-                                    public void onUpsert(Registration registration, Exception exception) {
-                                        if (exception != null) {
-                                            callback.onSet(registrationId, exception);
-
-                                            return;
-                                        } else {
-                                            try {
-                                                storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
-                                            } catch (Exception e) {
-                                                callback.onSet(registrationId, e);
-                                                return;
-                                            }
-
-                                            callback.onSet(registrationId, null);
-
-                                            return;
-                                        }
-
-                                    }
-                                });
-                            }
-                        }
-                    });
-                } else {
-                    callback.onSet(registrationId, exception);
-
+                try {
+                    storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
+                } catch (Exception exception) {
+                	resultFuture.setException(exception);
                     return;
                 }
+    	        resultFuture.set(registrationId);
             }
         });
+        
+        return resultFuture;
     }
-
+        
     /**
      * Deletes a registration and removes it from local storage
      * 
@@ -608,78 +655,56 @@ public class MobileServicePush {
      *            The registration name
      * @param callback
      *            The operation callback
+     * @throws Exception 
      */
-    private void unregisterInternal(String registrationName, final UnregisterInternalCallback callback) {
+    private ListenableFuture<Void> unregisterInternal(String registrationName) {
         String registrationId = null;
-        try {
-            registrationId = retrieveRegistrationId(registrationName);
-        } catch (Exception e) {
-            callback.onUnregister(null, e);
-            return;
-        }
-
-        if (!isNullOrWhiteSpace(registrationId)) {
-            deleteRegistrationInternal(registrationName, registrationId, new DeleteRegistrationInternalCallback() {
-
-                @Override
-                public void onDelete(String registrationId, Exception exception) {
-                    if (exception != null) {
-                        callback.onUnregister(registrationId, exception);
-
-                        return;
-                    } else {
-                        callback.onUnregister(registrationId, null);
-
-                        return;
-                    }
-
-                }
-            });
-        } else {
-            callback.onUnregister(null, null);
-            return;
-        }
+        
+        registrationId = retrieveRegistrationId(registrationName);
+      
+        return deleteRegistrationInternal(registrationName, registrationId);
     }
 
-    private void createRegistrationId(final CreateRegistrationIdCallback callback) {
+    private ListenableFuture<String> createRegistrationId() {
 
         String resource = "/registrationids/";
-        /*
-        mClient.invokeApiInternal(resource, null, "POST", null, null, MobileServiceClient.PNS_API_URL, new ServiceFilterResponseCallback() {
-
+        
+    	final SettableFuture<String> resultFuture = SettableFuture.create();
+        ListenableFuture<ServiceFilterResponse> serviceFilterFuture =  mClient.invokeApiInternal(resource, null, "POST", null, null, MobileServiceClient.PNS_API_URL);
+    
+        Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>()
+		{    
             @Override
-            public void onResponse(ServiceFilterResponse response, Exception exception) {
-                if (exception != null) {
-                    callback.onCreate(null, exception);
+            public void onFailure(Throwable exception) {
+             	resultFuture.setException(exception);
+            }
+       
+            @Override
+            public void onSuccess(ServiceFilterResponse response) {
+            	for (Header header : response.getHeaders()) {
+                    if (header.getName().equalsIgnoreCase(NEW_REGISTRATION_LOCATION_HEADER)) {
 
-                    return;
-                } else {
-                    for (Header header : response.getHeaders()) {
-                        if (header.getName().equalsIgnoreCase(NEW_REGISTRATION_LOCATION_HEADER)) {
-
-                            URI regIdUri = null;
-                            try {
-                                regIdUri = new URI(header.getValue());
-                            } catch (URISyntaxException e) {
-                                callback.onCreate(null, e);
-
-                                return;
-                            }
-
-                            String[] pathFragments = regIdUri.getPath().split("/");
-                            String result = pathFragments[pathFragments.length - 1];
-
-                            callback.onCreate(result, null);
+                        URI regIdUri = null;
+                        try {
+                            regIdUri = new URI(header.getValue());
+                        } catch (URISyntaxException e) {
+                        	resultFuture.setException(e);
 
                             return;
                         }
-                    }
-                }
-            }
-        });
-        */
-    }
 
+                        String[] pathFragments = regIdUri.getPath().split("/");
+                        String result = pathFragments[pathFragments.length - 1];
+
+                        resultFuture.set(result);
+                    }
+            	}
+            }
+		});
+
+        return resultFuture;
+    }
+        
     /**
      * Updates a registration
      * 
@@ -687,9 +712,13 @@ public class MobileServicePush {
      *            The registration to update
      * @param callback
      *            The operation callback
+     * @throws UnsupportedEncodingException 
+     * @throws Exception 
      */
-    private void upsertRegistrationInternal(final Registration registration, final UpsertRegistrationInternalCallback callback) {
+    private ListenableFuture<Void> upsertRegistrationInternal(final Registration registration) {
 
+    	final SettableFuture<Void> resultFuture = SettableFuture.create();
+    	
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder = gsonBuilder.excludeFieldsWithoutExposeAnnotation();
 
@@ -698,42 +727,45 @@ public class MobileServicePush {
         String resource = registration.getURI();
         JsonElement json = gson.toJsonTree(registration);
         String body = json.toString();
-        byte[] content = null;
 
-        try {
-            content = body.getBytes(MobileServiceClient.UTF8_ENCODING);
-        } catch (UnsupportedEncodingException e) {
-            callback.onUpsert(registration, e);
-            return;
-        }
-
+        
+        byte[] content;
+		try {
+			content = body.getBytes(MobileServiceClient.UTF8_ENCODING);
+		} catch (UnsupportedEncodingException e) {
+			resultFuture.setException(e);
+			return resultFuture;
+		}
+        
         List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
 
         requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
 
-        /*
-        mClient.invokeApiInternal(resource, content, "PUT", requestHeaders, null, MobileServiceClient.PNS_API_URL, new ServiceFilterResponseCallback() {
+        ListenableFuture<ServiceFilterResponse> serviceFilterFuture =  mClient.invokeApiInternal(resource, content, "PUT", requestHeaders, null, MobileServiceClient.PNS_API_URL);
 
+        Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>()
+		{    
             @Override
-            public void onResponse(ServiceFilterResponse response, Exception exception) {
-                if (exception != null) {
-                    if (response.getStatus().getStatusCode() == 410) {
-                        exception = new RegistrationGoneException(exception);
+            public void onFailure(Throwable exception) {
+             	resultFuture.setException(exception);
+            }
+       
+            @Override
+            public void onSuccess(ServiceFilterResponse response) {
+
+            		if (response != null && 
+                    		response.getStatus().getStatusCode() == 410) {
+                        resultFuture.setException(new RegistrationGoneException());
+                    	return;
                     }
-
-                    callback.onUpsert(registration, exception);
-
-                    return;
-                } else {
-                    callback.onUpsert(registration, null);
-
-                    return;
-                }
+    	        
+    	        resultFuture.set(null);
             }
         });
-        */
-    }
-
+        
+        return resultFuture;
+     }
+    
     /**
      * Deletes a registration and removes it from local storage
      * 
@@ -745,36 +777,40 @@ public class MobileServicePush {
      * 
      * @param callback
      *            The operation callback
+     * @throws ExecutionException 
+     * @throws InterruptedException 
      */
-    private void deleteRegistrationInternal(final String registrationName, final String registrationId, final DeleteRegistrationInternalCallback callback) {
+    private ListenableFuture<Void> deleteRegistrationInternal(final String registrationName, final String registrationId) {
 
+    	final SettableFuture<Void> resultFuture = SettableFuture.create();
+    	
+    	if (!isNullOrWhiteSpace(registrationId)) {
+    		resultFuture.set(null);
+    		return resultFuture;
+    	}
+    	
         String resource = "/registrations/" + registrationId;
-
-        /*
-        mClient.invokeApiInternal(resource, null, "DELETE", null, null, MobileServiceClient.PNS_API_URL, new ServiceFilterResponseCallback() {
-
+       
+        ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mClient.invokeApiInternal(resource, null, "DELETE", null, null, MobileServiceClient.PNS_API_URL);
+    
+        Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>()
+		{    
             @Override
-            public void onResponse(ServiceFilterResponse response, Exception exception) {
-                try {
-                    removeRegistrationId(registrationName);
-                } catch (Exception e) {
-                    callback.onDelete(registrationId, e);
-                    return;
-                }
-
-                if (exception != null) {
-                    callback.onDelete(registrationId, exception);
-                    return;
-                }
-
-                callback.onDelete(registrationId, null);
-                return;
-
+            public void onFailure(Throwable exception) {
+             	resultFuture.setException(exception);
+            }
+       
+            @Override
+            public void onSuccess(ServiceFilterResponse response) {
+                removeRegistrationId(registrationName);
+                
+                resultFuture.set(null);
             }
         });
-        */
+        
+        return resultFuture;
     }
-
+    
     /**
      * Retrieves the registration id associated to the registration name from
      * local storage
@@ -784,7 +820,7 @@ public class MobileServicePush {
      * @return A registration id String
      * @throws Exception
      */
-    private String retrieveRegistrationId(String registrationName) throws Exception {
+    private String retrieveRegistrationId(String registrationName) {
         return mSharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + registrationName, null);
     }
 
