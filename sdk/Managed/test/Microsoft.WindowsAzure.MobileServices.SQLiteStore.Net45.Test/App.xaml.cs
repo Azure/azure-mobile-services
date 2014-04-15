@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test;
 using Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests;
+using Microsoft.WindowsAzure.MobileServices.Test;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test
@@ -31,6 +32,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test
         /// </summary>
         static App()
         {
+            ConsoleHelper.Attach();
             Harness = new TestHarness();
             Harness.LoadTestAssembly(typeof(SQLiteStoreTests).GetTypeInfo().Assembly);
         }

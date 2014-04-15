@@ -90,6 +90,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Compile Include="..\Microsoft.WindowsAzure.Mobile.Net45.Test\ConsoleHelper.cs">
+      <Link>ConsoleHelper.cs</Link>
+    </Compile>
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.SQLiteStore.WindowsStore.Test\UI\GroupDescription.cs">
       <Link>UI\GroupDescription.cs</Link>
     </Compile>
