@@ -19,6 +19,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using Microsoft.WindowsAzure.MobileServices.Test;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test
@@ -78,6 +79,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test
                     lblResults.Text = string.Format(CultureInfo.InvariantCulture, "{0} tests passed!", harness.Count);
                 }
                 lblResults.Visibility = Visibility.Visible;
+                if (App.Harness.Settings.Custom["Auto"] == "True")
+                {
+                    Application.Current.Shutdown(harness.Failures);
+                }
             });
         }
 
@@ -118,6 +123,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test
         {
             await Dispatcher.InvokeAsync(async () =>
             {
+                ConsoleHelper.Write("{0}...", test.Name);
                 _currentTest = new TestDescription { Name = test.Name };
                 _currentGroup.Add(_currentTest);
                 _tests.Add(_currentTest);
@@ -136,14 +142,17 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test
                 if (method.Excluded)
                 {
                     _currentTest.Color = Color.FromArgb(0xFF, 0x66, 0x66, 0x66);
+                    ConsoleHelper.WriteLine("Skipped");
                 }
                 else if (!method.Passed)
                 {
                     _currentTest.Color = Color.FromArgb(0xFF, 0xFF, 0x00, 0x6E);
+                    ConsoleHelper.WriteLine("Failed"); 
                 }
                 else
                 {
                     _currentTest.Color = Color.FromArgb(0xFF, 0x2A, 0x9E, 0x39);
+                    ConsoleHelper.WriteLine("Passed");
                 }
                 _currentTest = null;
             });

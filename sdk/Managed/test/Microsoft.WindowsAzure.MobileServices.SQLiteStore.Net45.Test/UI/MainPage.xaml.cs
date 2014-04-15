@@ -35,7 +35,19 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test
 
             txtTags.Text = tags ?? "";
 
-            Loaded += (s, e) => btnUnitTests.Focus();
+            Loaded += (s, e) =>
+            {
+                btnUnitTests.Focus();
+                string[] args = Environment.GetCommandLineArgs();
+                if (args.Length >= 2 && args[1] == "/auto")
+                {
+                    if (args.Length > 2)
+                    {
+                        tags = args[2];
+                    }
+                    ExecuteUnitTests(tags, auto: true);
+                }
+            };
         }
 
         /// <summary>
@@ -46,9 +58,15 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test
         private void ExecuteUnitTests(object sender, RoutedEventArgs e)
         {
             // Get the test settings from the UI
-            App.Harness.Settings.TagExpression = txtTags.Text;
-
             Settings.Default.MobileServiceTags = txtTags.Text;
+
+            ExecuteUnitTests(txtTags.Text, auto: false);
+        }
+
+        private void ExecuteUnitTests(string tags, bool auto)
+        {
+            App.Harness.Settings.TagExpression = tags;
+            App.Harness.Settings.Custom["Auto"] = auto ? "True" : "False";
 
             this.NavigationService.Navigate(new TestPage());
         }
