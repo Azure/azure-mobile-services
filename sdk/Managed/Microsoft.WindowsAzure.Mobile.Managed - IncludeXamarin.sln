@@ -23,11 +23,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.WP8.Test", "test\Microsoft.WindowsAzure.MobileServices.WindowsPhone8.Test\Microsoft.WindowsAzure.Mobile.WP8.Test.csproj", "{46AE537A-1143-48A4-B9A4-4B2C7BD9AB1D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{E0DB6669-9295-4034-8E6D-7C4F2ED297DD}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Ext.Net45", "src\Microsoft.WindowsAzure.MobileServices.Net45\Microsoft.WindowsAzure.Mobile.Ext.Net45.csproj", "{8BE160B5-ADBF-4FE0-A0E2-A4A77A87E620}"
 EndProject
