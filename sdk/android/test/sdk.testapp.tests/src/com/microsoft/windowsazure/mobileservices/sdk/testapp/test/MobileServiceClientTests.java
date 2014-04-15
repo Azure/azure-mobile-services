@@ -36,6 +36,7 @@ import android.util.Pair;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.microsoft.windowsazure.mobileservices.ApiJsonOperationCallback;
 import com.microsoft.windowsazure.mobileservices.MobileServiceAuthenticationProvider;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
@@ -89,26 +90,80 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 		}
 	}
 
-	public void testNewMobileServiceClientWithEmptyAppKeyShouldThrowException() {
-		try {
-			new MobileServiceClient(appUrl, "", getInstrumentation().getTargetContext());
-			fail("Expected Exception MalformedURLException");
-		} catch (IllegalArgumentException e) {
-			// do nothing, it's OK
-		} catch (MalformedURLException e) {
-			fail("This should not happen");
-		}
+	private void mobileServiceClientWithoutAppKeyShouldNotSendXZumoApplicationHeader(final String appKeyValue) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+				try {
+					client = new MobileServiceClient(appUrl, appKeyValue, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				client = client.withFilter(new ServiceFilter() {
+
+					@Override
+					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
+							ServiceFilterResponseCallback responseCallback) {
+						String requestAppKey = null;
+						for (Header header : request.getHeaders()) {
+							if (header.getName().equalsIgnoreCase("x-zumo-application")) {
+								requestAppKey = header.getValue();
+							}
+						}
+
+						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+						response.setStatus(new StatusLineMock(200));
+						response.setContent("{\"appKeyPresent\":" +
+								(requestAppKey == null ? "false" : "true") + "}");
+
+						// create a mock request to replace the existing one
+						ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
+						nextServiceFilterCallback.onNext(requestMock, responseCallback);
+					}
+				});
+
+				try {
+					client.invokeApi("someApi", new ApiJsonOperationCallback() {
+
+						@Override
+						public void onCompleted(JsonElement jsonObject, Exception exception,
+								ServiceFilterResponse response) {
+							// TODO Auto-generated method stub
+							container.setJsonResult(jsonObject);
+							container.setException(exception);
+							latch.countDown();
+						}
+					});
+				} catch (Exception e) {
+					latch.countDown();
+				}
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		assertNull(container.getException());
+		JsonObject result = container.getJsonResult().getAsJsonObject();
+		assertNotNull(result);
+		boolean hasAppKeyHeader = result.get("appKeyPresent").getAsBoolean();
+		assertFalse(hasAppKeyHeader);
 	}
 
-	public void testNewMobileServiceClientWithNullAppKeyShouldThrowException() {
-		try {
-			new MobileServiceClient(appUrl, null, getInstrumentation().getTargetContext());
-			fail("Expected Exception MalformedURLException");
-		} catch (IllegalArgumentException e) {
-			// do nothing, it's OK
-		} catch (MalformedURLException e) {
-			fail("This should not happen");
-		}
+	public void testNewMobileServiceClientWithEmptyAppKeyShouldNotSendXZumoApplicationHeader() throws Throwable {
+		this.mobileServiceClientWithoutAppKeyShouldNotSendXZumoApplicationHeader("");
+	}
+
+	public void testNewMobileServiceClientWithNullAppKeyShouldNotSendXZumoApplicationHeader() throws Throwable {
+		this.mobileServiceClientWithoutAppKeyShouldNotSendXZumoApplicationHeader(null);
 	}
 
 	public void testMobileServiceClientWithNullServiceFilterShouldThrowException() {
