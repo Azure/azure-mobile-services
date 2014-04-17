@@ -68,7 +68,7 @@
       <HintPath>..\..\packages\Newtonsoft.Json.6.0.2\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="SQLitePCL">
-      <HintPath>..\..\packages\SQLitePCL.3.8.3.2\lib\portable-net45+wp8+win8\SQLitePCL.dll</HintPath>
+      <HintPath>..\..\packages\SQLitePCL.3.8.4.3\lib\portable-net45+wp8+win8+monoandroid+monotouch\SQLitePCL.dll</HintPath>
     </Reference>
     <Reference Include="System.Net.Http">
       <HintPath>..\..\packages\Microsoft.Net.Http.2.2.19\lib\portable-net40+sl4+win8+wp71+wpa81\System.Net.Http.dll</HintPath>

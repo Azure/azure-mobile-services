@@ -21,8 +21,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 {
     public class SQLiteStoreIntegrationTests: TestBase
     {
-        private const string TestDbName = "test.db";
         private const string TestTable = "stringId_test_table";
+
+        public static string TestDbName = SQLiteStoreTests.TestDbName;
 
         [AsyncTestMethod]
         public async Task ReadAsync_RoundTripsDate()

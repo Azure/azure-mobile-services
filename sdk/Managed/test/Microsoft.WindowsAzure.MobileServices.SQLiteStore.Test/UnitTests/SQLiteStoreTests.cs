@@ -19,10 +19,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
     public class SQLiteStoreTests : TestBase
     {
         private static readonly DateTime epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
-        private const string TestDbName = "test.db";
         private const string TestTable = "todo";
         private static readonly DateTime testDate = DateTime.Parse("2014-02-11 14:52:19").ToUniversalTime();
+
+        public static string TestDbName = "test.db";
 
         [AsyncTestMethod]
         public async Task InitializeAsync_InitializesTheStore()

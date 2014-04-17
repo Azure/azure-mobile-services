@@ -30,10 +30,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             new JObject(){{"id", "5"}, {"col1", "jumped"}, {"col2", 9}, {"col3", 678.932}, {"col4", epoch.AddMilliseconds(333333333332)}, {"col5", true}},
             new JObject(){{"id", "6"}, {"col1", "EndsWithBackslash\\"}, {"col2", 8}, {"col3", 521f}, {"col4", epoch.AddMilliseconds(17071985)}, {"col5", true}}
        };
-       private const string TestDbName = "queryTest.db";
        private const string TestTable = "test";
        private const string MathTestTable = "mathtest";
        private static bool queryTableInitialized;
+
+       public static string TestDbName = SQLiteStoreTests.TestDbName;
 
         [AsyncTestMethod]
         public async Task Query_OnBool_Implicit()
@@ -126,7 +127,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             Assert.AreEqual(results[0].ToString(), testData[2].ToString());
         }
 
-        [AsyncTestMethod]
+        [AsyncTestMethod, Tag("notXamarin")] // Android/iOS SQLite does not have INSTR function
         public async Task Query_OnString_IndexOf()
         {
             await TestQuery("$filter=indexof(col1, 'ump') eq 1", 1);
