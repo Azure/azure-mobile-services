@@ -651,6 +651,38 @@
     STAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
+-(void) testDeleteItemWithStringIdConflictWithEmptyJsonError
+{
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    NSString* stringData = @"{}";
+    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    
+    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                                   initWithURL:nil
+                                   statusCode:412
+                                   HTTPVersion:nil headerFields:nil];
+    testFilter.responseToUse = response;
+    testFilter.ignoreNextFilter = YES;
+    testFilter.dataToUse = data;
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
+    
+    // Create the item
+    id item = @{ @"id":@"120", @"name":@"test name" };
+    
+    // Test deletion of the item
+    [todoTable delete:item completion:^(id itemId, NSError *error) {
+        STAssertNil(itemId, @"item should have been nil.");
+        STAssertEquals(error.code, [@MSErrorPreconditionFailed integerValue], @"Error should be precondition");
+        NSDictionary* serverItem =[error.userInfo objectForKey:MSErrorServerItemKey];
+        STAssertEquals(serverItem.count, (unsigned int) 0, @"empty JSON object error has no members in userInfo");
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
 -(void) testDeleteItemWithNilItem
 {
     MSTable *todoTable = [client tableWithName:@"todoItem"];
