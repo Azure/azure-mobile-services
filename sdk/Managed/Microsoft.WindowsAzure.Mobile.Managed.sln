@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21111.0
+VisualStudioVersion = 12.0.30324.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile", "src\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.Mobile.csproj", "{75557793-E36E-4190-8714-5BD2665859FB}"
 EndProject
@@ -22,18 +22,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.WP8.Test", "test\Microsoft.WindowsAzure.MobileServices.WindowsPhone8.Test\Microsoft.WindowsAzure.Mobile.WP8.Test.csproj", "{46AE537A-1143-48A4-B9A4-4B2C7BD9AB1D}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{E0DB6669-9295-4034-8E6D-7C4F2ED297DD}"
-	ProjectSection(SolutionItems) = preProject
-		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Ext.Net45", "src\Microsoft.WindowsAzure.MobileServices.Net45\Microsoft.WindowsAzure.Mobile.Ext.Net45.csproj", "{8BE160B5-ADBF-4FE0-A0E2-A4A77A87E620}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Net45.Test", "test\Microsoft.WindowsAzure.Mobile.Net45.Test\Microsoft.WindowsAzure.Mobile.Net45.Test.csproj", "{7C1A9BC1-3E60-4673-AC08-AC8399032D49}"
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Microsoft.WindowsAzure.Mobile.Net45.Vb.Test", "test\Microsoft.WindowsAzure.Mobile.Net45.Vb.Test\Microsoft.WindowsAzure.Mobile.Net45.Vb.Test.vbproj", "{D3C7CD26-984A-46D1-8618-8363199F1573}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.Ext.WP81", "src\Microsoft.WindowsAzure.MobileServices.WindowsPhone81\Microsoft.WindowsAzure.Mobile.Ext.WP81.csproj", "{02EEF75A-D824-4203-B243-C1B97B0D35A9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.WP81.Test", "test\Microsoft.WindowsAzure.MobileServices.WindowsPhone81.Test\Microsoft.WindowsAzure.Mobile.WP81.Test.csproj", "{92CD4A69-950A-45FE-B8EA-774BA69E7482}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -264,6 +261,57 @@ Global
 		{D3C7CD26-984A-46D1-8618-8363199F1573}.Signed|ARM.ActiveCfg = Release|Any CPU
 		{D3C7CD26-984A-46D1-8618-8363199F1573}.Signed|x64.ActiveCfg = Release|Any CPU
 		{D3C7CD26-984A-46D1-8618-8363199F1573}.Signed|x86.ActiveCfg = Release|Any CPU
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Debug|ARM.ActiveCfg = Debug|ARM
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Debug|ARM.Build.0 = Debug|ARM
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Debug|x86.ActiveCfg = Debug|x86
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Debug|x86.Build.0 = Debug|x86
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Release|ARM.ActiveCfg = Release|ARM
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Release|ARM.Build.0 = Release|ARM
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Release|x64.ActiveCfg = Release|Any CPU
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Release|x86.ActiveCfg = Release|x86
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Release|x86.Build.0 = Release|x86
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Signed|Any CPU.ActiveCfg = Debug|Any CPU
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Signed|Any CPU.Build.0 = Debug|Any CPU
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Signed|ARM.ActiveCfg = Debug|ARM
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Signed|ARM.Build.0 = Debug|ARM
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Signed|x64.ActiveCfg = Debug|Any CPU
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Signed|x86.ActiveCfg = Debug|x86
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9}.Signed|x86.Build.0 = Debug|x86
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Debug|ARM.ActiveCfg = Debug|ARM
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Debug|ARM.Build.0 = Debug|ARM
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Debug|ARM.Deploy.0 = Debug|ARM
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Debug|x86.ActiveCfg = Debug|x86
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Debug|x86.Build.0 = Debug|x86
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Debug|x86.Deploy.0 = Debug|x86
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Release|Any CPU.Build.0 = Release|Any CPU
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Release|ARM.ActiveCfg = Release|ARM
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Release|ARM.Build.0 = Release|ARM
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Release|ARM.Deploy.0 = Release|ARM
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Release|x64.ActiveCfg = Release|Any CPU
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Release|x86.ActiveCfg = Release|x86
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Release|x86.Build.0 = Release|x86
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Release|x86.Deploy.0 = Release|x86
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Signed|Any CPU.ActiveCfg = Release|Any CPU
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Signed|Any CPU.Build.0 = Release|Any CPU
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Signed|Any CPU.Deploy.0 = Release|Any CPU
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Signed|ARM.ActiveCfg = Release|ARM
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Signed|ARM.Build.0 = Release|ARM
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Signed|ARM.Deploy.0 = Release|ARM
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Signed|x64.ActiveCfg = Release|Any CPU
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Signed|x86.ActiveCfg = Release|x86
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Signed|x86.Build.0 = Release|x86
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482}.Signed|x86.Deploy.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -280,5 +328,7 @@ Global
 		{8BE160B5-ADBF-4FE0-A0E2-A4A77A87E620} = {BA83494B-A52F-4CC8-B2BE-E339376AD2D5}
 		{7C1A9BC1-3E60-4673-AC08-AC8399032D49} = {45E57CDC-7178-4915-8D0B-CF80F5E44AF6}
 		{D3C7CD26-984A-46D1-8618-8363199F1573} = {45E57CDC-7178-4915-8D0B-CF80F5E44AF6}
+		{02EEF75A-D824-4203-B243-C1B97B0D35A9} = {BA83494B-A52F-4CC8-B2BE-E339376AD2D5}
+		{92CD4A69-950A-45FE-B8EA-774BA69E7482} = {45E57CDC-7178-4915-8D0B-CF80F5E44AF6}
 	EndGlobalSection
 EndGlobal

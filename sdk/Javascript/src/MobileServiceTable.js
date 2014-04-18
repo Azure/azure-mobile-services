@@ -344,10 +344,8 @@ MobileServiceTable.prototype.update = Platform.async(
             headers,
             function (error, response) {
                 if (!_.isNull(error)) {
-                    if (error.request && error.request.status === 412) {
-                        error.serverInstance = _.fromJson(error.request.responseText);
-                    }
-                    callback(error, null);
+                    setServerItemIfPreconditionFailed(error);
+                    callback(error);
                 } else {
                     var result = getItemFromResponse(response);
                     result = Platform.allowPlatformToMutateOriginal(instance, result);
@@ -513,7 +511,7 @@ MobileServiceTable.prototype.del = Platform.async(
         if (_.isNull(callback) && (typeof parameters === 'function')) {
             callback = parameters;
             parameters = null;
-        }
+        }        
 
         // Validate the arguments
         Validate.notNull(instance, 'instance');
@@ -523,6 +521,14 @@ MobileServiceTable.prototype.del = Platform.async(
             Validate.isValidParametersObject(parameters);
         }
         Validate.notNull(callback, 'callback');
+
+        var headers = [];
+
+        if (_.isString(instance[idPropertyName])) {
+            if (!_.isNullOrEmpty(instance.__version)) {
+                headers['If-Match'] = getEtagFromVersion(instance.__version);
+            }
+        }
 
         // Contruct the URL
         var urlFragment =  _.url.combinePathSegments(
@@ -539,7 +545,12 @@ MobileServiceTable.prototype.del = Platform.async(
             'DELETE',
             urlFragment,
             null,
+            false,
+            headers,
             function (error, response) {
+                if (!_.isNull(error)) {
+                    setServerItemIfPreconditionFailed(error);
+                }
                 callback(error);
             });
     });
@@ -633,6 +644,13 @@ function getItemFromResponse(response) {
         }
     }
     return result;
+}
+
+// Converts an error to precondition failed error
+function setServerItemIfPreconditionFailed(error) {
+    if (error.request && error.request.status === 412) {
+        error.serverInstance = _.fromJson(error.request.responseText);
+    }
 }
 
 // Add wrapping double quotes and escape all double quotes

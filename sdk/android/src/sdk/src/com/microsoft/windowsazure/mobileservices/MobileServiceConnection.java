@@ -154,8 +154,11 @@ class MobileServiceConnection {
 		// Set the User Agent header
 		request.addHeader(HTTP.USER_AGENT, getUserAgent());
 
-		// Set the special Application key header
-		request.addHeader(X_ZUMO_APPLICATION_HEADER, mClient.getAppKey());
+		// Set the special Application key header, if present
+		String appKey = mClient.getAppKey();
+		if (appKey != null && appKey.trim().length() > 0) {
+			request.addHeader(X_ZUMO_APPLICATION_HEADER, mClient.getAppKey());
+		}
 
 		// Set the special Installation ID header
 		request.addHeader(

@@ -65,6 +65,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 App.Harness.Settings.Custom.TryGetValue("MobileServiceRuntimeKey", out appKey);
 
                 client = new MobileServiceClient(appUrl, appKey);
+
+                App.LoginMobileService = client;
             }
 
             try

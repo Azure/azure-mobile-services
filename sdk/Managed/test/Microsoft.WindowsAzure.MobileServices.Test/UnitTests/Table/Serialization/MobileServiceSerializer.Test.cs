@@ -947,6 +947,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             }
         }
 
+        [Tag("notWP81")]
         [Tag("notWP80")]
         [Tag("notWP75")]
         [Tag("notXamarin")]
@@ -1087,6 +1088,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             }
         }
 
+        [Tag("notWP81")]
         [Tag("notWP80")]
         [Tag("notWP75")]
         [Tag("notXamarin")]

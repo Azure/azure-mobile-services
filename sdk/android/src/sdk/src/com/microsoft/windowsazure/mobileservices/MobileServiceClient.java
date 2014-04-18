@@ -596,7 +596,11 @@ public class MobileServiceClient {
 				
 		JsonElement json = null;
 		if (body != null) {
-			json = getGsonBuilder().create().toJsonTree(body);
+			if (body instanceof JsonElement) {
+				json = (JsonElement)body;
+			} else {
+				json = getGsonBuilder().create().toJsonTree(body);
+			}
 		}
 		
 		invokeApi(apiName, json, httpMethod, parameters, new ApiJsonOperationCallback() {
@@ -964,10 +968,6 @@ public class MobileServiceClient {
 			Context context, AndroidHttpClientFactory androidHttpClientFactory) {
 		if (appUrl == null || appUrl.toString().trim().length() == 0) {
 			throw new IllegalArgumentException("Invalid Application URL");
-		}
-
-		if (appKey == null || appKey.toString().trim().length() == 0) {
-			throw new IllegalArgumentException("Invalid Application Key");
 		}
 
 		if (context == null) {

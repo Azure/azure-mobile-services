@@ -7,14 +7,7 @@ between Windows 8 and node.js applications.
 Please see the Microsoft.Azure.Zumo.Build project and the MergeJsModules build
 task for more details on the .library format and all of its options.
 -->
-<Library DefaultPath="Generated\MobileServices.js" 
-         WebPath="Generated\MobileServices.Web.js" 
-         InternalsPath="Generated\MobileServices.Internals.js" 
-         WebInternalsPath="Generated\MobileServices.Web.Internals.js" 
-         IntellisensePath="Generated\MobileServices.DevIntellisense.js" 
-         Copyright="Copyright (c) Microsoft Corporation. All rights reserved." 
-         FileVersion="1.0.0.0">
-  
+<Library DefaultPath="Generated\MobileServices.js" WebPath="Generated\MobileServices.Web.js" InternalsPath="Generated\MobileServices.Internals.js" WebInternalsPath="Generated\MobileServices.Web.Internals.js" IntellisensePath="Generated\MobileServices.DevIntellisense.js" Copyright="Copyright (c) Microsoft Corporation. All rights reserved." FileVersion="1.0.20402.0">
   <!-- Add Resources  -->
   <Resource Path="Strings\en-US\Resources.resjson" LanguageTag="en-US" Condition="Web|WebInternals" />
   <!--
@@ -44,7 +37,7 @@ task for more details on the .library format and all of its options.
   <Module Path="Utilities\Extensions.js" />
   <Module Path="Utilities\PostMessageExchange.js" Condition="Web|WebInternals" />
   <Module Path="Utilities\Promises.js" Condition="Web|WebInternals" />
-  <Module Path="Utilities\Validate.js"  />
+  <Module Path="Utilities\Validate.js" />
   <Module Path="Internals\DevIntellisense.js" Condition="Intellisense" EntryPoint="true" />
   <!--  Add external modules -->
   <Module Path="External\queryjs\lib\*.js" />
