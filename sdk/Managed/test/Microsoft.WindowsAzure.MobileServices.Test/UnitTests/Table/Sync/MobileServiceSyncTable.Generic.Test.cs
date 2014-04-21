@@ -423,12 +423,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var item = new StringIdType() { Id = "an id", String = "what?" };
 
             await table.InsertAsync(item);
-            Assert.AreEqual(service.SyncContext.PendingOperations, 1);
+            Assert.AreEqual(service.SyncContext.PendingOperations, 1L);
 
             await table.DeleteAsync(item);
             await service.SyncContext.PushAsync();
 
-            Assert.AreEqual(service.SyncContext.PendingOperations, 0);
+            Assert.AreEqual(service.SyncContext.PendingOperations, 0L);
         }
 
         [AsyncTestMethod]
@@ -600,17 +600,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();
 
             await firstOperationOnItem1(table, item1);
-            Assert.AreEqual(service.SyncContext.PendingOperations, 1);
+            Assert.AreEqual(service.SyncContext.PendingOperations, 1L);
 
             await operationOnItem2(table, item2);
-            Assert.AreEqual(service.SyncContext.PendingOperations, 2);
+            Assert.AreEqual(service.SyncContext.PendingOperations, 2L);
 
             await secondOperationOnItem1(table, item1);
-            Assert.AreEqual(service.SyncContext.PendingOperations, 2); 
+            Assert.AreEqual(service.SyncContext.PendingOperations, 2L); 
 
             await service.SyncContext.PushAsync();
 
-            Assert.AreEqual(service.SyncContext.PendingOperations, 0);
+            Assert.AreEqual(service.SyncContext.PendingOperations, 0L);
             Assert.AreEqual(executed, 2); // total two operations executed
         }
 
@@ -628,11 +628,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             var item = new StringIdType() { Id = "an id", String = "what?" };
             await firstOperation(table, item);
-            Assert.AreEqual(service.SyncContext.PendingOperations, 1);
+            Assert.AreEqual(service.SyncContext.PendingOperations, 1L);
 
             await ThrowsAsync<InvalidOperationException>(() => secondOperation(table, item));
 
-            Assert.AreEqual(service.SyncContext.PendingOperations, 1);
+            Assert.AreEqual(service.SyncContext.PendingOperations, 1L);
         }
 
         /// <summary>
@@ -666,7 +666,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var item = new StringIdType() { Id = "an id", String = "what?" };
             await table.InsertAsync(item);
 
-            Assert.AreEqual(service.SyncContext.PendingOperations, 1);
+            Assert.AreEqual(service.SyncContext.PendingOperations, 1L);
 
             MobileServicePushFailedException ex = await ThrowsAsync<MobileServicePushFailedException>(service.SyncContext.PushAsync);
 
@@ -676,11 +676,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(operationHandler.PushCompletionResult.Status, expectedStatus);
 
             // the insert operation is still in queue
-            Assert.AreEqual(service.SyncContext.PendingOperations, 1);
+            Assert.AreEqual(service.SyncContext.PendingOperations, 1L);
 
             await service.SyncContext.PushAsync();
 
-            Assert.AreEqual(service.SyncContext.PendingOperations, 0);
+            Assert.AreEqual(service.SyncContext.PendingOperations, 0L);
             Assert.AreEqual(operationHandler.PushCompletionResult.Status, MobileServicePushStatus.Complete);
         }
     }

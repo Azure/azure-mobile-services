@@ -36,11 +36,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// </summary>
         private OperationQueue opQueue;
 
-        /// <summary>
-        /// Lock to ensure that multiple sync and op queue operations don't interleave
-        /// </summary>
-        private AsyncLock syncOpQueueLock = new AsyncLock();
-
         public IMobileServiceSyncHandler Handler { get; private set; }
 
         public IMobileServiceLocalStore Store
@@ -72,12 +67,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.client = client;
         }
 
-        public int PendingOperations
+        public long PendingOperations
         {
-            get
-            {
-                return this.opQueue.CountPending();   
-            }
+            get { return this.opQueue.PendingOperations; }
         }
 
         public async Task InitializeAsync(IMobileServiceLocalStore store, IMobileServiceSyncHandler handler)
@@ -100,7 +92,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
                 this.syncQueue = new ActionBlock();
                 await this.Store.InitializeAsync();
-                this.opQueue = await OperationQueue.LoadAsync(this.Store, this.client);
+                this.opQueue = await OperationQueue.LoadAsync(this.Store);
 
                 this.initializeTask.SetResult(null);
             }
@@ -188,14 +180,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             await this.EnsureInitializedAsync();
 
-            var bookmark = new BookmarkOperation();
-            var push = new PushAction(this.opQueue, this.Store, this.Handler, this.client.SerializerSettings, cancellationToken, bookmark);
+            var push = new PushAction(this.opQueue, 
+                                      this.Store, 
+                                      this.Handler, 
+                                      this.client, 
+                                      cancellationToken);
 
-            using (await this.syncOpQueueLock.Acquire(cancellationToken))
-            {                
-                await this.opQueue.EnqueueAsync(bookmark);
-                Task discard = this.syncQueue.Post(push.ExecuteAsync, cancellationToken);
-            }
+            Task discard = this.syncQueue.Post(push.ExecuteAsync, cancellationToken);
 
             await push.CompletionTask;
         }        
@@ -234,8 +225,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             using (await this.opQueue.LockTableAsync(operation.TableName, CancellationToken.None)) // prevent interferance with any in-progress pull/purge action
             using (await this.storeQueueLock.WriterLockAsync()) // prevent any other operation from interleaving between store and queue insert
             {
-                MobileServiceTableOperation existing;
-                if (this.opQueue.TryGetOperation(operation.ItemId, out existing))
+                MobileServiceTableOperation existing = await this.opQueue.GetOperationAsync(operation.ItemId);
+                if (existing != null)
                 {
                     existing.Validate(operation); // make sure this operation is legal and collapses after any previous operation on same item already in the queue
                 }
@@ -268,7 +259,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public void Dispose()
         {
-            this.syncOpQueueLock.Dispose();
             if (this._store != null)
             {
                 this._store.Dispose();

@@ -13,6 +13,9 @@ using Microsoft.WindowsAzure.MobileServices.Threading;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
+    /// <summary>
+    /// Base class for table specific sync actions that push all the pending changes on that table before executing i.e. Purge and Pull
+    /// </summary>
     internal abstract class TableAction: SyncAction
     {
         private Task pendingPush;
@@ -42,9 +45,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     await pendingPush; // this will cause any failed push to fail this dependant table action also
                 }
 
-                using (await OperationQueue.LockTableAsync(this.Table.TableName, this.CancellationToken))
+                using (await this.OperationQueue.LockTableAsync(this.Table.TableName, this.CancellationToken))
                 {
-                    if (OperationQueue.CountPending(this.Table.TableName) > 0)
+                    if (await this.OperationQueue.CountPending(this.Table.TableName) > 0)
                     {
                         // there are pending operations on the same table so defer the action
                         this.pendingPush = this.context.DeferTableActionAsync(this);

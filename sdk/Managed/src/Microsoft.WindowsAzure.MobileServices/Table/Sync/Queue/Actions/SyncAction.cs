@@ -11,6 +11,9 @@ using System.Threading.Tasks;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
+    /// <summary>
+    /// Base class for all sync actions i.e. Pull, Purge and Push
+    /// </summary>
     internal abstract class SyncAction
     {
         protected OperationQueue OperationQueue { get; private set; }

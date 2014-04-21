@@ -55,6 +55,7 @@
     <Compile Include="Extensions\JTokenExtensions.cs" />
     <Compile Include="Extensions\MobileServiceClientExtensions.cs" />
     <Compile Include="Extensions\MobileServiceCollectionExtensions.cs" />
+    <Compile Include="Extensions\MobileServiceLocalStoreExtensions.cs" />
     <Compile Include="Extensions\MobileServiceSyncContextExtensions.cs" />
     <Compile Include="Extensions\MobileServiceSyncTableExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
@@ -103,6 +104,7 @@
     <Compile Include="Table\Query\OData\UnaryOperatorNode.cs" />
     <Compile Include="Table\Query\OData\OrderByDirection.cs" />
     <Compile Include="Table\Query\OData\OrderByNode.cs" />
+    <Compile Include="Table\Query\QueryResult.cs" />
     <Compile Include="Table\Sync\IMobileServiceLocalStore.cs" />
     <Compile Include="Table\Sync\MobileServicePushStatus.cs" />
     <Compile Include="Table\Sync\MobileServiceSyncHandler.cs" />
@@ -134,7 +136,6 @@
     <Compile Include="Table\Sync\Queue\Actions\PullAction.cs" />
     <Compile Include="Table\Sync\Queue\Actions\TableAction.cs" />
     <Compile Include="Table\Sync\Queue\Operations\MobileServiceTableOperationError.cs" />
-    <Compile Include="Table\Sync\Queue\Operations\BookmarkOperation.cs" />
     <Compile Include="Table\Sync\Queue\Operations\DeleteOperation.cs" />
     <Compile Include="Table\Sync\Queue\Operations\UpdateOperation.cs" />
     <Compile Include="Table\Sync\Queue\Operations\InsertOperation.cs" />

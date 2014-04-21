@@ -27,14 +27,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         protected async override Task ProcessTableAsync()
         {
-            long ignore;
 
             JToken remoteResults = await this.Table.ReadAsync(this.Query.ToQueryString());
-            JArray remoteItems = MobileServiceTableQueryProvider.GetResponseSequence(remoteResults, totalCount: out ignore);
+            var result = QueryResult.Parse(remoteResults);
 
             this.CancellationToken.ThrowIfCancellationRequested();
 
-            await this.UpsertAll(remoteItems);
+            await this.UpsertAll(result.Values);
         }
 
         private async Task DeleteItems(IEnumerable<string> itemIds)

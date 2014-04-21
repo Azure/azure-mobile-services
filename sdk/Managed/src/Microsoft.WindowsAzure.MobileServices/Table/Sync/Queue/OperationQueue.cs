@@ -18,71 +18,45 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// <summary>
     /// Queue of all operations i.e. Push, Pull, Insert, Update, Delete
     /// </summary>
-    internal class OperationQueue: IDisposable
+    internal class OperationQueue
     {
         private readonly AsyncLockDictionary tableLocks = new AsyncLockDictionary();
         private readonly AsyncLockDictionary itemLocks = new AsyncLockDictionary();
-        private readonly Dictionary<string, MobileServiceTableOperation> idOpMap = new Dictionary<string, MobileServiceTableOperation>();        
-        private readonly AsyncLock storeQueueLock = new AsyncLock();
         private readonly IMobileServiceLocalStore store;
-        private Queue<MobileServiceTableOperation> queue;
         private long sequenceId;
+        private long pendingOperations;
 
         public OperationQueue(IMobileServiceLocalStore store)
         {
-            this.queue = new Queue<MobileServiceTableOperation>();
             this.store = store;
         }
 
-        public virtual MobileServiceTableOperation Peek()
+        public async virtual Task<MobileServiceTableOperation> PeekAsync()
         {
-            lock (this.queue)
+            MobileServiceTableQueryDescription query = CreateQuery();
+            query.Ordering.Add(new OrderByNode(new MemberAccessNode(null, "__createdAt"), OrderByDirection.Ascending));
+            query.Ordering.Add(new OrderByNode(new MemberAccessNode(null, "sequence"), OrderByDirection.Ascending));
+            query.Top = 1;
+
+            JObject op = await this.store.FirstOrDefault(query);
+            if (op == null)
             {
-                return this.queue.Peek();
+                return null;
             }
+
+            return MobileServiceTableOperation.Deserialize(op);
         }
 
-        public int CountPending()
+        public long PendingOperations 
         {
-            lock (this.queue)
-            {
-                int count = this.queue.Count(o => !(o is BookmarkOperation || o.IsCancelled));
-                return count;
-            }
+            get { return pendingOperations; }
         }
 
-        public int CountPending(string tableName)
+        public async Task<long> CountPending(string tableName)
         {
-            lock (this.queue)
-            {
-                int count = this.queue.Count(o => o.TableName == tableName);
-                return count;
-            }
-        }
-
-        public virtual async Task<MobileServiceTableOperation> DequeueAsync()
-        {
-            using (await this.storeQueueLock.Acquire(CancellationToken.None))
-            {
-                MobileServiceTableOperation op;
-                lock (this.queue)
-                {
-                    op = this.queue.Dequeue();
-                    if (!(op is BookmarkOperation))
-                    {
-                        this.idOpMap.Remove(op.ItemId);
-                    }
-                }
-                try
-                {
-                    await this.store.DeleteAsync(MobileServiceLocalSystemTables.OperationQueue, op.Id);
-                }
-                catch (Exception ex)
-                {
-                    throw new MobileServiceLocalStoreException(Resources.SyncStore_FailedToDeleteOperation, ex);
-                }
-                return op;
-            }
+            MobileServiceTableQueryDescription query = CreateQuery();
+            query.Filter = new BinaryOperatorNode(BinaryOperatorKind.Equal, new MemberAccessNode(null, "tableName"), new ConstantNode(tableName));
+            return await this.store.CountAsync(query);
         }
 
         public virtual Task<IDisposable> LockTableAsync(string name, CancellationToken cancellationToken)
@@ -95,80 +69,48 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return this.itemLocks.Acquire(id, cancellationToken);
         }
 
-        public bool TryGetOperation(string id, out MobileServiceTableOperation op)
+        public async Task<MobileServiceTableOperation> GetOperationAsync(string id)
         {
-            lock (this.queue)
-            {
-                return this.idOpMap.TryGetValue(id, out op);
-            }
+            MobileServiceTableQueryDescription query = CreateQuery();
+            query.Filter = new BinaryOperatorNode(BinaryOperatorKind.Equal, new MemberAccessNode(null, "itemId"), new ConstantNode(id));
+            JObject op = await this.store.FirstOrDefault(query);
+            return MobileServiceTableOperation.Deserialize(op);
         }
 
         public async Task EnqueueAsync(MobileServiceTableOperation op)
         {
-            using (await this.storeQueueLock.Acquire(CancellationToken.None))
-            {
-                bool isBookmark = op is BookmarkOperation;
-                if (!isBookmark)
-                {
-                    op.Sequence = this.sequenceId++;
-                    await this.store.UpsertAsync(MobileServiceLocalSystemTables.OperationQueue, op.Serialize(), fromServer: false);
-                }
+            op.Sequence = Interlocked.Increment(ref this.sequenceId);
 
-                lock (this.queue)
-                {
-                    this.queue.Enqueue(op);
-                    if (!isBookmark)
-                    {
-                        this.idOpMap[op.ItemId] = op;
-                    }
-                }
-            }
+            await this.store.UpsertAsync(MobileServiceLocalSystemTables.OperationQueue, op.Serialize(), fromServer: false);
+            Interlocked.Increment(ref this.pendingOperations);
         }
 
-        public async Task DeleteAsync(MobileServiceTableOperation op)
+        public virtual async Task DeleteAsync(MobileServiceTableOperation op)
         {
-            await this.store.DeleteAsync(MobileServiceLocalSystemTables.OperationQueue, op.Id);
+            try
+            {
+                await this.store.DeleteAsync(MobileServiceLocalSystemTables.OperationQueue, op.Id);
+                Interlocked.Decrement(ref this.pendingOperations);
+            }
+            catch (Exception ex)
+            {
+                throw new MobileServiceLocalStoreException(Resources.SyncStore_FailedToDeleteOperation, ex);
+            }            
         }
 
-        public static async Task<OperationQueue> LoadAsync(IMobileServiceLocalStore store, MobileServiceClient client)
+        public static async Task<OperationQueue> LoadAsync(IMobileServiceLocalStore store)
         {
             var opQueue = new OperationQueue(store);
 
-            JToken result = await store.ReadAsync(new MobileServiceTableQueryDescription(MobileServiceLocalSystemTables.OperationQueue));
-            if (result is JArray)
-            {
-                var unorderedOps = new List<MobileServiceTableOperation>();
-
-                var ops = (JArray)result;
-                foreach (JObject obj in ops)
-                {
-                    var op = MobileServiceTableOperation.Deserialize(obj);
-                    op.Table = client.GetTable(op.TableName) as MobileServiceTable;
-                    op.Table.SystemProperties = MobileServiceSystemProperties.Version;
-                    op.Table.AddRequestHeader(MobileServiceHttpClient.ZumoFeaturesHeader, MobileServiceFeatures.Offline);
-                    unorderedOps.Add(op);
-                }
-
-                IOrderedEnumerable<MobileServiceTableOperation> orderedOps = unorderedOps.OrderBy(o => o.CreatedAt)
-                                                                                         .ThenBy(o => o.Sequence);
-                opQueue.queue = new Queue<MobileServiceTableOperation>(orderedOps);
-            }
+            opQueue.pendingOperations = await store.CountAsync(MobileServiceLocalSystemTables.OperationQueue);
 
             return opQueue;
-        }
+        }        
 
-        public void Dispose()
+        private static MobileServiceTableQueryDescription CreateQuery()
         {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                this.storeQueueLock.Dispose();
-            }
+            var query = new MobileServiceTableQueryDescription(MobileServiceLocalSystemTables.OperationQueue);
+            return query;
         }
     }
 }

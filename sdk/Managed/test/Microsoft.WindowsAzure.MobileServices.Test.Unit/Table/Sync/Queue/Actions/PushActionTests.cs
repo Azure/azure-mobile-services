@@ -25,7 +25,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         private Mock<IMobileServiceLocalStore> store;
         private PushAction action;
         private Mock<IMobileServiceSyncHandler> handler;
-        BookmarkOperation bookmark;
+        private Mock<MobileServiceClient> client;
 
         [TestInitialize]
         public void Initialize()
@@ -33,8 +33,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             this.store = new Mock<IMobileServiceLocalStore>(MockBehavior.Strict);
             this.opQueue = new Mock<OperationQueue>(MockBehavior.Strict, this.store.Object);
             this.handler = new Mock<IMobileServiceSyncHandler>(MockBehavior.Strict);
-            this.bookmark = new BookmarkOperation();
-            this.action = new PushAction(this.opQueue.Object, this.store.Object, this.handler.Object, new MobileServiceJsonSerializerSettings(), CancellationToken.None, this.bookmark);
+            this.client = new Mock<MobileServiceClient>();
+            this.client.Object.Serializer = new MobileServiceSerializer();
+            this.action = new PushAction(this.opQueue.Object, this.store.Object, this.handler.Object, this.client.Object, CancellationToken.None);
         }
 
         [TestMethod]
@@ -43,7 +44,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             var op = new InsertOperation("abc", "abc") { Item = new JObject() }; // putting an item so it won't load it
             var peek = new Queue<MobileServiceTableOperation>(new[] { op, null });
             // picks up the operation
-            this.opQueue.Setup(q => q.Peek()).Returns(() => peek.Dequeue());
+            this.opQueue.Setup(q => q.PeekAsync()).Returns(() => Task.FromResult(peek.Dequeue()));
             // executes the operation via handler
             this.handler.Setup(h => h.ExecuteTableOperationAsync(op))
                         .Callback<IMobileServiceTableOperation>(o =>
@@ -117,7 +118,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         [TestMethod]
         public async Task ExecuteAsync_DoesNotSaveTheResult_IfPresentButResultDoesNotHaveId()
         {
-            this.action = new PushAction(this.opQueue.Object, this.store.Object, this.handler.Object, new MobileServiceJsonSerializerSettings(), CancellationToken.None, this.bookmark);
+            this.action = new PushAction(this.opQueue.Object, this.store.Object, this.handler.Object, this.client.Object, CancellationToken.None);
             var op = new InsertOperation("table", "id") { Item = new JObject() };
             await TestResultSave(op, status: null, resultId: null, saved: false);
         }
@@ -137,7 +138,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         {
             var peek = new Queue<MobileServiceTableOperation>(new[] { op, null });
             // picks up the operation
-            this.opQueue.Setup(q => q.Peek()).Returns(() => peek.Dequeue());
+            this.opQueue.Setup(q => q.PeekAsync()).Returns(() => Task.FromResult(peek.Dequeue()));
             // executes the operation via handler
             if (errorCode == null)
             {
@@ -154,7 +155,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
                                                                                }));
             }
             // removes the operation from queue
-            this.opQueue.Setup(q => q.DequeueAsync()).Returns(Task.FromResult<MobileServiceTableOperation>(null));
+            this.opQueue.Setup(q => q.DeleteAsync(It.IsAny<MobileServiceTableOperation>())).Returns(Task.FromResult(0));
             // loads sync errors
             string syncError = @"[]";
             this.store.Setup(s => s.ReadAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == MobileServiceLocalSystemTables.SyncErrors))).Returns(Task.FromResult(JToken.Parse(syncError)));

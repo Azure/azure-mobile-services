@@ -19,15 +19,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// </summary>
     internal class PushAction: SyncAction
     {
-        private BookmarkOperation bookmark;
         private IMobileServiceSyncHandler syncHandler;
-        private MobileServiceJsonSerializerSettings serializerSettings;
+        private MobileServiceClient client;
 
-        public PushAction(OperationQueue operationQueue, IMobileServiceLocalStore store, IMobileServiceSyncHandler syncHandler, MobileServiceJsonSerializerSettings  serializerSettings, CancellationToken cancellationToken, BookmarkOperation bookmark): base(operationQueue, store, cancellationToken)
+        public PushAction(OperationQueue operationQueue, 
+                          IMobileServiceLocalStore store, 
+                          IMobileServiceSyncHandler syncHandler,
+                          MobileServiceClient client,
+                          CancellationToken cancellationToken): base(operationQueue, store, cancellationToken)
         {
+            this.client = client;
             this.syncHandler = syncHandler;
-            this.bookmark = bookmark;
-            this.serializerSettings = serializerSettings;
         }        
 
         public override async Task ExecuteAsync()
@@ -65,7 +67,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             MobileServicePushStatus batchStatus = batch.AbortReason.GetValueOrDefault(MobileServicePushStatus.Complete);
             try
             {
-                syncErrors.AddRange(await batch.LoadSyncErrorsAsync(this.serializerSettings));
+                syncErrors.AddRange(await batch.LoadSyncErrorsAsync(this.client.SerializerSettings));
             }
             catch (Exception ex)
             {
@@ -117,10 +119,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         private async Task ExecuteAllOperationsAsync(OperationBatch batch)
         {
-            MobileServiceTableOperation operation = this.OperationQueue.Peek();
+            MobileServiceTableOperation operation = await this.OperationQueue.PeekAsync();
 
             // keep taking out operations and executing them until queue is empty or operation finds the bookmark or batch is aborted 
-            while (operation != null && operation != this.bookmark)
+            while (operation != null)
             {
                 await this.ExecuteOperationAsync(operation, batch);
 
@@ -130,26 +132,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 }
 
                 // we successfuly executed an operation so remove it from queue
-                await this.OperationQueue.DequeueAsync();
+                await this.OperationQueue.DeleteAsync(operation);
 
                 // get next operation
-                operation = this.OperationQueue.Peek();
-            }
-
-            // if sync operation found the bookmark in operation queue, remove it
-            if (operation == this.bookmark)
-            {
-                await this.OperationQueue.DequeueAsync();
+                operation = await this.OperationQueue.PeekAsync();
             }
         }
 
         private async Task ExecuteOperationAsync(MobileServiceTableOperation operation, OperationBatch batch)
         {
-            if (operation is BookmarkOperation)
-            {
-                return; // nothing to execute in a bookmark
-            }
-
             using (await this.OperationQueue.LockItemAsync(operation.ItemId, this.CancellationToken))
             {
                 if (operation.IsCancelled || this.CancellationToken.IsCancellationRequested)
@@ -159,6 +150,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
                 Exception error = null;
 
+                operation.Table = GetTable(this.client, operation.TableName);
                 await this.LoadOperationItem(operation, batch);
 
                 if (this.CancellationToken.IsCancellationRequested)
@@ -205,7 +197,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     if (iox != null && iox.Response != null)
                     {
                         statusCode = iox.Response.StatusCode;
-                        Tuple<string, JToken> content = await MobileServiceTable.ParseContent(iox.Response, this.serializerSettings);
+                        Tuple<string, JToken> content = await MobileServiceTable.ParseContent(iox.Response, this.client.SerializerSettings);
                         rawResult = content.Item1;
                         result = content.Item2.ValidItemOrNull();
                     }
@@ -213,6 +205,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     await batch.AddSyncErrorAsync(syncError);
                 }
             }
+        }
+
+        private static MobileServiceTable GetTable(MobileServiceClient client, string tableName)
+        {
+            var table = client.GetTable(tableName) as MobileServiceTable;
+            table.SystemProperties = MobileServiceSystemProperties.Version;
+            table.AddRequestHeader(MobileServiceHttpClient.ZumoFeaturesHeader, MobileServiceFeatures.Offline);
+
+            return table;
         }
 
         private async Task LoadOperationItem(MobileServiceTableOperation operation, OperationBatch batch)

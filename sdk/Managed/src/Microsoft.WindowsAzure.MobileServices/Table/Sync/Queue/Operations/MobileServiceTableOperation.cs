@@ -27,12 +27,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public DateTime CreatedAt { get; private set; }
         public long Sequence { get; set; }
 
-        IMobileServiceTable IMobileServiceTableOperation.Table 
+        // --- Non persisted properties -- //
+        IMobileServiceTable IMobileServiceTableOperation.Table
         {
             get { return this.Table; }
         }
 
-        // --- Non persisted properties -- //
         public MobileServiceTable Table { get; set; }
         
         public bool IsCancelled { get; private set; }
@@ -124,6 +124,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public static MobileServiceTableOperation Deserialize(JObject obj)
         {
+            if (obj == null)
+            {
+                return null;
+            }
+
             var kind = (MobileServiceTableOperationKind)obj.Value<int>("kind");
             string id = obj.Value<string>("id");
             string tableName = obj.Value<string>("tableName");

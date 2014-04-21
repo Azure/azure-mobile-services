@@ -37,23 +37,49 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             if (query.TableName == MobileServiceLocalSystemTables.OperationQueue || query.TableName == MobileServiceLocalSystemTables.SyncErrors)
             {
-                // we don't query the queue specially, we just need all records
-                return Task.FromResult<JToken>(new JArray(GetTable(query.TableName).Values.ToArray()));
+                MockTable table = GetTable(query.TableName);
+
+                IEnumerable<JObject> items = table.Values;
+                if (query.TableName == MobileServiceLocalSystemTables.OperationQueue)
+                {
+                    string odata = query.ToQueryString();
+                    if ( odata.Contains("$orderby=__createdAt,sequence"))
+                    {
+                        // must be the query to read all operations in order or peek the top item
+                        items = items.OrderBy(o => o.Value<DateTime>("__createdAt"))
+                                     .ThenBy(o => o.Value<long>("sequence"));
+                    }
+                    else if (odata.Contains("$filter=(itemId eq '"))
+                    {
+                        items = items.Where(o => o.Value<string>("itemId") == ((ConstantNode)((BinaryOperatorNode)query.Filter).RightOperand).Value.ToString());
+                    }
+                    else if (odata.Contains("$filter=(tableName eq '"))
+                    {
+                        items = items.Where(o => o.Value<string>("tableName") == ((ConstantNode)((BinaryOperatorNode)query.Filter).RightOperand).Value.ToString());
+                    }
+                }
+
+                if (query.IncludeTotalCount)
+                {
+                    return Task.FromResult<JToken>(new JObject() { { "count", items.Count() }, { "results", new JArray(items) } });
+                }
+
+                return Task.FromResult<JToken>(new JArray(items));
             }
 
             this.ReadQueries.Add(query);
-            JToken result;
+            JToken response;
 
             if (ReadAsyncFunc != null)
             {
-                result = ReadAsyncFunc(query);
+                response = ReadAsyncFunc(query);
             }
             else
             {
-                result = JToken.Parse(ReadResponses.Dequeue());
+                response = JToken.Parse(ReadResponses.Dequeue());
             }
 
-            return Task.FromResult(result);
+            return Task.FromResult(response);
         }
 
         public Task DeleteAsync(MobileServiceTableQueryDescription query)

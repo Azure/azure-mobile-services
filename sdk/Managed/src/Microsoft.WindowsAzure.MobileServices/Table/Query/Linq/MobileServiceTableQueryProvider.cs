@@ -16,16 +16,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 {
     internal class MobileServiceTableQueryProvider
     {
-        /// <summary>
-        /// The name of the results key in an inline count response object.
-        /// </summary>
-        protected const string InlineCountResultsKey = "results";
-        
-        /// <summary>
-        /// The name of the count key in an inline count response object.
-        /// </summary>
-        protected const string InlineCountCountKey = "count";
-
         private IMobileServiceSyncTable syncTable;
 
         public MobileServiceTableQueryProvider(IMobileServiceSyncTable syncTable = null)
@@ -101,12 +91,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             JToken response = await this.Execute<T>(query, odata);
 
             // Parse the results
-            long totalCount;
-            JArray values = GetResponseSequence(response, out totalCount);
-
+            var result = QueryResult.Parse(response);
             return new TotalCountEnumerable<T>(
-                totalCount,
-                query.Table.MobileServiceClient.Serializer.Deserialize(values, compiledQuery.ProjectionArgumentType).Select(
+                result.TotalCount,
+                query.Table.MobileServiceClient.Serializer.Deserialize(result.Values, compiledQuery.ProjectionArgumentType).Select(
                     value =>
                     {
                         // Apply the projection to the instance transforming it
@@ -149,55 +137,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         {
             MobileServiceTableQueryDescription description = this.Compile(query);
             return description.ToQueryString();
-        }
-
-        /// <summary>
-        /// Parse a JSON response into a sequence of elements and also return
-        /// the count of objects.  This method abstracts out the differences
-        /// between a raw array response and an inline count response.
-        /// </summary>
-        /// <param name="response">
-        /// The JSON response.
-        /// </param>
-        /// <param name="totalCount">
-        /// The total count as requested via the IncludeTotalCount method.
-        /// If the response does not include totalcount, it is set to -1.
-        /// </param>
-        /// <returns>
-        /// The response as a JSON array.
-        /// </returns>
-        internal static JArray GetResponseSequence(JToken response, out long totalCount)
-        {
-            Debug.Assert(response != null);
-
-            long? inlineCount = null;
-
-            // Try and get the values as an array
-            JArray values = response as JArray;
-            if (values == null)
-            {
-                // Otherwise try and get the values from the results property
-                // (which is the case when we retrieve the count inline)
-                values = response[InlineCountResultsKey] as JArray;
-                inlineCount = (long)response[InlineCountCountKey];
-                if (values == null)
-                {
-                    string responseStr = response != null ? response.ToString() : "null";
-                    throw new InvalidOperationException(
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            Resources.MobileServiceTable_ExpectedArray,
-                            responseStr));
-                }
-            }
-
-            // Get the count via the inline count or default an unspecified
-            // count to -1
-            totalCount = inlineCount != null ?
-                inlineCount.Value :
-                -1L;
-
-            return values;
-        }
+        }        
     }
 }
