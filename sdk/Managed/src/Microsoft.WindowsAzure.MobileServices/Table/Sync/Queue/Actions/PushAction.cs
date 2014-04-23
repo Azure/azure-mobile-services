@@ -21,20 +21,23 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     {
         private IMobileServiceSyncHandler syncHandler;
         private MobileServiceClient client;
+        private MobileServiceSyncContext context;
 
         public PushAction(OperationQueue operationQueue, 
                           IMobileServiceLocalStore store, 
                           IMobileServiceSyncHandler syncHandler,
                           MobileServiceClient client,
+                          MobileServiceSyncContext context,
                           CancellationToken cancellationToken): base(operationQueue, store, cancellationToken)
         {
             this.client = client;
             this.syncHandler = syncHandler;
+            this.context = context;
         }        
 
         public override async Task ExecuteAsync()
         {
-            var batch = new OperationBatch(this.syncHandler, this.Store);
+            var batch = new OperationBatch(this.syncHandler, this.Store, this.context);
             List<MobileServiceTableOperationError> syncErrors = new List<MobileServiceTableOperationError>();
             MobileServicePushStatus batchStatus = MobileServicePushStatus.InternalError;
 
@@ -119,33 +122,36 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         private async Task ExecuteAllOperationsAsync(OperationBatch batch)
         {
-            MobileServiceTableOperation operation = await this.OperationQueue.PeekAsync();
+            MobileServiceTableOperation operation = await this.OperationQueue.PeekAsync(0);
 
             // keep taking out operations and executing them until queue is empty or operation finds the bookmark or batch is aborted 
             while (operation != null)
             {
-                await this.ExecuteOperationAsync(operation, batch);
+                bool success = await this.ExecuteOperationAsync(operation, batch);
 
                 if (batch.AbortReason.HasValue)
                 {
                     break;
                 }
 
-                // we successfuly executed an operation so remove it from queue
-                await this.OperationQueue.DeleteAsync(operation);
+                if (success)
+                {
+                    // we successfuly executed an operation so remove it from queue
+                    await this.OperationQueue.DeleteAsync(operation.Id);
+                }
 
                 // get next operation
-                operation = await this.OperationQueue.PeekAsync();
+                operation = await this.OperationQueue.PeekAsync(operation.Sequence);
             }
         }
 
-        private async Task ExecuteOperationAsync(MobileServiceTableOperation operation, OperationBatch batch)
+        private async Task<bool> ExecuteOperationAsync(MobileServiceTableOperation operation, OperationBatch batch)
         {
             using (await this.OperationQueue.LockItemAsync(operation.ItemId, this.CancellationToken))
             {
                 if (operation.IsCancelled || this.CancellationToken.IsCancellationRequested)
                 {
-                    return;
+                    return false;
                 }
 
                 Exception error = null;
@@ -155,7 +161,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
                 if (this.CancellationToken.IsCancellationRequested)
                 {
-                    return;
+                    return false;
                 }
 
                 JObject result = null;
@@ -169,7 +175,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     {
                         // there is no error to save in sync error and no result to capture
                         // this operation will be executed again next time the push happens
-                        return;
+                        return false;
                     }
 
                     error = ex;
@@ -201,9 +207,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                         rawResult = content.Item1;
                         result = content.Item2.ValidItemOrNull();
                     }
-                    var syncError = new MobileServiceTableOperationError(statusCode, operation.Kind, operation.TableName, operation.Item, rawResult, result);
+                    var syncError = new MobileServiceTableOperationError(statusCode,
+                                                                         operation.Id,
+                                                                         operation.Kind,
+                                                                         operation.TableName,
+                                                                         operation.Item,
+                                                                         rawResult,
+                                                                         result)
+                                                                         {
+                                                                             Context = this.context
+                                                                         };
                     await batch.AddSyncErrorAsync(syncError);
                 }
+
+                bool success = error == null;
+                return success;
             }
         }
 

@@ -52,6 +52,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             {
                 { MobileServiceSystemColumns.Id, String.Empty },
                 { "httpStatus", 0 },
+                { "operationId", String.Empty },
                 { "operationKind", 0 },
                 { "tableName", String.Empty },
                 { "item", String.Empty },

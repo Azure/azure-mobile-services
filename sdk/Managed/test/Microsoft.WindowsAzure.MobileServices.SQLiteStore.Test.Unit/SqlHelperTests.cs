@@ -5,6 +5,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.WindowsAzure.MobileServices.Test;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
 {
@@ -21,6 +22,21 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
                 var ex = AssertEx.Throws<NotSupportedException>(() => SqlHelpers.GetColumnType(type));
                 Assert.AreEqual("Value of type '" + type.Name + "' is not supported.", ex.Message);
             }
+        }
+
+        [TestMethod]
+        public void SerializeValue_LosesPrecision_WhenValueIsDate()
+        {
+            var original = new DateTime(635338107839470268);
+            var serialized = (double)SqlHelpers.SerializeValue(new JValue(original), SqlColumnType.Real, JTokenType.Date);
+            Assert.AreEqual(1398213983.9470000, serialized);
+        }
+
+        [TestMethod] 
+        public void ParseReal_LosesPrecision_WhenValueIsDate()
+        {
+            var date = (DateTime)SqlHelpers.ParseReal(JTokenType.Date, 1398213983.9470267);
+            Assert.AreEqual(635338107839470000, date.Ticks);
         }
     }
 }

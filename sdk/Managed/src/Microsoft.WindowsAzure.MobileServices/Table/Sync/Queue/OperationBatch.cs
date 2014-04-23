@@ -19,6 +19,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// </summary>
     internal class OperationBatch
     {
+        private MobileServiceSyncContext context;
+
         /// <summary>
         /// Errors while interacting with store or calling push complete on handler
         /// </summary>
@@ -37,13 +39,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <summary>
         /// Local store that operations and date are read from
         /// </summary>
-        public IMobileServiceLocalStore Store { get; private set; }
+        public IMobileServiceLocalStore Store { get; private set; }        
 
-        public OperationBatch(IMobileServiceSyncHandler syncHandler, IMobileServiceLocalStore store)
+        public OperationBatch(IMobileServiceSyncHandler syncHandler, IMobileServiceLocalStore store, MobileServiceSyncContext context)
         {
             this.OtherErrors = new List<Exception>();
             this.SyncHandler = syncHandler;
             this.Store = store;
+            this.context = context;
         }
 
         /// <summary>
@@ -80,7 +83,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 foreach (JObject error in result)
                 {
-                    errors.Add(MobileServiceTableOperationError.Deserialize(error, serializerSettings));
+                    var obj = MobileServiceTableOperationError.Deserialize(error, serializerSettings);
+                    obj.Context = this.context;
+                    errors.Add(obj);
                 }
             }            
 

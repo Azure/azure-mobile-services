@@ -172,13 +172,15 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         }
 
         [AsyncTestMethod]
-        public async Task PushAsync_SavesErrorInStore_WhenConflictOccurs()
+        public async Task PushAsync_RetriesOperation_WhenConflictOccursInLastPush()
         {
             ResetDatabase(TestTable);
 
             var hijack = new TestHttpHandler();
             string conflictResult = "{\"id\":\"b\",\"String\":\"Hey\",\"__version\":\"def\"}";
-            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.PreconditionFailed) { Content = new StringContent(conflictResult) });
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.PreconditionFailed) { Content = new StringContent(conflictResult) }); // first push
+            string successResult = "{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\"}";
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(successResult) }); // second push
 
             var store = new MobileServiceSQLiteStore(TestDbName);
             store.DefineTable<ToDoWithSystemPropertiesType>();
@@ -212,6 +214,91 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             Assert.AreEqual(errorItem.UpdatedAt, updatedItem.UpdatedAt);
 
             Assert.AreEqual(error.Result.ToString(Formatting.None), conflictResult);
+
+            Assert.AreEqual(service.SyncContext.PendingOperations, 1L); // operation not removed
+            updatedItem = await table.LookupAsync("b");
+            Assert.AreEqual(updatedItem.String, "Hey"); // item is not updated 
+
+            await service.SyncContext.PushAsync();
+
+            Assert.AreEqual(service.SyncContext.PendingOperations, 0L); // operation now succeeds
+
+            updatedItem = await table.LookupAsync("b");
+            Assert.AreEqual(updatedItem.String, "Wow"); // item is updated
+        }
+
+        [AsyncTestMethod]
+        public async Task PushAsync_DiscardsOperationAndUpdatesTheItem_WhenCancelAndUpdateItemAsync()
+        {
+            ResetDatabase(TestTable);
+
+            var hijack = new TestHttpHandler();
+            string conflictResult = "{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\"}";
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.PreconditionFailed) { Content = new StringContent(conflictResult) }); // first push
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable<ToDoWithSystemPropertiesType>();
+
+            IMobileServiceClient service = await CreateClient(hijack, store);
+            IMobileServiceSyncTable<ToDoWithSystemPropertiesType> table = service.GetSyncTable<ToDoWithSystemPropertiesType>();
+
+            // first insert an item
+            var updatedItem = new ToDoWithSystemPropertiesType() { Id = "b", String = "Hey", Version = "abc" };
+            await table.UpdateAsync(updatedItem);
+
+            // then push it to server
+            var ex = await ThrowsAsync<MobileServicePushFailedException>(service.SyncContext.PushAsync);
+
+            Assert.IsNotNull(ex.PushResult);
+            MobileServiceTableOperationError error = ex.PushResult.Errors.FirstOrDefault();
+            Assert.IsNotNull(error);
+
+            Assert.AreEqual(service.SyncContext.PendingOperations, 1L); // operation is not removed
+            updatedItem = await table.LookupAsync("b");
+            Assert.AreEqual(updatedItem.String, "Hey"); // item is not updated 
+
+            await error.CancelAndUpdateItemAsync(error.Result);
+
+            Assert.AreEqual(service.SyncContext.PendingOperations, 0L); // operation is removed
+            updatedItem = await table.LookupAsync("b");
+            Assert.AreEqual(updatedItem.String, "Wow"); // item is updated             
+        }
+
+        [AsyncTestMethod]
+        public async Task PushAsync_DiscardsOperationAndDeletesTheItem_WhenCancelAndDiscardItemAsync()
+        {
+            ResetDatabase(TestTable);
+
+            var hijack = new TestHttpHandler();
+            string conflictResult = "{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\"}";
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.PreconditionFailed) { Content = new StringContent(conflictResult) }); // first push
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable<ToDoWithSystemPropertiesType>();
+
+            IMobileServiceClient service = await CreateClient(hijack, store);
+            IMobileServiceSyncTable<ToDoWithSystemPropertiesType> table = service.GetSyncTable<ToDoWithSystemPropertiesType>();
+
+            // first insert an item
+            var updatedItem = new ToDoWithSystemPropertiesType() { Id = "b", String = "Hey", Version = "abc" };
+            await table.UpdateAsync(updatedItem);
+
+            // then push it to server
+            var ex = await ThrowsAsync<MobileServicePushFailedException>(service.SyncContext.PushAsync);
+
+            Assert.IsNotNull(ex.PushResult);
+            MobileServiceTableOperationError error = ex.PushResult.Errors.FirstOrDefault();
+            Assert.IsNotNull(error);
+
+            Assert.AreEqual(service.SyncContext.PendingOperations, 1L); // operation is not removed
+            updatedItem = await table.LookupAsync("b");
+            Assert.AreEqual(updatedItem.String, "Hey"); // item is not updated 
+
+            await error.CancelAndDiscardItemAsync();
+
+            Assert.AreEqual(service.SyncContext.PendingOperations, 0L); // operation is removed
+            updatedItem = await table.LookupAsync("b");
+            Assert.IsNull(updatedItem); // item is deleted
         }
 
         [AsyncTestMethod]

@@ -70,7 +70,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 {
                     date = DateTime.SpecifyKind(date, DateTimeKind.Utc);
                 }
-                return (date.ToUniversalTime() - epoch).TotalSeconds;
+                double unixTimestamp = Math.Round((date.ToUniversalTime() - epoch).TotalSeconds, 3);
+                return unixTimestamp;
             }
             return value.Value<double>();
         }

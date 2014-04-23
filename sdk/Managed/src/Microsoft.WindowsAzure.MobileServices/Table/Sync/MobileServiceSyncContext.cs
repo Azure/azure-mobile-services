@@ -3,6 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using System;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
@@ -11,7 +12,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
-    internal sealed class MobileServiceSyncContext: IMobileServiceSyncContext, IDisposable  
+    internal class MobileServiceSyncContext: IMobileServiceSyncContext, IDisposable  
     {
         private TaskCompletionSource<object> initializeTask;
         private MobileServiceClient client;
@@ -184,12 +185,33 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                                       this.Store, 
                                       this.Handler, 
                                       this.client, 
+                                      this,
                                       cancellationToken);
 
             Task discard = this.syncQueue.Post(push.ExecuteAsync, cancellationToken);
 
             await push.CompletionTask;
         }        
+
+        public Task CancelAndUpdateItemAsync(MobileServiceTableOperationError error, JObject item)
+        {
+            string itemId = error.Item.Value<string>(MobileServiceSystemColumns.Id);
+            return this.ExecuteOperationSafeAsync(itemId, error.TableName, async () =>
+            {
+                await this.Store.UpsertAsync(error.TableName, item, fromServer: true);
+                await this.opQueue.DeleteAsync(error.OperationId);
+            });
+        }
+
+        public Task CancelAndDiscardItemAsync(MobileServiceTableOperationError error)
+        {
+            string itemId = error.Item.Value<string>(MobileServiceSystemColumns.Id);
+            return this.ExecuteOperationSafeAsync(itemId, error.TableName, async () =>
+            {
+                await this.Store.DeleteAsync(error.TableName, itemId);
+                await this.opQueue.DeleteAsync(error.OperationId);
+            });
+        }
 
         public async Task DeferTableActionAsync(TableAction action)
         {
@@ -216,14 +238,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
         }
 
-        private async Task ExecuteOperationAsync(MobileServiceTableOperation operation, JObject item)
+        private Task ExecuteOperationAsync(MobileServiceTableOperation operation, JObject item)
         {
-            await this.EnsureInitializedAsync();
-
-            // take slowest lock first and quickest last in order to avoid blocking quick operations for long time            
-            using (await this.opQueue.LockItemAsync(operation.ItemId, CancellationToken.None))  // prevent any inflight operation on the same item
-            using (await this.opQueue.LockTableAsync(operation.TableName, CancellationToken.None)) // prevent interferance with any in-progress pull/purge action
-            using (await this.storeQueueLock.WriterLockAsync()) // prevent any other operation from interleaving between store and queue insert
+            return this.ExecuteOperationSafeAsync(operation.ItemId, operation.TableName, async () =>
             {
                 MobileServiceTableOperation existing = await this.opQueue.GetOperationAsync(operation.ItemId);
                 if (existing != null)
@@ -245,7 +262,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     existing.Collapse(operation); // cancel either existing, new or both operation 
                     if (existing.IsCancelled)
                     {
-                        await this.opQueue.DeleteAsync(existing);
+                        await this.opQueue.DeleteAsync(existing.Id);
                     }
                 }
 
@@ -254,12 +271,31 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 {
                     await this.opQueue.EnqueueAsync(operation);
                 }
+            });
+        }
+
+        private async Task ExecuteOperationSafeAsync(string itemId, string tableName, Func<Task> action)
+        {
+            await this.EnsureInitializedAsync();
+
+            // take slowest lock first and quickest last in order to avoid blocking quick operations for long time            
+            using (await this.opQueue.LockItemAsync(itemId, CancellationToken.None))  // prevent any inflight operation on the same item
+            using (await this.opQueue.LockTableAsync(tableName, CancellationToken.None)) // prevent interferance with any in-progress pull/purge action
+            using (await this.storeQueueLock.WriterLockAsync()) // prevent any other operation from interleaving between store and queue insert
+            {
+                await action();
             }
         }
 
         public void Dispose()
         {
-            if (this._store != null)
+            this.Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing && this._store != null)
             {
                 this._store.Dispose();
             }

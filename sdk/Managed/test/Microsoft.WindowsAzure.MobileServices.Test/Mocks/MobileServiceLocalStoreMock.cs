@@ -43,11 +43,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 if (query.TableName == MobileServiceLocalSystemTables.OperationQueue)
                 {
                     string odata = query.ToQueryString();
-                    if ( odata.Contains("$orderby=__createdAt,sequence"))
+                    if ( odata.Contains("$orderby=sequence desc")) // the query to take total count and max sequence
                     {
-                        // must be the query to read all operations in order or peek the top item
-                        items = items.OrderBy(o => o.Value<DateTime>("__createdAt"))
-                                     .ThenBy(o => o.Value<long>("sequence"));
+                        items = items.OrderBy(o => o.Value<long>("sequence"));
+                    }
+                    else if (odata.Contains("$filter=(sequence gt ")) // the query to get next operation
+                    {
+                        items = items.Where(o => o.Value<long>("sequence") > (long)((ConstantNode)((BinaryOperatorNode)query.Filter).RightOperand).Value);
+                        items = items.OrderBy(o => o.Value<long>("sequence"));
                     }
                     else if (odata.Contains("$filter=(itemId eq '"))
                     {

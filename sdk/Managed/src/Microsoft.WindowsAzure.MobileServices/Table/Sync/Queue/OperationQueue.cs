@@ -31,10 +31,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.store = store;
         }
 
-        public async virtual Task<MobileServiceTableOperation> PeekAsync()
+        public async virtual Task<MobileServiceTableOperation> PeekAsync(long prevSequenceId)
         {
             MobileServiceTableQueryDescription query = CreateQuery();
-            query.Ordering.Add(new OrderByNode(new MemberAccessNode(null, "__createdAt"), OrderByDirection.Ascending));
+
+            query.Filter = Compare(BinaryOperatorKind.GreaterThan, "sequence", prevSequenceId);
             query.Ordering.Add(new OrderByNode(new MemberAccessNode(null, "sequence"), OrderByDirection.Ascending));
             query.Top = 1;
 
@@ -80,16 +81,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public async Task EnqueueAsync(MobileServiceTableOperation op)
         {
             op.Sequence = Interlocked.Increment(ref this.sequenceId);
-
             await this.store.UpsertAsync(MobileServiceLocalSystemTables.OperationQueue, op.Serialize(), fromServer: false);
             Interlocked.Increment(ref this.pendingOperations);
         }
 
-        public virtual async Task DeleteAsync(MobileServiceTableOperation op)
+        public virtual async Task DeleteAsync(string id)
         {
             try
             {
-                await this.store.DeleteAsync(MobileServiceLocalSystemTables.OperationQueue, op.Id);
+                await this.store.DeleteAsync(MobileServiceLocalSystemTables.OperationQueue, id);
                 Interlocked.Decrement(ref this.pendingOperations);
             }
             catch (Exception ex)
@@ -102,7 +102,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             var opQueue = new OperationQueue(store);
 
-            opQueue.pendingOperations = await store.CountAsync(MobileServiceLocalSystemTables.OperationQueue);
+            var query = CreateQuery();
+            // to know how many pending operations are there
+            query.IncludeTotalCount = true;
+            // to get the max sequence id, order by sequence desc
+            query.Ordering.Add(new OrderByNode(new MemberAccessNode(null, "sequence"), OrderByDirection.Descending));
+            // we just need the highest value, not all the operations
+            query.Top = 1;
+
+            QueryResult result = await store.QueryAsync(query);
+            opQueue.pendingOperations = result.TotalCount;
+            opQueue.sequenceId = result.Values == null ? 0: result.Values.Select(v=>v.Value<long>("sequence")).FirstOrDefault();
 
             return opQueue;
         }        
@@ -111,6 +121,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             var query = new MobileServiceTableQueryDescription(MobileServiceLocalSystemTables.OperationQueue);
             return query;
+        }
+
+        private static BinaryOperatorNode Compare(BinaryOperatorKind kind, string member, object value)
+        {
+            return new BinaryOperatorNode(kind, new MemberAccessNode(null, member), new ConstantNode(value));
         }
     }
 }

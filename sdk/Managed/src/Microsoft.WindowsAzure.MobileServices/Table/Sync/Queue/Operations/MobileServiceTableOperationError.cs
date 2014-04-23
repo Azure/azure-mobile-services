@@ -29,6 +29,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public bool Handled { get; set; }
 
         /// <summary>
+        /// The id of the operation.
+        /// </summary>
+        internal string OperationId { get; private set; }
+
+        /// <summary>
         /// The kind of table operation.
         /// </summary>
         public MobileServiceTableOperationKind OperationKind { get; private set; }
@@ -58,16 +63,20 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// </summary>        
         public HttpStatusCode? Status { get; private set; } // this is nullable because this error can also occur if the handler throws an exception
 
+        internal MobileServiceSyncContext Context { get; set; }
+
         /// <summary>
         /// Initializes an instance of <see cref="MobileServiceTableOperationError"/>
         /// </summary>
         /// <param name="status">The HTTP status code returned by server.</param>
+        /// <param name="operationId">The id of the operation.</param>
         /// <param name="operationKind">The kind of table operation.</param>
         /// <param name="tableName">The name of the remote table.</param>
         /// <param name="item">The item associated with the operation.</param>
         /// <param name="rawResult">Raw response of the table operation.</param>
         /// <param name="result">Response of the table operation.</param>
         public MobileServiceTableOperationError(HttpStatusCode? status, 
+                                                string operationId,
                                                 MobileServiceTableOperationKind operationKind, 
                                                 string tableName, 
                                                 JObject item,
@@ -75,6 +84,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                                                 JObject result)
         {
             this.Id = Guid.NewGuid().ToString();
+            this.OperationId = operationId;
             this.Status = status;
             this.OperationKind = operationKind;
             this.TableName = tableName;
@@ -83,12 +93,39 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.Result = result;
         }
 
+        /// <summary>
+        /// Cancels the table operation and updates the local instance of the item with the given item.
+        /// </summary>
+        /// <param name="item">The item to update in local store.</param>
+        /// <returns>Task that completes when operation is cancelled.</returns>
+        public async Task CancelAndUpdateItemAsync(JObject item)
+        {
+            if (item == null)
+            {
+                throw new ArgumentNullException("item");
+            }
+
+            await this.Context.CancelAndUpdateItemAsync(this, item);
+            this.Handled = true;
+        }
+
+        /// <summary>
+        /// Cancels the table operation and discards the local instance of the item.
+        /// </summary>
+        /// <returns>Task that completes when operation is cancelled.</returns>
+        public async Task CancelAndDiscardItemAsync()
+        {
+            await this.Context.CancelAndDiscardItemAsync(this);
+            this.Handled = true;
+        }
+
         internal JObject Serialize()
         {
             return new JObject()
             {
                 { "id", this.Id },
                 { "httpStatus", this.Status.HasValue ? (int?)this.Status.Value: null },
+                { "operationId", this.OperationId },
                 { "operationKind", (int)this.OperationKind },
                 { "tableName", this.TableName },
                 { "item", this.Item.ToString(Formatting.None) },
@@ -110,7 +147,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             string rawResult = obj.Value<string>("rawResult");
             var result = rawResult.ParseToJToken(settings) as JObject;
             string id = obj.Value<string>("id");
-            return new MobileServiceTableOperationError(status, operation, tableName, item, rawResult, result) { Id = id };
+            string operationId = obj.Value<string>("operationId");
+            return new MobileServiceTableOperationError(status, 
+                                                        operationId,
+                                                        operation, 
+                                                        tableName, 
+                                                        item, 
+                                                        rawResult, 
+                                                        result) 
+            { 
+                Id = id 
+            };
         }
     }
 }
