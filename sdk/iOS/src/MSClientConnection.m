@@ -1,4 +1,4 @@
-// ----------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
@@ -42,6 +42,8 @@ NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
 
 
 @implementation MSClientConnection
+
+static NSOperationQueue *delegateQueue;
 
 @synthesize client = client_;
 @synthesize request = request_;
@@ -155,13 +157,27 @@ NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
                completion:(MSFilterResponseBlock)completion
 {
     if (!filters || filters.count == 0) {
+        dispatch_async(dispatch_get_main_queue(), ^{
         
-        // No filters to invoke so use |NSURLConnection | to actually
-        // send the request.
-        MSConnectionDelegate *delegate = [[MSConnectionDelegate alloc]
-                                          initWithClient:client
-                                              completion:completion];
-        [NSURLConnection connectionWithRequest:request delegate:delegate];
+            // No filters to invoke so use |NSURLConnection | to actually
+            // send the request.
+            MSConnectionDelegate *delegate = [[MSConnectionDelegate alloc]
+                                              initWithClient:client
+                                                  completion:completion];
+        
+            [NSURLConnection connectionWithRequest:request delegate:delegate];
+        });
+        
+        //if (!delegateQueue) {
+        //    delegateQueue = [[NSOperationQueue alloc] init];
+        //}
+        //NSURLConnection *connection = [[NSURLConnection alloc]
+        //                                     initWithRequest:request
+        //                                            delegate:delegate
+        //                                   startImmediately:NO];
+        //[connection setDelegateQueue:delegateQueue];
+        //[connection start];
+        
     }
     else {
         

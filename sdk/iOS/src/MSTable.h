@@ -7,9 +7,7 @@
 
 @class MSQuery;
 
-
 #pragma mark * Block Type Definitions
-
 
 /// Callback for updates, inserts or readWithId requests. If there was an
 /// error, the *error* will be non-nil.

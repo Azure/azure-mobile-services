@@ -32,6 +32,9 @@
     MSClient *client = [MSClient
                         clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
                         applicationKey:@"<Application Key>"];
+    client = [MSClient clientWithApplicationURLString:@"https://philtotesting.azure-mobile.net/"
+                                       applicationKey:@"cusnemNWxPUJEBPdESCAZyZGJqIDUv47"];
+
     
     self.table = [client tableWithName:@"stringId_objC_test_table"];
     
@@ -910,7 +913,6 @@
         STAssertNotNil(error, @"An error should have occcurred");
         STAssertEquals([@MSErrorPreconditionFailed integerValue], error.code, @"Should have had precondition failed error");
         
-        //NSDictionary *itemResponse = error.localizedDescription;
         NSHTTPURLResponse *response = [error.userInfo objectForKey:MSErrorResponseKey];
         STAssertNotNil(response, @"response should have been available");
         STAssertEquals([@412 integerValue], response.statusCode, @"response should have been pre condition failed");
@@ -939,7 +941,7 @@
 {
     NSDate *timeoutAt = [NSDate dateWithTimeIntervalSinceNow:testDuration];
     while (!self.done) {
-        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
+        [[NSRunLoop currentRunLoop] runMode:NSRunLoopCommonModes
                                  beforeDate:timeoutAt];
         if([timeoutAt timeIntervalSinceNow] <= 0.0) {
             break;
