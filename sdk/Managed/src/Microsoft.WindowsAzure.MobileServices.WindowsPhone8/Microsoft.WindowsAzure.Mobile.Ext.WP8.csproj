@@ -51,6 +51,7 @@
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Platform\ExpressionUtility.cs">
       <Link>Platform\ExpressionUtility.cs</Link>
     </Compile>
+    <Compile Include="Platform\PushUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Platform\ApplicationStorage.cs" />
     <Compile Include="Platform\PlatformInformation.cs" />
@@ -63,9 +64,6 @@
     <Compile Include="Push\ConcurrentDictionary.cs" />
     <Compile Include="Push\LocalStorageManager.cs" />
     <Compile Include="Push\Push.cs" />
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\PushHttpClient.cs">
-      <Link>Push\PushHttpClient.cs</Link>
-    </Compile>
     <Compile Include="Push\Registration.cs" />
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\RegistrationManager.cs">
       <Link>Push\RegistrationManager.cs</Link>

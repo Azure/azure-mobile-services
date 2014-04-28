@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Globalization;
+
 using Windows.Storage;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -18,7 +18,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// A singleton instance of the <see cref="IApplicationStorage"/>.
         /// </summary>
-        private static IApplicationStorage instance = new ApplicationStorage();
+        private static readonly IApplicationStorage instance = new ApplicationStorage();
 
         /// <summary>
         /// A singleton instance of the <see cref="IApplicationStorage"/>.

@@ -118,14 +118,14 @@
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Platform\ExpressionUtility.cs">
       <Link>Platform\ExpressionUtility.cs</Link>
     </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Platform\PushUtility.cs">
+      <Link>Platform\PushUtility.cs</Link>
+    </Compile>
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\LocalStorageManager.cs">
       <Link>Push\LocalStorageManager.cs</Link>
     </Compile>
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\Push.cs">
       <Link>Push\Push.cs</Link>
-    </Compile>
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\PushHttpClient.cs">
-      <Link>Push\PushHttpClient.cs</Link>
     </Compile>
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\Registration.cs">
       <Link>Push\Registration.cs</Link>

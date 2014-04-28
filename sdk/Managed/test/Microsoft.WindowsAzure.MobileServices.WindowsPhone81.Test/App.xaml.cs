@@ -36,8 +36,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             HardwareButtons.BackPressed += HardwareButtons_BackPressed;
 
             Harness = new TestHarness();
-            Harness.LoadTestAssembly(typeof(MobileServiceSerializerTests).GetTypeInfo().Assembly); //
-            //Harness.LoadTestAssembly(typeof(LoginTests).GetTypeInfo().Assembly); //
+            Harness.LoadTestAssembly(typeof(MobileServiceSerializerTests).GetTypeInfo().Assembly);
+            
+            Harness.LoadTestAssembly(typeof(Push).GetTypeInfo().Assembly);
+            //Harness.LoadTestAssembly(typeof(LoginTests).GetTypeInfo().Assembly);
         }
 
         /// <summary>
@@ -110,7 +112,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Window.Current.Activate();
         }
 
-        protected async override void OnActivated(IActivatedEventArgs e)
+        protected override void OnActivated(IActivatedEventArgs e)
         {
             Frame rootFrame = Window.Current.Content as Frame;
 

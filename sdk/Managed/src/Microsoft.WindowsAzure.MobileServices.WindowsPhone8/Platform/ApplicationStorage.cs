@@ -3,7 +3,6 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Globalization;
 using System.IO.IsolatedStorage;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -18,7 +17,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// A singleton instance of the <see cref="ApplicationStorage"/>.
         /// </summary>
-        private static IApplicationStorage instance = new ApplicationStorage();
+        private static readonly IApplicationStorage instance = new ApplicationStorage();
 
         /// <summary>
         /// A singleton instance of the <see cref="ApplicationStorage"/>.
@@ -54,7 +53,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentException(message);
             }
 
-            return IsolatedStorageSettings.ApplicationSettings.TryGetValue<object>(name, out value);
+            return IsolatedStorageSettings.ApplicationSettings.TryGetValue(name, out value);
         }
 
         /// <summary>

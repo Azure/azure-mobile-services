@@ -31,12 +31,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="registration"></param>
         /// <returns></returns>
-        public async Task RegisterAsync(Registration registration)
+        public async Task RegisterAsync(RegistrationBase registration)
         {
             // if localStorage is empty or has different storage version, we need retrieve registrations and refresh local storage
             if (this.LocalStorageManager.IsRefreshNeeded)
             {
-                string refreshChannelUri = string.IsNullOrEmpty(this.LocalStorageManager.ChannelUri) ? registration.ChannelUri : this.LocalStorageManager.ChannelUri;
+                string refreshChannelUri = string.IsNullOrEmpty(this.LocalStorageManager.ChannelUri) ? registration.DeviceId : this.LocalStorageManager.ChannelUri;
                 await this.RefreshRegistrationsForChannelAsync(refreshChannelUri);
                 this.LocalStorageManager.RefreshFinished(refreshChannelUri);
             }
@@ -73,7 +73,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         public async Task RefreshRegistrationsForChannelAsync(string channelUri)
         {
-            List<Registration> registrations = new List<Registration>(await this.PushHttpClient.ListRegistrationsAsync(channelUri));
+            var registrations = new List<RegistrationBase>(await this.PushHttpClient.ListRegistrationsAsync(channelUri));
             var count = registrations.Count;
             if (count == 0)
             {
@@ -82,7 +82,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             for (int i = 0; i < count; i++)
             {
-                this.LocalStorageManager.UpdateRegistrationByRegistrationId(registrations[i].RegistrationId, registrations[i].Name, registrations[i].ChannelUri);
+                this.LocalStorageManager.UpdateRegistrationByRegistrationId(registrations[i].RegistrationId, registrations[i].Name, registrations[i].DeviceId);
             }
         }
 
@@ -105,7 +105,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         public async Task DeleteRegistrationsForChannelAsync(string channelUri)
         {
-            List<Registration> registrations = new List<Registration>(await this.PushHttpClient.ListRegistrationsAsync(channelUri));
+            var registrations = new List<RegistrationBase>(await this.PushHttpClient.ListRegistrationsAsync(channelUri));
             foreach (var registration in registrations)
             {
                 await this.PushHttpClient.UnregisterAsync(registration.RegistrationId);
@@ -116,17 +116,17 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.LocalStorageManager.ClearRegistrations();
         }
 
-        async Task<Registration> CreateRegistrationIdAsync(Registration registration)
+        async Task<RegistrationBase> CreateRegistrationIdAsync(RegistrationBase registration)
         {
             registration.RegistrationId = await this.PushHttpClient.CreateRegistrationIdAsync();
-            this.LocalStorageManager.UpdateRegistrationByName(registration.Name, registration.RegistrationId, registration.ChannelUri);
+            this.LocalStorageManager.UpdateRegistrationByName(registration.Name, registration.RegistrationId, registration.DeviceId);
             return registration;
         }
 
-        async Task UpsertRegistration(Registration registration)
+        async Task UpsertRegistration(RegistrationBase registration)
         {
             await this.PushHttpClient.CreateOrUpdateRegistrationAsync(registration);
-            this.LocalStorageManager.UpdateRegistrationByName(registration.Name, registration.RegistrationId, registration.ChannelUri);
+            this.LocalStorageManager.UpdateRegistrationByName(registration.Name, registration.RegistrationId, registration.DeviceId);
         }
     }
 }

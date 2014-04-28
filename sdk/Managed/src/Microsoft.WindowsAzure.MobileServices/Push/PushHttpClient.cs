@@ -23,11 +23,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.client = client;
         }
 
-        public async Task<IEnumerable<Registration>> ListRegistrationsAsync(string channelUri)
+        public async Task<IEnumerable<RegistrationBase>> ListRegistrationsAsync(string channelUri)
         {
-            var response = await this.client.HttpClient.RequestAsync(HttpMethod.Get, string.Format("/push/registrations?deviceId={0}&platform={1}", Uri.EscapeUriString(channelUri), Uri.EscapeUriString(Registration.PlatformConstant)), this.client.CurrentUser);
+            var response = await this.client.HttpClient.RequestAsync(HttpMethod.Get, string.Format("/push/registrations?deviceId={0}&platform={1}", Uri.EscapeUriString(channelUri), Uri.EscapeUriString(Platform.Instance.PushUtility.GetPlatform())), this.client.CurrentUser);
 
-            return JsonConvert.DeserializeObject<IEnumerable<Registration>>(response.Content, new JsonConverter[] { new RegistrationConverter() });
+            return JsonConvert.DeserializeObject<IEnumerable<RegistrationBase>>(response.Content, new JsonConverter[] { new RegistrationConverter() });
         }
 
         public Task UnregisterAsync(string registrationId)
@@ -42,7 +42,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             return locationPath.Substring(locationPath.LastIndexOf('/') + 1);
         }
 
-        public async Task CreateOrUpdateRegistrationAsync(Registration registration)
+        public async Task CreateOrUpdateRegistrationAsync(RegistrationBase registration)
         {
             var regId = registration.RegistrationId;
 
@@ -67,14 +67,16 @@ namespace Microsoft.WindowsAzure.MobileServices
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             JObject jObject = JObject.Load(reader);
-            object registration = jObject.Property("templateBody") == null ? new Registration() : new TemplateRegistration();
+            object registration = jObject.Property("templateBody") == null 
+                ? Platform.Instance.PushUtility.GetNewNativeRegistration() 
+                : Platform.Instance.PushUtility.GetNewTemplateRegistration();
             serializer.Populate(jObject.CreateReader(), registration);
             return registration;
         }
 
         public override bool CanConvert(Type objectType)
         {
-            return typeof(Registration).GetTypeInfo().IsAssignableFrom(objectType.GetTypeInfo());
+            return typeof(RegistrationBase).GetTypeInfo().IsAssignableFrom(objectType.GetTypeInfo());
         }
     }
 }

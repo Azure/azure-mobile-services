@@ -16,11 +16,11 @@
   </Resources>
   <Applications>
     <Application Id="x90d8932dy7158y463dy9db4y2cbce122d372x" Executable="$targetnametoken$.exe" EntryPoint="Microsoft.WindowsAzure.MobileServices.WindowsStore.Test.App">
-      <m2:VisualElements DisplayName="Microsoft.WindowsAzure.Mobile.WP81.Test" Square150x150Logo="Assets\Logo.png" Square30x30Logo="Assets\SmallLogo.png" Description="Windows Azure Mobile Services Test App" ForegroundText="light" BackgroundColor="#464646">
-        <m2:DefaultTile Wide310x150Logo="Assets\WideLogo.png">
-        </m2:DefaultTile>
-        <m2:SplashScreen Image="Assets\SplashScreen.png" />
-      </m2:VisualElements>
+      <m3:VisualElements DisplayName="ZumoAppTest" Description="Windows Azure Mobile Services Test App" BackgroundColor="#464646" ForegroundText="light" Square150x150Logo="Assets\Logo.png" Square44x44Logo="Assets\SmallLogo.png" xmlns:m3="http://schemas.microsoft.com/appx/2014/manifest">
+        <m3:DefaultTile Wide310x150Logo="Assets\WideLogo.png" Square71x71Logo="Assets\SmallLogo.png" >
+        </m3:DefaultTile>
+        <m3:SplashScreen Image="Assets\SplashScreen.png" />
+      </m3:VisualElements>
     </Application>
   </Applications>
   <Capabilities>
