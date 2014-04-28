@@ -550,8 +550,19 @@ public class MobileServicePush {
                 }           
                 @Override
                 public void onSuccess(String registrationId) {
-                    setRegistrationId(registration, registrationId);
-                    resultFuture.set(registrationId);    
+                	ListenableFuture<String> setRegistrationIdFuture = setRegistrationId(registration, registrationId);
+                    
+                    Futures.addCallback(setRegistrationIdFuture, new FutureCallback<String>() {
+                		
+                        @Override
+                        public void onFailure(Throwable exception) {
+                    		resultFuture.setException(exception);
+                        }           
+                        @Override
+                        public void onSuccess(String registrationId) {
+                            resultFuture.set(registrationId);    
+                        }
+                    });
                 }
             });
         	
@@ -601,29 +612,38 @@ public class MobileServicePush {
 					    
 					    @Override
 					    public void onSuccess(final String registrationId) {
-					    	registration.setRegistrationId(registrationId);
-					    	
-				    		ListenableFuture<Void> upsertRegistrationInternalFuture2 = upsertRegistrationInternal(registration);
+					    	ListenableFuture<String> setRegistrationIdFuture = setRegistrationId(registration, registrationId);
+		                    
+		                    Futures.addCallback(setRegistrationIdFuture, new FutureCallback<String>() {
+		                		
+		                        @Override
+		                        public void onFailure(Throwable exception) {
+		                    		resultFuture.setException(exception);
+		                        }           
+		                        @Override
+		                        public void onSuccess(final String registrationId) {
+		                        	ListenableFuture<Void> upsertRegistrationInternalFuture2 = upsertRegistrationInternal(registration);
 
-				    		Futures.addCallback(upsertRegistrationInternalFuture2, new FutureCallback<Void>()
-				    		{    
-	    			            @Override
-	    			            public void onFailure(Throwable exception) {
-	    			            }
-	    			            
-	    			            public void onSuccess(Void v) {
+						    		Futures.addCallback(upsertRegistrationInternalFuture2, new FutureCallback<Void>()
+						    		{    
+			    			            @Override
+			    			            public void onFailure(Throwable exception) {
+			    			            }
+			    			            
+			    			            public void onSuccess(Void v) {
 
-	    			                try {
-	    			                    storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
-	    			                } catch (Exception exception) {
-	    			                	resultFuture.setException(exception);
-	    			                    return;
-	    			                }
-	    			    	        resultFuture.set(registrationId);
-	    			            }
-				    		});
-                	
-					    }
+			    			                try {
+			    			                    storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
+			    			                } catch (Exception exception) {
+			    			                	resultFuture.setException(exception);
+			    			                    return;
+			    			                }
+			    			    	        resultFuture.set(registrationId);
+			    			            }
+						    		});    
+		                        }
+		                    });
+		                }
 					});
                               
             	}
@@ -784,7 +804,7 @@ public class MobileServicePush {
 
     	final SettableFuture<Void> resultFuture = SettableFuture.create();
     	
-    	if (!isNullOrWhiteSpace(registrationId)) {
+    	if (isNullOrWhiteSpace(registrationId)) {
     		resultFuture.set(null);
     		return resultFuture;
     	}
@@ -833,7 +853,7 @@ public class MobileServicePush {
      *            The registration id to store in local storage
      * @throws Exception
      */
-    private void storeRegistrationId(String registrationName, String registrationId, String pNSHandle) throws Exception {
+    private void storeRegistrationId(String registrationName, String registrationId, String pNSHandle) {
         Editor editor = mSharedPreferences.edit();
 
         editor.putString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + registrationName, registrationId);
@@ -879,9 +899,11 @@ public class MobileServicePush {
     private void verifyStorageVersion() {
         String currentStorageVersion = mSharedPreferences.getString(STORAGE_PREFIX + STORAGE_VERSION_KEY, "");
 
-        Editor editor = mSharedPreferences.edit();
 
         if (!currentStorageVersion.equals(STORAGE_VERSION)) {
+        	
+            Editor editor = mSharedPreferences.edit();
+            
             Set<String> keys = mSharedPreferences.getAll().keySet();
 
             for (String key : keys) {
@@ -889,11 +911,12 @@ public class MobileServicePush {
                     editor.remove(key);
                 }
             }
+
+            editor.commit();
+            
+            mIsRefreshNeeded = true;
         }
 
-        editor.commit();
-
-        mIsRefreshNeeded = true;
     }
 
     private static boolean isNullOrWhiteSpace(String str) {

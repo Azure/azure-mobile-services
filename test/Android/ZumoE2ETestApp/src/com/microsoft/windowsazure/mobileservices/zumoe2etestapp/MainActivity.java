@@ -32,12 +32,14 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -45,6 +47,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
@@ -72,15 +75,19 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestRe
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestStatus;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.CustomApiTests;
-import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.EnhancedPushTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.LoginTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.MiscTests;
-import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.PushTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.QueryTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.RoundTripTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.SystemPropertiesTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.UpdateDeleteTests;
+//import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.CustomApiTests;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.EnhancedPushTests;
+//import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.LoginTests;
+//import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.MiscTests;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.PushTests;
 
+@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 @SuppressWarnings("deprecation")
 public class MainActivity extends Activity {
 
@@ -93,32 +100,32 @@ public class MainActivity extends Activity {
 	private JsonObject mAutomationPreferences;
 
 	private ListView mTestCaseList;
-	
+
 	private Spinner mTestGroupSpinner;
 
 	private static Activity mInstance;
-	
+
 	private static final String automationPreferencesFile = "/zumo/automationPreferences.txt";
 
 	public static Activity getInstance() {
 		return mInstance;
 	}
-	
+
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		// don't restart the activity. Just process the configuration change
 		super.onConfigurationChanged(newConfig);
 	}
-	
+
 	@SuppressLint("WorldReadableFiles")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		
+
 		setContentView(R.layout.activity_main);
 
 		mInstance = this;
-		
+
 		mPrefManager = PreferenceManager.getDefaultSharedPreferences(this);
 
 		try {
@@ -173,7 +180,7 @@ public class MainActivity extends Activity {
 
 		PushTests.mainActivity = this;
 		EnhancedPushTests.mainActivity = this;
-		
+
 		refreshTestGroupsAndLog();
 	}
 
@@ -207,7 +214,7 @@ public class MainActivity extends Activity {
 			TestGroup group = adapter.getItem(i);
 			allTests.add(Util.createSeparatorTest("Start of group: " + group.getName()));
 			allUnattendedTests.add(Util.createSeparatorTest("Start of group: " + group.getName()));
-			
+
 			List<TestCase> testsForGroup = group.getTestCases();
 			for (TestCase test : testsForGroup) {
 				allTests.add(test);
@@ -218,12 +225,12 @@ public class MainActivity extends Activity {
 			allTests.add(Util.createSeparatorTest("------------------"));
 			allUnattendedTests.add(Util.createSeparatorTest("------------------"));
 		}
-		
+
 		int unattendedTestsIndex = adapter.getCount();
 
 		adapter.add(new CompositeTestGroup(TestGroup.AllUnattendedTestsGroupName, allUnattendedTests));
 		adapter.add(new CompositeTestGroup(TestGroup.AllTestsGroupName, allTests));
-		
+
 		if (shouldRunUnattended()) {
 			mTestGroupSpinner.setSelection(unattendedTestsIndex);
 			selectTestGroup(unattendedTestsIndex);
@@ -274,12 +281,12 @@ public class MainActivity extends Activity {
 			logDialogBuilder.setTitle("Log");
 
 			final WebView webView = new WebView(this);
-			
+
 			String logContent = TextUtils.htmlEncode(mLog.toString()).replace("\n", "<br />");
 			final boolean isLogForAllGroups = mRunningAllTests;
 			String logHtml = "<html><body><pre>" + logContent + "</pre></body></html>";
 			webView.loadData(logHtml, "text/html", "utf-8");
-			
+
 			logDialogBuilder.setPositiveButton("Copy", new DialogInterface.OnClickListener() {
 
 				@Override
@@ -288,11 +295,11 @@ public class MainActivity extends Activity {
 					clipboardManager.setText(mLog.toString());
 				}
 			});
-			
+
 			final String postContent = mLog.toString();
-			
+
 			logDialogBuilder.setNeutralButton("Post data", new DialogInterface.OnClickListener() {
-				
+
 				@Override
 				public void onClick(DialogInterface dialog, int which) {
 					postLogs(postContent, isLogForAllGroups);
@@ -366,103 +373,123 @@ public class MainActivity extends Activity {
 	}
 
 	private void runTests() {
-		MobileServiceClient client;
+
+		MobileServiceClient client = null;
 
 		try {
 			client = createMobileServiceClient();
 		} catch (MalformedURLException e) {
 			createAndShowDialog(e, "Error");
-			return;
 		}
 
-		TestGroup group = (TestGroup) mTestGroupSpinner.getSelectedItem();
+		final TestGroup group = (TestGroup) mTestGroupSpinner.getSelectedItem();
 		logWithTimestamp(new Date(), "Tests for group \'" + group.getName() + "\'");
 		if (group.getName().startsWith(TestGroup.AllTestsGroupName)) {
 			mRunningAllTests = true;
 		}
+
 		logSeparator();
-		group.runTests(client, new TestExecutionCallback() {
+
+		final MobileServiceClient currentClient = client;
+
+		new AsyncTask<Void, Void, Void>() {
 
 			@Override
-			public void onTestStart(TestCase test) {
-				TestCaseAdapter adapter = (TestCaseAdapter) mTestCaseList.getAdapter();
-				adapter.notifyDataSetChanged();
-				// log("TEST START", test.getName());
-			}
+			protected Void doInBackground(Void... arg0) {
+				group.runTests(currentClient, new TestExecutionCallback() {
 
-			@Override
-			public void onTestGroupComplete(TestGroup group, List<TestResult> results) {
-				log("TEST GROUP COMPLETED", group.getName() + " - " + group.getStatus().toString());
-				logSeparator();
+					@Override
+					public void onTestStart(TestCase test) {
+						final TestCaseAdapter adapter = (TestCaseAdapter) mTestCaseList.getAdapter();
 
-				if (shouldRunUnattended()) {
-					String logContent = mLog.toString();
-					postLogs(logContent, true);
+						runOnUiThread(new Runnable() {
 
-					boolean passed = true;
-					for (TestResult result : results) {
-						if (result.getStatus() != TestStatus.Passed) {
-							passed = false;
-							break;
+							@Override
+							public void run() {
+								adapter.notifyDataSetChanged();
+							}
+
+						});
+						
+						// log("TEST START", test.getName());
+					}
+
+					@Override
+					public void onTestGroupComplete(TestGroup group, List<TestResult> results) {
+						log("TEST GROUP COMPLETED", group.getName() + " - " + group.getStatus().toString());
+						logSeparator();
+
+						if (shouldRunUnattended()) {
+							String logContent = mLog.toString();
+							postLogs(logContent, true);
+
+							boolean passed = true;
+							for (TestResult result : results) {
+								if (result.getStatus() != TestStatus.Passed) {
+									passed = false;
+									break;
+								}
+							}
+
+							try {
+								String sdCard = Environment.getExternalStorageDirectory().getPath();
+								FileOutputStream fos = new FileOutputStream(sdCard + "/zumo/done.txt");
+								OutputStreamWriter osw = new OutputStreamWriter(fos);
+								BufferedWriter bw = new BufferedWriter(osw);
+								bw.write(passed ? "PASSED" : "FAILED");
+								bw.write("\n");
+								bw.close();
+								osw.close();
+								fos.close();
+							} catch (IOException e) {
+								e.printStackTrace();
+							}
 						}
 					}
 
-					try {
-						String sdCard = Environment.getExternalStorageDirectory().getPath();
-						FileOutputStream fos = new FileOutputStream(sdCard + "/zumo/done.txt");
-						OutputStreamWriter osw = new OutputStreamWriter(fos);
-						BufferedWriter bw = new BufferedWriter(osw);
-						bw.write(passed ? "PASSED" : "FAILED");
-						bw.write("\n");
-						bw.close();
-						osw.close();
-						fos.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-
-			@Override
-			public void onTestComplete(TestCase test, TestResult result) {
-				Throwable e = result.getException();
-				if (e != null) {
-					StringBuilder sb = new StringBuilder();
-					while (e != null) {
-						sb.append(e.getClass().getSimpleName() + ": ");
-						sb.append(e.getMessage());
-						sb.append(" // ");
-						e = e.getCause();
-					}
-
-					test.log("Exception: " + sb.toString());
-				}
-
-				final TestCaseAdapter adapter = (TestCaseAdapter) mTestCaseList.getAdapter();
-				
-				runOnUiThread(new Runnable() {
-
 					@Override
-					public void run() {
-						adapter.notifyDataSetChanged();
-						
+					public void onTestComplete(TestCase test, TestResult result) {
+						Throwable e = result.getException();
+						if (e != null) {
+							StringBuilder sb = new StringBuilder();
+							while (e != null) {
+								sb.append(e.getClass().getSimpleName() + ": ");
+								sb.append(e.getMessage());
+								sb.append(" // ");
+								e = e.getCause();
+							}
+
+							test.log("Exception: " + sb.toString());
+						}
+
+						final TestCaseAdapter adapter = (TestCaseAdapter) mTestCaseList.getAdapter();
+
+						runOnUiThread(new Runnable() {
+
+							@Override
+							public void run() {
+								adapter.notifyDataSetChanged();
+
+							}
+
+						});
+						logWithTimestamp(test.getStartTime(), "Logs for test " + test.getName() + " (" + result.getStatus().toString() + ")");
+						String testLogs = test.getLog();
+						if (testLogs.length() > 0) {
+							if (testLogs.endsWith("\n")) {
+								testLogs = testLogs.substring(0, testLogs.length() - 1);
+							}
+							log(testLogs);
+						}
+
+						logWithTimestamp(test.getEndTime(), "Test " + result.getStatus().toString());
+						logWithTimestamp(test.getEndTime(), "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-");
+						logSeparator();
 					}
-					
 				});
-				logWithTimestamp(test.getStartTime(), "Logs for test " + test.getName() + " (" + result.getStatus().toString() + ")");
-				String testLogs = test.getLog();
-				if (testLogs.length() > 0) {
-					if (testLogs.endsWith("\n")) {
-						testLogs = testLogs.substring(0, testLogs.length() - 1);
-					}
-					log(testLogs);
-				}
-				
-				logWithTimestamp(test.getEndTime(), "Test " + result.getStatus().toString());
-				logWithTimestamp(test.getEndTime(), "-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-");
-				logSeparator();
+				return null;
 			}
-		});
+		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
 	}
 
@@ -471,13 +498,13 @@ public class MainActivity extends Activity {
 		mLog.append("----\n");
 		mLog.append("\n");
 	}
-	
+
 	private void log(String content) {
 		log("Info", content);
 	}
 
 	private void logWithTimestamp(Date time, String content) {
-		log("Info", "[" + Util.dateToString(time, Util.LogTimeFormat) + "] " + content);
+		//log("Info", "[" + Util.dateToString(time, Util.LogTimeFormat) + "] " + content);
 	}
 
 	private void log(String title, String content) {
@@ -495,11 +522,11 @@ public class MainActivity extends Activity {
 	private String getMobileServiceKey() {
 		return this.getPreference(Constants.PREFERENCE_MOBILE_SERVICE_KEY);
 	}
-	
+
 	private String getLogPostURL() {
 		return this.getPreference(Constants.PREFERENCE_LOG_POST_URL);
 	}
-	
+
 	public String getGCMSenderId() {
 		return this.getPreference(Constants.PREFERENCE_GCM_SENDER_ID);
 	}

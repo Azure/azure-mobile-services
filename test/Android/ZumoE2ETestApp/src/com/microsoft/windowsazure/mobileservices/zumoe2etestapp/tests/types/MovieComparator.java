@@ -23,9 +23,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import android.util.Pair;
+import com.microsoft.windowsazure.mobileservices.table.QueryOrder;
 
-import com.microsoft.windowsazure.mobileservices.QueryOrder;
+import android.util.Pair;
 
 
 public class MovieComparator implements Comparator<Movie> {

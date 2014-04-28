@@ -115,7 +115,7 @@ public class MobileServiceConnection {
                     // If the response has error throw exception
                     if (statusCode < 200 || statusCode >= 300) {
                         String responseContent = response.getContent();
-                        if (responseContent != null && responseContent.trim() != "") {
+                        if (responseContent != null && !responseContent.isEmpty()) {
                             throw new MobileServiceException(responseContent, response);
                         } else {
                             throw new MobileServiceException(String.format("{'code': %d}", statusCode), response);

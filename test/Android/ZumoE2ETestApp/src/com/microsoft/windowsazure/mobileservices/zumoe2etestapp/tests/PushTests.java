@@ -24,9 +24,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.MainActivity;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
@@ -75,33 +73,43 @@ public class PushTests extends TestGroup {
 
 			@Override
 			protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-				MobileServiceJsonTable table = client.getTable(tableName);
-				JsonObject item = new JsonObject();
-				item.addProperty("method", "send");
-				item.addProperty("registrationId", registrationId);
-				item.add("payload", payload);
+
+				JsonObject jsonObject = null;
 				final TestCase testCase = this;
-				table.insert(item, new TableJsonOperationCallback() {
 
-					@Override
-					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
-						TestResult testResult = new TestResult();
-						testResult.setTestCase(testCase);
-						if (exception == null) {
-							log("Error, expected exception, but got none.");
-							log("Returned jsonObject: " + jsonObject.toString());
-							testResult.setStatus(TestStatus.Failed);
-						} else {
-							log("Received expected exception: " + exception.toString());
-							log("Response: " + response.getStatus().getStatusCode());
-							log("Response body: " + response.getContent());
-							testResult.setStatus(TestStatus.Passed);
-						}
+				TestResult testResult = new TestResult();
+				testResult.setTestCase(testCase);
 
-						callback.onTestComplete(testCase, testResult);
+				try {
+
+					MobileServiceJsonTable table = client.getTable(tableName);
+					JsonObject item = new JsonObject();
+					item.addProperty("method", "send");
+					item.addProperty("registrationId", registrationId);
+					item.add("payload", payload);
+
+					jsonObject = table.insert(item).get();
+
+					log("Error, expected exception, but got none.");
+					log("Returned jsonObject: " + jsonObject.toString());
+					testResult.setStatus(TestStatus.Failed);
+
+					callback.onTestComplete(testCase, testResult);
+
+				} catch (Exception e) {
+					log("Error, expected exception, but got none.");
+
+					if (jsonObject != null) {
+						log("Returned jsonObject: " + jsonObject.toString());
 					}
-				});
-			}
+
+					testResult.setStatus(TestStatus.Failed);
+
+					callback.onTestComplete(testCase, testResult);
+
+					return;
+				}
+			};
 		};
 	}
 
@@ -111,35 +119,31 @@ public class PushTests extends TestGroup {
 
 			@Override
 			protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
-				MobileServiceJsonTable table = client.getTable(tableName);
-				JsonObject item = new JsonObject();
-				item.addProperty("method", "send");
-				item.addProperty("registrationId", registrationId);
-				item.add("payload", payload);
+				try {
 
-				final TestCase test = this;
-				table.insert(item, new TableJsonOperationCallback() {
+					MobileServiceJsonTable table = client.getTable(tableName);
+					JsonObject item = new JsonObject();
+					item.addProperty("method", "send");
+					item.addProperty("registrationId", registrationId);
+					item.add("payload", payload);
 
-					@Override
-					public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
-						if (exception != null) {
-							callback.onTestComplete(test, createResultFromException(exception));
-							return;
-						}
-
-						final JsonObject expectedPayload;
-						if (payload.isJsonObject()) {
-							expectedPayload = payload.getAsJsonObject();
-						} else {
-							expectedPayload = new JsonObject();
-							expectedPayload.add("message", payload);
-						}
-
-						log("OnCompleted: " + jsonObject.toString());
-						GCMMessageManager.instance.waitForPushMessage(5000, GCMMessageHelper.getPushCallback(test, expectedPayload, callback));
+					final TestCase test = this;
+					JsonObject jsonObject = table.insert(item).get();
+					final JsonObject expectedPayload;
+					if (payload.isJsonObject()) {
+						expectedPayload = payload.getAsJsonObject();
+					} else {
+						expectedPayload = new JsonObject();
+						expectedPayload.add("message", payload);
 					}
-				});
-			}
+
+					log("OnCompleted: " + jsonObject.toString());
+					GCMMessageManager.instance.waitForPushMessage(5000, GCMMessageHelper.getPushCallback(test, expectedPayload, callback));
+				} catch (Exception exception) {
+					callback.onTestComplete(this, createResultFromException(exception));
+					return;
+				}
+			};
 		};
 
 		return result;

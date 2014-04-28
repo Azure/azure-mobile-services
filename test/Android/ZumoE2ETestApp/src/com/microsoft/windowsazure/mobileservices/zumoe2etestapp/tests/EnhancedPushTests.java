@@ -226,7 +226,7 @@ public class EnhancedPushTests extends TestGroup {
 
 					unregisterTemplate(this, MobileServicePush, templateName);
 
-					TemplateRegistration reg2 = registerTemplate(this, MobileServicePush, gcmId, templateName, (String[]) null);
+					TemplateRegistration reg2 = registerTemplate(this, MobileServicePush, gcmId, templateName + "1", (String[]) null);
 
 					if (reg2.getRegistrationId().equals(reg1.getRegistrationId())) {
 						result.setStatus(TestStatus.Failed);
@@ -560,7 +560,7 @@ public class EnhancedPushTests extends TestGroup {
 
 					this.log("OnCompleted: " + jsonObject.toString());
 					TestExecutionCallback nativeUnregisterTestExecutionCallback = getNativeUnregisterTestExecutionCallback(client, tag, payload, callback);
-					GCMMessageManager.instance.waitForPushMessage(5000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
+					GCMMessageManager.instance.waitForPushMessage(25000, GCMMessageHelper.getPushCallback(this, payload, nativeUnregisterTestExecutionCallback));
 
 				} catch (Exception e) {
 					callback.onTestComplete(this, createResultFromException(e));

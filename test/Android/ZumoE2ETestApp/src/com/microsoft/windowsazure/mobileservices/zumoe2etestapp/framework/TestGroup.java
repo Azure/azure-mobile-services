@@ -22,6 +22,11 @@ package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
+
+import android.annotation.TargetApi;
+import android.os.AsyncTask;
+import android.os.Build;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 
@@ -31,10 +36,10 @@ public abstract class TestGroup {
 	TestStatus mStatus;
 	ConcurrentLinkedQueue<TestCase> mTestRunQueue;
 	boolean mNewTestRun;
-	
+
 	public static final String AllTestsGroupName = "All tests";
 	public static final String AllUnattendedTestsGroupName = AllTestsGroupName + " (unattended)";
-	
+
 	public static final String ClientVersionKey = "client-version";
 	public static final String ServerVersionKey = "server-version";
 
@@ -58,10 +63,9 @@ public abstract class TestGroup {
 		mTestCases.add(testCase);
 	}
 
-	
 	public void runTests(MobileServiceClient client, TestExecutionCallback callback) {
 		List<TestCase> testsToRun = new ArrayList<TestCase>();
-		
+
 		for (int i = 0; i < mTestCases.size(); i++) {
 			if (mTestCases.get(i).isEnabled()) {
 				testsToRun.add(mTestCases.get(i));
@@ -72,8 +76,8 @@ public abstract class TestGroup {
 			runTests(testsToRun, client, callback);
 		}
 	}
-	
-	
+
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	public void runTests(List<TestCase> testsToRun, final MobileServiceClient client, final TestExecutionCallback callback) {
 		try {
 			onPreExecute(client);
@@ -83,23 +87,40 @@ public abstract class TestGroup {
 				callback.onTestGroupComplete(this, null);
 			return;
 		}
-		
+
 		final TestRunStatus testRunStatus = new TestRunStatus();
 
 		mNewTestRun = true;
-		
+
 		int oldQueueSize = mTestRunQueue.size();
 		mTestRunQueue.clear();
 		mTestRunQueue.addAll(testsToRun);
 		cleanTestsState();
 		testRunStatus.results.clear();
 		mStatus = TestStatus.NotRun;
-		
 		if (oldQueueSize == 0) {
-			executeNextTest(client, callback, testRunStatus);
+			for (final TestCase test : mTestRunQueue) {
+				
+				final CountDownLatch latch = new CountDownLatch(1);
+				
+				new AsyncTask<Void, Void, Void>() {
+					@Override
+					protected Void doInBackground(Void... arg0) {
+						executeNextTest(test, client, callback, testRunStatus, latch);
+						return null;
+					}
+				}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				
+				try {
+					latch.await();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
 		}
 	}
-
 
 	private void cleanTestsState() {
 		for (TestCase test : mTestRunQueue) {
@@ -107,13 +128,15 @@ public abstract class TestGroup {
 			test.clearLog();
 		}
 	}
-	
-	private void executeNextTest(final MobileServiceClient client, final TestExecutionCallback callback, final TestRunStatus testRunStatus) {
+
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
+	private void executeNextTest(final TestCase nextTest, final MobileServiceClient client, final TestExecutionCallback callback,
+			final TestRunStatus testRunStatus, final CountDownLatch latch) {
 		mNewTestRun = false;
 		final TestGroup group = this;
 
 		try {
-			TestCase nextTest = mTestRunQueue.poll();
+			// TestCase nextTest = mTestRunQueue.poll();
 			if (nextTest != null) {
 				nextTest.run(client, new TestExecutionCallback() {
 					@Override
@@ -142,28 +165,28 @@ public abstract class TestGroup {
 									result.setStatus(TestStatus.Failed);
 								}
 							}
-		
+
 							test.setStatus(result.getStatus());
 							testRunStatus.results.add(result);
-		
+
 							if (callback != null)
 								callback.onTestComplete(test, result);
 						}
-						
-						executeNextTest(client, callback, testRunStatus);
+
+						latch.countDown();
+						// executeNextTest(client, callback, testRunStatus);
 					}
 				});
-				
-				
+
 			} else {
 				// end run
-				
+
 				try {
-					onPostExecute(client);
+					group.onPostExecute(client);
 				} catch (Exception e) {
 					mStatus = TestStatus.Failed;
 				}
-				
+
 				// if at least one test failed, the test group
 				// failed
 				if (mStatus != TestStatus.Failed) {
@@ -178,13 +201,17 @@ public abstract class TestGroup {
 
 				if (callback != null)
 					callback.onTestGroupComplete(group, testRunStatus.results);
+				
+				latch.countDown();
 			}
-			
-			
+
 		} catch (Exception e) {
 			if (callback != null)
-				callback.onTestGroupComplete(this, testRunStatus.results);
+				callback.onTestGroupComplete(group, testRunStatus.results);
+			
+			latch.countDown();
 		}
+
 	}
 
 	public String getName() {

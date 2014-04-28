@@ -25,12 +25,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
-import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
-import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
-import com.microsoft.windowsazure.mobileservices.TableOperationCallback;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.ExpectedValueException;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
@@ -128,96 +124,52 @@ public class UpdateDeleteTests extends TestGroup {
 				log("insert item");
 				itemToInsert.id = null;
 				
-				table.insert(itemToInsert, new TableOperationCallback<RoundTripTableElement>() {
-
-					@Override
-					public void onCompleted(final RoundTripTableElement insertedItem, Exception exception, ServiceFilterResponse response) {
-						final TestResult result = new TestResult();
-						result.setTestCase(testCase);
-						result.setStatus(TestStatus.Passed);
-
-						if (exception == null) { // if it was ok
-
-							if (setUpdatedId) {
-								log("update item id " + insertedItem.id);
-								itemToUpdate.id = insertedItem.id;
-							}
-
-							log("update the item");
-							table.update(itemToUpdate, new TableOperationCallback<RoundTripTableElement>() {
-
-								@Override
-								public void onCompleted(final RoundTripTableElement updatedItem, Exception exception, ServiceFilterResponse response) {
-
-									if (exception == null) { // if it was ok
-
-										log("lookup item");
-										table.lookUp(updatedItem.id, new TableOperationCallback<RoundTripTableElement>() {
-
-											@Override
-											public void onCompleted(RoundTripTableElement lookedUpItem, Exception exception, ServiceFilterResponse response) {
-												if (exception == null) { // if
-																			// it
-																			// was
-																			// ok
-
-													log("verify items are equal");
-													if (Util.compare(updatedItem, lookedUpItem)) { // check
-																									// the
-																									// items
-																									// are
-																									// equal
-														log("cleanup");
-														table.delete(lookedUpItem.id, new TableDeleteCallback() { // clean
-																													// up
-
-																	@Override
-																	public void onCompleted(Exception exception, ServiceFilterResponse response) {
-																		if (exception != null) {
-																			createResultFromException(result, exception);
-																		}
-
-																		// callback
-																		// with
-																		// success
-																		// or
-																		// error
-																		// on
-																		// cleanup
-																		if (callback != null)
-																			callback.onTestComplete(testCase, result);
-																	}
-																});
-													} else {
-														createResultFromException(result, new ExpectedValueException(insertedItem, lookedUpItem));
-														if (callback != null)
-															callback.onTestComplete(testCase, result);
-													}
-												} else {
-													createResultFromException(result, exception);
-													if (callback != null)
-														callback.onTestComplete(testCase, result);
-												}
-											}
-
-										});
-									} else {
-										createResultFromException(result, exception);
-										if (callback != null)
-											callback.onTestComplete(testCase, result);
-									}
-								}
-
-							});
-						} else {
-							createResultFromException(result, exception);
-							if (callback != null)
-								callback.onTestComplete(testCase, result);
-						}
+				final TestResult result = new TestResult();
+				result.setTestCase(testCase);
+				result.setStatus(TestStatus.Passed);
+				
+				try {
+					
+					RoundTripTableElement insertedItem = table.insert(itemToInsert).get();
+			
+					if (setUpdatedId) {
+						log("update item id " + insertedItem.id);
+						itemToUpdate.id = insertedItem.id;
 					}
 
-				});
+					log("update the item");
 
+					RoundTripTableElement updatedItem = table.update(itemToUpdate).get();
+
+					log("lookup item");
+					
+					RoundTripTableElement lookedUpItem = table.lookUp(updatedItem.id).get();
+
+					log("verify items are equal");
+					if (Util.compare(updatedItem, lookedUpItem)) { // check
+																	// the
+																	// items
+																	// are
+																	// equal
+						log("cleanup");
+
+						table.delete(lookedUpItem.id).get();// clean
+															// up
+							
+						if (callback != null)
+								callback.onTestComplete(testCase, result);
+							
+					} else {
+						createResultFromException(result, new ExpectedValueException(updatedItem, lookedUpItem));
+						if (callback != null)
+							callback.onTestComplete(testCase, result);
+					}
+				}
+				catch(Exception exception) {
+					createResultFromException(result, exception);
+					if (callback != null)
+						callback.onTestComplete(testCase, result);
+				}
 			}
 		};
 
@@ -238,97 +190,52 @@ public class UpdateDeleteTests extends TestGroup {
 				final MobileServiceJsonTable table = client.getTable(ROUNDTRIP_TABLE_NAME);
 				final TestCase testCase = this;
 
+				final TestResult result = new TestResult();
+				result.setTestCase(testCase);
+				result.setStatus(TestStatus.Passed);
+
+				
 				log("insert item");
-				table.insert(itemToInsert, new TableJsonOperationCallback() {
+				
+				try {
+					
+					JsonObject insertedItem = table.insert(itemToInsert).get();
+					
 
-					@Override
-					public void onCompleted(final JsonObject insertedItem, Exception exception, ServiceFilterResponse response) {
-						final TestResult result = new TestResult();
-						result.setTestCase(testCase);
-						result.setStatus(TestStatus.Passed);
-
-						if (exception == null) { // if it was ok
-
-							if (setUpdatedId) {
-								int id = insertedItem.get("id").getAsInt();
-								log("update item id " + id);
-								itemToUpdate.addProperty("id", id);
-							}
-
-							log("update the item");
-							table.update(itemToUpdate, new TableJsonOperationCallback() {
-
-								@Override
-								public void onCompleted(final JsonObject updatedItem, Exception exception, ServiceFilterResponse response) {
-
-									if (exception == null) { // if it was ok
-
-										log("lookup the item");
-										table.lookUp(updatedItem.get("id").getAsInt(), new TableJsonOperationCallback() {
-
-											@Override
-											public void onCompleted(JsonObject lookedUpItem, Exception exception, ServiceFilterResponse response) {
-												if (exception == null) { // if
-																			// it
-																			// was
-																			// ok
-													log("verify items are equal");
-													if (Util.compareJson(updatedItem, lookedUpItem)) { // check
-																										// the
-																										// items
-																										// are
-																										// equal
-														log("cleanup");
-														table.delete(lookedUpItem.get("id").getAsInt(), new TableDeleteCallback() { // clean
-																																	// up
-
-																	@Override
-																	public void onCompleted(Exception exception, ServiceFilterResponse response) {
-																		if (exception != null) {
-																			createResultFromException(result, exception);
-																		}
-
-																		// callback
-																		// with
-																		// success
-																		// or
-																		// error
-																		// on
-																		// cleanup
-																		if (callback != null)
-																			callback.onTestComplete(testCase, result);
-																	}
-																});
-													} else {
-														createResultFromException(result, new ExpectedValueException(insertedItem, lookedUpItem));
-														if (callback != null)
-															callback.onTestComplete(testCase, result);
-													}
-												} else {
-													createResultFromException(result, exception);
-													if (callback != null)
-														callback.onTestComplete(testCase, result);
-												}
-											}
-
-										});
-									} else {
-										createResultFromException(result, exception);
-										if (callback != null)
-											callback.onTestComplete(testCase, result);
-									}
-								}
-
-							});
-						} else {
-							createResultFromException(result, exception);
-							if (callback != null)
-								callback.onTestComplete(testCase, result);
-						}
+					if (setUpdatedId) {
+						int id = insertedItem.get("id").getAsInt();
+						log("update item id " + id);
+						itemToUpdate.addProperty("id", id);
 					}
 
-				});
+					log("update the item");
+					JsonObject updatedItem = table.update(itemToUpdate).get();
 
+					log("lookup the item");
+					JsonObject lookedUpItem = (JsonObject) table.lookUp(updatedItem.get("id").getAsInt()).get();
+
+					log("verify items are equal");
+					if (Util.compareJson(updatedItem, lookedUpItem)) { // check
+																		// the
+																		// items
+																		// are
+																		// equal
+						log("cleanup");
+						table.delete(lookedUpItem.get("id").getAsInt()).get(); // clean
+						
+						if (callback != null)
+							callback.onTestComplete(testCase, result);
+					} else {
+						createResultFromException(result, new ExpectedValueException(updatedItem, lookedUpItem));
+						if (callback != null)
+							callback.onTestComplete(testCase, result);
+					}
+				}
+				catch(Exception exception) {
+					createResultFromException(result, exception);
+					if (callback != null)
+						callback.onTestComplete(testCase, result);
+				}
 			}
 		};
 
@@ -346,57 +253,50 @@ public class UpdateDeleteTests extends TestGroup {
 				RoundTripTableElement element = new RoundTripTableElement(new Random());
 				final MobileServiceTable<RoundTripTableElement> table = client.getTable(ROUNDTRIP_TABLE_NAME, RoundTripTableElement.class);
 
+				final TestResult result = new TestResult();
+				result.setStatus(TestStatus.Passed);
+				
 				final TestCase testCase = this;
+				result.setTestCase(testCase);
+
 				log("insert item");
-				table.insert(element, new TableOperationCallback<RoundTripTableElement>() {
+				
+				try {
+				
+					RoundTripTableElement entity = table.insert(element).get();
+				
+					Object deleteObject;
 
-					@Override
-					public void onCompleted(RoundTripTableElement entity, Exception exception, ServiceFilterResponse response) {
-						final TestResult result = new TestResult();
-						result.setStatus(TestStatus.Passed);
-						result.setTestCase(testCase);
-
-						if (exception == null) {
-							Object deleteObject;
-
-							if (useFakeId) {
-								log("use fake id");
-								entity.id = 1000000000;
-							}
-
-							if (!includeId) {
-								log("include id");
-								entity.id = null;
-							}
-
-							if (typed) {
-								deleteObject = entity;
-							} else {
-								deleteObject = client.getGsonBuilder().create().toJsonTree(entity).getAsJsonObject();
-							}
-
-							log("delete");
-							table.delete(deleteObject, new TableDeleteCallback() {
-
-								@Override
-								public void onCompleted(Exception exception, ServiceFilterResponse response) {
-									if (exception != null) {
-										createResultFromException(result, exception);
-									}
-
-									if (callback != null)
-										callback.onTestComplete(testCase, result);
-								}
-							});
-
-						} else {
-							createResultFromException(result, exception);
-							if (callback != null)
-								callback.onTestComplete(testCase, result);
-						}
+					if (useFakeId) {
+						log("use fake id");
+						entity.id = 1000000000;
 					}
 
-				});
+					if (!includeId) {
+						log("include id");
+						entity.id = null;
+					}
+
+					if (typed) {
+						deleteObject = entity;
+					} else {
+						deleteObject = client.getGsonBuilder().create().toJsonTree(entity).getAsJsonObject();
+					}
+
+					log("delete");
+					
+					table.delete(deleteObject).get();
+					
+				}
+				catch(Exception exception) {
+					if (exception != null) {
+						createResultFromException(result, exception);
+					}
+				}
+				finally {
+					if (callback != null)
+						callback.onTestComplete(testCase, result);
+				}
 			}
 		};
 

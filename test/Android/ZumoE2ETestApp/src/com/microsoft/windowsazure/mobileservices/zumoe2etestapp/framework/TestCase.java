@@ -165,6 +165,13 @@ public abstract class TestCase {
 	}
 
 	public TestResult createResultFromException(TestResult result, Exception e) {
+		
+		if (e instanceof java.util.concurrent.ExecutionException || 
+				e instanceof java.lang.InterruptedException) {
+			
+			e = (Exception) e.getCause();
+		}
+		
 		result.setException(e);
 		result.setTestCase(this);
 
