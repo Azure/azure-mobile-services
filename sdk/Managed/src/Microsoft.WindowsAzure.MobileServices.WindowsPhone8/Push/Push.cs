@@ -106,7 +106,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>Task that completes when unregister is complete</returns>
         public Task UnregisterNativeAsync()
         {
-            return this.UnregisterTemplateAsync(Registration.NativeRegistrationName);
+            return this.UnregisterTemplateAsync(RegistrationBase.NativeRegistrationName);
         }
 
         /// <summary>

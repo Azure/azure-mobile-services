@@ -37,14 +37,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(registrations.Count(), 1, "1 registration should exist after RegisterNativeAsync");
             Assert.AreEqual(
                 registrations.First().RegistrationId,
-                push.RegistrationManager.LocalStorageManager.GetRegistration(Registration.NativeRegistrationName).RegistrationId,
+                push.RegistrationManager.LocalStorageManager.GetRegistration(RegistrationBase.NativeRegistrationName).RegistrationId,
                 "Local storage should have the same RegistrationId as the one returned from service");
 
             push.UnregisterNativeAsync().Wait();
             registrations = push.RegistrationManager.PushHttpClient.ListRegistrationsAsync(channelUri).Result;
             Assert.AreEqual(registrations.Count(), 0, "0 registrations should exist in service after UnregisterNativeAsync");
             Assert.IsNull(
-                push.RegistrationManager.LocalStorageManager.GetRegistration(Registration.NativeRegistrationName),
+                push.RegistrationManager.LocalStorageManager.GetRegistration(RegistrationBase.NativeRegistrationName),
                 "Local storage should not contain a native registration after UnregisterNativeAsync.");
         }
 

@@ -157,7 +157,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>Task that completes when unregister is complete</returns>
         public Task UnregisterNativeAsync()
         {
-            return this.UnregisterTemplateAsync(Registration.NativeRegistrationName);
+            return this.UnregisterTemplateAsync(RegistrationBase.NativeRegistrationName);
         }
 
         /// <summary>
@@ -247,8 +247,6 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
             }
 
-            #region IDictionary interface
-
             public void Add(string key, Push value)
             {
                 throw new NotSupportedException();
@@ -327,7 +325,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return this.hubForTiles.GetEnumerator();
             }
-            #endregion
         }
     }
 }

@@ -6,15 +6,15 @@ using System.Collections.Generic;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
-    class PushUtility : IPushUtility
+    internal class PushUtility : IPushUtility
     {
         /// <summary>
-        /// A singleton instance of the <see cref="ExpressionUtility"/>.
+        /// A singleton instance of the <see cref="PushUtility"/>.
         /// </summary>
         private static readonly IPushUtility instance = new PushUtility();
 
         /// <summary>
-        /// A singleton instance of the <see cref="ExpressionUtility"/>.
+        /// A singleton instance of the <see cref="PushUtility"/>.
         /// </summary>
         public static IPushUtility Instance
         {

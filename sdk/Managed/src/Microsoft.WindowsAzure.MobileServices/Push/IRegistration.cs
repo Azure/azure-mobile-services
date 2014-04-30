@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
-    internal interface IRegistration
+    public interface IRegistration
     {
         /// <summary>
         /// Contains notification platform this registration is for

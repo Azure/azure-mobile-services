@@ -65,9 +65,9 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("templateName");
             }
 
-            if (templateName.Equals(Registration.NativeRegistrationName))
+            if (templateName.Equals(RegistrationBase.NativeRegistrationName))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Resources.Push_ConflictWithReservedName, Registration.NativeRegistrationName));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Resources.Push_ConflictWithReservedName, RegistrationBase.NativeRegistrationName));
             }
 
             if (templateName.Contains(":") || templateName.Contains(";"))

@@ -10,7 +10,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// An interface for platform-specific assemblies to provide utility functions
     /// regarding Push capabilities.
     /// </summary>
-    interface IPushUtility
+    public interface IPushUtility
     {
         /// <summary>
         /// Return a new, strongly typed native registration instance

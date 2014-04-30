@@ -15,10 +15,6 @@ namespace Microsoft.WindowsAzure.MobileServices
     [JsonObject(MemberSerialization.OptIn)]
     public class Registration : RegistrationBase
     {
-        internal const string NativeRegistrationName = "$Default";
-
-        internal const string PlatformConstant = "mpns";
-
         internal Registration()
         {
         }
@@ -49,7 +45,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// The Uri of the Channel returned by the Push Notification Channel Manager.
         /// </summary>
-        [JsonProperty(PropertyName = "deviceId")]
         public string ChannelUri
         {
             get
@@ -60,14 +55,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             set
             {
                 this.DeviceId = value;
-            }
-        }
-        
-        internal override string Name
-        {
-            get
-            {
-                return NativeRegistrationName;
             }
         }
     }

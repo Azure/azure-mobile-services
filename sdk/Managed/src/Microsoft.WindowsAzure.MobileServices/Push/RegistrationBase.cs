@@ -13,8 +13,11 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// <summary>
     /// RegistrationBase is used as the base class for common properties existing in all Registration types to define a target that is registered for notifications.
     /// </summary>
+    [JsonObject(MemberSerialization.OptIn)]
     public class RegistrationBase : IRegistration
     {
+        internal const string NativeRegistrationName = "$Default";
+
         internal RegistrationBase()
         {
         }
@@ -23,7 +26,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Common Registration constructor for common properties
         /// </summary>
         internal RegistrationBase(string deviceId, IEnumerable<string> tags)
-        {            
+        {
+            if (string.IsNullOrWhiteSpace(deviceId))
+            {
+                throw new ArgumentNullException("deviceId");
+            }
+
             if (tags != null)
             {
                 if (tags.Any(s => s.Contains(",")))
@@ -73,7 +81,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             get
             {
-                throw new NotImplementedException();
+                return NativeRegistrationName;
             }
         }
     }

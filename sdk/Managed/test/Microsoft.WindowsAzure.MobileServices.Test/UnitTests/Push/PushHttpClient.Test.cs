@@ -22,7 +22,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         const string RegistrationsPath = "/push/registrations";
         const string DefaultRegistrationId = "7313155627197174428-6522078074300559092-1";
         
-        # region ListRegistrations
         const string NativeRegistrationsResponse = "[{\"registrationId\":\"7313155627197174428-6522078074300559092-1\",\"tags\":[\"fooWns\",\"barWns\",\"4de2605e-fd09-4875-a897-c8c4c0a51682\"],\"deviceId\":\"https://bn1.notify.windows.com/?token=AgYAAADs42685sa5PFCEy82eYpuG8WCPB098AWHnwR8kNRQLwUwf%2f9p%2fy0r82m4hxrLSQ%2bfl5aNlSk99E4jrhEatfsWgyutFzqQxHcLk0Xun3mufO2G%2fb2b%2ftjQjCjVcBESjWvY%3d\"}]";
         const string TemplateRegistrationsResponse = "[{\"registrationId\":\"7313155627197174428-6522078074300559092-1\",\"tags\":[\"fooWns\",\"barWns\",\"4de2605e-fd09-4875-a897-c8c4c0a51682\"],\"deviceId\":\"https://bn1.notify.windows.com/?token=AgYAAADs42685sa5PFCEy82eYpuG8WCPB098AWHnwR8kNRQLwUwf%2f9p%2fy0r82m4hxrLSQ%2bfl5aNlSk99E4jrhEatfsWgyutFzqQxHcLk0Xun3mufO2G%2fb2b%2ftjQjCjVcBESjWvY%3d\",\"templateBody\":\"cool template body\"}]";
         const string MixedRegistrationsResponse = "[{\"registrationId\":\"7313155627197174428-6522078074300559092-1\",\"tags\":[\"fooWns\",\"barWns\",\"4de2605e-fd09-4875-a897-c8c4c0a51682\"],\"deviceId\":\"https://bn1.notify.windows.com/?token=AgYAAADs42685sa5PFCEy82eYpuG8WCPB098AWHnwR8kNRQLwUwf%2f9p%2fy0r82m4hxrLSQ%2bfl5aNlSk99E4jrhEatfsWgyutFzqQxHcLk0Xun3mufO2G%2fb2b%2ftjQjCjVcBESjWvY%3d\"}, " +
@@ -163,10 +162,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var exception = await AssertEx.Throws<MobileServiceInvalidOperationException>(() => pushHttpClient.ListRegistrationsAsync(DefaultChannelUri));
             Assert.AreEqual(exception.Message, "Server threw 500");
         }
-
-        # endregion ListRegistrations
-
-        # region CreateRegistrationId
         
         const string CreatePath = "/push/registrationids";
         static readonly Uri LocationUri = new Uri(string.Format("{0}{1}/{2}", DefaultServiceUri, RegistrationsPath, DefaultRegistrationId));
@@ -198,9 +193,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(exception.Message, "Server threw 500");
         }
 
-        # endregion CreateRegistrationId
-
-        # region DeleteRegistration        
         [AsyncTestMethod]
         public async Task DeleteRegistration()
         {
@@ -226,9 +218,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(exception.Message, "Server threw 500");
         }
 
-        # endregion DeleteRegistration
-
-        # region CreateOrUpdateRegistration
         [AsyncTestMethod]
         public async Task CreateOrUpdateRegistration()
         {
@@ -260,8 +249,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var exception = await AssertEx.Throws<MobileServiceInvalidOperationException>(() => pushHttpClient.CreateOrUpdateRegistrationAsync(registration));
             Assert.AreEqual(exception.Message, "Server threw 500");
         }
-
-        # endregion CreateOrUpdateRegistration
 
         static DelegatingHandler CreateTestHttpHandler(string expectedUri, HttpMethod expectedMethod, string responseContent, HttpStatusCode? httpStatusCode = null, Uri location = null, string expectedRequestContent = null)
         {

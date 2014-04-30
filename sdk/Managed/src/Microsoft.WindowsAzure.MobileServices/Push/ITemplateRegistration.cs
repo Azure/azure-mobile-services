@@ -4,7 +4,7 @@
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
-    interface ITemplateRegistration : IRegistration
+    public interface ITemplateRegistration : IRegistration
     {
         /// <summary>
         /// Get templateName

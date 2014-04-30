@@ -15,8 +15,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     [Tag("table")]
     public class MobileServiceTableTests : TestBase
     {
-        #region Read Tests
-
         [AsyncTestMethod]
         public async Task ReadAsyncWithStringIdResponseContent()
         {
@@ -227,10 +225,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.IsNotNull(expected);
         }
-
-        #endregion Read Tests
-
-        #region Lookup Tests
 
         [AsyncTestMethod]
         public async Task LookupAsyncWithStringIdResponseContent()
@@ -498,10 +492,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.IsNotNull(expected);
         }
-
-        #endregion Lookup Tests
-
-        #region Insert Tests
 
         [AsyncTestMethod]
         public async Task InsertAsyncWithStringIdResponseContent()
@@ -845,10 +835,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.IsNotNull(expected);
             Assert.IsTrue(expected.Message.Contains("The casing of the 'id' property is invalid."));
         }
-
-        #endregion Insert Tests
-
-        #region Update Tests
 
         [AsyncTestMethod]
         public async Task UpdateAsyncWithStringIdResponseContent()
@@ -1211,10 +1197,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.IsTrue(expected.Message.Contains("The casing of the 'id' property is invalid."));
         }
 
-        #endregion Update Tests
-
-        #region Delete Tests
-
         [AsyncTestMethod]
         public async Task DeleteAsyncWithStringIdResponseContent()
         {
@@ -1575,10 +1557,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.IsNotNull(expected);
             Assert.IsTrue(expected.Message.Contains("The casing of the 'id' property is invalid."));
         }
-
-        #endregion Delete Tests
-
-        #region System Property Tests
 
         [AsyncTestMethod]
         public async Task InsertAsync_RemovesSystemProperties_WhenIdIsString_Generic()
@@ -1964,7 +1942,5 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 Assert.IsTrue(hijack.Request.RequestUri.ToString().Contains("__systemproperties=__createdAt"));
             }
         }
-
-        #endregion System Property Tests
     }
 }

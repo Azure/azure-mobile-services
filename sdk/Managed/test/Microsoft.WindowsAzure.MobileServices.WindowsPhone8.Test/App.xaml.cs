@@ -120,8 +120,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             }
         }
 
-        #region Phone application initialization
-
         // Avoid double-initialization
         private bool phoneApplicationInitialized = false;
 
@@ -180,8 +178,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 ; // do nothing
             }
         }
-
-        #endregion
 
         // Initialize the app's font and flow direction as defined in its localized resource strings.
         //

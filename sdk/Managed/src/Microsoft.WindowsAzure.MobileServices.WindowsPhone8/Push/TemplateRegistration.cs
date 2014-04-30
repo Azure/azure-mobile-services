@@ -84,7 +84,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("bodyTemplate");
             }
 
-            if (templateName.Equals(Registration.NativeRegistrationName))
+            if (templateName.Equals(RegistrationBase.NativeRegistrationName))
             {
                 throw new ArgumentException(Resources.Push_ConflictWithReservedName);
             }
