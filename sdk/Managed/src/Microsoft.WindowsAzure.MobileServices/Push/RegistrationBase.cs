@@ -13,7 +13,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// <summary>
     /// RegistrationBase is used as the base class for common properties existing in all Registration types to define a target that is registered for notifications.
     /// </summary>
-    public class RegistrationBase
+    public class RegistrationBase : IRegistration
     {
         internal RegistrationBase()
         {
@@ -37,7 +37,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         [JsonProperty(PropertyName = "platform")]
-        internal string Platform {
+        public string Platform {
             get
             {
                 return Microsoft.WindowsAzure.MobileServices.Platform.Instance.PushUtility.GetPlatform();
@@ -55,7 +55,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The unique identifier for the device
         /// </summary>
         [JsonProperty(PropertyName = "deviceId")]
-        internal string DeviceId { get; set; }
+        public string DeviceId { get; protected set; }
 
         /// <summary>
         /// The registration id.

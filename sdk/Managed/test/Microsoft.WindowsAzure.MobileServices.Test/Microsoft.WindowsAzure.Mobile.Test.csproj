@@ -40,6 +40,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AssertEx.cs" />
     <Compile Include="FunctionalTests\DataSourceTest.cs" />
     <Compile Include="FunctionalTests\Table\MobileServiceTableTest.cs" />
     <Compile Include="Mocks\MobileServiceTableQueryMock.cs" />
@@ -82,6 +83,7 @@
     <Compile Include="SerializationTypes\SimpleTreeType.cs" />
     <Compile Include="UnitTests\HttpHandlers\ComplexDelegatingHandler.cs" />
     <Compile Include="UnitTests\MobileServiceClient.Test.cs" />
+    <Compile Include="UnitTests\Push\PushHttpClient.Test.cs" />
     <Compile Include="UnitTests\Table\MobileServiceTable.Test.cs" />
     <Compile Include="UnitTests\MobileServiceUser.Test.cs" />
     <Compile Include="UnitTests\MobileServiceUrlBuilder.Test.cs" />

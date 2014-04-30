@@ -16,7 +16,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// to define the format of the registration.
     /// </summary>
     [JsonObject]
-    public sealed class TemplateRegistration : Registration
+    public sealed class TemplateRegistration : Registration, ITemplateRegistration
     {
         /// <summary>
         /// Name of the MpnsHeader key for Windows Phone Notification Target
