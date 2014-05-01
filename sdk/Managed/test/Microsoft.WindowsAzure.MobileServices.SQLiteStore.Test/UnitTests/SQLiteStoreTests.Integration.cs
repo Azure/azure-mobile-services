@@ -172,6 +172,53 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         }
 
         [AsyncTestMethod]
+        public async Task TruncateAsync_DeletesAllTheRows()
+        {
+            string tableName = "stringId_test_table";
+
+            ResetDatabase(tableName);
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable<ToDoWithSystemPropertiesType>();
+            
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent(@"{""id"": ""123"", ""__version"": ""xyz""}");
+            hijack.AddResponseContent(@"{""id"": ""134"", ""__version"": ""ghi""}");
+
+            IMobileServiceClient service = await CreateClient(hijack, store);
+            var table = service.GetSyncTable<ToDoWithSystemPropertiesType>();
+
+            var items = new ToDoWithSystemPropertiesType[]
+            {
+                new ToDoWithSystemPropertiesType()
+                {
+                    Id = "123",
+                    Version = "abc",
+                    String = "def"
+                },
+                new ToDoWithSystemPropertiesType()
+                {
+                    Id = "134",
+                    Version = "ghi",
+                    String = "jkl"
+                }
+            };
+
+            foreach (var inserted in items)
+            {
+                await table.InsertAsync(inserted);
+            }
+
+            var result = await table.IncludeTotalCount().Take(0).ToCollectionAsync();
+            Assert.AreEqual(result.TotalCount, 2L);
+
+            await table.PurgeAsync();
+
+            result = await table.IncludeTotalCount().Take(0).ToCollectionAsync();
+            Assert.AreEqual(result.TotalCount, 0L);
+        }
+
+        [AsyncTestMethod]
         public async Task PushAsync_RetriesOperation_WhenConflictOccursInLastPush()
         {
             ResetDatabase(TestTable);
