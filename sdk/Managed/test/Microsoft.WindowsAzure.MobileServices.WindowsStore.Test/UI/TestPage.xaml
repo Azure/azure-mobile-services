@@ -53,7 +53,7 @@
                     <DataTemplate>
                         <StackPanel Margin="8 0">
                             <TextBlock Text="{Binding Name}" Foreground="{Binding Brush}" FontSize="16" FontWeight="ExtraLight" />
-                            <ItemsControl ItemsSource="{Binding Details}" Margin="15 0 0 0" FontSize="12" Foreground="LightGray" />
+                            <!--<ItemsControl ItemsSource="{Binding Details}" Margin="15 0 0 0" FontSize="12" Foreground="LightGray" />-->
                         </StackPanel>                        
                     </DataTemplate>
                 </ListView.ItemTemplate>
