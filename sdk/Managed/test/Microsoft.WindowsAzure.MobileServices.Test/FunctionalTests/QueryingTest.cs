@@ -67,6 +67,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 .OrderByDescending(p => p.Title));
         }
 
+        [Tag("notXamarin_iOS")] // LambdaExpression.Compile() is not supported on Xamarin.iOS
         [AsyncTestMethod]
         public async Task LiveProjection()
         {
