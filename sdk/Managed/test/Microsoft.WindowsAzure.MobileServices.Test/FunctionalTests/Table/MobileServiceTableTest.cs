@@ -64,7 +64,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             // Make sure the table is empty
             IMobileServiceTable<T> table = GetClient().GetTable<T>();
             table.MobileServiceClient.SerializerSettings.DateParseHandling = DateParseHandling.None;
-            IEnumerable<T> results = await table.ReadAsync();
+            IEnumerable<T> results = await table.Take(1000).ToEnumerableAsync();
             T[] items = results.ToArray();
 
             foreach (T item in items)
@@ -1490,6 +1490,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 Assert.IsNotNull(item.UpdatedAt);
                 Assert.IsNotNull(item.Version);
                 items.Add(item);
+
+                await Task.Delay(10); // to separate the items in time
             }
 
 

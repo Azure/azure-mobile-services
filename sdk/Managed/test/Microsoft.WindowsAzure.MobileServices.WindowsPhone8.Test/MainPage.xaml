@@ -63,7 +63,7 @@
                     <DataTemplate>
                         <StackPanel Margin="8 0">
                             <TextBlock Text="{Binding Name}" Foreground="{Binding Brush}" FontSize="25" />
-                            <ItemsControl ItemsSource="{Binding Details}" Margin="15 0 0 0" FontSize="20" Foreground="LightGray" />
+                            <!--<ItemsControl ItemsSource="{Binding Details}" Margin="15 0 0 0" FontSize="20" Foreground="LightGray" />-->
                         </StackPanel>
                     </DataTemplate>
                 </phone:LongListSelector.ItemTemplate>
