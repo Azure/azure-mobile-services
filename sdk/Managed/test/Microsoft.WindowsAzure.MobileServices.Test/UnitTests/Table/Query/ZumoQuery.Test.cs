@@ -288,10 +288,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             query = Compile<Product, Product>(table => table.Where(p => !p.InStock));
             AssertFilter(query.Filter, "not(InStock)");
+        }
 
+        [Tag("notXamarin_iOS")] // LambdaExpression.Compile() is not supported on Xamarin.iOS
+        [TestMethod]
+        public void Filtering_PartialEval()
+        {
             // Allow New Operations
             float foo = 10;
-            query = Compile<Product, Product>(table => table.Where(p => p.Weight <= new Product() { Weight = foo }.Weight || p.InStock == true));
+            var query = Compile<Product, Product>(table => table.Where(p => p.Weight <= new Product() { Weight = foo }.Weight || p.InStock == true));
             AssertFilter(query.Filter, "((Weight le 10f) or (InStock eq true))");
 
             query = Compile<Product, Product>(table => table.Where(p => p.Weight <= new Product(15) { Weight = foo }.Weight || p.InStock == true));
