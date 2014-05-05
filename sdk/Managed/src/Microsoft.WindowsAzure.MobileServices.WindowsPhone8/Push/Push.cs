@@ -54,7 +54,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("channelUri");
             }
 
-            var registration = new Registration(channelUri, tags);
+            var registration = new MpnsRegistration(channelUri, tags);
             return this.RegistrationManager.RegisterAsync(registration);
         }
 
@@ -95,7 +95,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("templateName");
             }
 
-            var registration = new TemplateRegistration(channelUri, xmlTemplate, templateName, tags, null);
+            var registration = new MpnsTemplateRegistration(channelUri, xmlTemplate, templateName, tags, null);
             return this.RegistrationManager.RegisterAsync(registration);
 
         }
@@ -106,7 +106,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>Task that completes when unregister is complete</returns>
         public Task UnregisterNativeAsync()
         {
-            return this.UnregisterTemplateAsync(RegistrationBase.NativeRegistrationName);
+            return this.UnregisterTemplateAsync(MpnsRegistration.NativeRegistrationName);
         }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("registration");
             }
 
-            if (string.IsNullOrWhiteSpace(registration.ChannelUri))
+            if (string.IsNullOrWhiteSpace(registration.DeviceId))
             {
                 throw new ArgumentNullException("registration.ChannelUri");
             }

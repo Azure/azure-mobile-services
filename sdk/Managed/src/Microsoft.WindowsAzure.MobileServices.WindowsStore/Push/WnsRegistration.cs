@@ -5,17 +5,14 @@
 using System;
 using System.Collections.Generic;
 
-using Newtonsoft.Json;
-
 namespace Microsoft.WindowsAzure.MobileServices
 {
     /// <summary>
     /// Registration is used to define a target that is registered for notifications
     /// </summary>
-    [JsonObject(MemberSerialization.OptIn)]
-    public class Registration : RegistrationBase
+    public class WnsRegistration : Registration
     {
-        internal Registration()
+        internal WnsRegistration()
         {
         }
 
@@ -23,7 +20,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Create a default Registration for a channelUri
         /// </summary>
         /// <param name="channelUri">The channel uri</param>
-        public Registration(string channelUri)
+        public WnsRegistration(string channelUri)
             : this(channelUri, null)
         {
         }
@@ -33,7 +30,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="channelUri">The channel uri</param>
         /// <param name="tags">The tags to register to receive notifications from</param>
-        public Registration(string channelUri, IEnumerable<string> tags)
+        public WnsRegistration(string channelUri, IEnumerable<string> tags)
             : base(channelUri, tags)
         {
             if (string.IsNullOrWhiteSpace(channelUri))

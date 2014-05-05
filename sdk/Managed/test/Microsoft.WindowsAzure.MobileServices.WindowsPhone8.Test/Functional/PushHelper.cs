@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 
@@ -30,47 +31,48 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Functional
             return DefaultChannelUri.Replace('A', 'B');
         }
 
-        public static TemplateRegistration GetTemplateRegistrationForToast()
+        public static Registration GetTemplateRegistrationForToast()
         {
             var channel = GetChannel();
-            return new TemplateRegistration(channel, BodyTemplate, DefaultToastTemplateName, DefaultTags, DefaultHeaders);
+            return new MpnsTemplateRegistration(channel, BodyTemplate, DefaultToastTemplateName, DefaultTags, DefaultHeaders);
         }
 
-        static void ValidateTemplateRegistration(TemplateRegistration registration)
+        static void ValidateTemplateRegistration(Registration registration)
         {
-            Assert.AreEqual(registration.BodyTemplate, BodyTemplate);
-            
+            var mpnsTemplateRegistration = (MpnsTemplateRegistration)registration;
+            Assert.AreEqual(mpnsTemplateRegistration.BodyTemplate, BodyTemplate);
+
             foreach (KeyValuePair<string, string> header in DefaultHeaders)
             {
-                Assert.IsTrue(registration.MpnsHeaders.ContainsKey(header.Key));
-                Assert.AreEqual(registration.MpnsHeaders[header.Key], header.Value);
+                Assert.IsTrue(mpnsTemplateRegistration.MpnsHeaders.ContainsKey(header.Key));
+                Assert.AreEqual(mpnsTemplateRegistration.MpnsHeaders[header.Key], header.Value);
             }
 
             foreach (KeyValuePair<string, string> header in DetectedHeaders)
             {
-                Assert.IsTrue(registration.MpnsHeaders.ContainsKey(header.Key));
-                Assert.AreEqual(registration.MpnsHeaders[header.Key], header.Value);
+                Assert.IsTrue(mpnsTemplateRegistration.MpnsHeaders.ContainsKey(header.Key));
+                Assert.AreEqual(mpnsTemplateRegistration.MpnsHeaders[header.Key], header.Value);
             }
 
-            Assert.AreEqual(registration.MpnsHeaders.Count, DefaultHeaders.Count + DetectedHeaders.Count);
+            Assert.AreEqual(mpnsTemplateRegistration.MpnsHeaders.Count, DefaultHeaders.Count + DetectedHeaders.Count);
 
             foreach (string tag in DefaultTags)
             {
                 Assert.IsTrue(registration.Tags.Contains(tag));
             }
 
-            Assert.AreEqual(registration.Name, DefaultToastTemplateName);
-            Assert.AreEqual(registration.TemplateName, DefaultToastTemplateName);
+            Assert.AreEqual(mpnsTemplateRegistration.Name, DefaultToastTemplateName);
+            Assert.AreEqual(mpnsTemplateRegistration.TemplateName, DefaultToastTemplateName);
         }
 
-        public static void ValidateTemplateRegistrationBeforeRegister(TemplateRegistration registration)
+        public static void ValidateTemplateRegistrationBeforeRegister(Registration registration)
         {
-            ValidateTemplateRegistration(registration);                        
+            ValidateTemplateRegistration(registration);
             Assert.AreEqual(registration.Tags.Count, DefaultTags.Length);
             Assert.IsNull(registration.RegistrationId);
         }
 
-        public static void ValidateTemplateRegistrationAfterRegister(TemplateRegistration registration, string zumoInstallationId)
+        public static void ValidateTemplateRegistrationAfterRegister(Registration registration, string zumoInstallationId)
         {
             ValidateTemplateRegistration(registration);
             Assert.IsNotNull(registration.RegistrationId);

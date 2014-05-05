@@ -18,7 +18,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// An object to JSON deserialize into
         /// </returns>
-        RegistrationBase GetNewNativeRegistration();
+        Registration GetNewNativeRegistration();
 
         /// <summary>
         /// Return a new, strongly typed native registration instance
@@ -26,7 +26,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="deviceId">The unique device Id for the registration</param>
         /// <param name="tags">The template name</param>
         /// <returns></returns>
-        RegistrationBase GetNewNativeRegistration(string deviceId, IEnumerable<string> tags);
+        Registration GetNewNativeRegistration(string deviceId, IEnumerable<string> tags);
 
         /// <summary>
         /// Return a new, strongly typed template registration instance
@@ -34,7 +34,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// An object to JSON deserialize into
         /// </returns>
-        RegistrationBase GetNewTemplateRegistration();
+        Registration GetNewTemplateRegistration();
 
         /// <summary>
         /// Return a new, strongly typed template registration instance
@@ -43,7 +43,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="bodyTemplate">The template body in string format</param>
         /// <param name="templateName">The template name</param>
         /// <returns></returns>
-        RegistrationBase GetNewTemplateRegistration(string deviceId, string bodyTemplate, string templateName);
+        Registration GetNewTemplateRegistration(string deviceId, string bodyTemplate, string templateName);
         
 
         /// <summary>

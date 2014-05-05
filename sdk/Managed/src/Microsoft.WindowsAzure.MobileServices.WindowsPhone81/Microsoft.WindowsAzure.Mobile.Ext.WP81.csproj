@@ -124,11 +124,11 @@
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\Push.cs">
       <Link>Push\Push.cs</Link>
     </Compile>
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\Registration.cs">
-      <Link>Push\Registration.cs</Link>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\WnsRegistration.cs">
+      <Link>Push\WnsRegistration.cs</Link>
     </Compile>
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\TemplateRegistration.cs">
-      <Link>Push\TemplateRegistration.cs</Link>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\WnsTemplateRegistration.cs">
+      <Link>Push\WnsTemplateRegistration.cs</Link>
     </Compile>
     <Compile Include="Authentication\AuthenticationBroker.cs" />
     <Compile Include="Extensions\MobileServiceClientExtensions.cs" />

@@ -24,24 +24,24 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
-        public RegistrationBase GetNewNativeRegistration()
+        public Registration GetNewNativeRegistration()
         {
-            return new Registration();
+            return new WnsRegistration();
         }
 
-        public RegistrationBase GetNewNativeRegistration(string deviceId, IEnumerable<string> tags)
+        public Registration GetNewNativeRegistration(string deviceId, IEnumerable<string> tags)
         {
-            return new Registration(deviceId, tags);
+            return new WnsRegistration(deviceId, tags);
         }
 
-        public RegistrationBase GetNewTemplateRegistration()
+        public Registration GetNewTemplateRegistration()
         {
-            return new TemplateRegistration();
+            return new WnsTemplateRegistration();
         }
 
-        public RegistrationBase GetNewTemplateRegistration(string deviceId, string bodyTemplate, string templateName)
+        public Registration GetNewTemplateRegistration(string deviceId, string bodyTemplate, string templateName)
         {
-            return new TemplateRegistration(deviceId, bodyTemplate, templateName);
+            return new WnsTemplateRegistration(deviceId, bodyTemplate, templateName);
         }
 
         public string GetPlatform()

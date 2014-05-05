@@ -14,18 +14,18 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// RegistrationBase is used as the base class for common properties existing in all Registration types to define a target that is registered for notifications.
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    public class RegistrationBase : IRegistration
+    public class Registration
     {
         internal const string NativeRegistrationName = "$Default";
 
-        internal RegistrationBase()
+        internal Registration()
         {
         }
 
         /// <summary>
         /// Common Registration constructor for common properties
         /// </summary>
-        internal RegistrationBase(string deviceId, IEnumerable<string> tags)
+        internal Registration(string deviceId, IEnumerable<string> tags)
         {
             if (string.IsNullOrWhiteSpace(deviceId))
             {
@@ -63,13 +63,13 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The unique identifier for the device
         /// </summary>
         [JsonProperty(PropertyName = "deviceId")]
-        public string DeviceId { get; protected set; }
+        public string DeviceId { get; set; }
 
         /// <summary>
         /// The registration id.
         /// </summary>
         [JsonProperty(PropertyName = "registrationId")]
-        public string RegistrationId { get; internal set; }
+        public string RegistrationId { get; set; }
 
         /// <summary>
         /// Internal--Helper method hinting to Json.Net that RegistrationId should not be serialized
@@ -77,7 +77,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>false</returns>
         public bool ShouldSerializeRegistrationId() { return false; }
 
-        internal virtual string Name
+        /// <summary>
+        /// The name of the registration is stored locally with the registrationId
+        /// </summary>
+        public virtual string Name
         {
             get
             {

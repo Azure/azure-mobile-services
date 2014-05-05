@@ -14,50 +14,50 @@ using Newtonsoft.Json;
 namespace Microsoft.WindowsAzure.MobileServices
 {
     /// <summary>
-    /// Registration is used to define a target that is registered for notifications. A TemplateRegistration allows the client application
+    /// Registration is used to define a target that is registered for notifications. A WnsTemplateRegistration allows the client application
     /// to define the format of the registration.
     /// </summary>
     [JsonObject]
-    public sealed class TemplateRegistration : Registration, ITemplateRegistration
+    internal sealed class WnsTemplateRegistration : WnsRegistration
     {
         private const string WnsTypeName = "X-WNS-Type";
 
-        internal TemplateRegistration()
+        internal WnsTemplateRegistration()
         {
         }
 
         /// <summary>
-        /// Create a TemplateRegistration
+        /// Create a WnsTemplateRegistration
         /// </summary>
         /// <param name="channelUri">The channel uri</param>
         /// <param name="bodyTemplate">The template xml in string format</param>
         /// <param name="templateName">The template name</param>
-        public TemplateRegistration(string channelUri, string bodyTemplate, string templateName)
+        public WnsTemplateRegistration(string channelUri, string bodyTemplate, string templateName)
             : this(channelUri, bodyTemplate, templateName, null, null)
         {
         }
 
         /// <summary>
-        /// Create a TemplateRegistration
+        /// Create a WnsTemplateRegistration
         /// </summary>
         /// <param name="channelUri">The channel uri</param>
         /// <param name="bodyTemplate">The template xml in string format</param>
         /// <param name="templateName">The template name</param>
         /// <param name="tags">The tags that restrict which notifications this registration will receive</param>
-        public TemplateRegistration(string channelUri, string bodyTemplate, string templateName, IEnumerable<string> tags)
+        public WnsTemplateRegistration(string channelUri, string bodyTemplate, string templateName, IEnumerable<string> tags)
             : this(channelUri, bodyTemplate, templateName, tags, null)
         {
         }
 
         /// <summary>
-        /// Create a TemplateRegistration
+        /// Create a WnsTemplateRegistration
         /// </summary>
         /// <param name="channelUri">The channel uri</param>
         /// <param name="bodyTemplate">The template xml in string format</param>
         /// <param name="templateName">The template name</param>
         /// <param name="tags">The tags that restrict which notifications this registration will receive</param>
         /// <param name="additionalHeaders">Additional headers</param>
-        public TemplateRegistration(string channelUri, string bodyTemplate, string templateName, IEnumerable<string> tags, IEnumerable<KeyValuePair<string, string>> additionalHeaders)
+        public WnsTemplateRegistration(string channelUri, string bodyTemplate, string templateName, IEnumerable<string> tags, IEnumerable<KeyValuePair<string, string>> additionalHeaders)
             : base(channelUri, tags)
         {
             if (string.IsNullOrWhiteSpace(templateName))
@@ -65,9 +65,9 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("templateName");
             }
 
-            if (templateName.Equals(RegistrationBase.NativeRegistrationName))
+            if (templateName.Equals(Registration.NativeRegistrationName))
             {
-                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Resources.Push_ConflictWithReservedName, RegistrationBase.NativeRegistrationName));
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, Resources.Push_ConflictWithReservedName, Registration.NativeRegistrationName));
             }
 
             if (templateName.Contains(":") || templateName.Contains(";"))
@@ -106,7 +106,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                     throw new ArgumentException(Resources.Push_BodyTemplateMustBeXml, "bodyTemplate", e);
                 }
 
-                var payloadType = TemplateRegistration.DetectBodyType(xmlDocument);
+                var payloadType = WnsTemplateRegistration.DetectBodyType(xmlDocument);
                 this.WnsHeaders.Add(WnsTypeName, payloadType);
             }
 
@@ -144,7 +144,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             return "wns/" + template.FirstChild.NodeName.ToLowerInvariant();
         }
 
-        internal override string Name
+        public override string Name
         {
             get
             {

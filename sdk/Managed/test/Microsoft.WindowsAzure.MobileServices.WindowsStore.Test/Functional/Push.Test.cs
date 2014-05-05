@@ -37,14 +37,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(registrations.Count(), 1, "1 registration should exist after RegisterNativeAsync");
             Assert.AreEqual(
                 registrations.First().RegistrationId,
-                push.RegistrationManager.LocalStorageManager.GetRegistration(RegistrationBase.NativeRegistrationName).RegistrationId,
+                push.RegistrationManager.LocalStorageManager.GetRegistration(Registration.NativeRegistrationName).RegistrationId,
                 "Local storage should have the same RegistrationId as the one returned from service");
 
             push.UnregisterNativeAsync().Wait();
             registrations = push.RegistrationManager.PushHttpClient.ListRegistrationsAsync(channelUri).Result;
             Assert.AreEqual(registrations.Count(), 0, "0 registrations should exist in service after UnregisterNativeAsync");
             Assert.IsNull(
-                push.RegistrationManager.LocalStorageManager.GetRegistration(RegistrationBase.NativeRegistrationName),
+                push.RegistrationManager.LocalStorageManager.GetRegistration(Registration.NativeRegistrationName),
                 "Local storage should not contain a native registration after UnregisterNativeAsync.");
         }
 
@@ -56,9 +56,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var template = PushHelper.GetTemplateRegistrationForToast();
             PushHelper.ValidateTemplateRegistrationBeforeRegister(template);
             push.RegisterAsync(template).Wait();
-            var registrations = push.RegistrationManager.PushHttpClient.ListRegistrationsAsync(template.ChannelUri).Result;
+            var registrations = push.RegistrationManager.PushHttpClient.ListRegistrationsAsync(template.DeviceId).Result;
             Assert.AreEqual(registrations.Count(), 1, "1 registration should exist after RegisterNativeAsync");
-            var registrationAfter = registrations.First() as TemplateRegistration;
+            var registrationAfter = registrations.First();
             Assert.IsNotNull(registrationAfter, "List and Deserialization of a TemplateRegistration after successful registration should have a value.");
             Assert.AreEqual(
                 registrationAfter.RegistrationId,
@@ -68,7 +68,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             PushHelper.ValidateTemplateRegistrationAfterRegister(registrationAfter, mobileClient.applicationInstallationId);
 
             push.UnregisterTemplateAsync(template.Name).Wait();
-            registrations = push.RegistrationManager.PushHttpClient.ListRegistrationsAsync(template.ChannelUri).Result;
+            registrations = push.RegistrationManager.PushHttpClient.ListRegistrationsAsync(template.DeviceId).Result;
             Assert.AreEqual(registrations.Count(), 0, "0 registrations should exist in service after UnregisterTemplateAsync");
             Assert.IsNull(
                 push.RegistrationManager.LocalStorageManager.GetRegistration(template.Name),
@@ -82,10 +82,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var push = mobileClient.GetPush();
             var template = PushHelper.GetTemplateRegistrationForToast();
             PushHelper.ValidateTemplateRegistrationBeforeRegister(template);
-            push.RegisterAsync(template).Wait();
-            var registrations = push.RegistrationManager.PushHttpClient.ListRegistrationsAsync(template.ChannelUri).Result;
+            push.RegisterAsync((Registration)template).Wait();
+            var registrations = push.RegistrationManager.PushHttpClient.ListRegistrationsAsync(template.DeviceId).Result;
             Assert.AreEqual(registrations.Count(), 1, "1 registration should exist after RegisterNativeAsync");
-            var registrationAfter = registrations.First() as TemplateRegistration;
+            var registrationAfter = registrations.First();
             Assert.IsNotNull(registrationAfter, "List and Deserialization of a TemplateRegistration after successful registration should have a value.");
             Assert.AreEqual(
                 registrationAfter.RegistrationId,
@@ -94,25 +94,25 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             PushHelper.ValidateTemplateRegistrationAfterRegister(registrationAfter, mobileClient.applicationInstallationId);
             push.RegistrationManager.LocalStorageManager.IsRefreshNeeded = true;
-            template.ChannelUri = PushHelper.GetUpdatedChannel();
+            template.DeviceId = PushHelper.GetUpdatedChannel();
 
-            push.RegisterAsync(template).Wait();
-            registrations = push.RegistrationManager.PushHttpClient.ListRegistrationsAsync(template.ChannelUri).Result;
+            push.RegisterAsync((Registration)template).Wait();
+            registrations = push.RegistrationManager.PushHttpClient.ListRegistrationsAsync(template.DeviceId).Result;
             Assert.AreEqual(registrations.Count(), 1, "1 registration should exist after RegisterNativeAsync");
-            var registrationAfterUpdate = registrations.First() as TemplateRegistration;
+            var registrationAfterUpdate = registrations.First();
             Assert.IsNotNull(registrationAfterUpdate, "List and Deserialization of a TemplateRegistration after successful registration should have a value.");
             Assert.AreEqual(
                 registrationAfterUpdate.RegistrationId,
                 push.RegistrationManager.LocalStorageManager.GetRegistration(template.Name).RegistrationId,
                 "Local storage should have the same RegistrationId as the one returned from service");
             Assert.AreEqual(registrationAfter.RegistrationId, registrationAfterUpdate.RegistrationId, "Expected the same RegistrationId to be used even after the refresh");
-            Assert.AreEqual(registrationAfterUpdate.ChannelUri, template.ChannelUri, "Expected updated channelUri after 2nd register");
-            Assert.AreEqual(push.RegistrationManager.LocalStorageManager.ChannelUri, template.ChannelUri, "Expected local storage to be updaed to the new channelUri after 2nd register");
+            Assert.AreEqual(registrationAfterUpdate.DeviceId, template.DeviceId, "Expected updated channelUri after 2nd register");
+            Assert.AreEqual(push.RegistrationManager.LocalStorageManager.ChannelUri, template.DeviceId, "Expected local storage to be updaed to the new channelUri after 2nd register");
 
-            Assert.AreEqual(push.RegistrationManager.PushHttpClient.ListRegistrationsAsync(registrationAfter.ChannelUri).Result.Count(), 0, "Original channel should be gone from service");
+            Assert.AreEqual(push.RegistrationManager.PushHttpClient.ListRegistrationsAsync(registrationAfter.DeviceId).Result.Count(), 0, "Original channel should be gone from service");
 
             push.UnregisterTemplateAsync(template.Name).Wait();
-            registrations = push.RegistrationManager.PushHttpClient.ListRegistrationsAsync(template.ChannelUri).Result;
+            registrations = push.RegistrationManager.PushHttpClient.ListRegistrationsAsync(template.DeviceId).Result;
             Assert.AreEqual(registrations.Count(), 0, "0 registrations should exist in service after UnregisterTemplateAsync");
             Assert.IsNull(
                 push.RegistrationManager.LocalStorageManager.GetRegistration(template.Name),
