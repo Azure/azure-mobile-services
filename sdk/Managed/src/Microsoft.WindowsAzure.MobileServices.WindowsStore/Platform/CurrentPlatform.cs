@@ -30,5 +30,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// that provides functionality for platform-specifc push capabilities.
         /// </summary>
         public IPushUtility PushUtility { get { return Microsoft.WindowsAzure.MobileServices.PushUtility.Instance; } }
+
+        public IApplicationStorage GetNamedApplicationStorage(string name)
+        {
+            return new ApplicationStorage(name);
+        }
     }
 }

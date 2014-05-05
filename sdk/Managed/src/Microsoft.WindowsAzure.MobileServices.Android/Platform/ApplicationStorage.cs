@@ -11,7 +11,7 @@ namespace Microsoft.WindowsAzure.MobileServices
          /// <summary>
         /// A singleton instance of the <see cref="ApplicationStorage"/>.
         /// </summary>
-        private static IApplicationStorage instance = new ApplicationStorage();
+        private static readonly IApplicationStorage instance = new ApplicationStorage();
 
         /// <summary>
         /// A singleton instance of the <see cref="ApplicationStorage"/>.
@@ -71,6 +71,11 @@ namespace Microsoft.WindowsAzure.MobileServices
                 editor.PutString (name, svalue);
                 editor.Commit();
             }
+        }
+
+        public void Save()
+        {
+            throw new NotImplementedException();
         }
     }
 }

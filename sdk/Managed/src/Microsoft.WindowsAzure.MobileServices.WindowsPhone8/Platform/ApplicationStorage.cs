@@ -30,6 +30,22 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
+        private ApplicationStorage() : this(string.Empty)
+        {
+        }
+
+        internal ApplicationStorage(string name)
+        {
+            this.StoragePrefix = name;
+        }
+
+        private string StoragePrefix { get; set; }
+
+        public static IApplicationStorage GetNamedApplicationStorage(string name)
+        {
+            return new ApplicationStorage(name);
+        }
+
         /// <summary>
         /// Tries to read a setting's value from 
         /// <see cref="IsolatedStorageSettings.ApplicationSettings"/>. 
@@ -53,7 +69,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentException(message);
             }
 
-            return IsolatedStorageSettings.ApplicationSettings.TryGetValue(name, out value);
+            return IsolatedStorageSettings.ApplicationSettings.TryGetValue(string.Concat(this.StoragePrefix, name), out value);
         }
 
         /// <summary>
@@ -74,7 +90,12 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentException(message);
             }
 
-            IsolatedStorageSettings.ApplicationSettings[name] = value;
+            IsolatedStorageSettings.ApplicationSettings[string.Concat(this.StoragePrefix, name)] = value;
+        }
+
+        public void Save()
+        {
+            IsolatedStorageSettings.ApplicationSettings.Save();
         }
     }
 }

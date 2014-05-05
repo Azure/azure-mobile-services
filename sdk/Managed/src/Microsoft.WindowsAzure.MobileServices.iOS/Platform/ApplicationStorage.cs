@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
 using MonoTouch.Foundation;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -11,7 +9,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// A singleton instance of the <see cref="ApplicationStorage"/>.
         /// </summary>
-        private static IApplicationStorage instance = new ApplicationStorage();
+        private static readonly IApplicationStorage instance = new ApplicationStorage();
 
         /// <summary>
         /// A singleton instance of the <see cref="ApplicationStorage"/>.
@@ -69,6 +67,11 @@ namespace Microsoft.WindowsAzure.MobileServices
                 svalue = value.ToString();
 
             defaults.SetString (type + ":" + svalue, name);
+        }
+
+        public void Save()
+        {
+            throw new NotImplementedException();
         }
     }
 }

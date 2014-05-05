@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //------------------------------------------------------------
 
+using Windows.ApplicationModel;
+
 namespace Microsoft.WindowsAzure.MobileServices
 {
     using System;
@@ -16,6 +18,8 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// </summary>
     public sealed class Push
     {
+        internal const string PrimaryChannelId = "$Primary";
+
         internal readonly RegistrationManager RegistrationManager;
 
         internal Push(MobileServiceClient client)
@@ -32,8 +36,13 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             this.Client = client;
             this.TileId = tileId;
+            if (string.IsNullOrEmpty(tileId))
+            {
+                tileId = PrimaryChannelId;
+            }
 
-            var storageManager = new LocalStorageManager(client.ApplicationUri.Host, tileId);
+            string name = string.Format("{0}-PushContainer-{1}-{2}", Package.Current.Id.Name, client.ApplicationUri.Host, tileId);
+            var storageManager = new LocalStorageManager(name);
             var pushHttpClient = new PushHttpClient(client);
             this.RegistrationManager = new RegistrationManager(pushHttpClient, storageManager);
 

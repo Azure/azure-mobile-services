@@ -15,6 +15,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 {
     [Tag("unit")]
     [Tag("push")]
+    [Tag("notDesktop")]
+    [Tag("notXamarin")] // Remove this attribute when Xamarin support is added.
     public class PushHttpClientTests : TestBase
     {
         const string DefaultChannelUri = "http://channelUri.com/a b";

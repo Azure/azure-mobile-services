@@ -1,3 +1,5 @@
+using System;
+
 namespace Microsoft.WindowsAzure.MobileServices
 {
     /// <summary>
@@ -26,6 +28,19 @@ namespace Microsoft.WindowsAzure.MobileServices
         IExpressionUtility IPlatform.ExpressionUtility
         {
             get { return ExpressionUtility.Instance; }
+        }
+
+        public IPushUtility PushUtility
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public IApplicationStorage GetNamedApplicationStorage(string name)
+        {
+            throw new NotImplementedException();
         }
     }
 }

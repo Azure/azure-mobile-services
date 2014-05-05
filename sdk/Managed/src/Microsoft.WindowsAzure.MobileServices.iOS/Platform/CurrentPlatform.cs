@@ -30,5 +30,18 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             get { return ExpressionUtility.Instance; }
         }
+
+        public IPushUtility PushUtility
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public IApplicationStorage GetNamedApplicationStorage(string name)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

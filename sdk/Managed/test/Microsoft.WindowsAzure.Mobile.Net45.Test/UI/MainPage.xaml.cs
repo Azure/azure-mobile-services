@@ -58,6 +58,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Settings.Default.MobileServiceRuntimeKey = txtRuntimeKey.Text;
             Settings.Default.MobileServiceTags = txtTags.Text;
 
+            if (!string.IsNullOrEmpty(App.Harness.Settings.TagExpression))
+            {
+                App.Harness.Settings.TagExpression += " - notDesktop";
+            }
+            else
+            {
+                App.Harness.Settings.TagExpression = "!notDesktop";
+            }
+
             this.NavigationService.Navigate(new TestPage());
         }
     }

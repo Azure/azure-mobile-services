@@ -25,7 +25,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// If local storage does not have this registartionName, we will create a new one.
+        /// If local storage does not have this registrationName, we will create a new one.
         /// If local storage has this name, we will call update.
         /// If update failed with 404(not found), we will create a new one.
         /// </summary>
