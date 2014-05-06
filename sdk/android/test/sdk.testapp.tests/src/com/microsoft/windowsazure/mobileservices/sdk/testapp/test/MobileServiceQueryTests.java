@@ -19,7 +19,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
-import static com.microsoft.windowsazure.mobileservices.MobileServiceQueryOperations.*;
+import static com.microsoft.windowsazure.mobileservices.table.MobileServiceQueryOperations.*;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -32,9 +32,9 @@ import android.test.InstrumentationTestCase;
 
 import com.google.gson.GsonBuilder;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
-import com.microsoft.windowsazure.mobileservices.MobileServiceQuery;
-import com.microsoft.windowsazure.mobileservices.QueryOrder;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceQuery;
+import com.microsoft.windowsazure.mobileservices.table.QueryOrder;
 
 public class MobileServiceQueryTests extends InstrumentationTestCase {
 

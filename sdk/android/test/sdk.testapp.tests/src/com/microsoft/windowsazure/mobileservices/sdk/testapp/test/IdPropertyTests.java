@@ -19,7 +19,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
-import static com.microsoft.windowsazure.mobileservices.MobileServiceQueryOperations.field;
+import static com.microsoft.windowsazure.mobileservices.table.MobileServiceQueryOperations.field;
 
 import java.net.MalformedURLException;
 import java.util.List;
@@ -34,18 +34,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
-import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
-import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
-import com.microsoft.windowsazure.mobileservices.ServiceFilter;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
-import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
-import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
-import com.microsoft.windowsazure.mobileservices.TableJsonQueryCallback;
-import com.microsoft.windowsazure.mobileservices.TableOperationCallback;
-import com.microsoft.windowsazure.mobileservices.TableQueryCallback;
 
 public class IdPropertyTests extends InstrumentationTestCase {
 	String appUrl = "";
@@ -105,18 +93,25 @@ public class IdPropertyTests extends InstrumentationTestCase {
 				// Create get the MobileService table
 				MobileServiceJsonTable msTable = client.getTable(tableName);
 
+				try {
 				// Call the select method
-				msTable.execute(new TableJsonQueryCallback() {
+				JsonElement result = msTable.execute().get();
+					if (result == null) {
+						container.setException(new Exception("Expected result"));
+					} else {
+						container.setJsonResult(result);
+					}
+				}
+				catch(Exception exception) {
+					container.setException(exception);
+					
+				}
+					
 
 					@Override
 					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
 						if (exception != null) {
-							container.setException(exception);
-						} else if (result == null) {
-							container.setException(new Exception("Expected result"));
-						} else {
-							container.setJsonResult(result);
-						}
+						} else 
 
 						latch.countDown();
 					}

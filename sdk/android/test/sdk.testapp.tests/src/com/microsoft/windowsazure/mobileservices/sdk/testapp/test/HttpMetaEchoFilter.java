@@ -21,16 +21,18 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
 import org.apache.http.Header;
 import android.net.Uri;
+
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.JsonObject;
-import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
-import com.microsoft.windowsazure.mobileservices.ServiceFilter;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
+import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 public class HttpMetaEchoFilter implements ServiceFilter {
 
 	@Override
-	public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback, ServiceFilterResponseCallback responseCallback) {
+	public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
 		JsonObject jResponse = new JsonObject();
 		
@@ -63,7 +65,6 @@ public class HttpMetaEchoFilter implements ServiceFilter {
 		response.setContent(jResponse.toString());
 		response.setStatus(new StatusLineMock(200));
 
-		responseCallback.onResponse(response, null);	
+		return nextServiceFilterCallback.onNext(request);
 	}
-
 }

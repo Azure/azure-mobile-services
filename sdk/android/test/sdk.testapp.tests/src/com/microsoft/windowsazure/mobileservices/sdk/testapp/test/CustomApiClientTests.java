@@ -32,18 +32,16 @@ import org.apache.http.client.methods.HttpPost;
 import android.test.InstrumentationTestCase;
 import android.util.Pair;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.microsoft.windowsazure.mobileservices.ApiJsonOperationCallback;
-import com.microsoft.windowsazure.mobileservices.ApiOperationCallback;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
-import com.microsoft.windowsazure.mobileservices.ServiceFilter;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 
 public class CustomApiClientTests extends InstrumentationTestCase {
 	String appUrl = "";
@@ -60,12 +58,12 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 	}
 	
 	public void testResponseWithNon2xxStatusShouldThrowException() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
+		//final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
-		final ResultsContainer container = new ResultsContainer();
+		//final ResultsContainer container = new ResultsContainer();
 
-		runTestOnUiThread(new Runnable() {
+		//runTestOnUiThread(new Runnable() {
 
 			@Override
 			public void run() {
@@ -76,15 +74,14 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 					client = client.withFilter(new ServiceFilter() {
 						
 						@Override
-						public void handleRequest(ServiceFilterRequest request,
-								NextServiceFilterCallback nextServiceFilterCallback,
-								ServiceFilterResponseCallback responseCallback) {
+						public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request,
+								NextServiceFilterCallback nextServiceFilterCallback) {
 
 							ServiceFilterResponseMock mockResponse = new ServiceFilterResponseMock();
 							mockResponse.setStatus(new StatusLineMock(418)); //I'm a teapot status code
 							ServiceFilterRequestMock mockRequest = new ServiceFilterRequestMock(mockResponse);
 							
-							nextServiceFilterCallback.onNext(mockRequest, responseCallback);
+							return nextServiceFilterCallback.onNext(mockRequest);
 						}
 					});
 					
@@ -92,7 +89,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 					e.printStackTrace();
 				}
 
-				client.invokeApi("myApi", new byte[] {1, 2, 3, 4}, HttpPost.METHOD_NAME, null, null, new ServiceFilterResponseCallback() {
+				ServiceFilterResponse response = client.invokeApi("myApi", new byte[] {1, 2, 3, 4}, HttpPost.METHOD_NAME, null, null, new ServiceFilterResponseCallback() {
 
 					@Override
 					public void onResponse(ServiceFilterResponse response, Exception exception) {
