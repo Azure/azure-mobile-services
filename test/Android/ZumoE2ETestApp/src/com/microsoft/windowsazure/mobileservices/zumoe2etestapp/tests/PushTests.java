@@ -97,22 +97,21 @@ public class PushTests extends TestGroup {
 					callback.onTestComplete(testCase, testResult);
 
 				} catch (Exception e) {
-					log("Error, expected exception, but got none.");
-
+					
+					log("Received expected exception: " + e.toString());
+				
 					if (jsonObject != null) {
 						log("Returned jsonObject: " + jsonObject.toString());
 					}
 
-					testResult.setStatus(TestStatus.Failed);
-
+					testResult.setStatus(TestStatus.Passed);
 					callback.onTestComplete(testCase, testResult);
-
 					return;
 				}
 			};
 		};
 	}
-
+	
 	private TestCase createPushTest(String testName, String jsonPayload) {
 		final JsonElement payload = new JsonParser().parse(jsonPayload);
 		TestCase result = new TestCase(testName) {

@@ -409,16 +409,16 @@ public class CustomApiTests extends TestGroup {
 				mClient = client;
 				mCallback = callback;
 
-				final Movie inputTemplate = QueryTestData.getRandomMovie(rndGen);
-				log("Using movie: " + inputTemplate.getTitle());
+				final Movie ramdomMovie = QueryTestData.getRandomMovie(rndGen);
+				log("Using movie: " + ramdomMovie.getTitle());
 
 				String apiName = MOVIEFINDER_API_NAME;
 				String apiUrl;
 				switch (testType) {
 				case GetByTitle:
-					apiUrl = apiName + "/title/" + inputTemplate.getTitle();
+					apiUrl = apiName + "/title/" + ramdomMovie.getTitle();
 					log("API: " + apiUrl);
-					mExpectedResult = new Movie[] { inputTemplate };
+					mExpectedResult = new Movie[] { ramdomMovie };
 					
 					try {
 						AllMovies result = mClient.invokeApi(apiUrl, HttpGet.METHOD_NAME, null, AllMovies.class).get();
@@ -438,7 +438,7 @@ public class CustomApiTests extends TestGroup {
 					break;
 
 				case GetByDate:
-					final Date releaseDate = inputTemplate.getReleaseDate();
+					final Date releaseDate = ramdomMovie.getReleaseDate();
 					TimeZone tz = TimeZone.getTimeZone("UTC");
 					Calendar c = Calendar.getInstance(tz);
 					c.setTime(releaseDate);
@@ -509,9 +509,9 @@ public class CustomApiTests extends TestGroup {
 						@Override
 						protected boolean criteria(Movie movie) {
 							if (testType == TypedTestType.PostByYear) {
-								return movie.getYear() == inputTemplate.getYear();
+								return movie.getYear() == ramdomMovie.getYear();
 							} else {
-								return movie.getDuration() == inputTemplate.getDuration();
+								return movie.getDuration() == ramdomMovie.getDuration();
 							}
 						}
 
@@ -530,7 +530,7 @@ public class CustomApiTests extends TestGroup {
 					if (mQuery == null) {
 						
 						try {
-							AllMovies result = mClient.invokeApi(apiUrl, HttpGet.METHOD_NAME, null, AllMovies.class).get();
+							AllMovies result = mClient.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, null, AllMovies.class).get();
 						
 							if (!Util.compareArrays(mExpectedResult, result.getMovies())) {
 								createResultFromException(mResult,
@@ -547,7 +547,7 @@ public class CustomApiTests extends TestGroup {
 					} else {
 						
 						try {
-							AllMovies result = mClient.invokeApi(apiUrl, HttpGet.METHOD_NAME, null, AllMovies.class).get();
+							AllMovies result = mClient.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, null, AllMovies.class).get();
 						
 							if (!Util.compareArrays(mExpectedResult, result.getMovies())) {
 								createResultFromException(mResult,
