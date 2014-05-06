@@ -26,7 +26,7 @@ import org.apache.http.ProtocolVersion;
 import org.apache.http.StatusLine;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 public class MockResponse implements ServiceFilterResponse {
 

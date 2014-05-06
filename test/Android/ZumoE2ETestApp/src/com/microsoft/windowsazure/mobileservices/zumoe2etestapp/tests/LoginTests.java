@@ -25,16 +25,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Random;
 
-
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.microsoft.windowsazure.mobileservices.MobileServiceAuthenticationProvider;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
-import com.microsoft.windowsazure.mobileservices.MobileServiceUser;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
-import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
-import com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback;
+import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider;
+import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.MainActivity;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.LogServiceFilter;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
@@ -60,11 +56,12 @@ public class LoginTests extends TestGroup {
 		this.addTest(createCRUDTest(ADMIN_PERMISSION_TABLE_NAME, null, TablePermission.Admin, false));
 
 		int indexOfStartAuthenticationTests = this.getTestCases().size();
-		
+
 		ArrayList<MobileServiceAuthenticationProvider> providersWithRecycledTokenSupport = new ArrayList<MobileServiceAuthenticationProvider>();
 		providersWithRecycledTokenSupport.add(MobileServiceAuthenticationProvider.Facebook);
-		// Known bug - Drop login via Google token until Google client flow is reintroduced
-		//providersWithRecycledTokenSupport.add(MobileServiceAuthenticationProvider.Google);
+		// Known bug - Drop login via Google token until Google client flow is
+		// reintroduced
+		// providersWithRecycledTokenSupport.add(MobileServiceAuthenticationProvider.Google);
 
 		for (MobileServiceAuthenticationProvider provider : MobileServiceAuthenticationProvider.values()) {
 			this.addTest(createLogoutTest());
@@ -88,7 +85,7 @@ public class LoginTests extends TestGroup {
 
 		this.addTest(createLogoutTest());
 		this.addTest(createLoginWithGoogleAccountTest(false, null));
-		
+
 		List<TestCase> testCases = this.getTestCases();
 		for (int i = indexOfStartAuthenticationTests; i < testCases.size(); i++) {
 			testCases.get(i).setCanRunUnattended(false);
@@ -97,60 +94,71 @@ public class LoginTests extends TestGroup {
 
 	private TestCase createLoginWithGoogleAccountTest(final boolean useDefaultAccount, final String customScope) {
 		StringBuilder name = new StringBuilder();
-		
+
 		name.append("Login with Google Account - ");
 		if (useDefaultAccount) {
 			name.append("Using default account - ");
 		} else {
 			name.append("Using null account - ");
 		}
-		
+
 		if (customScope == null) {
 			name.append("Using default scope");
 		} else {
 			name.append("Using custom scope");
 		}
-		
+
 		TestCase test = new TestCase(name.toString()) {
-			
+
 			@Override
 			protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
 				final TestCase testCase = this;
-				
+
 				final TestResult testResult = new TestResult();
 				testResult.setTestCase(testCase);
 				testResult.setStatus(TestStatus.Passed);
-				
-				UserAuthenticationCallback userAuthCallback = new UserAuthenticationCallback() {
-					
-					@Override
-					public void onCompleted(MobileServiceUser user, Exception exception,
-							ServiceFilterResponse response) {
-						if (user != null) {
-							log("User successfully authenticated. UserId: " + user.getUserId());
-							callback.onTestComplete(testCase, testResult);
-						} else {
-							log("User was not authenticated");
-							callback.onTestComplete(testCase, createResultFromException(testResult, exception));
-						}
-					}
-				};
-				
+
 				String scope = customScope;
-				
+
 				if (scope == null) {
 					scope = MobileServiceClient.GOOGLE_USER_INFO_SCOPE;
 				}
-				
-				if (useDefaultAccount) {
-					client.loginWithGoogleAccount(MainActivity.getInstance(), scope, userAuthCallback);
-				} else {
-					testCase.setExpectedExceptionClass(IllegalArgumentException.class);
-					client.loginWithGoogleAccount(MainActivity.getInstance(), null, scope, userAuthCallback);
+
+				try {
+					if (useDefaultAccount) {
+
+						try {
+							MobileServiceUser user = client.loginWithGoogleAccount(MainActivity.getInstance(), scope).get();
+
+							log("User successfully authenticated. UserId: " + user.getUserId());
+							callback.onTestComplete(testCase, testResult);
+						} catch (Exception exception) {
+							log("User was not authenticated");
+							callback.onTestComplete(testCase, createResultFromException(testResult, exception));
+						}
+
+					} else {
+						testCase.setExpectedExceptionClass(IllegalArgumentException.class);
+
+						try {
+							MobileServiceUser user = client.loginWithGoogleAccount(MainActivity.getInstance(), null, scope).get();
+
+							log("User successfully authenticated. UserId: " + user.getUserId());
+							callback.onTestComplete(testCase, testResult);
+						} catch (Exception exception) {
+							log("User was not authenticated");
+							callback.onTestComplete(testCase, createResultFromException(testResult, exception));
+						}
+
+					}
+				} catch (Exception e) {
+					log("User was not authenticated");
+					callback.onTestComplete(testCase, createResultFromException(e));
+					return;
 				}
 			}
 		};
-		
+
 		return test;
 	}
 
@@ -158,8 +166,7 @@ public class LoginTests extends TestGroup {
 		TestCase test = new TestCase("Login via token for " + provider.toString()) {
 
 			@Override
-			protected void executeTest(MobileServiceClient client,
-					final TestExecutionCallback callback) {
+			protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
 
 				final TestCase testCase = this;
 				long seed = new Date().getTime();
@@ -188,31 +195,43 @@ public class LoginTests extends TestGroup {
 
 				JsonObject token = new JsonObject();
 				token.addProperty("access_token", providerIdentity.get("accessToken").getAsString());
-				UserAuthenticationCallback authCallback = new UserAuthenticationCallback() {
 
-					@Override
-					public void onCompleted(MobileServiceUser user,
-							Exception exception, ServiceFilterResponse response) {
-						TestResult testResult = new TestResult();
-						testResult.setTestCase(testCase);
-						if (exception != null) {
-							log("Exception during login: " + exception.toString());
-							testResult.setStatus(TestStatus.Failed);
-						} else {
-							log("Logged in as " + user.getUserId());
-							testResult.setStatus(TestStatus.Passed);
-						}
-
-						callback.onTestComplete(testCase, testResult);
-					}
-				};
 				boolean useEnumOverload = rndGen.nextBoolean();
 				if (useEnumOverload) {
 					log("Calling the overload MobileServiceClient.login(MobileServiceAuthenticationProvider, JsonObject, UserAuthenticationCallback)");
-					client.login(provider, token, authCallback);
+
+					TestResult testResult = new TestResult();
+					testResult.setTestCase(testCase);
+					try {
+
+						MobileServiceUser user = client.login(provider, token).get();
+
+						log("Logged in as " + user.getUserId());
+						testResult.setStatus(TestStatus.Passed);
+					} catch (Exception exception) {
+						log("Exception during login: " + exception.toString());
+						testResult.setStatus(TestStatus.Failed);
+					}
+
+					callback.onTestComplete(testCase, testResult);
+
 				} else {
 					log("Calling the overload MobileServiceClient.login(String, JsonObject, UserAuthenticationCallback)");
-					client.login(provider.toString(), token, authCallback);
+
+					TestResult testResult = new TestResult();
+					testResult.setTestCase(testCase);
+					try {
+
+						MobileServiceUser user = client.login(provider.toString(), token).get();
+
+						log("Logged in as " + user.getUserId());
+						testResult.setStatus(TestStatus.Passed);
+					} catch (Exception exception) {
+						log("Exception during login: " + exception.toString());
+						testResult.setStatus(TestStatus.Failed);
+					}
+
+					callback.onTestComplete(testCase, testResult);
 				}
 			}
 		};
@@ -225,45 +244,64 @@ public class LoginTests extends TestGroup {
 
 			@Override
 			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
-				final TestCase testCase = this;
-				long seed = new Date().getTime();
-				final Random rndGen = new Random(seed);
 
-				UserAuthenticationCallback authCallback = new UserAuthenticationCallback() {
+				try {
+					final TestCase testCase = this;
 
-					@Override
-					public void onCompleted(MobileServiceUser user, Exception exception, ServiceFilterResponse response) {
+					long seed = new Date().getTime();
+					final Random rndGen = new Random(seed);
+
+					boolean useEnumOverload = rndGen.nextBoolean();
+					if (useEnumOverload) {
+						log("Calling the overload MobileServiceClient.login(MobileServiceAuthenticationProvider, UserAuthenticationCallback)");
+
 						TestResult result = new TestResult();
 						String userName;
-						if(user == null)
-						{
-							log("Error during login, user == null");
-							if (exception != null) {
-								log("Exception: " + exception.toString());
-							}
 
-							userName = "NULL";
-						}
-						else
-						{
+						try {
+							MobileServiceUser user = client.login(provider).get();
 							userName = user.getUserId();
+
+						} catch (Exception exception) {
+							userName = "NULL";
+							log("Error during login, user == null");
+							log("Exception: " + exception.toString());
+
 						}
-						
+
 						log("Logged in as " + userName);
 						result.setStatus(client.getCurrentUser() != null ? TestStatus.Passed : TestStatus.Failed);
 						result.setTestCase(testCase);
 
 						callback.onTestComplete(testCase, result);
-					}
-				};
 
-				boolean useEnumOverload = rndGen.nextBoolean();
-				if (useEnumOverload) {
-					log("Calling the overload MobileServiceClient.login(MobileServiceAuthenticationProvider, UserAuthenticationCallback)");
-					client.login(provider, authCallback);
-				} else {
-					log("Calling the overload MobileServiceClient.login(String, UserAuthenticationCallback)");
-					client.login(provider.toString(), authCallback);
+					} else {
+						log("Calling the overload MobileServiceClient.login(String, UserAuthenticationCallback)");
+					
+						TestResult result = new TestResult();
+						String userName;
+
+						try {
+							MobileServiceUser user = client.login(provider.toString()).get();
+							userName = user.getUserId();
+
+						} catch (Exception exception) {
+							userName = "NULL";
+							log("Error during login, user == null");
+							log("Exception: " + exception.toString());
+
+						}
+
+						log("Logged in as " + userName);
+						result.setStatus(client.getCurrentUser() != null ? TestStatus.Passed : TestStatus.Failed);
+						result.setTestCase(testCase);
+
+						callback.onTestComplete(testCase, result);
+
+					}
+				} catch (Exception e) {
+					callback.onTestComplete(this, createResultFromException(e));
+					return;
 				}
 			}
 		};
@@ -281,7 +319,7 @@ public class LoginTests extends TestGroup {
 
 			@Override
 			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
-				
+
 				client.logout();
 				log("Logged out");
 				TestResult result = new TestResult();
@@ -317,64 +355,65 @@ public class LoginTests extends TestGroup {
 				final JsonObject item = new JsonObject();
 				item.addProperty("name", "John Doe");
 				log("insert item");
-				table.insert(item, new TableJsonOperationCallback() {
 
-					@Override
-					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
-						int id = 1;
-						if (exception == null) {
-							id = jsonEntity.get("id").getAsInt();
-						}
+				int id = 1;
+				
+				try {
 
-						item.addProperty("id", id);
-						if (!validateExecution(crudShouldWork, exception, result)) {
-							callback.onTestComplete(testCase, result);
-							return;
-						}
+					JsonObject jsonEntityInsert = table.insert(item).get();
 
-						item.addProperty("name", "Jane Doe");
-						log("update item");
-						table.update(item, new TableJsonOperationCallback() {
+					id = jsonEntityInsert.get("id").getAsInt();
 
-							@Override
-							public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
-
-								if (!validateExecution(crudShouldWork, exception, result)) {
-									callback.onTestComplete(testCase, result);
-									return;
-								}
-
-								log("lookup item");
-								table.lookUp(item.get("id").getAsInt(), new TableJsonOperationCallback() {
-
-									@Override
-									public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
-										if (!validateExecution(crudShouldWork, exception, result)) {
-											callback.onTestComplete(testCase, result);
-											return;
-										}
-
-										if (userIsAuthenticated && tableType == TablePermission.User) {
-											lastUserIdentityObject = jsonEntity.getAsJsonObject("Identities");
-										}
-
-										log("delete item");
-										table.delete(item.get("id").getAsInt(), new TableDeleteCallback() {
-
-											@Override
-											public void onCompleted(Exception exception, ServiceFilterResponse response) {
-												validateExecution(crudShouldWork, exception, result);
-
-												callback.onTestComplete(testCase, result);
-												return;
-											}
-										});
-									}
-								});
-							}
-						});
+					item.addProperty("id", id);
+				} catch (Exception exception) {
+					if (!validateExecution(crudShouldWork, exception, result)) {
+						callback.onTestComplete(testCase, result);
+						return;
 					}
-				});
+				}
+
+				item.addProperty("name", "Jane Doe");
+				log("update item");
+
+				try {
+					JsonObject jsonEntityUpdate = table.update(item).get();
+				} catch (Exception exception) {
+					if (!validateExecution(crudShouldWork, exception, result)) {
+						callback.onTestComplete(testCase, result);
+						return;
+					}
+				}
+
+				log("lookup item");
+
+				try {
+
+					JsonElement jsonEntityLookUp = table.lookUp(item.get("id").getAsInt()).get();
+					if (userIsAuthenticated && tableType == TablePermission.User) {
+						lastUserIdentityObject = jsonEntityLookUp.getAsJsonObject();
+					}
+
+					log("delete item");
+					
+				} catch (Exception exception) {
+					if (!validateExecution(crudShouldWork, exception, result)) {
+						callback.onTestComplete(testCase, result);
+						return;
+					}
+				}
+
+				try {
+					table.delete(item.get("id").getAsInt()).get();
+				} catch (Exception exception) {
+					if (!validateExecution(crudShouldWork, exception, result)) {
+						callback.onTestComplete(testCase, result);
+						return;
+					}
+				}
+
+				callback.onTestComplete(testCase, result);
+
+				return;
 			}
 
 			private boolean validateExecution(boolean crudShouldWork, Exception exception, TestResult result) {
