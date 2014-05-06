@@ -521,6 +521,7 @@ public class QueryTests extends TestGroup {
 		return fields;
 	}
 
+	@SuppressWarnings("unchecked")
 	private List<Pair<String, QueryOrder>> createOrder(Pair<String, QueryOrder>... entries) {
 		List<Pair<String, QueryOrder>> ret = new ArrayList<Pair<String, QueryOrder>>();
 

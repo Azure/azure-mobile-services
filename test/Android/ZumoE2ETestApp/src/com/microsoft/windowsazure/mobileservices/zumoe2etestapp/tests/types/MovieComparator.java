@@ -44,6 +44,7 @@ public class MovieComparator implements Comparator<Movie> {
 		mFields = newFields.toArray(mFields);
 	}
 
+	@SuppressWarnings("unchecked")
 	public MovieComparator(Pair<String, QueryOrder>... fields) {
 		mFields = fields;
 	}
