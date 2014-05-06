@@ -98,7 +98,7 @@ public class MiscTests extends TestGroup {
 
 				try {
 
-					JsonElement result = client.getTable(ROUND_TRIP_TABLE_NAME).top(5).execute().get();
+					client.getTable(ROUND_TRIP_TABLE_NAME).top(5).execute().get();
 
 					if (callback != null)
 						callback.onTestComplete(testCase, testResult);
@@ -249,7 +249,7 @@ public class MiscTests extends TestGroup {
 
 				try {
 
-					JsonElement result = client.getTable(ROUND_TRIP_TABLE_NAME).top(5).execute().get();
+					client.getTable(ROUND_TRIP_TABLE_NAME).top(5).execute().get();
 				} catch (Exception exception) {
 					createResultFromException(testResult, exception);
 				} finally {
@@ -443,7 +443,7 @@ public class MiscTests extends TestGroup {
 					item.string1 = mUUID;
 
 					try {
-						RoundTripTableElement entity = filteredClientTable.insert(item).get();
+						filteredClientTable.insert(item).get();
 						requestCompleted(null);
 					} catch (Exception exception) {
 						requestCompleted(exception);
@@ -455,7 +455,7 @@ public class MiscTests extends TestGroup {
 					item.addProperty("string1", mUUID);
 
 					try {
-						JsonObject jsonEntity = filteredClientTable.insert(item).get();
+						filteredClientTable.insert(item).get();
 						requestCompleted(null);
 					} catch (Exception exception) {
 						requestCompleted(exception);

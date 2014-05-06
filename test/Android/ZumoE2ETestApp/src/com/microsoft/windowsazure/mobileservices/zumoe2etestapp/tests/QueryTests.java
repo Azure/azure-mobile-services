@@ -28,7 +28,6 @@ import java.util.Locale;
 import android.util.Pair;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.gson.JsonElement;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.MobileServiceList;
@@ -38,6 +37,7 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceQuery;
 import com.microsoft.windowsazure.mobileservices.table.QueryOrder;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.ExpectedValueException;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestGroup;
@@ -497,7 +497,7 @@ public class QueryTests extends TestGroup {
 					result.setTestCase(testCase);
 
 					try {
-						JsonElement jsonEntity = client.getTable(MOVIES_TABLE_NAME).lookUp(id).get();
+						client.getTable(MOVIES_TABLE_NAME).lookUp(id).get();
 						result.setStatus(TestStatus.Passed);
 
 					} catch (Exception exception) {
@@ -563,7 +563,7 @@ public class QueryTests extends TestGroup {
 				TestResult result = new TestResult();
 
 				try {
-					AllMovies entity = otherClient.getTable(MOVIES_TABLE_NAME, AllMovies.class).insert(allMovies).get();
+					otherClient.getTable(MOVIES_TABLE_NAME, AllMovies.class).insert(allMovies).get();
 					result.setTestCase(test);
 					result.setStatus(TestStatus.Passed);
 				} catch (Exception exception) {
@@ -648,17 +648,10 @@ public class QueryTests extends TestGroup {
 
 					log("verify result");
 
-//					if (Util.compareLists(expectedData.elements, movies)) {
-//
-//						if (includeInlineCount) {
-//							log("verify inline count");
-//							if (expectedData.totalCount != count) {
-//								createResultFromException(result, new ExpectedValueException(expectedData.totalCount, count));
-//							}
-//						}
-//					} else {
-//						createResultFromException(result, new ExpectedValueException(Util.listToString(expectedData.elements), Util.listToString(movies)));
-//					}
+					if (Util.compareLists(expectedData.elements, movies)) {
+					} else {
+						createResultFromException(result, new ExpectedValueException(Util.listToString(expectedData.elements), Util.listToString(movies)));
+					}
 
 				} catch (Exception exception) {
 

@@ -19,8 +19,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
-import java.util.concurrent.ExecutionException;
-
 import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
@@ -30,7 +28,6 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 public class MultipleRequestFilter implements ServiceFilter {
 
 	private int mNumberOfRequests;
-	private Exception mException;
 
 	public MultipleRequestFilter(int numberOfRequests) {
 		mNumberOfRequests = numberOfRequests;
@@ -41,22 +38,17 @@ public class MultipleRequestFilter implements ServiceFilter {
 		for (int i = 0; i < mNumberOfRequests; i++) {
 
 			final boolean doCallback = i == mNumberOfRequests - 1;
-			
+
 			if (doCallback) {
 				return nextServiceFilterCallback.onNext(request);
-			}
-			else {
+			} else {
 				try {
 					nextServiceFilterCallback.onNext(request).get();
-				} catch (InterruptedException e) {
-					mException = e;
-				} catch (ExecutionException e) {
-					// TODO Auto-generated catch block
-					mException = e;
+				} catch (Exception e) {
 				}
 			}
 		}
-	
+
 		return null;
 	}
 

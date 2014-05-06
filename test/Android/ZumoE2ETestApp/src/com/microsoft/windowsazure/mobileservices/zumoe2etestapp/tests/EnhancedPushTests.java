@@ -415,7 +415,7 @@ public class EnhancedPushTests extends TestGroup {
 
 					final String registrationId = nativeRegistration.getRegistrationId();
 
-					TemplateRegistration templateRegistration = registerTemplate(this, MobileServicePush, gcmId, templateName, (String[]) null);
+					registerTemplate(this, MobileServicePush, gcmId, templateName, (String[]) null);
 
 					unregisterAll(this, MobileServicePush, gcmId);
 
@@ -455,7 +455,7 @@ public class EnhancedPushTests extends TestGroup {
 
 					unregisterAll(this, MobileServicePush, gcmId);
 
-					Registration nativeRegistration = register(this, MobileServicePush, gcmId, (String[]) null);
+					register(this, MobileServicePush, gcmId, (String[]) null);
 
 					TemplateRegistration templateRegistration = registerTemplate(this, MobileServicePush, gcmId, templateName, (String[]) null);
 
@@ -499,9 +499,9 @@ public class EnhancedPushTests extends TestGroup {
 
 					unregisterAll(this, MobileServicePush, gcmId);
 
-					Registration nativeRegistration = register(this, MobileServicePush, gcmId, (String[]) null);
+					register(this, MobileServicePush, gcmId, (String[]) null);
 
-					TemplateRegistration templateRegistration = registerTemplate(this, MobileServicePush, gcmId, UUID.randomUUID().toString(), (String[]) null);
+					registerTemplate(this, MobileServicePush, gcmId, UUID.randomUUID().toString(), (String[]) null);
 
 					if (getRegistrationCountInLocalStorage() != 2) {
 						result.setStatus(TestStatus.Failed);
@@ -549,7 +549,7 @@ public class EnhancedPushTests extends TestGroup {
 
 					unregisterAll(this, MobileServicePush, registrationId);
 
-					Registration registration = register(this, MobileServicePush, registrationId, tags);
+					register(this, MobileServicePush, registrationId, tags);
 
 					GCMMessageManager.instance.clearPushMessages();
 					MobileServiceJsonTable table = client.getTable(tableName);
@@ -595,7 +595,7 @@ public class EnhancedPushTests extends TestGroup {
 
 					unregisterAll(this, MobileServicePush, registrationId);
 
-					TemplateRegistration registration = registerTemplate(this, MobileServicePush, registrationId, templateName, template, tags);
+					registerTemplate(this, MobileServicePush, registrationId, templateName, template, tags);
 
 					GCMMessageManager.instance.clearPushMessages();
 					MobileServiceJsonTable table = client.getTable(tableName);
@@ -782,7 +782,7 @@ public class EnhancedPushTests extends TestGroup {
 
 					String[] tags = tag != null ? new String[] { tag } : null;
 
-					TemplateRegistration registration = registerTemplate(test, client.getPush(), templateName, template, tags);
+					registerTemplate(test, client.getPush(), templateName, template, tags);
 
 					unregisterTemplate(test, client.getPush(), templateName);
 

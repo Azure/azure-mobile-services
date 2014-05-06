@@ -376,7 +376,7 @@ public class LoginTests extends TestGroup {
 				log("update item");
 
 				try {
-					JsonObject jsonEntityUpdate = table.update(item).get();
+					table.update(item).get();
 				} catch (Exception exception) {
 					if (!validateExecution(crudShouldWork, exception, result)) {
 						callback.onTestComplete(testCase, result);

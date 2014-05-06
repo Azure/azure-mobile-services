@@ -100,7 +100,7 @@ public class StringIdTests extends TestGroup {
 					TestResult result = null;
 
 					try {
-						StringIdTableItem entity = client.getTable(STRING_ID_TABLE_NAME, StringIdTableItem.class).insert(item).get();
+						client.getTable(STRING_ID_TABLE_NAME, StringIdTableItem.class).insert(item).get();
 
 						result = new TestResult();
 						result.setTestCase(testCase);
@@ -188,17 +188,10 @@ public class StringIdTests extends TestGroup {
 					FilterResult<StringIdTableItem> expectedData = expectedResultFilter.filter(allItems);
 
 					log("verify result");
-//					if (Util.compareLists(expectedData.elements, elements)) {
-//
-//						if (includeInlineCount) {
-//							log("verify inline count");
-//							if (expectedData.totalCount != count) {
-//								createResultFromException(result, new ExpectedValueException(expectedData.totalCount, count));
-//							}
-//						}
-//					} else {
-//						createResultFromException(result, new ExpectedValueException(Util.listToString(expectedData.elements), Util.listToString(elements)));
-//					}
+					if (Util.compareLists(expectedData.elements, elements)) {
+					} else {
+						createResultFromException(result, new ExpectedValueException(Util.listToString(expectedData.elements), Util.listToString(elements)));
+					}
 				} catch (Exception exception) {
 					createResultFromException(result, exception);
 				} finally {

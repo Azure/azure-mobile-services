@@ -577,7 +577,6 @@ public class CustomApiTests extends TestGroup {
 		TestCase test = new TestCase(name) {
 			MobileServiceClient mClient;
 			List<Pair<String, String>> mQuery;
-			TestExecutionCallback mCallback;
 			boolean mExpected401;
 			TestResult mResult;
 
@@ -593,8 +592,7 @@ public class CustomApiTests extends TestGroup {
 
 				mExpected401 = permission == ApiPermissions.Admin || (permission == ApiPermissions.User && !isAuthenticated);
 				mClient = client;
-				mCallback = callback;
-
+				
 				String method = createHttpMethod(rndGen);
 				log("Method = " + method);
 
