@@ -61,7 +61,7 @@ public class RoundTripTests extends TestGroup {
 				TestResult result = new TestResult();
 
 				try {
-					RoundTripTableElement entity = client.getTable(ROUND_TRIP_TABLE_NAME, RoundTripTableElement.class).insert(element).get();
+					client.getTable(ROUND_TRIP_TABLE_NAME, RoundTripTableElement.class).insert(element).get();
 
 					result.setStatus(TestStatus.Passed);
 

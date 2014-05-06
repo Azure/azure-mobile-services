@@ -26,8 +26,8 @@ import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 public class ServiceFilterRequestMock implements ServiceFilterRequest {
 	private ServiceFilterResponse responseToUse;

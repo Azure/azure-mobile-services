@@ -25,7 +25,7 @@ import org.apache.http.Header;
 import org.apache.http.StatusLine;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 public class ServiceFilterResponseMock implements ServiceFilterResponse {
 	private Header[] headers;
