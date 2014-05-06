@@ -37,7 +37,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.MobileServiceList;
+import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.serialization.JsonEntityParser;
 
 /**
@@ -79,10 +81,9 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<MobileSe
 	/**
 	 * Executes a query to retrieve all the table rows
 	 * 
-	 * @param callback
-	 *            Callback to invoke when the operation is completed
+	 * @throws MobileServiceException
 	 */
-	public ListenableFuture<MobileServiceList<E>> execute() {
+	public ListenableFuture<MobileServiceList<E>> execute() throws MobileServiceException {
 		// mInternalTable.execute(new ParseResultTableQueryCallback(callback));
 		final SettableFuture<MobileServiceList<E>> future = SettableFuture.create();
 		ListenableFuture<JsonElement> internalFuture = mInternalTable.execute();
@@ -120,11 +121,10 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<MobileSe
 	 * Executes a query to retrieve all the table rows
 	 * 
 	 * @param query
-	 *            The MobileServiceQuery instance to execute
-	 * @param callback
-	 *            Callback to invoke when the operation is completed
+	 *            The Query instance to execute
+	 * @throws MobileServiceException
 	 */
-	public ListenableFuture<MobileServiceList<E>> execute(MobileServiceQuery<?> query) {
+	public ListenableFuture<MobileServiceList<E>> execute(Query query) throws MobileServiceException {
 		// mInternalTable.execute(query, new
 		// ParseResultTableQueryCallback(callback));
 

@@ -17,15 +17,31 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/*
- * QueryOrder.java
- */
+package com.microsoft.windowsazure.mobileservices.table.query;
 
-package com.microsoft.windowsazure.mobileservices.table;
+import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 
 /**
- * Sort order values
+ * Class that represents a constant query node
  */
-public enum QueryOrder {
-	Ascending, Descending
+public class ConstantNode implements QueryNode {
+	private Object mValue;
+
+	@Override
+	public QueryNodeKind getKind() {
+		return QueryNodeKind.Constant;
+	}
+
+	@Override
+	public <T> T Accept(QueryNodeVisitor<T> visitor) throws MobileServiceException {
+		return visitor.Visit(this);
+	}
+
+	public Object getValue() {
+		return this.mValue;
+	}
+
+	public void setValue(Object value) {
+		this.mValue = value;
+	}
 }

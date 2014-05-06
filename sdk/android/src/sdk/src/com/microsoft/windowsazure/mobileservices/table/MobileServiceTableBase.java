@@ -42,10 +42,14 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.http.RequestAsyncTask;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequestImpl;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
+import com.microsoft.windowsazure.mobileservices.table.query.Query;
+import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 
 public abstract class MobileServiceTableBase<E> {
 
@@ -117,15 +121,13 @@ public abstract class MobileServiceTableBase<E> {
 		mTableName = name;
 	}
 
-	public abstract ListenableFuture<E> execute(MobileServiceQuery<?> query);
+	public abstract ListenableFuture<E> execute(Query query) throws MobileServiceException;
 
 	/**
 	 * Executes a query to retrieve all the table rows
-	 * 
-	 * @param callback
-	 *            Callback to invoke when the operation is completed
+	 * @throws MobileServiceException 
 	 */
-	public ListenableFuture<E> execute() {
+	public ListenableFuture<E> execute() throws MobileServiceException {
 		return this.where().execute();
 	}
 
@@ -158,9 +160,9 @@ public abstract class MobileServiceTableBase<E> {
 	 *            The parameter name
 	 * @param value
 	 *            The parameter value
-	 * @return MobileServiceQuery
+	 * @return ExecutableQuery
 	 */
-	public MobileServiceQuery<E> parameter(String parameter, String value) {
+	public ExecutableQuery<E> parameter(String parameter, String value) {
 		return this.where().parameter(parameter, value);
 	}
 
@@ -171,9 +173,9 @@ public abstract class MobileServiceTableBase<E> {
 	 *            Field name
 	 * @param order
 	 *            Sorting order
-	 * @return MobileServiceQuery
+	 * @return ExecutableQuery
 	 */
-	public MobileServiceQuery<E> orderBy(String field, QueryOrder order) {
+	public ExecutableQuery<E> orderBy(String field, QueryOrder order) {
 		return this.where().orderBy(field, order);
 	}
 
@@ -182,9 +184,9 @@ public abstract class MobileServiceTableBase<E> {
 	 * 
 	 * @param top
 	 *            Number of records to return
-	 * @return MobileServiceQuery
+	 * @return ExecutableQuery
 	 */
-	public MobileServiceQuery<E> top(int top) {
+	public ExecutableQuery<E> top(int top) {
 		return this.where().top(top);
 	}
 
@@ -193,9 +195,9 @@ public abstract class MobileServiceTableBase<E> {
 	 * sequence and then return the remainder.
 	 * 
 	 * @param skip
-	 * @return MobileServiceQuery
+	 * @return ExecutableQuery
 	 */
-	public MobileServiceQuery<E> skip(int skip) {
+	public ExecutableQuery<E> skip(int skip) {
 		return this.where().skip(skip);
 	}
 
@@ -204,28 +206,28 @@ public abstract class MobileServiceTableBase<E> {
 	 * 
 	 * @param fields
 	 *            Names of the fields to retrieve
-	 * @return MobileServiceQuery
+	 * @return ExecutableQuery
 	 */
-	public MobileServiceQuery<E> select(String... fields) {
+	public ExecutableQuery<E> select(String... fields) {
 		return this.where().select(fields);
 	}
 
 	/**
 	 * Include a property with the number of records returned.
 	 * 
-	 * @return MobileServiceQuery
+	 * @return ExecutableQuery
 	 */
-	public MobileServiceQuery<E> includeInlineCount() {
+	public ExecutableQuery<E> includeInlineCount() {
 		return this.where().includeInlineCount();
 	}
 
 	/**
 	 * Starts a filter to query the table
 	 * 
-	 * @return The MobileServiceQuery<E> representing the filter
+	 * @return The ExecutableQuery<E> representing the filter
 	 */
-	public MobileServiceQuery<E> where() {
-		MobileServiceQuery<E> query = new MobileServiceQuery<E>();
+	public ExecutableQuery<E> where() {
+		ExecutableQuery<E> query = new ExecutableQuery<E>();
 		query.setTable(this);
 		return query;
 	}
@@ -235,14 +237,14 @@ public abstract class MobileServiceTableBase<E> {
 	 * 
 	 * @param query
 	 *            The existing filter
-	 * @return The MobileServiceQuery<E> representing the filter
+	 * @return The ExecutableQuery<E> representing the filter
 	 */
-	public MobileServiceQuery<E> where(MobileServiceQuery<?> query) {
+	public ExecutableQuery<E> where(Query query) {
 		if (query == null) {
 			throw new IllegalArgumentException("Query must not be null");
 		}
 
-		MobileServiceQuery<E> baseQuery = new MobileServiceQuery<E>(query);
+		ExecutableQuery<E> baseQuery = new ExecutableQuery<E>(query);
 		baseQuery.setTable(this);
 		return baseQuery;
 	}
@@ -723,7 +725,7 @@ public abstract class MobileServiceTableBase<E> {
 	 * @return The parameters collection with any requested system properties
 	 *         included.
 	 */
-	protected List<Pair<String, String>> addSystemProperties(EnumSet<MobileServiceSystemProperty> systemProperties, List<Pair<String, String>> parameters) {
+	public List<Pair<String, String>> addSystemProperties(EnumSet<MobileServiceSystemProperty> systemProperties, List<Pair<String, String>> parameters) {
 		boolean containsSystemProperties = false;
 
 		List<Pair<String, String>> result = new ArrayList<Pair<String, String>>(parameters != null ? parameters.size() : 0);

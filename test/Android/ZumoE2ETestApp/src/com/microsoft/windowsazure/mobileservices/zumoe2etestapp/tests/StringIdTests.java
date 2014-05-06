@@ -19,7 +19,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
-import static com.microsoft.windowsazure.mobileservices.table.MobileServiceQueryOperations.*;
+import static com.microsoft.windowsazure.mobileservices.table.query.QueryOperations.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,11 +30,13 @@ import android.util.Pair;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.MobileServiceList;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceQuery;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
-import com.microsoft.windowsazure.mobileservices.table.QueryOrder;
+import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
+import com.microsoft.windowsazure.mobileservices.table.query.Query;
+import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.ExpectedValueException;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
@@ -54,34 +56,39 @@ public class StringIdTests extends TestGroup {
 	public StringIdTests() {
 		super("String Id tests");
 
-		List<StringIdTableItem> allItems = loadInitialItems();
+		try {
+			List<StringIdTableItem> allItems = loadInitialItems();
 
-		this.addTest(createQueryTest("Data begining with 0-7", allItems, subString("data", 0).ge().val("0").and().subString("data", 0).lt().val("8"),
-				new SimpleFilter<StringIdTableItem>() {
+			this.addTest(createQueryTest("Data begining with 0-7", allItems, subString("data", 0).ge().val("0").and().subString("data", 0).lt().val("8"),
+					new SimpleFilter<StringIdTableItem>() {
 
-					@Override
-					protected boolean criteria(StringIdTableItem element) {
-						return element.data.substring(0, 1).compareToIgnoreCase("0") >= 0 && element.data.substring(0, 1).compareToIgnoreCase("8") < 0;
-					}
-				}));
+						@Override
+						protected boolean criteria(StringIdTableItem element) {
+							return element.data.substring(0, 1).compareToIgnoreCase("0") >= 0 && element.data.substring(0, 1).compareToIgnoreCase("8") < 0;
+						}
+					}));
 
-		this.addTest(createQueryTest("Id begining with 0-7", allItems, subString("id", 0).ge().val("0").and().subString("id", 0).lt().val("8"),
-				new SimpleFilter<StringIdTableItem>() {
+			this.addTest(createQueryTest("Id begining with 0-7", allItems, subString("id", 0).ge().val("0").and().subString("id", 0).lt().val("8"),
+					new SimpleFilter<StringIdTableItem>() {
 
-					@Override
-					protected boolean criteria(StringIdTableItem element) {
-						return element.id.substring(0, 1).compareToIgnoreCase("0") >= 0 && element.id.substring(0, 1).compareToIgnoreCase("8") < 0;
-					}
-				}));
+						@Override
+						protected boolean criteria(StringIdTableItem element) {
+							return element.id.substring(0, 1).compareToIgnoreCase("0") >= 0 && element.id.substring(0, 1).compareToIgnoreCase("8") < 0;
+						}
+					}));
 
-		String jsonItem = "{\"data\": \"" + UUID.randomUUID().toString() + "\"}";
+			String jsonItem = "{\"data\": \"" + UUID.randomUUID().toString() + "\"}";
 
-		this.addTest(createSimpleUntypedRoundTripTestWithException("Round Trip Untyped", jsonItem, null));
+			this.addTest(createSimpleUntypedRoundTripTestWithException("Round Trip Untyped", jsonItem, null));
 
-		StringIdTableItem item = new StringIdTableItem();
-		item.data = UUID.randomUUID().toString();
+			StringIdTableItem item = new StringIdTableItem();
+			item.data = UUID.randomUUID().toString();
 
-		this.addTest(createSimpleTypedRoundTripTestWithException("Round Trip Typed", item, null, false));
+			this.addTest(createSimpleTypedRoundTripTestWithException("Round Trip Typed", item, null, false));
+
+		} catch (MobileServiceException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private List<StringIdTableItem> loadInitialItems() {
@@ -125,13 +132,12 @@ public class StringIdTests extends TestGroup {
 		return allItems;
 	}
 
-	private TestCase createQueryTest(String name, List<StringIdTableItem> allItems, final MobileServiceQuery<?> filter,
-			final ListFilter<StringIdTableItem> expectedResultFilter) {
+	private TestCase createQueryTest(String name, List<StringIdTableItem> allItems, final Query filter, final ListFilter<StringIdTableItem> expectedResultFilter) {
 
 		return createQueryTest(name, allItems, filter, expectedResultFilter, null, null, null, null, false, null);
 	}
 
-	private TestCase createQueryTest(String name, final List<StringIdTableItem> allItems, final MobileServiceQuery<?> filter,
+	private TestCase createQueryTest(String name, final List<StringIdTableItem> allItems, final Query filter,
 			final ListFilter<StringIdTableItem> expectedResultFilter, final Integer top, final Integer skip, final List<Pair<String, QueryOrder>> orderBy,
 			final String[] projection, final boolean includeInlineCount, final Class<?> expectedExceptionClass) {
 
@@ -140,7 +146,7 @@ public class StringIdTests extends TestGroup {
 			@Override
 			protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
 
-				MobileServiceQuery<MobileServiceList<StringIdTableItem>> query;
+				ExecutableQuery<MobileServiceList<StringIdTableItem>> query;
 
 				if (filter != null) {
 					log("add filter");
@@ -219,16 +225,16 @@ public class StringIdTests extends TestGroup {
 				final JsonObject json = new JsonParser().parse(jsonString).getAsJsonObject();
 
 				log("insert item");
-				
-				try{
-				
+
+				try {
+
 					JsonObject jsonEntity = table.insert(json).get();
-					
+
 					String id = jsonEntity.get("id").getAsString();
 					log("lookup item " + id);
-					
+
 					JsonObject newJsonEntity = (JsonObject) table.lookUp(id).get();
-					
+
 					log("verify items are equal");
 					if (!Util.compareJson(json, newJsonEntity)) {
 						createResultFromException(result, new ExpectedValueException(jsonEntity, newJsonEntity));
@@ -236,8 +242,7 @@ public class StringIdTests extends TestGroup {
 
 					if (callback != null)
 						callback.onTestComplete(test, result);
-				}
-				catch(Exception exception) {
+				} catch (Exception exception) {
 
 					createResultFromException(result, exception);
 					if (callback != null)
@@ -267,13 +272,13 @@ public class StringIdTests extends TestGroup {
 				}
 
 				log("insert item");
-				
+
 				try {
 					StringIdTableItem entity = table.insert(element).get();
-				
+
 					log("lookup item " + entity.id);
 					StringIdTableItem newEntity = table.lookUp(entity.id).get();
-		
+
 					entity.id = newEntity.id; // patch
 												// to
 												// make
@@ -284,12 +289,11 @@ public class StringIdTests extends TestGroup {
 					if (!Util.compare(entity, newEntity)) {
 						result.setException(new ExpectedValueException(entity, newEntity));
 						result.setStatus(TestStatus.Failed);
-					} 
-				
+					}
+
 					if (callback != null)
 						callback.onTestComplete(test, result);
-				}
-				catch(Exception exception) {
+				} catch (Exception exception) {
 					createResultFromException(result, exception);
 					if (callback != null)
 						callback.onTestComplete(test, result);

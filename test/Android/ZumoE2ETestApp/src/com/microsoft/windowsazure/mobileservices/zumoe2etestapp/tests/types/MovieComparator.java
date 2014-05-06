@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import com.microsoft.windowsazure.mobileservices.table.QueryOrder;
+import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 
 import android.util.Pair;
 

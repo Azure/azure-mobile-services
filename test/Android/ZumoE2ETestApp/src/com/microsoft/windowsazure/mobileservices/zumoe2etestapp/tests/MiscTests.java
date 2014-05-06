@@ -43,8 +43,9 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceList;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceQuery;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
+import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
+import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.ExpectedValueException;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.FroyoAndroidHttpClientFactory;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
@@ -59,7 +60,7 @@ import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
-import static com.microsoft.windowsazure.mobileservices.table.MobileServiceQueryOperations.*;
+import static com.microsoft.windowsazure.mobileservices.table.query.QueryOperations.*;
 
 public class MiscTests extends TestGroup {
 
@@ -131,21 +132,23 @@ public class MiscTests extends TestGroup {
 
 						final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-//						ListenableFuture<ServiceFilterResponse> notifyFuture = nextServiceFilterCallback.onNext(request);
-//
-//						Futures.addCallback(notifyFuture, new FutureCallback<ServiceFilterResponse>() {
-//
-//							@Override
-//							public void onFailure(Throwable exception) {
-//								resultFuture.setException(exception);
-//							}
-//
-//							@Override
-//							public void onSuccess(ServiceFilterResponse v) {
-								resultFuture.set(new MockResponse(json, 201));
-//								return;
-//							}
-//						});
+						// ListenableFuture<ServiceFilterResponse> notifyFuture
+						// = nextServiceFilterCallback.onNext(request);
+						//
+						// Futures.addCallback(notifyFuture, new
+						// FutureCallback<ServiceFilterResponse>() {
+						//
+						// @Override
+						// public void onFailure(Throwable exception) {
+						// resultFuture.setException(exception);
+						// }
+						//
+						// @Override
+						// public void onSuccess(ServiceFilterResponse v) {
+						resultFuture.set(new MockResponse(json, 201));
+						// return;
+						// }
+						// });
 
 						return resultFuture;
 					}
@@ -165,8 +168,7 @@ public class MiscTests extends TestGroup {
 				} catch (Exception exception) {
 
 					createResultFromException(result, exception);
-				}
-				finally {
+				} finally {
 					if (callback != null)
 						callback.onTestComplete(testCase, result);
 				}
@@ -320,7 +322,7 @@ public class MiscTests extends TestGroup {
 				log("execute query");
 				if (typed) {
 					MobileServiceTable<ParamsTestTableItem> table = client.getTable(PARAM_TEST_TABLE_NAME, ParamsTestTableItem.class);
-					MobileServiceQuery<MobileServiceList<ParamsTestTableItem>> query = table.where();
+					ExecutableQuery<MobileServiceList<ParamsTestTableItem>> query = table.where();
 					addParametersToQuery(query, params);
 
 					try {
@@ -352,7 +354,7 @@ public class MiscTests extends TestGroup {
 					}
 				} else {
 					MobileServiceJsonTable table = client.getTable(PARAM_TEST_TABLE_NAME);
-					MobileServiceQuery<JsonElement> query = table.where();
+					ExecutableQuery<JsonElement> query = table.where();
 					addParametersToQuery(query, params);
 
 					try {
@@ -387,7 +389,7 @@ public class MiscTests extends TestGroup {
 				}
 			}
 
-			private void addParametersToQuery(MobileServiceQuery<?> query, HashMap<String, String> params) {
+			private void addParametersToQuery(Query query, HashMap<String, String> params) {
 				for (String key : params.keySet()) {
 					query.parameter(key, params.get(key));
 				}

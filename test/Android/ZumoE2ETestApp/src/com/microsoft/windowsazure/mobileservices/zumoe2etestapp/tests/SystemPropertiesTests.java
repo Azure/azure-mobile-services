@@ -41,9 +41,10 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceList;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedException;
 import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionBase;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceQuery;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
+import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
+import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.ExpectedValueException;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
@@ -55,7 +56,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.Stri
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.StringIdRoundTripTableElement;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.SystemPropertiesTestData;
 
-import static com.microsoft.windowsazure.mobileservices.table.MobileServiceQueryOperations.*;
+import static com.microsoft.windowsazure.mobileservices.table.query.QueryOperations.*;
 
 public class SystemPropertiesTests extends TestGroup {
 
@@ -667,14 +668,13 @@ public class SystemPropertiesTests extends TestGroup {
 		return read(table, null, parameters);
 	}
 
-	private <T> List<T> read(final MobileServiceTable<T> table, final MobileServiceQuery<?> filter) throws Exception {
+	private <T> List<T> read(final MobileServiceTable<T> table, final Query filter) throws Exception {
 		return read(table, filter, null);
 	}
 
-	private <T> List<T> read(final MobileServiceTable<T> table, final MobileServiceQuery<?> filter, final List<Pair<String, String>> parameters)
-			throws Exception {
+	private <T> List<T> read(final MobileServiceTable<T> table, final Query filter, final List<Pair<String, String>> parameters) throws Exception {
 
-		MobileServiceQuery<MobileServiceList<T>> query;
+		ExecutableQuery<MobileServiceList<T>> query;
 
 		if (filter != null) {
 			query = table.where(filter);

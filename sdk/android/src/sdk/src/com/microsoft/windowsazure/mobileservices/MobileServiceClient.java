@@ -560,6 +560,18 @@ public class MobileServiceClient {
 	/**
 	 * Creates a MobileServiceTable
 	 * 
+	 * @param clazz
+	 *            The class used for table name and data serialization
+	 * 
+	 * @return MobileServiceTable with the given name
+	 */
+	public <E> MobileServiceTable<E> getTable(Class<E> clazz) {
+		return this.getTable(clazz.getSimpleName(), clazz);
+	}
+
+	/**
+	 * Creates a MobileServiceTable
+	 * 
 	 * @param name
 	 *            Table name
 	 * @param clazz
@@ -570,20 +582,6 @@ public class MobileServiceClient {
 	public <E> MobileServiceTable<E> getTable(String name, Class<E> clazz) {
 		validateClass(clazz);
 		return new MobileServiceTable<E>(name, this, clazz);
-	}
-
-	/**
-	 * Creates a MobileServiceTable
-	 * 
-	 * @param clazz
-	 *            The class used for table name and data serialization
-	 * 
-	 * @return MobileServiceTable with the given name
-	 */
-	public <E> MobileServiceTable<E> getTable(Class<E> clazz) {
-		validateClass(clazz);
-
-		return new MobileServiceTable<E>(clazz.getSimpleName(), this, clazz);
 	}
 
 	/**
@@ -1122,6 +1120,7 @@ public class MobileServiceClient {
 				// trailing "/" to a valid URL
 			}
 		}
+
 		mAppUrl = normalizedAppURL;
 		mAppKey = appKey;
 		mLoginManager = new LoginManager(this);

@@ -46,6 +46,8 @@ import com.microsoft.windowsazure.mobileservices.http.RequestAsyncTask;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequestImpl;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.query.Query;
+import com.microsoft.windowsazure.mobileservices.table.query.QueryODataWriter;
 
 /**
  * Represents a Mobile Service Table
@@ -71,22 +73,23 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<JsonEle
 	 *            The query used to retrieve the rows
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
+	 * @throws MobileServiceException 
 	 */
-	public ListenableFuture<JsonElement> execute(final MobileServiceQuery<?> query) {
+	public ListenableFuture<JsonElement> execute(final Query query) throws MobileServiceException {
 		final SettableFuture<JsonElement> future = SettableFuture.create();
 
 		String url = null;
 		try {
-			String filtersUrl = URLEncoder.encode(query.toString().trim(), MobileServiceClient.UTF8_ENCODING);
+			String filtersUrl = URLEncoder.encode(QueryODataWriter.getRowFilter(query).trim(), MobileServiceClient.UTF8_ENCODING);
 			url = mClient.getAppUrl().toString() + TABLES_URL + URLEncoder.encode(mTableName, MobileServiceClient.UTF8_ENCODING);
 
 			if (filtersUrl.length() > 0) {
-				url += "?$filter=" + filtersUrl + query.getRowSetModifiers();
+				url += "?$filter=" + filtersUrl + QueryODataWriter.getRowSetModifiers(query, this);
 			} else {
-				String rowSetModifiers = query.getRowSetModifiers();
+				String rowSetModifiers = QueryODataWriter.getRowSetModifiers(query, this);
 
 				if (rowSetModifiers.length() > 0) {
-					url += "?" + query.getRowSetModifiers().substring(1);
+					url += "?" + QueryODataWriter.getRowSetModifiers(query, this).substring(1);
 				}
 			}
 
