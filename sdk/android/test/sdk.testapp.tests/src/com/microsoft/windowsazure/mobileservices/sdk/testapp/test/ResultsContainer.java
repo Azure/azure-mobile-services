@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.JsonElement;
-import com.microsoft.windowsazure.mobileservices.MobileServiceUser;
+import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
 
 /**
  * 

@@ -26,10 +26,11 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
-import java.util.concurrent.CountDownLatch;
 
 import android.test.InstrumentationTestCase;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -43,13 +44,12 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
-import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
-import com.microsoft.windowsazure.mobileservices.ServiceFilter;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
-import com.microsoft.windowsazure.mobileservices.TableOperationCallback;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
+
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 
 class Person {
 	@Expose
@@ -291,7 +291,6 @@ public class SerializationTests extends InstrumentationTestCase {
 	}
 
 	public void testDateSerializationShouldReturnExpectedJson() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
@@ -303,43 +302,33 @@ public class SerializationTests extends InstrumentationTestCase {
 
 		final DateTestObject dateObject = new DateTestObject(date.getTime());
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+				// Store the request content
+				container.setRequestContent(request.getContent());
+				ServiceFilterResponseMock mockedResponse = new ServiceFilterResponseMock();
+				mockedResponse.setContent("{}");
 
-				client = client.withFilter(new ServiceFilter() {
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-						// Store the request content
-						container.setRequestContent(request.getContent());
-						ServiceFilterResponseMock mockedResponse = new ServiceFilterResponseMock();
-						mockedResponse.setContent("{}");
-						responseCallback.onResponse(mockedResponse, null);
-					}
-				});
+				resultFuture.set(mockedResponse);
 
-				MobileServiceTable<DateTestObject> table = client.getTable(tableName, DateTestObject.class);
-
-				table.insert(dateObject, new TableOperationCallback<DateTestObject>() {
-
-					@Override
-					public void onCompleted(DateTestObject entity, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		MobileServiceTable<DateTestObject> table = client.getTable(tableName, DateTestObject.class);
+
+		table.insert(dateObject).get();
 
 		// Asserts
 		// Date should have UTC format (+4 that date value)
@@ -348,10 +337,6 @@ public class SerializationTests extends InstrumentationTestCase {
 
 	@SuppressWarnings("deprecation")
 	public void testDateDeserializationShouldReturnExpectedEntity() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store callback's results and do the asserts.
-		final ResultsContainer container = new ResultsContainer();
 
 		final String tableName = "MyTableName";
 
@@ -360,51 +345,38 @@ public class SerializationTests extends InstrumentationTestCase {
 
 		final DateTestObject dateObject = new DateTestObject(calendar.getTime());
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				client = client.withFilter(new ServiceFilter() {
+				// Create a mock response simulating an error
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setStatus(new StatusLineMock(404));
+				response.setContent("{\"date\":\"2013-01-22T14:30:40.000Z\"}");
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						// Create a mock response simulating an error
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setStatus(new StatusLineMock(404));
-						response.setContent("{\"date\":\"2013-01-22T14:30:40.000Z\"}");
+				resultFuture.set(response);
 
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				MobileServiceTable<DateTestObject> table = client.getTable(tableName, DateTestObject.class);
-
-				table.insert(dateObject, new TableOperationCallback<DateTestObject>() {
-
-					@Override
-					public void onCompleted(DateTestObject entity, Exception exception, ServiceFilterResponse response) {
-						container.setDateTestObject(entity);
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		MobileServiceTable<DateTestObject> table = client.getTable(tableName, DateTestObject.class);
 
+		DateTestObject entity = table.insert(dateObject).get();
 		// Asserts
 		Date expctedDate = dateObject.getDate();
 
-		DateTestObject returnedDateObject = container.getDateTestObject();
+		DateTestObject returnedDateObject = entity;
 		assertNotNull("DateTestObject should not be null", returnedDateObject);
 		Date d = returnedDateObject.getDate();
 		assertNotNull("Date should not be null", d);
@@ -417,7 +389,6 @@ public class SerializationTests extends InstrumentationTestCase {
 	}
 
 	public void testSerializationWithComplexObjectsShouldReturnExpectedJsonUsingMobileServiceTable() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
@@ -426,59 +397,48 @@ public class SerializationTests extends InstrumentationTestCase {
 
 		final ComplexPersonTestObject person = new ComplexPersonTestObject("John", "Doe", new Address("1345 Washington St", 1313, "US"));
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+				// Store the request content
+				container.setRequestContent(request.getContent());
 
-				client = client.withFilter(new ServiceFilter() {
+				ServiceFilterResponseMock mockedResponse = new ServiceFilterResponseMock();
+				mockedResponse.setContent("{}");
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-						// Store the request content
-						container.setRequestContent(request.getContent());
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						ServiceFilterResponseMock mockedResponse = new ServiceFilterResponseMock();
-						mockedResponse.setContent("{}");
+				resultFuture.set(mockedResponse);
 
-						responseCallback.onResponse(mockedResponse, null);
-					}
-				});
-
-				MobileServiceTable<ComplexPersonTestObject> table = client.getTable(tableName, ComplexPersonTestObject.class);
-
-				client.registerSerializer(Address.class, new JsonSerializer<Address>() {
-
-					@Override
-					public JsonElement serialize(Address arg0, Type arg1, JsonSerializationContext arg2) {
-
-						JsonObject json = new JsonObject();
-						json.addProperty("zipcode", arg0.getZipCode());
-						json.addProperty("country", arg0.getCountry());
-						json.addProperty("streetaddress", arg0.getStreetAddress());
-
-						return json;
-					}
-				});
-
-				table.insert(person, new TableOperationCallback<ComplexPersonTestObject>() {
-
-					@Override
-					public void onCompleted(ComplexPersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		MobileServiceTable<ComplexPersonTestObject> table = client.getTable(tableName, ComplexPersonTestObject.class);
+
+		client.registerSerializer(Address.class, new JsonSerializer<Address>() {
+
+			@Override
+			public JsonElement serialize(Address arg0, Type arg1, JsonSerializationContext arg2) {
+
+				JsonObject json = new JsonObject();
+				json.addProperty("zipcode", arg0.getZipCode());
+				json.addProperty("country", arg0.getCountry());
+				json.addProperty("streetaddress", arg0.getStreetAddress());
+
+				return json;
+			}
+		});
+
+		table.insert(person).get();
 
 		// Asserts
 		assertEquals(
@@ -487,7 +447,6 @@ public class SerializationTests extends InstrumentationTestCase {
 	}
 
 	public void testDeserializationWithComplexObjectsShouldReturnExpectedEntityUsingMobileServiceTable() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
@@ -496,63 +455,50 @@ public class SerializationTests extends InstrumentationTestCase {
 
 		final ComplexPersonTestObject person = new ComplexPersonTestObject("John", "Doe", new Address("1345 Washington St", 1313, "US"));
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				client = client.withFilter(new ServiceFilter() {
+				// Create a mock response simulating an error
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setStatus(new StatusLineMock(404));
+				response.setContent("{\"address\":{\"zipcode\":1313,\"country\":\"US\",\"streetaddress\":\"1345 Washington St\"},\"firstName\":\"John\",\"lastName\":\"Doe\"}");
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						// Create a mock response simulating an error
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setStatus(new StatusLineMock(404));
-						response.setContent("{\"address\":{\"zipcode\":1313,\"country\":\"US\",\"streetaddress\":\"1345 Washington St\"},\"firstName\":\"John\",\"lastName\":\"Doe\"}");
+				resultFuture.set(response);
 
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				MobileServiceTable<ComplexPersonTestObject> table = client.getTable(tableName, ComplexPersonTestObject.class);
-
-				client.registerDeserializer(Address.class, new JsonDeserializer<Address>() {
-
-					@Override
-					public Address deserialize(JsonElement arg0, Type arg1, JsonDeserializationContext arg2) throws JsonParseException {
-
-						Address a = new Address(arg0.getAsJsonObject().get("streetaddress").getAsString(), arg0.getAsJsonObject().get("zipcode").getAsInt(),
-								arg0.getAsJsonObject().get("country").getAsString());
-
-						return a;
-					}
-				});
-
-				table.insert(person, new TableOperationCallback<ComplexPersonTestObject>() {
-
-					@Override
-					public void onCompleted(ComplexPersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						container.setComplexPerson(entity);
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		MobileServiceTable<ComplexPersonTestObject> table = client.getTable(tableName, ComplexPersonTestObject.class);
+
+		client.registerDeserializer(Address.class, new JsonDeserializer<Address>() {
+
+			@Override
+			public Address deserialize(JsonElement arg0, Type arg1, JsonDeserializationContext arg2) throws JsonParseException {
+
+				Address a = new Address(arg0.getAsJsonObject().get("streetaddress").getAsString(), arg0.getAsJsonObject().get("zipcode").getAsInt(), arg0
+						.getAsJsonObject().get("country").getAsString());
+
+				return a;
+			}
+		});
+
+		ComplexPersonTestObject p = table.insert(person).get();
 
 		// Asserts
 		Address expectedAddress = person.getAddress();
 
-		ComplexPersonTestObject p = container.getComplexPerson();
 		assertNotNull("Person should not be null", p);
 		Address a = p.getAddress();
 		assertNotNull("Address should not be null", a);
