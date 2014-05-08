@@ -448,9 +448,6 @@ public class SerializationTests extends InstrumentationTestCase {
 
 	public void testDeserializationWithComplexObjectsShouldReturnExpectedEntityUsingMobileServiceTable() throws Throwable {
 
-		// Container to store callback's results and do the asserts.
-		final ResultsContainer container = new ResultsContainer();
-
 		final String tableName = "MyTableName";
 
 		final ComplexPersonTestObject person = new ComplexPersonTestObject("John", "Doe", new Address("1345 Washington St", 1313, "US"));
