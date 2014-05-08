@@ -60,11 +60,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             if (!string.IsNullOrEmpty(App.Harness.Settings.TagExpression))
             {
-                App.Harness.Settings.TagExpression += " - notDesktop";
+                App.Harness.Settings.TagExpression += " - notNetFramework";
             }
             else
             {
-                App.Harness.Settings.TagExpression = "!notDesktop";
+                App.Harness.Settings.TagExpression = "!notNetFramework";
             }
 
             this.NavigationService.Navigate(new TestPage());
