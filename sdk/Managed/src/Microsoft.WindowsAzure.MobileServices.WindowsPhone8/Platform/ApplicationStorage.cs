@@ -17,7 +17,16 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// A singleton instance of the <see cref="ApplicationStorage"/>.
         /// </summary>
-        private static readonly IApplicationStorage instance = new ApplicationStorage();
+        private static readonly IApplicationStorage instance = new ApplicationStorage();        
+
+        private ApplicationStorage() : this(string.Empty)
+        {
+        }
+
+        internal ApplicationStorage(string name)
+        {
+            this.StoragePrefix = name;
+        }
 
         /// <summary>
         /// A singleton instance of the <see cref="ApplicationStorage"/>.
@@ -30,21 +39,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
-        private ApplicationStorage() : this(string.Empty)
-        {
-        }
-
-        internal ApplicationStorage(string name)
-        {
-            this.StoragePrefix = name;
-        }
-
         private string StoragePrefix { get; set; }
-
-        public static IApplicationStorage GetNamedApplicationStorage(string name)
-        {
-            return new ApplicationStorage(name);
-        }
 
         /// <summary>
         /// Tries to read a setting's value from 

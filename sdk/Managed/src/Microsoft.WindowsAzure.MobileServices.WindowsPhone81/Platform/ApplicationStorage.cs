@@ -16,7 +16,6 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// </summary>
     internal class ApplicationStorage : IApplicationStorage
     {
-
         /// <summary>
         /// A singleton instance of the <see cref="IApplicationStorage"/>.
         /// </summary>
@@ -44,12 +43,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         public IPropertySet Values { get; set; }
-
-        public IApplicationStorage GetNamedApplicationStorage(string name)
-        {
-            return new ApplicationStorage(name);
-        }
-
+        
         /// <summary>
         /// Tries to read a setting's value from application storage. 
         /// </summary>
