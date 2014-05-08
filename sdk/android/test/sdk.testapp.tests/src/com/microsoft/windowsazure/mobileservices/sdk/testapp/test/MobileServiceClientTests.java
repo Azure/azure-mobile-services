@@ -22,7 +22,6 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
 
 import junit.framework.Assert;
 
@@ -34,22 +33,19 @@ import android.os.Build;
 import android.test.InstrumentationTestCase;
 import android.util.Pair;
 
-import com.google.gson.JsonElement;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.gson.JsonObject;
-import com.microsoft.windowsazure.mobileservices.MobileServiceAuthenticationProvider;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
-import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
-import com.microsoft.windowsazure.mobileservices.MobileServiceUser;
-import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
-import com.microsoft.windowsazure.mobileservices.ServiceFilter;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
-import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
-import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
-import com.microsoft.windowsazure.mobileservices.TableJsonQueryCallback;
-import com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback;
+import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider;
+import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
+
+import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 public class MobileServiceClientTests extends InstrumentationTestCase {
 	String appUrl = "";
@@ -206,7 +202,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 			// do nothing, it's OK
 		}
 	}
-	
+
 	public void testGetTableWithClassWithIdMemberShouldWork() {
 		MobileServiceClient client = null;
 		try {
@@ -214,11 +210,11 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 		} catch (MalformedURLException e1) {
 			fail("This should not happen");
 		}
-		
+
 		MobileServiceTable<PersonTestObject> table = client.getTable(PersonTestObject.class);
 		assertEquals("PersonTestObject", table.getTableName());
 	}
-	
+
 	public void testGetTableWithClassWithStringIdMemberShouldWork() {
 		MobileServiceClient client = null;
 		try {
@@ -226,11 +222,11 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 		} catch (MalformedURLException e1) {
 			fail("This should not happen");
 		}
-		
+
 		MobileServiceTable<PersonTestObjectWithStringId> table = client.getTable(PersonTestObjectWithStringId.class);
 		assertEquals("PersonTestObjectWithStringId", table.getTableName());
 	}
-	
+
 	public void testGetTableWithClassWithIdAnnotationShouldWork() {
 		MobileServiceClient client = null;
 		try {
@@ -238,11 +234,11 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 		} catch (MalformedURLException e1) {
 			fail("This should not happen");
 		}
-		
+
 		MobileServiceTable<IdPropertyWithGsonAnnotation> table = client.getTable(IdPropertyWithGsonAnnotation.class);
 		assertEquals("IdPropertyWithGsonAnnotation", table.getTableName());
 	}
-	
+
 	public void testGetTableWithClassWithoutIdShouldFail() {
 		MobileServiceClient client = null;
 		try {
@@ -250,7 +246,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 		} catch (MalformedURLException e1) {
 			fail("This should not happen");
 		}
-		
+
 		try {
 			@SuppressWarnings("unused")
 			MobileServiceTable<PersonTestObjectWithoutId> table = client.getTable(PersonTestObjectWithoutId.class);
@@ -259,7 +255,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 			// do nothing, it's OK
 		}
 	}
-	
+
 	public void testGetTableWithClassWithMultipleIdPropertiesShouldFail() throws Throwable {
 		String tableName = "MyTableName";
 		MobileServiceClient client = null;
@@ -277,9 +273,9 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 		} catch (IllegalArgumentException e) {
 			// It's ok
 		}
-		
+
 	}
-	
+
 	public void testGetTableWithInterfaceShouldThrowException() {
 		MobileServiceClient client = null;
 		try {
@@ -296,7 +292,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 			// do nothing, it's OK
 		}
 	}
-	
+
 	public void testGetTableWithAbstractClassShouldThrowException() {
 		MobileServiceClient client = null;
 		try {
@@ -313,455 +309,351 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 			// do nothing, it's OK
 		}
 	}
-	
-	interface MyInterface 
-	{
+
+	interface MyInterface {
 
 	}
-	
-	abstract class MyAbstractClass
-	{
+
+	abstract class MyAbstractClass {
 		int id;
 		String name;
 	}
 
 	public void testLoginShouldParseJsonUserCorreclty() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store callback's results and do the asserts.
-		final ResultsContainer container = new ResultsContainer();
 
 		final String userId = "id";
 		final String userToken = "userToken";
-		runTestOnUiThread(new Runnable() {
+
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+				// User JSon Template
+				String userJsonTemplate = "{\"user\":{\"userId\":\"%s\"}, \"authenticationToken\":\"%s\"}";
+				// Create a mock response simulating an error
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setStatus(new StatusLineMock(200));
+				response.setContent(String.format(userJsonTemplate, userId, userToken));
 
-				client = client.withFilter(new ServiceFilter() {
-
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-						// User JSon Template
-						String userJsonTemplate = "{\"user\":{\"userId\":\"%s\"}, \"authenticationToken\":\"%s\"}";
-						// Create a mock response simulating an error
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setStatus(new StatusLineMock(200));
-						response.setContent(String.format(userJsonTemplate, userId, userToken));
-
-						// create a mock request to replace the existing one
-						ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
-						nextServiceFilterCallback.onNext(requestMock, responseCallback);
-					}
-				});
-
-				try {
-					client.login(MobileServiceAuthenticationProvider.Facebook, "oAuthToken", new UserAuthenticationCallback() {
-
-						@Override
-						public void onCompleted(MobileServiceUser user, Exception exception, ServiceFilterResponse response) {
-							container.setUser(user);
-							latch.countDown();
-						}
-					});
-				} catch (Exception e) {
-					latch.countDown();
-				}
+				// create a mock request to replace the existing one
+				ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
+				return nextServiceFilterCallback.onNext(requestMock);
 			}
 		});
 
-		latch.await();
-
+		MobileServiceUser user = client.login(MobileServiceAuthenticationProvider.Facebook, "oAuthToken").get();
 		// Asserts
-		MobileServiceUser user = container.getUser();
 		assertNotNull(user);
 		assertEquals(userId, user.getUserId());
 		assertEquals(userToken, user.getAuthenticationToken());
 	}
 
 	public void testOperationShouldAddHeaders() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
-		runTestOnUiThread(new Runnable() {
+		// Create client
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		final String expectedAppKey = client.getAppKey();
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+				int zumoInstallationHeaderIndex = -1;
+				int zumoAppHeaderIndex = -1;
+				int userAgentHeaderIndex = -1;
+				int acceptHeaderIndex = -1;
+				int acceptEncodingHeaderIndex = -1;
+
+				String installationHeader = "X-ZUMO-INSTALLATION-ID";
+				String appHeader = "X-ZUMO-APPLICATION";
+				String userAgentHeader = HTTP.USER_AGENT;
+				String acceptHeader = "Accept";
+				String acceptEncodingHeader = "Accept-Encoding";
+
+				Header[] headers = request.getHeaders();
+				for (int i = 0; i < headers.length; i++) {
+					if (headers[i].getName() == installationHeader) {
+						zumoInstallationHeaderIndex = i;
+					} else if (headers[i].getName() == appHeader) {
+						zumoAppHeaderIndex = i;
+					} else if (headers[i].getName() == userAgentHeader) {
+						userAgentHeaderIndex = i;
+					} else if (headers[i].getName() == acceptHeader) {
+						acceptHeaderIndex = i;
+					} else if (headers[i].getName() == acceptEncodingHeader) {
+						acceptEncodingHeaderIndex = i;
+					}
 				}
 
-				final String expectedAppKey = client.getAppKey();
+				if (zumoInstallationHeaderIndex == -1) {
+					Assert.fail();
+				}
+				if (zumoAppHeaderIndex == -1) {
+					Assert.fail();
+				}
+				if (userAgentHeaderIndex == -1) {
+					Assert.fail();
+				}
+				if (acceptHeaderIndex == -1) {
+					Assert.fail();
+				}
+				if (acceptEncodingHeaderIndex == -1) {
+					Assert.fail();
+				}
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				String expectedUserAgent = String.format("ZUMO/%s (lang=%s; os=%s; os_version=%s; arch=%s; version=%s)", "1.0", "Java", "Android",
+						Build.VERSION.RELEASE, Build.CPU_ABI, "1.0.10814.0");
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				assertNotNull(headers[zumoInstallationHeaderIndex].getValue());
+				assertEquals(expectedAppKey, headers[zumoAppHeaderIndex].getValue());
+				assertEquals(expectedUserAgent, headers[userAgentHeaderIndex].getValue());
+				assertEquals("application/json", headers[acceptHeaderIndex].getValue());
+				assertEquals("gzip", headers[acceptEncodingHeaderIndex].getValue());
 
-						int zumoInstallationHeaderIndex = -1;
-						int zumoAppHeaderIndex = -1;
-						int userAgentHeaderIndex = -1;
-						int acceptHeaderIndex = -1;
-						int acceptEncodingHeaderIndex = -1;
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{}");
 
-						String installationHeader = "X-ZUMO-INSTALLATION-ID";
-						String appHeader = "X-ZUMO-APPLICATION";
-						String userAgentHeader = HTTP.USER_AGENT;
-						String acceptHeader = "Accept";
-						String acceptEncodingHeader = "Accept-Encoding";
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						Header[] headers = request.getHeaders();
-						for (int i = 0; i < headers.length; i++) {
-							if (headers[i].getName() == installationHeader) {
-								zumoInstallationHeaderIndex = i;
-							} else if (headers[i].getName() == appHeader) {
-								zumoAppHeaderIndex = i;
-							} else if (headers[i].getName() == userAgentHeader) {
-								userAgentHeaderIndex = i;
-							} else if (headers[i].getName() == acceptHeader) {
-								acceptHeaderIndex = i;
-							} else if (headers[i].getName() == acceptEncodingHeader) {
-								acceptEncodingHeaderIndex = i;
-							}
-						}
+				resultFuture.set(response);
 
-						if (zumoInstallationHeaderIndex == -1) {
-							Assert.fail();
-						}
-						if (zumoAppHeaderIndex == -1) {
-							Assert.fail();
-						}
-						if (userAgentHeaderIndex == -1) {
-							Assert.fail();
-						}
-						if (acceptHeaderIndex == -1) {
-							Assert.fail();
-						}
-						if (acceptEncodingHeaderIndex == -1) {
-							Assert.fail();
-						}
-
-						String expectedUserAgent = String.format("ZUMO/%s (lang=%s; os=%s; os_version=%s; arch=%s; version=%s)", "1.0", "Java", "Android",
-								Build.VERSION.RELEASE, Build.CPU_ABI, "1.0.10814.0");
-
-						assertNotNull(headers[zumoInstallationHeaderIndex].getValue());
-						assertEquals(expectedAppKey, headers[zumoAppHeaderIndex].getValue());
-						assertEquals(expectedUserAgent, headers[userAgentHeaderIndex].getValue());
-						assertEquals("application/json", headers[acceptHeaderIndex].getValue());
-						assertEquals("gzip", headers[acceptEncodingHeaderIndex].getValue());
-
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{}");
-
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				client.getTable("dummy").execute(new TableJsonQueryCallback() {
-
-					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		client.getTable("dummy").execute().get();
 	}
-	
+
 	public void testOperationShouldNotReplaceWithDefaultHeaders() throws Throwable {
-		
-		final CountDownLatch latch = new CountDownLatch(1);
-		
-		runTestOnUiThread(new Runnable() {
+
+		// Create client
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		final String acceptHeaderKey = "Accept";
+		final String acceptEncodingHeaderKey = "Accept-Encoding";
+		final String acceptHeaderValue = "text/plain";
+		final String acceptEncodingHeaderValue = "deflate";
+
+		List<Pair<String, String>> headers = new ArrayList<Pair<String, String>>();
+		headers.add(new Pair<String, String>(acceptHeaderKey, acceptHeaderValue));
+		headers.add(new Pair<String, String>(acceptEncodingHeaderKey, acceptEncodingHeaderValue));
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+				int acceptHeaderIndex = -1;
+				int acceptEncodingHeaderIndex = -1;
+				int acceptHeaderCount = 0;
+				int acceptEncodingHeaderCount = 0;
+
+				Header[] headers = request.getHeaders();
+				for (int i = 0; i < headers.length; i++) {
+					if (headers[i].getName() == acceptHeaderKey) {
+						acceptHeaderIndex = i;
+						acceptHeaderCount++;
+					} else if (headers[i].getName() == acceptEncodingHeaderKey) {
+						acceptEncodingHeaderIndex = i;
+						acceptEncodingHeaderCount++;
+					}
 				}
-				
-				final String acceptHeaderKey = "Accept";
-				final String acceptEncodingHeaderKey = "Accept-Encoding";
-				final String acceptHeaderValue = "text/plain";
-				final String acceptEncodingHeaderValue = "deflate";
-				
-				List<Pair<String, String>> headers = new ArrayList<Pair<String, String>>();
-				headers.add(new Pair<String, String>(acceptHeaderKey, acceptHeaderValue));
-				headers.add(new Pair<String, String>(acceptEncodingHeaderKey, acceptEncodingHeaderValue));
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				if (acceptHeaderIndex == -1 || acceptHeaderCount != 1) {
+					Assert.fail();
+				}
+				if (acceptEncodingHeaderIndex == -1 || acceptEncodingHeaderCount != 1) {
+					Assert.fail();
+				}
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-						int acceptHeaderIndex = -1;
-						int acceptEncodingHeaderIndex = -1;
-						int acceptHeaderCount = 0;
-						int acceptEncodingHeaderCount = 0;
+				assertEquals(acceptHeaderValue, headers[acceptHeaderIndex].getValue());
+				assertEquals(acceptEncodingHeaderValue, headers[acceptEncodingHeaderIndex].getValue());
 
-						Header[] headers = request.getHeaders();
-						for (int i = 0; i < headers.length; i++) {
-							if (headers[i].getName() == acceptHeaderKey) {
-								acceptHeaderIndex = i;
-								acceptHeaderCount++;
-							} else if (headers[i].getName() == acceptEncodingHeaderKey) {
-								acceptEncodingHeaderIndex = i;
-								acceptEncodingHeaderCount++;
-							}
-						}
-						
-						if (acceptHeaderIndex == -1 || acceptHeaderCount != 1) {
-							Assert.fail();
-						}
-						if (acceptEncodingHeaderIndex == -1 || acceptEncodingHeaderCount != 1) {
-							Assert.fail();
-						}
-						
-						assertEquals(acceptHeaderValue, headers[acceptHeaderIndex].getValue());
-						assertEquals(acceptEncodingHeaderValue, headers[acceptEncodingHeaderIndex].getValue());
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{}");
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{}");
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						responseCallback.onResponse(response, null);
-					}
-				});
+				resultFuture.set(response);
 
-				client.invokeApi("myApi", null, HttpPost.METHOD_NAME, headers, null, new ServiceFilterResponseCallback() {
-
-					@Override
-					public void onResponse(ServiceFilterResponse response, Exception exception) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		client.invokeApi("myApi", null, HttpPost.METHOD_NAME, headers).get();
 	}
-	
+
 	public void testOperationDefaultHeadersShouldBeIdempotent() throws Throwable {
-		
-		final CountDownLatch latch = new CountDownLatch(1);
-		
-		runTestOnUiThread(new Runnable() {
+
+		// Create client
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		final String acceptHeaderKey = "Accept";
+		final String acceptEncodingHeaderKey = "Accept-Encoding";
+		final String acceptHeaderValue = "application/json";
+		final String acceptEncodingHeaderValue = "gzip";
+
+		List<Pair<String, String>> headers = new ArrayList<Pair<String, String>>();
+		headers.add(new Pair<String, String>(acceptHeaderKey, acceptHeaderValue));
+		headers.add(new Pair<String, String>(acceptEncodingHeaderKey, acceptEncodingHeaderValue));
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+				int acceptHeaderIndex = -1;
+				int acceptEncodingHeaderIndex = -1;
+				int acceptHeaderCount = 0;
+				int acceptEncodingHeaderCount = 0;
+
+				Header[] headers = request.getHeaders();
+				for (int i = 0; i < headers.length; i++) {
+					if (headers[i].getName() == acceptHeaderKey) {
+						acceptHeaderIndex = i;
+						acceptHeaderCount++;
+					} else if (headers[i].getName() == acceptEncodingHeaderKey) {
+						acceptEncodingHeaderIndex = i;
+						acceptEncodingHeaderCount++;
+					}
 				}
-				
-				final String acceptHeaderKey = "Accept";
-				final String acceptEncodingHeaderKey = "Accept-Encoding";
-				final String acceptHeaderValue = "application/json";
-				final String acceptEncodingHeaderValue = "gzip";
-				
-				List<Pair<String, String>> headers = new ArrayList<Pair<String, String>>();
-				headers.add(new Pair<String, String>(acceptHeaderKey, acceptHeaderValue));
-				headers.add(new Pair<String, String>(acceptEncodingHeaderKey, acceptEncodingHeaderValue));
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				if (acceptHeaderIndex == -1 || acceptHeaderCount != 1) {
+					Assert.fail();
+				}
+				if (acceptEncodingHeaderIndex == -1 || acceptEncodingHeaderCount != 1) {
+					Assert.fail();
+				}
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-						int acceptHeaderIndex = -1;
-						int acceptEncodingHeaderIndex = -1;
-						int acceptHeaderCount = 0;
-						int acceptEncodingHeaderCount = 0;
+				assertEquals(acceptHeaderValue, headers[acceptHeaderIndex].getValue());
+				assertEquals(acceptEncodingHeaderValue, headers[acceptEncodingHeaderIndex].getValue());
 
-						Header[] headers = request.getHeaders();
-						for (int i = 0; i < headers.length; i++) {
-							if (headers[i].getName() == acceptHeaderKey) {
-								acceptHeaderIndex = i;
-								acceptHeaderCount++;
-							} else if (headers[i].getName() == acceptEncodingHeaderKey) {
-								acceptEncodingHeaderIndex = i;
-								acceptEncodingHeaderCount++;
-							}
-						}
-						
-						if (acceptHeaderIndex == -1 || acceptHeaderCount != 1) {
-							Assert.fail();
-						}
-						if (acceptEncodingHeaderIndex == -1 || acceptEncodingHeaderCount != 1) {
-							Assert.fail();
-						}
-						
-						assertEquals(acceptHeaderValue, headers[acceptHeaderIndex].getValue());
-						assertEquals(acceptEncodingHeaderValue, headers[acceptEncodingHeaderIndex].getValue());
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{}");
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{}");
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						responseCallback.onResponse(response, null);
-					}
-				});
+				resultFuture.set(response);
 
-				client.invokeApi("myApi", null, HttpPost.METHOD_NAME, headers, null, new ServiceFilterResponseCallback() {
-
-					@Override
-					public void onResponse(ServiceFilterResponse response, Exception exception) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		client.invokeApi("myApi", null, HttpPost.METHOD_NAME, headers).get();
 	}
-	
+
 	public void testInsertUpdateShouldAddContentTypeJson() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(2);
 
-		runTestOnUiThread(new Runnable() {
+		// Create client
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+				Header[] headers = request.getHeaders();
+
+				boolean headerPresent = false;
+				for (int i = 0; i < headers.length; i++) {
+					if (headers[i].getName().equals(HTTP.CONTENT_TYPE) && headers[i].getValue().equals("application/json")) {
+						headerPresent = true;
+					}
 				}
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				assertTrue("Header not present", headerPresent);
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{}");
 
-						Header[] headers = request.getHeaders();
-						
-						boolean headerPresent = false;
-						for (int i = 0; i < headers.length; i++) {
-							if (headers[i].getName().equals(HTTP.CONTENT_TYPE) && headers[i].getValue().equals("application/json")) {
-								headerPresent = true;
-							}
-						}
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						assertTrue("Header not present", headerPresent);
+				resultFuture.set(response);
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{}");
-
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				JsonObject jsonObject = new JsonObject();
-				jsonObject.addProperty("someValue", 42);
-				
-				client.getTable("dummy").insert(jsonObject, new TableJsonOperationCallback() {
-					
-					@Override
-					public void onCompleted(JsonObject jsonObject, Exception exception,
-							ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
-				
-				client.getTable("dummy").update(jsonObject, new TableJsonOperationCallback() {
-					
-					@Override
-					public void onCompleted(JsonObject jsonObject, Exception exception,
-							ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		JsonObject jsonObject = new JsonObject();
+		jsonObject.addProperty("someValue", 42);
+
+		client.getTable("dummy").insert(jsonObject).get();
+
+		client.getTable("dummy").update(jsonObject).get();
+
 	}
-	
+
 	public void testDeleteQueryShouldNotAddContentTypeJson() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(2);
 
-		runTestOnUiThread(new Runnable() {
+		// Create client
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+				Header[] headers = request.getHeaders();
+
+				boolean headerPresent = false;
+				for (int i = 0; i < headers.length; i++) {
+					if (headers[i].getName().equals(HTTP.CONTENT_TYPE) && headers[i].getValue().equals("application/json")) {
+						headerPresent = true;
+					}
 				}
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				assertFalse("Header is present", headerPresent);
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{}");
 
-						Header[] headers = request.getHeaders();
-						
-						boolean headerPresent = false;
-						for (int i = 0; i < headers.length; i++) {
-							if (headers[i].getName().equals(HTTP.CONTENT_TYPE) && headers[i].getValue().equals("application/json")) {
-								headerPresent = true;
-							}
-						}
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						assertFalse("Header is present", headerPresent);
+				resultFuture.set(response);
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{}");
-
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				client.getTable("dummy").delete(42, new TableDeleteCallback() {
-					
-					@Override
-					public void onCompleted(Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
-				
-				client.getTable("dummy").execute(new TableJsonQueryCallback() {
-					
-					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception,
-							ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
-	}
+		client.getTable("dummy").delete(42).get();
 
+		client.getTable("dummy").execute().get();
+	}
 }
