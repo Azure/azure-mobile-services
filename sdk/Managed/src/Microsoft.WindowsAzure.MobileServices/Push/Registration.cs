@@ -45,7 +45,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         [JsonProperty(PropertyName = "platform")]
-        public string Platform {
+        public string Platform
+        {
             get
             {
                 return Microsoft.WindowsAzure.MobileServices.Platform.Instance.PushUtility.GetPlatform();
@@ -69,13 +70,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The registration id.
         /// </summary>
         [JsonProperty(PropertyName = "registrationId")]
-        public string RegistrationId { get; set; }
-
-        /// <summary>
-        /// Internal--Helper method hinting to Json.Net that RegistrationId should not be serialized
-        /// </summary>
-        /// <returns>false</returns>
-        public bool ShouldSerializeRegistrationId() { return false; }
+        public string RegistrationId { get; set; }        
 
         /// <summary>
         /// The name of the registration is stored locally with the registrationId
@@ -86,6 +81,15 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return NativeRegistrationName;
             }
+        }
+
+        /// <summary>
+        /// Internal--Helper method hinting to Json.Net that RegistrationId should not be serialized
+        /// </summary>
+        /// <returns>false</returns>
+        public bool ShouldSerializeRegistrationId()
+        {
+            return false;
         }
     }
 }

@@ -107,7 +107,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 "Local storage should have the same RegistrationId as the one returned from service");
             Assert.AreEqual(registrationAfter.RegistrationId, registrationAfterUpdate.RegistrationId, "Expected the same RegistrationId to be used even after the refresh");
             Assert.AreEqual(registrationAfterUpdate.DeviceId, template.DeviceId, "Expected updated channelUri after 2nd register");
-            Assert.AreEqual(push.RegistrationManager.LocalStorageManager.ChannelUri, template.DeviceId, "Expected local storage to be updaed to the new channelUri after 2nd register");
+            Assert.AreEqual(push.RegistrationManager.LocalStorageManager.DeviceId, template.DeviceId, "Expected local storage to be updaed to the new channelUri after 2nd register");
 
             Assert.AreEqual(push.RegistrationManager.PushHttpClient.ListRegistrationsAsync(registrationAfter.DeviceId).Result.Count(), 0, "Original channel should be gone from service");
 

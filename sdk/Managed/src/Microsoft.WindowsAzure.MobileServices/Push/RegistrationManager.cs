@@ -14,14 +14,15 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// </summary>
     internal class RegistrationManager
     {
-        readonly internal PushHttpClient PushHttpClient;
-        readonly internal LocalStorageManager LocalStorageManager;
+        internal readonly PushHttpClient PushHttpClient;
+        internal readonly ILocalStorageManager LocalStorageManager;
 
-        public RegistrationManager(PushHttpClient pushHttpClient, LocalStorageManager storageManager)
+        public RegistrationManager(PushHttpClient pushHttpClient, ILocalStorageManager storageManager)
         {
             this.PushHttpClient = pushHttpClient;
 
             this.LocalStorageManager = storageManager;
+            storageManager.GetRegistration("foo");
         }
 
         /// <summary>
@@ -36,9 +37,9 @@ namespace Microsoft.WindowsAzure.MobileServices
             // if localStorage is empty or has different storage version, we need retrieve registrations and refresh local storage
             if (this.LocalStorageManager.IsRefreshNeeded)
             {
-                string refreshChannelUri = string.IsNullOrEmpty(this.LocalStorageManager.ChannelUri) ? registration.DeviceId : this.LocalStorageManager.ChannelUri;
-                await this.RefreshRegistrationsForChannelAsync(refreshChannelUri);
-                this.LocalStorageManager.RefreshFinished(refreshChannelUri);
+                string refreshDeviceId = string.IsNullOrEmpty(this.LocalStorageManager.DeviceId) ? registration.DeviceId : this.LocalStorageManager.DeviceId;
+                await this.RefreshRegistrationsForChannelAsync(refreshDeviceId);
+                this.LocalStorageManager.RefreshFinished(refreshDeviceId);
             }
 
             var cached = this.LocalStorageManager.GetRegistration(registration.Name);
@@ -71,9 +72,9 @@ namespace Microsoft.WindowsAzure.MobileServices
             await this.UpsertRegistration(registration);
         }
 
-        public async Task RefreshRegistrationsForChannelAsync(string channelUri)
+        public async Task RefreshRegistrationsForChannelAsync(string deviceId)
         {
-            var registrations = new List<Registration>(await this.PushHttpClient.ListRegistrationsAsync(channelUri));
+            var registrations = new List<Registration>(await this.PushHttpClient.ListRegistrationsAsync(deviceId));
             var count = registrations.Count;
             if (count == 0)
             {
@@ -103,9 +104,9 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.LocalStorageManager.DeleteRegistrationByName(registrationName);
         }
 
-        public async Task DeleteRegistrationsForChannelAsync(string channelUri)
+        public async Task DeleteRegistrationsForChannelAsync(string deviceId)
         {
-            var registrations = new List<Registration>(await this.PushHttpClient.ListRegistrationsAsync(channelUri));
+            var registrations = new List<Registration>(await this.PushHttpClient.ListRegistrationsAsync(deviceId));
             foreach (var registration in registrations)
             {
                 await this.PushHttpClient.UnregisterAsync(registration.RegistrationId);
@@ -116,14 +117,14 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.LocalStorageManager.ClearRegistrations();
         }
 
-        async Task<Registration> CreateRegistrationIdAsync(Registration registration)
+        private async Task<Registration> CreateRegistrationIdAsync(Registration registration)
         {
             registration.RegistrationId = await this.PushHttpClient.CreateRegistrationIdAsync();
             this.LocalStorageManager.UpdateRegistrationByName(registration.Name, registration.RegistrationId, registration.DeviceId);
             return registration;
         }
 
-        async Task UpsertRegistration(Registration registration)
+        private async Task UpsertRegistration(Registration registration)
         {
             await this.PushHttpClient.CreateOrUpdateRegistrationAsync(registration);
             this.LocalStorageManager.UpdateRegistrationByName(registration.Name, registration.RegistrationId, registration.DeviceId);

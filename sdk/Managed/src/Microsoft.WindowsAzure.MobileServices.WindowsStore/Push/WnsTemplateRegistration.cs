@@ -7,14 +7,21 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 
-using Windows.Data.Xml.Dom;
-
 using Newtonsoft.Json;
+
+using Windows.Data.Xml.Dom;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
+    internal enum TemplateRegistrationType
+    {
+        Toast,
+        Tile,
+        Badge
+    }
+
     /// <summary>
-    /// Registration is used to define a target that is registered for notifications. A WnsTemplateRegistration allows the client application
+    /// Registration is used to define a target that is registered for notifications. A <see cref="WnsTemplateRegistration"/> allows the client application
     /// to define the format of the registration.
     /// </summary>
     [JsonObject]
@@ -27,7 +34,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Create a WnsTemplateRegistration
+        /// Create a <see cref="WnsTemplateRegistration"/>
         /// </summary>
         /// <param name="channelUri">The channel uri</param>
         /// <param name="bodyTemplate">The template xml in string format</param>
@@ -38,7 +45,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Create a WnsTemplateRegistration
+        /// Create a <see cref="WnsTemplateRegistration"/>
         /// </summary>
         /// <param name="channelUri">The channel uri</param>
         /// <param name="bodyTemplate">The template xml in string format</param>
@@ -50,7 +57,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Create a WnsTemplateRegistration
+        /// Create a <see cref="WnsTemplateRegistration"/>
         /// </summary>
         /// <param name="channelUri">The channel uri</param>
         /// <param name="bodyTemplate">The template xml in string format</param>
@@ -131,6 +138,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         [JsonProperty(PropertyName = "templateBody")]
         public string BodyTemplate { get; internal set; }
 
+        public override string Name
+        {
+            get
+            {
+                return this.TemplateName;
+            }
+        }
+
         private static string DetectBodyType(XmlDocument template)
         {
             TemplateRegistrationType registrationType;
@@ -143,20 +158,5 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return "wns/" + template.FirstChild.NodeName.ToLowerInvariant();
         }
-
-        public override string Name
-        {
-            get
-            {
-                return this.TemplateName;
-            }
-        }
-    }
-
-    enum TemplateRegistrationType
-    {
-        Toast,
-        Tile,
-        Badge
-    }
+    }    
 }

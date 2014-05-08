@@ -19,12 +19,12 @@ namespace Microsoft.WindowsAzure.MobileServices
     internal sealed class MpnsTemplateRegistration : MpnsRegistration
     {
         /// <summary>
-        /// Name of the MpnsHeader key for Windows Phone Notification Target
+        /// Name of the <see cref="MpnsHeaders"/> key for Windows Phone Notification Target
         /// </summary>
         internal const string NotificationType = "X-WindowsPhone-Target";
 
         /// <summary>
-        /// Name of the MpnsHeader key for Windows Phone Notification Class
+        /// Name of the <see cref="MpnsHeaders"/> key for Windows Phone Notification Class
         /// </summary>
         internal const string NotificationClass = "X-NotificationClass";
 
@@ -111,6 +111,12 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.MpnsHeaders = new ReadOnlyDictionary<string, string>(this.MpnsHeaders);
         }
 
+        private enum TemplateRegistrationType
+        {
+            Toast,
+            Tile
+        }
+
         /// <summary>
         /// Gets headers that should be sent to WNS with the notification
         /// </summary>
@@ -128,6 +134,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         [JsonProperty(PropertyName = "templateBody")]
         public string BodyTemplate { get; private set; }
+
+        public override string Name
+        {
+            get
+            {
+                return this.TemplateName;
+            }
+        }
 
         private void DetectBodyType()
         {
@@ -192,20 +206,6 @@ namespace Microsoft.WindowsAzure.MobileServices
                         break;
                 }
             }
-        }
-
-        public override string Name
-        {
-            get
-            {
-                return this.TemplateName;
-            }
-        }
-
-        enum TemplateRegistrationType
-        {
-            Toast,
-            Tile
-        }
+        }        
     }
 }

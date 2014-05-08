@@ -45,7 +45,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Register a particular channelUri
         /// </summary>
         /// <param name="channelUri">The channelUri to register</param>
-        /// <param name="tags">The tags to register to receive notifcations from</param>
+        /// <param name="tags">The tags to register to receive notifications from</param>
         /// <returns>Task that completes when registration is complete</returns>
         public Task RegisterNativeAsync(string channelUri, IEnumerable<string> tags)
         {
@@ -76,7 +76,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="channelUri">The channelUri to register</param>
         /// <param name="xmlTemplate">The XmlDocument defining the template</param>
         /// <param name="templateName">The template name</param>
-        /// <param name="tags">The tags to register to receive notifcations from</param>
+        /// <param name="tags">The tags to register to receive notifications from</param>
         /// <returns>Task that completes when registration is complete</returns>        
         public Task RegisterTemplateAsync(string channelUri, string xmlTemplate, string templateName, IEnumerable<string> tags)
         {
@@ -97,7 +97,6 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             var registration = new MpnsTemplateRegistration(channelUri, xmlTemplate, templateName, tags, null);
             return this.RegistrationManager.RegisterAsync(registration);
-
         }
 
         /// <summary>

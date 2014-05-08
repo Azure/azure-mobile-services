@@ -9,31 +9,26 @@ using System.Linq;
 using Newtonsoft.Json;
 
 namespace Microsoft.WindowsAzure.MobileServices
-{
-    
-
+{    
     /// <summary>
     /// The value will be stored in the following keys:
     ///     Version: the storage version
-    ///     ChannelUri: the latest channelUri used for creation.
-    ///     Registrations: {registrationName1}:{registrationId1};{registrationName2}:{registrationId2}
-    ///  
-    /// When create/delete is called, channelUri will be update.
+    ///     DeviceId: the latest deviceId used for creation.
+    ///     Registrations: Json representation of Dictionary of StoredRegistrationEntry. (Registration name and RegistrationId)
+    /// When create/delete is called, deviceId will be updated.
     /// When create/update/get/delete registrations, registrations value will be updated.
     /// </summary>
     internal class LocalStorageManager : ILocalStorageManager
     {
         internal const string StorageVersion = "v1.1.0";
-
         internal const string KeyNameVersion = "Version";
-        internal const string KeyNameChannelUri = "ChannelUri";
+        internal const string KeyNameDeviceId = "DeviceId";
         internal const string KeyNameRegistrations = "Registrations";
 
-        private string channelUri;
-
+        private readonly IApplicationStorage storage; 
+        
+        private string deviceId;
         private IDictionary<string, StoredRegistrationEntry> registrations;
-
-        private readonly IApplicationStorage storage;
 
         public LocalStorageManager(string name)
         {
@@ -42,19 +37,20 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.InitializeRegistrationInfoFromStorage();
         }
 
-        public bool IsRefreshNeeded { get; internal set; }
+        public bool IsRefreshNeeded { get; set; }
 
-        public string ChannelUri
+        public string DeviceId
         {
             get
             {
-                return this.channelUri;
+                return this.deviceId;
             }
-            set
+            
+            private set
             {
-                if (this.channelUri == null || !this.channelUri.Equals(value))
+                if (this.deviceId == null || !this.deviceId.Equals(value))
                 {
-                    this.channelUri = value;
+                    this.deviceId = value;
                     this.Flush();
                 }
             }
@@ -89,7 +85,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             lock (this.registrations)
             {
-                var found = registrations.FirstOrDefault(v => v.Value.RegistrationId.Equals(registrationId));
+                var found = this.registrations.FirstOrDefault(v => v.Value.RegistrationId.Equals(registrationId));
                 if (!found.Equals(default(KeyValuePair<string, StoredRegistrationEntry>)))
                 {
                     this.DeleteRegistrationByName(found.Key);
@@ -97,31 +93,31 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
-        public void UpdateRegistrationByName(string registrationName, string registrationId, string registrationChannelUri)
+        public void UpdateRegistrationByName(string registrationName, string registrationId, string registrationDeviceId)
         {
             StoredRegistrationEntry cacheReg = new StoredRegistrationEntry(registrationName, registrationId);
 
             lock (this.registrations)
             {
                 this.registrations[registrationName] = cacheReg;
-                this.channelUri = registrationChannelUri;
+                this.deviceId = registrationDeviceId;
                 this.Flush();
             }
         }
 
-        public void UpdateRegistrationByRegistrationId(string registrationId, string registrationName, string registrationChannelUri)
+        public void UpdateRegistrationByRegistrationId(string registrationId, string registrationName, string registrationDeviceId)
         {
             lock (this.registrations)
             {
                 // update registration is registrationId is in cached registrations, otherwise create new one
-                var found = registrations.FirstOrDefault(v => v.Value.RegistrationId.Equals(registrationId));
+                var found = this.registrations.FirstOrDefault(v => v.Value.RegistrationId.Equals(registrationId));
                 if (!found.Equals(default(KeyValuePair<string, StoredRegistrationEntry>)))
                 {
-                    this.UpdateRegistrationByName(found.Key, found.Value.RegistrationId, registrationChannelUri);
+                    this.UpdateRegistrationByName(found.Key, found.Value.RegistrationId, registrationDeviceId);
                 }
                 else
                 {
-                    this.UpdateRegistrationByName(registrationName, registrationId, registrationChannelUri);
+                    this.UpdateRegistrationByName(registrationName, registrationId, registrationDeviceId);
                 }
             }
         }
@@ -131,13 +127,13 @@ namespace Microsoft.WindowsAzure.MobileServices
             lock (this.registrations)
             {
                 this.registrations.Clear();
-                Flush();
+                this.Flush();
             }
         }
 
-        public void RefreshFinished(string refreshedChannelUri)
+        public void RefreshFinished(string refreshedDeviceId)
         {
-            this.ChannelUri = refreshedChannelUri;
+            this.DeviceId = refreshedDeviceId;
             this.IsRefreshNeeded = false;
         }
 
@@ -146,7 +142,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             lock (this.registrations)
             {
                 this.storage.WriteSetting(KeyNameVersion, StorageVersion);
-                this.storage.WriteSetting(KeyNameChannelUri, this.channelUri);
+                this.storage.WriteSetting(KeyNameDeviceId, this.deviceId);
 
                 string str = JsonConvert.SerializeObject(this.registrations);
                 this.storage.WriteSetting(KeyNameRegistrations, str);
@@ -160,11 +156,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             // This method is only called from the constructor. As long as this is true, no locks are needed in this method.
             this.registrations = new Dictionary<string, StoredRegistrationEntry>();
 
-            // Read channelUri
+            // Read deviceId
             object channelObject;
-            if (this.storage.TryReadSetting(KeyNameChannelUri, out channelObject))
+            if (this.storage.TryReadSetting(KeyNameDeviceId, out channelObject))
             {
-                this.channelUri = (string)channelObject;
+                this.deviceId = (string)channelObject;
                 this.IsRefreshNeeded = true;
                 return;
             }

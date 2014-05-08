@@ -70,6 +70,7 @@
     <Compile Include="Push\LocalStorageManager.cs" />
     <Compile Include="Push\PushHttpClient.cs" />
     <Compile Include="Push\Registration.cs" />
+    <Compile Include="Push\RegistrationClassConverter.cs" />
     <Compile Include="Push\RegistrationManager.cs" />
     <Compile Include="Push\StoredRegistrationEntry.cs" />
     <Compile Include="Resources.Designer.cs">
