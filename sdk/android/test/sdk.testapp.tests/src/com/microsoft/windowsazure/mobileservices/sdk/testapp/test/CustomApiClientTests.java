@@ -56,51 +56,37 @@
 //	protected void tearDown() throws Exception {
 //		super.tearDown();
 //	}
-//	
+//
 //	public void testResponseWithNon2xxStatusShouldThrowException() throws Throwable {
-//		//final CountDownLatch latch = new CountDownLatch(1);
 //
-//		// Container to store callback's results and do the asserts.
-//		//final ResultsContainer container = new ResultsContainer();
+//		final ResultsContainer container = new ResultsContainer();
 //
-//		//runTestOnUiThread(new Runnable() {
+//		MobileServiceClient client = null;
 //
-//			@Override
-//			public void run() {
-//				MobileServiceClient client = null;
-//				try {
-//					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-//					
-//					client = client.withFilter(new ServiceFilter() {
-//						
-//						@Override
-//						public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request,
-//								NextServiceFilterCallback nextServiceFilterCallback) {
+//		try {
+//			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 //
-//							ServiceFilterResponseMock mockResponse = new ServiceFilterResponseMock();
-//							mockResponse.setStatus(new StatusLineMock(418)); //I'm a teapot status code
-//							ServiceFilterRequestMock mockRequest = new ServiceFilterRequestMock(mockResponse);
-//							
-//							return nextServiceFilterCallback.onNext(mockRequest);
-//						}
-//					});
-//					
-//				} catch (MalformedURLException e) {
-//					e.printStackTrace();
+//			client = client.withFilter(new ServiceFilter() {
+//
+//				@Override
+//				public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+//
+//					ServiceFilterResponseMock mockResponse = new ServiceFilterResponseMock();
+//					mockResponse.setStatus(new StatusLineMock(418)); // I'm a
+//																		// teapot
+//																		// status
+//																		// code
+//					ServiceFilterRequestMock mockRequest = new ServiceFilterRequestMock(mockResponse);
+//
+//					return nextServiceFilterCallback.onNext(mockRequest);
 //				}
+//			});
 //
-//				ServiceFilterResponse response = client.invokeApi("myApi", new byte[] {1, 2, 3, 4}, HttpPost.METHOD_NAME, null, null, new ServiceFilterResponseCallback() {
+//			ServiceFilterResponse response = client.invokeApi("myApi", new byte[] { 1, 2, 3, 4 }, HttpPost.METHOD_NAME, null, null).get();
 //
-//					@Override
-//					public void onResponse(ServiceFilterResponse response, Exception exception) {
-//						container.setException(exception);
-//						latch.countDown();
-//					}
-//				});
-//			}
-//		});
-//
-//		latch.await();
+//		} catch (Exception exception) {
+//			container.setException(exception);
+//		}
 //
 //		// Asserts
 //		Exception exception = container.getException();
@@ -110,36 +96,17 @@
 //	}
 //
 //	public void testInvokeWithNullApiShouldThrowException() throws Throwable {
-//		final CountDownLatch latch = new CountDownLatch(1);
-//
 //		// Container to store callback's results and do the asserts.
 //		final ResultsContainer container = new ResultsContainer();
 //
-//		runTestOnUiThread(new Runnable() {
+//		MobileServiceClient client = null;
+//		try {
+//			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+//			client.invokeApi(null, HttpPost.METHOD_NAME, null, null).get();
+//		} catch (Exception exception) {
+//			container.setException(exception);
+//		}
 //
-//			@Override
-//			public void run() {
-//				MobileServiceClient client = null;
-//				try {
-//					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-//				} catch (MalformedURLException e) {
-//					e.printStackTrace();
-//				}
-//
-//				client.invokeApi(null, null, HttpPost.METHOD_NAME, null, null, new ServiceFilterResponseCallback() {
-//
-//					@Override
-//					public void onResponse(ServiceFilterResponse response, Exception exception) {
-//						container.setException(exception);
-//						latch.countDown();
-//					}
-//				});
-//			}
-//		});
-//
-//		latch.await();
-//
-//		// Asserts
 //		// Asserts
 //		Exception exception = container.getException();
 //		if (!(exception instanceof IllegalArgumentException)) {
@@ -148,34 +115,17 @@
 //	}
 //
 //	public void testInvokeWithNullMethodShouldThrowException() throws Throwable {
-//		final CountDownLatch latch = new CountDownLatch(1);
 //
 //		// Container to store callback's results and do the asserts.
 //		final ResultsContainer container = new ResultsContainer();
 //
-//		runTestOnUiThread(new Runnable() {
-//
-//			@Override
-//			public void run() {
-//				MobileServiceClient client = null;
-//				try {
-//					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-//				} catch (MalformedURLException e) {
-//					e.printStackTrace();
-//				}
-//
-//				client.invokeApi("myApi", null, null, null, null, new ServiceFilterResponseCallback() {
-//
-//					@Override
-//					public void onResponse(ServiceFilterResponse response, Exception exception) {
-//						container.setException(exception);
-//						latch.countDown();
-//					}
-//				});
-//			}
-//		});
-//
-//		latch.await();
+//		MobileServiceClient client = null;
+//		try {
+//			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+//		} catch (Exception exception) {
+//			client.invokeApi("myApi", new Object(), null, null, null).get();
+//			container.setException(exception);
+//		}
 //
 //		// Asserts
 //		Exception exception = container.getException();
@@ -185,34 +135,17 @@
 //	}
 //
 //	public void testInvokeWithNotSupportedMethodShouldThrowException() throws Throwable {
-//		final CountDownLatch latch = new CountDownLatch(1);
 //
 //		// Container to store callback's results and do the asserts.
 //		final ResultsContainer container = new ResultsContainer();
 //
-//		runTestOnUiThread(new Runnable() {
-//
-//			@Override
-//			public void run() {
-//				MobileServiceClient client = null;
-//				try {
-//					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-//				} catch (MalformedURLException e) {
-//					e.printStackTrace();
-//				}
-//
-//				client.invokeApi("myApi", null, HttpHead.METHOD_NAME, null, null, new ServiceFilterResponseCallback() {
-//
-//					@Override
-//					public void onResponse(ServiceFilterResponse response, Exception exception) {
-//						container.setException(exception);
-//						latch.countDown();
-//					}
-//				});
-//			}
-//		});
-//
-//		latch.await();
+//		MobileServiceClient client = null;
+//		try {
+//			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+//			client.invokeApi("myApi", new Object(), HttpHead.METHOD_NAME, null, null).get();
+//		} catch (Exception exception) {
+//			container.setException(exception);
+//		}
 //
 //		// Asserts
 //		Exception exception = container.getException();
@@ -222,35 +155,18 @@
 //	}
 //
 //	public void testInvokeGenericWithNullClassShouldThrowException() throws Throwable {
-//		final CountDownLatch latch = new CountDownLatch(1);
 //
 //		// Container to store callback's results and do the asserts.
 //		final ResultsContainer container = new ResultsContainer();
 //
-//		runTestOnUiThread(new Runnable() {
+//		MobileServiceClient client = null;
+//		try {
+//			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+//			client.invokeApi("myApi", new Object(), HttpPost.METHOD_NAME, null, null).get();
 //
-//			@Override
-//			public void run() {
-//				MobileServiceClient client = null;
-//				try {
-//					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-//				} catch (MalformedURLException e) {
-//					e.printStackTrace();
-//				}
-//
-//				client.invokeApi("myApi", null, HttpPost.METHOD_NAME, null, null, new ApiOperationCallback<String>() {
-//
-//					@Override
-//					public void onCompleted(String result, Exception exception, ServiceFilterResponse response) {
-//						container.setException(exception);
-//
-//						latch.countDown();
-//					}
-//				});
-//			}
-//		});
-//
-//		latch.await();
+//		} catch (Exception exception) {
+//			container.setException(exception);
+//		}
 //
 //		// Asserts
 //		Exception exception = container.getException();
@@ -260,45 +176,30 @@
 //	}
 //
 //	public void testInvokeTypedSingleObject() throws Throwable {
-//		final CountDownLatch latch = new CountDownLatch(1);
 //
 //		// Container to store callback's results and do the asserts.
 //		final ResultsContainer container = new ResultsContainer();
 //
 //		final PersonTestObject p = new PersonTestObject("john", "doe", 30);
 //
-//		runTestOnUiThread(new Runnable() {
+//		MobileServiceClient client = null;
+//		try {
 //
-//			@Override
-//			public void run() {
-//				MobileServiceClient client = null;
-//				try {
-//					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-//				} catch (MalformedURLException e) {
-//					e.printStackTrace();
-//				}
+//			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 //
-//				client = client.withFilter(new EchoFilter());
+//			client = client.withFilter(new EchoFilter());
 //
-//				client.invokeApi("myApi", p, HttpPost.METHOD_NAME, null, PersonTestObject.class, new ApiOperationCallback<PersonTestObject>() {
+//			PersonTestObject result = client.invokeApi("myApi", p, HttpPost.METHOD_NAME, null, PersonTestObject.class).get();
 //
-//					@Override
-//					public void onCompleted(PersonTestObject result, Exception exception, ServiceFilterResponse response) {
-//						if (exception != null) {
-//							container.setException(exception);
-//						} else if (result == null) {
-//							container.setException(new Exception("Expected one person result"));
-//						} else {
-//							container.setPerson(result);
-//						}
-//
-//						latch.countDown();
-//					}
-//				});
+//			if (result == null) {
+//				container.setException(new Exception("Expected one person result"));
+//			} else {
+//				container.setPerson(result);
 //			}
-//		});
 //
-//		latch.await();
+//		} catch (Exception exception) {
+//			container.setException(exception);
+//		}
 //
 //		// Asserts
 //		Exception exception = container.getException();
@@ -310,47 +211,29 @@
 //			assertEquals(p.getAge(), container.getPerson().getAge());
 //		}
 //	}
-//	
+//
 //	public void testInvokeTypedSingleString() throws Throwable {
-//		final CountDownLatch latch = new CountDownLatch(1);
 //
 //		// Container to store callback's results and do the asserts.
 //		final ResultsContainer container = new ResultsContainer();
 //
 //		final String s = "Hello world";
 //
-//		runTestOnUiThread(new Runnable() {
+//		MobileServiceClient client = null;
+//		try {
+//			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+//			client = client.withFilter(new EchoFilter());
+//			String result = client.invokeApi("myApi", s, HttpPost.METHOD_NAME, null, String.class).get();
 //
-//			@Override
-//			public void run() {
-//				MobileServiceClient client = null;
-//				try {
-//					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-//				} catch (MalformedURLException e) {
-//					e.printStackTrace();
-//				}
-//
-//				client = client.withFilter(new EchoFilter());
-//
-//				client.invokeApi("myApi", s, HttpPost.METHOD_NAME, null, String.class, new ApiOperationCallback<String>() {
-//
-//					@Override
-//					public void onCompleted(String result, Exception exception, ServiceFilterResponse response) {
-//						if (exception != null) {
-//							container.setException(exception);
-//						} else if (result == null) {
-//							container.setException(new Exception("Expected one string result"));
-//						} else {
-//							container.setCustomResult(result);
-//						}
-//
-//						latch.countDown();
-//					}
-//				});
+//			if (result == null) {
+//				container.setException(new Exception("Expected one string result"));
+//			} else {
+//				container.setCustomResult(result);
 //			}
-//		});
 //
-//		latch.await();
+//		} catch (Exception exception) {
+//			container.setException(exception);
+//		}
 //
 //		// Asserts
 //		Exception exception = container.getException();
@@ -360,47 +243,32 @@
 //			assertEquals(s, container.getCustomResult());
 //		}
 //	}
-//	
+//
 //	public void testInvokeTypedSingleInteger() throws Throwable {
-//		final CountDownLatch latch = new CountDownLatch(1);
 //
 //		// Container to store callback's results and do the asserts.
 //		final ResultsContainer container = new ResultsContainer();
 //
 //		final Integer i = 42;
 //
-//		runTestOnUiThread(new Runnable() {
+//		MobileServiceClient client = null;
 //
-//			@Override
-//			public void run() {
-//				MobileServiceClient client = null;
-//				try {
-//					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-//				} catch (MalformedURLException e) {
-//					e.printStackTrace();
-//				}
+//		try {
+//			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 //
-//				client = client.withFilter(new EchoFilter());
+//			client = client.withFilter(new EchoFilter());
 //
-//				client.invokeApi("myApi", i, HttpPost.METHOD_NAME, null, Integer.class, new ApiOperationCallback<Integer>() {
+//			Integer result = client.invokeApi("myApi", i, HttpPost.METHOD_NAME, null, Integer.class).get();
 //
-//					@Override
-//					public void onCompleted(Integer result, Exception exception, ServiceFilterResponse response) {
-//						if (exception != null) {
-//							container.setException(exception);
-//						} else if (result == null) {
-//							container.setException(new Exception("Expected one integer result"));
-//						} else {
-//							container.setCustomResult(result);
-//						}
-//
-//						latch.countDown();
-//					}
-//				});
+//			if (result == null) {
+//				container.setException(new Exception("Expected one integer result"));
+//			} else {
+//				container.setCustomResult(result);
 //			}
-//		});
 //
-//		latch.await();
+//		} catch (Exception exception) {
+//			container.setException(exception);
+//		}
 //
 //		// Asserts
 //		Exception exception = container.getException();
@@ -410,47 +278,32 @@
 //			assertEquals(i, container.getCustomResult());
 //		}
 //	}
-//	
+//
 //	public void testInvokeTypedSingleFloat() throws Throwable {
-//		final CountDownLatch latch = new CountDownLatch(1);
 //
 //		// Container to store callback's results and do the asserts.
 //		final ResultsContainer container = new ResultsContainer();
 //
 //		final Float f = 3.14f;
 //
-//		runTestOnUiThread(new Runnable() {
+//		MobileServiceClient client = null;
 //
-//			@Override
-//			public void run() {
-//				MobileServiceClient client = null;
-//				try {
-//					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-//				} catch (MalformedURLException e) {
-//					e.printStackTrace();
-//				}
+//		try {
+//			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+//			client = client.withFilter(new EchoFilter());
 //
-//				client = client.withFilter(new EchoFilter());
+//			Float result = client.invokeApi("myApi", f, HttpPost.METHOD_NAME, null, Float.class).get();
 //
-//				client.invokeApi("myApi", f, HttpPost.METHOD_NAME, null, Float.class, new ApiOperationCallback<Float>() {
-//
-//					@Override
-//					public void onCompleted(Float result, Exception exception, ServiceFilterResponse response) {
-//						if (exception != null) {
-//							container.setException(exception);
-//						} else if (result == null) {
-//							container.setException(new Exception("Expected one float result"));
-//						} else {
-//							container.setCustomResult(result);
-//						}
-//
-//						latch.countDown();
-//					}
-//				});
+//			if (result == null) {
+//				container.setException(new Exception("Expected one float result"));
+//			} else {
+//				container.setCustomResult(result);
 //			}
-//		});
 //
-//		latch.await();
+//		} catch (Exception exception) {
+//			container.setException(exception);
+//
+//		}
 //
 //		// Asserts
 //		Exception exception = container.getException();
@@ -460,47 +313,31 @@
 //			assertEquals(f, container.getCustomResult());
 //		}
 //	}
-//	
+//
 //	public void testInvokeTypedSingleBoolean() throws Throwable {
-//		final CountDownLatch latch = new CountDownLatch(1);
 //
 //		// Container to store callback's results and do the asserts.
 //		final ResultsContainer container = new ResultsContainer();
 //
 //		final Boolean b = true;
 //
-//		runTestOnUiThread(new Runnable() {
+//		MobileServiceClient client = null;
+//		try {
+//			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 //
-//			@Override
-//			public void run() {
-//				MobileServiceClient client = null;
-//				try {
-//					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-//				} catch (MalformedURLException e) {
-//					e.printStackTrace();
-//				}
+//			client = client.withFilter(new EchoFilter());
 //
-//				client = client.withFilter(new EchoFilter());
+//			Boolean result = client.invokeApi("myApi", b, HttpPost.METHOD_NAME, null, Boolean.class).get();
 //
-//				client.invokeApi("myApi", b, HttpPost.METHOD_NAME, null, Boolean.class, new ApiOperationCallback<Boolean>() {
-//
-//					@Override
-//					public void onCompleted(Boolean result, Exception exception, ServiceFilterResponse response) {
-//						if (exception != null) {
-//							container.setException(exception);
-//						} else if (result == null) {
-//							container.setException(new Exception("Expected one boolean result"));
-//						} else {
-//							container.setCustomResult(result);
-//						}
-//
-//						latch.countDown();
-//					}
-//				});
+//			if (result == null) {
+//				container.setException(new Exception("Expected one boolean result"));
+//			} else {
+//				container.setCustomResult(result);
 //			}
-//		});
 //
-//		latch.await();
+//		} catch (Exception exception) {
+//			container.setException(exception);
+//		}
 //
 //		// Asserts
 //		Exception exception = container.getException();
@@ -512,7 +349,6 @@
 //	}
 //
 //	public void testInvokeTypedMultipleObject() throws Throwable {
-//		final CountDownLatch latch = new CountDownLatch(1);
 //
 //		// Container to store callback's results and do the asserts.
 //		final ResultsContainer container = new ResultsContainer();
@@ -520,42 +356,27 @@
 //		final PersonTestObject p1 = new PersonTestObject("john", "doe", 30);
 //		final PersonTestObject p2 = new PersonTestObject("jane", "does", 31);
 //
-//		runTestOnUiThread(new Runnable() {
+//		MobileServiceClient client = null;
+//		try {
+//			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 //
-//			@Override
-//			public void run() {
-//				MobileServiceClient client = null;
-//				try {
-//					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-//				} catch (MalformedURLException e) {
-//					e.printStackTrace();
-//				}
+//			client = client.withFilter(new EchoFilter());
 //
-//				client = client.withFilter(new EchoFilter());
+//			List<PersonTestObject> people = new ArrayList<PersonTestObject>();
+//			people.add(p1);
+//			people.add(p2);
 //
-//				List<PersonTestObject> people = new ArrayList<PersonTestObject>();
-//				people.add(p1);
-//				people.add(p2);
+//			PersonTestObject[] entities = client.invokeApi("myApi", people, HttpPost.METHOD_NAME, null, PersonTestObject[].class).get();
 //
-//				client.invokeApi("myApi", people, HttpPost.METHOD_NAME, null, PersonTestObject[].class, new ApiOperationCallback<PersonTestObject[]>() {
-//
-//					@Override
-//					public void onCompleted(PersonTestObject[] entities, Exception exception, ServiceFilterResponse response) {
-//						if (exception != null) {
-//							container.setException(exception);
-//						} else if (entities == null || entities.length != 2) {
-//							container.setException(new Exception("Expected two person result"));
-//						} else {
-//							container.setPeopleResult(entities);
-//						}
-//
-//						latch.countDown();
-//					}
-//				});
+//			if (entities == null || entities.length != 2) {
+//				container.setException(new Exception("Expected two person result"));
+//			} else {
+//				container.setPeopleResult(entities);
 //			}
-//		});
 //
-//		latch.await();
+//		} catch (Exception exception) {
+//			container.setException(exception);
+//		}
 //
 //		// Asserts
 //		Exception exception = container.getException();
@@ -573,45 +394,29 @@
 //	}
 //
 //	public void testInvokeJsonEcho() throws Throwable {
-//		final CountDownLatch latch = new CountDownLatch(1);
 //
 //		// Container to store callback's results and do the asserts.
 //		final ResultsContainer container = new ResultsContainer();
 //
 //		final JsonObject json = new JsonParser().parse("{\"message\": \"hello world\"}").getAsJsonObject();
 //
-//		runTestOnUiThread(new Runnable() {
+//		MobileServiceClient client = null;
+//		try {
+//			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 //
-//			@Override
-//			public void run() {
-//				MobileServiceClient client = null;
-//				try {
-//					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-//				} catch (MalformedURLException e) {
-//					e.printStackTrace();
-//				}
+//			client = client.withFilter(new EchoFilter());
 //
-//				client = client.withFilter(new EchoFilter());
+//			JsonElement result = client.invokeApi("myApi", json, HttpPost.METHOD_NAME, null).get();
 //
-//				client.invokeApi("myApi", json, HttpPost.METHOD_NAME, null, new ApiJsonOperationCallback() {
-//
-//					@Override
-//					public void onCompleted(JsonElement result, Exception exception, ServiceFilterResponse response) {
-//						if (exception != null) {
-//							container.setException(exception);
-//						} else if (result == null) {
-//							container.setException(new Exception("Expected result"));
-//						} else {
-//							container.setJsonResult(result);
-//						}
-//
-//						latch.countDown();
-//					}
-//				});
+//			if (result == null) {
+//				container.setException(new Exception("Expected result"));
+//			} else {
+//				container.setJsonResult(result);
 //			}
-//		});
 //
-//		latch.await();
+//		} catch (Exception exception) {
+//			container.setException(exception);
+//		}
 //
 //		// Asserts
 //		Exception exception = container.getException();
@@ -625,45 +430,29 @@
 //	}
 //
 //	public void testInvokeRandomByteEcho() throws Throwable {
-//		final CountDownLatch latch = new CountDownLatch(1);
 //
 //		// Container to store callback's results and do the asserts.
 //		final ResultsContainer container = new ResultsContainer();
 //
 //		final byte[] content = UUID.randomUUID().toString().getBytes(MobileServiceClient.UTF8_ENCODING);
 //
-//		runTestOnUiThread(new Runnable() {
+//		MobileServiceClient client = null;
+//		try {
+//			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 //
-//			@Override
-//			public void run() {
-//				MobileServiceClient client = null;
-//				try {
-//					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-//				} catch (MalformedURLException e) {
-//					e.printStackTrace();
-//				}
+//			client = client.withFilter(new EchoFilter());
 //
-//				client = client.withFilter(new EchoFilter());
+//			ServiceFilterResponse response = client.invokeApi("myApi", content, HttpPost.METHOD_NAME, null, null).get();
 //
-//				client.invokeApi("myApi", content, HttpPost.METHOD_NAME, null, null, new ServiceFilterResponseCallback() {
-//
-//					@Override
-//					public void onResponse(ServiceFilterResponse response, Exception exception) {
-//						if (exception != null) {
-//							container.setException(exception);
-//						} else if (response == null || response.getRawContent() == null) {
-//							container.setException(new Exception("Expected response"));
-//						} else {
-//							container.setRawResponseContent(response.getRawContent());
-//						}
-//
-//						latch.countDown();
-//					}
-//				});
+//			if (response == null || response.getRawContent() == null) {
+//				container.setException(new Exception("Expected response"));
+//			} else {
+//				container.setRawResponseContent(response.getRawContent());
 //			}
-//		});
 //
-//		latch.await();
+//		} catch (Exception exception) {
+//			container.setException(exception);
+//		}
 //
 //		// Asserts
 //		Exception exception = container.getException();
@@ -680,38 +469,23 @@
 //		// Container to store callback's results and do the asserts.
 //		final ResultsContainer container = new ResultsContainer();
 //
-//		runTestOnUiThread(new Runnable() {
+//		MobileServiceClient client = null;
+//		try {
+//			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 //
-//			@Override
-//			public void run() {
-//				MobileServiceClient client = null;
-//				try {
-//					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-//				} catch (MalformedURLException e) {
-//					e.printStackTrace();
-//				}
+//			client = client.withFilter(new HttpMetaEchoFilter());
 //
-//				client = client.withFilter(new HttpMetaEchoFilter());
+//			ServiceFilterResponse response = client.invokeApi("myApi", null, HttpGet.METHOD_NAME, null, null).get();
 //
-//				client.invokeApi("myApi", null, HttpGet.METHOD_NAME, null, null, new ServiceFilterResponseCallback() {
-//
-//					@Override
-//					public void onResponse(ServiceFilterResponse response, Exception exception) {
-//						if (exception != null) {
-//							container.setException(exception);
-//						} else if (response == null || response.getContent() == null) {
-//							container.setException(new Exception("Expected response"));
-//						} else {
-//							container.setResponseValue(response.getContent());
-//						}
-//
-//						latch.countDown();
-//					}
-//				});
+//			if (response == null || response.getContent() == null) {
+//				container.setException(new Exception("Expected response"));
+//			} else {
+//				container.setResponseValue(response.getContent());
 //			}
-//		});
 //
-//		latch.await();
+//		} catch (Exception exception) {
+//			container.setException(exception);
+//		}
 //
 //		// Asserts
 //		Exception exception = container.getException();
@@ -733,7 +507,7 @@
 //
 //		for (int i = 0; i < 10; i++) {
 //			String name;
-//			
+//
 //			do {
 //				name = UUID.randomUUID().toString();
 //			} while (headerNames.contains(name));
@@ -742,38 +516,23 @@
 //			headerNames.add(name);
 //		}
 //
-//		runTestOnUiThread(new Runnable() {
+//		MobileServiceClient client = null;
+//		try {
+//			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 //
-//			@Override
-//			public void run() {
-//				MobileServiceClient client = null;
-//				try {
-//					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-//				} catch (MalformedURLException e) {
-//					e.printStackTrace();
-//				}
+//			client = client.withFilter(new HttpMetaEchoFilter());
 //
-//				client = client.withFilter(new HttpMetaEchoFilter());
+//			ServiceFilterResponse response = client.invokeApi("myApi", null, HttpPost.METHOD_NAME, headers, null).get();
 //
-//				client.invokeApi("myApi", null, HttpPost.METHOD_NAME, headers, null, new ServiceFilterResponseCallback() {
-//
-//					@Override
-//					public void onResponse(ServiceFilterResponse response, Exception exception) {
-//						if (exception != null) {
-//							container.setException(exception);
-//						} else if (response == null || response.getContent() == null) {
-//							container.setException(new Exception("Expected response"));
-//						} else {
-//							container.setResponseValue(response.getContent());
-//						}
-//
-//						latch.countDown();
-//					}
-//				});
+//			if (response == null || response.getContent() == null) {
+//				container.setException(new Exception("Expected response"));
+//			} else {
+//				container.setResponseValue(response.getContent());
 //			}
-//		});
 //
-//		latch.await();
+//		} catch (Exception exception) {
+//			container.setException(exception);
+//		}
 //
 //		// Asserts
 //		Exception exception = container.getException();
@@ -799,9 +558,8 @@
 //
 //		}
 //	}
-//	
+//
 //	public void testInvokeParametersEcho() throws Throwable {
-//		final CountDownLatch latch = new CountDownLatch(1);
 //
 //		// Container to store callback's results and do the asserts.
 //		final ResultsContainer container = new ResultsContainer();
@@ -810,7 +568,7 @@
 //
 //		for (int i = 0; i < 10; i++) {
 //			String name;
-//			
+//
 //			do {
 //				name = UUID.randomUUID().toString();
 //			} while (parameterNames.contains(name));
@@ -819,38 +577,23 @@
 //			parameterNames.add(name);
 //		}
 //
-//		runTestOnUiThread(new Runnable() {
+//		MobileServiceClient client = null;
+//		try {
+//			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 //
-//			@Override
-//			public void run() {
-//				MobileServiceClient client = null;
-//				try {
-//					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-//				} catch (MalformedURLException e) {
-//					e.printStackTrace();
-//				}
+//			client = client.withFilter(new HttpMetaEchoFilter());
 //
-//				client = client.withFilter(new HttpMetaEchoFilter());
+//			ServiceFilterResponse response = client.invokeApi("myApi", null, HttpPost.METHOD_NAME, null, parameters).get();
 //
-//				client.invokeApi("myApi", null, HttpPost.METHOD_NAME, null, parameters, new ServiceFilterResponseCallback() {
-//
-//					@Override
-//					public void onResponse(ServiceFilterResponse response, Exception exception) {
-//						if (exception != null) {
-//							container.setException(exception);
-//						} else if (response == null || response.getContent() == null) {
-//							container.setException(new Exception("Expected response"));
-//						} else {
-//							container.setResponseValue(response.getContent());
-//						}
-//
-//						latch.countDown();
-//					}
-//				});
+//			if (response == null || response.getContent() == null) {
+//				container.setException(new Exception("Expected response"));
+//			} else {
+//				container.setResponseValue(response.getContent());
 //			}
-//		});
 //
-//		latch.await();
+//		} catch (Exception exception) {
+//			container.setException(exception);
+//		}
 //
 //		// Asserts
 //		Exception exception = container.getException();
@@ -875,5 +618,4 @@
 //			}
 //		}
 //	}
-//
 //}

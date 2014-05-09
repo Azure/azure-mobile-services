@@ -33,7 +33,17 @@
 //import android.content.SharedPreferences;
 //import android.preference.PreferenceManager;
 //import android.test.InstrumentationTestCase;
+//
+//import com.google.common.util.concurrent.ListenableFuture;
 //import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+//import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
+//import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
+//import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
+//import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+//import com.microsoft.windowsazure.mobileservices.notifications.MobileServicePush;
+//import com.microsoft.windowsazure.mobileservices.notifications.Registration;
+//import com.microsoft.windowsazure.mobileservices.notifications.RegistrationGoneException;
+//import com.microsoft.windowsazure.mobileservices.notifications.TemplateRegistration;
 //
 //public class EnhancedPushTests extends InstrumentationTestCase {
 //
@@ -71,237 +81,143 @@
 //	}
 //
 //	public void testRegisterUnregisterNative() throws Throwable {
+//
+//		Context context = getInstrumentation().getTargetContext();
+//		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+//
+//		final Container container = new Container();
+//		final String handle = "handle";
+//
+//		String registrationId = "registrationId";
+//
+//		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+//
+//		client = client.withFilter(getUpsertTestFilter(registrationId));
+//
+//		final MobileServicePush push = client.getPush();
+//
+//		forceRefreshSync(push, handle);
+//
 //		try {
-//			final CountDownLatch latch = new CountDownLatch(1);
 //
-//			Context context = getInstrumentation().getTargetContext();
-//			final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+//			Registration registration = push.register(handle, new String[] { "tag1" }).get();
 //
-//			final Container container = new Container();
-//			final String handle = "handle";
+//			container.registrationId = registration.getRegistrationId();
 //
-//			String registrationId = "registrationId";
+//			container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null);
 //
-//			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+//			push.unregister().get();
 //
-//			client = client.withFilter(getUpsertTestFilter(registrationId));
+//			container.unregister = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null);
 //
-//			final MobileServicePush push = client.getPush();
-//
-//			forceRefreshSync(push, handle);
-//
-//			push.register(handle, new String[] { "tag1" }, new RegistrationCallback() {
-//
-//				@Override
-//				public void onRegister(Registration registration, Exception exception) {
-//					if (exception != null) {
-//						container.exception = exception;
-//
-//						latch.countDown();
-//					} else {
-//						container.registrationId = registration.getRegistrationId();
-//
-//						container.storedRegistrationId = sharedPreferences.getString(
-//								STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null);
-//
-//						push.unregister(new UnregisterCallback() {
-//
-//							@Override
-//							public void onUnregister(Exception exception) {
-//								if (exception != null) {
-//									container.exception = exception;
-//								} else {
-//									container.unregister = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY
-//											+ DEFAULT_REGISTRATION_NAME, null);
-//								}
-//
-//								latch.countDown();
-//							}
-//						});
-//					}
-//				}
-//			});
-//
-//			latch.await();
-//
-//			// Asserts
-//			Exception exception = container.exception;
-//
-//			if (exception != null) {
-//				fail(exception.getMessage());
-//			} else {
-//				Assert.assertEquals(registrationId, container.storedRegistrationId);
-//				Assert.assertEquals(registrationId, container.registrationId);
-//				Assert.assertNull(container.unregister);
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
+//		} catch (Exception exception) {
+//			fail(exception.getCause().getMessage());
 //		}
+//
+//		Assert.assertEquals(registrationId, container.storedRegistrationId);
+//		Assert.assertEquals(registrationId, container.registrationId);
+//		Assert.assertNull(container.unregister);
 //	}
 //
 //	public void testRegisterUnregisterTemplate() throws Throwable {
+//
+//		Context context = getInstrumentation().getTargetContext();
+//		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+//
+//		final Container container = new Container();
+//		final String handle = "handle";
+//		final String templateName = "templateName";
+//
+//		String registrationId = "registrationId";
+//
+//		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+//
+//		client = client.withFilter(getUpsertTestFilter(registrationId));
+//
+//		final MobileServicePush push = client.getPush();
+//
+//		forceRefreshSync(push, handle);
+//
 //		try {
-//			final CountDownLatch latch = new CountDownLatch(1);
+//			TemplateRegistration registration = push.registerTemplate(handle, templateName, "{ }", new String[] { "tag1" }).get();
 //
-//			Context context = getInstrumentation().getTargetContext();
-//			final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+//			container.registrationId = registration.getRegistrationId();
 //
-//			final Container container = new Container();
-//			final String handle = "handle";
-//			final String templateName = "templateName";
+//			container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
 //
-//			String registrationId = "registrationId";
+//			push.unregisterTemplate(templateName).get();
 //
-//			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+//			container.unregister = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
 //
-//			client = client.withFilter(getUpsertTestFilter(registrationId));
+//			Assert.assertEquals(registrationId, container.storedRegistrationId);
+//			Assert.assertEquals(registrationId, container.registrationId);
+//			Assert.assertNull(container.unregister);
 //
-//			final MobileServicePush push = client.getPush();
-//
-//			forceRefreshSync(push, handle);
-//
-//			push.registerTemplate(handle, templateName, "{ }", new String[] { "tag1" }, new TemplateRegistrationCallback() {
-//
-//				@Override
-//				public void onRegister(TemplateRegistration registration, Exception exception) {
-//					if (exception != null) {
-//						container.exception = exception;
-//
-//						latch.countDown();
-//					} else {
-//						container.registrationId = registration.getRegistrationId();
-//
-//						container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
-//
-//						push.unregisterTemplate(templateName, new UnregisterCallback() {
-//
-//							@Override
-//							public void onUnregister(Exception exception) {
-//								if (exception != null) {
-//									container.exception = exception;
-//								} else {
-//									container.unregister = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
-//								}
-//
-//								latch.countDown();
-//							}
-//						});
-//					}
-//				}
-//			});
-//
-//			latch.await();
-//
-//			// Asserts
-//			Exception exception = container.exception;
-//
-//			if (exception != null) {
-//				fail(exception.getMessage());
-//			} else {
-//				Assert.assertEquals(registrationId, container.storedRegistrationId);
-//				Assert.assertEquals(registrationId, container.registrationId);
-//				Assert.assertNull(container.unregister);
-//			}
-//		} catch (Exception e) {
-//			e.printStackTrace();
+//		} catch (Exception exception) {
+//			fail(exception.getMessage());
 //		}
 //	}
 //
 //	public void testRegisterFailNative() throws Throwable {
+//
+//		Context context = getInstrumentation().getTargetContext();
+//		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+//
+//		final String handle = "handle";
+//
+//		String registrationId = "registrationId";
+//
+//		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+//
+//		client = client.withFilter(getUpsertFailTestFilter(registrationId));
+//
+//		final MobileServicePush push = client.getPush();
+//
+//		forceRefreshSync(push, handle);
+//
 //		try {
-//			final CountDownLatch latch = new CountDownLatch(1);
+//			push.register(handle, new String[] { "tag1" }).get();
+//			fail("Expected Exception RegistrationGoneException");
+//		} catch (Exception exception) {
 //
-//			Context context = getInstrumentation().getTargetContext();
-//			final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
-//
-//			final Container container = new Container();
-//			final String handle = "handle";
-//
-//			String registrationId = "registrationId";
-//
-//			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
-//
-//			client = client.withFilter(getUpsertFailTestFilter(registrationId));
-//
-//			final MobileServicePush push = client.getPush();
-//
-//			forceRefreshSync(push, handle);
-//
-//			push.register(handle, new String[] { "tag1" }, new RegistrationCallback() {
-//
-//				@Override
-//				public void onRegister(Registration registration, Exception exception) {
-//					if (exception != null) {
-//						container.exception = exception;
-//						container.storedRegistrationId = sharedPreferences.getString(
-//								STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null);
-//					}
-//
-//					latch.countDown();
-//				}
-//			});
-//
-//			latch.await();
-//
-//			// Asserts
-//			Exception exception = container.exception;
-//
-//			if (!(exception instanceof RegistrationGoneException)) {
+//			if (!(exception.getCause() instanceof RegistrationGoneException)) {
 //				fail("Expected Exception RegistrationGoneException");
 //			}
 //
-//			Assert.assertNull(container.storedRegistrationId);
-//		} catch (Exception e) {
-//			e.printStackTrace();
+//			Assert.assertNull(sharedPreferences.getString(
+//					STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null));
 //		}
 //	}
 //
 //	public void testRegisterFailTemplate() throws Throwable {
+//		
+//		Context context = getInstrumentation().getTargetContext();
+//		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+//
+//		final String handle = "handle";
+//		final String templateName = "templateName";
+//
+//		String registrationId = "registrationId";
+//
+//		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+//
+//		client = client.withFilter(getUpsertFailTestFilter(registrationId));
+//
+//		final MobileServicePush push = client.getPush();
+//
+//		forceRefreshSync(push, handle);
+//
 //		try {
-//			final CountDownLatch latch = new CountDownLatch(1);
+//			push.registerTemplate(handle, templateName, "{ }", new String[] { "tag1" }).get();
+//			fail("Expected Exception RegistrationGoneException");
+//		} catch (Exception exception) {
 //
-//			Context context = getInstrumentation().getTargetContext();
-//			final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
-//
-//			final Container container = new Container();
-//			final String handle = "handle";
-//			final String templateName = "templateName";
-//
-//			String registrationId = "registrationId";
-//
-//			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
-//
-//			client = client.withFilter(getUpsertFailTestFilter(registrationId));
-//
-//			final MobileServicePush push = client.getPush();
-//
-//			forceRefreshSync(push, handle);
-//
-//			push.registerTemplate(handle, templateName, "{ }", new String[] { "tag1" }, new TemplateRegistrationCallback() {
-//
-//				@Override
-//				public void onRegister(TemplateRegistration registration, Exception exception) {
-//					if (exception != null) {
-//						container.exception = exception;
-//						container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
-//					}
-//
-//					latch.countDown();
-//				}
-//			});
-//
-//			latch.await();
-//
-//			// Asserts
-//			Exception exception = container.exception;
-//
-//			if (!(exception instanceof RegistrationGoneException)) {
+//			if (!(exception.getCause() instanceof RegistrationGoneException)) {
 //				fail("Expected Exception RegistrationGoneException");
 //			}
 //
-//			Assert.assertNull(container.storedRegistrationId);
-//		} catch (Exception e) {
-//			e.printStackTrace();
+//			Assert.assertNull(sharedPreferences.getString(
+//					STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null));
 //		}
 //	}
 //
@@ -332,8 +248,15 @@
 //			forceRefreshSync(registrationPush, handle);
 //			forceRefreshSync(reRegistrationPush, handle);
 //
-//			registrationPush.register(handle, tags1, new RegistrationCallback() {
-//
+//			try {
+//				Registration registration = registrationPush.register(handle, tags1).get();
+//			
+//				Registration registration2 = reRegistrationPush.register(handle, tags2).get();
+//				
+//				
+//			} catch(Exception exception) {
+//				
+//			}
 //				@Override
 //				public void onRegister(Registration registration, Exception exception) {
 //					if (exception != null) {
@@ -755,8 +678,7 @@
 //		return new ServiceFilter() {
 //
 //			@Override
-//			public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-//					ServiceFilterResponseCallback responseCallback) {
+//			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 //				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 //				response.setStatus(new StatusLineMock(400));
 //
@@ -800,7 +722,7 @@
 //
 //				// create a mock request to replace the existing one
 //				ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
-//				nextServiceFilterCallback.onNext(requestMock, responseCallback);
+//				return nextServiceFilterCallback.onNext(requestMock);
 //			}
 //		};
 //	}
@@ -809,8 +731,7 @@
 //		return new ServiceFilter() {
 //
 //			@Override
-//			public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-//					ServiceFilterResponseCallback responseCallback) {
+//			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 //				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 //				response.setStatus(new StatusLineMock(400));
 //
@@ -851,7 +772,7 @@
 //
 //				// create a mock request to replace the existing one
 //				ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
-//				nextServiceFilterCallback.onNext(requestMock, responseCallback);
+//				return nextServiceFilterCallback.onNext(requestMock);
 //			}
 //		};
 //	}
