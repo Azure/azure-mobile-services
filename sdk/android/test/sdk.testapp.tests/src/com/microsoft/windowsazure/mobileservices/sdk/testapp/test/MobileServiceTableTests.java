@@ -45,7 +45,7 @@ import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
-import com.microsoft.windowsazure.mobileservices.table.QueryOrder;
+import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 
 public class MobileServiceTableTests extends InstrumentationTestCase {
 	String appUrl = "";
