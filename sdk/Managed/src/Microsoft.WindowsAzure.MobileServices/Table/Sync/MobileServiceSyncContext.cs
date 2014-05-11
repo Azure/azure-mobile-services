@@ -160,6 +160,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
             // let us not burden the server to calculate the count when we don't need it for pull
             queryDescription.IncludeTotalCount = false;
+
             var pull = new PullAction(table, this, queryDescription, this.opQueue, this.Store, cancellationToken);
             Task discard = this.syncQueue.Post(pull.ExecuteAsync, cancellationToken);
 

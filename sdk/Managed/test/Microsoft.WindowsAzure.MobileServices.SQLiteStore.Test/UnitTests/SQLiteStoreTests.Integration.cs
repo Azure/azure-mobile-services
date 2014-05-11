@@ -163,11 +163,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
                 await store.InitializeAsync();
 
-                await store.UpsertAsync("ITEMwithDATE", new JObject()
+                await store.UpsertAsync("ITEMwithDATE", new[]{new JObject()
                 {
                     { "ID", Guid.NewGuid() },
                     {"dATE", DateTime.UtcNow }
-                }, fromServer: false);
+                }}, fromServer: false);
             }
         }
 

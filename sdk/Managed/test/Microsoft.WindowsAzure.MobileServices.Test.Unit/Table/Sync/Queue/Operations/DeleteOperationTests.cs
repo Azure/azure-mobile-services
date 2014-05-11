@@ -7,6 +7,7 @@ using Microsoft.WindowsAzure.MobileServices.Sync;
 using Moq;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Net;
 
@@ -50,7 +51,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         {
             var store = new Mock<IMobileServiceLocalStore>();
             await this.operation.ExecuteLocalAsync(store.Object, null);
-            store.Verify(s => s.DeleteAsync("test", "abc"), Times.Once());
+            store.Verify(s => s.DeleteAsync("test", It.Is<string[]>(i => i.Contains("abc"))), Times.Once());
         }
 
         [TestMethod]
@@ -58,7 +59,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         {
             var store = new Mock<IMobileServiceLocalStore>();
             var storeError = new InvalidOperationException();
-            store.Setup(s => s.DeleteAsync("test", "abc")).Throws(storeError);
+            store.Setup(s => s.DeleteAsync("test", It.Is<string[]>(i => i.Contains("abc")))).Throws(storeError);
 
             var ex = await AssertEx.Throws<InvalidOperationException>(() => this.operation.ExecuteLocalAsync(store.Object, null));
             Assert.AreSame(storeError, ex);

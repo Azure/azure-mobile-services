@@ -27,29 +27,39 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         protected async override Task ProcessTableAsync()
         {
-
-            JToken remoteResults = await this.Table.ReadAsync(this.Query.ToQueryString());
+            JToken remoteResults = await this.Table.ReadAsync(this.Query.ToQueryString(), MobileServiceTable.IncludeDeleted(null));
             var result = QueryResult.Parse(remoteResults);
 
             this.CancellationToken.ThrowIfCancellationRequested();
 
-            await this.UpsertAll(result.Values);
+            await this.ProcessAll(result.Values);
         }
 
-        private async Task DeleteItems(IEnumerable<string> itemIds)
+        private async Task ProcessAll(JArray items)
         {
-            foreach (string id in itemIds)
-            {
-                await this.Store.DeleteAsync(this.Table.TableName, id);
-            }
-        }
+            var deletedIds = new List<string>();
+            var upsertList = new List<JObject>();
 
-        private async Task UpsertAll(JArray items)
-        {
             foreach (JObject item in items)
             {
-                await this.Store.UpsertAsync(this.Table.TableName, item, fromServer: true);
+                string id = (string)item[MobileServiceSystemColumns.Id];
+                if (id == null)
+                {
+                    continue;
+                }
+
+                if (item[MobileServiceSystemColumns.Deleted] != null && item.Value<bool>(MobileServiceSystemColumns.Deleted))
+                {
+                    deletedIds.Add(id);
+                }
+                else
+                {
+                    upsertList.Add(item);                    
+                }
             }
+
+            await this.Store.UpsertAsync(this.Table.TableName, upsertList, fromServer: true);
+            await this.Store.DeleteAsync(this.Table.TableName, deletedIds);
         }
     }
 }

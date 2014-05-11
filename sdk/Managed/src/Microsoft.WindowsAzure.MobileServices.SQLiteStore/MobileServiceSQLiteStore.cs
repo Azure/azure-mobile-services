@@ -26,7 +26,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         protected MobileServiceSQLiteStore() { }
 
         /// <summary>
-        /// Initializes a new instance of <see cref="MObileServiceSQLiteStore"/>
+        /// Initializes a new instance of <see cref="MobileServiceSQLiteStore"/>
         /// </summary>
         /// <param name="fileName">Name of the local SQLite database file.</param>
         public MobileServiceSQLiteStore(string fileName)
@@ -160,7 +160,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             var formatter = new SqlQueryFormatter(query);
             string sql = formatter.FormatSelect();
 
-
             IList<JObject> rows = this.ExecuteQuery(query.TableName, sql, formatter.Parameters);
             JToken result = new JArray(rows.ToArray());
 
@@ -180,33 +179,43 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         }
 
         /// <summary>
-        /// Updates an item if already exists otherwise inserts it.
+        /// Updates or inserts data in local table.
         /// </summary>
         /// <param name="tableName">Name of the local table.</param>
-        /// <param name="item">The item to insert or update.</param>
+        /// <param name="items">A list of items to be inserted.</param>
         /// <param name="fromServer"><code>true</code> if the call is made based on data coming from the server e.g. in a pull operation; <code>false</code> if the call is made by the client, such as insert or update calls on an <see cref="IMobileServiceSyncTable"/>.</param>
-        /// <returns>A task that completes when upsert has been performed.</returns>
-        public Task UpsertAsync(string tableName, JObject item, bool fromServer)
+        /// <returns>A task that completes when item has been upserted in local table.</returns>
+        public Task UpsertAsync(string tableName, IEnumerable<JObject> items, bool fromServer)
         {
             if (tableName == null)
             {
                 throw new ArgumentNullException("tableName");
             }
-            if (item == null)
+            if (items == null)
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException("items");
             }
 
             this.EnsureInitialized();
 
-            return UpsertAsyncInternal(tableName, item, fromServer);
+            return UpsertAsyncInternal(tableName, items, fromServer);
         }
 
-        private Task UpsertAsyncInternal(string tableName, JObject item, bool fromServer)
+        private Task UpsertAsyncInternal(string tableName, IEnumerable<JObject> items, bool fromServer)
         {
             TableDefinition table = GetTable(tableName);
 
-            var properties = item.Properties();
+            var parameters = new Dictionary<string, object>();
+            var sql = new StringBuilder();
+
+            var first = items.FirstOrDefault();
+
+            if (first == null)
+            {
+                return Task.FromResult(0);
+            }
+
+            IEnumerable<JProperty> properties = first.Properties();
             if (fromServer)
             {
                 properties = properties.Where(p => table.ContainsKey(p.Name));
@@ -217,32 +226,22 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 return Task.FromResult(0); // no query to execute if there are no columns in the item
             }
 
-            IList<JProperty> columns = properties.ToList();
-            string columnNames = String.Join(", ", columns.Select(c => SqlHelpers.FormatMember(c.Name)));
+            IList<string> columns = properties.Select(c => c.Name).ToList();
+            string columnNames = String.Join(", ", columns.Select(c => SqlHelpers.FormatMember(c)));
 
-            var sql = new StringBuilder();
-            sql.AppendFormat("INSERT OR REPLACE INTO {0} ({1}) VALUES (", SqlHelpers.FormatTableName(tableName), columnNames);
+            sql.AppendFormat("INSERT OR REPLACE INTO {0} ({1}) VALUES ", SqlHelpers.FormatTableName(tableName), columnNames);
 
-            string separator = String.Empty;
-            ColumnDefinition columnDefinition;
-
-            var parameters = new Dictionary<string, object>();
-
-            foreach (JProperty column in columns)
+            foreach (JObject item in items)
             {
-                if (!table.TryGetValue(column.Name, out columnDefinition))
-                {
-                    throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_ColumnNotDefined, column.Name, tableName));
-                }
-
-                object value = SqlHelpers.SerializeValue(column.Value, columnDefinition.SqlType, columnDefinition.Property.Value.Type);
-                string paramName = "@p" + (parameters.Count + 1);
-                parameters.Add(paramName, value);
-                sql.AppendFormat("{0}{1}", separator, paramName);
-                separator = ", ";
+                AppendInsertValuesSql(tableName, item, table, columns, sql, parameters);
             }
-            sql.Append(")");
-            this.ExecuteNonQuery(sql.ToString(), parameters);
+
+            if (parameters.Any())
+            {
+                sql.Remove(sql.Length-1, 1); // remove the trailing comma
+                this.ExecuteNonQuery(sql.ToString(), parameters);
+            }
+            
             return Task.FromResult(0);
         }        
 
@@ -269,30 +268,38 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         }
 
         /// <summary>
-        /// Deletes item from local table that has given id.
+        /// Deletes items from local table with the given list of ids
         /// </summary>
         /// <param name="tableName">Name of the local table.</param>
-        /// <param name="id">The id of the item to delete.</param>
-        /// <returns>A task that completes when item has been deleted.</returns>
-        public Task DeleteAsync(string tableName, string id)
+        /// <param name="ids">A list of ids of the items to be deleted</param>
+        /// <returns>A task that completes when delete query has executed.</returns>
+        public Task DeleteAsync(string tableName, IEnumerable<string> ids)
         {
             if (tableName == null)
             {
                 throw new ArgumentNullException("tableName");
             }
-            if (id == null)
+            if (ids == null)
             {
-                throw new ArgumentNullException("id");
+                throw new ArgumentNullException("ids");
             }
 
             this.EnsureInitialized();
 
-            string sql = string.Format("DELETE FROM {0} WHERE {1} = @id", SqlHelpers.FormatTableName(tableName), MobileServiceSystemColumns.Id);
+            string idRange = String.Join(",", ids.Select((_, i) => "@id" + i));
 
-            var parameters = new Dictionary<string, object>
+            string sql = string.Format("DELETE FROM {0} WHERE {1} IN ({2})", 
+                                       SqlHelpers.FormatTableName(tableName), 
+                                       MobileServiceSystemColumns.Id,
+                                       idRange);
+
+            var parameters = new Dictionary<string, object>();
+
+            int j=0;
+            foreach (string id in ids)
             {
-                {"@id", id}
-            };
+                parameters.Add("@id" + (j++), id);
+            }
 
             this.ExecuteNonQuery(sql, parameters);
             return Task.FromResult(0);
@@ -328,6 +335,30 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             return Task.FromResult(results.FirstOrDefault());
         }
 
+        private static void AppendInsertValuesSql(string tableName, JObject item, TableDefinition table, IEnumerable<string> columns, StringBuilder sql, Dictionary<string, object> parameters)
+        {
+            string separator = String.Empty;
+            ColumnDefinition columnDefinition;
+
+            sql.Append("(");
+            foreach (string columnName in columns)
+            {
+                if (!table.TryGetValue(columnName, out columnDefinition))
+                {
+                    throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_ColumnNotDefined, columnName, tableName));
+                }
+
+                JToken rawValue = item[columnName];
+
+                object value = SqlHelpers.SerializeValue(rawValue, columnDefinition.SqlType, columnDefinition.Property.Value.Type);
+                string paramName = "@p" + (parameters.Count + 1);
+                parameters.Add(paramName, value);
+                sql.AppendFormat("{0}{1}", separator, paramName);
+                separator = ", ";
+            }
+            sql.Append("),");
+        }
+
         private TableDefinition GetTable(string tableName)
         {
             TableDefinition table;
@@ -345,7 +376,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 { "id", name }, 
                 { "value", value } 
             };
-            await this.UpsertAsyncInternal(MobileServiceLocalSystemTables.Config, setting, fromServer: false);
+            await this.UpsertAsyncInternal(MobileServiceLocalSystemTables.Config, new[]{ setting }, fromServer: false);
         }
 
         internal virtual void CreateTableFromObject(string tableName, IEnumerable<ColumnDefinition> columns)
@@ -376,6 +407,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         {
             parameters = parameters ?? new Dictionary<string, object>();
 
+            
             using (ISQLiteStatement statement = this.connection.Prepare(sql))
             {
                 foreach (KeyValuePair<string, object> parameter in parameters)

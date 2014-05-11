@@ -134,6 +134,24 @@ namespace Microsoft.WindowsAzure.MobileServices
         Task<JToken> DeleteAsync(JObject instance, IDictionary<string, string> parameters);
 
         /// <summary>
+        /// Undeletes an <paramref name="instance"/> from the table.
+        /// </summary>
+        /// <param name="instance">The instance to undelete from the table.</param>
+        /// <returns>A task that will complete when the undelete finishes.</returns>
+        Task<JToken> UndeleteAsync(JObject instance);
+
+        /// <summary>
+        /// Undeletes an <paramref name="instance"/> from the table.
+        /// </summary>
+        /// <param name="instance">The instance to undelete from the table.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.
+        /// </param>
+        /// <returns>A task that will complete when the undelete finishes.</returns>
+        Task<JToken> UndeleteAsync(JObject instance, IDictionary<string, string> parameters);
+
+        /// <summary>
         /// Executes a lookup against a table.
         /// </summary>
         /// <param name="id">

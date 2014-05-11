@@ -153,6 +153,24 @@ namespace Microsoft.WindowsAzure.MobileServices
         Task UpdateAsync(T instance, IDictionary<string, string> parameters);
 
         /// <summary>
+        /// Undeletes an <paramref name="instance"/> from the table.
+        /// </summary>
+        /// <param name="instance">The instance to undelete from the table.</param>
+        /// <returns>A task that will complete when the undelete finishes.</returns>
+        Task UndeleteAsync(T instance);
+
+        /// <summary>
+        /// Undeletes an <paramref name="instance"/> from the table.
+        /// </summary>
+        /// <param name="instance">The instance to undelete from the table.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.
+        /// </param>
+        /// <returns>A task that will complete when the undelete finishes.</returns>
+        Task UndeleteAsync(T instance, IDictionary<string, string> parameters);
+
+        /// <summary>
         /// Delete an instance from the table.
         /// </summary>
         /// <param name="instance">
@@ -194,6 +212,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// A query against the table.
         /// </returns>
         IMobileServiceTableQuery<T> IncludeTotalCount();
+
+        /// <summary>
+        /// Creates a query that will ensure it gets the deleted records.
+        /// </summary>
+        /// <returns>
+        /// A query against the table.
+        /// </returns>
+        IMobileServiceTableQuery<T> IncludeDeleted();
 
         /// <summary>
         /// Applies to the source query the specified string key-value 

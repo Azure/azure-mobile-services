@@ -36,7 +36,8 @@ namespace Microsoft.WindowsAzure.MobileServices
             new Dictionary<string, MobileServiceSystemProperties>(StringComparer.OrdinalIgnoreCase) { 
                 { GetSystemPropertyString(MobileServiceSystemProperties.CreatedAt), MobileServiceSystemProperties.CreatedAt },
                 { GetSystemPropertyString(MobileServiceSystemProperties.UpdatedAt), MobileServiceSystemProperties.UpdatedAt } ,
-                { GetSystemPropertyString(MobileServiceSystemProperties.Version), MobileServiceSystemProperties.Version }
+                { GetSystemPropertyString(MobileServiceSystemProperties.Version), MobileServiceSystemProperties.Version },
+                { GetSystemPropertyString(MobileServiceSystemProperties.Deleted), MobileServiceSystemProperties.Deleted }
         };
 
         /// <summary>

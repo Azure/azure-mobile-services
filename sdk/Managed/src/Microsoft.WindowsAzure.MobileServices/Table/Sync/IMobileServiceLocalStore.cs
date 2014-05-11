@@ -34,10 +34,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// Updates or inserts data in local table.
         /// </summary>
         /// <param name="tableName">Name of the local table.</param>
-        /// <param name="item">Item to be inserted.</param>
+        /// <param name="items">A list of items to be inserted.</param>
         /// <param name="fromServer"><code>true</code> if the call is made based on data coming from the server e.g. in a pull operation; <code>false</code> if the call is made by the client, such as insert or update calls on an <see cref="IMobileServiceSyncTable"/>.</param>
         /// <returns>A task that completes when item has been upserted in local table.</returns>
-        Task UpsertAsync(string tableName, JObject item, bool fromServer);
+        Task UpsertAsync(string tableName, IEnumerable<JObject> items, bool fromServer);
 
         /// <summary>
         /// Deletes all the items from local table that match the query.
@@ -47,12 +47,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         Task DeleteAsync(MobileServiceTableQueryDescription query);
 
         /// <summary>
-        /// Deletes an item with the specified id in the local table.
+        /// Deletes items from local table with the given list of ids
         /// </summary>
         /// <param name="tableName">Name of the local table.</param>
-        /// <param name="id">Id for the object to be deleted.</param>
-        /// <returns>A task that compltes when delete has been executed on local table.</returns>
-        Task DeleteAsync(string tableName, string id);
+        /// <param name="ids">A list of ids of the items to be deleted</param>
+        /// <returns>A task that completes when delete query has executed.</returns>
+        Task DeleteAsync(string tableName, IEnumerable<string> ids);
 
         /// <summary>
         /// Reads a single item from local table with specified id.

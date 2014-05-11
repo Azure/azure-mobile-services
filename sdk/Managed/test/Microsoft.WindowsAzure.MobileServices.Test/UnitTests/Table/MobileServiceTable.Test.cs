@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json.Linq;
@@ -1578,6 +1579,45 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
         #endregion Delete Tests
 
+
+        [AsyncTestMethod]
+        public async Task UndeleteAsync()
+        {
+            await TestUndeleteAsync("", null);
+        }
+
+        [AsyncTestMethod]
+        public async Task UndeleteAsyncWithParameters()
+        {
+            await TestUndeleteAsync("?custom=value", new Dictionary<string,string>(){{"custom", "value"}});
+        }
+
+        private static async Task TestUndeleteAsync(string query, IDictionary<string, string> parameters)
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+
+            hijack.SetResponseContent("{\"id\":\"an id\",\"String\":\"Hey\"}");
+            hijack.OnSendingRequest = req =>
+            {
+                Assert.AreEqual(req.RequestUri.Query, query);
+                Assert.AreEqual(req.Method, HttpMethod.Post);
+                
+                // only id and version should be sent
+                Assert.IsNull(req.Content);
+                Assert.AreEqual(req.Headers.IfMatch.First().Tag, "\"abc\"");
+                return Task.FromResult(req);
+            };
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            IMobileServiceTable table = service.GetTable("someTable");
+
+            var obj = JToken.Parse("{\"id\":\"id\",\"value\":\"new\", \"blah\":\"doh\", \"__version\": \"abc\"}") as JObject;
+            JObject item = await table.UndeleteAsync(obj, parameters) as JObject;
+
+            Assert.AreEqual("an id", (string)item["id"]);
+            Assert.AreEqual("Hey", (string)item["String"]);
+        }
+
         #region System Property Tests
 
         [AsyncTestMethod]
@@ -1844,6 +1884,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 else if ((testSystemProperty & MobileServiceSystemProperties.Version) == MobileServiceSystemProperties.Version)
                 {
                     Assert.IsTrue(requestUri.Contains("__version"));
+                }
+                else if ((testSystemProperty & MobileServiceSystemProperties.Deleted) == MobileServiceSystemProperties.Deleted)
+                {
+                    Assert.IsTrue(requestUri.Contains("__deleted"));
                 }
             };
 

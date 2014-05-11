@@ -164,10 +164,44 @@ namespace Microsoft.WindowsAzure.MobileServices
             MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
             JObject value = serializer.Serialize(instance) as JObject;
 
-            JToken updatedValue = await TransformPreconditionFailedException(serializer, () =>this.UpdateAsync(value, parameters));
+            JToken updatedValue = await TransformPreconditionFailedException(serializer, () => this.UpdateAsync(value, parameters));
 
             serializer.Deserialize<T>(updatedValue, instance);
         }        
+
+         /// <summary>
+        /// Undeletes an <paramref name="instance"/> from the table.
+        /// </summary>
+        /// <param name="instance">The instance to undelete from the table.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.
+        /// </param>
+        /// <returns>A task that will complete when the undelete finishes.</returns>
+        public async Task UndeleteAsync(T instance, IDictionary<string, string> parameters)
+        {
+            if (instance == null)
+            {
+                throw new ArgumentNullException("instance");
+            }
+
+            MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
+            JObject value = serializer.Serialize(instance) as JObject;
+
+            JToken updatedValue = await TransformPreconditionFailedException(serializer, () => this.UndeleteAsync(value, parameters));
+
+            serializer.Deserialize<T>(updatedValue, instance);
+        }
+
+         /// <summary>
+        /// Undeletes an <paramref name="instance"/> from the table.
+        /// </summary>
+        /// <param name="instance">The instance to undelete from the table.</param>
+        /// <returns>A task that will complete when the undelete finishes.</returns>
+        public Task UndeleteAsync(T instance)
+        {
+            return this.UndeleteAsync(instance, null);
+        }
 
         /// <summary>
         /// Deletes an instance from the table.
@@ -312,7 +346,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public IMobileServiceTableQuery<T> CreateQuery()
         {
-            return this.queryProvider.Create(this, new T[0].AsQueryable(), new Dictionary<string, string>(), false);
+            return this.queryProvider.Create(this, new T[0].AsQueryable(), new Dictionary<string, string>(), includeTotalCount: false);
         }
 
         /// <summary>
@@ -460,6 +494,17 @@ namespace Microsoft.WindowsAzure.MobileServices
         public IMobileServiceTableQuery<T> IncludeTotalCount()
         {
             return this.CreateQuery().IncludeTotalCount();
+        }
+
+        /// <summary>
+        /// Creates a query that will ensure it gets the deleted records.
+        /// </summary>
+        /// <returns>
+        /// A query against the table.
+        /// </returns>
+        public IMobileServiceTableQuery<T> IncludeDeleted()
+        {
+            return this.CreateQuery().IncludeDeleted();
         }
 
         /// <summary>

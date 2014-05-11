@@ -34,5 +34,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The updatedAt column on a Mobile Service table.
         /// </summary>
         public static readonly string UpdatedAt = "__updatedAt";
+
+        /// <summary>
+        /// The deleted colum on a Mobile Service table.
+        /// </summary>
+        public static readonly string Deleted = "__deleted";
     }
 }

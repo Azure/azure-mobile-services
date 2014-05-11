@@ -137,7 +137,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public IMobileServiceTableQuery<T> CreateQuery()
         {
-            return this.queryProvider.Create(this.remoteTable, new T[0].AsQueryable(), new Dictionary<string, string>(), false);
+            return this.queryProvider.Create(this.remoteTable, new T[0].AsQueryable(), new Dictionary<string, string>(), includeTotalCount: false);
         }
 
         public IMobileServiceTableQuery<T> Where(Expression<Func<T, bool>> predicate)
