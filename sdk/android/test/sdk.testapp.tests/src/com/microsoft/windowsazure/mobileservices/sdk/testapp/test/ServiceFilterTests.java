@@ -20,6 +20,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
 import java.net.MalformedURLException;
+import java.util.concurrent.ExecutionException;
 
 import android.test.InstrumentationTestCase;
 
@@ -242,7 +243,16 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 			client.getTable("TestTable").lookUp(1).get();
 
 		} catch (Exception exception) {
-			assertTrue(exception.getCause().getMessage().startsWith("Error in filter 1"));
+			
+			Exception testException = null;
+			
+			if (exception instanceof ExecutionException) {
+				testException = (Exception) exception.getCause();
+			} else {
+				testException = exception;
+			}
+			
+			assertTrue(testException.getMessage().startsWith("Error in filter 1"));
 			hasException = true;
 		}
 		
@@ -301,7 +311,16 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 		} catch (Exception exception) {
 			// Assert
 			hasException = true;
-			assertTrue(exception.getCause().getMessage().startsWith("Error in filter 2"));
+			
+			Exception testException = null;
+			
+			if (exception instanceof ExecutionException) {
+				testException = (Exception) exception.getCause();
+			} else {
+				testException = exception;
+			}
+			
+			assertTrue(testException.getMessage().startsWith("Error in filter 2"));
 		}
 		
 		assertTrue(hasException);

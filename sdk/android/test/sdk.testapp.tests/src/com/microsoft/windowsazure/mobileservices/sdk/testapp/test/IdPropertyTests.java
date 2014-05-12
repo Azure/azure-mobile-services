@@ -24,6 +24,7 @@ import static com.microsoft.windowsazure.mobileservices.table.MobileServiceQuery
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 import android.test.InstrumentationTestCase;
 
@@ -103,7 +104,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 				container.setJsonResult(result);
 			}
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 
 		}
 
@@ -172,7 +177,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -240,7 +249,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -317,7 +330,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -379,7 +396,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -455,7 +476,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -521,7 +546,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 		// Asserts
 		Exception exception = container.getException();
@@ -586,7 +615,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -659,7 +692,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -717,7 +754,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -787,7 +828,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -851,7 +896,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -907,7 +956,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -971,7 +1024,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -1017,7 +1074,15 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				if (exception instanceof ExecutionException) {
+					container.setException(exception.getCause());
+				} else {
+					container.setException(exception);
+				}
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -1063,7 +1128,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -1122,7 +1191,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -1190,7 +1263,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -1258,7 +1335,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -1333,7 +1414,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -1393,7 +1478,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -1465,7 +1554,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -1531,7 +1624,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -1599,7 +1696,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -1657,7 +1758,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -1705,7 +1810,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -1763,7 +1872,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -1821,7 +1934,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -1890,7 +2007,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -1958,7 +2079,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -2026,7 +2151,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -2101,7 +2230,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -2161,7 +2294,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -2228,7 +2365,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -2294,7 +2435,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -2352,7 +2497,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -2410,7 +2559,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -2468,7 +2621,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -2516,7 +2673,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -2564,7 +2725,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -2617,7 +2782,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			msTable.delete(obj).get();
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -2669,7 +2838,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			msTable.delete(obj).get();
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -2771,7 +2944,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 		if (exception != null) {
 			fail(exception.getMessage());
-		} 
+		}
 	}
 
 	public void testDeleteWithNoIdResponseContent() throws Throwable {
@@ -2805,7 +2978,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			msTable.delete(obj).get();
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -2856,7 +3033,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			msTable.delete(obj).get();
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -2864,7 +3045,7 @@ public class IdPropertyTests extends InstrumentationTestCase {
 
 		if (exception != null) {
 			fail(exception.getMessage());
-		} 
+		}
 	}
 
 	public void testDeleteWithEmptyStringIdItem() throws Throwable {
@@ -3009,7 +3190,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			msTable.delete(obj).get();
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -3192,7 +3377,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -3262,7 +3451,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -3322,7 +3515,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -3382,7 +3579,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -3451,7 +3652,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -3511,7 +3716,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -3580,7 +3789,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -3640,7 +3853,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -3700,7 +3917,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 		// Asserts
 		Exception exception = container.getException();
@@ -3770,7 +3991,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -3895,7 +4120,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -3955,7 +4184,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -4024,7 +4257,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -4080,7 +4317,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -4140,7 +4381,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -4209,7 +4454,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -4269,7 +4518,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -4329,7 +4582,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -4402,7 +4659,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -4466,7 +4727,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -4520,7 +4785,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -4574,7 +4843,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -4637,7 +4910,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -4699,7 +4976,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 		// Asserts
 		Exception exception = container.getException();
@@ -4805,7 +5086,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -4851,7 +5136,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -4908,7 +5197,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -5023,7 +5316,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -5077,7 +5374,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -5140,7 +5441,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -5196,7 +5501,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -5258,7 +5567,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -5366,7 +5679,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -5412,7 +5729,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -5475,7 +5796,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -5538,7 +5863,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -5637,7 +5966,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -5699,7 +6032,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -5760,7 +6097,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -5813,7 +6154,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -5874,7 +6219,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -5935,7 +6284,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -6045,7 +6398,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -6098,7 +6455,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -6160,7 +6521,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -6218,7 +6583,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -6281,7 +6650,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -6344,7 +6717,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -6443,7 +6820,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -6505,7 +6886,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -6566,7 +6951,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -6616,7 +7005,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -6674,7 +7067,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -6735,7 +7132,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -6891,7 +7292,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -6953,7 +7358,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -7012,7 +7421,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -7065,7 +7478,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
@@ -7123,7 +7540,11 @@ public class IdPropertyTests extends InstrumentationTestCase {
 			}
 
 		} catch (Exception exception) {
-			container.setException(exception.getCause());
+			if (exception instanceof ExecutionException) {
+				container.setException(exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts
