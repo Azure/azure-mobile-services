@@ -65,6 +65,9 @@ public class HttpMetaEchoFilter implements ServiceFilter {
 		response.setContent(jResponse.toString());
 		response.setStatus(new StatusLineMock(200));
 
-		return nextServiceFilterCallback.onNext(request);
+		ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
+		return nextServiceFilterCallback.onNext(requestMock);
+		
+		//return nextServiceFilterCallback.onNext(request);
 	}
 }

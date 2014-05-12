@@ -775,7 +775,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			}
 			
 			assertTrue(testException instanceof MobileServiceException);
-			assertTrue(testException.getMessage().contains("500"));
+			assertTrue(testException.getCause().getMessage().contains("500"));
 		}
 	}
 
