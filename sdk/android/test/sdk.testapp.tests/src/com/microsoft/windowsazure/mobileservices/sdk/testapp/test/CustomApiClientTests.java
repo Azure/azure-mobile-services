@@ -22,6 +22,7 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -86,7 +87,11 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 			client.invokeApi("myApi", new byte[] { 1, 2, 3, 4 }, HttpPost.METHOD_NAME, mockHeaders, mockParameters).get();
 
 		} catch (Exception exception) {
-			container.setException(exception);
+			if (exception instanceof ExecutionException) {
+				container.setException((Exception) exception.getCause());
+			} else {
+				container.setException(exception);
+			}
 		}
 
 		// Asserts

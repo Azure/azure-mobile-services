@@ -431,12 +431,12 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 					return resultFuture;
 				}
 
-				if (expectedAppKey.equals(headers[zumoAppHeaderIndex].getValue())) {
+				if (!expectedAppKey.equals(headers[zumoAppHeaderIndex].getValue())) {
 					resultFuture.setException(new Exception("expectedAppKey != headers[zumoAppHeaderIndex]"));
 					return resultFuture;
 				}
 
-				if (!expectedUserAgent.equals(headers[userAgentHeaderIndex].getValue().toString())) {
+				if (!expectedUserAgent.equals(headers[userAgentHeaderIndex].getValue())) {
 					resultFuture.setException(new Exception("expectedUserAgent != headers[userAgentHeaderIndex]"));
 					return resultFuture;
 				}
@@ -530,12 +530,12 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 					return resultFuture;
 				}
 
-				if (acceptHeaderValue != headers[acceptHeaderIndex].getValue()) {
+				if (acceptHeaderValue.equals(headers[acceptHeaderIndex].getValue())) {
 					resultFuture.setException(new Exception("acceptHeaderValue != headers[acceptHeaderIndex]"));
 					return resultFuture;
 				}
 
-				if (acceptEncodingHeaderValue != headers[acceptEncodingHeaderIndex].getValue()) {
+				if (acceptEncodingHeaderValue.equals(headers[acceptEncodingHeaderIndex].getValue())) {
 					resultFuture.setException(new Exception("acceptEncodingHeaderValue != headers[acceptEncodingHeaderIndex]"));
 					return resultFuture;
 				}
@@ -684,10 +684,13 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 
 		try {
 			JsonObject jsonObject = new JsonObject();
+			
 			jsonObject.addProperty("someValue", 42);
-
+			
 			client.getTable("dummy").insert(jsonObject).get();
 
+			jsonObject.addProperty("id", 1);
+			
 			client.getTable("dummy").update(jsonObject).get();
 		} catch (Exception exception) {
 			if (exception instanceof ExecutionException) {
@@ -726,7 +729,7 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 					}
 				}
 
-				if (!headerPresent) {
+				if (headerPresent) {
 					resultFuture.setException(new Exception("!headerPresent"));
 					return resultFuture;
 				}

@@ -20,7 +20,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
 import java.net.MalformedURLException;
-import java.util.concurrent.ExecutionException;
 
 import android.test.InstrumentationTestCase;
 
@@ -243,16 +242,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 			client.getTable("TestTable").lookUp(1).get();
 
 		} catch (Exception exception) {
-			
-			Exception testException = null;
-			
-			if (exception instanceof ExecutionException) {
-				testException = (Exception) exception.getCause();
-			} else {
-				testException = exception;
-			}
-			
-			assertTrue(testException.getMessage().startsWith("Error in filter 1"));
+			assertTrue(exception.getCause().getMessage().startsWith("Error in filter 1"));
 			hasException = true;
 		}
 		
@@ -311,16 +301,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 		} catch (Exception exception) {
 			// Assert
 			hasException = true;
-			
-			Exception testException = null;
-			
-			if (exception instanceof ExecutionException) {
-				testException = (Exception) exception.getCause();
-			} else {
-				testException = exception;
-			}
-			
-			assertTrue(testException.getMessage().startsWith("Error in filter 2"));
+			assertTrue(exception.getCause().getMessage().startsWith("Error in filter 2"));
 		}
 		
 		assertTrue(hasException);
@@ -342,21 +323,21 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 
 		// Create ServiceFilterRequestMock that returns the given
 		// response
-		ServiceFilterRequestMock request = new ServiceFilterRequestMock(response);
-		request.setHasErrorOnExecute(true);
+		final ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
+		requestMock.setHasErrorOnExecute(true);
 		// Add a new filter to the client
 		client = client.withFilter(new ServiceFilter() {
 
 			@Override
 			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				return null;
+				//return nextServiceFilterCallback.onNext(request);
 				
-//				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
-//
-//				resultFuture.set(response);
-//
-//				return resultFuture;
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+				//resultFuture.set(response);
+
+				return resultFuture;
 			}
 		});
 
