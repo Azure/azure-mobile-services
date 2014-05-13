@@ -79,6 +79,9 @@ import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.table.serialization.DateSerializer;
 import com.microsoft.windowsazure.mobileservices.table.serialization.JsonEntityParser;
 import com.microsoft.windowsazure.mobileservices.table.serialization.LongSerializer;
+import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceJsonSyncTable;
+import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncContext;
+import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
 
 /**
  * Entry-point for Windows Azure Mobile Services interactions
@@ -133,6 +136,12 @@ public class MobileServiceClient {
 	 * MobileServicePush used for push notifications
 	 */
 	private MobileServicePush mPush;
+
+	/**
+	 * MobileServiceSyncContext used for synchronization between local and
+	 * remote databases.
+	 */
+	private MobileServiceSyncContext mSyncContext;
 
 	/**
 	 * UTF-8 encoding
@@ -547,6 +556,15 @@ public class MobileServiceClient {
 	}
 
 	/**
+	 * Returns a MobileServiceSyncContext instance.
+	 * 
+	 * @return the MobileServiceSyncContext instance
+	 */
+	public MobileServiceSyncContext getSyncContext() {
+		return this.mSyncContext;
+	}
+
+	/**
 	 * Creates a MobileServiceJsonTable
 	 * 
 	 * @param name
@@ -555,6 +573,18 @@ public class MobileServiceClient {
 	 */
 	public MobileServiceJsonTable getTable(String name) {
 		return new MobileServiceJsonTable(name, this);
+	}
+
+	/**
+	 * Returns a MobileServiceJsonSyncTable instance, which provides untyped
+	 * data operations for a local table.
+	 * 
+	 * @param name
+	 *            Table name
+	 * @return The MobileServiceJsonSyncTable instance
+	 */
+	public MobileServiceJsonSyncTable getSyncTable(String name) {
+		return new MobileServiceJsonSyncTable(name, this);
 	}
 
 	/**
@@ -582,6 +612,35 @@ public class MobileServiceClient {
 	public <E> MobileServiceTable<E> getTable(String name, Class<E> clazz) {
 		validateClass(clazz);
 		return new MobileServiceTable<E>(name, this, clazz);
+	}
+
+	/**
+	 * Returns a MobileServiceTable<E> instance, which provides strongly typed
+	 * data operations for a local table.
+	 * 
+	 * @param name
+	 *            Table name
+	 * @param clazz
+	 *            The class used for data serialization
+	 * 
+	 * @return The MobileServiceSyncTable instance
+	 */
+	public <E> MobileServiceSyncTable<E> getSyncTable(String name, Class<E> clazz) {
+		validateClass(clazz);
+		return new MobileServiceSyncTable<E>(name, this, clazz);
+	}
+
+	/**
+	 * Returns a MobileServiceTable<E> instance, which provides strongly typed
+	 * data operations for a local table.
+	 * 
+	 * @param clazz
+	 *            The class used for table name and data serialization
+	 * 
+	 * @return The MobileServiceSyncTable instance
+	 */
+	public <E> MobileServiceSyncTable<E> getSyncTable(Class<E> clazz) {
+		return this.getSyncTable(clazz.getSimpleName(), clazz);
 	}
 
 	/**
@@ -1131,6 +1190,7 @@ public class MobileServiceClient {
 		mGsonBuilder = gsonBuiler;
 		mAndroidHttpClientFactory = androidHttpClientFactory;
 		mPush = new MobileServicePush(this, context);
+		mSyncContext = new MobileServiceSyncContext(this);
 	}
 
 	/**
