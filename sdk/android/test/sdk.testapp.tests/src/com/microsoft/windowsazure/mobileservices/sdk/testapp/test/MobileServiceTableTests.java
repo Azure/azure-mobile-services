@@ -23,6 +23,7 @@ import java.net.MalformedURLException;
 import java.net.URLEncoder;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
 import junit.framework.Assert;
 
@@ -198,7 +199,16 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		try {
 			msTable.insert(testObject).get();
 		} catch (Exception exception) {
-			assertEquals("The entity to insert should not have a numeric ID property defined.", exception.getCause().getMessage());
+			
+			Exception testException = null;
+			
+			if (exception instanceof ExecutionException) {
+				testException = (Exception) exception.getCause();
+			} else {
+				testException = exception;
+			}
+			
+			assertEquals("The entity to insert should not have a numeric ID property defined.", testException.getMessage());
 		}
 	}
 
@@ -682,7 +692,16 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			msTable.insert(json).get();
 			Assert.fail();
 		} catch (Exception exception) {
-			assertTrue(exception.getCause() instanceof MobileServiceException);
+			
+			Exception testException = null;
+			
+			if (exception instanceof ExecutionException) {
+				testException = (Exception) exception.getCause();
+			} else {
+				testException = exception;
+			}
+			
+			assertTrue(testException instanceof MobileServiceException);
 		}
 	}
 
@@ -746,9 +765,17 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			msTable.insert(json).get();
 			Assert.fail();
 		} catch (Exception exception) {
-			assertTrue(exception.getCause() instanceof MobileServiceException);
-			Throwable cause = exception.getCause();
-			assertTrue(cause.getCause().getMessage().contains("500"));
+			
+			Exception testException = null;
+			
+			if (exception instanceof ExecutionException) {
+				testException = (Exception) exception.getCause();
+			} else {
+				testException = exception;
+			}
+			
+			assertTrue(testException instanceof MobileServiceException);
+			assertTrue(testException.getCause().getMessage().contains("500"));
 		}
 	}
 
@@ -1015,7 +1042,16 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		} catch (Exception exception) {
 			// Asserts
 			Assert.assertNull("Null person expected", p);
-			Assert.assertEquals("The entity has an invalid numeric value on id property.", exception.getCause().getMessage());
+			
+			Exception testException = null;
+			
+			if (exception instanceof ExecutionException) {
+				testException = (Exception) exception.getCause();
+			} else {
+				testException = exception;
+			}
+			
+			Assert.assertEquals("The entity has an invalid numeric value on id property.", testException.getMessage());
 		}
 	}
 
@@ -1531,11 +1567,13 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			}
 		});
 
-		client.getTable(tableName, PersonTestObject.class).lookUp(personId).get();
-
-		// Asserts
-		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId, container.getRequestUrl());
-		assertTrue(container.getResponseValue().contains("{\"error\":404,\"message\":\"entity does not exist\"}"));
+		try {
+			client.getTable(tableName, PersonTestObject.class).lookUp(personId).get();
+		} catch (Exception exception) {
+			// Asserts
+			assertEquals(this.appUrl + "tables/" + tableName + "/" + personId, container.getRequestUrl());
+			assertTrue(container.getResponseValue().contains("{\"error\":404,\"message\":\"entity does not exist\"}"));
+		}
 	}
 
 	public void testLookupWithJSONShouldReturnErrorIfAPersonDoesNotExist() throws Throwable {
@@ -1574,11 +1612,13 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			}
 		});
 
-		client.getTable(tableName).lookUp(personId).get();
-
-		// Asserts
-		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId, container.getRequestUrl());
-		assertTrue(container.getResponseValue().contains("{\"error\":404,\"message\":\"entity does not exist\"}"));
+		try {
+			client.getTable(tableName).lookUp(personId).get();
+		} catch (Exception exception) {
+			// Asserts
+			assertEquals(this.appUrl + "tables/" + tableName + "/" + personId, container.getRequestUrl());
+			assertTrue(container.getResponseValue().contains("{\"error\":404,\"message\":\"entity does not exist\"}"));
+		}
 	}
 
 	public void testQueryShouldIncludeFilter() throws Throwable {

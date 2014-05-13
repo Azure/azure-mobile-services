@@ -22,8 +22,8 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-import junit.framework.Assert;
 
 import org.apache.http.Header;
 import org.apache.http.client.methods.HttpPost;
@@ -373,6 +373,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 			@Override
 			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
 				int zumoInstallationHeaderIndex = -1;
 				int zumoAppHeaderIndex = -1;
 				int userAgentHeaderIndex = -1;
@@ -401,34 +403,56 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 				}
 
 				if (zumoInstallationHeaderIndex == -1) {
-					Assert.fail();
+					resultFuture.setException(new Exception("zumoInstallationHeaderIndex == -1"));
+					return resultFuture;
 				}
 				if (zumoAppHeaderIndex == -1) {
-					Assert.fail();
+					resultFuture.setException(new Exception("zumoAppHeaderIndex == -1"));
+					return resultFuture;
 				}
 				if (userAgentHeaderIndex == -1) {
-					Assert.fail();
+					resultFuture.setException(new Exception("userAgentHeaderIndex == -1"));
+					return resultFuture;
 				}
 				if (acceptHeaderIndex == -1) {
-					Assert.fail();
+					resultFuture.setException(new Exception("acceptHeaderIndex == -1"));
+					return resultFuture;
 				}
 				if (acceptEncodingHeaderIndex == -1) {
-					Assert.fail();
+					resultFuture.setException(new Exception("acceptEncodingHeaderIndex == -1"));
+					return resultFuture;
 				}
 
 				String expectedUserAgent = String.format("ZUMO/%s (lang=%s; os=%s; os_version=%s; arch=%s; version=%s)", "1.0", "Java", "Android",
 						Build.VERSION.RELEASE, Build.CPU_ABI, "1.0.10814.0");
 
-				assertNotNull(headers[zumoInstallationHeaderIndex].getValue());
-				assertEquals(expectedAppKey, headers[zumoAppHeaderIndex].getValue());
-				assertEquals(expectedUserAgent, headers[userAgentHeaderIndex].getValue());
-				assertEquals("application/json", headers[acceptHeaderIndex].getValue());
-				assertEquals("gzip", headers[acceptEncodingHeaderIndex].getValue());
+				if (headers[zumoInstallationHeaderIndex].getValue() == null) {
+					resultFuture.setException(new Exception("headers[zumoInstallationHeaderIndex] == null"));
+					return resultFuture;
+				}
+
+				if (!expectedAppKey.equals(headers[zumoAppHeaderIndex].getValue())) {
+					resultFuture.setException(new Exception("expectedAppKey != headers[zumoAppHeaderIndex]"));
+					return resultFuture;
+				}
+
+				if (!expectedUserAgent.equals(headers[userAgentHeaderIndex].getValue())) {
+					resultFuture.setException(new Exception("expectedUserAgent != headers[userAgentHeaderIndex]"));
+					return resultFuture;
+				}
+
+				if (!"application/json".equals(headers[acceptHeaderIndex].getValue())) {
+					resultFuture.setException(new Exception("application/json != headers[acceptHeaderIndex]"));
+					return resultFuture;
+				}
+
+				if (!"gzip".equals(headers[acceptEncodingHeaderIndex].getValue())) {
+					resultFuture.setException(new Exception("gzip != headers[acceptEncodingHeaderIndex]"));
+					return resultFuture;
+				}
 
 				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 				response.setContent("{}");
-
-				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
 				resultFuture.set(response);
 
@@ -436,7 +460,15 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 			}
 		});
 
-		client.getTable("dummy").execute().get();
+		try {
+			client.getTable("dummy").execute().get();
+		} catch (Exception exception) {
+			if (exception instanceof ExecutionException) {
+				fail(exception.getCause().getMessage());
+			} else {
+				fail(exception.getMessage());
+			}
+		}
 	}
 
 	public void testOperationShouldNotReplaceWithDefaultHeaders() throws Throwable {
@@ -468,6 +500,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 				int acceptHeaderCount = 0;
 				int acceptEncodingHeaderCount = 0;
 
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
 				Header[] headers = request.getHeaders();
 				for (int i = 0; i < headers.length; i++) {
 					if (headers[i].getName() == acceptHeaderKey) {
@@ -479,20 +513,36 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 					}
 				}
 
-				if (acceptHeaderIndex == -1 || acceptHeaderCount != 1) {
-					Assert.fail();
+				if (acceptHeaderIndex == -1) {
+					resultFuture.setException(new Exception("acceptHeaderIndex == -1"));
+					return resultFuture;
 				}
-				if (acceptEncodingHeaderIndex == -1 || acceptEncodingHeaderCount != 1) {
-					Assert.fail();
+				if (acceptHeaderCount == -1) {
+					resultFuture.setException(new Exception("acceptHeaderCount == -1"));
+					return resultFuture;
+				}
+				if (acceptEncodingHeaderIndex == -1) {
+					resultFuture.setException(new Exception("acceptEncodingHeaderIndex == -1"));
+					return resultFuture;
+				}
+				if (acceptEncodingHeaderCount == -1) {
+					resultFuture.setException(new Exception("acceptEncodingHeaderIndex == -1"));
+					return resultFuture;
 				}
 
-				assertEquals(acceptHeaderValue, headers[acceptHeaderIndex].getValue());
-				assertEquals(acceptEncodingHeaderValue, headers[acceptEncodingHeaderIndex].getValue());
+				if (acceptHeaderValue.equals(headers[acceptHeaderIndex].getValue())) {
+					resultFuture.setException(new Exception("acceptHeaderValue != headers[acceptHeaderIndex]"));
+					return resultFuture;
+				}
+
+				if (acceptEncodingHeaderValue.equals(headers[acceptEncodingHeaderIndex].getValue())) {
+					resultFuture.setException(new Exception("acceptEncodingHeaderValue != headers[acceptEncodingHeaderIndex]"));
+					return resultFuture;
+				}
 
 				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-				response.setContent("{}");
 
-				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+				response.setContent("{}");
 
 				resultFuture.set(response);
 
@@ -500,7 +550,16 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 			}
 		});
 
-		client.invokeApi("myApi", null, HttpPost.METHOD_NAME, headers).get();
+		try {
+			client.invokeApi("myApi", null, HttpPost.METHOD_NAME, headers).get();
+		} catch (Exception exception) {
+			if (exception instanceof ExecutionException) {
+				fail(exception.getCause().getMessage());
+			} else {
+				fail(exception.getMessage());
+			}
+		}
+
 	}
 
 	public void testOperationDefaultHeadersShouldBeIdempotent() throws Throwable {
@@ -532,6 +591,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 				int acceptHeaderCount = 0;
 				int acceptEncodingHeaderCount = 0;
 
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
 				Header[] headers = request.getHeaders();
 				for (int i = 0; i < headers.length; i++) {
 					if (headers[i].getName() == acceptHeaderKey) {
@@ -543,20 +604,25 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 					}
 				}
 
-				if (acceptHeaderIndex == -1 || acceptHeaderCount != 1) {
-					Assert.fail();
+				if (acceptHeaderIndex == -1) {
+					resultFuture.setException(new Exception("acceptHeaderIndex == -1"));
+					return resultFuture;
 				}
-				if (acceptEncodingHeaderIndex == -1 || acceptEncodingHeaderCount != 1) {
-					Assert.fail();
+				if (acceptHeaderCount == -1) {
+					resultFuture.setException(new Exception("acceptHeaderCount == -1"));
+					return resultFuture;
 				}
-
-				assertEquals(acceptHeaderValue, headers[acceptHeaderIndex].getValue());
-				assertEquals(acceptEncodingHeaderValue, headers[acceptEncodingHeaderIndex].getValue());
+				if (acceptEncodingHeaderIndex == -1) {
+					resultFuture.setException(new Exception("acceptEncodingHeaderIndex == -1"));
+					return resultFuture;
+				}
+				if (acceptEncodingHeaderCount == -1) {
+					resultFuture.setException(new Exception("acceptEncodingHeaderIndex == -1"));
+					return resultFuture;
+				}
 
 				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 				response.setContent("{}");
-
-				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
 				resultFuture.set(response);
 
@@ -564,10 +630,20 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 			}
 		});
 
-		client.invokeApi("myApi", null, HttpPost.METHOD_NAME, headers).get();
+		try {
+			client.invokeApi("myApi", null, HttpPost.METHOD_NAME, headers).get();
+		} catch (Exception exception) {
+			if (exception instanceof ExecutionException) {
+				fail(exception.getCause().getMessage());
+			} else {
+				fail(exception.getMessage());
+			}
+		}
 	}
 
 	public void testInsertUpdateShouldAddContentTypeJson() throws Throwable {
+
+		final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
 		// Create client
 		MobileServiceClient client = null;
@@ -592,12 +668,13 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 					}
 				}
 
-				assertTrue("Header not present", headerPresent);
+				if (!headerPresent) {
+					resultFuture.setException(new Exception("!headerPresent"));
+					return resultFuture;
+				}
 
 				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 				response.setContent("{}");
-
-				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
 				resultFuture.set(response);
 
@@ -605,12 +682,23 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 			}
 		});
 
-		JsonObject jsonObject = new JsonObject();
-		jsonObject.addProperty("someValue", 42);
+		try {
+			JsonObject jsonObject = new JsonObject();
+			
+			jsonObject.addProperty("someValue", 42);
+			
+			client.getTable("dummy").insert(jsonObject).get();
 
-		client.getTable("dummy").insert(jsonObject).get();
-
-		client.getTable("dummy").update(jsonObject).get();
+			jsonObject.addProperty("id", 1);
+			
+			client.getTable("dummy").update(jsonObject).get();
+		} catch (Exception exception) {
+			if (exception instanceof ExecutionException) {
+				fail(exception.getCause().getMessage());
+			} else {
+				fail(exception.getMessage());
+			}
+		}
 
 	}
 
@@ -630,6 +718,8 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 			@Override
 			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
 				Header[] headers = request.getHeaders();
 
 				boolean headerPresent = false;
@@ -639,12 +729,13 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 					}
 				}
 
-				assertFalse("Header is present", headerPresent);
+				if (headerPresent) {
+					resultFuture.setException(new Exception("!headerPresent"));
+					return resultFuture;
+				}
 
 				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 				response.setContent("{}");
-
-				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
 				resultFuture.set(response);
 
@@ -652,8 +743,16 @@ public class MobileServiceClientTests extends InstrumentationTestCase {
 			}
 		});
 
-		client.getTable("dummy").delete(42).get();
+		try {
+			client.getTable("dummy").delete(42).get();
 
-		client.getTable("dummy").execute().get();
+			client.getTable("dummy").execute().get();
+		} catch (Exception exception) {
+			if (exception instanceof ExecutionException) {
+				fail(exception.getCause().getMessage());
+			} else {
+				fail(exception.getMessage());
+			}
+		}
 	}
 }

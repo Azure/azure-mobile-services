@@ -209,6 +209,10 @@ public class ResultsContainer {
 		this.exception = exception;
 	}
 
+	public void setException(Throwable exception) {
+		this.exception = (Exception) exception;
+	}
+	
 	public JsonElement getJsonResult() {
 		return jsonResult;
 	}

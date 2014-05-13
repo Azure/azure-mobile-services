@@ -323,21 +323,21 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 
 		// Create ServiceFilterRequestMock that returns the given
 		// response
-		ServiceFilterRequestMock request = new ServiceFilterRequestMock(response);
-		request.setHasErrorOnExecute(true);
+		final ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
+		requestMock.setHasErrorOnExecute(true);
 		// Add a new filter to the client
 		client = client.withFilter(new ServiceFilter() {
 
 			@Override
 			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				return null;
+				//return nextServiceFilterCallback.onNext(request);
 				
-//				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
-//
-//				resultFuture.set(response);
-//
-//				return resultFuture;
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+				//resultFuture.set(response);
+
+				return resultFuture;
 			}
 		});
 

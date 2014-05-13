@@ -45,6 +45,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.http.MobileServiceConnection;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
@@ -59,867 +60,907 @@ import android.util.Pair;
  */
 public class MobileServicePush {
 
-    /**
-     * Prefix for Storage keys
-     */
-    private static final String STORAGE_PREFIX = "__NH_";
+	/**
+	 * Prefix for Storage keys
+	 */
+	private static final String STORAGE_PREFIX = "__NH_";
 
-    /**
-     * Prefix for registration information keys in local storage
-     */
-    private static final String REGISTRATION_NAME_STORAGE_KEY = "REG_NAME_";
+	/**
+	 * Prefix for registration information keys in local storage
+	 */
+	private static final String REGISTRATION_NAME_STORAGE_KEY = "REG_NAME_";
 
-    /**
-     * Storage Version key
-     */
-    private static final String STORAGE_VERSION_KEY = "STORAGE_VERSION";
+	/**
+	 * Storage Version key
+	 */
+	private static final String STORAGE_VERSION_KEY = "STORAGE_VERSION";
 
-    /**
-     * Storage Version
-     */
-    private static final String STORAGE_VERSION = "1.0.0";
+	/**
+	 * Storage Version
+	 */
+	private static final String STORAGE_VERSION = "1.0.0";
 
-    /**
-     * PNS Handle Key
-     */
-    private static final String PNS_HANDLE_KEY = "PNS_HANDLE";
+	/**
+	 * PNS Handle Key
+	 */
+	private static final String PNS_HANDLE_KEY = "PNS_HANDLE";
 
-    /**
-     * New registration location header name
-     */
-    private static final String NEW_REGISTRATION_LOCATION_HEADER = "Location";
+	/**
+	 * New registration location header name
+	 */
+	private static final String NEW_REGISTRATION_LOCATION_HEADER = "Location";
 
-    /**
-     * The MobileServiceClient associated with this instance
-     */
-    private MobileServiceClient mClient;
+	/**
+	 * The MobileServiceClient associated with this instance
+	 */
+	private MobileServiceClient mClient;
 
-    /**
-     * SharedPreferences reference used to access local storage
-     */
-    private SharedPreferences mSharedPreferences;
+	/**
+	 * SharedPreferences reference used to access local storage
+	 */
+	private SharedPreferences mSharedPreferences;
 
-    /**
-     * Factory which creates Registrations according the PNS supported on device
-     */
-    private PnsSpecificRegistrationFactory mPnsSpecificRegistrationFactory;
+	/**
+	 * Factory which creates Registrations according the PNS supported on device
+	 */
+	private PnsSpecificRegistrationFactory mPnsSpecificRegistrationFactory;
 
-    /**
-     * Flag to signal the need of refreshing local storage
-     */
-    private boolean mIsRefreshNeeded = false;
+	/**
+	 * Flag to signal the need of refreshing local storage
+	 */
+	private boolean mIsRefreshNeeded = false;
 
-    /**
-     * Creates a new NotificationHub client
-     * 
-     * @param notificationHubPath
-     *            Notification Hub path
-     * @param connectionString
-     *            Notification Hub connection string
-     * @param context
-     *            Android context used to access SharedPreferences
-     */
-    public MobileServicePush(MobileServiceClient client, Context context) {
-        mPnsSpecificRegistrationFactory = new PnsSpecificRegistrationFactory();
+	/**
+	 * Creates a new NotificationHub client
+	 * 
+	 * @param notificationHubPath
+	 *            Notification Hub path
+	 * @param connectionString
+	 *            Notification Hub connection string
+	 * @param context
+	 *            Android context used to access SharedPreferences
+	 */
+	public MobileServicePush(MobileServiceClient client, Context context) {
+		mPnsSpecificRegistrationFactory = new PnsSpecificRegistrationFactory();
 
-        mClient = client;
+		mClient = client;
 
-        if (context == null) {
-            throw new IllegalArgumentException("context");
-        }
-
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
-
-        verifyStorageVersion();
-    }
-
-    /**
-     * Registers the client for native notifications with the specified tags
-     * 
-     * @param pnsHandle
-     *            PNS specific identifier
-     * @param callback
-     *            The callback to invoke after the Push execution
-     * @param tags
-     *            Tags to use in the registration
-     * @return The created registration
-     * @throws Exception
-     */
-    public ListenableFuture<Registration> register(String pnsHandle, String[] tags) {
-        
-    	final SettableFuture<Registration> resultFuture = SettableFuture.create();
-        
-    	if (isNullOrWhiteSpace(pnsHandle)) {
-    		resultFuture.setException(new IllegalArgumentException("pnsHandle"));
-            return resultFuture;
-        }
-
-        final Registration registration = mPnsSpecificRegistrationFactory.createNativeRegistration();
-        registration.setPNSHandle(pnsHandle);
-        registration.addTags(tags);
-
-        ListenableFuture<String> registerInternalFuture = registerInternal(registration);
-        
-        Futures.addCallback(registerInternalFuture, new FutureCallback<String>()
-		{ 
-            @Override
-            public void onFailure(Throwable exception) {
-            	resultFuture.setException(exception);
-            }       
-            
-            @Override
-            public void onSuccess(String v) {
-            	resultFuture.set(registration);
-            }
-		});
-        
-        return resultFuture;
-    }
-
-    /**
-     * Registers the client for template notifications with the specified tags
-     * 
-     * @param pnsHandle
-     *            PNS specific identifier
-     * @param templateName
-     *            The template name
-     * @param template
-     *            The template body
-     * @param tags
-     *            The tags to use in the registration
-     * @param callback
-     *            The operation callback
-     * @return 
-     */
-    public ListenableFuture<TemplateRegistration> registerTemplate(String pnsHandle, String templateName, String template, String[] tags) {
-        
-    	final SettableFuture<TemplateRegistration> resultFuture = SettableFuture.create();
-    	
-    	if (isNullOrWhiteSpace(pnsHandle)) {
-    		resultFuture.setException(new IllegalArgumentException("pnsHandle"));
-            return resultFuture;
-        }
-
-        if (isNullOrWhiteSpace(templateName)) {
-        	resultFuture.setException(new IllegalArgumentException("templateName"));
-            return resultFuture;
-        }
-
-        if (isNullOrWhiteSpace(template)) {
-        	resultFuture.setException(new IllegalArgumentException("template"));
-            return resultFuture;
-        }
-
-        final TemplateRegistration registration = mPnsSpecificRegistrationFactory.createTemplateRegistration();
-        registration.setPNSHandle(pnsHandle);
-        registration.setName(templateName);
-        registration.setTemplateBody(template);
-        registration.addTags(tags);
-
-        ListenableFuture<String> registerInternalFuture = registerInternal(registration);
-        
-        Futures.addCallback(registerInternalFuture, new FutureCallback<String>()
-		{ 
-            @Override
-            public void onFailure(Throwable exception) {
-            	resultFuture.setException(exception);
-            }       
-            
-            @Override
-            public void onSuccess(String v) {
-            	resultFuture.set(registration);
-            }
-		});
-        
-        return resultFuture;
-    }
-    
-    /**
-     * Unregisters the client for native notifications
-     * 
-     * @param callback
-     *            The operation callback
-     * @throws Exception 
-     */
-    public ListenableFuture<Void> unregister() {
-        return unregisterInternal(Registration.DEFAULT_REGISTRATION_NAME);
-    }
-
-    /**
-     * Unregisters the client for template notifications of a specific template
-     * 
-     * @param templateName
-     *            The template name
-     * @param callback
-     *            The operation callback
-     * 
-     */
-    public ListenableFuture<Void> unregisterTemplate(String templateName) {
-        if (isNullOrWhiteSpace(templateName)) {
-            throw new IllegalArgumentException("templateName");
-        }
-
-        return unregisterInternal(templateName);
-    }
-    
-    /**
-     * Unregisters the client for all notifications
-     * 
-     * @param pnsHandle
-     *            PNS specific identifier
-     * @param callback
-     *            The operation callback
-     * @throws ExecutionException 
-     * @throws InterruptedException 
-     */
-    public ListenableFuture<Void> unregisterAll(String pnsHandle) {
-        
-    	final SettableFuture<Void> resultFuture = SettableFuture.create();
-    	
-    	ListenableFuture<ArrayList<Registration>> fullRegistrationInformationFuture = 
-    			getFullRegistrationInformation(pnsHandle);
-		
-        Futures.addCallback(fullRegistrationInformationFuture, new FutureCallback<ArrayList<Registration>>()
-		{ 
-            @Override
-            public void onFailure(Throwable exception) {
-            	resultFuture.setException(exception);
-            }       
-            
-            @Override
-            public void onSuccess(ArrayList<Registration> registrations) {
-            	
-            	ListenableFuture<Void> unregisterAllInternalFuture = 
-            			unregisterAllInternal(registrations);
-            	
-            	Futures.addCallback(unregisterAllInternalFuture, new FutureCallback<Void>()
-    			{ 
-    	            @Override
-    	            public void onFailure(Throwable exception) {
-    	            	resultFuture.setException(exception);
-    	            }       
-    	            
-    	            @Override
-    	            public void onSuccess(Void v) {
-    	            	resultFuture.set(null);
-    	            }
-    			});
-            }
-		});
-        
-        return resultFuture;
-    }           
-                
-    private ListenableFuture<Void> unregisterAllInternal(ArrayList<Registration> registrations)
-    {
-    	final SettableFuture<Void> resultFuture = SettableFuture.create();
-    	
-		final SyncState state = new SyncState();
-				
-		state.size = registrations.size();
-		
-		final CopyOnWriteArrayList<String> concurrentArray = new CopyOnWriteArrayList<String>();
-		
-		final Object syncObject = new Object();
-		
-		if (state.size == 0) {
-		
-		    removeAllRegistrationsId();
-		
-		    mIsRefreshNeeded = false;
-		
-		    resultFuture.set(null);
-		    
-		    return resultFuture;
+		if (context == null) {
+			throw new IllegalArgumentException("context");
 		}
 
-		
-    	for (final Registration registration : registrations) {
-	    	
-	    	ListenableFuture<Void> serviceFilterFuture = deleteRegistrationInternal(registration.getName(), registration.getRegistrationId());
-	        
-	        Futures.addCallback(serviceFilterFuture, new FutureCallback<Void>()
-			{    
-	            @Override
-	            public void onFailure(Throwable exception) {
-	            	
-	            	if (exception != null) {
-	                    synchronized (syncObject) {
-	                        if (!state.alreadyReturn) {
-	                            state.alreadyReturn = true;
-	                            
-	                            resultFuture.setException(exception);
-	                            
-	                            return;
-	                        }
-	                    }
-	                }
-	            }
-	       
-	            @Override
-	            public void onSuccess(Void v) {
-	            	concurrentArray.add(registration.getRegistrationId());
+		mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
 
-	            	if (concurrentArray.size() == state.size && !state.alreadyReturn) {
-	                    removeAllRegistrationsId();
-	
-	                    mIsRefreshNeeded = false;
+		verifyStorageVersion();
+	}
 
-		                resultFuture.set(null);
-		                
-		                return;
-	                }
-	            }
-	        });
-    	}
-    	
-    	return resultFuture;
-    }
-    
-    private class SyncState {
-        public boolean alreadyReturn;
-        public int size;
-    }
+	/**
+	 * Registers the client for native notifications with the specified tags
+	 * 
+	 * @param pnsHandle
+	 *            PNS specific identifier
+	 * @param callback
+	 *            The callback to invoke after the Push execution
+	 * @param tags
+	 *            Tags to use in the registration
+	 * @return The created registration
+	 * @throws Exception
+	 */
+	public ListenableFuture<Registration> register(String pnsHandle, String[] tags) {
 
-    private ListenableFuture<Void> refreshRegistrationInformation(String pnsHandle) {
-    	
-    	final SettableFuture<Void> resultFuture = SettableFuture.create();
-    	
-        if (isNullOrWhiteSpace(pnsHandle)) {
-        	resultFuture.setException(new IllegalArgumentException("pnsHandle"));
-            return resultFuture;
-        }
+		final SettableFuture<Registration> resultFuture = SettableFuture.create();
 
-        // delete old registration information
-        Editor editor = mSharedPreferences.edit();
-        Set<String> keys = mSharedPreferences.getAll().keySet();
-        for (String key : keys) {
-            if (key.startsWith(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY)) {
-                editor.remove(key);
-            }
-        }
+		if (isNullOrWhiteSpace(pnsHandle)) {
+			resultFuture.setException(new IllegalArgumentException("pnsHandle"));
+			return resultFuture;
+		}
 
-        editor.commit();
+		final Registration registration = mPnsSpecificRegistrationFactory.createNativeRegistration();
+		registration.setPNSHandle(pnsHandle);
+		registration.addTags(tags);
 
-        ListenableFuture<ArrayList<Registration>> getFullRegistrationInformationFuture = getFullRegistrationInformation(pnsHandle);
+		ListenableFuture<String> registerInternalFuture = registerInternal(registration);
 
-        Futures.addCallback(getFullRegistrationInformationFuture, new FutureCallback<ArrayList<Registration>>()
-        {	
-        	@Override
-            public void onFailure(Throwable exception) {
-        		resultFuture.setException(exception);
-            }
-       
-            @Override
-            public void onSuccess(ArrayList<Registration> registrations) {
-                for (Registration registration : registrations) {
+		Futures.addCallback(registerInternalFuture, new FutureCallback<String>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				resultFuture.setException(exception);
+			}
 
-                    try {
-                        storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
-                    } catch (Exception e) {
-                    	resultFuture.setException(e);
-
-                        return;
-                    }
-                }
-
-                mIsRefreshNeeded = false;
-    	
-    	        resultFuture.set(null);
-            }
-        });
-        
-        return resultFuture;
-    }
-            
-    private ListenableFuture<ArrayList<Registration>> getFullRegistrationInformation(String pnsHandle)
-    {
-    	final SettableFuture<ArrayList<Registration>> resultFuture = SettableFuture.create();
-        
-        if (isNullOrWhiteSpace(pnsHandle)) {
-        	resultFuture.setException(new IllegalArgumentException("pnsHandle"));
-            return resultFuture;
-        }
-
-        // get existing registrations
-        String resource = "/registrations/";
-
-        List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
-        List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
-        parameters.add(new Pair<String, String>("platform", mPnsSpecificRegistrationFactory.getPlatform()));
-        parameters.add(new Pair<String, String>("deviceId", pnsHandle));
-        requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
-
-        ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mClient.invokeApiInternal(resource, null, "GET", requestHeaders, parameters, MobileServiceClient.PNS_API_URL);
-            
-        Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>()
-		{    
-            @Override
-            public void onFailure(Throwable exception) {
-             	resultFuture.setException(exception);
-            }
-       
-            @Override
-            public void onSuccess(ServiceFilterResponse response) {
-                    ArrayList<Registration> registrationsList = new ArrayList<Registration>();
-    	
-    	        JsonArray registrations = new JsonParser().parse(response.getContent()).getAsJsonArray();
-    	
-    	        for (JsonElement registrationJson : registrations) {
-    	            Registration registration = null;
-    	            if (registrationJson.getAsJsonObject().has("templateName")) {
-    	                registration = mPnsSpecificRegistrationFactory.parseTemplateRegistration(registrationJson.getAsJsonObject());
-    	            } else {
-    	                registration = mPnsSpecificRegistrationFactory.parseNativeRegistration(registrationJson.getAsJsonObject());
-    	            }
-    	
-    	            registrationsList.add(registration);
-    	        }
-    	
-    	        resultFuture.set(registrationsList);
-            }
-        });
-        
-        return resultFuture;
-    }
-    
-    /**
-     * Creates a new registration in the server. If it exists, updates its
-     * information
-     * 
-     * @param registration
-     *            The registration to create
-     * @param callback
-     *            The operation callback
-     */
-    private ListenableFuture<String> registerInternal(final Registration registration) {
-
-    	final SettableFuture<String> resultFuture = SettableFuture.create();
-    	
-        if (mIsRefreshNeeded) {
-            String pNSHandle = mSharedPreferences.getString(STORAGE_PREFIX + PNS_HANDLE_KEY, "");
-
-            if (isNullOrWhiteSpace(pNSHandle)) {
-                pNSHandle = registration.getPNSHandle();
-            }
-
-            ListenableFuture<Void> refreshRegistrationInformationFuture = refreshRegistrationInformation(pNSHandle);
-            
-            Futures.addCallback(refreshRegistrationInformationFuture, new FutureCallback<Void>() {
-            	
-            	 @Override
-                 public void onFailure(Throwable exception) {
-                  	resultFuture.setException(exception);
-                 }
-            
-                 @Override
-                 public void onSuccess(Void v) {
-         	        resultFuture.set(registration.getRegistrationId());
-                 }
-            });
-            
-            return resultFuture;
-            
-        } else {
-            return createRegistrationId(registration);
-        }
-    }
-
-    private ListenableFuture<String> createRegistrationId(final Registration registration) {
-
-        String registrationId = null;
-
-        final SettableFuture<String> resultFuture = SettableFuture.create();
-        
-        try {
-            registrationId = retrieveRegistrationId(registration.getName());
-        } catch (Exception e) {
-        	resultFuture.setException(e);
-            return resultFuture;
-        }
-
-        if (isNullOrWhiteSpace(registrationId)) {
-             
-        	ListenableFuture<String> createRegistrationIdFuture = createRegistrationId();
-        	
-        	Futures.addCallback(createRegistrationIdFuture, new FutureCallback<String>() {
-        		
-                @Override
-                public void onFailure(Throwable exception) {
-            		resultFuture.setException(exception);
-                }           
-                @Override
-                public void onSuccess(String registrationId) {
-                	ListenableFuture<String> setRegistrationIdFuture = setRegistrationId(registration, registrationId);
-                    
-                    Futures.addCallback(setRegistrationIdFuture, new FutureCallback<String>() {
-                		
-                        @Override
-                        public void onFailure(Throwable exception) {
-                    		resultFuture.setException(exception);
-                        }           
-                        @Override
-                        public void onSuccess(String registrationId) {
-                            resultFuture.set(registrationId);    
-                        }
-                    });
-                }
-            });
-        	
-        	return resultFuture;
-        } else {
-            return setRegistrationId(registration, registrationId);
-        }
-    }
-
-    private ListenableFuture<String> setRegistrationId(final Registration registration, final String registrationId) {
-        registration.setRegistrationId(registrationId);
-
-        final SettableFuture<String> resultFuture = SettableFuture.create();
-    	
-        ListenableFuture<Void> upsertRegistrationInternalFuture = upsertRegistrationInternal(registration);
-        
-        Futures.addCallback(upsertRegistrationInternalFuture, new FutureCallback<Void>()
-		{    
-            @Override
-            public void onFailure(Throwable exception) {
-            	
-            	if (exception instanceof RegistrationGoneException){
-            		
-            		// if we get an RegistrationGoneException (410) from
-                    // service, we
-                    // will recreate registration id and will try to do
-                    // upsert one more
-                    // time.
-                    // This can occur if the backing NotificationHub is changed
-                    // or if the registration expires.
-
-                    try {
-                        removeRegistrationId(registration.getName());
-                    } catch (Exception e) {
-                    	resultFuture.setException(e);
-                        return;
-                    }
-                    
-                    ListenableFuture<String> createRegistrationIdFuture = createRegistrationId();
-                    
-                	Futures.addCallback(createRegistrationIdFuture, new FutureCallback<String>()
-					{    
-					    @Override
-					    public void onFailure(Throwable exception) {
-					    	resultFuture.setException(exception);
-					    }
-					    
-					    @Override
-					    public void onSuccess(final String registrationId) {
-					    	ListenableFuture<String> setRegistrationIdFuture = setRegistrationId(registration, registrationId);
-		                    
-		                    Futures.addCallback(setRegistrationIdFuture, new FutureCallback<String>() {
-		                		
-		                        @Override
-		                        public void onFailure(Throwable exception) {
-		                    		resultFuture.setException(exception);
-		                        }           
-		                        @Override
-		                        public void onSuccess(final String registrationId) {
-		                        	ListenableFuture<Void> upsertRegistrationInternalFuture2 = upsertRegistrationInternal(registration);
-
-						    		Futures.addCallback(upsertRegistrationInternalFuture2, new FutureCallback<Void>()
-						    		{    
-			    			            @Override
-			    			            public void onFailure(Throwable exception) {
-			    			            }
-			    			            
-			    			            public void onSuccess(Void v) {
-
-			    			                try {
-			    			                    storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
-			    			                } catch (Exception exception) {
-			    			                	resultFuture.setException(exception);
-			    			                    return;
-			    			                }
-			    			    	        resultFuture.set(registrationId);
-			    			            }
-						    		});    
-		                        }
-		                    });
-		                }
-					});
-                              
-            	}
-            	else {
-            		resultFuture.setException(exception);
-            	}
-        	}
-       
-            @Override
-            public void onSuccess(Void v) {
-
-                try {
-                    storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
-                } catch (Exception exception) {
-                	resultFuture.setException(exception);
-                    return;
-                }
-    	        resultFuture.set(registrationId);
-            }
-        });
-        
-        return resultFuture;
-    }
-        
-    /**
-     * Deletes a registration and removes it from local storage
-     * 
-     * @param registrationName
-     *            The registration name
-     * @param callback
-     *            The operation callback
-     * @throws Exception 
-     */
-    private ListenableFuture<Void> unregisterInternal(String registrationName) {
-        String registrationId = null;
-        
-        registrationId = retrieveRegistrationId(registrationName);
-      
-        return deleteRegistrationInternal(registrationName, registrationId);
-    }
-
-    private ListenableFuture<String> createRegistrationId() {
-
-        String resource = "/registrationids/";
-        
-    	final SettableFuture<String> resultFuture = SettableFuture.create();
-        ListenableFuture<ServiceFilterResponse> serviceFilterFuture =  mClient.invokeApiInternal(resource, null, "POST", null, null, MobileServiceClient.PNS_API_URL);
-    
-        Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>()
-		{    
-            @Override
-            public void onFailure(Throwable exception) {
-             	resultFuture.setException(exception);
-            }
-       
-            @Override
-            public void onSuccess(ServiceFilterResponse response) {
-            	for (Header header : response.getHeaders()) {
-                    if (header.getName().equalsIgnoreCase(NEW_REGISTRATION_LOCATION_HEADER)) {
-
-                        URI regIdUri = null;
-                        try {
-                            regIdUri = new URI(header.getValue());
-                        } catch (URISyntaxException e) {
-                        	resultFuture.setException(e);
-
-                            return;
-                        }
-
-                        String[] pathFragments = regIdUri.getPath().split("/");
-                        String result = pathFragments[pathFragments.length - 1];
-
-                        resultFuture.set(result);
-                    }
-            	}
-            }
+			@Override
+			public void onSuccess(String v) {
+				resultFuture.set(registration);
+			}
 		});
 
-        return resultFuture;
-    }
-        
-    /**
-     * Updates a registration
-     * 
-     * @param registration
-     *            The registration to update
-     * @param callback
-     *            The operation callback
-     * @throws UnsupportedEncodingException 
-     * @throws Exception 
-     */
-    private ListenableFuture<Void> upsertRegistrationInternal(final Registration registration) {
+		return resultFuture;
+	}
 
-    	final SettableFuture<Void> resultFuture = SettableFuture.create();
-    	
-        GsonBuilder gsonBuilder = new GsonBuilder();
-        gsonBuilder = gsonBuilder.excludeFieldsWithoutExposeAnnotation();
+	/**
+	 * Registers the client for template notifications with the specified tags
+	 * 
+	 * @param pnsHandle
+	 *            PNS specific identifier
+	 * @param templateName
+	 *            The template name
+	 * @param template
+	 *            The template body
+	 * @param tags
+	 *            The tags to use in the registration
+	 * @param callback
+	 *            The operation callback
+	 * @return
+	 */
+	public ListenableFuture<TemplateRegistration> registerTemplate(String pnsHandle, String templateName, String template, String[] tags) {
 
-        Gson gson = gsonBuilder.create();
+		final SettableFuture<TemplateRegistration> resultFuture = SettableFuture.create();
 
-        String resource = registration.getURI();
-        JsonElement json = gson.toJsonTree(registration);
-        String body = json.toString();
+		if (isNullOrWhiteSpace(pnsHandle)) {
+			resultFuture.setException(new IllegalArgumentException("pnsHandle"));
+			return resultFuture;
+		}
 
-        
-        byte[] content;
+		if (isNullOrWhiteSpace(templateName)) {
+			resultFuture.setException(new IllegalArgumentException("templateName"));
+			return resultFuture;
+		}
+
+		if (isNullOrWhiteSpace(template)) {
+			resultFuture.setException(new IllegalArgumentException("template"));
+			return resultFuture;
+		}
+
+		final TemplateRegistration registration = mPnsSpecificRegistrationFactory.createTemplateRegistration();
+		registration.setPNSHandle(pnsHandle);
+		registration.setName(templateName);
+		registration.setTemplateBody(template);
+		registration.addTags(tags);
+
+		ListenableFuture<String> registerInternalFuture = registerInternal(registration);
+
+		Futures.addCallback(registerInternalFuture, new FutureCallback<String>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				resultFuture.setException(exception);
+			}
+
+			@Override
+			public void onSuccess(String v) {
+				resultFuture.set(registration);
+			}
+		});
+
+		return resultFuture;
+	}
+
+	/**
+	 * Unregisters the client for native notifications
+	 * 
+	 * @param callback
+	 *            The operation callback
+	 * @throws Exception
+	 */
+	public ListenableFuture<Void> unregister() {
+		return unregisterInternal(Registration.DEFAULT_REGISTRATION_NAME);
+	}
+
+	/**
+	 * Unregisters the client for template notifications of a specific template
+	 * 
+	 * @param templateName
+	 *            The template name
+	 * @param callback
+	 *            The operation callback
+	 * 
+	 */
+	public ListenableFuture<Void> unregisterTemplate(String templateName) {
+		if (isNullOrWhiteSpace(templateName)) {
+			throw new IllegalArgumentException("templateName");
+		}
+
+		return unregisterInternal(templateName);
+	}
+
+	/**
+	 * Unregisters the client for all notifications
+	 * 
+	 * @param pnsHandle
+	 *            PNS specific identifier
+	 * @param callback
+	 *            The operation callback
+	 * @throws ExecutionException
+	 * @throws InterruptedException
+	 */
+	public ListenableFuture<Void> unregisterAll(String pnsHandle) {
+
+		final SettableFuture<Void> resultFuture = SettableFuture.create();
+
+		ListenableFuture<ArrayList<Registration>> fullRegistrationInformationFuture = getFullRegistrationInformation(pnsHandle);
+
+		Futures.addCallback(fullRegistrationInformationFuture, new FutureCallback<ArrayList<Registration>>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				resultFuture.setException(exception);
+			}
+
+			@Override
+			public void onSuccess(ArrayList<Registration> registrations) {
+
+				ListenableFuture<Void> unregisterAllInternalFuture = unregisterAllInternal(registrations);
+
+				Futures.addCallback(unregisterAllInternalFuture, new FutureCallback<Void>() {
+					@Override
+					public void onFailure(Throwable exception) {
+						resultFuture.setException(exception);
+					}
+
+					@Override
+					public void onSuccess(Void v) {
+						resultFuture.set(null);
+					}
+				});
+			}
+		});
+
+		return resultFuture;
+	}
+
+	private ListenableFuture<Void> unregisterAllInternal(ArrayList<Registration> registrations) {
+		final SettableFuture<Void> resultFuture = SettableFuture.create();
+
+		final SyncState state = new SyncState();
+
+		state.size = registrations.size();
+
+		final CopyOnWriteArrayList<String> concurrentArray = new CopyOnWriteArrayList<String>();
+
+		final Object syncObject = new Object();
+
+		if (state.size == 0) {
+
+			removeAllRegistrationsId();
+
+			mIsRefreshNeeded = false;
+
+			resultFuture.set(null);
+
+			return resultFuture;
+		}
+
+		for (final Registration registration : registrations) {
+
+			ListenableFuture<Void> serviceFilterFuture = deleteRegistrationInternal(registration.getName(), registration.getRegistrationId());
+
+			Futures.addCallback(serviceFilterFuture, new FutureCallback<Void>() {
+				@Override
+				public void onFailure(Throwable exception) {
+
+					if (exception != null) {
+						synchronized (syncObject) {
+							if (!state.alreadyReturn) {
+								state.alreadyReturn = true;
+
+								resultFuture.setException(exception);
+
+								return;
+							}
+						}
+					}
+				}
+
+				@Override
+				public void onSuccess(Void v) {
+					concurrentArray.add(registration.getRegistrationId());
+
+					if (concurrentArray.size() == state.size && !state.alreadyReturn) {
+						removeAllRegistrationsId();
+
+						mIsRefreshNeeded = false;
+
+						resultFuture.set(null);
+
+						return;
+					}
+				}
+			});
+		}
+
+		return resultFuture;
+	}
+
+	private class SyncState {
+		public boolean alreadyReturn;
+		public int size;
+	}
+
+	private ListenableFuture<Void> refreshRegistrationInformation(String pnsHandle) {
+
+		final SettableFuture<Void> resultFuture = SettableFuture.create();
+
+		if (isNullOrWhiteSpace(pnsHandle)) {
+			resultFuture.setException(new IllegalArgumentException("pnsHandle"));
+			return resultFuture;
+		}
+
+		// delete old registration information
+		Editor editor = mSharedPreferences.edit();
+		Set<String> keys = mSharedPreferences.getAll().keySet();
+		for (String key : keys) {
+			if (key.startsWith(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY)) {
+				editor.remove(key);
+			}
+		}
+
+		editor.commit();
+
+		ListenableFuture<ArrayList<Registration>> getFullRegistrationInformationFuture = getFullRegistrationInformation(pnsHandle);
+
+		Futures.addCallback(getFullRegistrationInformationFuture, new FutureCallback<ArrayList<Registration>>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				resultFuture.setException(exception);
+			}
+
+			@Override
+			public void onSuccess(ArrayList<Registration> registrations) {
+				for (Registration registration : registrations) {
+
+					try {
+						storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
+					} catch (Exception e) {
+						resultFuture.setException(e);
+
+						return;
+					}
+				}
+
+				mIsRefreshNeeded = false;
+
+				resultFuture.set(null);
+			}
+		});
+
+		return resultFuture;
+	}
+
+	private ListenableFuture<ArrayList<Registration>> getFullRegistrationInformation(String pnsHandle) {
+		final SettableFuture<ArrayList<Registration>> resultFuture = SettableFuture.create();
+
+		if (isNullOrWhiteSpace(pnsHandle)) {
+			resultFuture.setException(new IllegalArgumentException("pnsHandle"));
+			return resultFuture;
+		}
+
+		// get existing registrations
+		String resource = "/registrations/";
+
+		List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
+		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+		parameters.add(new Pair<String, String>("platform", mPnsSpecificRegistrationFactory.getPlatform()));
+		parameters.add(new Pair<String, String>("deviceId", pnsHandle));
+		requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
+
+		ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mClient.invokeApiInternal(resource, null, "GET", requestHeaders, parameters,
+				MobileServiceClient.PNS_API_URL);
+
+		Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				resultFuture.setException(exception);
+			}
+
+			@Override
+			public void onSuccess(ServiceFilterResponse response) {
+				ArrayList<Registration> registrationsList = new ArrayList<Registration>();
+
+				JsonArray registrations = new JsonParser().parse(response.getContent()).getAsJsonArray();
+
+				for (JsonElement registrationJson : registrations) {
+					Registration registration = null;
+					if (registrationJson.getAsJsonObject().has("templateName")) {
+						registration = mPnsSpecificRegistrationFactory.parseTemplateRegistration(registrationJson.getAsJsonObject());
+					} else {
+						registration = mPnsSpecificRegistrationFactory.parseNativeRegistration(registrationJson.getAsJsonObject());
+					}
+
+					registrationsList.add(registration);
+				}
+
+				resultFuture.set(registrationsList);
+			}
+		});
+
+		return resultFuture;
+	}
+
+	/**
+	 * Creates a new registration in the server. If it exists, updates its
+	 * information
+	 * 
+	 * @param registration
+	 *            The registration to create
+	 * @param callback
+	 *            The operation callback
+	 */
+	private ListenableFuture<String> registerInternal(final Registration registration) {
+
+		final SettableFuture<String> resultFuture = SettableFuture.create();
+
+		if (mIsRefreshNeeded) {
+			String pNSHandle = mSharedPreferences.getString(STORAGE_PREFIX + PNS_HANDLE_KEY, "");
+
+			if (isNullOrWhiteSpace(pNSHandle)) {
+				pNSHandle = registration.getPNSHandle();
+			}
+
+			ListenableFuture<Void> refreshRegistrationInformationFuture = refreshRegistrationInformation(pNSHandle);
+
+			Futures.addCallback(refreshRegistrationInformationFuture, new FutureCallback<Void>() {
+
+				@Override
+				public void onFailure(Throwable exception) {
+					resultFuture.setException(exception);
+				}
+
+				@Override
+				public void onSuccess(Void v) {
+					resultFuture.set(registration.getRegistrationId());
+				}
+			});
+
+			return resultFuture;
+
+		} else {
+			return createRegistrationId(registration);
+		}
+	}
+
+	private ListenableFuture<String> createRegistrationId(final Registration registration) {
+
+		String registrationId = null;
+
+		final SettableFuture<String> resultFuture = SettableFuture.create();
+
+		try {
+			registrationId = retrieveRegistrationId(registration.getName());
+		} catch (Exception e) {
+			resultFuture.setException(e);
+			return resultFuture;
+		}
+
+		if (isNullOrWhiteSpace(registrationId)) {
+			return createRegistrationIdInternal(registration);
+		} else {
+			ListenableFuture<Void> unregisterInternalFuture = unregisterInternal(registration.getName());
+
+			Futures.addCallback(unregisterInternalFuture, new FutureCallback<Void>() {
+
+				@Override
+				public void onFailure(Throwable exception) {
+					resultFuture.setException(exception);
+				}
+
+				@Override
+				public void onSuccess(Void v) {
+
+					ListenableFuture<String> createRegistrationIdInternalFuture = createRegistrationIdInternal(registration);
+
+					Futures.addCallback(createRegistrationIdInternalFuture, new FutureCallback<String>() {
+
+						@Override
+						public void onFailure(Throwable exception) {
+							resultFuture.setException(exception);
+						}
+
+						@Override
+						public void onSuccess(String registrationId) {
+							resultFuture.set(registrationId);
+						}
+					});
+				}
+			});
+		}
+
+		return resultFuture;
+	}
+
+	private ListenableFuture<String> createRegistrationIdInternal(final Registration registration) {
+
+		final SettableFuture<String> resultFuture = SettableFuture.create();
+
+		ListenableFuture<String> createRegistrationIdFuture = createRegistrationId();
+
+		Futures.addCallback(createRegistrationIdFuture, new FutureCallback<String>() {
+
+			@Override
+			public void onFailure(Throwable exception) {
+				resultFuture.setException(exception);
+			}
+
+			@Override
+			public void onSuccess(String registrationId) {
+				ListenableFuture<String> setRegistrationIdFuture = setRegistrationId(registration, registrationId);
+
+				Futures.addCallback(setRegistrationIdFuture, new FutureCallback<String>() {
+
+					@Override
+					public void onFailure(Throwable exception) {
+						resultFuture.setException(exception);
+					}
+
+					@Override
+					public void onSuccess(String registrationId) {
+						resultFuture.set(registrationId);
+					}
+				});
+			}
+		});
+
+		return resultFuture;
+	}
+
+	private ListenableFuture<String> setRegistrationId(final Registration registration, final String registrationId) {
+		registration.setRegistrationId(registrationId);
+
+		final SettableFuture<String> resultFuture = SettableFuture.create();
+
+		ListenableFuture<Void> upsertRegistrationInternalFuture = upsertRegistrationInternal(registration);
+
+		Futures.addCallback(upsertRegistrationInternalFuture, new FutureCallback<Void>() {
+			@Override
+			public void onFailure(Throwable exception) {
+
+				if (!(exception instanceof MobileServiceException)) {
+					resultFuture.setException(exception);
+				}
+
+				MobileServiceException mobileServiceException = (MobileServiceException) exception;
+
+				ServiceFilterResponse response = mobileServiceException.getResponse();
+
+				if (response != null && response.getStatus().getStatusCode() == 410) {
+
+					// if we get an RegistrationGoneException (410) from
+					// service, we
+					// will recreate registration id and will try to do
+					// upsert one more
+					// time.
+					// This can occur if the backing NotificationHub is changed
+					// or if the registration expires.
+
+					try {
+						removeRegistrationId(registration.getName());
+					} catch (Exception e) {
+						resultFuture.setException(e);
+						return;
+					}
+
+					ListenableFuture<String> createRegistrationIdFuture = createRegistrationId();
+
+					Futures.addCallback(createRegistrationIdFuture, new FutureCallback<String>() {
+						@Override
+						public void onFailure(Throwable exception) {
+							resultFuture.setException(exception);
+						}
+
+						@Override
+						public void onSuccess(final String registrationId) {
+							// ListenableFuture<String> setRegistrationIdFuture
+							// = setRegistrationId(registration,
+							// registrationId);
+
+							// Futures.addCallback(setRegistrationIdFuture, new
+							// FutureCallback<String>() {
+							//
+							// @Override
+							// public void onFailure(Throwable exception) {
+							// resultFuture.setException(exception);
+							// }
+							//
+							// @Override
+							// public void onSuccess(final String
+							// registrationId) {
+							ListenableFuture<Void> upsertRegistrationInternalFuture2 = upsertRegistrationInternal(registration);
+
+							Futures.addCallback(upsertRegistrationInternalFuture2, new FutureCallback<Void>() {
+								@Override
+								public void onFailure(Throwable exception) {
+
+									if (!(exception instanceof MobileServiceException)) {
+										resultFuture.setException(exception);
+									}
+
+									MobileServiceException mobileServiceException = (MobileServiceException) exception;
+
+									ServiceFilterResponse response = mobileServiceException.getResponse();
+
+									if (response != null && response.getStatus().getStatusCode() == 410) {
+
+										RegistrationGoneException registrationGoneException = new RegistrationGoneException(mobileServiceException);
+										resultFuture.setException(registrationGoneException);
+									}
+
+								}
+
+								public void onSuccess(Void v) {
+									try {
+										storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
+									} catch (Exception exception) {
+										resultFuture.setException(exception);
+										return;
+									}
+									resultFuture.set(registrationId);
+								}
+							});
+						}
+					});
+					// }
+					// });
+
+				} else {
+					resultFuture.setException(exception);
+				}
+			}
+
+			@Override
+			public void onSuccess(Void v) {
+
+				try {
+					storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
+				} catch (Exception exception) {
+					resultFuture.setException(exception);
+					return;
+				}
+				resultFuture.set(registrationId);
+			}
+		});
+
+		return resultFuture;
+	}
+
+	/**
+	 * Deletes a registration and removes it from local storage
+	 * 
+	 * @param registrationName
+	 *            The registration name
+	 * @param callback
+	 *            The operation callback
+	 * @throws Exception
+	 */
+	private ListenableFuture<Void> unregisterInternal(String registrationName) {
+		String registrationId = null;
+
+		registrationId = retrieveRegistrationId(registrationName);
+
+		return deleteRegistrationInternal(registrationName, registrationId);
+	}
+
+	private ListenableFuture<String> createRegistrationId() {
+
+		String resource = "/registrationids/";
+
+		final SettableFuture<String> resultFuture = SettableFuture.create();
+		ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mClient.invokeApiInternal(resource, null, "POST", null, null,
+				MobileServiceClient.PNS_API_URL);
+
+		Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				resultFuture.setException(exception);
+			}
+
+			@Override
+			public void onSuccess(ServiceFilterResponse response) {
+				for (Header header : response.getHeaders()) {
+					if (header.getName().equalsIgnoreCase(NEW_REGISTRATION_LOCATION_HEADER)) {
+
+						URI regIdUri = null;
+						try {
+							regIdUri = new URI(header.getValue());
+						} catch (URISyntaxException e) {
+							resultFuture.setException(e);
+
+							return;
+						}
+
+						String[] pathFragments = regIdUri.getPath().split("/");
+						String result = pathFragments[pathFragments.length - 1];
+
+						resultFuture.set(result);
+					}
+				}
+			}
+		});
+
+		return resultFuture;
+	}
+
+	/**
+	 * Updates a registration
+	 * 
+	 * @param registration
+	 *            The registration to update
+	 * @param callback
+	 *            The operation callback
+	 * @throws UnsupportedEncodingException
+	 * @throws Exception
+	 */
+	private ListenableFuture<Void> upsertRegistrationInternal(final Registration registration) {
+
+		final SettableFuture<Void> resultFuture = SettableFuture.create();
+
+		GsonBuilder gsonBuilder = new GsonBuilder();
+		gsonBuilder = gsonBuilder.excludeFieldsWithoutExposeAnnotation();
+
+		Gson gson = gsonBuilder.create();
+
+		String resource = registration.getURI();
+		JsonElement json = gson.toJsonTree(registration);
+		String body = json.toString();
+
+		byte[] content;
 		try {
 			content = body.getBytes(MobileServiceClient.UTF8_ENCODING);
 		} catch (UnsupportedEncodingException e) {
 			resultFuture.setException(e);
 			return resultFuture;
 		}
-        
-        List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
 
-        requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
+		List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
 
-        ListenableFuture<ServiceFilterResponse> serviceFilterFuture =  mClient.invokeApiInternal(resource, content, "PUT", requestHeaders, null, MobileServiceClient.PNS_API_URL);
+		requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
 
-        Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>()
-		{    
-            @Override
-            public void onFailure(Throwable exception) {
-             	resultFuture.setException(exception);
-            }
-       
-            @Override
-            public void onSuccess(ServiceFilterResponse response) {
+		ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mClient.invokeApiInternal(resource, content, "PUT", requestHeaders, null,
+				MobileServiceClient.PNS_API_URL);
 
-            		if (response != null && 
-                    		response.getStatus().getStatusCode() == 410) {
-                        resultFuture.setException(new RegistrationGoneException());
-                    	return;
-                    }
-    	        
-    	        resultFuture.set(null);
-            }
-        });
-        
-        return resultFuture;
-     }
-    
-    /**
-     * Deletes a registration and removes it from local storage
-     * 
-     * @param registrationName
-     *            The registration Name
-     * 
-     * @param registrationId
-     *            The registration Id
-     * 
-     * @param callback
-     *            The operation callback
-     * @throws ExecutionException 
-     * @throws InterruptedException 
-     */
-    private ListenableFuture<Void> deleteRegistrationInternal(final String registrationName, final String registrationId) {
+		Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				resultFuture.setException(exception);
+			}
 
-    	final SettableFuture<Void> resultFuture = SettableFuture.create();
-    	
-    	if (isNullOrWhiteSpace(registrationId)) {
-    		resultFuture.set(null);
-    		return resultFuture;
-    	}
-    	
-        String resource = "/registrations/" + registrationId;
-       
-        ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mClient.invokeApiInternal(resource, null, "DELETE", null, null, MobileServiceClient.PNS_API_URL);
-    
-        Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>()
-		{    
-            @Override
-            public void onFailure(Throwable exception) {
-             	resultFuture.setException(exception);
-            }
-       
-            @Override
-            public void onSuccess(ServiceFilterResponse response) {
-                removeRegistrationId(registrationName);
-                
-                resultFuture.set(null);
-            }
-        });
-        
-        return resultFuture;
-    }
-    
-    /**
-     * Retrieves the registration id associated to the registration name from
-     * local storage
-     * 
-     * @param registrationName
-     *            The registration name to look for in local storage
-     * @return A registration id String
-     * @throws Exception
-     */
-    private String retrieveRegistrationId(String registrationName) {
-        return mSharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + registrationName, null);
-    }
+			@Override
+			public void onSuccess(ServiceFilterResponse response) {
+				resultFuture.set(null);
+			}
+		});
 
-    /**
-     * Stores the registration name and id association in local storage
-     * 
-     * @param registrationName
-     *            The registration name to store in local storage
-     * @param registrationId
-     *            The registration id to store in local storage
-     * @throws Exception
-     */
-    private void storeRegistrationId(String registrationName, String registrationId, String pNSHandle) {
-        Editor editor = mSharedPreferences.edit();
+		return resultFuture;
+	}
 
-        editor.putString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + registrationName, registrationId);
+	/**
+	 * Deletes a registration and removes it from local storage
+	 * 
+	 * @param registrationName
+	 *            The registration Name
+	 * 
+	 * @param registrationId
+	 *            The registration Id
+	 * 
+	 * @param callback
+	 *            The operation callback
+	 * @throws ExecutionException
+	 * @throws InterruptedException
+	 */
+	private ListenableFuture<Void> deleteRegistrationInternal(final String registrationName, final String registrationId) {
 
-        editor.putString(STORAGE_PREFIX + PNS_HANDLE_KEY, pNSHandle);
+		final SettableFuture<Void> resultFuture = SettableFuture.create();
 
-        // Always overwrite the storage version with the latest value
-        editor.putString(STORAGE_PREFIX + STORAGE_VERSION_KEY, STORAGE_VERSION);
+		if (isNullOrWhiteSpace(registrationId)) {
+			resultFuture.set(null);
+			return resultFuture;
+		}
 
-        editor.commit();
-    }
+		String resource = "/registrations/" + registrationId;
 
-    /**
-     * Removes the registration name and id association from local storage
-     * 
-     * @param registrationName
-     *            The registration name of the association to remove from local
-     *            storage
-     * @throws Exception
-     */
-    private void removeRegistrationId(String registrationName) {
-        Editor editor = mSharedPreferences.edit();
+		ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mClient.invokeApiInternal(resource, null, "DELETE", null, null,
+				MobileServiceClient.PNS_API_URL);
 
-        editor.remove(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + registrationName);
+		Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				resultFuture.setException(exception);
+			}
 
-        editor.commit();
-    }
+			@Override
+			public void onSuccess(ServiceFilterResponse response) {
+				removeRegistrationId(registrationName);
 
-    private void removeAllRegistrationsId() {
-        Editor editor = mSharedPreferences.edit();
+				resultFuture.set(null);
+			}
+		});
 
-        Set<String> keys = mSharedPreferences.getAll().keySet();
+		return resultFuture;
+	}
 
-        for (String key : keys) {
-            if (key.startsWith(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY)) {
-                editor.remove(key);
-            }
-        }
+	/**
+	 * Retrieves the registration id associated to the registration name from
+	 * local storage
+	 * 
+	 * @param registrationName
+	 *            The registration name to look for in local storage
+	 * @return A registration id String
+	 * @throws Exception
+	 */
+	private String retrieveRegistrationId(String registrationName) {
+		return mSharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + registrationName, null);
+	}
 
-        editor.commit();
-    }
+	/**
+	 * Stores the registration name and id association in local storage
+	 * 
+	 * @param registrationName
+	 *            The registration name to store in local storage
+	 * @param registrationId
+	 *            The registration id to store in local storage
+	 * @throws Exception
+	 */
+	private void storeRegistrationId(String registrationName, String registrationId, String pNSHandle) {
+		Editor editor = mSharedPreferences.edit();
 
-    private void verifyStorageVersion() {
-        String currentStorageVersion = mSharedPreferences.getString(STORAGE_PREFIX + STORAGE_VERSION_KEY, "");
+		editor.putString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + registrationName, registrationId);
 
+		editor.putString(STORAGE_PREFIX + PNS_HANDLE_KEY, pNSHandle);
 
-        if (!currentStorageVersion.equals(STORAGE_VERSION)) {
-        	
-            Editor editor = mSharedPreferences.edit();
-            
-            Set<String> keys = mSharedPreferences.getAll().keySet();
+		// Always overwrite the storage version with the latest value
+		editor.putString(STORAGE_PREFIX + STORAGE_VERSION_KEY, STORAGE_VERSION);
 
-            for (String key : keys) {
-                if (key.startsWith(STORAGE_PREFIX)) {
-                    editor.remove(key);
-                }
-            }
+		editor.commit();
+	}
 
-            editor.commit();
-            
-            mIsRefreshNeeded = true;
-        }
+	/**
+	 * Removes the registration name and id association from local storage
+	 * 
+	 * @param registrationName
+	 *            The registration name of the association to remove from local
+	 *            storage
+	 * @throws Exception
+	 */
+	private void removeRegistrationId(String registrationName) {
+		Editor editor = mSharedPreferences.edit();
 
-    }
+		editor.remove(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + registrationName);
 
-    private static boolean isNullOrWhiteSpace(String str) {
-        return str == null || str.trim().equals("");
-    }
+		editor.commit();
+	}
+
+	private void removeAllRegistrationsId() {
+		Editor editor = mSharedPreferences.edit();
+
+		Set<String> keys = mSharedPreferences.getAll().keySet();
+
+		for (String key : keys) {
+			if (key.startsWith(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY)) {
+				editor.remove(key);
+			}
+		}
+
+		editor.commit();
+	}
+
+	private void verifyStorageVersion() {
+		String currentStorageVersion = mSharedPreferences.getString(STORAGE_PREFIX + STORAGE_VERSION_KEY, "");
+
+		if (!currentStorageVersion.equals(STORAGE_VERSION)) {
+
+			Editor editor = mSharedPreferences.edit();
+
+			Set<String> keys = mSharedPreferences.getAll().keySet();
+
+			for (String key : keys) {
+				if (key.startsWith(STORAGE_PREFIX)) {
+					editor.remove(key);
+				}
+			}
+
+			editor.commit();
+
+			mIsRefreshNeeded = true;
+		}
+
+	}
+
+	private static boolean isNullOrWhiteSpace(String str) {
+		return str == null || str.trim().equals("");
+	}
 }

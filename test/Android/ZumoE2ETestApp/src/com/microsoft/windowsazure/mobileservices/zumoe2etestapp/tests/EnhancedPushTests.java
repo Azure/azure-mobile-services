@@ -657,8 +657,6 @@ public class EnhancedPushTests extends TestGroup {
 					String registrationId = GCMRegistrar.getRegistrationId(mainActivity);
 					EnhancedPushTests.registrationId = registrationId;
 
-					unregisterAll(this, client.getPush(), registrationId);
-
 					log("Registration ID: " + EnhancedPushTests.registrationId);
 
 					if ("".equals(registrationId)) {
