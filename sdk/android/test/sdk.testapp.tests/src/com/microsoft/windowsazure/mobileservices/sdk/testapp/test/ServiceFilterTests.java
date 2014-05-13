@@ -185,15 +185,15 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 		});
 
 		boolean hasException = false;
-		
+
 		try {
 			// Call the lookup method
 			client.getTable("TestTable").lookUp(1).get();
 
 		} catch (Exception exception) {
-			
+
 			hasException = true;
-			
+
 			// Assert
 			assertEquals(1, container.getCount());
 			assertEquals("Filter2", container.getRequestContent());
@@ -236,7 +236,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 		});
 
 		boolean hasException = false;
-		
+
 		try {
 			// Call the lookup method
 			client.getTable("TestTable").lookUp(1).get();
@@ -245,7 +245,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 			assertTrue(exception.getCause().getMessage().startsWith("Error in filter 1"));
 			hasException = true;
 		}
-		
+
 		assertTrue(hasException);
 	}
 
@@ -293,7 +293,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 		});
 
 		boolean hasException = false;
-		
+
 		try {
 			// Call the lookup method
 			client.getTable("TestTable").lookUp(1).get();
@@ -303,12 +303,12 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 			hasException = true;
 			assertTrue(exception.getCause().getMessage().startsWith("Error in filter 2"));
 		}
-		
+
 		assertTrue(hasException);
-	}		
+	}
 
 	public void testRequestShouldntFailWith401ResponseAndWithoutOnResponseCallbackInvokation() throws Throwable {
-		
+
 		// Create client
 		MobileServiceClient client = null;
 		try {
@@ -325,17 +325,26 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 		// response
 		final ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
 		requestMock.setHasErrorOnExecute(true);
+
 		// Add a new filter to the client
 		client = client.withFilter(new ServiceFilter() {
 
 			@Override
 			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				//return nextServiceFilterCallback.onNext(request);
-				
+				return nextServiceFilterCallback.onNext(requestMock);
+			}
+		});
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
+
+			@Override
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
 				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				//resultFuture.set(response);
+				resultFuture.set(new ServiceFilterResponseMock());
 
 				return resultFuture;
 			}
@@ -345,7 +354,7 @@ public class ServiceFilterTests extends InstrumentationTestCase {
 			// Call the lookup method
 			PersonTestObject entity = client.getTable(PersonTestObject.class).lookUp(1).get();
 
-			if (entity != null) {
+			if (entity.getId() != 0) {
 				fail("Since no onResponse wasn't invoked from the filter, there shouldn't be any kind of result (exception or entity)");
 			}
 
