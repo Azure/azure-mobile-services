@@ -3,7 +3,6 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSBookmarkOperation.h"
 #import "MSSyncContext.h"
 
 /// Performs all actions associated with a push operation including, sending each operation to
@@ -14,8 +13,7 @@
     BOOL finished_;
 }
 
-- (id) initWithPushOperation:(MSBookmarkOperation *)pushOperation
-                 syncContext:(MSSyncContext *)syncContext
+- (id) initWithSyncContext:(MSSyncContext *)syncContext
                dispatchQueue:(dispatch_queue_t)dispatchQueue
                   completion:(MSSyncBlock)completion;
 

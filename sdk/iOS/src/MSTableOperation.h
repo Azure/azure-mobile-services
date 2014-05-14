@@ -21,7 +21,7 @@ typedef NS_OPTIONS(NSUInteger, MSTableOperationTypes) {
 ///@name Properties
 ///@{
 
-/// The asociated table action that should be take on this table item, for example
+/// The action that should be taken for this table item, for example
 /// insert or update.
 @property (nonatomic, readonly) MSTableOperationTypes type;
 
@@ -33,11 +33,12 @@ typedef NS_OPTIONS(NSUInteger, MSTableOperationTypes) {
 
 /// @}
 
+
 ///@name Sending an operation to the Mobile Service
 ///@{
 
-/// Perform's the associated PushOperationType (table insert, etc) for the associated
-/// table item. The callback will be passed the result (an item on insert/update, and the string
+/// Perform's the associated PushOperationType (insert, etc) for the table item.
+/// The callback will be passed the result (an item on insert/update, and the string
 /// id on a delete) or the error from the mobile service.
 -(void) executeWithCompletion:(void(^)(NSDictionary *item, NSError *error))completion;
 
@@ -55,6 +56,13 @@ typedef NS_OPTIONS(NSUInteger, MSTableOperationTypes) {
 +(MSTableOperation *) pushOperationForTable:(NSString *)tableName
                                       type:(MSTableOperationTypes)type
                                       item:(NSString *)itemId;
+
+/// @}
+
+
+/// @name Canceling a Push operation
+/// @{
+- (void) cancelPush;
 
 /// @}
 

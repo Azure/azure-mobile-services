@@ -41,8 +41,7 @@
 {
     syncContext_ = syncContext;
     if (syncContext) {
-        syncContext_.client = self;
-        [syncContext_ loadOperations];
+        syncContext_.client = self;    
     }
 }
 

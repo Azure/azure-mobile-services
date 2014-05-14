@@ -9,12 +9,10 @@
 #import "MSTableOperationInternal.h"
 #import "MSTableOperationError.m"
 #import "MSQuery.h"
-#import "MSBookmarkOperation.h"
 #import "MSQueuePushOperation.h"
 
 @implementation MSSyncContext {
     dispatch_queue_t writeOperationQueue;
-    dispatch_queue_t callbackQueue;
 }
 
 static NSOperationQueue *pushQueue_;
@@ -23,44 +21,50 @@ static NSOperationQueue *pushQueue_;
 @synthesize dataSource = dataSource_;
 @synthesize operationQueue = operationQueue_;
 @synthesize errors = errors_;
+@synthesize client = client_;
+@synthesize callbackQueue = callbackQueue_;
 
-- (id) init
+-(void) setClient:(MSClient *)client
 {
-    return [self initWithDelegate:nil andDataSource:nil];
+    client_ = client;
+    operationQueue_ = [[MSOperationQueue alloc] initWithClient:client_ dataSource:self.dataSource];
+
+    // We don't need to wait for this, and all operation creation goes onto this queue so its guaranteed to
+    // happen only after this is populated.
+    dispatch_async(writeOperationQueue, ^{
+        self.operationSequence = [self.operationQueue getNextOperationId];
+    });
 }
 
-- (id) initWithDelegate:(id<MSSyncContextDelegate>) delegate andDataSource:(id<MSSyncContextDataSource>) dataSource
+-(id) init
+{
+    return [self initWithDelegate:nil dataSource:nil callback:nil];
+}
+
+-(id) initWithDelegate:(id<MSSyncContextDelegate>) delegate dataSource:(id<MSSyncContextDataSource>) dataSource callback:(NSOperationQueue *)callbackQueue
 {
     self = [super init];
     if (self)
     {
         writeOperationQueue = dispatch_queue_create("WriteOperationQueue", DISPATCH_QUEUE_CONCURRENT);
-        callbackQueue = dispatch_queue_create("SyncTableCallbacks", DISPATCH_QUEUE_CONCURRENT);
+        
+        callbackQueue_ = callbackQueue;
+        if (!callbackQueue_) {
+            callbackQueue_ = [[NSOperationQueue alloc] init];
+            callbackQueue_.name = @"Sync Context: Operation Callbacks";
+            callbackQueue.maxConcurrentOperationCount = 4;
+        }
         
         pushQueue_ = [NSOperationQueue new];
-        [pushQueue_ setMaxConcurrentOperationCount:1];
+        pushQueue_.maxConcurrentOperationCount = 1;
+        pushQueue_.name = @"Sync Context: Push";
         
         dataSource_ = dataSource;
         delegate_ = delegate;
-        operationQueue_ = [MSOperationQueue new];
         errors_ = [NSMutableArray new];
     }
+    
     return self;
-}
-
-/// Load previously stored operations from local store
--(void) loadOperations
-{
-    dispatch_async(writeOperationQueue, ^{
-        MSSyncTable *table = [[MSSyncTable alloc] initWithName:[self.dataSource operationTableName] client:self.client];
-        MSQuery *query = [[MSQuery alloc] initWithSyncTable:table];
-        
-        [self.dataSource readWithQuery:query completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-            for (NSDictionary *item in items) {
-                [self.operationQueue addOperation:[[MSTableOperation alloc] initWithItem:item]];
-            }
-        }];
-    });
 }
 
 /// Return the number of pending operations (including in progress)
@@ -74,14 +78,9 @@ static NSOperationQueue *pushQueue_;
 /// to the caller
 -(void) pushWithCompletion:(MSSyncBlock)completion
 {
-    // TODO: Allow users to cancel
-    
+    // TODO: Allow users to cancel operations
     dispatch_async(writeOperationQueue, ^{
-        MSBookmarkOperation *pushOperation = [MSBookmarkOperation new];
-        [self.operationQueue addOperation:pushOperation];
-        
-        MSQueuePushOperation *push = [[MSQueuePushOperation alloc] initWithPushOperation:pushOperation
-                                                                             syncContext:self
+        MSQueuePushOperation *push = [[MSQueuePushOperation alloc] initWithSyncContext:self
                                                                            dispatchQueue:writeOperationQueue
                                                                               completion:completion];
         
@@ -95,7 +94,7 @@ static NSOperationQueue *pushQueue_;
 
 /// Given an item and an action to perform (insert, update, delete) determines how that should be represented when sent to the
 /// server based on pending operations and how the local store should therefore be updated.
-- (void) syncTable:(NSString *)table item:(NSDictionary *)item action:(MSTableOperationTypes)action completion:(MSSyncItemBlock)completion
+-(void) syncTable:(NSString *)table item:(NSDictionary *)item action:(MSTableOperationTypes)action completion:(MSSyncItemBlock)completion
 {
     NSError *error;
     NSMutableDictionary *itemToSave = [item mutableCopy];
@@ -150,6 +149,8 @@ static NSOperationQueue *pushQueue_;
         
         if (condenseAction == MSCondenseAddNew) {
             operation = [MSTableOperation pushOperationForTable:table type:action item:itemId];
+            operation.operationId = self.operationSequence;
+            self.operationSequence++;
         }
 
         // Update local store and then the operation queue
@@ -164,7 +165,7 @@ static NSOperationQueue *pushQueue_;
                     break;
                     
                 case MSTableOperationDelete:
-                    // TODO: Save a copy of the original item
+                    // TODO: Save a copy of the original item into the operation
                     [self.dataSource deleteItemWithId:itemId table:table orError:&error];
                     break;
                 
@@ -176,42 +177,35 @@ static NSOperationQueue *pushQueue_;
         
         if (error) {
             if (completion) {
-                dispatch_async(callbackQueue, ^{
+                [self.callbackQueue addOperationWithBlock:^{
                     completion(nil, error);
-                });
+                }];
             }
             return;
         }
 
         // Update the operation queue now
         if (condenseAction == MSCondenseAddNew) {
-            [self.operationQueue addOperation:operation];
-            [self.dataSource upsertItem:[operation serialize]
-                                  table:[self.dataSource operationTableName]
-                                orError:&error];
-            
+            [self.operationQueue addOperation:operation orError:&error];
         }
         else if (condenseAction == MSCondenseToDelete) {
             operation.type = MSTableOperationDelete;
+            
+            // TODO: move upserts into operation queue logic?
             [self.dataSource upsertItem:[operation serialize]
                                   table:[self.dataSource operationTableName]
                                 orError:&error];
             
         } else if (condenseAction != MSCondenseKeep) {
-            [self removeOperation:operation];
+            [self.operationQueue removeOperation:operation orError:&error];
         }
         
         if (completion) {
-            dispatch_async(callbackQueue, ^{
-                completion([itemToSave copy], error);
-            });
+            [self.callbackQueue addOperationWithBlock:^{
+                completion(itemToSave, nil);
+            }];
         }
     });
-}
-
-/// Simple passthrough to the local storage data source to retrive a list of items
--(void)readWithQuery:(MSQuery *)query completion:(MSSyncReadBlock)completion {
-    [self.dataSource readWithQuery:query completion:completion];
 }
 
 /// Simple passthrough to the local storage data source to retrive a single item using its Id
@@ -224,18 +218,72 @@ static NSOperationQueue *pushQueue_;
 - (NSError *) removeOperation:(MSTableOperation *)operation
 {
     NSError *error;
-    
-    [self.operationQueue removeOperation:operation];
-    [self.dataSource deleteItemWithId:operation.guid
-                                table:[self.dataSource operationTableName]
-                              orError:&error];
-    
+    [self.operationQueue removeOperation:operation orError:&error];
     return error;
 }
 
+/// Simple passthrough to the local storage data source to retrive a list of items
+-(void)readWithQuery:(MSQuery *)query completion:(MSReadQueryBlock)completion {
+    NSError *error;
+    MSSyncContextReadResult *result = [self.dataSource readWithQuery:query orError:&error];
+    
+    if (completion) {
+        if (error) {
+            completion(nil, -1, error);
+        } else {
+            completion(result.items, result.totalCount, nil);
+        }
+    }
+}
 
-#pragma mark Local Storage Logic
+/// Given a pending operation in the queue, removes it from the queue and updates the local store
+/// with the given item
+- (void) cancelOperation:(MSTableOperation *)operation updateItem:(NSDictionary *)item completion:(MSSyncBlock)completion;
+{
+    // Removing an operation requires write access to the queue
+    dispatch_async(writeOperationQueue, ^{
+        NSError *error;
+        
+        // TODO: Verify operation hasn't been modified by others
+        
+        // Remove system properties but keep __version
+        NSMutableDictionary *itemToSave = [item mutableCopy];
+        
+        NSString *version = [itemToSave objectForKey:MSSystemColumnVersion];
+        [self.client.serializer removeSystemProperties:itemToSave];
+        if (version != nil) {
+            [itemToSave setValue:version forKey:MSSystemColumnVersion];
+        }
+        
+        [self.dataSource upsertItem:itemToSave table:operation.tableName orError:&error];
+        if (!error) {
+            [self.operationQueue removeOperation:operation orError:&error];
+        }
+        
+        if (completion) {
+            completion(error);
+        }
+    });
+}
 
+- (void) cancelOperation:(MSTableOperation *)operation discardItemWithCompletion:(MSSyncBlock)completion
+{
+    // Removing an operation requires write access to the queue
+    dispatch_async(writeOperationQueue, ^{
+        NSError *error;
+
+        // TODO: Verify operation hasn't been modified by others
+
+        [self.dataSource deleteItemWithId:operation.itemId table:operation.tableName orError:&error];
+        if (!error) {
+            [self.operationQueue removeOperation:operation orError:&error];
+        }
+        
+        if (completion) {
+            completion(error);
+        }
+    });
+}
 
 /// Verify our input is valid and try to pull our data down from the server
 - (void) pullWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
@@ -273,7 +321,7 @@ static NSOperationQueue *pushQueue_;
 ///  Read from server and get the new results
 ///  If our table became dirty while we read from the server, start over
 ///  Else save our data into the local store
-- (void)pullWithQueryInternal:(MSQuery *)query completion:(MSSyncBlock)completion
+- (void) pullWithQueryInternal:(MSQuery *)query completion:(MSSyncBlock)completion
 {
     dispatch_async(writeOperationQueue, ^{
         // Before we can pull from the remote, we need to make sure out table doesn't having pending operations
@@ -327,9 +375,9 @@ static NSOperationQueue *pushQueue_;
                 }
                 
                 if (completion) {
-                    dispatch_async(callbackQueue, ^{
+                    [self.callbackQueue addOperationWithBlock:^{
                         completion(localDataSourceError);
-                    });
+                    }];
                 }
             });
         }];
@@ -344,6 +392,7 @@ static NSOperationQueue *pushQueue_;
     dispatch_async(writeOperationQueue, ^{
         // Check if our table is dirty, if so, we need to force a push, otherwise we can proceed
         NSArray *tableOps = [self.operationQueue getOperationsForTable:query.syncTable.name item:nil];
+        
         if (tableOps.count > 0) {
             [self pushWithCompletion:^(NSError *error) {
                 // For now all push errors abort the purge, long term we could try again
@@ -363,9 +412,9 @@ static NSOperationQueue *pushQueue_;
             [self.dataSource deleteUsingQuery:query orError:&error];
             
             if (completion) {
-                dispatch_async(callbackQueue, ^{
+                [self.callbackQueue addOperationWithBlock:^{
                     completion(error);
-                });
+                }];
             }
         }
     });

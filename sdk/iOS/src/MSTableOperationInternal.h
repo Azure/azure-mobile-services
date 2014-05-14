@@ -8,13 +8,16 @@
 #import "MSSyncContext.h"
 
 @interface MSTableOperation()
+
+@property (nonatomic) NSInteger operationId;
+
 @property (nonatomic, weak)   MSClient *client;
 @property (nonatomic, strong) NSDictionary *item;
 @property (atomic)            BOOL inProgress;
 @property (nonatomic, weak)   id<MSSyncContextDataSource> dataSource;
 @property (nonatomic, weak)   id<MSSyncContextDelegate> delegate;
 @property (nonatomic)         MSTableOperationTypes type;
-@property (nonatomic, strong) NSString *guid;
+@property (nonatomic, weak)   NSOperation *pushOperation;
 
 - (NSDictionary *) serialize;
 

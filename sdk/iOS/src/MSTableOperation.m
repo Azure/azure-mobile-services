@@ -10,10 +10,10 @@
 
 @implementation MSTableOperation
 
+@synthesize operationId = operationId_;
 @synthesize type = type_;
 @synthesize tableName = tableName_;
 @synthesize itemId = itemId_;
-@synthesize guid = guid_;
 
 +(MSTableOperation *) pushOperationForTable:(NSString *)tableName
                                       type:(MSTableOperationTypes)type
@@ -29,7 +29,6 @@
     self = [super init];
     if (self)
     {
-        guid_ = [MSJSONSerializer generateGUID];
         type_ = type;
         tableName_ = [tableName copy];
         itemId_ = [itemId copy];
@@ -42,29 +41,23 @@
 {
     self = [super init];
     if (self) {
-        guid_ = [item objectForKey:@"id"];
-        
         NSData *data = [item objectForKey:@"properties"];
         MSJSONSerializer *serializer = [MSJSONSerializer new];
         
         NSDictionary *rawItem = [serializer itemFromData:data withOriginalItem:nil ensureDictionary:YES orError:nil];
         
         type_ = [[rawItem objectForKey:@"type"] integerValue];
-        itemId_ = [rawItem objectForKey:@"itemId"];
-        tableName_ = [rawItem objectForKey:@"table"];
+        itemId_ = [item objectForKey:@"itemId"];
+        tableName_ = [item objectForKey:@"table"];
+        operationId_ = [[item objectForKey:@"id"] integerValue];
     }
     return self;
-}
-
--(id) initWithData:(NSData *)data
-{
-    return nil;    
 }
 
 -(NSDictionary *) serialize
 {
     NSDictionary *properties;
-    if (self.type == MSTableOperationDelete) {
+    if (self.type == MSTableOperationDelete && self.item) {
         properties = @{ @"type": [NSNumber numberWithInteger:self.type],
                         @"item": self.item };
     } else {
@@ -74,13 +67,7 @@
     MSJSONSerializer *serializer = [MSJSONSerializer new];
     NSData *data = [serializer dataFromItem:properties idAllowed:YES ensureDictionary:NO removeSystemProperties:NO orError:nil];
     
-    // TODO: ordering on table operation
-    // Operation searches by:
-    // -- table
-    // -- item id
-    // -- instant added
-    
-    return @{ @"id": self.guid, @"table": self.tableName, @"itemId": self.itemId, @"properties": data };
+    return @{ @"id": [NSNumber numberWithInteger:self.operationId], @"table": self.tableName, @"itemId": self.itemId, @"properties": data };
 }
 
 - (void) executeWithCompletion:(void(^)(NSDictionary *, NSError *))completion
@@ -97,6 +84,10 @@
     }
 }
 
+- (void) cancelPush
+{
+    [self.pushOperation cancel];
+}
 
 /// Logic for determining how to operations should be condensed into one single pending operation
 /// For example: Insert + Update -> Insert

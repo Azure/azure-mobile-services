@@ -5,6 +5,8 @@
 #import "MSTableOperationError.h"
 #import "MSJSONSerializer.h"
 #import "MSError.h"
+#import "MSTableOperationInternal.h"
+#import "MSSyncContextInternal.h"
 
 @interface MSTableOperationError()
 
@@ -16,6 +18,7 @@
 
 @property (nonatomic, copy) NSString *table;
 @property (nonatomic) MSTableOperationTypes operation;
+@property (nonatomic) NSInteger operationId;
 @property (nonatomic, copy) NSString *itemId;
 @property (nonatomic, copy) NSDictionary *item;
 
@@ -23,6 +26,8 @@
 @property (nonatomic) NSInteger statusCode;
 @property (nonatomic) NSString *rawResponse;
 @property (nonatomic) NSDictionary *serverItem;
+
+@property (nonatomic, weak) MSSyncContext *syncContext;
 
 @end
 
@@ -35,10 +40,14 @@
 @synthesize description = description_;
 @synthesize table = table_;
 @synthesize operation = operation_;
+@synthesize operationId = operationId_;
 @synthesize itemId = itemId_;
 @synthesize item = item_;
 @synthesize serverItem = serverItem_;
 @synthesize statusCode = statusCode_;
+@synthesize syncContext = syncContext_;
+
+#pragma mark - Initialization
 
 - (id) init {
     self = [super init];
@@ -115,6 +124,32 @@
     NSData *data = [serializer dataFromItem:properties idAllowed:YES ensureDictionary:NO removeSystemProperties:NO orError:nil];
     
     return @{ @"id": self.guid, @"properties": data };
+}
+
+#pragma mark - Error Resolution
+
+- (void) cancelOperationAndUpdateItem:(NSDictionary *)item completion:(MSSyncBlock)completion
+{
+    if (!item) {
+        if (completion) {
+            // TODO: Generate error
+            NSError *error = nil;
+            completion(error);
+        }
+    }
+    
+    MSTableOperation *op = [[MSTableOperation alloc] initWithTable:self.table type:self.operation itemId:self.itemId];
+    op.operationId = self.operationId;
+    
+    [self.syncContext cancelOperation:op updateItem:item completion:completion];
+}
+
+- (void) cancelOperationAndDiscardItemWithCompletion:(MSSyncBlock)completion
+{
+    MSTableOperation *op = [[MSTableOperation alloc] initWithTable:self.table type:self.operation itemId:self.itemId];
+    op.operationId = self.operationId;
+    
+    [self.syncContext cancelOperation:op discardItemWithCompletion:completion];
 }
 
 @end

@@ -24,19 +24,16 @@
 static NSOperationQueue * delegateQueue_;
 
 @synthesize error = error_;
-@synthesize guid = guid_;
 @synthesize dispatchQueue = dispatchQueue_;
 @synthesize syncContext = syncContext_;
 @synthesize completion = completion_;
 
-- (id) initWithPushOperation:(MSBookmarkOperation *)pushOperation
-                 syncContext:(MSSyncContext *)syncContext
+- (id) initWithSyncContext:(MSSyncContext *)syncContext
                dispatchQueue:(dispatch_queue_t)dispatchQueue
                   completion:(MSSyncBlock)completion
 {
     self = [super init];
     if (self) {
-        guid_ = pushOperation.guid;
         syncContext_ = syncContext;
         dispatchQueue_ = dispatchQueue;
         completion_ = [completion copy];
@@ -84,37 +81,25 @@ static NSOperationQueue * delegateQueue_;
     [self processQueueEntry];
 }
 
-/// Pick an operation up out of the queue until we run out of opertions or find push
+/// Pick an operation up out of the queue until we run out of operations or find push
 /// For each operation, attempt to send to the server and record the results until we
 /// recieve a fatal error or we finish all pending operations
 - (void) processQueueEntry
 {
+    __block MSTableOperation* currentOp;
     dispatch_async(self.dispatchQueue, ^{
-        id nextOperation = [self.syncContext.operationQueue peek];
-        if ([nextOperation isKindOfClass:[MSTableOperation class]]) {
-            [self processTableOperation:nextOperation];
+        if (currentOp) {
+            currentOp = [self.syncContext.operationQueue getOperationAfter:currentOp.operationId];
+        } else {
+            currentOp = [self.syncContext.operationQueue peek];
+        }
+
+        if (currentOp) {
+            [self processTableOperation:currentOp];
             return;
         }
         
-        BOOL complete = false;
-        // Remove ourselves if present
-        if(nextOperation) {
-            // Aborted pushes may have left their bookmark in the queue so throw it away
-            if ([nextOperation isKindOfClass:[MSBookmarkOperation class]]) {
-                MSBookmarkOperation *operation = (MSBookmarkOperation *)nextOperation;
-                complete = [self.guid isEqualToString:operation.guid];
-            }
-            [self.syncContext.operationQueue removeOperation:nextOperation];
-        } else {
-            complete = true;
-        }
-        
-        // Stop if we found our bookmark or we hit the end of the queue
-        if (complete) {
-            [self pushComplete];
-        } else {
-            [self processQueueEntry];
-        }
+        [self pushComplete];
         return;
     });
 }
@@ -122,7 +107,8 @@ static NSOperationQueue * delegateQueue_;
 /// For a given pending table operation, create the request to send it to the remote table
 - (void) processTableOperation:(MSTableOperation *)operation
 {
-    operation.inProgress = YES;
+    // Lock table-item pair
+    [self.syncContext.operationQueue lockOperation:operation];
     
     NSError *error;
     
@@ -156,6 +142,8 @@ static NSOperationQueue * delegateQueue_;
     
     // Begin sending the table operation to the remote table
     operation.client = self.syncContext.client;
+    operation.pushOperation = self;
+    
     id<MSSyncContextDelegate> syncDelegate = self.syncContext.delegate;
     
     // Let go of the operation queue
@@ -210,7 +198,8 @@ static NSOperationQueue * delegateQueue_;
             }
         }
         else if (operation.type != MSTableOperationDelete && item != nil) {
-            // The operation excuted successfully, so save the item (if we have one)
+            // The operation executed successfully, so save the item (if we have one)
+            // and no additional changes have happened on this table-item pair
             NSError *storeError;
             if ([self.syncContext.operationQueue getOperationsForTable:operation.tableName item:operation.itemId].count <= 1) {
                 [self.syncContext.dataSource upsertItem:item table:operation.tableName orError:&storeError];
@@ -225,15 +214,16 @@ static NSOperationQueue * delegateQueue_;
                 }
             }
         }
-
-        // Remove our operation
-        NSError *storeError = [self.syncContext removeOperation:operation];
         
         if (self.error) {
+            [self.syncContext.operationQueue unlockOperation:operation];
             [self pushComplete];
             return;
         }
-        else if (storeError) {
+        
+        // Remove our operation if it completed successfully
+        NSError *storeError = [self.syncContext removeOperation:operation];
+        if (storeError) {
             self.error = [self errorWithDescription:@"error removing successful operation from queue"
                                                code:MSSyncTableInternalError
                                       internalError:error];
@@ -252,43 +242,44 @@ static NSOperationQueue * delegateQueue_;
     MSSyncTable *table = [[MSSyncTable alloc] initWithName:[self.syncContext.dataSource errorTableName]
                                                     client:self.syncContext.client];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:table];
+    NSError *error;
     
-    [self.syncContext.dataSource readWithQuery:query completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-        // remove all the errors now
-        [self.syncContext.dataSource deleteUsingQuery:query orError:nil];
-        
-        // Create the containing error as needed
-        if (items && items.count > 0) {
-            NSMutableArray *tableErrors = [NSMutableArray new];
-            for (NSDictionary *item in items) {
-                [tableErrors addObject:[[MSTableOperationError alloc] initWithSerializedItem:item]];
-            }
-            
-            if (self.error == nil) {
-                self.error = [self errorWithDescription:@"Not all operations completed successfully"
-                                                   code:MSPushCompleteWithErrors
-                                             pushErrors:tableErrors
-                                          internalError:nil];
-            } else {
-                self.error = [self errorWithDescription:[self.error localizedDescription]
-                                                   code:self.error.code
-                                             pushErrors:tableErrors
-                                          internalError:[self.error.userInfo objectForKey:NSUnderlyingErrorKey]];
-            }
+    MSSyncContextReadResult *result = [self.syncContext.dataSource readWithQuery:query orError:&error];
+    
+    // remove all the errors now
+    [self.syncContext.dataSource deleteUsingQuery:query orError:nil];
+    
+    // Create the containing error as needed
+    if (result.items && result.items.count > 0) {
+        NSMutableArray *tableErrors = [NSMutableArray new];
+        for (NSDictionary *item in result.items) {
+            [tableErrors addObject:[[MSTableOperationError alloc] initWithSerializedItem:item]];
         }
         
-        // Send the final table operation results to the delegate
-        id<MSSyncContextDelegate> syncDelegate = self.syncContext.delegate;
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            if (syncDelegate && [syncDelegate respondsToSelector:@selector(pushCompleteWithError:completion:)]) {
-                [syncDelegate pushCompleteWithError:self.error completion:^{
-                    [self processErrors];
-                }];
-            } else {
+        if (self.error == nil) {
+            self.error = [self errorWithDescription:@"Not all operations completed successfully"
+                                               code:MSPushCompleteWithErrors
+                                         pushErrors:tableErrors
+                                      internalError:nil];
+        } else {
+            self.error = [self errorWithDescription:[self.error localizedDescription]
+                                               code:self.error.code
+                                         pushErrors:tableErrors
+                                      internalError:[self.error.userInfo objectForKey:NSUnderlyingErrorKey]];
+        }
+    }
+    
+    // Send the final table operation results to the delegate
+    id<MSSyncContextDelegate> syncDelegate = self.syncContext.delegate;
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        if (syncDelegate && [syncDelegate respondsToSelector:@selector(syncContext:onPushCompleteWithError:completion:)]) {
+            [syncDelegate syncContext:self.syncContext onPushCompleteWithError:self.error completion:^{
                 [self processErrors];
-            }
-        });
-    }];
+            }];
+        } else {
+            [self processErrors];
+        }
+    });
 }
 
 /// Analyze the final errors from all the operations, updating the state as appropriate

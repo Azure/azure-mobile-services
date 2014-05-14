@@ -6,66 +6,176 @@
 
 #import "MSTable.h"
 #import "MSTableOperationInternal.h"
+#import "MSQuery.h"
 
 @interface MSOperationQueue()
-@property (nonatomic, strong) NSMutableArray *queue;
+@property (nonatomic, weak) id<MSSyncContextDataSource> dataSource;
+@property (nonatomic, weak) MSClient *client;
+@property (atomic, strong) NSMutableDictionary *locks;
 @end
 
 @implementation MSOperationQueue
+@synthesize dataSource = dataSource_;
+@synthesize client = client_;
+@synthesize locks = locks_;
 
-@synthesize queue = queue_;
-- (NSArray *) queue
+- (id) initWithClient:(MSClient *)client dataSource:(id<MSSyncContextDataSource>)dataSource
 {
-    if (queue_ == nil) {
-        queue_ = [NSMutableArray new];
+    self = [super init];
+    if (self) {
+        dataSource_ = dataSource;
+        client_ = client;
+        locks_ = [NSMutableDictionary new];
     }
-    
-    return queue_;
+    return self;
 }
 
+/// Return the total count of operations that exist in the queue
 -(NSUInteger) count
 {
-    // TODO: Filter out bookmarks
+    MSSyncTable *table = [[MSSyncTable alloc] initWithName:self.dataSource.operationTableName client:self.client];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:table];
     
-    return self.queue.count;
-}
+    // We want the total count from the DB, but no records
+    query.includeTotalCount = YES;
+    query.fetchLimit = 0;
 
--(NSArray *) getOperationsForTable:(NSString *) table item:(NSString *)item
-{
-    //return [self.queue filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"(tableName == %@) AND (itemId == %@)", table, item]];
+    NSError *error;
+    MSSyncContextReadResult *result = [self.dataSource readWithQuery:query orError:&error];
 
-    //find table-item pairs
-    NSMutableArray *results = [NSMutableArray new];
-    for (id op in self.queue) {
-        if ([op isKindOfClass:[MSTableOperation class]]) {
-            MSTableOperation *tableOp = (MSTableOperation *)op;
-            
-            if ([tableOp.tableName isEqualToString:table] && (item == nil || [tableOp.itemId isEqualToString:item])) {
-                [results addObject:tableOp];
-            }
-        }
+    // Return -1 if count fails
+    if (error) {
+        return -1;
     }
-    return results;
+    
+    return result.totalCount;
 }
 
--(void) addOperation:(id)operation
+/// Load up all operations for a given table and optionally a specific item on that table
+/// and return the list to the caller
+-(NSArray *) getOperationsForTable:(NSString *)table item:(NSString *)item
 {
-    [self.queue addObject:operation];
+    NSError *error;
+    MSSyncTable *syncTable = [[MSSyncTable alloc] initWithName:self.dataSource.operationTableName client:self.client];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:syncTable];
+    
+    if (item) {
+        query.predicate = [NSPredicate predicateWithFormat:@"(table == %@) AND (itemId == %@)", table, item];
+    } else {
+        query.predicate = [NSPredicate predicateWithFormat:@"(table == %@)", table];
+    }
+
+    MSSyncContextReadResult *result = [self.dataSource readWithQuery:query orError:&error];
+    if (error) {
+        return nil;
+    }
+    
+    NSMutableArray *operations = [NSMutableArray new];
+    for (NSDictionary *item in result.items) {
+        MSTableOperation *op = [[MSTableOperation alloc] initWithItem:item];
+        op.inProgress = [self isLocked:op];
+        [operations addObject:op];
+    }
+    return [operations copy];
 }
 
--(void) removeOperation:(id)operation
+-(void) addOperation:(MSTableOperation *)operation orError:(NSError **)error
 {
-    [self.queue removeObject:operation];
+    [self.dataSource upsertItem:[operation serialize]
+                          table:self.dataSource.operationTableName
+                        orError:error];
+}
+
+-(void) removeOperation:(MSTableOperation *)operation orError:(NSError **)error
+{
+    [self.dataSource deleteItemWithId:[NSNumber numberWithInteger:operation.operationId]
+                                table:[self.dataSource operationTableName]
+                              orError:error];
+    
+    // Make sure to clean up any lock if one existed
+    [self unlockOperation:operation];
 }
 
 - (id) peek
 {
-    return [self.queue firstObject];    
+    return [self getOperationAfter:-1];
 }
 
-- (NSArray *) operations
+- (id) getOperationAfter:(NSInteger)operationId
 {
-    return self.queue;
+    MSSyncTable *table = [[MSSyncTable alloc] initWithName:self.dataSource.operationTableName client:self.client];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:table];
+    
+    // We want the highest id from the DB, but no records
+    query.fetchLimit = 1;
+    [query orderByAscending:@"id"];
+    if (operationId >= 0) {
+        query.predicate = [NSPredicate predicateWithFormat:@"id > %@", operationId];
+    }
+    
+    MSSyncContextReadResult *result = [self.dataSource readWithQuery:query orError:nil];
+    if (result.items && result.items.count > 0) {
+        NSDictionary *item = [result.items objectAtIndex:0];
+        if (item) {
+            MSTableOperation *op = [[MSTableOperation alloc] initWithItem:item];
+            op.inProgress = [self isLocked:op];
+            return op;
+        }
+    }
+    
+    return nil;
+}
+
+/// Return the highest id currently in the table + 1. This API should not be called in parallel with
+/// an insert function.
+-(NSInteger) getNextOperationId
+{
+    MSSyncTable *table = [[MSSyncTable alloc] initWithName:self.dataSource.operationTableName client:self.client];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:table];
+    
+    // We want the highest id from the DB, but no records
+    query.fetchLimit = 1;
+    [query orderByDescending:@"id"];
+    
+    NSError *error;
+    MSSyncContextReadResult *result = [self.dataSource readWithQuery:query orError:&error];
+    
+    // Return -1 if count fails
+    if (error) {
+        return -1;
+    }
+    
+    if (result.items) {
+        NSDictionary *item = [result.items objectAtIndex:0];
+        return [[item objectForKey:@"id"] integerValue] + 1;
+    } else {
+        return 1;
+    }
+}
+
+- (BOOL) lockOperation:(MSTableOperation *)operation
+{
+    NSNumber *key = [NSNumber numberWithInteger:operation.operationId];
+    BOOL locked = [[self.locks objectForKey:key] boolValue];
+    if (locked) {
+        return NO;
+    } else {
+        [self.locks setObject:[NSNumber numberWithBool:YES] forKey:key];
+        return YES;
+    }
+}
+
+- (BOOL) unlockOperation:(MSTableOperation *)operation
+{
+    NSNumber *key = [NSNumber numberWithInteger:operation.operationId];
+    [self.locks removeObjectForKey:key];
+    return YES;
+}
+
+- (BOOL) isLocked:(MSTableOperation *)operation
+{
+    NSNumber *key = [NSNumber numberWithInteger:operation.operationId];
+    return [[self.locks objectForKey:key] boolValue];
 }
 
 @end

@@ -46,12 +46,22 @@
 /// of the item on the server
 @property (nonatomic, readonly) NSDictionary *serverItem;
 
+///@}
+
+/// @name Handling Errors
+
 /// Set the handled flag to indicate that all appropriate actions for this error have been taken and the
-/// owning operation can be removed and not attempted again. If this is not set, then the operation
-/// will be attempted again on the next sync operation.
+/// error will be removed from the list
 @property (nonatomic) BOOL handled;
 
-///@}
+/// Removes the pending operation so it will not be tried again the next time push is called. In addition,
+/// updates the local store state
+- (void) cancelOperationAndUpdateItem:(NSDictionary *)item completion:(MSSyncBlock)completion;
+
+/// Removes the pending operation so it will not be tried again the next time push is called. In addition,
+/// removes the item associated with the operation from the local store
+- (void) cancelOperationAndDiscardItemWithCompletion:(MSSyncBlock)completion;
+
 
 /// @name Initializing the MSTableOperationError Object
 /// @{

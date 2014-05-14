@@ -28,7 +28,7 @@
     offline = [MSOfflinePassthroughHelper new];
     
     // Enable offline mode
-    client.syncContext = [[MSSyncContext alloc] initWithDelegate:offline andDataSource:offline];
+    client.syncContext = [[MSSyncContext alloc] initWithDelegate:offline dataSource:offline callback:nil];
     
     done = NO;
 }
@@ -318,7 +318,7 @@
         STAssertNil(error, @"error should have been nil.");
         done = YES;
     }];
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    STAssertTrue([self waitForTest:100000.1], @"Test timed out.");
     
     // Update the item
     done = NO;
@@ -326,13 +326,13 @@
         STAssertNil(error, @"error should have been nil.");
         done = YES;
     }];
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    STAssertTrue([self waitForTest:1000000.1], @"Test timed out.");
     
     // Push queue to server
     done = NO;
     [client.syncContext pushWithCompletion:^(NSError *error) {
         STAssertNil(error, @"error should have been nil.");
-        STAssertTrue(callsToServer == 0, @"only one call to server should have been made");
+        STAssertTrue(callsToServer == 0, @"no calls to server should have been made");
         done = YES;
     }];
     STAssertTrue([self waitForTest:0.1], @"Test timed out.");
@@ -433,7 +433,7 @@
     MSSyncTable *todoTable = [filteredClient syncTableWithName:@"NoSuchTable"];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
     
-    [todoTable insert:@{ @"name": @"test one"} completion:^(NSDictionary *item, NSError *error) {
+    [todoTable insert:@{ @"id":@"test1", @"name": @"test one"} completion:^(NSDictionary *item, NSError *error) {
         [todoTable purgeWithQuery:query completion:^(NSError *error) {
             STAssertNil(error, error.description);
             STAssertTrue(callsToServer == 1, @"expected push to have called serer");
@@ -441,7 +441,7 @@
         }];
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    STAssertTrue([self waitForTest:100.0], @"Test timed out.");
 }
 
 -(void) testPurgeNoPushOnDifferentTableSuccess

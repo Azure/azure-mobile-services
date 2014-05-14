@@ -29,15 +29,23 @@
     return @"zumo_operations";
 }
 
--(void) readWithQuery:(MSQuery *)query completion:(MSSyncReadBlock)completion
+- (MSSyncContextReadResult *) readWithQuery:(MSQuery *)query orError:(NSError **)error
 {
     NSMutableDictionary *tableData = [self.data objectForKey:query.syncTable.name];
+    
     if (tableData == nil) {
-        completion(nil, 0, nil);
+        return [[MSSyncContextReadResult alloc] initWithCount:0 items:nil];
     }
     
-    NSArray *items = [tableData allValues];
-    completion(items, -1, nil);
+    NSArray *allTableRows = [tableData allValues];
+    NSArray *filteredResult;
+    if (query.predicate) {
+        filteredResult = [allTableRows filteredArrayUsingPredicate:query.predicate];
+    } else {
+        filteredResult = allTableRows;
+    }
+    
+    return [[MSSyncContextReadResult alloc] initWithCount:filteredResult.count items:filteredResult];
 }
 
 - (NSDictionary *) readTable:(NSString *)table withItemId:(NSString *)itemId orError:(NSError **)error
