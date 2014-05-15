@@ -110,7 +110,7 @@
     query.fetchLimit = 1;
     [query orderByAscending:@"id"];
     if (operationId >= 0) {
-        query.predicate = [NSPredicate predicateWithFormat:@"id > %@", operationId];
+        query.predicate = [NSPredicate predicateWithFormat:@"id > %d", operationId];
     }
     
     MSSyncContextReadResult *result = [self.dataSource readWithQuery:query orError:nil];
@@ -145,7 +145,7 @@
         return -1;
     }
     
-    if (result.items) {
+    if (result.items && result.items.count > 0) {
         NSDictionary *item = [result.items objectAtIndex:0];
         return [[item objectForKey:@"id"] integerValue] + 1;
     } else {

@@ -99,14 +99,10 @@
 /// the server.
 -(void)pullWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
 
-//-(void)pullWithoutPurgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
-
-
 /// Removes all records in the local cache that match the results of the specified query.
 /// If query is nil, all records in the local table will be removed.
 -(void)purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
 
 /// @}
-
 
 @end

@@ -17,7 +17,6 @@
 #pragma mark * Public Initializer Methods
 
 
-
 -(id) initWithName:(NSString *)tableName client:(MSClient *)client;
 {
     self = [super init];

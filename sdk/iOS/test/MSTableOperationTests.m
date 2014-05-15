@@ -37,20 +37,16 @@
 
 - (void)testOperationSerializationSuccess
 {
-    MSTableOperation *tableOperation = [[MSTableOperation alloc] initWithTable:@"testTable" type:MSTableOperationInsert itemId:@"ABC"];
-    tableOperation.operationId = 7;
-    tableOperation.
+    MSTableOperation *originalTableOperation = [[MSTableOperation alloc] initWithTable:@"testTable" type:MSTableOperationInsert itemId:@"ABC"];
+    originalTableOperation.operationId = 7;
+    originalTableOperation.type = MSTableOperationInsert;
     
+    NSDictionary *info = [originalTableOperation serialize];
+    MSTableOperation *tableOperation = [[MSTableOperation alloc] initWithItem:info];
     
     STAssertEquals(tableOperation.operationId, 7, @"Incorrect id");
     STAssertEquals(tableOperation.tableName, @"testTable", @"Incorrect table name");
     STAssertEquals(tableOperation.itemId, @"ABC", @"Incorrect table name");
     STAssertEquals(tableOperation.type, MSTableOperationInsert, @"incorrect type");
-    
-    tableOperation.type = MSTableOperationInsert;
-    
-    NSDictionary *info = [tableOperation serialize];
-    
-    STAssertEquals(info, serializedOp, @"not equal");
 }
 @end

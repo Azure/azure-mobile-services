@@ -164,6 +164,73 @@
     STAssertTrue([self waitForTest:2000.1], @"Test timed out.");
 }
 
+-(void) testInsertPushInsertPush
+{
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    
+    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                                   initWithURL:nil
+                                   statusCode:200
+                                   HTTPVersion:nil headerFields:nil];
+    NSString* stringData = @"{\"id\": \"test1\", \"name\":\"test name\"}";
+    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    
+    BOOL __block insertRanToServer = NO;
+    
+    testFilter.responseToUse = response;
+    testFilter.dataToUse = data;
+    testFilter.ignoreNextFilter = YES;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        insertRanToServer = YES;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"NoSuchTable"];
+    
+    // Create the item
+    NSDictionary *item = @{ @"id": @"test1", @"name":@"test name" };
+    
+    // Insert the item
+    done = NO;
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    
+    done = NO;
+    [client.syncContext pushWithCompletion:^(NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        STAssertTrue(insertRanToServer, @"the insert call didn't go to the server");
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:1110.1], @"Test timed out.");
+
+    // Create the item
+    item = @{ @"id": @"test2", @"name":@"test name" };
+    
+    // Insert the item
+    done = NO;
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    
+    insertRanToServer = NO;    
+    done = NO;
+    [client.syncContext pushWithCompletion:^(NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        STAssertTrue(insertRanToServer, @"the insert call didn't go to the server");
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:2000.1], @"Test timed out.");
+
+}
+
 -(void) testInsertItemWithValidIdConflict
 {
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];

@@ -16,7 +16,9 @@
 
 @property (atomic) NSInteger operationSequence;
 
+
 #pragma mark * SyncTable helpers
+
 
 -(void) syncTable:(NSString *)table item:(NSDictionary *)item action:(MSTableOperationTypes)action completion:(MSSyncItemBlock)completion;
 
@@ -28,11 +30,14 @@
 
 -(void) purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
 
+
 #pragma mark * Operation Helpers
+
 
 -(NSError *) removeOperation:(MSTableOperation *)operation;
 
-- (void) cancelOperation:(MSTableOperation *)operation updateItem:(NSDictionary *)item completion:(MSSyncBlock)completion;
-- (void) cancelOperation:(MSTableOperation *)operation discardItemWithCompletion:(MSSyncBlock)completion;
+-(void) cancelOperation:(MSTableOperation *)operation updateItem:(NSDictionary *)item completion:(MSSyncBlock)completion;
+
+-(void) cancelOperation:(MSTableOperation *)operation discardItemWithCompletion:(MSSyncBlock)completion;
 
 @end

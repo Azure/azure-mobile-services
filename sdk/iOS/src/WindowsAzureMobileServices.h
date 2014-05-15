@@ -16,6 +16,7 @@
 #import "MSSyncContext.h"
 #import "MSSyncTable.h"
 #import "MSTableOperationError.h"
+#import "MSCoreDataStore.h"
 
 #define WindowsAzureMobileServicesSdkMajorVersion 1
 #define WindowsAzureMobileServicesSdkMinorVersion 1

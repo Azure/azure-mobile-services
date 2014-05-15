@@ -12,16 +12,15 @@
 @interface MSQueuePushOperation()
 
 @property (nonatomic, strong) NSError *error;
-@property (nonatomic, copy) NSString *guid;
 @property (nonatomic, weak) dispatch_queue_t dispatchQueue;
 @property (nonatomic, weak) MSSyncContext *syncContext;
 @property (nonatomic, copy) MSSyncBlock completion;
 
+@property (nonatomic, strong) MSTableOperation* currentOp;
+
 @end
 
 @implementation MSQueuePushOperation
-
-static NSOperationQueue * delegateQueue_;
 
 @synthesize error = error_;
 @synthesize dispatchQueue = dispatchQueue_;
@@ -37,19 +36,19 @@ static NSOperationQueue * delegateQueue_;
         syncContext_ = syncContext;
         dispatchQueue_ = dispatchQueue;
         completion_ = [completion copy];
-        delegateQueue_ = [NSOperationQueue new];
     }
     return self;
 }
 
--(void) endExecution
-{
-    [self willChangeValueForKey:@"isExecuting"];
+- (void) completeOperation {
     [self willChangeValueForKey:@"isFinished"];
+    [self willChangeValueForKey:@"isExecuting"];
+    
     executing_ = NO;
-    finished_  = YES;
-    [self didChangeValueForKey:@"isFinished"];
+    finished_ = YES;
+    
     [self didChangeValueForKey:@"isExecuting"];
+    [self didChangeValueForKey:@"isFinished"];
 }
 
 // Check if the operation was cancelled and if so, begin winding down
@@ -86,16 +85,16 @@ static NSOperationQueue * delegateQueue_;
 /// recieve a fatal error or we finish all pending operations
 - (void) processQueueEntry
 {
-    __block MSTableOperation* currentOp;
     dispatch_async(self.dispatchQueue, ^{
-        if (currentOp) {
-            currentOp = [self.syncContext.operationQueue getOperationAfter:currentOp.operationId];
+         if (self.currentOp) {
+            NSInteger currentId = self.currentOp.operationId;
+            self.currentOp = [self.syncContext.operationQueue getOperationAfter:currentId];
         } else {
-            currentOp = [self.syncContext.operationQueue peek];
+            self.currentOp = [self.syncContext.operationQueue peek];
         }
 
-        if (currentOp) {
-            [self processTableOperation:currentOp];
+        if (self.currentOp) {
+            [self processTableOperation:self.currentOp];
             return;
         }
         
@@ -310,10 +309,12 @@ static NSOperationQueue * delegateQueue_;
     }
     
     if (self.completion) {
-        self.completion(self.error);
+        dispatch_async(self.dispatchQueue, ^{
+            self.completion(self.error);
+        });
     }
     
-    [self endExecution];
+    [self completeOperation];
 }
 
 /// Builds a NSError containing the errors related to a push operation
@@ -342,6 +343,18 @@ static NSOperationQueue * delegateQueue_;
     }
     
     return [NSError errorWithDomain:MSErrorDomain code:code userInfo:userInfo];
+}
+
+- (BOOL) isConcurrent {
+    return YES;
+}
+
+- (BOOL) isExecuting {
+    return executing_;
+}
+
+- (BOOL) isFinished {
+    return finished_;
 }
 
 @end

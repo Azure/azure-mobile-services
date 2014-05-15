@@ -81,8 +81,8 @@ static NSOperationQueue *pushQueue_;
     // TODO: Allow users to cancel operations
     dispatch_async(writeOperationQueue, ^{
         MSQueuePushOperation *push = [[MSQueuePushOperation alloc] initWithSyncContext:self
-                                                                           dispatchQueue:writeOperationQueue
-                                                                              completion:completion];
+                                                                         dispatchQueue:writeOperationQueue
+                                                                            completion:completion];
         
         [pushQueue_ addOperation:push];
     });
@@ -244,7 +244,7 @@ static NSOperationQueue *pushQueue_;
     dispatch_async(writeOperationQueue, ^{
         NSError *error;
         
-        // TODO: Verify operation hasn't been modified by others
+        // FUTURE: Verify operation hasn't been modified by others
         
         // Remove system properties but keep __version
         NSMutableDictionary *itemToSave = [item mutableCopy];
@@ -272,7 +272,7 @@ static NSOperationQueue *pushQueue_;
     dispatch_async(writeOperationQueue, ^{
         NSError *error;
 
-        // TODO: Verify operation hasn't been modified by others
+        // FUTURE: Verify operation hasn't been modified by others
 
         [self.dataSource deleteItemWithId:operation.itemId table:operation.tableName orError:&error];
         if (!error) {
