@@ -55,6 +55,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             
             // loads sync errors
             string syncError = @"[]";
+            this.store.Setup(s => s.LookupAsync(MobileServiceLocalSystemTables.Config, It.IsAny<string>())).Returns(Task.FromResult<JObject>(null));
             this.store.Setup(s => s.ReadAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == MobileServiceLocalSystemTables.SyncErrors))).Returns(Task.FromResult(JToken.Parse(syncError)));
             // calls push complete
             this.handler.Setup(h => h.OnPushCompleteAsync(It.IsAny<MobileServicePushCompletionResult>())).Returns(Task.FromResult(0))
@@ -165,6 +166,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             }
             // loads sync errors
             string syncError = @"[]";
+            this.store.Setup(s => s.LookupAsync(MobileServiceLocalSystemTables.Config, It.IsAny<string>())).Returns(Task.FromResult<JObject>(null));
             this.store.Setup(s => s.ReadAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == MobileServiceLocalSystemTables.SyncErrors))).Returns(Task.FromResult(JToken.Parse(syncError)));
             // calls push complete
             this.handler.Setup(h => h.OnPushCompleteAsync(It.IsAny<MobileServicePushCompletionResult>())).Returns(Task.FromResult(0))

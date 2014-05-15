@@ -90,6 +90,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
                         }
                     });
 
+            storeMock.Setup(store => store.SaveSetting(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(0));
+
             storeMock.Object.DefineTable<T>();
             await storeMock.Object.InitializeAsync();
 

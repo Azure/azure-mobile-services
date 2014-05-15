@@ -58,6 +58,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 { "item", String.Empty },
                 { "rawResult", String.Empty }
             });
+            this.DefineTable(MobileServiceLocalSystemTables.Config, new JObject()
+            {
+                { MobileServiceSystemColumns.Id, String.Empty },
+                { "value", String.Empty },
+            });
         }
 
         /// <summary>
@@ -93,14 +98,29 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                                    select new ColumnDefinition(columnType, property))
                                   .ToDictionary(p => p.Property.Name, StringComparer.OrdinalIgnoreCase);
 
-            this.tables.Add(tableName, new TableDefinition(tableDefinition));
+            var sysProperties = MobileServiceSystemProperties.None;
+
+            if (item[MobileServiceSystemColumns.Version] != null)
+            {
+                sysProperties = sysProperties | MobileServiceSystemProperties.Version;
+            }
+            if (item[MobileServiceSystemColumns.CreatedAt] != null)
+            {
+                sysProperties = sysProperties | MobileServiceSystemProperties.CreatedAt;
+            }
+            if (item[MobileServiceSystemColumns.UpdatedAt] != null)
+            {
+                sysProperties = sysProperties | MobileServiceSystemProperties.UpdatedAt;
+            }
+
+            this.tables.Add(tableName, new TableDefinition(tableDefinition, sysProperties));
         }
 
         /// <summary>
         /// Initializes the local store and creates all the defined tables.
         /// </summary>
         /// <returns>Task that completes when initialization is complete.</returns>
-        public Task InitializeAsync()
+        public async Task InitializeAsync()
         {
             if (initialized)
             {
@@ -110,10 +130,17 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             foreach (KeyValuePair<string, TableDefinition> table in this.tables)
             {
                 this.CreateTableFromObject(table.Key, table.Value.Values);
+
+                if (!MobileServiceLocalSystemTables.All.Contains(table.Key))
+                {
+                    // preserve system properties setting for non-system tables
+                    string name = String.Format("{0}_systemProperties", table.Key);
+                    string value = ((int)table.Value.SystemProperties).ToString();
+                    await this.SaveSetting(name, value);
+                }
             }
 
             this.initialized = true;
-            return Task.FromResult(0);
         }
 
         /// <summary>
@@ -172,12 +199,17 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
             this.EnsureInitialized();
 
+            return UpsertAsyncInternal(tableName, item, fromServer);
+        }
+
+        private Task UpsertAsyncInternal(string tableName, JObject item, bool fromServer)
+        {
             TableDefinition table = GetTable(tableName);
 
             var properties = item.Properties();
             if (fromServer)
             {
-                properties = properties.Where(p => table.ContainsKey(p.Name));                
+                properties = properties.Where(p => table.ContainsKey(p.Name));
             }
 
             if (!properties.Any())
@@ -190,7 +222,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
             var sql = new StringBuilder();
             sql.AppendFormat("INSERT OR REPLACE INTO {0} ({1}) VALUES (", SqlHelpers.FormatTableName(tableName), columnNames);
-         
+
             string separator = String.Empty;
             ColumnDefinition columnDefinition;
 
@@ -200,7 +232,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             {
                 if (!table.TryGetValue(column.Name, out columnDefinition))
                 {
-                   throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_ColumnNotDefined, column.Name, tableName));
+                    throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_ColumnNotDefined, column.Name, tableName));
                 }
 
                 object value = SqlHelpers.SerializeValue(column.Value, columnDefinition.SqlType, columnDefinition.Property.Value.Type);
@@ -304,6 +336,16 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_TableNotDefined, tableName));
             }
             return table;
+        }
+
+        internal virtual async Task SaveSetting(string name, string value)
+        {
+            var setting = new JObject() 
+            { 
+                { "id", name }, 
+                { "value", value } 
+            };
+            await this.UpsertAsyncInternal(MobileServiceLocalSystemTables.Config, setting, fromServer: false);
         }
 
         internal virtual void CreateTableFromObject(string tableName, IEnumerable<ColumnDefinition> columns)

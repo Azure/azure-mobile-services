@@ -24,5 +24,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// Table that stores sync errors
         /// </summary>
         public static readonly string SyncErrors = "__errors";
+
+        /// <summary>
+        /// Configuration settings related to sync framework
+        /// </summary>
+        public static readonly string Config = "__config";
+
+        public static IEnumerable<string> All { get; private set; }
+
+        static MobileServiceLocalSystemTables()
+        {
+            All = new [] { OperationQueue, SyncErrors, Config };
+        }
     }
 }

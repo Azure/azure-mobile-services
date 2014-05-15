@@ -12,12 +12,16 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 {
     internal class TableDefinition: Dictionary<string, ColumnDefinition>
     {
+        public MobileServiceSystemProperties SystemProperties { get; private set; }
+
         public TableDefinition()
         {
         }
 
-        public TableDefinition(IDictionary<string, ColumnDefinition> definition): base(definition, StringComparer.OrdinalIgnoreCase)
+        public TableDefinition(IDictionary<string, ColumnDefinition> definition, MobileServiceSystemProperties systemProperties)
+            : base(definition, StringComparer.OrdinalIgnoreCase)
         {
+            this.SystemProperties = systemProperties;
         }
     }
 }

@@ -172,6 +172,62 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         }
 
         [AsyncTestMethod]
+        public async Task SystemPropertiesArePreserved_OnlyWhenReturnedFromServer()
+        {
+            ResetDatabase(TestTable);
+
+            var hijack = new TestHttpHandler();
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable<ToDoWithSystemPropertiesType>();
+
+            IMobileServiceClient service = await CreateClient(hijack, store);
+            IMobileServiceSyncTable<ToDoWithSystemPropertiesType> table = service.GetSyncTable<ToDoWithSystemPropertiesType>();
+
+            // first insert an item
+            var updatedItem = new ToDoWithSystemPropertiesType() 
+            { 
+                Id = "b", 
+                String = "Hey", 
+                Version = "abc", 
+                CreatedAt = new DateTime(2013,1,1,1,1,1, DateTimeKind.Utc),
+                UpdatedAt = new DateTime(2013,1,1,1,1,2, DateTimeKind.Utc)
+            };
+            await table.UpdateAsync(updatedItem);
+
+            var lookedupItem = await table.LookupAsync("b");
+
+            Assert.AreEqual(lookedupItem.String, "Hey");
+            Assert.AreEqual(lookedupItem.Version, "abc");
+            // we ignored the sys properties on the local object
+            Assert.AreEqual(lookedupItem.CreatedAt, new DateTime(0, DateTimeKind.Utc)); 
+            Assert.AreEqual(lookedupItem.UpdatedAt, new DateTime(0, DateTimeKind.Utc));
+
+            Assert.AreEqual(service.SyncContext.PendingOperations, 1L); // operation pending
+
+            hijack.OnSendingRequest = async req =>
+            {
+                // we request all the system properties present on DefineTable<> object
+                Assert.AreEqual(req.RequestUri.Query, "?__systemproperties=__createdAt%2C__updatedAt%2C__version");
+
+                string content = await req.Content.ReadAsStringAsync();
+                Assert.AreEqual(content, @"{""id"":""b"",""String"":""Hey""}"); // the system properties are not sent to server
+                return req;
+            };
+            string updateResult = "{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\",\"__createdAt\":\"2014-01-29T23:01:33.444Z\", \"__updatedAt\":\"2014-01-30T23:01:33.444Z\"}";
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(updateResult) }); // push
+            await service.SyncContext.PushAsync();            
+
+            Assert.AreEqual(service.SyncContext.PendingOperations, 0L); // operation removed
+
+            lookedupItem = await table.LookupAsync("b");
+            Assert.AreEqual(lookedupItem.String, "Wow");
+            Assert.AreEqual(lookedupItem.Version, "def");
+            // we preserved the system properties returned from server on update
+            Assert.AreEqual(lookedupItem.CreatedAt.ToUniversalTime(), new DateTime(2014, 01, 29, 23, 1, 33, 444, DateTimeKind.Utc));
+            Assert.AreEqual(lookedupItem.UpdatedAt.ToUniversalTime(), new DateTime(2014, 01, 30, 23, 1, 33, 444, DateTimeKind.Utc)); 
+        }
+
+        [AsyncTestMethod]
         public async Task TruncateAsync_DeletesAllTheRows()
         {
             string tableName = "stringId_test_table";
