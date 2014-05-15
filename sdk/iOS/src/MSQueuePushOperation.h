@@ -14,7 +14,7 @@
 }
 
 - (id) initWithSyncContext:(MSSyncContext *)syncContext
-               dispatchQueue:(dispatch_queue_t)dispatchQueue
-                  completion:(MSSyncBlock)completion;
+             dispatchQueue:(dispatch_queue_t)dispatchQueue
+                completion:(MSSyncBlock)completion;
 
 @end

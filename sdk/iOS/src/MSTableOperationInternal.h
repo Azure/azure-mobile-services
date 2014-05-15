@@ -12,7 +12,6 @@
 @property (nonatomic) NSInteger operationId;
 
 @property (nonatomic, weak)   MSClient *client;
-@property (nonatomic, strong) NSDictionary *item;
 @property (atomic)            BOOL inProgress;
 @property (nonatomic, weak)   id<MSSyncContextDataSource> dataSource;
 @property (nonatomic, weak)   id<MSSyncContextDelegate> delegate;
@@ -21,10 +20,21 @@
 
 - (NSDictionary *) serialize;
 
+/// Initialized an *MSTableOperation* instance from a record in the local store
 -(id) initWithItem:(NSDictionary *)item;
 
-/// Operation helper for tables
+/// Initializes an *MSTableOperation* instance for the given type, table, and item.
+-(id) initWithTable:(NSString *)tableName
+               type:(MSTableOperationTypes)type
+             itemId:(NSString *)item;
 
+/// Initializes an *MSPushOperation* instance for the given type, table, and item.
++(MSTableOperation *) pushOperationForTable:(NSString *)tableName
+                                       type:(MSTableOperationTypes)type
+                                     itemId:(NSString *)item;
+
+
+/// Operation helper for tables
 typedef NS_OPTIONS(NSUInteger, MSCondenseAction) {
     MSCondenseRemove = 0,
     MSCondenseKeep,
@@ -33,6 +43,7 @@ typedef NS_OPTIONS(NSUInteger, MSCondenseAction) {
     MSCondenseAddNew
 };
 
+/// Determines if two operations can be represented as a single operation in the queue
 + (MSCondenseAction) condenseAction:(MSTableOperationTypes)newAction withExistingOperation:(MSTableOperation *)operation;
 
 @end

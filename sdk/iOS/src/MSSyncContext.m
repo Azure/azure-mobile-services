@@ -148,7 +148,7 @@ static NSOperationQueue *pushQueue_;
         }
         
         if (condenseAction == MSCondenseAddNew) {
-            operation = [MSTableOperation pushOperationForTable:table type:action item:itemId];
+            operation = [MSTableOperation pushOperationForTable:table type:action itemId:itemId];
             operation.operationId = self.operationSequence;
             self.operationSequence++;
         }

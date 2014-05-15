@@ -14,17 +14,18 @@
 @synthesize type = type_;
 @synthesize tableName = tableName_;
 @synthesize itemId = itemId_;
+@synthesize item = item_;
 
 +(MSTableOperation *) pushOperationForTable:(NSString *)tableName
                                       type:(MSTableOperationTypes)type
-                                      item:(NSString *)itemId;
+                                      itemId:(NSString *)itemId;
 {
     return [[MSTableOperation alloc] initWithTable:tableName type:type itemId:itemId];
 }
 
 -(id) initWithTable:(NSString *)tableName
                type:(MSTableOperationTypes)type
-             itemId:(NSString *)itemId;
+               itemId:(NSString *)itemId;
 {
     self = [super init];
     if (self)

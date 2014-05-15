@@ -160,12 +160,21 @@
 
 - (BOOL) deleteUsingQuery:(MSQuery *)query orError:(NSError *__autoreleasing *)error
 {
-    NSFetchRequest *request = [[NSFetchRequest alloc] init];
-    NSEntityDescription *entity = [NSEntityDescription entityForName:query.syncTable.name
-                                              inManagedObjectContext:self.context];
-    [request setEntity:entity];
+    NSFetchRequest *fr = [NSFetchRequest fetchRequestWithEntityName:query.syncTable.name];
+    fr.predicate = query.predicate;
+    fr.sortDescriptors = query.orderBy;
     
-    NSArray *array = [self.context executeFetchRequest:request error:error];
+    if (query.fetchOffset != -1) {
+        fr.fetchOffset = query.fetchOffset;
+    }
+    
+    if (query.fetchLimit != -1) {
+        fr.fetchLimit = query.fetchLimit;
+    }
+    
+    fr.includesPropertyValues = NO;
+    
+    NSArray *array = [self.context executeFetchRequest:fr error:error];
     for (NSManagedObject *object in array) {
         [self.context deleteObject:object];
     }

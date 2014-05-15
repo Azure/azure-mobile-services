@@ -10,6 +10,7 @@
 /// completion
 @interface MSTableOperation : NSObject
 
+/// The types of operations possible to perform.
 typedef NS_OPTIONS(NSUInteger, MSTableOperationTypes) {
     MSTableOperationInsert = 0,
     MSTableOperationUpdate,
@@ -31,8 +32,10 @@ typedef NS_OPTIONS(NSUInteger, MSTableOperationTypes) {
 /// The Id of the item the operation should run on.
 @property (nonatomic, copy, readonly) NSString *itemId;
 
-/// @}
+/// The item that will be sent to the server when execute is called.
+@property (nonatomic, strong) NSDictionary *item;
 
+/// @}
 
 ///@name Sending an operation to the Mobile Service
 ///@{
@@ -43,22 +46,6 @@ typedef NS_OPTIONS(NSUInteger, MSTableOperationTypes) {
 -(void) executeWithCompletion:(void(^)(NSDictionary *item, NSError *error))completion;
 
 /// @}
-
-///@name Initializing the MSTable Object
-///@{
-
-/// Initializes an *MSTableOperation* instance for the given type, table, and item.
--(id) initWithTable:(NSString *)tableName
-               type:(MSTableOperationTypes)type
-             itemId:(NSString *)itemId;
-
-/// Initializes an *MSPushOperation* instance for the given type, table, and item.
-+(MSTableOperation *) pushOperationForTable:(NSString *)tableName
-                                      type:(MSTableOperationTypes)type
-                                      item:(NSString *)itemId;
-
-/// @}
-
 
 /// @name Canceling a Push operation
 /// @{
