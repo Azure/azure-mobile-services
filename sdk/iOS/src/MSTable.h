@@ -7,9 +7,7 @@
 
 @class MSQuery;
 
-
 #pragma mark * Block Type Definitions
-
 
 /// Callback for updates, inserts or readWithId requests. If there was an
 /// error, the *error* will be non-nil.
@@ -36,6 +34,7 @@ typedef NS_OPTIONS(NSUInteger, MSSystemProperties) {
     MSSystemPropertyAll         = 0xFFFF
 };
 
+extern NSString *const MSSystemColumnId;
 extern NSString *const MSSystemColumnCreatedAt;
 extern NSString *const MSSystemColumnUpdatedAt;
 extern NSString *const MSSystemColumnVersion;
