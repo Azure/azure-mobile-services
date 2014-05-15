@@ -157,16 +157,18 @@ static NSOperationQueue *pushQueue_;
         if (error == nil) {
             switch (action) {
                 case MSTableOperationInsert:
-                    [self.dataSource upsertItem:itemToSave table:table orError:&error];
+                    [self.dataSource upsertItems:[NSArray arrayWithObject:itemToSave] table:table orError:&error];
                     break;
                 
                 case MSTableOperationUpdate:
-                    [self.dataSource upsertItem:itemToSave table:table orError:&error];
+                    [self.dataSource upsertItems:[NSArray arrayWithObject:itemToSave] table:table orError:&error];
                     break;
                     
                 case MSTableOperationDelete:
-                    // TODO: Save a copy of the original item into the operation
-                    [self.dataSource deleteItemWithId:itemId table:table orError:&error];
+                    [self.dataSource deleteItemsWithIds:[NSArray arrayWithObject:itemId] table:table orError:&error];
+                    
+                    // Capture the deleted item in case the user wants to cancel it or a conflict occur
+                    operation.item = item;
                     break;
                 
                 default:
@@ -191,8 +193,8 @@ static NSOperationQueue *pushQueue_;
         else if (condenseAction == MSCondenseToDelete) {
             operation.type = MSTableOperationDelete;
             
-            // TODO: move upserts into operation queue logic?
-            [self.dataSource upsertItem:[operation serialize]
+            // FUTURE: Look at moving this upserts into the operation queue object
+            [self.dataSource upsertItems:[NSArray arrayWithObject:[operation serialize]]
                                   table:[self.dataSource operationTableName]
                                 orError:&error];
             
@@ -255,7 +257,7 @@ static NSOperationQueue *pushQueue_;
             [itemToSave setValue:version forKey:MSSystemColumnVersion];
         }
         
-        [self.dataSource upsertItem:itemToSave table:operation.tableName orError:&error];
+        [self.dataSource upsertItems:[NSArray arrayWithObject:itemToSave] table:operation.tableName orError:&error];
         if (!error) {
             [self.operationQueue removeOperation:operation orError:&error];
         }
@@ -274,7 +276,7 @@ static NSOperationQueue *pushQueue_;
 
         // FUTURE: Verify operation hasn't been modified by others
 
-        [self.dataSource deleteItemWithId:operation.itemId table:operation.tableName orError:&error];
+        [self.dataSource deleteItemsWithIds:[NSArray arrayWithObject:operation.itemId] table:operation.tableName orError:&error];
         if (!error) {
             [self.operationQueue removeOperation:operation orError:&error];
         }
@@ -365,14 +367,7 @@ static NSOperationQueue *pushQueue_;
                 
                 // upsert each item into table that isn't pending to go to server
                 NSError *localDataSourceError;
-                for (NSDictionary *serverItem in serverItems) {
-                    [self.dataSource upsertItem:serverItem table:query.table.name orError:&localDataSourceError];
-                    if (error) {
-                        // Not ideal, but any store error aborts the pull in progress (we will want to review this
-                        // when we add a smarter sync policy)
-                        break;
-                    }
-                }
+                [self.dataSource upsertItems:serverItems table:query.table.name orError:&localDataSourceError];
                 
                 if (completion) {
                     [self.callbackQueue addOperationWithBlock:^{

@@ -22,7 +22,7 @@ typedef void (^MSSyncPushCompletionBlock)(void);
 /// conditions that may occur when syncing data between the device and the mobile service.
 @protocol MSSyncContextDelegate <NSObject>
 
-/// @name Handling conflicts and errors during syncs
+/// @name Handling Conflicts and Errors
 /// @{
 
 @optional
@@ -44,7 +44,7 @@ typedef void (^MSSyncPushCompletionBlock)(void);
 /// any given sync operation and will be surfaced to the mobile service through push or the delegate.
 @protocol MSSyncContextDataSource <NSObject>
 
-/// @name Controlling where data is stored
+/// @name Controlling Where Data is Stored
 /// @{
 
 /// Provides the name of the table to track all table operation meta data
@@ -54,7 +54,7 @@ typedef void (^MSSyncPushCompletionBlock)(void);
 - (NSString *) errorTableName;
 /// @}
 
-/// @name Fetching and retrieving data
+/// @name Fetching and Retrieving Data
 /// @{
 
 /// Returns a dictionary containing the items and totalCount
@@ -64,10 +64,10 @@ typedef void (^MSSyncPushCompletionBlock)(void);
 -(NSDictionary *) readTable:(NSString *)table withItemId:(NSString *)itemId orError:(NSError **)error;
 
 /// Should insert/update the given item in the local store as appropriate
--(BOOL) upsertItem:(NSDictionary *)item table:(NSString *)table orError:(NSError **)error;
+-(BOOL) upsertItems:(NSArray *)item table:(NSString *)table orError:(NSError **)error;
 
 /// Should remove the provided item from the local store
--(BOOL) deleteItemWithId:(id)item table:(NSString *)table orError:(NSError **)error;
+-(BOOL) deleteItemsWithIds:(NSArray *)items table:(NSString *)table orError:(NSError **)error;
 
 /// Should remove all entries from the specified table in the local store
 -(BOOL) deleteUsingQuery:(MSQuery *)query orError:(NSError **)error;
@@ -87,7 +87,7 @@ typedef void (^MSSyncPushCompletionBlock)(void);
 
 /// @}
 
-/// @name Syncing and storing data
+/// @name Syncing and Storing Data
 /// @{
 
 /// Returns the number of pending outbound operations on the queue

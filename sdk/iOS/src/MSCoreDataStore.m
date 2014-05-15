@@ -19,16 +19,16 @@
     return self;
 }
 
-- (NSString *) operationTableName {
+-(NSString *) operationTableName {
     return @"MS_TableOperations";
 }
 
-- (NSString *) errorTableName {
+-(NSString *) errorTableName {
     return @"MS_TableOperationErrors";
 }
 
 /// Helper function to get a specific record from a table
-- (NSManagedObject *) getRecordForTable:(NSString *)table itemId:(NSString *)itemId orError:(NSError **)error
+-(NSManagedObject *) getRecordForTable:(NSString *)table itemId:(NSString *)itemId orError:(NSError **)error
 {
     NSFetchRequest *fr = [NSFetchRequest fetchRequestWithEntityName:table];
     fr.predicate = [NSPredicate predicateWithFormat:@"id == %@", itemId];
@@ -42,7 +42,7 @@
 }
 
 /// Helper function to conver a managed object into a correctly formatted NSDictionary
-- (NSDictionary *) itemFromManagedObject:(NSManagedObject *)object {
+-(NSDictionary *) itemFromManagedObject:(NSManagedObject *)object {
     NSArray *keys = [[[object entity] attributesByName] allKeys];
     
     NSMutableDictionary *item = [[object dictionaryWithValuesForKeys:keys] mutableCopy];
@@ -56,7 +56,7 @@
 
 #pragma mark - MSSyncContextDataSource
 
-- (NSDictionary *)readTable:(NSString *)table withItemId:(NSString *)itemId orError:(NSError *__autoreleasing *)error
+-(NSDictionary *)readTable:(NSString *)table withItemId:(NSString *)itemId orError:(NSError *__autoreleasing *)error
 {
     NSManagedObject *item = [self getRecordForTable:table itemId:itemId orError:error];
     if (error && *error) {
@@ -66,7 +66,7 @@
     return [self itemFromManagedObject:item];
 }
 
-- (MSSyncContextReadResult *)readWithQuery:(MSQuery *)query orError:(NSError *__autoreleasing *)error
+-(MSSyncContextReadResult *)readWithQuery:(MSQuery *)query orError:(NSError *__autoreleasing *)error
 {
     NSInteger totalCount = -1;
     
@@ -108,24 +108,25 @@
     return [[MSSyncContextReadResult alloc] initWithCount:totalCount items:items];
 }
 
-- (BOOL) upsertItem:(NSDictionary *)item table:(NSString *)table orError:(NSError *__autoreleasing *)error
+-(BOOL) upsertItems:(NSArray *)items table:(NSString *)table orError:(NSError *__autoreleasing *)error
 {
-    NSManagedObject *todoitem = [self getRecordForTable:table itemId:[item objectForKey:@"id"] orError:error];
-    if (error && *error) {
-        return NO;
+    for (NSDictionary *item in items) {
+        NSManagedObject *managedItem = [self getRecordForTable:table itemId:[item objectForKey:@"id"] orError:error];
+        if (error && *error) {
+            return NO;
+        }
+        
+        if (managedItem == nil) {
+            managedItem = [NSEntityDescription insertNewObjectForEntityForName:table
+                                                        inManagedObjectContext:self.context];
+        }
+        
+        NSMutableDictionary *adjustedItem = [item mutableCopy];
+        [adjustedItem setValue:[item objectForKey:MSSystemColumnVersion] forKey:@"MS_Version"];
+        [adjustedItem removeObjectForKey:MSSystemColumnVersion];
+        
+        [managedItem setValuesForKeysWithDictionary:adjustedItem];
     }
-    
-    if (todoitem == nil) {
-        todoitem = [NSEntityDescription
-                    insertNewObjectForEntityForName:table
-                    inManagedObjectContext:self.context];
-    }
-    
-    NSMutableDictionary *adjustedItem = [item mutableCopy];
-    [adjustedItem setValue:[item objectForKey:MSSystemColumnVersion] forKey:@"MS_Version"];
-    [adjustedItem removeObjectForKey:MSSystemColumnVersion];
-    
-    [todoitem setValuesForKeysWithDictionary:adjustedItem];
     
     if (![self.context save:error]) {
         return NO;
@@ -134,22 +135,18 @@
     return YES;
 }
 
-- (BOOL) deleteItemWithId:(NSString *)item table:(NSString *)table orError:(NSError *__autoreleasing *)error
+-(BOOL) deleteItemsWithIds:(NSArray *)items table:(NSString *)table orError:(NSError **)error
 {
-    NSFetchRequest *request = [[NSFetchRequest alloc] init];
-    NSEntityDescription *entity = [NSEntityDescription entityForName:table
-                                              inManagedObjectContext:self.context];
-    [request setEntity:entity];
-    
-    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"id == %@", item];
-    [request setPredicate:predicate];
-    
-    NSArray *array = [self.context executeFetchRequest:request error:error];
-    if (array == nil) {
-        return YES;
+    for (NSString *itemId in items) {
+        NSManagedObject *foundItem = [self getRecordForTable:table itemId:itemId orError:error];
+        if (error && *error) {
+            return NO;
+        }
+        
+        if (foundItem) {
+            [self.context deleteObject:foundItem];
+        }
     }
-    
-    [self.context deleteObject:[array firstObject]];
     
     if (![self.context save:error]) {
         return NO;
@@ -158,7 +155,7 @@
     return YES;
 }
 
-- (BOOL) deleteUsingQuery:(MSQuery *)query orError:(NSError *__autoreleasing *)error
+-(BOOL) deleteUsingQuery:(MSQuery *)query orError:(NSError *__autoreleasing *)error
 {
     NSFetchRequest *fr = [NSFetchRequest fetchRequestWithEntityName:query.syncTable.name];
     fr.predicate = query.predicate;
@@ -180,7 +177,6 @@
     }
     
     if (![self.context save:error]) {
-        NSLog(@"Couldn't save: %@", [*error localizedDescription]);
         return NO;
     }
     
