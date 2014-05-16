@@ -42,6 +42,7 @@ import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedException;
 import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionBase;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceQuery;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceQueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.ExpectedValueException;
@@ -132,7 +133,12 @@ public class SystemPropertiesTests extends TestGroup {
 							verifySystemProperties("Insert response", responseElement1);
 
 							log("Read table");
-							List<StringIdRoundTripTableElement> responseElements2 = read(table);
+							
+							MobileServiceQuery<?> query = MobileServiceQueryOperations.field("id");
+							
+							query.eq(responseElement1.id);
+							
+							List<StringIdRoundTripTableElement> responseElements2 = read(table, query);
 
 							List<StringIdRoundTripTableElement> filteredResponseElements = filter(responseElements2,
 									new IPredicate<StringIdRoundTripTableElement>() {
@@ -446,8 +452,13 @@ public class SystemPropertiesTests extends TestGroup {
 							log("Verify Query Parameter System Properties");
 							verifySystemProperties("Insert Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, responseElement1);
 
+							MobileServiceQuery<?> query = MobileServiceQueryOperations.field("id");
+							
+							query.eq(responseElement1.id);
+							
+							
 							log("Read with Query Parameter System Properties - " + systemProperties);
-							List<StringIdRoundTripTableElement> responseElements2 = read(table, userParameters);
+							List<StringIdRoundTripTableElement> responseElements2 = read(table, query, userParameters);
 
 							List<StringIdRoundTripTableElement> filteredResponseElements = filter(responseElements2,
 									new IPredicate<StringIdRoundTripTableElement>() {
@@ -657,14 +668,6 @@ public class SystemPropertiesTests extends TestGroup {
 		roundtripTest.setExpectedExceptionClass(MobileServicePreconditionFailedException.class);
 		roundtripTest.setName(name);
 		return roundtripTest;
-	}
-
-	private <T> List<T> read(final MobileServiceTable<T> table) throws Exception {
-		return read(table, null, null);
-	}
-
-	private <T> List<T> read(final MobileServiceTable<T> table, final List<Pair<String, String>> parameters) throws Exception {
-		return read(table, null, parameters);
 	}
 
 	private <T> List<T> read(final MobileServiceTable<T> table, final MobileServiceQuery<?> filter) throws Exception {
