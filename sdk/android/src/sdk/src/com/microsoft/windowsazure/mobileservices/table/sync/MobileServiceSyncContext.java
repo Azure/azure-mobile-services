@@ -502,7 +502,7 @@ public class MobileServiceSyncContext {
 		LockProtectedOperation lockedOp = null;
 
 		// get exclusive lock to prevent on going modifications
-		// will quickly release as soon as peek and retain table/id lock
+		// will release quickly, as soon as peek and retain table/id lock
 		// prevent Coffman Circular wait condition: lock resources in same
 		// order, independent of unlock order. Op then Table then Id.
 		this.mOpLock.writeLock().lock();

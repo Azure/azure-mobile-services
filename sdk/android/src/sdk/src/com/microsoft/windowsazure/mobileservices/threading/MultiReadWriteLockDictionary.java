@@ -89,12 +89,12 @@ public class MultiReadWriteLockDictionary<T> {
 		return multiRWLock;
 	}
 
-	private void decreaseLock(MultiReadWriteLock<T> multiLock) {
+	private void decreaseLock(MultiReadWriteLock<T> multiRWLock) {
 		synchronized (sync) {
-			multiLock.mCount--;
+			multiRWLock.mCount--;
 
-			if (multiLock.mCount == 0) {
-				this.mMap.remove(multiLock.mKey);
+			if (multiRWLock.mCount == 0) {
+				this.mMap.remove(multiRWLock.mKey);
 			}
 		}
 	}
