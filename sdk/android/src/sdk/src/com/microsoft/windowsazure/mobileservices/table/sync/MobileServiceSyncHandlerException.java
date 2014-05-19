@@ -19,16 +19,18 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.sync;
 
-import com.google.gson.JsonObject;
-import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
-import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationProcessor;
+public class MobileServiceSyncHandlerException extends Exception {
+	private static final long serialVersionUID = 7017018356478886950L;
+	
+	public MobileServiceSyncHandlerException(String detailMessage) {
+		super(detailMessage);
+	}
 
-/**
- * Handles table operation errors and push completion results.
- */
-public interface MobileServiceSyncHandler {
+	public MobileServiceSyncHandlerException(Throwable throwable) {
+		super(throwable);
+	}
 
-	JsonObject executeTableOperation(TableOperationProcessor processor, TableOperation operation) throws MobileServiceSyncHandlerException;
-
-	void onPushComplete(MobileServicePushCompletionResult pushCompletionResult) throws MobileServiceSyncHandlerException;
+	public MobileServiceSyncHandlerException(String detailMessage, Throwable throwable) {
+		super(detailMessage, throwable);
+	}	
 }

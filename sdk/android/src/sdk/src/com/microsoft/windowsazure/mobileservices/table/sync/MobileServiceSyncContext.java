@@ -19,7 +19,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.sync;
 
-import java.text.ParseException;
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ExecutionException;
@@ -33,10 +33,18 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionBase;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationProcessor;
+import com.microsoft.windowsazure.mobileservices.table.sync.queue.OperationErrorList;
 import com.microsoft.windowsazure.mobileservices.table.sync.queue.OperationQueue;
 import com.microsoft.windowsazure.mobileservices.table.sync.queue.OperationQueue.Bookmark;
+import com.microsoft.windowsazure.mobileservices.threading.MultiLockDictionary;
+import com.microsoft.windowsazure.mobileservices.threading.MultiLockDictionary.MultiLock;
+import com.microsoft.windowsazure.mobileservices.threading.MultiReadWriteLockDictionary;
+import com.microsoft.windowsazure.mobileservices.threading.MultiReadWriteLockDictionary.MultiReadWriteLock;
 
 /**
  * Provides a way to synchronize local database with remote database.
@@ -46,6 +54,8 @@ public class MobileServiceSyncContext {
 		private Bookmark mBookmark;
 
 		private Semaphore mSignalDone;
+
+		private MobileServicePushFailedException mPushException;
 
 		private PushSyncRequest(Bookmark bookmark, Semaphore signalDone) {
 			this.mBookmark = bookmark;
@@ -70,6 +80,30 @@ public class MobileServiceSyncContext {
 		}
 	}
 
+	private static class LockProtectedOperation {
+		private TableOperation mOperation;
+		private MultiReadWriteLock<String> mTableLock;
+		private MultiLock<String> mIdLock;
+
+		public LockProtectedOperation(TableOperation operation, MultiReadWriteLock<String> tableLock, MultiLock<String> idLock) {
+			this.mOperation = operation;
+			this.mTableLock = tableLock;
+			this.mIdLock = idLock;
+		}
+
+		public TableOperation getOperation() {
+			return this.mOperation;
+		}
+
+		public MultiReadWriteLock<String> getTableLock() {
+			return this.mTableLock;
+		}
+
+		public MultiLock<String> getIdLock() {
+			return this.mIdLock;
+		}
+	}
+
 	private SettableFuture<Void> mInitialized;
 
 	private MobileServiceClient mClient;
@@ -89,15 +123,29 @@ public class MobileServiceSyncContext {
 	private Queue<PushSyncRequest> mPushSRQueue;
 
 	/**
+	 * List for operation errors against remote table.
+	 */
+	private OperationErrorList mOpErrorList;
+
+	/**
 	 * Consumer thread that processes push sync requests.
 	 */
 	private PushSyncRequestConsumer mPushSRConsumer;
 
 	/**
-	 * Lock to ensure that multiple insert,update,delete operations don't
-	 * interleave as they are added to queue and storage.
+	 * Shared/Exclusive Lock that works together with id and table lock
 	 */
 	private ReadWriteLock mOpLock;
+
+	/**
+	 * Lock by table name (table lock)
+	 */
+	private MultiReadWriteLockDictionary<String> mTableLockMap;
+
+	/**
+	 * Lock by item id (row lock)
+	 */
+	private MultiLockDictionary<String> mIdLockMap;
 
 	/**
 	 * Lock to ensure that multiple push sync requests don't interleave
@@ -236,7 +284,7 @@ public class MobileServiceSyncContext {
 		return result;
 	}
 
-	private void initializeContext(final MobileServiceLocalStore store, final MobileServiceSyncHandler handler) throws ParseException, InterruptedException {
+	private void initializeContext(final MobileServiceLocalStore store, final MobileServiceSyncHandler handler) throws Throwable {
 		this.mInitLock.writeLock().lock();
 
 		try {
@@ -254,8 +302,12 @@ public class MobileServiceSyncContext {
 						this.mHandler = handler;
 						this.mStore = store;
 
+						this.mIdLockMap = new MultiLockDictionary<String>();
+						this.mTableLockMap = new MultiReadWriteLockDictionary<String>();
+
 						this.mOpQueue = OperationQueue.load(this.mStore);
 						this.mPushSRQueue = new LinkedList<PushSyncRequest>();
+						this.mOpErrorList = OperationErrorList.load(this.mStore);
 
 						this.mPendingPush = new Semaphore(0, true);
 
@@ -283,7 +335,7 @@ public class MobileServiceSyncContext {
 	}
 
 	private void pushContext() throws Throwable {
-		Semaphore signalDone = new Semaphore(0);
+		PushSyncRequest pushSR = null;
 
 		this.mInitLock.readLock().lock();
 
@@ -296,7 +348,8 @@ public class MobileServiceSyncContext {
 				Bookmark bookmark = this.mOpQueue.bookmark();
 
 				try {
-					this.mPushSRQueue.add(new PushSyncRequest(bookmark, signalDone));
+					pushSR = new PushSyncRequest(bookmark, new Semaphore(0));
+					this.mPushSRQueue.add(pushSR);
 					this.mPendingPush.release();
 				} finally {
 					this.mOpQueue.unbookmark(bookmark);
@@ -308,7 +361,13 @@ public class MobileServiceSyncContext {
 			this.mInitLock.readLock().unlock();
 		}
 
-		signalDone.acquire();
+		if (pushSR != null) {
+			pushSR.mSignalDone.acquire();
+
+			if (pushSR.mPushException != null) {
+				throw pushSR.mPushException;
+			}
+		}
 	}
 
 	private void ensureCorrectlyInitialized() throws Throwable {
@@ -353,6 +412,8 @@ public class MobileServiceSyncContext {
 					if (pushSR != null) {
 						try {
 							pushOperations(pushSR.mBookmark);
+						} catch (MobileServicePushFailedException pushException) {
+							pushSR.mPushException = pushException;
 						} finally {
 							pushSR.mSignalDone.release();
 						}
@@ -368,28 +429,66 @@ public class MobileServiceSyncContext {
 		}
 	}
 
-	private void pushOperations(Bookmark bookmark) {
-		TableOperation operation = bookmark.peek(true);
+	private void pushOperations(Bookmark bookmark) throws MobileServicePushFailedException {
+		MobileServicePushCompletionResult pushCompletionResult = new MobileServicePushCompletionResult();
 
-		while (operation != null) {
-			try {
-				pushOperation(operation);
-				bookmark.dequeue();
-			} catch (Throwable throwable) {
-				// TODO handle exception
+		try {
+			LockProtectedOperation lockedOp = peekAndLock(bookmark);
 
-				break;
-			} finally {
-				bookmark.release(operation);
+			TableOperation operation = lockedOp != null ? lockedOp.getOperation() : null;
+
+			while (operation != null) {
+				try {
+					try {
+						pushOperation(operation);
+					} catch (MobileServiceLocalStoreException localStoreException) {
+						pushCompletionResult.setStatus(MobileServicePushStatus.CancelledByLocalStoreError);
+						break;
+					} catch (MobileServiceSyncHandlerException syncHandlerException) {
+						MobileServicePushStatus cancelReason = getPushCancelReason(syncHandlerException);
+
+						if (cancelReason != null) {
+							pushCompletionResult.setStatus(cancelReason);
+							break;
+						} else {
+							this.mOpErrorList.add(getTableOperationError(operation, syncHandlerException));
+						}
+					}
+
+					bookmark.dequeue();
+				} finally {
+					try {
+						this.mIdLockMap.unLock(lockedOp.getIdLock());
+					} finally {
+						this.mTableLockMap.unLockRead(lockedOp.getTableLock());
+					}
+				}
+
+				lockedOp = peekAndLock(bookmark);
+
+				operation = lockedOp != null ? lockedOp.getOperation() : null;
 			}
 
-			operation = bookmark.peek(true);
+			if (pushCompletionResult.getStatus() == null) {
+				pushCompletionResult.setStatus(MobileServicePushStatus.Complete);
+			}
+
+			pushCompletionResult.setOperationErrors(this.mOpErrorList.getAll());
+
+			this.mHandler.onPushComplete(pushCompletionResult);
+
+			this.mOpErrorList.clear();
+		} catch (Throwable internalError) {
+			pushCompletionResult.setStatus(MobileServicePushStatus.InternalError);
+			pushCompletionResult.setInternalError(internalError);
 		}
 
-		this.mOpQueue.unbookmark(bookmark);
+		if (pushCompletionResult.getStatus() != MobileServicePushStatus.Complete) {
+			throw new MobileServicePushFailedException(pushCompletionResult);
+		}
 	}
 
-	private void pushOperation(TableOperation operation) throws Throwable {
+	private void pushOperation(TableOperation operation) throws MobileServiceLocalStoreException, MobileServiceSyncHandlerException {
 		JsonObject item = this.mStore.lookup(operation.getTableName(), operation.getItemId());
 
 		JsonObject result = this.mHandler.executeTableOperation(new TableOperationProcessor(this.mClient, item), operation);
@@ -397,5 +496,75 @@ public class MobileServiceSyncContext {
 		if (result != null) {
 			this.mStore.upsert(operation.getTableName(), result);
 		}
+	}
+
+	private LockProtectedOperation peekAndLock(Bookmark bookmark) {
+		LockProtectedOperation lockedOp = null;
+
+		// get exclusive lock to prevent on going modifications
+		// will quickly release as soon as peek and retain table/id lock
+		// prevent Coffman Circular wait condition: lock resources in same
+		// order, independent of unlock order. Op then Table then Id.
+		this.mOpLock.writeLock().lock();
+
+		try {
+			TableOperation operation = bookmark.peek();
+
+			if (operation != null) {
+				// get shared access to table lock
+				MultiReadWriteLock<String> tableLock = this.mTableLockMap.lockRead(operation.getTableName());
+
+				// get exclusive access to id lock
+				MultiLock<String> idLock = this.mIdLockMap.lock(operation.getItemId());
+
+				lockedOp = new LockProtectedOperation(operation, tableLock, idLock);
+			}
+		} finally {
+			this.mOpLock.writeLock().unlock();
+		}
+
+		return lockedOp;
+	}
+
+	private MobileServicePushStatus getPushCancelReason(MobileServiceSyncHandlerException syncHandlerException) {
+		MobileServicePushStatus reason = null;
+
+		Throwable innerException = syncHandlerException.getCause();
+
+		if (innerException instanceof MobileServiceException) {
+			MobileServiceException msEx = (MobileServiceException) innerException;
+			if (msEx.getCause() != null && msEx.getCause() instanceof IOException) {
+				reason = MobileServicePushStatus.CancelledByNetworkError;
+			} else if (msEx.getResponse() != null && msEx.getResponse().getStatus() != null && msEx.getResponse().getStatus().getStatusCode() == 401) {
+				reason = MobileServicePushStatus.CancelledByAuthenticationError;
+			}
+		}
+
+		return reason;
+	}
+
+	private TableOperationError getTableOperationError(TableOperation operation, Throwable throwable) throws MobileServiceLocalStoreException {
+		JsonObject clientItem = this.mStore.lookup(operation.getTableName(), operation.getItemId());
+		Integer statusCode = null;
+		String serverResponse = null;
+		JsonObject serverItem = null;
+
+		if (throwable instanceof MobileServiceException) {
+			MobileServiceException msEx = (MobileServiceException) throwable;
+			if (msEx.getResponse() != null) {
+				serverResponse = msEx.getResponse().getContent();
+				if (msEx.getResponse().getStatus() != null) {
+					statusCode = msEx.getResponse().getStatus().getStatusCode();
+				}
+			}
+		}
+
+		if (throwable instanceof MobileServicePreconditionFailedExceptionBase) {
+			MobileServicePreconditionFailedExceptionBase mspfEx = (MobileServicePreconditionFailedExceptionBase) throwable;
+			serverItem = mspfEx.getValue();
+		}
+
+		return new TableOperationError(operation.getKind(), operation.getTableName(), operation.getItemId(), clientItem, throwable.getMessage(), statusCode,
+				serverResponse, serverItem);
 	}
 }

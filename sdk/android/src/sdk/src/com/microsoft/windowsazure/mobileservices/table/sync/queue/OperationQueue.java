@@ -31,12 +31,11 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.microsoft.windowsazure.mobileservices.threading.MultiLockDictionary;
-import com.microsoft.windowsazure.mobileservices.threading.MultiLockDictionary.MultiLock;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 import com.microsoft.windowsazure.mobileservices.table.serialization.DateSerializer;
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceLocalStore;
+import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceLocalStoreException;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.DeleteOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.InsertOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
@@ -135,52 +134,6 @@ public class OperationQueue {
 		}
 	}
 
-	private static class LockProtectedOperation implements TableOperation {
-
-		private TableOperation mOperation;
-
-		private MultiLock<String> mLock;
-
-		private LockProtectedOperation(TableOperation operation, MultiLock<String> lock) {
-			this.mOperation = operation;
-			this.mLock = lock;
-		}
-
-		@Override
-		public String getId() {
-			return this.mOperation.getId();
-		}
-
-		@Override
-		public TableOperationKind getKind() {
-			return this.mOperation.getKind();
-		}
-
-		@Override
-		public String getTableName() {
-			return this.mOperation.getTableName();
-		}
-
-		@Override
-		public String getItemId() {
-			return this.mOperation.getItemId();
-		}
-
-		@Override
-		public Date getCreatedAt() {
-			return this.mOperation.getCreatedAt();
-		}
-
-		public MultiLock<String> getLock() {
-			return this.mLock;
-		}
-
-		@Override
-		public <T> T Accept(TableOperationVisitor<T> visitor) throws Throwable {
-			return this.mOperation.Accept(visitor);
-		}
-	}
-
 	public static class Bookmark {
 		private OperationQueue mOpQueue;
 
@@ -191,20 +144,12 @@ public class OperationQueue {
 			this.mBookmarkQueueItem = bookmarkQueueItem;
 		}
 
-		public TableOperation dequeue() {
+		public TableOperation dequeue() throws MobileServiceLocalStoreException {
 			return this.mOpQueue.dequeueBookmarked(this.mBookmarkQueueItem);
 		}
 
 		public TableOperation peek() {
-			return peek(false);
-		}
-
-		public TableOperation peek(boolean withLock) {
-			return this.mOpQueue.peekBookmarked(this.mBookmarkQueueItem, withLock);
-		}
-
-		public void release(TableOperation operation) {
-			this.mOpQueue.release(operation);
+			return this.mOpQueue.peekBookmarked(this.mBookmarkQueueItem);
 		}
 
 		public boolean isCurrentBookmark() {
@@ -224,8 +169,6 @@ public class OperationQueue {
 
 	private Map<String, OperationQueueItem> mIdOperationMap;
 
-	private MultiLockDictionary<String> mIdLockMap;
-
 	private Date mLoadedAt;
 
 	private long mSequence;
@@ -239,7 +182,6 @@ public class OperationQueue {
 		this.mBookmarkQueue = new LinkedList<BookmarkQueueItem>();
 
 		this.mIdOperationMap = new HashMap<String, OperationQueueItem>();
-		this.mIdLockMap = new MultiLockDictionary<String>();
 
 		this.mLoadedAt = new Date();
 		this.mSequence = 0;
@@ -277,7 +219,7 @@ public class OperationQueue {
 		}
 	}
 
-	public TableOperation dequeue() throws ParseException {
+	public TableOperation dequeue() throws ParseException, MobileServiceLocalStoreException {
 		this.mSyncLock.writeLock().lock();
 
 		try {
@@ -338,10 +280,10 @@ public class OperationQueue {
 		}
 	}
 
-	public static OperationQueue load(MobileServiceLocalStore store) throws ParseException {
+	public static OperationQueue load(MobileServiceLocalStore store) throws ParseException, MobileServiceLocalStoreException {
 		OperationQueue opQueue = new OperationQueue(store);
 
-		JsonElement operations = store.Read(QueryOperations.tableName(OPERATION_QUEUE_TABLE).orderBy("__queueLoadedAt", QueryOrder.Ascending)
+		JsonElement operations = store.read(QueryOperations.tableName(OPERATION_QUEUE_TABLE).orderBy("__queueLoadedAt", QueryOrder.Ascending)
 				.orderBy("sequence", QueryOrder.Ascending));
 
 		if (operations.isJsonArray()) {
@@ -359,7 +301,7 @@ public class OperationQueue {
 		return opQueue;
 	}
 
-	private void enqueueOperation(TableOperation operation) throws ParseException {
+	private void enqueueOperation(TableOperation operation) throws ParseException, MobileServiceLocalStoreException {
 		OperationQueueItem opQueueItem = new OperationQueueItem(operation, this.mLoadedAt, this.mSequence++);
 
 		this.mStore.upsert(OPERATION_QUEUE_TABLE, serialize(opQueueItem));
@@ -369,7 +311,7 @@ public class OperationQueue {
 		this.mIdOperationMap.put(operation.getItemId(), opQueueItem);
 	}
 
-	private TableOperation dequeueOperation(OperationQueueItem opQueueItem) {
+	private TableOperation dequeueOperation(OperationQueueItem opQueueItem) throws MobileServiceLocalStoreException {
 		this.mQueue.poll();
 
 		removeOperationQueueItem(opQueueItem);
@@ -378,7 +320,7 @@ public class OperationQueue {
 		return opQueueItem.getOperation();
 	}
 
-	private void removeOperationQueueItem(OperationQueueItem opQueueItem) {
+	private void removeOperationQueueItem(OperationQueueItem opQueueItem) throws MobileServiceLocalStoreException {
 		this.mIdOperationMap.remove(opQueueItem.getItemId());
 
 		this.mStore.delete(OPERATION_QUEUE_TABLE, opQueueItem.getId());
@@ -396,7 +338,7 @@ public class OperationQueue {
 		}
 	}
 
-	private TableOperation dequeueBookmarked(BookmarkQueueItem bookmarkQueueItem) {
+	private TableOperation dequeueBookmarked(BookmarkQueueItem bookmarkQueueItem) throws MobileServiceLocalStoreException {
 		this.mSyncLock.writeLock().lock();
 
 		try {
@@ -419,7 +361,7 @@ public class OperationQueue {
 		}
 	}
 
-	private TableOperation peekBookmarked(BookmarkQueueItem bookmarkQueueItem, boolean withLock) {
+	private TableOperation peekBookmarked(BookmarkQueueItem bookmarkQueueItem) {
 		this.mSyncLock.readLock().lock();
 
 		try {
@@ -432,31 +374,13 @@ public class OperationQueue {
 				OperationQueueItem opQueueItem = this.mQueue.peek();
 
 				if (verifyBookmarkedOperation(bookmarkQueueItem, opQueueItem)) {
-					TableOperation operation = opQueueItem.getOperation();
-
-					if (withLock) {
-						MultiLock<String> lock = this.mIdLockMap.lock(operation.getItemId());
-
-						result = new LockProtectedOperation(operation, lock);
-					} else {
-
-						result = operation;
-					}
+					result = opQueueItem.getOperation();
 				}
 
 				return result;
 			}
 		} finally {
 			this.mSyncLock.readLock().unlock();
-		}
-	}
-
-	public void release(TableOperation operation) {
-		if (operation instanceof LockProtectedOperation) {
-			LockProtectedOperation lockedOp = (LockProtectedOperation) operation;
-			this.mIdLockMap.unLock(lockedOp.getLock());
-		} else {
-			throw new IllegalArgumentException("The operation is not lock protected.");
 		}
 	}
 

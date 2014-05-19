@@ -21,6 +21,7 @@ package com.microsoft.windowsazure.mobileservices.threading;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class MultiLockDictionary<T> {
@@ -29,7 +30,7 @@ public class MultiLockDictionary<T> {
 
 		private int mCount;
 
-		private ReentrantLock mLock;
+		private Lock mLock;
 
 		public MultiLock() {
 			this.mCount = 0;

@@ -30,13 +30,15 @@ public interface MobileServiceLocalStore {
 	/**
 	 * Initializes the store for use.
 	 */
-	public void initialize();
+	public void initialize() throws MobileServiceLocalStoreException;
 
-	public JsonElement Read(Query tableName);
+	public JsonElement read(Query query) throws MobileServiceLocalStoreException;
 
-	public JsonObject lookup(String tableName, String itemId);
+	public JsonObject lookup(String tableName, String itemId) throws MobileServiceLocalStoreException;
 
-	public void upsert(String tableName, JsonObject item);
+	public void upsert(String tableName, JsonObject item) throws MobileServiceLocalStoreException;
 
-	public void delete(String tableName, String itemId);
+	public void delete(String tableName, String itemId) throws MobileServiceLocalStoreException;
+
+	public void delete(Query query) throws MobileServiceLocalStoreException;
 }

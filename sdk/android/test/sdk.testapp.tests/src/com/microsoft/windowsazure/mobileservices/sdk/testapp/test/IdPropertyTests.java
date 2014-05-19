@@ -19,7 +19,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
-import static com.microsoft.windowsazure.mobileservices.table.MobileServiceQueryOperations.field;
+import static com.microsoft.windowsazure.mobileservices.table.query.QueryOperations.field;
 
 import java.net.MalformedURLException;
 import java.util.List;
