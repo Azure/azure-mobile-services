@@ -479,7 +479,7 @@ public class CustomApiTests extends TestGroup {
 						orderBy = null;
 						break;
 					case 1:
-						orderBy = "id";
+						orderBy = "duration";
 						break;
 
 					case 2:

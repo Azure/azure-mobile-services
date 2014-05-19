@@ -29,3 +29,6 @@ mv ./gcm_r03/gcm-client/dist/gcm.jar ./
 
 echo "Remove extra files"
 rm -rf ./gcm_r03
+
+echo "Downloading Guava Libraries 17.0"
+curl -O http://search.maven.org/remotecontent?filepath=com/google/guava/guava/17.0/guava-17.0.jar

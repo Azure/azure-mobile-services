@@ -63,439 +63,465 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
  */
 @SuppressLint({ "SetJavaScriptEnabled" })
 public class LoginManager {
-    /**
-     * The MobileServiceClient used to invoke the login operations
-     */
-    private MobileServiceClient mClient;
+	/**
+	 * The MobileServiceClient used to invoke the login operations
+	 */
+	private MobileServiceClient mClient;
 
-    /**
-     * Login process initial URL
-     */
-    private static final String START_URL = "login/";
+	/**
+	 * Login process initial URL
+	 */
+	private static final String START_URL = "login/";
 
-    /**
-     * Login process final URL
-     */
-    private static final String END_URL = "login/done";
+	/**
+	 * Login process final URL
+	 */
+	private static final String END_URL = "login/done";
 
-    /**
-     * The name for the Azure Active Directory authentication provider as used
-     * by the service REST API.
-     */
-    private static final String WINDOWS_AZURE_ACTIVE_DIRECTORY_REST_API_PATH_NAME = "aad";
+	/**
+	 * The name for the Azure Active Directory authentication provider as used
+	 * by the service REST API.
+	 */
+	private static final String WINDOWS_AZURE_ACTIVE_DIRECTORY_REST_API_PATH_NAME = "aad";
 
-    /**
-     * Token indicator for interactive authentication URL
-     */
-    private static final String TOKEN_MARK = "#token=";
+	/**
+	 * Token indicator for interactive authentication URL
+	 */
+	private static final String TOKEN_MARK = "#token=";
 
-    /**
-     * Authentication Token parameter in JSON objects
-     */
-    private static final String TOKEN_JSON_PARAMETER = "authenticationToken";
+	/**
+	 * Authentication Token parameter in JSON objects
+	 */
+	private static final String TOKEN_JSON_PARAMETER = "authenticationToken";
 
-    /**
-     * UserId property in JSON objects
-     */
-    private static final String USERID_JSON_PROPERTY = "userId";
+	/**
+	 * UserId property in JSON objects
+	 */
+	private static final String USERID_JSON_PROPERTY = "userId";
 
-    /**
-     * User property in JSON objects
-     */
-    private static final String USER_JSON_PROPERTY = "user";
+	/**
+	 * User property in JSON objects
+	 */
+	private static final String USER_JSON_PROPERTY = "user";
 
-    /**
-     * Constructor for LoginManager
-     * 
-     * @param client
-     *            The MobileServiceClient used to invoke the login operations
-     */
-    public LoginManager(MobileServiceClient client) {
-        if (client == null) {
-            throw new IllegalArgumentException("Client can not be null");
-        }
+	/**
+	 * Constructor for LoginManager
+	 * 
+	 * @param client
+	 *            The MobileServiceClient used to invoke the login operations
+	 */
+	public LoginManager(MobileServiceClient client) {
+		if (client == null) {
+			throw new IllegalArgumentException("Client can not be null");
+		}
 
-        mClient = client;
-    }
+		mClient = client;
+	}
 
-    /**
-     * Invokes an interactive authentication process using the specified
-     * Authentication Provider
-     * 
-     * @param provider
-     *            The provider used for the authentication process
-     * @param context
-     *            The context used to create the authentication dialog
-     * @param callback
-     *            Callback to invoke when the authentication process finishes
-     */
-    public ListenableFuture<MobileServiceUser> authenticate(String provider, Context context) {
-        final SettableFuture<MobileServiceUser> future = SettableFuture.create();
-        
-        if (context == null) {
-            throw new IllegalArgumentException("context cannot be null");
-        }
+	/**
+	 * Invokes an interactive authentication process using the specified
+	 * Authentication Provider
+	 * 
+	 * @param provider
+	 *            The provider used for the authentication process
+	 * @param context
+	 *            The context used to create the authentication dialog
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public ListenableFuture<MobileServiceUser> authenticate(String provider, Context context) {
+		final SettableFuture<MobileServiceUser> future = SettableFuture.create();
 
-        if (provider == null || provider.length() == 0) {
-            throw new IllegalArgumentException("provider cannot be null or empty");
-        }
+		if (context == null) {
+			throw new IllegalArgumentException("context cannot be null");
+		}
 
-        // Create login URL
-        String startUrl = mClient.getAppUrl().toString() + LoginManager.START_URL + normalizeProvider(provider);
-        // Create the expected end URL
-        String endUrl = mClient.getAppUrl().toString() + LoginManager.END_URL;
+		if (provider == null || provider.length() == 0) {
+			throw new IllegalArgumentException("provider cannot be null or empty");
+		}
 
-        // Shows an interactive view with the provider's login
-        showLoginUI(startUrl, endUrl, context, new LoginUIOperationCallback() {
+		// Create login URL
+		String startUrl = mClient.getAppUrl().toString() + LoginManager.START_URL + normalizeProvider(provider);
+		// Create the expected end URL
+		String endUrl = mClient.getAppUrl().toString() + LoginManager.END_URL;
 
-            @Override
-            public void onCompleted(String url, Exception exception) {
-                if (exception == null) {
-                    MobileServiceUser user = null;
-                    try {
-                        String decodedUrl = URLDecoder.decode(url, MobileServiceClient.UTF8_ENCODING);
+		// Shows an interactive view with the provider's login
+		showLoginUI(startUrl, endUrl, context, new LoginUIOperationCallback() {
 
-                        JsonObject json = (JsonObject) new JsonParser().parse(decodedUrl.substring(decodedUrl.indexOf(TOKEN_MARK) + TOKEN_MARK.length()));
+			@Override
+			public void onCompleted(String url, Exception exception) {
+				if (exception == null) {
+					MobileServiceUser user = null;
+					try {
+						String decodedUrl = URLDecoder.decode(url, MobileServiceClient.UTF8_ENCODING);
 
-                        user = createUserFromJSON(json);
-                    } catch (Exception e) {
-                        // If exists an external callback, call
-                        // onComplete method
-                        // method with exception
-                        future.setException(e);
-                        return;
-                        
-                        /*
-                        if (externalCallback != null) {
-                            externalCallback.onCompleted(null, e, null);
-                        }
-                        return;
-                        */
-                    }
+						JsonObject json = (JsonObject) new JsonParser().parse(decodedUrl.substring(decodedUrl.indexOf(TOKEN_MARK) + TOKEN_MARK.length()));
 
-                    // If exists an external callback, call
-                    // onComplete method
-                    
-                    future.set(user);
-                    /*
-                    if (externalCallback != null) {
-                        externalCallback.onCompleted(user, null, null);
-                    }
-                    */
-                } else {
-                    future.setException(exception);
-                    //externalCallback.onCompleted(null, exception, null);
-                }
-            }
+						user = createUserFromJSON(json);
+					} catch (Exception e) {
+						// If exists an external callback, call
+						// onComplete method
+						// method with exception
+						future.setException(e);
+						return;
 
-        });
-        
-        return future;
-    }
+						/*
+						 * if (externalCallback != null) {
+						 * externalCallback.onCompleted(null, e, null); }
+						 * return;
+						 */
+					}
 
-    /**
-     * Invokes Windows Azure Mobile Service authentication using a
-     * provider-specific oAuth token
-     * 
-     * @param provider
-     *            The provider used for the authentication process
-     * @param oAuthToken
-     *            The oAuth token used for authentication
-     * @param callback
-     *            Callback to invoke when the authentication process finishes
-     */
+					// If exists an external callback, call
+					// onComplete method
 
-    public ListenableFuture<MobileServiceUser> authenticate(String provider, String oAuthToken) {
-        if (oAuthToken == null || oAuthToken.trim() == "") {
-            throw new IllegalArgumentException("oAuthToken can not be null or empty");
-        }
+					future.set(user);
+					/*
+					 * if (externalCallback != null) {
+					 * externalCallback.onCompleted(user, null, null); }
+					 */
+				} else {
+					future.setException(exception);
+					// externalCallback.onCompleted(null, exception, null);
+				}
+			}
 
-        // Create the login URL
-        String url = mClient.getAppUrl().toString() + LoginManager.START_URL + normalizeProvider(provider);
+		});
 
-        return authenticateWithToken(oAuthToken, url);
-    }
+		return future;
+	}
 
-    /**
-     * Normalizes the provider name to match the value required in the mobile
-     * service REST API. For example, WindowsAzureActiveDirectory needs to be
-     * sent as /login/aad.
-     * 
-     * @param provider
-     *            the name of the authentication provider.
-     * @return the normalized provider name.
-     */
-    private String normalizeProvider(String provider) {
-        if (provider == null || provider.length() == 0) {
-            throw new IllegalArgumentException("provider cannot be null or empty");
-        }
+	/**
+	 * Invokes Windows Azure Mobile Service authentication using a
+	 * provider-specific oAuth token
+	 * 
+	 * @param provider
+	 *            The provider used for the authentication process
+	 * @param oAuthToken
+	 *            The oAuth token used for authentication
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
 
-        provider = provider.toLowerCase(Locale.getDefault());
-        if (provider.equalsIgnoreCase(MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory.toString())) {
-            provider = WINDOWS_AZURE_ACTIVE_DIRECTORY_REST_API_PATH_NAME;
-        }
+	public ListenableFuture<MobileServiceUser> authenticate(String provider, String oAuthToken) {
+		if (oAuthToken == null || oAuthToken.trim() == "") {
+			throw new IllegalArgumentException("oAuthToken can not be null or empty");
+		}
 
-        return provider;
-    }
+		// Create the login URL
+		String url = mClient.getAppUrl().toString() + LoginManager.START_URL + normalizeProvider(provider);
 
-    /**
-     * Creates the UI for the interactive authentication process
-     * 
-     * @param provider
-     *            The provider used for the authentication process
-     * @param startUrl
-     *            The initial URL for the authentication process
-     * @param endUrl
-     *            The final URL for the authentication process
-     * @param context
-     *            The context used to create the authentication dialog
-     * @param callback
-     *            Callback to invoke when the authentication process finishes
-     */
-    private void showLoginUI(final String startUrl, final String endUrl, final Context context, LoginUIOperationCallback callback) {
-        if (startUrl == null || startUrl == "") {
-            throw new IllegalArgumentException("startUrl can not be null or empty");
-        }
+		return authenticateWithToken(oAuthToken, url);
+	}
 
-        if (endUrl == null || endUrl == "") {
-            throw new IllegalArgumentException("endUrl can not be null or empty");
-        }
+	/**
+	 * Normalizes the provider name to match the value required in the mobile
+	 * service REST API. For example, WindowsAzureActiveDirectory needs to be
+	 * sent as /login/aad.
+	 * 
+	 * @param provider
+	 *            the name of the authentication provider.
+	 * @return the normalized provider name.
+	 */
+	private String normalizeProvider(String provider) {
+		if (provider == null || provider.length() == 0) {
+			throw new IllegalArgumentException("provider cannot be null or empty");
+		}
 
-        if (context == null) {
-            throw new IllegalArgumentException("context can not be null");
-        }
+		provider = provider.toLowerCase(Locale.getDefault());
+		if (provider.equalsIgnoreCase(MobileServiceAuthenticationProvider.WindowsAzureActiveDirectory.toString())) {
+			provider = WINDOWS_AZURE_ACTIVE_DIRECTORY_REST_API_PATH_NAME;
+		}
 
-        final LoginUIOperationCallback externalCallback = callback;
-        final AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        // Create the Web View to show the login page
-        final WebView wv = new WebView(context);
-        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+		return provider;
+	}
 
-            @Override
-            public void onCancel(DialogInterface dialog) {
-                if (externalCallback != null) {
-                    externalCallback.onCompleted(null, new MobileServiceException("User Canceled"));
-                }
-            }
-        });
-        wv.getSettings().setJavaScriptEnabled(true);
+	/**
+	 * Creates the UI for the interactive authentication process
+	 * 
+	 * @param provider
+	 *            The provider used for the authentication process
+	 * @param startUrl
+	 *            The initial URL for the authentication process
+	 * @param endUrl
+	 *            The final URL for the authentication process
+	 * @param context
+	 *            The context used to create the authentication dialog
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	private void showLoginUI(final String startUrl, final String endUrl, final Context context, final LoginUIOperationCallback callback) {
+	
+		Activity activity = (Activity)context;
+		
+		activity.runOnUiThread(new Runnable() {
+		    public void run() {
+		    	showLoginUIInternal(startUrl, endUrl, context, callback);
+		    }
+		});
+	}
+	/**
+	 * Creates the UI for the interactive authentication process
+	 * 
+	 * @param provider
+	 *            The provider used for the authentication process
+	 * @param startUrl
+	 *            The initial URL for the authentication process
+	 * @param endUrl
+	 *            The final URL for the authentication process
+	 * @param context
+	 *            The context used to create the authentication dialog
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	private void showLoginUIInternal(final String startUrl, final String endUrl, final Context context, LoginUIOperationCallback callback) {
+		if (startUrl == null || startUrl == "") {
+			throw new IllegalArgumentException("startUrl can not be null or empty");
+		}
 
-        DisplayMetrics displaymetrics = new DisplayMetrics();
-        ((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
-        int webViewHeight = displaymetrics.heightPixels;
+		if (endUrl == null || endUrl == "") {
+			throw new IllegalArgumentException("endUrl can not be null or empty");
+		}
 
-        wv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, webViewHeight));
+		if (context == null) {
+			throw new IllegalArgumentException("context can not be null");
+		}
 
-        wv.requestFocus(View.FOCUS_DOWN);
-        wv.setOnTouchListener(new View.OnTouchListener() {
+		final LoginUIOperationCallback externalCallback = callback;
+		final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+		// Create the Web View to show the login page
+		final WebView wv = new WebView(context);
+		builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
 
-            @Override
-            public boolean onTouch(View view, MotionEvent event) {
-                int action = event.getAction();
-                if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_UP) {
-                    if (!view.hasFocus()) {
-                        view.requestFocus();
-                    }
-                }
+			@Override
+			public void onCancel(DialogInterface dialog) {
+				if (externalCallback != null) {
+					externalCallback.onCompleted(null, new MobileServiceException("User Canceled"));
+				}
+			}
+		});
+		wv.getSettings().setJavaScriptEnabled(true);
 
-                return false;
-            }
-        });
+		DisplayMetrics displaymetrics = new DisplayMetrics();
+		((Activity) context).getWindowManager().getDefaultDisplay().getMetrics(displaymetrics);
+		int webViewHeight = displaymetrics.heightPixels;
 
-        // Create a LinearLayout and add the WebView to the Layout
-        LinearLayout layout = new LinearLayout(context);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.addView(wv);
+		wv.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, webViewHeight));
 
-        // Add a dummy EditText to the layout as a workaround for a bug
-        // that prevents showing the keyboard for the WebView on some devices
-        EditText dummyEditText = new EditText(context);
-        dummyEditText.setVisibility(View.GONE);
-        layout.addView(dummyEditText);
+		wv.requestFocus(View.FOCUS_DOWN);
+		wv.setOnTouchListener(new View.OnTouchListener() {
 
-        // Add the layout to the dialog
-        builder.setView(layout);
+			@Override
+			public boolean onTouch(View view, MotionEvent event) {
+				int action = event.getAction();
+				if (action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_UP) {
+					if (!view.hasFocus()) {
+						view.requestFocus();
+					}
+				}
 
-        final AlertDialog dialog = builder.create();
+				return false;
+			}
+		});
 
-        wv.setWebViewClient(new WebViewClient() {
+		// Create a LinearLayout and add the WebView to the Layout
+		LinearLayout layout = new LinearLayout(context);
+		layout.setOrientation(LinearLayout.VERTICAL);
+		layout.addView(wv);
 
-            @Override
-            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                // If the URL of the started page matches with the final URL
-                // format, the login process finished
-                if (isFinalUrl(url)) {
-                    if (externalCallback != null) {
-                        externalCallback.onCompleted(url, null);
-                    }
+		// Add a dummy EditText to the layout as a workaround for a bug
+		// that prevents showing the keyboard for the WebView on some devices
+		EditText dummyEditText = new EditText(context);
+		dummyEditText.setVisibility(View.GONE);
+		layout.addView(dummyEditText);
 
-                    dialog.dismiss();
-                }
+		// Add the layout to the dialog
+		builder.setView(layout);
 
-                super.onPageStarted(view, url, favicon);
-            }
+		final AlertDialog dialog = builder.create();
 
-            // Checks if the given URL matches with the final URL's format
-            private boolean isFinalUrl(String url) {
-                if (url == null) {
-                    return false;
-                }
+		wv.setWebViewClient(new WebViewClient() {
 
-                return url.startsWith(endUrl);
-            }
+			@Override
+			public void onPageStarted(WebView view, String url, Bitmap favicon) {
+				// If the URL of the started page matches with the final URL
+				// format, the login process finished
+				if (isFinalUrl(url)) {
+					if (externalCallback != null) {
+						externalCallback.onCompleted(url, null);
+					}
 
-            // Checks if the given URL matches with the start URL's format
-            private boolean isStartUrl(String url) {
-                if (url == null) {
-                    return false;
-                }
+					dialog.dismiss();
+				}
 
-                return url.startsWith(startUrl);
-            }
+				super.onPageStarted(view, url, favicon);
+			}
 
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                if (isStartUrl(url)) {
-                    if (externalCallback != null) {
-                        externalCallback.onCompleted(null, new MobileServiceException("Logging in with the selected authentication provider is not enabled"));
-                    }
+			// Checks if the given URL matches with the final URL's format
+			private boolean isFinalUrl(String url) {
+				if (url == null) {
+					return false;
+				}
 
-                    dialog.dismiss();
-                }
-            }
-        });
+				return url.startsWith(endUrl);
+			}
 
-        wv.loadUrl(startUrl);
-        dialog.show();
-    }
+			// Checks if the given URL matches with the start URL's format
+			private boolean isStartUrl(String url) {
+				if (url == null) {
+					return false;
+				}
 
-    /**
-     * Creates a User based on a Windows Azure Mobile Service JSON object
-     * containing a UserId and Authentication Token
-     * 
-     * @param json
-     *            JSON object used to create the User
-     * @return The created user if it is a valid JSON object. Null otherwise
-     * @throws MobileServiceException
-     */
-    private MobileServiceUser createUserFromJSON(JsonObject json) throws MobileServiceException {
-        if (json == null) {
-            throw new IllegalArgumentException("json can not be null");
-        }
+				return url.startsWith(startUrl);
+			}
 
-        // If the JSON object is valid, create a MobileServiceUser object
-        if (json.has(USER_JSON_PROPERTY)) {
-            JsonObject jsonUser = json.getAsJsonObject(USER_JSON_PROPERTY);
+			@Override
+			public void onPageFinished(WebView view, String url) {
+				if (isStartUrl(url)) {
+					if (externalCallback != null) {
+						externalCallback.onCompleted(null, new MobileServiceException("Logging in with the selected authentication provider is not enabled"));
+					}
 
-            if (!jsonUser.has(USERID_JSON_PROPERTY)) {
-                throw new JsonParseException(USERID_JSON_PROPERTY + " property expected");
-            }
-            String userId = jsonUser.get(USERID_JSON_PROPERTY).getAsString();
+					dialog.dismiss();
+				}
+			}
+		});
 
-            MobileServiceUser user = new MobileServiceUser(userId);
+		wv.loadUrl(startUrl);
+		dialog.show();
+	}
 
-            if (!json.has(TOKEN_JSON_PARAMETER)) {
-                throw new JsonParseException(TOKEN_JSON_PARAMETER + " property expected");
-            }
+	/**
+	 * Creates a User based on a Windows Azure Mobile Service JSON object
+	 * containing a UserId and Authentication Token
+	 * 
+	 * @param json
+	 *            JSON object used to create the User
+	 * @return The created user if it is a valid JSON object. Null otherwise
+	 * @throws MobileServiceException
+	 */
+	private MobileServiceUser createUserFromJSON(JsonObject json) throws MobileServiceException {
+		if (json == null) {
+			throw new IllegalArgumentException("json can not be null");
+		}
 
-            user.setAuthenticationToken(json.get(TOKEN_JSON_PARAMETER).getAsString());
-            return user;
-        } else {
-            // If the JSON contains an error property show it, otherwise raise
-            // an error with JSON content
-            if (json.has("error")) {
-                throw new MobileServiceException(json.get("error").getAsString());
-            } else {
-                throw new JsonParseException(json.toString());
-            }
-        }
-    }
+		// If the JSON object is valid, create a MobileServiceUser object
+		if (json.has(USER_JSON_PROPERTY)) {
+			JsonObject jsonUser = json.getAsJsonObject(USER_JSON_PROPERTY);
 
-    /**
-     * Invokes Windows Azure Mobile Services authentication using the specified
-     * token
-     * 
-     * @param token
-     *            The token used for authentication
-     * @param url
-     *            The URL used for the authentication process
-     * @param callback
-     *            Callback to invoke when the authentication process finishes
-     */
-    private ListenableFuture<MobileServiceUser> authenticateWithToken(String token, String url) {
-        final SettableFuture<MobileServiceUser> future = SettableFuture.create();
-        
-        if (token == null) {
-            throw new IllegalArgumentException("token can not be null");
-        }
+			if (!jsonUser.has(USERID_JSON_PROPERTY)) {
+				throw new JsonParseException(USERID_JSON_PROPERTY + " property expected");
+			}
+			String userId = jsonUser.get(USERID_JSON_PROPERTY).getAsString();
 
-        if (url == null) {
-            throw new IllegalArgumentException("url can not be null");
-        }
+			MobileServiceUser user = new MobileServiceUser(userId);
 
-        // Create a request
-        final ServiceFilterRequest request = new ServiceFilterRequestImpl(new HttpPost(url), mClient.getAndroidHttpClientFactory());
-        request.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
+			if (!json.has(TOKEN_JSON_PARAMETER)) {
+				throw new JsonParseException(TOKEN_JSON_PARAMETER + " property expected");
+			}
 
-        try {
-            // Set request's content with the token
-            request.setContent(token);
-        } catch (Exception e) {
-            // this should never happen
-        }
-        final MobileServiceConnection connection = mClient.createConnection();
+			user.setAuthenticationToken(json.get(TOKEN_JSON_PARAMETER).getAsString());
+			return user;
+		} else {
+			// If the JSON contains an error property show it, otherwise raise
+			// an error with JSON content
+			if (json.has("error")) {
+				throw new MobileServiceException(json.get("error").getAsString());
+			} else {
+				throw new JsonParseException(json.toString());
+			}
+		}
+	}
 
-        // Create the AsyncTask that will execute the request
-        new RequestAsyncTask(request, connection) {
-            @Override
-            protected void onPostExecute(ServiceFilterResponse response) {    
-                if (mTaskException == null && response != null) {
-                    MobileServiceUser user = null;
-                    try {
-                        // Get the user from the response and create a
-                        // MobileServiceUser object from the JSON
-                        String content = response.getContent();
-                        user = createUserFromJSON((JsonObject) new JsonParser().parse((content.trim())));
-                        
-                    } catch (Exception e) {
-                        // Something went wrong, call onCompleted method
-                        // with exception
-                        
-                        future.setException(new MobileServiceException("Error while authenticating user.", e, response));
-                        //callback.onCompleted(null, new MobileServiceException("Error while authenticating user.", e), response);
-                        return;
-                    }
-                    
-                    future.set(user);
-                    // Call onCompleted method
-                    //callback.onCompleted(user, null, response);
-                } else {
-                    // Something went wrong, call onCompleted method with
-                    // exception
-                    future.setException(new MobileServiceException("Error while authenticating user.", mTaskException));
-                    //callback.onCompleted(null, new MobileServiceException("Error while authenticating user.", mTaskException), response);
-                }
-            
-            }
-        }.executeTask();
-        
-        return future;
-    }
+	/**
+	 * Invokes Windows Azure Mobile Services authentication using the specified
+	 * token
+	 * 
+	 * @param token
+	 *            The token used for authentication
+	 * @param url
+	 *            The URL used for the authentication process
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	private ListenableFuture<MobileServiceUser> authenticateWithToken(String token, String url) {
+		final SettableFuture<MobileServiceUser> future = SettableFuture.create();
 
-    /**
-     * Internal callback used after the interactive authentication UI is
-     * completed
-     */
-    interface LoginUIOperationCallback {
-        /**
-         * Method to call if the operation finishes successfully
-         * 
-         * @param url
-         *            The final login URL
-         * @param e
-         *            An exception representing the error, in case there was one
-         */
-        void onCompleted(String url, Exception exception);
+		if (token == null) {
+			throw new IllegalArgumentException("token can not be null");
+		}
 
-    }
+		if (url == null) {
+			throw new IllegalArgumentException("url can not be null");
+		}
+
+		// Create a request
+		final ServiceFilterRequest request = new ServiceFilterRequestImpl(new HttpPost(url), mClient.getAndroidHttpClientFactory());
+		request.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
+
+		try {
+			// Set request's content with the token
+			request.setContent(token);
+		} catch (Exception e) {
+			// this should never happen
+		}
+		final MobileServiceConnection connection = mClient.createConnection();
+
+		// Create the AsyncTask that will execute the request
+		new RequestAsyncTask(request, connection) {
+			@Override
+			protected void onPostExecute(ServiceFilterResponse response) {
+				if (mTaskException == null && response != null) {
+					MobileServiceUser user = null;
+					try {
+						// Get the user from the response and create a
+						// MobileServiceUser object from the JSON
+						String content = response.getContent();
+						user = createUserFromJSON((JsonObject) new JsonParser().parse((content.trim())));
+
+					} catch (Exception e) {
+						// Something went wrong, call onCompleted method
+						// with exception
+
+						future.setException(new MobileServiceException("Error while authenticating user.", e, response));
+						// callback.onCompleted(null, new
+						// MobileServiceException("Error while authenticating user.",
+						// e), response);
+						return;
+					}
+
+					future.set(user);
+					// Call onCompleted method
+					// callback.onCompleted(user, null, response);
+				} else {
+					// Something went wrong, call onCompleted method with
+					// exception
+					future.setException(new MobileServiceException("Error while authenticating user.", mTaskException));
+					// callback.onCompleted(null, new
+					// MobileServiceException("Error while authenticating user.",
+					// mTaskException), response);
+				}
+
+			}
+		}.executeTask();
+
+		return future;
+	}
+
+	/**
+	 * Internal callback used after the interactive authentication UI is
+	 * completed
+	 */
+	interface LoginUIOperationCallback {
+		/**
+		 * Method to call if the operation finishes successfully
+		 * 
+		 * @param url
+		 *            The final login URL
+		 * @param e
+		 *            An exception representing the error, in case there was one
+		 */
+		void onCompleted(String url, Exception exception);
+
+	}
 }

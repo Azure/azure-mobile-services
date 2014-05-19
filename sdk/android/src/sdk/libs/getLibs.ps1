@@ -23,4 +23,4 @@ Remove-Item "$dir\google-gson-2.2.2\" -recurse
 
 $filename = "guava-16.0.1.jar"
 Write-Host "Downloading Guava Libraries 16.0.1"
-$client.DownloadFile("http://search.maven.org/remotecontent?filepath=com/google/guava/guava/16.0.1/guava-16.0.1.jar", "$dir\$filename")
+$client.DownloadFile("http://search.maven.org/remotecontent?filepath=com/google/guava/guava/17.0/guava-17.0.jar", "$dir\$filename")

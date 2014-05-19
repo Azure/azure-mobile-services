@@ -259,6 +259,7 @@ public class LoginTests extends TestGroup {
 						String userName;
 
 						try {
+					
 							MobileServiceUser user = client.login(provider).get();
 							userName = user.getUserId();
 

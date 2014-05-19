@@ -381,6 +381,8 @@ public class MainActivity extends Activity {
 			createAndShowDialog(e, "Error");
 		}
 
+//		getMobileServiceRuntimeFeatures(client);
+
 		final TestGroup group = (TestGroup) mTestGroupSpinner.getSelectedItem();
 		logWithTimestamp(new Date(), "Tests for group \'" + group.getName() + "\'");
 		if (group.getName().startsWith(TestGroup.AllTestsGroupName)) {
@@ -409,7 +411,7 @@ public class MainActivity extends Activity {
 							}
 
 						});
-						
+
 						// log("TEST START", test.getName());
 					}
 
@@ -492,6 +494,27 @@ public class MainActivity extends Activity {
 
 	}
 
+//	private static List<Pair<String, String>> mobileServiceRuntimeFeatures;
+
+//	private void getMobileServiceRuntimeFeatures(MobileServiceClient client) {
+//		mobileServiceRuntimeFeatures = new ArrayList<Pair<String, String>>();
+//
+//		Pair<String, String> runtimeFeature1 = new Pair<String, String>("1", "1");
+//
+//		mobileServiceRuntimeFeatures.add(runtimeFeature1);
+//	}
+//
+//	public boolean mobileServiceRuntimeHasFeature(String featureKey, String featureValue) {
+//
+//		for (Pair<String, String> runtimeFeature : mobileServiceRuntimeFeatures) {
+//			if (runtimeFeature.first.equals(featureKey) && runtimeFeature.second.equals(featureValue)) {
+//				return true;
+//			}
+//		}
+//
+//		return false;
+//	}
+
 	private void logSeparator() {
 		mLog.append("\n");
 		mLog.append("----\n");
@@ -503,7 +526,8 @@ public class MainActivity extends Activity {
 	}
 
 	private void logWithTimestamp(Date time, String content) {
-		//log("Info", "[" + Util.dateToString(time, Util.LogTimeFormat) + "] " + content);
+		// log("Info", "[" + Util.dateToString(time, Util.LogTimeFormat) + "] "
+		// + content);
 	}
 
 	private void log(String title, String content) {
