@@ -103,13 +103,13 @@ public abstract class TestGroup {
 				
 				final CountDownLatch latch = new CountDownLatch(1);
 				
-				new AsyncTask<Void, Void, Void>() {
-					@Override
-					protected Void doInBackground(Void... arg0) {
+				Thread thread = new Thread() {
+					public void run() {
 						executeNextTest(test, client, callback, testRunStatus, latch);
-						return null;
 					}
-				}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+				};
+				
+				thread.run();
 				
 				try {
 					latch.await();

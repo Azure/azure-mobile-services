@@ -381,7 +381,7 @@ public class MainActivity extends Activity {
 			createAndShowDialog(e, "Error");
 		}
 
-//		getMobileServiceRuntimeFeatures(client);
+		// getMobileServiceRuntimeFeatures(client);
 
 		final TestGroup group = (TestGroup) mTestGroupSpinner.getSelectedItem();
 		logWithTimestamp(new Date(), "Tests for group \'" + group.getName() + "\'");
@@ -393,10 +393,10 @@ public class MainActivity extends Activity {
 
 		final MobileServiceClient currentClient = client;
 
-		new AsyncTask<Void, Void, Void>() {
+		Thread thread = new Thread() {
 
 			@Override
-			protected Void doInBackground(Void... arg0) {
+			public void run() {
 				group.runTests(currentClient, new TestExecutionCallback() {
 
 					@Override
@@ -412,7 +412,7 @@ public class MainActivity extends Activity {
 
 						});
 
-						// log("TEST START", test.getName());
+						log("TEST START", test.getName());
 					}
 
 					@Override
@@ -488,32 +488,37 @@ public class MainActivity extends Activity {
 						logSeparator();
 					}
 				});
-				return null;
 			}
-		}.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+		};
 
+		thread.start();
 	}
 
-//	private static List<Pair<String, String>> mobileServiceRuntimeFeatures;
+	// private static List<Pair<String, String>> mobileServiceRuntimeFeatures;
 
-//	private void getMobileServiceRuntimeFeatures(MobileServiceClient client) {
-//		mobileServiceRuntimeFeatures = new ArrayList<Pair<String, String>>();
-//
-//		Pair<String, String> runtimeFeature1 = new Pair<String, String>("1", "1");
-//
-//		mobileServiceRuntimeFeatures.add(runtimeFeature1);
-//	}
-//
-//	public boolean mobileServiceRuntimeHasFeature(String featureKey, String featureValue) {
-//
-//		for (Pair<String, String> runtimeFeature : mobileServiceRuntimeFeatures) {
-//			if (runtimeFeature.first.equals(featureKey) && runtimeFeature.second.equals(featureValue)) {
-//				return true;
-//			}
-//		}
-//
-//		return false;
-//	}
+	// private void getMobileServiceRuntimeFeatures(MobileServiceClient client)
+	// {
+	// mobileServiceRuntimeFeatures = new ArrayList<Pair<String, String>>();
+	//
+	// Pair<String, String> runtimeFeature1 = new Pair<String, String>("1",
+	// "1");
+	//
+	// mobileServiceRuntimeFeatures.add(runtimeFeature1);
+	// }
+	//
+	// public boolean mobileServiceRuntimeHasFeature(String featureKey, String
+	// featureValue) {
+	//
+	// for (Pair<String, String> runtimeFeature : mobileServiceRuntimeFeatures)
+	// {
+	// if (runtimeFeature.first.equals(featureKey) &&
+	// runtimeFeature.second.equals(featureValue)) {
+	// return true;
+	// }
+	// }
+	//
+	// return false;
+	// }
 
 	private void logSeparator() {
 		mLog.append("\n");
