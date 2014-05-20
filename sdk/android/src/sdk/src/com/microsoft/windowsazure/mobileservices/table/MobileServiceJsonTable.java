@@ -128,7 +128,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<JsonEle
 	 * @param callback
 	 *            Callback to invoke after the operation is completed
 	 */
-	public ListenableFuture<JsonElement> lookUp(Object id) {
+	public ListenableFuture<JsonObject> lookUp(Object id) {
 		return this.lookUp(id, null);
 	}
 
@@ -143,8 +143,8 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<JsonEle
 	 * @param callback
 	 *            Callback to invoke after the operation is completed
 	 */
-	public ListenableFuture<JsonElement> lookUp(Object id, List<Pair<String, String>> parameters) {
-		final SettableFuture<JsonElement> future = SettableFuture.create();
+	public ListenableFuture<JsonObject> lookUp(Object id, List<Pair<String, String>> parameters) {
+		final SettableFuture<JsonObject> future = SettableFuture.create();
 
 		// Create request URL
 		try {

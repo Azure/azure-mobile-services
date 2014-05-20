@@ -25,12 +25,12 @@ import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 
-public class TableOperationProcessor implements TableOperationVisitor<JsonObject> {
+public class RemoteTableOperationProcessor implements TableOperationVisitor<JsonObject> {
 	MobileServiceClient mClient;
 
 	JsonObject mItem;
 
-	public TableOperationProcessor(MobileServiceClient client, JsonObject item) {
+	public RemoteTableOperationProcessor(MobileServiceClient client, JsonObject item) {
 		this.mClient = client;
 		this.mItem = item;
 	}

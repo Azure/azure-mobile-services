@@ -21,14 +21,14 @@ package com.microsoft.windowsazure.mobileservices.table.sync;
 
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
-import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationProcessor;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.RemoteTableOperationProcessor;
 
 /**
  * Handles table operation errors and push completion results.
  */
 public interface MobileServiceSyncHandler {
 
-	JsonObject executeTableOperation(TableOperationProcessor processor, TableOperation operation) throws MobileServiceSyncHandlerException;
+	JsonObject executeTableOperation(RemoteTableOperationProcessor processor, TableOperation operation) throws MobileServiceSyncHandlerException;
 
 	void onPushComplete(MobileServicePushCompletionResult pushCompletionResult) throws MobileServiceSyncHandlerException;
 }

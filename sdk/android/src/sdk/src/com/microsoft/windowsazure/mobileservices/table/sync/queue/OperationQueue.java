@@ -169,6 +169,8 @@ public class OperationQueue {
 
 	private Map<String, OperationQueueItem> mIdOperationMap;
 
+	private Map<String, Integer> mTableCountMap;
+
 	private Date mLoadedAt;
 
 	private long mSequence;
@@ -182,6 +184,7 @@ public class OperationQueue {
 		this.mBookmarkQueue = new LinkedList<BookmarkQueueItem>();
 
 		this.mIdOperationMap = new HashMap<String, OperationQueueItem>();
+		this.mTableCountMap = new HashMap<String, Integer>();
 
 		this.mLoadedAt = new Date();
 		this.mSequence = 0;
@@ -256,6 +259,16 @@ public class OperationQueue {
 		}
 	}
 
+	public int countPending(String tableName) {
+		this.mSyncLock.readLock().lock();
+
+		try {
+			return this.mTableCountMap.get(tableName) != null ? this.mTableCountMap.get(tableName) : 0;
+		} finally {
+			this.mSyncLock.readLock().unlock();
+		}
+	}
+
 	public Bookmark bookmark() {
 		this.mSyncLock.writeLock().lock();
 
@@ -309,6 +322,14 @@ public class OperationQueue {
 		this.mQueue.add(opQueueItem);
 
 		this.mIdOperationMap.put(operation.getItemId(), opQueueItem);
+
+		Integer tableCount = this.mTableCountMap.get(operation.getTableName());
+
+		if (tableCount != null) {
+			this.mTableCountMap.put(operation.getTableName(), tableCount + 1);
+		} else {
+			this.mTableCountMap.put(operation.getTableName(), 1);
+		}
 	}
 
 	private TableOperation dequeueOperation(OperationQueueItem opQueueItem) throws MobileServiceLocalStoreException {
@@ -322,6 +343,14 @@ public class OperationQueue {
 
 	private void removeOperationQueueItem(OperationQueueItem opQueueItem) throws MobileServiceLocalStoreException {
 		this.mIdOperationMap.remove(opQueueItem.getItemId());
+
+		Integer tableCount = this.mTableCountMap.get(opQueueItem.getTableName());
+
+		if (tableCount != null && tableCount > 1) {
+			this.mTableCountMap.put(opQueueItem.getTableName(), tableCount + 1);
+		} else {
+			this.mTableCountMap.remove(opQueueItem.getTableName());
+		}
 
 		this.mStore.delete(OPERATION_QUEUE_TABLE, opQueueItem.getId());
 	}

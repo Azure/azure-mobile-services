@@ -23,6 +23,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -47,28 +49,55 @@ public class OperationErrorList {
 
 	private List<TableOperationError> mList;
 
+	private ReadWriteLock mSyncLock;
+
 	private OperationErrorList(MobileServiceLocalStore store) {
 		this.mStore = store;
+		this.mSyncLock = new ReentrantReadWriteLock(true);
 	}
 
 	public void add(TableOperationError operationError) throws ParseException, MobileServiceLocalStoreException {
-		this.mStore.upsert(OPERATION_ERROR_TABLE, serialize(operationError));
+		this.mSyncLock.writeLock().lock();
 
-		this.mList.add(operationError);
+		try {
+			this.mStore.upsert(OPERATION_ERROR_TABLE, serialize(operationError));
+
+			this.mList.add(operationError);
+		} finally {
+			this.mSyncLock.writeLock().unlock();
+		}
 	}
 
 	public int countPending() {
-		return this.mList.size();
+		this.mSyncLock.readLock().lock();
+
+		try {
+			return this.mList.size();
+		} finally {
+			this.mSyncLock.readLock().unlock();
+		}
 	}
 
 	public List<TableOperationError> getAll() {
-		return new ArrayList<TableOperationError>(this.mList);
+		this.mSyncLock.readLock().lock();
+
+		try {
+			return new ArrayList<TableOperationError>(this.mList);
+		} finally {
+			this.mSyncLock.readLock().unlock();
+		}
 	}
 
 	public void clear() throws MobileServiceLocalStoreException {
-		this.mList.clear();
+		this.mSyncLock.writeLock().lock();
 
-		this.mStore.delete(QueryOperations.tableName(OPERATION_ERROR_TABLE));
+		try {
+			this.mList.clear();
+
+			this.mStore.delete(QueryOperations.tableName(OPERATION_ERROR_TABLE));
+		} finally {
+			this.mSyncLock.writeLock().unlock();
+		}
 	}
 
 	public static OperationErrorList load(MobileServiceLocalStore store) throws ParseException, MobileServiceLocalStoreException {

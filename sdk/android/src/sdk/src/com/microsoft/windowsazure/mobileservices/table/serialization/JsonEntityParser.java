@@ -62,6 +62,7 @@ public class JsonEntityParser {
 			E typedElement = gson.fromJson(results, clazz);
 			result.add(typedElement);
 		}
+
 		return result;
 	}
 

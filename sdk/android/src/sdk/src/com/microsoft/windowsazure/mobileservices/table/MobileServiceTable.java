@@ -197,7 +197,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<MobileSe
 		// ParseResultOperationCallback(callback));
 		final SettableFuture<E> future = SettableFuture.create();
 
-		ListenableFuture<JsonElement> internalFuture = mInternalTable.lookUp(id, parameters);
+		ListenableFuture<JsonObject> internalFuture = mInternalTable.lookUp(id, parameters);
 		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
 			@Override
 			public void onFailure(Throwable exc) {
