@@ -4,29 +4,26 @@
 
 #import "MSLocalStorage.h"
 
+@interface MSLocalStorage ()
+@property (nonatomic) NSMutableDictionary *registrations;
+@property (copy, nonatomic) NSString *versionKey;
+@property (copy, nonatomic) NSString *deviceTokenKey;
+@property (copy, nonatomic) NSString *registrationsKey;
+@end
+
 @implementation MSLocalStorage
 
-@synthesize isRefreshNeeded, deviceToken;
+NSString * const storageVersion = @"v1.0.0";
 
-NSString* _path;
-NSMutableDictionary* _registrations;
-NSString* _versionKey;
-NSString* _deviceTokenKey;
-NSString* _registrationsKey;
-
-NSString* const storageVersion = @"v1.0.0";
-
-- (MSLocalStorage*) initWithNotificationHubPath: (NSString*) mobileServiceUrl
+- (MSLocalStorage *) initWithNotificationHubPath:(NSString *) mobileServiceUrl
 {
     self = [super init];
     
-    if(self){
-        _path = mobileServiceUrl;
-        
-        _versionKey = [NSString stringWithFormat:@"%@-version", mobileServiceUrl];
-        _deviceTokenKey = [NSString stringWithFormat:@"%@-deviceToken", mobileServiceUrl];
-        _registrationsKey =[NSString stringWithFormat:@"%@-registrations", mobileServiceUrl];
-        _registrations = [NSMutableDictionary dictionary];
+    if (self) {
+        self.versionKey = [NSString stringWithFormat:@"%@-version", mobileServiceUrl];
+        self.deviceTokenKey = [NSString stringWithFormat:@"%@-deviceToken", mobileServiceUrl];
+        self.registrationsKey = [NSString stringWithFormat:@"%@-registrations", mobileServiceUrl];
+        self.registrations = [NSMutableDictionary dictionary];
         
         [self readContent];
     }
@@ -35,24 +32,21 @@ NSString* const storageVersion = @"v1.0.0";
 }
 
 
-- (MSStoredRegistration*) getMSStoredRegistrationWithRegistrationName:(NSString*) registrationName
+- (MSStoredRegistration *) getMSStoredRegistrationWithRegistrationName:(NSString *)registrationName
 {
-    NSString* registrationId = [_registrations objectForKey:registrationName];
-    if (registrationId)
-    {
-        return [[MSStoredRegistration alloc] initWithName:registrationName registrationId:registrationId];
-    }
-    else
-    {
-        return nil;
-    }
+    NSString * registrationId = [self.registrations objectForKey:registrationName];
+    return [[MSStoredRegistration alloc] initWithName:registrationName registrationId:registrationId];
 }
 
-- (void) updateWithRegistrationId: (NSString*) registrationId registrationName:(NSString *)registrationName deviceToken:(NSString *)deviceTokenIn
+
+// Can we chop this?
+- (void) updateWithRegistrationId:(NSString *)registrationId
+                 registrationName:(NSString *)registrationName
+                      deviceToken:(NSString *)deviceToken
 {
-    for (NSString* key in [_registrations allKeys])
+    for (NSString *key in [self.registrations allKeys])
     {
-        NSString* regId = _registrations[key];
+        NSString *regId = self.registrations[key];
         if([regId isEqualToString: registrationId])
         {
             if (![key isEqualToString:registrationName])
@@ -62,25 +56,29 @@ NSString* const storageVersion = @"v1.0.0";
         }
     }
     
-    [self updateWithRegistrationName:registrationName registrationId:registrationId deviceToken:deviceTokenIn];
+    [self updateWithRegistrationName:registrationName
+                      registrationId:registrationId
+                         deviceToken:deviceToken];
 }
 
-- (void) updateWithRegistrationName: (NSString*) registrationName registrationId:(NSString *)registrationId deviceToken:(NSString *)deviceTokenIn
+- (void) updateWithRegistrationName:(NSString *)registrationName
+                     registrationId:(NSString *)registrationId
+                        deviceToken:(NSString *)deviceToken
 {
-    [_registrations setObject:registrationId forKey:registrationName];
-    self.deviceToken = deviceTokenIn;
+    [self.registrations setObject:registrationId forKey:registrationName];
+    self.deviceToken = deviceToken;
     [self flush];
 }
 
-- (void) deleteWithRegistrationName: (NSString*) registrationName
+- (void) deleteWithRegistrationName:(NSString *)registrationName
 {
-    [_registrations removeObjectForKey:registrationName];
+    [self.registrations removeObjectForKey:registrationName];
     [self flush];
 }
 
 - (void) deleteAllRegistrations
 {
-    [_registrations removeAllObjects];
+    [self.registrations removeAllObjects];
     [self flush];
 }
 
@@ -88,19 +86,19 @@ NSString* const storageVersion = @"v1.0.0";
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     
-    self.deviceToken = [defaults stringForKey:_deviceTokenKey];
+    self.deviceToken = [defaults stringForKey:self.deviceTokenKey];
     
-    NSString* version = [defaults stringForKey:_versionKey];
+    NSString *version = [defaults stringForKey:self.versionKey];
     self.isRefreshNeeded = version == nil || ![version isEqualToString:storageVersion];
     if(self.isRefreshNeeded)
     {
         return;
     }
     
-    NSDictionary* registrations = [defaults dictionaryForKey:_registrationsKey];
+    NSDictionary *registrations = [defaults dictionaryForKey:self.registrationsKey];
     if (registrations)
     {
-        _registrations = [registrations mutableCopy];
+        self.registrations = [registrations mutableCopy];
     }
     else
     {
@@ -112,14 +110,14 @@ NSString* const storageVersion = @"v1.0.0";
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     
-    [defaults setObject:self.deviceToken forKey:_deviceTokenKey];
-    [defaults setObject:storageVersion forKey:_versionKey];
-    [defaults setObject:_registrations forKey:_registrationsKey];
+    [defaults setObject:self.deviceToken forKey:self.deviceTokenKey];
+    [defaults setObject:storageVersion forKey:self.versionKey];
+    [defaults setObject:self.registrations forKey:self.registrationsKey];
     
     [defaults synchronize];
 }
 
-- (void) refreshFinishedWithDeviceToken:(NSString*)newDeviceToken
+- (void) refreshFinishedWithDeviceToken:(NSString *)newDeviceToken
 {
     self.isRefreshNeeded = NO;
     
@@ -131,4 +129,3 @@ NSString* const storageVersion = @"v1.0.0";
 }
 
 @end
-

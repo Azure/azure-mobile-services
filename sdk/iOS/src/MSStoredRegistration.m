@@ -5,15 +5,19 @@
 #import "MSStoredRegistration.h"
 
 @implementation MSStoredRegistration
-@synthesize registrationName, registrationId;
 
-- (MSStoredRegistration*) initWithName:(NSString*)regName registrationId: (NSString*)regId;
+- (MSStoredRegistration*) initWithName:(NSString*)registrationName
+                        registrationId:(NSString*)registrationId;
 {
+    if (!registrationName || !registrationId) {
+        return nil;
+    }
+    
     self = [super init];
     
-    if(self){
-        self.registrationName = regName;
-        self.registrationId = regId;
+    if (self) {
+        self.registrationName = registrationName;
+        self.registrationId = registrationId;
     }
     
     return self;

@@ -14,6 +14,9 @@
 
 #pragma mark * Block Type Definitions
 
+/// Callback for method with no return other than error.
+typedef void (^MSCompletionBlock)(NSError *error);
+
 /// Callback for invokeAPI method that expects a JSON result.
 typedef void (^MSAPIBlock)(id result, NSHTTPURLResponse *response, NSError *error);
 

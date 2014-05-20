@@ -28,6 +28,15 @@
 		AD0D4FC7191AEE7F001F4766 /* MSStoredRegistration.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0D4FC5191AEE7F001F4766 /* MSStoredRegistration.m */; };
 		AD0D4FCA19220026001F4766 /* MSStoredRegistrationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0D4FC919220026001F4766 /* MSStoredRegistrationTests.m */; };
 		AD0D4FCC1922030E001F4766 /* MSLocalStorageTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0D4FCB1922030E001F4766 /* MSLocalStorageTests.m */; };
+		AD0D4FD1192577ED001F4766 /* MSPushConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = AD0D4FCF192577ED001F4766 /* MSPushConnection.h */; };
+		AD0D4FD2192577ED001F4766 /* MSPushConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0D4FD0192577ED001F4766 /* MSPushConnection.m */; };
+		AD0D4FD519257DFC001F4766 /* MSPushRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = AD0D4FD319257DFC001F4766 /* MSPushRequest.h */; };
+		AD0D4FD619257DFC001F4766 /* MSPushRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0D4FD419257DFC001F4766 /* MSPushRequest.m */; };
+		AD0D4FD919259D70001F4766 /* MSPushHttp.h in Headers */ = {isa = PBXBuildFile; fileRef = AD0D4FD719259D70001F4766 /* MSPushHttp.h */; };
+		AD0D4FDA19259D70001F4766 /* MSPushHttp.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0D4FD819259D70001F4766 /* MSPushHttp.m */; };
+		AD0D4FE119281111001F4766 /* MSPush.h in Headers */ = {isa = PBXBuildFile; fileRef = AD0D4FDF19281111001F4766 /* MSPush.h */; };
+		AD0D4FE219281111001F4766 /* MSPush.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0D4FE019281111001F4766 /* MSPush.m */; };
+		AD45B93F1929D90000188AF3 /* MSPushHttpTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AD45B93E1929D90000188AF3 /* MSPushHttpTests.m */; };
 		ADB659F1190738AB008C638F /* MSLocalStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = ADB659EF190738AB008C638F /* MSLocalStorage.h */; };
 		ADB659F2190738AB008C638F /* MSLocalStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = ADB659F0190738AB008C638F /* MSLocalStorage.m */; };
 		E8146642165BE0150038EBE5 /* MSLogin.h in Headers */ = {isa = PBXBuildFile; fileRef = E8146640165BE0150038EBE5 /* MSLogin.h */; };
@@ -131,6 +140,15 @@
 		AD0D4FC5191AEE7F001F4766 /* MSStoredRegistration.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSStoredRegistration.m; sourceTree = "<group>"; };
 		AD0D4FC919220026001F4766 /* MSStoredRegistrationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSStoredRegistrationTests.m; sourceTree = "<group>"; };
 		AD0D4FCB1922030E001F4766 /* MSLocalStorageTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSLocalStorageTests.m; sourceTree = "<group>"; };
+		AD0D4FCF192577ED001F4766 /* MSPushConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSPushConnection.h; sourceTree = "<group>"; };
+		AD0D4FD0192577ED001F4766 /* MSPushConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPushConnection.m; sourceTree = "<group>"; };
+		AD0D4FD319257DFC001F4766 /* MSPushRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSPushRequest.h; sourceTree = "<group>"; };
+		AD0D4FD419257DFC001F4766 /* MSPushRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPushRequest.m; sourceTree = "<group>"; };
+		AD0D4FD719259D70001F4766 /* MSPushHttp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSPushHttp.h; sourceTree = "<group>"; };
+		AD0D4FD819259D70001F4766 /* MSPushHttp.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPushHttp.m; sourceTree = "<group>"; };
+		AD0D4FDF19281111001F4766 /* MSPush.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSPush.h; sourceTree = "<group>"; };
+		AD0D4FE019281111001F4766 /* MSPush.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPush.m; sourceTree = "<group>"; };
+		AD45B93E1929D90000188AF3 /* MSPushHttpTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPushHttpTests.m; sourceTree = "<group>"; };
 		ADB659EF190738AB008C638F /* MSLocalStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSLocalStorage.h; sourceTree = "<group>"; };
 		ADB659F0190738AB008C638F /* MSLocalStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSLocalStorage.m; sourceTree = "<group>"; };
 		E8146640165BE0150038EBE5 /* MSLogin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSLogin.h; sourceTree = "<group>"; };
@@ -235,6 +253,7 @@
 			children = (
 				AD0D4FC919220026001F4766 /* MSStoredRegistrationTests.m */,
 				AD0D4FCB1922030E001F4766 /* MSLocalStorageTests.m */,
+				AD45B93E1929D90000188AF3 /* MSPushHttpTests.m */,
 			);
 			name = Push;
 			sourceTree = "<group>";
@@ -246,6 +265,14 @@
 				ADB659F0190738AB008C638F /* MSLocalStorage.m */,
 				AD0D4FC4191AEE7F001F4766 /* MSStoredRegistration.h */,
 				AD0D4FC5191AEE7F001F4766 /* MSStoredRegistration.m */,
+				AD0D4FCF192577ED001F4766 /* MSPushConnection.h */,
+				AD0D4FD0192577ED001F4766 /* MSPushConnection.m */,
+				AD0D4FD319257DFC001F4766 /* MSPushRequest.h */,
+				AD0D4FD419257DFC001F4766 /* MSPushRequest.m */,
+				AD0D4FD719259D70001F4766 /* MSPushHttp.h */,
+				AD0D4FD819259D70001F4766 /* MSPushHttp.m */,
+				AD0D4FDF19281111001F4766 /* MSPush.h */,
+				AD0D4FE019281111001F4766 /* MSPush.m */,
 			);
 			name = Push;
 			sourceTree = "<group>";
@@ -448,8 +475,10 @@
 				ADB659F1190738AB008C638F /* MSLocalStorage.h in Headers */,
 				E8E3790E161F769D00C13F00 /* MSClient.h in Headers */,
 				E8E37911161F769D00C13F00 /* MSTable.h in Headers */,
+				AD0D4FD919259D70001F4766 /* MSPushHttp.h in Headers */,
 				E8E37910161F769D00C13F00 /* MSQuery.h in Headers */,
 				E8E37912161F769D00C13F00 /* MSUser.h in Headers */,
+				AD0D4FD519257DFC001F4766 /* MSPushRequest.h in Headers */,
 				E8E37913161F769D00C13F00 /* MSFilter.h in Headers */,
 				E8E3790F161F769D00C13F00 /* MSError.h in Headers */,
 				E8E37914161F769D00C13F00 /* MSClientConnection.h in Headers */,
@@ -458,6 +487,8 @@
 				E8E37917161F769D00C13F00 /* MSURLBuilder.h in Headers */,
 				E8E37918161F769D00C13F00 /* MSNaiveISODateFormatter.h in Headers */,
 				E8E37919161F769D00C13F00 /* MSSerializer.h in Headers */,
+				AD0D4FD1192577ED001F4766 /* MSPushConnection.h in Headers */,
+				AD0D4FE119281111001F4766 /* MSPush.h in Headers */,
 				E8E3791A161F769D00C13F00 /* MSJSONSerializer.h in Headers */,
 				E8E3791B161F769D00C13F00 /* MSPredicateTranslator.h in Headers */,
 				E84CA4CF162369BD009B2588 /* MSUserAgentBuilder.h in Headers */,
@@ -605,17 +636,21 @@
 				E8F33B19161667CE002DD7C6 /* MSUser.m in Sources */,
 				E8F33B2416166822002DD7C6 /* MSClientConnection.m in Sources */,
 				E8F33B2516166822002DD7C6 /* MSTableConnection.m in Sources */,
+				AD0D4FDA19259D70001F4766 /* MSPushHttp.m in Sources */,
 				E8F33B2616166822002DD7C6 /* MSTableRequest.m in Sources */,
 				E8F33B2A16166837002DD7C6 /* MSJSONSerializer.m in Sources */,
 				E8F33B2F1616684F002DD7C6 /* MSPredicateTranslator.m in Sources */,
 				E87BB01F161A446C008053F9 /* MSURLBuilder.m in Sources */,
 				E8EA24BD161CFC5300BE055D /* MSNaiveISODateFormatter.m in Sources */,
+				AD0D4FE219281111001F4766 /* MSPush.m in Sources */,
 				AD0D4FC7191AEE7F001F4766 /* MSStoredRegistration.m in Sources */,
 				E84CA4D0162369BD009B2588 /* MSUserAgentBuilder.m in Sources */,
 				E8653C0D16559C15002CB440 /* MSLoginView.m in Sources */,
 				E8146643165BE0150038EBE5 /* MSLogin.m in Sources */,
 				E8146647165BE2440038EBE5 /* MSLoginSerializer.m in Sources */,
+				AD0D4FD2192577ED001F4766 /* MSPushConnection.m in Sources */,
 				E814664B165C07EB0038EBE5 /* MSLoginController.m in Sources */,
+				AD0D4FD619257DFC001F4766 /* MSPushRequest.m in Sources */,
 				E8C44043170BAD49002FC997 /* MSAPIConnection.m in Sources */,
 				E8C44048170BAD93002FC997 /* MSAPIRequest.m in Sources */,
 				ADB659F2190738AB008C638F /* MSLocalStorage.m in Sources */,
@@ -641,6 +676,7 @@
 				E8E37907161F4D0D00C13F00 /* MSFilterTest.m in Sources */,
 				E84CA4D6162373E2009B2588 /* MSUserAgentBuilderTests.m in Sources */,
 				AD0D4FCA19220026001F4766 /* MSStoredRegistrationTests.m in Sources */,
+				AD45B93F1929D90000188AF3 /* MSPushHttpTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

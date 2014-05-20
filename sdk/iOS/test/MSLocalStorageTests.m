@@ -121,7 +121,7 @@
     reg4 = [storage2 getMSStoredRegistrationWithRegistrationName:@"regName4"];
     STAssertNil(reg4, @"reg4 should be Nil after being deleted.");
     
-    [storage deleteAllRegistrations];
+    [storage2 deleteAllRegistrations];
     
     // Get the original item and ensure it is accurate
     reg2New = [storage2 getMSStoredRegistrationWithRegistrationName:@"regName2"];

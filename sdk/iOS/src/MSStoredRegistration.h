@@ -6,8 +6,9 @@
 
 @interface MSStoredRegistration : NSObject
 
-@property (copy, nonatomic) NSString* registrationName;
-@property (copy, nonatomic) NSString* registrationId;
+@property (copy, nonatomic) NSString *registrationName;
+@property (copy, nonatomic) NSString *registrationId;
 
-- (MSStoredRegistration*) initWithName:(NSString*)registrationName registrationId: (NSString*)registrationId;
+- (MSStoredRegistration*) initWithName:(NSString*)registrationName
+                        registrationId:(NSString*)registrationId;
 @end
