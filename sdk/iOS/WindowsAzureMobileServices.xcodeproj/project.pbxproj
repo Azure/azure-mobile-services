@@ -40,6 +40,10 @@
 		A2818FFD18BB0660001B14E7 /* MSQueuePushOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = A2818FFB18BB0660001B14E7 /* MSQueuePushOperation.m */; };
 		A281900418BB2FF5001B14E7 /* MSTableOperationError.h in Headers */ = {isa = PBXBuildFile; fileRef = A281900218BB2FF5001B14E7 /* MSTableOperationError.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A281900518BB2FF5001B14E7 /* MSTableOperationError.m in Sources */ = {isa = PBXBuildFile; fileRef = A281900318BB2FF5001B14E7 /* MSTableOperationError.m */; };
+		A28224B0192ACEAE00EF8743 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A28224AF192ACEAE00EF8743 /* CoreData.framework */; };
+		A28224B3192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A28224B1192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld */; };
+		A28224B4192AD00E00EF8743 /* CoreDataTestModel.xcdatamodeld in Resources */ = {isa = PBXBuildFile; fileRef = A28224B1192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld */; };
+		A295B2B3192AB2040067562E /* MSCoreDataStoreTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A295B2B2192AB2040067562E /* MSCoreDataStoreTests.m */; };
 		A2ACD540192322C50012B1ED /* MSCoreDataStore.h in Headers */ = {isa = PBXBuildFile; fileRef = A2ACD53E192322C50012B1ED /* MSCoreDataStore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A2ACD541192322C50012B1ED /* MSCoreDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ACD53F192322C50012B1ED /* MSCoreDataStore.m */; };
 		A2ADF7E91914481B0078BB16 /* MSTableOperationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ADF7E81914481B0078BB16 /* MSTableOperationTests.m */; };
@@ -159,6 +163,9 @@
 		A2818FFB18BB0660001B14E7 /* MSQueuePushOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSQueuePushOperation.m; sourceTree = "<group>"; };
 		A281900218BB2FF5001B14E7 /* MSTableOperationError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSTableOperationError.h; sourceTree = "<group>"; };
 		A281900318BB2FF5001B14E7 /* MSTableOperationError.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableOperationError.m; sourceTree = "<group>"; };
+		A28224AF192ACEAE00EF8743 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
+		A28224B2192ACFB700EF8743 /* CoreDataTestModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreDataTestModel.xcdatamodel; sourceTree = "<group>"; };
+		A295B2B2192AB2040067562E /* MSCoreDataStoreTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSCoreDataStoreTests.m; sourceTree = "<group>"; };
 		A2ACD53E192322C50012B1ED /* MSCoreDataStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSCoreDataStore.h; sourceTree = "<group>"; };
 		A2ACD53F192322C50012B1ED /* MSCoreDataStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSCoreDataStore.m; sourceTree = "<group>"; };
 		A2ADF7E81914481B0078BB16 /* MSTableOperationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableOperationTests.m; sourceTree = "<group>"; };
@@ -241,6 +248,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A28224B0192ACEAE00EF8743 /* CoreData.framework in Frameworks */,
 				E8F33AEE1616659C002DD7C6 /* SenTestingKit.framework in Frameworks */,
 				E84CA4DE16272371009B2588 /* UIKit.framework in Frameworks */,
 				E8F33AF11616659C002DD7C6 /* Foundation.framework in Frameworks */,
@@ -283,6 +291,15 @@
 			name = Operations;
 			sourceTree = "<group>";
 		};
+		A295B2B1192AB1DC0067562E /* CoreData */ = {
+			isa = PBXGroup;
+			children = (
+				A295B2B2192AB2040067562E /* MSCoreDataStoreTests.m */,
+				A28224B1192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld */,
+			);
+			name = CoreData;
+			sourceTree = "<group>";
+		};
 		A2ACD539192322760012B1ED /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
@@ -295,6 +312,7 @@
 		A2B8D6011909D42100F198DC /* Offline */ = {
 			isa = PBXGroup;
 			children = (
+				A295B2B1192AB1DC0067562E /* CoreData */,
 				A2B8D6021909D4AF00F198DC /* Operations */,
 				A258891818A19D1B00962F9A /* MSOfflinePassthroughHelper.h */,
 				A258891918A19D1B00962F9A /* MSOfflinePassthroughHelper.m */,
@@ -367,6 +385,7 @@
 		E8F33ADD1616659C002DD7C6 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				A28224AF192ACEAE00EF8743 /* CoreData.framework */,
 				E84CA4D216236A6E009B2588 /* UIKit.framework */,
 				E8F33ADE1616659C002DD7C6 /* Foundation.framework */,
 				E8F33AED1616659C002DD7C6 /* SenTestingKit.framework */,
@@ -623,6 +642,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A28224B4192AD00E00EF8743 /* CoreDataTestModel.xcdatamodeld in Resources */,
 				E8F33AFA1616659C002DD7C6 /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -722,9 +742,11 @@
 				E87BB022161B57C8008053F9 /* MSUserTests.m in Sources */,
 				E87BB025161B5A4D008053F9 /* MSTableTests.m in Sources */,
 				E8EA24C0161CFCF400BE055D /* MSURLbuilderTests.m in Sources */,
+				A28224B3192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld in Sources */,
 				E8E37904161E2FC500C13F00 /* MSTestFilter.m in Sources */,
 				A22CF3731825914700660C79 /* MSTable+MSTableTestUtilities.m in Sources */,
 				E8E37907161F4D0D00C13F00 /* MSFilterTest.m in Sources */,
+				A295B2B3192AB2040067562E /* MSCoreDataStoreTests.m in Sources */,
 				E84CA4D6162373E2009B2588 /* MSUserAgentBuilderTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -948,6 +970,19 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		A28224B1192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				A28224B2192ACFB700EF8743 /* CoreDataTestModel.xcdatamodel */,
+			);
+			currentVersion = A28224B2192ACFB700EF8743 /* CoreDataTestModel.xcdatamodel */;
+			path = CoreDataTestModel.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = E8F33AD21616659C002DD7C6 /* Project object */;
 }
