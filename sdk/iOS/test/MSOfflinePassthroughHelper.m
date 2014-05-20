@@ -1,10 +1,6 @@
-//
-//  MSOfflinePassthroughHelper.m
-//  WindowsAzureMobileServices
-//
-//  Created by Phillip Van Nortwick on 2/2/14.
-//  Copyright (c) 2014 Windows Azure. All rights reserved.
-//
+// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
 
 #import "MSOfflinePassthroughHelper.h"
 #import "MSQuery.h"
@@ -65,7 +61,7 @@
     return [tableData objectForKey:itemId];
 }
 
-- (BOOL) upsertItem:(NSDictionary *)item table:(NSString *)table orError:(NSError **)error
+- (BOOL) upsertItems:(NSArray *)items table:(NSString *)table orError:(NSError **)error
 {
     NSMutableDictionary *tableData = [self.data objectForKey:table];
     if (tableData == nil) {
@@ -73,18 +69,19 @@
         [self.data setObject:tableData forKey:table];
     }
     
-    [tableData setObject:item forKey:[item objectForKey:@"id"]];
-    self.upsertCalls++;
+    for (NSDictionary *item in items) {
+        [tableData setObject:item forKey:[item objectForKey:@"id"]];
+        self.upsertCalls++;
+    }
     
     return YES;
 }
 
-- (BOOL) deleteItemWithId:(NSString *)item table:(NSString *)table orError:(NSError **)error
+- (BOOL) deleteItemsWithIds:(NSArray *)items table:(NSString *)table orError:(NSError **)error
 {
     NSMutableDictionary *tableData = [self.data objectForKey:table];
-    if (tableData) {
-        [tableData removeObjectForKey:item];
-    }
+    [tableData removeObjectsForKeys:items];
+    
     return YES;
 }
 

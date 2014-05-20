@@ -385,7 +385,7 @@
         STAssertNil(error, @"error should have been nil.");
         done = YES;
     }];
-    STAssertTrue([self waitForTest:100000.1], @"Test timed out.");
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
     // Update the item
     done = NO;
@@ -393,7 +393,7 @@
         STAssertNil(error, @"error should have been nil.");
         done = YES;
     }];
-    STAssertTrue([self waitForTest:1000000.1], @"Test timed out.");
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
     // Push queue to server
     done = NO;

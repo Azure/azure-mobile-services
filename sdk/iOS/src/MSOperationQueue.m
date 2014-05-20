@@ -81,16 +81,16 @@
 
 -(void) addOperation:(MSTableOperation *)operation orError:(NSError **)error
 {
-    [self.dataSource upsertItem:[operation serialize]
+    [self.dataSource upsertItems:[NSArray arrayWithObject:[operation serialize]]
                           table:self.dataSource.operationTableName
                         orError:error];
 }
 
 -(void) removeOperation:(MSTableOperation *)operation orError:(NSError **)error
 {
-    [self.dataSource deleteItemWithId:[NSNumber numberWithInteger:operation.operationId]
-                                table:[self.dataSource operationTableName]
-                              orError:error];
+    [self.dataSource deleteItemsWithIds:[NSArray arrayWithObject:[NSNumber numberWithInteger:operation.operationId]]
+                                  table:[self.dataSource operationTableName]
+                                orError:error];
     
     // Make sure to clean up any lock if one existed
     [self unlockOperation:operation];

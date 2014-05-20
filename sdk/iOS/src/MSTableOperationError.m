@@ -140,6 +140,7 @@
     
     MSTableOperation *op = [[MSTableOperation alloc] initWithTable:self.table type:self.operation itemId:self.itemId];
     op.operationId = self.operationId;
+    op.item = item;
     
     [self.syncContext cancelOperation:op updateItem:item completion:completion];
 }

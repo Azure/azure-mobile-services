@@ -186,7 +186,7 @@
                                                                                                error:error];
                 
                 NSError *storeError;
-                [self.syncContext.dataSource upsertItem:[tableError serialize]
+                [self.syncContext.dataSource upsertItems:[NSArray arrayWithObject:[tableError serialize]]
                                                   table:[self.syncContext.dataSource errorTableName]
                                                 orError:&storeError];
                 if (storeError) {
@@ -200,8 +200,11 @@
             // The operation executed successfully, so save the item (if we have one)
             // and no additional changes have happened on this table-item pair
             NSError *storeError;
-            if ([self.syncContext.operationQueue getOperationsForTable:operation.tableName item:operation.itemId].count <= 1) {
-                [self.syncContext.dataSource upsertItem:item table:operation.tableName orError:&storeError];
+            if ([self.syncContext.operationQueue getOperationsForTable:operation.tableName
+                                                                  item:operation.itemId].count <= 1) {
+                [self.syncContext.dataSource upsertItems:[NSArray arrayWithObject:item]
+                                                   table:operation.tableName
+                                                 orError:&storeError];
                 
                 if (storeError) {
                     NSString *errorMessage = [NSString stringWithFormat:@"Unable to upsert item '%@' into table '%@'",
