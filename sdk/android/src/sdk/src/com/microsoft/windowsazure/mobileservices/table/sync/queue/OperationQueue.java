@@ -196,10 +196,13 @@ public class OperationQueue {
 		this.mSyncLock.writeLock().lock();
 
 		try {
-			String itemId = operation.getItemId();
+			// '/' is a reserved character that cannot be used on string ids.
+			// We use it to build a unique compound string from tableName and
+			// itemId
+			String tableItemId = operation.getTableName() + "/" + operation.getItemId();
 
-			if (this.mIdOperationMap.containsKey(itemId)) {
-				OperationQueueItem prevOpQueueItem = this.mIdOperationMap.get(itemId);
+			if (this.mIdOperationMap.containsKey(tableItemId)) {
+				OperationQueueItem prevOpQueueItem = this.mIdOperationMap.get(tableItemId);
 				TableOperation prevOperation = prevOpQueueItem.getOperation();
 				TableOperation collapsedOperation = prevOperation.Accept(new TableOperationCollapser(operation));
 
@@ -306,7 +309,22 @@ public class OperationQueue {
 				if (element.isJsonObject()) {
 					OperationQueueItem opQueueItem = deserialize((JsonObject) element);
 					opQueue.mQueue.add(opQueueItem);
-					opQueue.mIdOperationMap.put(opQueueItem.getItemId(), opQueueItem);
+
+					// '/' is a reserved character that cannot be used on string
+					// ids.
+					// We use it to build a unique compound string from
+					// tableName and itemId
+					String tableItemId = opQueueItem.getTableName() + "/" + opQueueItem.getItemId();
+
+					opQueue.mIdOperationMap.put(tableItemId, opQueueItem);
+
+					Integer tableCount = opQueue.mTableCountMap.get(opQueueItem.getTableName());
+
+					if (tableCount != null) {
+						opQueue.mTableCountMap.put(opQueueItem.getTableName(), tableCount + 1);
+					} else {
+						opQueue.mTableCountMap.put(opQueueItem.getTableName(), 1);
+					}
 				}
 			}
 		}
@@ -321,7 +339,12 @@ public class OperationQueue {
 
 		this.mQueue.add(opQueueItem);
 
-		this.mIdOperationMap.put(operation.getItemId(), opQueueItem);
+		// '/' is a reserved character that cannot be used on string ids.
+		// We use it to build a unique compound string from tableName and
+		// itemId
+		String tableItemId = operation.getTableName() + "/" + operation.getItemId();
+
+		this.mIdOperationMap.put(tableItemId, opQueueItem);
 
 		Integer tableCount = this.mTableCountMap.get(operation.getTableName());
 
@@ -342,7 +365,12 @@ public class OperationQueue {
 	}
 
 	private void removeOperationQueueItem(OperationQueueItem opQueueItem) throws MobileServiceLocalStoreException {
-		this.mIdOperationMap.remove(opQueueItem.getItemId());
+		// '/' is a reserved character that cannot be used on string ids.
+		// We use it to build a unique compound string from tableName and
+		// itemId
+		String tableItemId = opQueueItem.getTableName() + "/" + opQueueItem.getItemId();
+
+		this.mIdOperationMap.remove(tableItemId);
 
 		Integer tableCount = this.mTableCountMap.get(opQueueItem.getTableName());
 

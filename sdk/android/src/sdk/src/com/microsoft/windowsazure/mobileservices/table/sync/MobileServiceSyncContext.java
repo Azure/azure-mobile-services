@@ -685,8 +685,14 @@ public class MobileServiceSyncContext {
 				// get SHARED access to table lock
 				MultiReadWriteLock<String> tableLock = this.mTableLockMap.lockRead(operation.getTableName());
 
+				// '/' is a reserved character that cannot be used on string
+				// ids.
+				// We use it to build a unique compound string from tableName
+				// and itemId
+				String tableItemId = operation.getTableName() + "/" + operation.getItemId();
+
 				// get EXCLUSIVE access to id lock
-				MultiLock<String> idLock = this.mIdLockMap.lock(operation.getItemId());
+				MultiLock<String> idLock = this.mIdLockMap.lock(tableItemId);
 
 				lockedOp = new LockProtectedOperation(operation, tableLock, idLock);
 			}
@@ -756,8 +762,15 @@ public class MobileServiceSyncContext {
 				MultiReadWriteLock<String> tableLock = this.mTableLockMap.lockRead(operation.getTableName());
 
 				try {
+					// '/' is a reserved character that cannot be used on string
+					// ids.
+					// We use it to build a unique compound string from
+					// tableName
+					// and itemId
+					String tableItemId = operation.getTableName() + "/" + operation.getItemId();
+
 					// get EXCLUSIVE access to id lock
-					MultiLock<String> idLock = this.mIdLockMap.lock(operation.getItemId());
+					MultiLock<String> idLock = this.mIdLockMap.lock(tableItemId);
 
 					try {
 						operation.Accept(new LocalTableOperationProcessor(this.mStore, item));
