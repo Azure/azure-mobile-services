@@ -44,6 +44,8 @@ import android.webkit.WebViewClient;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.gson.JsonObject;
@@ -51,6 +53,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback;
 import com.microsoft.windowsazure.mobileservices.http.MobileServiceConnection;
 import com.microsoft.windowsazure.mobileservices.http.RequestAsyncTask;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
@@ -192,6 +195,36 @@ public class LoginManager {
 	}
 
 	/**
+	 * Invokes an interactive authentication process using the specified
+	 * Authentication Provider
+	 * 
+	 * @param provider
+	 *            The provider used for the authentication process
+	 * @param context
+	 *            The context used to create the authentication dialog
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void authenticate(String provider, Context context, final UserAuthenticationCallback callback) {
+
+		ListenableFuture<MobileServiceUser> authenticateFuture = authenticate(provider, context);
+
+		Futures.addCallback(authenticateFuture, new FutureCallback<MobileServiceUser>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(MobileServiceUser user) {
+				callback.onCompleted(user, null, null);
+			}
+		});
+	}
+
+	/**
 	 * Invokes Windows Azure Mobile Service authentication using a
 	 * provider-specific oAuth token
 	 * 
@@ -212,6 +245,35 @@ public class LoginManager {
 		String url = mClient.getAppUrl().toString() + LoginManager.START_URL + normalizeProvider(provider);
 
 		return authenticateWithToken(oAuthToken, url);
+	}
+
+	/**
+	 * Invokes Windows Azure Mobile Service authentication using a
+	 * provider-specific oAuth token
+	 * 
+	 * @param provider
+	 *            The provider used for the authentication process
+	 * @param oAuthToken
+	 *            The oAuth token used for authentication
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void authenticate(String provider, String oAuthToken, final UserAuthenticationCallback callback) {
+		ListenableFuture<MobileServiceUser> authenticateFuture = authenticate(provider, oAuthToken);
+
+		Futures.addCallback(authenticateFuture, new FutureCallback<MobileServiceUser>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(MobileServiceUser user) {
+				callback.onCompleted(user, null, null);
+			}
+		});
 	}
 
 	/**
@@ -251,15 +313,16 @@ public class LoginManager {
 	 *            Callback to invoke when the authentication process finishes
 	 */
 	private void showLoginUI(final String startUrl, final String endUrl, final Context context, final LoginUIOperationCallback callback) {
-	
-		Activity activity = (Activity)context;
-		
+
+		Activity activity = (Activity) context;
+
 		activity.runOnUiThread(new Runnable() {
-		    public void run() {
-		    	showLoginUIInternal(startUrl, endUrl, context, callback);
-		    }
+			public void run() {
+				showLoginUIInternal(startUrl, endUrl, context, callback);
+			}
 		});
 	}
+
 	/**
 	 * Creates the UI for the interactive authentication process
 	 * 

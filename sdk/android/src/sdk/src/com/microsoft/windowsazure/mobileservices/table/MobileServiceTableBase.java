@@ -33,6 +33,8 @@ import org.apache.http.client.methods.HttpDelete;
 import android.net.Uri;
 import android.util.Pair;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.gson.JsonElement;
@@ -42,6 +44,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.http.RequestAsyncTask;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequestImpl;
@@ -119,6 +122,8 @@ public abstract class MobileServiceTableBase<E> {
 
     public abstract ListenableFuture<E> execute(MobileServiceQuery<?> query);
 
+    public abstract void execute(final MobileServiceQuery<?> query, final TableQueryCallback<E> callback);
+    	
     /**
      * Executes a query to retrieve all the table rows
      * 
@@ -129,6 +134,16 @@ public abstract class MobileServiceTableBase<E> {
         return this.where().execute();
     }
 
+	/**
+	 * Executes the query
+	 * 
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void execute(final TableQueryCallback<E> callback) {
+		this.where().execute(callback);
+	}
+	
     /**
      * Returns the name of the represented table
      */
@@ -256,9 +271,21 @@ public abstract class MobileServiceTableBase<E> {
      *            Callback to invoke when the operation is completed
      */
     public ListenableFuture<Void> delete(Object element) {
-        return this.delete(element, null);
+        return this.delete(element, (List<Pair<String, String>>) null);
     }
 
+	/**
+	 * Deletes an entity from a Mobile Service Table
+	 * 
+	 * @param element
+	 *            The entity to delete
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void delete(Object element, TableDeleteCallback callback) {
+		this.delete(element, null, callback);
+	}
+	
     /**
      * Deletes an entity from a Mobile Service Table using a given id
      * 
@@ -315,6 +342,34 @@ public abstract class MobileServiceTableBase<E> {
         return future;
     }
 
+	/**
+	 * Deletes an entity from a Mobile Service Table using a given id
+	 * 
+	 * @param id
+	 *            The id of the entity to delete
+	 * @param parameters
+	 * 			  A list of user-defined parameters and values to include in the request URI query string            
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void delete(Object elementOrId, List<Pair<String, String>> parameters, final TableDeleteCallback callback) {
+		
+		ListenableFuture<Void> deleteFuture = delete(elementOrId, parameters);
+
+		Futures.addCallback(deleteFuture, new FutureCallback<Void>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted((Exception) exception, MobileServiceException.getServiceResponse(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(Void v) {
+				callback.onCompleted(null, null);
+			}
+		});
+	}
     /**
      * Patches the original entity with the one returned in the response after
      * executing the operation

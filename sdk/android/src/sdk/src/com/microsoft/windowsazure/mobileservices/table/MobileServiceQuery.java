@@ -274,6 +274,16 @@ public final class MobileServiceQuery<E> {
         return mTable.execute(this);
     }
 
+	/**
+	 * Executes the query
+	 * 
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void execute(final TableQueryCallback<E> callback) {
+		mTable.execute(this, callback);
+	}
+	
     /**** Row Operations ****/
 
     /**

@@ -26,11 +26,14 @@ package com.microsoft.windowsazure.mobileservices.http;
 import org.apache.http.Header;
 import org.apache.http.protocol.HTTP;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.windowsazure.mobileservices.MobileServiceApplication;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
 
 import android.os.Build;
@@ -40,171 +43,196 @@ import android.os.Build;
  */
 public class MobileServiceConnection {
 
-    /**
-     * The MobileServiceClient used for communication with the Mobile Service
-     */
-    private MobileServiceClient mClient;
+	/**
+	 * The MobileServiceClient used for communication with the Mobile Service
+	 */
+	private MobileServiceClient mClient;
 
-    /**
-     * Request header to indicate the Mobile Service application key
-     */
-    private static final String X_ZUMO_APPLICATION_HEADER = "X-ZUMO-APPLICATION";
+	/**
+	 * Request header to indicate the Mobile Service application key
+	 */
+	private static final String X_ZUMO_APPLICATION_HEADER = "X-ZUMO-APPLICATION";
 
-    /**
-     * Request header to indicate the Mobile Service Installation ID
-     */
-    private static final String X_ZUMO_INSTALLATION_ID_HEADER = "X-ZUMO-INSTALLATION-ID";
+	/**
+	 * Request header to indicate the Mobile Service Installation ID
+	 */
+	private static final String X_ZUMO_INSTALLATION_ID_HEADER = "X-ZUMO-INSTALLATION-ID";
 
-    /**
-     * Request header to indicate the Mobile Service user authentication token
-     */
-    private static final String X_ZUMO_AUTH_HEADER = "X-ZUMO-AUTH";
+	/**
+	 * Request header to indicate the Mobile Service user authentication token
+	 */
+	private static final String X_ZUMO_AUTH_HEADER = "X-ZUMO-AUTH";
 
-    /**
-     * Header value to represent JSON content-type
-     */
-    public static final String JSON_CONTENTTYPE = "application/json";
+	/**
+	 * Header value to represent JSON content-type
+	 */
+	public static final String JSON_CONTENTTYPE = "application/json";
 
-    /**
-     * Header value to represent GZIP content-encoding
-     */
-    private static final String GZIP_CONTENTENCODING = "gzip";
+	/**
+	 * Header value to represent GZIP content-encoding
+	 */
+	private static final String GZIP_CONTENTENCODING = "gzip";
 
-    /**
-     * Current SDK version
-     */
-    private static final String SDK_VERSION = "1.0.10814.0";
+	/**
+	 * Current SDK version
+	 */
+	private static final String SDK_VERSION = "1.0.10814.0";
 
-    /**
-     * Constructor for the MobileServiceConnection
-     * 
-     * @param client
-     *            The client used for communication with the Mobile Service
-     */
-    public MobileServiceConnection(MobileServiceClient client) {
-        mClient = client;
-    }
+	/**
+	 * Constructor for the MobileServiceConnection
+	 * 
+	 * @param client
+	 *            The client used for communication with the Mobile Service
+	 */
+	public MobileServiceConnection(MobileServiceClient client) {
+		mClient = client;
+	}
 
-    /**
-     * Execute a request-response operation with a Mobile Service
-     * 
-     * @param request
-     *            The request to execute
-     * @param responseCallback
-     *            Callback to invoke after the request is executed
-     */
-    public ListenableFuture<ServiceFilterResponse> start(final ServiceFilterRequest request) {
-        if (request == null) {
-            throw new IllegalArgumentException("Request can not be null");
-        }
-        
-        ServiceFilter filter = mClient.getServiceFilter();
-        // Set the request's headers
-        configureHeadersOnRequest(request);
-        return filter.handleRequest(request, new NextServiceFilterCallback() {
+	/**
+	 * Execute a request-response operation with a Mobile Service
+	 * 
+	 * @param request
+	 *            The request to execute
+	 * @param responseCallback
+	 *            Callback to invoke after the request is executed
+	 */
+	public ListenableFuture<ServiceFilterResponse> start(final ServiceFilterRequest request) {
+		if (request == null) {
+			throw new IllegalArgumentException("Request can not be null");
+		}
 
-            @Override
-            public ListenableFuture<ServiceFilterResponse> onNext(ServiceFilterRequest request) {
-                SettableFuture<ServiceFilterResponse> future = SettableFuture.create();
-                ServiceFilterResponse response = null;
+		ServiceFilter filter = mClient.getServiceFilter();
+		// Set the request's headers
+		configureHeadersOnRequest(request);
+		return filter.handleRequest(request, new NextServiceFilterCallback() {
 
-                try {
-                    response = request.execute();
-                    int statusCode = response.getStatus().getStatusCode();
+			@Override
+			public ListenableFuture<ServiceFilterResponse> onNext(ServiceFilterRequest request) {
+				SettableFuture<ServiceFilterResponse> future = SettableFuture.create();
+				ServiceFilterResponse response = null;
 
-                    // If the response has error throw exception
-                    if (statusCode < 200 || statusCode >= 300) {
-                        String responseContent = response.getContent();
-                        if (responseContent != null && !responseContent.isEmpty()) {
-                            throw new MobileServiceException(responseContent, response);
-                        } else {
-                            throw new MobileServiceException(String.format("{'code': %d}", statusCode), response);
-                        }
-                    }
-                    
-                    future.set(response);
-                } catch (MobileServiceException e) {
-                    // Something went wrong, call onResponse with exception
-                    // method
-                    /*
-                    if (responseCallback != null) {
-                        responseCallback.onResponse(response, new MobileServiceException("Error while processing request.", e));
-                        return;
-                    }
-                    */
-                    future.setException(e);
-                } catch (Exception e) {
-                    future.setException(new MobileServiceException("Error while processing request.", e, response));
-                }
+				try {
+					response = request.execute();
+					int statusCode = response.getStatus().getStatusCode();
 
-                return future;
-                // Call onResponse method
-                /*
-                if (responseCallback != null) {
-                    responseCallback.onResponse(response, null);
-                }
-                */
-            }
-        });
-    }
+					// If the response has error throw exception
+					if (statusCode < 200 || statusCode >= 300) {
+						String responseContent = response.getContent();
+						if (responseContent != null && !responseContent.isEmpty()) {
+							throw new MobileServiceException(responseContent, response);
+						} else {
+							throw new MobileServiceException(String.format("{'code': %d}", statusCode), response);
+						}
+					}
 
-    /**
-     * Configures the HttpRequestBase to execute a request with a Mobile Service
-     * 
-     * @param request
-     *            The request to configure
-     */
-    private void configureHeadersOnRequest(ServiceFilterRequest request) {
-        // Add the authentication header if the user is logged in
-        MobileServiceUser user = mClient.getCurrentUser();
-        if (user != null && user.getAuthenticationToken() != "") {
-            request.addHeader(X_ZUMO_AUTH_HEADER, user.getAuthenticationToken());
-        }
+					future.set(response);
+				} catch (MobileServiceException e) {
+					// Something went wrong, call onResponse with exception
+					// method
+					/*
+					 * if (responseCallback != null) {
+					 * responseCallback.onResponse(response, new
+					 * MobileServiceException("Error while processing request.",
+					 * e)); return; }
+					 */
+					future.setException(e);
+				} catch (Exception e) {
+					future.setException(new MobileServiceException("Error while processing request.", e, response));
+				}
 
-        // Set the User Agent header
-        request.addHeader(HTTP.USER_AGENT, getUserAgent());
+				return future;
+				// Call onResponse method
+				/*
+				 * if (responseCallback != null) {
+				 * responseCallback.onResponse(response, null); }
+				 */
+			}
+		});
+	}
 
-        // Set the special Application key header
-        request.addHeader(X_ZUMO_APPLICATION_HEADER, mClient.getAppKey());
+	/**
+	 * Execute a request-response operation with a Mobile Service
+	 * 
+	 * @param request
+	 *            The request to execute
+	 * @param responseCallback
+	 *            Callback to invoke after the request is executed
+	 */
+	public void start(final ServiceFilterRequest request, final ServiceFilterResponseCallback responseCallback) {
+		ListenableFuture<ServiceFilterResponse> startFuture = start(request);
 
-        // Set the special Installation ID header
-        request.addHeader(X_ZUMO_INSTALLATION_ID_HEADER, MobileServiceApplication.getInstallationId(mClient.getContext()));
+		Futures.addCallback(startFuture, new FutureCallback<ServiceFilterResponse>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					responseCallback.onResponse(MobileServiceException.getServiceResponse(exception), (Exception)exception);
+				}
+			}
 
-        if (!requestContainsHeader(request, "Accept")) {
-            request.addHeader("Accept", JSON_CONTENTTYPE);
-        }
+			@Override
+			public void onSuccess(ServiceFilterResponse response) {
+				responseCallback.onResponse(response, null);
+			}
+		});
+	}
 
-        if (!requestContainsHeader(request, "Accept-Encoding")) {
-            request.addHeader("Accept-Encoding", GZIP_CONTENTENCODING);
-        }
-    }
+	/**
+	 * Configures the HttpRequestBase to execute a request with a Mobile Service
+	 * 
+	 * @param request
+	 *            The request to configure
+	 */
+	private void configureHeadersOnRequest(ServiceFilterRequest request) {
+		// Add the authentication header if the user is logged in
+		MobileServiceUser user = mClient.getCurrentUser();
+		if (user != null && user.getAuthenticationToken() != "") {
+			request.addHeader(X_ZUMO_AUTH_HEADER, user.getAuthenticationToken());
+		}
 
-    /**
-     * Verifies if the request contains the specified header
-     * 
-     * @param request
-     *            The request to verify
-     * @param headerName
-     *            The header name to find
-     * @return True if the header is present, false otherwise
-     */
-    private boolean requestContainsHeader(ServiceFilterRequest request, String headerName) {
-        for (Header header : request.getHeaders()) {
-            if (header.getName().equals(headerName)) {
-                return true;
-            }
-        }
+		// Set the User Agent header
+		request.addHeader(HTTP.USER_AGENT, getUserAgent());
 
-        return false;
-    }
+		// Set the special Application key header
+		request.addHeader(X_ZUMO_APPLICATION_HEADER, mClient.getAppKey());
 
-    /**
-     * Generates the User-Agent
-     */
-    static String getUserAgent() {
-        String userAgent = String.format("ZUMO/1.0 (lang=%s; os=%s; os_version=%s; arch=%s; version=%s)", "Java", "Android", Build.VERSION.RELEASE,
-                Build.CPU_ABI, SDK_VERSION);
+		// Set the special Installation ID header
+		request.addHeader(X_ZUMO_INSTALLATION_ID_HEADER, MobileServiceApplication.getInstallationId(mClient.getContext()));
 
-        return userAgent;
-    }
+		if (!requestContainsHeader(request, "Accept")) {
+			request.addHeader("Accept", JSON_CONTENTTYPE);
+		}
+
+		if (!requestContainsHeader(request, "Accept-Encoding")) {
+			request.addHeader("Accept-Encoding", GZIP_CONTENTENCODING);
+		}
+	}
+
+	/**
+	 * Verifies if the request contains the specified header
+	 * 
+	 * @param request
+	 *            The request to verify
+	 * @param headerName
+	 *            The header name to find
+	 * @return True if the header is present, false otherwise
+	 */
+	private boolean requestContainsHeader(ServiceFilterRequest request, String headerName) {
+		for (Header header : request.getHeaders()) {
+			if (header.getName().equals(headerName)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Generates the User-Agent
+	 */
+	static String getUserAgent() {
+		String userAgent = String.format("ZUMO/1.0 (lang=%s; os=%s; os_version=%s; arch=%s; version=%s)", "Java", "Android", Build.VERSION.RELEASE,
+				Build.CPU_ABI, SDK_VERSION);
+
+		return userAgent;
+	}
 }

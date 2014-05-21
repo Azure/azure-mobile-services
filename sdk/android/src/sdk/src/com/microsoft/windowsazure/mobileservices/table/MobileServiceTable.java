@@ -37,6 +37,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.MobileServiceList;
 import com.microsoft.windowsazure.mobileservices.table.serialization.JsonEntityParser;
 
@@ -45,397 +46,594 @@ import com.microsoft.windowsazure.mobileservices.table.serialization.JsonEntityP
  */
 public final class MobileServiceTable<E> extends MobileServiceTableBase<MobileServiceList<E>> {
 
-    private MobileServiceJsonTable mInternalTable;
+	private MobileServiceJsonTable mInternalTable;
 
-    private Class<E> mClazz;
+	private Class<E> mClazz;
 
-    
+	/**
+	 * Constructor for MobileServiceTable
+	 * 
+	 * @param name
+	 *            The name of the represented table
+	 * @param client
+	 *            The MobileServiceClient used to invoke table operations
+	 */
+	public MobileServiceTable(String name, MobileServiceClient client, Class<E> clazz) {
+		initialize(name, client);
 
-    /**
-     * Constructor for MobileServiceTable
-     * 
-     * @param name
-     *            The name of the represented table
-     * @param client
-     *            The MobileServiceClient used to invoke table operations
-     */
-    public MobileServiceTable(String name, MobileServiceClient client, Class<E> clazz) {
-        initialize(name, client);
+		mInternalTable = new MobileServiceJsonTable(name, client);
+		mClazz = clazz;
 
-        mInternalTable = new MobileServiceJsonTable(name, client);
-        mClazz = clazz;
+		mSystemProperties = getSystemProperties(clazz);
+		mInternalTable.setSystemProperties(mSystemProperties);
+	}
 
-        mSystemProperties = getSystemProperties(clazz);
-        mInternalTable.setSystemProperties(mSystemProperties);
-    }
+	public EnumSet<MobileServiceSystemProperty> getSystemProperties() {
+		return mInternalTable.getSystemProperties();
+	}
 
-    public EnumSet<MobileServiceSystemProperty> getSystemProperties() {
-        return mInternalTable.getSystemProperties();
-    }
+	public void setSystemProperties(EnumSet<MobileServiceSystemProperty> systemProperties) {
+		this.mSystemProperties = systemProperties;
+		this.mInternalTable.setSystemProperties(systemProperties);
+	}
 
-    public void setSystemProperties(EnumSet<MobileServiceSystemProperty> systemProperties) {
-        this.mSystemProperties = systemProperties;
-        this.mInternalTable.setSystemProperties(systemProperties);
-    }
+	/**
+	 * Executes a query to retrieve all the table rows
+	 * 
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public ListenableFuture<MobileServiceList<E>> execute() {
+		// mInternalTable.execute(new ParseResultTableQueryCallback(callback));
+		final SettableFuture<MobileServiceList<E>> future = SettableFuture.create();
+		ListenableFuture<JsonElement> internalFuture = mInternalTable.execute();
+		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
+			@Override
+			public void onFailure(Throwable exc) {
+				future.setException(exc);
+			}
 
-    /**
-     * Executes a query to retrieve all the table rows
-     * 
-     * @param callback
-     *            Callback to invoke when the operation is completed
-     */
-    public ListenableFuture<MobileServiceList<E>> execute() {
-        //mInternalTable.execute(new ParseResultTableQueryCallback(callback));
-        final SettableFuture<MobileServiceList<E>> future = SettableFuture.create();
-        ListenableFuture<JsonElement> internalFuture = mInternalTable.execute();
-        Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
-            @Override
-            public void onFailure(Throwable exc) {
-                future.setException(exc);
-            }
-            
-            @Override
-            public void onSuccess(JsonElement result) {
-                try {
-                    if (result.isJsonObject()) {
-                        JsonObject jsonObject = result.getAsJsonObject();
-                        
-                        int count = jsonObject.get("count").getAsInt();
-                        JsonElement elements = jsonObject.get("results");
-                            
-                        List<E> list = parseResults(elements);
-                        future.set(new MobileServiceList<E>(list, count));
-                    } else {
-                        List<E> list = parseResults(result);
-                        future.set(new MobileServiceList<E>(list, list.size()));                        
-                    }   
-                } catch (Exception e) {
-                    future.setException(e);
-                }
-            }
-        });
-        
-        return future;
-    }
+			@Override
+			public void onSuccess(JsonElement result) {
+				try {
+					if (result.isJsonObject()) {
+						JsonObject jsonObject = result.getAsJsonObject();
 
-    /**
-     * Executes a query to retrieve all the table rows
-     * 
-     * @param query
-     *            The MobileServiceQuery instance to execute
-     * @param callback
-     *            Callback to invoke when the operation is completed
-     */
-    public ListenableFuture<MobileServiceList<E>> execute(MobileServiceQuery<?> query) {
-        //mInternalTable.execute(query, new ParseResultTableQueryCallback(callback));
-        
-        final SettableFuture<MobileServiceList<E>> future = SettableFuture.create();
-        ListenableFuture<JsonElement> internalFuture = mInternalTable.execute(query);
-        Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
-            @Override
-            public void onFailure(Throwable exc) {
-                future.setException(exc);
-            }
-            
-            @Override
-            public void onSuccess(JsonElement result) {
-                try {
-                    if (result.isJsonObject()) {
-                        JsonObject jsonObject = result.getAsJsonObject();
-                        
-                        int count = jsonObject.get("count").getAsInt();
-                        JsonElement elements = jsonObject.get("results");
-                            
-                        List<E> list = parseResults(elements);
-                        future.set(new MobileServiceList<E>(list, count));
-                    } else {
-                        List<E> list = parseResults(result);
-                        future.set(new MobileServiceList<E>(list, list.size()));                        
-                    }   
-                } catch (Exception e) {
-                    future.setException(e);
-                }
-            }
-        });
-        
-        return future;
-    }
+						int count = jsonObject.get("count").getAsInt();
+						JsonElement elements = jsonObject.get("results");
 
-    /**
-     * Looks up a row in the table. Deserializes the row using the given class.
-     * 
-     * @param id
-     *            The id of the row
-     * @param clazz
-     *            The class used to deserialize the row
-     * @param callback
-     *            Callback to invoke after the operation is completed
-     */
-    public ListenableFuture<E> lookUp(Object id) {
+						List<E> list = parseResults(elements);
+						future.set(new MobileServiceList<E>(list, count));
+					} else {
+						List<E> list = parseResults(result);
+						future.set(new MobileServiceList<E>(list, list.size()));
+					}
+				} catch (Exception e) {
+					future.setException(e);
+				}
+			}
+		});
 
-        //mInternalTable.lookUp(id, null, new ParseResultOperationCallback(callback));
-        
-        return lookUp(id, null);
-    }
+		return future;
+	}
 
-    /**
-     * Looks up a row in the table. Deserializes the row using the given class.
-     * 
-     * @param id
-     *            The id of the row
-     * @param clazz
-     *            The class used to deserialize the row
-     * @param parameters
-     *            A list of user-defined parameters and values to include in the
-     *            request URI query string
-     * @param callback
-     *            Callback to invoke after the operation is completed
-     */
-    public ListenableFuture<E> lookUp(Object id, List<Pair<String, String>> parameters) {
+	/**
+	 * Executes a query to retrieve all the table rows
+	 * 
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void execute(final TableQueryCallback<MobileServiceList<E>> callback) {
 
-       // mInternalTable.lookUp(id, parameters, new ParseResultOperationCallback(callback));
-        final SettableFuture<E> future = SettableFuture.create();
-        
-        ListenableFuture<JsonElement> internalFuture = mInternalTable.lookUp(id, parameters);
-        Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
-            @Override
-            public void onFailure(Throwable exc) {
-                if (exc instanceof MobileServicePreconditionFailedExceptionBase) {
-                    MobileServicePreconditionFailedExceptionBase ex = (MobileServicePreconditionFailedExceptionBase) exc;
+		ListenableFuture<MobileServiceList<E>> executeFuture = execute();
 
-                    E entity = null;
+		Futures.addCallback(executeFuture, new FutureCallback<MobileServiceList<E>>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, 0, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				}
+			}
 
-                    try {
-                        entity = parseResults(ex.getValue()).get(0);
-                    } catch (Exception e) {
-                    }
+			@Override
+			public void onSuccess(MobileServiceList<E> result) {
+				callback.onCompleted(result, result.size(), null, null);
+			}
+		});
+	}
 
-                    future.setException(new MobileServicePreconditionFailedException(ex, entity));
-                } else {
-                    future.setException(exc);
-                }
-            }
-            
-            @Override
-            public void onSuccess(JsonElement result) {
-                try {
-                    future.set(parseResults(result).get(0));
-                } catch (Exception e) {
-                    future.setException(e);
-                }
-            }
-        });
-        
-        return future;
-    }
+	/**
+	 * Executes a query to retrieve all the table rows
+	 * 
+	 * @param query
+	 *            The MobileServiceQuery instance to execute
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public ListenableFuture<MobileServiceList<E>> execute(MobileServiceQuery<?> query) {
+		// mInternalTable.execute(query, new
+		// ParseResultTableQueryCallback(callback));
 
-    /**
-     * Inserts an entity into a Mobile Service Table
-     * 
-     * @param element
-     *            The entity to insert
-     * @param callback
-     *            Callback to invoke when the operation is completed
-     */
-    public ListenableFuture<E> insert(final E element) {
-        return this.insert(element, null);
-    }
+		final SettableFuture<MobileServiceList<E>> future = SettableFuture.create();
+		ListenableFuture<JsonElement> internalFuture = mInternalTable.execute(query);
+		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
+			@Override
+			public void onFailure(Throwable exc) {
+				future.setException(exc);
+			}
 
-    /**
-     * Inserts an entity into a Mobile Service Table
-     * 
-     * @param element
-     *            The entity to insert
-     * @param parameters
-     *            A list of user-defined parameters and values to include in the
-     *            request URI query string
-     * @param callback
-     *            Callback to invoke when the operation is completed
-     */
-    public ListenableFuture<E> insert(final E element, List<Pair<String, String>> parameters) {
-        final SettableFuture<E> future = SettableFuture.create();
-        JsonObject json = null;
-        try {
-            json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
-        } catch (IllegalArgumentException e) {
-            future.setException(e);
-            /*
-            if (callback != null) {
-                callback.onCompleted(null, e, null);
-            }
-            */
+			@Override
+			public void onSuccess(JsonElement result) {
+				try {
+					if (result.isJsonObject()) {
+						JsonObject jsonObject = result.getAsJsonObject();
 
-            return future;
-        }
+						int count = jsonObject.get("count").getAsInt();
+						JsonElement elements = jsonObject.get("results");
 
-        Class<?> idClazz = getIdPropertyClass(element.getClass());
+						List<E> list = parseResults(elements);
+						future.set(new MobileServiceList<E>(list, count));
+					} else {
+						List<E> list = parseResults(result);
+						future.set(new MobileServiceList<E>(list, list.size()));
+					}
+				} catch (Exception e) {
+					future.setException(e);
+				}
+			}
+		});
 
-        if (idClazz != null && !isIntegerClass(idClazz)) {
-            json = removeSystemProperties(json);
-        }
+		return future;
+	}
 
-        //mInternalTable.insert(json, parameters, new ParseResultOperationCallback(callback, element));
-        
-        ListenableFuture<JsonObject> internalFuture = mInternalTable.insert(json, parameters);
-        Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
-            @Override
-            public void onFailure(Throwable exc) {
-                if (exc instanceof MobileServicePreconditionFailedExceptionBase) {
-                    MobileServicePreconditionFailedExceptionBase ex = (MobileServicePreconditionFailedExceptionBase) exc;
+	/**
+	 * Executes a query to retrieve all the table rows
+	 * 
+	 * @param query
+	 *            The MobileServiceQuery instance to execute
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void execute(MobileServiceQuery<?> query, final TableQueryCallback<MobileServiceList<E>> callback) {
 
-                    E entity = null;
+		ListenableFuture<MobileServiceList<E>> executeFuture = execute(query);
 
-                    try {
-                        entity = parseResults(ex.getValue()).get(0);
+		Futures.addCallback(executeFuture, new FutureCallback<MobileServiceList<E>>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, 0, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				}
+			}
 
-                        if (entity != null && element != null) {
-                            copyFields(entity, element);
-                            entity = element;
-                        }
-                    } catch (Exception e) {
-                    }
-                    
-                    future.setException(new MobileServicePreconditionFailedException(ex, entity));
+			@Override
+			public void onSuccess(MobileServiceList<E> result) {
+				callback.onCompleted(result, result.size(), null, null);
+			}
+		});
+	}
 
-                } else {
-                    future.setException(exc);
-                }
-            }
-            
-            @Override
-            public void onSuccess(JsonElement result) {
-                E entity = null;
-                try {
-                    entity = parseResults(result).get(0);
-                    if (entity != null && element != null) {
-                        copyFields(entity, element);
-                        entity = element;
-                    }
-                    future.set(entity);
-                } catch (Exception e) {
-                    future.setException(e);
-                }
-            }
-        });
-        
-        return future;
-    }
+	/**
+	 * Looks up a row in the table. Deserializes the row using the given class.
+	 * 
+	 * @param id
+	 *            The id of the row
+	 * @param clazz
+	 *            The class used to deserialize the row
+	 * @param callback
+	 *            Callback to invoke after the operation is completed
+	 */
+	public ListenableFuture<E> lookUp(Object id) {
 
-    /**
-     * Updates an entity from a Mobile Service Table
-     * 
-     * @param element
-     *            The entity to update
-     * @param callback
-     *            Callback to invoke when the operation is completed
-     */
-    public ListenableFuture<E> update(final E element) {
-        return this.update(element, null);
-    }
+		// mInternalTable.lookUp(id, null, new
+		// ParseResultOperationCallback(callback));
 
-    /**
-     * Updates an entity from a Mobile Service Table
-     * 
-     * @param element
-     *            The entity to update
-     * @param parameters
-     *            A list of user-defined parameters and values to include in the
-     *            request URI query string
-     * @param callback
-     *            Callback to invoke when the operation is completed
-     */
-    public ListenableFuture<E> update(final E element, final List<Pair<String, String>> parameters) {
-        final SettableFuture<E> future = SettableFuture.create();
-        
-        JsonObject json = null;
+		return lookUp(id, (List<Pair<String, String>>) null);
+	}
 
-        try {
-            json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
-        } catch (IllegalArgumentException e) {
-            /*if (callback != null) {
-                callback.onCompleted(null, e, null);
-            }
-            */
-            future.setException(e);
-            return future;
-        }
+	/**
+	 * Looks up a row in the table. Deserializes the row using the given class.
+	 * 
+	 * @param id
+	 *            The id of the row
+	 * @param clazz
+	 *            The class used to deserialize the row
+	 * @param callback
+	 *            Callback to invoke after the operation is completed
+	 */
+	public void lookUp(Object id, final TableOperationCallback<E> callback) {
 
-        //mInternalTable.update(json, parameters, new ParseResultOperationCallback(callback, element));
-        
-        ListenableFuture<JsonObject> internalFuture = mInternalTable.update(json, parameters);
-        Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
-            @Override
-            public void onFailure(Throwable exc) {
-                if (exc instanceof MobileServicePreconditionFailedExceptionBase) {
-                    MobileServicePreconditionFailedExceptionBase ex = (MobileServicePreconditionFailedExceptionBase) exc;
+		ListenableFuture<E> lookUpFuture = lookUp(id);
 
-                    E entity = null;
+		Futures.addCallback(lookUpFuture, new FutureCallback<E>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				}
+			}
 
-                    try {
-                        entity = parseResults(ex.getValue()).get(0);
+			@Override
+			public void onSuccess(E result) {
+				callback.onCompleted(result, null, null);
+			}
+		});
+	}
 
-                        if (entity != null && element != null) {
-                            copyFields(entity, element);
-                            entity = element;
-                        }
-                    } catch (Exception e) {
-                    }
-                    
-                    future.setException(new MobileServicePreconditionFailedException(ex, entity));
+	/**
+	 * Looks up a row in the table. Deserializes the row using the given class.
+	 * 
+	 * @param id
+	 *            The id of the row
+	 * @param clazz
+	 *            The class used to deserialize the row
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the
+	 *            request URI query string
+	 * @param callback
+	 *            Callback to invoke after the operation is completed
+	 */
+	public ListenableFuture<E> lookUp(Object id, List<Pair<String, String>> parameters) {
 
-                } else {
-                    future.setException(exc);
-                }
-            }
-            
-            @Override
-            public void onSuccess(JsonElement result) {
-                E entity = null;
-                try {
-                    entity = parseResults(result).get(0);
-                    if (entity != null && element != null) {
-                        copyFields(entity, element);
-                        entity = element;
-                    }
-                    future.set(entity);
-                } catch (Exception e) {
-                    future.setException(e);
-                }
-            }
-        });
-        
-        return future;
-    }
+		// mInternalTable.lookUp(id, parameters, new
+		// ParseResultOperationCallback(callback));
+		final SettableFuture<E> future = SettableFuture.create();
 
-    /**
-     * Parses the JSON object to a typed list
-     * 
-     * @param results
-     *            JSON results
-     * @return List of entities
-     */
-    private List<E> parseResults(JsonElement results) {
-        Gson gson = mClient.getGsonBuilder().create();
-        return JsonEntityParser.parseResults(results, gson, mClazz);
-    }
+		ListenableFuture<JsonElement> internalFuture = mInternalTable.lookUp(id, parameters);
+		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
+			@Override
+			public void onFailure(Throwable exc) {
+				if (exc instanceof MobileServicePreconditionFailedExceptionBase) {
+					MobileServicePreconditionFailedExceptionBase ex = (MobileServicePreconditionFailedExceptionBase) exc;
 
-    /**
-     * Copy object field values from source to target object
-     * 
-     * @param source
-     *            The object to copy the values from
-     * @param target
-     *            The destination object
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     */
-    private void copyFields(Object source, Object target) throws IllegalArgumentException, IllegalAccessException {
-        if (source != null && target != null) {
-            for (Field field : source.getClass().getDeclaredFields()) {
-                field.setAccessible(true);
-                field.set(target, field.get(source));
-            }
-        }
-    }
+					E entity = null;
+
+					try {
+						entity = parseResults(ex.getValue()).get(0);
+					} catch (Exception e) {
+					}
+
+					future.setException(new MobileServicePreconditionFailedException(ex, entity));
+				} else {
+					future.setException(exc);
+				}
+			}
+
+			@Override
+			public void onSuccess(JsonElement result) {
+				try {
+					future.set(parseResults(result).get(0));
+				} catch (Exception e) {
+					future.setException(e);
+				}
+			}
+		});
+
+		return future;
+	}
+
+	/**
+	 * Looks up a row in the table. Deserializes the row using the given class.
+	 * 
+	 * @param id
+	 *            The id of the row
+	 * @param clazz
+	 *            The class used to deserialize the row
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the
+	 *            request URI query string
+	 * @param callback
+	 *            Callback to invoke after the operation is completed
+	 */
+	public void lookUp(Object id, List<Pair<String, String>> parameters, final TableOperationCallback<E> callback) {
+
+		ListenableFuture<E> lookUpFuture = lookUp(id, parameters);
+
+		Futures.addCallback(lookUpFuture, new FutureCallback<E>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(E result) {
+				callback.onCompleted(result, null, null);
+			}
+		});
+	}
+
+	/**
+	 * Inserts an entity into a Mobile Service Table
+	 * 
+	 * @param element
+	 *            The entity to insert
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public ListenableFuture<E> insert(final E element) {
+		return this.insert(element, (List<Pair<String, String>>) null);
+	}
+
+	/**
+	 * Inserts an entity into a Mobile Service Table
+	 * 
+	 * @param element
+	 *            The entity to insert
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void insert(final E element, final TableOperationCallback<E> callback) {
+		this.insert(element, null, callback);
+	}
+
+	/**
+	 * Inserts an entity into a Mobile Service Table
+	 * 
+	 * @param element
+	 *            The entity to insert
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the
+	 *            request URI query string
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public ListenableFuture<E> insert(final E element, List<Pair<String, String>> parameters) {
+		final SettableFuture<E> future = SettableFuture.create();
+		JsonObject json = null;
+		try {
+			json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
+		} catch (IllegalArgumentException e) {
+			future.setException(e);
+			/*
+			 * if (callback != null) { callback.onCompleted(null, e, null); }
+			 */
+
+			return future;
+		}
+
+		Class<?> idClazz = getIdPropertyClass(element.getClass());
+
+		if (idClazz != null && !isIntegerClass(idClazz)) {
+			json = removeSystemProperties(json);
+		}
+
+		// mInternalTable.insert(json, parameters, new
+		// ParseResultOperationCallback(callback, element));
+
+		ListenableFuture<JsonObject> internalFuture = mInternalTable.insert(json, parameters);
+		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
+			@Override
+			public void onFailure(Throwable exc) {
+				if (exc instanceof MobileServicePreconditionFailedExceptionBase) {
+					MobileServicePreconditionFailedExceptionBase ex = (MobileServicePreconditionFailedExceptionBase) exc;
+
+					E entity = null;
+
+					try {
+						entity = parseResults(ex.getValue()).get(0);
+
+						if (entity != null && element != null) {
+							copyFields(entity, element);
+							entity = element;
+						}
+					} catch (Exception e) {
+					}
+
+					future.setException(new MobileServicePreconditionFailedException(ex, entity));
+
+				} else {
+					future.setException(exc);
+				}
+			}
+
+			@Override
+			public void onSuccess(JsonElement result) {
+				E entity = null;
+				try {
+					entity = parseResults(result).get(0);
+					if (entity != null && element != null) {
+						copyFields(entity, element);
+						entity = element;
+					}
+					future.set(entity);
+				} catch (Exception e) {
+					future.setException(e);
+				}
+			}
+		});
+
+		return future;
+	}
+
+	/**
+	 * Inserts an entity into a Mobile Service Table
+	 * 
+	 * @param element
+	 *            The entity to insert
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the
+	 *            request URI query string
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void insert(final E element, List<Pair<String, String>> parameters, final TableOperationCallback<E> callback) {
+
+		ListenableFuture<E> insertFuture = insert(element, parameters);
+
+		Futures.addCallback(insertFuture, new FutureCallback<E>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(E result) {
+				callback.onCompleted(result, null, null);
+			}
+		});
+	}
+
+	/**
+	 * Updates an entity from a Mobile Service Table
+	 * 
+	 * @param element
+	 *            The entity to update
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public ListenableFuture<E> update(final E element) {
+		return this.update(element, (List<Pair<String, String>>) null);
+	}
+
+	/**
+	 * Updates an entity from a Mobile Service Table
+	 * 
+	 * @param element
+	 *            The entity to update
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void update(final E element, final TableOperationCallback<E> callback) {
+		this.update(element, null, callback);
+	}
+
+	/**
+	 * Updates an entity from a Mobile Service Table
+	 * 
+	 * @param element
+	 *            The entity to update
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the
+	 *            request URI query string
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public ListenableFuture<E> update(final E element, final List<Pair<String, String>> parameters) {
+		final SettableFuture<E> future = SettableFuture.create();
+
+		JsonObject json = null;
+
+		try {
+			json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
+		} catch (IllegalArgumentException e) {
+			/*
+			 * if (callback != null) { callback.onCompleted(null, e, null); }
+			 */
+			future.setException(e);
+			return future;
+		}
+
+		// mInternalTable.update(json, parameters, new
+		// ParseResultOperationCallback(callback, element));
+
+		ListenableFuture<JsonObject> internalFuture = mInternalTable.update(json, parameters);
+		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
+			@Override
+			public void onFailure(Throwable exc) {
+				if (exc instanceof MobileServicePreconditionFailedExceptionBase) {
+					MobileServicePreconditionFailedExceptionBase ex = (MobileServicePreconditionFailedExceptionBase) exc;
+
+					E entity = null;
+
+					try {
+						entity = parseResults(ex.getValue()).get(0);
+
+						if (entity != null && element != null) {
+							copyFields(entity, element);
+							entity = element;
+						}
+					} catch (Exception e) {
+					}
+
+					future.setException(new MobileServicePreconditionFailedException(ex, entity));
+
+				} else {
+					future.setException(exc);
+				}
+			}
+
+			@Override
+			public void onSuccess(JsonElement result) {
+				E entity = null;
+				try {
+					entity = parseResults(result).get(0);
+					if (entity != null && element != null) {
+						copyFields(entity, element);
+						entity = element;
+					}
+					future.set(entity);
+				} catch (Exception e) {
+					future.setException(e);
+				}
+			}
+		});
+
+		return future;
+	}
+
+	/**
+	 * Updates an entity from a Mobile Service Table
+	 * 
+	 * @param element
+	 *            The entity to update
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the
+	 *            request URI query string
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void update(final E element, final List<Pair<String, String>> parameters, final TableOperationCallback<E> callback) {
+		
+		ListenableFuture<E> updateFuture = update(element, parameters);
+
+		Futures.addCallback(updateFuture, new FutureCallback<E>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(E result) {
+				callback.onCompleted(result, null, null);
+			}
+		});
+	}
+
+	/**
+	 * Parses the JSON object to a typed list
+	 * 
+	 * @param results
+	 *            JSON results
+	 * @return List of entities
+	 */
+	private List<E> parseResults(JsonElement results) {
+		Gson gson = mClient.getGsonBuilder().create();
+		return JsonEntityParser.parseResults(results, gson, mClazz);
+	}
+
+	/**
+	 * Copy object field values from source to target object
+	 * 
+	 * @param source
+	 *            The object to copy the values from
+	 * @param target
+	 *            The destination object
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 */
+	private void copyFields(Object source, Object target) throws IllegalArgumentException, IllegalAccessException {
+		if (source != null && target != null) {
+			for (Field field : source.getClass().getDeclaredFields()) {
+				field.setAccessible(true);
+				field.set(target, field.get(source));
+			}
+		}
+	}
 
 }

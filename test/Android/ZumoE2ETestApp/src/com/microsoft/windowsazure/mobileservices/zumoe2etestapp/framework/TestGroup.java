@@ -25,7 +25,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.CountDownLatch;
 
 import android.annotation.TargetApi;
-import android.os.AsyncTask;
 import android.os.Build;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
