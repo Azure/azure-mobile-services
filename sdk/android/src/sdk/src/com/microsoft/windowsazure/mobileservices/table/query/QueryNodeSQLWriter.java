@@ -41,7 +41,7 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 	}
 
 	@Override
-	public QueryNode Visit(ConstantNode node) {
+	public QueryNode visit(ConstantNode node) {
 		Object value = node.getValue();
 		String constant = value != null ? value.toString() : "NULL";
 
@@ -57,19 +57,19 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 	}
 
 	@Override
-	public QueryNode Visit(FieldNode node) {
+	public QueryNode visit(FieldNode node) {
 		this.mBuilder.append(node.getFieldName());
 
 		return node;
 	}
 
 	@Override
-	public QueryNode Visit(UnaryOperatorNode node) throws MobileServiceException {
+	public QueryNode visit(UnaryOperatorNode node) throws MobileServiceException {
 		if (node.getUnaryOperatorKind() == UnaryOperatorKind.Parenthesis) {
 			this.mBuilder.append("(");
 
 			if (node.getArgument() != null) {
-				node.getArgument().Accept(this);
+				node.getArgument().accept(this);
 			}
 
 			this.mBuilder.append(")");
@@ -78,7 +78,7 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 
 			if (node.getArgument() != null) {
 				this.mBuilder.append(" ");
-				node.getArgument().Accept(this);
+				node.getArgument().accept(this);
 			}
 		}
 
@@ -86,9 +86,9 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 	}
 
 	@Override
-	public QueryNode Visit(BinaryOperatorNode node) throws MobileServiceException {
+	public QueryNode visit(BinaryOperatorNode node) throws MobileServiceException {
 		if (node.getLeftArgument() != null) {
-			node.getLeftArgument().Accept(this);
+			node.getLeftArgument().accept(this);
 			this.mBuilder.append(" ");
 		}
 
@@ -96,14 +96,14 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 
 		if (node.getRightArgument() != null) {
 			this.mBuilder.append(" ");
-			node.getRightArgument().Accept(this);
+			node.getRightArgument().accept(this);
 		}
 
 		return node;
 	}
 
 	@Override
-	public QueryNode Visit(FunctionCallNode node) throws MobileServiceException {
+	public QueryNode visit(FunctionCallNode node) throws MobileServiceException {
 		String format = getSQLOperatorFormat(node);
 
 		Object[] args = new Object[node.getArguments().size()];
@@ -111,7 +111,7 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 
 		for (int index = 0; index < arguments.size(); index++) {
 			QueryNode argument = arguments.get(index);
-			args[index] = argument.Accept(this);
+			args[index] = argument.accept(this);
 		}
 
 		this.mBuilder.append(String.format(format, args));

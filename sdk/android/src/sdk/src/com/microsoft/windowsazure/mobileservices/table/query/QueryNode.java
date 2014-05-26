@@ -41,5 +41,5 @@ public interface QueryNode {
 	 *         visitor.
 	 * @throws MobileServiceException
 	 */
-	public <T> T Accept(QueryNodeVisitor<T> visitor) throws MobileServiceException;
+	public <T> T accept(QueryNodeVisitor<T> visitor) throws MobileServiceException;
 }

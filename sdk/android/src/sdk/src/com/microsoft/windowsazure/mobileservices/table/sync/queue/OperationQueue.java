@@ -34,8 +34,9 @@ import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 import com.microsoft.windowsazure.mobileservices.table.serialization.DateSerializer;
-import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceLocalStore;
-import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceLocalStoreException;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.ColumnDataType;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStore;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStoreException;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.DeleteOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.InsertOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
@@ -115,8 +116,8 @@ public class OperationQueue {
 		}
 
 		@Override
-		public <T> T Accept(TableOperationVisitor<T> visitor) throws Throwable {
-			return this.mOperation.Accept(visitor);
+		public <T> T accept(TableOperationVisitor<T> visitor) throws Throwable {
+			return this.mOperation.accept(visitor);
 		}
 	}
 
@@ -204,7 +205,7 @@ public class OperationQueue {
 			if (this.mIdOperationMap.containsKey(tableItemId)) {
 				OperationQueueItem prevOpQueueItem = this.mIdOperationMap.get(tableItemId);
 				TableOperation prevOperation = prevOpQueueItem.getOperation();
-				TableOperation collapsedOperation = prevOperation.Accept(new TableOperationCollapser(operation));
+				TableOperation collapsedOperation = prevOperation.accept(new TableOperationCollapser(operation));
 
 				if (collapsedOperation == null || collapsedOperation == operation) {
 					prevOpQueueItem.cancel();
@@ -294,6 +295,19 @@ public class OperationQueue {
 		} finally {
 			this.mSyncLock.writeLock().unlock();
 		}
+	}
+
+	public static void initializeStore(MobileServiceLocalStore store) throws MobileServiceLocalStoreException {
+		Map<String, ColumnDataType> columns = new HashMap<String, ColumnDataType>();
+		columns.put("id", ColumnDataType.String);
+		columns.put("kind", ColumnDataType.Number);
+		columns.put("tablename", ColumnDataType.String);
+		columns.put("itemid", ColumnDataType.String);
+		columns.put("__createdat", ColumnDataType.Date);
+		columns.put("__queueloadedat", ColumnDataType.Date);
+		columns.put("sequence", ColumnDataType.Number);
+
+		store.defineTable(OPERATION_QUEUE_TABLE, columns);
 	}
 
 	public static OperationQueue load(MobileServiceLocalStore store) throws ParseException, MobileServiceLocalStoreException {

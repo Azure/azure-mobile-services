@@ -40,7 +40,7 @@ public class QueryODataWriter {
 		QueryNodeODataWriter oDataWriter = new QueryNodeODataWriter();
 
 		if (query.getQueryNode() != null) {
-			query.getQueryNode().Accept(oDataWriter);
+			query.getQueryNode().accept(oDataWriter);
 		}
 
 		return oDataWriter.getBuilder().toString();

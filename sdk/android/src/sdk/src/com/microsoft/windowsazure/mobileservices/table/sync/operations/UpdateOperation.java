@@ -68,8 +68,8 @@ public class UpdateOperation implements TableOperation {
 	}
 
 	@Override
-	public <T> T Accept(TableOperationVisitor<T> visitor) throws Throwable {
-		return visitor.Visit(this);
+	public <T> T accept(TableOperationVisitor<T> visitor) throws Throwable {
+		return visitor.visit(this);
 	}
 
 	public static UpdateOperation parse(String id, String tableName, String itemId, Date createdAt) {

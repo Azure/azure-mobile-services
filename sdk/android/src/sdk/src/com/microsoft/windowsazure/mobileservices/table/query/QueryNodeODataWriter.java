@@ -41,7 +41,7 @@ public class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
 	}
 
 	@Override
-	public QueryNode Visit(ConstantNode node) {
+	public QueryNode visit(ConstantNode node) {
 		Object value = node.getValue();
 		String constant = value != null ? value.toString() : "null";
 
@@ -57,19 +57,19 @@ public class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
 	}
 
 	@Override
-	public QueryNode Visit(FieldNode node) {
+	public QueryNode visit(FieldNode node) {
 		this.mBuilder.append(node.getFieldName());
 
 		return node;
 	}
 
 	@Override
-	public QueryNode Visit(UnaryOperatorNode node) throws MobileServiceException {
+	public QueryNode visit(UnaryOperatorNode node) throws MobileServiceException {
 		if (node.getUnaryOperatorKind() == UnaryOperatorKind.Parenthesis) {
 			this.mBuilder.append("(");
 
 			if (node.getArgument() != null) {
-				node.getArgument().Accept(this);
+				node.getArgument().accept(this);
 			}
 
 			this.mBuilder.append(")");
@@ -78,7 +78,7 @@ public class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
 
 			if (node.getArgument() != null) {
 				this.mBuilder.append(" ");
-				node.getArgument().Accept(this);
+				node.getArgument().accept(this);
 			}
 		}
 
@@ -86,9 +86,9 @@ public class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
 	}
 
 	@Override
-	public QueryNode Visit(BinaryOperatorNode node) throws MobileServiceException {
+	public QueryNode visit(BinaryOperatorNode node) throws MobileServiceException {
 		if (node.getLeftArgument() != null) {
-			node.getLeftArgument().Accept(this);
+			node.getLeftArgument().accept(this);
 			this.mBuilder.append(" ");
 		}
 
@@ -96,14 +96,14 @@ public class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
 
 		if (node.getRightArgument() != null) {
 			this.mBuilder.append(" ");
-			node.getRightArgument().Accept(this);
+			node.getRightArgument().accept(this);
 		}
 
 		return node;
 	}
 
 	@Override
-	public QueryNode Visit(FunctionCallNode node) throws MobileServiceException {
+	public QueryNode visit(FunctionCallNode node) throws MobileServiceException {
 		this.mBuilder.append(node.getFunctionCallKind().name().toLowerCase(Locale.getDefault()));
 		this.mBuilder.append("(");
 
@@ -116,7 +116,7 @@ public class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
 				first = false;
 			}
 
-			argument.Accept(this);
+			argument.accept(this);
 		}
 
 		this.mBuilder.append(")");

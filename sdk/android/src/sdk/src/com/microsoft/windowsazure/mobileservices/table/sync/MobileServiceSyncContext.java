@@ -39,14 +39,21 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionBase;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStore;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStoreException;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.InsertOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.LocalTableOperationProcessor;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.RemoteTableOperationProcessor;
+import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushCompletionResult;
+import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
+import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushStatus;
 import com.microsoft.windowsazure.mobileservices.table.sync.queue.OperationErrorList;
 import com.microsoft.windowsazure.mobileservices.table.sync.queue.OperationQueue;
 import com.microsoft.windowsazure.mobileservices.table.sync.queue.OperationQueue.Bookmark;
+import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.MobileServiceSyncHandler;
+import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.MobileServiceSyncHandlerException;
 import com.microsoft.windowsazure.mobileservices.threading.MultiLockDictionary;
 import com.microsoft.windowsazure.mobileservices.threading.MultiLockDictionary.MultiLock;
 import com.microsoft.windowsazure.mobileservices.threading.MultiReadWriteLockDictionary;
@@ -435,6 +442,11 @@ public class MobileServiceSyncContext {
 						this.mHandler = handler;
 						this.mStore = store;
 
+						OperationQueue.initializeStore(this.mStore);
+						OperationErrorList.initializeStore(this.mStore);
+
+						this.mStore.initialize();
+
 						this.mIdLockMap = new MultiLockDictionary<String>();
 						this.mTableLockMap = new MultiReadWriteLockDictionary<String>();
 
@@ -443,8 +455,6 @@ public class MobileServiceSyncContext {
 						this.mOpErrorList = OperationErrorList.load(this.mStore);
 
 						this.mPendingPush = new Semaphore(0, true);
-
-						this.mStore.initialize();
 
 						if (this.mPushSRConsumer == null) {
 							this.mPushSRConsumer = new PushSyncRequestConsumer(this);
@@ -773,7 +783,7 @@ public class MobileServiceSyncContext {
 					MultiLock<String> idLock = this.mIdLockMap.lock(tableItemId);
 
 					try {
-						operation.Accept(new LocalTableOperationProcessor(this.mStore, item));
+						operation.accept(new LocalTableOperationProcessor(this.mStore, item));
 						this.mOpQueue.enqueue(operation);
 					} finally {
 						this.mIdLockMap.unLock(idLock);

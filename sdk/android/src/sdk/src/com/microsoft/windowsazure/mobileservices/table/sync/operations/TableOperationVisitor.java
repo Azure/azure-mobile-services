@@ -32,7 +32,7 @@ public interface TableOperationVisitor<E> {
 	 * @return Defined by the implementer.
 	 * @throws Throwable 
 	 */
-	public E Visit(InsertOperation operation) throws Throwable;
+	public E visit(InsertOperation operation) throws Throwable;
 
 	/**
 	 * Visit an update operation.
@@ -42,7 +42,7 @@ public interface TableOperationVisitor<E> {
 	 * @return Defined by the implementer.
 	 * @throws Throwable 
 	 */
-	public E Visit(UpdateOperation operation) throws Throwable;
+	public E visit(UpdateOperation operation) throws Throwable;
 
 	/**
 	 * Visit a delete operation.
@@ -52,5 +52,5 @@ public interface TableOperationVisitor<E> {
 	 * @return Defined by the implementer.
 	 * @throws Throwable 
 	 */
-	public E Visit(DeleteOperation operation) throws Throwable;
+	public E visit(DeleteOperation operation) throws Throwable;
 }

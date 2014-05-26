@@ -20,7 +20,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.table.sync;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -38,7 +37,6 @@ import com.microsoft.windowsazure.mobileservices.table.serialization.JsonEntityP
  * Provides operations on local table.
  */
 public class MobileServiceSyncTable<E> {
-
 	MobileServiceJsonSyncTable mInternalTable;
 	MobileServiceClient mClient;
 	Class<E> mClazz;
@@ -65,11 +63,7 @@ public class MobileServiceSyncTable<E> {
 
 			@Override
 			public void onFailure(Throwable throwable) {
-				if (throwable instanceof ExecutionException) {
-					result.setException(throwable.getCause());
-				} else {
-					result.setException(throwable);
-				}
+				result.setException(throwable);
 			}
 
 			@Override
@@ -98,11 +92,7 @@ public class MobileServiceSyncTable<E> {
 
 			@Override
 			public void onFailure(Throwable throwable) {
-				if (throwable instanceof ExecutionException) {
-					future.setException(throwable.getCause());
-				} else {
-					future.setException(throwable);
-				}
+				future.setException(throwable);
 			}
 
 			@Override
@@ -131,11 +121,7 @@ public class MobileServiceSyncTable<E> {
 		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
 			@Override
 			public void onFailure(Throwable throwable) {
-				if (throwable instanceof ExecutionException) {
-					future.setException(throwable.getCause());
-				} else {
-					future.setException(throwable);
-				}
+				future.setException(throwable);
 			}
 
 			@Override
@@ -177,11 +163,7 @@ public class MobileServiceSyncTable<E> {
 		Futures.addCallback(internalFuture, new FutureCallback<JsonObject>() {
 			@Override
 			public void onFailure(Throwable throwable) {
-				if (throwable instanceof ExecutionException) {
-					future.setException(throwable.getCause());
-				} else {
-					future.setException(throwable);
-				}
+				future.setException(throwable);
 			}
 
 			@Override
@@ -217,11 +199,7 @@ public class MobileServiceSyncTable<E> {
 		Futures.addCallback(internalFuture, new FutureCallback<JsonObject>() {
 			@Override
 			public void onFailure(Throwable throwable) {
-				if (throwable instanceof ExecutionException) {
-					future.setException(throwable.getCause());
-				} else {
-					future.setException(throwable);
-				}
+				future.setException(throwable);
 			}
 
 			@Override
@@ -252,11 +230,7 @@ public class MobileServiceSyncTable<E> {
 		Futures.addCallback(internalFuture, new FutureCallback<Void>() {
 			@Override
 			public void onFailure(Throwable throwable) {
-				if (throwable instanceof ExecutionException) {
-					future.setException(throwable.getCause());
-				} else {
-					future.setException(throwable);
-				}
+				future.setException(throwable);
 			}
 
 			@Override
@@ -287,11 +261,7 @@ public class MobileServiceSyncTable<E> {
 		Futures.addCallback(internalFuture, new FutureCallback<Void>() {
 			@Override
 			public void onFailure(Throwable throwable) {
-				if (throwable instanceof ExecutionException) {
-					future.setException(throwable.getCause());
-				} else {
-					future.setException(throwable);
-				}
+				future.setException(throwable);
 			}
 
 			@Override
@@ -320,11 +290,7 @@ public class MobileServiceSyncTable<E> {
 		Futures.addCallback(internalFuture, new FutureCallback<Void>() {
 			@Override
 			public void onFailure(Throwable throwable) {
-				if (throwable instanceof ExecutionException) {
-					future.setException(throwable.getCause());
-				} else {
-					future.setException(throwable);
-				}
+				future.setException(throwable);
 			}
 
 			@Override

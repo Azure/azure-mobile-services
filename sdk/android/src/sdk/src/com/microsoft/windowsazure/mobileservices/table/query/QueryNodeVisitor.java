@@ -34,7 +34,7 @@ public interface QueryNodeVisitor<E> {
 	 * @return Defined by the implementer.
 	 * @throws MobileServiceException
 	 */
-	public E Visit(ConstantNode nodeIn) throws MobileServiceException;
+	public E visit(ConstantNode nodeIn) throws MobileServiceException;
 
 	/**
 	 * Visit a field node.
@@ -44,7 +44,7 @@ public interface QueryNodeVisitor<E> {
 	 * @return Defined by the implementer.
 	 * @throws MobileServiceException
 	 */
-	public E Visit(FieldNode nodeIn) throws MobileServiceException;
+	public E visit(FieldNode nodeIn) throws MobileServiceException;
 
 	/**
 	 * Visit a unary operator node.
@@ -54,7 +54,7 @@ public interface QueryNodeVisitor<E> {
 	 * @return Defined by the implementer.
 	 * @throws MobileServiceException
 	 */
-	public E Visit(UnaryOperatorNode nodeIn) throws MobileServiceException;
+	public E visit(UnaryOperatorNode nodeIn) throws MobileServiceException;
 
 	/**
 	 * Visit a binary operator node.
@@ -64,7 +64,7 @@ public interface QueryNodeVisitor<E> {
 	 * @return Defined by the implementer.
 	 * @throws MobileServiceException
 	 */
-	public E Visit(BinaryOperatorNode nodeIn) throws MobileServiceException;
+	public E visit(BinaryOperatorNode nodeIn) throws MobileServiceException;
 
 	/**
 	 * Visit a function call node.
@@ -74,5 +74,5 @@ public interface QueryNodeVisitor<E> {
 	 * @return Defined by the implementer.
 	 * @throws MobileServiceException
 	 */
-	public E Visit(FunctionCallNode nodeIn) throws MobileServiceException;
+	public E visit(FunctionCallNode nodeIn) throws MobileServiceException;
 }

@@ -31,17 +31,17 @@ public class TableOperationCollapser implements TableOperationVisitor<TableOpera
 	}
 
 	@Override
-	public TableOperation Visit(InsertOperation previousOperation) throws Throwable {
-		return mNewOperation.Accept(new InsertOperationCollapser(previousOperation));
+	public TableOperation visit(InsertOperation previousOperation) throws Throwable {
+		return mNewOperation.accept(new InsertOperationCollapser(previousOperation));
 	}
 
 	@Override
-	public TableOperation Visit(UpdateOperation previousOperation) throws Throwable {
-		return mNewOperation.Accept(new UpdateOperationCollapser(previousOperation));
+	public TableOperation visit(UpdateOperation previousOperation) throws Throwable {
+		return mNewOperation.accept(new UpdateOperationCollapser(previousOperation));
 	}
 
 	@Override
-	public TableOperation Visit(DeleteOperation previousOperation) throws Throwable {
-		return mNewOperation.Accept(new DeleteOperationCollapser(previousOperation));
+	public TableOperation visit(DeleteOperation previousOperation) throws Throwable {
+		return mNewOperation.accept(new DeleteOperationCollapser(previousOperation));
 	}
 }

@@ -33,8 +33,8 @@ public class ConstantNode implements QueryNode {
 	}
 
 	@Override
-	public <T> T Accept(QueryNodeVisitor<T> visitor) throws MobileServiceException {
-		return visitor.Visit(this);
+	public <T> T accept(QueryNodeVisitor<T> visitor) throws MobileServiceException {
+		return visitor.visit(this);
 	}
 
 	public Object getValue() {

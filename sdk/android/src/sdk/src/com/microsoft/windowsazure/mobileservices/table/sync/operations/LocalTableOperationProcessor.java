@@ -20,7 +20,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.table.sync.operations;
 
 import com.google.gson.JsonObject;
-import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceLocalStore;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStore;
 
 public class LocalTableOperationProcessor implements TableOperationVisitor<Void> {
 	MobileServiceLocalStore mStore;
@@ -33,19 +33,19 @@ public class LocalTableOperationProcessor implements TableOperationVisitor<Void>
 	}
 
 	@Override
-	public Void Visit(InsertOperation operation) throws Throwable {
+	public Void visit(InsertOperation operation) throws Throwable {
 		this.mStore.upsert(operation.getTableName(), this.mItem);
 		return null;
 	}
 
 	@Override
-	public Void Visit(UpdateOperation operation) throws Throwable {
+	public Void visit(UpdateOperation operation) throws Throwable {
 		this.mStore.upsert(operation.getTableName(), this.mItem);
 		return null;
 	}
 
 	@Override
-	public Void Visit(DeleteOperation operation) throws Throwable {
+	public Void visit(DeleteOperation operation) throws Throwable {
 		this.mStore.delete(operation.getTableName(), operation.getItemId());
 		return null;
 	}

@@ -22,7 +22,9 @@ package com.microsoft.windowsazure.mobileservices.table.sync.queue;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -31,8 +33,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.serialization.DateSerializer;
-import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceLocalStore;
-import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceLocalStoreException;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.ColumnDataType;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStore;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStoreException;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationKind;
 
@@ -98,6 +101,21 @@ public class OperationErrorList {
 		} finally {
 			this.mSyncLock.writeLock().unlock();
 		}
+	}
+
+	public static void initializeStore(MobileServiceLocalStore store) throws MobileServiceLocalStoreException {
+		Map<String, ColumnDataType> columns = new HashMap<String, ColumnDataType>();
+		columns.put("id", ColumnDataType.String);
+		columns.put("tablename", ColumnDataType.String);
+		columns.put("itemid", ColumnDataType.String);
+		columns.put("clientitem", ColumnDataType.Other);
+		columns.put("errormessage", ColumnDataType.String);
+		columns.put("statuscode", ColumnDataType.Number);
+		columns.put("serverresponse", ColumnDataType.String);
+		columns.put("serveritem", ColumnDataType.Other);
+		columns.put("__createdat", ColumnDataType.Date);
+
+		store.defineTable(OPERATION_ERROR_TABLE, columns);
 	}
 
 	public static OperationErrorList load(MobileServiceLocalStore store) throws ParseException, MobileServiceLocalStoreException {

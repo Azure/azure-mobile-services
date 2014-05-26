@@ -1140,7 +1140,7 @@ public class QueryOperations {
 	}
 
 	private static QueryNode merge(QueryNode leftNode, QueryNode rightNode) throws MobileServiceException {
-		return leftNode.Accept(new QueryNodeMerger(rightNode));
+		return leftNode.accept(new QueryNodeMerger(rightNode));
 	}
 
 	/**

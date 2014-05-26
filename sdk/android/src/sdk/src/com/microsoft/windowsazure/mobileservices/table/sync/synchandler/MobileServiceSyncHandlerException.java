@@ -17,18 +17,20 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-package com.microsoft.windowsazure.mobileservices.table.sync;
+package com.microsoft.windowsazure.mobileservices.table.sync.synchandler;
 
-public class MobileServicePushFailedException extends Exception {
-	private static final long serialVersionUID = 1365719768140939515L;
-
-	MobileServicePushCompletionResult mPushCompletionResult;
-
-	public MobileServicePushFailedException(MobileServicePushCompletionResult pushCompletionResult) {
-		this.mPushCompletionResult = pushCompletionResult;
+public class MobileServiceSyncHandlerException extends Exception {
+	private static final long serialVersionUID = 7017018356478886950L;
+	
+	public MobileServiceSyncHandlerException(String detailMessage) {
+		super(detailMessage);
 	}
 
-	MobileServicePushCompletionResult getPushCompletionResult() {
-		return this.mPushCompletionResult;
+	public MobileServiceSyncHandlerException(Throwable throwable) {
+		super(throwable);
 	}
+
+	public MobileServiceSyncHandlerException(String detailMessage, Throwable throwable) {
+		super(detailMessage, throwable);
+	}	
 }

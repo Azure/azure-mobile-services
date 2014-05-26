@@ -33,22 +33,22 @@ public class FieldNodeMerger implements QueryNodeVisitor<QueryNode> {
 	}
 
 	@Override
-	public QueryNode Visit(ConstantNode rightNode) throws MobileServiceException {
+	public QueryNode visit(ConstantNode rightNode) throws MobileServiceException {
 		throw QueryNodeMerger.getInvalidSequenceException();
 	}
 
 	@Override
-	public QueryNode Visit(FieldNode rightNode) throws MobileServiceException {
+	public QueryNode visit(FieldNode rightNode) throws MobileServiceException {
 		throw QueryNodeMerger.getInvalidSequenceException();
 	}
 
 	@Override
-	public QueryNode Visit(UnaryOperatorNode rightNode) throws MobileServiceException {
+	public QueryNode visit(UnaryOperatorNode rightNode) throws MobileServiceException {
 		throw QueryNodeMerger.getInvalidSequenceException();
 	}
 
 	@Override
-	public QueryNode Visit(BinaryOperatorNode rightNode) throws MobileServiceException {
+	public QueryNode visit(BinaryOperatorNode rightNode) throws MobileServiceException {
 		if (rightNode.getLeftArgument() != null) {
 			throw QueryNodeMerger.getInvalidSequenceException();
 		}
@@ -59,7 +59,7 @@ public class FieldNodeMerger implements QueryNodeVisitor<QueryNode> {
 	}
 
 	@Override
-	public QueryNode Visit(FunctionCallNode rightNode) throws MobileServiceException {
+	public QueryNode visit(FunctionCallNode rightNode) throws MobileServiceException {
 		throw QueryNodeMerger.getInvalidSequenceException();
 	}
 }

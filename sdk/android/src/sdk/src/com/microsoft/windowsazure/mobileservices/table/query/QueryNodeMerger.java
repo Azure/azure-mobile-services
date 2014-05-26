@@ -33,29 +33,29 @@ public class QueryNodeMerger implements QueryNodeVisitor<QueryNode> {
 	}
 
 	@Override
-	public QueryNode Visit(ConstantNode leftNode) throws MobileServiceException {
-		return mRightNode.Accept(new ConstantNodeMerger(leftNode));
+	public QueryNode visit(ConstantNode leftNode) throws MobileServiceException {
+		return mRightNode.accept(new ConstantNodeMerger(leftNode));
 	}
 
 	@Override
-	public QueryNode Visit(FieldNode leftNode) throws MobileServiceException {
-		return mRightNode.Accept(new FieldNodeMerger(leftNode));
+	public QueryNode visit(FieldNode leftNode) throws MobileServiceException {
+		return mRightNode.accept(new FieldNodeMerger(leftNode));
 	}
 
 	@Override
-	public QueryNode Visit(UnaryOperatorNode leftNode) throws MobileServiceException {
-		return mRightNode.Accept(new UnaryOperatorNodeMerger(leftNode));
+	public QueryNode visit(UnaryOperatorNode leftNode) throws MobileServiceException {
+		return mRightNode.accept(new UnaryOperatorNodeMerger(leftNode));
 
 	}
 
 	@Override
-	public QueryNode Visit(BinaryOperatorNode leftNode) throws MobileServiceException {
-		return mRightNode.Accept(new BinaryOperatorNodeMerger(leftNode));
+	public QueryNode visit(BinaryOperatorNode leftNode) throws MobileServiceException {
+		return mRightNode.accept(new BinaryOperatorNodeMerger(leftNode));
 	}
 
 	@Override
-	public QueryNode Visit(FunctionCallNode leftNode) throws MobileServiceException {
-		return mRightNode.Accept(new FunctionCallNodeMerger(leftNode));
+	public QueryNode visit(FunctionCallNode leftNode) throws MobileServiceException {
+		return mRightNode.accept(new FunctionCallNodeMerger(leftNode));
 	}
 
 	static MobileServiceException getInvalidSequenceException() {

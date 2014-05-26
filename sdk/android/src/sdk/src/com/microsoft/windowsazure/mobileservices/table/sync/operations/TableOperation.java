@@ -70,5 +70,5 @@ public interface TableOperation {
 	 *         visitor.
 	 * @throws Throwable 
 	 */
-	public <T> T Accept(TableOperationVisitor<T> visitor) throws Throwable;
+	public <T> T accept(TableOperationVisitor<T> visitor) throws Throwable;
 }

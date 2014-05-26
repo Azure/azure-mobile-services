@@ -17,7 +17,9 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-package com.microsoft.windowsazure.mobileservices.table.sync;
+package com.microsoft.windowsazure.mobileservices.table.sync.localstore;
+
+import java.util.Map;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -31,6 +33,8 @@ public interface MobileServiceLocalStore {
 	 * Initializes the store for use.
 	 */
 	public void initialize() throws MobileServiceLocalStoreException;
+
+	public void defineTable(String tableName, Map<String, ColumnDataType> columns) throws MobileServiceLocalStoreException;
 
 	public JsonElement read(Query query) throws MobileServiceLocalStoreException;
 

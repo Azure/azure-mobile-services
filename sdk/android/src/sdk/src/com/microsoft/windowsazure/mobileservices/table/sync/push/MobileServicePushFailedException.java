@@ -17,31 +17,18 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-package com.microsoft.windowsazure.mobileservices.table.query;
+package com.microsoft.windowsazure.mobileservices.table.sync.push;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+public class MobileServicePushFailedException extends Exception {
+	private static final long serialVersionUID = 1365719768140939515L;
 
-/**
- * Class that represents a field query node
- */
-public class FieldNode implements QueryNode {
-	private String mFieldName;
+	MobileServicePushCompletionResult mPushCompletionResult;
 
-	@Override
-	public QueryNodeKind getKind() {
-		return QueryNodeKind.Field;
+	public MobileServicePushFailedException(MobileServicePushCompletionResult pushCompletionResult) {
+		this.mPushCompletionResult = pushCompletionResult;
 	}
 
-	@Override
-	public <T> T accept(QueryNodeVisitor<T> visitor) throws MobileServiceException {
-		return visitor.visit(this);
-	}
-
-	public String getFieldName() {
-		return this.mFieldName;
-	}
-
-	public void setFieldName(String fieldName) {
-		this.mFieldName = fieldName;
+	MobileServicePushCompletionResult getPushCompletionResult() {
+		return this.mPushCompletionResult;
 	}
 }

@@ -28,17 +28,17 @@ public class UpdateOperationCollapser implements TableOperationVisitor<TableOper
 	}
 
 	@Override
-	public TableOperation Visit(InsertOperation newOperation) {
+	public TableOperation visit(InsertOperation newOperation) {
 		throw new IllegalStateException("An update operation on the item is already in the queue.");
 	}
 
 	@Override
-	public TableOperation Visit(UpdateOperation newOperation) {
+	public TableOperation visit(UpdateOperation newOperation) {
 		return this.mPreviousOperation;
 	}
 
 	@Override
-	public TableOperation Visit(DeleteOperation newOperation) {
+	public TableOperation visit(DeleteOperation newOperation) {
 		return newOperation;
 	}
 }
