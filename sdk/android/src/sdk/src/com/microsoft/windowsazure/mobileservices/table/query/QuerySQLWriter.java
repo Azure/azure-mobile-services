@@ -29,7 +29,7 @@ public class QuerySQLWriter {
 	public static String getSelectClause(Query query) {
 		String result = "*";
 
-		if (query.getProjection() != null && query.getProjection().size() > 0) {
+		if (query != null && query.getProjection() != null && query.getProjection().size() > 0) {
 			StringBuilder sb = new StringBuilder();
 
 			int index = 0;
@@ -54,7 +54,7 @@ public class QuerySQLWriter {
 	public static String getWhereClause(Query query) throws MobileServiceException {
 		QueryNodeSQLWriter sqlWriter = new QueryNodeSQLWriter();
 
-		if (query.getQueryNode() != null) {
+		if (query != null && query.getQueryNode() != null) {
 			query.getQueryNode().accept(sqlWriter);
 		}
 
@@ -64,7 +64,7 @@ public class QuerySQLWriter {
 	public static String getOrderByClause(Query query) {
 		String result = null;
 
-		if (query.getOrderBy() != null && query.getOrderBy().size() > 0) {
+		if (query != null && query.getOrderBy() != null && query.getOrderBy().size() > 0) {
 			StringBuilder sb = new StringBuilder();
 
 			int index = 0;
@@ -92,8 +92,8 @@ public class QuerySQLWriter {
 	public static String getLimitClause(Query query) {
 		String result = null;
 
-		int limit = query.getTop();
-		int offset = query.getSkip();
+		int limit = query != null ? query.getTop() : -1;
+		int offset = query != null ? query.getSkip() : -1;
 
 		if (limit > 0 || offset > 0) {
 			result = String.valueOf(offset) + "," + String.valueOf(limit);

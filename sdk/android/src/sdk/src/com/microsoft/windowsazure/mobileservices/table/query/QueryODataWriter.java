@@ -39,7 +39,7 @@ public class QueryODataWriter {
 	public static String getRowFilter(Query query) throws MobileServiceException {
 		QueryNodeODataWriter oDataWriter = new QueryNodeODataWriter();
 
-		if (query.getQueryNode() != null) {
+		if (query != null && query.getQueryNode() != null) {
 			query.getQueryNode().accept(oDataWriter);
 		}
 
@@ -54,38 +54,42 @@ public class QueryODataWriter {
 	public static String getRowSetModifiers(Query query, MobileServiceTableBase<?> table) throws UnsupportedEncodingException {
 		StringBuilder sb = new StringBuilder();
 
-		if (query.hasInlineCount()) {
-			sb.append("&$inlinecount=allpages");
-		}
+		if (query != null) {
+			if (query.hasInlineCount()) {
+				sb.append("&$inlinecount=allpages");
+			}
 
-		if (query.getTop() > 0) {
-			sb.append("&$top=");
-			sb.append(query.getTop());
-		}
+			if (query.getTop() > 0) {
+				sb.append("&$top=");
+				sb.append(query.getTop());
+			}
 
-		if (query.getSkip() > 0) {
-			sb.append("&$skip=");
-			sb.append(query.getSkip());
-		}
+			if (query.getSkip() > 0) {
+				sb.append("&$skip=");
+				sb.append(query.getSkip());
+			}
 
-		if (query.getOrderBy().size() > 0) {
-			sb.append("&$orderby=");
+			if (query.getOrderBy().size() > 0) {
+				sb.append("&$orderby=");
 
-			boolean first = true;
-			for (Pair<String, QueryOrder> order : query.getOrderBy()) {
-				if (first) {
-					first = false;
-				} else {
-					sb.append(URLEncoder.encode(",", MobileServiceClient.UTF8_ENCODING));
+				boolean first = true;
+				for (Pair<String, QueryOrder> order : query.getOrderBy()) {
+					if (first) {
+						first = false;
+					} else {
+						sb.append(URLEncoder.encode(",", MobileServiceClient.UTF8_ENCODING));
+					}
+
+					sb.append(URLEncoder.encode(order.first, MobileServiceClient.UTF8_ENCODING));
+					sb.append(URLEncoder.encode(" ", MobileServiceClient.UTF8_ENCODING));
+					sb.append(order.second == QueryOrder.Ascending ? "asc" : "desc");
+
 				}
-
-				sb.append(URLEncoder.encode(order.first, MobileServiceClient.UTF8_ENCODING));
-				sb.append(URLEncoder.encode(" ", MobileServiceClient.UTF8_ENCODING));
-				sb.append(order.second == QueryOrder.Ascending ? "asc" : "desc");
-
 			}
 		}
-		List<Pair<String, String>> parameters = table.addSystemProperties(table.getSystemProperties(), query.getUserDefinedParameters());
+
+		List<Pair<String, String>> parameters = table.addSystemProperties(table.getSystemProperties(), query != null ? query.getUserDefinedParameters() : null);
+
 		for (Pair<String, String> parameter : parameters) {
 			if (parameter.first != null) {
 				sb.append("&");
@@ -101,7 +105,7 @@ public class QueryODataWriter {
 			}
 		}
 
-		if (query.getProjection() != null && query.getProjection().size() > 0) {
+		if (query != null && query.getProjection() != null && query.getProjection().size() > 0) {
 			sb.append("&$select=");
 
 			boolean first = true;

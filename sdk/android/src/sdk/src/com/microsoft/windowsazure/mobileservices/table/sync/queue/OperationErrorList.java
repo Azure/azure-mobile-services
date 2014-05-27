@@ -56,6 +56,7 @@ public class OperationErrorList {
 
 	private OperationErrorList(MobileServiceLocalStore store) {
 		this.mStore = store;
+		this.mList = new ArrayList<TableOperationError>();
 		this.mSyncLock = new ReentrantReadWriteLock(true);
 	}
 
@@ -141,44 +142,44 @@ public class OperationErrorList {
 		JsonObject element = new JsonObject();
 
 		element.addProperty("id", operationError.getId());
-		element.addProperty("operationKind", operationError.getOperationKind().getValue());
-		element.addProperty("tableName", operationError.getTableName());
-		element.addProperty("itemId", operationError.getItemId());
+		element.addProperty("operationkind", operationError.getOperationKind().getValue());
+		element.addProperty("tablename", operationError.getTableName());
+		element.addProperty("itemid", operationError.getItemId());
 
 		if (operationError.getClientItem() != null) {
-			element.add("clientItem", operationError.getClientItem());
+			element.add("clientitem", operationError.getClientItem());
 		}
 
-		element.addProperty("errorMessage", operationError.getErrorMessage());
+		element.addProperty("errormessage", operationError.getErrorMessage());
 
 		if (operationError.getStatusCode() != null) {
-			element.addProperty("statusCode", operationError.getStatusCode());
+			element.addProperty("statuscode", operationError.getStatusCode());
 		}
 
 		if (operationError.getServerResponse() != null) {
-			element.addProperty("serverResponse", operationError.getServerResponse());
+			element.addProperty("serverresponse", operationError.getServerResponse());
 		}
 
 		if (operationError.getServerItem() != null) {
-			element.add("serverItem", operationError.getServerItem());
+			element.add("serveritem", operationError.getServerItem());
 		}
 
-		element.addProperty("__createdAt", DateSerializer.serialize(operationError.getCreatedAt()));
+		element.addProperty("__createdat", DateSerializer.serialize(operationError.getCreatedAt()));
 
 		return element;
 	}
 
 	private static TableOperationError deserialize(JsonObject element) throws ParseException {
 		String id = element.get("id").getAsString();
-		int operationKind = element.get("operationKind").getAsInt();
-		String tableName = element.get("tableName").getAsString();
-		String itemId = element.get("itemId").getAsString();
-		JsonObject clientItem = element.get("clientItem") != null ? element.get("clientItem").getAsJsonObject() : null;
-		String errorMessage = element.get("errorMessage").getAsString();
-		Integer statusCode = element.get("statusCode") != null ? element.get("statusCode").getAsInt() : null;
-		String serverResponse = element.get("serverResponse") != null ? element.get("serverResponse").getAsString() : null;
-		JsonObject serverItem = element.get("serverItem") != null ? element.get("serverItem").getAsJsonObject() : null;
-		Date createdAt = DateSerializer.deserialize(element.get("__createdAt").getAsString());
+		int operationKind = element.get("operationkind").getAsInt();
+		String tableName = element.get("tablename").getAsString();
+		String itemId = element.get("itemid").getAsString();
+		JsonObject clientItem = element.get("clientitem") != null ? element.get("clientitem").getAsJsonObject() : null;
+		String errorMessage = element.get("errormessage").getAsString();
+		Integer statusCode = element.get("statuscode") != null ? element.get("statuscode").getAsInt() : null;
+		String serverResponse = element.get("serverresponse") != null ? element.get("serverresponse").getAsString() : null;
+		JsonObject serverItem = element.get("serveritem") != null ? element.get("serveritem").getAsJsonObject() : null;
+		Date createdAt = DateSerializer.deserialize(element.get("__createdat").getAsString());
 
 		return TableOperationError.parse(id, TableOperationKind.parse(operationKind), tableName, itemId, clientItem, errorMessage, statusCode, serverResponse,
 				serverItem, createdAt);

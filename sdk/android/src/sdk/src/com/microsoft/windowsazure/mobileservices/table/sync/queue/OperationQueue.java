@@ -477,10 +477,10 @@ public class OperationQueue {
 
 		element.addProperty("id", opQueueItem.getId());
 		element.addProperty("kind", opQueueItem.getKind().getValue());
-		element.addProperty("tableName", opQueueItem.getTableName());
-		element.addProperty("itemId", opQueueItem.getItemId());
-		element.addProperty("__createdAt", DateSerializer.serialize(opQueueItem.getCreatedAt()));
-		element.addProperty("__queueLoadedAt", DateSerializer.serialize(opQueueItem.getQueueLoadedAt()));
+		element.addProperty("tablename", opQueueItem.getTableName());
+		element.addProperty("itemid", opQueueItem.getItemId());
+		element.addProperty("__createdat", DateSerializer.serialize(opQueueItem.getCreatedAt()));
+		element.addProperty("__queueloadedat", DateSerializer.serialize(opQueueItem.getQueueLoadedAt()));
 		element.addProperty("sequence", opQueueItem.getSequence());
 
 		return element;
@@ -489,10 +489,10 @@ public class OperationQueue {
 	private static OperationQueueItem deserialize(JsonObject element) throws ParseException {
 		String id = element.get("id").getAsString();
 		int kind = element.get("kind").getAsInt();
-		String tableName = element.get("tableName").getAsString();
-		String itemId = element.get("itemId").getAsString();
-		Date createdAt = DateSerializer.deserialize(element.get("__createdAt").getAsString());
-		Date queueLoadedAt = DateSerializer.deserialize(element.get("__queueLoadedAt").getAsString());
+		String tableName = element.get("tablename").getAsString();
+		String itemId = element.get("itemid").getAsString();
+		Date createdAt = DateSerializer.deserialize(element.get("__createdat").getAsString());
+		Date queueLoadedAt = DateSerializer.deserialize(element.get("__queueloadedat").getAsString());
 		long sequence = element.get("sequence").getAsLong();
 
 		TableOperation operation = null;

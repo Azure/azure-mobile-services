@@ -20,6 +20,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.table.sync;
 
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ExecutionException;
@@ -36,7 +37,9 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionBase;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStore;
@@ -182,6 +185,7 @@ public class MobileServiceSyncContext {
 
 	public MobileServiceSyncContext(MobileServiceClient mobileServiceClient) {
 		this.mClient = mobileServiceClient;
+		this.mInitLock = new ReentrantReadWriteLock(true);
 		this.mOpLock = new ReentrantReadWriteLock(true);
 		this.mPushSRLock = new ReentrantLock(true);
 	}
@@ -320,7 +324,7 @@ public class MobileServiceSyncContext {
 					MultiReadWriteLock<String> multiRWLock = this.mTableLockMap.lockWrite(tableName);
 
 					try {
-						int pendingTable = this.mOpQueue.countPending();
+						int pendingTable = this.mOpQueue.countPending(tableName);
 
 						if (pendingTable > 0) {
 							pushFuture = push();
@@ -370,7 +374,7 @@ public class MobileServiceSyncContext {
 					MultiReadWriteLock<String> multiRWLock = this.mTableLockMap.lockWrite(tableName);
 
 					try {
-						int pendingTable = this.mOpQueue.countPending();
+						int pendingTable = this.mOpQueue.countPending(tableName);
 
 						if (pendingTable > 0) {
 							pushFuture = push();
@@ -490,13 +494,9 @@ public class MobileServiceSyncContext {
 			try {
 				Bookmark bookmark = this.mOpQueue.bookmark();
 
-				try {
-					pushSR = new PushSyncRequest(bookmark, new Semaphore(0));
-					this.mPushSRQueue.add(pushSR);
-					this.mPendingPush.release();
-				} finally {
-					this.mOpQueue.unbookmark(bookmark);
-				}
+				pushSR = new PushSyncRequest(bookmark, new Semaphore(0));
+				this.mPushSRQueue.add(pushSR);
+				this.mPendingPush.release();
 			} finally {
 				this.mPushSRLock.unlock();
 			}
@@ -527,7 +527,9 @@ public class MobileServiceSyncContext {
 
 	private void processPull(String tableName, Query query) throws Throwable {
 		try {
-			JsonElement result = this.mClient.getTable(tableName).execute(query).get();
+			MobileServiceJsonTable table = this.mClient.getTable(tableName);
+			table.setSystemProperties(EnumSet.allOf(MobileServiceSystemProperty.class));
+			JsonElement result = table.execute(query).get();
 
 			if (result != null) {
 				JsonArray elements = null;
@@ -567,7 +569,7 @@ public class MobileServiceSyncContext {
 		this.mPushSRLock.lock();
 
 		try {
-			if (!this.mPushSRQueue.isEmpty()) {
+			if (this.mPushSRQueue != null && !this.mPushSRQueue.isEmpty()) {
 				this.mPushSRConsumerIdle = new Semaphore(0, true);
 			}
 		} finally {
@@ -596,6 +598,7 @@ public class MobileServiceSyncContext {
 						} catch (MobileServicePushFailedException pushException) {
 							pushSR.mPushException = pushException;
 						} finally {
+							this.mOpQueue.unbookmark(pushSR.mBookmark);
 							pushSR.mSignalDone.release();
 						}
 					}

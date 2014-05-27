@@ -44,6 +44,7 @@ public class MultiLockDictionary<T> {
 
 	public MultiLockDictionary() {
 		this.mMap = new HashMap<T, MultiLock<T>>();
+		this.sync = new Object();
 	}
 
 	public MultiLock<T> lock(T key) {

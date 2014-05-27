@@ -44,6 +44,7 @@ public class MultiReadWriteLockDictionary<T> {
 
 	public MultiReadWriteLockDictionary() {
 		this.mMap = new HashMap<T, MultiReadWriteLock<T>>();
+		this.sync = new Object();
 	}
 
 	public MultiReadWriteLock<T> lockRead(T key) {

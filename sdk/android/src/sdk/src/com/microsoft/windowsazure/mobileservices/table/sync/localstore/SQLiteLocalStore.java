@@ -11,7 +11,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseErrorHandler;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -31,12 +30,10 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 		public List<Object> parameters;
 	}
 
-	private static final int SQLITE_STORE_VERSION = 1;
-
 	private Map<String, Map<String, ColumnDataType>> mTables;
 
 	public SQLiteLocalStore(Context context, String name, CursorFactory factory, int version) {
-		super(context, name, factory, SQLITE_STORE_VERSION);
+		super(context, name, factory, version);
 		this.mTables = new HashMap<String, Map<String, ColumnDataType>>();
 	}
 
@@ -48,191 +45,207 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
 	@Override
 	public void initialize() throws MobileServiceLocalStoreException {
-		SQLiteDatabase db = this.getWritableDatabase();
-		db.close();
+		try {
+			SQLiteDatabase db = this.getWritableDatabase();
+			db.close();
+
+			for (Entry<String, Map<String, ColumnDataType>> entry : this.mTables.entrySet()) {
+				createTableFromObject(entry.getKey(), entry.getValue());
+			}
+		} catch (Throwable t) {
+			throw new MobileServiceLocalStoreException(t);
+		}
 	}
 
 	@Override
 	public void defineTable(String tableName, Map<String, ColumnDataType> columns) throws MobileServiceLocalStoreException {
-		String invTableName = normalizeTableName(tableName);
+		try {
+			String invTableName = normalizeTableName(tableName);
 
-		Map<String, ColumnDataType> table = this.mTables.containsKey(invTableName) ? this.mTables.get(invTableName) : new HashMap<String, ColumnDataType>();
-		table.put("id", ColumnDataType.String);
+			Map<String, ColumnDataType> table = this.mTables.containsKey(invTableName) ? this.mTables.get(invTableName) : new HashMap<String, ColumnDataType>();
+			table.put("id", ColumnDataType.String);
 
-		for (String colName : columns.keySet()) {
-			ColumnDataType colDataType = columns.get(colName);
-			String invColumnName = normalizeColumnName(colName);
+			for (String colName : columns.keySet()) {
+				ColumnDataType colDataType = columns.get(colName);
+				String invColumnName = normalizeColumnName(colName);
 
-			validateReservedProperties(colDataType, invColumnName);
+				validateReservedProperties(colDataType, invColumnName);
 
-			if (!invColumnName.equals("id")) {
-				table.put(invColumnName, colDataType);
+				if (!invColumnName.equals("id")) {
+					table.put(invColumnName, colDataType);
+				}
 			}
-		}
 
-		this.mTables.put(invTableName, table);
+			this.mTables.put(invTableName, table);
+		} catch (Throwable t) {
+			throw new MobileServiceLocalStoreException(t);
+		}
 	}
 
 	@Override
 	public JsonElement read(Query query) throws MobileServiceLocalStoreException {
-		JsonElement result;
-		JsonArray rows = new JsonArray();
-
-		String tableName = query.getTableName();
-		Map<String, ColumnDataType> table = this.mTables.get(tableName);
-
-		String[] columns = getColumns(query, table);
-
-		String whereClause = getWhereClause(query);
-
-		String orderByClause = QuerySQLWriter.getOrderByClause(query);
-
-		String limitClause = QuerySQLWriter.getLimitClause(query);
-
-		Integer inlineCount = null;
-
-		SQLiteDatabase db = this.getReadableDatabase();
-
 		try {
-			Cursor cursor = null;
+			JsonElement result;
+			JsonArray rows = new JsonArray();
+
+			String invTableName = normalizeTableName(query.getTableName());
+
+			Map<String, ColumnDataType> table = this.mTables.get(invTableName);
+
+			String[] columns = getColumns(query, table);
+
+			String whereClause = getWhereClause(query);
+
+			String orderByClause = QuerySQLWriter.getOrderByClause(query);
+
+			String limitClause = QuerySQLWriter.getLimitClause(query);
+
+			Integer inlineCount = null;
+
+			SQLiteDatabase db = this.getReadableDatabase();
 
 			try {
-				if (query.hasInlineCount()) {
-					cursor = db.query(tableName, columns, whereClause, null, null, null, orderByClause, null);
-					inlineCount = cursor.getCount();
+				Cursor cursor = null;
 
-					if (query.getSkip() > 0) {
-						cursor.move(query.getSkip());
+				try {
+					if (query.hasInlineCount()) {
+						cursor = db.query(invTableName, columns, whereClause, null, null, null, orderByClause, null);
+						inlineCount = cursor.getCount();
+
+						if (query.getSkip() > 0) {
+							cursor.move(query.getSkip());
+						}
+					} else {
+						cursor = db.query(invTableName, columns, whereClause, null, null, null, orderByClause, limitClause);
 					}
-				} else {
-					cursor = db.query(tableName, columns, whereClause, null, null, null, orderByClause, limitClause);
-				}
 
-				int limit = 0;
+					int limit = 0;
 
-				while (!(query.getTop() > 0 && limit == query.getTop()) && cursor.moveToNext()) {
-					JsonObject row = parseRow(cursor, table);
-					rows.add(row);
+					while (!(query.getTop() > 0 && limit == query.getTop()) && cursor.moveToNext()) {
+						JsonObject row = parseRow(cursor, table);
+						rows.add(row);
 
-					limit++;
+						limit++;
+					}
+				} finally {
+					if (cursor != null && !cursor.isClosed()) {
+						cursor.close();
+					}
 				}
 			} finally {
-				if (cursor != null && !cursor.isClosed()) {
-					cursor.close();
-				}
+				db.close();
 			}
-		} finally {
-			db.close();
-		}
 
-		if (query.hasInlineCount()) {
-			JsonObject resObj = new JsonObject();
-			resObj.addProperty("count", inlineCount);
-			resObj.add("results", rows);
-			result = resObj;
-		} else {
-			result = rows;
-		}
+			if (query.hasInlineCount()) {
+				JsonObject resObj = new JsonObject();
+				resObj.addProperty("count", inlineCount);
+				resObj.add("results", rows);
+				result = resObj;
+			} else {
+				result = rows;
+			}
 
-		return result;
+			return result;
+		} catch (Throwable t) {
+			throw new MobileServiceLocalStoreException(t);
+		}
 	}
 
 	@Override
 	public JsonObject lookup(String tableName, String itemId) throws MobileServiceLocalStoreException {
-		JsonObject result = null;
-		Map<String, ColumnDataType> table = this.mTables.get(tableName);
-
-		SQLiteDatabase db = this.getReadableDatabase();
-
 		try {
-			Cursor cursor = null;
+			JsonObject result = null;
+			String invTableName = normalizeTableName(tableName);
+
+			Map<String, ColumnDataType> table = this.mTables.get(invTableName);
+
+			SQLiteDatabase db = this.getReadableDatabase();
 
 			try {
-				cursor = db.query(tableName, (String[]) table.keySet().toArray(), "id = '" + itemId + "'", null, null, null, null);
+				Cursor cursor = null;
 
-				if (cursor.moveToNext()) {
-					result = parseRow(cursor, table);
+				try {
+					cursor = db.query(invTableName, table.keySet().toArray(new String[0]), "id = '" + itemId + "'", null, null, null, null);
+
+					if (cursor.moveToNext()) {
+						result = parseRow(cursor, table);
+					}
+				} finally {
+					if (cursor != null && !cursor.isClosed()) {
+						cursor.close();
+					}
 				}
 			} finally {
-				if (cursor != null && !cursor.isClosed()) {
-					cursor.close();
-				}
+				db.close();
 			}
-		} finally {
-			db.close();
-		}
 
-		return result;
+			return result;
+		} catch (Throwable t) {
+			throw new MobileServiceLocalStoreException(t);
+		}
 	}
 
 	@Override
 	public void upsert(String tableName, JsonObject item) throws MobileServiceLocalStoreException {
-		Statement statement = generateUpsertStatement(tableName, item);
-
-		SQLiteDatabase db = this.getWritableDatabase();
-
 		try {
-			db.execSQL(statement.sql, statement.parameters.toArray());
-		} catch (SQLException ex) {
-			throw new MobileServiceLocalStoreException(ex);
-		} finally {
-			db.close();
+			String invTableName = normalizeTableName(tableName);
+
+			Statement statement = generateUpsertStatement(invTableName, item);
+
+			SQLiteDatabase db = this.getWritableDatabase();
+
+			try {
+				db.execSQL(statement.sql, statement.parameters.toArray());
+			} finally {
+				db.close();
+			}
+		} catch (Throwable t) {
+			throw new MobileServiceLocalStoreException(t);
 		}
 	}
 
 	@Override
 	public void delete(String tableName, String itemId) throws MobileServiceLocalStoreException {
-		SQLiteDatabase db = this.getWritableDatabase();
-
 		try {
-			db.delete(tableName, "id = '" + itemId + "'", null);
-		} finally {
-			db.close();
+			String invTableName = normalizeTableName(tableName);
+
+			SQLiteDatabase db = this.getWritableDatabase();
+
+			try {
+				db.delete(invTableName, "id = '" + itemId + "'", null);
+			} finally {
+				db.close();
+			}
+		} catch (Throwable t) {
+			throw new MobileServiceLocalStoreException(t);
 		}
 	}
 
 	@Override
 	public void delete(Query query) throws MobileServiceLocalStoreException {
-		String tableName = query.getTableName();
-
-		String whereClause = getWhereClause(query);
-
-		SQLiteDatabase db = this.getWritableDatabase();
-
 		try {
-			db.delete(tableName, whereClause, null);
-		} finally {
-			db.close();
+			String invTableName = normalizeTableName(query.getTableName());
+
+			String whereClause = getWhereClause(query);
+
+			SQLiteDatabase db = this.getWritableDatabase();
+
+			try {
+				db.delete(invTableName, whereClause, null);
+			} finally {
+				db.close();
+			}
+		} catch (Throwable t) {
+			throw new MobileServiceLocalStoreException(t);
 		}
 	}
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		for (Entry<String, Map<String, ColumnDataType>> entry : this.mTables.entrySet()) {
-			createTableFromObject(entry.getKey(), entry.getValue());
-		}
-		/*
-		 * db.execSQL("CREATE TABLE IF NOT EXISTS " + OPERATIONS_TABLE +
-		 * " (id TEXT" + ", kind INTEGER" + ", tableName TEXT" + ", itemId TEXT"
-		 * + ", __createdAt TEXT" + ", __queueLoadedAt TEXT" +
-		 * ", sequence INTEGER)");
-		 * 
-		 * db.execSQL("CREATE TABLE IF NOT EXISTS " + ERRORS_TABLE + " (id TEXT"
-		 * + ", operationKind INTEGER" + ", tableName TEXT" + ", itemId TEXT" +
-		 * ", clientItem TEXT" + ", errorMessage TEXT" + ", statusCode INTEGER"
-		 * + ", serverResponse TEXT" + ", serverItem TEXT," +
-		 * ", createdAt TEXT)");
-		 * 
-		 * db.execSQL("CREATE TABLE IF NOT EXISTS " + DATA_TABLE +
-		 * " (tableName TEXT" + ", itemId TEXT" + ", jsonObject TEXT)");
-		 */
 	}
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		if (oldVersion != newVersion || newVersion != SQLITE_STORE_VERSION) {
-			onCreate(db);
-		}
 	}
 
 	private String normalizeTableName(String tableName) {
@@ -403,12 +416,12 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 	}
 
 	private String[] getColumns(Query query, Map<String, ColumnDataType> table) {
-		String[] columns = (String[]) table.keySet().toArray();
+		String[] columns = table.keySet().toArray(new String[0]);
 
 		List<String> projection = query.getProjection();
 
 		if (projection != null && projection.size() > 0) {
-			columns = (String[]) normalizeColumnNames(projection).toArray();
+			columns = normalizeColumnNames(projection).toArray(new String[0]);
 		}
 		return columns;
 	}
