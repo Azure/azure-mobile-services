@@ -76,6 +76,7 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.CustomApiTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.LoginTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.MiscTests;
+import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.OfflineTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.QueryTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.RoundTripTests;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.SystemPropertiesTests;
@@ -206,6 +207,7 @@ public class MainActivity extends Activity {
 		adapter.add(new CustomApiTests());
 		adapter.add(new SystemPropertiesTests());
 		adapter.add(new EnhancedPushTests());
+		adapter.add(new OfflineTests());
 
 		ArrayList<TestCase> allTests = new ArrayList<TestCase>();
 		ArrayList<TestCase> allUnattendedTests = new ArrayList<TestCase>();
