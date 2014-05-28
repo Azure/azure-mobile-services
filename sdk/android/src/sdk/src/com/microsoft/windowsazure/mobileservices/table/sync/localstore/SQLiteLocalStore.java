@@ -102,7 +102,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
 			Integer inlineCount = null;
 
-			SQLiteDatabase db = this.getReadableDatabase();
+			SQLiteDatabase db = this.getWritableDatabase();
 
 			try {
 				Cursor cursor = null;
@@ -159,7 +159,7 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 
 			Map<String, ColumnDataType> table = this.mTables.get(invTableName);
 
-			SQLiteDatabase db = this.getReadableDatabase();
+			SQLiteDatabase db = this.getWritableDatabase();
 
 			try {
 				Cursor cursor = null;

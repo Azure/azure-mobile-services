@@ -22,6 +22,7 @@ package com.microsoft.windowsazure.mobileservices.table.sync;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.LinkedList;
+import java.util.Locale;
 import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
@@ -42,13 +43,16 @@ import com.microsoft.windowsazure.mobileservices.table.MobileServicePrecondition
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
+import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStore;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStoreException;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.DeleteOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.InsertOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.LocalTableOperationProcessor;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationError;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.RemoteTableOperationProcessor;
+import com.microsoft.windowsazure.mobileservices.table.sync.operations.UpdateOperation;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushCompletionResult;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushStatus;
@@ -307,6 +311,8 @@ public class MobileServiceSyncContext {
 		try {
 			ensureCorrectlyInitialized();
 
+			String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
+
 			boolean busyPullDone = false;
 
 			while (!busyPullDone) {
@@ -321,15 +327,15 @@ public class MobileServiceSyncContext {
 
 				try {
 					// get EXCLUSIVE access to table lock
-					MultiReadWriteLock<String> multiRWLock = this.mTableLockMap.lockWrite(tableName);
+					MultiReadWriteLock<String> multiRWLock = this.mTableLockMap.lockWrite(invTableName);
 
 					try {
-						int pendingTable = this.mOpQueue.countPending(tableName);
+						int pendingTable = this.mOpQueue.countPending(invTableName);
 
 						if (pendingTable > 0) {
 							pushFuture = push();
 						} else {
-							processPull(tableName, query);
+							processPull(invTableName, query);
 						}
 					} finally {
 						this.mTableLockMap.unLockWrite(multiRWLock);
@@ -359,9 +365,11 @@ public class MobileServiceSyncContext {
 		try {
 			ensureCorrectlyInitialized();
 
-			boolean busyPullDone = false;
+			String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
 
-			while (!busyPullDone) {
+			boolean busyPurgeDone = false;
+
+			while (!busyPurgeDone) {
 				ListenableFuture<Void> pushFuture = null;
 
 				// prevent Coffman Circular wait condition: lock resources in
@@ -371,15 +379,15 @@ public class MobileServiceSyncContext {
 				this.mOpLock.readLock().lock();
 
 				try {
-					MultiReadWriteLock<String> multiRWLock = this.mTableLockMap.lockWrite(tableName);
+					MultiReadWriteLock<String> multiRWLock = this.mTableLockMap.lockWrite(invTableName);
 
 					try {
-						int pendingTable = this.mOpQueue.countPending(tableName);
+						int pendingTable = this.mOpQueue.countPending(invTableName);
 
 						if (pendingTable > 0) {
 							pushFuture = push();
 						} else {
-							processPurge(tableName, query);
+							processPurge(invTableName, query);
 						}
 					} finally {
 						this.mTableLockMap.unLockWrite(multiRWLock);
@@ -391,7 +399,7 @@ public class MobileServiceSyncContext {
 				if (pushFuture != null) {
 					pushFuture.get();
 				} else {
-					busyPullDone = true;
+					busyPurgeDone = true;
 				}
 			}
 		} finally {
@@ -400,31 +408,41 @@ public class MobileServiceSyncContext {
 	}
 
 	JsonElement read(String tableName, Query query) throws MobileServiceLocalStoreException {
+		String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
+
 		if (query == null) {
-			query = QueryOperations.tableName(tableName);
-		} else if (query.getTableName() == null || !query.getTableName().equals(tableName)) {
-			query = query.tableName(tableName);
+			query = QueryOperations.tableName(invTableName);
+		} else if (query.getTableName() == null || !query.getTableName().equals(invTableName)) {
+			query = query.tableName(invTableName);
 		}
 
 		return this.mStore.read(query);
 	}
 
 	JsonObject lookUp(String tableName, String itemId) throws MobileServiceLocalStoreException {
-		return this.mStore.lookup(tableName, itemId);
+		String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
+
+		return this.mStore.lookup(invTableName, itemId);
 	}
 
 	void insert(String tableName, String itemId, JsonObject item) throws Throwable {
-		InsertOperation operation = new InsertOperation(tableName, itemId);
+		String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
+
+		InsertOperation operation = new InsertOperation(invTableName, itemId);
 		processOperation(operation, item);
 	}
 
 	void update(String tableName, String itemId, JsonObject item) throws Throwable {
-		InsertOperation operation = new InsertOperation(tableName, itemId);
+		String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
+
+		UpdateOperation operation = new UpdateOperation(invTableName, itemId);
 		processOperation(operation, item);
 	}
 
 	void delete(String tableName, String itemId) throws Throwable {
-		InsertOperation operation = new InsertOperation(tableName, itemId);
+		String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
+
+		DeleteOperation operation = new DeleteOperation(invTableName, itemId);
 		processOperation(operation, null);
 	}
 
@@ -529,24 +547,66 @@ public class MobileServiceSyncContext {
 		try {
 			MobileServiceJsonTable table = this.mClient.getTable(tableName);
 			table.setSystemProperties(EnumSet.allOf(MobileServiceSystemProperty.class));
-			JsonElement result = table.execute(query).get();
 
-			if (result != null) {
-				JsonArray elements = null;
+			if (query == null) {
+				query = table.top(1000).orderBy("id", QueryOrder.Ascending);
+			} else {
+				query = query.deepClone();
+			}
 
-				if (result.isJsonObject()) {
-					JsonObject jsonObject = result.getAsJsonObject();
+			int originalTop = query.getTop();
+			int top = originalTop;
+			int skip = query.getSkip();
+			long count = -1;
 
-					if (jsonObject.has("results") && jsonObject.get("results").isJsonArray()) {
-						elements = jsonObject.get("results").getAsJsonArray();
+			if (originalTop <= 0 || originalTop > 1000) {
+				query = query.includeInlineCount();
+				top = 1000;
+			} else {
+				query = query.removeInlineCount();
+			}
+
+			boolean allProcessed = false;
+
+			while (!allProcessed) {
+				query.top(top);
+				query.skip(skip);
+
+				JsonElement result = table.execute(query).get();
+
+				if (result != null) {
+					JsonArray elements = null;
+
+					if (result.isJsonObject()) {
+						JsonObject jsonObject = result.getAsJsonObject();
+
+						if (jsonObject.has("count")) {
+							count = jsonObject.get("count").getAsLong();
+						}
+
+						if (jsonObject.has("results") && jsonObject.get("results").isJsonArray()) {
+							elements = jsonObject.get("results").getAsJsonArray();
+							count -= elements.size();
+						}
+
+						query.removeInlineCount();
+					} else if (result.isJsonArray()) {
+						elements = result.getAsJsonArray();
 					}
-				} else if (result.isJsonArray()) {
-					elements = result.getAsJsonArray();
-				}
 
-				if (elements != null) {
-					for (JsonElement element : elements) {
-						this.mStore.upsert(tableName, element.getAsJsonObject());
+					if (elements != null) {
+						for (JsonElement element : elements) {
+							this.mStore.upsert(tableName, element.getAsJsonObject());
+						}
+					}
+
+					originalTop -= elements.size();
+					top = originalTop > 1000 ? 1000 : originalTop;
+					skip += elements.size();
+					count -= elements.size();
+
+					if (count <= 0) {
+						allProcessed = true;
 					}
 				}
 			}

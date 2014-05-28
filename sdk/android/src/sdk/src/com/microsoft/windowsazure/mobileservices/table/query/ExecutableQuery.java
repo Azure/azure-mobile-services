@@ -66,7 +66,6 @@ public final class ExecutableQuery<E> implements Query {
 	 */
 	public ExecutableQuery() {
 		this.mQuery = new QueryBase();
-
 	}
 
 	/**
@@ -85,10 +84,25 @@ public final class ExecutableQuery<E> implements Query {
 
 	/**
 	 * Executes the query
-	 * @throws MobileServiceException 
+	 * 
+	 * @throws MobileServiceException
 	 */
 	public ListenableFuture<E> execute() throws MobileServiceException {
 		return this.mTable.execute(this);
+	}
+
+	@Override
+	public ExecutableQuery<E> deepClone() {
+		ExecutableQuery<E> clone = new ExecutableQuery<E>();
+
+		if (this.mQuery != null) {
+			clone.mQuery = this.mQuery.deepClone();
+		}
+
+		// No need to clone table
+		clone.mTable = this.mTable;
+
+		return clone;
 	}
 
 	@Override
@@ -171,6 +185,12 @@ public final class ExecutableQuery<E> implements Query {
 	@Override
 	public ExecutableQuery<E> includeInlineCount() {
 		this.mQuery.includeInlineCount();
+		return this;
+	}
+
+	@Override
+	public ExecutableQuery<E> removeInlineCount() {
+		this.mQuery.removeInlineCount();
 		return this;
 	}
 

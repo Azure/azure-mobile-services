@@ -32,6 +32,15 @@ public class UnaryOperatorNode implements QueryNode {
 	public UnaryOperatorNode(UnaryOperatorKind unaryOperatorKind) {
 		this.mUnaryOperatorKind = unaryOperatorKind;
 	}
+	
+	@Override
+	public QueryNode deepClone() {
+		UnaryOperatorNode clone = new UnaryOperatorNode(this.mUnaryOperatorKind);
+
+		clone.mArgument = this.mArgument.deepClone();
+
+		return clone;
+	}
 
 	@Override
 	public QueryNodeKind getKind() {

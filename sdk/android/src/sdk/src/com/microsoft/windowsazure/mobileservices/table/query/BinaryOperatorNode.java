@@ -35,6 +35,16 @@ public class BinaryOperatorNode implements QueryNode {
 	}
 
 	@Override
+	public QueryNode deepClone() {
+		BinaryOperatorNode clone = new BinaryOperatorNode(this.mBinaryOperatorKind);
+
+		clone.mLeftArgument = this.mLeftArgument.deepClone();
+		clone.mRightArgument = this.mRightArgument.deepClone();
+
+		return clone;
+	}
+
+	@Override
 	public QueryNodeKind getKind() {
 		return QueryNodeKind.BinaryOperator;
 	}

@@ -389,7 +389,7 @@ public class OperationQueue {
 		Integer tableCount = this.mTableCountMap.get(opQueueItem.getTableName());
 
 		if (tableCount != null && tableCount > 1) {
-			this.mTableCountMap.put(opQueueItem.getTableName(), tableCount + 1);
+			this.mTableCountMap.put(opQueueItem.getTableName(), tableCount - 1);
 		} else {
 			this.mTableCountMap.remove(opQueueItem.getTableName());
 		}

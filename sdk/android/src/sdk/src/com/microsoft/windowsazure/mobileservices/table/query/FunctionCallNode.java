@@ -38,6 +38,21 @@ public class FunctionCallNode implements QueryNode {
 	}
 
 	@Override
+	public QueryNode deepClone() {
+		FunctionCallNode clone = new FunctionCallNode(this.mFunctionCallKind);
+
+		if (this.mArguments != null) {
+			clone.mArguments = new ArrayList<QueryNode>();
+
+			for (QueryNode queryNode : this.mArguments) {
+				clone.mArguments.add(queryNode.deepClone());
+			}
+		}
+
+		return clone;
+	}
+
+	@Override
 	public QueryNodeKind getKind() {
 		return QueryNodeKind.FunctionCall;
 	}

@@ -78,6 +78,38 @@ public class QueryBase implements Query {
 	}
 
 	@Override
+	public Query deepClone() {
+		QueryBase clone = new QueryBase();
+
+		clone.mQueryNode = this.mQueryNode != null ? this.mQueryNode.deepClone() : null;
+		clone.mHasInlineCount = this.mHasInlineCount;
+
+		for (Pair<String, QueryOrder> orderBy : this.mOrderBy) {
+			clone.mOrderBy.add(new Pair<String, QueryOrder>(orderBy.first, orderBy.second));
+		}
+
+		if (this.mProjection != null) {
+			clone.mProjection = new ArrayList<String>();
+
+			for (String column : this.mProjection) {
+				clone.mProjection.add(column);
+			}
+		}
+
+		for (Pair<String, String> parameter : this.mUserDefinedParameters) {
+			clone.mUserDefinedParameters.add(new Pair<String, String>(parameter.first, parameter.second));
+		}
+
+		clone.mTop = this.mTop;
+
+		clone.mSkip = this.mSkip;
+
+		clone.mTableName = this.mTableName;
+
+		return clone;
+	}
+
+	@Override
 	public QueryNode getQueryNode() {
 		return this.mQueryNode;
 	}
@@ -163,6 +195,13 @@ public class QueryBase implements Query {
 	@Override
 	public Query includeInlineCount() {
 		this.mHasInlineCount = true;
+
+		return this;
+	}
+
+	@Override
+	public Query removeInlineCount() {
+		this.mHasInlineCount = false;
 
 		return this;
 	}

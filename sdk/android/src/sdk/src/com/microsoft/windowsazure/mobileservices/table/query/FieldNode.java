@@ -26,6 +26,15 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceException;
  */
 public class FieldNode implements QueryNode {
 	private String mFieldName;
+	
+	@Override
+	public QueryNode deepClone() {
+		FieldNode clone = new FieldNode();
+
+		clone.mFieldName = this.mFieldName;
+
+		return clone;
+	}
 
 	@Override
 	public QueryNodeKind getKind() {

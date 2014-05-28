@@ -25,6 +25,9 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceException;
  * Interface of a query node used to represent a row filter expression.
  */
 public interface QueryNode {
+	
+	QueryNode deepClone();
+	
 	/**
 	 * Gets the kind of the query node.
 	 * 

@@ -30,6 +30,8 @@ import android.util.Pair;
  * Interface that represents a query to a table.
  */
 public interface Query {
+	
+	public Query deepClone();
 
 	/**
 	 * Returns the root node of the query
@@ -134,6 +136,13 @@ public interface Query {
 	 * @return Query
 	 */
 	public Query includeInlineCount();
+
+	/**
+	 * Set the inlinecount property to false.
+	 * 
+	 * @return Query
+	 */
+	public Query removeInlineCount();
 
 	/**
 	 * Specifies the fields to retrieve
