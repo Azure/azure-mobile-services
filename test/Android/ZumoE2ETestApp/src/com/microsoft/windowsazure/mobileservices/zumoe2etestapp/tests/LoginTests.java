@@ -81,23 +81,26 @@ public class LoginTests extends TestGroup {
 			}
 		}
 
-		this.addTest(createLogoutTest());
-		this.addTest(createLoginWithGoogleAccountTest(true, null));
-
-		this.addTest(createLogoutTest());
-		this.addTest(createLoginWithGoogleAccountTest(true, MobileServiceClient.GOOGLE_USER_INFO_SCOPE + " https://www.googleapis.com/auth/userinfo.email"));
-
-		this.addTest(createLogoutTest());
-		this.addTest(createLoginWithGoogleAccountTest(false, null));
+//		this.addTest(createLogoutTest());
+//		this.addTest(createLoginWithGoogleAccountTest(true, null));
+//
+//		this.addTest(createLogoutTest());
+//		this.addTest(createLoginWithGoogleAccountTest(true, MobileServiceClient.GOOGLE_USER_INFO_SCOPE + " https://www.googleapis.com/auth/userinfo.email"));
+//
+//		this.addTest(createLogoutTest());
+//		this.addTest(createLoginWithGoogleAccountTest(false, null));
 
 		//With Callback
 		this.addTest(createLogoutWithCallbackTest());
-		this.addTest(createLoginTest(MobileServiceAuthenticationProvider.Google));
-		this.addTest(createCRUDWithCallbackTest(APPLICATION_PERMISSION_TABLE_NAME, MobileServiceAuthenticationProvider.Google, TablePermission.Application, true));
+		this.addTest(createLoginWithCallbackTest(MobileServiceAuthenticationProvider.Google));
+		this.addTest(createCRUDWithCallbackTest(USER_PERMISSION_TABLE_NAME, MobileServiceAuthenticationProvider.Google, TablePermission.User, true));
+		this.addTest(createLogoutWithCallbackTest());
+		this.addTest(createLoginWithCallbackTest(MobileServiceAuthenticationProvider.Facebook));
+		this.addTest(createCRUDWithCallbackTest(USER_PERMISSION_TABLE_NAME, MobileServiceAuthenticationProvider.Facebook, TablePermission.User, true));
 		this.addTest(createLogoutWithCallbackTest());
 		this.addTest(createClientSideLoginWithCallbackTest(providersWithRecycledTokenSupport.get(0)));
 		this.addTest(createLogoutWithCallbackTest());
-		this.addTest(createLoginWithGoogleAccountWithCallbackTest(false, null));
+//		this.addTest(createLoginWithGoogleAccountWithCallbackTest(false, null));
 		
 		List<TestCase> testCases = this.getTestCases();
 		for (int i = indexOfStartAuthenticationTests; i < testCases.size(); i++) {
@@ -196,7 +199,7 @@ public class LoginTests extends TestGroup {
 
 				JsonObject lastIdentity = lastUserIdentityObject;
 				lastUserIdentityObject = null;
-				JsonObject providerIdentity = lastIdentity.getAsJsonObject(provider.toString().toLowerCase(Locale.US));
+				JsonObject providerIdentity = lastIdentity.getAsJsonObject("Identities").getAsJsonObject(provider.toString().toLowerCase(Locale.US));
 				if (providerIdentity == null) {
 					log("Cannot find identity for specified provider. Cannot run this test.");
 					TestResult testResult = new TestResult();
@@ -284,7 +287,14 @@ public class LoginTests extends TestGroup {
 						}
 
 						log("Logged in as " + userName);
-						result.setStatus(client.getCurrentUser() != null ? TestStatus.Passed : TestStatus.Failed);
+						
+						MobileServiceUser currentUser = client.getCurrentUser();
+						
+						if (currentUser == null) {
+							result.setStatus(TestStatus.Failed);
+						} else {
+							result.setStatus(TestStatus.Passed);
+						}
 						result.setTestCase(testCase);
 
 						callback.onTestComplete(testCase, result);
@@ -307,7 +317,15 @@ public class LoginTests extends TestGroup {
 						}
 
 						log("Logged in as " + userName);
-						result.setStatus(client.getCurrentUser() != null ? TestStatus.Passed : TestStatus.Failed);
+						
+						MobileServiceUser currentUser = client.getCurrentUser();
+						
+						if (currentUser == null) {
+							result.setStatus(TestStatus.Failed);
+						} else {
+							result.setStatus(TestStatus.Passed);
+						}
+						
 						result.setTestCase(testCase);
 
 						callback.onTestComplete(testCase, result);
@@ -458,7 +476,7 @@ public class LoginTests extends TestGroup {
 	private TestCase createLoginWithGoogleAccountWithCallbackTest(final boolean useDefaultAccount, final String customScope) {
 		StringBuilder name = new StringBuilder();
 		
-		name.append("Login with Google Account - ");
+		name.append("With Callback - Login with Google Account - ");
 		if (useDefaultAccount) {
 			name.append("Using default account - ");
 		} else {

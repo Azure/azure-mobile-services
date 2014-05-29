@@ -259,22 +259,28 @@ public class MobileServiceClient {
 	public ListenableFuture<MobileServiceUser> login(String provider) {
 		mLoginInProgress = true;
 
+		final SettableFuture<MobileServiceUser> resultFuture = SettableFuture.create();
+		
 		ListenableFuture<MobileServiceUser> future = mLoginManager.authenticate(provider, mContext);
 
 		Futures.addCallback(future, new FutureCallback<MobileServiceUser>() {
 			@Override
 			public void onFailure(Throwable e) {
 				mLoginInProgress = false;
+				
+				resultFuture.setException(e);
 			}
 
 			@Override
 			public void onSuccess(MobileServiceUser user) {
 				mCurrentUser = user;
 				mLoginInProgress = false;
+				
+				resultFuture.set(user);
 			}
 		});
 
-		return future;
+		return resultFuture;
 		/*
 		 * mLoginManager.authenticate(provider, mContext, new
 		 * UserAuthenticationCallback() {
@@ -433,6 +439,8 @@ public class MobileServiceClient {
 			throw new IllegalArgumentException("oAuthToken cannot be null");
 		}
 
+		final SettableFuture<MobileServiceUser> resultFuture = SettableFuture.create();
+		
 		mLoginInProgress = true;
 
 		ListenableFuture<MobileServiceUser> future = mLoginManager.authenticate(provider, oAuthToken);
@@ -441,16 +449,20 @@ public class MobileServiceClient {
 			@Override
 			public void onFailure(Throwable e) {
 				mLoginInProgress = false;
+				
+				resultFuture.setException(e);
 			}
 
 			@Override
 			public void onSuccess(MobileServiceUser user) {
 				mCurrentUser = user;
 				mLoginInProgress = false;
+				
+				resultFuture.set(user);
 			}
 		});
 
-		return future;
+		return resultFuture;
 
 		/*
 		 * mLoginManager.authenticate(provider, oAuthToken, new
