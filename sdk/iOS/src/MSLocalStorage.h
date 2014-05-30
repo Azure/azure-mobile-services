@@ -3,22 +3,20 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSStoredRegistration.h"
 
 @interface MSLocalStorage : NSObject
 
 @property (copy, nonatomic) NSString *deviceToken;
 @property (nonatomic) BOOL isRefreshNeeded;
 
-- (MSLocalStorage *) initWithNotificationHubPath:(NSString *)mobileServiceUrl;
-- (void) refreshFinishedWithDeviceToken:(NSString *)newDeviceToken;
-- (MSStoredRegistration *) getMSStoredRegistrationWithRegistrationName:(NSString *)registrationName;
-- (void) updateWithRegistrationName:(NSString *)registrationName
-                     registrationId:(NSString *)registrationId
-                        deviceToken:(NSString *)deviceToken;
-- (void) updateWithRegistrationId:(NSString *)registrationId
-                 registrationName:(NSString *)registrationName
-                      deviceToken:(NSString *)deviceToken;
-- (void) deleteWithRegistrationName:(NSString*)registrationName;
-- (void) deleteAllRegistrations;
+- (MSLocalStorage *)initWithMobileServiceHost:(NSString *)mobileServiceHost;
+- (NSArray *)getRegistrationIds;
+- (NSString *)getRegistrationId:(NSString *)registrationName;
+- (void)updateRegistrations:(NSArray *)registrations
+                deviceToken:(NSString *)deviceToken;
+- (void)updateWithRegistrationName:(NSString *)registrationName
+                    registrationId:(NSString *)registrationId
+                       deviceToken:(NSString *)deviceToken;
+- (void)deleteWithRegistrationName:(NSString*)registrationName;
+- (void)deleteAllRegistrations;
 @end

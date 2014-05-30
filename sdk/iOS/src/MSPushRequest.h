@@ -6,7 +6,7 @@
 #import "MSClient.h"
 
 @interface MSPushRequest : NSMutableURLRequest
--(MSPushRequest *) initPushRequest:(NSURL *)url
+- (MSPushRequest *)initPushRequest:(NSURL *)url
                               data:(NSData *)data
                         HTTPMethod:(NSString *)method;
 @end

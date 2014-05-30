@@ -9,9 +9,10 @@
 @implementation MSPushRequest
 
 #pragma mark * Private Static Constructors
--(MSPushRequest *) initPushRequest:(NSURL *)url
+- (MSPushRequest *)initPushRequest:(NSURL *)url
                               data:(NSData *)data
-                          HTTPMethod:(NSString *)method {
+                        HTTPMethod:(NSString *)method
+{
     // Create the request
     MSPushRequest *request = [[MSPushRequest alloc] initWithURL:url];
     
@@ -23,15 +24,12 @@
     return request;
 }
 
-
 #pragma mark * Private Initializer Method
 
-
--(id) initWithURL:(NSURL *)url
+- (id)initWithURL:(NSURL *)url
 {
     self = [super initWithURL:url];
     
     return self;
 }
-
 @end

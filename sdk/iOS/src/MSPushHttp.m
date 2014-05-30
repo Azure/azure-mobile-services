@@ -2,34 +2,35 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-#import "MSPushHttp.h"
 #import "MSPushRequest.h"
-#import "MSPushConnection.h"
+#import "MSPushHttp.h"
 #import "MSClient.h"
 
 @interface MSPushHttp ()
-@property (nonatomic) MSClient *client;
+@property (nonatomic, weak, readonly) MSClient *client;
 @end
     
 @implementation MSPushHttp
 
--(MSPushHttp*)init:(MSClient*)client {
+- (MSPushHttp*)init:(MSClient*)client
+{
     self = [super init];
     
     if (self) {
-        self.client = client;
+        _client = client;
     }
     
     return self;
 }
 
--(void)createRegistrationId:(MSCreateRegistrationBlock)completion {
+- (void)createRegistrationId:(MSCreateRegistrationIdBlock)completion
+{
     NSURL *url = [self.client.applicationURL URLByAppendingPathComponent:@"push/registrationids"];
     MSPushRequest *request = [[MSPushRequest alloc] initPushRequest:url
                                                                data:nil
                                                          HTTPMethod:@"POST"];
 
-    __block MSPushConnection *connection = nil;
+    __block MSClientConnection *connection = nil;
     
     MSResponseBlock responseCompletion = nil;
     if (completion) {
@@ -53,12 +54,15 @@
                 [connection addRequestAndResponse:response toError:&error];
             }
             
-            completion(registrationId, error);
             connection = nil;
+            
+            if (completion) {
+                completion(registrationId, error);
+            }
         };
     }
     
-    connection = [[MSPushConnection alloc]
+    connection = [[MSClientConnection alloc]
                   initWithRequest:request
                   client:self.client
                   completion:responseCompletion];
@@ -66,11 +70,16 @@
     [connection start];
 }
 
--(void)createRegistration:(NSMutableDictionary *)registration
-               completion:(MSCompletionBlock)completion {
+- (void)createRegistration:(NSMutableDictionary*)registration
+                completion:(MSCompletionBlock)completion
+{
+    NSString *registrationId = registration[@"registrationId"];
     NSURL *url = [self.client.applicationURL URLByAppendingPathComponent:@"push/registrations"];
-    url = [url URLByAppendingPathComponent:registration[@"registrationId"]];
+    url = [url URLByAppendingPathComponent:registrationId];
     [registration removeObjectForKey:@"registrationId"];
+    
+    NSString *name = registration[@"name"];
+    [registration removeObjectForKey:@"name"];
     
     NSError *error = nil;
     NSData *data = [NSJSONSerialization dataWithJSONObject:registration options:0 error:&error];
@@ -79,7 +88,7 @@
                                                                data:data
                                                          HTTPMethod:@"PUT"];
     
-    __block MSPushConnection *connection = nil;
+    __block MSClientConnection *connection = nil;
 
     MSResponseBlock responseCompletion = nil;
     if (completion) {
@@ -94,12 +103,17 @@
                 [connection addRequestAndResponse:response toError:&error];
             }
             
-            completion(error);
             connection = nil;
+            
+            if (completion) {
+                [registration setValue:name forKey:@"name"];
+                [registration setValue:registrationId forKey:@"registrationId"];
+                completion(error);
+            }
         };
     }
     
-    connection = [[MSPushConnection alloc]
+    connection = [[MSClientConnection alloc]
                   initWithRequest:request
                   client:self.client
                   completion:responseCompletion];
@@ -107,8 +121,9 @@
     [connection start];
 }
 
--(void)listRegistrations:(NSString *)deviceToken
-              completion:(MSListRegistrationsBlock)completion {
+- (void)listRegistrations:(NSString*)deviceToken
+               completion:(MSListRegistrationsBlock)completion
+{
     NSString *query = @"?deviceId=";
     query = [query stringByAppendingString:deviceToken];
     query = [query stringByAppendingString:@"&platform=apns"];
@@ -119,7 +134,7 @@
                                                                data:nil
                                                          HTTPMethod:@"GET"];
     
-    __block MSPushConnection *connection = nil;
+    __block MSClientConnection *connection = nil;
     
     MSResponseBlock responseCompletion = nil;
     if (completion) {
@@ -145,7 +160,7 @@
         };
     }
     
-    connection = [[MSPushConnection alloc]
+    connection = [[MSClientConnection alloc]
                   initWithRequest:request
                   client:self.client
                   completion:responseCompletion];
@@ -153,8 +168,9 @@
     [connection start];
 }
 
--(void)deleteRegistration:(NSString *)registrationId
-               completion:(MSCompletionBlock)completion {
+- (void)deleteRegistration:(NSString*)registrationId
+                completion:(MSCompletionBlock)completion
+{
     NSURL *url = [self.client.applicationURL URLByAppendingPathComponent:@"push/registrations"];
     url = [url URLByAppendingPathComponent:registrationId];
     
@@ -162,7 +178,7 @@
                                                                data:nil
                                                          HTTPMethod:@"DELETE"];
     
-    __block MSPushConnection *connection = nil;
+    __block MSClientConnection *connection = nil;
     
     MSResponseBlock responseCompletion = nil;
     if (completion) {
@@ -182,7 +198,7 @@
         };
     }
     
-    connection = [[MSPushConnection alloc]
+    connection = [[MSClientConnection alloc]
                   initWithRequest:request
                   client:self.client
                   completion:responseCompletion];

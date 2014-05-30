@@ -15,14 +15,14 @@
 
 NSString * const storageVersion = @"v1.0.0";
 
-- (MSLocalStorage *) initWithNotificationHubPath:(NSString *) mobileServiceUrl
+- (MSLocalStorage *)initWithMobileServiceHost:(NSString *)mobileServiceHost
 {
     self = [super init];
     
     if (self) {
-        self.versionKey = [NSString stringWithFormat:@"%@-version", mobileServiceUrl];
-        self.deviceTokenKey = [NSString stringWithFormat:@"%@-deviceToken", mobileServiceUrl];
-        self.registrationsKey = [NSString stringWithFormat:@"%@-registrations", mobileServiceUrl];
+        self.versionKey = [NSString stringWithFormat:@"%@-version", mobileServiceHost];
+        self.deviceTokenKey = [NSString stringWithFormat:@"%@-deviceToken", mobileServiceHost];
+        self.registrationsKey = [NSString stringWithFormat:@"%@-registrations", mobileServiceHost];
         self.registrations = [NSMutableDictionary dictionary];
         
         [self readContent];
@@ -32,57 +32,55 @@ NSString * const storageVersion = @"v1.0.0";
 }
 
 
-- (MSStoredRegistration *) getMSStoredRegistrationWithRegistrationName:(NSString *)registrationName
+- (NSString *)getRegistrationId:(NSString *)registrationName
 {
-    NSString * registrationId = [self.registrations objectForKey:registrationName];
-    return [[MSStoredRegistration alloc] initWithName:registrationName registrationId:registrationId];
+    return [self.registrations objectForKey:registrationName];
 }
 
-
-// Can we chop this?
-- (void) updateWithRegistrationId:(NSString *)registrationId
-                 registrationName:(NSString *)registrationName
-                      deviceToken:(NSString *)deviceToken
+- (NSArray *)getRegistrationIds
 {
-    for (NSString *key in [self.registrations allKeys])
-    {
-        NSString *regId = self.registrations[key];
-        if([regId isEqualToString: registrationId])
-        {
-            if (![key isEqualToString:registrationName])
-            {
-                [self deleteWithRegistrationName:key];
-            }
-        }
-    }
-    
-    [self updateWithRegistrationName:registrationName
-                      registrationId:registrationId
-                         deviceToken:deviceToken];
+    return [self.registrations allValues];
 }
 
-- (void) updateWithRegistrationName:(NSString *)registrationName
-                     registrationId:(NSString *)registrationId
-                        deviceToken:(NSString *)deviceToken
+- (void)updateWithRegistrationName:(NSString *)registrationName
+                    registrationId:(NSString *)registrationId
+                       deviceToken:(NSString *)deviceToken
 {
     [self.registrations setObject:registrationId forKey:registrationName];
     self.deviceToken = deviceToken;
     [self flush];
 }
 
-- (void) deleteWithRegistrationName:(NSString *)registrationName
+- (void)updateRegistrations:(NSArray *)registrations
+                deviceToken:(NSString *)deviceToken
+{
+    self.registrations = [[NSMutableDictionary alloc] init];
+    
+    for (int i = 0; i < [registrations count]; i++)
+    {
+        [self.registrations setObject:registrations[i][@"registrationId"] forKey:registrations[i][@"name"]];
+    }
+    
+    self.deviceToken  = deviceToken;
+    
+    [self flush];
+    
+    self.isRefreshNeeded = NO;
+}
+
+- (void)deleteWithRegistrationName:(NSString *)registrationName
 {
     [self.registrations removeObjectForKey:registrationName];
     [self flush];
 }
 
-- (void) deleteAllRegistrations
+- (void)deleteAllRegistrations
 {
     [self.registrations removeAllObjects];
     [self flush];
 }
 
-- (void) readContent
+- (void)readContent
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     
@@ -106,7 +104,7 @@ NSString * const storageVersion = @"v1.0.0";
     }
 }
 
-- (void) flush
+- (void)flush
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     
@@ -116,16 +114,4 @@ NSString * const storageVersion = @"v1.0.0";
     
     [defaults synchronize];
 }
-
-- (void) refreshFinishedWithDeviceToken:(NSString *)newDeviceToken
-{
-    self.isRefreshNeeded = NO;
-    
-    if(![self.deviceToken isEqualToString:newDeviceToken])
-    {
-        self.deviceToken = newDeviceToken;
-        [self flush];
-    }
-}
-
 @end

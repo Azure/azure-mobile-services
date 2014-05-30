@@ -10,12 +10,13 @@
 
 @class MSTable;
 @class MSUser;
-
+@class MSPush;
 
 #pragma mark * Block Type Definitions
-
 /// Callback for method with no return other than error.
 typedef void (^MSCompletionBlock)(NSError *error);
+
+#import "MSPush.h"
 
 /// Callback for invokeAPI method that expects a JSON result.
 typedef void (^MSAPIBlock)(id result, NSHTTPURLResponse *response, NSError *error);
@@ -56,6 +57,9 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 /// array is not-mutable. To apply a filter to a client, use the withFilter:
 /// method.
 @property (nonatomic, strong, readonly)         NSArray *filters;
+
+/// The property to use for making registration calls.
+@property (nonatomic, strong, readonly)     MSPush *push;
 
 #pragma mark * Public ReadWrite Properties
 
