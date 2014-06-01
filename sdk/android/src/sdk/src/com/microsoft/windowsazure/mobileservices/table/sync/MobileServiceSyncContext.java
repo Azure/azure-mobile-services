@@ -84,7 +84,7 @@ public class MobileServiceSyncContext {
 	}
 
 	private static class PushSyncRequestConsumer extends Thread {
-		MobileServiceSyncContext mContext;
+		private MobileServiceSyncContext mContext;
 
 		public PushSyncRequestConsumer(MobileServiceSyncContext context) {
 			this.mContext = context;
@@ -476,9 +476,9 @@ public class MobileServiceSyncContext {
 						this.mPushSRQueue = new LinkedList<PushSyncRequest>();
 						this.mOpErrorList = OperationErrorList.load(this.mStore);
 
-						this.mPendingPush = new Semaphore(0, true);
-
 						if (this.mPushSRConsumer == null) {
+							this.mPendingPush = new Semaphore(0, true);
+
 							this.mPushSRConsumer = new PushSyncRequestConsumer(this);
 							this.mPushSRConsumer.start();
 						}
