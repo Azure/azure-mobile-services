@@ -72,4 +72,14 @@ public class MobileServiceException extends Exception {
 	public ServiceFilterResponse getResponse() {
 		return mResponse;
 	}
+
+	public static ServiceFilterResponse getServiceResponse(Throwable throwable) {
+
+		if (!(throwable instanceof MobileServiceException))
+			return null;
+
+		MobileServiceException exception = (MobileServiceException) throwable;
+
+		return exception.getResponse();
+	}
 }

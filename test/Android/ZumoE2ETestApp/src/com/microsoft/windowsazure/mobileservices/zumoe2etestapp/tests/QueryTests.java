@@ -35,6 +35,7 @@ import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
@@ -524,6 +525,113 @@ public class QueryTests extends TestGroup {
 				test.setName("(Neg) Invalid Lookup - ID: " + id);
 				this.addTest(test);
 			}
+
+			// With Callback
+			this.addTest(createQueryWithCallbackTest(
+					"With Callback - Addition, subtraction, relational, AND - Movies from the 1980s which last less than 2 hours",
+					field("year").sub(1900).ge(80).and().field("year").add(10).lt(2000).and().field("duration").lt(120), new SimpleMovieFilter() {
+
+						@Override
+						protected boolean criteria(Movie movie) {
+							return (movie.getYear() - 1900 >= 80) && (movie.getYear() + 10 < 2000) && (movie.getDuration() < 120);
+						}
+					}));
+
+			this.addTest(createQueryWithCallbackTest("With Callback - String field, comparison (not equal) to null - Movies before 1970 with a MPAA rating",
+					field("year").lt(1970).and().field("mpaarating").ne((String) null), new SimpleMovieFilter() {
+
+						@Override
+						protected boolean criteria(Movie movie) {
+							return movie.getYear() < 1970 && movie.getMPAARating() != null;
+						}
+
+						@Override
+						public FilterResult<Movie> filter(List<Movie> list) {
+							return applyTopSkip(super.filter(list), 100, 0);
+						}
+					}, 100));
+
+			this.addTest(createQueryWithCallbackTest("With Callback - Date: Date: Equal - Movies released on 1994-10-14 (Shawshank Redemption / Pulp Fiction)",
+					field("releaseDate").eq(Util.getUTCDate(1994, 10, 14)), new SimpleMovieFilter() {
+
+						@Override
+						protected boolean criteria(Movie movie) {
+							return movie.getReleaseDate().compareTo(Util.getUTCDate(1994, 10, 14)) == 0;
+						}
+					}));
+
+			this.addTest(createQueryWithCallbackTest("With Callback - Date (year): Movies whose year is different than its release year", year("releaseDate")
+					.ne().field("year"), new SimpleMovieFilter() {
+
+				@Override
+				protected boolean criteria(Movie movie) {
+					return Util.getUTCCalendar(movie.getReleaseDate()).get(Calendar.YEAR) != movie.getYear();
+				}
+
+				@Override
+				public FilterResult<Movie> filter(List<Movie> list) {
+					return applyTopSkip(super.filter(list), 100, 0);
+				}
+			}, 100));
+
+			this.addTest(createQueryWithCallbackTest("With Callback - Bool: not equal to false - Best picture winners after 2000", field("bestPictureWinner")
+					.ne(false).and().field("year").ge(2000), new SimpleMovieFilter() {
+
+				@Override
+				protected boolean criteria(Movie movie) {
+					return movie.isBestPictureWinner() != false && movie.getYear() >= 2000;
+				}
+			}));
+
+			this.addTest(createQueryWithCallbackTest(
+					"With Callback - Select multiple fields - List of movies from the 2000's",
+					field("year").ge(2000),
+					new SimpleMovieFilter() {
+
+						@Override
+						protected FilterResult<Movie> getElements(List<Movie> list) {
+							FilterResult<Movie> res = super.getElements(list);
+							FilterResult<Movie> newRes = new FilterResult<Movie>();
+							newRes.totalCount = res.totalCount;
+							newRes.elements = new ArrayList<Movie>();
+
+							for (Movie movie : res.elements) {
+								// only add title, bestPictureWinner,
+								// releaseDate
+								// and duration fields
+								Movie newMovie = new Movie();
+								newMovie.setTitle(movie.getTitle());
+								newMovie.setBestPictureWinner(movie.isBestPictureWinner());
+								newMovie.setReleaseDate(movie.getReleaseDate());
+								newMovie.setDuration(movie.getDuration());
+								newRes.elements.add(newMovie);
+							}
+
+							return newRes;
+						}
+
+						@Override
+						public FilterResult<Movie> filter(List<Movie> list) {
+							return applyTopSkip(super.filter(list), 5, 0);
+						}
+
+						@Override
+						protected boolean criteria(Movie movie) {
+							return movie.getYear() >= 2000;
+						}
+
+						@Override
+						protected List<Movie> applyOrder(List<Movie> movies) {
+							Collections.sort(movies, new MovieComparator(new Pair<String, QueryOrder>("getReleaseDate", QueryOrder.Descending),
+									new Pair<String, QueryOrder>("getTitle", QueryOrder.Ascending)));
+							return movies;
+						}
+
+					},
+					5,
+					null,
+					createOrder(new Pair<String, QueryOrder>("releaseDate", QueryOrder.Descending), new Pair<String, QueryOrder>("title", QueryOrder.Ascending)),
+					project("title", "bestPictureWinner", "duration", "releaseDate"), true, null));
 		} catch (MobileServiceException e) {
 			e.printStackTrace();
 		}
@@ -672,6 +780,103 @@ public class QueryTests extends TestGroup {
 				} finally {
 					callback.onTestComplete(testCase, result);
 
+				}
+			}
+		};
+
+		test.setExpectedExceptionClass(expectedExceptionClass);
+		test.setName(name);
+
+		return test;
+	}
+
+	private TestCase createQueryWithCallbackTest(String name, final Query filter, final ListFilter<Movie> expectedResultFilter) {
+
+		return createQueryTest(name, filter, expectedResultFilter, null, null, null, null, false, null);
+	}
+
+	private TestCase createQueryWithCallbackTest(String name, final Query filter, final ListFilter<Movie> expectedResultFilter, final int top) {
+
+		return createQueryTest(name, filter, expectedResultFilter, top, null, null, null, false, null);
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase createQueryWithCallbackTest(String name, final Query filter, final ListFilter<Movie> expectedResultFilter, final Integer top,
+			final Integer skip, final List<Pair<String, QueryOrder>> orderBy, final String[] projection, final boolean includeInlineCount,
+			final Class<?> expectedExceptionClass) {
+
+		final TestCase test = new TestCase() {
+			@Override
+			protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
+
+				ExecutableQuery<MobileServiceList<Movie>> query;
+
+				if (filter != null) {
+					log("add filter");
+					query = client.getTable(MOVIES_TABLE_NAME, Movie.class).where(filter);
+				} else {
+					query = client.getTable(MOVIES_TABLE_NAME, Movie.class).where();
+				}
+
+				if (top != null) {
+					log("add top");
+					query = query.top(top);
+				}
+
+				if (skip != null) {
+					log("add skip");
+					query = query.skip(skip);
+				}
+
+				if (orderBy != null) {
+					log("add orderby");
+					for (Pair<String, QueryOrder> order : orderBy) {
+						query = query.orderBy(order.first, order.second);
+					}
+				}
+
+				if (projection != null) {
+					log("add projection");
+					query = query.select(projection);
+				}
+
+				if (includeInlineCount) {
+					log("add inlinecount");
+					query.includeInlineCount();
+				}
+
+				final TestCase testCase = this;
+
+				final TestResult result = new TestResult();
+				result.setStatus(TestStatus.Passed);
+				result.setTestCase(testCase);
+
+				try {
+					query.execute(new TableQueryCallback<MobileServiceList<Movie>>() {
+
+						@Override
+						public void onCompleted(MobileServiceList<Movie> movies, int count, Exception exception, ServiceFilterResponse response) {
+
+							if (exception == null) {
+								FilterResult<Movie> expectedData = expectedResultFilter.filter(QueryTestData.getAllMovies());
+
+								log("verify result");
+								if (Util.compareLists(expectedData.elements, movies)) {
+								} else {
+									createResultFromException(result,
+											new ExpectedValueException(Util.listToString(expectedData.elements), Util.listToString(movies)));
+								}
+							} else {
+								createResultFromException(result, exception);
+							}
+
+							if (callback != null)
+								callback.onTestComplete(testCase, result);
+						}
+					});
+				} catch (Exception exception) {
+					createResultFromException(result, exception);
+					callback.onTestComplete(testCase, result);
 				}
 			}
 		};

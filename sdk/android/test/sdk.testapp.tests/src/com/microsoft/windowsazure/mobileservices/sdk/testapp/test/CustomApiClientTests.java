@@ -108,7 +108,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 		MobileServiceClient client = null;
 		try {
 			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-			client.invokeApi(null, HttpPost.METHOD_NAME, null, null).get();
+			client.invokeApi(null, new Object(), null).get();
 		} catch (Exception exception) {
 			container.setException(exception);
 		}

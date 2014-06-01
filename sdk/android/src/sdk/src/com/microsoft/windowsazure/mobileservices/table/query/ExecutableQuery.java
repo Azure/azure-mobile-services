@@ -25,6 +25,7 @@ import java.util.List;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTableBase;
+import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 
 import android.util.Pair;
 
@@ -89,6 +90,19 @@ public final class ExecutableQuery<E> implements Query {
 	 */
 	public ListenableFuture<E> execute() throws MobileServiceException {
 		return this.mTable.execute(this);
+	}
+
+	/**
+	 * Executes the query
+	 * 
+	 * @deprecated use {@link execute()} instead
+	 * 
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 * @throws MobileServiceException
+	 */
+	public void execute(final TableQueryCallback<E> callback) throws MobileServiceException {
+		mTable.execute(this, callback);
 	}
 
 	@Override

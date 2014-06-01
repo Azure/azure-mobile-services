@@ -47,8 +47,11 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
+import com.microsoft.windowsazure.mobileservices.ApiJsonOperationCallback;
+import com.microsoft.windowsazure.mobileservices.ApiOperationCallback;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
 import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.ExpectedValueException;
@@ -122,8 +125,38 @@ public class CustomApiTests extends TestGroup {
 				this.addTest(createHttpContentApiTest(inputFormat, outputFormat, rndGen));
 			}
 		}
-	}
 
+		this.addTest(invokeJsonApiOverload1WithCallbackTest());
+		this.addTest(invokeJsonApiOverload1WithCallbackFailTest());
+
+		this.addTest(invokeJsonApiOverload2WithCallbackTest());
+		this.addTest(invokeJsonApiOverload2WithCallbackFailTest());
+
+		this.addTest(invokeJsonApiOverload3WithCallbackTest());
+		this.addTest(invokeJsonApiOverload3WithCallbackFailTest());
+
+		this.addTest(invokeJsonApiOverload4WithCallbackTest());
+		this.addTest(invokeJsonApiOverload4WithCallbackFailTest());
+
+		this.addTest(invokeTypedApiOverload1WithCallbackTest());
+		this.addTest(invokeTypedApiOverload1WithCallbackFailTest());
+
+		this.addTest(invokeTypedApiOverload2WithCallbackTest(rndGen));
+		this.addTest(invokeTypedApiOverload2WithCallbackFailTest(rndGen));
+
+		this.addTest(invokeTypedApiOverload3WithCallbackTest(rndGen));
+		this.addTest(invokeTypedApiOverload3WithCallbackFailTest(rndGen));
+
+		this.addTest(invokeTypedApiOverload4WithCallbackTest(rndGen));
+		this.addTest(invokeTypedApiOverload4WithCallbackFailTest(rndGen));
+
+		this.addTest(invokeHttpContentApiOverload1WithCallbackTest());
+		this.addTest(invokeHttpContentApiOverload1WithCallbackFailTest());
+		
+		this.addTest(invokeHttpContentApiOverload2WithCallbackTest());
+		this.addTest(invokeHttpContentApiOverload2WithCallbackFailTest());
+	}
+	
 	private TestCase createHttpContentApiTest(final DataFormat inputFormat, final DataFormat outputFormat, final Random rndGen) {
 		String name = String.format("HttpContent Overload - Input: %s - Output: %s", inputFormat, outputFormat);
 
@@ -419,22 +452,20 @@ public class CustomApiTests extends TestGroup {
 					apiUrl = apiName + "/title/" + ramdomMovie.getTitle();
 					log("API: " + apiUrl);
 					mExpectedResult = new Movie[] { ramdomMovie };
-					
+
 					try {
 						AllMovies result = mClient.invokeApi(apiUrl, HttpGet.METHOD_NAME, null, AllMovies.class).get();
-					
+
 						if (!Util.compareArrays(mExpectedResult, result.getMovies())) {
 							createResultFromException(mResult,
 									new ExpectedValueException(Util.arrayToString(mExpectedResult), Util.arrayToString(result.getMovies())));
 						}
-					}
-					catch(Exception exception) {
+					} catch (Exception exception) {
 						createResultFromException(mResult, exception);
-					}
-					finally {
+					} finally {
 						mCallback.onTestComplete(mResult.getTestCase(), mResult);
 					}
-					
+
 					break;
 
 				case GetByDate:
@@ -456,19 +487,17 @@ public class CustomApiTests extends TestGroup {
 
 					try {
 						AllMovies result = mClient.invokeApi(apiUrl, HttpGet.METHOD_NAME, null, AllMovies.class).get();
-					
+
 						if (!Util.compareArrays(mExpectedResult, result.getMovies())) {
 							createResultFromException(mResult,
 									new ExpectedValueException(Util.arrayToString(mExpectedResult), Util.arrayToString(result.getMovies())));
 						}
-					}
-					catch(Exception exception) {
+					} catch (Exception exception) {
 						createResultFromException(mResult, exception);
-					}
-					finally {
+					} finally {
 						mCallback.onTestComplete(mResult.getTestCase(), mResult);
 					}
-					
+
 					break;
 
 				case PostByDuration:
@@ -528,36 +557,32 @@ public class CustomApiTests extends TestGroup {
 					mExpectedResult = movieFilter.filter(QueryTestData.getAllMovies()).elements.toArray(new Movie[0]);
 
 					if (mQuery == null) {
-						
+
 						try {
 							AllMovies result = mClient.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, null, AllMovies.class).get();
-						
+
 							if (!Util.compareArrays(mExpectedResult, result.getMovies())) {
 								createResultFromException(mResult,
 										new ExpectedValueException(Util.arrayToString(mExpectedResult), Util.arrayToString(result.getMovies())));
 							}
-						}
-						catch(Exception exception) {
+						} catch (Exception exception) {
 							createResultFromException(mResult, exception);
-						}
-						finally {
+						} finally {
 							mCallback.onTestComplete(mResult.getTestCase(), mResult);
 						}
-						
+
 					} else {
-						
+
 						try {
 							AllMovies result = mClient.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, null, AllMovies.class).get();
-						
+
 							if (!Util.compareArrays(mExpectedResult, result.getMovies())) {
 								createResultFromException(mResult,
 										new ExpectedValueException(Util.arrayToString(mExpectedResult), Util.arrayToString(result.getMovies())));
 							}
-						}
-						catch(Exception exception) {
+						} catch (Exception exception) {
 							createResultFromException(mResult, exception);
-						}
-						finally {
+						} finally {
 							mCallback.onTestComplete(mResult.getTestCase(), mResult);
 						}
 					}
@@ -592,7 +617,7 @@ public class CustomApiTests extends TestGroup {
 
 				mExpected401 = permission == ApiPermissions.Admin || (permission == ApiPermissions.User && !isAuthenticated);
 				mClient = client;
-				
+
 				String method = createHttpMethod(rndGen);
 				log("Method = " + method);
 
@@ -620,10 +645,10 @@ public class CustomApiTests extends TestGroup {
 				log("API: " + api);
 
 				if (body == null && method.equals(HttpPost.METHOD_NAME) && mQuery == null) {
-					
+
 					try {
 						JsonElement jsonElement = client.invokeApi(api).get();
-						
+
 						JsonObject expectedResult = new JsonObject();
 						expectedResult.add("user", createUserObject(mClient));
 
@@ -634,12 +659,11 @@ public class CustomApiTests extends TestGroup {
 						if (!Util.compareJson(expectedResult, jsonElement)) {
 							createResultFromException(mResult, new ExpectedValueException(expectedResult, jsonElement));
 						}
-					}
-					catch(Exception exception) {
+					} catch (Exception exception) {
 						MobileServiceException cause = (MobileServiceException) exception.getCause();
-						
+
 						ServiceFilterResponse response = cause.getResponse();
-						
+
 						if (mExpected401) {
 							if (response == null || response.getStatus().getStatusCode() != 401) {
 								mResult.setStatus(TestStatus.Failed);
@@ -652,11 +676,11 @@ public class CustomApiTests extends TestGroup {
 							}
 						}
 					}
-					
+
 				} else if (body != null && method.equals(HttpPost.METHOD_NAME) && mQuery == null) {
 					try {
 						JsonElement jsonElement = client.invokeApi(api, body).get();
-						
+
 						JsonObject expectedResult = new JsonObject();
 						expectedResult.add("user", createUserObject(mClient));
 
@@ -667,13 +691,12 @@ public class CustomApiTests extends TestGroup {
 						if (!Util.compareJson(expectedResult, jsonElement)) {
 							createResultFromException(mResult, new ExpectedValueException(expectedResult, jsonElement));
 						}
-					}
-					catch(Exception exception) {
+					} catch (Exception exception) {
 						if (mExpected401) {
 							MobileServiceException cause = (MobileServiceException) exception.getCause();
-							
+
 							ServiceFilterResponse response = cause.getResponse();
-							
+
 							if (response == null || response.getStatus().getStatusCode() != 401) {
 								mResult.setStatus(TestStatus.Failed);
 								mResult.setException(exception);
@@ -685,12 +708,12 @@ public class CustomApiTests extends TestGroup {
 							}
 						}
 					}
-					
+
 				} else if (body == null) {
-					
+
 					try {
 						JsonElement jsonElement = client.invokeApi(api, method, mQuery).get();
-						
+
 						JsonObject expectedResult = new JsonObject();
 						expectedResult.add("user", createUserObject(mClient));
 
@@ -701,13 +724,12 @@ public class CustomApiTests extends TestGroup {
 						if (!Util.compareJson(expectedResult, jsonElement)) {
 							createResultFromException(mResult, new ExpectedValueException(expectedResult, jsonElement));
 						}
-					}
-					catch(Exception exception) {
+					} catch (Exception exception) {
 						if (mExpected401) {
 							MobileServiceException cause = (MobileServiceException) exception.getCause();
-							
+
 							ServiceFilterResponse response = cause.getResponse();
-							
+
 							if (response == null || response.getStatus().getStatusCode() != 401) {
 								mResult.setStatus(TestStatus.Failed);
 								mResult.setException(exception);
@@ -719,13 +741,12 @@ public class CustomApiTests extends TestGroup {
 							}
 						}
 					}
-					
+
 				} else {
-					
 
 					try {
 						JsonElement jsonElement = client.invokeApi(api, body, method, mQuery).get();
-						
+
 						JsonObject expectedResult = new JsonObject();
 						expectedResult.add("user", createUserObject(mClient));
 
@@ -736,13 +757,12 @@ public class CustomApiTests extends TestGroup {
 						if (!Util.compareJson(expectedResult, jsonElement)) {
 							createResultFromException(mResult, new ExpectedValueException(expectedResult, jsonElement));
 						}
-					}
-					catch(Exception exception) {
+					} catch (Exception exception) {
 						if (mExpected401) {
 							MobileServiceException cause = (MobileServiceException) exception.getCause();
-							
+
 							ServiceFilterResponse response = cause.getResponse();
-							
+
 							if (response == null || response.getStatus().getStatusCode() != 401) {
 								mResult.setStatus(TestStatus.Failed);
 								mResult.setException(exception);
@@ -755,7 +775,7 @@ public class CustomApiTests extends TestGroup {
 						}
 					}
 				}
-				
+
 				if (callback != null)
 					callback.onTestComplete(this, mResult);
 			}
@@ -875,6 +895,944 @@ public class CustomApiTests extends TestGroup {
 				return result;
 			}
 		}
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeTypedApiOverload1WithCallbackTest() {
+
+		String name = String.format("Typed With Callback - Overload 1");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				String apiName = MOVIEFINDER_API_NAME;
+				String apiUrl;
+
+				apiUrl = apiName + "/moviesWithSameDuration";
+
+				try {
+					client.invokeApi(apiUrl, AllMovies.class, typedTestCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ApiOperationCallback<AllMovies> typedTestCallback() {
+				return new ApiOperationCallback<AllMovies>() {
+
+					@Override
+					public void onCompleted(AllMovies result, Exception exception, ServiceFilterResponse response) {
+
+						if (exception != null) {
+							createResultFromException(mResult, exception);
+						}
+
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeTypedApiOverload1WithCallbackFailTest() {
+
+		String name = String.format("Typed With Callback - Overload 1");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				String apiName = MOVIEFINDER_API_NAME + "wronguri";
+				String apiUrl;
+
+				apiUrl = apiName + "/moviesWithSameDuration";
+
+				try {
+					client.invokeApi(apiUrl, AllMovies.class, typedTestCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ApiOperationCallback<AllMovies> typedTestCallback() {
+				return new ApiOperationCallback<AllMovies>() {
+
+					@Override
+					public void onCompleted(AllMovies result, Exception exception, ServiceFilterResponse response) {
+
+						if (exception == null) {
+							mResult.setStatus(TestStatus.Failed);
+						}
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeTypedApiOverload2WithCallbackTest(final Random rndGen) {
+
+		String name = String.format("Typed With Callback - Overload 2");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				final Movie ramdomMovie = QueryTestData.getRandomMovie(rndGen);
+
+				String apiName = MOVIEFINDER_API_NAME;
+				String apiUrl;
+
+				apiUrl = apiName + "/moviesWithSameDuration";
+
+				try {
+					client.invokeApi(apiUrl, ramdomMovie, AllMovies.class, typedTestCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ApiOperationCallback<AllMovies> typedTestCallback() {
+				return new ApiOperationCallback<AllMovies>() {
+
+					@Override
+					public void onCompleted(AllMovies result, Exception exception, ServiceFilterResponse response) {
+
+						if (exception != null) {
+							createResultFromException(mResult, exception);
+						}
+
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeTypedApiOverload2WithCallbackFailTest(final Random rndGen) {
+
+		String name = String.format("Typed With Callback - Overload 2");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				final Movie ramdomMovie = QueryTestData.getRandomMovie(rndGen);
+
+				String apiName = MOVIEFINDER_API_NAME + "wronguri";
+				String apiUrl;
+
+				apiUrl = apiName + "/moviesWithSameDuration";
+
+				try {
+					client.invokeApi(apiUrl, ramdomMovie, AllMovies.class, typedTestCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ApiOperationCallback<AllMovies> typedTestCallback() {
+				return new ApiOperationCallback<AllMovies>() {
+
+					@Override
+					public void onCompleted(AllMovies result, Exception exception, ServiceFilterResponse response) {
+
+						if (exception == null) {
+							mResult.setStatus(TestStatus.Failed);
+						}
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeTypedApiOverload3WithCallbackTest(final Random rndGen) {
+
+		String name = String.format("Typed With Callback - Overload 3");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				final Movie ramdomMovie = QueryTestData.getRandomMovie(rndGen);
+
+				String apiName = MOVIEFINDER_API_NAME;
+				String apiUrl;
+
+				apiUrl = apiName + "/title/" + ramdomMovie.getTitle();
+
+				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+
+				try {
+					client.invokeApi(apiUrl, HttpGet.METHOD_NAME, parameters, AllMovies.class, typedTestCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ApiOperationCallback<AllMovies> typedTestCallback() {
+				return new ApiOperationCallback<AllMovies>() {
+
+					@Override
+					public void onCompleted(AllMovies result, Exception exception, ServiceFilterResponse response) {
+
+						if (exception != null) {
+							createResultFromException(mResult, exception);
+						}
+
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeTypedApiOverload3WithCallbackFailTest(final Random rndGen) {
+
+		String name = String.format("Typed With Callback - Overload 3");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				final Movie ramdomMovie = QueryTestData.getRandomMovie(rndGen);
+
+				String apiName = MOVIEFINDER_API_NAME + "wronguri";
+				String apiUrl;
+
+				apiUrl = apiName + "/title/" + ramdomMovie.getTitle();
+
+				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+
+				try {
+					client.invokeApi(apiUrl, HttpGet.METHOD_NAME, parameters, AllMovies.class, typedTestCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ApiOperationCallback<AllMovies> typedTestCallback() {
+				return new ApiOperationCallback<AllMovies>() {
+
+					@Override
+					public void onCompleted(AllMovies result, Exception exception, ServiceFilterResponse response) {
+
+						if (exception == null) {
+							mResult.setStatus(TestStatus.Failed);
+						}
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeTypedApiOverload4WithCallbackTest(final Random rndGen) {
+
+		String name = String.format("Typed With Callback - Overload 4");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				final Movie ramdomMovie = QueryTestData.getRandomMovie(rndGen);
+
+				String apiName = MOVIEFINDER_API_NAME;
+				String apiUrl;
+
+				apiUrl = apiName + "/moviesWithSameDuration";
+
+				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+
+				try {
+					client.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, parameters, AllMovies.class, typedTestCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ApiOperationCallback<AllMovies> typedTestCallback() {
+				return new ApiOperationCallback<AllMovies>() {
+
+					@Override
+					public void onCompleted(AllMovies result, Exception exception, ServiceFilterResponse response) {
+
+						if (exception != null) {
+							createResultFromException(mResult, exception);
+						}
+
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeTypedApiOverload4WithCallbackFailTest(final Random rndGen) {
+
+		String name = String.format("Typed With Callback - Overload 4");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				final Movie ramdomMovie = QueryTestData.getRandomMovie(rndGen);
+
+				String apiName = MOVIEFINDER_API_NAME + "wronguri";
+				String apiUrl;
+
+				apiUrl = apiName + "/moviesWithSameDuration";
+
+				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+
+				try {
+					client.invokeApi(apiUrl, ramdomMovie, HttpPost.METHOD_NAME, parameters, AllMovies.class, typedTestCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ApiOperationCallback<AllMovies> typedTestCallback() {
+				return new ApiOperationCallback<AllMovies>() {
+
+					@Override
+					public void onCompleted(AllMovies result, Exception exception, ServiceFilterResponse response) {
+
+						if (exception == null) {
+							mResult.setStatus(TestStatus.Failed);
+						}
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeJsonApiOverload1WithCallbackTest() {
+
+		String name = String.format("Json With Callback - Overload 1");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				try {
+					client.invokeApi("public", jsonTestCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ApiJsonOperationCallback jsonTestCallback() {
+				return new ApiJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response) {
+
+						if (exception != null) {
+							createResultFromException(mResult, exception);
+						}
+
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeJsonApiOverload1WithCallbackFailTest() {
+
+		String name = String.format("Json With Callback - Overload 1 - Fail");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				try {
+					client.invokeApi("inexistent", jsonTestCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ApiJsonOperationCallback jsonTestCallback() {
+				return new ApiJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response) {
+
+						if (exception == null) {
+							mResult.setStatus(TestStatus.Failed);
+						}
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeJsonApiOverload2WithCallbackTest() {
+
+		String name = String.format("Json With Callback - Overload 2");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				JsonElement json = createJson(new Random(), 0, false);
+				
+				try {
+					client.invokeApi("public", json, jsonTestCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ApiJsonOperationCallback jsonTestCallback() {
+				return new ApiJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response) {
+
+						if (exception != null) {
+							createResultFromException(mResult, exception);
+						}
+
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeJsonApiOverload2WithCallbackFailTest() {
+
+		String name = String.format("Json With Callback - Overload 2 - Fail");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				JsonElement json = createJson(new Random(), 0, false);
+				
+				try {
+					client.invokeApi("inexistent", json, jsonTestCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ApiJsonOperationCallback jsonTestCallback() {
+				return new ApiJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response) {
+
+						if (exception == null) {
+							mResult.setStatus(TestStatus.Failed);
+						}
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeJsonApiOverload3WithCallbackTest() {
+
+		String name = String.format("Json With Callback - Overload 3");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+
+				try {
+					client.invokeApi("public", HttpGet.METHOD_NAME, parameters, jsonTestCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ApiJsonOperationCallback jsonTestCallback() {
+				return new ApiJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response) {
+
+						if (exception != null) {
+							createResultFromException(mResult, exception);
+						}
+
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeJsonApiOverload3WithCallbackFailTest() {
+
+		String name = String.format("Json With Callback - Overload 3 - Fail");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+
+				try {
+					client.invokeApi("inexistent", HttpGet.METHOD_NAME, parameters, jsonTestCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ApiJsonOperationCallback jsonTestCallback() {
+				return new ApiJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response) {
+
+						if (exception == null) {
+							mResult.setStatus(TestStatus.Failed);
+						}
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeJsonApiOverload4WithCallbackTest() {
+
+		String name = String.format("Json With Callback - Overload 4");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+
+				JsonElement json = createJson(new Random(), 0, false);
+				
+				try {
+					client.invokeApi("public", json, HttpPost.METHOD_NAME, parameters, jsonTestCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ApiJsonOperationCallback jsonTestCallback() {
+				return new ApiJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response) {
+
+						if (exception != null) {
+							createResultFromException(mResult, exception);
+						}
+
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeJsonApiOverload4WithCallbackFailTest() {
+
+		String name = String.format("Json With Callback - Overload 4 - Fail");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
+
+				JsonElement json = createJson(new Random(), 0, false);
+				
+				try {
+					client.invokeApi("inexistent", json, HttpPost.METHOD_NAME, parameters, jsonTestCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ApiJsonOperationCallback jsonTestCallback() {
+				return new ApiJsonOperationCallback() {
+
+					@Override
+					public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response) {
+
+						if (exception == null) {
+							mResult.setStatus(TestStatus.Failed);
+						}
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	private TestCase invokeHttpContentApiOverload1WithCallbackTest() {
+
+		String name = String.format("Http With Callback - Overload 1");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				String apiUrl = APP_API_NAME;
+
+				try {
+
+					client.invokeApi(apiUrl, new byte[0], HttpPost.METHOD_NAME, new ArrayList<Pair<String, String>>(), new ArrayList<Pair<String, String>>(),
+							serviceFilterResponseCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ServiceFilterResponseCallback serviceFilterResponseCallback() {
+				return new ServiceFilterResponseCallback() {
+
+					@Override
+					public void onResponse(ServiceFilterResponse response, Exception exception) {
+						if (exception != null) {
+							createResultFromException(mResult, exception);
+						}
+
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	private TestCase invokeHttpContentApiOverload1WithCallbackFailTest() {
+
+		String name = String.format("Http With Callback - Overload 1 - Fail");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				String apiUrl = APP_API_NAME + "inexistent";
+
+				try {
+
+					client.invokeApi(apiUrl, new byte[0], HttpPost.METHOD_NAME, new ArrayList<Pair<String, String>>(), new ArrayList<Pair<String, String>>(),
+							serviceFilterResponseCallback());
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ServiceFilterResponseCallback serviceFilterResponseCallback() {
+				return new ServiceFilterResponseCallback() {
+
+					@Override
+					public void onResponse(ServiceFilterResponse response, Exception exception) {
+						if (exception == null) {
+							mResult.setStatus(TestStatus.Failed);
+						}
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeHttpContentApiOverload2WithCallbackTest() {
+
+		String name = String.format("Http With Callback - Overload 2");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				String apiUrl = APP_API_NAME;
+
+				try {
+
+					client.invokeApiInternal(apiUrl, new byte[0], HttpPost.METHOD_NAME, new ArrayList<Pair<String, String>>(), new ArrayList<Pair<String, String>>(),
+							"api/", serviceFilterResponseCallback());
+
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ServiceFilterResponseCallback serviceFilterResponseCallback() {
+				return new ServiceFilterResponseCallback() {
+
+					@Override
+					public void onResponse(ServiceFilterResponse response, Exception exception) {
+						if (exception != null) {
+							createResultFromException(mResult, exception);
+						}
+
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase invokeHttpContentApiOverload2WithCallbackFailTest() {
+
+		String name = String.format("Http With Callback - Overload 2 - Fail");
+
+		TestCase test = new TestCase(name) {
+			TestExecutionCallback mCallback;
+
+			TestResult mResult;
+
+			@Override
+			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
+				mResult = new TestResult();
+				mResult.setTestCase(this);
+				mResult.setStatus(TestStatus.Passed);
+				mCallback = callback;
+
+				String apiUrl = APP_API_NAME + "inexistent";
+
+				try {
+							
+					client.invokeApiInternal(apiUrl, new byte[0], HttpPost.METHOD_NAME, new ArrayList<Pair<String, String>>(), new ArrayList<Pair<String, String>>(),
+							"api/", serviceFilterResponseCallback());
+					
+				} catch (Exception exception) {
+					createResultFromException(mResult, exception);
+				}
+			}
+
+			private ServiceFilterResponseCallback serviceFilterResponseCallback() {
+				return new ServiceFilterResponseCallback() {
+
+					@Override
+					public void onResponse(ServiceFilterResponse response, Exception exception) {
+						if (exception == null) {
+							mResult.setStatus(TestStatus.Failed);
+						}
+						mCallback.onTestComplete(mResult.getTestCase(), mResult);
+					}
+				};
+			}
+		};
+
+		return test;
 	}
 
 	private String createHttpMethod(final Random rndGen) {

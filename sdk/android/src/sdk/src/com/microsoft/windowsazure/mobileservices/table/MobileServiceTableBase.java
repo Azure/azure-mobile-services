@@ -33,6 +33,8 @@ import org.apache.http.client.methods.HttpDelete;
 import android.net.Uri;
 import android.util.Pair;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.gson.JsonElement;
@@ -123,12 +125,28 @@ public abstract class MobileServiceTableBase<E> {
 
 	public abstract ListenableFuture<E> execute(Query query) throws MobileServiceException;
 
+	public abstract void execute(final Query query, final TableQueryCallback<E> callback) throws MobileServiceException;
+
 	/**
 	 * Executes a query to retrieve all the table rows
-	 * @throws MobileServiceException 
+	 * 
+	 * @throws MobileServiceException
 	 */
 	public ListenableFuture<E> execute() throws MobileServiceException {
 		return this.where().execute();
+	}
+
+	/**
+	 * Executes the query
+	 * 
+	 * @deprecated use {@link execute()} instead
+	 * 
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 * @throws MobileServiceException
+	 */
+	public void execute(final TableQueryCallback<E> callback) throws MobileServiceException {
+		this.where().execute(callback);
 	}
 
 	/**
@@ -254,11 +272,23 @@ public abstract class MobileServiceTableBase<E> {
 	 * 
 	 * @param element
 	 *            The entity to delete
+	 */
+	public ListenableFuture<Void> delete(Object element) {
+		return this.delete(element, (List<Pair<String, String>>) null);
+	}
+
+	/**
+	 * Deletes an entity from a Mobile Service Table
+	 * 
+	 * @deprecated use {@link delete(Object elementOrId)} instead
+	 * 
+	 * @param element
+	 *            The entity to delete
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
-	public ListenableFuture<Void> delete(Object element) {
-		return this.delete(element, null);
+	public void delete(Object element, TableDeleteCallback callback) {
+		this.delete(element, null, callback);
 	}
 
 	/**
@@ -269,8 +299,6 @@ public abstract class MobileServiceTableBase<E> {
 	 * @param parameters
 	 *            A list of user-defined parameters and values to include in the
 	 *            request URI query string
-	 * @param callback
-	 *            Callback to invoke when the operation is completed
 	 */
 	public ListenableFuture<Void> delete(Object elementOrId, List<Pair<String, String>> parameters) {
 		validateId(elementOrId);
@@ -314,6 +342,39 @@ public abstract class MobileServiceTableBase<E> {
 		}.executeTask();
 
 		return future;
+	}
+
+	/**
+	 * Deletes an entity from a Mobile Service Table using a given id
+	 * 
+	 * @deprecated use {@link delete(Object elementOrId, List<Pair<String,
+	 *             String>> parameters)} instead
+	 * 
+	 * @param id
+	 *            The id of the entity to delete
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the
+	 *            request URI query string
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void delete(Object elementOrId, List<Pair<String, String>> parameters, final TableDeleteCallback callback) {
+
+		ListenableFuture<Void> deleteFuture = delete(elementOrId, parameters);
+
+		Futures.addCallback(deleteFuture, new FutureCallback<Void>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted((Exception) exception, MobileServiceException.getServiceResponse(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(Void v) {
+				callback.onCompleted(null, null);
+			}
+		});
 	}
 
 	/**

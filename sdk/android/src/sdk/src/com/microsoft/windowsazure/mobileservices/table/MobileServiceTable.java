@@ -84,7 +84,6 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<MobileSe
 	 * @throws MobileServiceException
 	 */
 	public ListenableFuture<MobileServiceList<E>> execute() throws MobileServiceException {
-		// mInternalTable.execute(new ParseResultTableQueryCallback(callback));
 		final SettableFuture<MobileServiceList<E>> future = SettableFuture.create();
 		ListenableFuture<JsonElement> internalFuture = mInternalTable.execute();
 		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
@@ -115,6 +114,34 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<MobileSe
 		});
 
 		return future;
+	}
+
+	/**
+	 * Executes a query to retrieve all the table rows
+	 * 
+	 * @deprecated use {@link execute()} instead
+	 * 
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 * @throws MobileServiceException
+	 */
+	public void execute(final TableQueryCallback<MobileServiceList<E>> callback) throws MobileServiceException {
+
+		ListenableFuture<MobileServiceList<E>> executeFuture = execute();
+
+		Futures.addCallback(executeFuture, new FutureCallback<MobileServiceList<E>>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, 0, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(MobileServiceList<E> result) {
+				callback.onCompleted(result, result.size(), null, null);
+			}
+		});
 	}
 
 	/**
@@ -161,40 +188,84 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<MobileSe
 	}
 
 	/**
-	 * Looks up a row in the table. Deserializes the row using the given class.
+	 * Executes a query to retrieve all the table rows
 	 * 
-	 * @param id
-	 *            The id of the row
-	 * @param clazz
-	 *            The class used to deserialize the row
+	 * @deprecated use {@link execute(Query query)} instead
+	 * 
+	 * @param query
+	 *            The MobileServiceQuery instance to execute
 	 * @param callback
-	 *            Callback to invoke after the operation is completed
+	 *            Callback to invoke when the operation is completed
+	 * @throws MobileServiceException
 	 */
-	public ListenableFuture<E> lookUp(Object id) {
+	public void execute(Query query, final TableQueryCallback<MobileServiceList<E>> callback) throws MobileServiceException {
 
-		// mInternalTable.lookUp(id, null, new
-		// ParseResultOperationCallback(callback));
+		ListenableFuture<MobileServiceList<E>> executeFuture = execute(query);
 
-		return lookUp(id, null);
+		Futures.addCallback(executeFuture, new FutureCallback<MobileServiceList<E>>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, 0, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(MobileServiceList<E> result) {
+				callback.onCompleted(result, result.size(), null, null);
+			}
+		});
 	}
 
 	/**
-	 * Looks up a row in the table. Deserializes the row using the given class.
+	 * Looks up a row in the table.
 	 * 
 	 * @param id
 	 *            The id of the row
-	 * @param clazz
-	 *            The class used to deserialize the row
-	 * @param parameters
-	 *            A list of user-defined parameters and values to include in the
-	 *            request URI query string
+	 */
+	public ListenableFuture<E> lookUp(Object id) {
+		return lookUp(id, (List<Pair<String, String>>) null);
+	}
+
+	/**
+	 * Looks up a row in the table.
+	 * 
+	 * @deprecated use {@link lookUp(Object id)} instead
+	 * 
+	 * @param id
+	 *            The id of the row
 	 * @param callback
 	 *            Callback to invoke after the operation is completed
 	 */
-	public ListenableFuture<E> lookUp(Object id, List<Pair<String, String>> parameters) {
+	public void lookUp(Object id, final TableOperationCallback<E> callback) {
 
-		// mInternalTable.lookUp(id, parameters, new
-		// ParseResultOperationCallback(callback));
+		ListenableFuture<E> lookUpFuture = lookUp(id);
+
+		Futures.addCallback(lookUpFuture, new FutureCallback<E>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(E result) {
+				callback.onCompleted(result, null, null);
+			}
+		});
+	}
+
+	/**
+	 * Looks up a row in the table.
+	 * 
+	 * @param id
+	 *            The id of the row
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the
+	 *            request URI query string
+	 */
+	public ListenableFuture<E> lookUp(Object id, List<Pair<String, String>> parameters) {
 		final SettableFuture<E> future = SettableFuture.create();
 
 		ListenableFuture<JsonObject> internalFuture = mInternalTable.lookUp(id, parameters);
@@ -231,15 +302,61 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<MobileSe
 	}
 
 	/**
+	 * 
+	 * Looks up a row in the table.
+	 * 
+	 * @deprecated use {@link lookUp(Object id, List<Pair<String, String>>
+	 *             parameters)} instead
+	 * 
+	 * @param id
+	 *            The id of the row
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the
+	 *            request URI query string
+	 * @param callback
+	 *            Callback to invoke after the operation is completed
+	 */
+	public void lookUp(Object id, List<Pair<String, String>> parameters, final TableOperationCallback<E> callback) {
+
+		ListenableFuture<E> lookUpFuture = lookUp(id, parameters);
+
+		Futures.addCallback(lookUpFuture, new FutureCallback<E>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(E result) {
+				callback.onCompleted(result, null, null);
+			}
+		});
+	}
+
+	/**
 	 * Inserts an entity into a Mobile Service Table
+	 * 
+	 * @param element
+	 *            The entity to insert
+	 */
+	public ListenableFuture<E> insert(final E element) {
+		return this.insert(element, (List<Pair<String, String>>) null);
+	}
+
+	/**
+	 * Inserts an entity into a Mobile Service Table
+	 * 
+	 * @deprecated use {@link insert(final E element)} instead
 	 * 
 	 * @param element
 	 *            The entity to insert
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
-	public ListenableFuture<E> insert(final E element) {
-		return this.insert(element, null);
+	public void insert(final E element, final TableOperationCallback<E> callback) {
+		this.insert(element, null, callback);
 	}
 
 	/**
@@ -322,15 +439,60 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<MobileSe
 	}
 
 	/**
+	 * Inserts an entity into a Mobile Service Table
+	 * 
+	 * @deprecated use {@link insert(final E element, List<Pair<String, String>>
+	 *             parameters)} instead
+	 * 
+	 * @param element
+	 *            The entity to insert
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the
+	 *            request URI query string
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void insert(final E element, List<Pair<String, String>> parameters, final TableOperationCallback<E> callback) {
+
+		ListenableFuture<E> insertFuture = insert(element, parameters);
+
+		Futures.addCallback(insertFuture, new FutureCallback<E>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(E result) {
+				callback.onCompleted(result, null, null);
+			}
+		});
+	}
+
+	/**
 	 * Updates an entity from a Mobile Service Table
+	 * 
+	 * @param element
+	 *            The entity to update
+	 */
+	public ListenableFuture<E> update(final E element) {
+		return this.update(element, (List<Pair<String, String>>) null);
+	}
+
+	/**
+	 * Updates an entity from a Mobile Service Table
+	 * 
+	 * @deprecated use {@link update(final E element)} instead
 	 * 
 	 * @param element
 	 *            The entity to update
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
 	 */
-	public ListenableFuture<E> update(final E element) {
-		return this.update(element, null);
+	public void update(final E element, final TableOperationCallback<E> callback) {
+		this.update(element, null, callback);
 	}
 
 	/**
@@ -408,6 +570,40 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<MobileSe
 	}
 
 	/**
+	 * 
+	 * Updates an entity from a Mobile Service Table
+	 * 
+	 * @deprecated use {@link update(final E element, final List<Pair<String,
+	 *             String>> parameters)} instead
+	 * 
+	 * @param element
+	 *            The entity to update
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the
+	 *            request URI query string
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 */
+	public void update(final E element, final List<Pair<String, String>> parameters, final TableOperationCallback<E> callback) {
+
+		ListenableFuture<E> updateFuture = update(element, parameters);
+
+		Futures.addCallback(updateFuture, new FutureCallback<E>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(E result) {
+				callback.onCompleted(result, null, null);
+			}
+		});
+	}
+
+	/**
 	 * Parses the JSON object to a typed list
 	 * 
 	 * @param results
@@ -437,5 +633,4 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<MobileSe
 			}
 		}
 	}
-
 }

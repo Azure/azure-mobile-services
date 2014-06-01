@@ -139,12 +139,10 @@ public class MobileServicePush {
 	 * 
 	 * @param pnsHandle
 	 *            PNS specific identifier
-	 * @param callback
-	 *            The callback to invoke after the Push execution
 	 * @param tags
 	 *            Tags to use in the registration
-	 * @return The created registration
-	 * @throws Exception
+	 * 
+	 * @return Future with Registration Information
 	 */
 	public ListenableFuture<Registration> register(String pnsHandle, String[] tags) {
 
@@ -177,6 +175,36 @@ public class MobileServicePush {
 	}
 
 	/**
+	 * Registers the client for native notifications with the specified tags
+	 * 
+	 * @deprecated use {@link register(String pnsHandle, String[] tags)} instead
+	 * 
+	 * @param pnsHandle
+	 *            PNS specific identifier
+	 * @param callback
+	 *            The callback to invoke after the Push execution
+	 * @param tags
+	 *            Tags to use in the registration
+	 */
+	public void register(String pnsHandle, String[] tags, final RegistrationCallback callback) {
+		ListenableFuture<Registration> registerFuture = register(pnsHandle, tags);
+
+		Futures.addCallback(registerFuture, new FutureCallback<Registration>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onRegister(null, (Exception) exception);
+				}
+			}
+
+			@Override
+			public void onSuccess(Registration registration) {
+				callback.onRegister(registration, null);
+			}
+		});
+	}
+
+	/**
 	 * Registers the client for template notifications with the specified tags
 	 * 
 	 * @param pnsHandle
@@ -187,9 +215,8 @@ public class MobileServicePush {
 	 *            The template body
 	 * @param tags
 	 *            The tags to use in the registration
-	 * @param callback
-	 *            The operation callback
-	 * @return
+	 * 
+	 * @return Future with TemplateRegistration Information
 	 */
 	public ListenableFuture<TemplateRegistration> registerTemplate(String pnsHandle, String templateName, String template, String[] tags) {
 
@@ -234,14 +261,73 @@ public class MobileServicePush {
 	}
 
 	/**
-	 * Unregisters the client for native notifications
+	 * Registers the client for template notifications with the specified tags
 	 * 
+	 * @deprecated use {@link registerTemplate(String pnsHandle, String
+	 *             templateName, String template, String[] tags)} instead
+	 * 
+	 * @param pnsHandle
+	 *            PNS specific identifier
+	 * @param templateName
+	 *            The template name
+	 * @param template
+	 *            The template body
+	 * @param tags
+	 *            The tags to use in the registration
 	 * @param callback
 	 *            The operation callback
-	 * @throws Exception
+	 */
+	public void registerTemplate(String pnsHandle, String templateName, String template, String[] tags, final TemplateRegistrationCallback callback) {
+		ListenableFuture<TemplateRegistration> registerFuture = registerTemplate(pnsHandle, templateName, template, tags);
+
+		Futures.addCallback(registerFuture, new FutureCallback<TemplateRegistration>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onRegister(null, (Exception) exception);
+				}
+			}
+
+			@Override
+			public void onSuccess(TemplateRegistration registration) {
+				callback.onRegister(registration, null);
+			}
+		});
+	}
+
+	/**
+	 * Unregisters the client for native notifications
+	 * 
+	 * @return Future with TemplateRegistration Information
 	 */
 	public ListenableFuture<Void> unregister() {
 		return unregisterInternal(Registration.DEFAULT_REGISTRATION_NAME);
+	}
+
+	/**
+	 * Unregisters the client for native notifications
+	 * 
+	 * @deprecated use {@link unregister()} instead
+	 * 
+	 * @param callback
+	 *            The operation callback
+	 */
+	public void unregister(final UnregisterCallback callback) {
+		ListenableFuture<Void> unregisterFuture = unregister();
+
+		Futures.addCallback(unregisterFuture, new FutureCallback<Void>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onUnregister((Exception) exception);
+				}
+			}
+
+			@Override
+			public void onSuccess(Void v) {
+				callback.onUnregister(null);
+			}
+		});
 	}
 
 	/**
@@ -249,8 +335,8 @@ public class MobileServicePush {
 	 * 
 	 * @param templateName
 	 *            The template name
-	 * @param callback
-	 *            The operation callback
+	 * 
+	 * @return Future with TemplateRegistration Information
 	 * 
 	 */
 	public ListenableFuture<Void> unregisterTemplate(String templateName) {
@@ -262,14 +348,41 @@ public class MobileServicePush {
 	}
 
 	/**
+	 * Unregisters the client for template notifications of a specific template
+	 * 
+	 * @deprecated use {@link unregisterTemplate(String templateName)} instead
+	 * 
+	 * @param templateName
+	 *            The template name
+	 * @param callback
+	 *            The operation callback
+	 * 
+	 */
+	public void unregisterTemplate(String templateName, final UnregisterCallback callback) {
+		ListenableFuture<Void> unregisterTemplateFuture = unregisterTemplate(templateName);
+
+		Futures.addCallback(unregisterTemplateFuture, new FutureCallback<Void>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onUnregister((Exception) exception);
+				}
+			}
+
+			@Override
+			public void onSuccess(Void v) {
+				callback.onUnregister(null);
+			}
+		});
+	}
+
+	/**
 	 * Unregisters the client for all notifications
 	 * 
 	 * @param pnsHandle
 	 *            PNS specific identifier
-	 * @param callback
-	 *            The operation callback
-	 * @throws ExecutionException
-	 * @throws InterruptedException
+	 * 
+	 * @return Future with TemplateRegistration Information
 	 */
 	public ListenableFuture<Void> unregisterAll(String pnsHandle) {
 
@@ -303,6 +416,34 @@ public class MobileServicePush {
 		});
 
 		return resultFuture;
+	}
+
+	/**
+	 * Unregisters the client for all notifications
+	 * 
+	 * @deprecated use {@link unregisterAll(String pnsHandle)} instead
+	 * 
+	 * @param pnsHandle
+	 *            PNS specific identifier
+	 * @param callback
+	 *            The operation callback
+	 */
+	public void unregisterAll(String pnsHandle, final UnregisterCallback callback) {
+		ListenableFuture<Void> unregisterAllFuture = unregisterAll(pnsHandle);
+
+		Futures.addCallback(unregisterAllFuture, new FutureCallback<Void>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onUnregister((Exception) exception);
+				}
+			}
+
+			@Override
+			public void onSuccess(Void v) {
+				callback.onUnregister(null);
+			}
+		});
 	}
 
 	private ListenableFuture<Void> unregisterAllInternal(ArrayList<Registration> registrations) {
