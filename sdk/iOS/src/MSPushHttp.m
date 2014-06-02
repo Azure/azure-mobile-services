@@ -12,7 +12,7 @@
     
 @implementation MSPushHttp
 
-- (MSPushHttp*)init:(MSClient*)client
+- (MSPushHttp *)initWithClient:(MSClient *)client
 {
     self = [super init];
     
@@ -26,7 +26,7 @@
 - (void)createRegistrationId:(MSCreateRegistrationIdBlock)completion
 {
     NSURL *url = [self.client.applicationURL URLByAppendingPathComponent:@"push/registrationids"];
-    MSPushRequest *request = [[MSPushRequest alloc] initPushRequest:url
+    MSPushRequest *request = [[MSPushRequest alloc] initWithURL:url
                                                                data:nil
                                                          HTTPMethod:@"POST"];
 
@@ -44,8 +44,7 @@
                 [connection isSuccessfulResponse:response
                                             data:data
                                          orError:&error];
-                if (!error)
-                {
+                if (!error) {
                     registrationId = response.allHeaderFields[@"Location"];
                     NSRange stringLocation = [registrationId rangeOfString:@"/" options:(NSBackwardsSearch)];
                     registrationId = [registrationId substringFromIndex:stringLocation.location + 1];
@@ -70,7 +69,7 @@
     [connection start];
 }
 
-- (void)createRegistration:(NSMutableDictionary*)registration
+- (void)upsertRegistration:(NSMutableDictionary *)registration
                 completion:(MSCompletionBlock)completion
 {
     NSString *registrationId = registration[@"registrationId"];
@@ -84,7 +83,7 @@
     NSError *error = nil;
     NSData *data = [NSJSONSerialization dataWithJSONObject:registration options:0 error:&error];
     
-    MSPushRequest *request = [[MSPushRequest alloc] initPushRequest:url
+    MSPushRequest *request = [[MSPushRequest alloc] initWithURL:url
                                                                data:data
                                                          HTTPMethod:@"PUT"];
     
@@ -121,7 +120,7 @@
     [connection start];
 }
 
-- (void)listRegistrations:(NSString*)deviceToken
+- (void)listRegistrations:(NSString *)deviceToken
                completion:(MSListRegistrationsBlock)completion
 {
     NSString *query = @"?deviceId=";
@@ -130,7 +129,7 @@
     NSURL *url = [self.client.applicationURL URLByAppendingPathComponent:@"push/registrations"];
     url = [url URLByAppendingPathComponent:query];
     
-    MSPushRequest *request = [[MSPushRequest alloc] initPushRequest:url
+    MSPushRequest *request = [[MSPushRequest alloc] initWithURL:url
                                                                data:nil
                                                          HTTPMethod:@"GET"];
     
@@ -168,13 +167,13 @@
     [connection start];
 }
 
-- (void)deleteRegistration:(NSString*)registrationId
+- (void)deleteRegistration:(NSString *)registrationId
                 completion:(MSCompletionBlock)completion
 {
     NSURL *url = [self.client.applicationURL URLByAppendingPathComponent:@"push/registrations"];
     url = [url URLByAppendingPathComponent:registrationId];
     
-    MSPushRequest *request = [[MSPushRequest alloc] initPushRequest:url
+    MSPushRequest *request = [[MSPushRequest alloc] initWithURL:url
                                                                data:nil
                                                          HTTPMethod:@"DELETE"];
     

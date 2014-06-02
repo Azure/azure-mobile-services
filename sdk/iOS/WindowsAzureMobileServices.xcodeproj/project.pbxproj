@@ -29,7 +29,7 @@
 		AD0D4FD619257DFC001F4766 /* MSPushRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0D4FD419257DFC001F4766 /* MSPushRequest.m */; };
 		AD0D4FD919259D70001F4766 /* MSPushHttp.h in Headers */ = {isa = PBXBuildFile; fileRef = AD0D4FD719259D70001F4766 /* MSPushHttp.h */; };
 		AD0D4FDA19259D70001F4766 /* MSPushHttp.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0D4FD819259D70001F4766 /* MSPushHttp.m */; };
-		AD0D4FE119281111001F4766 /* MSPush.h in Headers */ = {isa = PBXBuildFile; fileRef = AD0D4FDF19281111001F4766 /* MSPush.h */; };
+		AD0D4FE119281111001F4766 /* MSPush.h in Headers */ = {isa = PBXBuildFile; fileRef = AD0D4FDF19281111001F4766 /* MSPush.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AD0D4FE219281111001F4766 /* MSPush.m in Sources */ = {isa = PBXBuildFile; fileRef = AD0D4FE019281111001F4766 /* MSPush.m */; };
 		AD45B93F1929D90000188AF3 /* MSPushHttpTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AD45B93E1929D90000188AF3 /* MSPushHttpTests.m */; };
 		AD45B9421934FDD100188AF3 /* MSRegistrationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = AD45B9401934FDD100188AF3 /* MSRegistrationManager.h */; };
@@ -468,6 +468,7 @@
 				AD0D4FD919259D70001F4766 /* MSPushHttp.h in Headers */,
 				E8E37910161F769D00C13F00 /* MSQuery.h in Headers */,
 				E8E37912161F769D00C13F00 /* MSUser.h in Headers */,
+				AD0D4FE119281111001F4766 /* MSPush.h in Headers */,
 				AD0D4FD519257DFC001F4766 /* MSPushRequest.h in Headers */,
 				E8E37913161F769D00C13F00 /* MSFilter.h in Headers */,
 				E8E3790F161F769D00C13F00 /* MSError.h in Headers */,
@@ -478,7 +479,6 @@
 				E8E37917161F769D00C13F00 /* MSURLBuilder.h in Headers */,
 				E8E37918161F769D00C13F00 /* MSNaiveISODateFormatter.h in Headers */,
 				E8E37919161F769D00C13F00 /* MSSerializer.h in Headers */,
-				AD0D4FE119281111001F4766 /* MSPush.h in Headers */,
 				E8E3791A161F769D00C13F00 /* MSJSONSerializer.h in Headers */,
 				E8E3791B161F769D00C13F00 /* MSPredicateTranslator.h in Headers */,
 				E84CA4CF162369BD009B2588 /* MSUserAgentBuilder.h in Headers */,

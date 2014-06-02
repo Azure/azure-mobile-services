@@ -4,6 +4,8 @@
 
 #import "MSLocalStorage.h"
 
+NSString * const NativeRegistrationName = @"$Default";
+
 @interface MSLocalStorage ()
 @property (nonatomic) NSMutableDictionary *registrations;
 @property (copy, nonatomic) NSString *versionKey;
@@ -31,8 +33,7 @@ NSString * const storageVersion = @"v1.0.0";
     return self;
 }
 
-
-- (NSString *)getRegistrationId:(NSString *)registrationName
+- (NSString *)getRegistrationIdWithName:(NSString *)registrationName
 {
     return [self.registrations objectForKey:registrationName];
 }
@@ -42,7 +43,7 @@ NSString * const storageVersion = @"v1.0.0";
     return [self.registrations allValues];
 }
 
-- (void)updateWithRegistrationName:(NSString *)registrationName
+- (void)updateRegistrationWithName:(NSString *)registrationName
                     registrationId:(NSString *)registrationId
                        deviceToken:(NSString *)deviceToken
 {
@@ -56,9 +57,12 @@ NSString * const storageVersion = @"v1.0.0";
 {
     self.registrations = [[NSMutableDictionary alloc] init];
     
-    for (int i = 0; i < [registrations count]; i++)
-    {
-        [self.registrations setObject:registrations[i][@"registrationId"] forKey:registrations[i][@"name"]];
+    for (int i = 0; i < [registrations count]; i++) {
+        NSString *name = registrations[i][@"name"];
+        if (!name) {
+            name = NativeRegistrationName;
+        }
+        [self.registrations setObject:registrations[i][@"registrationId"] forKey:name];
     }
     
     self.deviceToken  = deviceToken;
@@ -68,7 +72,7 @@ NSString * const storageVersion = @"v1.0.0";
     self.isRefreshNeeded = NO;
 }
 
-- (void)deleteWithRegistrationName:(NSString *)registrationName
+- (void)deleteRegistrationWithName:(NSString *)registrationName
 {
     [self.registrations removeObjectForKey:registrationName];
     [self flush];
@@ -88,18 +92,14 @@ NSString * const storageVersion = @"v1.0.0";
     
     NSString *version = [defaults stringForKey:self.versionKey];
     self.isRefreshNeeded = version == nil || ![version isEqualToString:storageVersion];
-    if(self.isRefreshNeeded)
-    {
+    if(self.isRefreshNeeded) {
         return;
     }
     
     NSDictionary *registrations = [defaults dictionaryForKey:self.registrationsKey];
-    if (registrations)
-    {
+    if (registrations) {
         self.registrations = [registrations mutableCopy];
-    }
-    else
-    {
+    } else {
         self.isRefreshNeeded = YES;
     }
 }
@@ -114,4 +114,5 @@ NSString * const storageVersion = @"v1.0.0";
     
     [defaults synchronize];
 }
+
 @end

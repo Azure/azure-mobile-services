@@ -13,13 +13,13 @@
 
 @implementation MSRegistrationManager
 
-- (MSRegistrationManager *)init:(MSClient *)client
+- (MSRegistrationManager *)initWithClient:(MSClient *)client
 {
     self = [super init];
     
     if (self) {
         _storage = [[MSLocalStorage alloc] initWithMobileServiceHost:client.applicationURL.host];
-        _pushHttp = [[MSPushHttp alloc] init:client];
+        _pushHttp = [[MSPushHttp alloc] initWithClient:client];
     }
     
     return self;
@@ -67,10 +67,10 @@
     }];
 }
 
--(void)firstRegistration:(NSMutableDictionary *)registration
-              completion:(MSCompletionBlock)completion
+- (void)firstRegistration:(NSMutableDictionary *)registration
+               completion:(MSCompletionBlock)completion
 {
-    NSString *cachedRegistrationId = [self.storage getRegistrationId:registration[@"name"]];
+    NSString *cachedRegistrationId = [self.storage getRegistrationIdWithName:registration[@"name"]];
     if (cachedRegistrationId) {
         [registration setValue:cachedRegistrationId forKey:@"registrationId"];
         [self upsertRegistrationCore:registration
@@ -92,7 +92,7 @@
     }
 }
 
--(void) expiredRegistration:(NSMutableDictionary *)registration
+- (void)expiredRegistration:(NSMutableDictionary *)registration
                  completion:(MSCompletionBlock)completion
 {
     [self createRegistrationId:registration completion:^(NSError *error) {
@@ -112,11 +112,11 @@
     }];
 }
 
-- (void)unregister:(NSString *)registrationName
-             retry:(BOOL)retry
-        completion:(MSCompletionBlock)completion
+- (void)deleteRegistrationWithName:(NSString *)registrationName
+                             retry:(BOOL)retry
+                        completion:(MSCompletionBlock)completion
 {
-    NSString *cachedRegistrationId = [self.storage getRegistrationId:registrationName];
+    NSString *cachedRegistrationId = [self.storage getRegistrationIdWithName:registrationName];
     if (!cachedRegistrationId) {
         if (retry)
         {
@@ -128,7 +128,7 @@
                     return;
                 }
                 
-                [self unregister:registrationName retry:NO completion:completion];
+                [self deleteRegistrationWithName:registrationName retry:NO completion:completion];
             }];
         } else if (completion) {
             completion(nil);
@@ -138,7 +138,7 @@
     
     [self.pushHttp deleteRegistration:cachedRegistrationId completion:^(NSError *error) {
         if (!error) {
-            [self.storage deleteWithRegistrationName:registrationName];
+            [self.storage deleteRegistrationWithName:registrationName];
         }
 
         if (!completion) {
@@ -147,8 +147,8 @@
     }];
 }
 
-- (void)unregisterAllWithDeviceToken:(NSString *)deviceToken
-                                completion:(MSCompletionBlock)completion
+- (void)deleteAllWithDeviceToken:(NSString *)deviceToken
+                      completion:(MSCompletionBlock)completion
 {
     [self refreshRegistrations:deviceToken completion:^(NSError *error) {
         if (!error) {
@@ -179,7 +179,7 @@
     }];
 }
 
--(void) createRegistrationId:(NSMutableDictionary *)registration
+- (void)createRegistrationId:(NSMutableDictionary *)registration
                   completion:(MSCompletionBlock)completion
 {
     [self.pushHttp createRegistrationId:^(NSString *registrationId, NSError *error) {
@@ -197,12 +197,12 @@
                         retry:(BOOL)retry
                    completion:(MSCompletionBlock)completion
 {
-    [self.pushHttp createRegistration:registration completion:^(NSError *error) {
+    [self.pushHttp upsertRegistration:registration completion:^(NSError *error) {
         if (!error) {
-            [self.storage updateWithRegistrationName:registration[@"name"]
+            [self.storage updateRegistrationWithName:registration[@"name"]
                                       registrationId:registration[@"registrationId"]
                                          deviceToken:registration[@"deviceId"]];
-        } else if (retry && [error.userInfo[MSErrorResponseKey] code] == 410) {
+        } else if (retry && [error.userInfo[MSErrorResponseKey] statusCode] == 410) {
             // evaluate if error has 410
             [self expiredRegistration:registration completion:completion];
             return;
@@ -217,4 +217,5 @@
 -(BOOL)isWhitespace:(NSString *)string{
     return [[string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] == 0;
 }
+
 @end

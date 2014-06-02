@@ -11,17 +11,17 @@ typedef void (^MSListRegistrationsBlock)(NSArray *registrations, NSError *error)
 
 @interface MSPushHttp : NSObject
 
-- (MSPushHttp*)init:(MSClient*)client;
+- (MSPushHttp*)initWithClient:(MSClient *)client;
 
 - (void)createRegistrationId:(MSCreateRegistrationIdBlock)completion;
 
-- (void)createRegistration:(NSDictionary*)registration
+- (void)upsertRegistration:(NSDictionary *)registration
                 completion:(MSCompletionBlock)completion;
 
-- (void)listRegistrations:(NSString*)deviceToken
+- (void)listRegistrations:(NSString *)deviceToken
                completion:(MSListRegistrationsBlock)completion;
 
-- (void)deleteRegistration:(NSString*)registrationId
+- (void)deleteRegistration:(NSString *)registrationId
                 completion:(MSCompletionBlock)completion;
 
 @end

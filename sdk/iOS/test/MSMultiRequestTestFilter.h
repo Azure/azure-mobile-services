@@ -3,12 +3,12 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSClient.h"
+#import "MSFilter.h"
+#import "MSTestFilterData.h"
 
-@interface MSPushRequest : NSMutableURLRequest
+@interface MSMultiRequestTestFilter : NSObject <MSFilter>
 
-- (MSPushRequest *)initWithURL:(NSURL *)url
-                          data:(NSData *)data
-                    HTTPMethod:(NSString *)method;
+@property (nonatomic) NSArray *testFilters;
+@property (nonatomic) NSUInteger currentIndex;
 
 @end

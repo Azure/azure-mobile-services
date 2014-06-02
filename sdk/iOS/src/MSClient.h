@@ -58,7 +58,7 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 /// method.
 @property (nonatomic, strong, readonly)         NSArray *filters;
 
-/// The property to use for making registration calls.
+/// The property to use for registering and unregistering for notifications via *MSPush*.
 @property (nonatomic, strong, readonly)     MSPush *push;
 
 #pragma mark * Public ReadWrite Properties

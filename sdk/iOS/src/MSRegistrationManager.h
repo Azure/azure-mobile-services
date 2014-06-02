@@ -6,15 +6,17 @@
 #import "MSClient.h"
 
 @interface MSRegistrationManager : NSObject
-- (MSRegistrationManager *)init:(MSClient *)client;
+
+- (MSRegistrationManager *)initWithClient:(MSClient *)client;
 
 - (void)upsertRegistration:(NSMutableDictionary *)registration
                 completion:(MSCompletionBlock)completion;
 
-- (void)unregister:(NSString *)registrationName
-             retry:(BOOL)retry
-        completion:(MSCompletionBlock)completion;
+- (void)deleteRegistrationWithName:(NSString *)registrationName
+                             retry:(BOOL)retry
+                        completion:(MSCompletionBlock)completion;
 
-- (void)unregisterAllWithDeviceToken:(NSString *)deviceToken
-                          completion:(MSCompletionBlock)completion;
+- (void)deleteAllWithDeviceToken:(NSString *)deviceToken
+                      completion:(MSCompletionBlock)completion;
+
 @end

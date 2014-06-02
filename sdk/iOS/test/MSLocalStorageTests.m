@@ -19,8 +19,8 @@
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     for (NSString* key in [[defaults dictionaryRepresentation] allKeys]) {
         [defaults removeObjectForKey:key];
-        [defaults synchronize];
     }
+    [defaults synchronize];
 }
 
 -(void)testBasicState
@@ -31,31 +31,31 @@
     STAssertEquals(storage.isRefreshNeeded, YES, @"isRefreshNeeded should be YES when MSLocalStorage is initialized with empty defaults.");
 
     // Add an item
-    [storage updateWithRegistrationName:@"regName" registrationId:@"regId" deviceToken:@"token"];
+    [storage updateRegistrationWithName:@"regName" registrationId:@"regId" deviceToken:@"token"];
     STAssertEquals(storage.deviceToken, @"token", @"Token is expected to be set correctly after updateWithRegistrationName is called.");
     
     // Get that item and ensure it is accurate
-    NSString *reg = [storage getRegistrationId:@"regName"];
+    NSString *reg = [storage getRegistrationIdWithName:@"regName"];
     STAssertEquals(reg, @"regId", @"Expected registrationId to be regId");
     
     // Update by registration name
-    [storage updateWithRegistrationName:@"regName2" registrationId:@"regId2" deviceToken:@"token4"];
+    [storage updateRegistrationWithName:@"regName2" registrationId:@"regId2" deviceToken:@"token4"];
     STAssertEquals(storage.deviceToken, @"token4", @"Token is expected to be set correctly after updateWithRegistrationName is called.");
     
     // Get that item and ensure it is accurate
-    NSString *reg2New = [storage getRegistrationId:@"regName2"];
+    NSString *reg2New = [storage getRegistrationIdWithName:@"regName2"];
     STAssertEquals(reg2New, @"regId2", @"Expected registrationId to be regId2");
 
     // Add a new registration name
-    [storage updateWithRegistrationName:@"regName4" registrationId:@"regId4" deviceToken:@"token4"];
+    [storage updateRegistrationWithName:@"regName4" registrationId:@"regId4" deviceToken:@"token4"];
     STAssertEquals(storage.deviceToken, @"token4", @"Token is expected to be set correctly after updateWithRegistrationName is called.");
     
     // Get the original item and ensure it is accurate
-    reg2New = [storage getRegistrationId:@"regName2"];
+    reg2New = [storage getRegistrationIdWithName:@"regName2"];
     STAssertEquals(reg2New, @"regId2", @"Expected registrationId to be regId2");
 
     // Get that item and ensure it is accurate
-    NSString *reg4 = [storage getRegistrationId:@"regName4"];
+    NSString *reg4 = [storage getRegistrationIdWithName:@"regName4"];
     STAssertEquals(reg4, @"regId4", @"Expected registrationId to be regId4");
     
     // initialize MSLocalStorage to test loading and saving to local storage
@@ -64,22 +64,22 @@
     STAssertEquals(storage2.isRefreshNeeded, NO, @"isRefreshNeeded should be NO when MSLocalStorage is initialized with empty defaults.");
 
     // Get the original item and ensure it is accurate
-    reg2New = [storage2 getRegistrationId:@"regName2"];
+    reg2New = [storage2 getRegistrationIdWithName:@"regName2"];
     STAssertEquals(reg2New, @"regId2", @"Expected registrationId to be regId2");
     
     // Get that item and ensure it is accurate
-    reg4 = [storage2 getRegistrationId:@"regName4"];
+    reg4 = [storage2 getRegistrationIdWithName:@"regName4"];
     STAssertEquals(reg4, @"regId4", @"Expected registrationId to be regId4");
     
     // Test delete
-    [storage2 deleteWithRegistrationName:@"regName4"];
+    [storage2 deleteRegistrationWithName:@"regName4"];
     
     // Get the original item and ensure it is accurate
-    reg2New = [storage2 getRegistrationId:@"regName2"];
+    reg2New = [storage2 getRegistrationIdWithName:@"regName2"];
     STAssertEquals(reg2New, @"regId2", @"Expected registrationId to be regId2");
     
     // Get that item and ensure it is accurate
-    reg4 = [storage2 getRegistrationId:@"regName4"];
+    reg4 = [storage2 getRegistrationIdWithName:@"regName4"];
     STAssertNil(reg4, @"reg4 should be Nil after being deleted.");
     
     // Re-initialize storage from storage
@@ -88,21 +88,21 @@
     STAssertEquals(storage2.isRefreshNeeded, NO, @"isRefreshNeeded should be NO when MSLocalStorage is initialized with empty defaults.");
     
     // Get the original item and ensure it is accurate
-    reg2New = [storage2 getRegistrationId:@"regName2"];
+    reg2New = [storage2 getRegistrationIdWithName:@"regName2"];
     STAssertEquals(reg2New, @"regId2", @"Expected registrationId to be regId2");
     
     // Get that item and ensure it is accurate
-    reg4 = [storage2 getRegistrationId:@"regName4"];
+    reg4 = [storage2 getRegistrationIdWithName:@"regName4"];
     STAssertNil(reg4, @"reg4 should be Nil after being deleted.");
     
     [storage2 deleteAllRegistrations];
     
     // Get the original item and ensure it is accurate
-    reg2New = [storage2 getRegistrationId:@"regName2"];
+    reg2New = [storage2 getRegistrationIdWithName:@"regName2"];
     STAssertNil(reg2New, @"reg2New should be Nil after being deleted.");
     
     // Get that item and ensure it is accurate
-    reg4 = [storage2 getRegistrationId:@"regName4"];
+    reg4 = [storage2 getRegistrationIdWithName:@"regName4"];
     STAssertNil(reg4, @"reg4 should be Nil after being deleted.");
 }
 

@@ -9,6 +9,8 @@
 
 @interface MSPushHttpTests : SenTestCase
 @property (nonatomic) BOOL done;
+@property (nonatomic) MSClient *client;
+@property (nonatomic) NSURL *url;
 @end
 
 @implementation MSPushHttpTests
@@ -16,8 +18,9 @@
 - (void)setUp
 {
     [super setUp];
+    self.url = [[NSURL alloc] initWithString:@"https://toddtestms.azure-mobile.net"];
+    self.client = [[MSClient alloc] initWithApplicationURL:self.url applicationKey:@"QdffoEwYCblcmkvbInMEkEoSemgJHm31"];
     self.done = NO;
-    // Put setup code here. This method is called before the invocation of each test method in the class.
 }
 
 - (void)tearDown
@@ -28,9 +31,6 @@
 
 - (void)testCreateRegistrationId
 {
-    __block NSURL *url = [[NSURL alloc] initWithString:@"https://toddtestms.azure-mobile.net"];
-    MSClient *client = [[MSClient alloc] initWithApplicationURL:url applicationKey:@"QdffoEwYCblcmkvbInMEkEoSemgJHm31"];
-    
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
     __block NSString *expectedRegistrationId = @"8313603759421994114-6468852488791307573-9";
     NSURL *locationUrl = [[NSURL URLWithString:@"https://toddtestms.azure-mobile.net/push/registrations/"] URLByAppendingPathComponent:expectedRegistrationId];
@@ -44,16 +44,14 @@
     testFilter.ignoreNextFilter = YES;
     testFilter.onInspectRequest = ^(NSURLRequest *request) {
         STAssertTrue([request.HTTPMethod isEqualToString:@"POST"], @"Expected request HTTPMethod to be POST.");
-        NSString *expectedUrl = [[url URLByAppendingPathComponent:@"push/registrationids"] absoluteString];
+        NSString *expectedUrl = [[self.url URLByAppendingPathComponent:@"push/registrationids"] absoluteString];
         STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         return request;
     };
 
-    MSClient *filteredClient = [client clientWithFilter:testFilter];
-    
-    self.done = NO;
+    MSClient *filteredClient = [self.client clientWithFilter:testFilter];
 
-    MSPushHttp *pushHttp = [[MSPushHttp alloc] init:filteredClient];
+    MSPushHttp *pushHttp = [[MSPushHttp alloc] initWithClient:filteredClient];
     [pushHttp createRegistrationId:^(NSString *registrationId, NSError *error) {
         STAssertTrue([expectedRegistrationId isEqualToString:registrationId],
                      @"Expected registrationId to be parsed correctly from returned header.");
@@ -65,8 +63,6 @@
 
 - (void)testCreateRegistration
 {
-    self.done = NO;
-    
     // Create the registration
     NSMutableDictionary *registration = [[NSMutableDictionary alloc] init];
     NSArray *tags = [[NSArray alloc] initWithObjects:@"tag1", @"tag2", nil];
@@ -75,10 +71,6 @@
     [registration setValue:tags forKey:@"tags"];
     __block NSString *registrationId = @"8313603759421994114-6468852488791307573-9";
     [registration setValue:registrationId forKey:@"registrationId"];
-    
-    // Create the original client
-    __block NSURL *url = [[NSURL alloc] initWithString:@"https://toddtestms.azure-mobile.net"];
-    MSClient *client = [[MSClient alloc] initWithApplicationURL:url applicationKey:@"QdffoEwYCblcmkvbInMEkEoSemgJHm31"];
     
     // Create the test filter to allow testing request and returning response without connecting to service
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
@@ -92,7 +84,7 @@
 
     testFilter.onInspectRequest = ^(NSURLRequest *request) {
         STAssertTrue([request.HTTPMethod isEqualToString:@"PUT"], @"Expected request HTTPMethod to be POST.");
-        NSString *expectedUrl = [[[url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:registrationId] absoluteString];
+        NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:registrationId] absoluteString];
         STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         
         NSString *httpBody = [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding];
@@ -104,11 +96,11 @@
         return request;
     };
     
-    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSClient *filteredClient = [self.client clientWithFilter:testFilter];
 
-    MSPushHttp *pushHttp = [[MSPushHttp alloc] init:filteredClient];
+    MSPushHttp *pushHttp = [[MSPushHttp alloc] initWithClient:filteredClient];
     
-    [pushHttp createRegistration:registration
+    [pushHttp upsertRegistration:registration
                       completion:^(NSError *error) {
                           STAssertTrue(!error, @"error is expected to be nil.");
                           self.done = YES;
@@ -119,11 +111,6 @@
 
 - (void)testListRegistrations
 {
-    self.done = NO;
-    
-    NSURL *url = [[NSURL alloc] initWithString:@"https://toddtestms.azure-mobile.net"];
-    MSClient *client = [[MSClient alloc] initWithApplicationURL:url applicationKey:@"QdffoEwYCblcmkvbInMEkEoSemgJHm31"];
-    
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
     NSString* stringData = @"[{\"registrationId\": \"8313603759421994114-6468852488791307573-9\", \"deviceId\":\"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8\", \"tags\":[\"tag1\",\"tag2\"]}]";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
@@ -139,15 +126,15 @@
     testFilter.onInspectRequest = ^(NSURLRequest *request) {
         STAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
         NSString *expectedQuery = @"?deviceId=59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8&platform=apns";
-        NSString *expectedUrl = [[[url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:expectedQuery]  absoluteString];
+        NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:expectedQuery]  absoluteString];
         STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         
         return request;
     };
     
-    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSClient *filteredClient = [self.client clientWithFilter:testFilter];
     
-    MSPushHttp *pushHttp = [[MSPushHttp alloc] init:filteredClient];
+    MSPushHttp *pushHttp = [[MSPushHttp alloc] initWithClient:filteredClient];
     [pushHttp listRegistrations:@"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8"
                      completion:^(NSArray *registrations, NSError *error) {
                          STAssertTrue(!error, @"error is expected to be nil.");
@@ -168,8 +155,6 @@
 - (void)testDeleteRegistrations
 {
     NSString *registrationId = @"8313603759421994114-6468852488791307573-9";
-    NSURL *url = [[NSURL alloc] initWithString:@"https://toddtestms.azure-mobile.net"];
-    MSClient *client = [[MSClient alloc] initWithApplicationURL:url applicationKey:@"QdffoEwYCblcmkvbInMEkEoSemgJHm31"];
     
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
     
@@ -182,15 +167,14 @@
     testFilter.ignoreNextFilter = YES;
     testFilter.onInspectRequest = ^(NSURLRequest *request) {
         STAssertTrue([request.HTTPMethod isEqualToString:@"DELETE"], @"Expected request HTTPMethod to be DELETE.");
-        NSString *expectedUrl = [[[url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:registrationId] absoluteString];
+        NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:registrationId] absoluteString];
         STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         return request;
     };
     
-    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSClient *filteredClient = [self.client clientWithFilter:testFilter];
     
-    self.done = NO;
-    MSPushHttp *pushHttp = [[MSPushHttp alloc] init:filteredClient];
+    MSPushHttp *pushHttp = [[MSPushHttp alloc] initWithClient:filteredClient];
     [pushHttp deleteRegistration:registrationId
                       completion:^(NSError *error) {
                           STAssertTrue(!error, @"error is expected to be nil.");

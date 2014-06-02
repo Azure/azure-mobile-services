@@ -4,19 +4,28 @@
 
 #import <Foundation/Foundation.h>
 
+extern NSString * const NativeRegistrationName;
+
 @interface MSLocalStorage : NSObject
 
 @property (copy, nonatomic) NSString *deviceToken;
 @property (nonatomic) BOOL isRefreshNeeded;
 
 - (MSLocalStorage *)initWithMobileServiceHost:(NSString *)mobileServiceHost;
+
 - (NSArray *)getRegistrationIds;
-- (NSString *)getRegistrationId:(NSString *)registrationName;
+
+- (NSString *)getRegistrationIdWithName:(NSString *)registrationName;
+
 - (void)updateRegistrations:(NSArray *)registrations
                 deviceToken:(NSString *)deviceToken;
-- (void)updateWithRegistrationName:(NSString *)registrationName
+
+- (void)updateRegistrationWithName:(NSString *)registrationName
                     registrationId:(NSString *)registrationId
                        deviceToken:(NSString *)deviceToken;
-- (void)deleteWithRegistrationName:(NSString*)registrationName;
+
+- (void)deleteRegistrationWithName:(NSString *)registrationName;
+
 - (void)deleteAllRegistrations;
+
 @end
