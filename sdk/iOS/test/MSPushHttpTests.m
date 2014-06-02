@@ -102,7 +102,7 @@
     
     [pushHttp upsertRegistration:registration
                       completion:^(NSError *error) {
-                          STAssertTrue(!error, @"error is expected to be nil.");
+                          STAssertNil(error, @"error is expected to be nil.");
                           self.done = YES;
                       }];
     
@@ -137,7 +137,7 @@
     MSPushHttp *pushHttp = [[MSPushHttp alloc] initWithClient:filteredClient];
     [pushHttp listRegistrations:@"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8"
                      completion:^(NSArray *registrations, NSError *error) {
-                         STAssertTrue(!error, @"error is expected to be nil.");
+                         STAssertNil(error, @"error is expected to be nil.");
                          STAssertTrue([registrations[0][@"deviceId"] isEqualToString:@"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8"],
                                      @"deviceId is expected to deserialize correctly.");
                          STAssertTrue([registrations[0][@"registrationId"] isEqualToString:@"8313603759421994114-6468852488791307573-9"],
@@ -177,7 +177,7 @@
     MSPushHttp *pushHttp = [[MSPushHttp alloc] initWithClient:filteredClient];
     [pushHttp deleteRegistration:registrationId
                       completion:^(NSError *error) {
-                          STAssertTrue(!error, @"error is expected to be nil.");
+                          STAssertNil(error, @"error is expected to be nil.");
                           self.done = YES;
                       }];
     

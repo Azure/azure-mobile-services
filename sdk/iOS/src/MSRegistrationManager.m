@@ -97,17 +97,18 @@
 {
     [self createRegistrationId:registration completion:^(NSError *error) {
         if (error) {
-            completion(error);
+            if (completion) {
+                completion(error);
+            }
             return;
         }
         
         [self upsertRegistrationCore:registration
                                retry:NO
                           completion:^(NSError *error) {
-            if (error) {
-                    completion(error);
-                    return;
-            }
+                              if (completion) {
+                                  completion(error);
+                              }
         }];
     }];
 }
@@ -136,12 +137,14 @@
         return;
     }
     
+    // Corrupt local storage in case disconnect occurs in midst of operation
+    [self.storage corruptDefaults];
     [self.pushHttp deleteRegistration:cachedRegistrationId completion:^(NSError *error) {
         if (!error) {
             [self.storage deleteRegistrationWithName:registrationName];
         }
 
-        if (!completion) {
+        if (completion) {
             completion(error);
         }
     }];
@@ -152,8 +155,16 @@
 {
     [self refreshRegistrations:deviceToken completion:^(NSError *error) {
         if (!error) {
+            // Corrupt local storage in case disconnect occurs in midst of operation
+            [self.storage corruptDefaults];
+            
             NSMutableArray *registrationIds = [[self.storage getRegistrationIds] mutableCopy];
             [self recursiveDelete:registrationIds completion:completion];
+            return;
+        }
+        
+        if (completion) {
+            completion(error);
         }
     }];
 }
@@ -163,6 +174,7 @@
 {
     NSString *registrationId = registrationIds[registrationIds.count-1];
     [registrationIds removeLastObject];
+    
     [self.pushHttp deleteRegistration:registrationId completion:^(NSError *error) {
         if (!error) {
             if (registrationIds.count > 0) {
@@ -197,6 +209,8 @@
                         retry:(BOOL)retry
                    completion:(MSCompletionBlock)completion
 {
+    // Corrupt local storage in case disconnect occurs in midst of operation
+    [self.storage corruptDefaults];
     [self.pushHttp upsertRegistration:registration completion:^(NSError *error) {
         if (!error) {
             [self.storage updateRegistrationWithName:registration[@"name"]

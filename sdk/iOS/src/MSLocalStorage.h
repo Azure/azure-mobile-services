@@ -8,8 +8,8 @@ extern NSString * const NativeRegistrationName;
 
 @interface MSLocalStorage : NSObject
 
-@property (copy, nonatomic) NSString *deviceToken;
-@property (nonatomic) BOOL isRefreshNeeded;
+@property (copy, nonatomic, readonly) NSString *deviceToken;
+@property (nonatomic, readonly) BOOL isRefreshNeeded;
 
 - (MSLocalStorage *)initWithMobileServiceHost:(NSString *)mobileServiceHost;
 
@@ -27,5 +27,7 @@ extern NSString * const NativeRegistrationName;
 - (void)deleteRegistrationWithName:(NSString *)registrationName;
 
 - (void)deleteAllRegistrations;
+
+- (void)corruptDefaults;
 
 @end

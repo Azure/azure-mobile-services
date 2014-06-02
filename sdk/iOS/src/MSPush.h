@@ -40,6 +40,7 @@
 /// @{
 
 /// Register for template notififications. deviceToken, name and bodyTemplate are required.
+/// See http://go.microsoft.com/fwlink/?LinkId=401137 for furthur details.
 - (void)registerTemplateWithDeviceToken:(NSData *)deviceToken
                                    name:(NSString *)name
                        jsonBodyTemplate:(NSString *)bodyTemplate

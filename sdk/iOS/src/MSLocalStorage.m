@@ -11,6 +11,8 @@ NSString * const NativeRegistrationName = @"$Default";
 @property (copy, nonatomic) NSString *versionKey;
 @property (copy, nonatomic) NSString *deviceTokenKey;
 @property (copy, nonatomic) NSString *registrationsKey;
+@property (nonatomic, readwrite) BOOL isRefreshNeeded;
+@property (copy, nonatomic, readwrite) NSString *deviceToken;
 @end
 
 @implementation MSLocalStorage
@@ -49,7 +51,7 @@ NSString * const storageVersion = @"v1.0.0";
 {
     [self.registrations setObject:registrationId forKey:registrationName];
     self.deviceToken = deviceToken;
-    [self flush];
+    [self commitDefaults];
 }
 
 - (void)updateRegistrations:(NSArray *)registrations
@@ -67,7 +69,7 @@ NSString * const storageVersion = @"v1.0.0";
     
     self.deviceToken  = deviceToken;
     
-    [self flush];
+    [self commitDefaults];
     
     self.isRefreshNeeded = NO;
 }
@@ -75,13 +77,13 @@ NSString * const storageVersion = @"v1.0.0";
 - (void)deleteRegistrationWithName:(NSString *)registrationName
 {
     [self.registrations removeObjectForKey:registrationName];
-    [self flush];
+    [self commitDefaults];
 }
 
 - (void)deleteAllRegistrations
 {
     [self.registrations removeAllObjects];
-    [self flush];
+    [self commitDefaults];
 }
 
 - (void)readContent
@@ -104,7 +106,17 @@ NSString * const storageVersion = @"v1.0.0";
     }
 }
 
-- (void)flush
+- (void)corruptDefaults
+{
+    [self commitDefaultsWithStorageVersion:nil];
+}
+
+- (void)commitDefaults
+{
+    [self commitDefaultsWithStorageVersion:storageVersion];
+}
+
+- (void)commitDefaultsWithStorageVersion:(NSString *)storageVersion
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     
