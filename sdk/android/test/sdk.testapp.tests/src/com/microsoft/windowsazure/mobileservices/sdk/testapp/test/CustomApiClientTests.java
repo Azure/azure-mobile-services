@@ -313,7 +313,62 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 			assertEquals(p.getAge(), container.getPerson().getAge());
 		}
 	}
-	
+
+	public void testInvokeTypedJsonObjectAsInput() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final JsonObject input = new JsonObject();
+		input.addProperty("firstName", "john");
+		input.addProperty("lastName", "doe");
+		input.addProperty("age", 30);
+
+		runTestOnUiThread(new Runnable() {
+
+			@Override
+			public void run() {
+				MobileServiceClient client = null;
+				try {
+					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+				client = client.withFilter(new EchoFilter());
+
+				client.invokeApi("myApi", input, HttpPost.METHOD_NAME, null, PersonTestObject.class, new ApiOperationCallback<PersonTestObject>() {
+
+					@Override
+					public void onCompleted(PersonTestObject result, Exception exception, ServiceFilterResponse response) {
+						if (exception != null) {
+							container.setException(exception);
+						} else if (result == null) {
+							container.setException(new Exception("Expected one person result"));
+						} else {
+							container.setPerson(result);
+						}
+
+						latch.countDown();
+					}
+				});
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.getException();
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertEquals(input.get("firstName").getAsString(), container.getPerson().getFirstName());
+			assertEquals(input.get("lastName").getAsString(), container.getPerson().getLastName());
+			assertEquals(input.get("age").getAsInt(), container.getPerson().getAge());
+		}
+	}
+
 	public void testInvokeTypedSingleString() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 

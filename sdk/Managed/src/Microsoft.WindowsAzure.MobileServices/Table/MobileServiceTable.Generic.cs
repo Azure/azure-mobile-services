@@ -120,7 +120,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             if (!this.hasIntegerId)
             {
                 string unused;
-                value = RemoveSystemProperties(value, out unused);
+                value = MobileServiceSerializer.RemoveSystemProperties(value, out unused);
             } 
             JToken insertedValue = await this.InsertAsync(value, parameters);
             serializer.Deserialize<T>(insertedValue, instance);
@@ -163,25 +163,10 @@ namespace Microsoft.WindowsAzure.MobileServices
             MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
             JObject value = serializer.Serialize(instance) as JObject;
 
-            JToken updatedValue = null;
-            try
-            {
-                updatedValue = await this.UpdateAsync(value, parameters);
-            }
-            catch (MobileServicePreconditionFailedException ex)
-            {
-                T item = default(T);
-                try
-                {
-                    item = serializer.Deserialize<T>(ex.Value);
-                }
-                catch { }
-
-                throw new MobileServicePreconditionFailedException<T>(ex, item);
-            }
+            JToken updatedValue = await TransformPreconditionFailedException(serializer, () =>this.UpdateAsync(value, parameters));
 
             serializer.Deserialize<T>(updatedValue, instance);
-        }
+        }        
 
         /// <summary>
         /// Deletes an instance from the table.
@@ -219,7 +204,8 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
             JObject value = serializer.Serialize(instance) as JObject;
-            await this.DeleteAsync(value, parameters);
+
+            await this.TransformPreconditionFailedException(serializer, () => this.DeleteAsync(value, parameters));
 
             // Clear the instance id since it's no longer associated with that
             // id on the server (note that reflection is goodly enough to turn
@@ -514,6 +500,28 @@ namespace Microsoft.WindowsAzure.MobileServices
         public async Task<List<T>> ToListAsync()
         {
             return new TotalCountList<T>(await this.ReadAsync());
+        }
+
+        /// <summary>
+        /// Transforms the <see cref="MobileServicePreconditionFailedException"/> to to a <see cref="MobileServicePreconditionFailedException{T}"/>.
+        /// </summary>
+        private async Task<JToken> TransformPreconditionFailedException(MobileServiceSerializer serializer, Func<Task<JToken>> action)
+        {
+            try
+            {
+                return await action();
+            }
+            catch (MobileServicePreconditionFailedException ex)
+            {
+                T item = default(T);
+                try
+                {
+                    item = serializer.Deserialize<T>(ex.Value);
+                }
+                catch { }
+
+                throw new MobileServicePreconditionFailedException<T>(ex, item);
+            }
         }
 
         /// <summary>

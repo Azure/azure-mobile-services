@@ -426,6 +426,85 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task DeleteAsync_ThrowsPreconditionFailedException_WhenMergeConflictOccurs()
+        {
+            await EnsureEmptyTableAsync<ToDoWithSystemPropertiesType>();
+            string id = "an id";
+            IMobileServiceTable table = GetClient().GetTable("stringId_test_table");
+            table.SystemProperties = MobileServiceSystemProperties.Version;
+
+            var item = new JObject() { { "id", id }, { "String", "a value" } };
+            var inserted = await table.InsertAsync(item);
+            item["__version"] = "random";
+
+            MobileServicePreconditionFailedException expectedException = null;
+            try
+            {
+                await table.DeleteAsync(item);
+            }
+            catch (MobileServicePreconditionFailedException ex)
+            {
+                expectedException = ex;
+            }
+            Assert.IsNotNull(expectedException);
+            Assert.AreEqual(expectedException.Value["__version"], inserted["__version"]);
+            Assert.AreEqual(expectedException.Value["String"], inserted["String"]);
+        }
+
+        [AsyncTestMethod]
+        public async Task DeleteAsync_ThrowsPreconditionFailedException_WhenMergeConflictOccurs_Generic()
+        {
+            await EnsureEmptyTableAsync<ToDoWithSystemPropertiesType>();
+
+            string id = "an id";
+            IMobileServiceTable<ToDoWithSystemPropertiesType> table = GetClient().GetTable<ToDoWithSystemPropertiesType>();
+
+            // insert a new item
+            var item = new ToDoWithSystemPropertiesType() { Id = id, String = "a value" };
+            await table.InsertAsync(item);
+
+            Assert.IsNotNull(item.CreatedAt);
+            Assert.IsNotNull(item.UpdatedAt);
+            Assert.IsNotNull(item.Version);
+
+            string version = item.Version;
+
+            // Delete with wrong version
+            item.Version = "abc";
+            item.String = "But wait!";
+            MobileServicePreconditionFailedException<ToDoWithSystemPropertiesType> expectedException = null;
+            try
+            {
+                 await table.DeleteAsync(item);
+            }
+            catch (MobileServicePreconditionFailedException<ToDoWithSystemPropertiesType> exception)
+            {
+                expectedException = exception;
+            }
+
+            Assert.IsNotNull(expectedException);
+            Assert.AreEqual(expectedException.Response.StatusCode, HttpStatusCode.PreconditionFailed);
+
+            string responseContent = await expectedException.Response.Content.ReadAsStringAsync();
+            JToken jtoken = responseContent.ParseToJToken(table.MobileServiceClient.SerializerSettings);
+            string serverVersion = (string)jtoken["__version"];
+            string stringValue = (string)jtoken["String"];
+
+            Assert.AreEqual(version, serverVersion);
+            Assert.AreEqual(stringValue, "a value");
+
+            Assert.IsNotNull(expectedException.Item);
+            Assert.AreEqual(version, expectedException.Item.Version);
+            Assert.AreEqual(stringValue, expectedException.Item.String);
+
+            // Delete one last time with the version from the server
+            item.Version = serverVersion;
+            await table.DeleteAsync(item);
+            
+            Assert.IsNull(item.Id);
+        }
+
+        [AsyncTestMethod]
         public async Task AsyncTableOperationsWithIntegerAsStringIdAgainstIntIdTable()
         {
             await EnsureEmptyTableAsync<ToDoWithStringIdAgainstIntIdTable>();

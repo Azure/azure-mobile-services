@@ -267,6 +267,40 @@ static NSArray *allIdKeys;
     return item;
 }
 
+-(NSArray *) arrayFromData:(NSData *)data
+           orError:(NSError **)error
+{
+    id jsonObject = nil;
+    NSError *localError = nil;
+    
+    // Ensure there is data
+    if (!data) {
+        localError = [self errorForNilData];
+    }
+    else {
+        
+        // Try to deserialize the data; if it fails the error will be set
+        // and item will be nil.
+        jsonObject = [NSJSONSerialization JSONObjectWithData:data
+                                               options:NSJSONReadingAllowFragments
+                                                 error:error];
+        
+        if (jsonObject) {
+            // The data should have been of array type
+            if (![jsonObject isKindOfClass:[NSArray class]]) {
+                jsonObject = nil;
+                localError = [self errorForExpectedArray];
+            }
+        }
+    }
+    
+    if (localError && error) {
+        *error = localError;
+    }
+    
+    return jsonObject;
+}
+
 -(NSInteger) totalCountAndItems:(NSArray **)items
                        fromData:(NSData *)data
                         orError:(NSError **)error
@@ -534,6 +568,12 @@ static NSArray *allIdKeys;
 -(NSError *) errorForExpectedItem
 {
     return [self errorWithDescriptionKey:@"The server did not return the expected item."
+                            andErrorCode:MSExpectedItemWithResponse];
+}
+
+-(NSError *) errorForExpectedArray
+{
+    return [self errorWithDescriptionKey:@"The server did not return object of expected array type."
                             andErrorCode:MSExpectedItemWithResponse];
 }
 

@@ -169,17 +169,7 @@ NSString *const httpDelete = @"DELETE";
                                                         withTable:table];
                 request.itemId = itemId;
             
-                NSString *version = nil;
-                
-                // If string id, cache the version field as we strip it out during serialization
-                if([itemId isKindOfClass:[NSString class]]) {
-                    @try {
-                        version = [item objectForKey:MSSystemColumnVersion];
-                    }
-                    @catch (NSException *exception) {
-                        // Do nothing
-                    }
-                }
+                NSString *version = [self getVersionFromItem:item itemId:itemId];
                 
                 // Create the body or capture the error from serialization
                 NSData *data = [serializer dataFromItem:item
@@ -200,8 +190,7 @@ NSString *const httpDelete = @"DELETE";
                     
                     // Version becomes an etag if passed
                     if(version) {
-                        version = [NSString stringWithFormat:@"\"%@\"", [version stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""]];
-                        [request addValue:version forHTTPHeaderField:@"If-Match"];
+                        [self setVersion:version request:request];
                     }
                 }
             }
@@ -231,6 +220,7 @@ NSString *const httpDelete = @"DELETE";
     // Ensure we can get the item Id
     id itemId = [table.client.serializer itemIdFromItem:item orError:&error];
     if (!error) {
+        NSString *version = [self getVersionFromItem:item itemId:itemId];
         
         // Get the request from the other constructor
         request = [MSTableRequest requestToDeleteItemWithId:itemId
@@ -240,6 +230,11 @@ NSString *const httpDelete = @"DELETE";
         
         // Set the additional properties
         request.item = item;
+        
+        // Version becomes an etag if passed
+        if(version) {
+            [self setVersion:version request:request];
+        }
     }
     
     // If there was an error, call the completion and make sure
@@ -365,6 +360,29 @@ NSString *const httpDelete = @"DELETE";
     request.HTTPMethod = httpGet;
     
     return request;
+}
+
+#pragma mark * Private Static Constructors
+
++ (NSString *)getVersionFromItem:(id)item itemId:(id)itemId
+{
+    // If string id, cache the version field as we strip it out during serialization
+    NSString *version= nil;
+    if([itemId isKindOfClass:[NSString class]]) {
+        @try {
+            version = [item objectForKey:MSSystemColumnVersion];
+        }
+        @catch (NSException *exception) {
+            // Do nothing
+        }
+    }
+    return version;
+}
+
++ (void)setVersion:(NSString *)version request:(MSTableRequest *)request
+{
+    version = [NSString stringWithFormat:@"\"%@\"", [version stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""]];
+    [request addValue:version forHTTPHeaderField:@"If-Match"];
 }
 
 @end

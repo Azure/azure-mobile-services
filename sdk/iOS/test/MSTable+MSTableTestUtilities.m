@@ -126,8 +126,8 @@
              @"id\nwith\n\newline",
              @"id with fowardslash \\",
              @"id with backslash /",
-             @"1/8/2010 8:00:00 AM"
-             @"""idWithQuotes""",
+             @"1/8/2010 8:00:00 AM",
+             @"\"idWithQuotes\"",
              @"?",
              @"\\",
              @"/",

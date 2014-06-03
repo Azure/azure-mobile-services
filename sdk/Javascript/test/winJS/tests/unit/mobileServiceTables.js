@@ -972,6 +972,59 @@ $testGroup('MobileServiceTables.js',
         });
     }),
 
+    $test('del with version')
+    .tag('SystemProperties')
+    .description('Verify that serverItem is set if delete fails with pre-condition failed error.')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers['If-Match'], '"test\\"qu\\"oteAnd\\\\""');
+            callback(null, {
+                status: 412,
+                responseText: '{"id":"abc", "title":"test", "__version":"apple"}'
+            });
+        });
+
+        var table = client.getTable('books');
+        table.systemProperties = WindowsAzure.MobileServiceTable.SystemProperties.Version;
+
+        return table.del({ id: 'my id', value: 'A', __version: 'test"qu"oteAnd\\"' })
+                    .then(function (result) {
+                        $assert.fail('Should have failed');
+                    }, function (error) {
+                        $assert.areEqual(error.serverInstance.__version, 'apple');
+                    });
+    }),
+
+    $test('del with version but without response')
+    .tag('SystemProperties')
+    .description('Verify that serverItem is not set if delete fails with pre-condition failed error but without repsonse body.')
+    .checkAsync(function () {
+        var client = new WindowsAzure.MobileServiceClient("http://www.test.com", "123456abcdefg"),
+
+        client = client.withFilter(function (req, next, callback) {
+            $assert.areEqual(req.headers['If-Match'], '"test\\"qu\\"oteAnd\\\\""');
+            callback(null, {
+                status: 412,
+                responseText: ''
+            });
+        });
+
+        var table = client.getTable('books');
+        table.systemProperties = WindowsAzure.MobileServiceTable.SystemProperties.Version;
+
+        return table.del({ id: 'my id', value: 'A', __version: 'test"qu"oteAnd\\"' })
+                    .then(function (result) {
+                        $assert.fail('Should have failed');
+                    }, function (error) {
+                        // has the server instance key 
+                        $assert.isTrue(Object.keys(error).indexOf('serverInstance') > -1);
+                        // but with null value
+                        $assert.isNull(error.serverInstance);
+                    });
+    }),
+
     $test('Test receiving invalid json')
     .description('Verify error is handled correctly when we receive invalid json')
     .checkAsync(function () {
