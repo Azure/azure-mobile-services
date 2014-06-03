@@ -3,8 +3,7 @@
 // ----------------------------------------------------------------------------
 
 #import <Foundation/Foundation.h>
-#import "MSFilter.h"
-#import "MSTestFilterData.h"
+#import "MSTestFilter.h"
 
 @interface MSMultiRequestTestFilter : NSObject <MSFilter>
 

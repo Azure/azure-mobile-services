@@ -35,7 +35,6 @@
 		AD45B9421934FDD100188AF3 /* MSRegistrationManager.h in Headers */ = {isa = PBXBuildFile; fileRef = AD45B9401934FDD100188AF3 /* MSRegistrationManager.h */; };
 		AD45B9431934FDD100188AF3 /* MSRegistrationManager.m in Sources */ = {isa = PBXBuildFile; fileRef = AD45B9411934FDD100188AF3 /* MSRegistrationManager.m */; };
 		ADA6A4A2193C2CD4000C9425 /* MSPushTests.m in Sources */ = {isa = PBXBuildFile; fileRef = ADA6A4A1193C2CD4000C9425 /* MSPushTests.m */; };
-		ADA6A4A9193C3D3A000C9425 /* MSTestFilterData.m in Sources */ = {isa = PBXBuildFile; fileRef = ADA6A4A8193C3D3A000C9425 /* MSTestFilterData.m */; };
 		ADA6A4AA193C3D5F000C9425 /* MSMultiRequestTestFilter.m in Sources */ = {isa = PBXBuildFile; fileRef = ADA6A4A4193C3C60000C9425 /* MSMultiRequestTestFilter.m */; };
 		ADB659F1190738AB008C638F /* MSLocalStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = ADB659EF190738AB008C638F /* MSLocalStorage.h */; };
 		ADB659F2190738AB008C638F /* MSLocalStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = ADB659F0190738AB008C638F /* MSLocalStorage.m */; };
@@ -149,8 +148,6 @@
 		ADA6A4A1193C2CD4000C9425 /* MSPushTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPushTests.m; sourceTree = "<group>"; };
 		ADA6A4A3193C3C60000C9425 /* MSMultiRequestTestFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSMultiRequestTestFilter.h; sourceTree = "<group>"; };
 		ADA6A4A4193C3C60000C9425 /* MSMultiRequestTestFilter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSMultiRequestTestFilter.m; sourceTree = "<group>"; };
-		ADA6A4A7193C3D3A000C9425 /* MSTestFilterData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSTestFilterData.h; sourceTree = "<group>"; };
-		ADA6A4A8193C3D3A000C9425 /* MSTestFilterData.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTestFilterData.m; sourceTree = "<group>"; };
 		ADB659EF190738AB008C638F /* MSLocalStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSLocalStorage.h; sourceTree = "<group>"; };
 		ADB659F0190738AB008C638F /* MSLocalStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSLocalStorage.m; sourceTree = "<group>"; };
 		E8146640165BE0150038EBE5 /* MSLogin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSLogin.h; sourceTree = "<group>"; };
@@ -299,8 +296,6 @@
 				E8E37903161E2FC500C13F00 /* MSTestFilter.m */,
 				ADA6A4A3193C3C60000C9425 /* MSMultiRequestTestFilter.h */,
 				ADA6A4A4193C3C60000C9425 /* MSMultiRequestTestFilter.m */,
-				ADA6A4A7193C3D3A000C9425 /* MSTestFilterData.h */,
-				ADA6A4A8193C3D3A000C9425 /* MSTestFilterData.m */,
 			);
 			name = Filters;
 			sourceTree = "<group>";
@@ -664,7 +659,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				E8F33B3C16166945002DD7C6 /* WindowsAzureMobileServicesFunctionalTests.m in Sources */,
-				ADA6A4A9193C3D3A000C9425 /* MSTestFilterData.m in Sources */,
 				A214410C182631A500C2E762 /* MSTableFuncTests.m in Sources */,
 				AD0D4FCC1922030E001F4766 /* MSLocalStorageTests.m in Sources */,
 				E8F33B3D1616694C002DD7C6 /* MSQueryTests.m in Sources */,

@@ -38,7 +38,7 @@
 
 - (void)testRegisterNativeInitial
 {
-    MSTestFilterData *testFilterEmptyListRegistrations = [MSTestFilterData new];
+    MSTestFilter *testFilterEmptyListRegistrations = [MSTestFilter new];
     NSString* stringData = @"[]";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -60,7 +60,7 @@
         return request;
     };
     
-    MSTestFilterData *testFilterCreateRegistrationId = [MSTestFilterData new];
+    MSTestFilter *testFilterCreateRegistrationId = [MSTestFilter new];
     __block NSString *expectedRegistrationId = @"8313603759421994114-6468852488791307573-9";
 
     NSURL *locationUrl = [[self.url URLByAppendingPathComponent:@"push/registrations"]
@@ -90,7 +90,7 @@
     [registration setValue:registrationId forKey:@"registrationId"];
     
     // Create the test filter to allow testing request and returning response without connecting to service
-    MSTestFilterData *testFilterUpsertRegistration = [[MSTestFilterData alloc] init];
+    MSTestFilter *testFilterUpsertRegistration = [[MSTestFilter alloc] init];
     
     NSHTTPURLResponse *upsertRegistrationResponse = [[NSHTTPURLResponse alloc]
                                    initWithURL:nil
@@ -198,7 +198,7 @@
 
 - (void)testRegisterTemplateInitial
 {
-    MSTestFilterData *testFilterEmptyListRegistrations = [MSTestFilterData new];
+    MSTestFilter *testFilterEmptyListRegistrations = [MSTestFilter new];
     NSString* stringData = @"[]";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -220,7 +220,7 @@
         return request;
     };
     
-    MSTestFilterData *testFilterCreateRegistrationId = [MSTestFilterData new];
+    MSTestFilter *testFilterCreateRegistrationId = [MSTestFilter new];
     __block NSString *expectedRegistrationId = @"8313603759421994114-6468852488791307573-9";
     
     NSURL *locationUrl = [[self.url URLByAppendingPathComponent:@"push/registrations"]
@@ -250,7 +250,7 @@
     [registration setValue:registrationId forKey:@"registrationId"];
     
     // Create the test filter to allow testing request and returning response without connecting to service
-    MSTestFilterData *testFilterUpsertRegistration = [[MSTestFilterData alloc] init];
+    MSTestFilter *testFilterUpsertRegistration = [[MSTestFilter alloc] init];
     
     NSHTTPURLResponse *upsertRegistrationResponse = [[NSHTTPURLResponse alloc]
                                                      initWithURL:nil
@@ -293,7 +293,7 @@
 
 - (void)testRegisterUpdateWithEmptyStorage
 {
-    MSTestFilterData *testFilterListRegistrations = [MSTestFilterData new];
+    MSTestFilter *testFilterListRegistrations = [MSTestFilter new];
     NSString* stringData = @"[{\"registrationId\":\"8313603759421994114-6468852488791307573-9\", \"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\", \"tags\":[\"tag1\",\"tag2\"]}]";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -325,7 +325,7 @@
     [registration setValue:registrationId forKey:@"registrationId"];
     
     // Create the test filter to allow testing request and returning response without connecting to service
-    MSTestFilterData *testFilterUpsertRegistration = [[MSTestFilterData alloc] init];
+    MSTestFilter *testFilterUpsertRegistration = [[MSTestFilter alloc] init];
     
     NSHTTPURLResponse *upsertRegistrationResponse = [[NSHTTPURLResponse alloc]
                                                      initWithURL:nil
@@ -376,7 +376,7 @@
     [registration setValue:registrationId forKey:@"registrationId"];
     
     // Create the test filter to allow testing request and returning response without connecting to service
-    MSTestFilterData *testFilterUpsertRegistration = [[MSTestFilterData alloc] init];
+    MSTestFilter *testFilterUpsertRegistration = [[MSTestFilter alloc] init];
     
     NSHTTPURLResponse *upsertRegistrationResponse = [[NSHTTPURLResponse alloc]
                                                      initWithURL:nil
@@ -426,7 +426,7 @@
     [registration setValue:registrationId forKey:@"registrationId"];
     
     // Create the test filter to allow testing request and returning response without connecting to service
-    MSTestFilterData *testFilterUpsertRegistrationExpired = [[MSTestFilterData alloc] init];
+    MSTestFilter *testFilterUpsertRegistrationExpired = [[MSTestFilter alloc] init];
     
     NSHTTPURLResponse *upsertRegistrationResponseExpired = [[NSHTTPURLResponse alloc]
                                                      initWithURL:nil
@@ -449,7 +449,7 @@
         return request;
     };
     
-    MSTestFilterData *testFilterCreateRegistrationId = [MSTestFilterData new];
+    MSTestFilter *testFilterCreateRegistrationId = [MSTestFilter new];
     __block NSString *expectedRegistrationId = @"8313603759421994114-6468852488791307573-9";
     
     NSURL *locationUrl = [[self.url URLByAppendingPathComponent:@"push/registrations"]
@@ -470,7 +470,7 @@
     };
     
     // Create the test filter to allow testing request and returning response without connecting to service
-    MSTestFilterData *testFilterUpsertRegistration = [[MSTestFilterData alloc] init];
+    MSTestFilter *testFilterUpsertRegistration = [[MSTestFilter alloc] init];
     
     NSHTTPURLResponse *upsertRegistrationResponse = [[NSHTTPURLResponse alloc]
                                                      initWithURL:nil
@@ -511,7 +511,7 @@
 
 - (void)testDeleteForMissingRegistration
 {
-    MSTestFilterData *testFilterEmptyListRegistrations = [MSTestFilterData new];
+    MSTestFilter *testFilterEmptyListRegistrations = [MSTestFilter new];
     NSString* stringData = @"[]";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -549,7 +549,7 @@
 {
     [self setStorage:[self.url host] deviceToken:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" storageVersion:@"v1.0.0" registrations:[NSDictionary dictionary]];
     
-    MSTestFilterData *testFilterListRegistrations = [MSTestFilterData new];
+    MSTestFilter *testFilterListRegistrations = [MSTestFilter new];
     NSString* stringData = @"[{\"templateName\":\"template1\",\"registrationId\":\"8313603759421994114-6468852488791307573-9\"}]";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -571,7 +571,7 @@
         return request;
     };
     
-    MSTestFilterData *testFilterDeleteRegistration = [MSTestFilterData new];
+    MSTestFilter *testFilterDeleteRegistration = [MSTestFilter new];
     
     NSHTTPURLResponse *deleteResponse = [[NSHTTPURLResponse alloc]
                                    initWithURL:nil
@@ -604,7 +604,7 @@
 {
     [self setStorage:[self.url host] deviceToken:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" storageVersion:@"v1.0.0" registrations:@{@"template1":@"8313603759421994114-6468852488791307573-9"}];
     
-    MSTestFilterData *testFilterDeleteRegistration = [MSTestFilterData new];
+    MSTestFilter *testFilterDeleteRegistration = [MSTestFilter new];
     
     NSHTTPURLResponse *deleteResponse = [[NSHTTPURLResponse alloc]
                                          initWithURL:nil
@@ -636,7 +636,7 @@
 {
     [self setStorage:[self.url host] deviceToken:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" storageVersion:@"v1.0.0" registrations:[NSDictionary dictionary]];
     
-    MSTestFilterData *testFilterListRegistrations = [MSTestFilterData new];
+    MSTestFilter *testFilterListRegistrations = [MSTestFilter new];
     NSString* stringData = @"[{\"templateName\":\"template1\",\"registrationId\":\"8313603759421994114-6468852488791307573-9\"}]";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -658,7 +658,7 @@
         return request;
     };
     
-    MSTestFilterData *testFilterDeleteRegistration = [MSTestFilterData new];
+    MSTestFilter *testFilterDeleteRegistration = [MSTestFilter new];
     
     NSHTTPURLResponse *deleteResponse = [[NSHTTPURLResponse alloc]
                                          initWithURL:nil
@@ -691,7 +691,7 @@
 {
     [self setStorage:[self.url host] deviceToken:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" storageVersion:@"v1.0.0" registrations:[NSDictionary dictionary]];
     
-    MSTestFilterData *testFilterListRegistrations = [MSTestFilterData new];
+    MSTestFilter *testFilterListRegistrations = [MSTestFilter new];
     NSString* stringData = @"[{\"templateName\":\"template1\",\"registrationId\":\"8313603759421994114-6468852488791307573-9\"},{\"templateName\":\"template2\",\"registrationId\":\"8313603759421994114-6468852488791307573-7\"}]";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
@@ -713,7 +713,7 @@
         return request;
     };
     
-    MSTestFilterData *testFilterDeleteRegistration = [MSTestFilterData new];
+    MSTestFilter *testFilterDeleteRegistration = [MSTestFilter new];
     
     NSHTTPURLResponse *deleteResponse = [[NSHTTPURLResponse alloc]
                                          initWithURL:nil
@@ -729,7 +729,7 @@
         return request;
     };
     
-    MSTestFilterData *testFilterDeleteRegistration2 = [MSTestFilterData new];
+    MSTestFilter *testFilterDeleteRegistration2 = [MSTestFilter new];
     
     NSHTTPURLResponse *deleteResponse2 = [[NSHTTPURLResponse alloc]
                                          initWithURL:nil
