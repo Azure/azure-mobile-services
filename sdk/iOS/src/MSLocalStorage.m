@@ -49,7 +49,12 @@ NSString * const storageVersion = @"v1.0.0";
                     registrationId:(NSString *)registrationId
                        deviceToken:(NSString *)deviceToken
 {
-    [self.registrations setObject:registrationId forKey:registrationName];
+    NSString *name = registrationName;
+    if (!name) {
+        name = NativeRegistrationName;
+    }
+    
+    [self.registrations setObject:registrationId forKey:name];
     self.deviceToken = deviceToken;
     [self commitDefaults];
 }
@@ -60,7 +65,7 @@ NSString * const storageVersion = @"v1.0.0";
     self.registrations = [[NSMutableDictionary alloc] init];
     
     for (int i = 0; i < [registrations count]; i++) {
-        NSString *name = registrations[i][@"name"];
+        NSString *name = registrations[i][@"templateName"];
         if (!name) {
             name = NativeRegistrationName;
         }

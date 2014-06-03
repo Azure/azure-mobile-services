@@ -41,8 +41,7 @@
     }
     
     NSMutableDictionary *registration = [self createBaseRegistration:deviceToken
-                                                                tags:tags
-                                                                name:NativeRegistrationName];
+                                                                tags:tags];
     [self.registrationManager upsertRegistration:registration
                                       completion:completion];
 }
@@ -85,8 +84,7 @@
     }
     
     NSMutableDictionary *registration = [self createBaseRegistration:deviceToken
-                                                                tags:tags
-                                                                name:name];
+                                                                tags:tags];
     [registration setValue:name forKey:@"templateName"];
     [registration setValue:bodyTemplate forKey:@"templateBody"];
     [registration setValue:expiryTemplate forKey:@"expiry"];
@@ -138,7 +136,6 @@
 
 - (NSMutableDictionary *)createBaseRegistration:(NSData *)deviceToken
                                            tags:(NSArray *)tags
-                                           name:(NSString *)name
 {
     NSMutableDictionary *registration = [[NSMutableDictionary alloc] init];
     [registration setValue:[self convertDeviceToken:deviceToken] forKey:@"deviceId"];
@@ -146,7 +143,6 @@
         [registration setValue:tags forKey:@"tags"];
     }
     [registration setValue:@"apns" forKey:@"platform"];
-    [registration setValue:name forKey:@"name"];
     return registration;
 }
 

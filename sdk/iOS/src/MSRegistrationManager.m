@@ -55,6 +55,13 @@
         refreshDeviceToken = self.storage.deviceToken;
     }
     
+    if (!refreshDeviceToken) {
+        if (completion) {
+            completion([self errorForCorruptLocalStorage]);
+        }
+        return;
+    }
+    
     [self.pushHttp listRegistrations:refreshDeviceToken completion:^(NSArray *registrations, NSError *error) {
         if (!error) {
             [self.storage updateRegistrations:registrations deviceToken:refreshDeviceToken];
@@ -69,7 +76,12 @@
 - (void)firstRegistration:(NSMutableDictionary *)registration
                completion:(MSCompletionBlock)completion
 {
-    NSString *cachedRegistrationId = [self.storage getRegistrationIdWithName:registration[@"name"]];
+    NSString *name = registration[@"templateName"];
+    if (!name) {
+        name = NativeRegistrationName;
+    }
+    
+    NSString *cachedRegistrationId = [self.storage getRegistrationIdWithName:name];
     if (cachedRegistrationId) {
         [registration setValue:cachedRegistrationId forKey:@"registrationId"];
         [self upsertRegistrationCore:registration
@@ -212,7 +224,7 @@
     [self.storage forceRefreshUntilSaved];
     [self.pushHttp upsertRegistration:registration completion:^(NSError *error) {
         if (!error) {
-            [self.storage updateRegistrationWithName:registration[@"name"]
+            [self.storage updateRegistrationWithName:registration[@"templateName"]
                                       registrationId:registration[@"registrationId"]
                                          deviceToken:registration[@"deviceId"]];
         } else if (retry && [error.userInfo[MSErrorResponseKey] statusCode] == 410) {
@@ -229,6 +241,15 @@
 
 -(BOOL)isWhitespace:(NSString *)string{
     return [[string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] == 0;
+}
+
+-(NSError *) errorForCorruptLocalStorage
+{
+    NSDictionary *userInfo = @{ NSLocalizedDescriptionKey:@"Deleting registration name cannot be completed due to corrupt local storage. Recommend using registerNativeWithDeviceToken, registerTemplateWithDeviceToken or unregisterAllWithDeviceToken to rebuild local storage from service." };
+    
+    return [NSError errorWithDomain:MSErrorDomain
+                               code:MSPushLocalStorageCorrupt
+                           userInfo:userInfo];
 }
 
 @end

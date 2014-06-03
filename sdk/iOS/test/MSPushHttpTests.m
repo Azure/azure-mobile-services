@@ -18,7 +18,7 @@
 - (void)setUp
 {
     [super setUp];
-    self.url = [[NSURL alloc] initWithString:@"https://toddtestms.azure-mobile.net"];
+    self.url = [[NSURL alloc] initWithString:@"https://aurl.azure-mobilefake.net"];
     self.client = [[MSClient alloc] initWithApplicationURL:self.url applicationKey:@"QdffoEwYCblcmkvbInMEkEoSemgJHm31"];
     self.done = NO;
 }
@@ -33,7 +33,7 @@
 {
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
     __block NSString *expectedRegistrationId = @"8313603759421994114-6468852488791307573-9";
-    NSURL *locationUrl = [[NSURL URLWithString:@"https://toddtestms.azure-mobile.net/push/registrations/"] URLByAppendingPathComponent:expectedRegistrationId];
+    NSURL *locationUrl = [[self.url URLByAppendingPathComponent:@"push/registrations/"] URLByAppendingPathComponent:expectedRegistrationId];
     NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
                                    initWithURL:nil
                                    statusCode:201

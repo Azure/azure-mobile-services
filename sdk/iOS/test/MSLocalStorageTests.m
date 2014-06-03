@@ -23,7 +23,7 @@
     [defaults synchronize];
 }
 
--(void)testBasicState
+-(void)testInitialLoadUpdateGetAndReload
 {
     // initialize MSLocalStorage
     MSLocalStorage *storage = [[MSLocalStorage alloc] initWithMobileServiceHost:@"foo.mobileservices.net"];
@@ -38,25 +38,25 @@
     NSString *reg = [storage getRegistrationIdWithName:@"regName"];
     STAssertEquals(reg, @"regId", @"Expected registrationId to be regId");
     
-    // Update by registration name
+    // Update by registration name to add second registration
     [storage updateRegistrationWithName:@"regName2" registrationId:@"regId2" deviceToken:@"token4"];
     STAssertEquals(storage.deviceToken, @"token4", @"Token is expected to be set correctly after updateWithRegistrationName is called.");
     
-    // Get that item and ensure it is accurate
+    // Get second item and ensure it is accurate
     NSString *reg2New = [storage getRegistrationIdWithName:@"regName2"];
     STAssertEquals(reg2New, @"regId2", @"Expected registrationId to be regId2");
 
-    // Add a new registration name
-    [storage updateRegistrationWithName:@"regName4" registrationId:@"regId4" deviceToken:@"token4"];
+    // Update original registration name
+    [storage updateRegistrationWithName:@"regName" registrationId:@"regId4" deviceToken:@"token4"];
     STAssertEquals(storage.deviceToken, @"token4", @"Token is expected to be set correctly after updateWithRegistrationName is called.");
     
     // Get the original item and ensure it is accurate
-    reg2New = [storage getRegistrationIdWithName:@"regName2"];
-    STAssertEquals(reg2New, @"regId2", @"Expected registrationId to be regId2");
+    reg2New = [storage getRegistrationIdWithName:@"regName"];
+    STAssertEquals(reg2New, @"regId4", @"Expected registrationId to be regId4");
 
     // Get that item and ensure it is accurate
-    NSString *reg4 = [storage getRegistrationIdWithName:@"regName4"];
-    STAssertEquals(reg4, @"regId4", @"Expected registrationId to be regId4");
+    reg2New = [storage getRegistrationIdWithName:@"regName2"];
+    STAssertEquals(reg2New, @"regId2", @"Expected registrationId to be regId2");
     
     // initialize MSLocalStorage to test loading and saving to local storage
     MSLocalStorage *storage2 = [[MSLocalStorage alloc] initWithMobileServiceHost:@"foo.mobileservices.net"];
@@ -68,42 +68,104 @@
     STAssertEquals(reg2New, @"regId2", @"Expected registrationId to be regId2");
     
     // Get that item and ensure it is accurate
-    reg4 = [storage2 getRegistrationIdWithName:@"regName4"];
-    STAssertEquals(reg4, @"regId4", @"Expected registrationId to be regId4");
+    reg2New = [storage2 getRegistrationIdWithName:@"regName"];
+    STAssertEquals(reg2New, @"regId4", @"Expected registrationId to be regId4");
+}
+
+-(void)testBasicState
+{
+    // initialize MSLocalStorage
+    MSLocalStorage *storage = [[MSLocalStorage alloc] initWithMobileServiceHost:@"foo.mobileservices.net"];
+    STAssertNil(storage.deviceToken, @"Device Token should be nil when MSLocalStorage is initialized with empty defaults.");
+    STAssertEquals(storage.isRefreshNeeded, YES, @"isRefreshNeeded should be YES when MSLocalStorage is initialized with empty defaults.");
+    
+    // Add an item
+    [storage updateRegistrationWithName:@"regName" registrationId:@"regId" deviceToken:@"token"];
+    STAssertEquals(storage.deviceToken, @"token", @"Token is expected to be set correctly after updateWithRegistrationName is called.");
+    
+    // Add an item
+    [storage updateRegistrationWithName:@"regName2" registrationId:@"regId2" deviceToken:@"token"];
+    STAssertEquals(storage.deviceToken, @"token", @"Token is expected to be set correctly after updateWithRegistrationName is called.");
     
     // Test delete
-    [storage2 deleteRegistrationWithName:@"regName4"];
+    [storage deleteRegistrationWithName:@"regName"];
     
     // Get the original item and ensure it is accurate
-    reg2New = [storage2 getRegistrationIdWithName:@"regName2"];
-    STAssertEquals(reg2New, @"regId2", @"Expected registrationId to be regId2");
+    NSString *reg = [storage getRegistrationIdWithName:@"regName2"];
+    STAssertEquals(reg, @"regId2", @"Expected registrationId to be regId2");
     
     // Get that item and ensure it is accurate
-    reg4 = [storage2 getRegistrationIdWithName:@"regName4"];
-    STAssertNil(reg4, @"reg4 should be Nil after being deleted.");
+    reg = [storage getRegistrationIdWithName:@"regName"];
+    STAssertNil(reg, @"reg should be Nil after being deleted.");
+}
+
+- (void)testDeleteAllRegistrations
+{
+    // initialize MSLocalStorage
+    MSLocalStorage *storage = [[MSLocalStorage alloc] initWithMobileServiceHost:@"foo.mobileservices.net"];
+    STAssertNil(storage.deviceToken, @"Device Token should be nil when MSLocalStorage is initialized with empty defaults.");
+    STAssertEquals(storage.isRefreshNeeded, YES, @"isRefreshNeeded should be YES when MSLocalStorage is initialized with empty defaults.");
     
-    // Re-initialize storage from storage
-    storage2 = [[MSLocalStorage alloc] initWithMobileServiceHost:@"foo.mobileservices.net"];
-    STAssertEquals(storage2.deviceToken, @"token4", @"Token is expected to be set correctly loaded from storage.");
-    STAssertEquals(storage2.isRefreshNeeded, NO, @"isRefreshNeeded should be NO when MSLocalStorage is initialized with empty defaults.");
+    // Updare registrations
+    [storage updateRegistrations:@[@{@"templateName":@"regName", @"registrationId":@"regId"},@{@"registrationId":@"regId2"}] deviceToken:@"token2"];
+    STAssertEquals(storage.deviceToken, @"token2", @"Token is expected to be set correctly after updateWithRegistrationName is called.");
+    STAssertEquals(storage.isRefreshNeeded, NO, @"isRefreshNeeded should be NO after updateRegistrations.");
+    
+    // Get that item and ensure it is accurate
+    NSString *reg = [storage getRegistrationIdWithName:@"regName"];
+    STAssertEquals(reg, @"regId", @"Expected registrationId to be regId");
+    
+    // Get that item and ensure it is accurate
+    reg = [storage getRegistrationIdWithName:@"$Default"];
+    STAssertEquals(reg, @"regId2", @"Expected registrationId to be regId2");
+    
+    [storage deleteAllRegistrations];
     
     // Get the original item and ensure it is accurate
-    reg2New = [storage2 getRegistrationIdWithName:@"regName2"];
-    STAssertEquals(reg2New, @"regId2", @"Expected registrationId to be regId2");
+    reg = [storage getRegistrationIdWithName:@"regName"];
+    STAssertNil(reg, @"reg should be Nil after being deleted.");
     
     // Get that item and ensure it is accurate
-    reg4 = [storage2 getRegistrationIdWithName:@"regName4"];
-    STAssertNil(reg4, @"reg4 should be Nil after being deleted.");
+    reg = [storage getRegistrationIdWithName:@"$Default"];
+    STAssertNil(reg, @"$Default should be Nil after being deleted.");
+}
+
+- (void)testForceRefreshUntilSaved
+{
+    // initialize MSLocalStorage
+    MSLocalStorage *storage = [[MSLocalStorage alloc] initWithMobileServiceHost:@"foo.mobileservices.net"];
+    STAssertNil(storage.deviceToken, @"Device Token should be nil when MSLocalStorage is initialized with empty defaults.");
+    STAssertEquals(storage.isRefreshNeeded, YES, @"isRefreshNeeded should be YES when MSLocalStorage is initialized with empty defaults.");
     
-    [storage2 deleteAllRegistrations];
+    // Updare registrations
+    [storage updateRegistrations:@[@{@"templateName":@"regName", @"registrationId":@"regId"},@{@"registrationId":@"regId2"}] deviceToken:@"token2"];
+    STAssertEquals(storage.deviceToken, @"token2", @"Token is expected to be set correctly after updateWithRegistrationName is called.");
+    STAssertEquals(storage.isRefreshNeeded, NO, @"isRefreshNeeded should be NO after updateRegistrations.");
     
-    // Get the original item and ensure it is accurate
-    reg2New = [storage2 getRegistrationIdWithName:@"regName2"];
-    STAssertNil(reg2New, @"reg2New should be Nil after being deleted.");
+    [storage forceRefreshUntilSaved];
+    STAssertEquals(storage.deviceToken, @"token2", @"Token is expected to be set correctly after updateWithRegistrationName is called.");
+    STAssertEquals(storage.isRefreshNeeded, NO, @"isRefreshNeeded should be NO after updateRegistrations.");
     
-    // Get that item and ensure it is accurate
-    reg4 = [storage2 getRegistrationIdWithName:@"regName4"];
-    STAssertNil(reg4, @"reg4 should be Nil after being deleted.");
+    storage = [[MSLocalStorage alloc] initWithMobileServiceHost:@"foo.mobileservices.net"];
+    STAssertEquals(storage.deviceToken, @"token2", @"Token is expected to be set correctly after updateWithRegistrationName is called.");
+    STAssertEquals(storage.isRefreshNeeded, YES, @"isRefreshNeeded should be YES when MSLocalStorage is initialized with empty defaults.");
+}
+
+- (void)testGetRegistrationIds
+{
+    // initialize MSLocalStorage
+    MSLocalStorage *storage = [[MSLocalStorage alloc] initWithMobileServiceHost:@"foo.mobileservices.net"];
+    STAssertNil(storage.deviceToken, @"Device Token should be nil when MSLocalStorage is initialized with empty defaults.");
+    STAssertEquals(storage.isRefreshNeeded, YES, @"isRefreshNeeded should be YES when MSLocalStorage is initialized with empty defaults.");
+    
+    // Updare registrations
+    [storage updateRegistrations:@[@{@"templateName":@"regName", @"registrationId":@"regId"},@{@"registrationId":@"regId2"}] deviceToken:@"token2"];
+    STAssertEquals(storage.deviceToken, @"token2", @"Token is expected to be set correctly after updateWithRegistrationName is called.");
+    STAssertEquals(storage.isRefreshNeeded, NO, @"isRefreshNeeded should be NO after updateRegistrations.");
+    
+    NSArray *registrationIds = [storage getRegistrationIds];
+    STAssertEquals(registrationIds[0], @"regId2", @"RegistrationIds should match those in storage.");
+    STAssertEquals(registrationIds[1], @"regId", @"RegistrationIds should match those in storage.");
 }
 
 @end
