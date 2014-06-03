@@ -6,6 +6,7 @@
 #import "MSFilter.h"
 
 typedef NSURLRequest *(^MSInspectRequestBlock)(NSURLRequest *request);
+typedef NSData *(^MSInspectResponseDataBlock)(NSURLRequest *request, NSData *data);
 
 @interface MSTestFilter : NSObject <MSFilter>
 
@@ -15,5 +16,6 @@ typedef NSURLRequest *(^MSInspectRequestBlock)(NSURLRequest *request);
 @property (nonatomic, strong)   NSData *dataToUse;
 @property (nonatomic, strong)   NSError *errorToUse;
 @property (nonatomic)           BOOL ignoreNextFilter;
+@property (nonatomic, copy)     MSInspectResponseDataBlock onInspectResponseData;
 
 @end

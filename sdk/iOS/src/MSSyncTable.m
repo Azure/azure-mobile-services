@@ -66,7 +66,14 @@
 
 -(void)purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion
 {
-    [self.client.syncContext purgeWithQuery:query completion:completion];
+    // If no query, purge all records in the table by default
+    if (query == nil) {
+        MSQuery *allRecords = [[MSQuery alloc] initWithSyncTable:self];
+        [self.client.syncContext purgeWithQuery:allRecords completion:completion];
+        
+    } else {
+        [self.client.syncContext purgeWithQuery:query completion:completion];
+    }
 }
 
 #pragma mark * Public Read Methods
