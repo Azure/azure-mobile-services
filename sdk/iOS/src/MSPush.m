@@ -33,6 +33,13 @@
                                  tags:(NSArray *)tags
                            completion:(MSCompletionBlock)completion
 {
+    if (!deviceToken) {
+        if (completion) {
+            completion([self errorForMissingParameterWithParameterName:@"deviceToken"]);
+        }
+        return;
+    }
+    
     NSMutableDictionary *registration = [self createBaseRegistration:deviceToken
                                                                 tags:tags
                                                                 name:NativeRegistrationName];
@@ -43,8 +50,8 @@
 - (void) unregisterNativeWithCompletion:(MSCompletionBlock)completion
 {
     [self.registrationManager deleteRegistrationWithName:NativeRegistrationName
-                                   retry:YES
-                              completion:completion];
+                                                   retry:YES
+                                              completion:completion];
 }
 
 #pragma  mark * Public Template Registration Methods
@@ -56,6 +63,27 @@
                                    tags:(NSArray *)tags
                              completion:(MSCompletionBlock)completion
 {
+    if (!deviceToken) {
+        if (completion) {
+            completion([self errorForMissingParameterWithParameterName:@"deviceToken"]);
+        }
+        return;
+    }
+    
+    if (!name) {
+        if (completion) {
+            completion([self errorForMissingParameterWithParameterName:@"name"]);
+        }
+        return;
+    }
+    
+    if (!bodyTemplate) {
+        if (completion) {
+            completion([self errorForMissingParameterWithParameterName:@"bodyTemplate"]);
+        }
+        return;
+    }
+    
     NSMutableDictionary *registration = [self createBaseRegistration:deviceToken
                                                                 tags:tags
                                                                 name:name];
@@ -69,6 +97,13 @@
 
 - (void) unregisterTemplateWithName:(NSString *)name completion:(MSCompletionBlock)completion
 {
+    if (!name) {
+        if (completion) {
+            completion([self errorForMissingParameterWithParameterName:@"name"]);
+        }
+        return;
+    }
+    
     [self.registrationManager deleteRegistrationWithName:name
                                    retry:YES
                               completion:completion];
@@ -78,6 +113,13 @@
 
 - (void) unregisterAllWithDeviceToken:(NSData *)deviceToken completion:(MSCompletionBlock)completion
 {
+    if (!deviceToken) {
+        if (completion) {
+            completion([self errorForMissingParameterWithParameterName:@"deviceToken"]);
+        }
+        return;
+    }
+    
     [self.registrationManager deleteAllWithDeviceToken:[self convertDeviceToken:deviceToken]
                                                       completion:completion];
 }
@@ -86,10 +128,11 @@
 
 - (NSString *)convertDeviceToken:(NSData *)deviceTokenData
 {
-    NSString* newDeviceToken = [[[[[deviceTokenData description]
-                                   stringByReplacingOccurrencesOfString:@"<"withString:@""]
-                                  stringByReplacingOccurrencesOfString:@">" withString:@""]
-                                 stringByReplacingOccurrencesOfString: @" " withString: @""] uppercaseString];
+    NSCharacterSet *hexFormattingCharacters = [NSCharacterSet characterSetWithCharactersInString:@"< >"];
+    NSString* newDeviceToken = [[[[deviceTokenData description]
+                                 stringByTrimmingCharactersInSet:hexFormattingCharacters]
+                                stringByReplacingOccurrencesOfString:@" " withString:@""]
+                                uppercaseString];
     return newDeviceToken;
 }
 
@@ -105,6 +148,18 @@
     [registration setValue:@"apns" forKey:@"platform"];
     [registration setValue:name forKey:@"name"];
     return registration;
+}
+
+-(NSError *) errorForMissingParameterWithParameterName:(NSString *)parameterName
+{
+    NSString *descriptionKey = @"'%@' is a required parameter.";
+    NSString *descriptionFormat = NSLocalizedString(descriptionKey, nil);
+    NSString *description = [NSString stringWithFormat:descriptionFormat, parameterName];
+    NSDictionary *userInfo = @{ NSLocalizedDescriptionKey :description };
+    
+    return [NSError errorWithDomain:MSErrorDomain
+                               code:MSPushRequiredParameter
+                           userInfo:userInfo];
 }
 
 @end

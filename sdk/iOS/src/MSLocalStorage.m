@@ -64,6 +64,9 @@ NSString * const storageVersion = @"v1.0.0";
         if (!name) {
             name = NativeRegistrationName;
         }
+        
+        /// All registrations passed to this method will have registrationId as they
+        /// come directly from notification hub where registrationId is the key field.
         [self.registrations setObject:registrations[i][@"registrationId"] forKey:name];
     }
     
@@ -106,7 +109,7 @@ NSString * const storageVersion = @"v1.0.0";
     }
 }
 
-- (void)corruptDefaults
+- (void)forceRefreshUntilSaved
 {
     [self commitDefaultsWithStorageVersion:nil];
 }

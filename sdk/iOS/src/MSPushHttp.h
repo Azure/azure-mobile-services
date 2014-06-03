@@ -11,16 +11,21 @@ typedef void (^MSListRegistrationsBlock)(NSArray *registrations, NSError *error)
 
 @interface MSPushHttp : NSObject
 
-- (MSPushHttp*)initWithClient:(MSClient *)client;
+/// Initialize an MSPushHttp instance with the specified MSClient.
+- (MSPushHttp *)initWithClient:(MSClient *)client;
 
+/// Make the http call to create a registrationId.
 - (void)createRegistrationId:(MSCreateRegistrationIdBlock)completion;
 
+/// Make the http call to upsert a registration.
 - (void)upsertRegistration:(NSDictionary *)registration
                 completion:(MSCompletionBlock)completion;
 
+/// Make the http call to retrieve registrations for the specified deviceToken.
 - (void)listRegistrations:(NSString *)deviceToken
                completion:(MSListRegistrationsBlock)completion;
 
+/// Make the http call to delete the registration having specified registrationId.
 - (void)deleteRegistration:(NSString *)registrationId
                 completion:(MSCompletionBlock)completion;
 

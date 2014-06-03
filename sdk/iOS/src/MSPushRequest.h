@@ -7,6 +7,7 @@
 
 @interface MSPushRequest : NSMutableURLRequest
 
+/// Initialize an MSPushRequest with url, data and method.
 - (MSPushRequest *)initWithURL:(NSURL *)url
                           data:(NSData *)data
                     HTTPMethod:(NSString *)method;

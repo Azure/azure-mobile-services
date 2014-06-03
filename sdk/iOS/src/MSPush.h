@@ -61,7 +61,7 @@
 
 /// Unregister for all native and template registrations. deviceToken is required.
 - (void)unregisterAllWithDeviceToken:(NSData *)deviceToken
-                           completion:(MSCompletionBlock)completion;
+                          completion:(MSCompletionBlock)completion;
 
 /// @}
 

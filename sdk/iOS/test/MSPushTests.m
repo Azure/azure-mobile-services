@@ -19,7 +19,7 @@
     [super setUp];
     self.url = [[NSURL alloc] initWithString:@"https://toddtestms.azure-mobile.net"];
     self.client = [[MSClient alloc] initWithApplicationURL:self.url applicationKey:@"QdffoEwYCblcmkvbInMEkEoSemgJHm31"];
-    
+
     // Clear storage
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     for (NSString* key in [[defaults dictionaryRepresentation] allKeys]) {
@@ -52,10 +52,10 @@
     testFilterEmptyListRegistrations.dataToUse = data;
     testFilterEmptyListRegistrations.onInspectRequest = ^(NSURLRequest *request) {
         STAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
-        NSString *expectedQuery = @"?deviceId=59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8&platform=apns";
+        NSString *expectedQuery = @"?deviceId=59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8&platform=apns";
         NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:expectedQuery]  absoluteString];
         
-        STAssertTrue([expectedUrl caseInsensitiveCompare:[[request URL] absoluteString]] == NSOrderedSame, @"Expected request to have expected Uri.");
+        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         
         return request;
     };
@@ -83,7 +83,7 @@
     // Create the registration
     NSMutableDictionary *registration = [[NSMutableDictionary alloc] init];
     NSArray *tags = [[NSArray alloc] initWithObjects:@"tag1", @"tag2", nil];
-    [registration setValue:@"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8" forKey:@"deviceId"];
+    [registration setValue:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" forKey:@"deviceId"];
     [registration setValue:@"apns" forKey:@"platform"];
     [registration setValue:tags forKey:@"tags"];
     __block NSString *registrationId = @"8313603759421994114-6468852488791307573-9";
@@ -106,7 +106,7 @@
         
         NSString *httpBody = [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding];
         STAssertTrue([httpBody rangeOfString:registrationId].location == NSNotFound, @"The request body should not included registrationId.");
-        STAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8\""].location != NSNotFound,
+        STAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\""].location != NSNotFound,
                      @"The request body should include deviceId.");
         STAssertTrue([httpBody rangeOfString:@"\"platform\":\"apns\""].location != NSNotFound, @"The request body should include platform.");
         STAssertTrue([httpBody rangeOfString:@"\"tags\":[\"tag1\",\"tag2\"]"].location != NSNotFound, @"The request body should include tags.");
@@ -119,17 +119,19 @@
                                testFilterUpsertRegistration];
     MSClient *filteredClient = [self.client clientWithFilter:testFilter];
     
-    NSData *deviceToken = [self bytesFromHexString:@"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8"];
+    NSData *deviceToken = [self bytesFromHexString:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8"];
     [filteredClient.push registerNativeWithDeviceToken:deviceToken tags:@[@"tag1",@"tag2"] completion:^(NSError *error) {
-        STAssertNil(error, @"No error");
+        STAssertNil(error, @"Error should be nil %@", error.description);
         self.done = YES;
     }];
+    
+    STAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testRegisterUpdateWithEmptyStorage
 {
     MSTestFilterData *testFilterListRegistrations = [MSTestFilterData new];
-    NSString* stringData = @"[{\"registrationId\": \"8313603759421994114-6468852488791307573-9\", \"deviceId\":\"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8\", \"tags\":[\"tag1\",\"tag2\"]}]";
+    NSString* stringData = @"[{\"registrationId\": \"8313603759421994114-6468852488791307573-9\", \"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\", \"tags\":[\"tag1\",\"tag2\"]}]";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
     NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
@@ -142,10 +144,10 @@
     testFilterListRegistrations.dataToUse = data;
     testFilterListRegistrations.onInspectRequest = ^(NSURLRequest *request) {
         STAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
-        NSString *expectedQuery = @"?deviceId=59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8&platform=apns";
+        NSString *expectedQuery = @"?deviceId=59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8&platform=apns";
         NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:expectedQuery]  absoluteString];
         
-        STAssertTrue([expectedUrl caseInsensitiveCompare:[[request URL] absoluteString]] == NSOrderedSame, @"Expected request to have expected Uri.");
+        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         
         return request;
     };
@@ -153,7 +155,7 @@
     // Create the registration
     NSMutableDictionary *registration = [[NSMutableDictionary alloc] init];
     NSArray *tags = [[NSArray alloc] initWithObjects:@"tag1", @"tag2", nil];
-    [registration setValue:@"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8" forKey:@"deviceId"];
+    [registration setValue:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" forKey:@"deviceId"];
     [registration setValue:@"apns" forKey:@"platform"];
     [registration setValue:tags forKey:@"tags"];
     __block NSString *registrationId = @"8313603759421994114-6468852488791307573-9";
@@ -176,7 +178,7 @@
         
         NSString *httpBody = [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding];
         STAssertTrue([httpBody rangeOfString:registrationId].location == NSNotFound, @"The request body should not included registrationId.");
-        STAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8\""].location != NSNotFound,
+        STAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\""].location != NSNotFound,
                      @"The request body should include deviceId.");
         STAssertTrue([httpBody rangeOfString:@"\"platform\":\"apns\""].location != NSNotFound, @"The request body should include platform.");
         STAssertTrue([httpBody rangeOfString:@"\"tags\":[\"tag1\",\"tag2\"]"].location != NSNotFound, @"The request body should include tags.");
@@ -188,21 +190,23 @@
                                testFilterUpsertRegistration];
     MSClient *filteredClient = [self.client clientWithFilter:testFilter];
     
-    NSData *deviceToken = [self bytesFromHexString:@"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8"];
+    NSData *deviceToken = [self bytesFromHexString:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8"];
     [filteredClient.push registerNativeWithDeviceToken:deviceToken tags:@[@"tag1",@"tag2"] completion:^(NSError *error) {
-        STAssertNil(error, @"No error");
+        STAssertNil(error, @"Error should be nil %@", error.description);
         self.done = YES;
     }];
+    
+    STAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testRegisterUpdateWithRegistrationInStorage
 {
-    [self setStorage:[self.url host] deviceToken:@"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8" storageVersion:@"v1.0.0" registrations:@{@"$Default": @"8313603759421994114-6468852488791307573-9"}];
+    [self setStorage:[self.url host] deviceToken:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" storageVersion:@"v1.0.0" registrations:@{@"$Default": @"8313603759421994114-6468852488791307573-9"}];
     
     // Create the registration
     NSMutableDictionary *registration = [[NSMutableDictionary alloc] init];
     NSArray *tags = [[NSArray alloc] initWithObjects:@"tag1", @"tag2", nil];
-    [registration setValue:@"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8" forKey:@"deviceId"];
+    [registration setValue:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" forKey:@"deviceId"];
     [registration setValue:@"apns" forKey:@"platform"];
     [registration setValue:tags forKey:@"tags"];
     __block NSString *registrationId = @"8313603759421994114-6468852488791307573-9";
@@ -225,7 +229,7 @@
         
         NSString *httpBody = [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding];
         STAssertTrue([httpBody rangeOfString:registrationId].location == NSNotFound, @"The request body should not included registrationId.");
-        STAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8\"" options:NSCaseInsensitiveSearch].location != NSNotFound,
+        STAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\""].location != NSNotFound,
                      @"The request body should include deviceId.");
         STAssertTrue([httpBody rangeOfString:@"\"platform\":\"apns\""].location != NSNotFound, @"The request body should include platform.");
         STAssertTrue([httpBody rangeOfString:@"\"tags\":[\"tag1\",\"tag2\"]"].location != NSNotFound, @"The request body should include tags.");
@@ -236,21 +240,23 @@
     testFilter.testFilters = @[testFilterUpsertRegistration];
     MSClient *filteredClient = [self.client clientWithFilter:testFilter];
     
-    NSData *deviceToken = [self bytesFromHexString:@"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8"];
+    NSData *deviceToken = [self bytesFromHexString:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8"];
     [filteredClient.push registerNativeWithDeviceToken:deviceToken tags:@[@"tag1",@"tag2"] completion:^(NSError *error) {
-        STAssertNil(error, @"No error");
+        STAssertNil(error, @"Error should be nil %@", error.description);
         self.done = YES;
     }];
+
+    STAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 - (void)testRegisterUpdateWithRegistrationInStorageExpiredRegistrationId
 {
-    [self setStorage:[self.url host] deviceToken:@"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8" storageVersion:@"v1.0.0" registrations:@{@"$Default": @"8313603759421994114-6468852488791307573-9"}];
+    [self setStorage:[self.url host] deviceToken:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" storageVersion:@"v1.0.0" registrations:@{@"$Default": @"8313603759421994114-6468852488791307573-9"}];
     
     // Create the registration
     NSMutableDictionary *registration = [[NSMutableDictionary alloc] init];
     NSArray *tags = [[NSArray alloc] initWithObjects:@"tag1", @"tag2", nil];
-    [registration setValue:@"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8" forKey:@"deviceId"];
+    [registration setValue:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" forKey:@"deviceId"];
     [registration setValue:@"apns" forKey:@"platform"];
     [registration setValue:tags forKey:@"tags"];
     __block NSString *registrationId = @"8313603759421994114-6468852488791307573-9";
@@ -273,7 +279,7 @@
         
         NSString *httpBody = [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding];
         STAssertTrue([httpBody rangeOfString:registrationId].location == NSNotFound, @"The request body should not included registrationId.");
-        STAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8\"" options:NSCaseInsensitiveSearch].location != NSNotFound,
+        STAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\""].location != NSNotFound,
                      @"The request body should include deviceId.");
         STAssertTrue([httpBody rangeOfString:@"\"platform\":\"apns\""].location != NSNotFound, @"The request body should include platform.");
         STAssertTrue([httpBody rangeOfString:@"\"tags\":[\"tag1\",\"tag2\"]"].location != NSNotFound, @"The request body should include tags.");
@@ -317,7 +323,7 @@
         
         NSString *httpBody = [[NSString alloc] initWithData:request.HTTPBody encoding:NSUTF8StringEncoding];
         STAssertTrue([httpBody rangeOfString:registrationId].location == NSNotFound, @"The request body should not included registrationId.");
-        STAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8\"" options:NSCaseInsensitiveSearch].location != NSNotFound,
+        STAssertTrue([httpBody rangeOfString:@"\"deviceId\":\"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8\""].location != NSNotFound,
                      @"The request body should include deviceId.");
         STAssertTrue([httpBody rangeOfString:@"\"platform\":\"apns\""].location != NSNotFound, @"The request body should include platform.");
         STAssertTrue([httpBody rangeOfString:@"\"tags\":[\"tag1\",\"tag2\"]"].location != NSNotFound, @"The request body should include tags.");
@@ -331,11 +337,13 @@
                                testFilterUpsertRegistration];
     MSClient *filteredClient = [self.client clientWithFilter:testFilter];
     
-    NSData *deviceToken = [self bytesFromHexString:@"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8"];
+    NSData *deviceToken = [self bytesFromHexString:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8"];
     [filteredClient.push registerNativeWithDeviceToken:deviceToken tags:@[@"tag1",@"tag2"] completion:^(NSError *error) {
-        STAssertNil(error, @"No error");
+        STAssertNil(error, @"Error should be nil %@", error.description);
         self.done = YES;
     }];
+
+    STAssertTrue([self waitForTest:15], @"Test timed out.");
 }
 
 -(BOOL) waitForTest:(NSTimeInterval)testDuration {

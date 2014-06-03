@@ -31,7 +31,7 @@
     if (self.storage.isRefreshNeeded)
     {
         [self refreshRegistrations:registration[@"deviceId"] completion:^(NSError *error) {
-            if (!error) {
+            if (error) {
                 if (completion) {
                     completion(error);
                 }
@@ -56,14 +56,13 @@
     }
     
     [self.pushHttp listRegistrations:refreshDeviceToken completion:^(NSArray *registrations, NSError *error) {
-        if (error) {
-            if (completion) {
-                completion(error);
-            }
-            return;
+        if (!error) {
+            [self.storage updateRegistrations:registrations deviceToken:refreshDeviceToken];
         }
         
-        [self.storage updateRegistrations:registrations deviceToken:refreshDeviceToken];
+        if (completion) {
+            completion(error);
+        }
     }];
 }
 
@@ -138,7 +137,7 @@
     }
     
     // Corrupt local storage in case disconnect occurs in midst of operation
-    [self.storage corruptDefaults];
+    [self.storage forceRefreshUntilSaved];
     [self.pushHttp deleteRegistration:cachedRegistrationId completion:^(NSError *error) {
         if (!error) {
             [self.storage deleteRegistrationWithName:registrationName];
@@ -156,7 +155,7 @@
     [self refreshRegistrations:deviceToken completion:^(NSError *error) {
         if (!error) {
             // Corrupt local storage in case disconnect occurs in midst of operation
-            [self.storage corruptDefaults];
+            [self.storage forceRefreshUntilSaved];
             
             NSMutableArray *registrationIds = [[self.storage getRegistrationIds] mutableCopy];
             [self recursiveDelete:registrationIds completion:completion];
@@ -210,7 +209,7 @@
                    completion:(MSCompletionBlock)completion
 {
     // Corrupt local storage in case disconnect occurs in midst of operation
-    [self.storage corruptDefaults];
+    [self.storage forceRefreshUntilSaved];
     [self.pushHttp upsertRegistration:registration completion:^(NSError *error) {
         if (!error) {
             [self.storage updateRegistrationWithName:registration[@"name"]
