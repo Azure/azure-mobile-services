@@ -598,12 +598,12 @@ public class MobileServiceSyncContext {
 						for (JsonElement element : elements) {
 							this.mStore.upsert(tableName, element.getAsJsonObject());
 						}
-					}
 
-					originalTop -= elements.size();
-					top = originalTop > 1000 ? 1000 : originalTop;
-					skip += elements.size();
-					count -= elements.size();
+						originalTop -= elements.size();
+						top = originalTop > 1000 ? 1000 : originalTop;
+						skip += elements.size();
+						count -= elements.size();
+					}
 
 					if (count <= 0) {
 						allProcessed = true;

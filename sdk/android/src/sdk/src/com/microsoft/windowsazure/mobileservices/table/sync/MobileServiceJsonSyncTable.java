@@ -38,6 +38,10 @@ public class MobileServiceJsonSyncTable {
 
 	private String mName;
 
+	public String getName() {
+		return mName;
+	}
+
 	private MobileServiceClient mClient;
 
 	public MobileServiceJsonSyncTable(String name, MobileServiceClient client) {
@@ -300,7 +304,7 @@ public class MobileServiceJsonSyncTable {
 	private JsonObject insertContext(JsonObject item) throws Throwable {
 		JsonObject newItem = validateIdOnInsert(item);
 
-		this.mClient.getSyncContext().insert(this.mName, newItem.get("id").getAsString(), item);
+		this.mClient.getSyncContext().insert(this.mName, newItem.get("id").getAsString(), newItem);
 
 		return newItem;
 	}

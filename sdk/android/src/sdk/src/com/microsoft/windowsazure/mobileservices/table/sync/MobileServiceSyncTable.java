@@ -44,6 +44,11 @@ public class MobileServiceSyncTable<E> {
 	public MobileServiceSyncTable(String name, MobileServiceClient client, Class<E> clazz) {
 		this.mInternalTable = new MobileServiceJsonSyncTable(name, client);
 		this.mClazz = clazz;
+		this.mClient = client;
+	}
+
+	public String getName() {
+		return mInternalTable.getName();
 	}
 
 	/**
