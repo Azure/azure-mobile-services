@@ -28,7 +28,7 @@ public class MobileServicePushFailedException extends Exception {
 		this.mPushCompletionResult = pushCompletionResult;
 	}
 
-	MobileServicePushCompletionResult getPushCompletionResult() {
+	public MobileServicePushCompletionResult getPushCompletionResult() {
 		return this.mPushCompletionResult;
 	}
 }

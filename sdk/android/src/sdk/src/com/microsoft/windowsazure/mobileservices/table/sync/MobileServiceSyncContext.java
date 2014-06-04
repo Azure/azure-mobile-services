@@ -239,12 +239,34 @@ public class MobileServiceSyncContext {
 
 	/**
 	 * Returns the number of pending operations that are not yet pushed to
-	 * remote table.
+	 * remote tables.
 	 * 
 	 * @return The number of pending operations
+	 * @throws Throwable
 	 */
-	public int getPendingOperations() {
-		return -1;
+	public int getPendingOperations() throws Throwable {
+
+		int result = -1;
+
+		this.mInitLock.readLock().lock();
+
+		try {
+			ensureCorrectlyInitialized();
+
+			// get SHARED access to op lock
+			this.mOpLock.readLock().lock();
+
+			try {
+				result = this.mOpQueue.countPending();
+			} finally {
+				this.mOpLock.readLock().unlock();
+			}
+
+		} finally {
+			this.mInitLock.readLock().unlock();
+		}
+
+		return result;
 	}
 
 	/**

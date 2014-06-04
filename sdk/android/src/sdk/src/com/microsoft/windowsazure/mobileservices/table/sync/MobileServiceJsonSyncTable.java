@@ -312,7 +312,7 @@ public class MobileServiceJsonSyncTable {
 	private void updateContext(JsonObject item) throws Throwable {
 		JsonObject newItem = validateIdOnUpdateOrDelete(item);
 
-		this.mClient.getSyncContext().update(this.mName, newItem.get("id").getAsString(), item);
+		this.mClient.getSyncContext().update(this.mName, newItem.get("id").getAsString(), newItem);
 	}
 
 	private void deleteContext(JsonObject item) throws Throwable {
