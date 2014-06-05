@@ -32,6 +32,7 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 public class ServiceFilterRequestMock implements ServiceFilterRequest {
 	private ServiceFilterResponse responseToUse;
 	private Boolean hasErrorOnExecute;
+	private Exception exceptionToThrow;
 
 	public ServiceFilterRequestMock(ServiceFilterResponse response) {
 		this.responseToUse = response;
@@ -87,7 +88,12 @@ public class ServiceFilterRequestMock implements ServiceFilterRequest {
 	@Override
 	public ServiceFilterResponse execute() throws Exception {
 		if (this.hasErrorOnExecute) {
-			throw new MobileServiceException("Error while processing request");
+
+			if (exceptionToThrow == null) {
+				throw new MobileServiceException("Error while processing request");
+			} else {
+				throw exceptionToThrow;
+			}
 		}
 
 		return this.responseToUse;
@@ -99,6 +105,14 @@ public class ServiceFilterRequestMock implements ServiceFilterRequest {
 
 	public void setHasErrorOnExecute(Boolean hasErrorOnExecute) {
 		this.hasErrorOnExecute = hasErrorOnExecute;
+	}
+
+	public Exception getExceptionToThrow() {
+		return exceptionToThrow;
+	}
+
+	public void setExceptionToThrow(Exception exceptionToThrow) {
+		this.exceptionToThrow = exceptionToThrow;
 	}
 
 	@Override
