@@ -70,7 +70,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public long PendingOperations
         {
-            get { return this.opQueue.PendingOperations; }
+            get 
+            { 
+                if (!this.IsInitialized)
+                {
+                    return 0;
+                }
+                return this.opQueue.PendingOperations; 
+            }
         }
 
         public async Task InitializeAsync(IMobileServiceLocalStore store, IMobileServiceSyncHandler handler)
