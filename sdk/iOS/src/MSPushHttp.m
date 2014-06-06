@@ -73,8 +73,8 @@
                 completion:(MSCompletionBlock)completion
 {
     NSString *registrationId = registration[@"registrationId"];
-    NSURL *url = [self.client.applicationURL URLByAppendingPathComponent:@"push/registrations"];
-    url = [url URLByAppendingPathComponent:registrationId];
+    NSString *urlPath =[NSString stringWithFormat:@"push/registrations/%@", registrationId];
+    NSURL *url = [self.client.applicationURL URLByAppendingPathComponent:urlPath];
     [registration removeObjectForKey:@"registrationId"];
     
     NSString *name = registration[@"name"];
@@ -94,6 +94,9 @@
         responseCompletion =
         ^(NSHTTPURLResponse *response, NSData *data, NSError *error)
         {
+            [registration setValue:name forKey:@"name"];
+            [registration setValue:registrationId forKey:@"registrationId"];
+            
             if (!error) {
                 [connection isSuccessfulResponse:response
                                             data:data
@@ -105,8 +108,6 @@
             connection = nil;
             
             if (completion) {
-                [registration setValue:name forKey:@"name"];
-                [registration setValue:registrationId forKey:@"registrationId"];
                 completion(error);
             }
         };
@@ -120,14 +121,11 @@
     [connection start];
 }
 
-- (void)listRegistrations:(NSString *)deviceToken
+- (void)registrationsForDeviceToken:(NSString *)deviceToken
                completion:(MSListRegistrationsBlock)completion
 {
-    NSString *query = @"?deviceId=";
-    query = [query stringByAppendingString:deviceToken];
-    query = [query stringByAppendingString:@"&platform=apns"];
-    NSURL *url = [self.client.applicationURL URLByAppendingPathComponent:@"push/registrations"];
-    url = [url URLByAppendingPathComponent:query];
+    NSString *queryAndUrlPath = [NSString stringWithFormat:@"push/registrations?deviceId=%@&platform=apns", deviceToken];
+    NSURL *url = [self.client.applicationURL URLByAppendingPathComponent:queryAndUrlPath];
     
     MSPushRequest *request = [[MSPushRequest alloc] initWithURL:url
                                                                data:nil
@@ -167,11 +165,11 @@
     [connection start];
 }
 
-- (void)deleteRegistration:(NSString *)registrationId
+- (void)deleteRegistrationById:(NSString *)registrationId
                 completion:(MSCompletionBlock)completion
 {
-    NSURL *url = [self.client.applicationURL URLByAppendingPathComponent:@"push/registrations"];
-    url = [url URLByAppendingPathComponent:registrationId];
+    NSString *urlPath = [NSString stringWithFormat:@"push/registrations/%@", registrationId];
+    NSURL *url = [self.client.applicationURL URLByAppendingPathComponent:urlPath];
     
     MSPushRequest *request = [[MSPushRequest alloc] initWithURL:url
                                                                data:nil

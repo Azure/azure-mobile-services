@@ -114,11 +114,6 @@ NSString * const storageVersion = @"v1.0.0";
     }
 }
 
-- (void)forceRefreshUntilSaved
-{
-    [self commitDefaultsWithStorageVersion:nil];
-}
-
 - (void)commitDefaults
 {
     [self commitDefaultsWithStorageVersion:storageVersion];

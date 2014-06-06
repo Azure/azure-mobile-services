@@ -36,8 +36,4 @@ extern NSString * const NativeRegistrationName;
 /// Delete all registrations.
 - (void)deleteAllRegistrations;
 
-/// Force the isRefreshNeeded bit to be set to true when storage is next loaded.
-/// This setting is set to false again when any update/delete is called.
-- (void)forceRefreshUntilSaved;
-
 @end

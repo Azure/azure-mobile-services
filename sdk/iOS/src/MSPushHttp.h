@@ -22,11 +22,11 @@ typedef void (^MSListRegistrationsBlock)(NSArray *registrations, NSError *error)
                 completion:(MSCompletionBlock)completion;
 
 /// Make the http call to retrieve registrations for the specified deviceToken.
-- (void)listRegistrations:(NSString *)deviceToken
+- (void)registrationsForDeviceToken:(NSString *)deviceToken
                completion:(MSListRegistrationsBlock)completion;
 
 /// Make the http call to delete the registration having specified registrationId.
-- (void)deleteRegistration:(NSString *)registrationId
+- (void)deleteRegistrationById:(NSString *)registrationId
                 completion:(MSCompletionBlock)completion;
 
 @end

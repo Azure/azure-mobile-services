@@ -130,27 +130,6 @@
     STAssertNil(reg, @"$Default should be Nil after being deleted.");
 }
 
-- (void)testForceRefreshUntilSaved
-{
-    // initialize MSLocalStorage
-    MSLocalStorage *storage = [[MSLocalStorage alloc] initWithMobileServiceHost:@"foo.mobileservices.net"];
-    STAssertNil(storage.deviceToken, @"Device Token should be nil when MSLocalStorage is initialized with empty defaults.");
-    STAssertEquals(storage.isRefreshNeeded, YES, @"isRefreshNeeded should be YES when MSLocalStorage is initialized with empty defaults.");
-    
-    // Updare registrations
-    [storage updateRegistrations:@[@{@"templateName":@"regName", @"registrationId":@"regId"},@{@"registrationId":@"regId2"}] deviceToken:@"token2"];
-    STAssertEquals(storage.deviceToken, @"token2", @"Token is expected to be set correctly after updateWithRegistrationName is called.");
-    STAssertEquals(storage.isRefreshNeeded, NO, @"isRefreshNeeded should be NO after updateRegistrations.");
-    
-    [storage forceRefreshUntilSaved];
-    STAssertEquals(storage.deviceToken, @"token2", @"Token is expected to be set correctly after updateWithRegistrationName is called.");
-    STAssertEquals(storage.isRefreshNeeded, NO, @"isRefreshNeeded should be NO after updateRegistrations.");
-    
-    storage = [[MSLocalStorage alloc] initWithMobileServiceHost:@"foo.mobileservices.net"];
-    STAssertEquals(storage.deviceToken, @"token2", @"Token is expected to be set correctly after updateWithRegistrationName is called.");
-    STAssertEquals(storage.isRefreshNeeded, YES, @"isRefreshNeeded should be YES when MSLocalStorage is initialized with empty defaults.");
-}
-
 - (void)testGetRegistrationIds
 {
     // initialize MSLocalStorage

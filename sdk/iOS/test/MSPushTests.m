@@ -52,10 +52,10 @@
     testFilterEmptyListRegistrations.dataToUse = data;
     testFilterEmptyListRegistrations.onInspectRequest = ^(NSURLRequest *request) {
         STAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
-        NSString *expectedQuery = @"?deviceId=59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8&platform=apns";
-        NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:expectedQuery]  absoluteString];
+        NSString *expectedQueryAndPath = @"push/registrations?deviceId=59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8&platform=apns";
+        NSString *expectedUrl = [[self.url URLByAppendingPathComponent:expectedQueryAndPath]  absoluteString];
         
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri %@, but found %@.", expectedUrl, [request URL]);
         
         return request;
     };
@@ -82,7 +82,7 @@
     
     // Create the registration
     NSMutableDictionary *registration = [[NSMutableDictionary alloc] init];
-    NSArray *tags = [[NSArray alloc] initWithObjects:@"tag1", @"tag2", nil];
+    NSArray *tags = @[@"tag1", @"tag2"];
     [registration setValue:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" forKey:@"deviceId"];
     [registration setValue:@"apns" forKey:@"platform"];
     [registration setValue:tags forKey:@"tags"];
@@ -212,8 +212,8 @@
     testFilterEmptyListRegistrations.dataToUse = data;
     testFilterEmptyListRegistrations.onInspectRequest = ^(NSURLRequest *request) {
         STAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
-        NSString *expectedQuery = @"?deviceId=59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8&platform=apns";
-        NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:expectedQuery]  absoluteString];
+        NSString *expectedQueryAndPath = @"push/registrations?deviceId=59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8&platform=apns";
+        NSString *expectedUrl = [[self.url URLByAppendingPathComponent:expectedQueryAndPath]  absoluteString];
         
         STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
         
@@ -242,7 +242,7 @@
     
     // Create the registration
     NSMutableDictionary *registration = [[NSMutableDictionary alloc] init];
-    NSArray *tags = [[NSArray alloc] initWithObjects:@"tag1", @"tag2", nil];
+    NSArray *tags = @[@"tag1", @"tag2"];
     [registration setValue:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" forKey:@"deviceId"];
     [registration setValue:@"apns" forKey:@"platform"];
     [registration setValue:tags forKey:@"tags"];
@@ -307,17 +307,17 @@
     testFilterListRegistrations.dataToUse = data;
     testFilterListRegistrations.onInspectRequest = ^(NSURLRequest *request) {
         STAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
-        NSString *expectedQuery = @"?deviceId=59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8&platform=apns";
-        NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:expectedQuery]  absoluteString];
+        NSString *expectedQueryAndPath = @"push/registrations?deviceId=59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8&platform=apns";
+        NSString *expectedUrl = [[self.url URLByAppendingPathComponent:expectedQueryAndPath] absoluteString];
         
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri %@, but found %@.", expectedUrl, [request URL]);
         
         return request;
     };
     
     // Create the registration
     NSMutableDictionary *registration = [[NSMutableDictionary alloc] init];
-    NSArray *tags = [[NSArray alloc] initWithObjects:@"tag1", @"tag2", nil];
+    NSArray *tags = @[@"tag1", @"tag2"];
     [registration setValue:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" forKey:@"deviceId"];
     [registration setValue:@"apns" forKey:@"platform"];
     [registration setValue:tags forKey:@"tags"];
@@ -368,7 +368,7 @@
     
     // Create the registration
     NSMutableDictionary *registration = [[NSMutableDictionary alloc] init];
-    NSArray *tags = [[NSArray alloc] initWithObjects:@"tag1", @"tag2", nil];
+    NSArray *tags = @[@"tag1", @"tag2"];
     [registration setValue:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" forKey:@"deviceId"];
     [registration setValue:@"apns" forKey:@"platform"];
     [registration setValue:tags forKey:@"tags"];
@@ -418,7 +418,7 @@
     
     // Create the registration
     NSMutableDictionary *registration = [[NSMutableDictionary alloc] init];
-    NSArray *tags = [[NSArray alloc] initWithObjects:@"tag1", @"tag2", nil];
+    NSArray *tags = @[@"tag1", @"tag2"];
     [registration setValue:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8" forKey:@"deviceId"];
     [registration setValue:@"apns" forKey:@"platform"];
     [registration setValue:tags forKey:@"tags"];
@@ -538,7 +538,7 @@
     MSClient *filteredClient = [self.client clientWithFilter:testFilter];
     
     [filteredClient.push unregisterTemplateWithName:@"template1" completion:^(NSError *error) {
-        STAssertEquals(error.code, MSPushLocalStorageCorrupt, @"Error code should be MSPushLocalStorageCorrupt.");
+        STAssertNil(error, @"Missing local registration is a no-op on delete");
         self.done = YES;
     }];
     
@@ -705,10 +705,10 @@
     testFilterListRegistrations.dataToUse = data;
     testFilterListRegistrations.onInspectRequest = ^(NSURLRequest *request) {
         STAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
-        NSString *expectedQuery = @"?deviceId=59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8&platform=apns";
-        NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:expectedQuery]  absoluteString];
+        NSString *expectedQueryAndPath = @"push/registrations?deviceId=59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8&platform=apns";
+        NSString *expectedUrl = [[self.url URLByAppendingPathComponent:expectedQueryAndPath]  absoluteString];
         
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri %@, but found %@.", expectedUrl, [request URL]);
         
         return request;
     };

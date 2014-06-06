@@ -32,7 +32,7 @@
 - (void)testCreateRegistrationId
 {
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
-    __block NSString *expectedRegistrationId = @"8313603759421994114-6468852488791307573-9";
+    NSString *expectedRegistrationId = @"8313603759421994114-6468852488791307573-9";
     NSURL *locationUrl = [[self.url URLByAppendingPathComponent:@"push/registrations/"] URLByAppendingPathComponent:expectedRegistrationId];
     NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
                                    initWithURL:nil
@@ -65,11 +65,11 @@
 {
     // Create the registration
     NSMutableDictionary *registration = [[NSMutableDictionary alloc] init];
-    NSArray *tags = [[NSArray alloc] initWithObjects:@"tag1", @"tag2", nil];
+    NSArray *tags = @[@"tag1", @"tag2"];
     [registration setValue:@"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8" forKey:@"deviceId"];
     [registration setValue:@"apns" forKey:@"platform"];
     [registration setValue:tags forKey:@"tags"];
-    __block NSString *registrationId = @"8313603759421994114-6468852488791307573-9";
+    NSString *registrationId = @"8313603759421994114-6468852488791307573-9";
     [registration setValue:registrationId forKey:@"registrationId"];
     
     // Create the test filter to allow testing request and returning response without connecting to service
@@ -125,9 +125,9 @@
     testFilter.dataToUse = data;
     testFilter.onInspectRequest = ^(NSURLRequest *request) {
         STAssertTrue([request.HTTPMethod isEqualToString:@"GET"], @"Expected request HTTPMethod to be GET.");
-        NSString *expectedQuery = @"?deviceId=59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8&platform=apns";
-        NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:expectedQuery]  absoluteString];
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        NSString *expectedQueryAndPath = @"push/registrations?deviceId=59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8&platform=apns";
+        NSString *expectedUrl = [[self.url URLByAppendingPathComponent:expectedQueryAndPath]  absoluteString];
+        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri %@, but got %@.", expectedUrl, [request URL]);
         
         return request;
     };
@@ -135,7 +135,7 @@
     MSClient *filteredClient = [self.client clientWithFilter:testFilter];
     
     MSPushHttp *pushHttp = [[MSPushHttp alloc] initWithClient:filteredClient];
-    [pushHttp listRegistrations:@"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8"
+    [pushHttp registrationsForDeviceToken:@"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8"
                      completion:^(NSArray *registrations, NSError *error) {
                          STAssertNil(error, @"error is expected to be nil.");
                          STAssertTrue([registrations[0][@"deviceId"] isEqualToString:@"59d31b14081b92daa98fad91edc0e61fc23767d5b90892c4f22df56e312045c8"],
@@ -175,7 +175,7 @@
     MSClient *filteredClient = [self.client clientWithFilter:testFilter];
     
     MSPushHttp *pushHttp = [[MSPushHttp alloc] initWithClient:filteredClient];
-    [pushHttp deleteRegistration:registrationId
+    [pushHttp deleteRegistrationById:registrationId
                       completion:^(NSError *error) {
                           STAssertNil(error, @"error is expected to be nil.");
                           self.done = YES;

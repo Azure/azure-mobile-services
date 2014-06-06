@@ -49,7 +49,6 @@
 - (void) unregisterNativeWithCompletion:(MSCompletionBlock)completion
 {
     [self.registrationManager deleteRegistrationWithName:NativeRegistrationName
-                                                   retry:YES
                                               completion:completion];
 }
 
@@ -103,7 +102,6 @@
     }
     
     [self.registrationManager deleteRegistrationWithName:name
-                                   retry:YES
                               completion:completion];
 }
 
@@ -126,7 +124,7 @@
 
 - (NSString *)convertDeviceToken:(NSData *)deviceTokenData
 {
-    NSCharacterSet *hexFormattingCharacters = [NSCharacterSet characterSetWithCharactersInString:@"< >"];
+    NSCharacterSet *hexFormattingCharacters = [NSCharacterSet characterSetWithCharactersInString:@"<>"];
     NSString* newDeviceToken = [[[[deviceTokenData description]
                                  stringByTrimmingCharactersInSet:hexFormattingCharacters]
                                 stringByReplacingOccurrencesOfString:@" " withString:@""]

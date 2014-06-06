@@ -18,10 +18,7 @@
                 completion:(MSCompletionBlock)completion;
 
 /// Delete the registration with the specified name.
-/// If retry is YES and registration is not in local storage,
-/// then refresh local storage and try again with retry NO.
 - (void)deleteRegistrationWithName:(NSString *)registrationName
-                             retry:(BOOL)retry
                         completion:(MSCompletionBlock)completion;
 
 /// Delete all registrations for the specified deviceToken.

@@ -56,10 +56,11 @@
 
 #pragma  mark * Public Unregister All Registration Methods
 
-/// @name Unregistering All Registrations
+/// @name Debug utilities--Unregistering All Registrations
 /// @{
 
 /// Unregister for all native and template registrations. deviceToken is required.
+/// NOT RECOMMENDED FOR USE IN PRODUCTION APPLICATON.
 - (void)unregisterAllWithDeviceToken:(NSData *)deviceToken
                           completion:(MSCompletionBlock)completion;
 

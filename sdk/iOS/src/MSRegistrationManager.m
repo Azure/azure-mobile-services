@@ -55,14 +55,7 @@
         refreshDeviceToken = self.storage.deviceToken;
     }
     
-    if (!refreshDeviceToken) {
-        if (completion) {
-            completion([self errorForCorruptLocalStorage]);
-        }
-        return;
-    }
-    
-    [self.pushHttp listRegistrations:refreshDeviceToken completion:^(NSArray *registrations, NSError *error) {
+    [self.pushHttp registrationsForDeviceToken:refreshDeviceToken completion:^(NSArray *registrations, NSError *error) {
         if (!error) {
             [self.storage updateRegistrations:registrations deviceToken:refreshDeviceToken];
         }
@@ -125,32 +118,18 @@
 }
 
 - (void)deleteRegistrationWithName:(NSString *)registrationName
-                             retry:(BOOL)retry
                         completion:(MSCompletionBlock)completion
 {
     NSString *cachedRegistrationId = [self.storage getRegistrationIdWithName:registrationName];
     if (!cachedRegistrationId) {
-        if (retry)
-        {
-            [self refreshRegistrations:nil completion:^(NSError *error) {
-                if (error) {
-                    if (completion) {
-                        completion(error);
-                    }
-                    return;
-                }
-                
-                [self deleteRegistrationWithName:registrationName retry:NO completion:completion];
-            }];
-        } else if (completion) {
+        if (completion) {
             completion(nil);
         }
         return;
     }
     
-    // Corrupt local storage in case disconnect occurs in midst of operation
-    [self.storage forceRefreshUntilSaved];
-    [self.pushHttp deleteRegistration:cachedRegistrationId completion:^(NSError *error) {
+    
+    [self.pushHttp deleteRegistrationById:cachedRegistrationId completion:^(NSError *error) {
         if (!error) {
             [self.storage deleteRegistrationWithName:registrationName];
         }
@@ -166,9 +145,6 @@
 {
     [self refreshRegistrations:deviceToken completion:^(NSError *error) {
         if (!error) {
-            // Corrupt local storage in case disconnect occurs in midst of operation
-            [self.storage forceRefreshUntilSaved];
-            
             NSMutableArray *registrationIds = [[self.storage getRegistrationIds] mutableCopy];
             [self recursiveDelete:registrationIds completion:completion];
             return;
@@ -186,7 +162,7 @@
     NSString *registrationId = registrationIds[registrationIds.count-1];
     [registrationIds removeLastObject];
     
-    [self.pushHttp deleteRegistration:registrationId completion:^(NSError *error) {
+    [self.pushHttp deleteRegistrationById:registrationId completion:^(NSError *error) {
         if (!error) {
             if (registrationIds.count > 0) {
                 [self recursiveDelete:registrationIds completion:completion];
@@ -207,6 +183,9 @@
 {
     [self.pushHttp createRegistrationId:^(NSString *registrationId, NSError *error) {
         if (!error) {
+            [self.storage updateRegistrationWithName:registration[@"templateName"]
+                                      registrationId:registration[@"registrationId"]
+                                         deviceToken:registration[@"deviceId"]];
             [registration setValue:registrationId forKey:@"registrationId"];
         }
     
@@ -220,13 +199,9 @@
                         retry:(BOOL)retry
                    completion:(MSCompletionBlock)completion
 {
-    // Corrupt local storage in case disconnect occurs in midst of operation
-    [self.storage forceRefreshUntilSaved];
     [self.pushHttp upsertRegistration:registration completion:^(NSError *error) {
         if (!error) {
-            [self.storage updateRegistrationWithName:registration[@"templateName"]
-                                      registrationId:registration[@"registrationId"]
-                                         deviceToken:registration[@"deviceId"]];
+            
         } else if (retry && [error.userInfo[MSErrorResponseKey] statusCode] == 410) {
             // evaluate if error has 410
             [self expiredRegistration:registration completion:completion];
@@ -241,15 +216,6 @@
 
 -(BOOL)isWhitespace:(NSString *)string{
     return [[string stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]] length] == 0;
-}
-
--(NSError *) errorForCorruptLocalStorage
-{
-    NSDictionary *userInfo = @{ NSLocalizedDescriptionKey:@"Deleting registration name cannot be completed due to corrupt local storage. Recommend using registerNativeWithDeviceToken, registerTemplateWithDeviceToken or unregisterAllWithDeviceToken to rebuild local storage from service." };
-    
-    return [NSError errorWithDomain:MSErrorDomain
-                               code:MSPushLocalStorageCorrupt
-                           userInfo:userInfo];
 }
 
 @end
