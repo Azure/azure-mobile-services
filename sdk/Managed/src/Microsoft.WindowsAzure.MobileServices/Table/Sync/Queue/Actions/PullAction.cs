@@ -58,8 +58,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 }
             }
 
-            await this.Store.UpsertAsync(this.Table.TableName, upsertList, fromServer: true);
-            await this.Store.DeleteAsync(this.Table.TableName, deletedIds);
+            if (upsertList.Any())
+            {
+                await this.Store.UpsertAsync(this.Table.TableName, upsertList, fromServer: true);
+            }
+
+            if (deletedIds.Any())
+            {
+                await this.Store.DeleteAsync(this.Table.TableName, deletedIds);
+            }
         }
     }
 }

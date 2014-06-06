@@ -126,7 +126,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will return with results when the query finishes.
         /// </returns>
-        public async Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters)
+        public virtual async Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters)
         {
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
