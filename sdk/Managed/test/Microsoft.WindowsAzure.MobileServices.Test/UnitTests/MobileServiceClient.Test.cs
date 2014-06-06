@@ -218,6 +218,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [TestMethod]
+        public void GetSyncTable_Throws_WhenSyncContextIsNotInitialized()
+        {
+            var service = new MobileServiceClient("http://www.test.com", "secret...");
+            var ex = AssertEx.Throws<InvalidOperationException>(()=>service.GetSyncTable("test"));
+            Assert.AreEqual(ex.Message, "SyncContext is not yet initialized.");
+        }
+
+        [TestMethod]
+        public void GetSyncTableGeneric_Throws_WhenSyncContextIsNotInitialized()
+        {
+            var service = new MobileServiceClient("http://www.test.com", "secret...");
+            var ex = AssertEx.Throws<InvalidOperationException>(() => service.GetSyncTable<ToDoWithStringId>());
+            Assert.AreEqual(ex.Message, "SyncContext is not yet initialized.");
+        }
+
+        [TestMethod]
         public void GetTableThrowsWithNullTable()
         {
             MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");

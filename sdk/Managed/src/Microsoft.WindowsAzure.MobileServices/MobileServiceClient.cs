@@ -235,6 +235,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>The table.</returns>
         public IMobileServiceSyncTable GetSyncTable(string tableName)
         {
+            this.EnsureSyncContextIsInitialized();
             ValidateTableName(tableName);
 
             return new MobileServiceSyncTable(tableName, this);
@@ -269,6 +270,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public IMobileServiceSyncTable<T> GetSyncTable<T>()
         {
+            this.EnsureSyncContextIsInitialized();
+
             string tableName = this.SerializerSettings.ContractResolver.ResolveTableName(typeof(T));
             return new MobileServiceSyncTable<T>(tableName, this);
         }
@@ -543,6 +546,17 @@ namespace Microsoft.WindowsAzure.MobileServices
             string queryString = MobileServiceUrlBuilder.GetQueryString(parameters, useTableAPIRules: false);
             
             return MobileServiceUrlBuilder.CombinePathAndQuery(uriFragment, queryString);            
+        }
+
+        /// <summary>
+        /// Throws if SyncContext is not initialized
+        /// </summary>
+        private void EnsureSyncContextIsInitialized()
+        {
+            if (!this.SyncContext.IsInitialized)
+            {
+                throw new InvalidOperationException(Resources.SyncContext_NotInitialized);
+            }
         }
 
         /// <summary>
