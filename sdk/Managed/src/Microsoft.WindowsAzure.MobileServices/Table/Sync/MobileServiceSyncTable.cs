@@ -17,14 +17,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     internal class MobileServiceSyncTable: IMobileServiceSyncTable
     {
         private MobileServiceSyncContext syncContext;
-        private MobileServiceTable remoteTable;
 
         public MobileServiceClient MobileServiceClient { get; private set; }
-        
-        public string TableName
-        {
-            get { return this.remoteTable.TableName; }
-        }
+
+        public string TableName { get; private set; }
 
         public MobileServiceSyncTable(string tableName, MobileServiceClient client)
         {
@@ -32,25 +28,23 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             Debug.Assert(client != null);
 
             this.MobileServiceClient = client;
+            this.TableName = tableName;
             this.syncContext = (MobileServiceSyncContext)client.SyncContext;
-            this.remoteTable = (MobileServiceTable)client.GetTable(tableName);
-            this.remoteTable.SystemProperties = MobileServiceSystemProperties.Version;
-            this.remoteTable.AddRequestHeader(MobileServiceHttpClient.ZumoFeaturesHeader, MobileServiceFeatures.Offline);
         }
 
         public Task<JToken> ReadAsync(string query)
         {
-            return this.syncContext.ReadAsync(this.remoteTable, query);
+            return this.syncContext.ReadAsync(this.TableName, query);
         }
 
         public Task PullAsync(string query, CancellationToken cancellationToken)
         {
-            return this.syncContext.PullAsync(this.remoteTable, query, cancellationToken);
+            return this.syncContext.PullAsync(this.TableName, query, cancellationToken);
         }
 
         public Task PurgeAsync(string query, CancellationToken cancellationToken)
         {
-            return this.syncContext.PurgeAsync(this.remoteTable, query, cancellationToken);
+            return this.syncContext.PurgeAsync(this.TableName, query, cancellationToken);
         }
 
         public async Task<JObject> InsertAsync(JObject instance)
@@ -67,7 +61,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 EnsureIdIsString(id);
             }
 
-            await this.syncContext.InsertAsync(this.remoteTable, (string)id, instance);
+            await this.syncContext.InsertAsync(this.TableName, (string)id, instance);
 
             return instance;
         }        
@@ -77,7 +71,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             string id = EnsureIdIsString(instance);
             instance = RemoveSystemPropertiesKeepVersion(instance);
 
-            await this.syncContext.UpdateAsync(this.remoteTable, id, instance);
+            await this.syncContext.UpdateAsync(this.TableName, id, instance);
         }        
 
         public async Task DeleteAsync(JObject instance)
@@ -85,12 +79,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             string id = EnsureIdIsString(instance);
             instance = RemoveSystemPropertiesKeepVersion(instance);
 
-            await this.syncContext.DeleteAsync(this.remoteTable, id, instance);
+            await this.syncContext.DeleteAsync(this.TableName, id, instance);
         }
 
         public Task<JObject> LookupAsync(string id)
         {
-            return this.syncContext.LookupAsync(this.remoteTable, id);
+            return this.syncContext.LookupAsync(this.TableName, id);
         }
 
         // we want to keep version as it rides on the object until the sync operation happens using classic table.

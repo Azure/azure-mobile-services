@@ -99,60 +99,61 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
         }
 
-        public async Task<JToken> ReadAsync(MobileServiceTable table, string query)
+        public async Task<JToken> ReadAsync(string tableName, string query)
         {
             await this.EnsureInitializedAsync();
 
-            var queryDescription = MobileServiceTableQueryDescription.Parse(table.TableName, query);
+            var queryDescription = MobileServiceTableQueryDescription.Parse(tableName, query);
             using (await this.storeQueueLock.ReaderLockAsync())
             {
                 return await this.Store.ReadAsync(queryDescription);
             }
         }
 
-        public async Task InsertAsync(MobileServiceTable table, string id, JObject item)
+        public async Task InsertAsync(string tableName, string id, JObject item)
         {
-            var operation = new InsertOperation(table.TableName, id)
+            var operation = new InsertOperation(tableName, id)
             {
-                Table = table
+                Table = await this.GetTable(tableName)
             };
 
             await this.ExecuteOperationAsync(operation, item);
         }        
 
-        public async Task UpdateAsync(MobileServiceTable table, string id, JObject item)
+        public async Task UpdateAsync(string tableName, string id, JObject item)
         {
-            var operation = new UpdateOperation(table.TableName, id)
+            var operation = new UpdateOperation(tableName, id)
             {
-                Table = table
+                Table = await this.GetTable(tableName)
             };
 
             await this.ExecuteOperationAsync(operation, item);
         }
 
-        public async Task DeleteAsync(MobileServiceTable table, string id, JObject item)
+        public async Task DeleteAsync(string tableName, string id, JObject item)
         {
-            var operation = new DeleteOperation(table.TableName, id)
+            var operation = new DeleteOperation(tableName, id)
             {
-                Table = table,
+                Table = await this.GetTable(tableName),
                 Item = item // item will be deleted from store, so we need to put it in the operation queue
             };
 
             await this.ExecuteOperationAsync(operation, item);
         }
         
-        public async Task<JObject> LookupAsync(MobileServiceTable table, string id)
+        public async Task<JObject> LookupAsync(string tableName, string id)
         {
             await this.EnsureInitializedAsync();
 
-            return await this.Store.LookupAsync(table.TableName, id);
+            return await this.Store.LookupAsync(tableName, id);
         }
 
-        public async Task PullAsync(MobileServiceTable table, string query, CancellationToken cancellationToken)
+        public async Task PullAsync(string tableName, string query, CancellationToken cancellationToken)
         {
             await this.EnsureInitializedAsync();
 
-            var queryDescription = MobileServiceTableQueryDescription.Parse(table.TableName, query);
+            var table = await this.GetTable(tableName);
+            var queryDescription = MobileServiceTableQueryDescription.Parse(tableName, query);
             // local schema should be same as remote schema otherwise push can't function
             if (queryDescription.Selection.Count > 0 || queryDescription.Projections.Count > 0)
             {
@@ -167,11 +168,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             await pull.CompletionTask;
         }
 
-        public async Task PurgeAsync(MobileServiceTable table, string query, CancellationToken cancellationToken)
+        public async Task PurgeAsync(string tableName, string query, CancellationToken cancellationToken)
         {
             await this.EnsureInitializedAsync();
 
-            var queryDescription = MobileServiceTableQueryDescription.Parse(table.TableName, query);
+            var table = await this.GetTable(tableName);
+            var queryDescription = MobileServiceTableQueryDescription.Parse(tableName, query);
             var purge = new PurgeAction(table, queryDescription, this, this.opQueue, this.Store, cancellationToken);
             Task discard = this.syncQueue.Post(purge.ExecuteAsync, cancellationToken);
 
@@ -193,6 +195,25 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             await push.CompletionTask;
         }        
+
+        public virtual async Task<MobileServiceTable> GetTable(string tableName)
+        {
+            await this.EnsureInitializedAsync();
+
+            var table = this.client.GetTable(tableName) as MobileServiceTable;
+            JObject value = await this.Store.LookupAsync(MobileServiceLocalSystemTables.Config, tableName + "_systemProperties");
+            if (value == null)
+            {
+                table.SystemProperties = MobileServiceSystemProperties.Version;
+            }
+            else
+            {
+                table.SystemProperties = (MobileServiceSystemProperties)value.Value<int>("value");
+            }
+            table.AddRequestHeader(MobileServiceHttpClient.ZumoFeaturesHeader, MobileServiceFeatures.Offline);
+
+            return table;
+        }
 
         public Task CancelAndUpdateItemAsync(MobileServiceTableOperationError error, JObject item)
         {

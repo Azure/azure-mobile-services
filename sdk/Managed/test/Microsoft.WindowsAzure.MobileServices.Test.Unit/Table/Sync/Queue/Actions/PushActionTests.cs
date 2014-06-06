@@ -37,6 +37,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             this.client = new Mock<MobileServiceClient>();
             this.client.Object.Serializer = new MobileServiceSerializer();
             this.context = new Mock<MobileServiceSyncContext>(this.client.Object);
+            this.context.Setup(c => c.GetTable(It.IsAny<string>())).Returns(Task.FromResult(new MobileServiceTable("test", this.client.Object)));
             this.action = new PushAction(this.opQueue.Object, this.store.Object, this.handler.Object, this.client.Object, this.context.Object, CancellationToken.None);
         }
 
@@ -55,7 +56,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             
             // loads sync errors
             string syncError = @"[]";
-            this.store.Setup(s => s.LookupAsync(MobileServiceLocalSystemTables.Config, It.IsAny<string>())).Returns(Task.FromResult<JObject>(null));
             this.store.Setup(s => s.ReadAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == MobileServiceLocalSystemTables.SyncErrors))).Returns(Task.FromResult(JToken.Parse(syncError)));
             // calls push complete
             this.handler.Setup(h => h.OnPushCompleteAsync(It.IsAny<MobileServicePushCompletionResult>())).Returns(Task.FromResult(0))
@@ -166,7 +166,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             }
             // loads sync errors
             string syncError = @"[]";
-            this.store.Setup(s => s.LookupAsync(MobileServiceLocalSystemTables.Config, It.IsAny<string>())).Returns(Task.FromResult<JObject>(null));
             this.store.Setup(s => s.ReadAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == MobileServiceLocalSystemTables.SyncErrors))).Returns(Task.FromResult(JToken.Parse(syncError)));
             // calls push complete
             this.handler.Setup(h => h.OnPushCompleteAsync(It.IsAny<MobileServicePushCompletionResult>())).Returns(Task.FromResult(0))

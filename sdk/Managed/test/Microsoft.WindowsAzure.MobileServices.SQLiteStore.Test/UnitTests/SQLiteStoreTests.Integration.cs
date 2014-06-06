@@ -172,6 +172,38 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         }
 
         [AsyncTestMethod]
+        public async Task PullAsync_RequestsSystemProperties_WhenDefinedOnTableType()
+        {
+            ResetDatabase(TestTable);
+
+            var hijack = new TestHttpHandler();
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable<ToDoWithSystemPropertiesType>();
+
+            IMobileServiceClient service = await CreateClient(hijack, store);
+            IMobileServiceSyncTable<ToDoWithSystemPropertiesType> table = service.GetSyncTable<ToDoWithSystemPropertiesType>();            
+
+            hijack.OnSendingRequest = async req =>
+            {
+                // we request all the system properties present on DefineTable<> object
+                Assert.AreEqual(req.RequestUri.Query, "?__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt%2C__version");
+
+                return req;
+            };
+            string pullResult = "[{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\",\"__createdAt\":\"2014-01-29T23:01:33.444Z\", \"__updatedAt\":\"2014-01-30T23:01:33.444Z\"}]";
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(pullResult) }); // pull
+
+            await table.PullAsync();
+
+            var item = await table.LookupAsync("b");
+            Assert.AreEqual(item.String, "Wow");
+            Assert.AreEqual(item.Version, "def");
+            // we preserved the system properties returned from server on update
+            Assert.AreEqual(item.CreatedAt.ToUniversalTime(), new DateTime(2014, 01, 29, 23, 1, 33, 444, DateTimeKind.Utc));
+            Assert.AreEqual(item.UpdatedAt.ToUniversalTime(), new DateTime(2014, 01, 30, 23, 1, 33, 444, DateTimeKind.Utc));
+        }
+
+        [AsyncTestMethod]
         public async Task SystemPropertiesArePreserved_OnlyWhenReturnedFromServer()
         {
             ResetDatabase(TestTable);
