@@ -49,6 +49,8 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 			constant = process((String) value);
 		} else if (value instanceof Date) {
 			constant = process((Date) value);
+		} else if (value instanceof Boolean) {
+			constant = process((Boolean) value);
 		}
 
 		this.mBuilder.append(constant);
@@ -371,6 +373,15 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 		return "'" + sanitize(DateSerializer.serialize(date)) + "'";
 	}
 
+	private static String process(Boolean value) {
+		
+		if (value) {
+			return "1";
+		}
+		
+		return "0";
+	}
+	
 	/**
 	 * Sanitizes the string to use in a oData query
 	 * 

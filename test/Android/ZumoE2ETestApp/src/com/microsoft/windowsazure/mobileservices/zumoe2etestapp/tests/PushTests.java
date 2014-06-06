@@ -82,12 +82,6 @@ public class PushTests extends TestGroup {
 				
 				try {
 
-//					if (!mainActivity.mobileServiceRuntimeHasFeature("1", "2")) {
-//						testResult.setStatus(TestStatus.MissingFeatures);
-//						callback.onTestComplete(testCase, testResult);
-//						return;
-//					}
-
 					MobileServiceJsonTable table = client.getTable(tableName);
 					JsonObject item = new JsonObject();
 					item.addProperty("method", "send");
