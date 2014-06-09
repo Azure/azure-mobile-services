@@ -108,12 +108,17 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 	public QueryNode visit(FunctionCallNode node) throws MobileServiceException {
 		String format = getSQLOperatorFormat(node);
 
-		Object[] args = new Object[node.getArguments().size()];
+		String[] args = new String[node.getArguments().size()];
 		List<QueryNode> arguments = node.getArguments();
 
 		for (int index = 0; index < arguments.size(); index++) {
 			QueryNode argument = arguments.get(index);
-			args[index] = argument.accept(this);
+
+			QueryNodeSQLWriter internalVisitor = new QueryNodeSQLWriter();
+
+			argument.accept(internalVisitor);
+
+			args[index] = internalVisitor.getBuilder().toString();
 		}
 
 		this.mBuilder.append(String.format(format, args));
@@ -259,7 +264,7 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 			operatorFormat = formatIndexOfOperation();
 			break;
 		case Substring:
-			operatorFormat = formatOperation("substring", node.getArguments().size());
+			operatorFormat = formatSubstringOperation(node.getArguments().size());
 			break;
 		case Replace:
 			operatorFormat = formatOperation("replace", node.getArguments().size());
@@ -274,7 +279,7 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 
 		builder.append("CAST(strftime('");
 		builder.append(datePart);
-		builder.append("', %1$) AS INTEGER)");
+		builder.append("', %1$s) AS INTEGER)");
 
 		return builder.toString();
 	}
@@ -283,16 +288,16 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 		StringBuilder builder = new StringBuilder();
 
 		if (roundDirection == 0) {
-			builder.append("round(%1$)");
+			builder.append("round(%1$s)");
 		} else {
 			String incorrectInequality = roundDirection < 0 ? ">" : "<";
 			String correction = roundDirection < 0 ? "-" : "+";
 
-			builder.append("CASE WHEN round(%1$) ");
+			builder.append("CASE WHEN round(%1$s) ");
 			builder.append(incorrectInequality);
-			builder.append(" %1$ THEN round(%1$) ");
+			builder.append(" %1$s THEN round(%1$s) ");
 			builder.append(correction);
-			builder.append(" 1 ELSE round(%1$) END");
+			builder.append(" 1 ELSE round(%1$s) END");
 		}
 
 		return builder.toString();
@@ -301,7 +306,7 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 	private static String formatStartsWithOperation() {
 		StringBuilder builder = new StringBuilder();
 
-		builder.append("(instr(%1$,%2$) = 1)");
+		builder.append("(%1$s LIKE (%2$s || '%%'))");
 
 		return builder.toString();
 	}
@@ -309,7 +314,7 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 	private static String formatEndsWithOperation() {
 		StringBuilder builder = new StringBuilder();
 
-		builder.append("(instr(%1$,%2$) = (length(%1$) - length(%2$) + 1))");
+		builder.append("((%1$s LIKE ('%%' || %2$s))");
 
 		return builder.toString();
 	}
@@ -317,19 +322,31 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 	private static String formatSubstringOfOperation() {
 		StringBuilder builder = new StringBuilder();
 
-		builder.append("(instr(%1$,%2$) >= 1)");
+		builder.append("(%2$s LIKE ('%%'  || %1$s || '%%'))");
 
 		return builder.toString();
 	}
 
+	private static String formatSubstringOperation(int argumentsSize) {
+		StringBuilder builder = new StringBuilder();
+
+		if (argumentsSize == 2) {
+			builder.append("(substr(%1$s,(%2$s + 1)))");
+		} else if (argumentsSize == 3) {
+			builder.append("(substr(%1$s,(%2$s + 1),%3$s))");
+		}
+		
+		return builder.toString();
+	}
+
 	private static String formatConcatOperation() {
-		return "(%1$ || %2$)";
+		return "(%1$s || %2$s)";
 	}
 
 	private static String formatIndexOfOperation() {
 		StringBuilder builder = new StringBuilder();
 
-		builder.append("(instr(%1$,%2$) - 1)");
+		builder.append("(instr(%1$s,%2$s) - 1)");
 
 		return builder.toString();
 	}
@@ -339,7 +356,7 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 
 		builder.append(operation);
 		builder.append("(");
-		formatArguments(totalArguments);
+		builder.append(formatArguments(totalArguments));
 		builder.append(")");
 
 		return builder.toString();
@@ -359,7 +376,7 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 
 			builder.append("%");
 			builder.append(index);
-			builder.append("$");
+			builder.append("$s");
 		}
 
 		return builder.toString();
@@ -374,14 +391,9 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 	}
 
 	private static String process(Boolean value) {
-		
-		if (value) {
-			return "1";
-		}
-		
-		return "0";
+		return value ? "1" : "0";
 	}
-	
+
 	/**
 	 * Sanitizes the string to use in a oData query
 	 * 

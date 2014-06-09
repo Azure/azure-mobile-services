@@ -82,15 +82,260 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		super.tearDown();
 	}
 
-	public void testQueryOnBoolImplicit() throws MobileServiceException, MobileServiceLocalStoreException
-    {
+	public void testQueryOnBool() throws MobileServiceException, MobileServiceLocalStoreException {
 		Query query1 = QueryOperations.tableName(TestTable).field("col5").eq(true);
-        testQuery(query1, 4);
-        
-        Query query2 = QueryOperations.tableName(TestTable).field("col5").eq(false);
-        testQuery(query2, 2);            
+		testQuery(query1, 4);
+
+		Query query2 = QueryOperations.tableName(TestTable).field("col5").eq(false);
+		testQuery(query2, 2);
+	}
+
+	public void testQueryNotOperatorWithBoolComparison() throws MobileServiceException, MobileServiceLocalStoreException {
+		Query query = QueryOperations.tableName(TestTable).not().field("col5").eq(true);
+		testQuery(query, 2);
+	}
+
+	public void testQueryDateBeforeEpoch() throws MobileServiceException, MobileServiceLocalStoreException {
+		Query query = QueryOperations.tableName(TestTable).field("col4").gt(epoch);
+		testQuery(query, 6);
+	}
+
+	public void testQueryWithTop() throws MobileServiceLocalStoreException {
+		Query query = QueryOperations.tableName(TestTable).top(5);
+		testQuery(query, 5);
+	}
+
+	public void testQueryWithSelection() throws MobileServiceLocalStoreException {
+		Query query = QueryOperations.tableName(TestTable).select("col1", "col2");
+
+		JsonArray results = runQuery(query);
+
+		assertEquals(results.size(), 6);
+
+		assertJsonArraysAreEqual(results, getQueryWithSelectionTestData());
+	}
+
+	public void testQueryWithOrderingDescending() throws MobileServiceLocalStoreException {
+		Query query = QueryOperations.tableName(TestTable).select("col1", "col2").orderBy("col2", QueryOrder.Descending);
+
+		JsonArray results = runQuery(query);
+
+		assertEquals(results.size(), 6);
+
+		assertJsonArraysAreEqual(results, getQueryWithOrderingDescending());
+	}
+
+	public void testQueryComplexFilter() throws MobileServiceException, MobileServiceLocalStoreException {
+		Query query = QueryOperations.tableName(TestTable).field("col1").eq("brown").or().field("col1").eq("fox").and().field("col2").le(5);
+
+		JsonArray results = runQuery(query);
+
+		assertEquals(results.size(), 1);
+
+		assertEquals(results.get(0).getAsJsonObject().get("id").getAsString(), getTestData()[2].getAsJsonObject().get("id").getAsString());
+	}
+
+	// public void testQueryOnStringIndexOf() throws MobileServiceException,
+	// MobileServiceLocalStoreException {
+	// Query query1 = QueryOperations.tableName(TestTable).indexOf("col1",
+	// "ump").eq(1);
+	//
+	// testQuery(query1, 1);
+	//
+	// Query query2 = QueryOperations.tableName(TestTable).indexOf("col1",
+	// "ump").eq(2);
+	//
+	// testQuery(query2, 0);
+	// }
+
+	public void testQueryOnStringStartsWith() throws MobileServiceException, MobileServiceLocalStoreException {
+		Query query1 = QueryOperations.tableName(TestTable).startsWith("col1", "qu");
+
+		testQuery(query1, 1);
+
+		Query query2 = QueryOperations.tableName(TestTable).startsWith("col1", "ump");
+
+		testQuery(query2, 0);
+	}
+
+	public void testQueryOnStringSubstringOf() throws MobileServiceException, MobileServiceLocalStoreException {
+		Query query1 = QueryOperations.tableName(TestTable).subStringOf("qu", "col1");
+
+		testQuery(query1, 1);
+
+		Query query2 = QueryOperations.tableName(TestTable).subStringOf("fer", "col1");
+
+		testQuery(query2, 0);
+	}
+
+	// public void testQueryOnStringConcatAndCompare()
+	// {
+	// Query query1 = QueryOperations.tableName(TestTable)
+	//
+	// testQuery(query1, 1);
+	//
+	// Query query2 = QueryOperations.tableName(TestTable).subStringOf("fer",
+	// "col1");
+	//
+	// testQuery(query2, 0);
+	//
+	// await
+	// TestQuery("$filter=concat(concat(col1, 'ies'), col2) eq 'brownies1'", 1);
+	// await
+	// TestQuery("$filter=concat(concat(col1, 'ies'), col2) eq 'brownies2'", 0);
+	// }
+
+	public void testQueryOnStringReplaceAndCompare() throws MobileServiceException, MobileServiceLocalStoreException {
+		Query query1 = QueryOperations.tableName(TestTable).replace("col1", "j", "p").eq("pumped");
+
+		testQuery(query1, 1);
+
+		Query query2 = QueryOperations.tableName(TestTable).replace("col1", "j", "x").eq("pumped");
+
+		testQuery(query2, 0);
+	}
+
+	public void testQueryOnStringSubstringAndCompare() throws MobileServiceException, MobileServiceLocalStoreException {
+
+		Query query1 = QueryOperations.tableName(TestTable).subString("col1", 1).eq("ox");
+
+		testQuery(query1, 1);
+
+		Query query2 = QueryOperations.tableName(TestTable).subString("col1", 1).eq("oy");
+
+		testQuery(query2, 0);
+	}
+
+	public void testQueryOnStringSubstringWithLengthAndCompare() throws MobileServiceException, MobileServiceLocalStoreException {
+		Query query1 = QueryOperations.tableName(TestTable).subString("col1", 1, 3).eq("uic");
+
+		testQuery(query1, 1);
+
+		Query query2 = QueryOperations.tableName(TestTable).subString("col1", 1, 3).eq("uix");
+
+		testQuery(query2, 0);
+	}
+
+	public void testQueryMathModuloOperator() throws MobileServiceLocalStoreException, MobileServiceException {
+		Query query = QueryOperations.tableName(TestTable).field("col3").mod(3).eq(0);
+
+		JsonArray results = runQuery(query);
+
+		assertEquals(results.size(), 3);
+	}
+
+	public void testQueryMathRound() throws MobileServiceException, MobileServiceLocalStoreException {
+		List<JsonObject> result = new ArrayList<JsonObject>();
+
+		JsonObject item5 = new JsonObject();
+		item5.addProperty("val", -0.0900);
+		item5.addProperty("expected", 0);
+		result.add(item5);
+
+		JsonObject item6 = new JsonObject();
+		item6.addProperty("val", -1.0900);
+		item6.addProperty("expected", -1);
+		result.add(item6);
+
+		JsonObject item4 = new JsonObject();
+		item4.addProperty("val", 1.0900);
+		item4.addProperty("expected", 1);
+		result.add(item4);
+
+		JsonObject item1 = new JsonObject();
+		item1.addProperty("val", 0.0900);
+		item1.addProperty("expected", 0);
+		result.add(item1);
+
+		JsonObject item2 = new JsonObject();
+		item2.addProperty("val", 1.5);
+		item2.addProperty("expected", 2);
+		result.add(item2);
+
+		JsonObject item3 = new JsonObject();
+		item3.addProperty("val", -1.5);
+		item3.addProperty("expected", -2);
+		result.add(item3);
+
+		Query query = QueryOperations.tableName(MathTestTable)
+				.round(QueryOperations.field("val"))
+				.eq(QueryOperations.field("expected"));
+
+		testMathQuery(result.toArray(new JsonObject[0]), query);
+	}
+
+	public void testQueryMathCeiling() throws MobileServiceException, MobileServiceLocalStoreException
+    {
+		List<JsonObject> result = new ArrayList<JsonObject>();
+
+		JsonObject item5 = new JsonObject();
+		item5.addProperty("val", -0.0900);
+		item5.addProperty("expected", 0);
+		result.add(item5);
+
+		JsonObject item6 = new JsonObject();
+		item6.addProperty("val", -1.0900);
+		item6.addProperty("expected", -1);
+		result.add(item6);
+
+		JsonObject item4 = new JsonObject();
+		item4.addProperty("val", 1.0900);
+		item4.addProperty("expected", 2);
+		result.add(item4);
+
+		JsonObject item1 = new JsonObject();
+		item1.addProperty("val", 0.0900);
+		item1.addProperty("expected", 1);
+		result.add(item1);
+
+		Query query = QueryOperations.tableName(MathTestTable)
+				.ceiling(QueryOperations.field("val"))
+				.eq(QueryOperations.field("expected"));
+		
+		testMathQuery(result.toArray(new JsonObject[0]), query);
     }
-	
+
+    public void testQueryOnStringLength() throws MobileServiceException, MobileServiceLocalStoreException
+    {
+    	Query query1 = QueryOperations.tableName(TestTable).length("col1").eq(18);
+
+		testQuery(query1, 1);
+
+		Query query2 = QueryOperations.tableName(TestTable).length("col1").eq(19);
+
+		testQuery(query2, 0);
+    }
+	 
+    public void testQueryWithPaging() throws MobileServiceLocalStoreException
+    {
+        for (int skip = 0; skip < 4; skip++)
+        {
+            for (int take = 0; take < 4; take++)
+            {   
+                Query query = QueryOperations.tableName(TestTable)
+                		.skip(skip)
+                		.top(take);
+                
+                testQuery(query, take);
+            }
+        }
+    }
+    
+    public void testQueryWithTotalCount() throws MobileServiceLocalStoreException
+    {
+    	Query query = QueryOperations.tableName(TestTable)
+        		.top(5)
+        		.includeInlineCount();
+    	
+    	JsonObject queryResults = runQuery(query);
+    	
+    	JsonArray results = queryResults.get("results").getAsJsonArray();
+		long resultCount = queryResults.get("count").getAsLong();
+    	
+		assertEquals(results.size(), 5);
+		assertEquals(resultCount, 6);
+    }
+    
 	private JsonObject[] getTestData() {
 
 		ArrayList<JsonObject> result = new ArrayList<JsonObject>();
@@ -102,7 +347,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		JsonObject item1 = new JsonObject();
 		item1.addProperty("id", "1");
 		item1.addProperty("col1", "the");
-		item1.addProperty("col2", 5);
+		item1.addProperty("col2", 5.0);
 		item1.addProperty("col3", 234f);
 		item1.addProperty("col4", cal1.getTime().toString());
 		item1.addProperty("col5", false);
@@ -115,7 +360,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		JsonObject item2 = new JsonObject();
 		item2.addProperty("id", "2");
 		item2.addProperty("col1", "quick");
-		item2.addProperty("col2", 3);
+		item2.addProperty("col2", 3.0);
 		item2.addProperty("col3", 9867.12);
 		item2.addProperty("col4", cal2.getTime().toString());
 		item2.addProperty("col5", true);
@@ -128,7 +373,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		JsonObject item3 = new JsonObject();
 		item3.addProperty("id", "3");
 		item3.addProperty("col1", "brown");
-		item3.addProperty("col2", 1);
+		item3.addProperty("col2", 1.0);
 		item3.addProperty("col3", 11f);
 		item3.addProperty("col4", cal3.getTime().toString());
 		item3.addProperty("col5", false);
@@ -141,7 +386,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		JsonObject item4 = new JsonObject();
 		item4.addProperty("id", "4");
 		item4.addProperty("col1", "fox");
-		item4.addProperty("col2", 6);
+		item4.addProperty("col2", 6.0);
 		item4.addProperty("col3", 23908.99);
 		item4.addProperty("col4", cal4.getTime().toString());
 		item4.addProperty("col5", true);
@@ -154,7 +399,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		JsonObject item5 = new JsonObject();
 		item5.addProperty("id", "5");
 		item5.addProperty("col1", "jumped");
-		item5.addProperty("col2", 9);
+		item5.addProperty("col2", 9.0);
 		item5.addProperty("col3", 678.932);
 		item5.addProperty("col4", cal5.getTime().toString());
 		item5.addProperty("col5", true);
@@ -167,7 +412,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		JsonObject item6 = new JsonObject();
 		item6.addProperty("id", "6");
 		item6.addProperty("col1", "EndsWithBackslash\\");
-		item6.addProperty("col2", 8);
+		item6.addProperty("col2", 8.0);
 		item6.addProperty("col3", 521f);
 		item6.addProperty("col4", cal5.getTime().toString());
 		item6.addProperty("col5", true);
@@ -176,7 +421,81 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		return result.toArray(new JsonObject[0]);
 	}
 
-	private void AssertJArraysAreEqual(JsonArray results, JsonArray expected) {
+	private JsonArray getQueryWithSelectionTestData() {
+
+		JsonArray result = new JsonArray();
+
+		JsonObject item1 = new JsonObject();
+		item1.addProperty("col1", "the");
+		item1.addProperty("col2", 5.0);
+		result.add(item1);
+
+		JsonObject item2 = new JsonObject();
+		item2.addProperty("col1", "quick");
+		item2.addProperty("col2", 3.0);
+		result.add(item2);
+
+		JsonObject item3 = new JsonObject();
+		item3.addProperty("col1", "brown");
+		item3.addProperty("col2", 1.0);
+		result.add(item3);
+
+		JsonObject item4 = new JsonObject();
+		item4.addProperty("col1", "fox");
+		item4.addProperty("col2", 6.0);
+		result.add(item4);
+
+		JsonObject item5 = new JsonObject();
+		item5.addProperty("col1", "jumped");
+		item5.addProperty("col2", 9.0);
+		result.add(item5);
+
+		JsonObject item6 = new JsonObject();
+		item6.addProperty("col1", "EndsWithBackslash\\");
+		item6.addProperty("col2", 8.0);
+		result.add(item6);
+
+		return result;
+	}
+
+	private JsonArray getQueryWithOrderingDescending() {
+
+		JsonArray result = new JsonArray();
+
+		JsonObject item5 = new JsonObject();
+		item5.addProperty("col1", "jumped");
+		item5.addProperty("col2", 9.0);
+		result.add(item5);
+
+		JsonObject item6 = new JsonObject();
+		item6.addProperty("col1", "EndsWithBackslash\\");
+		item6.addProperty("col2", 8.0);
+		result.add(item6);
+
+		JsonObject item4 = new JsonObject();
+		item4.addProperty("col1", "fox");
+		item4.addProperty("col2", 6.0);
+		result.add(item4);
+
+		JsonObject item1 = new JsonObject();
+		item1.addProperty("col1", "the");
+		item1.addProperty("col2", 5.0);
+		result.add(item1);
+
+		JsonObject item2 = new JsonObject();
+		item2.addProperty("col1", "quick");
+		item2.addProperty("col2", 3.0);
+		result.add(item2);
+
+		JsonObject item3 = new JsonObject();
+		item3.addProperty("col1", "brown");
+		item3.addProperty("col2", 1.0);
+		result.add(item3);
+
+		return result;
+	}
+
+	private void assertJsonArraysAreEqual(JsonArray results, JsonArray expected) {
 		String actualResult = results.toString();
 		String expectedResult = expected.toString();
 		assertEquals(actualResult, expectedResult);
@@ -185,21 +504,29 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 	private void testMathQuery(JsonObject[] mathTestData, Query query) throws MobileServiceLocalStoreException {
 		SQLiteLocalStore store = setupMathTestTable(mathTestData);
 
-		JsonArray results = runQuery(query);
+		JsonArray results = runQuery(store, query);
 
 		assertEquals(results.size(), mathTestData.length);
 	}
 
 	private void testQuery(Query query, int expectedResults) throws MobileServiceLocalStoreException {
+
 		JsonArray results = runQuery(query);
+
 		assertEquals(results.size(), expectedResults);
 	}
 
 	private <T> T runQuery(Query query) throws MobileServiceLocalStoreException // where
-																				// T:JToken
+	// T:JToken
 	{
 		SQLiteLocalStore store = setupTestTable();
 
+		return runQuery(store, query);
+	}
+
+	private <T> T runQuery(SQLiteLocalStore store, Query query) throws MobileServiceLocalStoreException // where
+	// T:JToken
+	{
 		return (T) store.read(query);
 	}
 

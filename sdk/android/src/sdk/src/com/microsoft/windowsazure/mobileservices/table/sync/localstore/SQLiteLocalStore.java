@@ -330,27 +330,30 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 			ColumnDataType columnDataType = column.getValue();
 			int columnIndex = cursor.getColumnIndex(columnName);
 
-			switch (columnDataType) {
-			case Boolean:
-				boolean booleanValue = cursor.getInt(columnIndex) > 0 ? true : false;
-				result.addProperty(columnName, booleanValue);
-				break;
-			case Number:
-				double doubleValue = cursor.getDouble(columnIndex);
-				result.addProperty(columnName, doubleValue);
-				break;
-			case String:
-				String stringValue = cursor.getString(columnIndex);
-				result.addProperty(columnName, stringValue);
-				break;
-			case Date:
-				String dateValue = cursor.getString(columnIndex);
-				result.addProperty(columnName, dateValue);
-				break;
-			case Other:
-				JsonElement otherValue = new JsonParser().parse(cursor.getString(columnIndex));
-				result.add(columnName, otherValue);
-				break;
+			if (columnIndex != -1) {
+
+				switch (columnDataType) {
+				case Boolean:
+					boolean booleanValue = cursor.getInt(columnIndex) > 0 ? true : false;
+					result.addProperty(columnName, booleanValue);
+					break;
+				case Number:
+					double doubleValue = cursor.getDouble(columnIndex);
+					result.addProperty(columnName, doubleValue);
+					break;
+				case String:
+					String stringValue = cursor.getString(columnIndex);
+					result.addProperty(columnName, stringValue);
+					break;
+				case Date:
+					String dateValue = cursor.getString(columnIndex);
+					result.addProperty(columnName, dateValue);
+					break;
+				case Other:
+					JsonElement otherValue = new JsonParser().parse(cursor.getString(columnIndex));
+					result.add(columnName, otherValue);
+					break;
+				}
 			}
 		}
 

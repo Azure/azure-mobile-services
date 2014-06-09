@@ -92,8 +92,8 @@ public class QuerySQLWriter {
 	public static String getLimitClause(Query query) {
 		String result = null;
 
-		int limit = query != null ? query.getTop() : -1;
-		int offset = query != null ? query.getSkip() : -1;
+		int limit = query != null ? query.getTop() : 0;
+		int offset = query != null ? query.getSkip() : 0;
 
 		if (limit > 0 || offset > 0) {
 			result = String.valueOf(offset) + "," + String.valueOf(limit);

@@ -61,12 +61,12 @@ public class QueryBase implements Query {
 	/**
 	 * Top rows to retrieve
 	 */
-	private int mTop = -1;
+	private int mTop = 0;
 
 	/**
 	 * Rows to skip
 	 */
-	private int mSkip = -1;
+	private int mSkip = 0;
 
 	private String mTableName = "";
 
