@@ -14,13 +14,15 @@
 // limitations under the License.
 //
 
-#import "QSAppDelegate.h"
+import UIKit
 
-@implementation QSAppDelegate
-
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
-{
-    return YES;
+@UIApplicationMain
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    
+    var window: UIWindow?
+    
+    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: NSDictionary?) -> Bool {
+        return true
+    }
 }
 
-@end
