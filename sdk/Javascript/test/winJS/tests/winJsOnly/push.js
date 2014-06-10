@@ -100,7 +100,7 @@ $testGroup('Push')
                             $assert.areEqual(registrations[0].headers[header], defaultHeaders[header], 'Each header returned by registration should match what was registered.');
                         });
                         $assert.areEqual(Object.getOwnPropertyNames(registrations[0].headers).length, Object.getOwnPropertyNames(defaultHeaders).length, 'Returned registration should contain same number of headers sent from registered template');
-                        $assert.areEqual(registrations[0].tags.length, defaultTags.length + 1, 'Returned registration should contain tags sent from registered template and 1 extra for installationId');
+                        $assert.areEqual(registrations[0].tags.length, $isDotNet() ? defaultTags.length : defaultTags.length + 1, 'Returned registration should contain tags sent from registered template and 1 extra for installationId');
                         // TODO: Re-enable when .Net runtime supports installationID in service
                         //$assert.isTrue(registrations[0].tags.indexOf(WindowsAzure.MobileServiceClient._applicationInstallationId) > -1, 'Expected the installationID in the tags');
                         $assert.areEqual(registrations[0].templateName, templateName, 'Expected returned registration to use templateName it was fed');
@@ -144,7 +144,7 @@ $testGroup('Push')
                             $assert.areEqual(registrations[0].headers[header], defaultHeaders[header], 'Each header returned by registration should match what was registered.');
                         });
                         $assert.areEqual(Object.getOwnPropertyNames(registrations[0].headers).length, Object.getOwnPropertyNames(defaultHeaders).length, 'Returned registration should contain same number of headers sent from registered template');
-                        $assert.areEqual(registrations[0].tags.length, defaultTags.length + 1, 'Returned registration should contain tags sent from registered template and 1 extra for installationId');
+                        $assert.areEqual(registrations[0].tags.length, $isDotNet() ? defaultTags.length : defaultTags.length + 1, 'Returned registration should contain tags sent from registered template and 1 extra for installationId');
                         // TODO: Re-enable when .Net runtime supports installationID in service
                         //$assert.isTrue(registrations[0].tags.indexOf(WindowsAzure.MobileServiceClient._applicationInstallationId) > -1, 'Expected the installationID in the tags');
                         $assert.areEqual(registrations[0].templateName, templateName, 'Expected returned registration to use templateName it was fed');
@@ -173,7 +173,7 @@ $testGroup('Push')
                             $assert.areEqual(registrations[0].headers[header], defaultHeaders[header], 'Each header returned by registration should match what was registered.');
                         });
                         $assert.areEqual(Object.getOwnPropertyNames(registrations[0].headers).length, Object.getOwnPropertyNames(defaultHeaders).length, 'Returned registration should contain same number of headers sent from registered template');
-                        $assert.areEqual(registrations[0].tags.length, defaultTags.length + 1, 'Returned registration should contain tags sent from registered template and 1 extra for installationId');
+                        $assert.areEqual(registrations[0].tags.length, $isDotNet() ? defaultTags.length : defaultTags.length + 1, 'Returned registration should contain tags sent from registered template and 1 extra for installationId');
                         // TODO: Re-enable when .Net runtime supports installationID in service
                         //$assert.isTrue(registrations[0].tags.indexOf(WindowsAzure.MobileServiceClient._applicationInstallationId) > -1, 'Expected the installationID in the tags');
                         $assert.areEqual(registrations[0].templateName, templateName, 'Expected returned registration to use templateName it was fed');

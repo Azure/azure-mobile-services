@@ -13,16 +13,10 @@ namespace Microsoft.Azure.Zumo.Win8.Test
     /// </summary>
     internal class RuntimeTestFilter : TestFilter
     {
-
         /// <summary>
         /// The custom key for the runtime url.
         /// </summary>
-        private const string DotNet = "dotNet";
-
-        /// <summary>
-        /// The tag used to mark node.js tests.
-        /// </summary>
-        private const string NodeTag = "node";
+        private const string Platform = "platform";
 
         /// <summary>
         /// Initializes a new instance of the FunctionalTestFilter class.
@@ -39,17 +33,16 @@ namespace Microsoft.Azure.Zumo.Win8.Test
         /// <param name="groups">The groups to test.</param>
         public override void Filter(IList<TestGroup> groups)
         {
-            string runtimeUrl = null, runtimeToRemove;
+            string platform = null;
             bool dotNet = false;
-            this.Settings.Custom.TryGetValue(DotNet, out runtimeUrl);
-            bool.TryParse(runtimeUrl, out dotNet);
-            runtimeToRemove = dotNet ? NodeTag : DotNet;
+            this.Settings.Custom.TryGetValue(Platform, out platform);
 
-            this.Settings.TestRunStatusMessage += " - " + runtimeToRemove + " Runtime";
-            Remove(groups, g => g.Tags.Contains(runtimeToRemove));
+            this.Settings.TestRunStatusMessage += " - " + platform + " Runtime";
+            platform += "_not_supported";
+            Remove(groups, g => g.Tags.Contains(platform));
             foreach (TestGroup group in groups)
             {
-                Remove(group.Methods, m => m.Tags.Contains(runtimeToRemove));
+                Remove(group.Methods, m => m.Tags.Contains(platform));
             }
             Remove(groups, g => g.Methods.Count == 0);
         }
