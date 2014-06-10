@@ -16,6 +16,7 @@ $testGroup('Blogging')
             var client = $getClient();
             var postTable = client.getTable('blog_posts');
             var commentTable = client.getTable('blog_comments');
+            var tableHelper = $getTableHelper();
             var context = {};
             return $chain(
                 function () {
@@ -24,10 +25,11 @@ $testGroup('Blogging')
                 },
                 function (post) {
                     context.post = post;
-                    context.newItems = 'id ge ' + post.id;
+                    context.newItems = tableHelper.getNewItems(post.id);
                     return postTable.insert({ title: "ZUMO" });
                 },
                 function (highlight) {
+                    context.newItems = tableHelper.getNewItems(highlight.id);
                     context.highlight = highlight;
                     return commentTable.insert({
                         postid: context.post.id,

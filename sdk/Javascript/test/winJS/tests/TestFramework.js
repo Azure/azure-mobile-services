@@ -381,3 +381,24 @@ global.$chain = function () {
         exec();
     });
 };
+
+global.$isDotNet = function() {
+    /// <summary>
+    /// Returns true if .NET runtime checked
+    /// </summary>
+    /// <returns type="MobileServiceClient">MobileServiceClient</returns>
+
+    return global.$harness.settings.custom.platform === 'dotNet';
+}
+
+global.$getTableHelper = function () {
+    /// <summary>
+    /// Create table helper for function tests.
+    /// </summary>
+    /// <returns type="MobileServiceClient">MobileServiceClient</returns>
+
+    global.$assert.isTrue(
+        global.$harness.settings.custom.MobileServiceRuntimeUrl,
+        'TableHelper should only be called from functional tests!');
+    return new (require("TableHelper")).TableHelper(global.$isDotNet);
+}

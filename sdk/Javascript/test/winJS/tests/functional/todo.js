@@ -7,6 +7,7 @@
 /// <reference path="..\..\js\MobileServices.Internals.js" />
 /// <reference path="..\..\generated\Tests.js" />
 
+
 $testGroup('ToDo')
     .functional()
     .tests(
@@ -14,44 +15,48 @@ $testGroup('ToDo')
         .description('Run through some basic TODO scenarios')
         .checkAsync(function () {
             var table = $getClient().getTable('test_table');
+            var tableHelper = $getTableHelper();
+
             var context = { };
             return $chain(
-                function () {
-                    $log('Insert a few records');
-                    return table.insert({ col1: "ABC", col2: 0 });
-                },
-                function (first) {
-                    $log('Check we can lookup inserted record');
-                    return table.lookup(first.id);
-                },
-                function (first) {
-                    $assert.areEqual("ABC", first.col1);
-                    context.first = first;
-                    context.newItems = 'id ge ' + first.id;
-                    return table.insert({ col1: "DEF", col2: 1 }, { testMode: true });
-                },
-                function () {
-                    $log('Verify the exception message for looking up a instance that does not exist.');
-                    return table.lookup(9999).then(
                     function () {
-                        $assert.fail('Should have errored');
+                        $log('Insert a few records');
+                        return table.insert({ col1: "ABC", colr2: 0 });
                     },
-                    function (err) {
-                        $assert.contains(err.message, 'An item with id \'9999\' does not exist.');
-                    });
-                },
-                function () {
-                    return table.insert({ col1: "GHI", col2: 0 });
-                },
-                function () {
-                    return table.where(context.newItems).read({ testMode: true });
-                },
-                function (results) {
-                    $assert.areEqual(3, results.length);
+                    function (first) {
+                        $log('Check we can lookup inserted record');
+                        return table.lookup(first.id);
+                    },
+                    function (first) {
+                        $assert.areEqual("ABC", first.col1);
+                        context.first = first;
+                        context.newItems = tableHelper.getNewItems(first.id);
+                        return table.insert({ col1: "DEF", col2: 1 }, { testMode: true });
+                    },
+                    function (second) {
+                        context.newItems = tableHelper.getNewItems(second.id);
+                        $log('Verify the exception message for looking up a instance that does not exist.');
+                        return table.lookup($isDotNet() ? '9999' : 9999).then(
+                        function () {
+                            $assert.fail('Should have errored');
+                        },
+                        function (err) {
+                            $assert.contains(err.message, $isDotNet() ? 'Not Found' : 'An item with id \'9999\' does not exist.');
+                        });
+                    },
+                    function () {
+                        return table.insert({ col1: "GHI", col2: 0 });
+                    },
+                    function (third) {
+                        context.newItems = tableHelper.getNewItems(third.id);
+                        return table.where(context.newItems).read({ testMode: true });
+                    },
+                    function (results) {
+                        $assert.areEqual(3, results.length);
 
-                    $log('Query and sort ascending');
-                    return table.where(context.newItems).orderBy('col1').read();
-                },
+                        $log('Query and sort ascending');
+                        return table.where(context.newItems).orderBy('col1').read();
+                    },
                 function (items) {
                     $assert.areEqual(3, items.length);
                     $assert.areEqual('ABC', items[0].col1);
@@ -68,7 +73,7 @@ $testGroup('ToDo')
                     $assert.areEqual('GHI', items[0].col1);
 
                     $log('Query for completed');
-                    return table.where(context.newItems).where('col2 gt 0').read();
+                    return table.where(context.newItems).where('Col2 gt 0.0').read();
                 },
                 function (items) {
                     $assert.areEqual(1, items.length);
@@ -90,8 +95,10 @@ $testGroup('ToDo')
                             $assert.fail('Should have errored');
                         },
                         function (err) {
-                            $assert.contains(err.message, 'notreal');
-                            $assert.contains(err.request.responseText.toString(), 'notreal');
+                            $assert.contains(err.message, $isDotNet() ? 'Not Found' : 'notreal');
+                            if (!$isDotNet()) {
+                                $assert.contains(err.request.responseText.toString(), 'notreal');
+                            }
                         });
                 });
         }),
@@ -100,6 +107,8 @@ $testGroup('ToDo')
         .description('Simple TODO usage scenario')
         .checkAsync(function () {
             var table = $getClient().getTable('test_table');
+            var tableHelper = $getTableHelper();
+
             var context = {};
             return $chain(
                 function () {
@@ -108,10 +117,11 @@ $testGroup('ToDo')
                 },
                 function (first) {
                     context.first = first;
-                    context.newItems = 'id ge ' + first.id;
+                    context.newItems = tableHelper.getNewItems(first.id);
                     return table.insert({ col1: "Pick up dry cleaning", col2: 0 });
                 },
-                function () {
+                function (second) {
+                    context.newItems = tableHelper.getNewItems(second.id);
                     $log('Run a simple query and verify we get both items');
                     return table.where(context.newItems).read();
                 },
@@ -119,7 +129,8 @@ $testGroup('ToDo')
                     $assert.areEqual(2, items.length);
                     return table.insert({ col1 : "Submit TPS report", col2 : 0 });
                 },
-                function () {
+                function (third) {
+                    context.newItems = tableHelper.getNewItems(third.id);
                     $log('Check off the first item');
                     context.first.col2 = 1;
                     return table.update(context.first);
@@ -147,6 +158,8 @@ $testGroup('ToDo')
         .tag('TotalCount')
         .checkAsync(function () {
             var table = $getClient().getTable('test_table');
+            var tableHelper = $getTableHelper();
+
             var context = { };
             return $chain(
                 function () {
@@ -154,13 +167,15 @@ $testGroup('ToDo')
                 },
                 function (first) {
                     context.first = first;
-                    context.newItems = 'id ge ' + first.id;
+                    context.newItems = tableHelper.getNewItems(first.id);
                     return table.insert({ col1: "DEF", col2: 1 });
                 },
-                function () {
+                function (second) {
+                    context.newItems = tableHelper.getNewItems(second.id);
                     return table.insert({ col1: "GHI", col2: 0 });
                 },
-                function () {
+                function (third) {
+                    context.newItems = tableHelper.getNewItems(third.id);
                     return table.where(context.newItems).read();
                 },
                 function (results) {
@@ -185,12 +200,11 @@ $testGroup('ToDo')
             var table = $getClient().getTable('test_table');
             var context = {};
             var actions = [];
+
             actions.push(function () {
                 return table.insert({ col1: "Test1", col2: 0 });
             });
-            actions.push(function (first) {
-                context.first = first;
-                context.newItems = 'id ge ' + first.id;
+            actions.push(function () {
                 return table.insert({ col1: "Test2", col2: 1 });
             });
             var insertRow = function(row) {
@@ -204,13 +218,14 @@ $testGroup('ToDo')
                 insertRow(i);
             }
             actions.push(function() {
-                $log('Use inline count manually');                
-                return table.includeTotalCount().where(context.newItems).read();
+                $log('Use inline count manually');
+
+                return table.includeTotalCount().read();
             });
             actions.push(function(items) {
                 // Make sure the item has the correct totalCount
                 $assert.areEqual(50, items.length);
-                $assert.areEqual(totalCount, items.totalCount);
+                $assert.isTrue(items.totalCount >= totalCount);
             });
 
             return $chain.apply(null, actions);
