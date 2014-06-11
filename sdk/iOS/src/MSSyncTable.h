@@ -93,14 +93,15 @@
 /// @{
 
 /// Initiates a request to go to the server and get a set of records matching the specified
-/// MSQeury object.  Also compares the results of the same query executed against the local cache
-/// and will delete local copies that are not present in the server results.
-/// Before a pull is allowed to run, any pending requests on the specified table will be sent to
-/// the server.
+/// MSQeury object.
+/// Before a pull is allowed to run, all pending requests on the specified table will be sent to
+/// the server. If a pending request for this table fails, the pull will be cancelled
 -(void)pullWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
 
 /// Removes all records in the local cache that match the results of the specified query.
 /// If query is nil, all records in the local table will be removed.
+/// Before local data is removed, all pending operations for this table will be pushed to
+/// the server.
 -(void)purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
 
 /// @}

@@ -11,7 +11,7 @@
 /// logic using CoreData.
 /// This class assumes the provided managed object context has the following tables:
 /// MS_Operations:      Columns: id (Integer 64), itemId (string), table (string), properties (binary data)
-/// MS_OperationErrors: Columns: id (Integer 64), properties (binary data)
+/// MS_OperationErrors: Columns: id (string), properties (binary data)
 /// and all tables contain a ms_version column
 @interface MSCoreDataStore : NSObject <MSSyncContextDataSource>
 

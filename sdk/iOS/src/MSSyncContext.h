@@ -26,9 +26,9 @@ typedef void (^MSSyncPushCompletionBlock)(void);
 /// @{
 
 @optional
-/// Called once for each entry on the queue, allowing for any adjustments to the item to the server, or custom handling
-/// of the server's response (such as conflict handling). Errors returned from this function will be collected and sent
-/// as a group to the [syncContext: onPushCompleteWithError: completion:] function.
+/// Called once for each entry on the queue, allowing for any adjustments to the item before it is sent to the server,
+/// or custom handling of the server's response (such as conflict handling). Errors returned from this function will
+/// be collected and sent as a group to the [syncContext: onPushCompleteWithError: completion:] function.
 -(void) tableOperation:(MSTableOperation *)operation onComplete:(MSSyncItemBlock)completion;
 
 /// Called when all operations that were triggered due to a [pushWithCompletion:] call have completed. If not provided, any

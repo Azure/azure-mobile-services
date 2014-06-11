@@ -167,17 +167,6 @@ static NSOperationQueue *delegateQueue;
         
             [NSURLConnection connectionWithRequest:request delegate:delegate];
         });
-        
-        //if (!delegateQueue) {
-        //    delegateQueue = [[NSOperationQueue alloc] init];
-        //}
-        //NSURLConnection *connection = [[NSURLConnection alloc]
-        //                                     initWithRequest:request
-        //                                            delegate:delegate
-        //                                   startImmediately:NO];
-        //[connection setDelegateQueue:delegateQueue];
-        //[connection start];
-        
     }
     else {
         
