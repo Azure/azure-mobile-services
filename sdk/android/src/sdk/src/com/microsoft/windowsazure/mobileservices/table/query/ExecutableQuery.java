@@ -739,6 +739,12 @@ public final class ExecutableQuery<E> implements Query {
 	}
 
 	@Override
+	public ExecutableQuery<E> concat(Query str1, String str2) throws MobileServiceException {
+		this.mQuery.concat(str1, str2);
+		return this;
+	}
+	
+	@Override
 	public ExecutableQuery<E> indexOf(Query haystack, Query needle) throws MobileServiceException {
 		this.mQuery.indexOf(haystack, needle);
 		return this;

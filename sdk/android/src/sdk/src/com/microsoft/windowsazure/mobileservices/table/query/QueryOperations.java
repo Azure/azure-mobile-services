@@ -995,6 +995,20 @@ public class QueryOperations {
 	}
 
 	/**
+	 * String value which is the first and second parameter values merged
+	 * together with the first parameter value coming first in the result.
+	 * 
+	 * @param str1
+	 *            First string
+	 * @param str2
+	 *            Second string
+	 * @return Query
+	 */
+	public static Query concat(Query str1, String str2) {
+		return function(FunctionCallKind.Concat, str1, val(str2));
+	}
+	
+	/**
 	 * Index of the first occurrence of the second parameter value in the first
 	 * parameter value or -1 otherwise.
 	 * 

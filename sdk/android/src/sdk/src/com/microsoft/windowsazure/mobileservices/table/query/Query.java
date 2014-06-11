@@ -957,6 +957,19 @@ public interface Query {
 	public Query concat(Query str1, Query str2) throws MobileServiceException;
 
 	/**
+	 * String value which is the first and second parameter values merged
+	 * together with the first parameter value coming first in the result.
+	 * 
+	 * @param str1
+	 *            First string
+	 * @param str2
+	 *            Second string
+	 * @return Query
+	 * @throws MobileServiceException
+	 */
+	public Query concat(Query str1, String str2) throws MobileServiceException;
+	
+	/**
 	 * Index of the first occurrence of the second parameter value in the first
 	 * parameter value or -1 otherwise.
 	 * 

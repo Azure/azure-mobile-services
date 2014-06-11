@@ -741,6 +741,12 @@ public class QueryBase implements Query {
 	}
 
 	@Override
+	public Query concat(Query str1, String str2) throws MobileServiceException {
+		QueryOperations.join(this, QueryOperations.concat(str1, str2));
+		return this;
+	}
+	
+	@Override
 	public Query indexOf(Query haystack, Query needle) throws MobileServiceException {
 		QueryOperations.join(this, QueryOperations.indexOf(haystack, needle));
 		return this;

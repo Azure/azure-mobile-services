@@ -1,7 +1,6 @@
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;

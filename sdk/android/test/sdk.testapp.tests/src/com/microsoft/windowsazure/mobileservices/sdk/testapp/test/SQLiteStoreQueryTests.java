@@ -19,47 +19,26 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import org.apache.http.Header;
 
-import android.R.string;
 import android.content.Context;
 import android.test.InstrumentationTestCase;
 
-import com.google.common.base.Function;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
-import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceJsonSyncTable;
-import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
+import com.microsoft.windowsazure.mobileservices.table.serialization.DateSerializer;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.ColumnDataType;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStoreException;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.SQLiteLocalStore;
-import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
-import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushStatus;
-import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.MobileServiceSyncHandler;
-import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSyncHandler;
 
 public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 
@@ -158,6 +137,16 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		testQuery(query2, 0);
 	}
 
+	public void testQueryOnStringEndsWith() throws MobileServiceException, MobileServiceLocalStoreException {
+		Query query1 = QueryOperations.tableName(TestTable).endsWith("col1", "ox");
+
+		testQuery(query1, 1);
+
+		Query query2 = QueryOperations.tableName(TestTable).endsWith("col1", "ump");
+
+		testQuery(query2, 0);
+	}
+
 	public void testQueryOnStringSubstringOf() throws MobileServiceException, MobileServiceLocalStoreException {
 		Query query1 = QueryOperations.tableName(TestTable).subStringOf("qu", "col1");
 
@@ -168,22 +157,64 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		testQuery(query2, 0);
 	}
 
-	// public void testQueryOnStringConcatAndCompare()
-	// {
-	// Query query1 = QueryOperations.tableName(TestTable)
-	//
-	// testQuery(query1, 1);
-	//
-	// Query query2 = QueryOperations.tableName(TestTable).subStringOf("fer",
-	// "col1");
-	//
-	// testQuery(query2, 0);
-	//
-	// await
-	// TestQuery("$filter=concat(concat(col1, 'ies'), col2) eq 'brownies1'", 1);
-	// await
-	// TestQuery("$filter=concat(concat(col1, 'ies'), col2) eq 'brownies2'", 0);
-	// }
+	public void testQueryOnStringTrim() throws MobileServiceException, MobileServiceLocalStoreException {
+		Query query1 = QueryOperations.tableName(TestTable).trim("col1").eq("EndsWithBackslash\\");
+
+		testQuery(query1, 1);
+
+		Query query2 = QueryOperations.tableName(TestTable).trim("col1").eq(" EndsWithBackslash\\");
+
+		testQuery(query2, 0);
+	}
+	
+	public void testQueryOnStringConcatAndCompare() throws MobileServiceLocalStoreException, MobileServiceException {
+		Query query1 = QueryOperations.tableName(TestTable)
+				.concat(QueryOperations.concat(QueryOperations.field("col1"), "ies"), QueryOperations.field("col2"))
+				.eq("brownies1.0");
+
+		testQuery(query1, 1);
+
+		Query query2 = QueryOperations.tableName(TestTable).concat(QueryOperations.concat(QueryOperations.field("col1"), "ies"), QueryOperations.field("col2"))
+				.eq("brownies2.0");
+
+		testQuery(query2, 0);
+	}
+
+	public void testQueryOnYear() throws MobileServiceLocalStoreException, MobileServiceException {
+		Query query1 = QueryOperations.tableName(TestTable)
+				.year("col4").eq(1970);
+			
+		testQuery(query1, 6);
+
+		Query query2 = QueryOperations.tableName(TestTable)
+				.year("col4").eq(2015);
+		
+		testQuery(query2, 0);
+	}
+	
+	public void testQueryOnMonth() throws MobileServiceLocalStoreException, MobileServiceException {
+		Query query1 = QueryOperations.tableName(TestTable)
+				.month("col4").eq(1);
+			
+		testQuery(query1, 6);
+
+		Query query2 = QueryOperations.tableName(TestTable)
+				.month("col4").eq(12);
+		
+		testQuery(query2, 0);
+	}
+	
+	public void testQueryOnDay() throws MobileServiceLocalStoreException, MobileServiceException {
+		Query query1 = QueryOperations.tableName(TestTable)
+				.month("col4").eq(1);
+			
+		testQuery(query1, 6);
+
+		Query query2 = QueryOperations.tableName(TestTable)
+				.month("col4").eq(31);
+		
+		testQuery(query2, 0);
+	}
 
 	public void testQueryOnStringReplaceAndCompare() throws MobileServiceException, MobileServiceLocalStoreException {
 		Query query1 = QueryOperations.tableName(TestTable).replace("col1", "j", "p").eq("pumped");
@@ -206,6 +237,26 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		testQuery(query2, 0);
 	}
 
+	public void testQueryOnStringSubstringToUpper() throws MobileServiceException, MobileServiceLocalStoreException {
+		Query query1 = QueryOperations.tableName(TestTable).toUpper("col1").eq("FOX");
+
+		testQuery(query1, 1);
+
+		Query query2 = QueryOperations.tableName(TestTable).toUpper("col1").eq("fox");
+
+		testQuery(query2, 0);
+	}
+
+	public void testQueryOnStringSubstringToLower() throws MobileServiceException, MobileServiceLocalStoreException {
+		Query query1 = QueryOperations.tableName(TestTable).toLower("col1").eq("fox");
+
+		testQuery(query1, 1);
+
+		Query query2 = QueryOperations.tableName(TestTable).toLower("col1").eq("FOX");
+
+		testQuery(query2, 0);
+	}
+	
 	public void testQueryOnStringSubstringWithLengthAndCompare() throws MobileServiceException, MobileServiceLocalStoreException {
 		Query query1 = QueryOperations.tableName(TestTable).subString("col1", 1, 3).eq("uic");
 
@@ -257,15 +308,12 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		item3.addProperty("expected", -2);
 		result.add(item3);
 
-		Query query = QueryOperations.tableName(MathTestTable)
-				.round(QueryOperations.field("val"))
-				.eq(QueryOperations.field("expected"));
+		Query query = QueryOperations.tableName(MathTestTable).round(QueryOperations.field("val")).eq(QueryOperations.field("expected"));
 
 		testMathQuery(result.toArray(new JsonObject[0]), query);
 	}
 
-	public void testQueryMathCeiling() throws MobileServiceException, MobileServiceLocalStoreException
-    {
+	public void testQueryMathCeiling() throws MobileServiceException, MobileServiceLocalStoreException {
 		List<JsonObject> result = new ArrayList<JsonObject>();
 
 		JsonObject item5 = new JsonObject();
@@ -288,54 +336,47 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		item1.addProperty("expected", 1);
 		result.add(item1);
 
-		Query query = QueryOperations.tableName(MathTestTable)
-				.ceiling(QueryOperations.field("val"))
-				.eq(QueryOperations.field("expected"));
-		
-		testMathQuery(result.toArray(new JsonObject[0]), query);
-    }
+		Query query = QueryOperations.tableName(MathTestTable).ceiling(QueryOperations.field("val")).eq(QueryOperations.field("expected"));
 
-    public void testQueryOnStringLength() throws MobileServiceException, MobileServiceLocalStoreException
-    {
-    	Query query1 = QueryOperations.tableName(TestTable).length("col1").eq(18);
+		testMathQuery(result.toArray(new JsonObject[0]), query);
+	}
+
+	public void testQueryOnStringLength() throws MobileServiceException, MobileServiceLocalStoreException {
+		Query query1 = QueryOperations.tableName(TestTable).length("col1").eq(19);
 
 		testQuery(query1, 1);
 
-		Query query2 = QueryOperations.tableName(TestTable).length("col1").eq(19);
+		Query query2 = QueryOperations.tableName(TestTable).length("col1").eq(20);
 
 		testQuery(query2, 0);
-    }
-	 
-    public void testQueryWithPaging() throws MobileServiceLocalStoreException
-    {
-        for (int skip = 0; skip < 4; skip++)
-        {
-            for (int take = 0; take < 4; take++)
-            {   
-                Query query = QueryOperations.tableName(TestTable)
-                		.skip(skip)
-                		.top(take);
-                
-                testQuery(query, take);
-            }
-        }
-    }
-    
-    public void testQueryWithTotalCount() throws MobileServiceLocalStoreException
-    {
-    	Query query = QueryOperations.tableName(TestTable)
-        		.top(5)
-        		.includeInlineCount();
-    	
-    	JsonObject queryResults = runQuery(query);
-    	
-    	JsonArray results = queryResults.get("results").getAsJsonArray();
+	}
+
+	public void testQueryWithPaging() throws MobileServiceLocalStoreException {
+		for (int skip = 0; skip < 4; skip++) {
+			for (int take = 1; take < 4; take++) {
+				Query query = QueryOperations.tableName(TestTable).skip(skip).top(take);
+
+				JsonArray queryResults = runQuery(query);
+
+				if ((skip + take - 1) < getTestData().length) {
+					assertEquals(queryResults.get(take - 1).getAsJsonObject().get("id").getAsString(), getTestData()[skip + take - 1].get("id").getAsString());
+				}
+			}
+		}
+	}
+
+	public void testQueryWithTotalCount() throws MobileServiceLocalStoreException {
+		Query query = QueryOperations.tableName(TestTable).top(5).includeInlineCount();
+
+		JsonObject queryResults = runQuery(query);
+
+		JsonArray results = queryResults.get("results").getAsJsonArray();
 		long resultCount = queryResults.get("count").getAsLong();
-    	
+
 		assertEquals(results.size(), 5);
 		assertEquals(resultCount, 6);
-    }
-    
+	}
+
 	private JsonObject[] getTestData() {
 
 		ArrayList<JsonObject> result = new ArrayList<JsonObject>();
@@ -349,7 +390,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		item1.addProperty("col1", "the");
 		item1.addProperty("col2", 5.0);
 		item1.addProperty("col3", 234f);
-		item1.addProperty("col4", cal1.getTime().toString());
+		item1.addProperty("col4", DateSerializer.serialize(cal1.getTime()));
 		item1.addProperty("col5", false);
 		result.add(item1);
 
@@ -362,7 +403,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		item2.addProperty("col1", "quick");
 		item2.addProperty("col2", 3.0);
 		item2.addProperty("col3", 9867.12);
-		item2.addProperty("col4", cal2.getTime().toString());
+		item2.addProperty("col4", DateSerializer.serialize(cal2.getTime()));
 		item2.addProperty("col5", true);
 		result.add(item2);
 
@@ -375,7 +416,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		item3.addProperty("col1", "brown");
 		item3.addProperty("col2", 1.0);
 		item3.addProperty("col3", 11f);
-		item3.addProperty("col4", cal3.getTime().toString());
+		item3.addProperty("col4", DateSerializer.serialize(cal3.getTime()));
 		item3.addProperty("col5", false);
 		result.add(item3);
 
@@ -388,7 +429,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		item4.addProperty("col1", "fox");
 		item4.addProperty("col2", 6.0);
 		item4.addProperty("col3", 23908.99);
-		item4.addProperty("col4", cal4.getTime().toString());
+		item4.addProperty("col4", DateSerializer.serialize(cal4.getTime()));
 		item4.addProperty("col5", true);
 		result.add(item4);
 
@@ -401,7 +442,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		item5.addProperty("col1", "jumped");
 		item5.addProperty("col2", 9.0);
 		item5.addProperty("col3", 678.932);
-		item5.addProperty("col4", cal5.getTime().toString());
+		item5.addProperty("col4", DateSerializer.serialize(cal5.getTime()));
 		item5.addProperty("col5", true);
 		result.add(item5);
 
@@ -411,10 +452,10 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 
 		JsonObject item6 = new JsonObject();
 		item6.addProperty("id", "6");
-		item6.addProperty("col1", "EndsWithBackslash\\");
+		item6.addProperty("col1", " EndsWithBackslash\\");
 		item6.addProperty("col2", 8.0);
 		item6.addProperty("col3", 521f);
-		item6.addProperty("col4", cal5.getTime().toString());
+		item6.addProperty("col4", DateSerializer.serialize(cal6.getTime()));
 		item6.addProperty("col5", true);
 		result.add(item6);
 
@@ -451,7 +492,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		result.add(item5);
 
 		JsonObject item6 = new JsonObject();
-		item6.addProperty("col1", "EndsWithBackslash\\");
+		item6.addProperty("col1", " EndsWithBackslash\\");
 		item6.addProperty("col2", 8.0);
 		result.add(item6);
 
@@ -468,7 +509,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		result.add(item5);
 
 		JsonObject item6 = new JsonObject();
-		item6.addProperty("col1", "EndsWithBackslash\\");
+		item6.addProperty("col1", " EndsWithBackslash\\");
 		item6.addProperty("col2", 8.0);
 		result.add(item6);
 
@@ -527,7 +568,9 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 	private <T> T runQuery(SQLiteLocalStore store, Query query) throws MobileServiceLocalStoreException // where
 	// T:JToken
 	{
-		return (T) store.read(query);
+		T read = (T) store.read(query);
+		
+		return read;
 	}
 
 	private SQLiteLocalStore setupMathTestTable(JsonObject[] mathTestData) throws MobileServiceLocalStoreException {

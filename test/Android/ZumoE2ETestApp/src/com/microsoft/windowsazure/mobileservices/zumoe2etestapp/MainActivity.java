@@ -395,6 +395,19 @@ public class MainActivity extends Activity {
 
 		final MobileServiceClient currentClient = client;
 
+		if (Build.VERSION.SDK_INT == Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1 || Build.VERSION.SDK_INT == Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+			// For android versions 4.0.x
+			// Run a first Void AsyncTask on UI thread to enable the possibility
+			// of running others on sub threads
+			new AsyncTask<Void, Void, Void>() {
+				@Override
+				protected Void doInBackground(Void... params) {
+					return null;
+				}
+			}.execute();
+
+		}
+
 		Thread thread = new Thread() {
 
 			@Override

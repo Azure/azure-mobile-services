@@ -210,22 +210,22 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 
 		switch (operatorKind) {
 		case Year:
-			operatorFormat = formatDateOperation("%Y");
+			operatorFormat = formatDateOperation("%%Y");
 			break;
 		case Month:
-			operatorFormat = formatDateOperation("%m");
+			operatorFormat = formatDateOperation("%%m");
 			break;
 		case Day:
-			operatorFormat = formatDateOperation("%d");
+			operatorFormat = formatDateOperation("%%d");
 			break;
 		case Hour:
-			operatorFormat = formatDateOperation("%H");
+			operatorFormat = formatDateOperation("%%H");
 			break;
 		case Minute:
-			operatorFormat = formatDateOperation("%M");
+			operatorFormat = formatDateOperation("%%M");
 			break;
 		case Second:
-			operatorFormat = formatDateOperation("%s");
+			operatorFormat = formatDateOperation("%%s");
 			break;
 		case Floor:
 			operatorFormat = formatMathOperation(-1);
@@ -314,7 +314,7 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 	private static String formatEndsWithOperation() {
 		StringBuilder builder = new StringBuilder();
 
-		builder.append("((%1$s LIKE ('%%' || %2$s))");
+		builder.append("(%1$s LIKE ('%%' || %2$s))");
 
 		return builder.toString();
 	}
