@@ -384,7 +384,7 @@ global.$chain = function () {
 
 global.$isDotNet = function() {
     /// <summary>
-    /// Returns true if .NET runtime checked
+    /// Returns true if .NET runtime is checked.
     /// </summary>
     /// <returns type="MobileServiceClient">MobileServiceClient</returns>
 
@@ -393,7 +393,7 @@ global.$isDotNet = function() {
 
 global.$getTableHelper = function () {
     /// <summary>
-    /// Create table helper for function tests.
+    /// Create table helper for functional tests.
     /// </summary>
     /// <returns type="MobileServiceClient">MobileServiceClient</returns>
 
