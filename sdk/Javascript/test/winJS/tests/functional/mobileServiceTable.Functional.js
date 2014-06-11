@@ -655,7 +655,7 @@ $testGroup('Mobile Service Table Tests')
 
         $test('AsyncTableOperationsWithSystemPropertiesSetExplicitly')
         .tag('SystemProperties')
-        //.tag('dotNet_not_supported') // .NET apps always return all system properties on insert operation
+        .tag('dotNet_not_supported') // .NET apps always return all system properties on insert operation
         .checkAsync(function () {
 
             var client = $getClient(),
