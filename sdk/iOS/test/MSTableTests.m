@@ -1022,6 +1022,104 @@
 }
 
 
+#pragma mark * UndeleteItem Method Tests
+
+
+-(void) testUnDeleteItemWithStringId
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:@"{\"id\":\"an id\",\"String\":\"Hey\"}"];
+
+    __block NSURLRequest *actualRequest;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
+    
+    // Create the item
+    id item = @{ @"id":@"ID-ABC", @"name":@"test name" };
+    
+    // Insert the item
+    [todoTable undelete:item completion:^(id item, NSError *error) {
+        STAssertEqualObjects(actualRequest.HTTPMethod, @"POST", @"Expected undelete to send a POST, not %@", actualRequest.HTTPMethod);
+        STAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/NoSuchTable/ID-ABC", @"Unexpected URL");
+        
+        STAssertNil(error, @"error should have been nil.");
+        
+        STAssertNotNil(item, @"item should not have  been nil.");
+        STAssertEqualObjects(item[@"id"], @"an id", @"item id should have come from server.");
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+-(void) testUnDeleteItemWithParametersWithStringId
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:@"{\"id\":\"an id\",\"String\":\"Hey\", \"__version\":\"def\"}"];
+    
+    __block NSURLRequest *actualRequest;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
+    
+    // Create the item
+    id item = @{ @"id":@"ID-ABC", @"name":@"test name", MSSystemColumnVersion: @"abc" };
+    
+    // Insert the item
+    [todoTable undelete:item parameters:@{@"extra-extra": @"read-all-about-it"} completion:^(NSDictionary *item, NSError *error) {
+        STAssertEqualObjects(actualRequest.HTTPMethod, @"POST", @"Expected undelete to send a POST, not %@", actualRequest.HTTPMethod);
+        STAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/NoSuchTable/ID-ABC?extra-extra=read-all-about-it", @"Unexpected URL");
+        STAssertEqualObjects(actualRequest.allHTTPHeaderFields[@"If-Match"], @"\"abc\"", @"Missing if-match header");
+                                          
+        STAssertNil(error, @"error should have been nil.");
+        
+        STAssertNotNil(item, @"item should not have  been nil.");
+        STAssertEqualObjects(item[@"id"], @"an id", @"item id should have come from server.");
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+
+-(void) testUnDeleteItemWithNoItemId
+{
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
+    
+    // Create the item
+    NSDictionary *item = @{ @"text":@"Write unit tests!", @"complete": @(NO) };
+    
+    // Update the item
+    [todoTable undelete:item completion:^(id itemId, NSError *error) {
+        
+        STAssertNil(itemId, @"itemId should have been nil.");
+        
+        STAssertNotNil(error, @"error should not have been nil.");
+        STAssertTrue(error.domain == MSErrorDomain,
+                     @"error domain should have been MSErrorDomain.");
+        STAssertTrue(error.code == MSMissingItemIdWithRequest,
+                     @"error code should have been MSMissingItemIdWithRequest.");
+        
+        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        STAssertTrue([description isEqualToString:@"The item provided did not have an id."],
+                     @"description was: %@", description);
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+
 #pragma mark * ReadWithId Method Tests
 
 

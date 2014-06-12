@@ -123,6 +123,17 @@ extern NSString *const MSSystemColumnVersion;
          parameters:(NSDictionary *)parameters
          completion:(MSDeleteBlock)completion;
 
+/// Sends a request to the Windows Azure Mobile Service to undelete the item
+/// with the given id in from table.
+-(void)undelete:(NSDictionary *)item completion:(MSItemBlock)completion;
+
+/// Sends a request to the Windows Azure Mobile Service to undelete the item
+/// with the given id in from table. Addtional user-defined parameters are
+/// sent in the request query string.
+-(void)undelete:(NSDictionary *)item
+     parameters:(NSDictionary *)parameters
+     completion:(MSItemBlock)completion;
+
 ///@}
 
 #pragma mark * Public Read Methods

@@ -137,6 +137,32 @@ NSString *const MSSystemColumnVersion = @"__version";
     }
 }
 
+-(void)undelete:(NSDictionary *)item completion:(MSItemBlock)completion
+{
+    [self undelete:item parameters:nil completion:completion];
+}
+
+-(void)undelete:(NSDictionary *)item
+        parameters:(NSDictionary *)parameters
+        completion:(MSItemBlock)completion
+{
+    // Create the request
+    MSTableItemRequest *request = [MSTableRequest
+                                     requestToUndeleteItem:item
+                                     table:self
+                                     parameters:parameters
+                                     completion:completion];
+                                     
+    // Send the request
+    if (request) {
+        MSTableConnection *connection =
+        [MSTableConnection connectionWithItemRequest:request
+                                          completion:completion];
+        [connection start];
+    }
+    
+}
+
 
 #pragma mark * Public Read Methods
 
