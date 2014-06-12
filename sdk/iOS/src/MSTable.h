@@ -42,10 +42,10 @@ extern NSString *const MSSystemColumnVersion;
 #pragma mark * MSTable Public Interface
 
 
-/// The *MSTable* class represents a table of a Windows Azure Mobile Service.
+/// The *MSTable* class represents a table of a Azure Mobile Service.
 /// Items can be inserted, updated, deleted and read from the table. The table
 /// can also be queried to retrieve an array of items that meet the given query
-/// conditions. All table operations result in a request to the Windows Azure
+/// conditions. All table operations result in a request to the Azure
 /// Mobile Service to perform the given operation.
 @interface MSTable : NSObject
 
@@ -79,55 +79,55 @@ extern NSString *const MSSystemColumnVersion;
 ///@name Modifying Items
 ///@{
 
-/// Sends a request to the Windows Azure Mobile Service to insert the given
+/// Sends a request to the Azure Mobile Service to insert the given
 /// item into the table. The item must not have an id.
 -(void)insert:(NSDictionary *)item completion:(MSItemBlock)completion;
 
-/// Sends a request to the Windows Azure Mobile Service to insert the given
+/// Sends a request to the Azure Mobile Service to insert the given
 /// item into the table. Addtional user-defined parameters are sent in the
 /// request query string. The item must not have an id.
 -(void)insert:(NSDictionary *)item
    parameters:(NSDictionary *)parameters
    completion:(MSItemBlock)completion;
 
-/// Sends a request to the Windows Azure Mobile Service to update the given
+/// Sends a request to the Azure Mobile Service to update the given
 /// item in the table. The item must have an id.
 -(void)update:(NSDictionary *)item completion:(MSItemBlock)completion;
 
-/// Sends a request to the Windows Azure Mobile Service to update the given
+/// Sends a request to the Azure Mobile Service to update the given
 /// item in the table. Addtional user-defined parameters are sent in the
 /// request query string. The item must have an id.
 -(void)update:(NSDictionary *)item
    parameters:(NSDictionary *)parameters
    completion:(MSItemBlock)completion;
 
-/// Sends a request to the Windows Azure Mobile Service to delete the given
+/// Sends a request to the Azure Mobile Service to delete the given
 /// item from the table. The item must have an id.
 -(void)delete:(NSDictionary *)item completion:(MSDeleteBlock)completion;
 
-/// Sends a request to the Windows Azure Mobile Service to delete the given
+/// Sends a request to the Azure Mobile Service to delete the given
 /// item from the table. Addtional user-defined parameters are sent in the
 /// request query string. The item must have an id.
 -(void)delete:(NSDictionary *)item
    parameters:(NSDictionary *)parameters
    completion:(MSDeleteBlock)completion;
 
-/// Sends a request to the Windows Azure Mobile Service to delete the item
+/// Sends a request to the Azure Mobile Service to delete the item
 /// with the given id in from table.
 -(void)deleteWithId:(id)itemId completion:(MSDeleteBlock)completion;
 
-/// Sends a request to the Windows Azure Mobile Service to delete the item
+/// Sends a request to the Azure Mobile Service to delete the item
 /// with the given id in from table. Addtional user-defined parameters are
 /// sent in the request query string.
 -(void)deleteWithId:(id)itemId
          parameters:(NSDictionary *)parameters
          completion:(MSDeleteBlock)completion;
 
-/// Sends a request to the Windows Azure Mobile Service to undelete the item
+/// Sends a request to the Azure Mobile Service to undelete the item
 /// with the given id in from table.
 -(void)undelete:(NSDictionary *)item completion:(MSItemBlock)completion;
 
-/// Sends a request to the Windows Azure Mobile Service to undelete the item
+/// Sends a request to the Azure Mobile Service to undelete the item
 /// with the given id in from table. Addtional user-defined parameters are
 /// sent in the request query string.
 -(void)undelete:(NSDictionary *)item
@@ -141,28 +141,28 @@ extern NSString *const MSSystemColumnVersion;
 ///@name Retreiving Items
 ///@{
 
-/// Sends a request to the Windows Azure Mobile Service to return the item
+/// Sends a request to the Azure Mobile Service to return the item
 /// with the given id from the table.
 -(void)readWithId:(id)itemId completion:(MSItemBlock)completion;
 
-/// Sends a request to the Windows Azure Mobile Service to return the item
+/// Sends a request to the Azure Mobile Service to return the item
 /// with the given id from the table. Addtional user-defined parameters are
 /// sent in the request query string.
 -(void)readWithId:(id)itemId
        parameters:(NSDictionary *)parameters
        completion:(MSItemBlock)completion;
 
-/// Sends a request to the Windows Azure Mobile Service to return all items
+/// Sends a request to the Azure Mobile Service to return all items
 /// fromm the table that meet the conditions of the given query.
 -(void)readWithQueryString:(NSString *)queryString
                 completion:(MSReadQueryBlock)completion;
 
-/// Sends a request to the Windows Azure Mobile Service to return all items
-/// from the table. The Windows Azure Mobile Service will apply a default
+/// Sends a request to the Azure Mobile Service to return all items
+/// from the table. The Azure Mobile Service will apply a default
 /// limit to the number of items returned.
 -(void)readWithCompletion:(MSReadQueryBlock)completion;
 
-/// Sends a request to the Windows Azure Mobile Service to return all items
+/// Sends a request to the Azure Mobile Service to return all items
 /// from the table that meet the conditions of the given predicate.
 -(void)readWithPredicate:(NSPredicate *) predicate
       completion:(MSReadQueryBlock)completion;

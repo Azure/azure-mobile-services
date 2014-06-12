@@ -81,7 +81,7 @@ typedef enum MSTableRequestTypeEnum {
 +(MSTableItemRequest *) requestToUndeleteItem:(id)item
                                         table:(MSTable *)table
                                    parameters:(NSDictionary *)parameters
-                                   completion:(MSDeleteBlock)completion;
+                                   completion:(MSItemBlock)completion;
 
 // Creates a request to read the item with the given ide from the given table.
 +(MSTableItemRequest *) requestToReadWithId:(id)itemId

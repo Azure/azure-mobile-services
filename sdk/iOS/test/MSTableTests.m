@@ -1042,7 +1042,7 @@
     id item = @{ @"id":@"ID-ABC", @"name":@"test name" };
     
     // Insert the item
-    [todoTable undelete:item completion:^(id item, NSError *error) {
+    [todoTable undelete:item completion:^(NSDictionary *item, NSError *error) {
         STAssertEqualObjects(actualRequest.HTTPMethod, @"POST", @"Expected undelete to send a POST, not %@", actualRequest.HTTPMethod);
         STAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/NoSuchTable/ID-ABC", @"Unexpected URL");
         
@@ -1099,9 +1099,8 @@
     NSDictionary *item = @{ @"text":@"Write unit tests!", @"complete": @(NO) };
     
     // Update the item
-    [todoTable undelete:item completion:^(id itemId, NSError *error) {
-        
-        STAssertNil(itemId, @"itemId should have been nil.");
+    [todoTable undelete:item completion:^(NSDictionary *item, NSError *error) {
+        STAssertNil(item, @"item should have been nil.");
         
         STAssertNotNil(error, @"error should not have been nil.");
         STAssertTrue(error.domain == MSErrorDomain,

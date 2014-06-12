@@ -112,7 +112,7 @@ NSString *const httpDelete = @"DELETE";
 
 #pragma mark - Private Static Helper Functions
 
-+(NSString *) versionFromItem:(NSDictionary *)item ItemId:(NSString *)itemId
++(NSString *) versionFromItem:(NSDictionary *)item ItemId:(id)itemId
 {
     if([itemId isKindOfClass:[NSString class]]) {
         return item[MSSystemColumnVersion];
@@ -321,14 +321,14 @@ NSString *const httpDelete = @"DELETE";
 +(MSTableItemRequest *) requestToUndeleteItem:(id)item
                                         table:(MSTable *)table
                                    parameters:(NSDictionary *)parameters
-                                   completion:(MSDeleteBlock)completion
+                                   completion:(MSItemBlock)completion
 {
     MSTableItemRequest *request = nil;
     NSError *error = nil;
     id<MSSerializer> serializer = table.client.serializer;
     
     // Ensure we can get the item Id
-    id itemId = [table.client.serializer itemIdFromItem:item orError:&error];
+    id itemId = [serializer itemIdFromItem:item orError:&error];
     if (!error) {
         // Ensure we can get a string from the item Id
         NSString *idString = [serializer stringFromItemId:itemId
@@ -340,7 +340,6 @@ NSString *const httpDelete = @"DELETE";
                                        itemIdString:idString
                                          parameters:parameters
                                             orError:&error];
-        
             
             if (!error) {
                 // Create the request
