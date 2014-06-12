@@ -138,8 +138,8 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
     
     func didSaveItem(text: String)
     {
-        let itemToInsert = NSDictionary(objects: [text, false], forKeys: ["text", "complete"])
-
+        let itemToInsert = ["text": text, "complete": false]
+        
         UIApplication.sharedApplication().networkActivityIndicatorVisible = true
         self.table!.insert(itemToInsert) {
             (item, error) in
