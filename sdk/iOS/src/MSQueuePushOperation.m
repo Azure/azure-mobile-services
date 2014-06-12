@@ -167,9 +167,19 @@
     // Remove the operation
     dispatch_async(self.dispatchQueue, ^{
         if (error) {
-            // TODO: Condense any table-item logic since new actions can come in while this one is outgoing
-            // Fix insert-update (keep insert), insert-delete (remove both), update-delete (keep delete)
             NSHTTPURLResponse *response = [error.userInfo objectForKey:MSErrorResponseKey];
+            BOOL didCondense = NO;
+            
+            // Determine if table-item operation is dirty (if so, ignore this operations response)
+            // and condense any table-item logic since new actions can come in while this one is outgoing
+            NSError *condenseError;
+            didCondense = [self.syncContext.operationQueue condenseOperation:operation orError:&condenseError];
+            if (condenseError) {
+                self.error = [self errorWithDescription:@"Push aborted due to failure to condense operations in the store"
+                                                   code:MSPushAbortedDataSource
+                                          internalError:error];
+            }
+            
             if (response && response.statusCode == 401) {
                 self.error = [self errorWithDescription:@"Push aborted due to authentication error"
                                                    code:MSPushAbortedAuthentication
@@ -180,7 +190,7 @@
                                                    code:MSPushAbortedUnknown
                                           internalError:error];
             }
-            else {
+            else if (!didCondense) {
                 MSTableOperationError *tableError = [[MSTableOperationError alloc] initWithOperation:operation
                                                                                                 item:operation.item
                                                                                                error:error];
@@ -222,15 +232,17 @@
             [self pushComplete];
             return;
         }
-        
+            
         // Remove our operation if it completed successfully
-        NSError *storeError = [self.syncContext removeOperation:operation];
-        if (storeError) {
-            self.error = [self errorWithDescription:@"error removing successful operation from queue"
-                                               code:MSSyncTableInternalError
-                                      internalError:error];
-            [self pushComplete];
-            return;
+        if (!error) {
+            NSError *storeError = [self.syncContext removeOperation:operation];
+            if (storeError) {
+                self.error = [self errorWithDescription:@"error removing successful operation from queue"
+                                                   code:MSSyncTableInternalError
+                                          internalError:error];
+                [self pushComplete];
+                return;
+            }
         }
         
         [self processQueueEntry];

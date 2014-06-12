@@ -6,6 +6,7 @@
 
 @interface MSCoreDataStore()
 @property (nonatomic, weak) NSManagedObjectContext *context;
+
 @end
 
 @implementation MSCoreDataStore
@@ -53,6 +54,28 @@
     }
     
     return [results firstObject];
+}
+
+/// Helper function to convert a server response item to only contain the appropriate keys for consumption by
+/// a mobile service
++(NSDictionary *) adjustItem:(NSDictionary *)item forEntityDescription:(NSEntityDescription *)entityDescription
+{
+    NSMutableDictionary *modifiedItem = [item mutableCopy];
+
+    // Convert __version to ms_version
+    id version = [item objectForKey:MSSystemColumnVersion];
+    if (version) {
+        [modifiedItem setValue:[item objectForKey:MSSystemColumnVersion] forKey:@"ms_version"];
+        [modifiedItem removeObjectForKey:MSSystemColumnVersion];
+    }
+
+    // Copy over only supported attributes
+    NSMutableDictionary *adjustedItem = [[NSMutableDictionary alloc] init];
+    for (NSString *attributeName in entityDescription.attributesByName) {
+        [adjustedItem setValue:[modifiedItem objectForKey:attributeName] forKey:attributeName];
+    }
+
+    return [adjustedItem copy];
 }
 
 /// Helper function to convert a managed object into a correctly formatted NSDictionary
@@ -114,7 +137,7 @@
             fr.fetchLimit = query.fetchLimit;
         }
         
-        // Convert version back to __version from MS_Version
+        // Convert version back to __version from ms_version
         NSAttributeDescription *versionProperty;
         NSMutableArray *properties;
         
@@ -176,6 +199,8 @@
 {
     __block BOOL success;
     [self.context performBlockAndWait:^{
+        NSEntityDescription *entity = [NSEntityDescription entityForName:table inManagedObjectContext:self.context];
+        
         for (NSDictionary *item in items) {
             NSManagedObject *managedItem = [self getRecordForTable:table itemId:[item objectForKey:@"id"] asDictionary:NO orError:error];
             if (error && *error) {
@@ -192,16 +217,9 @@
                                                             inManagedObjectContext:self.context];
             }
             
-            id version = [item objectForKey:MSSystemColumnVersion];
-            if (version) {
-                NSMutableDictionary *adjustedItem = [item mutableCopy];
-                [adjustedItem setValue:[item objectForKey:MSSystemColumnVersion] forKey:@"ms_version"];
-                [adjustedItem removeObjectForKey:MSSystemColumnVersion];
-                
-                [managedItem setValuesForKeysWithDictionary:adjustedItem];
-            } else {
-                [managedItem setValuesForKeysWithDictionary:item];
-            }
+            
+            NSDictionary *managedItemDictionary = [MSCoreDataStore adjustItem:item forEntityDescription:entity];
+            [managedItem setValuesForKeysWithDictionary:managedItemDictionary];
         }
         
         success = [self.context save:error];

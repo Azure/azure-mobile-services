@@ -36,7 +36,10 @@
             // with it
             response(nil, nil, self.errorToUse);
         }
-        else {
+        else {            
+            if (self.onInspectResponseData) {
+                self.dataToUse = self.onInspectResponseData(request, self.dataToUse);
+            }
             
             // Otherwise we'll assume a mock response/data are available
             response(self.responseToUse, self.dataToUse, nil);
@@ -59,7 +62,9 @@
                     res = self.responseToUse;
                 }
                 
-                if (self.dataToUse) {
+                if (self.onInspectResponseData) {
+                    data = self.onInspectResponseData(request, data);
+                } else if (self.dataToUse) {
                     data = self.dataToUse;
                 }
                 

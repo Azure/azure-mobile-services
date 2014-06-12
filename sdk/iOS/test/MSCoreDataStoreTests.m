@@ -18,21 +18,19 @@
 {
     NSBundle *bundle = [NSBundle bundleForClass:[self class]];
     NSURL *url = [bundle URLForResource:@"CoreDataTestModel" withExtension:@"momd"];
-    NSManagedObjectModel *mom = [[NSManagedObjectModel alloc] initWithContentsOfURL:url];
+    NSManagedObjectModel *model = [[NSManagedObjectModel alloc] initWithContentsOfURL:url];
+    STAssertNotNil(model, @"NSManagedObjectModel creation failed");
     
-    STAssertNotNil(mom, @"Can not create NSManagedObjectModel");
+    NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];
+    STAssertNotNil(coordinator, @"NSPersistentStoreCoordinator creation failed");
     
-    NSPersistentStoreCoordinator *psc = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:mom];
-    STAssertNotNil(psc, @"Can not create persistent store coordinator");
+    NSPersistentStore *store = [coordinator addPersistentStoreWithType:NSInMemoryStoreType configuration:nil URL:nil options:nil error:0];
+    STAssertNotNil(store, @"NSPersistentStore creation failed");
     
-    NSPersistentStore *store = [psc addPersistentStoreWithType:NSInMemoryStoreType configuration:nil URL:nil options:nil error:0];
-    STAssertNotNil(store, @"Can not create In-Memory persistent store");
+    NSManagedObjectContext *context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
+    context.persistentStoreCoordinator = coordinator;
     
-    NSManagedObjectContext *moc = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-    
-    moc.persistentStoreCoordinator = psc;
-    
-    return moc;
+    return context;
 }
 
 - (void)setUp

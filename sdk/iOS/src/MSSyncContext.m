@@ -327,7 +327,7 @@ static NSOperationQueue *pushQueue_;
 {
     dispatch_async(writeOperationQueue, ^{
         // Before we can pull from the remote, we need to make sure out table doesn't having pending operations
-        NSArray *tableOps = [self.operationQueue getOperationsForTable:query.syncTable.name item:nil];
+        NSArray *tableOps = [self.operationQueue getOperationsForTable:query.table.name item:nil];
         if (tableOps.count > 0) {
             [self pushWithCompletion:^(NSError *error) {
                 // For now we just abort the pull if the push failed to complete successfully
@@ -349,9 +349,11 @@ static NSOperationQueue *pushQueue_;
         [query readWithCompletion:^(NSArray *serverItems, NSInteger totalCount, NSError *error) {
             if (error) {
                 if (completion) {
-                    completion(error);
-                    return;
+                    [self.callbackQueue addOperationWithBlock:^{
+                        completion(error);
+                    }];
                 }
+                return;
             }
             
             // Update our local store (we need to block inbound operations while we do this)

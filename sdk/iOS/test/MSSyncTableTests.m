@@ -461,6 +461,54 @@
     STAssertTrue([self waitForTest:30.0], @"Test timed out.");
 }
 
+-(void) testPullWithPushSuccess
+{
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+
+    offline.upsertCalls = 0;
+    
+    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                                   initWithURL:nil
+                                   statusCode:200
+                                   HTTPVersion:nil headerFields:nil];
+    
+    __block NSInteger nextResponse = 0;
+    NSString *insertResponse = @"{\"id\": \"one\", \"name\":\"first item\"}";
+    NSString *pushResponse = @"[{\"id\": \"one\", \"name\":\"first item\"},{\"id\": \"two\", \"name\":\"second item\"}]";
+    
+    __block NSArray *responses = [NSArray arrayWithObjects:
+                                  [insertResponse dataUsingEncoding:NSUTF8StringEncoding],
+                                  [pushResponse dataUsingEncoding:NSUTF8StringEncoding],
+                                  nil];
+    
+    testFilter.onInspectResponseData = ^(NSURLRequest *request, NSData *data) {
+        return responses[nextResponse++];
+    };
+    
+    testFilter.responseToUse = response;
+    testFilter.ignoreNextFilter = YES;
+    testFilter.dataToUse = nil;
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"NoSuchTable"];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+    
+    [todoTable insert:@{ @"id":@"test1", @"name": @"test one"} completion:^(NSDictionary *item, NSError *error) {
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:60.0], @"Test timed out.");
+    
+    done = NO;
+    
+    [todoTable pullWithQuery:query completion:^(NSError *error) {
+        STAssertNil(error, error.description);
+        STAssertEquals(offline.upsertCalls, 5, @"Unexpected number of upsert calls");
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:300.0], @"Test timed out.");
+}
+
 -(void) testPurgeWithEmptyQueueSuccess
 {
     MSSyncTable *todoTable = [client syncTableWithName:@"NoSuchTable"];
@@ -565,6 +613,8 @@
             STAssertNotNil(error, error.description);
             STAssertTrue(callsToServer == 1, @"expected push to have called serer");
             done = YES;
+
+            STAssertTrue(client.syncContext.pendingOperationsCount == 1, @"expected pending operations to still be 1");
         }];
     }];
     

@@ -153,6 +153,62 @@
     }
 }
 
+/// Given an operation, analyzes the queue to see if two operations exist on the same
+/// table-item pair and if so, determines if the two can be combined into a single operation
+/// on the queue.
+-(BOOL) condenseOperation:(MSTableOperation *)operation orError:(NSError **)error
+{
+    // FUTURE: Combine operation changes into a single batch
+    
+    // For performance, assume queue is always in a valid state
+    if (operation.type == MSTableOperationDelete) {
+        return NO;
+    }
+    
+    // Look up the second possible operation
+    NSArray *operations = [self getOperationsForTable:operation.tableName item:operation.itemId];
+    if (operations == nil || operations.count < 2) {
+        return NO;
+    }
+    
+    MSTableOperation *firstOperation = [operations objectAtIndex:0];
+    MSTableOperation *secondOperation = [operations objectAtIndex:1];
+
+    // Abort any invalid condense patterns
+    if (secondOperation.type != MSTableOperationInsert) {
+        return NO;
+    }
+    
+    if (firstOperation.type == MSTableOperationUpdate) {
+        // update: condenses to delete when present
+        if (secondOperation.type == MSTableOperationDelete) {
+            firstOperation.type = secondOperation.type;
+            firstOperation.item = secondOperation.item;
+            [self addOperation:firstOperation orError:error];
+        }
+    } else {
+        // insert wins unless a delete also is present
+        if (secondOperation.type == MSTableOperationDelete) {
+            [self removeOperation:firstOperation orError:error];
+        }
+    }
+    
+    // Check for any errors fixing state
+    if (error && *error) {
+        return NO;
+    }
+    
+    // Condense always collapses to first operation
+    [self removeOperation:secondOperation orError:error];
+    
+    // If an error occurred, indicate a condense did not occur
+    if (error && *error) {
+        return NO;
+    }
+    
+    return YES;
+}
+
 - (BOOL) lockOperation:(MSTableOperation *)operation
 {
     NSNumber *key = [NSNumber numberWithInteger:operation.operationId];
