@@ -26,4 +26,5 @@ if [ "$COPY_TO_SHARE" == "YES" ]; then
   done
 fi
 
-
+# Build the swift quickstart as well
+bash ../iOS-Swift/build.command

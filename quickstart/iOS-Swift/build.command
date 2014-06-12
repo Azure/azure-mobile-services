@@ -1,5 +1,8 @@
 # This bash script cleans and builds the Windows Azure Mobile Services QuickStart project
 
+# set working directory to this scripts directory
+cd "$( cd "$( dirname "$0" )" && pwd )"
+
 # First, we'll remove all previous artifacts created by this script
 rm iOS_Swift.zip
 rm -rf ZUMOAPPNAME/WindowsAzureMobileServices.framework

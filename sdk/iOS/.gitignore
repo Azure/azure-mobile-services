@@ -3,3 +3,5 @@ WindowsAzureMobileServices.xcodeproj/xcuserdata/
 DerivedData/
 build/
 *.xccheckout
+WindowsAzureMobileServices.framework.zip
+WindowsAzureMobileServices.framework
