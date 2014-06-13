@@ -184,7 +184,7 @@
     [self.pushHttp createRegistrationId:^(NSString *registrationId, NSError *error) {
         if (!error) {
             [self.storage updateRegistrationWithName:registration[@"templateName"]
-                                      registrationId:registration[@"registrationId"]
+                                      registrationId:registrationId
                                          deviceToken:registration[@"deviceId"]];
             [registration setValue:registrationId forKey:@"registrationId"];
         }
