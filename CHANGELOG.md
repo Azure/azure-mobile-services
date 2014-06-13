@@ -1,5 +1,9 @@
 # Windows Azure Mobile Services Change Log
 
+### Version 1.2.2
+**iOS SDK**
+- Added support for APNS Azure Notification Hub integration
+
 ### Version 1.2.1
 **Managed SDK**
 - Added support for Windows Phone 8.1, requires using Visual Studio 2013 Update 2 RC
