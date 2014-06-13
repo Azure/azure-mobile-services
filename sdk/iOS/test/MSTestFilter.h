@@ -10,6 +10,9 @@ typedef NSData *(^MSInspectResponseDataBlock)(NSURLRequest *request, NSData *dat
 
 @interface MSTestFilter : NSObject <MSFilter>
 
++(MSTestFilter *)testFilterWithStatusCode:(NSInteger) statusCode;
++(MSTestFilter *)testFilterWithStatusCode:(NSInteger) statusCode data:(NSString *)data;
+
 @property (nonatomic, strong)   NSURLRequest *requestToUse;
 @property (nonatomic, copy)     MSInspectRequestBlock onInspectRequest;
 @property (nonatomic, strong)   NSHTTPURLResponse *responseToUse;
