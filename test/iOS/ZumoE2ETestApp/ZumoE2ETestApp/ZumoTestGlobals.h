@@ -13,6 +13,7 @@ extern NSString *const RUNTIME_FEATURES_KEY;
 
 extern NSString *const FEATURE_STRING_ID_TABLES;
 extern NSString *const FEATURE_INT_ID_TABLES;
+extern NSString *const FEATURE_NH_PUSH_ENABLED;
 
 @protocol PushNotificationReceiver <NSObject>
 
@@ -28,6 +29,7 @@ extern NSString *const FEATURE_INT_ID_TABLES;
 
 @property (nonatomic, strong) MSClient *client;
 @property (nonatomic, copy) NSString *deviceToken;
+@property (nonatomic, copy) NSData *deviceTokenData;
 @property (nonatomic, copy) NSString *remoteNotificationRegistrationStatus;
 @property (nonatomic, weak) id<PushNotificationReceiver> pushNotificationDelegate;
 

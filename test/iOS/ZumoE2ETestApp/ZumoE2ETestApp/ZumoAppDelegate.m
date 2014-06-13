@@ -38,6 +38,7 @@
     NSString *token = [deviceToken description];
     token = [token stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"<>"]];
     [[ZumoTestGlobals sharedInstance] setDeviceToken:token];
+    [ZumoTestGlobals sharedInstance].deviceTokenData = deviceToken;
 }
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {

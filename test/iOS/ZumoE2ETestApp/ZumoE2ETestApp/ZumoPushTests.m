@@ -143,6 +143,7 @@ static NSString *pushClientKey = @"PushClientKey";
 + (NSArray *)createTests {
     NSMutableArray *result = [[NSMutableArray alloc] init];
     if ([self isRunningOnSimulator]) {
+        [ZumoPushTests isNhEnabled];
         [result addObject:[ZumoTest createTestWithName:@"No push on simulator" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
             [test addLog:@"Running on a simulator, no push tests can be executed"];
             [test setTestStatus:TSPassed];
@@ -150,7 +151,11 @@ static NSString *pushClientKey = @"PushClientKey";
         }]];
     } else {
         [result addObject:[self createValidatePushRegistrationTest]];
-        [result addObject:[self createFeedbackTest]];
+        
+        if (![ZumoPushTests isNhEnabled]) {
+            [result addObject:[self createFeedbackTest]];
+        }
+        
         [result addObject:[self createPushTestWithName:@"Push simple alert" forPayload:@{@"alert":@"push received"} withDelay:0]];
         [result addObject:[self createPushTestWithName:@"Push simple badge" forPayload:@{@"badge":@9} withDelay:0]];
         [result addObject:[self createPushTestWithName:@"Push simple sound and alert" forPayload:@{@"alert":@"push received",@"sound":@"default"} withDelay:0]];
@@ -163,6 +168,11 @@ static NSString *pushClientKey = @"PushClientKey";
     }
     
     return result;
+}
+
++ (BOOL)isNhEnabled {
+    NSDictionary *runtimeFeatures = [[[ZumoTestGlobals sharedInstance] globalTestParameters] objectForKey:RUNTIME_FEATURES_KEY];
+    return [runtimeFeatures objectForKey:FEATURE_NH_PUSH_ENABLED];
 }
 
 + (BOOL)isRunningOnSimulator {
@@ -201,7 +211,28 @@ static NSString *pushClientKey = @"PushClientKey";
 }
 
 + (ZumoTest *)createPushTestWithName:(NSString *)name forPayload:(NSDictionary *)payload withDelay:(int)seconds {
-    return [self createPushTestWithName:name forPayload:payload withDelay:0 isNegativeTest:NO];
+    return [self createPushTestWithName:name forPayload:payload withDelay:seconds isNegativeTest:NO];
+}
+
++ (void)sendNotificationViaInsert:(MSClient *)client test:(ZumoTest *)test seconds:(int)seconds deviceToken:(NSString *)deviceToken payload:(NSDictionary *)payload completion:(ZumoTestCompletion)completion isNegative:(BOOL)isNegative {
+    MSTable *table = [client tableWithName:tableName];
+    NSURL *appUrl = [client applicationURL];
+    [test addLog:[NSString stringWithFormat:@"Sending a request to %@ / table %@", [appUrl description], tableName]];
+    NSDictionary *item = @{@"method" : @"send", @"payload" : payload, @"token": deviceToken, @"delay": @(seconds)};
+    [table insert:item completion:^(NSDictionary *insertedItem, NSError *error) {
+        if (error) {
+            [test addLog:[NSString stringWithFormat:@"Error requesting push: %@", error]];
+            [test setTestStatus:TSFailed];
+            completion(NO);
+        } else {
+            NSTimeInterval timeToWait = 15;
+            NSDictionary *expectedPayload = isNegative ? nil : payload;
+            ZumoPushClient *pushClient = [[ZumoPushClient alloc] initForTest:test withPayload:expectedPayload waitFor:timeToWait withTestCompletion:completion];
+            [[test propertyBag] setValue:pushClient forKey:pushClientKey];
+            
+            // completion will be called on the push client...
+        }
+    }];
 }
 
 + (ZumoTest *)createPushTestWithName:(NSString *)name forPayload:(NSDictionary *)payload withDelay:(int)seconds isNegativeTest:(BOOL)isNegative {
@@ -212,32 +243,22 @@ static NSString *pushClientKey = @"PushClientKey";
             completion(YES);
             return;
         }
-
-        NSString *deviceToken = [[ZumoTestGlobals sharedInstance] deviceToken];
+        
+        NSString *deviceToken = [[[ZumoTestGlobals sharedInstance] deviceToken] stringByReplacingOccurrencesOfString:@" " withString:@""];
         if (!deviceToken) {
             [test addLog:@"Device not correctly registered for push"];
             [test setTestStatus:TSFailed];
             completion(NO);
         } else {
             MSClient *client = [[ZumoTestGlobals sharedInstance] client];
-            MSTable *table = [client tableWithName:tableName];
-            NSURL *appUrl = [client applicationURL];
-            [test addLog:[NSString stringWithFormat:@"Sending a request to %@ / table %@", [appUrl description], tableName]];
-            NSDictionary *item = @{@"method" : @"send", @"payload" : payload, @"token": deviceToken, @"delay": @(seconds)};
-            [table insert:item completion:^(NSDictionary *insertedItem, NSError *error) {
-                if (error) {
-                    [test addLog:[NSString stringWithFormat:@"Error requesting push: %@", error]];
-                    [test setTestStatus:TSFailed];
-                    completion(NO);
-                } else {
-                    NSTimeInterval timeToWait = 15;
-                    NSDictionary *expectedPayload = isNegative ? nil : payload;
-                    ZumoPushClient *pushClient = [[ZumoPushClient alloc] initForTest:test withPayload:expectedPayload waitFor:timeToWait withTestCompletion:completion];
-                    [[test propertyBag] setValue:pushClient forKey:pushClientKey];
-                    
-                    // completion will be called on the push client...
-                }
-            }];
+            if ([ZumoPushTests isNhEnabled]) {
+                NSData *deviceTokenData = [ZumoTestGlobals sharedInstance].deviceTokenData;
+                [client.push registerNativeWithDeviceToken:deviceTokenData tags:@[deviceToken] completion:^(NSError *error) {
+                    [self sendNotificationViaInsert:client test:test seconds:seconds deviceToken:deviceToken payload:payload completion:completion isNegative:isNegative];
+                }];
+            } else {
+                [self sendNotificationViaInsert:client test:test seconds:seconds deviceToken:deviceToken payload:payload completion:completion isNegative:isNegative];
+            }
         }
     }];
     
@@ -248,6 +269,13 @@ static NSString *pushClientKey = @"PushClientKey";
     ZumoTest *result = [ZumoTest createTestWithName:@"Simple feedback test" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
         if ([self isRunningOnSimulator]) {
             [test addLog:@"Test running on a simulator, skipping test."];
+            [test setTestStatus:TSSkipped];
+            completion(YES);
+            return;
+        }
+        
+        if ([ZumoPushTests isNhEnabled]) {
+            [test addLog:@"Service has enhanced push enabled. Skipping feedback test."];
             [test setTestStatus:TSSkipped];
             completion(YES);
             return;
