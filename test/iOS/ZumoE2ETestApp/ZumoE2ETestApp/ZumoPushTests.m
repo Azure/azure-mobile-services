@@ -172,7 +172,8 @@ static NSString *pushClientKey = @"PushClientKey";
 
 + (BOOL)isNhEnabled {
     NSDictionary *runtimeFeatures = [[[ZumoTestGlobals sharedInstance] globalTestParameters] objectForKey:RUNTIME_FEATURES_KEY];
-    return [runtimeFeatures objectForKey:FEATURE_NH_PUSH_ENABLED];
+    NSNumber *nhEnabledPropertyNames = [runtimeFeatures objectForKey:FEATURE_NH_PUSH_ENABLED];
+    return (nhEnabledPropertyNames && [nhEnabledPropertyNames boolValue]);
 }
 
 + (BOOL)isRunningOnSimulator {
