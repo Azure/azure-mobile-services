@@ -16,7 +16,7 @@ NSString *const FEATURE_NH_PUSH_ENABLED = @"nhPushEnabled";
 
 @implementation ZumoTestGlobals
 
-@synthesize client, deviceToken, remoteNotificationRegistrationStatus, pushNotificationDelegate;
+@synthesize client, remoteNotificationRegistrationStatus, pushNotificationDelegate;
 
 +(ZumoTestGlobals *)sharedInstance {
     static ZumoTestGlobals *instance = nil;

@@ -143,7 +143,6 @@ static NSString *pushClientKey = @"PushClientKey";
 + (NSArray *)createTests {
     NSMutableArray *result = [[NSMutableArray alloc] init];
     if ([self isRunningOnSimulator]) {
-        [ZumoPushTests isNhEnabled];
         [result addObject:[ZumoTest createTestWithName:@"No push on simulator" andExecution:^(ZumoTest *test, UIViewController *viewController, ZumoTestCompletion completion) {
             [test addLog:@"Running on a simulator, no push tests can be executed"];
             [test setTestStatus:TSPassed];
@@ -245,7 +244,8 @@ static NSString *pushClientKey = @"PushClientKey";
             return;
         }
         
-        NSString *deviceToken = [[[ZumoTestGlobals sharedInstance] deviceToken] stringByReplacingOccurrencesOfString:@" " withString:@""];
+        NSData *deviceToken = [[ZumoTestGlobals sharedInstance] deviceToken];
+        NSString *deviceTokenString = [[deviceToken.description stringByReplacingOccurrencesOfString:@" " withString:@""] stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"<>"]];
         if (!deviceToken) {
             [test addLog:@"Device not correctly registered for push"];
             [test setTestStatus:TSFailed];
@@ -253,12 +253,19 @@ static NSString *pushClientKey = @"PushClientKey";
         } else {
             MSClient *client = [[ZumoTestGlobals sharedInstance] client];
             if ([ZumoPushTests isNhEnabled]) {
-                NSData *deviceTokenData = [ZumoTestGlobals sharedInstance].deviceTokenData;
-                [client.push registerNativeWithDeviceToken:deviceTokenData tags:@[deviceToken] completion:^(NSError *error) {
-                    [self sendNotificationViaInsert:client test:test seconds:seconds deviceToken:deviceToken payload:payload completion:completion isNegative:isNegative];
+                NSData *deviceToken = [ZumoTestGlobals sharedInstance].deviceToken;
+                [client.push registerNativeWithDeviceToken:deviceToken tags:@[deviceToken] completion:^(NSError *error) {
+                    if (error) {
+                        [test addLog:[NSString stringWithFormat:@"Encountered error registering with Mobile Service: %@", error.description]];
+                        [test setTestStatus:TSFailed];
+                        completion(NO);
+                        return;
+                    }
+                    
+                    [self sendNotificationViaInsert:client test:test seconds:seconds deviceToken:deviceTokenString payload:payload completion:completion isNegative:isNegative];
                 }];
             } else {
-                [self sendNotificationViaInsert:client test:test seconds:seconds deviceToken:deviceToken payload:payload completion:completion isNegative:isNegative];
+                [self sendNotificationViaInsert:client test:test seconds:seconds deviceToken:deviceTokenString payload:payload completion:completion isNegative:isNegative];
             }
         }
     }];

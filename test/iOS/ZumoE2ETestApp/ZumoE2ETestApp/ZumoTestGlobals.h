@@ -28,8 +28,7 @@ extern NSString *const FEATURE_NH_PUSH_ENABLED;
 }
 
 @property (nonatomic, strong) MSClient *client;
-@property (nonatomic, copy) NSString *deviceToken;
-@property (nonatomic, copy) NSData *deviceTokenData;
+@property (nonatomic, copy) NSData *deviceToken;
 @property (nonatomic, copy) NSString *remoteNotificationRegistrationStatus;
 @property (nonatomic, weak) id<PushNotificationReceiver> pushNotificationDelegate;
 
