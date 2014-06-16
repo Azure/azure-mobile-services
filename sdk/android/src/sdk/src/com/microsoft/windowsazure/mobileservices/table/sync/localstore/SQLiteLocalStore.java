@@ -304,11 +304,17 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 	}
 
 	private boolean isSystemProperty(String invColumnName) {
+		
+		invColumnName = invColumnName.trim().toLowerCase(Locale.getDefault());
+		
 		return invColumnName.equals("__version") || invColumnName.equals("__createdat") || invColumnName.equals("__updatedat")
 				|| invColumnName.equals("__queueloadedat");
 	}
 
 	private void validateReservedProperties(ColumnDataType colDataType, String invColumnName) throws IllegalArgumentException {
+		
+		invColumnName = invColumnName.trim().toLowerCase(Locale.getDefault());
+		
 		if (invColumnName.equals("id") && colDataType != ColumnDataType.String) {
 			throw new IllegalArgumentException("System column \"id\" must be ColumnDataType.String.");
 		} else if (invColumnName.equals("__version") && colDataType != ColumnDataType.String) {
@@ -374,7 +380,17 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 		List<Object> parameters = new ArrayList<Object>(item.entrySet().size());
 
 		String delimiter = "";
+		
+		
+		Map<String, ColumnDataType> tableDefinition = mTables.get(invTableName);
+		
 		for (Entry<String, JsonElement> property : item.entrySet()) {
+		
+			if (isSystemProperty(property.getKey()) && 
+					!tableDefinition.containsKey(property.getKey())) {
+				continue;
+			}
+				
 			JsonElement value = property.getValue();
 
 			if (value.isJsonNull()) {
