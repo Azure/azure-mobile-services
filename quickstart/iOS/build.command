@@ -1,10 +1,10 @@
-# This bash script cleans and builds the Windows Azure Mobile Services QuickStart project
+# This bash script cleans and builds the Microsoft Azure Mobile Services QuickStart project
 
 # First, we'll remove all previous artifacts created by this script
 rm iOS_ObjC.zip
 rm -rf ZUMOAPPNAME/WindowsAzureMobileServices.framework
 
-# Second, build the Windows Azure Mobile Services iOS Framework
+# Second, build the Microsoft Azure Mobile Services iOS Framework
 bash ../../sdk/iOS/build.command
 
 # Third, copy the framework over into this directory

@@ -319,7 +319,7 @@ didReceiveResponse:(NSURLResponse *)response
 {
     NSURLRequest *newRequest = nil;
     
-    // Only follow redirects to the Windows Azure Mobile Service and not
+    // Only follow redirects to the Microsoft Azure Mobile Service and not
     // to other hosts
     NSString *requestHost = request.URL.host;
     NSString *applicationHost = self.client.applicationURL.host;

@@ -58,7 +58,7 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Entry-point for Windows Azure Mobile Services interactions
+ * Entry-point for Microsoft Azure Mobile Services interactions
  */
 public class MobileServiceClient {
 	/**
@@ -137,7 +137,7 @@ public class MobileServiceClient {
 	public static final String GOOGLE_USER_INFO_SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
 
 	/**
-	 * Creates a GsonBuilder with custom serializers to use with Windows Azure
+	 * Creates a GsonBuilder with custom serializers to use with Microsoft Azure
 	 * Mobile Services
 	 * 
 	 * @return
@@ -245,7 +245,7 @@ public class MobileServiceClient {
 	}
 
 	/**
-	 * Invokes Windows Azure Mobile Service authentication using a
+	 * Invokes Microsoft Azure Mobile Service authentication using a
 	 * provider-specific oAuth token
 	 *
 	 * @param provider
@@ -262,7 +262,7 @@ public class MobileServiceClient {
 	}
 
 	/**
-	 * Invokes Windows Azure Mobile Service authentication using a
+	 * Invokes Microsoft Azure Mobile Service authentication using a
 	 * provider-specific oAuth token
 	 *
 	 * @param provider
@@ -283,7 +283,7 @@ public class MobileServiceClient {
 	}
 
 	/**
-	 * Invokes Windows Azure Mobile Service authentication using a
+	 * Invokes Microsoft Azure Mobile Service authentication using a
 	 * provider-specific oAuth token
 	 * 
 	 * @param provider
@@ -299,7 +299,7 @@ public class MobileServiceClient {
 	}
 
 	/**
-	 * Invokes Windows Azure Mobile Service authentication using a
+	 * Invokes Microsoft Azure Mobile Service authentication using a
 	 * provider-specific oAuth token
 	 * 
 	 * @param provider
@@ -337,7 +337,7 @@ public class MobileServiceClient {
 	}
 	
 	/**
-	 * Invokes Windows Azure Mobile Service authentication using a
+	 * Invokes Microsoft Azure Mobile Service authentication using a
 	 * the Google account registered in the device
 	 * 
 	 * @param activity
@@ -350,7 +350,7 @@ public class MobileServiceClient {
 	}
 	
 	/**
-	 * Invokes Windows Azure Mobile Service authentication using a
+	 * Invokes Microsoft Azure Mobile Service authentication using a
 	 * the Google account registered in the device
 	 * 
 	 * @param activity
@@ -375,7 +375,7 @@ public class MobileServiceClient {
 	}
 	
 	/**
-	 * Invokes Windows Azure Mobile Service authentication using a
+	 * Invokes Microsoft Azure Mobile Service authentication using a
 	 * the Google account registered in the device
 	 * 
 	 * @param activity
@@ -390,7 +390,7 @@ public class MobileServiceClient {
 	}
 	
 	/**
-	 * Invokes Windows Azure Mobile Service authentication using a
+	 * Invokes Microsoft Azure Mobile Service authentication using a
 	 * the Google account registered in the device
 	 * 
 	 * @param activity

@@ -548,7 +548,7 @@
 			attributes = {
 				LastTestingUpgradeCheck = 0510;
 				LastUpgradeCheck = 0510;
-				ORGANIZATIONNAME = "Windows Azure";
+				ORGANIZATIONNAME = "Microsoft Azure";
 			};
 			buildConfigurationList = E8F33AD51616659C002DD7C6 /* Build configuration list for PBXProject "WindowsAzureMobileServices" */;
 			compatibilityVersion = "Xcode 3.2";

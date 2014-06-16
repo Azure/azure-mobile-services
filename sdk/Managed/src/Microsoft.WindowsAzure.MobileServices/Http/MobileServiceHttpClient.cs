@@ -51,7 +51,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         private const string RequestJsonContentType = "application/json";
 
         /// <summary>
-        /// The URI for the Windows Azure Mobile Service.
+        /// The URI for the Microsoft Azure Mobile Service.
         /// </summary>
         private readonly Uri applicationUri;
 
@@ -61,7 +61,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         private readonly string installationId;
 
         /// <summary>
-        /// The application key for the Windows Azure Mobile Service.
+        /// The application key for the Microsoft Azure Mobile Service.
         /// </summary>
         private readonly string applicationKey;
 
@@ -103,13 +103,13 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// All but the last should be <see cref="DelegatingHandler"/>s. 
         /// </param>
         /// <param name="applicationUri">
-        /// The URI for the Windows Azure Mobile Service.
+        /// The URI for the Microsoft Azure Mobile Service.
         /// </param>
         /// <param name="installationId">
         /// The installation id of the application.
         /// </param>
         /// <param name="applicationKey">
-        /// The application key for the Windows Azure Mobile Service.
+        /// The application key for the Microsoft Azure Mobile Service.
         /// </param>
         public MobileServiceHttpClient(IEnumerable<HttpMessageHandler> handlers, Uri applicationUri, string installationId, string applicationKey)
         {
