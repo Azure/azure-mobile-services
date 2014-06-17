@@ -143,7 +143,7 @@
         {
             self.busyUpdate(YES);
         }
-        self.busyCount ++;
+        self.busyCount++;
     }
     else
     {
