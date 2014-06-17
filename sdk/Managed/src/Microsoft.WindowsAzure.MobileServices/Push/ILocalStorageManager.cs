@@ -17,7 +17,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Gets the DeviceId of all registrations in this instance of ILocalStorageManager
         /// </summary>
-        string DeviceId { get; }
+        string PushHandle { get; }
 
         /// <summary>
         /// Get the registration from local storage

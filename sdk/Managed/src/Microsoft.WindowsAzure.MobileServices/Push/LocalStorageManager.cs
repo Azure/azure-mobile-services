@@ -22,12 +22,12 @@ namespace Microsoft.WindowsAzure.MobileServices
     {
         internal const string StorageVersion = "v1.1.0";
         internal const string KeyNameVersion = "Version";
-        internal const string KeyNameDeviceId = "DeviceId";
+        internal const string KeyNamePushHandle = "Channel";
         internal const string KeyNameRegistrations = "Registrations";
 
         private readonly IApplicationStorage storage; 
         
-        private string deviceId;
+        private string pushHandle;
         private IDictionary<string, StoredRegistrationEntry> registrations;
 
         public LocalStorageManager(string name)
@@ -39,18 +39,18 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         public bool IsRefreshNeeded { get; set; }
 
-        public string DeviceId
+        public string PushHandle
         {
             get
             {
-                return this.deviceId;
+                return this.pushHandle;
             }
             
             private set
             {
-                if (this.deviceId == null || !this.deviceId.Equals(value))
+                if (this.pushHandle == null || !this.pushHandle.Equals(value))
                 {
-                    this.deviceId = value;
+                    this.pushHandle = value;
                     this.Flush();
                 }
             }
@@ -100,7 +100,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             lock (this.registrations)
             {
                 this.registrations[registrationName] = cacheReg;
-                this.deviceId = registrationDeviceId;
+                this.pushHandle = registrationDeviceId;
                 this.Flush();
             }
         }
@@ -133,7 +133,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         public void RefreshFinished(string refreshedDeviceId)
         {
-            this.DeviceId = refreshedDeviceId;
+            this.PushHandle = refreshedDeviceId;
             this.IsRefreshNeeded = false;
         }
 
@@ -142,7 +142,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             lock (this.registrations)
             {
                 this.storage.WriteSetting(KeyNameVersion, StorageVersion);
-                this.storage.WriteSetting(KeyNameDeviceId, this.deviceId);
+                this.storage.WriteSetting(KeyNamePushHandle, this.pushHandle);
 
                 string str = JsonConvert.SerializeObject(this.registrations);
                 this.storage.WriteSetting(KeyNameRegistrations, str);
@@ -158,9 +158,9 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             // Read deviceId
             object channelObject;
-            if (this.storage.TryReadSetting(KeyNameDeviceId, out channelObject))
+            if (this.storage.TryReadSetting(KeyNamePushHandle, out channelObject))
             {
-                this.deviceId = (string)channelObject;
+                this.pushHandle = (string)channelObject;
                 this.IsRefreshNeeded = true;
                 return;
             }
@@ -184,19 +184,14 @@ namespace Microsoft.WindowsAzure.MobileServices
                 return;
             }
 
-            this.IsRefreshNeeded = false;
-
             // read registrations
             object registrationsObject;
-            string regsStr;
+            string regsStr = null;
             if (this.storage.TryReadSetting(KeyNameRegistrations, out registrationsObject))
             {
                 regsStr = (string)channelObject;
-            }
-            else
-            {
-                throw new Exception("Something is really really wrong");
-            }
+                this.IsRefreshNeeded = false;
+            }            
 
             if (!string.IsNullOrEmpty(regsStr))
             {

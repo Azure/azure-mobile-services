@@ -73,7 +73,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(tags[1], "barWns", "tag[1] on the registration is not correct.");
             Assert.AreEqual(tags[2], "4de2605e-fd09-4875-a897-c8c4c0a51682", "tag[2] on the registration is not correct.");
 
-            Assert.AreEqual(firstRegistration.DeviceId, DefaultChannelUri, "The DeviceId on the registration is not correct.");
+            Assert.AreEqual(firstRegistration.PushHandle, DefaultChannelUri, "The DeviceId on the registration is not correct.");
         }
 
         [AsyncTestMethod]
@@ -101,7 +101,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(tags[1], "barWns", "tag[1] on the registration is not correct.");
             Assert.AreEqual(tags[2], "4de2605e-fd09-4875-a897-c8c4c0a51682", "tag[2] on the registration is not correct.");
 
-            Assert.AreEqual(firstRegistration.DeviceId, DefaultChannelUri, "The DeviceId on the registration is not correct.");
+            Assert.AreEqual(firstRegistration.PushHandle, DefaultChannelUri, "The DeviceId on the registration is not correct.");
         }
 
         [AsyncTestMethod]
@@ -128,7 +128,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(nativeTags[1], "barWns", "nativeTags[1] on the registration is not correct.");
             Assert.AreEqual(nativeTags[2], "4de2605e-fd09-4875-a897-c8c4c0a51682", "nativeTags[2] on the registration is not correct.");
 
-            Assert.AreEqual(firstRegistration.DeviceId, DefaultChannelUri, "The DeviceId on the native registration is not correct.");
+            Assert.AreEqual(firstRegistration.PushHandle, DefaultChannelUri, "The DeviceId on the native registration is not correct.");
 
             var secondRegistration = registrationsArray[1];
             var templateReg = Platform.Instance.PushUtility.GetNewTemplateRegistration();
@@ -140,7 +140,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(templateTags[1], "barWns", "templateTags[1] on the registration is not correct.");
             Assert.AreEqual(templateTags[2], "4de2605e-fd09-4875-a897-c8c4c0a51682", "templateTags[2] on the registration is not correct.");
 
-            Assert.AreEqual(secondRegistration.DeviceId, DefaultChannelUri, "The DeviceId on the template registration is not correct.");
+            Assert.AreEqual(secondRegistration.PushHandle, DefaultChannelUri, "The DeviceId on the template registration is not correct.");
         }
         
         [AsyncTestMethod]

@@ -22,7 +22,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.PushHttpClient = pushHttpClient;
 
             this.LocalStorageManager = storageManager;
-            storageManager.GetRegistration("foo");
         }
 
         /// <summary>
@@ -37,7 +36,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             // if localStorage is empty or has different storage version, we need retrieve registrations and refresh local storage
             if (this.LocalStorageManager.IsRefreshNeeded)
             {
-                string refreshDeviceId = string.IsNullOrEmpty(this.LocalStorageManager.DeviceId) ? registration.DeviceId : this.LocalStorageManager.DeviceId;
+                string refreshDeviceId = string.IsNullOrEmpty(this.LocalStorageManager.PushHandle) ? registration.PushHandle : this.LocalStorageManager.PushHandle;
                 await this.RefreshRegistrationsForChannelAsync(refreshDeviceId);
                 this.LocalStorageManager.RefreshFinished(refreshDeviceId);
             }
@@ -83,7 +82,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             for (int i = 0; i < count; i++)
             {
-                this.LocalStorageManager.UpdateRegistrationByRegistrationId(registrations[i].RegistrationId, registrations[i].Name, registrations[i].DeviceId);
+                this.LocalStorageManager.UpdateRegistrationByRegistrationId(registrations[i].RegistrationId, registrations[i].Name, registrations[i].PushHandle);
             }
         }
 
@@ -120,14 +119,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         private async Task<Registration> CreateRegistrationIdAsync(Registration registration)
         {
             registration.RegistrationId = await this.PushHttpClient.CreateRegistrationIdAsync();
-            this.LocalStorageManager.UpdateRegistrationByName(registration.Name, registration.RegistrationId, registration.DeviceId);
+            this.LocalStorageManager.UpdateRegistrationByName(registration.Name, registration.RegistrationId, registration.PushHandle);
             return registration;
         }
 
         private async Task UpsertRegistration(Registration registration)
         {
             await this.PushHttpClient.CreateOrUpdateRegistrationAsync(registration);
-            this.LocalStorageManager.UpdateRegistrationByName(registration.Name, registration.RegistrationId, registration.DeviceId);
+            this.LocalStorageManager.UpdateRegistrationByName(registration.Name, registration.RegistrationId, registration.PushHandle);
         }
     }
 }

@@ -25,7 +25,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// to define the format of the registration.
     /// </summary>
     [JsonObject]
-    internal sealed class WnsTemplateRegistration : WnsRegistration
+    public sealed class WnsTemplateRegistration : WnsRegistration
     {
         private const string WnsTypeName = "X-WNS-Type";
 
@@ -138,6 +138,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         [JsonProperty(PropertyName = "templateBody")]
         public string BodyTemplate { get; internal set; }
 
+        /// <summary>
+        /// The name of the registration used in local storage.
+        /// </summary>
         public override string Name
         {
             get

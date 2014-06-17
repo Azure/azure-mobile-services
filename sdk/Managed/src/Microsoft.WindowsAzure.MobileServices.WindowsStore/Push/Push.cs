@@ -205,7 +205,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("registration");
             }
 
-            if (string.IsNullOrWhiteSpace(registration.DeviceId))
+            if (string.IsNullOrWhiteSpace(registration.PushHandle))
             {
                 throw new ArgumentNullException("registration.ChannelUri");
             }

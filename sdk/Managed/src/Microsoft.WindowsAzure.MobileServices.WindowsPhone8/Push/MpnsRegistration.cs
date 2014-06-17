@@ -48,12 +48,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             get
             {
-                return this.DeviceId;
+                return this.PushHandle;
             }
 
             set
             {
-                this.DeviceId = value;
+                this.PushHandle = value;
             }
         }
     }

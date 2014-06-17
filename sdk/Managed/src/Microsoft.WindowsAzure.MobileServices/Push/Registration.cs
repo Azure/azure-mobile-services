@@ -25,7 +25,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Common Registration constructor for common properties
         /// </summary>
-        internal Registration(string deviceId, IEnumerable<string> tags)
+        public Registration(string deviceId, IEnumerable<string> tags)
         {
             if (string.IsNullOrWhiteSpace(deviceId))
             {
@@ -40,10 +40,13 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
             }
 
-            this.DeviceId = deviceId;
+            this.PushHandle = deviceId;
             this.Tags = tags != null ? new HashSet<string>(tags) : new HashSet<string>();
         }
 
+        /// <summary>
+        /// The platform's name for its push notifcation system.
+        /// </summary>
         [JsonProperty(PropertyName = "platform")]
         public string Platform
         {
@@ -61,16 +64,16 @@ namespace Microsoft.WindowsAzure.MobileServices
         public ISet<string> Tags { get; private set; }
 
         /// <summary>
-        /// The unique identifier for the device
+        /// The push handle used to address the device by the push notification service (Possibly nonunique)
         /// </summary>
         [JsonProperty(PropertyName = "deviceId")]
-        public string DeviceId { get; set; }
+        public string PushHandle { get; internal set; }
 
         /// <summary>
         /// The registration id.
         /// </summary>
         [JsonProperty(PropertyName = "registrationId")]
-        public string RegistrationId { get; set; }        
+        public string RegistrationId { get; internal set; }        
 
         /// <summary>
         /// The name of the registration is stored locally with the registrationId

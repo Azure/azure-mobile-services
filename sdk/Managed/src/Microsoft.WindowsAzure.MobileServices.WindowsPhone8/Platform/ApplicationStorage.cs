@@ -88,7 +88,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             IsolatedStorageSettings.ApplicationSettings[string.Concat(this.StoragePrefix, name)] = value;
         }
 
-        public void Save()
+        void IApplicationStorage.Save()
         {
             IsolatedStorageSettings.ApplicationSettings.Save();
         }
