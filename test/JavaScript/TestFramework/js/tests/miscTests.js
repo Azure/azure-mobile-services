@@ -188,7 +188,7 @@ function defineMiscTestsNamespace() {
         table.insert(item, dict).done(function (inserted) {
             testPassed = testPassed && validateParameters('insert', dict, JSON.parse(inserted.parameters));
             dict.operation = 'update';
-            var id = inserted.id || "1";
+            var id = inserted.id || 1;
             table.update({ id: id, string1: item.string1 }, dict).done(function (updated) {
                 testPassed = testPassed && validateParameters('update', dict, JSON.parse(updated.parameters));
                 dict.operation = 'lookup';
