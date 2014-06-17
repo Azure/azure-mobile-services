@@ -138,6 +138,8 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
     
     func didSaveItem(text: String)
     {
+        if (text == "") { return; }
+        
         let itemToInsert = ["text": text, "complete": false]
         
         UIApplication.sharedApplication().networkActivityIndicatorVisible = true
