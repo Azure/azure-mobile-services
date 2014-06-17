@@ -19,3 +19,5 @@ obj
 *.csproj.user
 test/ZumoE2EServerApp/Properties/PublishProfiles/
 StyleCop.Cache
+packages
+*.suo
