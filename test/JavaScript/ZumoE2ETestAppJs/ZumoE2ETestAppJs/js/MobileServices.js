@@ -15,7 +15,7 @@
     /// will define the module's exports when invoked.
     /// </field>
     var $__modules__ = { };
-    var $__fileVersion__ = "1.0.20324.0";
+    var $__fileVersion__ = "1.0.20616.0";
     
     function require(name) {
         /// <summary>
@@ -493,13 +493,13 @@
             UpdatedAt: 2,
             Version: 4,
             All: 0xFFFF
-        }
+        };
         
         var MobileServiceSystemColumns = {
             CreatedAt: "__createdAt",
             UpdatedAt: "__updatedAt",
             Version: "__version"
-        }
+        };
         
         Platform.addToMobileServicesClientNamespace({
             MobileServiceTable:
@@ -812,10 +812,8 @@
                     headers,
                     function (error, response) {
                         if (!_.isNull(error)) {
-                            if (error.request && error.request.status === 412) {
-                                error.serverInstance = _.fromJson(error.request.responseText);
-                            }
-                            callback(error, null);
+                            setServerItemIfPreconditionFailed(error);
+                            callback(error);
                         } else {
                             var result = getItemFromResponse(response);
                             result = Platform.allowPlatformToMutateOriginal(instance, result);
@@ -981,7 +979,7 @@
                 if (_.isNull(callback) && (typeof parameters === 'function')) {
                     callback = parameters;
                     parameters = null;
-                }
+                }        
         
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
@@ -991,6 +989,14 @@
                     Validate.isValidParametersObject(parameters);
                 }
                 Validate.notNull(callback, 'callback');
+        
+                var headers = [];
+        
+                if (_.isString(instance[idPropertyName])) {
+                    if (!_.isNullOrEmpty(instance.__version)) {
+                        headers['If-Match'] = getEtagFromVersion(instance.__version);
+                    }
+                }
         
                 // Contruct the URL
                 var urlFragment =  _.url.combinePathSegments(
@@ -1007,7 +1013,12 @@
                     'DELETE',
                     urlFragment,
                     null,
+                    false,
+                    headers,
                     function (error, response) {
+                        if (!_.isNull(error)) {
+                            setServerItemIfPreconditionFailed(error);
+                        }
                         callback(error);
                     });
             });
@@ -1101,6 +1112,13 @@
                 }
             }
             return result;
+        }
+        
+        // Converts an error to precondition failed error
+        function setServerItemIfPreconditionFailed(error) {
+            if (error.request && error.request.status === 412) {
+                error.serverInstance = _.fromJson(error.request.responseText);
+            }
         }
         
         // Add wrapping double quotes and escape all double quotes
@@ -2888,17 +2906,30 @@
                 } else {
                     // Try to pull out an error message from the response before
                     // defaulting to the status
+                    var isText = false;
+                    if (request.getResponseHeader) {
+                        isText = request.getResponseHeader('Content-Type').toLowerCase().indexOf("text") >= 0;
+                    }
+        
                     try {
                         var response = JSON.parse(request.responseText);
-                        error.message =
-                            response.error ||
-                            response.description ||
-                            request.statusText ||
-                            Platform.getResourceString("Extensions_DefaultErrorMessage");
+                        if (typeof response === 'string') {
+                            error.message = response;
+                        } else {
+                            error.message =
+                                response.error ||
+                                response.description ||
+                                request.statusText ||
+                                Platform.getResourceString("Extensions_DefaultErrorMessage");
+                        }
                     } catch (ex) {
-                        error.message =
-                            request.statusText ||
-                            Platform.getResourceString("Extensions_DefaultErrorMessage");
+                        if (isText) {
+                            error.message = request.responseText;
+                        } else {
+                            error.message =
+                                request.statusText ||
+                                Platform.getResourceString("Extensions_DefaultErrorMessage");
+                        }
                     }
                 }
             } else if (_.isString(exceptionOrMessage) && !_.isNullOrEmpty(exceptionOrMessage)) {
@@ -3146,14 +3177,13 @@
     };
 
     $__modules__.JavaScript = function (exports) {
-        // Generated by CoffeeScript 1.4.0
+        // Generated by CoffeeScript 1.7.1
         
         /*
-        # ----------------------------------------------------------------------------
-        # Copyright (c) Microsoft Corporation. All rights reserved.
-        # ----------------------------------------------------------------------------
-        */
-        
+         * ----------------------------------------------------------------------------
+         * Copyright (c) Microsoft Corporation. All rights reserved.
+         * ----------------------------------------------------------------------------
+         */
         
         (function() {
           var JS, JavaScript, JavaScriptToQueryVisitor, PartialEvaluator, esprima;
@@ -3166,99 +3196,99 @@
         
           JavaScriptToQueryVisitor = require('./JavaScriptToQueryVisitor').JavaScriptToQueryVisitor;
         
-          /*
-          # Define operations on JavaScript
-          */
         
+          /*
+           * Define operations on JavaScript
+           */
         
           exports.JavaScript = JavaScript = (function() {
-        
             function JavaScript() {}
         
-            /*
-                    # Static method to transform a constraint specified as a function into
-                    # a QueryExpression tree.
-            */
         
+            /*
+             * Static method to transform a constraint specified as a function into
+             * a QueryExpression tree.
+             */
         
             JavaScript.transformConstraint = function(func, env) {
-              /*
-                          # Parse the body of the function into a JavaScriptExpression tree
-                          # (into a context that also contains its source and manually reified
-                          # environment)
-              */
         
+              /*
+               * Parse the body of the function into a JavaScriptExpression tree
+               * (into a context that also contains its source and manually reified
+               * environment)
+               */
               var context, translator;
               context = JavaScript.getExpression(func, env);
-              /*
-                          # Evaluate any independent subexpressions and turn them into
-                          # literals.
-              */
         
+              /*
+               * Evaluate any independent subexpressions and turn them into
+               * literals.
+               */
               context.expression = PartialEvaluator.evaluate(context);
-              /*
-                          # Convert the JavaScriptExpression tree into a QueryExpression tree
-              */
         
+              /*
+               * Convert the JavaScriptExpression tree into a QueryExpression tree
+               */
               translator = new JavaScriptToQueryVisitor(context);
               return translator.visit(context.expression);
             };
         
-            /*
-                    # Static method to walk a projection specified as a function and
-                    # determine which fields it uses.
-            */
         
+            /*
+             * Static method to walk a projection specified as a function and
+             * determine which fields it uses.
+             */
         
             JavaScript.getProjectedFields = function(func) {
+        
               /*
-                          # This currently returns an empty array which indicates all fields.
-                          # At some point we'll need to go through and walk the expression
-                          # tree for func and see exactly which fields it uses.  This is
-                          # complicated by the fact that we support arbitrary expressions and
-                          # could for example pass 'this' to a nested lambda which means we
-                          # can't just check for MemberExpressions (though in that case we'll
-                          # probably just default to [] rather than trying to do alias
-                          # analysis across function calls, etc.)
-              */
+               * This currently returns an empty array which indicates all fields.
+               * At some point we'll need to go through and walk the expression
+               * tree for func and see exactly which fields it uses.  This is
+               * complicated by the fact that we support arbitrary expressions and
+               * could for example pass 'this' to a nested lambda which means we
+               * can't just check for MemberExpressions (though in that case we'll
+               * probably just default to [] rather than trying to do alias
+               * analysis across function calls, etc.)
+               */
               return [];
             };
         
-            /*
-                    # Turn a function and its explicitly passed environment into an
-                    # expression tree
-            */
         
+            /*
+             * Turn a function and its explicitly passed environment into an
+             * expression tree
+             */
         
             JavaScript.getExpression = function(func, env) {
-              /*
-                          # An anonymous function isn't considered a valid program, so we'll wrap
-                          # it in an assignment statement to keep the parser happy
-              */
         
+              /*
+               * An anonymous function isn't considered a valid program, so we'll wrap
+               * it in an assignment statement to keep the parser happy
+               */
               var environment, expr, i, name, names, program, source, _i, _len, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
               source = "var _$$_stmt_$$_ = " + func + ";";
-              /*
-                          # Use esprima to parse the source of the function body (and have it
-                          # return source locations in character ranges )
-              */
         
+              /*
+               * Use esprima to parse the source of the function body (and have it
+               * return source locations in character ranges )
+               */
               program = esprima.parse(source, {
                 range: true
-                /*
-                            # Get the expression from return statement of the function body to use
-                            # as our lambda expression
-                */
-        
               });
+        
+              /*
+               * Get the expression from return statement of the function body to use
+               * as our lambda expression
+               */
               expr = (program != null ? program.type : void 0) === 'Program' && (program != null ? (_ref = program.body) != null ? _ref.length : void 0 : void 0) === 1 && ((_ref1 = program.body[0]) != null ? _ref1.type : void 0) === 'VariableDeclaration' && ((_ref2 = program.body[0]) != null ? (_ref3 = _ref2.declarations) != null ? _ref3.length : void 0 : void 0) === 1 && ((_ref4 = program.body[0].declarations[0]) != null ? _ref4.type : void 0) === 'VariableDeclarator' && ((_ref5 = program.body[0].declarations[0]) != null ? (_ref6 = _ref5.init) != null ? _ref6.type : void 0 : void 0) === 'FunctionExpression' && ((_ref7 = program.body[0].declarations[0].init) != null ? (_ref8 = _ref7.body) != null ? _ref8.type : void 0 : void 0) === 'BlockStatement' && ((_ref9 = program.body[0].declarations[0].init.body) != null ? (_ref10 = _ref9.body) != null ? _ref10.length : void 0 : void 0) === 1 && ((_ref11 = program.body[0].declarations[0].init.body.body[0]) != null ? _ref11.type : void 0) === 'ReturnStatement' && ((_ref12 = program.body[0].declarations[0].init.body.body[0]) != null ? _ref12.argument : void 0);
               if (!expr) {
                 throw "Expected a predicate with a single return statement, not " + func;
               }
-              /*
-                          # Create the environment mqpping parameters to values
-              */
         
+              /*
+               * Create the environment mqpping parameters to values
+               */
               names = (_ref13 = program.body[0].declarations[0].init.params) != null ? _ref13.map(function(p) {
                 return p.name;
               }) : void 0;
@@ -3273,10 +3303,10 @@
                 environment[name] = env[i];
               }
               return {
-                /*
-                            # Return the environment context
-                */
         
+                /*
+                 * Return the environment context
+                 */
                 source: source,
                 expression: expr,
                 environment: environment
@@ -3291,31 +3321,29 @@
     };
 
     $__modules__.JavaScriptNodes = function (exports) {
-        // Generated by CoffeeScript 1.4.0
+        // Generated by CoffeeScript 1.7.1
         
         /*
-        # ----------------------------------------------------------------------------
-        # Copyright (c) Microsoft Corporation. All rights reserved.
-        # ----------------------------------------------------------------------------
-        */
+         * ----------------------------------------------------------------------------
+         * Copyright (c) Microsoft Corporation. All rights reserved.
+         * ----------------------------------------------------------------------------
+         */
         
         
         /*
-        # Define the Esprima node structure for JavaScript parse trees.  This is mostly
-        # identical to the SpiderMonkey API defined at
-        # https://developer.mozilla.org/en/SpiderMonkey/Parser_API without any of the
-        # SpiderMonkey specifics and a few simplifications made by Esprima (i.e. it
-        # doesn't have separate objects for operator types, etc.).
-        #
-        # It's important to note that the Esprima parse tree will return object literals
-        # and not instances of these types.  They're provided primarily for reference
-        # and for easily constructing new subtrees during transformations by visitors.
-        */
+         * Define the Esprima node structure for JavaScript parse trees.  This is mostly
+         * identical to the SpiderMonkey API defined at
+         * https://developer.mozilla.org/en/SpiderMonkey/Parser_API without any of the
+         * SpiderMonkey specifics and a few simplifications made by Esprima (i.e. it
+         * doesn't have separate objects for operator types, etc.).
+         *
+         * It's important to note that the Esprima parse tree will return object literals
+         * and not instances of these types.  They're provided primarily for reference
+         * and for easily constructing new subtrees during transformations by visitors.
+         */
         
         
-        /* Get the base Node and Visitor classes.
-        */
-        
+        /* Get the base Node and Visitor classes. */
         
         (function() {
           var ArrayExpression, ArrayPattern, AssignmentExpression, BinaryExpression, BlockStatement, BreakStatement, CallExpression, CatchClause, ConditionalExpression, ContinueStatement, DebuggerStatement, Declaration, DoWhileStatement, EmptyStatement, Expression, ExpressionStatement, ForInStatement, ForStatement, Function, FunctionDeclaration, FunctionExpression, Identifier, IfStatement, JavaScriptNode, JavaScriptVisitor, LabeledStatement, Literal, LogicalExpression, MemberExpression, NewExpression, Node, ObjectExpression, ObjectPattern, Pattern, Program, ReturnStatement, SequenceExpression, Statement, SwitchCase, SwitchStatement, ThisExpression, ThrowStatement, TryStatement, UnaryExpression, UpdateExpression, VariableDeclaration, VariableDeclarator, Visitor, WhileStatement, WithStatement, _ref,
@@ -3324,13 +3352,12 @@
         
           _ref = require('./Node'), Node = _ref.Node, Visitor = _ref.Visitor;
         
-          /*
-          # Base node for all JavaScript nodes.
-          */
         
+          /*
+           * Base node for all JavaScript nodes.
+           */
         
           exports.JavaScriptNode = JavaScriptNode = (function(_super) {
-        
             __extends(JavaScriptNode, _super);
         
             function JavaScriptNode() {
@@ -3341,13 +3368,12 @@
         
           })(Node);
         
-          /*
-          # Base visitor for all JavaScript nodes.
-          */
         
+          /*
+           * Base visitor for all JavaScript nodes.
+           */
         
           exports.JavaScriptVisitor = JavaScriptVisitor = (function(_super) {
-        
             __extends(JavaScriptVisitor, _super);
         
             function JavaScriptVisitor() {
@@ -3362,19 +3388,18 @@
         
           })(Visitor);
         
-          /*
-          # A complete program source tree.
-          */
         
+          /*
+           * A complete program source tree.
+           */
         
           exports.Program = Program = (function(_super) {
-        
             __extends(Program, _super);
         
-            /*
-                    # @elements: [Statement]
-            */
         
+            /*
+             * @elements: [Statement]
+             */
         
             function Program(elements) {
               this.elements = elements;
@@ -3391,22 +3416,21 @@
             return node;
           };
         
-          /*
-          # A function declaration or expression. The body of the function is a  block
-          # statement.
-          */
         
+          /*
+           * A function declaration or expression. The body of the function is a  block
+           * statement.
+           */
         
           exports.Function = Function = (function(_super) {
-        
             __extends(Function, _super);
         
-            /*
-                    # @id: Identifier | null
-                    # @params: [Pattern]
-                    # @body: BlockStatement
-            */
         
+            /*
+             * @id: Identifier | null
+             * @params: [Pattern]
+             * @body: BlockStatement
+             */
         
             function Function(id, params, body) {
               this.id = id;
@@ -3427,13 +3451,12 @@
             return node;
           };
         
-          /*
-          # Any statement.
-          */
         
+          /*
+           * Any statement.
+           */
         
           exports.Statement = Statement = (function(_super) {
-        
             __extends(Statement, _super);
         
             function Statement() {
@@ -3449,13 +3472,12 @@
             return node;
           };
         
-          /*
-          # An empty statement, i.e., a solitary semicolon.
-          */
         
+          /*
+           * An empty statement, i.e., a solitary semicolon.
+           */
         
           exports.EmptyStatement = EmptyStatement = (function(_super) {
-        
             __extends(EmptyStatement, _super);
         
             function EmptyStatement() {
@@ -3471,19 +3493,18 @@
             return node;
           };
         
-          /*
-          # A block statement, i.e., a sequence of statements surrounded by braces.
-          */
         
+          /*
+           * A block statement, i.e., a sequence of statements surrounded by braces.
+           */
         
           exports.BlockStatement = BlockStatement = (function(_super) {
-        
             __extends(BlockStatement, _super);
         
-            /*
-                    # @body: [Statement]
-            */
         
+            /*
+             * @body: [Statement]
+             */
         
             function BlockStatement(body) {
               this.body = body;
@@ -3500,13 +3521,12 @@
             return node;
           };
         
-          /*
-          # An expression statement, i.e., a statement consisting of a single expression.
-          */
         
+          /*
+           * An expression statement, i.e., a statement consisting of a single expression.
+           */
         
           exports.ExpressionStatement = ExpressionStatement = (function(_super) {
-        
             __extends(ExpressionStatement, _super);
         
             function ExpressionStatement() {
@@ -3522,21 +3542,20 @@
             return node;
           };
         
-          /*
-          # An if statement.
-          */
         
+          /*
+           * An if statement.
+           */
         
           exports.IfStatement = IfStatement = (function(_super) {
-        
             __extends(IfStatement, _super);
         
-            /*
-                    # @test: Expression
-                    # @consequent: Statement
-                    # @alternate: Statement | null
-            */
         
+            /*
+             * @test: Expression
+             * @consequent: Statement
+             * @alternate: Statement | null
+             */
         
             function IfStatement(test, consequent, alternate) {
               this.test = test;
@@ -3557,20 +3576,19 @@
             return node;
           };
         
-          /*
-          # A labeled statement, i.e., a statement prefixed by a break/continue label.
-          */
         
+          /*
+           * A labeled statement, i.e., a statement prefixed by a break/continue label.
+           */
         
           exports.LabeledStatement = LabeledStatement = (function(_super) {
-        
             __extends(LabeledStatement, _super);
         
-            /*
-                    # @label: Identifier
-                    # @body: Statement
-            */
         
+            /*
+             * @label: Identifier
+             * @body: Statement
+             */
         
             function LabeledStatement(label, body) {
               this.label = label;
@@ -3589,19 +3607,18 @@
             return node;
           };
         
-          /*
-          # A break statement.
-          */
         
+          /*
+           * A break statement.
+           */
         
           exports.BreakStatement = BreakStatement = (function(_super) {
-        
             __extends(BreakStatement, _super);
         
-            /*
-                    # @label: Identifier | null
-            */
         
+            /*
+             * @label: Identifier | null
+             */
         
             function BreakStatement(label) {
               this.label = label;
@@ -3618,19 +3635,18 @@
             return node;
           };
         
+        
           /*
           A continue statement.
-          */
-        
+           */
         
           exports.ContinueStatement = ContinueStatement = (function(_super) {
-        
             __extends(ContinueStatement, _super);
         
-            /*
-                    @label: Identifier | null
-            */
         
+            /*
+            @label: Identifier | null
+             */
         
             function ContinueStatement(label) {
               this.label = label;
@@ -3647,20 +3663,19 @@
             return node;
           };
         
-          /*
-          # A with statement.
-          */
         
+          /*
+           * A with statement.
+           */
         
           exports.WithStatement = WithStatement = (function(_super) {
-        
             __extends(WithStatement, _super);
         
-            /*
-                    # @object: Expression
-                    # @body: Statement
-            */
         
+            /*
+             * @object: Expression
+             * @body: Statement
+             */
         
             function WithStatement(object, body) {
               this.object = object;
@@ -3679,20 +3694,19 @@
             return node;
           };
         
-          /*
-          # A switch statement.
-          */
         
+          /*
+           * A switch statement.
+           */
         
           exports.SwitchStatement = SwitchStatement = (function(_super) {
-        
             __extends(SwitchStatement, _super);
         
-            /*
-                    # @discriminant: Expression
-                    # @cases: [SwitchCase]
-            */
         
+            /*
+             * @discriminant: Expression
+             * @cases: [SwitchCase]
+             */
         
             function SwitchStatement(discriminant, cases) {
               this.discriminant = discriminant;
@@ -3711,19 +3725,18 @@
             return node;
           };
         
-          /*
-          # A return statement.
-          */
         
+          /*
+           * A return statement.
+           */
         
           exports.ReturnStatement = ReturnStatement = (function(_super) {
-        
             __extends(ReturnStatement, _super);
         
-            /*
-                    # @argument: Expression | null
-            */
         
+            /*
+             * @argument: Expression | null
+             */
         
             function ReturnStatement(argument) {
               this.argument = argument;
@@ -3740,19 +3753,18 @@
             return node;
           };
         
-          /*
-          # A throw statement.
-          */
         
+          /*
+           * A throw statement.
+           */
         
           exports.ThrowStatement = ThrowStatement = (function(_super) {
-        
             __extends(ThrowStatement, _super);
         
-            /*
-                    # @argument: Expression
-            */
         
+            /*
+             * @argument: Expression
+             */
         
             function ThrowStatement(argument) {
               this.argument = argument;
@@ -3769,21 +3781,20 @@
             return node;
           };
         
-          /*
-          # A try statement.
-          */
         
+          /*
+           * A try statement.
+           */
         
           exports.TryStatement = TryStatement = (function(_super) {
-        
             __extends(TryStatement, _super);
         
-            /*
-                    # @block: BlockStatement
-                    # @handlers: [CatchClause]
-                    # @finalizer: BlockStatement | null
-            */
         
+            /*
+             * @block: BlockStatement
+             * @handlers: [CatchClause]
+             * @finalizer: BlockStatement | null
+             */
         
             function TryStatement(block, handlers, finalizer) {
               this.block = block;
@@ -3804,20 +3815,19 @@
             return node;
           };
         
-          /*
-          # A while statement.
-          */
         
+          /*
+           * A while statement.
+           */
         
           exports.WhileStatement = WhileStatement = (function(_super) {
-        
             __extends(WhileStatement, _super);
         
-            /*
-                    # @test: Expression
-                    # @body: Statement
-            */
         
+            /*
+             * @test: Expression
+             * @body: Statement
+             */
         
             function WhileStatement(test, body) {
               this.test = test;
@@ -3836,20 +3846,19 @@
             return node;
           };
         
-          /*
-          # A do/while statement.
-          */
         
+          /*
+           * A do/while statement.
+           */
         
           exports.DoWhileStatement = DoWhileStatement = (function(_super) {
-        
             __extends(DoWhileStatement, _super);
         
-            /*
-                    # @body: Statement
-                    # @test: Expression
-            */
         
+            /*
+             * @body: Statement
+             * @test: Expression
+             */
         
             function DoWhileStatement(body, test) {
               this.body = body;
@@ -3868,22 +3877,21 @@
             return node;
           };
         
-          /*
-          # A for statement.
-          */
         
+          /*
+           * A for statement.
+           */
         
           exports.ForStatement = ForStatement = (function(_super) {
-        
             __extends(ForStatement, _super);
         
-            /*
-                    # @init: VariableDeclaration | Expression | null
-                    # @test: Expression | null
-                    # @update: Expression | null
-                    # @body: Statement
-            */
         
+            /*
+             * @init: VariableDeclaration | Expression | null
+             * @test: Expression | null
+             * @update: Expression | null
+             * @body: Statement
+             */
         
             function ForStatement(init, test, update, body) {
               this.init = init;
@@ -3906,21 +3914,20 @@
             return node;
           };
         
-          /*
-          # A for/in statement, or, if each is true, a for each/in statement.
-          */
         
+          /*
+           * A for/in statement, or, if each is true, a for each/in statement.
+           */
         
           exports.ForInStatement = ForInStatement = (function(_super) {
-        
             __extends(ForInStatement, _super);
         
-            /*
-                    # @left: VariableDeclaration |  Expression
-                    # @right: Expression
-                    # @body: Statement
-            */
         
+            /*
+             * @left: VariableDeclaration |  Expression
+             * @right: Expression
+             * @body: Statement
+             */
         
             function ForInStatement(left, right, body) {
               this.left = left;
@@ -3941,13 +3948,12 @@
             return node;
           };
         
-          /*
-          # A debugger statement.
-          */
         
+          /*
+           * A debugger statement.
+           */
         
           exports.DebuggerStatement = DebuggerStatement = (function(_super) {
-        
             __extends(DebuggerStatement, _super);
         
             function DebuggerStatement() {
@@ -3963,14 +3969,13 @@
             return node;
           };
         
-          /*
-          # Any declaration node. Note that declarations are considered statements; this
-          # is because declarations can appear in any statement context in the language.
-          */
         
+          /*
+           * Any declaration node. Note that declarations are considered statements; this
+           * is because declarations can appear in any statement context in the language.
+           */
         
           exports.Declaration = Declaration = (function(_super) {
-        
             __extends(Declaration, _super);
         
             function Declaration() {
@@ -3986,21 +3991,20 @@
             return node;
           };
         
-          /*
-          # A function declaration.  Note: The id field cannot be null.
-          */
         
+          /*
+           * A function declaration.  Note: The id field cannot be null.
+           */
         
           exports.FunctionDeclaration = FunctionDeclaration = (function(_super) {
-        
             __extends(FunctionDeclaration, _super);
         
-            /*
-                    # @id: Identifier
-                    # @params: [ Pattern ]
-                    # @body: BlockStatement | Expression
-            */
         
+            /*
+             * @id: Identifier
+             * @params: [ Pattern ]
+             * @body: BlockStatement | Expression
+             */
         
             function FunctionDeclaration(id, params, body) {
               this.id = id;
@@ -4021,20 +4025,19 @@
             return node;
           };
         
-          /*
-          # A variable declaration, via one of var, let, or const.
-          */
         
+          /*
+           * A variable declaration, via one of var, let, or const.
+           */
         
           exports.VariableDeclaration = VariableDeclaration = (function(_super) {
-        
             __extends(VariableDeclaration, _super);
         
-            /*
-                    # @declarations: [ VariableDeclarator ]
-                    # @kind: "var"
-            */
         
+            /*
+             * @declarations: [ VariableDeclarator ]
+             * @kind: "var"
+             */
         
             function VariableDeclaration(declarations, kind) {
               this.declarations = declarations;
@@ -4052,20 +4055,19 @@
             return node;
           };
         
-          /*
-          # A variable declarator.  Note: The id field cannot be null.
-          */
         
+          /*
+           * A variable declarator.  Note: The id field cannot be null.
+           */
         
           exports.VariableDeclarator = VariableDeclarator = (function(_super) {
-        
             __extends(VariableDeclarator, _super);
         
-            /*
-                    # @id: Pattern
-                    # @init: Expression | null
-            */
         
+            /*
+             * @id: Pattern
+             * @init: Expression | null
+             */
         
             function VariableDeclarator(id, init) {
               this.id = id;
@@ -4084,14 +4086,13 @@
             return node;
           };
         
-          /*
-          # Any expression node. Since the left-hand side of an assignment may be any
-          # expression in general, an expression can also be a pattern.
-          */
         
+          /*
+           * Any expression node. Since the left-hand side of an assignment may be any
+           * expression in general, an expression can also be a pattern.
+           */
         
           exports.Expression = Expression = (function(_super) {
-        
             __extends(Expression, _super);
         
             function Expression() {
@@ -4111,13 +4112,12 @@
             return node;
           };
         
-          /*
-          # A this expression.
-          */
         
+          /*
+           * A this expression.
+           */
         
           exports.ThisExpression = ThisExpression = (function(_super) {
-        
             __extends(ThisExpression, _super);
         
             function ThisExpression() {
@@ -4133,19 +4133,18 @@
             return node;
           };
         
-          /*
-          # An array expression.
-          */
         
+          /*
+           * An array expression.
+           */
         
           exports.ArrayExpression = ArrayExpression = (function(_super) {
-        
             __extends(ArrayExpression, _super);
         
-            /*
-                    # @elements: [ Expression | null ]
-            */
         
+            /*
+             * @elements: [ Expression | null ]
+             */
         
             function ArrayExpression(elements) {
               this.elements = elements;
@@ -4162,24 +4161,23 @@
             return node;
           };
         
-          /*
-          # An object expression. A literal property in an object expression can have
-          # either a string or number as its value.  Ordinary property initializers have a
-          # kind value "init"; getters and setters have the kind values "get" and "set",
-          # respectively.
-          */
         
+          /*
+           * An object expression. A literal property in an object expression can have
+           * either a string or number as its value.  Ordinary property initializers have a
+           * kind value "init"; getters and setters have the kind values "get" and "set",
+           * respectively.
+           */
         
           exports.ObjectExpression = ObjectExpression = (function(_super) {
-        
             __extends(ObjectExpression, _super);
         
-            /*
-                    # @properties: [ { key: Literal | Identifier,
-                    #                 value: Expression,
-                    #                 kind: "init" | "get" | "set" } ];
-            */
         
+            /*
+             * @properties: [ { key: Literal | Identifier,
+             *                 value: Expression,
+             *                 kind: "init" | "get" | "set" } ];
+             */
         
             function ObjectExpression(properties) {
               this.properties = properties;
@@ -4202,21 +4200,20 @@
             return node;
           };
         
-          /*
-          # A function expression.
-          */
         
+          /*
+           * A function expression.
+           */
         
           exports.FunctionExpression = FunctionExpression = (function(_super) {
-        
             __extends(FunctionExpression, _super);
         
-            /*
-                    # @id: Identifier | null
-                    # @params: [ Pattern ]
-                    # @body: BlockStatement | Expression
-            */
         
+            /*
+             * @id: Identifier | null
+             * @params: [ Pattern ]
+             * @body: BlockStatement | Expression
+             */
         
             function FunctionExpression(id, params, body) {
               this.id = id;
@@ -4237,19 +4234,18 @@
             return node;
           };
         
-          /*
-          # A sequence expression, i.e., a comma-separated sequence of expressions.
-          */
         
+          /*
+           * A sequence expression, i.e., a comma-separated sequence of expressions.
+           */
         
           exports.SequenceExpression = SequenceExpression = (function(_super) {
-        
             __extends(SequenceExpression, _super);
         
-            /*
-                    # @expressions: [ Expression ]
-            */
         
+            /*
+             * @expressions: [ Expression ]
+             */
         
             function SequenceExpression(expressions) {
               this.expressions = expressions;
@@ -4266,21 +4262,20 @@
             return node;
           };
         
-          /*
-          # A unary operator expression.
-          */
         
+          /*
+           * A unary operator expression.
+           */
         
           exports.UnaryExpression = UnaryExpression = (function(_super) {
-        
             __extends(UnaryExpression, _super);
         
-            /*
-                    # @operator: "-" | "+" | "!" | "~" | "typeof" | "void" | "delete"
-                    # @prefix: boolean
-                    # @argument: Expression
-            */
         
+            /*
+             * @operator: "-" | "+" | "!" | "~" | "typeof" | "void" | "delete"
+             * @prefix: boolean
+             * @argument: Expression
+             */
         
             function UnaryExpression(operator, prefix, argument) {
               this.operator = operator;
@@ -4299,23 +4294,22 @@
             return node;
           };
         
-          /*
-          # A binary operator expression.
-          */
         
+          /*
+           * A binary operator expression.
+           */
         
           exports.BinaryExpression = BinaryExpression = (function(_super) {
-        
             __extends(BinaryExpression, _super);
         
-            /*
-                    # @operator: "==" | "!=" | "===" | "!==" | "<" | "<=" | ">" | ">="
-                    #     | "<<" | ">>" | ">>>" | "+" | "-" | "*" | "/" | "%"
-                    #     | "|" | "&" | "^" | "in" | "instanceof" | ".."
-                    # @left: Expression
-                    # @right: Expression
-            */
         
+            /*
+             * @operator: "==" | "!=" | "===" | "!==" | "<" | "<=" | ">" | ">="
+             *     | "<<" | ">>" | ">>>" | "+" | "-" | "*" | "/" | "%"
+             *     | "|" | "&" | "^" | "in" | "instanceof" | ".."
+             * @left: Expression
+             * @right: Expression
+             */
         
             function BinaryExpression(operator, left, right) {
               this.operator = operator;
@@ -4335,22 +4329,21 @@
             return node;
           };
         
-          /*
-          # An assignment operator expression.
-          */
         
+          /*
+           * An assignment operator expression.
+           */
         
           exports.AssignmentExpression = AssignmentExpression = (function(_super) {
-        
             __extends(AssignmentExpression, _super);
         
-            /*
-                    # @operator: "=" | "+=" | "-=" | "*=" | "/=" | "%="
-                    #     | "<<=" | ">>=" | ">>>=" | "|=" | "^=" | "&=";
-                    # @left: Expression
-                    # @right: Expression
-            */
         
+            /*
+             * @operator: "=" | "+=" | "-=" | "*=" | "/=" | "%="
+             *     | "<<=" | ">>=" | ">>>=" | "|=" | "^=" | "&=";
+             * @left: Expression
+             * @right: Expression
+             */
         
             function AssignmentExpression(operator, left, right) {
               this.operator = operator;
@@ -4370,21 +4363,20 @@
             return node;
           };
         
-          /*
-          # An update (increment or decrement) operator expression.
-          */
         
+          /*
+           * An update (increment or decrement) operator expression.
+           */
         
           exports.UpdateExpression = UpdateExpression = (function(_super) {
-        
             __extends(UpdateExpression, _super);
         
-            /*
-                    # @operator: "++" | "--"
-                    # @argument: Expression
-                    # @prefix: boolean
-            */
         
+            /*
+             * @operator: "++" | "--"
+             * @argument: Expression
+             * @prefix: boolean
+             */
         
             function UpdateExpression(operator, argument, prefix) {
               this.operator = operator;
@@ -4403,21 +4395,20 @@
             return node;
           };
         
-          /*
-          # A logical operator expression.
-          */
         
+          /*
+           * A logical operator expression.
+           */
         
           exports.LogicalExpression = LogicalExpression = (function(_super) {
-        
             __extends(LogicalExpression, _super);
         
-            /*
-                    # @operator: "||" | "&&"
-                    # @left: Expression
-                    # @right: Expression
-            */
         
+            /*
+             * @operator: "||" | "&&"
+             * @left: Expression
+             * @right: Expression
+             */
         
             function LogicalExpression(operator, left, right) {
               this.operator = operator;
@@ -4437,21 +4428,20 @@
             return node;
           };
         
-          /*
-          # A conditional expression, i.e., a ternary ?/: expression.
-          */
         
+          /*
+           * A conditional expression, i.e., a ternary ?/: expression.
+           */
         
           exports.ConditionalExpression = ConditionalExpression = (function(_super) {
-        
             __extends(ConditionalExpression, _super);
         
-            /*
-                    # @test: Expression
-                    # @alternate: Expression
-                    # @consequent: Expression
-            */
         
+            /*
+             * @test: Expression
+             * @alternate: Expression
+             * @consequent: Expression
+             */
         
             function ConditionalExpression(test, alternate, consequent) {
               this.test = test;
@@ -4472,20 +4462,19 @@
             return node;
           };
         
-          /*
-          # A new expression.
-          */
         
+          /*
+           * A new expression.
+           */
         
           exports.NewExpression = NewExpression = (function(_super) {
-        
             __extends(NewExpression, _super);
         
-            /*
-                    # @callee: Expression
-                    # @arguments: [ Expression ] | null
-            */
         
+            /*
+             * @callee: Expression
+             * @arguments: [ Expression ] | null
+             */
         
             function NewExpression(callee, _arguments) {
               this.callee = callee;
@@ -4504,20 +4493,19 @@
             return node;
           };
         
-          /*
-          # A function or method call expression.
-          */
         
+          /*
+           * A function or method call expression.
+           */
         
           exports.CallExpression = CallExpression = (function(_super) {
-        
             __extends(CallExpression, _super);
         
-            /*
-                    # @callee: Expression
-                    # @arguments: [ Expression ]
-            */
         
+            /*
+             * @callee: Expression
+             * @arguments: [ Expression ]
+             */
         
             function CallExpression(callee, _arguments) {
               this.callee = callee;
@@ -4536,23 +4524,22 @@
             return node;
           };
         
-          /*
-          # A member expression. If computed === true, the node corresponds to a computed
-          # e1[e2] expression and property is an Expression. If computed === false, the
-          # node corresponds to a static e1.x expression and property is an Identifier.
-          */
         
+          /*
+           * A member expression. If computed === true, the node corresponds to a computed
+           * e1[e2] expression and property is an Expression. If computed === false, the
+           * node corresponds to a static e1.x expression and property is an Identifier.
+           */
         
           exports.MemberExpression = MemberExpression = (function(_super) {
-        
             __extends(MemberExpression, _super);
         
-            /*
-                    # @object: Expression
-                    # @property: Identifier | Expression
-                    # @computed : boolean
-            */
         
+            /*
+             * @object: Expression
+             * @property: Identifier | Expression
+             * @computed : boolean
+             */
         
             function MemberExpression(object, property, computed) {
               this.object = object;
@@ -4572,23 +4559,22 @@
             return node;
           };
         
-          /*
-          # JavaScript 1.7 introduced destructuring assignment and binding forms.  All
-          # binding forms (such as function parameters, variable declarations, and catch
-          # block headers), accept array and object destructuring patterns in addition to
-          # plain identifiers. The left-hand sides of assignment expressions can be
-          # arbitrary expressions, but in the case where the expression is an object or
-          # array literal, it is interpreted by SpiderMonkey as a destructuring pattern.
-          #
-          # Since the left-hand side of an assignment can in general be any expression, in
-          # an assignment context, a pattern can be any expression. In binding positions
-          # (such as function parameters, variable declarations, and catch headers),
-          # patterns can only be identifiers in the base case, not arbitrary expressions.
-          */
         
+          /*
+           * JavaScript 1.7 introduced destructuring assignment and binding forms.  All
+           * binding forms (such as function parameters, variable declarations, and catch
+           * block headers), accept array and object destructuring patterns in addition to
+           * plain identifiers. The left-hand sides of assignment expressions can be
+           * arbitrary expressions, but in the case where the expression is an object or
+           * array literal, it is interpreted by SpiderMonkey as a destructuring pattern.
+           *
+           * Since the left-hand side of an assignment can in general be any expression, in
+           * an assignment context, a pattern can be any expression. In binding positions
+           * (such as function parameters, variable declarations, and catch headers),
+           * patterns can only be identifiers in the base case, not arbitrary expressions.
+           */
         
           exports.Pattern = Pattern = (function(_super) {
-        
             __extends(Pattern, _super);
         
             function Pattern() {
@@ -4604,20 +4590,19 @@
             return node;
           };
         
-          /*
-          # An object-destructuring pattern. A literal property in an object pattern can
-          # have either a string or number as its value.
-          */
         
+          /*
+           * An object-destructuring pattern. A literal property in an object pattern can
+           * have either a string or number as its value.
+           */
         
           exports.ObjectPattern = ObjectPattern = (function(_super) {
-        
             __extends(ObjectPattern, _super);
         
-            /*
-                    # @properties: [ { key: Literal | Identifier, value: Pattern } ]
-            */
         
+            /*
+             * @properties: [ { key: Literal | Identifier, value: Pattern } ]
+             */
         
             function ObjectPattern(properties) {
               this.properties = properties;
@@ -4640,19 +4625,18 @@
             return node;
           };
         
-          /*
-          # An array-destructuring pattern.
-          */
         
+          /*
+           * An array-destructuring pattern.
+           */
         
           exports.ArrayPattern = ArrayPattern = (function(_super) {
-        
             __extends(ArrayPattern, _super);
         
-            /*
-                    # @elements: [ Pattern | null ]
-            */
         
+            /*
+             * @elements: [ Pattern | null ]
+             */
         
             function ArrayPattern(elements) {
               this.elements = elements;
@@ -4669,21 +4653,20 @@
             return node;
           };
         
-          /*
-          # A case (if test is an Expression) or default (if test === null) clause in the
-          # body of a switch statement.
-          */
         
+          /*
+           * A case (if test is an Expression) or default (if test === null) clause in the
+           * body of a switch statement.
+           */
         
           exports.SwitchCase = SwitchCase = (function(_super) {
-        
             __extends(SwitchCase, _super);
         
-            /*
-                    # @test: Expression | null
-                    # @consequent: [ Statement ]
-            */
         
+            /*
+             * @test: Expression | null
+             * @consequent: [ Statement ]
+             */
         
             function SwitchCase(test, consequent) {
               this.test = test;
@@ -4702,21 +4685,20 @@
             return node;
           };
         
-          /*
-          # A catch clause following a try block. The optional guard property corresponds
-          # to the optional expression guard on the bound variable.
-          */
         
+          /*
+           * A catch clause following a try block. The optional guard property corresponds
+           * to the optional expression guard on the bound variable.
+           */
         
           exports.CatchClause = CatchClause = (function(_super) {
-        
             __extends(CatchClause, _super);
         
-            /*
-                    # @param: Pattern
-                    # @body: BlockStatement
-            */
         
+            /*
+             * @param: Pattern
+             * @body: BlockStatement
+             */
         
             function CatchClause(param, body) {
               this.param = param;
@@ -4735,20 +4717,19 @@
             return node;
           };
         
-          /*
-          # An identifier. Note that an identifier may be an expression or a destructuring
-          # pattern.
-          */
         
+          /*
+           * An identifier. Note that an identifier may be an expression or a destructuring
+           * pattern.
+           */
         
           exports.Identifier = Identifier = (function(_super) {
-        
             __extends(Identifier, _super);
         
-            /*
-                    # @name: string
-            */
         
+            /*
+             * @name: string
+             */
         
             function Identifier(name) {
               this.name = name;
@@ -4764,19 +4745,18 @@
             return node;
           };
         
-          /*
-          # A literal token. Note that a literal can be an expression.
-          */
         
+          /*
+           * A literal token. Note that a literal can be an expression.
+           */
         
           exports.Literal = Literal = (function(_super) {
-        
             __extends(Literal, _super);
         
-            /*
-                    # @value: string | boolean | null | number | RegExp
-            */
         
+            /*
+             * @value: string | boolean | null | number | RegExp
+             */
         
             function Literal(value) {
               this.value = value;
@@ -4796,14 +4776,13 @@
     };
 
     $__modules__.JavaScriptToQueryVisitor = function (exports) {
-        // Generated by CoffeeScript 1.4.0
+        // Generated by CoffeeScript 1.7.1
         
         /*
-        # ----------------------------------------------------------------------------
-        # Copyright (c) Microsoft Corporation. All rights reserved.
-        # ----------------------------------------------------------------------------
-        */
-        
+         * ----------------------------------------------------------------------------
+         * Copyright (c) Microsoft Corporation. All rights reserved.
+         * ----------------------------------------------------------------------------
+         */
         
         (function() {
           var JS, JavaScriptToQueryVisitor, Q, _,
@@ -4816,40 +4795,36 @@
         
           Q = require('./QueryNodes');
         
-          /*
-          # Walk the JavaScriptExpression tree and convert its nodes into QueryExpression
-          # trees
-          */
         
+          /*
+           * Walk the JavaScriptExpression tree and convert its nodes into QueryExpression
+           * trees
+           */
         
           exports.JavaScriptToQueryVisitor = JavaScriptToQueryVisitor = (function(_super) {
-        
             __extends(JavaScriptToQueryVisitor, _super);
         
             function JavaScriptToQueryVisitor(context) {
               this.context = context;
             }
         
-            /* Get the source code for a given node
-            */
         
+            /* Get the source code for a given node */
         
             JavaScriptToQueryVisitor.prototype.getSource = function(node) {
               var _ref, _ref1;
               return this.context.source.slice(node != null ? (_ref = node.range) != null ? _ref[0] : void 0 : void 0, +((node != null ? (_ref1 = node.range) != null ? _ref1[1] : void 0 : void 0) - 1) + 1 || 9e9);
             };
         
-            /* Throw an exception for an invalid node.
-            */
         
+            /* Throw an exception for an invalid node. */
         
             JavaScriptToQueryVisitor.prototype.invalid = function(node) {
               throw "The expression '" + (this.getSource(node)) + "'' is not supported.";
             };
         
-            /* Unary expressions just map operators
-            */
         
+            /* Unary expressions just map operators */
         
             JavaScriptToQueryVisitor.prototype.translateUnary = function(node, mapping) {
               var op, value;
@@ -4862,9 +4837,8 @@
               }
             };
         
-            /* Binary expressions just map operators
-            */
         
+            /* Binary expressions just map operators */
         
             JavaScriptToQueryVisitor.prototype.translateBinary = function(node, mapping) {
               var left, op, right;
@@ -4878,12 +4852,12 @@
               }
             };
         
-            /*
-                    # The base visit method will throw exceptions for any nodes that remain
-                    # untransformed (which allows us to only bother defining meaningful
-                    # translations)
-            */
         
+            /*
+             * The base visit method will throw exceptions for any nodes that remain
+             * untransformed (which allows us to only bother defining meaningful
+             * translations)
+             */
         
             JavaScriptToQueryVisitor.prototype.visit = function(node) {
               var visited;
@@ -4899,14 +4873,12 @@
               expr = (function() {
                 var _ref, _ref1, _ref2, _ref3;
                 if ((node != null ? (_ref = node.object) != null ? _ref.type : void 0 : void 0) === 'ThisExpression' && (node != null ? (_ref1 = node.property) != null ? _ref1.type : void 0 : void 0) === 'Identifier') {
-                  /* Simple member access
-                  */
         
+                  /* Simple member access */
                   return new Q.MemberExpression(node.property.name);
                 } else if ((node != null ? (_ref2 = node.object) != null ? _ref2.type : void 0 : void 0) === 'MemberExpression' && ((_ref3 = node.object.object) != null ? _ref3.type : void 0) === 'ThisExpression' && node.property.type === 'Identifier') {
-                  /* Methods that look like properties
-                  */
         
+                  /* Methods that look like properties */
                   if (node.property.name === 'length') {
                     return new Q.InvocationExpression(Q.Methods.Length, new Q.MemberExpression(node.object.property.name));
                   }
@@ -4922,9 +4894,8 @@
             JavaScriptToQueryVisitor.prototype.UnaryExpression = function(node) {
               var mapping, _ref;
               if (node.operator === '+') {
-                /* Ignore the + in '+52'
-                */
         
+                /* Ignore the + in '+52' */
                 return this.visit(node.argument);
               } else {
                 mapping = {
@@ -4975,11 +4946,11 @@
                 if ((_ref = this.translateBinary(node, mapping)) != null) {
                   return _ref;
                 } else if (node.operator === 'in' && ((_ref1 = node.right) != null ? _ref1.type : void 0) === 'Literal' && _.isArray((_ref2 = node.right) != null ? _ref2.value : void 0)) {
-                  /*
-                                      # Transform the 'foo in [x, y, z]' operator into a series of
-                                      # comparisons like foo == x || foo == y || foo == z.
-                  */
         
+                  /*
+                   * Transform the 'varName in [x, y, z]' operator into a series of
+                   * comparisons like varName == x || varName == y || varName == z.
+                   */
                   if (node.right.value.length > 0) {
                     left = this.visit(node.left);
                     return Q.QueryExpression.groupClauses(Q.BinaryOperators.Or, (function() {
@@ -4988,12 +4959,12 @@
                       _results = [];
                       for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
                         value = _ref3[_i];
-                        /*
-                                                        # If we've got an array of objects who each have
-                                                        # a single property, we'll use the value of that
-                                                        # property.  Otherwise we'll throw an exception.
-                        */
         
+                        /*
+                         * If we've got an array of objects who each have
+                         * a single property, we'll use the value of that
+                         * property.  Otherwise we'll throw an exception.
+                         */
                         if (_.isObject(value)) {
                           properties = (function() {
                             var _results1;
@@ -5014,11 +4985,11 @@
                       return _results;
                     }).call(this));
                   } else {
-                    /*
-                                            # If the array of values is empty, change the query to
-                                            # true == false since it can't be satisfied.
-                    */
         
+                    /*
+                     * If the array of values is empty, change the query to
+                     * true == false since it can't be satisfied.
+                     */
                     return new Q.BinaryExpression(Q.BinaryOperators.Equal, new Q.ConstantExpression(true), new Q.ConstantExpression(false));
                   }
                 } else {
@@ -5028,28 +4999,31 @@
             };
         
             JavaScriptToQueryVisitor.prototype.CallExpression = function(node) {
-              var expr, func, getSingleArg, getTwoArgs, member, method, _ref,
-                _this = this;
-              getSingleArg = function(name) {
-                var _ref;
-                if (((_ref = node["arguments"]) != null ? _ref.length : void 0) !== 1) {
-                  throw "Function " + name + " expects one argument in expression '" + (_this.getSource(node)) + "'";
-                }
-                return _this.visit(node["arguments"][0]);
-              };
-              getTwoArgs = function(member, name) {
-                var _ref;
-                if (((_ref = node["arguments"]) != null ? _ref.length : void 0) !== 2) {
-                  throw "Function " + name + " expects two arguments in expression '" + (_this.getSource(node)) + "'";
-                }
-                return [member, _this.visit(node["arguments"][0]), _this.visit(node["arguments"][1])];
-              };
-              /*
-                          # Translate known method calls that aren't attached to an instance.
-                          # Note that we can compare against the actual method because the
-                          # partial evaluator will have converted it into a literal for us.
-              */
+              var expr, func, getSingleArg, getTwoArgs, member, method, _ref;
+              getSingleArg = (function(_this) {
+                return function(name) {
+                  var _ref;
+                  if (((_ref = node["arguments"]) != null ? _ref.length : void 0) !== 1) {
+                    throw "Function " + name + " expects one argument in expression '" + (_this.getSource(node)) + "'";
+                  }
+                  return _this.visit(node["arguments"][0]);
+                };
+              })(this);
+              getTwoArgs = (function(_this) {
+                return function(member, name) {
+                  var _ref;
+                  if (((_ref = node["arguments"]) != null ? _ref.length : void 0) !== 2) {
+                    throw "Function " + name + " expects two arguments in expression '" + (_this.getSource(node)) + "'";
+                  }
+                  return [member, _this.visit(node["arguments"][0]), _this.visit(node["arguments"][1])];
+                };
+              })(this);
         
+              /*
+               * Translate known method calls that aren't attached to an instance.
+               * Note that we can compare against the actual method because the
+               * partial evaluator will have converted it into a literal for us.
+               */
               func = node != null ? (_ref = node.callee) != null ? _ref.value : void 0 : void 0;
               expr = (function() {
                 var _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
@@ -5060,10 +5034,10 @@
                 } else if (func === Math.round) {
                   return new Q.InvocationExpression(Q.Methods.Round, [getSingleArg('round')]);
                 } else {
-                  /*
-                                      # Translate methods dangling off an instance
-                  */
         
+                  /*
+                   * Translate methods dangling off an instance
+                   */
                   if (node.callee.type === 'MemberExpression' && ((_ref1 = node.callee.object) != null ? _ref1.__hasThisExp : void 0) === true) {
                     if ((node != null ? (_ref2 = node.callee) != null ? (_ref3 = _ref2.object) != null ? _ref3.type : void 0 : void 0 : void 0) === 'CallExpression') {
                       member = this.visit(node.callee.object);
@@ -5090,9 +5064,8 @@
                     } else if (method === 'getYear') {
                       return new Q.BinaryExpression(Q.BinaryOperators.Subtract, new Q.InvocationExpression(Q.Methods.Year, [member]), new Q.ConstantExpression(1900));
                     } else if (method === 'getMonth' || method === 'getUTCMonth') {
-                      /* getMonth is 0 indexed in JavaScript
-                      */
         
+                      /* getMonth is 0 indexed in JavaScript */
                       return new Q.BinaryExpression(Q.BinaryOperators.Subtract, new Q.InvocationExpression(Q.Methods.Month, [member]), new Q.ConstantExpression(1));
                     } else if (method === 'getDate' || method === 'getUTCDate') {
                       return new Q.InvocationExpression(Q.Methods.Day, [member]);
@@ -5111,40 +5084,39 @@
     };
 
     $__modules__.Node = function (exports) {
-        // Generated by CoffeeScript 1.4.0
+        // Generated by CoffeeScript 1.7.1
         
         /*
-        # ----------------------------------------------------------------------------
-        # Copyright (c) Microsoft Corporation. All rights reserved.
-        # ----------------------------------------------------------------------------
-        */
-        
+         * ----------------------------------------------------------------------------
+         * Copyright (c) Microsoft Corporation. All rights reserved.
+         * ----------------------------------------------------------------------------
+         */
         
         (function() {
           var Node, Visitor, _;
         
           _ = require('./Utilities');
         
-          /*
-          # The base Node class for all expressions used for analysis and translation by
-          # visitors.  It's designed to interop with other modules that create expression
-          # trees using object literals with a type tag.
-          */
         
+          /*
+           * The base Node class for all expressions used for analysis and translation by
+           * visitors.  It's designed to interop with other modules that create expression
+           * trees using object literals with a type tag.
+           */
         
           exports.Node = Node = (function() {
-            /*
-                # Type tag of the node that allows for eash dispatch in visitors.  This is
-                # automatically set in the constructor (so it's important to call super() in
-                # derived Node classes).
-            */
         
+            /*
+             * Type tag of the node that allows for eash dispatch in visitors.  This is
+             * automatically set in the constructor (so it's important to call super() in
+             * derived Node classes).
+             */
             Node.prototype.type = 'Node';
         
-            /*
-                # Initializes a new instance of the Node class and sets its type tag.
-            */
         
+            /*
+             * Initializes a new instance of the Node class and sets its type tag.
+             */
         
             function Node() {
               this.type = _.functionName(this.constructor);
@@ -5154,19 +5126,18 @@
         
           })();
         
-          /*
-          # Base class for all visitors
-          */
         
+          /*
+           * Base class for all visitors
+           */
         
           exports.Visitor = Visitor = (function() {
-        
             function Visitor() {}
         
-            /*
-                    # Visit a node.
-            */
         
+            /*
+             * Visit a node.
+             */
         
             Visitor.prototype.visit = function(node) {
               var element, _i, _len, _results;
@@ -5186,14 +5157,14 @@
               }
             };
         
-            /*
-                    # Get the source code corresponding to a node.
-            */
         
+            /*
+             * Get the source code corresponding to a node.
+             */
         
             Visitor.prototype.getSource = function(node) {
-              /* It is expected this will be overridden in derived visitors.
-              */
+        
+              /* It is expected this will be overridden in derived visitors. */
               return null;
             };
         
@@ -5205,14 +5176,13 @@
     };
 
     $__modules__.ODataProvider = function (exports) {
-        // Generated by CoffeeScript 1.4.0
+        // Generated by CoffeeScript 1.7.1
         
         /*
-        # ----------------------------------------------------------------------------
-        # Copyright (c) Microsoft Corporation. All rights reserved.
-        # ----------------------------------------------------------------------------
-        */
-        
+         * ----------------------------------------------------------------------------
+         * Copyright (c) Microsoft Corporation. All rights reserved.
+         * ----------------------------------------------------------------------------
+         */
         
         (function() {
           var ODataFilterQueryVisitor, ODataProvider, Q, Query, _,
@@ -5226,13 +5196,12 @@
           Query = require('./Query').Query;
         
           exports.ODataProvider = ODataProvider = (function() {
-        
             function ODataProvider() {}
         
-            /*
-                    # Convert a query into an OData URI.
-            */
         
+            /*
+             * Convert a query into an OData URI.
+             */
         
             ODataProvider.prototype.toQuery = function(query) {
               var odata, s, url;
@@ -5265,14 +5234,14 @@
               return url;
             };
         
-            /*
-                    # Translate the query components into OData strings
-            */
         
+            /*
+             * Translate the query components into OData strings
+             */
         
             ODataProvider.prototype.toOData = function(query, encodeForUri) {
               var asc, components, name, odata, ordering, _ref, _ref1;
-              if (!(encodeForUri != null)) {
+              if (encodeForUri == null) {
                 encodeForUri = false;
               }
               components = (_ref = query != null ? query.getComponents() : void 0) != null ? _ref : {};
@@ -5297,10 +5266,10 @@
               };
             };
         
-            /*
-                    # Convert OData components into a query object
-            */
         
+            /*
+             * Convert OData components into a query object
+             */
         
             ODataProvider.prototype.fromOData = function(table, filters, ordering, skip, take, selections, includeTotalCount) {
               var direction, field, item, query, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3;
@@ -5347,13 +5316,12 @@
         
           })();
         
-          /*
-          # Visitor that converts query expression trees into OData filter statements.
-          */
         
+          /*
+           * Visitor that converts query expression trees into OData filter statements.
+           */
         
           ODataFilterQueryVisitor = (function(_super) {
-        
             __extends(ODataFilterQueryVisitor, _super);
         
             function ODataFilterQueryVisitor(encodeForUri) {
@@ -5377,12 +5345,12 @@
                 }
                 return "'" + value + "'";
               } else if (_.isDate(value)) {
-                /*
-                            # Dates are expected in the format
-                            #   "datetime'yyyy-mm-ddThh:mm[:ss[.fffffff]]'"
-                            # which JSON.stringify gives us by default
-                */
         
+                /*
+                 * Dates are expected in the format
+                 *   "datetime'yyyy-mm-ddThh:mm[:ss[.fffffff]]'"
+                 * which JSON.stringify gives us by default
+                 */
                 text = JSON.stringify(value);
                 if (text.length > 2) {
                   text = text.slice(1, +(text.length - 2) + 1 || 9e9);
@@ -5505,14 +5473,13 @@
     };
 
     $__modules__.PartialEvaluator = function (exports) {
-        // Generated by CoffeeScript 1.4.0
+        // Generated by CoffeeScript 1.7.1
         
         /*
-        # ----------------------------------------------------------------------------
-        # Copyright (c) Microsoft Corporation. All rights reserved.
-        # ----------------------------------------------------------------------------
-        */
-        
+         * ----------------------------------------------------------------------------
+         * Copyright (c) Microsoft Corporation. All rights reserved.
+         * ----------------------------------------------------------------------------
+         */
         
         (function() {
           var IndependenceNominator, JS, PartialEvaluator, _,
@@ -5523,20 +5490,19 @@
         
           JS = require('./JavaScriptNodes');
         
-          /*
-          # Partially evaluate a complex expression in the context of its environment.
-          # This allows us to support arbitrary JavaScript expressions even though we
-          # only explicitly transform a subset of expressions into QueryExpressions.
-          #
-          # For example, assuming we have an expression like (x) -> @id == x + 1 with an
-          # environment where x == 12, then the entire right hand side of the comparison
-          # is independent of any values computed by the query and could be replaced with
-          # the literal value 13.
-          */
         
+          /*
+           * Partially evaluate a complex expression in the context of its environment.
+           * This allows us to support arbitrary JavaScript expressions even though we
+           * only explicitly transform a subset of expressions into QueryExpressions.
+           *
+           * For example, assuming we have an expression like (x) -> @id == x + 1 with an
+           * environment where x == 12, then the entire right hand side of the comparison
+           * is independent of any values computed by the query and could be replaced with
+           * the literal value 13.
+           */
         
           exports.PartialEvaluator = PartialEvaluator = (function(_super) {
-        
             __extends(PartialEvaluator, _super);
         
             function PartialEvaluator(context) {
@@ -5546,27 +5512,27 @@
             PartialEvaluator.prototype.visit = function(node) {
               var key, params, source, thunk, value, values, _ref, _ref1, _ref2, _ref3;
               if (!node.__independent || node.type === 'Literal' || (!node.type)) {
-                /*
-                                # If the node isn't independent or it's already a literal, then
-                                # just keep walking the tree
-                */
         
+                /*
+                 * If the node isn't independent or it's already a literal, then
+                 * just keep walking the tree
+                 */
                 return PartialEvaluator.__super__.visit.call(this, node);
               } else {
-                /*
-                                # Otherwse we'll evaluate the node in the context of the
-                                # environment by either looking up identifiers directly or
-                                # evaluating whole sub expressions
-                */
         
+                /*
+                 * Otherwse we'll evaluate the node in the context of the
+                 * environment by either looking up identifiers directly or
+                 * evaluating whole sub expressions
+                 */
                 if (node.type === 'Identifier' && this.context.environment[node.name]) {
                   return new JS.Literal(this.context.environment[node.name]);
                 } else {
-                  /*
-                                      # Evaluate the source of the sub expression in the context
-                                      # of the environment
-                  */
         
+                  /*
+                   * Evaluate the source of the sub expression in the context
+                   * of the environment
+                   */
                   source = this.context.source.slice(node != null ? (_ref = node.range) != null ? _ref[0] : void 0 : void 0, +((node != null ? (_ref1 = node.range) != null ? _ref1[1] : void 0 : void 0) - 1) + 1 || 9e9);
                   params = (_ref2 = (function() {
                     var _ref3, _results;
@@ -5607,14 +5573,13 @@
         
           })(JS.JavaScriptVisitor);
         
-          /*
-          # Nominate independent nodes in an expression tree that don't depend on any
-          # server side values.
-          */
         
+          /*
+           * Nominate independent nodes in an expression tree that don't depend on any
+           * server side values.
+           */
         
           exports.IndependenceNominator = IndependenceNominator = (function(_super) {
-        
             __extends(IndependenceNominator, _super);
         
             function IndependenceNominator(context) {
@@ -5645,11 +5610,11 @@
             IndependenceNominator.prototype.MemberExpression = function(node) {
               var _ref;
               IndependenceNominator.__super__.MemberExpression.call(this, node);
-              /*
-                          # Undo independence of identifiers when they're members of this.* or
-                          # this.member.* (the latter allows for member functions)
-              */
         
+              /*
+               * Undo independence of identifiers when they're members of this.* or
+               * this.member.* (the latter allows for member functions)
+               */
               node.__hasThisExp = (_ref = node.object) != null ? _ref.__hasThisExp : void 0;
               if (node.__hasThisExp) {
                 node.__independent = false;
@@ -5669,21 +5634,21 @@
             IndependenceNominator.prototype.ObjectExpression = function(node) {
               var independence, setter, _i, _j, _len, _len1, _ref, _ref1;
               IndependenceNominator.__super__.ObjectExpression.call(this, node);
-              /*
-                          # Prevent literal key identifiers from being evaluated out of
-                          # context
-              */
         
+              /*
+               * Prevent literal key identifiers from being evaluated out of
+               * context
+               */
               _ref = node.properties;
               for (_i = 0, _len = _ref.length; _i < _len; _i++) {
                 setter = _ref[_i];
                 setter.key.__independent = false;
               }
-              /*
-                          # An object literal is independent if all of its values are
-                          # independent
-              */
         
+              /*
+               * An object literal is independent if all of its values are
+               * independent
+               */
               independence = true;
               _ref1 = node.properties;
               for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
@@ -5695,20 +5660,20 @@
             };
         
             IndependenceNominator.prototype.visit = function(node) {
-              /*
-                          # Call the base visit method which will both visit all of our
-                          # subexpressions and also call the couple of overrides above which
-                          # handle the base independence cases
-              */
         
+              /*
+               * Call the base visit method which will both visit all of our
+               * subexpressions and also call the couple of overrides above which
+               * handle the base independence cases
+               */
               var independence, isIndependent, name, v, value, _i, _len;
               IndependenceNominator.__super__.visit.call(this, node);
-              /*
-                          # If the node's independence wasn't determined automatically by the
-                          # base cases above, then it's independence is determined by checking
-                          # all of its values and aggregating their independence
-              */
         
+              /*
+               * If the node's independence wasn't determined automatically by the
+               * base cases above, then it's independence is determined by checking
+               * all of its values and aggregating their independence
+               */
               if (!(Object.prototype.hasOwnProperty.call(node, '__independent'))) {
                 independence = true;
                 isIndependent = function(node) {
@@ -5730,9 +5695,8 @@
                     independence &= isIndependent(value);
                   }
                 }
-                /* &= will turn true/false into 1/0 so we'll turn it back
-                */
         
+                /* &= will turn true/false into 1/0 so we'll turn it back */
                 node.__independent = independence ? true : false;
               }
               return node;
@@ -5746,18 +5710,16 @@
     };
 
     $__modules__.Query = function (exports) {
-        // Generated by CoffeeScript 1.4.0
+        // Generated by CoffeeScript 1.7.1
         
         /*
-        # ----------------------------------------------------------------------------
-        # Copyright (c) Microsoft Corporation. All rights reserved.
-        # ----------------------------------------------------------------------------
-        */
+         * ----------------------------------------------------------------------------
+         * Copyright (c) Microsoft Corporation. All rights reserved.
+         * ----------------------------------------------------------------------------
+         */
         
         
-        /* Pull in references
-        */
-        
+        /* Pull in references */
         
         (function() {
           var JavaScript, ODataProvider, Q, Query, _,
@@ -5769,27 +5731,24 @@
         
           JavaScript = require('./JavaScript').JavaScript;
         
-          /*
-          # Define a query that can be translated into a desired query language and
-          # executed remotely.
-          */
         
+          /*
+           * Define a query that can be translated into a desired query language and
+           * executed remotely.
+           */
         
           exports.Query = Query = (function() {
-        
             function Query(table, context) {
               var _context, _filters, _includeTotalCount, _ordering, _projection, _selections, _skip, _table, _take, _version;
               if (!table || !(_.isString(table))) {
                 throw 'Expected the name of a table!';
               }
-              /* Store the table name and any extra context
-              */
         
+              /* Store the table name and any extra context */
               _table = table;
               _context = context;
-              /* Private Query component members
-              */
         
+              /* Private Query component members */
               _filters = null;
               _projection = null;
               _selections = [];
@@ -5797,16 +5756,15 @@
               _skip = null;
               _take = null;
               _includeTotalCount = false;
+        
               /*
-                          # Keep a version flag that's updated on each mutation so we can
-                          # track whether changes have been made.  This is to enable caching
-                          # of compiled queries without reevaluating unless necessary.
-              */
-        
+               * Keep a version flag that's updated on each mutation so we can
+               * track whether changes have been made.  This is to enable caching
+               * of compiled queries without reevaluating unless necessary.
+               */
               _version = 0;
-              /* Get the individual components of the query
-              */
         
+              /* Get the individual components of the query */
               this.getComponents = function() {
                 return {
                   filters: _filters,
@@ -5821,11 +5779,11 @@
                   version: _version
                 };
               };
-              /*
-                          # Set the individual components of the query (this is primarily
-                          # meant to be used for rehydrating a query).
-              */
         
+              /*
+               * Set the individual components of the query (this is primarily
+               * meant to be used for rehydrating a query).
+               */
               this.setComponents = function(components) {
                 var _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8;
                 _version++;
@@ -5840,33 +5798,33 @@
                 _context = (_ref8 = components != null ? components.context : void 0) != null ? _ref8 : null;
                 return this;
               };
-              /*
-                          # Add a constraint to a query.  Constraints can take the form of
-                          # a function with a single return statement, key/value pairs of
-                          # equality comparisons, or provider-specific literal strings (note
-                          # that not all providers support literals).
-              */
         
+              /*
+               * Add a constraint to a query.  Constraints can take the form of
+               * a function with a single return statement, key/value pairs of
+               * equality comparisons, or provider-specific literal strings (note
+               * that not all providers support literals).
+               */
               this.where = function() {
                 var args, constraint, expr, name, value;
                 constraint = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
                 _version++;
-                /*
-                                # Translate the constraint from its high level form into a
-                                # QueryExpression tree that can be manipulated by a query
-                                # provider
-                */
         
+                /*
+                 * Translate the constraint from its high level form into a
+                 * QueryExpression tree that can be manipulated by a query
+                 * provider
+                 */
                 expr = (function() {
                   if (_.isFunction(constraint)) {
                     return JavaScript.transformConstraint(constraint, args);
                   } else if (_.isObject(constraint)) {
-                    /*
-                                            # Turn an object of key value pairs into a series of
-                                            # equality expressions that are and'ed together to form
-                                            # a single expression
-                    */
         
+                    /*
+                     * Turn an object of key value pairs into a series of
+                     * equality expressions that are and'ed together to form
+                     * a single expression
+                     */
                     return Q.QueryExpression.groupClauses(Q.BinaryOperators.And, (function() {
                       var _results;
                       _results = [];
@@ -5877,39 +5835,37 @@
                       return _results;
                     })());
                   } else if (_.isString(constraint)) {
-                    /*
-                                            # Store the literal query along with any arguments for
-                                            # providers that support basic string replacement (i.e.,
-                                            # something like where('name eq ?', 'Steve'))
-                    */
         
+                    /*
+                     * Store the literal query along with any arguments for
+                     * providers that support basic string replacement (i.e.,
+                     * something like where('name eq ?', 'Steve'))
+                     */
                     return new Q.LiteralExpression(constraint, args);
                   } else {
                     throw "Expected a function, object, or string, not " + constraint;
                   }
                 })();
-                /* Merge the new filters with any existing filters
-                */
         
+                /* Merge the new filters with any existing filters */
                 _filters = Q.QueryExpression.groupClauses(Q.BinaryOperators.And, [_filters, expr]);
                 return this;
               };
-              /*
-                          # Project the query results.  A projection can either be defined as
-                          # a set of fields that we'll pull back (instead of the entire row)
-                          # or a function that will transform a row into a new type.  If a
-                          # function is used, we'll analyze the function to pull back the
-                          # minimal number of fields required.
-              */
         
+              /*
+               * Project the query results.  A projection can either be defined as
+               * a set of fields that we'll pull back (instead of the entire row)
+               * or a function that will transform a row into a new type.  If a
+               * function is used, we'll analyze the function to pull back the
+               * minimal number of fields required.
+               */
               this.select = function() {
                 var param, parameters, projectionOrParameter, _i, _len;
                 projectionOrParameter = arguments[0], parameters = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
                 _version++;
                 if (_.isString(projectionOrParameter)) {
-                  /* Add all the literal string parameters
-                  */
         
+                  /* Add all the literal string parameters */
                   _selections.push(projectionOrParameter);
                   for (_i = 0, _len = parameters.length; _i < _len; _i++) {
                     param = parameters[_i];
@@ -5919,9 +5875,8 @@
                     _selections.push(param);
                   }
                 } else if (_.isFunction(projectionOrParameter)) {
-                  /* Set the projection and calculate the fields it uses
-                  */
         
+                  /* Set the projection and calculate the fields it uses */
                   _projection = projectionOrParameter;
                   _selections = JavaScript.getProjectedFields(_projection);
                 } else {
@@ -5971,12 +5926,12 @@
                 _take = count;
                 return this;
               };
-              /*
-                          # Indicate that the query should include the total count for all the
-                          # records that would have been returned ignoring any take paging
-                          # limit clause specified by client or server.
-              */
         
+              /*
+               * Indicate that the query should include the total count for all the
+               * records that would have been returned ignoring any take paging
+               * limit clause specified by client or server.
+               */
               this.includeTotalCount = function() {
                 _version++;
                 _includeTotalCount = true;
@@ -5984,12 +5939,12 @@
               };
             }
         
-            /*
-                    # Static method to register custom provider types.  A custom provider is
-                    # an object with a toQuery method that takes a Query instance and
-                    # returns a compiled query for that provider.
-            */
         
+            /*
+             * Static method to register custom provider types.  A custom provider is
+             * an object with a toQuery method that takes a Query instance and
+             * returns a compiled query for that provider.
+             */
         
             Query.registerProvider = function(name, provider) {
               Query.Providers[name] = provider;
@@ -5998,18 +5953,18 @@
               };
             };
         
-            /*
-                    # Expose the registered providers via the Query.Providers namespace.
-            */
         
+            /*
+             * Expose the registered providers via the Query.Providers namespace.
+             */
         
             Query.Providers = {};
         
-            /*
-                    # Expose the query expressions and visitors externally via a
-                    # Query.Expressions namespace.
-            */
         
+            /*
+             * Expose the query expressions and visitors externally via a
+             * Query.Expressions namespace.
+             */
         
             Query.Expressions = Q;
         
@@ -6017,9 +5972,8 @@
         
           })();
         
-          /* Register the built in OData provider
-          */
         
+          /* Register the built in OData provider */
         
           ODataProvider = require('./ODataProvider').ODataProvider;
         
@@ -6029,24 +5983,22 @@
     };
 
     $__modules__.QueryNodes = function (exports) {
-        // Generated by CoffeeScript 1.4.0
+        // Generated by CoffeeScript 1.7.1
         
         /*
-        # ----------------------------------------------------------------------------
-        # Copyright (c) Microsoft Corporation. All rights reserved.
-        # ----------------------------------------------------------------------------
-        */
+         * ----------------------------------------------------------------------------
+         * Copyright (c) Microsoft Corporation. All rights reserved.
+         * ----------------------------------------------------------------------------
+         */
         
         
         /*
-        # Define a low level intermediate query expression language that we can
-        # translate other expressions languages (like JavaScript) into.
-        */
+         * Define a low level intermediate query expression language that we can
+         * translate other expressions languages (like JavaScript) into.
+         */
         
         
-        /* Get the base Node class.
-        */
-        
+        /* Get the base Node class. */
         
         (function() {
           var BinaryExpression, ConstantExpression, InvocationExpression, LiteralExpression, MemberExpression, Node, QueryExpression, QueryExpressionVisitor, UnaryExpression, Visitor, _ref,
@@ -6055,25 +6007,24 @@
         
           _ref = require('./Node'), Node = _ref.Node, Visitor = _ref.Visitor;
         
-          /*
-          # Provides the base class from which the classes that represent expression tree
-          # nodes are derived.
-          */
         
+          /*
+           * Provides the base class from which the classes that represent expression tree
+           * nodes are derived.
+           */
         
           exports.QueryExpression = QueryExpression = (function(_super) {
-        
             __extends(QueryExpression, _super);
         
             function QueryExpression() {
               QueryExpression.__super__.constructor.call(this);
             }
         
-            /*
-                    # Group a sequence of clauses together with a given operator (like And
-                    # or Or).
-            */
         
+            /*
+             * Group a sequence of clauses together with a given operator (like And
+             * or Or).
+             */
         
             QueryExpression.groupClauses = function(operator, clauses) {
               var combine;
@@ -6094,7 +6045,6 @@
           })(Node);
         
           exports.QueryExpressionVisitor = QueryExpressionVisitor = (function(_super) {
-        
             __extends(QueryExpressionVisitor, _super);
         
             function QueryExpressionVisitor() {
@@ -6109,19 +6059,18 @@
         
           })(Visitor);
         
-          /*
-          # Represents an expression that has a constant value.
-          */
         
+          /*
+           * Represents an expression that has a constant value.
+           */
         
           exports.ConstantExpression = ConstantExpression = (function(_super) {
-        
             __extends(ConstantExpression, _super);
         
-            /*
-                    # @value: The value of the constant expression.
-            */
         
+            /*
+             * @value: The value of the constant expression.
+             */
         
             function ConstantExpression(value) {
               this.value = value;
@@ -6136,19 +6085,18 @@
             return this.QueryExpression(node);
           };
         
-          /*
-          # Represents accessing a field.
-          */
         
+          /*
+           * Represents accessing a field.
+           */
         
           exports.MemberExpression = MemberExpression = (function(_super) {
-        
             __extends(MemberExpression, _super);
         
-            /*
-                    # @member: Gets the field to be accessed.
-            */
         
+            /*
+             * @member: Gets the field to be accessed.
+             */
         
             function MemberExpression(member) {
               this.member = member;
@@ -6163,21 +6111,20 @@
             return this.QueryExpression(node);
           };
         
-          /*
-          # Represents an expression that has a binary operator.
-          */
         
+          /*
+           * Represents an expression that has a binary operator.
+           */
         
           exports.BinaryExpression = BinaryExpression = (function(_super) {
-        
             __extends(BinaryExpression, _super);
         
-            /*
-                    # @operator: The operator of the binary expression.
-                    # @left: The left operand of the binary operation.
-                    # @right: The right operand of the binary operation.
-            */
         
+            /*
+             * @operator: The operator of the binary expression.
+             * @left: The left operand of the binary operation.
+             * @right: The right operand of the binary operation.
+             */
         
             function BinaryExpression(operator, left, right) {
               this.operator = operator;
@@ -6197,10 +6144,10 @@
             return node;
           };
         
-          /*
-          # Represents the known binary operators.
-          */
         
+          /*
+           * Represents the known binary operators.
+           */
         
           exports.BinaryOperators = {
             And: 'And',
@@ -6218,20 +6165,19 @@
             Equal: 'Equal'
           };
         
-          /*
-          # Represents the known unary operators.
-          */
         
+          /*
+           * Represents the known unary operators.
+           */
         
           exports.UnaryExpression = UnaryExpression = (function(_super) {
-        
             __extends(UnaryExpression, _super);
         
-            /*
-                    # @operator: The operator of the unary expression.
-                    # @operand: The operand of the unary expression.
-            */
         
+            /*
+             * @operator: The operator of the unary expression.
+             * @operand: The operand of the unary expression.
+             */
         
             function UnaryExpression(operator, operand) {
               this.operator = operator;
@@ -6249,10 +6195,10 @@
             return node;
           };
         
-          /*
-          # Represents the known unary operators.
-          */
         
+          /*
+           * Represents the known unary operators.
+           */
         
           exports.UnaryOperators = {
             Not: 'Not',
@@ -6261,20 +6207,19 @@
             Decrement: 'Decrement'
           };
         
-          /*
-          # Represents a method invocation.
-          */
         
+          /*
+           * Represents a method invocation.
+           */
         
           exports.InvocationExpression = InvocationExpression = (function(_super) {
-        
             __extends(InvocationExpression, _super);
         
-            /*
-                    # @method: The name of the method to invoke.
-                    # @args: The arguments to the method.
-            */
         
+            /*
+             * @method: The name of the method to invoke.
+             * @args: The arguments to the method.
+             */
         
             function InvocationExpression(method, args) {
               this.method = method;
@@ -6292,10 +6237,10 @@
             return node;
           };
         
-          /*
-          # Represents the known unary operators.
-          */
         
+          /*
+           * Represents the known unary operators.
+           */
         
           exports.Methods = {
             Length: 'Length',
@@ -6314,20 +6259,19 @@
             Round: 'Round'
           };
         
-          /*
-          # Represents a literal string in the query language.
-          */
         
+          /*
+           * Represents a literal string in the query language.
+           */
         
           exports.LiteralExpression = LiteralExpression = (function(_super) {
-        
             __extends(LiteralExpression, _super);
         
-            /*
-                    # @queryString
-                    # @args
-            */
         
+            /*
+             * @queryString
+             * @args
+             */
         
             function LiteralExpression(queryString, args) {
               this.queryString = queryString;
@@ -6347,14 +6291,13 @@
     };
 
     $__modules__.Utilities = function (exports) {
-        // Generated by CoffeeScript 1.4.0
+        // Generated by CoffeeScript 1.7.1
         
         /*
-        # ----------------------------------------------------------------------------
-        # Copyright (c) Microsoft Corporation. All rights reserved.
-        # ----------------------------------------------------------------------------
-        */
-        
+         * ----------------------------------------------------------------------------
+         * Copyright (c) Microsoft Corporation. All rights reserved.
+         * ----------------------------------------------------------------------------
+         */
         
         (function() {
           var classOf,
@@ -6364,7 +6307,7 @@
             return Object.prototype.toString.call(obj).slice(8, -1).toLowerCase();
           };
         
-          if (!(Array.prototype.reduce != null)) {
+          if (Array.prototype.reduce == null) {
             Array.prototype.reduce = function() {
               var accumulator, array, arrayLength, currentIndex, currentValue, moreArgs;
               accumulator = arguments[0], moreArgs = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
@@ -6372,7 +6315,7 @@
               arrayLength = array.length;
               currentIndex = 0;
               currentValue = void 0;
-              if (!(array != null)) {
+              if (array == null) {
                 throw new TypeError("Object is null or undefined");
               }
               if (typeof accumulator !== "function") {
@@ -6398,10 +6341,10 @@
             };
           }
         
-          if (!(Array.prototype.map != null)) {
+          if (Array.prototype.map == null) {
             Array.prototype.map = function(callback, thisArg) {
               var elem, index, inputArray, len, outputArray, _i, _len;
-              if (!(typeof this !== "undefined" && this !== null)) {
+              if (typeof this === "undefined" || this === null) {
                 throw new TypeError("this is null or not defined");
               }
               if (typeof callback !== "function") {
@@ -6421,7 +6364,7 @@
             };
           }
         
-          if (!(Array.isArray != null)) {
+          if (Array.isArray == null) {
             Array.isArray = function(vArg) {
               return Object.prototype.toString.call(vArg) === "[object Array]";
             };
@@ -10232,11 +10175,11 @@
 })(this || exports);
 
 // SIG // Begin signature block
-// SIG // MIIkIAYJKoZIhvcNAQcCoIIkETCCJA0CAQExDzANBglg
+// SIG // MIIkBwYJKoZIhvcNAQcCoIIj+DCCI/QCAQExDzANBglg
 // SIG // hkgBZQMEAgEFADB3BgorBgEEAYI3AgEEoGkwZzAyBgor
 // SIG // BgEEAYI3AgEeMCQCAQEEEBDgyQbOONQRoqMAEEvTUJAC
 // SIG // AQACAQACAQACAQACAQAwMTANBglghkgBZQMEAgEFAAQg
-// SIG // 1HCXPIy8V+eL32hWCNrgZRVAxSOKEDyHforO0jlEwGKg
+// SIG // k5lf5tTTFKtMn4ETqds5PA8p1+lPvavkZAy6N+WzVWag
 // SIG // gg2SMIIGEDCCA/igAwIBAgITMwAAABp3u3SzB9EWuAAA
 // SIG // AAAAGjANBgkqhkiG9w0BAQsFADB+MQswCQYDVQQGEwJV
 // SIG // UzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMH
@@ -10342,7 +10285,7 @@
 // SIG // nvi/a7dLl+LrdXga7Oo3mXkYS//WsyNodeav+vyL6wuA
 // SIG // 6mk7r/ww7QRMjt/fdW1jkT3RnVZOT7+AVyKheBEyIXrv
 // SIG // QQqxP/uozKRdwaGIm1dxVk5IRcBCyZt2WwqASGv9eZ/B
-// SIG // vW1taslScxMNelDNMYIV5jCCFeICAQEwgZUwfjELMAkG
+// SIG // vW1taslScxMNelDNMYIVzTCCFckCAQEwgZUwfjELMAkG
 // SIG // A1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAO
 // SIG // BgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29m
 // SIG // dCBDb3Jwb3JhdGlvbjEoMCYGA1UEAxMfTWljcm9zb2Z0
@@ -10350,167 +10293,166 @@
 // SIG // B9EWuAAAAAAAGjANBglghkgBZQMEAgEFAKCB1DAZBgkq
 // SIG // hkiG9w0BCQMxDAYKKwYBBAGCNwIBBDAcBgorBgEEAYI3
 // SIG // AgELMQ4wDAYKKwYBBAGCNwIBFTAvBgkqhkiG9w0BCQQx
-// SIG // IgQgdx+09/1HBFzAT+u+TvRwQI5aY1pl/IbyrA6WOl0F
-// SIG // GjYwaAYKKwYBBAGCNwIBDDFaMFigPoA8AE0AaQBjAHIA
+// SIG // IgQg+TuBWkPHJLb2UdDdrusztdIAt/veCdFlvotY8ZGV
+// SIG // uIUwaAYKKwYBBAGCNwIBDDFaMFigPoA8AE0AaQBjAHIA
 // SIG // bwBzAG8AZgB0ACAAVwBpAG4AZABvAHcAcwAgAEEAegB1
 // SIG // AHIAZQAgAE0AbwBiAGkAbABloRaAFGh0dHA6Ly93d3cu
-// SIG // YXNwLm5ldC8gMA0GCSqGSIb3DQEBAQUABIIBAGRgdDYM
-// SIG // CaCdwjZW1WCks9d/bfSfQovZ8ygbc6haPVvFSGqnnB3R
-// SIG // m7/Rxf0uR2dAugPehsRMSkKyfyPjaCPO3ovFd8KwtVrI
-// SIG // xKEFgYdciQ2QorDkZ7r4UhAsEFnpdSE33twcVVTTrS9g
-// SIG // cZNlBevyo4HlF4tWsHooOiEJNvwVFCoDOBt5AYL5gVXG
-// SIG // Nadizh+oa4WFXvdkDSrHpwRfWIsum412oFZSWxJKO1Sm
-// SIG // p7CMwe8DREx0ZY9yu92H8nwzJIzlDZEdBwmT3+ewjjHH
-// SIG // +C2H5ZDynyeL18nhpBrTPaffLbCv2uaqlbV9RdJr77FL
-// SIG // fMvmOqYfkQpaZwCp3eD5rVf8y9KhghNKMIITRgYKKwYB
-// SIG // BAGCNwMDATGCEzYwghMyBgkqhkiG9w0BBwKgghMjMIIT
-// SIG // HwIBAzEPMA0GCWCGSAFlAwQCAQUAMIIBPQYLKoZIhvcN
-// SIG // AQkQAQSgggEsBIIBKDCCASQCAQEGCisGAQQBhFkKAwEw
-// SIG // MTANBglghkgBZQMEAgEFAAQgUY4SqLNXC7dMSs6xHqYS
-// SIG // j4b0A2iuhKYeN8W1PfpGS+sCBlMPbvs7BBgTMjAxNDAz
-// SIG // MjUwMjE3MzQuNjg5WjAHAgEBgAIB9KCBuaSBtjCBszEL
-// SIG // MAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24x
-// SIG // EDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jv
-// SIG // c29mdCBDb3Jwb3JhdGlvbjENMAsGA1UECxMETU9QUjEn
-// SIG // MCUGA1UECxMebkNpcGhlciBEU0UgRVNOOkMwRjQtMzA4
-// SIG // Ni1ERUY4MSUwIwYDVQQDExxNaWNyb3NvZnQgVGltZS1T
-// SIG // dGFtcCBTZXJ2aWNloIIOzTCCBnEwggRZoAMCAQICCmEJ
-// SIG // gSoAAAAAAAIwDQYJKoZIhvcNAQELBQAwgYgxCzAJBgNV
-// SIG // BAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYD
-// SIG // VQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQg
-// SIG // Q29ycG9yYXRpb24xMjAwBgNVBAMTKU1pY3Jvc29mdCBS
-// SIG // b290IENlcnRpZmljYXRlIEF1dGhvcml0eSAyMDEwMB4X
-// SIG // DTEwMDcwMTIxMzY1NVoXDTI1MDcwMTIxNDY1NVowfDEL
-// SIG // MAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24x
-// SIG // EDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jv
-// SIG // c29mdCBDb3Jwb3JhdGlvbjEmMCQGA1UEAxMdTWljcm9z
-// SIG // b2Z0IFRpbWUtU3RhbXAgUENBIDIwMTAwggEiMA0GCSqG
-// SIG // SIb3DQEBAQUAA4IBDwAwggEKAoIBAQCpHQ28dxGKOiDs
-// SIG // /BOX9fp/aZRrdFQQ1aUKAIKF++18aEssX8XD5WHCdrc+
-// SIG // Zitb8BVTJwQxH0EbGpUdzgkTjnxhMFmxMEQP8WCIhFRD
-// SIG // DNdNuDgIs0Ldk6zWczBXJoKjRQ3Q6vVHgc2/JGAyWGBG
-// SIG // 8lhHhjKEHnRhZ5FfgVSxz5NMksHEpl3RYRNuKMYa+YaA
-// SIG // u99h/EbBJx0kZxJyGiGKr0tkiVBisV39dx898Fd1rL2K
-// SIG // Qk1AUdEPnAY+Z3/1ZsADlkR+79BL/W7lmsqxqPJ6Kgox
-// SIG // 8NpOBpG2iAg16HgcsOmZzTznL0S6p/TcZL2kAcEgCZN4
-// SIG // zfy8wMlEXV4WnAEFTyJNAgMBAAGjggHmMIIB4jAQBgkr
-// SIG // BgEEAYI3FQEEAwIBADAdBgNVHQ4EFgQU1WM6XIoxkPND
-// SIG // e3xGG8UzaFqFbVUwGQYJKwYBBAGCNxQCBAweCgBTAHUA
-// SIG // YgBDAEEwCwYDVR0PBAQDAgGGMA8GA1UdEwEB/wQFMAMB
-// SIG // Af8wHwYDVR0jBBgwFoAU1fZWy4/oolxiaNE9lJBb186a
-// SIG // GMQwVgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5t
-// SIG // aWNyb3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWlj
-// SIG // Um9vQ2VyQXV0XzIwMTAtMDYtMjMuY3JsMFoGCCsGAQUF
-// SIG // BwEBBE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5t
-// SIG // aWNyb3NvZnQuY29tL3BraS9jZXJ0cy9NaWNSb29DZXJB
-// SIG // dXRfMjAxMC0wNi0yMy5jcnQwgaAGA1UdIAEB/wSBlTCB
-// SIG // kjCBjwYJKwYBBAGCNy4DMIGBMD0GCCsGAQUFBwIBFjFo
-// SIG // dHRwOi8vd3d3Lm1pY3Jvc29mdC5jb20vUEtJL2RvY3Mv
-// SIG // Q1BTL2RlZmF1bHQuaHRtMEAGCCsGAQUFBwICMDQeMiAd
-// SIG // AEwAZQBnAGEAbABfAFAAbwBsAGkAYwB5AF8AUwB0AGEA
-// SIG // dABlAG0AZQBuAHQALiAdMA0GCSqGSIb3DQEBCwUAA4IC
-// SIG // AQAH5ohRDeLG4Jg/gXEDPZ2joSFvs+umzPUxvs8F4qn+
-// SIG // +ldtGTCzwsVmyWrf9efweL3HqJ4l4/m87WtUVwgrUYJE
-// SIG // Evu5U4zM9GASinbMQEBBm9xcF/9c+V4XNZgkVkt070IQ
-// SIG // yK+/f8Z/8jd9Wj8c8pl5SpFSAK84Dxf1L3mBZdmptWvk
-// SIG // x872ynoAb0swRCQiPM/tA6WWj1kpvLb9BOFwnzJKJ/1V
-// SIG // ry/+tuWOM7tiX5rbV0Dp8c6ZZpCM/2pif93FSguRJuI5
-// SIG // 7BlKcWOdeyFtw5yjojz6f32WapB4pm3S4Zz5Hfw42JT0
-// SIG // xqUKloakvZ4argRCg7i1gJsiOCC1JeVk7Pf0v35jWSUP
-// SIG // ei45V3aicaoGig+JFrphpxHLmtgOR5qAxdDNp9DvfYPw
-// SIG // 4TtxCd9ddJgiCGHasFAeb73x4QDf5zEHpJM692VHeOj4
-// SIG // qEir995yfmFrb3epgcunCaw5u+zGy9iCtHLNHfS4hQEe
-// SIG // gPsbiSpUObJb2sgNVZl6h3M7COaYLeqN4DMuEin1wC9U
-// SIG // JyH3yKxO2ii4sanblrKnQqLJzxlBTeCG+SqaoxFmMNO7
-// SIG // dDJL32N79ZmKLxvHIa9Zta7cRDyXUHHXodLFVeNp3lfB
-// SIG // 0d4wwP3M5k37Db9dT+mdHhk4L7zPWAUu7w2gUDXa7wkn
-// SIG // HNWzfjUeCLraNtvTX4/edIhJEjCCBNowggPCoAMCAQIC
-// SIG // EzMAAAAokGe5BLA8bmYAAAAAACgwDQYJKoZIhvcNAQEL
-// SIG // BQAwfDELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hp
-// SIG // bmd0b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoT
-// SIG // FU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjEmMCQGA1UEAxMd
-// SIG // TWljcm9zb2Z0IFRpbWUtU3RhbXAgUENBIDIwMTAwHhcN
-// SIG // MTMwMzI3MjAxMzEzWhcNMTQwNjI3MjAxMzEzWjCBszEL
-// SIG // MAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24x
-// SIG // EDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jv
-// SIG // c29mdCBDb3Jwb3JhdGlvbjENMAsGA1UECxMETU9QUjEn
-// SIG // MCUGA1UECxMebkNpcGhlciBEU0UgRVNOOkMwRjQtMzA4
-// SIG // Ni1ERUY4MSUwIwYDVQQDExxNaWNyb3NvZnQgVGltZS1T
-// SIG // dGFtcCBTZXJ2aWNlMIIBIjANBgkqhkiG9w0BAQEFAAOC
-// SIG // AQ8AMIIBCgKCAQEA3aVIv2pInUohnJJr3uAt3ORj+My5
-// SIG // icTHG73ntdP77a7PMf7zZrBEA9qZZwhav3UGIhGJ0GdS
-// SIG // zPrPkjdF6PrxvTPTzHPjuCGkoBV9yy/EAwXaP5Zz01nl
-// SIG // mE0LVoYvnUfR1l+dkenHhNmVazJMtGsAUuBB0zxpdKjO
-// SIG // zH1onVJV5nB/FAeinmewhkTzMz9zXcYo+BdfUgEtRC/W
-// SIG // 7XgIuOU7L8C5w0vDtzsv06a1nLFISt0yCVahG0ta06om
-// SIG // JwwSQ2DFatfaQA1gmIlBu5Nz3b/+xIxbzvpVJ8pNTZpv
-// SIG // fRFssUcjsEx8bH8GoXSCH1J4GOkGGhZQmsM63YGB95sn
-// SIG // ciF/dQIDAQABo4IBGzCCARcwHQYDVR0OBBYEFNyYCJ15
-// SIG // 0QSyi0fDcdCM57PmsFOdMB8GA1UdIwQYMBaAFNVjOlyK
-// SIG // MZDzQ3t8RhvFM2hahW1VMFYGA1UdHwRPME0wS6BJoEeG
-// SIG // RWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9wa2kvY3Js
-// SIG // L3Byb2R1Y3RzL01pY1RpbVN0YVBDQV8yMDEwLTA3LTAx
-// SIG // LmNybDBaBggrBgEFBQcBAQROMEwwSgYIKwYBBQUHMAKG
-// SIG // Pmh0dHA6Ly93d3cubWljcm9zb2Z0LmNvbS9wa2kvY2Vy
-// SIG // dHMvTWljVGltU3RhUENBXzIwMTAtMDctMDEuY3J0MAwG
-// SIG // A1UdEwEB/wQCMAAwEwYDVR0lBAwwCgYIKwYBBQUHAwgw
-// SIG // DQYJKoZIhvcNAQELBQADggEBAIIi87c9ZH4SS/wm/ODk
-// SIG // t9DEFE4J/qtWmtFamKa+jEEelLQyvoS0t0V24+9gGCSH
-// SIG // qM/ptNFUKbzK5MsSe8Dx1A6fMTMbET96O93dAqoYyso8
-// SIG // +pbjbLuvu8mEPsfYDIXLcgsBG6T1MREQDEWlWkiZftq+
-// SIG // RYbXuk3kgf/TWAp2ZQZZL/bCQs8Eyasb+mGd9fOYSXCx
-// SIG // SdBkxCHo7mAXU37rAtpolYv1CjwB26O1mBRRdJ5T6dpy
-// SIG // mGagXynPj68fgpzT6+bxTBtU+Ogy3MEVw6wqbnQFFoPj
-// SIG // RJify+/oMHl/r1KlOh/fZceN/ifYRxmSCLSLNI5pJzca
-// SIG // AvaRs5Ui/whIKv6hggN2MIICXgIBATCB46GBuaSBtjCB
-// SIG // szELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0
+// SIG // YXNwLm5ldC8gMA0GCSqGSIb3DQEBAQUABIIBAGksDcdb
+// SIG // MxP8VZKtQSlh4HZWRl96hFy1SKyZyLmIJYePMFE9aOUm
+// SIG // uJDm1RIAI4sjdKk/ppFvZhO9lC7s8uqfRXaFsACWmiUQ
+// SIG // bajGKK8xgeQND04taNHZgIywNMiBn5fiBHgz2bDdmGVp
+// SIG // h4LX0S0k5c4pMhj9sQY20ZUIf7Ht86ozF3ClzyH7QOuY
+// SIG // KP+irte5z9OSvHH0/c4AnGuEXJCsvQHIcWb5b5cBiwt/
+// SIG // BCkiDp75g9It3v90ZoOng5K8oz5lHpoOMSnz+vqFVoDm
+// SIG // pulwAEQOCEFL5o89a0cCJhMnX+YFt0UfFIPcG7b1NJ9U
+// SIG // JYy6xx8m8EFO66MdQHGJngblScqhghMxMIITLQYKKwYB
+// SIG // BAGCNwMDATGCEx0wghMZBgkqhkiG9w0BBwKgghMKMIIT
+// SIG // BgIBAzEPMA0GCWCGSAFlAwQCAQUAMIIBNQYLKoZIhvcN
+// SIG // AQkQAQSgggEkBIIBIDCCARwCAQEGCisGAQQBhFkKAwEw
+// SIG // MTANBglghkgBZQMEAgEFAAQg39i82oBeJuOVOIj2NU4x
+// SIG // T5iiDT3bGCov22pc8gja0QgCBlOfMRwUhRgTMjAxNDA2
+// SIG // MTYyMjQ1MDAuODg4WjAHAgEBgAIB9KCBsaSBrjCBqzEL
+// SIG // MAkGA1UEBhMCVVMxCzAJBgNVBAgTAldBMRAwDgYDVQQH
+// SIG // EwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29y
+// SIG // cG9yYXRpb24xDTALBgNVBAsTBE1PUFIxJzAlBgNVBAsT
+// SIG // Hm5DaXBoZXIgRFNFIEVTTjpGNTI4LTM3NzctOEE3NjEl
+// SIG // MCMGA1UEAxMcTWljcm9zb2Z0IFRpbWUtU3RhbXAgU2Vy
+// SIG // dmljZaCCDrwwggZxMIIEWaADAgECAgphCYEqAAAAAAAC
+// SIG // MA0GCSqGSIb3DQEBCwUAMIGIMQswCQYDVQQGEwJVUzET
+// SIG // MBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVk
+// SIG // bW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0
+// SIG // aW9uMTIwMAYDVQQDEylNaWNyb3NvZnQgUm9vdCBDZXJ0
+// SIG // aWZpY2F0ZSBBdXRob3JpdHkgMjAxMDAeFw0xMDA3MDEy
+// SIG // MTM2NTVaFw0yNTA3MDEyMTQ2NTVaMHwxCzAJBgNVBAYT
+// SIG // AlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQH
+// SIG // EwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29y
+// SIG // cG9yYXRpb24xJjAkBgNVBAMTHU1pY3Jvc29mdCBUaW1l
+// SIG // LVN0YW1wIFBDQSAyMDEwMIIBIjANBgkqhkiG9w0BAQEF
+// SIG // AAOCAQ8AMIIBCgKCAQEAqR0NvHcRijog7PwTl/X6f2mU
+// SIG // a3RUENWlCgCChfvtfGhLLF/Fw+Vhwna3PmYrW/AVUycE
+// SIG // MR9BGxqVHc4JE458YTBZsTBED/FgiIRUQwzXTbg4CLNC
+// SIG // 3ZOs1nMwVyaCo0UN0Or1R4HNvyRgMlhgRvJYR4YyhB50
+// SIG // YWeRX4FUsc+TTJLBxKZd0WETbijGGvmGgLvfYfxGwScd
+// SIG // JGcSchohiq9LZIlQYrFd/XcfPfBXday9ikJNQFHRD5wG
+// SIG // Pmd/9WbAA5ZEfu/QS/1u5ZrKsajyeioKMfDaTgaRtogI
+// SIG // Neh4HLDpmc085y9Euqf03GS9pAHBIAmTeM38vMDJRF1e
+// SIG // FpwBBU8iTQIDAQABo4IB5jCCAeIwEAYJKwYBBAGCNxUB
+// SIG // BAMCAQAwHQYDVR0OBBYEFNVjOlyKMZDzQ3t8RhvFM2ha
+// SIG // hW1VMBkGCSsGAQQBgjcUAgQMHgoAUwB1AGIAQwBBMAsG
+// SIG // A1UdDwQEAwIBhjAPBgNVHRMBAf8EBTADAQH/MB8GA1Ud
+// SIG // IwQYMBaAFNX2VsuP6KJcYmjRPZSQW9fOmhjEMFYGA1Ud
+// SIG // HwRPME0wS6BJoEeGRWh0dHA6Ly9jcmwubWljcm9zb2Z0
+// SIG // LmNvbS9wa2kvY3JsL3Byb2R1Y3RzL01pY1Jvb0NlckF1
+// SIG // dF8yMDEwLTA2LTIzLmNybDBaBggrBgEFBQcBAQROMEww
+// SIG // SgYIKwYBBQUHMAKGPmh0dHA6Ly93d3cubWljcm9zb2Z0
+// SIG // LmNvbS9wa2kvY2VydHMvTWljUm9vQ2VyQXV0XzIwMTAt
+// SIG // MDYtMjMuY3J0MIGgBgNVHSABAf8EgZUwgZIwgY8GCSsG
+// SIG // AQQBgjcuAzCBgTA9BggrBgEFBQcCARYxaHR0cDovL3d3
+// SIG // dy5taWNyb3NvZnQuY29tL1BLSS9kb2NzL0NQUy9kZWZh
+// SIG // dWx0Lmh0bTBABggrBgEFBQcCAjA0HjIgHQBMAGUAZwBh
+// SIG // AGwAXwBQAG8AbABpAGMAeQBfAFMAdABhAHQAZQBtAGUA
+// SIG // bgB0AC4gHTANBgkqhkiG9w0BAQsFAAOCAgEAB+aIUQ3i
+// SIG // xuCYP4FxAz2do6Ehb7Prpsz1Mb7PBeKp/vpXbRkws8LF
+// SIG // Zslq3/Xn8Hi9x6ieJeP5vO1rVFcIK1GCRBL7uVOMzPRg
+// SIG // Eop2zEBAQZvcXBf/XPleFzWYJFZLdO9CEMivv3/Gf/I3
+// SIG // fVo/HPKZeUqRUgCvOA8X9S95gWXZqbVr5MfO9sp6AG9L
+// SIG // MEQkIjzP7QOllo9ZKby2/QThcJ8ySif9Va8v/rbljjO7
+// SIG // Yl+a21dA6fHOmWaQjP9qYn/dxUoLkSbiOewZSnFjnXsh
+// SIG // bcOco6I8+n99lmqQeKZt0uGc+R38ONiU9MalCpaGpL2e
+// SIG // Gq4EQoO4tYCbIjggtSXlZOz39L9+Y1klD3ouOVd2onGq
+// SIG // BooPiRa6YacRy5rYDkeagMXQzafQ732D8OE7cQnfXXSY
+// SIG // Ighh2rBQHm+98eEA3+cxB6STOvdlR3jo+KhIq/fecn5h
+// SIG // a293qYHLpwmsObvsxsvYgrRyzR30uIUBHoD7G4kqVDmy
+// SIG // W9rIDVWZeodzOwjmmC3qjeAzLhIp9cAvVCch98isTtoo
+// SIG // uLGp25ayp0Kiyc8ZQU3ghvkqmqMRZjDTu3QyS99je/WZ
+// SIG // ii8bxyGvWbWu3EQ8l1Bx16HSxVXjad5XwdHeMMD9zOZN
+// SIG // +w2/XU/pnR4ZOC+8z1gFLu8NoFA12u8JJxzVs341Hgi6
+// SIG // 2jbb01+P3nSISRIwggTSMIIDuqADAgECAhMzAAAATYof
+// SIG // /TMuN/EAAAAAAABNMA0GCSqGSIb3DQEBCwUAMHwxCzAJ
+// SIG // BgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAw
+// SIG // DgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3Nv
+// SIG // ZnQgQ29ycG9yYXRpb24xJjAkBgNVBAMTHU1pY3Jvc29m
+// SIG // dCBUaW1lLVN0YW1wIFBDQSAyMDEwMB4XDTE0MDUyMzE3
+// SIG // MjAwN1oXDTE1MDgyMzE3MjAwN1owgasxCzAJBgNVBAYT
+// SIG // AlVTMQswCQYDVQQIEwJXQTEQMA4GA1UEBxMHUmVkbW9u
+// SIG // ZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9u
+// SIG // MQ0wCwYDVQQLEwRNT1BSMScwJQYDVQQLEx5uQ2lwaGVy
+// SIG // IERTRSBFU046RjUyOC0zNzc3LThBNzYxJTAjBgNVBAMT
+// SIG // HE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEi
+// SIG // MA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCbfeW0
+// SIG // 2THH0TdkyhS8FtFZ2QC1QvHZqQc7J7puYrfp6GjEghHK
+// SIG // 1nclr8eeuTfL4dwevA88vr9ItW7HDGWSjnMNu6hBJWs4
+// SIG // Dzl4cU9mxoQQbgNl9pRsw/QjZzyfI6xvQaunsbXnSIgl
+// SIG // 65iqXjozTfXnaStpg6Qe4BU7iGY7mzSv2DBORbq739a8
+// SIG // XBhe/O4NWcWubpWwlY+N6kBLi5kpbFJnJRMuTtCau6jY
+// SIG // 2zNPZ7WHCl1Pm71GfyNvWc4mjpR/yJizyP0ZOyhAG+f2
+// SIG // hQ+jQ+Cn3Fl32I6D5hWN6enpON8w7MljX7Cyi4DieGAs
+// SIG // RLC4QCjYhRKXcQSBvdm8662BVIKxAgMBAAGjggEbMIIB
+// SIG // FzAdBgNVHQ4EFgQUcSMpS0eWhBieUG9ABA35oN/kiqMw
+// SIG // HwYDVR0jBBgwFoAU1WM6XIoxkPNDe3xGG8UzaFqFbVUw
+// SIG // VgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNy
+// SIG // b3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljVGlt
+// SIG // U3RhUENBXzIwMTAtMDctMDEuY3JsMFoGCCsGAQUFBwEB
+// SIG // BE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNy
+// SIG // b3NvZnQuY29tL3BraS9jZXJ0cy9NaWNUaW1TdGFQQ0Ff
+// SIG // MjAxMC0wNy0wMS5jcnQwDAYDVR0TAQH/BAIwADATBgNV
+// SIG // HSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQsFAAOC
+// SIG // AQEAkH0LZnVAqiX7RkutCS5Vr8JXoywOLdWmD6BLRVgt
+// SIG // IdznDsDEA4lSi9fo6Ga5l2s/IcC7zkwwTkBGt1cQRgQl
+// SIG // vSEj+XIVByxScnng4CICkdH/Qtyfx7a/8dcM97y7CiPv
+// SIG // rP7WBZtMkoF9hiz7A4twfPBe6Gw6Of3I5jZptF29+2mp
+// SIG // eJTtY/HSimUn4qIStSadi2m2XxHPRQch5Q7ZCjW+Sl+c
+// SIG // zBGCiY3Py+zQFyhgJxxHofy2ViNVUf7Wm4cg1N0OeFa6
+// SIG // a5CDwfLZoxp3BVzKWHkQN+Z2YPYsh/Bc+uK4EoFnw6Tf
+// SIG // OrZtKJz+I08oU+6dvnT7DqC72PiypjwrYqgM56GCA20w
+// SIG // ggJVAgEBMIHboYGxpIGuMIGrMQswCQYDVQQGEwJVUzEL
+// SIG // MAkGA1UECBMCV0ExEDAOBgNVBAcTB1JlZG1vbmQxHjAc
+// SIG // BgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjENMAsG
+// SIG // A1UECxMETU9QUjEnMCUGA1UECxMebkNpcGhlciBEU0Ug
+// SIG // RVNOOkY1MjgtMzc3Ny04QTc2MSUwIwYDVQQDExxNaWNy
+// SIG // b3NvZnQgVGltZS1TdGFtcCBTZXJ2aWNloiUKAQEwCQYF
+// SIG // Kw4DAhoFAAMVAHMoNR+RpexTOIkfsfpflBJ+59tGoIHC
+// SIG // MIG/pIG8MIG5MQswCQYDVQQGEwJVUzETMBEGA1UECBMK
+// SIG // V2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwG
+// SIG // A1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMQ0wCwYD
+// SIG // VQQLEwRNT1BSMScwJQYDVQQLEx5uQ2lwaGVyIE5UUyBF
+// SIG // U046QjAyNy1DNkY4LTFEODgxKzApBgNVBAMTIk1pY3Jv
+// SIG // c29mdCBUaW1lIFNvdXJjZSBNYXN0ZXIgQ2xvY2swDQYJ
+// SIG // KoZIhvcNAQEFBQACBQDXSa+2MCIYDzIwMTQwNjE2MTgw
+// SIG // MjMwWhgPMjAxNDA2MTcxODAyMzBaMHMwOQYKKwYBBAGE
+// SIG // WQoEATErMCkwCgIFANdJr7YCAQAwBgIBAAIBZDAHAgEA
+// SIG // AgIXGjAKAgUA10sBNgIBADA2BgorBgEEAYRZCgQCMSgw
+// SIG // JjAMBgorBgEEAYRZCgMBoAowCAIBAAIDFuNgoQowCAIB
+// SIG // AAIDB6EgMA0GCSqGSIb3DQEBBQUAA4IBAQAJ/e+5a1It
+// SIG // yKPlRW9KDsLdimgW+dt73i8LNjsagRfLVypthXl2yh1/
+// SIG // AY9/6pneTcke+YXU3ridu+0DJJnrPnV18A4EDOOrRcy6
+// SIG // Y/V5EtJTLITsbwDE6VMtXr38MnrR3YMPKRmAKlXBfJnV
+// SIG // rkaVb1L78o4CDL9MKOfCoTaL/ZYnZFxwzrypMczJXmeg
+// SIG // TevnV/wOKuiDN4D2ZNWb9/snCjRXBQK4Bgfm2l8Cs8hD
+// SIG // XN/JRhNX+h4pduqweodfC7gwnkNmeRM2MFbIevI1/Ck4
+// SIG // hxZHtSgvTLYXQpmXHM7g5QJJl7WwKCMdTIX0F6luQsr1
+// SIG // fot4PMS2IqH6J2a9aerJBNfiMYIC9TCCAvECAQEwgZMw
+// SIG // fDELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0
 // SIG // b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1p
-// SIG // Y3Jvc29mdCBDb3Jwb3JhdGlvbjENMAsGA1UECxMETU9Q
-// SIG // UjEnMCUGA1UECxMebkNpcGhlciBEU0UgRVNOOkMwRjQt
-// SIG // MzA4Ni1ERUY4MSUwIwYDVQQDExxNaWNyb3NvZnQgVGlt
-// SIG // ZS1TdGFtcCBTZXJ2aWNloiUKAQEwCQYFKw4DAhoFAAMV
-// SIG // APNdtB7HXztmTmUO3pgEU/YVpx9EoIHCMIG/pIG8MIG5
-// SIG // MQswCQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3Rv
-// SIG // bjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWlj
-// SIG // cm9zb2Z0IENvcnBvcmF0aW9uMQ0wCwYDVQQLEwRNT1BS
-// SIG // MScwJQYDVQQLEx5uQ2lwaGVyIE5UUyBFU046QjAyNy1D
-// SIG // NkY4LTFEODgxKzApBgNVBAMTIk1pY3Jvc29mdCBUaW1l
-// SIG // IFNvdXJjZSBNYXN0ZXIgQ2xvY2swDQYJKoZIhvcNAQEF
-// SIG // BQACBQDW2z+6MCIYDzIwMTQwMzI0MjMzNTIyWhgPMjAx
-// SIG // NDAzMjUyMzM1MjJaMHQwOgYKKwYBBAGEWQoEATEsMCow
-// SIG // CgIFANbbP7oCAQAwBwIBAAICAj0wBwIBAAICG9swCgIF
-// SIG // ANbckToCAQAwNgYKKwYBBAGEWQoEAjEoMCYwDAYKKwYB
-// SIG // BAGEWQoDAaAKMAgCAQACAxbjYKEKMAgCAQACAwehIDAN
-// SIG // BgkqhkiG9w0BAQUFAAOCAQEAiNIOOsXHIAb/svZA+dra
-// SIG // qm7h0YWzsi06kMwHquiFlBe+cdOLmqLaJG8j2O8LaDTd
-// SIG // 3LcJPCbBX/xRG5SSQ1SGabmQqhy68s3sMO8UggBlIveP
-// SIG // yg089/8Egf/RzSVr3cFh5iPKK62OwYRbqgNtVMkq3pTm
-// SIG // jsAq33N4gawcKxkJty8yBNumIqtmhqQX24ymNwM9Zngo
-// SIG // LYXk12tXO91ujFWZFt0f8aqAhkXkULzLl6vIAMwoH+h9
-// SIG // mXvfAelrTHUN6/nJ4NODm9WVdlYvveKJ6MU8ziSr9Itz
-// SIG // iLzQiCzj0iJ+fafH56jNwMgyskcIOXikfDWuEL1PV/hq
-// SIG // SBwI5fgnHg4b6jGCAvUwggLxAgEBMIGTMHwxCzAJBgNV
-// SIG // BAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYD
-// SIG // VQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQg
-// SIG // Q29ycG9yYXRpb24xJjAkBgNVBAMTHU1pY3Jvc29mdCBU
-// SIG // aW1lLVN0YW1wIFBDQSAyMDEwAhMzAAAAKJBnuQSwPG5m
-// SIG // AAAAAAAoMA0GCWCGSAFlAwQCAQUAoIIBMjAaBgkqhkiG
-// SIG // 9w0BCQMxDQYLKoZIhvcNAQkQAQQwLwYJKoZIhvcNAQkE
-// SIG // MSIEIHaguQGbTyFVoGmUUZZbQU1Ml/HwHJ/jo0A1IAJb
-// SIG // JFtLMIHiBgsqhkiG9w0BCRACDDGB0jCBzzCBzDCBsQQU
-// SIG // 8120HsdfO2ZOZQ7emART9hWnH0QwgZgwgYCkfjB8MQsw
-// SIG // CQYDVQQGEwJVUzETMBEGA1UECBMKV2FzaGluZ3RvbjEQ
-// SIG // MA4GA1UEBxMHUmVkbW9uZDEeMBwGA1UEChMVTWljcm9z
-// SIG // b2Z0IENvcnBvcmF0aW9uMSYwJAYDVQQDEx1NaWNyb3Nv
-// SIG // ZnQgVGltZS1TdGFtcCBQQ0EgMjAxMAITMwAAACiQZ7kE
-// SIG // sDxuZgAAAAAAKDAWBBRoYK1vhbFtnAays0BPpmJwhQhu
-// SIG // +DANBgkqhkiG9w0BAQsFAASCAQBz0XoOGA0W3L+0Ig6f
-// SIG // jrdtf30Y2DmoaM4Utcrzd0XBffrUzyvaHqBiK1ZOq712
-// SIG // xh8927ThifsgrVQft5Pr43vGwGUfA5FrzZy+W8QMiNaq
-// SIG // XAUo2CkXmr4Oncggdi/PS6wZ5XYTEYte3n+bWTi031sT
-// SIG // zp5Yr1rskZdM7td9uwQMc9YMmQEZPoIp65EPTtZzfk/L
-// SIG // vHmbnux7SEvdTAvLZ5A8I1d/TH1IfsKqJde99phjv0yf
-// SIG // Y98qg23wrIxPNvbkNKGq4YW0k8ceVoSdEoAkv7uUgPmN
-// SIG // kC5YCgJRA+32KPk24LaSwwkO2nEUsHwOABjD4TvJoaCu
-// SIG // J+YTGZmLpAqPjvEI
+// SIG // Y3Jvc29mdCBDb3Jwb3JhdGlvbjEmMCQGA1UEAxMdTWlj
+// SIG // cm9zb2Z0IFRpbWUtU3RhbXAgUENBIDIwMTACEzMAAABN
+// SIG // ih/9My438QAAAAAAAE0wDQYJYIZIAWUDBAIBBQCgggEy
+// SIG // MBoGCSqGSIb3DQEJAzENBgsqhkiG9w0BCRABBDAvBgkq
+// SIG // hkiG9w0BCQQxIgQgtMXP3OBgYTfiog/11RvR812wt/l4
+// SIG // unZ4tBs0OE/6yl4wgeIGCyqGSIb3DQEJEAIMMYHSMIHP
+// SIG // MIHMMIGxBBRzKDUfkaXsUziJH7H6X5QSfufbRjCBmDCB
+// SIG // gKR+MHwxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNo
+// SIG // aW5ndG9uMRAwDgYDVQQHEwdSZWRtb25kMR4wHAYDVQQK
+// SIG // ExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xJjAkBgNVBAMT
+// SIG // HU1pY3Jvc29mdCBUaW1lLVN0YW1wIFBDQSAyMDEwAhMz
+// SIG // AAAATYof/TMuN/EAAAAAAABNMBYEFGBLMEtc1BMw7hyU
+// SIG // xJKVRz22lMiCMA0GCSqGSIb3DQEBCwUABIIBAGULgG8q
+// SIG // k6D/SQnjmfu5YOjVnEJdShqVhIRa5FXeKTcKKYdtrNBz
+// SIG // DgqZXeDWN8h+4Yfu52ljy06Bq/3zsLZjX3XQ9ce/XIqt
+// SIG // 57skGyQ/jRW6C1xIwKDbs87wMkcUSSioH24XWM1lrWyh
+// SIG // HoNue7qc/BdDhSv0dbgxT1IS8eO0SIvgbPubATSLLX5N
+// SIG // loM8xT1X3TXBR7YXo37ymjXSw14Iyq0uDuZ/vPpCT8ML
+// SIG // +n1XSAC5PlxgtryjbbcB8/rJrwn+qHGYGK1OCf7OYnyG
+// SIG // 12a3+2D4C2wDukRuCKOPhiQQiAtuYeTw1iZ8pjuTFTa+
+// SIG // CmSOISndyiq4KXaXHS4quZtZvn4=
 // SIG // End signature block
