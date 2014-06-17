@@ -138,7 +138,9 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
     
     func didSaveItem(text: String)
     {
-        if (text == "") { return; }
+        if text.isEmpty {
+            return
+        }
         
         let itemToInsert = ["text": text, "complete": false]
         
