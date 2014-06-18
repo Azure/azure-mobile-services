@@ -6,8 +6,7 @@
 #import "MSQuery.h"
 
 @implementation MSOfflinePassthroughHelper
-@synthesize returnErrors = returnErrors_;
-@synthesize upsertCalls = upsertCalls_;
+
 @synthesize data = data_;
 - (NSMutableDictionary *)data {
     if (data_ == nil) {
@@ -63,6 +62,8 @@
 
 - (BOOL) upsertItems:(NSArray *)items table:(NSString *)table orError:(NSError **)error
 {
+    self.upsertCalls++;
+
     NSMutableDictionary *tableData = [self.data objectForKey:table];
     if (tableData == nil) {
         tableData = [NSMutableDictionary new];
@@ -70,8 +71,8 @@
     }
     
     for (NSDictionary *item in items) {
+        self.upsertedItems++;
         [tableData setObject:item forKey:[item objectForKey:@"id"]];
-        self.upsertCalls++;
     }
     
     return YES;
@@ -79,8 +80,12 @@
 
 - (BOOL) deleteItemsWithIds:(NSArray *)items table:(NSString *)table orError:(NSError **)error
 {
+    self.deleteCalls++;
+    
     NSMutableDictionary *tableData = [self.data objectForKey:table];
     [tableData removeObjectsForKeys:items];
+    
+    self.deletedItems += items.count;
     
     return YES;
 }
@@ -90,6 +95,14 @@
     [self.data removeObjectForKey:query.syncTable.name];
      
     return YES;
+}
+
+-(void) resetCounts
+{
+    self.upsertedItems = 0;
+    self.upsertCalls = 0;
+    self.deleteCalls = 0;
+    self.deletedItems = 0;
 }
 
 @end

@@ -33,8 +33,7 @@ NSString *const inlineCountNone = @"none";
         return url;
     }
 
-    if(url.query != nil && [url.query rangeOfString:@"__systemProperties" options:NSCaseInsensitiveSearch].location != NSNotFound)
-    {
+    if(url.query != nil && [url.query rangeOfString:@"__systemProperties" options:NSCaseInsensitiveSearch].location != NSNotFound) {
         return url;
     }
                                
@@ -43,17 +42,17 @@ NSString *const inlineCountNone = @"none";
         value = encodeToPercentEscapeString(@"*");
     } else {
         NSMutableArray *properties = [NSMutableArray array];
-        if (table.systemProperties & MSSystemPropertyCreatedAt)
-        {
-            [properties addObject:@"__createdAt"];
+        if (table.systemProperties & MSSystemPropertyCreatedAt) {
+            [properties addObject:MSSystemColumnCreatedAt];
         }
-        if (table.systemProperties & MSSystemPropertyUpdatedAt)
-        {
-            [properties addObject:@"__updatedAt"];
+        if (table.systemProperties & MSSystemPropertyUpdatedAt) {
+            [properties addObject:MSSystemColumnUpdatedAt];
         }
-        if (table.systemProperties & MSSystemPropertyVersion)
-        {
-            [properties addObject:@"__version"];
+        if (table.systemProperties & MSSystemPropertyVersion) {
+            [properties addObject:MSSystemColumnVersion];
+        }
+        if (table.systemProperties & MSSystemPropertyDeleted) {
+            [properties addObject:MSSystemColumnDeleted];
         }
         value = [properties componentsJoinedByString:@","];
     }
