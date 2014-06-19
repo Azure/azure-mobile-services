@@ -37,6 +37,10 @@ public class SimpleSyncHandler implements MobileServiceSyncHandler {
 
 	@Override
 	public void onPushComplete(MobileServicePushCompletionResult pushCompletionResult) throws MobileServiceSyncHandlerException {
+		if (pushCompletionResult.getOperationErrors() != null && pushCompletionResult.getOperationErrors().size() > 0) {
+			throw new MobileServiceSyncHandlerException("There were unhandled operation errors.");
+		}
+		
 		return;
 	}
 }
