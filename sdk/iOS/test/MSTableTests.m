@@ -63,7 +63,7 @@
 #pragma mark * Insert Method Tests
 
 // See the WindowsAzureMobileServicesFunctionalTests.m tests for additional
-// insert tests that require a working Windows Azure Mobile Service.
+// insert tests that require a working Microsoft Azure Mobile Service.
 
 -(void) testInsertItem
 {
@@ -318,7 +318,7 @@
 
 
 // See the WindowsAzureMobileServicesFunctionalTests.m tests for additional
-// update tests that require a working Windows Azure Mobile Service.
+// update tests that require a working Microsoft Azure Mobile Service.
 
 -(void) testUpdateItemWithIntId
 {
@@ -555,7 +555,7 @@
 
 
 // See the WindowsAzureMobileServicesFunctionalTests.m tests for additional
-// delete tests that require a working Windows Azure Mobile Service.
+// delete tests that require a working Microsoft Azure Mobile Service.
 
 
 -(void) testDeleteItemWithIntId
@@ -1091,7 +1091,7 @@
 
 
 // See the WindowsAzureMobileServicesFunctionalTests.m tests for additional
-// readWithId tests that require a working Windows Azure Mobile Service.
+// readWithId tests that require a working Microsoft Azure Mobile Service.
 
 -(void) testReadItemWithIntId
 {

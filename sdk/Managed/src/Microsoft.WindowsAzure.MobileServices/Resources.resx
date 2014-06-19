@@ -151,7 +151,7 @@
     <value>The assembly {0} does not define a type that implements the {1} interface.</value>
   </data>
   <data name="Platform_AssemblyNotFound" xml:space="preserve">
-    <value>A Windows Azure Mobile Services assembly for the current platform was not found. Ensure that the current project references both {0} and the following platform-specific assembly: {1}.</value>
+    <value>A Microsoft Azure Mobile Services assembly for the current platform was not found. Ensure that the current project references both {0} and the following platform-specific assembly: {1}.</value>
   </data>
   <data name="Platform_InstantiationFailed" xml:space="preserve">
     <value>Failed to instantiate the platform implemenation of {0} from the assembly {1} due to the following error: {2}</value>

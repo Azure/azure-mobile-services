@@ -72,11 +72,11 @@ The SDK requires XCode 4.6.3 or greater.
 1. Open the ```sdk\iOS\WindowsAzureMobileServices.xcodeproj``` file in XCode.
 2. Set the active scheme option to ```WindowsAzureMobileServices\* Simulator```.
 3. Open the ```Test\WindowsAzureMobileServicesFunctionalTests.m``` file in the Project Navigator panel of XCode.
-4. In the ```setUp``` code, replace the ```<Windows Azure Mobile Service App URL>``` and ```<Application Key>``` with the valid URL and Application Key for a working Mobile Service.
+4. In the ```setUp``` code, replace the ```<Microsoft Azure Mobile Service App URL>``` and ```<Application Key>``` with the valid URL and Application Key for a working Mobile Service.
 5. Run the tests using Command-U.
 
 ## Android SDK
-Windows Azure Mobile Services can be used with an Android-based device using our Android SDK. You can [download the Android SDK](https://go.microsoft.com/fwLink/?LinkID=280126&clcid=0x409) directly or you can download the source code using the instructions above.  
+Microsoft Azure Mobile Services can be used with an Android-based device using our Android SDK. You can [download the Android SDK](https://go.microsoft.com/fwLink/?LinkID=280126&clcid=0x409) directly or you can download the source code using the instructions above.  
 
 ### Prerequisites
 
@@ -146,7 +146,7 @@ Be sure to check out the Mobile Services [Developer Forum](http://social.msdn.mi
 
 ## Contribute Code or Provide Feedback
 
-If you would like to become an active contributor to this project please follow the instructions provided in [Windows Azure Projects Contribution Guidelines](http://azure.github.com/guidelines.html).
+If you would like to become an active contributor to this project please follow the instructions provided in [Microsoft Azure Projects Contribution Guidelines](http://azure.github.com/guidelines.html).
 
 If you encounter any bugs with the library please file an issue in the [Issues](https://github.com/Azure/azure-mobile-services/issues) section of the project.
 

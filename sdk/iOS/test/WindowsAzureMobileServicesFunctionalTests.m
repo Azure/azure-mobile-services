@@ -34,7 +34,7 @@
     // 'testsEnabled' BOOL above to YES.
     
     client = [MSClient
-                clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
+                clientWithApplicationURLString:@"<Microsoft Azure Mobile Service App URL>"
                 applicationKey:@"<Application Key>"];
     
     done = NO;

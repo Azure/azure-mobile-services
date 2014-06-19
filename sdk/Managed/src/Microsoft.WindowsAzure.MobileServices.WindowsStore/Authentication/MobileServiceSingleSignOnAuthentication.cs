@@ -18,7 +18,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Instantiates a new instance of <see cref="MobileServiceSingleSignOnAuthentication"/>.
         /// Single sign-on requires that the
-        /// application's Package SID be registered with the Windows Azure Mobile Service, but it
+        /// application's Package SID be registered with the Microsoft Azure Mobile Service, but it
         /// provides a better experience as HTTP cookies are supported so that users do not have to
         /// login in everytime the application is launched.
         /// </summary>

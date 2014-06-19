@@ -86,7 +86,7 @@ MobileServiceLogin.prototype.login = function (provider, token, useSingleSignOn,
     /// <param name="useSingleSignOn" type="Boolean" mayBeNull="true">
     /// Only applies to Windows 8 clients.  Will be ignored on other platforms.
     /// Indicates if single sign-on should be used. Single sign-on requires that the 
-    /// application's Package SID be registered with the Windows Azure Mobile Service, 
+    /// application's Package SID be registered with the Microsoft Azure Mobile Service, 
     /// but it provides a better experience as HTTP cookies are supported so that users 
     /// do not have to login in everytime the application is launched.
     /// </param>
@@ -135,7 +135,7 @@ MobileServiceLogin.prototype.login = function (provider, token, useSingleSignOn,
 
     if (!_.isNull(provider)) {
         if (provider.toLowerCase() === 'windowsazureactivedirectory') {
-            // The mobile service REST API uses '/login/aad' for Windows Azure Active Directory
+            // The mobile service REST API uses '/login/aad' for Microsoft Azure Active Directory
             provider = 'aad';
         }
         this.loginWithProvider(provider, token, useSingleSignOn, callback);
@@ -185,7 +185,7 @@ MobileServiceLogin.prototype.loginWithProvider = function(provider, token, useSi
     /// </param>
     /// <param name="useSingleSignOn" type="Boolean" mayBeNull="true">
     /// Optional, indicates if single sign-on should be used.  Single sign-on requires that the
-    /// application's Package SID be registered with the Windows Azure Mobile Service, but it
+    /// application's Package SID be registered with the Microsoft Azure Mobile Service, but it
     /// provides a better experience as HTTP cookies are supported so that users do not have to
     /// login in everytime the application is launched. Is false be default.
     /// </param>
@@ -337,7 +337,7 @@ function loginWithProviderAndToken(login, provider, token, callback) {
     login._loginState = { inProcess: true, cancelCallback: null };
 
     // Invoke the POST endpoint to exchange provider-specific token for a 
-    // Windows Azure Mobile Services token
+    // Microsoft Azure Mobile Services token
     client._request(
         'POST',
         loginUrl + '/' + provider,
@@ -362,7 +362,7 @@ function loginWithLoginControl(login, provider, useSingleSignOn, callback) {
     /// </param>
     /// <param name="useSingleSignOn" type="Boolean">
     /// Optional, indicates if single sign-on should be used.  Single sign-on requires that the
-    /// application's Package SID be registered with the Windows Azure Mobile Service, but it
+    /// application's Package SID be registered with the Microsoft Azure Mobile Service, but it
     /// provides a better experience as HTTP cookies are supported so that users do not have to
     /// login in everytime the application is launched. Is false be default.
     /// </param>

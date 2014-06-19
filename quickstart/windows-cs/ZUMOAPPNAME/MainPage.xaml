@@ -22,7 +22,7 @@
 
             <Grid Grid.Row="0" Grid.ColumnSpan="2" Margin="0,0,0,20">
                 <StackPanel>
-                    <TextBlock Foreground="#0094ff" FontFamily="Segoe UI Light" Margin="0,0,0,6">WINDOWS AZURE MOBILE SERVICES</TextBlock>
+                    <TextBlock Foreground="#0094ff" FontFamily="Segoe UI Light" Margin="0,0,0,6">MICROSOFT AZURE MOBILE SERVICES</TextBlock>
                     <TextBlock Foreground="Gray" FontFamily="Segoe UI Light" FontSize="45" >ZUMOAPPNAME</TextBlock>
                 </StackPanel>
             </Grid>
