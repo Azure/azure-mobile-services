@@ -19,6 +19,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -754,8 +755,8 @@ public class OfflineTests extends TestGroup {
 					result.setStatus(TestStatus.Passed);
 					result.setTestCase(test);
 
-					Date now = new Date();
-					int seed = now.getYear() * 10000 + now.getMonth() * 100 + now.getDay();
+					Calendar now = Calendar.getInstance();
+					int seed = (now.get(Calendar.YEAR) -1900) * 10000 + now.get(Calendar.MONTH) * 100 + now.get(Calendar.DAY_OF_MONTH);
 					test.log("Using random seed: " + seed);
 					Random rndGen = new Random(seed);
 
@@ -885,8 +886,8 @@ public class OfflineTests extends TestGroup {
 					result.setStatus(TestStatus.Passed);
 					result.setTestCase(test);
 
-					Date now = new Date();
-					int seed = now.getYear() * 10000 + now.getMonth() * 100 + now.getDay();
+					Calendar now = Calendar.getInstance();
+					int seed = (now.get(Calendar.YEAR) -1900) * 10000 + now.get(Calendar.MONTH) * 100 + now.get(Calendar.DAY_OF_MONTH);
 					test.log("Using random seed: " + seed);
 					Random rndGen = new Random(seed);
 

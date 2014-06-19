@@ -166,10 +166,9 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 
 		testQuery(query2, 0);
 	}
-	
+
 	public void testQueryOnStringConcatAndCompare() throws MobileServiceLocalStoreException, MobileServiceException {
-		Query query1 = QueryOperations.tableName(TestTable)
-				.concat(QueryOperations.concat(QueryOperations.field("col1"), "ies"), QueryOperations.field("col2"))
+		Query query1 = QueryOperations.tableName(TestTable).concat(QueryOperations.concat(QueryOperations.field("col1"), "ies"), QueryOperations.field("col2"))
 				.eq("brownies1.0");
 
 		testQuery(query1, 1);
@@ -181,38 +180,32 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 	}
 
 	public void testQueryOnYear() throws MobileServiceLocalStoreException, MobileServiceException {
-		Query query1 = QueryOperations.tableName(TestTable)
-				.year("col4").eq(1970);
-			
+		Query query1 = QueryOperations.tableName(TestTable).year("col4").eq(1970);
+
 		testQuery(query1, 6);
 
-		Query query2 = QueryOperations.tableName(TestTable)
-				.year("col4").eq(2015);
-		
+		Query query2 = QueryOperations.tableName(TestTable).year("col4").eq(2015);
+
 		testQuery(query2, 0);
 	}
-	
+
 	public void testQueryOnMonth() throws MobileServiceLocalStoreException, MobileServiceException {
-		Query query1 = QueryOperations.tableName(TestTable)
-				.month("col4").eq(1);
-			
+		Query query1 = QueryOperations.tableName(TestTable).month("col4").eq(1);
+
 		testQuery(query1, 6);
 
-		Query query2 = QueryOperations.tableName(TestTable)
-				.month("col4").eq(12);
-		
+		Query query2 = QueryOperations.tableName(TestTable).month("col4").eq(12);
+
 		testQuery(query2, 0);
 	}
-	
+
 	public void testQueryOnDay() throws MobileServiceLocalStoreException, MobileServiceException {
-		Query query1 = QueryOperations.tableName(TestTable)
-				.month("col4").eq(1);
-			
+		Query query1 = QueryOperations.tableName(TestTable).month("col4").eq(1);
+
 		testQuery(query1, 6);
 
-		Query query2 = QueryOperations.tableName(TestTable)
-				.month("col4").eq(31);
-		
+		Query query2 = QueryOperations.tableName(TestTable).month("col4").eq(31);
+
 		testQuery(query2, 0);
 	}
 
@@ -256,7 +249,7 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 
 		testQuery(query2, 0);
 	}
-	
+
 	public void testQueryOnStringSubstringWithLengthAndCompare() throws MobileServiceException, MobileServiceLocalStoreException {
 		Query query1 = QueryOperations.tableName(TestTable).subString("col1", 1, 3).eq("uic");
 
@@ -565,11 +558,12 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 		return runQuery(store, query);
 	}
 
+	@SuppressWarnings("unchecked")
 	private <T> T runQuery(SQLiteLocalStore store, Query query) throws MobileServiceLocalStoreException // where
 	// T:JToken
 	{
 		T read = (T) store.read(query);
-		
+
 		return read;
 	}
 
@@ -627,8 +621,6 @@ public class SQLiteStoreQueryTests extends InstrumentationTestCase {
 	}
 
 	private Context getContext() {
-		// TODO Auto-generated method stub
 		return getInstrumentation().getTargetContext();
 	}
-
 }

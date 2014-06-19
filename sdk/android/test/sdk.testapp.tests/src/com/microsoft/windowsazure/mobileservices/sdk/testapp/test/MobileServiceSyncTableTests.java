@@ -24,7 +24,6 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import org.apache.http.Header;
 import android.test.InstrumentationTestCase;
@@ -46,7 +45,6 @@ import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceJsonSyn
 import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushFailedException;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushStatus;
-import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.MobileServiceSyncHandler;
 import com.microsoft.windowsazure.mobileservices.table.sync.synchandler.SimpleSyncHandler;
 
 public class MobileServiceSyncTableTests extends InstrumentationTestCase {
@@ -67,8 +65,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 		super.tearDown();
 	}
 
-	public void testPushExecutesThePendingOperationsInOrder() throws InterruptedException, ExecutionException, MalformedURLException
-    {
+	public void testPushExecutesThePendingOperationsInOrder() throws InterruptedException, ExecutionException, MalformedURLException {
 		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
 		ServiceFilterContainer serviceFilterContainer1 = new ServiceFilterContainer();
 
@@ -85,44 +82,46 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
 		JsonObject item2 = new JsonObject();
 		item2.addProperty("id", "def");
-		
+
 		table.insert(item1).get();
-        table.insert(item2).get();
+		table.insert(item2).get();
 
-        assertEquals(serviceFilterContainer1.Requests.size(), 0);
+		assertEquals(serviceFilterContainer1.Requests.size(), 0);
 
-        // create a new service to test that operations are loaded from store
-        ServiceFilterContainer serviceFilterContainer2 = new ServiceFilterContainer();
-        
-        MobileServiceClient client2 = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		// create a new service to test that operations are loaded from store
+		ServiceFilterContainer serviceFilterContainer2 = new ServiceFilterContainer();
 
-        client2 = client2.withFilter(getTestFilter(serviceFilterContainer2, "{\"id\":\"abc\",\"String\":\"Hey\"}"
-				, "{\"id\":\"def\",\"String\":\"What\"}"));
+		MobileServiceClient client2 = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-        client2.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
-		
+		client2 = client2.withFilter(getTestFilter(serviceFilterContainer2, "{\"id\":\"abc\",\"String\":\"Hey\"}", "{\"id\":\"def\",\"String\":\"What\"}"));
+
+		client2.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
 		assertEquals(serviceFilterContainer2.Requests.size(), 0);
 		client2.getSyncContext().push().get();
-        assertEquals(serviceFilterContainer2.Requests.size(), 2);
+		assertEquals(serviceFilterContainer2.Requests.size(), 2);
 
-        assertEquals(serviceFilterContainer2.Requests.get(0).Content, item1.toString());
-        //Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(), "OL");
-        assertEquals(serviceFilterContainer2.Requests.get(1).Content, item2.toString());
-        //Assert.AreEqual(hijack.Requests[1].Headers.GetValues("X-ZUMO-FEATURES").First(), "OL");
+		assertEquals(serviceFilterContainer2.Requests.get(0).Content, item1.toString());
+		// Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(),
+		// "OL");
+		assertEquals(serviceFilterContainer2.Requests.get(1).Content, item2.toString());
+		// Assert.AreEqual(hijack.Requests[1].Headers.GetValues("X-ZUMO-FEATURES").First(),
+		// "OL");
 
-        // create yet another service to make sure the old items were purged from queue
-        ServiceFilterContainer serviceFilterContainer3 = new ServiceFilterContainer();
-        MobileServiceClient client3 = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		// create yet another service to make sure the old items were purged
+		// from queue
+		ServiceFilterContainer serviceFilterContainer3 = new ServiceFilterContainer();
+		MobileServiceClient client3 = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-        client3 = client3.withFilter(getTestFilter(serviceFilterContainer3, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
+		client3 = client3.withFilter(getTestFilter(serviceFilterContainer3, "{\"id\":\"abc\",\"String\":\"Hey\"}"));
 
-        client3.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
-	
+		client3.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
 		assertEquals(serviceFilterContainer3.Requests.size(), 0);
 		client3.getSyncContext().push().get();
-        assertEquals(serviceFilterContainer3.Requests.size(), 0);
-    }
-    
+		assertEquals(serviceFilterContainer3.Requests.size(), 0);
+	}
+
 	public void testPullThrowsWhenPushThrows() throws MalformedURLException, InterruptedException, ExecutionException {
 		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
 		ServiceFilterContainer serviceFilterContainer = new ServiceFilterContainer();
@@ -134,7 +133,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 																					// push
 
 		client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
-		
+
 		// insert an item but don't push
 		MobileServiceJsonSyncTable table = client.getSyncTable("someTable");
 
@@ -142,7 +141,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 		jsonObject.addProperty("id", "abc");
 
 		table.insert(jsonObject).get();
-		
+
 		assertEquals(store.Tables.get(table.getName().toLowerCase(Locale.getDefault())).size(), 1); // item
 																									// is
 																									// inserted
@@ -280,9 +279,9 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
 		table1.insert(jsonObject).get(); // insert an item
 
-		assertEquals(store.Tables.get(table1.getName().toLowerCase()).size(), 1); // item
-																					// is
-																					// inserted
+		assertEquals(store.Tables.get(table1.getName().toLowerCase(Locale.getDefault())).size(), 1); // item
+		// is
+		// inserted
 
 		// this should trigger a push
 		table1.pull(null).get();
@@ -290,9 +289,9 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 		assertEquals(serviceFilterContainer.Requests.size(), 2); // 1 for push
 																	// and 1 for
 		// pull
-		assertEquals(store.Tables.get(table1.getName().toLowerCase()).size(), 2); // table
-																					// is
-																					// populated
+		assertEquals(store.Tables.get(table1.getName().toLowerCase(Locale.getDefault())).size(), 2); // table
+		// is
+		// populated
 	}
 
 	// REVISAR EL TEMA DE LOS HANDLERS Y LAS EXCEPCIONES
@@ -408,7 +407,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 																				// sync
 		// erros
 
-		assertEquals(store.DeleteQueries.get(1).getTableName(), table1.getName().toLowerCase());
+		assertEquals(store.DeleteQueries.get(1).getTableName(), table1.getName().toLowerCase(Locale.getDefault()));
 		// purged table
 		assertEquals(serviceFilterContainer.Requests.size(), 1); // still 1
 																	// means no
@@ -604,8 +603,6 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
 			@Override
 			public Void apply(ServiceFilterRequest serviceFilterRequest, Integer executed) {
-				// TODO Auto-generated method stub
-
 				if (executed == 1) // order is maintained by doing insert first
 									// and delete after that. This means first
 									// update was cancelled, not the second one.
@@ -832,7 +829,6 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 	// @Override
 	// public Void apply(ServiceFilterRequest serviceFilterRequest, Integer
 	// executed) {
-	// // TODO Auto-generated method stub
 	//
 	// // if (executed == 1) // order is maintained by doing insert first
 	// // // and delete after that. This means first
@@ -902,8 +898,6 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 
 			@Override
 			public Void apply(ServiceFilterRequest serviceFilterRequest, Integer executed) {
-				// TODO Auto-generated method stub
-
 				if (executed == 1) // order is maintained by doing insert first
 									// and delete after that. This means first
 									// update was cancelled, not the second one.
@@ -1012,7 +1006,6 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 		try {
 			secondOperation.apply(table, item);
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 
 			assertEquals(client.getSyncContext().getPendingOperations(), 1);
@@ -1179,7 +1172,7 @@ public class MobileServiceSyncTableTests extends InstrumentationTestCase {
 		public Header[] Headers;
 
 		public String Content;
-		
+
 		public int Count;
 
 		public String getHeaderValue(String headerName) {

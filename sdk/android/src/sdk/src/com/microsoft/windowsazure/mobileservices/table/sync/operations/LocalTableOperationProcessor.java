@@ -27,9 +27,12 @@ public class LocalTableOperationProcessor implements TableOperationVisitor<Void>
 
 	JsonObject mItem;
 
-	public LocalTableOperationProcessor(MobileServiceLocalStore store, JsonObject item) {
+	String mItemBackupTable;
+
+	public LocalTableOperationProcessor(MobileServiceLocalStore store, JsonObject item, String itemBackupTable) {
 		this.mStore = store;
 		this.mItem = item;
+		this.mItemBackupTable = itemBackupTable;
 	}
 
 	@Override
@@ -46,7 +49,22 @@ public class LocalTableOperationProcessor implements TableOperationVisitor<Void>
 
 	@Override
 	public Void visit(DeleteOperation operation) throws Throwable {
+		JsonObject backedUpItem = this.mStore.lookup(operation.getTableName(), operation.getItemId());
+
+		// '/' is a reserved character that cannot be used on string ids.
+		// We use it to build a unique compound string from tableName and
+		// itemId
+		String tableItemId = operation.getTableName() + "/" + operation.getItemId();
+
+		JsonObject item = new JsonObject();
+		item.addProperty("id", tableItemId);
+		item.addProperty("tablename", operation.getTableName());
+		item.addProperty("itemid", operation.getItemId());
+		item.add("clientitem", backedUpItem);
+
+		this.mStore.upsert(this.mItemBackupTable, item);
 		this.mStore.delete(operation.getTableName(), operation.getItemId());
+
 		return null;
 	}
 

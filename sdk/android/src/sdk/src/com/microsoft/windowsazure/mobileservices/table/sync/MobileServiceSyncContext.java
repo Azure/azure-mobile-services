@@ -21,8 +21,10 @@ package com.microsoft.windowsazure.mobileservices.table.sync;
 
 import java.io.IOException;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Semaphore;
@@ -44,6 +46,7 @@ import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProper
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
+import com.microsoft.windowsazure.mobileservices.table.sync.localstore.ColumnDataType;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStore;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStoreException;
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.DeleteOperation;
@@ -123,6 +126,11 @@ public class MobileServiceSyncContext {
 			return this.mIdLock;
 		}
 	}
+
+	/**
+	 * Table that stores backed up items
+	 */
+	private static final String ITEM_BACKUP_TABLE = "__itembackups";
 
 	private SettableFuture<Void> mInitialized;
 
@@ -488,6 +496,7 @@ public class MobileServiceSyncContext {
 
 						OperationQueue.initializeStore(this.mStore);
 						OperationErrorList.initializeStore(this.mStore);
+						initializeStore(this.mStore);
 
 						this.mStore.initialize();
 
@@ -519,6 +528,16 @@ public class MobileServiceSyncContext {
 		} finally {
 			this.mInitLock.writeLock().unlock();
 		}
+	}
+
+	private static void initializeStore(MobileServiceLocalStore store) throws MobileServiceLocalStoreException {
+		Map<String, ColumnDataType> columns = new HashMap<String, ColumnDataType>();
+		columns.put("id", ColumnDataType.String);
+		columns.put("tablename", ColumnDataType.String);
+		columns.put("itemid", ColumnDataType.String);
+		columns.put("clientitem", ColumnDataType.Other);
+
+		store.defineTable(ITEM_BACKUP_TABLE, columns);
 	}
 
 	private void pushContext() throws Throwable {
@@ -720,6 +739,14 @@ public class MobileServiceSyncContext {
 							this.mOpErrorList.add(getTableOperationError(operation, syncHandlerException));
 						}
 					}
+					// '/' is a reserved character that cannot be used on string
+					// ids.
+					// We use it to build a unique compound string from
+					// tableName and
+					// itemId
+					String tableItemId = operation.getTableName() + "/" + operation.getItemId();
+
+					this.mStore.delete(ITEM_BACKUP_TABLE, tableItemId);
 
 					bookmark.dequeue();
 				} finally {
@@ -756,6 +783,19 @@ public class MobileServiceSyncContext {
 
 	private void pushOperation(TableOperation operation) throws MobileServiceLocalStoreException, MobileServiceSyncHandlerException {
 		JsonObject item = this.mStore.lookup(operation.getTableName(), operation.getItemId());
+
+		if (item == null) {
+			// '/' is a reserved character that cannot be used on string ids.
+			// We use it to build a unique compound string from tableName and
+			// itemId
+			String tableItemId = operation.getTableName() + "/" + operation.getItemId();
+
+			JsonObject backedUpItem = this.mStore.lookup(ITEM_BACKUP_TABLE, tableItemId);
+
+			if (backedUpItem != null) {
+				item = backedUpItem.get("clientitem").isJsonObject() ? backedUpItem.getAsJsonObject("clientitem") : null;
+			}
+		}
 
 		JsonObject result = this.mHandler.executeTableOperation(new RemoteTableOperationProcessor(this.mClient, item), operation);
 
@@ -817,6 +857,20 @@ public class MobileServiceSyncContext {
 
 	private TableOperationError getTableOperationError(TableOperation operation, Throwable throwable) throws MobileServiceLocalStoreException {
 		JsonObject clientItem = this.mStore.lookup(operation.getTableName(), operation.getItemId());
+
+		if (clientItem == null) {
+			// '/' is a reserved character that cannot be used on string ids.
+			// We use it to build a unique compound string from tableName and
+			// itemId
+			String tableItemId = operation.getTableName() + "/" + operation.getItemId();
+
+			JsonObject backedUpItem = this.mStore.lookup(ITEM_BACKUP_TABLE, tableItemId);
+
+			if (backedUpItem != null) {
+				clientItem = backedUpItem.get("clientitem").isJsonObject() ? backedUpItem.getAsJsonObject("clientitem") : null;
+			}
+		}
+
 		Integer statusCode = null;
 		String serverResponse = null;
 		JsonObject serverItem = null;
@@ -868,7 +922,7 @@ public class MobileServiceSyncContext {
 					MultiLock<String> idLock = this.mIdLockMap.lock(tableItemId);
 
 					try {
-						operation.accept(new LocalTableOperationProcessor(this.mStore, item));
+						operation.accept(new LocalTableOperationProcessor(this.mStore, item, ITEM_BACKUP_TABLE));
 						this.mOpQueue.enqueue(operation);
 					} finally {
 						this.mIdLockMap.unLock(idLock);

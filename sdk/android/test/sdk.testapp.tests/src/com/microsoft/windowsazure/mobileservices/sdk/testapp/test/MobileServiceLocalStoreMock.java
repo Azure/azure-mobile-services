@@ -2,6 +2,7 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileSer
 
 public class MobileServiceLocalStoreMock implements MobileServiceLocalStore {
 
-	public Map<String, HashMap<String, JsonObject>> Tables = new HashMap<String, HashMap<String, JsonObject>>();
+	public Map<String, LinkedHashMap<String, JsonObject>> Tables = new HashMap<String, LinkedHashMap<String, JsonObject>>();
 
 	public List<Query> ReadQueries = new ArrayList<Query>();
 	public List<Query> DeleteQueries = new ArrayList<Query>();
@@ -38,13 +39,11 @@ public class MobileServiceLocalStoreMock implements MobileServiceLocalStore {
 
 	@Override
 	public void initialize() throws MobileServiceLocalStoreException {
-		// TODO Auto-generated method stub
 
 	}
 
 	@Override
 	public void defineTable(String tableName, Map<String, ColumnDataType> columns) throws MobileServiceLocalStoreException {
-		// TODO Auto-generated method stub
 
 	}
 
@@ -123,7 +122,7 @@ public class MobileServiceLocalStoreMock implements MobileServiceLocalStore {
 
 	private Map<String, JsonObject> GetTable(String tableName) {
 		if (!this.Tables.containsKey(tableName)) {
-			this.Tables.put(tableName, new HashMap<String, JsonObject>());
+			this.Tables.put(tableName, new LinkedHashMap<String, JsonObject>());
 		}
 
 		return this.Tables.get(tableName);

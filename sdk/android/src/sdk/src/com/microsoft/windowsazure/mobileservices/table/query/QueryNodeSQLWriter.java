@@ -108,7 +108,7 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 	public QueryNode visit(FunctionCallNode node) throws MobileServiceException {
 		String format = getSQLOperatorFormat(node);
 
-		String[] args = new String[node.getArguments().size()];
+		Object[] args = new Object[node.getArguments().size()];
 		List<QueryNode> arguments = node.getArguments();
 
 		for (int index = 0; index < arguments.size(); index++) {
@@ -335,7 +335,7 @@ public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
 		} else if (argumentsSize == 3) {
 			builder.append("(substr(%1$s,(%2$s + 1),%3$s))");
 		}
-		
+
 		return builder.toString();
 	}
 
