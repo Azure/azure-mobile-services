@@ -8,6 +8,7 @@
 #import "MSQuery.h"
 #import "MSTable+MSTableTestUtilities.h"
 #import "MSOfflinePassthroughHelper.h"
+#import "MSCoreDataStore+TestHelper.h"
 
 @interface MSSyncTableTests : SenTestCase {
     MSClient *client;
@@ -25,11 +26,11 @@
     NSLog(@"%@ setUp", self.name);
     
     client = [MSClient clientWithApplicationURLString:@"https://someUrl/"];
-    offline = [MSOfflinePassthroughHelper new];
+    offline = [[MSOfflinePassthroughHelper alloc] initWithManagedObjectContext:[MSCoreDataStore inMemoryManagedObjectContext]];
     
     // Enable offline mode
     client.syncContext = [[MSSyncContext alloc] initWithDelegate:offline dataSource:offline callback:nil];
-    
+        
     done = NO;
 }
 
@@ -51,7 +52,7 @@
 
 -(void) testInsertItemWithNoId
 {
-    MSSyncTable *todoTable = [client syncTableWithName:@"NoSuchTable"];
+    MSSyncTable *todoTable = [client syncTableWithName:@"TodoNoVersion"];
     
     // Create the item
     id item = @{ @"name":@"test name" };
@@ -69,7 +70,7 @@
 {
     // TODO: Fix error message when non string ids are used
     
-    MSSyncTable *todoTable = [client syncTableWithName:@"NoSuchTable"];
+    MSSyncTable *todoTable = [client syncTableWithName:@"TodoNoVersion"];
     
     // Create the item
     id item = @{ @"id": @12345, @"name":@"test name" };
@@ -86,7 +87,7 @@
 
 -(void) testInsertItemWithInvalidItem
 {
-    MSSyncTable *todoTable = [client syncTableWithName:@"NoSuchTable"];
+    MSSyncTable *todoTable = [client syncTableWithName:@"TodoNoVersion"];
     
     // Create the item
     id item = @[ @"I_am_a", @"Array", @"I should be an object" ];
@@ -103,7 +104,7 @@
 
 - (void) testInsertItemWithoutDatasource
 {
-    MSSyncTable *todoTable = [client syncTableWithName:@"NoSuchTable"];
+    MSSyncTable *todoTable = [client syncTableWithName:@"TodoNoVersion"];
     client.syncContext.dataSource = nil;
     
     // Create the item
@@ -127,7 +128,7 @@
                                    initWithURL:nil
                                    statusCode:200
                                    HTTPVersion:nil headerFields:nil];
-    NSString* stringData = @"{\"id\": \"test1\", \"name\":\"test name\"}";
+    NSString* stringData = @"{\"id\": \"test1\", \"text\":\"test name\"}";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
     BOOL __block insertRanToServer = NO;
@@ -141,7 +142,7 @@
     };
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
-    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"NoSuchTable"];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
     
     // Create the item
     NSDictionary *item = @{ @"id": @"test1", @"name":@"test name" };
@@ -172,7 +173,7 @@
                                    initWithURL:nil
                                    statusCode:200
                                    HTTPVersion:nil headerFields:nil];
-    NSString* stringData = @"{\"id\": \"test1\", \"name\":\"test name\"}";
+    NSString* stringData = @"{\"id\": \"test1\", \"text\":\"test name\"}";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
     BOOL __block insertRanToServer = NO;
@@ -186,7 +187,7 @@
     };
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
-    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"NoSuchTable"];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
     
     // Create the item
     NSDictionary *item = @{ @"id": @"test1", @"name":@"test name" };
@@ -239,7 +240,7 @@
                                    initWithURL:nil
                                    statusCode:412
                                    HTTPVersion:nil headerFields:nil];
-    NSString* stringData = @"{\"id\": \"test1\", \"name\":\"test name\", \"__version\":\"1\" }";
+    NSString* stringData = @"{\"id\": \"test1\", \"text\":\"test name\", \"__version\":\"1\" }";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
     BOOL __block insertRanToServer = NO;
@@ -253,7 +254,7 @@
     };
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
-    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"NoSuchTable"];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
     
     // Create the item
     NSDictionary *item = @{ @"id": @"test1", @"name":@"test name" };
@@ -300,7 +301,7 @@
                                    initWithURL:nil
                                    statusCode:200
                                    HTTPVersion:nil headerFields:nil];
-    NSString* stringData = @"{\"id\": \"test1\", \"name\":\"updated name\"}";
+    NSString* stringData = @"{\"id\": \"test1\", \"text\":\"updated name\"}";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
     __block NSInteger callsToServer = 0;
@@ -319,7 +320,7 @@
     };
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
-    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"NoSuchTable"];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
     
     // Create the item
     NSDictionary *item = @{ @"id": @"test1", @"name": @"test name" };
@@ -360,7 +361,7 @@
                                    initWithURL:nil
                                    statusCode:200
                                    HTTPVersion:nil headerFields:nil];
-    NSString* stringData = @"{\"id\": \"test1\", \"name\":\"updated name\"}";
+    NSString* stringData = @"{\"id\": \"test1\", \"text\":\"updated name\"}";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
     __block NSInteger callsToServer = 0;
@@ -374,7 +375,7 @@
     };
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
-    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"NoSuchTable"];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
     
     // Create the item
     NSDictionary *item = @{ @"id": @"test1", @"name": @"test name" };
@@ -407,7 +408,7 @@
 
 -(void) testInsertInsertCollapseThrows
 {
-    MSSyncTable *todoTable = [client syncTableWithName:@"NoSuchTable"];
+    MSSyncTable *todoTable = [client syncTableWithName:@"TodoNoVersion"];
     
     NSDictionary *item = @{ @"name": @"test" };
     [todoTable insert:item completion:^(NSDictionary *itemOne, NSError *error) {
@@ -420,14 +421,15 @@
     STAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
--(void) testReadLocalStoreError
+-(void) testReadWithIdNoItemSuccess
 {
     offline.returnErrors = YES;
     
-    MSSyncTable *todoTable = [client syncTableWithName:@"NoSuchTable"];
+    MSSyncTable *todoTable = [client syncTableWithName:@"TodoNoVersion"];
     
     [todoTable readWithId:@"10" completion:^(NSDictionary *item, NSError *error) {
-        STAssertNotNil(error, @"Error should have been returned");
+        STAssertNil(item, @"No item should have been found");
+        STAssertNil(error, @"No error should have been returned");
     }];
 }
 
@@ -440,7 +442,7 @@
                                    statusCode:200
                                    HTTPVersion:nil headerFields:nil];
     
-    NSString* stringData = @"[{\"id\": \"one\", \"name\":\"first item\"},{\"id\": \"two\", \"name\":\"second item\"}]";
+    NSString* stringData = @"[{\"id\": \"one\", \"text\":\"first item\"},{\"id\": \"two\", \"text\":\"second item\"}]";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
     testFilter.responseToUse = response;
@@ -449,7 +451,7 @@
     offline.upsertCalls = 0;
 
     MSClient *filteredClient = [client clientWithFilter:testFilter];
-    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"NoSuchTable"];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoItem"];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
     
     [todoTable pullWithQuery:query completion:^(NSError *error) {
@@ -462,6 +464,36 @@
     STAssertTrue([self waitForTest:30.0], @"Test timed out.");
 }
 
+-(void) testPullWithSystemPropeties
+{
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    
+    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                                   initWithURL:nil
+                                   statusCode:200
+                                   HTTPVersion:nil headerFields:nil];
+    
+    NSString* stringData = @"[{\"id\": \"one\", \"text\":\"first item\"},{\"id\": \"two\", \"text\":\"second item\"}]";
+    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    
+    testFilter.responseToUse = response;
+    testFilter.dataToUse = data;
+    testFilter.ignoreNextFilter = YES;
+    offline.upsertCalls = 0;
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+    
+    [todoTable pullWithQuery:query completion:^(NSError *error) {
+        STAssertNil(error, error.description);
+        STAssertEquals(offline.upsertCalls, 1, @"Unexpected number of upsert calls");
+        STAssertEquals(offline.upsertedItems, 2, @"Unexpected number of upsert calls");
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:30.0], @"Test timed out.");
+}
 
 -(void) testPullSuccessWithDeleted
 {
@@ -472,7 +504,7 @@
                                    statusCode:200
                                    HTTPVersion:nil headerFields:nil];
     
-    NSString* stringData = @"[{\"id\": \"one\", \"name\":\"first item\", \"__deleted\":false},{\"id\": \"two\", \"name\":\"second item\", \"__deleted\":true}, {\"id\": \"three\", \"name\":\"third item\", \"__deleted\":null}]";
+    NSString* stringData = @"[{\"id\": \"one\", \"text\":\"first item\", \"__deleted\":false},{\"id\": \"two\", \"text\":\"second item\", \"__deleted\":true}, {\"id\": \"three\", \"text\":\"third item\", \"__deleted\":null}]";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
     testFilter.responseToUse = response;
@@ -480,7 +512,7 @@
     testFilter.ignoreNextFilter = YES;
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
-    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"NoSuchTable"];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
     
     [todoTable pullWithQuery:query completion:^(NSError *error) {
@@ -505,8 +537,8 @@
                                    HTTPVersion:nil headerFields:nil];
     
     __block NSInteger nextResponse = 0;
-    NSString *insertResponse = @"{\"id\": \"one\", \"name\":\"first item\"}";
-    NSString *pushResponse = @"[{\"id\": \"one\", \"name\":\"first item\"},{\"id\": \"two\", \"name\":\"second item\"}]";
+    NSString *insertResponse = @"{\"id\": \"one\", \"text\":\"first item\"}";
+    NSString *pushResponse = @"[{\"id\": \"one\", \"text\":\"first item\"},{\"id\": \"two\", \"text\":\"second item\"}]";
     
     __block NSArray *responses = [NSArray arrayWithObjects:
                                   [insertResponse dataUsingEncoding:NSUTF8StringEncoding],
@@ -522,7 +554,7 @@
     testFilter.dataToUse = nil;
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
-    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"NoSuchTable"];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
     
     [todoTable insert:@{ @"id":@"test1", @"name": @"test one"} completion:^(NSDictionary *item, NSError *error) {
@@ -545,7 +577,7 @@
 
 -(void) testPurgeWithEmptyQueueSuccess
 {
-    MSSyncTable *todoTable = [client syncTableWithName:@"NoSuchTable"];
+    MSSyncTable *todoTable = [client syncTableWithName:@"TodoNoVersion"];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
     
     [todoTable purgeWithQuery:query completion:^(NSError *error) {
@@ -565,7 +597,7 @@
                                    statusCode:200
                                    HTTPVersion:nil headerFields:nil];
     
-    NSString* stringData = @"{\"id\": \"test1\", \"name\":\"updated name\"}";
+    NSString* stringData = @"{\"id\": \"test1\", \"text\":\"updated name\"}";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
     __block NSInteger callsToServer = 0;
@@ -579,7 +611,7 @@
     };
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
-    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"NoSuchTable"];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
     
     [todoTable insert:@{ @"id":@"test1", @"name": @"test one"} completion:^(NSDictionary *item, NSError *error) {
@@ -600,9 +632,9 @@
     testFilter.errorToUse = [NSError errorWithDomain:MSErrorDomain code:-1 userInfo:nil];
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
-    MSSyncTable *testTable = [filteredClient syncTableWithName:@"Test"];
+    MSSyncTable *testTable = [filteredClient syncTableWithName:@"TodoItem"];
 
-    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"ToDo"];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
     
     [testTable insert:@{ @"name": @"test one"} completion:^(NSDictionary *item, NSError *error) {
@@ -625,7 +657,7 @@
                                    statusCode:409
                                    HTTPVersion:nil headerFields:nil];
     
-    NSString* stringData = @"{\"id\": \"test1\", \"name\":\"updated name\"}";
+    NSString* stringData = @"{\"id\": \"test1\", \"text\":\"updated name\"}";
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
     __block NSInteger callsToServer = 0;
@@ -639,7 +671,7 @@
     };
     
     MSClient *filteredClient = [client clientWithFilter:testFilter];
-    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"NoSuchTable"];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
     MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
     
     [todoTable insert:@{ @"name": @"test one"} completion:^(NSDictionary *item, NSError *error) {

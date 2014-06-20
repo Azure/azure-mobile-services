@@ -4,9 +4,15 @@
 
 #import "MSCoreDataStore.h"
 
-@interface MSCoreDataStore()
-@property (nonatomic, weak) NSManagedObjectContext *context;
+NSString *const SystemColumnPrefix = @"__";
+NSString *const StoreSystemColumnPrefix = @"ms_";
+NSString *const StoreVersion = @"ms_version";
+NSString *const StoreCreatedAt = @"ms_createdAt";
+NSString *const StoreUpdatedAt = @"ms_updatedAt";
+NSString *const StoreDeleted = @"ms_deleted";
 
+@interface MSCoreDataStore()
+@property (nonatomic, strong) NSManagedObjectContext *context;
 @end
 
 @implementation MSCoreDataStore
@@ -28,18 +34,29 @@
     return @"MS_TableOperationErrors";
 }
 
-/// Helper function to get a specific record from a table
+/// Helper function to get a specific record from a table, if
 -(id) getRecordForTable:(NSString *)table itemId:(NSString *)itemId asDictionary:(BOOL)asDictionary orError:(NSError **)error
 {
-    NSFetchRequest *fr = [NSFetchRequest fetchRequestWithEntityName:table];
-    fr.predicate = [NSPredicate predicateWithFormat:@"id == %@", itemId];
+    // Create the entity description
+    NSEntityDescription *entity = [NSEntityDescription entityForName:table inManagedObjectContext:self.context];
+    if (!entity) {
+        if (error) {
+            *error = [MSCoreDataStore errorInvalidTable:table];
+        }
+        return nil;
+    }
+    
+    NSFetchRequest *fr = [[NSFetchRequest alloc] init];
+    [fr setEntity:entity];
+    
+    fr.predicate = [NSPredicate predicateWithFormat:@"%K == %@", MSSystemColumnId, itemId];
     
     if (asDictionary) {
         fr.resultType = NSDictionaryResultType;
     }
     
     NSArray *results = [self.context executeFetchRequest:fr error:error];
-    if (error && *error) {
+    if (!results || (error && *error)) {
         return nil;
     }
     
@@ -56,20 +73,26 @@
     return [results firstObject];
 }
 
-/// Helper function to convert a server response item to only contain the appropriate keys for consumption by
-/// a mobile service
-+(NSDictionary *) adjustItem:(NSDictionary *)item forEntityDescription:(NSEntityDescription *)entityDescription
+/// Helper function to convert a server (external) item to only contain the appropriate keys for storage
+/// in core data tables. This means we need to change system columns (prefix: __) to use ms_, and remove
+/// any retrieved columns from the user's schema that aren't in the local store's schema
++(NSDictionary *) adjustExternalItem:(NSDictionary *)item forEntityDescription:(NSEntityDescription *)entityDescription
 {
     NSMutableDictionary *modifiedItem = [item mutableCopy];
 
-    // Convert __version to ms_version
-    id version = [item objectForKey:MSSystemColumnVersion];
-    if (version) {
-        [modifiedItem setValue:[item objectForKey:MSSystemColumnVersion] forKey:@"ms_version"];
-        [modifiedItem removeObjectForKey:MSSystemColumnVersion];
+    // Find all system columns in the item
+    NSSet *systemColumnNames = [modifiedItem keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+        NSString *columnName = (NSString *)key;
+        return [columnName hasPrefix:SystemColumnPrefix];
+    }];
+    
+    // Now translate every system column from __x to ms_x
+    for (NSString *columnName in systemColumnNames) {
+        NSString *adjustedName = [MSCoreDataStore internalNameForMSColumnName:columnName];
+        modifiedItem[adjustedName] = modifiedItem[columnName];;
     }
 
-    // Copy over only supported attributes
+    // Finally, remove any attributes in the dictionary that are not also in the data model
     NSMutableDictionary *adjustedItem = [[NSMutableDictionary alloc] init];
     for (NSString *attributeName in entityDescription.attributesByName) {
         [adjustedItem setValue:[modifiedItem objectForKey:attributeName] forKey:attributeName];
@@ -78,48 +101,100 @@
     return [adjustedItem copy];
 }
 
-/// Helper function to convert a managed object into a correctly formatted NSDictionary
-+(NSDictionary *) adjustSystemPropertiesOnItem:(NSDictionary *)item {
-    NSMutableDictionary *exposedItem = [item mutableCopy];
+/// Helper function to convert a managed object's dictionary representation into a correctly formatted
+/// NSDictionary by changing ms_ prefixes back to __ prefixes
++(NSDictionary *) adjustInternalItem:(NSDictionary *)item {
+    NSMutableDictionary *externalItem = [item mutableCopy];
     
-    [exposedItem setValue:[exposedItem objectForKey:@"ms_version"] forKey:MSSystemColumnVersion];
-    [exposedItem removeObjectForKey:@"ms_version"];
+    NSSet *internalSystemColumns = [externalItem keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+        NSString *columnName = (NSString *)key;
+        return [columnName hasPrefix:StoreSystemColumnPrefix];
+    }];
     
-    return [exposedItem copy];
+    for (NSString *columnName in internalSystemColumns) {
+        NSString *externalColumnName = [MSCoreDataStore externalNameForStoreColumnName:columnName];
+        [externalItem removeObjectForKey:columnName];
+        externalItem[externalColumnName] = item[columnName];
+    }
+    
+    return externalItem;
+}
+
++(NSString *) internalNameForMSColumnName:(NSString *)columnName
+{
+   return [StoreSystemColumnPrefix stringByAppendingString:
+            [columnName substringFromIndex:SystemColumnPrefix.length]];
+}
+
++(NSString *) externalNameForStoreColumnName:(NSString *)columnName
+{
+    return [SystemColumnPrefix stringByAppendingString:
+            [columnName substringFromIndex:StoreSystemColumnPrefix.length]];
 }
 
 #pragma mark - MSSyncContextDataSource
+
+-(NSUInteger) systemPropetiesForTable:(NSString *)table
+{
+    NSUInteger properties = 0;
+    NSEntityDescription *entity = [NSEntityDescription entityForName:table
+                                              inManagedObjectContext:self.context];
+    
+    NSDictionary *columns = [entity propertiesByName];
+    
+    if ([columns objectForKey:StoreVersion]) {
+        properties = properties | MSSystemPropertyVersion;
+    }
+    if ([columns objectForKey:StoreCreatedAt]) {
+        properties = properties | MSSystemPropertyCreatedAt;
+    }
+    if ([columns objectForKey:StoreUpdatedAt]) {
+        properties = properties | MSSystemPropertyUpdatedAt;
+    }
+    if ([columns objectForKey:StoreDeleted]) {
+        properties = properties | MSSystemPropertyDeleted;
+    }
+    
+    return MSSystemPropertyNone;
+}
 
 -(NSDictionary *)readTable:(NSString *)table withItemId:(NSString *)itemId orError:(NSError *__autoreleasing *)error
 {
     __block NSDictionary *item;
     [self.context performBlockAndWait:^{
         item = [self getRecordForTable:table itemId:itemId asDictionary:YES orError:error];
-        
-        if (error && *error) {
-            item = nil;
-        }
     }];
 
-    return [MSCoreDataStore adjustSystemPropertiesOnItem:item];
+    if (!item) {
+        return nil;
+    }
+    
+    return [MSCoreDataStore adjustInternalItem:item];
 }
 
 -(MSSyncContextReadResult *)readWithQuery:(MSQuery *)query orError:(NSError *__autoreleasing *)error
 {
     __block NSInteger totalCount = -1;
     __block NSArray *results;
+    __block NSError *internalError;
     [self.context performBlockAndWait:^{
+        // Create the entity description
         NSEntityDescription *entity = [NSEntityDescription entityForName:query.syncTable.name inManagedObjectContext:self.context];
+        if (!entity) {
+            internalError = [MSCoreDataStore errorInvalidTable:query.syncTable.name];
+            return;
+        }
         
-        NSFetchRequest *fr = [NSFetchRequest fetchRequestWithEntityName:query.syncTable.name];
+        NSFetchRequest *fr = [[NSFetchRequest alloc] init];
+        fr.entity = entity;
         fr.predicate = query.predicate;
         fr.sortDescriptors = query.orderBy;
         fr.resultType = NSDictionaryResultType;
 
         // Only calculate total count if fetchLimit/Offset is set
         if (query.includeTotalCount && (query.fetchLimit != -1 || query.fetchOffset != -1)) {
-            totalCount = [self.context countForFetchRequest:fr error:error];
-            if (error && *error) {
+            totalCount = [self.context countForFetchRequest:fr error:&internalError];
+            if (internalError) {
                 return;
             }
             
@@ -137,47 +212,53 @@
             fr.fetchLimit = query.fetchLimit;
         }
         
-        // Convert version back to __version from ms_version
-        NSAttributeDescription *versionProperty;
         NSMutableArray *properties;
-        
-        for (NSAttributeDescription *desc in entity.properties) {
-            if ([desc.name isEqualToString:@"ms_version"]) {
-                versionProperty = desc;
-                break;
-            }
-        }
-
-        // If the table has __version, add a conversion step
-        if (versionProperty) {
-            if (query.selectFields) {
-                properties = [query.selectFields mutableCopy];
-            } else {
-                properties = [[entity properties] mutableCopy];
-                [properties removeObject:versionProperty];
+        if (query.selectFields) {
+            // We don't let users opt out of version for now to be safe
+            NSAttributeDescription *versionProperty;
+            for (NSAttributeDescription *desc in entity.properties) {
+                if ([desc.name isEqualToString:StoreVersion]) {
+                    versionProperty = desc;
+                    break;
+                }
             }
             
-            NSExpression *actualVersionColumn = [NSExpression expressionForKeyPath:@"ms_version"];
-            NSExpressionDescription *systemVersionColumn = [[NSExpressionDescription alloc] init];
-            [systemVersionColumn setName:@"__version"];
-            [systemVersionColumn setExpression:actualVersionColumn];
-            [systemVersionColumn setExpressionResultType:NSStringAttributeType];
+            properties = [query.selectFields mutableCopy];
             
-            [properties addObject:systemVersionColumn];
+            NSIndexSet *systemColumnIndexes = [properties indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+                NSString *columnName = (NSString *)obj;
+                return [columnName hasPrefix:SystemColumnPrefix];
+            }];
+            
+            __block bool hasVersion;
+            [systemColumnIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+                NSString *columnName = [properties objectAtIndex:idx];
+                if (!hasVersion && versionProperty) {
+                    hasVersion = [columnName isEqualToString:MSSystemColumnVersion];
+                }
+                
+                [properties replaceObjectAtIndex:idx
+                                      withObject:[MSCoreDataStore internalNameForMSColumnName:columnName]];
+            }];
+            
+            if (!hasVersion && versionProperty) {
+                [properties addObject:StoreVersion];
+            }
         }
-        
         fr.propertiesToFetch = properties;
         
-        NSArray *rawResult = [self.context executeFetchRequest:fr error:error];
-        if (error && *error) {
+        NSArray *rawResult = [self.context executeFetchRequest:fr error:&internalError];
+        if (internalError) {
             return;
         }
         
-        // Convert NSKeyedDictionary to regular dictionary objects since for now this keyed dictionaries don't
+        // Convert NSKeyedDictionary to regular dictionary objects since for now keyed dictionaries don't
         // seem to convert to mutable dictionaries as a user may expect
         NSMutableArray *finalResult = [[NSMutableArray alloc] initWithCapacity:rawResult.count];
         [rawResult enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-            [finalResult addObject:[NSDictionary dictionaryWithDictionary:obj]];
+            NSDictionary *rawItem = [NSDictionary dictionaryWithDictionary:obj];
+            NSDictionary *adjustedItem = [MSCoreDataStore adjustInternalItem:rawItem];
+            [finalResult addObject:adjustedItem];
         }];
         
         // If there was no fetch/skip (totalCount will still be -1) and total count requested, use the results array for the count
@@ -188,7 +269,10 @@
         results = [finalResult copy];
     }];
     
-    if (error && *error) {
+    if (internalError) {
+        if (error) {
+            *error = internalError;
+        }
         return nil;
     } else {
         return [[MSSyncContextReadResult alloc] initWithCount:totalCount items:results];
@@ -200,15 +284,18 @@
     __block BOOL success;
     [self.context performBlockAndWait:^{
         NSEntityDescription *entity = [NSEntityDescription entityForName:table inManagedObjectContext:self.context];
+        if (!entity) {
+            if (error) {
+                *error = [MSCoreDataStore errorInvalidTable:table];
+            }
+            return;
+        }
         
         for (NSDictionary *item in items) {
-            NSManagedObject *managedItem = [self getRecordForTable:table itemId:[item objectForKey:@"id"] asDictionary:NO orError:error];
+            NSManagedObject *managedItem = [self getRecordForTable:table itemId:[item objectForKey:MSSystemColumnId] asDictionary:NO orError:error];
             if (error && *error) {
-                success = NO;
-                
                 // Reset since we may have made changes earlier
                 [self.context reset];
-                
                 return;
             }
             
@@ -218,7 +305,7 @@
             }
             
             
-            NSDictionary *managedItemDictionary = [MSCoreDataStore adjustItem:item forEntityDescription:entity];
+            NSDictionary *managedItemDictionary = [MSCoreDataStore adjustExternalItem:item forEntityDescription:entity];
             [managedItem setValuesForKeysWithDictionary:managedItemDictionary];
         }
         
@@ -238,7 +325,7 @@
         for (NSString *itemId in items) {
             NSManagedObject *foundItem = [self getRecordForTable:table itemId:itemId asDictionary:NO orError:error];
             if (error && *error) {
-                success = NO;
+                [self.context reset];
                 return;
             }
             
@@ -260,7 +347,16 @@
 {
     __block BOOL success;
     [self.context performBlockAndWait:^{
-        NSFetchRequest *fr = [NSFetchRequest fetchRequestWithEntityName:query.syncTable.name];
+        NSEntityDescription *entity = [NSEntityDescription entityForName:query.syncTable.name inManagedObjectContext:self.context];
+        if (!entity) {
+            if (error) {
+                *error = [MSCoreDataStore errorInvalidTable:query.syncTable.name];
+            }
+            return;
+        }
+        
+        NSFetchRequest *fr = [[NSFetchRequest alloc] init];
+        fr.entity = entity;
         fr.predicate = query.predicate;
         fr.sortDescriptors = query.orderBy;
         
@@ -286,6 +382,19 @@
     }];
     
     return success;
+}
+
+
+# pragma mark Error helpers
+
++ (NSError *) errorInvalidTable:(NSString *)table
+{
+    NSDictionary *errorDetails = @{ NSLocalizedDescriptionKey:
+                                        [NSString stringWithFormat:@"Table '%@' not found", table] };
+    
+    return [NSError errorWithDomain:MSErrorDomain
+                               code:MSSyncTableLocalStoreError
+                           userInfo:errorDetails];
 }
 
 @end

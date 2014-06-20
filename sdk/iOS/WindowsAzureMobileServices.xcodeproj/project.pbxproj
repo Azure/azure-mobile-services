@@ -44,6 +44,7 @@
 		A28224B3192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A28224B1192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld */; };
 		A28224B4192AD00E00EF8743 /* CoreDataTestModel.xcdatamodeld in Resources */ = {isa = PBXBuildFile; fileRef = A28224B1192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld */; };
 		A295B2B3192AB2040067562E /* MSCoreDataStoreTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A295B2B2192AB2040067562E /* MSCoreDataStoreTests.m */; };
+		A29F44A31953CBF30063C0C1 /* MSCoreDataStore+TestHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = A29F44A21953CBF30063C0C1 /* MSCoreDataStore+TestHelper.m */; };
 		A2ACD540192322C50012B1ED /* MSCoreDataStore.h in Headers */ = {isa = PBXBuildFile; fileRef = A2ACD53E192322C50012B1ED /* MSCoreDataStore.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A2ACD541192322C50012B1ED /* MSCoreDataStore.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ACD53F192322C50012B1ED /* MSCoreDataStore.m */; };
 		A2ADF7E91914481B0078BB16 /* MSTableOperationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = A2ADF7E81914481B0078BB16 /* MSTableOperationTests.m */; };
@@ -166,6 +167,8 @@
 		A28224AF192ACEAE00EF8743 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		A28224B2192ACFB700EF8743 /* CoreDataTestModel.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = CoreDataTestModel.xcdatamodel; sourceTree = "<group>"; };
 		A295B2B2192AB2040067562E /* MSCoreDataStoreTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSCoreDataStoreTests.m; sourceTree = "<group>"; };
+		A29F44A11953CBF30063C0C1 /* MSCoreDataStore+TestHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MSCoreDataStore+TestHelper.h"; sourceTree = "<group>"; };
+		A29F44A21953CBF30063C0C1 /* MSCoreDataStore+TestHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MSCoreDataStore+TestHelper.m"; sourceTree = "<group>"; };
 		A2ACD53E192322C50012B1ED /* MSCoreDataStore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSCoreDataStore.h; sourceTree = "<group>"; };
 		A2ACD53F192322C50012B1ED /* MSCoreDataStore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSCoreDataStore.m; sourceTree = "<group>"; };
 		A2ADF7E81914481B0078BB16 /* MSTableOperationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableOperationTests.m; sourceTree = "<group>"; };
@@ -296,6 +299,8 @@
 			children = (
 				A295B2B2192AB2040067562E /* MSCoreDataStoreTests.m */,
 				A28224B1192ACFB700EF8743 /* CoreDataTestModel.xcdatamodeld */,
+				A29F44A11953CBF30063C0C1 /* MSCoreDataStore+TestHelper.h */,
+				A29F44A21953CBF30063C0C1 /* MSCoreDataStore+TestHelper.m */,
 			);
 			name = CoreData;
 			sourceTree = "<group>";
@@ -747,6 +752,7 @@
 				A22CF3731825914700660C79 /* MSTable+MSTableTestUtilities.m in Sources */,
 				E8E37907161F4D0D00C13F00 /* MSFilterTest.m in Sources */,
 				A295B2B3192AB2040067562E /* MSCoreDataStoreTests.m in Sources */,
+				A29F44A31953CBF30063C0C1 /* MSCoreDataStore+TestHelper.m in Sources */,
 				E84CA4D6162373E2009B2588 /* MSUserAgentBuilderTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

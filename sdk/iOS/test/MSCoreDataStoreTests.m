@@ -5,6 +5,8 @@
 
 #import <SenTestingKit/SenTestingKit.h>
 #import "MSCoreDataStore.h"
+#import "MSCoreDataStore+TestHelper.h"
+#import "MSJSONSerializer.h"
 
 @interface MSCoreDataStoreTests : SenTestCase {
     BOOL done;
@@ -14,30 +16,12 @@
 
 @implementation MSCoreDataStoreTests
 
--(NSManagedObjectContext *)inMemoryManagedObjectContext
-{
-    NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-    NSURL *url = [bundle URLForResource:@"CoreDataTestModel" withExtension:@"momd"];
-    NSManagedObjectModel *model = [[NSManagedObjectModel alloc] initWithContentsOfURL:url];
-    STAssertNotNil(model, @"NSManagedObjectModel creation failed");
-    
-    NSPersistentStoreCoordinator *coordinator = [[NSPersistentStoreCoordinator alloc] initWithManagedObjectModel:model];
-    STAssertNotNil(coordinator, @"NSPersistentStoreCoordinator creation failed");
-    
-    NSPersistentStore *store = [coordinator addPersistentStoreWithType:NSInMemoryStoreType configuration:nil URL:nil options:nil error:0];
-    STAssertNotNil(store, @"NSPersistentStore creation failed");
-    
-    NSManagedObjectContext *context = [[NSManagedObjectContext alloc] initWithConcurrencyType:NSPrivateQueueConcurrencyType];
-    context.persistentStoreCoordinator = coordinator;
-    
-    return context;
-}
-
 - (void)setUp
 {
     NSLog(@"%@ setUp", self.name);
     
-    self.store = [[MSCoreDataStore alloc] initWithManagedObjectContext:[self inMemoryManagedObjectContext]];
+    self.store = [[MSCoreDataStore alloc] initWithManagedObjectContext:[MSCoreDataStore inMemoryManagedObjectContext]];
+    STAssertNotNil(self.store, @"In memory store could not be created");
     
     done = NO;
 }
@@ -142,7 +126,84 @@
     STAssertNil([item objectForKey:@"ms_version"], @"__version was missing");
 }
 
-- (void)testReadWithQuery
+-(void)testUpsertSystemColumnsConvert_Success
+{
+    NSError *error;
+    
+    NSDate *now = [NSDate date];
+    MSJSONSerializer *serializer = [MSJSONSerializer JSONSerializer];
+    NSData *rawDate = [@"\"2014-05-27T20:37:33.055Z\"" dataUsingEncoding:NSUTF8StringEncoding];
+    NSDate *testDate = [serializer itemFromData:rawDate withOriginalItem:nil ensureDictionary:NO orError:&error];
+    
+    NSDictionary *originalItem = @{
+                               MSSystemColumnId:@"AmazingRecord1",
+                               @"text": @"test1",
+                               MSSystemColumnVersion: @"AAAAAAAAjlg=",
+                               MSSystemColumnCreatedAt: testDate,
+                               MSSystemColumnUpdatedAt: now,
+                               @"__meaningOfLife": @42,
+                               MSSystemColumnDeleted : @NO
+                           };
+    
+    [self.store upsertItems:@[originalItem] table:@"ManySystemColumns" orError:&error];
+    STAssertNil(error, @"upsert failed: %@", error.description);
+    
+    // Test read with id
+
+    NSDictionary *item = [self.store readTable:@"ManySystemColumns" withItemId:@"AmazingRecord1" orError:&error];
+    STAssertNil(error, @"readTable:withItemId: failed: %@", error.description);
+    
+    STAssertNotNil(item, @"item should not have been nil");
+    STAssertTrue([item[MSSystemColumnId] isEqualToString:@"AmazingRecord1"], @"Incorrect item id");
+    STAssertTrue([item[MSSystemColumnVersion] isEqualToString:originalItem[MSSystemColumnVersion]], @"Incorrect version");
+    STAssertEqualObjects(item[MSSystemColumnUpdatedAt], originalItem[MSSystemColumnUpdatedAt], @"Incorrect updated at");
+    STAssertEqualObjects(item[MSSystemColumnCreatedAt], originalItem[MSSystemColumnCreatedAt], @"Incorrect created at");
+    STAssertEqualObjects(item[MSSystemColumnDeleted], originalItem[MSSystemColumnDeleted], @"Incorrect deleted");
+    STAssertEqualObjects(item[@"__meaningOfLife"], originalItem[@"__meaningOfLife"], @"Incorrect meaning of life");
+    
+    NSSet *msKeys = [item keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+        *stop = [(NSString *)key hasPrefix:@"ms_"];
+        return *stop;
+    }];
+    STAssertTrue(msKeys.count == 0, @"ms_ column keys were exposed");
+    
+    // Repeat for query
+    
+    MSSyncTable *manySystemColumns = [[MSSyncTable alloc] initWithName:@"ManySystemColumns" client:nil];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:manySystemColumns predicate:nil];
+    
+    MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
+    STAssertNil(error, @"readWithQuery: failed: %@", error.description);
+    STAssertNotNil(result, @"result should not have been nil");
+    STAssertTrue(result.items.count == 1, @"Unexpected result count %d", result.items.count);
+    
+    STAssertNotNil(item, @"item should not have been nil");
+    STAssertTrue([item[MSSystemColumnId] isEqualToString:@"AmazingRecord1"], @"Incorrect item id");
+    STAssertTrue([item[MSSystemColumnVersion] isEqualToString:originalItem[MSSystemColumnVersion]], @"Incorrect version");
+    STAssertEqualObjects(item[MSSystemColumnUpdatedAt], originalItem[MSSystemColumnUpdatedAt], @"Incorrect updated at");
+    STAssertEqualObjects(item[MSSystemColumnCreatedAt], originalItem[MSSystemColumnCreatedAt], @"Incorrect created at");
+    STAssertEqualObjects(item[MSSystemColumnDeleted], originalItem[MSSystemColumnDeleted], @"Incorrect deleted");
+    STAssertEqualObjects(item[@"__meaningOfLife"], originalItem[@"__meaningOfLife"], @"Incorrect meaning of life");
+    
+    msKeys = [item keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+        *stop = [(NSString *)key hasPrefix:@"ms_"];
+        return *stop;
+    }];
+    STAssertTrue(msKeys.count == 0, @"ms_ column keys were exposed");
+}
+
+-(void)testUpsertNoTableError
+{
+    NSError *error;
+    NSArray *testArray = [NSArray arrayWithObject:@{@"id":@"A", @"text": @"test1"}];
+    
+    [self.store upsertItems:testArray table:@"NoSuchTable" orError:&error];
+
+    STAssertNotNil(error, @"upsert failed: %@", error.description);
+    STAssertEquals(error.code, MSSyncTableLocalStoreError, @"Unexpected code");
+}
+
+-(void)testReadWithQuery
 {
     NSError *error;
     
@@ -235,11 +296,55 @@
     STAssertNotNil([item objectForKey:@"sort"], @"sort should not have been nil");
     STAssertNotNil([item objectForKey:@"text"], @"text should not have been nil");
     
-    // note: to not break oc, you get version always
+    // NOTE: to not break oc, you get version regardless
     STAssertNotNil([item objectForKey:@"__version"], @"version should have been nil");
 }
 
--(void)testDeleteWithIdSuccess
+-(void)testReadWithQuery_Select_SystemColumns
+{
+    NSError *error;
+    
+    NSArray *testData = @[
+      @{ MSSystemColumnId:@"A", @"text": @"t1", MSSystemColumnVersion: @"AAAAAAAAjlg=", @"__meaningOfLife": @42},
+      @{ MSSystemColumnId:@"B", @"text": @"t2", MSSystemColumnVersion: @"AAAAAAAAjlh=", @"__meaningOfLife": @43},
+      @{ MSSystemColumnId:@"C", @"text": @"t3", MSSystemColumnVersion: @"AAAAAAAAjli=", @"__meaningOfLife": @44}
+    ];
+    
+    [self.store upsertItems:testData table:@"ManySystemColumns" orError:&error];
+    STAssertNil(error, @"Upsert failed: %@", error.description);
+    
+    // Now check selecting subset of columns
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"ManySystemColumns" client:nil];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
+    query.selectFields = [NSArray arrayWithObjects:@"text", @"__version", @"__meaningOfLife", nil];
+    
+    MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
+    STAssertNil(error, @"readWithQuery: failed: %@", error.description);
+    STAssertNotNil(result, @"result should not have been nil");
+    STAssertTrue(result.items.count == 3, @"Unexpected result count %d", result.items.count);
+    
+    NSDictionary *item = [result.items objectAtIndex:0];
+    STAssertNotNil([item objectForKey:@"text"], @"Expected text");
+    STAssertNotNil([item objectForKey:@"__meaningOfLife"], @"Expected __meaningOfLine");
+    STAssertNotNil([item objectForKey:MSSystemColumnVersion], @"Expected __version");
+    STAssertEquals(item.count, 3U, @"Select returned extra columns");
+}
+
+-(void)testReadWithQuery_NoTable_Error
+{
+    NSError *error;
+
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"NoSuchTable" client:nil];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
+    
+    MSSyncContextReadResult *result = [self.store readWithQuery:query orError:&error];
+
+    STAssertNil(result, @"Result should have been nil");
+    STAssertNotNil(error, @"upsert failed: %@", error.description);
+    STAssertEquals(error.code, MSSyncTableLocalStoreError, @"Unexpected code");
+}
+
+-(void)testDeleteWithId_Success
 {
     NSError *error;
     
@@ -277,6 +382,16 @@
     
     [self.store deleteItemsWithIds:[NSArray arrayWithObject:@"B"] table:@"TodoNoVersion" orError:&error];
     STAssertNil(error, @"deleteItemsWithIds: failed: %@", error.description);
+}
+
+-(void)testDeleteWithIds_NoTable_Error
+{
+    NSError *error;
+    
+    [self.store deleteItemsWithIds:[NSArray arrayWithObject:@"B"] table:@"NoSuchTable" orError:&error];
+    
+    STAssertNotNil(error, @"upsert failed: %@", error.description);
+    STAssertEquals(error.code, MSSyncTableLocalStoreError, @"Unexpected code");
 }
 
 - (void)testDeleteWithQuery_AllRecord_Success
@@ -317,6 +432,20 @@
     STAssertTrue(result.items.count == 2, @"Unexpected result count %d", result.items.count);
     STAssertFalse([[[result.items objectAtIndex:0] objectForKey:@"id"] isEqualToString:@"C"], @"Record C should have been deleted");
     STAssertFalse([[[result.items objectAtIndex:1] objectForKey:@"id"] isEqualToString:@"C"], @"Record C should have been deleted");
+}
+
+-(void)testDeleteWithQuery_NoTable_Error
+{
+    NSError *error;
+    
+    MSSyncTable *todoItem = [[MSSyncTable alloc] initWithName:@"NoSuchTable" client:nil];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoItem predicate:nil];
+    query.predicate = [NSPredicate predicateWithFormat:@"text == 'test3'"];
+    
+    [self.store deleteUsingQuery:query orError:&error];
+
+    STAssertNotNil(error, @"upsert failed: %@", error.description);
+    STAssertEquals(error.code, MSSyncTableLocalStoreError, @"Unexpected code");
 }
 
 - (void) populateTestData
