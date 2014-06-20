@@ -454,8 +454,42 @@
     
     [todoTable pullWithQuery:query completion:^(NSError *error) {
         STAssertNil(error, error.description);
-        STAssertEquals(offline.upsertCalls, 2, @"Unexpected number of upsert calls");
-        done = YES;        
+        STAssertEquals(offline.upsertCalls, 1, @"Unexpected number of upsert calls");
+        STAssertEquals(offline.upsertedItems, 2, @"Unexpected number of upsert calls");
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:30.0], @"Test timed out.");
+}
+
+
+-(void) testPullSuccessWithDeleted
+{
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    
+    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                                   initWithURL:nil
+                                   statusCode:200
+                                   HTTPVersion:nil headerFields:nil];
+    
+    NSString* stringData = @"[{\"id\": \"one\", \"name\":\"first item\", \"__deleted\":false},{\"id\": \"two\", \"name\":\"second item\", \"__deleted\":true}, {\"id\": \"three\", \"name\":\"third item\", \"__deleted\":null}]";
+    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    
+    testFilter.responseToUse = response;
+    testFilter.dataToUse = data;
+    testFilter.ignoreNextFilter = YES;
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"NoSuchTable"];
+    MSQuery *query = [[MSQuery alloc] initWithSyncTable:todoTable];
+    
+    [todoTable pullWithQuery:query completion:^(NSError *error) {
+        STAssertNil(error, error.description);
+        STAssertEquals(offline.upsertCalls, 1, @"Unexpected number of upsert calls");
+        STAssertEquals(offline.upsertedItems, 2, @"Unexpected number of upsert calls");
+        STAssertEquals(offline.deleteCalls, 1, @"Unexpected number of delete calls");
+        STAssertEquals(offline.deletedItems, 1, @"Unexpected number of upsert calls");
+        done = YES;
     }];
     
     STAssertTrue([self waitForTest:30.0], @"Test timed out.");
@@ -465,8 +499,6 @@
 {
     MSTestFilter *testFilter = [[MSTestFilter alloc] init];
 
-    offline.upsertCalls = 0;
-    
     NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
                                    initWithURL:nil
                                    statusCode:200
@@ -502,7 +534,9 @@
     
     [todoTable pullWithQuery:query completion:^(NSError *error) {
         STAssertNil(error, error.description);
-        STAssertEquals(offline.upsertCalls, 5, @"Unexpected number of upsert calls");
+        STAssertEquals(offline.upsertCalls, 4, @"Unexpected number of upsert calls");
+        STAssertEquals(offline.upsertedItems, 5, @"Unexpected number of upsert calls");
+        
         done = YES;
     }];
     

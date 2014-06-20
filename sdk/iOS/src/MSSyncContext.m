@@ -298,6 +298,9 @@ static NSOperationQueue *pushQueue_;
     else if (query.includeTotalCount) {
         error = [self errorWithDescription:@"Use of includeTotalCount is not supported in pullWithQuery:" andErrorCode:MSInvalidParameter];
     }
+    else if (query.parameters) {
+        error = [self errorWithDescription:@"Use of parameters is not supported in pullWithQuery:" andErrorCode:MSInvalidParameter];
+    }
     else if (query.table) {
         // We allow users to pull with a regular table, if it is setup properly
         if (query.table.systemProperties != MSSystemPropertyVersion) {
@@ -312,6 +315,9 @@ static NSOperationQueue *pushQueue_;
         // MSQuery itself should disallow this, but for safety verify we have a table object
         error = [self errorWithDescription:@"Missing required syncTable object in query" andErrorCode:MSInvalidParameter];
     }
+    
+    // Pulls always include deleted records
+    query.parameters = @{@"__includeDeleted" : @YES };
     
     // Begin the actual pull request
     [self pullWithQueryInternal:query completion:completion];
@@ -347,7 +353,8 @@ static NSOperationQueue *pushQueue_;
         
         // Read from server
         [query readWithCompletion:^(NSArray *serverItems, NSInteger totalCount, NSError *error) {
-            if (error) {
+            // If error, or no results we can stop processing
+            if (error || !serverItems || serverItems.count == 0) {
                 if (completion) {
                     [self.callbackQueue addOperationWithBlock:^{
                         completion(error);
@@ -367,9 +374,30 @@ static NSOperationQueue *pushQueue_;
                     return;
                 }
                 
-                // upsert each item into table that isn't pending to go to server
+                //Check if results include the deleted column
                 NSError *localDataSourceError;
-                [self.dataSource upsertItems:serverItems table:query.table.name orError:&localDataSourceError];
+                NSArray *itemsToUpsert = serverItems;
+                NSArray *itemsToDelete = [serverItems filteredArrayUsingPredicate:
+                                          [NSPredicate predicateWithFormat:@"%@ == YES", MSSystemColumnDeleted]];
+                if ([itemsToDelete count] > 0) {
+                    // Remove the deleted items from the overall list if we had some
+                    itemsToUpsert = [serverItems filteredArrayUsingPredicate:
+                                     [NSPredicate predicateWithFormat:@"%@ != YES", MSSystemColumnDeleted]];
+
+                    
+                    NSMutableArray *itemIds = [NSMutableArray arrayWithCapacity:itemsToDelete.count];
+                    for (NSDictionary *item in itemsToDelete) {
+                        [itemIds addObject:item[@"id"]];
+                    }
+                    
+                    [self.dataSource deleteItemsWithIds:itemIds table:query.table.name orError:&localDataSourceError];
+                    
+                }
+                
+                if (!localDataSourceError) {
+                    // upsert each item into table that isn't pending to go to the server
+                    [self.dataSource upsertItems:itemsToUpsert table:query.table.name orError:&localDataSourceError];
+                }
                 
                 if (completion) {
                     [self.callbackQueue addOperationWithBlock:^{

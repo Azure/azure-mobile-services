@@ -16,6 +16,7 @@ NSString *const MSSystemColumnId = @"id";
 NSString *const MSSystemColumnCreatedAt = @"__createdAt";
 NSString *const MSSystemColumnUpdatedAt = @"__updatedAt";
 NSString *const MSSystemColumnVersion = @"__version";
+NSString *const MSSystemColumnDeleted = @"__deleted";
 
 @implementation MSTable
 
