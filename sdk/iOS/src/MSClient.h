@@ -28,11 +28,11 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 
 #pragma  mark * MSClient Public Interface
 
-/// The MSClient class is the starting point for working with a Windows Azure
+/// The MSClient class is the starting point for working with a Microsoft Azure
 /// Mobile Service on a client device. An instance of the *MSClient* class is
-/// created with a URL pointing to a Windows Azure Mobile Service. The *MSClient*
+/// created with a URL pointing to a Microsoft Azure Mobile Service. The *MSClient*
 /// allows the developer to get MSTable instances, which are used to work with
-/// the data of the Windows Azure Mobile Service, as well as login and logout an
+/// the data of the Microsoft Azure Mobile Service, as well as login and logout an
 /// end user.
 @interface MSClient : NSObject <NSCopying>
 
@@ -41,14 +41,14 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 /// @name Properties
 /// @{
 
-/// The URL of the Windows Azure Mobile Service associated with the client.
+/// The URL of the Microsoft Azure Mobile Service associated with the client.
 @property (nonatomic, strong, readonly)     NSURL *applicationURL;
 
-/// The application key for the Windows Azure Mobile Service associated with
+/// The application key for the Microsoft Azure Mobile Service associated with
 /// the client if one was provided in the creation of the client and nil
 /// otherwise. If non-nil, the application key will be included in all requests
-/// made to the Windows Azure Mobile Service, allowing the client to perform
-/// all actions on the Windows Azure Mobile Service that require application-key
+/// made to the Microsoft Azure Mobile Service, allowing the client to perform
+/// all actions on the Microsoft Azure Mobile Service that require application-key
 /// level permissions.
 @property (nonatomic, copy, readonly)     NSString *applicationKey;
 
@@ -80,32 +80,32 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 /// @name Initializing the MSClient Object
 /// @{
 
-/// Creates a client with the given URL for the Windows Azure Mobile Service.
+/// Creates a client with the given URL for the Microsoft Azure Mobile Service.
 +(MSClient *)clientWithApplicationURLString:(NSString *)urlString;
 
-/// Creates a client with the given URL and application key for the Windows Azure
+/// Creates a client with the given URL and application key for the Microsoft Azure
 /// Mobile Service.
 +(MSClient *)clientWithApplicationURLString:(NSString *)urlString
                          applicationKey:(NSString *)key;
 
 /// Old method to create a client with the given URL and application key for the
-/// Windows Azure Mobile Service. This has been deprecated. Use
+/// Microsoft Azure Mobile Service. This has been deprecated. Use
 /// clientWithApplicationURLString:applicationKey:
 /// @deprecated
 +(MSClient *)clientWithApplicationURLString:(NSString *)urlString
                          withApplicationKey:(NSString *)key __deprecated;
 
-/// Creates a client with the given URL for the Windows Azure Mobile Service.
+/// Creates a client with the given URL for the Microsoft Azure Mobile Service.
 +(MSClient *)clientWithApplicationURL:(NSURL *)url;
 
-/// Creates a client with the given URL and application key for the Windows Azure
+/// Creates a client with the given URL and application key for the Microsoft Azure
 /// Mobile Service.
 +(MSClient *)clientWithApplicationURL:(NSURL *)url
                        applicationKey:(NSString *)key;
 
 #pragma  mark * Public Initializer Methods
 
-/// Initializes a client with the given URL for the Windows Azure Mobile Service.
+/// Initializes a client with the given URL for the Microsoft Azure Mobile Service.
 -(id)initWithApplicationURL:(NSURL *)url;
 
 /// Initializes a client with the given URL and application key for the Windows

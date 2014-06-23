@@ -59,7 +59,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         IMobileServiceTable<T> GetTable<T>();
 
         /// <summary>
-        /// Logs a user into a Windows Azure Mobile Service with the provider and a token object.
+        /// Logs a user into a Microsoft Azure Mobile Service with the provider and a token object.
         /// </summary>
         /// <param name="provider">
         /// Authentication provider to use.
@@ -91,7 +91,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         Task<MobileServiceUser> LoginAsync(MobileServiceAuthenticationProvider provider, JObject token);
 
         /// <summary>
-        /// Logs a user into a Windows Azure Mobile Service with the provider and a token object.
+        /// Logs a user into a Microsoft Azure Mobile Service with the provider and a token object.
         /// </summary>
         /// <param name="provider">
         /// Authentication provider to use.
@@ -128,29 +128,29 @@ namespace Microsoft.WindowsAzure.MobileServices
         void Logout();
 
         /// <summary>
-        /// Invokes a user-defined custom API of a Windows Azure Mobile Service using an HTTP POST.
+        /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using an HTTP POST.
         /// </summary>
-        /// <typeparam name="T">The type of instance returned from the Windows Azure Mobile Service.</typeparam>    
+        /// <typeparam name="T">The type of instance returned from the Microsoft Azure Mobile Service.</typeparam>    
         /// <param name="apiName">The name of the custom API.</param>
         /// <returns>The response content from the custom api invocation.</returns>
         Task<T> InvokeApiAsync<T>(string apiName);
 
         /// <summary>
-        /// Invokes a user-defined custom API of a Windows Azure Mobile Service using an HTTP POST with
+        /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using an HTTP POST with
         /// support for sending HTTP content.
         /// </summary>
-        /// <typeparam name="T">The type of instance sent to the Windows Azure Mobile Service.</typeparam>
-        /// <typeparam name="U">The type of instance returned from the Windows Azure Mobile Service.</typeparam>    
+        /// <typeparam name="T">The type of instance sent to the Microsoft Azure Mobile Service.</typeparam>
+        /// <typeparam name="U">The type of instance returned from the Microsoft Azure Mobile Service.</typeparam>    
         /// <param name="apiName">The name of the custom API.</param>
         /// <param name="body">The value to be sent as the HTTP body.</param>
         /// <returns>The response content from the custom api invocation.</returns>
         Task<U> InvokeApiAsync<T, U>(string apiName, T body);
 
         /// <summary>
-        /// Invokes a user-defined custom API of a Windows Azure Mobile Service using the specified HTTP Method.
+        /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using the specified HTTP Method.
         /// Additional data can be passed using the query string.
         /// </summary>
-        /// <typeparam name="T">The type of instance sent to the Windows Azure Mobile Service.</typeparam>
+        /// <typeparam name="T">The type of instance sent to the Microsoft Azure Mobile Service.</typeparam>
         /// <param name="apiName">The name of the custom API.</param>
         /// <param name="method">The HTTP method.</param>
         /// <param name="parameters">
@@ -160,11 +160,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         Task<T> InvokeApiAsync<T>(string apiName, HttpMethod method, IDictionary<string, string> parameters);
 
         /// <summary>
-        /// Invokes a user-defined custom API of a Windows Azure Mobile Service using the specified HTTP Method.
+        /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using the specified HTTP Method.
         /// Additional data can be sent though the HTTP content or the query string.
         /// </summary>
-        /// <typeparam name="T">The type of instance sent to the Windows Azure Mobile Service.</typeparam>
-        /// <typeparam name="U">The type of instance returned from the Windows Azure Mobile Service.</typeparam>    
+        /// <typeparam name="T">The type of instance sent to the Microsoft Azure Mobile Service.</typeparam>
+        /// <typeparam name="U">The type of instance returned from the Microsoft Azure Mobile Service.</typeparam>    
         /// <param name="apiName">The name of the custom API.</param>
         /// <param name="body">The value to be sent as the HTTP body.</param>
         /// <param name="method">The HTTP method.</param>
@@ -175,14 +175,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         Task<U> InvokeApiAsync<T, U>(string apiName, T body, HttpMethod method, IDictionary<string, string> parameters);
 
         /// <summary>
-        /// Invokes a user-defined custom API of a Windows Azure Mobile Service using an HTTP POST.
+        /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using an HTTP POST.
         /// </summary>
         /// <param name="apiName">The name of the custom API.</param>
         /// <returns></returns>
         Task<JToken> InvokeApiAsync(string apiName);
 
         /// <summary>
-        /// Invokes a user-defined custom API of a Windows Azure Mobile Service using an HTTP POST, with
+        /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using an HTTP POST, with
         /// support for sending HTTP content.
         /// </summary>
         /// <param name="apiName">The name of the custom API.</param>
@@ -191,7 +191,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         Task<JToken> InvokeApiAsync(string apiName, JToken body);
 
         /// <summary>
-        /// Invokes a user-defined custom API of a Windows Azure Mobile Service using the specified HTTP Method.
+        /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using the specified HTTP Method.
         /// Additional data will sent to through the query string.
         /// </summary>
         /// <param name="apiName">The name of the custom API.</param>
@@ -203,7 +203,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         Task<JToken> InvokeApiAsync(string apiName, HttpMethod method, IDictionary<string, string> parameters);
 
         /// <summary>
-        /// Invokes a user-defined custom API of a Windows Azure Mobile Service using the specified HTTP method.
+        /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using the specified HTTP method.
         /// Additional data can be sent though the HTTP content or the query string.
         /// </summary>
         /// <param name="apiName">The name of the custom API.</param>
@@ -216,7 +216,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         Task<JToken> InvokeApiAsync(string apiName, JToken body, HttpMethod method, IDictionary<string, string> parameters);
         
         /// <summary>
-        /// Invokes a user-defined custom API of a Windows Azure Mobile Service using the specified HttpMethod.
+        /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using the specified HttpMethod.
         /// Additional data can be sent though the HTTP content or the query string. 
         /// </summary>
         /// <param name="apiName">The name of the custom API.</param>

@@ -11,7 +11,7 @@
 
 
 // The |MSAPIRequest| class represents a request to invoke a user-defined
-// API of a Windows Azure Mobile Service.
+// API of a Microsoft Azure Mobile Service.
 @interface MSAPIRequest : NSMutableURLRequest
 
 

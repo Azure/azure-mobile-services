@@ -142,7 +142,7 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
     }
     else {
         
-        // Check if this request is to the Windows Azure Mobile Service and
+        // Check if this request is to the Microsoft Azure Mobile Service and
         // if so, make the request with the MSClientConnection so that we
         // can inspect the response
         NSString *appURLString = self.client.applicationURL.absoluteString;
@@ -162,7 +162,7 @@ NSString *const MSLoginViewErrorResponseData = @"com.Microsoft.WindowsAzureMobil
 -(void) webView:(UIWebView *)webView didFailLoadWithError:(NSError *)error
 {    
     // Ignore "Fame Load Interrupted" errors.  These are caused by us
-    // taking over the HTTP calls to the Windows Azure Mobile Service
+    // taking over the HTTP calls to the Microsoft Azure Mobile Service
     if (error.code == 102 && [error.domain isEqual:@"WebKitErrorDomain"]) {
         return;
     }

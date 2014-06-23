@@ -29,7 +29,7 @@ import org.apache.http.protocol.HTTP;
 import android.os.Build;
 
 /**
- * Class for handling communication with Windows Azure Mobile Services REST APIs
+ * Class for handling communication with Microsoft Azure Mobile Services REST APIs
  */
 class MobileServiceConnection {
 

@@ -1,4 +1,7 @@
 WindowsAzureMobileServices.framework.zip
 WindowsAzureMobileServices.framework/
 ZUMOAPPNAME/WindowsAzureMobileServices.framework/
+DerivedData
+ZUMOAPPNAME/ZUMOAPPNAME.xcodeproj/project.xcworkspace
+ZUMOAPPNAME/ZUMOAPPNAME.xcodeproj/xcuserdata
 iOS_ObjC.zip

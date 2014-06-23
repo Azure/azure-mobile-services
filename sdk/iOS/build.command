@@ -1,4 +1,4 @@
-# This bash script cleans and builds the Windows Azure Mobile Services iOS Framework
+# This bash script cleans and builds the Microsoft Azure Mobile Services iOS Framework
 
 # Make sure we are executing in this script's directory
 cd "$( cd "$( dirname "$0" )" && pwd )"

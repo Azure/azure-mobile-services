@@ -25,8 +25,7 @@
 @interface QSTodoListViewController ()
 
 // Private properties
-@property (strong, nonatomic)   QSTodoService   *todoService;
-@property (nonatomic)           BOOL            useRefreshControl;
+@property (strong, nonatomic) QSTodoService *todoService;
 
 @end
 
@@ -64,24 +63,22 @@
         }
     };
     
-    // add the refresh control to the table (iOS6+ only)
-    [self addRefreshControl];
-    
+    // have refresh control reload all data from server
+    [self.refreshControl addTarget:self
+                            action:@selector(onRefresh:)
+                  forControlEvents:UIControlEventValueChanged];
+
     // load the data
     [self refresh];
 }
 
 - (void) refresh
 {
-    // only activate the refresh control if the feature is available
-    if (self.useRefreshControl == YES) {
-        [self.refreshControl beginRefreshing];
-    }
+    [self.refreshControl beginRefreshing];
+    
     [self.todoService refreshDataOnSuccess:^
     {
-        if (self.useRefreshControl == YES) {
-            [self.refreshControl endRefreshing];
-        }
+        [self.refreshControl endRefreshing];
         [self.tableView reloadData];
     }];
 }
@@ -97,12 +94,12 @@
     NSDictionary *item = [self.todoService.items objectAtIndex:indexPath.row];
     
     // Change the appearance to look greyed out until we remove the item
-    UILabel *label = (UILabel *)[[tableView cellForRowAtIndexPath:indexPath] viewWithTag:1];
-    label.textColor = [UIColor grayColor];
+    UITableViewCell *cell = [tableView cellForRowAtIndexPath:indexPath];
+    cell.textLabel.textColor = [UIColor grayColor];
     
     // Ask the todoService to set the item's complete value to YES, and remove the row if successful
     [self.todoService completeItem:item completion:^(NSUInteger index)
-    {  
+    {
         // Remove the row from the UITableView
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:index inSection:0];
         [self.tableView deleteRowsAtIndexPaths:@[ indexPath ]
@@ -142,10 +139,10 @@
     
     // Set the label on the cell and make sure the label color is black (in case this cell
     // has been reused and was previously greyed out
-    UILabel *label = (UILabel *)[cell viewWithTag:1];
-    label.textColor = [UIColor blackColor];
+    cell.textLabel.textColor = [UIColor blackColor];
+    
     NSDictionary *item = [self.todoService.items objectAtIndex:indexPath.row];
-    label.text = [item objectForKey:@"text"];
+    cell.textLabel.text = [item objectForKey:@"text"];
     
     return cell;
 }
@@ -195,25 +192,6 @@
     itemText.text = @"";
 }
 
-
-#pragma mark * iOS Specific Code
-
-// This method will add the UIRefreshControl to the table view if
-// it is available, ie, we are running on iOS 6+
-
-- (void)addRefreshControl
-{
-    Class refreshControlClass = NSClassFromString(@"UIRefreshControl");
-    if (refreshControlClass != nil)
-    {
-        // the refresh control is available, let's add it
-        self.refreshControl = [[UIRefreshControl alloc] init];
-        [self.refreshControl addTarget:self
-                                action:@selector(onRefresh:)
-                      forControlEvents:UIControlEventValueChanged];
-        self.useRefreshControl = YES;
-    }
-}
 
 - (void)onRefresh:(id) sender
 {

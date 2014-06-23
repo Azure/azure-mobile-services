@@ -47,6 +47,32 @@
         }
     }
 
+    $__modules__.Resources = { };
+
+    $__modules__.Resources['en-US'] =
+        {
+            "Validate_NotNullError"                                 : "{0} cannot be null.",
+            "Validate_NotNullOrEmptyError"                          : "{0} cannot be null or empty.",
+            "Validate_InvalidId"                                    : "{0} is not valid.",
+            "Validate_TypeCheckError"                               : "{0} is expected to be a value of type {1}, not {2}.",
+            "Validate_LengthUnexpected"                             : "{0} is expected to have length {1}, not {2}.",
+            "Validate_InvalidUserParameter"                         : "{0} contains an invalid user-defined query string parameter: {1}. User-defined query string parameters must not begin with a '$'.",
+            "Extensions_DefaultErrorMessage"                        : "Unexpected failure.",
+            "Extensions_ConnectionFailureMessage"                   : "Unexpected connection failure.",
+            "MobileServiceTable_ReadMismatchedQueryTables"          : "Cannot get the results of a query for table '{1}' via table '{0}'.",
+            "MobileServiceTable_InsertIdAlreadySet"                 : "Cannot insert if the {0} member is already set.",
+            "MobileServiceLogin_AuthenticationProviderNotSupported" : "Unsupported authentication provider name. Please specify one of {0}.",
+            "MobileServiceLogin_LoginErrorResponse"                 : "Cannot start a login operation because login is already in progress.",
+            "MobileServiceLogin_InvalidResponseFormat"              : "Invalid format of the authentication response.",
+            "MobileServiceLogin_InvalidProvider"                    : "The first parameter must be the name of the autentication provider or a Microsoft Account authentication token.",
+            "MobileServiceTable_NotSingleObject"                    : "Could not get object from response {0}.",
+            "Push_ConflictWithReservedName"                         : "Template name conflicts with reserved name '{0}'.",
+            "Push_InvalidTemplateName"                              : "Template name can't contain ';' or ':'.",
+            "Push_NotSupportedXMLFormatAsBodyTemplateWin8"          : "The bodyTemplate is not in accepted XML format. The first node of the bodyTemplate should be Badge\/Tile\/Toast, except for the wns\/raw template, which need to be a valid XML.",
+            "Push_BodyTemplateMustBeXml"                            : "Valid XML is required for any template without a raw header.",
+            "Push_TagNoCommas"                                      : "Tags must not contain ','."
+        };
+
     $__modules__.MobileServiceClient = function (exports) {
         // ----------------------------------------------------------------------------
         // Copyright (c) Microsoft Corporation. All rights reserved.
@@ -1545,509 +1571,38 @@
         }
     };
 
-    $__modules__.Push = function (exports) {
-        // ----------------------------------------------------------------------------
-        // Copyright (c) Microsoft Corporation. All rights reserved.
-        // ----------------------------------------------------------------------------
-        
-        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
-        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
-        /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
-        
-        var Validate = require('Validate');
-        var LocalStorageManager = require('LocalStorageManager').LocalStorageManager;
-        var RegistrationManager = require('RegistrationManager').RegistrationManager;
-        var PushHttpClient = require('PushHttpClient').PushHttpClient;
-        
-        function Push(mobileServicesClient, tileId) {
-            var localStorage = new LocalStorageManager(mobileServicesClient.applicationUrl, tileId);
-            this.registrationManager = new RegistrationManager(
-                new PushHttpClient(mobileServicesClient),
-                localStorage
-                );
-        }
-        
-        exports.Push = Push;
-        
-        Push.prototype.registerNative = function (channelUri, tags) {
-            /// <summary>
-            /// Register for native notification
-            /// </summary>
-            /// <param name="channelUri">The channelUri to register</param>
-            /// <param name="tags">Array containing the tags for this registeration</param>
-            /// <returns>Promise that will complete when the registration is completed</returns>
-            
-            var registration = makeCoreRegistration(channelUri, tags);
-            return this.registrationManager.register(registration);
-        };
-        
-        
-        Push.prototype.registerTemplate = function (channelUri, templateBody, templateName, headers, tags) {
-            /// <summary>
-            /// Register for template notification
-            /// </summary>
-            /// <param name="channelUri">The channelUri to register</param>
-            /// <param name="templateBody">The xml body to register</param>
-            /// <param name="templateName">The name of the template</param>
-            /// <param name="headers">Object containing key/value pairs for the template to provide to WNS. X-WNS-Type is required. Example: { 'X-WNS-Type' : 'wns/toast' }</param>
-            /// <param name="tags">Array containing the tags for this registeration</param>
-            /// <returns>Promise that will complete when the template registration is completed</returns>
-            
-            var registration = makeCoreRegistration(channelUri, tags);
-            
-            if (templateBody) {
-                Validate.isString(templateBody, 'templateBody');
-                registration.templateBody = templateBody;
-                Validate.isString(templateName, 'templateName');
-                Validate.notNullOrEmpty(templateName);
-                registration.templateName = templateName;
-        
-                if (headers) {
-                    Validate.isObject(headers);
-                    registration.headers = headers;
-                }
-            }
-        
-            return this.registrationManager.register(registration);
-        };
-        
-        Push.prototype.unregisterNative = function () {
-            /// <summary>
-            /// Unregister for native notification
-            /// </summary>
-            /// <returns>Promise that will complete when the unregister is completed</returns>
-            
-            return this.unregisterTemplate(RegistrationManager.nativeRegistrationName);
-        };
-        
-        Push.prototype.unregisterTemplate = function (templateName) {
-            /// <summary>
-            /// Unregister for template notification
-            /// </summary>
-            /// <param name="templateName">The name of the template</param>
-            /// <returns>Promise that will complete when the unregister is completed</returns>
-            
-            Validate.notNullOrEmpty(templateName);
-            return this.registrationManager.unregister(templateName);
-        };
-        
-        Push.prototype.unregisterAll = function (channelUri) {
-            /// <summary>
-            /// Unregister all notifications for a specfic channelUri
-            /// </summary>
-            /// <param name="channelUri">The channelUri to unregister</param>
-            /// <returns>Promise that will complete when the unregistration of all registrations at the channelUri is completed</returns>
-            
-            Validate.notNullOrEmpty(channelUri);
-            return this.registrationManager.deleteRegistrationsForChannel(channelUri);
-        };
-        
-        Push.prototype.getSecondaryTile = function (tileId) {
-            return new Push(this.mobileServicesClient, tileId);
-        };
-        
-        function makeCoreRegistration(channelUri, tags) {
-            var registration = {};
-        
-            registration.platform = 'wns';
-        
-            Validate.isString(channelUri, 'channelUri');
-            Validate.notNullOrEmpty(channelUri, 'channelUri');
-        
-            registration.deviceId = channelUri;
-        
-            if (tags) {
-                Validate.isArray(tags, 'tags');
-                registration.tags = tags;
-            }
-        
-            return registration;
-        }
-    };
-
-    $__modules__.RegistrationManager = function (exports) {
-        // ----------------------------------------------------------------------------
-        // Copyright (c) Microsoft Corporation. All rights reserved.
-        // ----------------------------------------------------------------------------
-        
-        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
-        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
-        /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
-        
-        // Declare JSHint globals
-        /*global WinJS:false */
-        
-        function RegistrationManager(pushHttpClient, storageManager) {
-            this.pushHttpClient = pushHttpClient;
-            this.localStorageManager = storageManager;
-        }
-        
-        exports.RegistrationManager = RegistrationManager;
-        
-        RegistrationManager.nativeRegistrationName = '$Default';
-        
-        RegistrationManager.prototype.refreshLocalStorage = function(refreshChannelUri) {
-            var refreshPromise;
-            var self = this;
-            // if localStorage is empty or has different storage version, we need retrieve registrations and refresh local storage
-            if (this.localStorageManager.isRefreshNeeded) {
-                refreshPromise = this.pushHttpClient.listRegistrations(refreshChannelUri)
-                    .then(function (registrations) {
-                        var count = registrations.length;
-                        if (count === 0) {
-                            self.localStorageManager.clearRegistrations();
-                        }
-        
-                        for (var i = 0; i < count; i++) {
-                            self.localStorageManager.updateRegistrationByRegistrationId(registrations[i].registrationId, registrations[i].registrationName || RegistrationManager.nativeRegistrationName, refreshChannelUri);
-                        }
-                    })
-                    .then(function() {
-                        self.localStorageManager.refreshFinished(refreshChannelUri);
-                    });
-        
-            } else {
-                refreshPromise = WinJS.Promise.wrap();
-            }
-        
-            return refreshPromise;
-        };
-        
-        RegistrationManager.prototype.register = function (registration) {
-            var self = this;
-            return this.refreshLocalStorage(this.localStorageManager.channelUri || registration.deviceId)
-                .then(function () {
-                    return self.localStorageManager.getRegistration(registration.templateName || RegistrationManager.nativeRegistrationName);
-                })
-                .then(function (cached) {
-                    if (cached !== null) {
-                        registration.registrationId = cached.registrationId;
-                        return WinJS.Promise.wrap();
-                    } else {
-                        return self.createRegistrationId(registration);
-                    }
-                })
-                .then(function () {
-                    return self.upsertRegistration(registration);
-                })
-                .then(
-                    function () {
-                        // dead complete function
-                        return WinJS.Promise.wrap();
-                    },
-                    function (error) {
-                        // if we get an RegistrationGoneException (410) from service, we will recreate registration id and will try to do upsert one more time.
-                        // The likely cause of this is an expired registration in local storage due to a long unused app.
-                        if (error.request.status === 410) {
-                            return self.createRegistrationId(registration)
-                                .then(function () {
-                                    return self.upsertRegistration(registration);
-                                });
-                        }
-        
-                        throw error;
-                    }
-                );
-        };
-        
-        RegistrationManager.prototype.unregister = function (registrationName) {
-            var cached = this.localStorageManager.getRegistration(registrationName);
-            if (!cached) {
-                return WinJS.Promise.wrap();
-            }
-        
-            var self = this;
-            return this.pushHttpClient.unregister(cached.registrationId)
-                .then(function () {
-                    self.localStorageManager.deleteRegistrationByName(registrationName);
-                });
-        };
-        
-        RegistrationManager.prototype.deleteRegistrationsForChannel = function (channelUri) {
-            var self = this;
-            return this.pushHttpClient.listRegistrations(channelUri)
-                .then(function (registrations) {
-                    return WinJS.Promise.join(
-                        registrations.map(function (registration) {
-                            return self.pushHttpClient.unregister(registration.registrationId)
-                                .then(function () {
-                                    self.localStorageManager.deleteRegistrationByRegistrationId(registration.registrationId);
-                                });
-                        }));
-                })
-                .then(function() {
-                    self.localStorageManager.clearRegistrations();
-                });
-        };
-        
-        RegistrationManager.prototype.createRegistrationId = function (registration) {
-            var self = this;
-            return this.pushHttpClient.createRegistrationId()
-                .then(function (registrationId) {
-                    registration.registrationId = registrationId;
-                    self.localStorageManager.updateRegistrationByRegistrationName(registration.templateName || RegistrationManager.nativeRegistrationName, registration.registrationId, registration.deviceId);
-                });
-        };
-        
-        RegistrationManager.prototype.upsertRegistration = function (registration) {
-            var self = this;
-            return this.pushHttpClient.createOrUpdateRegistration(registration)
-                .then(function () {
-                    self.localStorageManager.updateRegistrationByRegistrationName(registration.templateName || RegistrationManager.nativeRegistrationName, registration.registrationId, registration.deviceId);
-                });
-        };
-    };
-
-    $__modules__.LocalStorageManager = function (exports) {
-        // ----------------------------------------------------------------------------
-        // Copyright (c) Microsoft Corporation. All rights reserved.
-        // ----------------------------------------------------------------------------
-        
-        /// <reference path='C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js' />
-        /// <reference path='C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js' />
-        /// <reference path='..\Generated\MobileServices.DevIntellisense.js' />
-        
-        // Declare JSHint globals
-        /*global WinJS:false, Windows:false */
-        
-        var _ = require('Extensions');
-        var Platform = require('Platform');
-        
-        function LocalStorageManager(applicationUri, tileId) {
-            this.storageVersion = 'v1.0.0';
-            this.primaryChannelId = '$Primary';
-            this.keyNameVersion = 'Version';
-            this.keyNameChannelUri = 'ChannelUri';
-            this.keyNameRegistrations = 'Registrations';
-            
-            if (!tileId) {
-                tileId = this.primaryChannelId;
-            }
-        
-            var name = _.format('{0}-PushContainer-{1}-{2}', Windows.ApplicationModel.Package.current.id.name, applicationUri, tileId);
-            this.settings = Windows.Storage.ApplicationData.current.localSettings.createContainer(name, Windows.Storage.ApplicationDataCreateDisposition.always).values;
-            this.isRefreshNeeded = false;
-            this.channelUri = null;    
-        
-            this.initializeRegistrationInfoFromStorage();
-        }
-        
-        exports.LocalStorageManager = LocalStorageManager;
-        
-        LocalStorageManager.prototype.getChannelUri = function () {
-            return this.channelUri;
-        };
-        
-        LocalStorageManager.prototype.setChannelUri = function (channelUri) {
-            this.channelUri = channelUri;
-            this.flushToSettings();
-        };
-        
-        LocalStorageManager.prototype.getRegistration = function (registrationName) {
-            return this.readRegistration(registrationName);
-        };
-        
-        LocalStorageManager.prototype.deleteRegistrationByName = function (registrationName) {
-            if (tryRemoveSetting(registrationName, this.registrations)) {
-                this.flushToSettings();
-                return true;
-            }
-        
-            return false;
-        };
-        
-        LocalStorageManager.prototype.deleteRegistrationByRegistrationId = function (registrationId) {
-            var registration = this.getFirstRegistrationByRegistrationId(registrationId);
-        
-            if (registration) {
-                this.deleteRegistrationByName(registration.registrationName);
-                return true;
-            }
-        
-            return false;
-        };
-        
-        LocalStorageManager.prototype.getFirstRegistrationByRegistrationId = function (registrationId) {
-            var returnValue = null;
-            for (var regName in this.registrations) {
-                if (this.registrations.hasOwnProperty(regName)) {
-                    // Update only the first registration with matching registrationId
-                    var registration = this.readRegistration(regName);
-                    if (!returnValue && registration && (registration.registrationId === registrationId)) {
-                        returnValue = registration;
-                    }
-                }
-            }
-        
-            return returnValue;
-        };
-        
-        LocalStorageManager.prototype.updateRegistrationByRegistrationName = function (registrationName, registrationId, channelUri) {
-            var cacheReg = {};
-            cacheReg.registrationName = registrationName;
-            cacheReg.registrationId = registrationId;
-            this.writeRegistration(registrationName, cacheReg);
-            this.channelUri = channelUri;
-            this.flushToSettings();
-        };
-        
-        LocalStorageManager.prototype.writeRegistration = function (registrationName, cacheReg) {
-            var cachedRegForPropertySet = JSON.stringify(cacheReg);
-            this.registrations.insert(registrationName, cachedRegForPropertySet);
-        };
-        
-        LocalStorageManager.prototype.readRegistration = function (registrationName) {
-            if (this.registrations.hasKey(registrationName)) {
-                var cachedRegFromPropertySet = this.registrations[registrationName];
-                return JSON.parse(cachedRegFromPropertySet);
-            } else {
-                return null;
-            }
-        };
-        
-        LocalStorageManager.prototype.updateRegistrationByRegistrationId = function (registrationId, registrationName, channelUri) {
-            var registration = this.getFirstRegistrationByRegistrationId(registrationId);
-        
-            if (registration) {
-                this.updateRegistrationByRegistrationName(registration.registrationName, registration.registrationId, channelUri);
-            } else {
-                this.updateRegistrationByRegistrationName(registrationName, registrationId, channelUri);
-            }
-        };
-        
-        LocalStorageManager.prototype.clearRegistrations = function () {
-            this.registrations.clear();
-            this.flushToSettings();
-        };
-        
-        LocalStorageManager.prototype.refreshFinished = function (refreshedChannelUri) {
-            this.setChannelUri(refreshedChannelUri);
-            this.isRefreshNeeded = false;
-        };
-        
-        LocalStorageManager.prototype.flushToSettings = function () {
-            this.settings.insert(this.keyNameVersion, this.storageVersion);
-            this.settings.insert(this.keyNameChannelUri, this.channelUri);
-        
-            var str = '';
-            if (this.registrations !== null) {
-                str = JSON.stringify(this.registrations);
-            }
-        
-            this.settings.insert(this.keyNameRegistrations, str);
-        };
-        
-        LocalStorageManager.prototype.initializeRegistrationInfoFromStorage = function () {
-            this.registrations = new Windows.Foundation.Collections.PropertySet();
-        
-            try {
-                // Read channelUri
-                this.channelUri = readContent(this.settings, this.keyNameChannelUri);
-        
-                // Verify this.storage version
-                var version = readContent(this.settings, this.keyNameVersion);
-                if (this.storageVersion !== version.toLowerCase()) {
-                    this.isRefreshNeeded = true;
-                    return;
-                }
-        
-                this.isRefreshNeeded = false;
-        
-                // read registrations
-                var regsStr = readContent(this.settings, this.keyNameRegistrations);
-                if (regsStr) {
-                    var entries = JSON.parse(regsStr);
-        
-                    for (var reg in entries) {
-                        if (entries.hasOwnProperty(reg)) {
-                            this.registrations.insert(reg, entries[reg]);
-                        }
-                    }
-                }
-            } catch (err) {
-                // It is possible that local storage is corrupted by users, bugs or other issues.
-                // If this occurs, force a full refresh.
-                this.isRefreshNeeded = true;
-            }
-        };
-        
-        function readContent(propertySet, key) {
-            if (propertySet.hasKey(key)) {
-                return propertySet[key];
-            }
-            return '';
-        }
-        
-        function tryRemoveSetting(name, values) {
-            if (values[name]) {
-                values.remove(name);
-                return true;
-            }
-            return false;
-        };
-    };
-
-    $__modules__.PushHttpClient = function (exports) {
-        // ----------------------------------------------------------------------------
-        // Copyright (c) Microsoft Corporation. All rights reserved.
-        // ----------------------------------------------------------------------------
-        
-        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
-        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
-        /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
-        
-        var _ = require('Extensions');
-        var Platform = require('Platform');
-        var noCacheHeader = { 'If-Modified-Since': 'Mon, 27 Mar 1972 00:00:00 GMT' };
-        function PushHttpClient(mobileServicesClient) {
-            this.mobileServicesClient = mobileServicesClient;
-        }
-        
-        exports.PushHttpClient = PushHttpClient;
-        
-        PushHttpClient.prototype.listRegistrations = function (channelUri) {
-            return this._request('GET', '/push/registrations?platform=wns&deviceId=' + encodeURIComponent(channelUri), null, null, noCacheHeader)
-                .then(function (request) {
-                    return JSON.parse(request.response);
-                });
-        };
-        
-        PushHttpClient.prototype.unregister = function (registrationId) {
-            return this._request('DELETE', '/push/registrations/' + encodeURIComponent(registrationId), null, null, noCacheHeader);
-        };
-        
-        PushHttpClient.prototype.createRegistrationId = function () {
-            return this._request('POST', '/push/registrationIds', null, null, noCacheHeader)
-                .then(function (response) {
-                    var locationHeader = response.getResponseHeader('Location');
-                    return locationHeader.slice(locationHeader.lastIndexOf('/') + 1);
-                });
-        };
-        
-        PushHttpClient.prototype.createOrUpdateRegistration = function (registration) {
-            return this._request('PUT', '/push/registrations/' + encodeURIComponent(registration.registrationId), registration, null, noCacheHeader);
-        };
-        
-        PushHttpClient.prototype._request = Platform.async(
-            function (method, uriFragment, content, ignoreFilters, headers, callback) {
-                this.mobileServicesClient._request(method, uriFragment, content, ignoreFilters, headers, callback);
-            });
-    };
-
     $__modules__.Platform = function (exports) {
         // ----------------------------------------------------------------------------
         // Copyright (c) Microsoft Corporation. All rights reserved.
         // ----------------------------------------------------------------------------
         
-        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
-        /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
         /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
-        
-        // Declare JSHint globals
-        /*global WinJS:false, Windows:false, $__fileVersion__:false, $__version__:false */
+        /*global $__fileVersion__:false, $__version__:false */
         
         var _ = require('Extensions');
         var Validate = require('Validate');
+        var Promises = require('Promises');
+        var Resources = require('Resources');
+        var inMemorySettingStore = {};
+        if (window.localStorage) {
+            inMemorySettingStore = window.localStorage;
+        }
+        var bestAvailableTransport = null;
+        var knownTransports = [ // In order of preference
+            require('DirectAjaxTransport'),
+            require('IframeTransport')
+        ];
+        var knownLoginUis = [ // In order of preference
+            require('CordovaPopup'),
+            require('BrowserPopup')
+        ];
+        
+        // Matches an ISO date and separates out the fractional part of the seconds
+        // because IE < 10 has quirks parsing fractional seconds
+        var isoDateRegex = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})(?:\.(\d*))?Z$/;
+        
+        // Feature-detect IE8's date serializer
+        var dateSerializerOmitsDecimals = !JSON.stringify(new Date(100)).match(/\.100Z"$/);
         
         exports.async = function async(func) {
             /// <summary>
@@ -2058,7 +1613,7 @@
             /// An async function with a callback as its last parameter 
             /// </param>
             /// <returns type="Function">
-            /// Function that when invoked will return a WinJS.Promise.
+            /// Function that when invoked will return a promise.
             /// </returns>
         
             return function () {
@@ -2067,7 +1622,7 @@
                 var args = arguments;
         
                 // Create a new promise that will wrap the async call
-                return new WinJS.Promise(function (complete, error) {
+                return new Promises.Promise(function (complete, error) {
         
                     // Add a callback to the args which will call the appropriate
                     // promise handlers
@@ -2102,18 +1657,14 @@
             /// Object consisting of names and values to define in the namespace.
             /// </param>
         
-            try {
-                // The following namespace is retained for backward compatibility, but
-                // may soon change to 'WindowsAzure'
-                WinJS.Namespace.define('WindowsAzure', declarations);
-            } catch (ex) {
-                // This can fail due to a WinRT issue where another assembly defining a
-                // non-JavaScript type with a Microsoft namespace.  The wrapper object
-                // created to represent the namespace doesn't allow expando
-                // properties...  so it will never let any additional JavaScript
-                // namespaces be defined under it.  We only see this with our test
-                // library at the moment, but it could also appear if customers are
-                // using other Microsoft libraries in WinJS.        
+            // First ensure our 'WindowsAzure' namespace exists
+            var namespaceObject = global.WindowsAzure = global.WindowsAzure || {};
+            
+            // Now add each of the declarations to the namespace
+            for (var key in declarations) {
+                if (declarations.hasOwnProperty(key)) {
+                    namespaceObject[key] = declarations[key];
+                }
             }
         };
         
@@ -2128,10 +1679,7 @@
             /// The value of the setting or null if not set.
             /// </returns>
         
-            var localSettings = Windows.Storage.ApplicationData.current.localSettings;
-            return !_.isNull(localSettings) ?
-                localSettings.values[name] :
-                null;
+            return inMemorySettingStore[name];
         };
         
         exports.writeSetting = function writeSetting(name, value) {
@@ -2145,10 +1693,7 @@
             /// The value of the setting.
             /// </returns>
         
-            var localSettings = Windows.Storage.ApplicationData.current.localSettings;
-            if (!_.isNull(localSettings)) {
-                localSettings.values[name] = value;
-            }
+            inMemorySettingStore[name] = value;
         };
         
         exports.webRequest = function (request, callback) {
@@ -2162,137 +1707,39 @@
             /// The callback to execute when the request completes.
             /// </param>
         
-            WinJS.xhr(request).done(
-                function (response) { callback(null, response); },
-                function (error) { callback(null, error); });
+            return getBestTransport().performRequest(request, callback);
         };
         
-        exports.login = function (startUri, endUri, callback) {
-            /// <summary>
-            /// Log a user into a Mobile Services application by launching a
-            /// browser-based control that will allow the user to enter their credentials
-            /// with a given provider.
-            /// </summary>
-            /// <param name="startUri" type="string">
-            /// The absolute URI to which the login control should first navigate to in order to
-            /// start the login process flow.
-            /// </param>
-            /// <param name="endUri" type="string" mayBeNull="true">
-            /// The absolute URI that indicates login is complete. Once the login control navigates
-            /// to this URI, it will execute the callback.
-            /// </param>
-            /// <param name="callback" type="Function" mayBeNull="true">
-            /// The callback to execute when the login completes: callback(error, endUri).
-            /// </param>
-        
-            // Account for absent optional arguments
-            if (_.isNull(callback) && typeof endUri === 'function') {
-                callback = endUri;
-                endUri = null;
-            }
-        
-            Validate.notNullOrEmpty(startUri, 'startUri');
-            Validate.isString(startUri, 'startUri');
-        
-            var windowsWebAuthBroker = Windows.Security.Authentication.Web.WebAuthenticationBroker;
-            var noneWebAuthOptions = Windows.Security.Authentication.Web.WebAuthenticationOptions.none;
-            var successWebAuthStatus = Windows.Security.Authentication.Web.WebAuthenticationStatus.success;
-        
-            var webAuthBrokerSuccessCallback = null;
-            var webAuthBrokerErrorCallback = null;
-            if (!_.isNull(callback)) {
-                webAuthBrokerSuccessCallback = function (result) {
-                    var error = null;
-                    var token = null;
-        
-                    if (result.responseStatus !== successWebAuthStatus) {
-                        error = result;
-                    }
-                    else {
-                        var callbackEndUri = result.responseData;
-                        var tokenAsJson = null;
-                        if (_.isNull(error)) {
-                            var i = callbackEndUri.indexOf('#token=');
-                            if (i > 0) {
-                                tokenAsJson = decodeURIComponent(callbackEndUri.substring(i + 7));
-                            }
-                            else {
-                                i = callbackEndUri.indexOf('#error=');
-                                if (i > 0) {
-                                    error = decodeURIComponent(callbackEndUri.substring(i + 7));
-                                }
-                            }
-                        }
-        
-                        if (!_.isNull(tokenAsJson)) {
-                            try {
-                                token = _.fromJson(tokenAsJson);
-                            }
-                            catch (e) {
-                                error = e;
-                            }
-                        }
-                    }
-        
-                    callback(error, token);
-                };
-        
-                webAuthBrokerErrorCallback = function (error) {
-                    callback(error, null);
-                };
-            }
-        
-            if (!_.isNull(endUri)) {
-                var windowsStartUri = new Windows.Foundation.Uri(startUri);
-                var windowsEndUri = new Windows.Foundation.Uri(endUri);
-                windowsWebAuthBroker.authenticateAsync(noneWebAuthOptions, windowsStartUri, windowsEndUri)
-                                    .done(webAuthBrokerSuccessCallback, webAuthBrokerErrorCallback);
-            }
-            else {
-                // If no endURI was given, then we'll use the single sign-on overload of the 
-                // windowsWebAuthBroker. Single sign-on requires that the application's Package SID 
-                // be registered with the Windows Azure Mobile Service, but it provides a better 
-                // experience as HTTP cookies are supported so that users do not have to
-                // login in everytime the application is launched.
-                var redirectUri = windowsWebAuthBroker.getCurrentApplicationCallbackUri().absoluteUri;
-                var startUriWithRedirect = startUri + "?sso_end_uri=" + encodeURIComponent(redirectUri);
-                var windowsStartUriWithRedirect = new Windows.Foundation.Uri(startUriWithRedirect);
-                windowsWebAuthBroker.authenticateAsync(noneWebAuthOptions, windowsStartUriWithRedirect)
-                                    .done(webAuthBrokerSuccessCallback, webAuthBrokerErrorCallback);
-            }
+        exports.getUserAgent = function () {
+            // Browsers don't allow you to set a custom user-agent in ajax requests. Trying to do so
+            // will cause an exception. So we don't.
+            return null;
         };
         
         exports.getOperatingSystemInfo = function () {
-        
-            var architecture = "Unknown";
-        
-            // The Windows API provides the architecture as an enum, so we have to 
-            // lookup the string value
-            var archValue = Windows.ApplicationModel.Package.current.id.architecture;
-            switch (archValue) {
-                case 0: architecture = "X86"; break;
-                case 5: architecture = "Arm"; break;
-                case 9: architecture = "X64"; break;
-                case 11: architecture = "Neutral"; break;
-            }
-        
             return {
-                name: "Windows 8",
+                name: "--",
                 version: "--",
-                architecture: architecture
+                architecture: "--"
             };
         };
         
         exports.getSdkInfo = function () {
             return {
-                language: "WinJS",
-                fileVersion: $__fileVersion__        
+                language: "Web",
+                fileVersion: $__fileVersion__
             };
         };
         
-        exports.getUserAgent = function () {
-            // The User-Agent header can not be set in WinJS
-            return null;
+        exports.login = function (startUri, endUri, callback) {
+            // Force logins to go over HTTPS because the runtime is hardcoded to redirect
+            // the server flow back to HTTPS, and we need the origin to match.
+            var findProtocol = /^[a-z]+:/,
+                requiredProtocol = 'https:';
+            startUri = startUri.replace(findProtocol, requiredProtocol);
+            endUri = endUri.replace(findProtocol, requiredProtocol);
+        
+            return getBestProvider(knownLoginUis).login(startUri, endUri, callback);
         };
         
         exports.toJson = function (value) {
@@ -2307,7 +1754,20 @@
             // serialize dates in ISO8061 because JSON.stringify does that by defualt.
             // TODO: Convert geolocations once they're supported
             // TODO: Expose the ability for developers to convert custom types
-            return JSON.stringify(value);
+            return JSON.stringify(value, function (key, stringifiedValue) {
+                if (dateSerializerOmitsDecimals && this && _.isDate(this[key])) {
+                    // IE8 doesn't include the decimal part in its serialization of dates
+                    // For consistency, we extract the non-decimal part from the string
+                    // representation, and then append the expected decimal part.
+                    var msec = this[key].getMilliseconds(),
+                        msecString = String(msec + 1000).substring(1);
+                    return stringifiedValue.replace(isoDateRegex, function (all, datetime) {
+                        return datetime + "." + msecString + "Z";
+                    });
+                } else {
+                    return stringifiedValue;
+                }
+            });
         };
         
         exports.tryParseIsoDateString = function (text) {
@@ -2320,52 +1780,466 @@
             Validate.isString(text);
         
             // Check against a lenient regex
-            if (/^(\d{4})-(\d{2})-(\d{2})T(\d{2})\:(\d{2})\:(\d{2})(\.(\d{1,3}))?Z$/.test(text)) {
+            var matchedDate = isoDateRegex.exec(text);
+            if (matchedDate) {
+                // IE9 only handles precisely 0 or 3 decimal places when parsing ISO dates,
+                // and IE8 doesn't parse them at all. Fortunately, all browsers can handle 
+                // 'yyyy/mm/dd hh:MM:ss UTC' (without fractional seconds), so we can rewrite
+                // the date to that format, and the apply fractional seconds.
+                var dateWithoutFraction = matchedDate[1],
+                    fraction = matchedDate[2] || "0",
+                    milliseconds = Math.round(1000 * Number("0." + fraction)); // 6 -> 600, 65 -> 650, etc.
+                dateWithoutFraction = dateWithoutFraction
+                    .replace(/\-/g, "/")   // yyyy-mm-ddThh:mm:ss -> yyyy/mm/ddThh:mm:ss
+                    .replace("T", " ");    // yyyy/mm/ddThh:mm:ss -> yyyy/mm/dd hh:mm:ss
+        
                 // Try and parse - it will return NaN if invalid
-                var ticks = Date.parse(text);
+                var ticks = Date.parse(dateWithoutFraction + " UTC");
                 if (!isNaN(ticks)) {
-                    // Convert to a regular Date
-                    return new Date(ticks);
+                    return new Date(ticks + milliseconds); // ticks are just milliseconds since 1970/01/01
                 }
             }
         
-            // Return null if not found
+            // Doesn't look like a date
             return null;
         };
         
         exports.getResourceString = function (resourceName) {
-            var resourceManager = Windows.ApplicationModel.Resources.Core.ResourceManager.current;
-            var resource = resourceManager.mainResourceMap.getValue("MobileServices/Resources/" + resourceName);
-            return resource.valueAsString;
+            // For now, we'll just always use English
+            return Resources["en-US"][resourceName];
         };
+        
         
         exports.allowPlatformToMutateOriginal = function (original, updated) {
-            /// <summary>
-            /// Patch an object with the values returned by from the server.  Given
-            /// that it's possible for the server to change values on an insert/update,
-            /// we want to make sure the client object reflects those changes.
-            /// </summary>
-            /// <param name="original" type="Object">The original value.</param>
-            /// <param name="updated" type="Object">The updated value.</param>
-            /// <returns type="Object">The patched original object.</returns>
-            if (!_.isNull(original) && !_.isNull(updated)) {
-                var key = null;
-                var binding = WinJS.Binding.as(original);
+            // For the Web/HTML client, we don't modify the original object.
+            // This is the more typical arrangement for most JavaScript data access.
+            return updated;
+        };
         
-                for (key in updated) {
-                    if (key in original) {
-                        binding[key] = updated[key];
-                    } else {
-                        binding.addProperty(key, updated[key]);
-                    }
-                }
-        
-                // TODO: Should we also delete any fields on the original object that
-                // aren't also on the updated object?  Is that a scenario for scripts?
+        function getBestTransport() {
+            // We cache this just because it gets called such a lot
+            if (!bestAvailableTransport) {
+                bestAvailableTransport = getBestProvider(knownTransports);
             }
         
-            return original;
+            return bestAvailableTransport;
+        }
+        
+        function getBestProvider(providers) {
+            /// <summary>
+            /// Given an array of objects which each have a 'supportsCurrentRuntime' function,
+            /// returns the first instance where that function returns true.
+            /// </summary>
+        
+            for (var i = 0; i < providers.length; i++) {
+                if (providers[i].supportsCurrentRuntime()) {
+                    return providers[i];
+                }
+            }
+        
+            throw new Error("Unsupported browser - no suitable providers are available.");
+        }
+    };
+
+    $__modules__.DirectAjaxTransport = function (exports) {
+        // ----------------------------------------------------------------------------
+        // Copyright (c) Microsoft Corporation. All rights reserved.
+        // ----------------------------------------------------------------------------
+        
+        /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
+        
+        // This transport is for modern browsers - it uses XMLHttpRequest with Cross-Origin Resource Sharing (CORS)
+        
+        exports.name = "DirectAjaxTransport";
+        
+        exports.supportsCurrentRuntime = function () {
+            /// <summary>
+            /// Determines whether or not this transport is usable in the current runtime.
+            /// </summary>
+        
+            // Feature-detect support for CORS (for IE, it's in version 10+)
+            return (typeof global.XMLHttpRequest !== "undefined") &&
+                   ('withCredentials' in new global.XMLHttpRequest());
         };
+        
+        exports.performRequest = function (request, callback) {
+            /// <summary>
+            /// Make a web request.
+            /// </summary>
+            /// <param name="request" type="Object">
+            /// Object describing the request (in the WinJS.xhr format).
+            /// </param>
+            /// <param name="callback" type="Function">
+            /// The callback to execute when the request completes.
+            /// </param>
+        
+            var headers = request.headers || {},
+                url = request.url.replace(/#.*$/, ""), // Strip hash part of URL for consistency across browsers
+                httpMethod = request.type ? request.type.toUpperCase() : "GET",
+                xhr = new global.XMLHttpRequest();
+        
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    callback(null, xhr);
+                }
+            };
+        
+            xhr.open(httpMethod, url);
+        
+            for (var key in headers) {
+                if (request.headers.hasOwnProperty(key)) {
+                    xhr.setRequestHeader(key, request.headers[key]);
+                }
+            }
+        
+            xhr.send(request.data);
+        };
+    };
+
+    $__modules__.IframeTransport = function (exports) {
+        // ----------------------------------------------------------------------------
+        // Copyright (c) Microsoft Corporation. All rights reserved.
+        // ----------------------------------------------------------------------------
+        
+        /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
+        
+        // This transport is for midlevel browsers (IE8-9) that don't support CORS but do support postMessage.
+        // It creates an invisible <iframe> that loads a special bridge.html page from the runtime domain.
+        // To issue a request, it uses postMessage to pass the request into the <iframe>, which in turn makes
+        // a same-domain Ajax request to the runtime. To associate postMessage replies with the original
+        // request, we track an array of promises that eventually time out if not resolved (see PostMessageExchange).
+        
+        var Promises = require('Promises'),
+            PostMessageExchange = require('PostMessageExchange'),
+            loadBridgeFramePromises = [], // One per target proto/host/port triplet
+            messageExchange = PostMessageExchange.instance;
+        
+        exports.name = "IframeTransport";
+        
+        exports.supportsCurrentRuntime = function () {
+            /// <summary>
+            /// Determines whether or not this transport is usable in the current runtime.
+            /// </summary>
+        
+            return typeof global.postMessage !== "undefined";
+        };
+        
+        exports.performRequest = function (request, callback) {
+            /// <summary>
+            /// Make a web request.
+            /// </summary>
+            /// <param name="request" type="Object">
+            /// Object describing the request (in the WinJS.xhr format).
+            /// </param>
+            /// <param name="callback" type="Function">
+            /// The callback to execute when the request completes.
+            /// </param>
+        
+            var originRoot = PostMessageExchange.getOriginRoot(request.url);
+            whenBridgeLoaded(originRoot, function (bridgeFrame) {
+                var message = {
+                    type: request.type,
+                    url: request.url,
+                    headers: request.headers,
+                    data: request.data
+                };
+                messageExchange.request(bridgeFrame.contentWindow, message, originRoot).then(function (reply) {
+                    fixupAjax(reply);
+                    callback(null, reply);
+                }, function (error) {
+                    callback(error, null);
+                });
+            });
+        };
+        
+        function fixupAjax(xhr) {
+            if (xhr) {
+                // IE sometimes converts status 204 into 1223
+                // http://stackoverflow.com/questions/10046972/msie-returns-status-code-of-1223-for-ajax-request
+                if (xhr.status === 1223) {
+                    xhr.status = 204;
+                }
+            }
+        }
+        
+        function whenBridgeLoaded(originRoot, callback) {
+            /// <summary>
+            /// Performs the callback once the bridge iframe has finished loading.
+            /// Lazily creates the bridge iframe if necessary. Note that each proto/host/port
+            /// triplet (i.e., same-domain origin) needs a separate bridge.
+            /// </summary>
+        
+            var cacheEntry = loadBridgeFramePromises[originRoot];
+        
+            if (!cacheEntry) {
+                cacheEntry = loadBridgeFramePromises[originRoot] = new Promises.Promise(function (complete, error) {
+                    var bridgeFrame = document.createElement("iframe"),
+                        callerOrigin = PostMessageExchange.getOriginRoot(window.location.href),
+                        handleBridgeLoaded = function() {
+                            complete(bridgeFrame);
+                        };
+                    
+                    if (bridgeFrame.addEventListener) {
+                        bridgeFrame.addEventListener("load", handleBridgeLoaded, false);
+                    } else {
+                        // For IE8
+                        bridgeFrame.attachEvent("onload", handleBridgeLoaded);
+                    }
+        
+                    bridgeFrame.src = originRoot + "/crossdomain/bridge?origin=" + encodeURIComponent(callerOrigin);
+                    
+                    // Try to keep it invisible, even if someone does $("iframe").show()
+                    bridgeFrame.setAttribute("width", 0);
+                    bridgeFrame.setAttribute("height", 0);
+                    bridgeFrame.style.display = "none";
+        
+                    global.document.body.appendChild(bridgeFrame);
+                });
+            }
+        
+            cacheEntry.then(callback);
+        }
+        
+    };
+
+    $__modules__.BrowserPopup = function (exports) {
+        // ----------------------------------------------------------------------------
+        // Copyright (c) Microsoft Corporation. All rights reserved.
+        // ----------------------------------------------------------------------------
+        
+        var PostMessageExchange = require('PostMessageExchange');
+        
+        exports.supportsCurrentRuntime = function () {
+            /// <summary>
+            /// Determines whether or not this login UI is usable in the current runtime.
+            /// </summary>
+            return true;
+        };
+        
+        exports.login = function (startUri, endUri, callback) {
+            /// <summary>
+            /// Displays the login UI and calls back on completion
+            /// </summary>
+        
+            // Tell the runtime which form of completion signal we are looking for,
+            // and which origin should be allowed to receive the result (note that this
+            // is validated against whitelist on the server; we are only supplying this
+            // origin to indicate *which* of the whitelisted origins to use).
+            var completionOrigin = PostMessageExchange.getOriginRoot(window.location.href),
+                runtimeOrigin = PostMessageExchange.getOriginRoot(startUri),
+                // IE does not support popup->opener postMessage calls, so we have to
+                // route the message via an iframe
+                useIntermediateIframe = window.navigator.userAgent.indexOf("MSIE") >= 0 || window.navigator.userAgent.indexOf("Trident") >= 0,
+                intermediateIframe = useIntermediateIframe && createIntermediateIframeForLogin(runtimeOrigin, completionOrigin),
+                completionType = useIntermediateIframe ? "iframe" : "postMessage";
+            startUri += "?completion_type=" + completionType + "&completion_origin=" + encodeURIComponent(completionOrigin);
+        
+            // Browsers don't allow postMessage to a file:// URL (except by setting origin to "*", which is unacceptable)
+            // so abort the process early with an explanation in that case.
+            if (!(completionOrigin && (completionOrigin.indexOf("http:") === 0 || completionOrigin.indexOf("https:") === 0))) {
+                var error = "Login is only supported from http:// or https:// URLs. Please host your page in a web server.";
+                callback(error, null);
+                return;
+            }
+        
+            var loginWindow = window.open(startUri, "_blank", "location=no"),
+                complete = function(errorValue, oauthValue) {
+                    // Clean up event handlers, windows, frames, ...
+                    window.clearInterval(checkForWindowClosedInterval);
+                    loginWindow.close();
+                    if (window.removeEventListener) {
+                        window.removeEventListener("message", handlePostMessage);
+                    } else {
+                        // For IE8
+                        window.detachEvent("onmessage", handlePostMessage);
+                    }
+                    if (intermediateIframe) {
+                        intermediateIframe.parentNode.removeChild(intermediateIframe);
+                    }
+                    
+                    // Finally, notify the caller
+                    callback(errorValue, oauthValue);
+                },
+                handlePostMessage = function(evt) {
+                    // Validate source
+                    var expectedSource = useIntermediateIframe ? intermediateIframe.contentWindow : loginWindow;
+                    if (evt.source !== expectedSource) {
+                        return;
+                    }
+        
+                    // Parse message
+                    var envelope;
+                    try {
+                        envelope = JSON.parse(evt.data);
+                    } catch(ex) {
+                        // Not JSON - it's not for us. Ignore it and keep waiting for the next message.
+                        return;
+                    }
+        
+                    // Process message only if it's for us
+                    if (envelope && envelope.type === "LoginCompleted" && (envelope.oauth || envelope.error)) {
+                        complete(envelope.error, envelope.oauth);
+                    }
+                },
+                checkForWindowClosedInterval = window.setInterval(function() {
+                    // We can't directly catch any "onclose" event from the popup because it's usually on a different
+                    // origin, but in all the mainstream browsers we can poll for changes to its "closed" property
+                    if (loginWindow && loginWindow.closed === true) {
+                        complete("canceled", null);
+                    }
+                }, 250);
+        
+            if (window.addEventListener) {
+                window.addEventListener("message", handlePostMessage, false);
+            } else {
+                // For IE8
+                window.attachEvent("onmessage", handlePostMessage);
+            }
+            
+            // Permit cancellation, e.g., if the app tries to login again while the popup is still open
+            return {
+                cancelCallback: function () {
+                    complete("canceled", null);
+                    return true; // Affirm that it was cancelled
+                }
+            };
+        };
+        
+        function createIntermediateIframeForLogin(runtimeOrigin, completionOrigin) {
+            var frame = document.createElement("iframe");
+            frame.name = "zumo-login-receiver"; // loginviaiframe.html specifically looks for this name
+            frame.src = runtimeOrigin +
+                "/crossdomain/loginreceiver?completion_origin=" + encodeURIComponent(completionOrigin);
+            frame.setAttribute("width", 0);
+            frame.setAttribute("height", 0);
+            frame.style.display = "none";
+            document.body.appendChild(frame);
+            return frame;
+        }
+    };
+
+    $__modules__.CordovaPopup = function (exports) {
+        // ----------------------------------------------------------------------------
+        // Copyright (c) Microsoft Corporation. All rights reserved.
+        // ----------------------------------------------------------------------------
+        
+        // Note: Cordova is PhoneGap.
+        // This login UI implementation uses the InAppBrowser plugin which is built into Cordova 2.3.0+.
+        
+        var requiredCordovaVersion = { major: 2, minor: 3 };
+        
+        exports.supportsCurrentRuntime = function () {
+            /// <summary>
+            /// Determines whether or not this login UI is usable in the current runtime.
+            /// </summary>
+        
+            return !!currentCordovaVersion();
+        };
+        
+        exports.login = function (startUri, endUri, callback) {
+            /// <summary>
+            /// Displays the login UI and calls back on completion
+            /// </summary>
+        
+            // Ensure it's a sufficiently new version of Cordova, and if not fail synchronously so that
+            // the error message will show up in the browser console.
+            var foundCordovaVersion = currentCordovaVersion();
+            if (!isSupportedCordovaVersion(foundCordovaVersion)) {
+                var message = "Not a supported version of Cordova. Detected: " + foundCordovaVersion +
+                            ". Required: " + requiredCordovaVersion.major + "." + requiredCordovaVersion.minor;
+                throw new Error(message);
+            }
+        
+            // Initially we show a page with a spinner. This stays on screen until the login form has loaded.
+            var redirectionScript = "<script>location.href = unescape('" + window.escape(startUri) + "')</script>",
+                startPage = "data:text/html," + encodeURIComponent(getSpinnerMarkup() + redirectionScript),
+                loginWindow = window.open(startPage, "_blank", "location=no"),
+                flowHasFinished = false,
+                loadEventHandler = function (evt) {
+                    if (!flowHasFinished && evt.url.indexOf(endUri) === 0) {
+                        flowHasFinished = true;
+                        loginWindow.close();
+                        var result = parseOAuthResultFromDoneUrl(evt.url);
+                        callback(result.error, result.oAuthToken);
+                    }
+                };
+        
+            // Ideally we'd just use loadstart because it happens earlier, but it randomly skips
+            // requests on iOS, so we have to listen for loadstop as well (which is reliable).
+            loginWindow.addEventListener('loadstart', loadEventHandler);
+            loginWindow.addEventListener('loadstop', loadEventHandler);
+        
+            loginWindow.addEventListener('exit', function (evt) {
+                if (!flowHasFinished) {
+                    flowHasFinished = true;
+                    callback("UserCancelled", null);
+                }
+            });
+        };
+        
+        function currentCordovaVersion() {
+            // If running inside Cordova, returns a string similar to "2.3.0". Otherwise, returns a falsey value.
+            // Note: We can only detect Cordova after its deviceready event has fired, so don't call login until then.
+            return window.device && window.device.cordova;
+        }
+        
+        function isSupportedCordovaVersion(version) {
+            var versionParts = currentCordovaVersion().match(/^(\d+).(\d+)./);
+            if (versionParts) {
+                var major = Number(versionParts[1]),
+                    minor = Number(versionParts[2]),
+                    required = requiredCordovaVersion;
+                return (major > required.major) ||
+                       (major === required.major && minor >= required.minor);
+            }
+            return false;
+        }
+        
+        function parseOAuthResultFromDoneUrl(url) {
+            var successMessage = extractMessageFromUrl(url, "#token="),
+                errorMessage = extractMessageFromUrl(url, "#error=");
+            return {
+                oAuthToken: successMessage ? JSON.parse(successMessage) : null,
+                error: errorMessage
+            };
+        }
+        
+        function extractMessageFromUrl(url, separator) {
+            var pos = url.indexOf(separator);
+            return pos < 0 ? null : decodeURIComponent(url.substring(pos + separator.length));
+        }
+        
+        function getSpinnerMarkup() {
+            // The default InAppBrowser experience isn't ideal, as it just shows the user a blank white screen
+            // until the login form appears. This might take 10+ seconds during which it looks broken.
+            // Also on iOS it's possible for the InAppBrowser to initially show the results of the *previous*
+            // login flow if the InAppBrowser was dismissed before completion, which is totally undesirable.
+            // To fix both of these problems, we display a simple "spinner" graphic via a data: URL until
+            // the current login screen has loaded. We generate the spinner via CSS rather than referencing
+            // an animated GIF just because this makes the client library smaller overall.
+            var vendorPrefix = "webkitTransform" in document.documentElement.style ? "-webkit-" : "",
+                numSpokes = 12,
+                spokesMarkup = "";
+            for (var i = 0; i < numSpokes; i++) {
+                spokesMarkup += "<div style='-prefix-transform: rotateZ(" + (180 + i * 360 / numSpokes) + "deg);" +
+                                            "-prefix-animation-delay: " + (0.75 * i / numSpokes) + "s;'></div>";
+            }
+            return [
+                "<!DOCTYPE html><html>",
+                "<head><meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'></head>",
+                "<body><div id='spinner'>" + spokesMarkup + "</div>",
+                "<style type='text/css'>",
+                "    #spinner { position: absolute; top: 50%; left: 50%; -prefix-animation: spinner 10s linear infinite; }",
+                "    #spinner > div {",
+                "        background: #333; opacity: 0; position: absolute; top: 11px; left: -2px; width: 4px; height: 21px; border-radius: 2px;",
+                "        -prefix-transform-origin: 50% -11px; -prefix-animation: spinner-spoke 0.75s linear infinite;",
+                "    }",
+                "    @-prefix-keyframes spinner { 0% { -prefix-transform: rotateZ(0deg); } 100% { -prefix-transform: rotateZ(-360deg); } }",
+                "    @-prefix-keyframes spinner-spoke { 0% { opacity: 0; } 5% { opacity: 1; } 70% { opacity: 0; } 100% { opacity: 0; } }",
+                "</style>",
+                "</body></html>"
+            ].join("").replace(/-prefix-/g, vendorPrefix);
+        }
     };
 
     $__modules__.Extensions = function (exports) {
@@ -2943,6 +2817,266 @@
         
             return error;
         };
+    };
+
+    $__modules__.PostMessageExchange = function (exports) {
+        // ----------------------------------------------------------------------------
+        // Copyright (c) Microsoft Corporation. All rights reserved.
+        // ----------------------------------------------------------------------------
+        
+        // window.postMessage does not have a concept of responses, so this class associates messages
+        // with IDs so that we can identify which message a reply refers to.
+        
+        var Promises = require('Promises'),
+            messageTimeoutDuration = 5 * 60 * 1000; // If no reply after 5 mins, surely there will be no reply
+        
+        function PostMessageExchange() {
+            var self = this;
+            self._lastMessageId = 0;
+            self._hasListener = false;
+            self._pendingMessages = {};
+        }
+        
+        PostMessageExchange.prototype.request = function (targetWindow, messageData, origin) {
+            /// <summary>
+            /// Issues a request to the target window via postMessage
+            /// </summary>
+            /// <param name="targetWindow" type="Object">
+            /// The window object (on an actual window, or iframe) to send the request to
+            /// </param>
+            /// <param name="messageData" type="Object">
+            /// A JSON-serializable object to pass to the target
+            /// </param>
+            /// <param name="origin" type="String">
+            /// The expected origin (e.g., "http://example.com:81") of the recipient window.
+            /// If at runtime the origin does not match, the request will not be issued.
+            /// </param>
+            /// <returns type="Object">
+            /// A promise that completes once the target window sends back a reply, with
+            /// value equal to that reply.
+            /// </returns>
+        
+            var self = this,
+                messageId = ++self._lastMessageId,
+                envelope = { messageId: messageId, contents: messageData };
+        
+            self._ensureHasListener();
+        
+            return new Promises.Promise(function (complete, error) {
+                // Track callbacks and origin data so we can complete the promise only for valid replies
+                self._pendingMessages[messageId] = {
+                    messageId: messageId,
+                    complete: complete,
+                    error: error,
+                    targetWindow: targetWindow,
+                    origin: origin
+                };
+        
+                // Don't want to leak memory, so if there's no reply, forget about it eventually
+                self._pendingMessages[messageId].timeoutId = global.setTimeout(function () {
+                    var pendingMessage = self._pendingMessages[messageId];
+                    if (pendingMessage) {
+                        delete self._pendingMessages[messageId];
+                        pendingMessage.error({ status: 0, statusText: "Timeout", responseText: null });
+                    }
+                }, messageTimeoutDuration);
+        
+                targetWindow.postMessage(JSON.stringify(envelope), origin);
+            });
+        };
+        
+        PostMessageExchange.prototype._ensureHasListener = function () {
+            if (this._hasListener) {
+                return;
+            }
+            this._hasListener = true;
+        
+            var self = this,
+                boundHandleMessage = function () {
+                    self._handleMessage.apply(self, arguments);
+                };
+        
+            if (window.addEventListener) {
+                window.addEventListener('message', boundHandleMessage, false);
+            } else {
+                // For IE8
+                window.attachEvent('onmessage', boundHandleMessage);
+            }
+        };
+        
+        PostMessageExchange.prototype._handleMessage = function (evt) {
+            var envelope = this._tryDeserializeMessage(evt.data),
+                messageId = envelope && envelope.messageId,
+                pendingMessage = messageId && this._pendingMessages[messageId],
+                isValidReply = pendingMessage && pendingMessage.targetWindow === evt.source &&
+                               pendingMessage.origin === getOriginRoot(evt.origin);
+            
+            if (isValidReply) {
+                global.clearTimeout(pendingMessage.timeoutId); // No point holding this in memory until the timeout expires
+                delete this._pendingMessages[messageId];
+                pendingMessage.complete(envelope.contents);
+            }
+        };
+        
+        PostMessageExchange.prototype._tryDeserializeMessage = function (messageString) {
+            if (!messageString || typeof messageString !== 'string') {
+                return null;
+            }
+        
+            try {
+                return JSON.parse(messageString);
+            } catch (ex) {
+                // It's not JSON, so it's not a message for us. Ignore it.
+                return null;
+            }
+        };
+        
+        function getOriginRoot(url) {
+            // Returns the proto/host/port part of a URL, i.e., the part that defines the access boundary
+            // for same-origin policy. This is of the form "protocol://host:port", where ":port" is omitted
+            // if it is the default port for that protocol.
+            var parsedUrl = parseUrl(url),
+                portString = parsedUrl.port ? parsedUrl.port.toString() : null,
+                isDefaultPort = (parsedUrl.protocol === 'http:' && portString === '80') ||
+                                (parsedUrl.protocol === 'https:' && portString === '443'),
+                portSuffix = (portString && !isDefaultPort) ? ':' + portString : '';
+            return parsedUrl.protocol + '//' + parsedUrl.hostname + portSuffix;
+        }
+        
+        function parseUrl(url) {
+            // https://gist.github.com/2428561 - works on IE8+. Could switch to a more manual, less magic
+            // parser in the future if we need to support IE < 8.
+            var elem = global.document.createElement('a');
+            elem.href = url;
+            return elem;
+        }
+        
+        exports.instance = new PostMessageExchange();
+        exports.getOriginRoot = getOriginRoot;
+    };
+
+    $__modules__.Promises = function (exports) {
+        // ----------------------------------------------------------------------------
+        // Copyright (c) Microsoft Corporation. All rights reserved.
+        // ----------------------------------------------------------------------------
+        
+        // In WinJS, we use WinJS.Promise.
+        // There's no native equivalent for regular JavaScript in the browser, so we implement it here.
+        // This implementation conforms to Promises/A+, making it compatible with WinJS.Promise.
+        
+        // Note: There is a standard Promises/A+ test suite, to which this implementation conforms.
+        // See test\Microsoft.Azure.Zumo.Web.Test\promiseTests
+        
+        // Declare JSHint globals
+        /*global setTimeout:false */
+        
+        (function (exports) {
+            "use strict";
+        
+            var resolutionState = { success: {}, error: {} },
+                bind = function (func, target) { return function () { func.apply(target, arguments); }; }, // Older browsers lack Function.prototype.bind
+                isGenericPromise = function (obj) { return obj && (typeof obj.then === "function"); };
+        
+            function Promise(init) {
+                this._callbackFrames = [];
+                this._resolutionState = null;
+                this._resolutionValueOrError = null;
+                this._resolveSuccess = bind(this._resolveSuccess, this);
+                this._resolveError = bind(this._resolveError, this);
+        
+                if (init) {
+                    init(this._resolveSuccess, this._resolveError);
+                }
+            }
+        
+            Promise.prototype.then = function (success, error) {
+                var callbackFrame = { success: success, error: error, chainedPromise: new Promise() };
+        
+                // If this promise is already resolved, invoke callbacks immediately. Otherwise queue them.
+                if (this._resolutionState) {
+                    this._invokeCallback(callbackFrame);
+                } else {
+                    this._callbackFrames.push(callbackFrame);
+                }
+        
+                return callbackFrame.chainedPromise;
+            };
+        
+            Promise.prototype._resolveSuccess = function (val) { this._resolve(resolutionState.success, val); };
+            Promise.prototype._resolveError = function (err) { this._resolve(resolutionState.error, err); };
+        
+            Promise.prototype._resolve = function (state, valueOrError) {
+                if (this._resolutionState) {
+                    // Can't affect resolution state when already resolved. We silently ignore the request, without throwing an error,
+                    // to prevent concurrent resolvers from affecting each other during race conditions.
+                    return;
+                }
+        
+                this._resolutionState = state;
+                this._resolutionValueOrError = valueOrError;
+        
+                // Notify all queued callbacks
+                for (var i = 0, j = this._callbackFrames.length; i < j; i++) {
+                    this._invokeCallback(this._callbackFrames[i]);
+                }
+            };
+        
+            Promise.prototype._invokeCallback = function (frame) {
+                var callbackToInvoke = this._resolutionState === resolutionState.success ? frame.success : frame.error;
+                if (typeof callbackToInvoke === "function") {
+                    // Call the supplied callback either to transform the result (for success) or to handle the error (for error)
+                    // The setTimeout ensures handlers are always invoked asynchronosly, even if the promise was already resolved,
+                    // to avoid callers having to differentiate between sync/async cases
+                    setTimeout(bind(function () {
+                        var passthroughValue, passthroughState, callbackDidNotThrow = true;
+                        try {
+                            passthroughValue = callbackToInvoke(this._resolutionValueOrError);
+                            passthroughState = resolutionState.success;
+                        } catch (ex) {
+                            callbackDidNotThrow = false;
+                            passthroughValue = ex;
+                            passthroughState = resolutionState.error;
+                        }
+        
+                        if (callbackDidNotThrow && isGenericPromise(passthroughValue)) {
+                            // By returning a futher promise from a callback, you can insert it into the chain. This is the basis for composition.
+                            // This rule is in the Promises/A+ spec, but not Promises/A.
+                            passthroughValue.then(frame.chainedPromise._resolveSuccess, frame.chainedPromise._resolveError);
+                        } else {
+                            frame.chainedPromise._resolve(passthroughState, passthroughValue);
+                        }
+                    }, this), 1);
+                } else {
+                    // No callback of the applicable type, so transparently pass existing state/value down the chain
+                    frame.chainedPromise._resolve(this._resolutionState, this._resolutionValueOrError);
+                }
+            };
+        
+            // -----------
+            // Everything from here on is extensions beyond the Promises/A+ spec intended to ease code
+            // sharing between WinJS and browser-based Mobile Services apps
+        
+            Promise.prototype.done = function (success, error) {
+                this.then(success, error).then(null, function(err) {
+                    // "done" throws any final errors as global uncaught exceptions. The setTimeout
+                    // ensures the exception won't get caught in the Promises machinery or user code.
+                    setTimeout(function () { throw new Error(err); }, 1);
+                });
+                return undefined; // You can't chain onto a .done()
+            };
+        
+            // Note that we're not implementing any of the static WinJS.Promise.* functions because
+            // the Mobile Services client doesn't even expose any static "Promise" object that you
+            // could reference static functions on. Developers who want to use any of the WinJS-style
+            // static functions (any, join, theneach, ...) can use any Promises/A-compatible library
+            // such as when.js.
+            //
+            // Additionally, we don't implement .cancel() yet because Mobile Services operations don't
+            // support cancellation in WinJS yet either. This could be added to both WinJS and Web
+            // client libraries in the future.
+        
+            exports.Promise = Promise;
+        })(exports);
     };
 
     $__modules__.Validate = function (exports) {
@@ -10173,286 +10307,3 @@
 
     require('MobileServiceClient');
 })(this || exports);
-
-// SIG // Begin signature block
-// SIG // MIIkBwYJKoZIhvcNAQcCoIIj+DCCI/QCAQExDzANBglg
-// SIG // hkgBZQMEAgEFADB3BgorBgEEAYI3AgEEoGkwZzAyBgor
-// SIG // BgEEAYI3AgEeMCQCAQEEEBDgyQbOONQRoqMAEEvTUJAC
-// SIG // AQACAQACAQACAQACAQAwMTANBglghkgBZQMEAgEFAAQg
-// SIG // k5lf5tTTFKtMn4ETqds5PA8p1+lPvavkZAy6N+WzVWag
-// SIG // gg2SMIIGEDCCA/igAwIBAgITMwAAABp3u3SzB9EWuAAA
-// SIG // AAAAGjANBgkqhkiG9w0BAQsFADB+MQswCQYDVQQGEwJV
-// SIG // UzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMH
-// SIG // UmVkbW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBv
-// SIG // cmF0aW9uMSgwJgYDVQQDEx9NaWNyb3NvZnQgQ29kZSBT
-// SIG // aWduaW5nIFBDQSAyMDExMB4XDTEzMDkyNDE3NDE0MVoX
-// SIG // DTE0MTIyNDE3NDE0MVowgYMxCzAJBgNVBAYTAlVTMRMw
-// SIG // EQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQHEwdSZWRt
-// SIG // b25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29ycG9yYXRp
-// SIG // b24xDTALBgNVBAsTBE1PUFIxHjAcBgNVBAMTFU1pY3Jv
-// SIG // c29mdCBDb3Jwb3JhdGlvbjCCASIwDQYJKoZIhvcNAQEB
-// SIG // BQADggEPADCCAQoCggEBAOV8Ly0Mqex6qDTgTD9/SQ4N
-// SIG // thWtGRPeUoommRVxqWInBzelgzCCYmwLo/0GDRcUBubg
-// SIG // rcyVlgogWqKW4eBXMDxdYpvFXYkM0DTf2dj6Ne8RI4vA
-// SIG // +etK9DnaL3EQ6xGzLDejcOiGFz7vKkbQjse5SAChN/HH
-// SIG // yOfSHmtKKvLGTB1wn3zDaEKOPO2BGlLjPjKUPX4Y8Zvk
-// SIG // S1wR5NbDhR5sAzBzvMmoAX2drdH1c/BbGnsvH4syvrOO
-// SIG // tTvZ9//zX7MTfBOTV7igXjWYg6E0NPLFBJ+5/kYXDJHf
-// SIG // 7w9V9uzMOclhZaEp7r4RNxu3bkJVycw10VKzA3CcmDSe
-// SIG // KTapFxlfC78CAwEAAaOCAX8wggF7MB8GA1UdJQQYMBYG
-// SIG // CCsGAQUFBwMDBgorBgEEAYI3TAgBMB0GA1UdDgQWBBQk
-// SIG // Kz3KkJyeKHVyPM8Msz3mrCRWWTBRBgNVHREESjBIpEYw
-// SIG // RDENMAsGA1UECxMETU9QUjEzMDEGA1UEBRMqMzE2NDIr
-// SIG // Mjg2MGI1MmUtYzRhMy00NTRkLWJjMWUtMzJjNWFkZDE3
-// SIG // ZTkwMB8GA1UdIwQYMBaAFEhuZOVQBdOCqhc3NyK1bajK
-// SIG // dQKVMFQGA1UdHwRNMEswSaBHoEWGQ2h0dHA6Ly93d3cu
-// SIG // bWljcm9zb2Z0LmNvbS9wa2lvcHMvY3JsL01pY0NvZFNp
-// SIG // Z1BDQTIwMTFfMjAxMS0wNy0wOC5jcmwwYQYIKwYBBQUH
-// SIG // AQEEVTBTMFEGCCsGAQUFBzAChkVodHRwOi8vd3d3Lm1p
-// SIG // Y3Jvc29mdC5jb20vcGtpb3BzL2NlcnRzL01pY0NvZFNp
-// SIG // Z1BDQTIwMTFfMjAxMS0wNy0wOC5jcnQwDAYDVR0TAQH/
-// SIG // BAIwADANBgkqhkiG9w0BAQsFAAOCAgEAEXJgC/KsJrYE
-// SIG // BWbcOFjX1GzaI6pgLUEouGs/lHL/PmJRZVkXMVELP9QJ
-// SIG // Djg2gynneJhUbaQWwS5EwMhRoD7SUEWF5sK8eW5bWzTh
-// SIG // FtQxOcUjWbcH50yxiU+AYsdXoEl+nsMYwCJG6LBt5iDG
-// SIG // KR8ImoRtyoAOg729Ft5/vgjzzYB5kdP43OhDTPZmAhJq
-// SIG // 9ICOSwbRbYgMW9GBHO30shHFkC9Um41gByQhgW00y5Kd
-// SIG // jqpAE0KsID/g9hBlwFvKgKjaju+GWpek9RFLhoVvYquK
-// SIG // LqBPKA0S+cXNkUcDCsQ2yWPX3feFelj9W4fsZsGY/I3u
-// SIG // WHqintEde4lJjh77PsOyiu7EZ0ildbH9zmyms6DgFFeI
-// SIG // b3xI8UiMT5Ieq2wkZAy6sa6I6V2NLz8LUQJcaqysGUzU
-// SIG // THpfuRu1TjWua7G/2FoorUjKFVO4i7QsjOrEpBPklxlR
-// SIG // JvEgH36kw+Oux3uJ+WOhtqgGXELd+GR37wYxpR/pEV/L
-// SIG // pKAVaJ0Y8Sh7ehOuckYgvyJ9CEwg0jCWMQ2W1Cf0RkVg
-// SIG // LZHM1/C6VHlGTZ4w6NsgKzC2chWxQaeU4KKUJQf8+Hnt
-// SIG // JsLwZj2Pg/7645RBM513Rr0lrAKkq0jqh21bQL0m7/UY
-// SIG // Fzkc/Mnd2ey+06QFZIC417t6tSHGCCN7gbKcjDxc+wvi
-// SIG // U+LB6boPX1Awggd6MIIFYqADAgECAgphDpDSAAAAAAAD
-// SIG // MA0GCSqGSIb3DQEBCwUAMIGIMQswCQYDVQQGEwJVUzET
-// SIG // MBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVk
-// SIG // bW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0
-// SIG // aW9uMTIwMAYDVQQDEylNaWNyb3NvZnQgUm9vdCBDZXJ0
-// SIG // aWZpY2F0ZSBBdXRob3JpdHkgMjAxMTAeFw0xMTA3MDgy
-// SIG // MDU5MDlaFw0yNjA3MDgyMTA5MDlaMH4xCzAJBgNVBAYT
-// SIG // AlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQH
-// SIG // EwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29y
-// SIG // cG9yYXRpb24xKDAmBgNVBAMTH01pY3Jvc29mdCBDb2Rl
-// SIG // IFNpZ25pbmcgUENBIDIwMTEwggIiMA0GCSqGSIb3DQEB
-// SIG // AQUAA4ICDwAwggIKAoICAQCr8PpyEBwurdhuqoIQTTS6
-// SIG // 8rZYIZ9CGypr6VpQqrgGOBoESbp/wwwe3TdrxhLYC/A4
-// SIG // wpkGsMg51QEUMULTiQ15ZId+lGAkbK+eSZzpaF7S35tT
-// SIG // sgosw6/ZqSuuegmv15ZZymAaBelmdugyUiYSL+erCFDP
-// SIG // s0S3XdjELgN1q2jzy23zOlyhFvRGuuA4ZKxuZDV4pqBj
-// SIG // Dy3TQJP4494HDdVceaVJKecNvqATd76UPe/74ytaEB9N
-// SIG // ViiienLgEjq3SV7Y7e1DkYPZe7J7hhvZPrGMXeiJT4Qa
-// SIG // 8qEvWeSQOy2uM1jFtz7+MtOzAz2xsq+SOH7SnYAs9U5W
-// SIG // kSE1JcM5bmR/U7qcD60ZI4TL9LoDho33X/DQUr+MlIe8
-// SIG // wCF0JV8YKLbMJyg4JZg5SjbPfLGSrhwjp6lm7GEfauEo
-// SIG // SZ1fiOIlXdMhSz5SxLVXPyQD8NF6Wy/VI+NwXQ9RRnez
-// SIG // +ADhvKwCgl/bwBWzvRvUVUvnOaEP6SNJvBi4RHxF5MHD
-// SIG // cnrgcuck379GmcXvwhxX24ON7E1JMKerjt/sW5+v/N2w
-// SIG // ZuLBl4F77dbtS+dJKacTKKanfWeA5opieF+yL4TXV5xc
-// SIG // v3coKPHtbcMojyyPQDdPweGFRInECUzF1KVDL3SV9274
-// SIG // eCBYLBNdYJWaPk8zhNqwiBfenk70lrC8RqBsmNLg1oiM
-// SIG // CwIDAQABo4IB7TCCAekwEAYJKwYBBAGCNxUBBAMCAQAw
-// SIG // HQYDVR0OBBYEFEhuZOVQBdOCqhc3NyK1bajKdQKVMBkG
-// SIG // CSsGAQQBgjcUAgQMHgoAUwB1AGIAQwBBMAsGA1UdDwQE
-// SIG // AwIBhjAPBgNVHRMBAf8EBTADAQH/MB8GA1UdIwQYMBaA
-// SIG // FHItOgIxkEO5FAVO4eqnxzHRI4k0MFoGA1UdHwRTMFEw
-// SIG // T6BNoEuGSWh0dHA6Ly9jcmwubWljcm9zb2Z0LmNvbS9w
-// SIG // a2kvY3JsL3Byb2R1Y3RzL01pY1Jvb0NlckF1dDIwMTFf
-// SIG // MjAxMV8wM18yMi5jcmwwXgYIKwYBBQUHAQEEUjBQME4G
-// SIG // CCsGAQUFBzAChkJodHRwOi8vd3d3Lm1pY3Jvc29mdC5j
-// SIG // b20vcGtpL2NlcnRzL01pY1Jvb0NlckF1dDIwMTFfMjAx
-// SIG // MV8wM18yMi5jcnQwgZ8GA1UdIASBlzCBlDCBkQYJKwYB
-// SIG // BAGCNy4DMIGDMD8GCCsGAQUFBwIBFjNodHRwOi8vd3d3
-// SIG // Lm1pY3Jvc29mdC5jb20vcGtpb3BzL2RvY3MvcHJpbWFy
-// SIG // eWNwcy5odG0wQAYIKwYBBQUHAgIwNB4yIB0ATABlAGcA
-// SIG // YQBsAF8AcABvAGwAaQBjAHkAXwBzAHQAYQB0AGUAbQBl
-// SIG // AG4AdAAuIB0wDQYJKoZIhvcNAQELBQADggIBAGfyhqWY
-// SIG // 4FR5Gi7T2HRnIpsLlhHhY5KZQpZ90nkMkMFlXy4sPvjD
-// SIG // ctFtg/6+P+gKyju/R6mj82nbY78iNaWXXWWEkH2LRlBV
-// SIG // 2AySfNIaSxzzPEKLUtCw/WvjPgcuKZvmPRul1LUdd5Q5
-// SIG // 4ulkyUQ9eHoj8xN9ppB0g430yyYCRirCihC7pKkFDJvt
-// SIG // aPpoLpWgKj8qa1hJYx8JaW5amJbkg/TAj/NGK978O9C9
-// SIG // Ne9uJa7lryft0N3zDq+ZKJeYTQ49C/IIidYfwzIY4vDF
-// SIG // Lc5bnrRJOQrGCsLGra7lstnbFYhRRVg4MnEnGn+x9Cf4
-// SIG // 3iw6IGmYslmJaG5vp7d0w0AFBqYBKig+gj8TTWYLwLNN
-// SIG // 9eGPfxxvFX1Fp3blQCplo8NdUmKGwx1jNpeG39rz+PIW
-// SIG // oZon4c2ll9DuXWNB41sHnIc+BncG0QaxdR8UvmFhtfDc
-// SIG // xhsEvt9Bxw4o7t5lL+yX9qFcltgA1qFGvVnzl6UJS0gQ
-// SIG // mYAf0AApxbGbpT9Fdx41xtKiop96eiL6SJUfq/tHI4D1
-// SIG // nvi/a7dLl+LrdXga7Oo3mXkYS//WsyNodeav+vyL6wuA
-// SIG // 6mk7r/ww7QRMjt/fdW1jkT3RnVZOT7+AVyKheBEyIXrv
-// SIG // QQqxP/uozKRdwaGIm1dxVk5IRcBCyZt2WwqASGv9eZ/B
-// SIG // vW1taslScxMNelDNMYIVzTCCFckCAQEwgZUwfjELMAkG
-// SIG // A1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAO
-// SIG // BgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29m
-// SIG // dCBDb3Jwb3JhdGlvbjEoMCYGA1UEAxMfTWljcm9zb2Z0
-// SIG // IENvZGUgU2lnbmluZyBQQ0EgMjAxMQITMwAAABp3u3Sz
-// SIG // B9EWuAAAAAAAGjANBglghkgBZQMEAgEFAKCB1DAZBgkq
-// SIG // hkiG9w0BCQMxDAYKKwYBBAGCNwIBBDAcBgorBgEEAYI3
-// SIG // AgELMQ4wDAYKKwYBBAGCNwIBFTAvBgkqhkiG9w0BCQQx
-// SIG // IgQg+TuBWkPHJLb2UdDdrusztdIAt/veCdFlvotY8ZGV
-// SIG // uIUwaAYKKwYBBAGCNwIBDDFaMFigPoA8AE0AaQBjAHIA
-// SIG // bwBzAG8AZgB0ACAAVwBpAG4AZABvAHcAcwAgAEEAegB1
-// SIG // AHIAZQAgAE0AbwBiAGkAbABloRaAFGh0dHA6Ly93d3cu
-// SIG // YXNwLm5ldC8gMA0GCSqGSIb3DQEBAQUABIIBAGksDcdb
-// SIG // MxP8VZKtQSlh4HZWRl96hFy1SKyZyLmIJYePMFE9aOUm
-// SIG // uJDm1RIAI4sjdKk/ppFvZhO9lC7s8uqfRXaFsACWmiUQ
-// SIG // bajGKK8xgeQND04taNHZgIywNMiBn5fiBHgz2bDdmGVp
-// SIG // h4LX0S0k5c4pMhj9sQY20ZUIf7Ht86ozF3ClzyH7QOuY
-// SIG // KP+irte5z9OSvHH0/c4AnGuEXJCsvQHIcWb5b5cBiwt/
-// SIG // BCkiDp75g9It3v90ZoOng5K8oz5lHpoOMSnz+vqFVoDm
-// SIG // pulwAEQOCEFL5o89a0cCJhMnX+YFt0UfFIPcG7b1NJ9U
-// SIG // JYy6xx8m8EFO66MdQHGJngblScqhghMxMIITLQYKKwYB
-// SIG // BAGCNwMDATGCEx0wghMZBgkqhkiG9w0BBwKgghMKMIIT
-// SIG // BgIBAzEPMA0GCWCGSAFlAwQCAQUAMIIBNQYLKoZIhvcN
-// SIG // AQkQAQSgggEkBIIBIDCCARwCAQEGCisGAQQBhFkKAwEw
-// SIG // MTANBglghkgBZQMEAgEFAAQg39i82oBeJuOVOIj2NU4x
-// SIG // T5iiDT3bGCov22pc8gja0QgCBlOfMRwUhRgTMjAxNDA2
-// SIG // MTYyMjQ1MDAuODg4WjAHAgEBgAIB9KCBsaSBrjCBqzEL
-// SIG // MAkGA1UEBhMCVVMxCzAJBgNVBAgTAldBMRAwDgYDVQQH
-// SIG // EwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29y
-// SIG // cG9yYXRpb24xDTALBgNVBAsTBE1PUFIxJzAlBgNVBAsT
-// SIG // Hm5DaXBoZXIgRFNFIEVTTjpGNTI4LTM3NzctOEE3NjEl
-// SIG // MCMGA1UEAxMcTWljcm9zb2Z0IFRpbWUtU3RhbXAgU2Vy
-// SIG // dmljZaCCDrwwggZxMIIEWaADAgECAgphCYEqAAAAAAAC
-// SIG // MA0GCSqGSIb3DQEBCwUAMIGIMQswCQYDVQQGEwJVUzET
-// SIG // MBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVk
-// SIG // bW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0
-// SIG // aW9uMTIwMAYDVQQDEylNaWNyb3NvZnQgUm9vdCBDZXJ0
-// SIG // aWZpY2F0ZSBBdXRob3JpdHkgMjAxMDAeFw0xMDA3MDEy
-// SIG // MTM2NTVaFw0yNTA3MDEyMTQ2NTVaMHwxCzAJBgNVBAYT
-// SIG // AlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAwDgYDVQQH
-// SIG // EwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29y
-// SIG // cG9yYXRpb24xJjAkBgNVBAMTHU1pY3Jvc29mdCBUaW1l
-// SIG // LVN0YW1wIFBDQSAyMDEwMIIBIjANBgkqhkiG9w0BAQEF
-// SIG // AAOCAQ8AMIIBCgKCAQEAqR0NvHcRijog7PwTl/X6f2mU
-// SIG // a3RUENWlCgCChfvtfGhLLF/Fw+Vhwna3PmYrW/AVUycE
-// SIG // MR9BGxqVHc4JE458YTBZsTBED/FgiIRUQwzXTbg4CLNC
-// SIG // 3ZOs1nMwVyaCo0UN0Or1R4HNvyRgMlhgRvJYR4YyhB50
-// SIG // YWeRX4FUsc+TTJLBxKZd0WETbijGGvmGgLvfYfxGwScd
-// SIG // JGcSchohiq9LZIlQYrFd/XcfPfBXday9ikJNQFHRD5wG
-// SIG // Pmd/9WbAA5ZEfu/QS/1u5ZrKsajyeioKMfDaTgaRtogI
-// SIG // Neh4HLDpmc085y9Euqf03GS9pAHBIAmTeM38vMDJRF1e
-// SIG // FpwBBU8iTQIDAQABo4IB5jCCAeIwEAYJKwYBBAGCNxUB
-// SIG // BAMCAQAwHQYDVR0OBBYEFNVjOlyKMZDzQ3t8RhvFM2ha
-// SIG // hW1VMBkGCSsGAQQBgjcUAgQMHgoAUwB1AGIAQwBBMAsG
-// SIG // A1UdDwQEAwIBhjAPBgNVHRMBAf8EBTADAQH/MB8GA1Ud
-// SIG // IwQYMBaAFNX2VsuP6KJcYmjRPZSQW9fOmhjEMFYGA1Ud
-// SIG // HwRPME0wS6BJoEeGRWh0dHA6Ly9jcmwubWljcm9zb2Z0
-// SIG // LmNvbS9wa2kvY3JsL3Byb2R1Y3RzL01pY1Jvb0NlckF1
-// SIG // dF8yMDEwLTA2LTIzLmNybDBaBggrBgEFBQcBAQROMEww
-// SIG // SgYIKwYBBQUHMAKGPmh0dHA6Ly93d3cubWljcm9zb2Z0
-// SIG // LmNvbS9wa2kvY2VydHMvTWljUm9vQ2VyQXV0XzIwMTAt
-// SIG // MDYtMjMuY3J0MIGgBgNVHSABAf8EgZUwgZIwgY8GCSsG
-// SIG // AQQBgjcuAzCBgTA9BggrBgEFBQcCARYxaHR0cDovL3d3
-// SIG // dy5taWNyb3NvZnQuY29tL1BLSS9kb2NzL0NQUy9kZWZh
-// SIG // dWx0Lmh0bTBABggrBgEFBQcCAjA0HjIgHQBMAGUAZwBh
-// SIG // AGwAXwBQAG8AbABpAGMAeQBfAFMAdABhAHQAZQBtAGUA
-// SIG // bgB0AC4gHTANBgkqhkiG9w0BAQsFAAOCAgEAB+aIUQ3i
-// SIG // xuCYP4FxAz2do6Ehb7Prpsz1Mb7PBeKp/vpXbRkws8LF
-// SIG // Zslq3/Xn8Hi9x6ieJeP5vO1rVFcIK1GCRBL7uVOMzPRg
-// SIG // Eop2zEBAQZvcXBf/XPleFzWYJFZLdO9CEMivv3/Gf/I3
-// SIG // fVo/HPKZeUqRUgCvOA8X9S95gWXZqbVr5MfO9sp6AG9L
-// SIG // MEQkIjzP7QOllo9ZKby2/QThcJ8ySif9Va8v/rbljjO7
-// SIG // Yl+a21dA6fHOmWaQjP9qYn/dxUoLkSbiOewZSnFjnXsh
-// SIG // bcOco6I8+n99lmqQeKZt0uGc+R38ONiU9MalCpaGpL2e
-// SIG // Gq4EQoO4tYCbIjggtSXlZOz39L9+Y1klD3ouOVd2onGq
-// SIG // BooPiRa6YacRy5rYDkeagMXQzafQ732D8OE7cQnfXXSY
-// SIG // Ighh2rBQHm+98eEA3+cxB6STOvdlR3jo+KhIq/fecn5h
-// SIG // a293qYHLpwmsObvsxsvYgrRyzR30uIUBHoD7G4kqVDmy
-// SIG // W9rIDVWZeodzOwjmmC3qjeAzLhIp9cAvVCch98isTtoo
-// SIG // uLGp25ayp0Kiyc8ZQU3ghvkqmqMRZjDTu3QyS99je/WZ
-// SIG // ii8bxyGvWbWu3EQ8l1Bx16HSxVXjad5XwdHeMMD9zOZN
-// SIG // +w2/XU/pnR4ZOC+8z1gFLu8NoFA12u8JJxzVs341Hgi6
-// SIG // 2jbb01+P3nSISRIwggTSMIIDuqADAgECAhMzAAAATYof
-// SIG // /TMuN/EAAAAAAABNMA0GCSqGSIb3DQEBCwUAMHwxCzAJ
-// SIG // BgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAw
-// SIG // DgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3Nv
-// SIG // ZnQgQ29ycG9yYXRpb24xJjAkBgNVBAMTHU1pY3Jvc29m
-// SIG // dCBUaW1lLVN0YW1wIFBDQSAyMDEwMB4XDTE0MDUyMzE3
-// SIG // MjAwN1oXDTE1MDgyMzE3MjAwN1owgasxCzAJBgNVBAYT
-// SIG // AlVTMQswCQYDVQQIEwJXQTEQMA4GA1UEBxMHUmVkbW9u
-// SIG // ZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9u
-// SIG // MQ0wCwYDVQQLEwRNT1BSMScwJQYDVQQLEx5uQ2lwaGVy
-// SIG // IERTRSBFU046RjUyOC0zNzc3LThBNzYxJTAjBgNVBAMT
-// SIG // HE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEi
-// SIG // MA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCbfeW0
-// SIG // 2THH0TdkyhS8FtFZ2QC1QvHZqQc7J7puYrfp6GjEghHK
-// SIG // 1nclr8eeuTfL4dwevA88vr9ItW7HDGWSjnMNu6hBJWs4
-// SIG // Dzl4cU9mxoQQbgNl9pRsw/QjZzyfI6xvQaunsbXnSIgl
-// SIG // 65iqXjozTfXnaStpg6Qe4BU7iGY7mzSv2DBORbq739a8
-// SIG // XBhe/O4NWcWubpWwlY+N6kBLi5kpbFJnJRMuTtCau6jY
-// SIG // 2zNPZ7WHCl1Pm71GfyNvWc4mjpR/yJizyP0ZOyhAG+f2
-// SIG // hQ+jQ+Cn3Fl32I6D5hWN6enpON8w7MljX7Cyi4DieGAs
-// SIG // RLC4QCjYhRKXcQSBvdm8662BVIKxAgMBAAGjggEbMIIB
-// SIG // FzAdBgNVHQ4EFgQUcSMpS0eWhBieUG9ABA35oN/kiqMw
-// SIG // HwYDVR0jBBgwFoAU1WM6XIoxkPNDe3xGG8UzaFqFbVUw
-// SIG // VgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNy
-// SIG // b3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljVGlt
-// SIG // U3RhUENBXzIwMTAtMDctMDEuY3JsMFoGCCsGAQUFBwEB
-// SIG // BE4wTDBKBggrBgEFBQcwAoY+aHR0cDovL3d3dy5taWNy
-// SIG // b3NvZnQuY29tL3BraS9jZXJ0cy9NaWNUaW1TdGFQQ0Ff
-// SIG // MjAxMC0wNy0wMS5jcnQwDAYDVR0TAQH/BAIwADATBgNV
-// SIG // HSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQsFAAOC
-// SIG // AQEAkH0LZnVAqiX7RkutCS5Vr8JXoywOLdWmD6BLRVgt
-// SIG // IdznDsDEA4lSi9fo6Ga5l2s/IcC7zkwwTkBGt1cQRgQl
-// SIG // vSEj+XIVByxScnng4CICkdH/Qtyfx7a/8dcM97y7CiPv
-// SIG // rP7WBZtMkoF9hiz7A4twfPBe6Gw6Of3I5jZptF29+2mp
-// SIG // eJTtY/HSimUn4qIStSadi2m2XxHPRQch5Q7ZCjW+Sl+c
-// SIG // zBGCiY3Py+zQFyhgJxxHofy2ViNVUf7Wm4cg1N0OeFa6
-// SIG // a5CDwfLZoxp3BVzKWHkQN+Z2YPYsh/Bc+uK4EoFnw6Tf
-// SIG // OrZtKJz+I08oU+6dvnT7DqC72PiypjwrYqgM56GCA20w
-// SIG // ggJVAgEBMIHboYGxpIGuMIGrMQswCQYDVQQGEwJVUzEL
-// SIG // MAkGA1UECBMCV0ExEDAOBgNVBAcTB1JlZG1vbmQxHjAc
-// SIG // BgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjENMAsG
-// SIG // A1UECxMETU9QUjEnMCUGA1UECxMebkNpcGhlciBEU0Ug
-// SIG // RVNOOkY1MjgtMzc3Ny04QTc2MSUwIwYDVQQDExxNaWNy
-// SIG // b3NvZnQgVGltZS1TdGFtcCBTZXJ2aWNloiUKAQEwCQYF
-// SIG // Kw4DAhoFAAMVAHMoNR+RpexTOIkfsfpflBJ+59tGoIHC
-// SIG // MIG/pIG8MIG5MQswCQYDVQQGEwJVUzETMBEGA1UECBMK
-// SIG // V2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwG
-// SIG // A1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMQ0wCwYD
-// SIG // VQQLEwRNT1BSMScwJQYDVQQLEx5uQ2lwaGVyIE5UUyBF
-// SIG // U046QjAyNy1DNkY4LTFEODgxKzApBgNVBAMTIk1pY3Jv
-// SIG // c29mdCBUaW1lIFNvdXJjZSBNYXN0ZXIgQ2xvY2swDQYJ
-// SIG // KoZIhvcNAQEFBQACBQDXSa+2MCIYDzIwMTQwNjE2MTgw
-// SIG // MjMwWhgPMjAxNDA2MTcxODAyMzBaMHMwOQYKKwYBBAGE
-// SIG // WQoEATErMCkwCgIFANdJr7YCAQAwBgIBAAIBZDAHAgEA
-// SIG // AgIXGjAKAgUA10sBNgIBADA2BgorBgEEAYRZCgQCMSgw
-// SIG // JjAMBgorBgEEAYRZCgMBoAowCAIBAAIDFuNgoQowCAIB
-// SIG // AAIDB6EgMA0GCSqGSIb3DQEBBQUAA4IBAQAJ/e+5a1It
-// SIG // yKPlRW9KDsLdimgW+dt73i8LNjsagRfLVypthXl2yh1/
-// SIG // AY9/6pneTcke+YXU3ridu+0DJJnrPnV18A4EDOOrRcy6
-// SIG // Y/V5EtJTLITsbwDE6VMtXr38MnrR3YMPKRmAKlXBfJnV
-// SIG // rkaVb1L78o4CDL9MKOfCoTaL/ZYnZFxwzrypMczJXmeg
-// SIG // TevnV/wOKuiDN4D2ZNWb9/snCjRXBQK4Bgfm2l8Cs8hD
-// SIG // XN/JRhNX+h4pduqweodfC7gwnkNmeRM2MFbIevI1/Ck4
-// SIG // hxZHtSgvTLYXQpmXHM7g5QJJl7WwKCMdTIX0F6luQsr1
-// SIG // fot4PMS2IqH6J2a9aerJBNfiMYIC9TCCAvECAQEwgZMw
-// SIG // fDELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0
-// SIG // b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1p
-// SIG // Y3Jvc29mdCBDb3Jwb3JhdGlvbjEmMCQGA1UEAxMdTWlj
-// SIG // cm9zb2Z0IFRpbWUtU3RhbXAgUENBIDIwMTACEzMAAABN
-// SIG // ih/9My438QAAAAAAAE0wDQYJYIZIAWUDBAIBBQCgggEy
-// SIG // MBoGCSqGSIb3DQEJAzENBgsqhkiG9w0BCRABBDAvBgkq
-// SIG // hkiG9w0BCQQxIgQgtMXP3OBgYTfiog/11RvR812wt/l4
-// SIG // unZ4tBs0OE/6yl4wgeIGCyqGSIb3DQEJEAIMMYHSMIHP
-// SIG // MIHMMIGxBBRzKDUfkaXsUziJH7H6X5QSfufbRjCBmDCB
-// SIG // gKR+MHwxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNo
-// SIG // aW5ndG9uMRAwDgYDVQQHEwdSZWRtb25kMR4wHAYDVQQK
-// SIG // ExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xJjAkBgNVBAMT
-// SIG // HU1pY3Jvc29mdCBUaW1lLVN0YW1wIFBDQSAyMDEwAhMz
-// SIG // AAAATYof/TMuN/EAAAAAAABNMBYEFGBLMEtc1BMw7hyU
-// SIG // xJKVRz22lMiCMA0GCSqGSIb3DQEBCwUABIIBAGULgG8q
-// SIG // k6D/SQnjmfu5YOjVnEJdShqVhIRa5FXeKTcKKYdtrNBz
-// SIG // DgqZXeDWN8h+4Yfu52ljy06Bq/3zsLZjX3XQ9ce/XIqt
-// SIG // 57skGyQ/jRW6C1xIwKDbs87wMkcUSSioH24XWM1lrWyh
-// SIG // HoNue7qc/BdDhSv0dbgxT1IS8eO0SIvgbPubATSLLX5N
-// SIG // loM8xT1X3TXBR7YXo37ymjXSw14Iyq0uDuZ/vPpCT8ML
-// SIG // +n1XSAC5PlxgtryjbbcB8/rJrwn+qHGYGK1OCf7OYnyG
-// SIG // 12a3+2D4C2wDukRuCKOPhiQQiAtuYeTw1iZ8pjuTFTa+
-// SIG // CmSOISndyiq4KXaXHS4quZtZvn4=
-// SIG // End signature block

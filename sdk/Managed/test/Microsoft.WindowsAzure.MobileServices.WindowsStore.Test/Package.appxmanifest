@@ -15,7 +15,7 @@
   </Resources>
   <Applications>
     <Application Id="App" Executable="$targetnametoken$.exe" EntryPoint="Microsoft.WindowsAzure.MobileServices.WindowsStore.Test.App">
-      <VisualElements DisplayName="Windows Azure Mobile Services Test App" Logo="Assets\Logo.png" SmallLogo="Assets\SmallLogo.png" Description="Windows Azure Mobile Services Test App" ForegroundText="light" BackgroundColor="#464646" ToastCapable="true">
+      <VisualElements DisplayName="Microsoft Azure Mobile Services Test App" Logo="Assets\Logo.png" SmallLogo="Assets\SmallLogo.png" Description="Microsoft Azure Mobile Services Test App" ForegroundText="light" BackgroundColor="#464646">
         <DefaultTile ShowName="logoOnly" />
         <SplashScreen Image="Assets\SplashScreen.png" />
       </VisualElements>

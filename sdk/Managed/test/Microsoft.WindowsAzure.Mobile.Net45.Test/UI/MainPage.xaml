@@ -41,7 +41,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Style="{StaticResource SubheaderStyle}">Windows Azure Mobile Services</TextBlock>
+            <TextBlock Grid.Row="0" Style="{StaticResource SubheaderStyle}">Microsoft Azure Mobile Services</TextBlock>
             <TextBlock Grid.Row="1"  Style="{StaticResource HeaderStyle}">C# Client Library Tests</TextBlock>
             <Border Grid.Row="2" Style="{StaticResource DialogStyle}">
                 <Grid>
