@@ -106,6 +106,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="default.html" />
+    <Content Include="js\lib\MobileServices.Web.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="js\platformSpecificFunctions.js" />
     <Content Include="Web.config" />
   </ItemGroup>
