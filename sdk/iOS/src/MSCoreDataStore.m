@@ -98,7 +98,7 @@ NSString *const StoreDeleted = @"ms_deleted";
         [adjustedItem setValue:[modifiedItem objectForKey:attributeName] forKey:attributeName];
     }
 
-    return [adjustedItem copy];
+    return adjustedItem;
 }
 
 /// Helper function to convert a managed object's dictionary representation into a correctly formatted
