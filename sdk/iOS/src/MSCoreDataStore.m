@@ -76,7 +76,7 @@ NSString *const StoreDeleted = @"ms_deleted";
 /// Helper function to convert a server (external) item to only contain the appropriate keys for storage
 /// in core data tables. This means we need to change system columns (prefix: __) to use ms_, and remove
 /// any retrieved columns from the user's schema that aren't in the local store's schema
-+(NSDictionary *) adjustExternalItem:(NSDictionary *)item forEntityDescription:(NSEntityDescription *)entityDescription
++(NSDictionary *) internalItemFromExternalItem:(NSDictionary *)item forEntityDescription:(NSEntityDescription *)entityDescription
 {
     NSMutableDictionary *modifiedItem = [item mutableCopy];
 
@@ -266,7 +266,7 @@ NSString *const StoreDeleted = @"ms_deleted";
             totalCount = results.count;
         }
         
-        results = [finalResult copy];
+        results = finalResult;
     }];
     
     if (internalError) {
@@ -305,7 +305,7 @@ NSString *const StoreDeleted = @"ms_deleted";
             }
             
             
-            NSDictionary *managedItemDictionary = [MSCoreDataStore adjustExternalItem:item forEntityDescription:entity];
+            NSDictionary *managedItemDictionary = [MSCoreDataStore internalItemFromExternalItem:item forEntityDescription:entity];
             [managedItem setValuesForKeysWithDictionary:managedItemDictionary];
         }
         
