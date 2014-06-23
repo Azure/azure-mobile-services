@@ -67,7 +67,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             while (true)
             {
-                IEnumerable<T> results = await table.ReadAsync();
+                IEnumerable<T> results = await table.Take(1000).ToListAsync();
                 T[] items = results.ToArray();
 
                 if (!items.Any())

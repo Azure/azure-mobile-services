@@ -16,6 +16,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     [Tag("unit")]
     [Tag("push")]
     [Tag("notNetFramework")]
+    [Tag("notXamarin_iOS")]
     public class PushTest : TestBase
     {        
         const string DefaultChannelUri = "http://channelUri.com/a b";
