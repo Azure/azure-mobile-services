@@ -10,7 +10,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// <summary>
     /// Registration is used to define a target that is registered for notifications
     /// </summary>
-    public class ApnsRegistration : Registration
+    internal class ApnsRegistration : Registration
     {
         internal ApnsRegistration()
         {

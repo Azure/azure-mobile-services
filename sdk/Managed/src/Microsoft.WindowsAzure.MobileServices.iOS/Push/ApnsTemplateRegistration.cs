@@ -16,7 +16,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// to define the format of the registration.
     /// </summary>
     [JsonObject]
-    public sealed class ApnsTemplateRegistration : ApnsRegistration
+    internal sealed class ApnsTemplateRegistration : ApnsRegistration
     {
         internal ApnsTemplateRegistration()
         {
