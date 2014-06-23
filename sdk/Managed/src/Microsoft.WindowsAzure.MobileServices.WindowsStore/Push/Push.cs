@@ -214,6 +214,16 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
+        /// DEBUG-ONLY: List the registrations made with the service for a channelUri
+        /// </summary>
+        /// <param name="channelUri">The channelUri to check for</param>
+        /// <returns>List of registrations</returns>
+        public Task<List<Registration>> ListRegistrationsAsync(string channelUri)
+        {
+            return this.RegistrationManager.ListRegistrationsAsync(channelUri);
+        }
+
+        /// <summary>
         /// Collection of Push objects for secondary tiles
         /// </summary>
         private class SecondaryTilesList : IDictionary<string, Push>

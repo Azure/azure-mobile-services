@@ -70,7 +70,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public void ValidateTemplateRegistrationBeforeRegister(Registration registration)
         {
             ValidateTemplateRegistration(registration);
-            Assert.AreEqual(registration.Tags.Count, DefaultTags.Length);
+            Assert.AreEqual(registration.Tags.Count(), DefaultTags.Length);
             Assert.IsNull(registration.RegistrationId);
         }
 
@@ -79,7 +79,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             ValidateTemplateRegistration(registration);
             Assert.IsNotNull(registration.RegistrationId);
             Assert.IsTrue(registration.Tags.Contains(zumoInstallationId));
-            Assert.AreEqual(registration.Tags.Count, DefaultTags.Length + 1);
+            Assert.AreEqual(registration.Tags.Count(), DefaultTags.Length + 1);
         }
 
         public Registration GetNewNativeRegistration(string deviceId, IEnumerable<string> tags)
@@ -90,6 +90,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public Registration GetNewTemplateRegistration(string deviceId, string bodyTemplate, string templateName)
         {
             return new MpnsTemplateRegistration(deviceId, bodyTemplate, templateName);
+        }
+
+        public string GetListNativeRegistrationResponse()
+        {
+            return "[{\"registrationId\":\"7313155627197174428-6522078074300559092-1\",\"tags\":[\"fooWns\",\"barWns\",\"4de2605e-fd09-4875-a897-c8c4c0a51682\"],\"deviceId\":\"http://channelUri.com/a b\"}]";
+        }
+
+        public string GetListTemplateRegistrationResponse()
+        {
+            return "[{\"registrationId\":\"7313155627197174428-6522078074300559092-1\",\"tags\":[\"fooWns\",\"barWns\",\"4de2605e-fd09-4875-a897-c8c4c0a51682\"],\"deviceId\":\"http://channelUri.com/a b\",\"templateBody\":\"cool template body\",\"templateName\":\"cool name\"}]";
+        }
+
+        public string GetListMixedRegistrationResponse()
+        {
+            return "[{\"registrationId\":\"7313155627197174428-6522078074300559092-1\",\"tags\":[\"fooWns\",\"barWns\",\"4de2605e-fd09-4875-a897-c8c4c0a51682\"],\"deviceId\":\"http://channelUri.com/a b\"}, " +
+            "{\"registrationId\":\"7313155627197174428-6522078074300559092-1\",\"tags\":[\"fooWns\",\"barWns\",\"4de2605e-fd09-4875-a897-c8c4c0a51682\"],\"deviceId\":\"http://channelUri.com/a b\",\"templateBody\":\"cool template body\",\"templateName\":\"cool name\"}]";
         }
     }
 }

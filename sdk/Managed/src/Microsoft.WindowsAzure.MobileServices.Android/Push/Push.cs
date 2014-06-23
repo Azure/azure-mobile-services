@@ -156,5 +156,15 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return this.RegistrationManager.RegisterAsync(registration);
         }
+
+        /// <summary>
+        /// DEBUG-ONLY: List the registrations made with the service for a deviceId
+        /// </summary>
+        /// <param name="deviceToken">The deviceId to check for</param>
+        /// <returns>List of registrations</returns>
+        public Task<List<Registration>> ListRegistrationsAsync(string deviceId)
+        {
+            return this.RegistrationManager.ListRegistrationsAsync(deviceId);
+        }
     }
 }

@@ -61,7 +61,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// are annotated with one of the specified tags. Note that a tag with a comma in it will be split into two tags.
         /// </summary>
         [JsonProperty(PropertyName = "tags")]
-        public ISet<string> Tags { get; private set; }
+        public IEnumerable<string> Tags { get; private set; }
 
         /// <summary>
         /// The push handle used to address the device by the push notification service (Possibly nonunique)

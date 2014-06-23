@@ -105,7 +105,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         public async Task DeleteRegistrationsForChannelAsync(string deviceId)
         {
-            var registrations = new List<Registration>(await this.PushHttpClient.ListRegistrationsAsync(deviceId));
+            var registrations = await this.ListRegistrationsAsync(deviceId);
             foreach (var registration in registrations)
             {
                 await this.PushHttpClient.UnregisterAsync(registration.RegistrationId);
@@ -114,6 +114,11 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             // clear local storage
             this.LocalStorageManager.ClearRegistrations();
+        }
+
+        public async Task<List<Registration>> ListRegistrationsAsync(string deviceId)
+        {
+            return new List<Registration>(await this.PushHttpClient.ListRegistrationsAsync(deviceId));
         }
 
         private async Task<Registration> CreateRegistrationIdAsync(Registration registration)

@@ -123,7 +123,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Unregister any registrations with given deviceToken
+        /// DEBUG-ONLY: Unregister any registrations with given deviceToken
         /// </summary>
         /// <param name="deviceToken">The device token</param>
         /// <returns>Task that completes when unregister is complete</returns>
@@ -155,6 +155,16 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             return this.RegistrationManager.RegisterAsync(registration);
+        }
+
+        /// <summary>
+        /// DEBUG-ONLY: List the registrations made with the service for a deviceToken
+        /// </summary>
+        /// <param name="deviceToken">The deviceToken to check for</param>
+        /// <returns>List of registrations</returns>
+        public Task<List<Registration>> ListRegistrationsAsync(string deviceToken)
+        {
+            return this.RegistrationManager.ListRegistrationsAsync(deviceToken);
         }
     }
 }

@@ -47,5 +47,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             throw new NotImplementedException();
         }
+
+
+        public string GetListNativeRegistrationResponse()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetListTemplateRegistrationResponse()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string GetListMixedRegistrationResponse()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -22,22 +22,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         const string DefaultServiceUri = "http://www.test.com";
         const string RegistrationsPath = "/push/registrations";
         const string DefaultRegistrationId = "7313155627197174428-6522078074300559092-1";
-        
-        const string NativeRegistrationsResponse = "[{\"registrationId\":\"7313155627197174428-6522078074300559092-1\",\"tags\":[\"fooWns\",\"barWns\",\"4de2605e-fd09-4875-a897-c8c4c0a51682\"],\"deviceId\":\"http://channelUri.com/a b\"}]";
-        const string TemplateRegistrationsResponse = "[{\"registrationId\":\"7313155627197174428-6522078074300559092-1\",\"tags\":[\"fooWns\",\"barWns\",\"4de2605e-fd09-4875-a897-c8c4c0a51682\"],\"deviceId\":\"http://channelUri.com/a b\",\"templateBody\":\"cool template body\"}]";
-        const string MixedRegistrationsResponse = "[{\"registrationId\":\"7313155627197174428-6522078074300559092-1\",\"tags\":[\"fooWns\",\"barWns\",\"4de2605e-fd09-4875-a897-c8c4c0a51682\"],\"deviceId\":\"http://channelUri.com/a b\"}, " +
-            "{\"registrationId\":\"7313155627197174428-6522078074300559092-1\",\"tags\":[\"fooWns\",\"barWns\",\"4de2605e-fd09-4875-a897-c8c4c0a51682\"],\"deviceId\":\"http://channelUri.com/a b\",\"templateBody\":\"cool template body\"}]";
 
         readonly IPushUtility pushUtility;
         readonly IPushTestUtility pushTestUtility;
         readonly string platform;
+
         public PushTest()
         {
             this.pushTestUtility = TestPlatform.Instance.PushTestUtility;
+
             this.pushUtility = Platform.Instance.PushUtility;
             if (this.pushUtility != null)
             {
-                this.platform = this.pushUtility.GetPlatform();
+                this.platform = this.pushUtility.GetPlatform();                
             }
         }
 
@@ -45,7 +42,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task ListRegistrations_Empty()
         {
             // Ensure Uri and method are correct for request and specify body to return for empty registrations list
-            var expectedUri = string.Format("{0}{1}?deviceId={2}&platform={3}", DefaultServiceUri, RegistrationsPath, Uri.EscapeUriString(DefaultChannelUri), Uri.EscapeUriString(this.platform));
+            var expectedUri = this.GetExpectedListUri();
             var hijack = CreateTestHttpHandler(expectedUri, HttpMethod.Get, "[]");
             
             MobileServiceClient mobileClient = new MobileServiceClient(DefaultServiceUri, null, hijack);
@@ -60,8 +57,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task ListRegistrations_Native()
         {
             // Ensure Uri and method are correct for request and specify body to return for registrations list with only 1 native registration
-            var expectedUri = string.Format("{0}{1}?deviceId={2}&platform={3}", DefaultServiceUri, RegistrationsPath, Uri.EscapeUriString(DefaultChannelUri), Uri.EscapeUriString(this.platform));
-            var hijack = CreateTestHttpHandler(expectedUri, HttpMethod.Get, NativeRegistrationsResponse);
+            var expectedUri = this.GetExpectedListUri();
+            var hijack = CreateTestHttpHandler(expectedUri, HttpMethod.Get, this.pushTestUtility.GetListNativeRegistrationResponse());
 
             MobileServiceClient mobileClient = new MobileServiceClient(DefaultServiceUri, null, hijack);
             var pushHttpClient = new PushHttpClient(mobileClient);
@@ -87,8 +84,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task ListRegistrations_Template()
         {
-            var expectedUri = string.Format("{0}{1}?deviceId={2}&platform={3}", DefaultServiceUri, RegistrationsPath, Uri.EscapeUriString(DefaultChannelUri), Uri.EscapeUriString(this.platform));
-            var hijack = CreateTestHttpHandler(expectedUri, HttpMethod.Get, TemplateRegistrationsResponse);
+            var expectedUri = this.GetExpectedListUri();
+            var hijack = CreateTestHttpHandler(expectedUri, HttpMethod.Get, this.pushTestUtility.GetListTemplateRegistrationResponse());
 
             MobileServiceClient mobileClient = new MobileServiceClient(DefaultServiceUri, null, hijack);
             var pushHttpClient = new PushHttpClient(mobileClient);
@@ -111,11 +108,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(firstRegistration.PushHandle, DefaultChannelUri, "The DeviceId on the registration is not correct.");
         }
 
+        string GetExpectedListUri()
+        {
+            var channelUri = Uri.EscapeUriString(DefaultChannelUri);
+            if (this.platform == "gcm")
+            {
+                channelUri = DefaultChannelUri;
+            }
+
+            return string.Format("{0}{1}?deviceId={2}&platform={3}", DefaultServiceUri, RegistrationsPath, channelUri, Uri.EscapeUriString(this.platform));
+        }
+
         [AsyncTestMethod]
         public async Task ListRegistrations_NativeAndTemplate()
         {
-            var expectedUri = string.Format("{0}{1}?deviceId={2}&platform={3}", DefaultServiceUri, RegistrationsPath, Uri.EscapeUriString(DefaultChannelUri), Uri.EscapeUriString(this.platform));
-            var hijack = CreateTestHttpHandler(expectedUri, HttpMethod.Get, MixedRegistrationsResponse);
+            var expectedUri = this.GetExpectedListUri();
+            var hijack = CreateTestHttpHandler(expectedUri, HttpMethod.Get, this.pushTestUtility.GetListMixedRegistrationResponse());
 
             MobileServiceClient mobileClient = new MobileServiceClient(DefaultServiceUri, null, hijack);
             var pushHttpClient = new PushHttpClient(mobileClient);
@@ -152,7 +160,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task ListRegistrations_Error_WithStringBody()
         {
-            var expectedUri = string.Format("{0}{1}?deviceId={2}&platform={3}", DefaultServiceUri, RegistrationsPath, Uri.EscapeUriString(DefaultChannelUri), Uri.EscapeUriString(this.platform));
+            var expectedUri = this.GetExpectedListUri();
             var hijack = CreateTestHttpHandler(expectedUri, HttpMethod.Get, "\"Server threw 500\"", HttpStatusCode.InternalServerError);
 
             MobileServiceClient mobileClient = new MobileServiceClient(DefaultServiceUri, null, hijack);
@@ -166,7 +174,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task ListRegistrations_Error_WithError()
         {
-            var expectedUri = string.Format("{0}{1}?deviceId={2}&platform={3}", DefaultServiceUri, RegistrationsPath, Uri.EscapeUriString(DefaultChannelUri), Uri.EscapeUriString(this.platform));
+            var expectedUri = this.GetExpectedListUri();
             var hijack = CreateTestHttpHandler(expectedUri, HttpMethod.Get, "{\"error\":\"Server threw 500\"}", HttpStatusCode.InternalServerError);
 
             MobileServiceClient mobileClient = new MobileServiceClient(DefaultServiceUri, null, hijack);

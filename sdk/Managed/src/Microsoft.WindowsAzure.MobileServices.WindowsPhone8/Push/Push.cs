@@ -152,5 +152,15 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return this.RegistrationManager.RegisterAsync(registration);
         }
+
+        /// <summary>
+        /// DEBUG-ONLY: List the registrations made with the service for a channelUri
+        /// </summary>
+        /// <param name="channelUri">The deviceToken to check for</param>
+        /// <returns>List of registrations</returns>
+        public Task<List<Registration>> ListRegistrationsAsync(string channelUri)
+        {
+            return this.RegistrationManager.ListRegistrationsAsync(channelUri);
+        }
     }
 }

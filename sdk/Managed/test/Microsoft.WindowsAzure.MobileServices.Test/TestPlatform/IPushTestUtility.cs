@@ -27,5 +27,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         Registration GetNewNativeRegistration(string deviceId, IEnumerable<string> tags);        
 
         Registration GetNewTemplateRegistration(string deviceId, string bodyTemplate, string templateName);
+
+        string GetListNativeRegistrationResponse();
+
+        string GetListTemplateRegistrationResponse();
+
+        string GetListMixedRegistrationResponse();
     }
 }
