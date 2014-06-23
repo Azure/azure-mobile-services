@@ -64,10 +64,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             // Make sure the table is empty
             IMobileServiceTable<T> table = GetClient().GetTable<T>();
             table.MobileServiceClient.SerializerSettings.DateParseHandling = DateParseHandling.None;
-            IEnumerable<T> results = await table.ReadAsync();
-            T[] items = results.ToArray();
-
-            foreach (T item in items)
+            IEnumerable<T> results = await table.Take(1000).ToListAsync();
+            foreach (T item in results)
             {
                 await table.DeleteAsync(item);
             }
