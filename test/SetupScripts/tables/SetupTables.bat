@@ -10,14 +10,23 @@ echo   with all four providers.
 goto :TheEnd
 
 :Start
-call azure mobile table create %1 stringIdRoundTripTable
-call azure mobile table create %1 stringIdMovies
-call azure mobile table create --integerId %1 intIdMovies
-call azure mobile table create --integerId %1 ParamsTestTable
+REM Tables specific to functional tests
+call azure mobile table create --integerId %1 blog_posts
+call azure mobile table create --integerId %1 blog_comments
+call azure mobile table create --integerId %1 books
+call azure mobile table create %1 stringId_test_table
+call azure mobile table create --integerId %1 test_table
+call azure mobile table create --integerId %1 types
+
+REM Tables specific to E2E tests
 call azure mobile table create --integerId %1 admin
 call azure mobile table create --integerId %1 application
 call azure mobile table create --integerId %1 authenticated
+call azure mobile table create --integerId %1 intIdMovies
+call azure mobile table create --integerId %1 ParamsTestTable
 call azure mobile table create --integerId %1 public
+call azure mobile table create %1 stringIdRoundTripTable
+call azure mobile table create %1 stringIdMovies
 
 REM Tables specific to JS tests
 call azure mobile table create --integerId %1 w8jsRoundTripTable
@@ -34,12 +43,28 @@ call azure mobile table create %1 iosPushTest
 call azure mobile table create %1 w8PushTest
 call azure mobile table create %1 wp8PushTest
 
+REM Permissions
+REM Tables specific to unit tests
+call azure mobile table update --addColumn title=string,commentCount=number,showComments=boolean,data=string -p insert=public,read=public,update=application,delete=public %1 blog_posts
+call azure mobile table update --addColumn postId=string,commentText=string,name=string,test=number -p insert=public,read=public,update=public,delete=public %1 blog_comments
+call azure mobile table update --addColumn title=string,type=string,pub_id=string,price=number,advance=number,royalty=number,ytd_sales=number,notes=string,pubdate=date -p insert=public,read=public,update=public,delete=public %1 books
+call azure mobile table update --addColumn col5=boolean,name=string -p insert=public,read=public,update=public,delete=public %1 stringId_test_table
+call azure mobile table update --addColumn col5=boolean,__anything=string -p insert=public,read=public,update=public,delete=public %1 test_table
+call azure mobile table update --addColumn numCol=number,stringCol=string,dateCol=date,boolCol=boolean -p insert=public,read=public,update=public,delete=public %1 types
+
+REM Tables specific to E2E tests
 call azure mobile table update -p insert=admin,read=admin,update=admin,delete=admin %1 admin
 call azure mobile table update -p insert=application,read=application,update=application,delete=application %1 application
 call azure mobile table update -p insert=user,read=user,update=user,delete=user %1 authenticated
 call azure mobile table update -p insert=application,read=public,update=public,delete=public %1 public
 call azure mobile table update -p insert=admin,read=application,update=admin,delete=admin %1 w8jsServerQueryMovies
 
+REM Scripts
+REM Tables specific to unit tests
+call azure mobile script upload %1 table/blog_comments.insert -f blog_comments.insert.js
+call azure mobile script upload %1 table/blog_comments.read -f blog_comments.read.js
+
+REM Tables specific to E2E tests
 call azure mobile script upload %1 table/stringIdRoundTripTable.insert -f stringIdRoundTripTable.insert.js
 call azure mobile script upload %1 table/stringIdRoundTripTable.read -f stringIdRoundTripTable.read.js
 call azure mobile script upload %1 table/stringIdRoundTripTable.update -f stringIdRoundTripTable.update.js

@@ -11,6 +11,18 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         private static readonly IApplicationStorage instance = new ApplicationStorage();
 
+        private ApplicationStorage()
+            : this(string.Empty)
+        {
+        }
+
+        internal ApplicationStorage(string name)
+        {
+            this.StoragePrefix = name;
+        }
+
+        private string StoragePrefix { get; set; }
+
         /// <summary>
         /// A singleton instance of the <see cref="ApplicationStorage"/>.
         /// </summary>
@@ -30,7 +42,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             value = null;
 
             var defaults = NSUserDefaults.StandardUserDefaults;
-            string svalue = defaults.StringForKey (name);
+            string svalue = defaults.StringForKey(string.Concat(this.StoragePrefix, name));
             if (svalue == null)
                 return false;
 
@@ -54,7 +66,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             var defaults = NSUserDefaults.StandardUserDefaults;
             if (value == null)
             {
-                defaults.SetString (null, name);
+                defaults.SetString(null, string.Concat(this.StoragePrefix, name));
                 return;
             }
 
@@ -66,12 +78,12 @@ namespace Microsoft.WindowsAzure.MobileServices
             else
                 svalue = value.ToString();
 
-            defaults.SetString (type + ":" + svalue, name);
+            defaults.SetString(type + ":" + svalue, string.Concat(this.StoragePrefix, name));            
         }
 
         public void Save()
         {
-            throw new NotImplementedException();
+            NSUserDefaults.StandardUserDefaults.Synchronize();
         }
     }
 }

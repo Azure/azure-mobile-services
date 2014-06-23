@@ -29,19 +29,9 @@ namespace Microsoft.WindowsAzure.MobileServices
             return new MpnsRegistration();
         }
 
-        public Registration GetNewNativeRegistration(string deviceId, IEnumerable<string> tags)
-        {
-            return new MpnsRegistration(deviceId, tags);
-        }
-
         public Registration GetNewTemplateRegistration()
         {
             return new MpnsTemplateRegistration();
-        }
-
-        public Registration GetNewTemplateRegistration(string deviceId, string bodyTemplate, string templateName)
-        {
-            return new MpnsTemplateRegistration(deviceId, bodyTemplate, templateName);
         }
 
         public string GetPlatform()

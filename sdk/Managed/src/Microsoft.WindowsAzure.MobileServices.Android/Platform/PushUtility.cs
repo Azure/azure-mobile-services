@@ -26,17 +26,27 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         public Registration GetNewNativeRegistration()
         {
-            return new WnsRegistration();
+            return new GcmRegistration();
+        }
+
+        public Registration GetNewNativeRegistration(string deviceId, IEnumerable<string> tags)
+        {
+            return new GcmRegistration(deviceId, tags);
         }
 
         public Registration GetNewTemplateRegistration()
         {
-            return new WnsTemplateRegistration();
+            return new GcmTemplateRegistration();
+        }
+
+        public Registration GetNewTemplateRegistration(string deviceId, string bodyTemplate, string templateName)
+        {
+            return new GcmTemplateRegistration(deviceId, bodyTemplate, templateName);
         }
 
         public string GetPlatform()
         {
-            return "wns";
+            return "gcm";
         }
     }
 }

@@ -127,10 +127,11 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Functional\Push.Test.cs" />
-    <Compile Include="Functional\PushHelper.cs" />
+    <Compile Include="Functional\PushFunctional.Test.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PlatformTests\LoginTests.cs" />
+    <Compile Include="TestPlatform\CurrentTestPlatform.cs" />
+    <Compile Include="TestPlatform\PushTestUtility.cs" />
     <Compile Include="UI\LoginPage.xaml.cs">
       <DependentUpon>LoginPage.xaml</DependentUpon>
     </Compile>

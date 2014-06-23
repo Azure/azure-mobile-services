@@ -11,10 +11,22 @@ namespace Microsoft.WindowsAzure.MobileServices
 {
     internal class ApplicationStorage : IApplicationStorage
     {
-         /// <summary>
+        /// <summary>
         /// A singleton instance of the <see cref="ApplicationStorage"/>.
         /// </summary>
         private static readonly IApplicationStorage instance = new ApplicationStorage();
+
+        private ApplicationStorage()
+            : this(string.Empty)
+        {
+        }
+
+        internal ApplicationStorage(string name)
+        {
+            this.StoragePrefix = name;
+        }
+
+        private string StoragePrefix { get; set; }
 
         /// <summary>
         /// A singleton instance of the <see cref="ApplicationStorage"/>.
@@ -38,7 +50,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             using (ISharedPreferences prefs = PreferenceManager.GetDefaultSharedPreferences(Application.Context))
             {
-                string svalue = prefs.GetString(name, null);
+                string svalue = prefs.GetString(string.Concat(this.StoragePrefix, name), null);
                 if (svalue == null)
                 {
                     return false;
@@ -83,14 +95,14 @@ namespace Microsoft.WindowsAzure.MobileServices
                     svalue = String.Format("{0}:{1}", type, svalue);
                 }
 
-                editor.PutString(name, svalue);
+                editor.PutString(string.Concat(this.StoragePrefix, name), svalue);
                 editor.Commit();
             }
         }
 
         public void Save()
         {
-            throw new NotImplementedException();
+            // No-op--The setting is saved during the write
         }
     }
 }

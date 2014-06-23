@@ -30,17 +30,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             get { return ExpressionUtility.Instance; }
         }
 
-        IPushUtility IPlatform.PushUtility
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-        }
+        IPushUtility IPlatform.PushUtility { get { return Microsoft.WindowsAzure.MobileServices.PushUtility.Instance; } }
 
         IApplicationStorage IPlatform.GetNamedApplicationStorage(string name)
         {
-            throw new NotImplementedException();
+            return new ApplicationStorage(name);
         }
     }
 }

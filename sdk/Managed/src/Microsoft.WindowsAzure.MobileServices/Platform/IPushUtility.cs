@@ -21,30 +21,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         Registration GetNewNativeRegistration();
 
         /// <summary>
-        /// Return a new, strongly typed native registration instance
-        /// </summary>
-        /// <param name="deviceId">The unique device Id for the registration</param>
-        /// <param name="tags">The template name</param>
-        /// <returns></returns>
-        Registration GetNewNativeRegistration(string deviceId, IEnumerable<string> tags);
-
-        /// <summary>
         /// Return a new, strongly typed template registration instance
         /// </summary>        
         /// <returns>
         /// An object to JSON deserialize into
         /// </returns>
         Registration GetNewTemplateRegistration();
-
-        /// <summary>
-        /// Return a new, strongly typed template registration instance
-        /// </summary>
-        /// <param name="deviceId">The unique device Id for the registration</param>
-        /// <param name="bodyTemplate">The template body in string format</param>
-        /// <param name="templateName">The template name</param>
-        /// <returns></returns>
-        Registration GetNewTemplateRegistration(string deviceId, string bodyTemplate, string templateName);
-        
 
         /// <summary>
         /// Return the string describing the notification platform

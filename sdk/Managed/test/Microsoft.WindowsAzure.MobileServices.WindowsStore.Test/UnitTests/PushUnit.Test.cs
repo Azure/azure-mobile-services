@@ -5,7 +5,6 @@
 using System;
 using System.Linq;
 
-using Microsoft.WindowsAzure.MobileServices.Test.Functional;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
