@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30324.0
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile", "src\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.Mobile.csproj", "{75557793-E36E-4190-8714-5BD2665859FB}"
 EndProject
@@ -398,6 +398,8 @@ Global
 		{36A77431-95A0-4AA7-924A-A8F6C6C631C6}.Signed|x64.ActiveCfg = Release|Any CPU
 		{36A77431-95A0-4AA7-924A-A8F6C6C631C6}.Signed|x86.ActiveCfg = Release|Any CPU
 		{977A5F48-B0F3-4860-AA1A-5B3081ED7D98}.Debug|Any CPU.ActiveCfg = Debug|iPhoneSimulator
+		{977A5F48-B0F3-4860-AA1A-5B3081ED7D98}.Debug|Any CPU.Build.0 = Debug|iPhoneSimulator
+		{977A5F48-B0F3-4860-AA1A-5B3081ED7D98}.Debug|Any CPU.Deploy.0 = Debug|iPhoneSimulator
 		{977A5F48-B0F3-4860-AA1A-5B3081ED7D98}.Debug|ARM.ActiveCfg = Debug|iPhone
 		{977A5F48-B0F3-4860-AA1A-5B3081ED7D98}.Debug|ARM.Build.0 = Debug|iPhone
 		{977A5F48-B0F3-4860-AA1A-5B3081ED7D98}.Debug|ARM.Deploy.0 = Debug|iPhone

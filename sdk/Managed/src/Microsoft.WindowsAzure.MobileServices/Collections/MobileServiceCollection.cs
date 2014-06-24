@@ -157,8 +157,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
-        #region Data virtualization
-
         /// <summary>
         /// Evaluates the query and adds the result to the collection.
         /// </summary>
@@ -186,10 +184,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             return data.Count();
         }
 
-        #endregion
-
-        #region Virtual methods
-
         /// <summary>
         /// Transforms the data from the query into data for the collection
         /// using the provided selector function.
@@ -211,10 +205,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             return selectorFunction(new TTable[] { item }).FirstOrDefault();
         }
-
-        #endregion
-
-        #region IncrementalLoading
 
         private bool hasMoreItems;
         /// <summary>
@@ -321,10 +311,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
-        #endregion
-
-        #region INotifyPropertyChanged
-
         /// <summary>
         /// Invokes the PropertyChanged event for the <paramref name="propertyName"/> property.
         /// Provides a way for subclasses to override the event invocation behavior.
@@ -347,8 +333,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
             this.OnPropertyChanged(new PropertyChangedEventArgs(propertyName));
         }
-
-        #endregion
     }
 
     /// <summary>

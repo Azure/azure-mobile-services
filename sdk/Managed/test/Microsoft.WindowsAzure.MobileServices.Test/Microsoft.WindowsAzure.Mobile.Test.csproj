@@ -40,6 +40,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AssertEx.cs" />
     <Compile Include="FunctionalTests\DataSourceTest.cs" />
     <Compile Include="FunctionalTests\Table\MobileServiceTableTest.cs" />
     <Compile Include="Mocks\MobileServiceTableQueryMock.cs" />
@@ -50,6 +51,11 @@
     <Compile Include="SerializationTypes\TestConverter.cs" />
     <Compile Include="TestData\IdTestData.cs" />
     <Compile Include="TestData\SystemPropertiesTestData.cs" />
+    <Compile Include="TestPlatform\IPushTestUtility.cs" />
+    <Compile Include="TestPlatform\ITestPlatform.cs" />
+    <Compile Include="TestPlatform\MissingPushTestUtility.cs" />
+    <Compile Include="TestPlatform\MissingTestPlatform.cs" />
+    <Compile Include="TestPlatform\TestPlatform.cs" />
     <Compile Include="UnitTests\Collections\MobileServiceCollection.Test.cs" />
     <Compile Include="UnitTests\HttpHandlers\TestHttpHandler.cs" />
     <Compile Include="FunctionalTests\BloggingTest.cs" />
@@ -82,6 +88,8 @@
     <Compile Include="SerializationTypes\SimpleTreeType.cs" />
     <Compile Include="UnitTests\HttpHandlers\ComplexDelegatingHandler.cs" />
     <Compile Include="UnitTests\MobileServiceClient.Test.cs" />
+    <Compile Include="UnitTests\Push\Push.Test.cs" />
+    <Compile Include="UnitTests\Push\PushHttpClient.Test.cs" />
     <Compile Include="UnitTests\Table\MobileServiceTable.Test.cs" />
     <Compile Include="UnitTests\MobileServiceUser.Test.cs" />
     <Compile Include="UnitTests\MobileServiceUrlBuilder.Test.cs" />

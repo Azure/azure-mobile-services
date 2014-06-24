@@ -18,3 +18,6 @@ sdk/android/test/sdk.testapp.tests/libs/gson-2.2.2.jar
 obj
 *.csproj.user
 test/ZumoE2EServerApp/Properties/PublishProfiles/
+StyleCop.Cache
+packages
+*.suo

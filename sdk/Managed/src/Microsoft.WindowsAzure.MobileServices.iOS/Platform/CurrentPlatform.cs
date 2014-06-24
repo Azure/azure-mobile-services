@@ -30,5 +30,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             get { return ExpressionUtility.Instance; }
         }
+
+        IPushUtility IPlatform.PushUtility { get { return Microsoft.WindowsAzure.MobileServices.PushUtility.Instance; } }
+
+        IApplicationStorage IPlatform.GetNamedApplicationStorage(string name)
+        {
+            return new ApplicationStorage(name);
+        }
     }
 }

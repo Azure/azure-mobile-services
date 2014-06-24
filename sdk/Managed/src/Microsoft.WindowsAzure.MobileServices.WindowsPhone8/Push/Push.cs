@@ -45,7 +45,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Register a particular channelUri
         /// </summary>
         /// <param name="channelUri">The channelUri to register</param>
-        /// <param name="tags">The tags to register to receive notifcations from</param>
+        /// <param name="tags">The tags to register to receive notifications from</param>
         /// <returns>Task that completes when registration is complete</returns>
         public Task RegisterNativeAsync(string channelUri, IEnumerable<string> tags)
         {
@@ -54,7 +54,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("channelUri");
             }
 
-            var registration = new Registration(channelUri, tags);
+            var registration = new MpnsRegistration(channelUri, tags);
             return this.RegistrationManager.RegisterAsync(registration);
         }
 
@@ -76,7 +76,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="channelUri">The channelUri to register</param>
         /// <param name="xmlTemplate">The XmlDocument defining the template</param>
         /// <param name="templateName">The template name</param>
-        /// <param name="tags">The tags to register to receive notifcations from</param>
+        /// <param name="tags">The tags to register to receive notifications from</param>
         /// <returns>Task that completes when registration is complete</returns>        
         public Task RegisterTemplateAsync(string channelUri, string xmlTemplate, string templateName, IEnumerable<string> tags)
         {
@@ -95,9 +95,8 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("templateName");
             }
 
-            var registration = new TemplateRegistration(channelUri, xmlTemplate, templateName, tags, null);
+            var registration = new MpnsTemplateRegistration(channelUri, xmlTemplate, templateName, tags, null);
             return this.RegistrationManager.RegisterAsync(registration);
-
         }
 
         /// <summary>
@@ -106,7 +105,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>Task that completes when unregister is complete</returns>
         public Task UnregisterNativeAsync()
         {
-            return this.UnregisterTemplateAsync(Registration.NativeRegistrationName);
+            return this.UnregisterTemplateAsync(MpnsRegistration.NativeRegistrationName);
         }
 
         /// <summary>
@@ -146,12 +145,22 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("registration");
             }
 
-            if (string.IsNullOrWhiteSpace(registration.ChannelUri))
+            if (string.IsNullOrWhiteSpace(registration.PushHandle))
             {
                 throw new ArgumentNullException("registration.ChannelUri");
             }
 
             return this.RegistrationManager.RegisterAsync(registration);
+        }
+
+        /// <summary>
+        /// DEBUG-ONLY: List the registrations made with the service for a channelUri
+        /// </summary>
+        /// <param name="channelUri">The deviceToken to check for</param>
+        /// <returns>List of registrations</returns>
+        public Task<List<Registration>> ListRegistrationsAsync(string channelUri)
+        {
+            return this.RegistrationManager.ListRegistrationsAsync(channelUri);
         }
     }
 }

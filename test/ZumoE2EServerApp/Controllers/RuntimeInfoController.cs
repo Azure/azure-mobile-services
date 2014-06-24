@@ -14,7 +14,7 @@ using System.Reflection;
 
 namespace ZumoE2EServerApp.Controllers
 {
-    [RequiresAuthorization(AuthorizationLevel.Anonymous)]
+    [AuthorizeLevel(AuthorizationLevel.Anonymous)]
     public class RuntimeInfoController : ApiController
     {
         public ApiServices Services { get; set; }

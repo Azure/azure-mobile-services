@@ -67,6 +67,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 .OrderByDescending(p => p.Title));
         }
 
+        [Tag("notXamarin_iOS")]
         [AsyncTestMethod]
         public async Task LiveProjection()
         {

@@ -16,7 +16,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// A singleton instance of the <see cref="ApplicationStorage"/>.
         /// </summary>
-        private static IPlatformInformation instance = new PlatformInformation();
+        private static readonly IPlatformInformation instance = new PlatformInformation();
 
         /// <summary>
         /// A singleton instance of the <see cref="ApplicationStorage"/>.

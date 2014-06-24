@@ -1,4 +1,4 @@
-# Windows Azure Mobile Services Change Log
+# Microsoft Azure Mobile Services Change Log
 
 ### Version 1.2.2
 **iOS SDK**
@@ -7,6 +7,8 @@
 
 **Managed SDK** 
 - Support for optimistic concurrency on delete
+- Update to Push surface area with minor object model changes. Added Registration base class in PCL and changed name within each extension to match the push notifcation surface. Example: WnsRegistration, WnsTemplateRegistration
+- Added support for Xamarin Android Azure Notification Hub integration
 
 **Javascript SDK** 
 - Support for optimistic concurrency on delete

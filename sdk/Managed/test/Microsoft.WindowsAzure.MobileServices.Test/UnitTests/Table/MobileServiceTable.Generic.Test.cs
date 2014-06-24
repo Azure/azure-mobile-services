@@ -20,8 +20,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     [Tag("table")]
     public class MobileServiceTableGenericTests :TestBase
     {
-        #region Read Tests
-
         [AsyncTestMethod] // this is the default buggy behavior that we've already shipped
         public async Task ReadAsync_ModifiesStringId_IfItContainsIsoDateValue()
         {
@@ -589,10 +587,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             }
         }
 
-        #endregion Read Tests
-
-        #region Lookup Tests
-
         [AsyncTestMethod]
         public async Task LookupAsyncWithStringIdTypeAndStringIdResponseContent()
         {
@@ -1017,10 +1011,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual("Hello", expected.String);
         }
 
-        #endregion Lookup Tests
-
-        #region Refresh Tests
-
         [AsyncTestMethod]
         public async Task RefreshAsyncWithStringIdTypeAndStringIdResponseContent()
         {
@@ -1415,10 +1405,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.IsNotNull(expected);
         }
-
-        #endregion Refresh Tests
-
-        #region Insert Tests
 
         [AsyncTestMethod]
         public async Task InsertAsyncWithStringIdTypeAndStringIdResponseContent()
@@ -1829,10 +1815,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.Contains(hijack.Request.RequestUri.Query, "state=CA");
         }
 
-        #endregion Insert Tests
-
-        #region Update Tests
-
         [AsyncTestMethod]
         public async Task UpdateAsyncWithStringIdTypeAndStringIdResponseContent()
         {
@@ -2233,10 +2215,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.Contains(hijack.Request.RequestUri.Query, "state=FL");
         }
 
-        #endregion Update Tests
-
-        #region Delete Tests
-
         [AsyncTestMethod]
         public async Task DeleteAsyncWithStringIdTypeAndStringIdItem()
         {
@@ -2443,10 +2421,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.Contains(hijack.Request.RequestUri.Query, "state=WY");
         }
 
-        #endregion Delete Tests
-
-        #region Query Tests
-
         [TestMethod]
         public void CreateQueryGeneric()
         {
@@ -2643,10 +2617,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.Contains(hijack.Request.RequestUri.ToString(), "$skip=100");
             Assert.Contains(hijack.Request.RequestUri.ToString(), "$top=10");
         }
-
-        #endregion Query Tests
-
-        #region System Properties Tests
 
         [AsyncTestMethod]
         public async Task InsertAsyncStringIdSystemPropertiesRemovedFromRequest()
@@ -2996,8 +2966,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual("AAAAAAAAH2o=", items[0].Version);
         }
 
-        #endregion System Properties Tests
-
         // This test fails on mono because there is already header validation that prevents the invalid etag values this test uses.
         // If Xamarin ever updates to use the BCL implementation of HttpClient (instead of their own) this tag can be removed.
         [Tag("notXamarin")]
@@ -3079,9 +3047,5 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 Assert.AreEqual(item.Version, testcase.Item1);
             }
         }
-
-        #region ETag Tests
-
-        #endregion
     }
 }
