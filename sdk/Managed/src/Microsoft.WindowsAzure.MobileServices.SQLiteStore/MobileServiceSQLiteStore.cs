@@ -488,10 +488,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         private JObject ReadRow(TableDefinition table, ISQLiteStatement statement)
         {
             var row = new JObject();
-            int i = 0;
-            string name = statement.ColumnName(i);
-            while (name != null)
+            for (int i = 0; i < statement.ColumnCount; i++)
             {
+                string name = statement.ColumnName(i);
                 object value = statement[i];
 
                 ColumnDefinition column;
@@ -504,8 +503,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 {
                     row[name] = value == null ? null : JToken.FromObject(value);
                 }
-
-                name = statement.ColumnName(++i);
             }
             return row;
         }
