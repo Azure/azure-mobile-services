@@ -1,8 +1,8 @@
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework;
 
-import android.net.http.AndroidHttpClient;
+import com.microsoft.windowsazure.mobileservices.http.AndroidHttpClientFactoryImpl;
 
-import com.microsoft.windowsazure.mobileservices.AndroidHttpClientFactoryImpl;
+import android.net.http.AndroidHttpClient;
 
 /**
  * AndroidHttpClientFactory with Froyo support

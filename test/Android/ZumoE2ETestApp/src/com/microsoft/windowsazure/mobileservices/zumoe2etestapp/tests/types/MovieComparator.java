@@ -23,9 +23,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-import android.util.Pair;
+import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 
-import com.microsoft.windowsazure.mobileservices.QueryOrder;
+import android.util.Pair;
 
 
 public class MovieComparator implements Comparator<Movie> {
@@ -44,6 +44,7 @@ public class MovieComparator implements Comparator<Movie> {
 		mFields = newFields.toArray(mFields);
 	}
 
+	@SuppressWarnings("unchecked")
 	public MovieComparator(Pair<String, QueryOrder>... fields) {
 		mFields = fields;
 	}

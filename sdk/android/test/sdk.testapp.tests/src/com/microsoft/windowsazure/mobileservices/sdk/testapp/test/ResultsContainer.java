@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.JsonElement;
-import com.microsoft.windowsazure.mobileservices.MobileServiceUser;
+import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
 
 /**
  * 
@@ -209,6 +209,10 @@ public class ResultsContainer {
 		this.exception = exception;
 	}
 
+	public void setException(Throwable exception) {
+		this.exception = (Exception) exception;
+	}
+	
 	public JsonElement getJsonResult() {
 		return jsonResult;
 	}
