@@ -74,8 +74,13 @@
 - (void) executeWithCompletion:(void(^)(NSDictionary *, NSError *))completion
 {
     MSTable *table = [self.client tableWithName:self.tableName];
-    table.systemProperties = MSSystemPropertyVersion;
     
+    if ([self.dataSource respondsToSelector:@selector(systemPropetiesForTable:)]) {
+        table.systemProperties = [self.dataSource systemPropetiesForTable:self.tableName];
+    } else {
+        table.systemProperties = MSSystemPropertyVersion;
+    }
+  
     if (self.type == MSTableOperationInsert) {
         [table insert:self.item completion:completion];
     } else if (self.type == MSTableOperationUpdate) {
@@ -90,7 +95,7 @@
     [self.pushOperation cancel];
 }
 
-/// Logic for determining how to operations should be condensed into one single pending operation
+/// Logic for determining how operations should be condensed into one single pending operation
 /// For example: Insert + Update -> Insert
 ///              Update + Insert -> Error (don't allow user to do this)
 + (MSCondenseAction) condenseAction:(MSTableOperationTypes)newAction withExistingOperation:(MSTableOperation *)operation

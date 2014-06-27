@@ -1,5 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="5064" systemVersion="13C1021" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="5064" systemVersion="13D65" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="ManySystemColumns" syncable="YES">
+        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="ms_createdAt" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="ms_deleted" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="ms_meaningOfLife" optional="YES" attributeType="Integer 32" defaultValueString="0" syncable="YES"/>
+        <attribute name="ms_updatedAt" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="ms_version" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="text" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="MS_TableOperationErrors" syncable="YES">
+        <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="properties" optional="YES" attributeType="Binary" syncable="YES"/>
+    </entity>
+    <entity name="MS_TableOperations" syncable="YES">
+        <attribute name="id" optional="YES" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="itemId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="properties" optional="YES" attributeType="Binary" syncable="YES"/>
+        <attribute name="table" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
     <entity name="TodoItem" syncable="YES">
         <attribute name="id" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="ms_version" optional="YES" attributeType="String" syncable="YES"/>
@@ -11,7 +30,10 @@
         <attribute name="text" optional="YES" attributeType="String" syncable="YES"/>
     </entity>
     <elements>
+        <element name="MS_TableOperationErrors" positionX="-45" positionY="27" width="128" height="75"/>
+        <element name="MS_TableOperations" positionX="-54" positionY="18" width="128" height="103"/>
         <element name="TodoItem" positionX="-63" positionY="-18" width="128" height="103"/>
         <element name="TodoNoVersion" positionX="-45" positionY="18" width="128" height="73"/>
+        <element name="ManySystemColumns" positionX="-54" positionY="27" width="128" height="148"/>
     </elements>
 </model>

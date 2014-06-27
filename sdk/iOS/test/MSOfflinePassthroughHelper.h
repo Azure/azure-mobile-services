@@ -5,8 +5,9 @@
 
 #import <Foundation/Foundation.h>
 #import "MSSyncContext.h"
+#import "MSCoreDataStore.h"
 
-@interface MSOfflinePassthroughHelper : NSObject <MSSyncContextDataSource, MSSyncContextDelegate>
+@interface MSOfflinePassthroughHelper : MSCoreDataStore <MSSyncContextDelegate>
 
 @property (nonatomic) BOOL returnErrors;
 

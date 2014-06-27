@@ -52,7 +52,7 @@ static NSOperationQueue *pushQueue_;
         if (!callbackQueue_) {
             callbackQueue_ = [[NSOperationQueue alloc] init];
             callbackQueue_.name = @"Sync Context: Operation Callbacks";
-            callbackQueue.maxConcurrentOperationCount = 4;
+            callbackQueue_.maxConcurrentOperationCount = 4;
         }
         
         pushQueue_ = [NSOperationQueue new];
@@ -121,13 +121,6 @@ static NSOperationQueue *pushQueue_;
             completion(nil, error);
         }
         return;
-    }
-    
-    // Remove system properties but keep __version
-    NSString *version = [itemToSave objectForKey:MSSystemColumnVersion];
-    [self.client.serializer removeSystemProperties:itemToSave];
-    if (version != nil) {
-        [itemToSave setValue:version forKey:MSSystemColumnVersion];
     }
 
     // Add the operation to the queue
@@ -301,23 +294,25 @@ static NSOperationQueue *pushQueue_;
     else if (query.parameters) {
         error = [self errorWithDescription:@"Use of parameters is not supported in pullWithQuery:" andErrorCode:MSInvalidParameter];
     }
-    else if (query.table) {
-        // We allow users to pull with a regular table, if it is setup properly
-        if (query.table.systemProperties != MSSystemPropertyVersion) {
-            error = [self errorWithDescription:@"Only the version system property is supported in pullWithQuery:" andErrorCode:MSInvalidParameter];
-        }
-    } else if (query.syncTable) {
+    else if (query.syncTable) {
         // Otherwise we convert the sync table to a normal table
         query.table = [[MSTable alloc] initWithName:query.syncTable.name client:query.syncTable.client];
-        query.table.systemProperties = MSSystemPropertyVersion;
         query.syncTable = nil;
-    } else {
+    }
+    else if (!query.table) {
         // MSQuery itself should disallow this, but for safety verify we have a table object
         error = [self errorWithDescription:@"Missing required syncTable object in query" andErrorCode:MSInvalidParameter];
     }
     
     // Pulls always include deleted records
     query.parameters = @{@"__includeDeleted" : @YES };
+    
+    // Get the required system properties from the server
+    if ([self.dataSource respondsToSelector:@selector(systemPropetiesForTable:)]) {
+        query.table.systemProperties = [self.dataSource systemPropetiesForTable:query.table.name];
+    } else {
+        query.table.systemProperties = MSSystemPropertyVersion;
+    }
     
     // Begin the actual pull request
     [self pullWithQueryInternal:query completion:completion];
@@ -378,11 +373,11 @@ static NSOperationQueue *pushQueue_;
                 NSError *localDataSourceError;
                 NSArray *itemsToUpsert = serverItems;
                 NSArray *itemsToDelete = [serverItems filteredArrayUsingPredicate:
-                                          [NSPredicate predicateWithFormat:@"%@ == YES", MSSystemColumnDeleted]];
+                                          [NSPredicate predicateWithFormat:@"%K == YES", MSSystemColumnDeleted]];
                 if ([itemsToDelete count] > 0) {
                     // Remove the deleted items from the overall list if we had some
                     itemsToUpsert = [serverItems filteredArrayUsingPredicate:
-                                     [NSPredicate predicateWithFormat:@"%@ != YES", MSSystemColumnDeleted]];
+                                     [NSPredicate predicateWithFormat:@"%K != YES", MSSystemColumnDeleted]];
 
                     
                     NSMutableArray *itemIds = [NSMutableArray arrayWithCapacity:itemsToDelete.count];
