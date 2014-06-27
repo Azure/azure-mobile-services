@@ -40,3 +40,7 @@ Move-Item "$dir\gcm_r03\gcm-client\dist\gcm.jar" "$dir"
 
 Write-Host "Remove extra files"
 Remove-Item "$dir\gcm_r03\" -recurse
+
+$filename = "guava-17.0.jar"
+Write-Host "Downloading Guava Libraries 17.0"
+$client.DownloadFile("http://search.maven.org/remotecontent?filepath=com/google/guava/guava/17.0/guava-17.0.jar", "$dir\$filename")

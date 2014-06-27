@@ -21,7 +21,6 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
 import java.net.MalformedURLException;
 import java.util.Locale;
-import java.util.concurrent.CountDownLatch;
 
 import junit.framework.Assert;
 
@@ -31,18 +30,16 @@ import org.apache.http.StatusLine;
 
 import android.test.InstrumentationTestCase;
 
-import com.google.gson.JsonElement;
-import com.microsoft.windowsazure.mobileservices.MobileServiceAuthenticationProvider;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-import com.microsoft.windowsazure.mobileservices.MobileServiceUser;
-import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
-import com.microsoft.windowsazure.mobileservices.ServiceFilter;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
-import com.microsoft.windowsazure.mobileservices.TableJsonQueryCallback;
-import com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback;
+import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider;
+import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
+import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 public class LoginTests extends InstrumentationTestCase {
 
@@ -66,62 +63,54 @@ public class LoginTests extends InstrumentationTestCase {
 		testLoginOperation("twitter");
 		testLoginOperation("MicrosoftAccount");
 		testLoginOperation("GOOGLE");
-}
+	}
 
 	private void testLoginOperation(final Object provider) throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 		final ResultsContainer result = new ResultsContainer();
 
-		runTestOnUiThread(new Runnable() {
+		// Create client
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				result.setRequestUrl(request.getUrl());
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{authenticationToken:'123abc', user:{userId:'123456'}}");
 
-						result.setRequestUrl(request.getUrl());
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{authenticationToken:'123abc', user:{userId:'123456'}}");
+				resultFuture.set(response);
 
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				UserAuthenticationCallback callback = new UserAuthenticationCallback() {
-
-					@Override
-					public void onCompleted(MobileServiceUser user, Exception exception, ServiceFilterResponse response) {
-						if (exception == null) {
-							assertEquals("123456", user.getUserId());
-							assertEquals("123abc", user.getAuthenticationToken());
-						} else {
-							Assert.fail();
-						}
-
-						latch.countDown();
-					}
-				};
-				if (provider.getClass().equals(MobileServiceAuthenticationProvider.class)) {
-					client.login((MobileServiceAuthenticationProvider)provider, "{myToken:123}", callback);
-				} else {
-					client.login((String)provider, "{myToken:123}", callback);
-				}
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		try {
+
+			MobileServiceUser user = null;
+
+			if (provider.getClass().equals(MobileServiceAuthenticationProvider.class)) {
+				user = client.login((MobileServiceAuthenticationProvider) provider, "{myToken:123}").get();
+
+			} else {
+				user = client.login((String) provider, "{myToken:123}").get();
+			}
+
+			assertEquals("123456", user.getUserId());
+			assertEquals("123abc", user.getAuthenticationToken());
+
+		} catch (Exception exception) {
+			Assert.fail();
+		}
 
 		// Assert
 		String expectedURL = appUrl + "login/" + provider.toString().toLowerCase(Locale.getDefault());
@@ -138,131 +127,106 @@ public class LoginTests extends InstrumentationTestCase {
 	}
 
 	private void testLoginShouldThrowError(final MobileServiceAuthenticationProvider provider) throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 		final ResultsContainer result = new ResultsContainer();
 		final String errorMessage = "fake error";
 		final String errorJson = "{error:'" + errorMessage + "'}";
 
-		runTestOnUiThread(new Runnable() {
+		// Create client
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				result.setRequestUrl(request.getUrl());
+
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent(errorJson);
+				response.setStatus(new StatusLine() {
 
 					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+					public int getStatusCode() {
+						return 400;
+					}
 
-						result.setRequestUrl(request.getUrl());
+					@Override
+					public String getReasonPhrase() {
+						return errorMessage;
+					}
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent(errorJson);
-						response.setStatus(new StatusLine() {
-
-							@Override
-							public int getStatusCode() {
-								return 400;
-							}
-
-							@Override
-							public String getReasonPhrase() {
-								return errorMessage;
-							}
-
-							@Override
-							public ProtocolVersion getProtocolVersion() {
-								return null;
-							}
-						});
-
-						responseCallback.onResponse(response, null);
+					@Override
+					public ProtocolVersion getProtocolVersion() {
+						return null;
 					}
 				});
 
-				client.login(provider, "{myToken:123}", new UserAuthenticationCallback() {
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-					@Override
-					public void onCompleted(MobileServiceUser user, Exception exception, ServiceFilterResponse response) {
-						if (exception == null) {
-							Assert.fail();
-						} else {
-							assertTrue(exception instanceof MobileServiceException);
-							MobileServiceException cause = (MobileServiceException) exception.getCause();
-							assertEquals(errorMessage, cause.getMessage());
-						}
+				resultFuture.set(response);
 
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		try {
+			client.login(provider, "{myToken:123}").get();
+			Assert.fail();
+		} catch (Exception exception) {
+			assertTrue(exception.getCause() instanceof MobileServiceException);
+			MobileServiceException cause = (MobileServiceException) exception.getCause().getCause();
+			assertEquals(errorMessage, cause.getMessage());
+		}
 	}
 
 	public void testAuthenticatedRequest() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 		final MobileServiceUser user = new MobileServiceUser("dummyUser");
 		user.setAuthenticationToken("123abc");
 
-		runTestOnUiThread(new Runnable() {
+		// Create client
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+			client.setCurrentUser(user);
+		} catch (MalformedURLException e) {
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-					client.setCurrentUser(user);
-				} catch (MalformedURLException e) {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+				int headerIndex = -1;
+				Header[] headers = request.getHeaders();
+				for (int i = 0; i < headers.length; i++) {
+					if (headers[i].getName() == "X-ZUMO-AUTH") {
+						headerIndex = i;
+					}
+				}
+				if (headerIndex == -1) {
+					Assert.fail();
 				}
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				assertEquals(user.getAuthenticationToken(), headers[headerIndex].getValue());
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{}");
 
-						int headerIndex = -1;
-						Header[] headers = request.getHeaders();
-						for (int i = 0; i < headers.length; i++) {
-							if (headers[i].getName() == "X-ZUMO-AUTH") {
-								headerIndex = i;
-							}
-						}
-						if (headerIndex == -1) {
-							Assert.fail();
-						}
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						assertEquals(user.getAuthenticationToken(), headers[headerIndex].getValue());
+				resultFuture.set(response);
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{}");
-
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				client.getTable("dummy").execute(new TableJsonQueryCallback() {
-
-					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		client.getTable("dummy").execute().get();
 	}
 
 	public void testLoginWithEmptyTokenShouldFail() throws Throwable {
@@ -276,14 +240,14 @@ public class LoginTests extends InstrumentationTestCase {
 
 		String token = null;
 		try {
-			client.login(MobileServiceAuthenticationProvider.Facebook, token, null);
+			client.login(MobileServiceAuthenticationProvider.Facebook, token).get();
 			Assert.fail();
 		} catch (IllegalArgumentException e) {
 			// It should throw an exception
 		}
 
 		try {
-			client.login(MobileServiceAuthenticationProvider.Facebook, "", null);
+			client.login(MobileServiceAuthenticationProvider.Facebook, "").get();
 			Assert.fail();
 		} catch (IllegalArgumentException e) {
 			// It should throw an exception
@@ -301,14 +265,14 @@ public class LoginTests extends InstrumentationTestCase {
 
 		String provider = null;
 		try {
-			client.login(provider, "{myToken:123}", null);
+			client.login(provider, "{myToken:123}").get();
 			Assert.fail();
 		} catch (IllegalArgumentException e) {
 			// It should throw an exception
 		}
 
 		try {
-			client.login("", "{myToken:123}", null);
+			client.login("", "{myToken:123}").get();
 			Assert.fail();
 		} catch (IllegalArgumentException e) {
 			// It should throw an exception

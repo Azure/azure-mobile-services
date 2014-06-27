@@ -19,9 +19,9 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
-import android.test.InstrumentationTestCase;
+import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceUser;
+import android.test.InstrumentationTestCase;
 
 public class MobileServiceUserTests extends InstrumentationTestCase {
 

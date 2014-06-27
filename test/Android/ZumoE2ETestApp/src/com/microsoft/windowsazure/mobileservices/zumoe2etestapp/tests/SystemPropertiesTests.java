@@ -19,7 +19,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
-import static com.microsoft.windowsazure.mobileservices.MobileServiceQueryOperations.field;
 import static com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util.filter;
 import static com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util.compare;
 
@@ -29,7 +28,6 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
 
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
@@ -39,17 +37,15 @@ import android.util.Pair;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
-import com.microsoft.windowsazure.mobileservices.MobileServicePreconditionFailedException;
-import com.microsoft.windowsazure.mobileservices.MobileServicePreconditionFailedExceptionBase;
-import com.microsoft.windowsazure.mobileservices.MobileServiceQuery;
-import com.microsoft.windowsazure.mobileservices.MobileServiceSystemProperty;
-import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
-import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
-import com.microsoft.windowsazure.mobileservices.TableOperationCallback;
-import com.microsoft.windowsazure.mobileservices.TableQueryCallback;
+import com.microsoft.windowsazure.mobileservices.MobileServiceList;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
+import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedException;
+import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionBase;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
+import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
+import com.microsoft.windowsazure.mobileservices.table.query.Query;
+import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.ExpectedValueException;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
@@ -60,6 +56,8 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util.I
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.StringIdJsonElement;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.StringIdRoundTripTableElement;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.SystemPropertiesTestData;
+
+import static com.microsoft.windowsazure.mobileservices.table.query.QueryOperations.*;
 
 public class SystemPropertiesTests extends TestGroup {
 
@@ -136,7 +134,12 @@ public class SystemPropertiesTests extends TestGroup {
 							verifySystemProperties("Insert response", responseElement1);
 
 							log("Read table");
-							List<StringIdRoundTripTableElement> responseElements2 = read(table);
+
+							Query query = QueryOperations.field("id");
+
+							query.eq(responseElement1.id);
+
+							List<StringIdRoundTripTableElement> responseElements2 = read(table, query);
 
 							List<StringIdRoundTripTableElement> filteredResponseElements = filter(responseElements2,
 									new IPredicate<StringIdRoundTripTableElement>() {
@@ -450,8 +453,12 @@ public class SystemPropertiesTests extends TestGroup {
 							log("Verify Query Parameter System Properties");
 							verifySystemProperties("Insert Response", shouldHaveCreatedAt, shouldHaveUpdatedAt, shouldHaveVersion, responseElement1);
 
+							Query query = QueryOperations.field("id");
+
+							query.eq(responseElement1.id);
+
 							log("Read with Query Parameter System Properties - " + systemProperties);
-							List<StringIdRoundTripTableElement> responseElements2 = read(table, userParameters);
+							List<StringIdRoundTripTableElement> responseElements2 = read(table, query, userParameters);
 
 							List<StringIdRoundTripTableElement> filteredResponseElements = filter(responseElements2,
 									new IPredicate<StringIdRoundTripTableElement>() {
@@ -663,24 +670,13 @@ public class SystemPropertiesTests extends TestGroup {
 		return roundtripTest;
 	}
 
-	private <T> List<T> read(final MobileServiceTable<T> table) throws Exception {
-		return read(table, null, null);
-	}
-
-	private <T> List<T> read(final MobileServiceTable<T> table, final List<Pair<String, String>> parameters) throws Exception {
-		return read(table, null, parameters);
-	}
-
-	private <T> List<T> read(final MobileServiceTable<T> table, final MobileServiceQuery<?> filter) throws Exception {
+	private <T> List<T> read(final MobileServiceTable<T> table, final Query filter) throws Exception {
 		return read(table, filter, null);
 	}
 
-	private <T> List<T> read(final MobileServiceTable<T> table, final MobileServiceQuery<?> filter, final List<Pair<String, String>> parameters)
-			throws Exception {
-		final CountDownLatch latch = new CountDownLatch(1);
-		final ResultsContainer<T> container = new ResultsContainer<T>();
+	private <T> List<T> read(final MobileServiceTable<T> table, final Query filter, final List<Pair<String, String>> parameters) throws Exception {
 
-		MobileServiceQuery<TableQueryCallback<T>> query;
+		ExecutableQuery<MobileServiceList<T>> query;
 
 		if (filter != null) {
 			query = table.where(filter);
@@ -694,28 +690,12 @@ public class SystemPropertiesTests extends TestGroup {
 			}
 		}
 
-		table.execute(query, new TableQueryCallback<T>() {
+		try {
+			List<T> responseElements = table.execute(query).get();
+			return responseElements;
 
-			@Override
-			public void onCompleted(List<T> responseElements, int count, Exception executeException, ServiceFilterResponse response) {
-				if (executeException == null) {
-					container.setItems(responseElements);
-				} else {
-					container.setException(executeException);
-				}
-
-				latch.countDown();
-			}
-		});
-
-		latch.await();
-
-		Exception ex = container.getException();
-
-		if (ex != null) {
-			throw ex;
-		} else {
-			return container.getItems();
+		} catch (Exception exception) {
+			throw exception;
 		}
 	}
 
@@ -724,31 +704,12 @@ public class SystemPropertiesTests extends TestGroup {
 	}
 
 	private <T> T lookUp(final MobileServiceTable<T> table, final Object id, final List<Pair<String, String>> parameters) throws Exception {
-		final ResultsContainer<T> container = new ResultsContainer<T>();
-		final CountDownLatch latch = new CountDownLatch(1);
 
-		table.lookUp(id, parameters, new TableOperationCallback<T>() {
-
-			@Override
-			public void onCompleted(T responseElement, Exception exception, ServiceFilterResponse response) {
-				if (exception == null) {
-					container.setItem(responseElement);
-				} else {
-					container.setException(exception);
-				}
-
-				latch.countDown();
-			}
-		});
-
-		latch.await();
-
-		Exception ex = container.getException();
-
-		if (ex != null) {
-			throw ex;
-		} else {
-			return container.getItem();
+		try {
+			T responseElement = table.lookUp(id, parameters).get();
+			return responseElement;
+		} catch (Exception exception) {
+			throw exception;
 		}
 	}
 
@@ -757,31 +718,11 @@ public class SystemPropertiesTests extends TestGroup {
 	}
 
 	private <T> T insert(final MobileServiceTable<T> table, final T element, final List<Pair<String, String>> parameters) throws Exception {
-		final ResultsContainer<T> container = new ResultsContainer<T>();
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		table.insert(element, parameters, new TableOperationCallback<T>() {
-
-			@Override
-			public void onCompleted(T responseElement, Exception exception, ServiceFilterResponse response) {
-				if (exception == null) {
-					container.setItem(responseElement);
-				} else {
-					container.setException(exception);
-				}
-
-				latch.countDown();
-			}
-		});
-
-		latch.await();
-
-		Exception ex = container.getException();
-
-		if (ex != null) {
-			throw ex;
-		} else {
-			return container.getItem();
+		try {
+			T responseElement = table.insert(element, parameters).get();
+			return responseElement;
+		} catch (Exception exception) {
+			throw exception;
 		}
 	}
 
@@ -790,31 +731,12 @@ public class SystemPropertiesTests extends TestGroup {
 	}
 
 	private JsonObject insert(final MobileServiceJsonTable table, final JsonObject element, final List<Pair<String, String>> parameters) throws Exception {
-		final ResultsContainer<JsonObject> container = new ResultsContainer<JsonObject>();
-		final CountDownLatch latch = new CountDownLatch(1);
 
-		table.insert(element, parameters, new TableJsonOperationCallback() {
-
-			@Override
-			public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
-				if (exception == null) {
-					container.setItem(jsonObject);
-				} else {
-					container.setException(exception);
-				}
-
-				latch.countDown();
-			}
-		});
-
-		latch.await();
-
-		Exception ex = container.getException();
-
-		if (ex != null) {
-			throw ex;
-		} else {
-			return container.getItem();
+		try {
+			JsonObject jsonObject = table.insert(element, parameters).get();
+			return jsonObject;
+		} catch (Exception exception) {
+			throw exception;
 		}
 	}
 
@@ -823,31 +745,12 @@ public class SystemPropertiesTests extends TestGroup {
 	}
 
 	private <T> T update(final MobileServiceTable<T> table, final T element, final List<Pair<String, String>> parameters) throws Exception {
-		final ResultsContainer<T> container = new ResultsContainer<T>();
-		final CountDownLatch latch = new CountDownLatch(1);
 
-		table.update(element, parameters, new TableOperationCallback<T>() {
-
-			@Override
-			public void onCompleted(T responseElement, Exception exception, ServiceFilterResponse response) {
-				if (exception == null) {
-					container.setItem(responseElement);
-				} else {
-					container.setException(exception);
-				}
-
-				latch.countDown();
-			}
-		});
-
-		latch.await();
-
-		Exception ex = container.getException();
-
-		if (ex != null) {
-			throw ex;
-		} else {
-			return container.getItem();
+		try {
+			T responseElement = table.update(element, parameters).get();
+			return responseElement;
+		} catch (Exception exception) {
+			throw exception;
 		}
 	}
 
@@ -856,56 +759,23 @@ public class SystemPropertiesTests extends TestGroup {
 	}
 
 	private JsonObject update(final MobileServiceJsonTable table, final JsonObject element, final List<Pair<String, String>> parameters) throws Exception {
-		final ResultsContainer<JsonObject> container = new ResultsContainer<JsonObject>();
-		final CountDownLatch latch = new CountDownLatch(1);
 
-		table.update(element, parameters, new TableJsonOperationCallback() {
-
-			@Override
-			public void onCompleted(JsonObject jsonObject, Exception exception, ServiceFilterResponse response) {
-				if (exception == null) {
-					container.setItem(jsonObject);
-				} else {
-					container.setException(exception);
-				}
-
-				latch.countDown();
-			}
-		});
-
-		latch.await();
-
-		Exception ex = container.getException();
-
-		if (ex != null) {
-			throw ex;
-		} else {
-			return container.getItem();
+		try {
+			JsonObject responseElement = table.update(element, parameters).get();
+			return responseElement;
+		} catch (Exception exception) {
+			throw exception;
 		}
+
 	}
 
 	private <T> void delete(final MobileServiceTable<T> table, final T element) throws Exception {
-		final ResultsContainer<T> container = new ResultsContainer<T>();
-		final CountDownLatch latch = new CountDownLatch(1);
 
-		table.delete(element, new TableDeleteCallback() {
-
-			@Override
-			public void onCompleted(Exception exception, ServiceFilterResponse response) {
-				if (exception != null) {
-					container.setException(exception);
-				}
-
-				latch.countDown();
-			}
-		});
-
-		latch.await();
-
-		Exception ex = container.getException();
-
-		if (ex != null) {
-			throw ex;
+		try {
+			table.delete(element).get();
+			return;
+		} catch (Exception exception) {
+			throw exception;
 		}
 	}
 

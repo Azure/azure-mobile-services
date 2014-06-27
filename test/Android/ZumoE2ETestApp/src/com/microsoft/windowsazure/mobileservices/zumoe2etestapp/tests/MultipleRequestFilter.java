@@ -19,42 +19,37 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests;
 
-import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
-import com.microsoft.windowsazure.mobileservices.ServiceFilter;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 public class MultipleRequestFilter implements ServiceFilter {
 
 	private int mNumberOfRequests;
-	private Exception mException;
 
 	public MultipleRequestFilter(int numberOfRequests) {
 		mNumberOfRequests = numberOfRequests;
 	}
 
 	@Override
-	public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-			final ServiceFilterResponseCallback responseCallback) {
-
+	public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 		for (int i = 0; i < mNumberOfRequests; i++) {
 
 			final boolean doCallback = i == mNumberOfRequests - 1;
-			nextServiceFilterCallback.onNext(request, new ServiceFilterResponseCallback() {
 
-				@Override
-				public void onResponse(ServiceFilterResponse response, Exception exception) {
-					if (exception != null) {
-						mException = exception;
-					}
-
-					if (doCallback) {
-						responseCallback.onResponse(response, mException);
-					}
+			if (doCallback) {
+				return nextServiceFilterCallback.onNext(request);
+			} else {
+				try {
+					nextServiceFilterCallback.onNext(request).get();
+				} catch (Exception e) {
 				}
-			});
+			}
 		}
+
+		return null;
 	}
 
 }

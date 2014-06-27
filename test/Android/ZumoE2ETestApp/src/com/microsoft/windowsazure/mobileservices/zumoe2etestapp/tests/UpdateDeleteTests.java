@@ -25,12 +25,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
-import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
-import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
-import com.microsoft.windowsazure.mobileservices.TableOperationCallback;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.ExpectedValueException;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
@@ -39,6 +35,10 @@ import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestRe
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestStatus;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.Util;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.tests.types.RoundTripTableElement;
+import com.microsoft.windowsazure.mobileservices.table.TableDeleteCallback;
+import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
+import com.microsoft.windowsazure.mobileservices.table.TableJsonOperationCallback;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 public class UpdateDeleteTests extends TestGroup {
 
@@ -89,17 +89,16 @@ public class UpdateDeleteTests extends TestGroup {
 		toUpdate.add("complexType1", null);
 		toUpdate.add("int1", null);
 
-		
-		this.addTest(createUntypedUpdateTest("Update untyped item, setting values to null", parser.parse(toInsertJsonString).getAsJsonObject(), cloneJson(toUpdate), true,
-				null));
+		this.addTest(createUntypedUpdateTest("Update untyped item, setting values to null", parser.parse(toInsertJsonString).getAsJsonObject(),
+				cloneJson(toUpdate), true, null));
 
 		toUpdate.addProperty("id", 1000000000);
-		this.addTest(createUntypedUpdateTest("(Neg) Update untyped item, non-existing item id", parser.parse(toInsertJsonString).getAsJsonObject(), cloneJson(toUpdate),
-				false, MobileServiceException.class));
+		this.addTest(createUntypedUpdateTest("(Neg) Update untyped item, non-existing item id", parser.parse(toInsertJsonString).getAsJsonObject(),
+				cloneJson(toUpdate), false, MobileServiceException.class));
 
 		toUpdate.addProperty("id", 0);
-		this.addTest(createUntypedUpdateTest("(Neg) Update untyped item, id = 0", parser.parse(toInsertJsonString).getAsJsonObject(), cloneJson(toUpdate), false,
-				IllegalArgumentException.class));
+		this.addTest(createUntypedUpdateTest("(Neg) Update untyped item, id = 0", parser.parse(toInsertJsonString).getAsJsonObject(), cloneJson(toUpdate),
+				false, IllegalArgumentException.class));
 
 		// delete tests
 		this.addTest(createDeleteTest("Delete typed item", true, false, true, null));
@@ -107,6 +106,15 @@ public class UpdateDeleteTests extends TestGroup {
 		this.addTest(createDeleteTest("Delete untyped item", false, false, true, null));
 		this.addTest(createDeleteTest("(Neg) Delete untyped item with non-existing id", false, true, true, MobileServiceException.class));
 		this.addTest(createDeleteTest("(Neg) Delete untyped item without id field", false, false, false, IllegalArgumentException.class));
+
+		// With Callbacks
+		this.addTest(createTypedUpdateWithCallbackTest("With Callback - Update typed item", new RoundTripTableElement(rndGen),
+				new RoundTripTableElement(rndGen), true, null));
+		this.addTest(createUntypedUpdateWithCallbackTest("With Callback - Update untyped item, setting values to null", parser.parse(toInsertJsonString)
+				.getAsJsonObject(), cloneJson(toUpdate), true, null));
+
+		this.addTest(createDeleteWithCallbackTest("With Callback - Delete typed item", true, false, true, null));
+		this.addTest(createDeleteWithCallbackTest("With Callback - Delete untyped item", false, false, true, null));
 
 	}
 
@@ -127,7 +135,198 @@ public class UpdateDeleteTests extends TestGroup {
 
 				log("insert item");
 				itemToInsert.id = null;
-				
+
+				final TestResult result = new TestResult();
+				result.setTestCase(testCase);
+				result.setStatus(TestStatus.Passed);
+
+				try {
+
+					RoundTripTableElement insertedItem = table.insert(itemToInsert).get();
+
+					if (setUpdatedId) {
+						log("update item id " + insertedItem.id);
+						itemToUpdate.id = insertedItem.id;
+					}
+
+					log("update the item");
+
+					RoundTripTableElement updatedItem = table.update(itemToUpdate).get();
+
+					log("lookup item");
+
+					RoundTripTableElement lookedUpItem = table.lookUp(updatedItem.id).get();
+
+					log("verify items are equal");
+					if (Util.compare(updatedItem, lookedUpItem)) { // check
+																	// the
+																	// items
+																	// are
+																	// equal
+						log("cleanup");
+
+						table.delete(lookedUpItem.id).get();// clean
+															// up
+
+						if (callback != null)
+							callback.onTestComplete(testCase, result);
+
+					} else {
+						createResultFromException(result, new ExpectedValueException(updatedItem, lookedUpItem));
+						if (callback != null)
+							callback.onTestComplete(testCase, result);
+					}
+				} catch (Exception exception) {
+					createResultFromException(result, exception);
+					if (callback != null)
+						callback.onTestComplete(testCase, result);
+				}
+			}
+		};
+
+		test.setExpectedExceptionClass(expectedExceptionClass);
+		test.setName(name);
+
+		return test;
+	}
+
+	private TestCase createUntypedUpdateTest(String name, final JsonObject itemToInsert, final JsonObject itemToUpdate, final boolean setUpdatedId,
+			final Class<?> expectedExceptionClass) {
+
+		final TestCase test = new TestCase() {
+
+			@Override
+			protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
+
+				final MobileServiceJsonTable table = client.getTable(ROUNDTRIP_TABLE_NAME);
+				final TestCase testCase = this;
+
+				final TestResult result = new TestResult();
+				result.setTestCase(testCase);
+				result.setStatus(TestStatus.Passed);
+
+				log("insert item");
+
+				try {
+
+					JsonObject insertedItem = table.insert(itemToInsert).get();
+
+					if (setUpdatedId) {
+						int id = insertedItem.get("id").getAsInt();
+						log("update item id " + id);
+						itemToUpdate.addProperty("id", id);
+					}
+
+					log("update the item");
+					JsonObject updatedItem = table.update(itemToUpdate).get();
+
+					log("lookup the item");
+					JsonObject lookedUpItem = (JsonObject) table.lookUp(updatedItem.get("id").getAsInt()).get();
+
+					log("verify items are equal");
+					if (Util.compareJson(updatedItem, lookedUpItem)) { // check
+																		// the
+																		// items
+																		// are
+																		// equal
+						log("cleanup");
+						table.delete(lookedUpItem.get("id").getAsInt()).get(); // clean
+
+						if (callback != null)
+							callback.onTestComplete(testCase, result);
+					} else {
+						createResultFromException(result, new ExpectedValueException(updatedItem, lookedUpItem));
+						if (callback != null)
+							callback.onTestComplete(testCase, result);
+					}
+				} catch (Exception exception) {
+					createResultFromException(result, exception);
+					if (callback != null)
+						callback.onTestComplete(testCase, result);
+				}
+			}
+		};
+
+		test.setExpectedExceptionClass(expectedExceptionClass);
+		test.setName(name);
+
+		return test;
+	}
+
+	private TestCase createDeleteTest(String name, final boolean typed, final boolean useFakeId, final boolean includeId, Class<?> expectedExceptionClass) {
+		TestCase testCase = new TestCase() {
+
+			@Override
+			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
+				RoundTripTableElement element = new RoundTripTableElement(new Random());
+				final MobileServiceTable<RoundTripTableElement> table = client.getTable(ROUNDTRIP_TABLE_NAME, RoundTripTableElement.class);
+
+				final TestResult result = new TestResult();
+				result.setStatus(TestStatus.Passed);
+
+				final TestCase testCase = this;
+				result.setTestCase(testCase);
+
+				log("insert item");
+
+				try {
+
+					RoundTripTableElement entity = table.insert(element).get();
+
+					Object deleteObject;
+
+					if (useFakeId) {
+						log("use fake id");
+						entity.id = 1000000000;
+					}
+
+					if (!includeId) {
+						log("include id");
+						entity.id = null;
+					}
+
+					if (typed) {
+						deleteObject = entity;
+					} else {
+						deleteObject = client.getGsonBuilder().create().toJsonTree(entity).getAsJsonObject();
+					}
+
+					log("delete");
+
+					table.delete(deleteObject).get();
+
+				} catch (Exception exception) {
+					if (exception != null) {
+						createResultFromException(result, exception);
+					}
+				} finally {
+					if (callback != null)
+						callback.onTestComplete(testCase, result);
+				}
+			}
+		};
+
+		testCase.setName(name);
+		testCase.setExpectedExceptionClass(expectedExceptionClass);
+
+		return testCase;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase createTypedUpdateWithCallbackTest(String name, final RoundTripTableElement itemToInsert, final RoundTripTableElement itemToUpdate,
+			final boolean setUpdatedId, final Class<?> expectedExceptionClass) {
+
+		final TestCase test = new TestCase() {
+
+			@Override
+			protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
+
+				final MobileServiceTable<RoundTripTableElement> table = client.getTable(ROUNDTRIP_TABLE_NAME, RoundTripTableElement.class);
+				final TestCase testCase = this;
+
+				log("insert item");
+				itemToInsert.id = null;
+
 				table.insert(itemToInsert, new TableOperationCallback<RoundTripTableElement>() {
 
 					@Override
@@ -227,7 +426,8 @@ public class UpdateDeleteTests extends TestGroup {
 		return test;
 	}
 
-	private TestCase createUntypedUpdateTest(String name, final JsonObject itemToInsert, final JsonObject itemToUpdate, final boolean setUpdatedId,
+	@SuppressWarnings("deprecation")
+	private TestCase createUntypedUpdateWithCallbackTest(String name, final JsonObject itemToInsert, final JsonObject itemToUpdate, final boolean setUpdatedId,
 			final Class<?> expectedExceptionClass) {
 
 		final TestCase test = new TestCase() {
@@ -338,7 +538,9 @@ public class UpdateDeleteTests extends TestGroup {
 		return test;
 	}
 
-	private TestCase createDeleteTest(String name, final boolean typed, final boolean useFakeId, final boolean includeId, Class<?> expectedExceptionClass) {
+	@SuppressWarnings("deprecation")
+	private TestCase createDeleteWithCallbackTest(String name, final boolean typed, final boolean useFakeId, final boolean includeId,
+			Class<?> expectedExceptionClass) {
 		TestCase testCase = new TestCase() {
 
 			@Override

@@ -12,6 +12,7 @@ map.txt
 .metadata
 sdk/android/src/notifications-handler/libs/google-play-services.jar
 sdk/android/src/sdk/libs/gson-2.2.2.jar
+sdk/android/src/sdk/libs/guava-16.0.1.jar
 sdk/android/test/sdk.testapp.tests/libs/gson-2.2.2.jar
 *.mdf
 *.ldf
@@ -19,3 +20,4 @@ obj
 *.csproj.user
 test/ZumoE2EServerApp/Properties/PublishProfiles/
 sdk/Managed/test/Microsoft.WindowsAzure.MobileServices.SQLiteStore.Net45.Test/sqlite3.dll
+*.jar

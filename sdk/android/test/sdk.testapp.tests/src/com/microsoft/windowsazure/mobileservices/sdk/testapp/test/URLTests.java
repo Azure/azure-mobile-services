@@ -23,26 +23,20 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.CountDownLatch;
 
 import junit.framework.Assert;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.microsoft.windowsazure.mobileservices.MobileServiceAuthenticationProvider;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.MobileServiceUser;
-import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
-import com.microsoft.windowsazure.mobileservices.ServiceFilter;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
-import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
-import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
-import com.microsoft.windowsazure.mobileservices.TableJsonQueryCallback;
-import com.microsoft.windowsazure.mobileservices.TableOperationCallback;
-import com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback;
+import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider;
+import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
+import android.annotation.TargetApi;
+import android.os.Build;
 import android.test.InstrumentationTestCase;
 import android.util.Pair;
 
@@ -74,59 +68,47 @@ public class URLTests extends InstrumentationTestCase {
 		testLoginURL("aad");
 	}
 
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	private void testLoginURL(final Object provider) throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
+
 		final ResultsContainer result = new ResultsContainer();
 
-		runTestOnUiThread(new Runnable() {
+		// Create client
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				result.setRequestUrl(request.getUrl());
+				assertEquals("POST", request.getMethod());
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{authenticationToken:'123abc', user:{userId:'123456'}}");
 
-						result.setRequestUrl(request.getUrl());
-						assertEquals("POST", request.getMethod());
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{authenticationToken:'123abc', user:{userId:'123456'}}");
+				resultFuture.set(response);
 
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				UserAuthenticationCallback callback = new UserAuthenticationCallback() {
-
-					@Override
-					public void onCompleted(MobileServiceUser user, Exception exception, ServiceFilterResponse response) {
-						if (exception != null) {
-							Assert.fail();
-						}
-
-						latch.countDown();
-					}
-				};
-
-				if (provider.getClass().equals(MobileServiceAuthenticationProvider.class)) {
-					client.login((MobileServiceAuthenticationProvider)provider, "{\"myToken\":123}", callback);
-				} else {
-					client.login((String)provider, "{\"myToken\":123}", callback);
-				}
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		try {
+			if (provider.getClass().equals(MobileServiceAuthenticationProvider.class)) {
+				client.login((MobileServiceAuthenticationProvider) provider, "{\"myToken\":123}").get();
+			} else {
+				client.login((String) provider, "{\"myToken\":123}").get();
+			}
+		} catch (Exception exception) {
+			Assert.fail();
+		}
 
 		String normalizedProvider = provider.toString().toLowerCase(Locale.getDefault());
 		if (normalizedProvider.equals("windowsazureactivedirectory")) {
@@ -140,60 +122,47 @@ public class URLTests extends InstrumentationTestCase {
 	}
 
 	public void testUpdateURL() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 		final ResultsContainer result = new ResultsContainer();
 
 		final String tableName = "dummy";
 		final PersonTestObject person = new PersonTestObject("john", "doe", 10);
 		person.setId(10);
 
-		runTestOnUiThread(new Runnable() {
+		// Create client
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				result.setRequestUrl(request.getUrl());
+				assertEquals("PATCH", request.getMethod());
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{}");
 
-						result.setRequestUrl(request.getUrl());
-						assertEquals("PATCH", request.getMethod());
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{}");
+				resultFuture.set(response);
 
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				client.getTable(tableName, PersonTestObject.class).update(person, new TableOperationCallback<PersonTestObject>() {
-
-					@Override
-					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		client.getTable(tableName, PersonTestObject.class).update(person).get();
 
 		// Assert
 		String expectedURL = appUrl + "tables/" + tableName + "/" + person.getId();
 		assertEquals(expectedURL, result.getRequestUrl());
 	}
-	
+
 	public void testUpdateURLWithParameters() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 		final ResultsContainer result = new ResultsContainer();
 
 		final String tableName = "dummy";
@@ -202,45 +171,34 @@ public class URLTests extends InstrumentationTestCase {
 		final List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 		parameters.add(new Pair<String, String>("a key", "my <>&=?@ value"));
 
-		runTestOnUiThread(new Runnable() {
+		// Create client
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				result.setRequestUrl(request.getUrl());
+				assertEquals("PATCH", request.getMethod());
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{}");
 
-						result.setRequestUrl(request.getUrl());
-						assertEquals("PATCH", request.getMethod());
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{}");
+				resultFuture.set(response);
 
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				client.getTable(tableName, PersonTestObject.class).update(person, parameters, new TableOperationCallback<PersonTestObject>() {
-
-					@Override
-					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		client.getTable(tableName, PersonTestObject.class).update(person, parameters).get();
 
 		// Assert
 		String expectedURL = appUrl + "tables/" + tableName + "/" + person.getId() + "?a%20key=my%20%3C%3E%26%3D%3F%40%20value";
@@ -248,59 +206,45 @@ public class URLTests extends InstrumentationTestCase {
 	}
 
 	public void testInsertURL() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 		final ResultsContainer result = new ResultsContainer();
 
 		final String tableName = "dummy";
 		final PersonTestObject person = new PersonTestObject("john", "doe", 10);
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				result.setRequestUrl(request.getUrl());
+				assertEquals("POST", request.getMethod());
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{}");
 
-						result.setRequestUrl(request.getUrl());
-						assertEquals("POST", request.getMethod());
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{}");
+				resultFuture.set(response);
 
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				client.getTable(tableName, PersonTestObject.class).insert(person, new TableOperationCallback<PersonTestObject>() {
-
-					@Override
-					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		client.getTable(tableName, PersonTestObject.class).insert(person).get();
 
 		// Assert
 		String expectedURL = appUrl + "tables/" + tableName;
 		assertEquals(expectedURL, result.getRequestUrl());
 	}
-	
+
 	public void testInsertURLWithParameters() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 		final ResultsContainer result = new ResultsContainer();
 
 		final String tableName = "dummy";
@@ -308,45 +252,34 @@ public class URLTests extends InstrumentationTestCase {
 		final List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 		parameters.add(new Pair<String, String>("a key", "my <>&=?@ value"));
 
-		runTestOnUiThread(new Runnable() {
+		// Create client
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				result.setRequestUrl(request.getUrl());
+				assertEquals("POST", request.getMethod());
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{}");
 
-						result.setRequestUrl(request.getUrl());
-						assertEquals("POST", request.getMethod());
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{}");
+				resultFuture.set(response);
 
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				client.getTable(tableName, PersonTestObject.class).insert(person, parameters, new TableOperationCallback<PersonTestObject>() {
-
-					@Override
-					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		client.getTable(tableName, PersonTestObject.class).insert(person, parameters).get();
 
 		// Assert
 		String expectedURL = appUrl + "tables/" + tableName + "?a%20key=my%20%3C%3E%26%3D%3F%40%20value";
@@ -354,59 +287,46 @@ public class URLTests extends InstrumentationTestCase {
 	}
 
 	public void testLookupURL() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 		final ResultsContainer result = new ResultsContainer();
 
 		final String tableName = "dummy";
 		final int id = 10;
 
-		runTestOnUiThread(new Runnable() {
+		// Create client
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				result.setRequestUrl(request.getUrl());
+				assertEquals("GET", request.getMethod());
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{}");
 
-						result.setRequestUrl(request.getUrl());
-						assertEquals("GET", request.getMethod());
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{}");
+				resultFuture.set(response);
 
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				client.getTable(tableName).lookUp(id, new TableJsonOperationCallback() {
-
-					@Override
-					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		client.getTable(tableName).lookUp(id).get();
 
 		// Assert
 		String expectedURL = appUrl + "tables/" + tableName + "/" + id;
 		assertEquals(expectedURL, result.getRequestUrl());
 	}
-	
+
 	public void testLookupURLWithParameters() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 		final ResultsContainer result = new ResultsContainer();
 
 		final String tableName = "dummy";
@@ -414,105 +334,81 @@ public class URLTests extends InstrumentationTestCase {
 		final List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 		parameters.add(new Pair<String, String>("a key", "my <>&=?@ value"));
 
-		runTestOnUiThread(new Runnable() {
+		// Create client
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				result.setRequestUrl(request.getUrl());
+				assertEquals("GET", request.getMethod());
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{}");
 
-						result.setRequestUrl(request.getUrl());
-						assertEquals("GET", request.getMethod());
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{}");
+				resultFuture.set(response);
 
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				client.getTable(tableName).lookUp(id, parameters, new TableJsonOperationCallback() {
-
-					@Override
-					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		client.getTable(tableName).lookUp(id, parameters).get();
 
 		// Assert
 		String expectedURL = appUrl + "tables/" + tableName + "/" + id + "?a%20key=my%20%3C%3E%26%3D%3F%40%20value";
 		assertEquals(expectedURL, result.getRequestUrl());
 	}
 
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	public void testDeleteURL() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 		final ResultsContainer result = new ResultsContainer();
 
 		final String tableName = "dummy";
 		final int id = 10;
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				result.setRequestUrl(request.getUrl());
+				assertEquals("DELETE", request.getMethod());
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{}");
 
-						result.setRequestUrl(request.getUrl());
-						assertEquals("DELETE", request.getMethod());
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{}");
+				resultFuture.set(response);
 
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				client.getTable(tableName).delete(id, new TableDeleteCallback() {
-
-					@Override
-					public void onCompleted(Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		client.getTable(tableName).delete(id).get();
 
 		// Assert
 		String expectedURL = appUrl + "tables/" + tableName + "/" + id;
 		assertEquals(expectedURL, result.getRequestUrl());
 	}
-	
+
 	public void testDeleteURLWithParameters() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 		final ResultsContainer result = new ResultsContainer();
 
 		final String tableName = "dummy";
@@ -520,45 +416,33 @@ public class URLTests extends InstrumentationTestCase {
 		final List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
 		parameters.add(new Pair<String, String>("a key", "my <>&=?@ value"));
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				result.setRequestUrl(request.getUrl());
+				assertEquals("DELETE", request.getMethod());
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{}");
 
-						result.setRequestUrl(request.getUrl());
-						assertEquals("DELETE", request.getMethod());
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{}");
+				resultFuture.set(response);
 
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				client.getTable(tableName).delete(id, parameters, new TableDeleteCallback() {
-
-					@Override
-					public void onCompleted(Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		client.getTable(tableName).delete(id, parameters).get();
 
 		// Assert
 		String expectedURL = appUrl + "tables/" + tableName + "/" + id + "?a%20key=my%20%3C%3E%26%3D%3F%40%20value";
@@ -566,50 +450,38 @@ public class URLTests extends InstrumentationTestCase {
 	}
 
 	public void testQueryURL() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 		final ResultsContainer result = new ResultsContainer();
 
 		final String tableName = "dummy";
 
-		runTestOnUiThread(new Runnable() {
+		// Create client
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				// Create client
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				// Add a new filter to the client
-				client = client.withFilter(new ServiceFilter() {
+				result.setRequestUrl(request.getUrl());
+				assertEquals("GET", request.getMethod());
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{}");
 
-						result.setRequestUrl(request.getUrl());
-						assertEquals("GET", request.getMethod());
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{}");
+				resultFuture.set(response);
 
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				client.getTable(tableName).execute(new TableJsonQueryCallback() {
-
-					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		client.getTable(tableName).execute().get();
 
 		// Assert
 		String expectedURL = appUrl + "tables/" + tableName;

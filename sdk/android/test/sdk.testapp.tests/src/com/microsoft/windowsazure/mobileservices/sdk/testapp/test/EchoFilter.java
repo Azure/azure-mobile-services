@@ -19,20 +19,23 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
-import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
-import com.microsoft.windowsazure.mobileservices.ServiceFilter;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 public class EchoFilter implements ServiceFilter {
 
 	@Override
-	public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback, ServiceFilterResponseCallback responseCallback) {
+	public ListenableFuture<ServiceFilterResponse>  handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 		ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 		response.setContent(request.getRawContent());
 		response.setStatus(new StatusLineMock(200));
 
-		responseCallback.onResponse(response, null);	
+		ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
+		return nextServiceFilterCallback.onNext(requestMock);
+		
+		//return nextServiceFilterCallback.onNext(request);
 	}
-
 }
