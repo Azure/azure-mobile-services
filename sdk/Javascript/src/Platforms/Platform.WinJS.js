@@ -214,7 +214,7 @@ exports.login = function (startUri, endUri, callback) {
     else {
         // If no endURI was given, then we'll use the single sign-on overload of the 
         // windowsWebAuthBroker. Single sign-on requires that the application's Package SID 
-        // be registered with the Windows Azure Mobile Service, but it provides a better 
+        // be registered with the Microsoft Azure Mobile Service, but it provides a better 
         // experience as HTTP cookies are supported so that users do not have to
         // login in everytime the application is launched.
         var redirectUri = windowsWebAuthBroker.getCurrentApplicationCallbackUri().absoluteUri;

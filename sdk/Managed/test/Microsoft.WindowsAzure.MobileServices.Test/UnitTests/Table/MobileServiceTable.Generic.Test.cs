@@ -20,8 +20,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     [Tag("table")]
     public class MobileServiceTableGenericTests :TestBase
     {
-        #region Read Tests
-
         [AsyncTestMethod] // this is the default buggy behavior that we've already shipped
         public async Task ReadAsync_ModifiesStringId_IfItContainsIsoDateValue()
         {
@@ -589,10 +587,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             }
         }
 
-        #endregion Read Tests
-
-        #region Lookup Tests
-
         [AsyncTestMethod]
         public async Task LookupAsyncWithStringIdTypeAndStringIdResponseContent()
         {
@@ -1017,10 +1011,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual("Hello", expected.String);
         }
 
-        #endregion Lookup Tests
-
-        #region Refresh Tests
-
         [AsyncTestMethod]
         public async Task RefreshAsyncWithStringIdTypeAndStringIdResponseContent()
         {
@@ -1415,10 +1405,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.IsNotNull(expected);
         }
-
-        #endregion Refresh Tests
-
-        #region Insert Tests
 
         [AsyncTestMethod]
         public async Task InsertAsyncWithStringIdTypeAndStringIdResponseContent()
@@ -1829,10 +1815,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.Contains(hijack.Request.RequestUri.Query, "state=CA");
         }
 
-        #endregion Insert Tests
-
-        #region Update Tests
-
         [AsyncTestMethod]
         public async Task UpdateAsyncWithStringIdTypeAndStringIdResponseContent()
         {
@@ -2233,10 +2215,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.Contains(hijack.Request.RequestUri.Query, "state=FL");
         }
 
-        #endregion Update Tests
-
-        #region Delete Tests
-
         [AsyncTestMethod]
         public async Task DeleteAsyncWithStringIdTypeAndStringIdItem()
         {
@@ -2443,10 +2421,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.Contains(hijack.Request.RequestUri.Query, "state=WY");
         }
 
-        #endregion Delete Tests
-
-        #region Query Tests
-
         [TestMethod]
         public void CreateQueryGeneric()
         {
@@ -2643,10 +2617,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.Contains(hijack.Request.RequestUri.ToString(), "$skip=100");
             Assert.Contains(hijack.Request.RequestUri.ToString(), "$top=10");
         }
-
-        #endregion Query Tests
-
-        #region System Properties Tests
 
         [AsyncTestMethod]
         public async Task InsertAsyncStringIdSystemPropertiesRemovedFromRequest()
@@ -2996,15 +2966,25 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual("AAAAAAAAH2o=", items[0].Version);
         }
 
-        #endregion System Properties Tests
-
         // This test fails on mono because there is already header validation that prevents the invalid etag values this test uses.
         // If Xamarin ever updates to use the BCL implementation of HttpClient (instead of their own) this tag can be removed.
         [Tag("notXamarin")]
         [AsyncTestMethod]
-        public async Task VersionSystemPropertySetsIfMatchHeader()
+        public async Task UpdateAsync_SetsIfMatchHeader_WhenObjectHasVersionOnIt()
+        {           
+            await TestIfMatchHeaderIsSet((client, item) => client.UpdateAsync(item));
+        }
+
+        [Tag("notXamarin")]
+        [AsyncTestMethod]
+        public async Task DeleteAsync_SetsIfMatchHeader_WhenObjectHasVersionOnIt()
         {
-            List<Tuple<string, string>> testCases = new List<Tuple<string,string>>() {
+            await TestIfMatchHeaderIsSet((client, item) => client.DeleteAsync(item));
+        }
+
+        private static async Task TestIfMatchHeaderIsSet(Func<IMobileServiceTable<VersionType>, VersionType, Task> action)
+        {
+             List<Tuple<string, string>> testCases = new List<Tuple<string,string>>() {
                 new Tuple<string, string>("AAAAAAAAH2o=", "\"AAAAAAAAH2o=\""),
                 new Tuple<string, string>("a version", "\"a version\""),
                 new Tuple<string, string>("a version with a \" quote", "\"a version with a \\\" quote\""),
@@ -3014,28 +2994,24 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 new Tuple<string, string>("datetime'2013-10-08T04%3A12%3A36.96Z'", "\"datetime'2013-10-08T04%3A12%3A36.96Z'\""),
             };
 
-            foreach (Tuple<string, string> testcase in testCases)
-            {
-                TestHttpHandler hijack = new TestHttpHandler();
+             foreach (Tuple<string, string> testcase in testCases)
+             {
+                 TestHttpHandler hijack = new TestHttpHandler();
 
-                hijack.SetResponseContent("{\"id\":\"an id\",\"__version\":\"AAAAAAAAH2o=\"}");
+                 hijack.SetResponseContent("{\"id\":\"an id\",\"__version\":\"AAAAAAAAH2o=\"}");
 
-                IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+                 IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
 
-                IMobileServiceTable<VersionType> table = service.GetTable<VersionType>();
+                 IMobileServiceTable<VersionType> table = service.GetTable<VersionType>();
 
-                hijack.OnSendingRequest = async (request) =>
-                {
-                    string content = await request.Content.ReadAsStringAsync();
-                    JObject jobject = JObject.Parse(content);
-                    Assert.AreEqual(request.Headers.IfMatch.First().Tag, testcase.Item2);
-                    return request;
-                };
-
-                VersionType item = new VersionType() { Id = "an id", Version = testcase.Item1 };
-                await table.UpdateAsync(item);
-
-            }
+                 hijack.OnSendingRequest = (request) =>
+                 {
+                     Assert.AreEqual(request.Headers.IfMatch.First().Tag, testcase.Item2);
+                     return Task.FromResult(request);
+                 };
+                 var item = new VersionType() { Id = "an id", Version = testcase.Item1 };
+                 await action(table, item);
+             }
         }
 
         // This test fails on mono because there is already header validation that prevents the invalid etag values this test uses.
@@ -3071,9 +3047,5 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 Assert.AreEqual(item.Version, testcase.Item1);
             }
         }
-
-        #region ETag Tests
-
-        #endregion
     }
 }

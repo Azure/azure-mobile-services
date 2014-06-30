@@ -28,5 +28,18 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <see cref="System.Linq.Expressions.Expression"/> instances.
         /// </summary>
         IExpressionUtility ExpressionUtility { get; }
+
+        /// <summary>
+        /// Returns a platform-specific implementation of a utility class
+        /// that provides functionality for platform-specifc push capabilities.
+        /// </summary>
+        IPushUtility PushUtility { get; }
+
+        /// <summary>
+        /// Retrieves an ApplicationStorage where all items stored are segmented from other stored items
+        /// </summary>
+        /// <param name="name">The name of the segemented area in application storage</param>
+        /// <returns>The specific instance of that segment</returns>
+        IApplicationStorage GetNamedApplicationStorage(string name);
     }
 }

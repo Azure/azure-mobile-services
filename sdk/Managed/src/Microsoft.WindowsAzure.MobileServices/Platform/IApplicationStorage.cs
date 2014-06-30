@@ -14,7 +14,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// Only base data types are supported for setting values: int, string, bool, 
     /// etc.
     /// </remarks>
-    interface IApplicationStorage
+    internal interface IApplicationStorage
     {
         /// <summary>
         /// Tries to read a setting's value from application storage. 
@@ -51,5 +51,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Thrown if an error occurs while writing the setting.
         /// </exception>
         void WriteSetting(string name, object value);
+
+        /// <summary>
+        /// Force the ApplicationStorage to save any state that is still in memory
+        /// </summary>
+        void Save();
     }
 }

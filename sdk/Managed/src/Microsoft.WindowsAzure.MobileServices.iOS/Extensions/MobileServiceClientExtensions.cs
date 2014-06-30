@@ -145,5 +145,19 @@ namespace Microsoft.WindowsAzure.MobileServices
             var auth = new MobileServiceUIAuthentication(rect, view, client, provider);
             return auth.LoginAsync();
         }
+
+        /// <summary>
+        /// Extension method to get a <see cref="Push"/> object made from an existing <see cref="MobileServiceClient"/>.
+        /// </summary>
+        /// <param name="client">
+        /// The <see cref="MobileServiceClient"/> to create with.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Push"/> object used for registering for notifications.
+        /// </returns>
+        internal static Push GetPush(this MobileServiceClient client)
+        {
+            return new Push(client);
+        }
     }
 }

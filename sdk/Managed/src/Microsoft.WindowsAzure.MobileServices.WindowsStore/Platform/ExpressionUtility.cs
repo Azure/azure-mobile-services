@@ -16,7 +16,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// A singleton instance of the <see cref="ExpressionUtility"/>.
         /// </summary>
-        private static IExpressionUtility instance = new ExpressionUtility();
+        private static readonly IExpressionUtility instance = new ExpressionUtility();
 
         /// <summary>
         /// A singleton instance of the <see cref="ExpressionUtility"/>.

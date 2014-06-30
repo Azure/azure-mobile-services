@@ -46,18 +46,7 @@
                                    ensureDictionary:YES
                                             orError:&error];
                 } else if (response && response.statusCode == 412) {
-                    NSError *serverItemError;
-                    NSDictionary *serverItem = [connection itemFromData:data
-                                                               response:response
-                                                       ensureDictionary:YES
-                                                                orError:&serverItemError];
-                    
-                    // Only override default error if response was a valid item
-                    if (!serverItemError) {
-                        NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : @"The server's version did not match the passed version",
-                                                    MSErrorServerItemKey: serverItem };
-                        error = [NSError errorWithDomain:MSErrorDomain code:MSErrorPreconditionFailed userInfo:userInfo];
-                    }
+                    error = [self handleConflictResponse:response data:data connection:connection];
                 }
                 
                 if (response && item && !error) {
@@ -104,6 +93,10 @@
                 [connection isSuccessfulResponse:response
                                         data:data
                                          orError:&error];
+                
+                if (error && response && response.statusCode == 412) {
+                    error = [self handleConflictResponse:response data:data connection:connection];
+                }
             }
             
             if (error) {
@@ -165,6 +158,26 @@
     connection = [[MSTableConnection alloc] initWithTableRequest:request
                                                       completion:responseCompletion];
     return connection;
+}
+
+# pragma mark * Private Static Methods
+
++ (NSError *)handleConflictResponse:(NSHTTPURLResponse *)response data:(NSData *)data connection:(MSTableConnection *)connection
+{
+    NSError *error;
+    NSError *serverItemError;
+    NSDictionary *serverItem = [connection itemFromData:data
+                                               response:response
+                                       ensureDictionary:YES
+                                                orError:&serverItemError];
+    
+    // Only override default error if response was a valid item
+    if (!serverItemError) {
+        NSDictionary *userInfo = @{ NSLocalizedDescriptionKey : @"The server's version did not match the passed version",
+                                    MSErrorServerItemKey: serverItem };
+        error = [NSError errorWithDomain:MSErrorDomain code:MSErrorPreconditionFailed userInfo:userInfo];
+    }
+    return error;
 }
 
 

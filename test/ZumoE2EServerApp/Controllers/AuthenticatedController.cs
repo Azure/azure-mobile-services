@@ -15,7 +15,7 @@ using ZumoE2EServerApp.DataObjects;
 
 namespace ZumoE2EServerApp.Controllers
 {
-    [RequiresAuthorization(AuthorizationLevel.User)]
+    [AuthorizeLevel(AuthorizationLevel.User)]
     public class AuthenticatedController : PublicController
     {
         public override async Task<IQueryable<TestUser>> GetAllTestUser()

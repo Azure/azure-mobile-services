@@ -11,7 +11,7 @@ using ZumoE2EServerApp.Utils;
 
 namespace ZumoE2EServerApp.Controllers
 {
-    [RequiresAuthorization(AuthorizationLevel.Application)]
+    [AuthorizeLevel(AuthorizationLevel.Application)]
     public class ApplicationApiController : ApiController
     {
         [Route("api/application")]

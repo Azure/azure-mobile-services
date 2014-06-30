@@ -3,10 +3,6 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -28,5 +24,16 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <see cref="System.Linq.Expressions.Expression"/> instances.
         /// </summary>
         public IExpressionUtility ExpressionUtility { get { return Microsoft.WindowsAzure.MobileServices.ExpressionUtility.Instance; } }
+
+        /// <summary>
+        /// Returns a platform-specific implementation of a utility class
+        /// that provides functionality for platform-specifc push capabilities.
+        /// </summary>
+        public IPushUtility PushUtility { get { return Microsoft.WindowsAzure.MobileServices.PushUtility.Instance; } }
+
+        public IApplicationStorage GetNamedApplicationStorage(string name)
+        {
+            return new ApplicationStorage(name);
+        }
     }
 }

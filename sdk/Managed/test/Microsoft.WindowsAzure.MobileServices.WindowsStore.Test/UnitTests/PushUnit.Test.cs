@@ -5,7 +5,6 @@
 using System;
 using System.Linq;
 
-using Microsoft.WindowsAzure.MobileServices.Test.Functional;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
@@ -18,7 +17,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             try
             {
-                var registration = new TemplateRegistration("uri", "junkBodyTemplate", "testName");
+                var registration = new WnsTemplateRegistration("uri", "junkBodyTemplate", "testName");
                 Assert.Fail("Expected templateBody that is not XML to throw ArgumentException");
             }
             catch
@@ -32,7 +31,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             try
             {
-                var registration = new TemplateRegistration(
+                var registration = new WnsTemplateRegistration(
                     "uri",
                     "<foo><visual><binding template=\"ToastText01\"><text id=\"1\">$(message)</text></binding></visual></foo>", 
                     "testName");

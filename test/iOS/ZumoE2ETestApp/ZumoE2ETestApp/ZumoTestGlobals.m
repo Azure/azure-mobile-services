@@ -12,10 +12,11 @@ NSString *const CLIENT_VERSION_KEY = @"server-version";
 NSString *const RUNTIME_FEATURES_KEY = @"runtime-features";
 NSString *const FEATURE_STRING_ID_TABLES = @"stringIdTables";
 NSString *const FEATURE_INT_ID_TABLES = @"intIdTables";
+NSString *const FEATURE_NH_PUSH_ENABLED = @"nhPushEnabled";
 
 @implementation ZumoTestGlobals
 
-@synthesize client, deviceToken, remoteNotificationRegistrationStatus, pushNotificationDelegate;
+@synthesize client, remoteNotificationRegistrationStatus, pushNotificationDelegate;
 
 +(ZumoTestGlobals *)sharedInstance {
     static ZumoTestGlobals *instance = nil;

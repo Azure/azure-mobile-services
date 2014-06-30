@@ -1,21 +1,21 @@
-﻿# Windows Azure Mobile Services
+﻿# Microsoft Azure Mobile Services
 
-With Windows Azure Mobile Services you can add a scalable backend to your connected client applications in minutes.
-To learn more, visit our [Developer Center](http://www.windowsazure.com/en-us/develop/mobile).
+With Microsoft Azure Mobile Services you can add a scalable backend to your connected client applications in minutes.
+To learn more, visit our [Developer Center](http://azure.microsoft.com/en-us/develop/mobile/).
 
 ## Getting Started
 
 If you are new to Mobile Services, you can get started by following our tutorials for connecting your Mobile
-Services cloud backend to [Windows Store apps](https://www.windowsazure.com/en-us/develop/mobile/tutorials/get-started/),
-[Windows Phone 8 apps](https://www.windowsazure.com/en-us/develop/mobile/tutorials/get-started-wp8/),
-[iOS apps](https://www.windowsazure.com/en-us/develop/mobile/tutorials/get-started-ios/),
-and [Android apps](https://www.windowsazure.com/en-us/develop/mobile/tutorials/get-started-android/).
+Services cloud backend to [Windows Store apps](http://azure.microsoft.com/en-us/documentation/articles/mobile-services-windows-store-get-started/),
+[Windows Phone 8 apps](http://azure.microsoft.com/en-us/documentation/articles/mobile-services-windows-phone-get-started/),
+[iOS apps](http://azure.microsoft.com/en-us/documentation/articles/mobile-services-ios-get-started/),
+and [Android apps](http://azure.microsoft.com/en-us/documentation/articles/mobile-services-android-get-started/).
 
 ## Download Source Code
 
 To get the source code of our SDKs and samples via **git** just type:
 
-    git clone https://github.com/WindowsAzure/azure-mobile-services.git
+    git clone https://github.com/Azure/azure-mobile-services.git
     cd ./azure-mobile-services/
 
 ## Change log
@@ -25,7 +25,7 @@ see [Change Log](CHANGELOG.md)
 ## Managed Windows 8 and Windows Phone 8 Client SDK
 
 Our managed portable library for Windows 8 and Windows Phone 8 Client SDK makes it incredibly easy to use Mobile Services from your Windows Store
-and Windows Phone 8 applications. The [Windows Azure Mobile Services SDK](http://nuget.org/packages/WindowsAzure.MobileServices/) is available 
+and Windows Phone 8 applications. The [Microsoft Azure Mobile Services SDK](http://nuget.org/packages/WindowsAzure.MobileServices/) is available 
 as a Nuget package or you can download the source using the instructions above. The managed portable library also supports the full .NET 4.5 platform.
 
 ### Prerequisites
@@ -72,11 +72,11 @@ The SDK requires XCode 4.6.3 or greater.
 1. Open the ```sdk\iOS\WindowsAzureMobileServices.xcodeproj``` file in XCode.
 2. Set the active scheme option to ```WindowsAzureMobileServices\* Simulator```.
 3. Open the ```Test\WindowsAzureMobileServicesFunctionalTests.m``` file in the Project Navigator panel of XCode.
-4. In the ```setUp``` code, replace the ```<Windows Azure Mobile Service App URL>``` and ```<Application Key>``` with the valid URL and Application Key for a working Mobile Service.
+4. In the ```setUp``` code, replace the ```<Microsoft Azure Mobile Service App URL>``` and ```<Application Key>``` with the valid URL and Application Key for a working Mobile Service.
 5. Run the tests using Command-U.
 
 ## Android SDK
-Windows Azure Mobile Services can be used with an Android-based device using our Android SDK. You can [download the Android SDK](https://go.microsoft.com/fwLink/?LinkID=280126&clcid=0x409) directly or you can download the source code using the instructions above.  
+Microsoft Azure Mobile Services can be used with an Android-based device using our Android SDK. You can [download the Android SDK](https://go.microsoft.com/fwLink/?LinkID=280126&clcid=0x409) directly or you can download the source code using the instructions above.  
 
 ### Prerequisites
 
@@ -111,11 +111,11 @@ It also contains an end-to-end test application.
 
 ## JavaScript SDK
 
-Our JavaScript SDK makes it easy to use our Windows Azure Mobile Services in a Windows 8 application or an HTML client. The [Windows Azure Mobile Services for WinJS SDK](http://nuget.org/packages/WindowsAzure.MobileServices.WinJS/) is available as a Nuget package or you can download the source for both WinJS and HTML using the instructions above. 
+Our JavaScript SDK makes it easy to use our Microsoft Azure Mobile Services in a Windows 8 application or an HTML client. The [Microsoft Azure Mobile Services for WinJS SDK](http://nuget.org/packages/WindowsAzure.MobileServices.WinJS/) is available as a Nuget package or you can download the source for both WinJS and HTML using the instructions above. 
 
 ### Prerequisites
 
-The Windows Azure Mobile Services for WinJS SDK requires Windows 8 RTM and Visual Studio 2012 RTM. 
+The Microsoft Azure Mobile Services for WinJS SDK requires Windows 8 RTM and Visual Studio 2012 RTM. 
 
 ### Building and Referencing the SDK
 
@@ -146,9 +146,9 @@ Be sure to check out the Mobile Services [Developer Forum](http://social.msdn.mi
 
 ## Contribute Code or Provide Feedback
 
-If you would like to become an active contributor to this project please follow the instructions provided in [Windows Azure Projects Contribution Guidelines](http://windowsazure.github.com/guidelines.html).
+If you would like to become an active contributor to this project please follow the instructions provided in [Microsoft Azure Projects Contribution Guidelines](http://azure.github.com/guidelines.html).
 
-If you encounter any bugs with the library please file an issue in the [Issues](https://github.com/WindowsAzure/azure-mobile-services/issues) section of the project.
+If you encounter any bugs with the library please file an issue in the [Issues](https://github.com/Azure/azure-mobile-services/issues) section of the project.
 
 ## Learn More
-[Windows Azure Mobile Services Developer Center](http://www.windowsazure.com/en-us/develop/mobile)
+[Microsoft Azure Mobile Services Developer Center](http://azure.microsoft.com/en-us/develop/mobile)

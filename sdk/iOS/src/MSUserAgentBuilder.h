@@ -10,7 +10,7 @@
 
 // The |MSUserAgentBuilder| class encapsulates the logic for building the
 // appropriate HTTP 'User-Agent' header value for all |MSClient| requests.
-// Windows Azure Mobile Services expects the 'User-Agent' to be of the form:
+// Microsoft Azure Mobile Services expects the 'User-Agent' to be of the form:
 //
 //     ZUMO/<sdk-version> (<sdk-language> <OS> <OS-version> <Architecture> <sdk-fileversion>)
 //

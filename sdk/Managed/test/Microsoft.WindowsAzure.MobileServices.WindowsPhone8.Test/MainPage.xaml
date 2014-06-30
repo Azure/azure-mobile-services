@@ -22,7 +22,7 @@
         </Grid.RowDefinitions>
         
         <StackPanel Grid.Row="0">
-            <TextBlock Text="Windows Azure Mobile Services" Style="{StaticResource PhoneTextNormalStyle}" FontSize="20" FontWeight="Bold"/>
+            <TextBlock Text="Microsoft Azure Mobile Services" Style="{StaticResource PhoneTextNormalStyle}" FontSize="20" FontWeight="Bold"/>
             <TextBlock Text="C# Client Library Tests" Style="{StaticResource PhoneTextAccentStyle}" Foreground="#0094ff" FontSize="30" />
             <TextBlock TextWrapping="Wrap" Visibility="Collapsed" x:Name="lblStatus" Text="Status pending..."  Style="{StaticResource PhoneTextNormalStyle}"/>
             <StackPanel x:Name="testSettings">
@@ -82,7 +82,7 @@
                         Content="Google" 
                         Click="LoginButtonClicked"/>
                 <Button x:Name="AzureActiveDirectoryButton"
-                        Content="Windows Azure Active Directory" 
+                        Content="Microsoft Azure Active Directory" 
                         Click="LoginButtonClicked"/>
                 <CheckBox x:Name="UseProviderStringOverloadCheckBox"
                           Content="Use overload with string provider"

@@ -49,14 +49,11 @@
     <Compile Include="Platform\ApplicationStorage.cs" />
     <Compile Include="Authentication\AuthenticationBroker.cs" />
     <Compile Include="Platform\PlatformInformation.cs" />
+    <Compile Include="Platform\PushUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Push\LocalStorageManager.cs" />
     <Compile Include="Push\Push.cs" />
-    <Compile Include="Push\PushHttpClient.cs" />
-    <Compile Include="Push\Registration.cs" />
-    <Compile Include="Push\RegistrationManager.cs" />
-    <Compile Include="Push\StoredRegistrationEntry.cs" />
-    <Compile Include="Push\TemplateRegistration.cs" />
+    <Compile Include="Push\WnsRegistration.cs" />
+    <Compile Include="Push\WnsTemplateRegistration.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.Mobile.csproj">
@@ -89,7 +86,6 @@
     <VisualStudioVersion>11.0</VisualStudioVersion>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
     <Error Condition="!Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />

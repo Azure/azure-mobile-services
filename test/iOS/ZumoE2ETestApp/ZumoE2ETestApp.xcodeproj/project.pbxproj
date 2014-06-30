@@ -420,7 +420,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)",
-					"/Users/carlosfigueira/Documents/github/carlosfigueira/azure-mobile-services-pr/test/iOS/ZumoE2ETestApp",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ZumoE2ETestApp/ZumoE2ETestApp-Prefix.pch";
@@ -436,7 +435,6 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)",
-					"/Users/carlosfigueira/Documents/github/carlosfigueira/azure-mobile-services-pr/test/iOS/ZumoE2ETestApp",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "ZumoE2ETestApp/ZumoE2ETestApp-Prefix.pch";

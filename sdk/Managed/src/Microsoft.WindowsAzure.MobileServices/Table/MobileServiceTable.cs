@@ -15,7 +15,7 @@ using Newtonsoft.Json.Linq;
 namespace Microsoft.WindowsAzure.MobileServices
 {
     /// <summary>
-    /// Provides operations on tables for a Windows Azure Mobile Service.
+    /// Provides operations on tables for a Microsoft Azure Mobile Service.
     /// </summary>
     internal class MobileServiceTable : IMobileServiceTable
     {
@@ -166,7 +166,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                         string.Format(
                             CultureInfo.InvariantCulture,
                             Resources.MobileServiceTable_InsertWithExistingId,
-                           MobileServiceSerializer.IdPropertyName),
+                            MobileServiceSerializer.IdPropertyName),
                             "instance");
             }
 
@@ -209,49 +209,22 @@ namespace Microsoft.WindowsAzure.MobileServices
             if (instance == null)
             {
                 throw new ArgumentNullException("instance");
-            }            
-            
-            MobileServiceInvalidOperationException error = null;
+            }
 
             object id = MobileServiceSerializer.GetId(instance);
-            string version = null;
-            if (!MobileServiceSerializer.IsIntegerId(id))
-            {
-                instance = RemoveSystemProperties(instance, out version);
-            }
-            parameters = AddSystemProperties(this.SystemProperties, parameters);
+            Dictionary<string, string> headers = StripSystemPropertiesAndAddVersionHeader(ref instance, ref parameters, id);
 
-            try
-            {
-                Dictionary<string, string> headers = null;
 
+            return await this.TransformConflictToPreconditionFailedException(async () =>
+            {
                 string content = instance.ToString(Formatting.None);
                 string uriString = GetUri(this.TableName, id, parameters);
 
-                if (version != null)
-                {
-                    headers = new Dictionary<string, string>();
-                    headers.Add("If-Match", GetEtagFromValue(version));
-                }
-
                 MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(patchHttpMethod, uriString, this.MobileServiceClient.CurrentUser, content, true, headers);
                 return GetJTokenFromResponse(response);
-            }
-            catch (MobileServiceInvalidOperationException ex)
-            {
-                if (ex.Response != null && 
-                    ex.Response.StatusCode != HttpStatusCode.PreconditionFailed)
-                {
-                    throw;
-                }
-
-                error = ex;                    
-            }
-
-            JToken value = await this.ParseContent(error.Response);
-            throw new MobileServicePreconditionFailedException(error, value);
-        }        
-
+            });            
+        }  
+     
         /// <summary>
         /// Deletes an <paramref name="instance"/> from the table.
         /// </summary>
@@ -286,12 +259,14 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("instance");
             }
 
-            object id = MobileServiceSerializer.GetId(instance);
-            parameters = AddSystemProperties(this.SystemProperties, parameters);
-
-            string uriString = GetUri(this.TableName, id, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false);
-            return GetJTokenFromResponse(response);
+            return await TransformConflictToPreconditionFailedException(async () =>
+            {
+                object id = MobileServiceSerializer.GetId(instance);
+                Dictionary<string, string> headers = StripSystemPropertiesAndAddVersionHeader(ref instance, ref parameters, id);
+                string uriString = GetUri(this.TableName, id, parameters);
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false, headers);
+                return GetJTokenFromResponse(response);
+            });
         }
 
         /// <summary>
@@ -391,60 +366,32 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             string systemPropertiesString = string.Join(",", systemProperties);
             return systemPropertiesString;
-        }
+        }       
 
         /// <summary>
-        /// Removes all system properties (name start with '__') from the instance
-        /// if the instance is determined to have a string id and therefore be for table that
-        /// supports system properties.
+        /// Parses body of the <paramref name="response"/> as JToken
         /// </summary>
-        /// <param name="instance">The instance to remove the system properties from.</param>
-        /// <param name="version">Set to the value of the version system property before it is removed.</param>
-        /// <returns>
-        /// The instance with the system properties removed.
-        /// </returns>
-        protected static JObject RemoveSystemProperties(JObject instance, out string version)
+        /// <param name="response">The http response message.</param>
+        /// <returns>A pair of raw response and parsed JToken</returns>
+        internal async Task<Tuple<string, JToken>> ParseContent(HttpResponseMessage response)
         {
-            version = null;
-
-            bool haveCloned = false;
-            foreach (JProperty property in instance.Properties())
-            {
-                if (property.Name.StartsWith(MobileServiceSerializer.SystemPropertyPrefix))
-                {
-                    // We don't want to alter the original jtoken passed in by the caller
-                    // so if we find a system property to remove, we have to clone first
-                    if (!haveCloned)
-                    {
-                        instance = instance.DeepClone() as JObject;
-                        haveCloned = true;
-                    }
-
-                    if (String.Equals(property.Name, MobileServiceSerializer.VersionSystemPropertyString, StringComparison.OrdinalIgnoreCase))
-                    {
-                        version = (string)instance[property.Name];
-                    }
-
-                    instance.Remove(property.Name);
-                }
-            }
-
-            return instance;
+            return await ParseContent(response, this.MobileServiceClient.SerializerSettings);
         }
 
-        private async Task<JToken> ParseContent(HttpResponseMessage response)
+        internal static async Task<Tuple<string, JToken>> ParseContent(HttpResponseMessage response, MobileServiceJsonSerializerSettings serializerSettings)
         {
+            string content = null;
             JToken value = null;
             try
             {
                 if (response.Content != null)
                 {
-                    string content = await response.Content.ReadAsStringAsync();
-                    value = content.ParseToJToken(this.MobileServiceClient.SerializerSettings);
+                    content = await response.Content.ReadAsStringAsync();
+                    value = content.ParseToJToken(serializerSettings);
                 }
             }
             catch { }
-            return value;
+            return Tuple.Create(content, value);
         }
 
         /// <summary>
@@ -495,6 +442,64 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return jtoken;
         }
+
+        /// <summary>
+        /// Executes a request and transforms a 412 precondition failed response to <see cref="MobileServicePreconditionFailedException"/>.
+        /// </summary>
+        private async Task<JToken> TransformConflictToPreconditionFailedException(Func<Task<JToken>> action)
+        {
+            MobileServiceInvalidOperationException error = null;
+
+            try
+            {
+                return await action();
+            }
+            catch (MobileServiceInvalidOperationException ex)
+            {
+                if (ex.Response != null &&
+                    ex.Response.StatusCode != HttpStatusCode.PreconditionFailed)
+                {
+                    throw;
+                }
+
+                error = ex;
+            }
+
+            Tuple<string, JToken> responseContent = await this.ParseContent(error.Response);
+            throw new MobileServicePreconditionFailedException(error, responseContent.Item2);
+        }
+
+        /// <summary>
+        /// if id is of type string then it strips the system properties and adds version header.
+        /// </summary>
+        /// <returns>The header collection with if-match header.</returns>
+        private Dictionary<string, string> StripSystemPropertiesAndAddVersionHeader(ref JObject instance, ref IDictionary<string, string> parameters, object id)
+        {
+            string version = null;
+            if (!MobileServiceSerializer.IsIntegerId(id))
+            {
+                instance = MobileServiceSerializer.RemoveSystemProperties(instance, out version);
+            }
+            parameters = AddSystemProperties(this.SystemProperties, parameters);
+            Dictionary<string, string> headers = AddIfMatchHeader(version, null);
+            return headers;
+        }
+
+        /// <summary>
+        /// Adds If-Match header to request if version is non-null.
+        /// </summary>
+        private static Dictionary<string, string> AddIfMatchHeader(string version, Dictionary<string, string> headers)
+        {
+            if (!String.IsNullOrEmpty(version))
+            {
+                if (headers == null)
+                {
+                    headers = new Dictionary<string, string>();
+                }
+                headers.Add("If-Match", GetEtagFromValue(version));
+            }
+            return headers;
+        } 
 
         /// <summary>
         /// Gets a valid etag from a string value. Etags are surrounded

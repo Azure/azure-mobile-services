@@ -51,6 +51,7 @@
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Platform\ExpressionUtility.cs">
       <Link>Platform\ExpressionUtility.cs</Link>
     </Compile>
+    <Compile Include="Platform\PushUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Platform\ApplicationStorage.cs" />
     <Compile Include="Platform\PlatformInformation.cs" />
@@ -60,20 +61,9 @@
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\ExpressionUtility\VisitorHelper.cs">
       <Link>ExpressionUtility\VisitorHelper.cs</Link>
     </Compile>
-    <Compile Include="Push\ConcurrentDictionary.cs" />
-    <Compile Include="Push\LocalStorageManager.cs" />
     <Compile Include="Push\Push.cs" />
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\PushHttpClient.cs">
-      <Link>Push\PushHttpClient.cs</Link>
-    </Compile>
-    <Compile Include="Push\Registration.cs" />
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\RegistrationManager.cs">
-      <Link>Push\RegistrationManager.cs</Link>
-    </Compile>
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\StoredRegistrationEntry.cs">
-      <Link>Push\StoredRegistrationEntry.cs</Link>
-    </Compile>
-    <Compile Include="Push\TemplateRegistration.cs" />
+    <Compile Include="Push\MpnsRegistration.cs" />
+    <Compile Include="Push\MpnsTemplateRegistration.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.Mobile.csproj">
@@ -105,7 +95,6 @@
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).$(TargetFrameworkVersion).Overrides.targets" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\$(TargetFrameworkIdentifier)\$(TargetFrameworkVersion)\Microsoft.$(TargetFrameworkIdentifier).CSharp.targets" />
   <ProjectExtensions />
-  <Import Project="$(SolutionDir)\.nuget\nuget.targets" />
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
     <Error Condition="!Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />

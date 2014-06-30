@@ -46,6 +46,10 @@
         ensureDictionary:(BOOL)ensureDictionary
                  orError:(NSError **)error;
 
+// Called to deserialize a response to an NSArray
+-(NSArray *) arrayFromData:(NSData *)data
+                   orError:(NSError **)error;
+
 // Called for reads when the data will either by an array of items or
 // an array of items and a total count. After returning, either the items
 // parameter or the error parameter (but not both) will be set. The

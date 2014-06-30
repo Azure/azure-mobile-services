@@ -118,26 +118,17 @@
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Platform\ExpressionUtility.cs">
       <Link>Platform\ExpressionUtility.cs</Link>
     </Compile>
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\LocalStorageManager.cs">
-      <Link>Push\LocalStorageManager.cs</Link>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Platform\PushUtility.cs">
+      <Link>Platform\PushUtility.cs</Link>
     </Compile>
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\Push.cs">
       <Link>Push\Push.cs</Link>
     </Compile>
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\PushHttpClient.cs">
-      <Link>Push\PushHttpClient.cs</Link>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\WnsRegistration.cs">
+      <Link>Push\WnsRegistration.cs</Link>
     </Compile>
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\Registration.cs">
-      <Link>Push\Registration.cs</Link>
-    </Compile>
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\RegistrationManager.cs">
-      <Link>Push\RegistrationManager.cs</Link>
-    </Compile>
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\StoredRegistrationEntry.cs">
-      <Link>Push\StoredRegistrationEntry.cs</Link>
-    </Compile>
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\TemplateRegistration.cs">
-      <Link>Push\TemplateRegistration.cs</Link>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Push\WnsTemplateRegistration.cs">
+      <Link>Push\WnsTemplateRegistration.cs</Link>
     </Compile>
     <Compile Include="Authentication\AuthenticationBroker.cs" />
     <Compile Include="Extensions\MobileServiceClientExtensions.cs" />
@@ -170,13 +161,6 @@
     <TargetPlatformIdentifier>WindowsPhoneApp</TargetPlatformIdentifier>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\$(TargetPlatformVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
-  </Target>
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
     <Error Condition="!Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" Text="This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=317567." HelpKeyword="BCLBUILD2001" />

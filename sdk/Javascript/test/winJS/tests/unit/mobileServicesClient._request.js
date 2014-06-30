@@ -129,10 +129,10 @@ $testGroup('MobileServiceClient._request',
         client = client.withFilter(function (req, next, callback) {
             var isWinJs = typeof Windows === "object";
             if (isWinJs) {
-                $assert.areEqual(req.headers['X-ZUMO-VERSION'], "ZUMO/1.0 (lang=WinJS; os=Windows 8; os_version=--; arch=Neutral; version=1.0.0.0)");
+                $assert.areEqual(0, req.headers['X-ZUMO-VERSION'].indexOf("ZUMO/1.0 (lang=WinJS; os=Windows 8; os_version=--; arch=Neutral; version="));
             }
             else {
-                $assert.areEqual(req.headers['X-ZUMO-VERSION'], "ZUMO/1.0 (lang=Web; os=--; os_version=--; arch=--; version=1.0.0.0)");
+                $assert.areEqual(0, req.headers['X-ZUMO-VERSION'].indexOf("ZUMO/1.0 (lang=Web; os=--; os_version=--; arch=--; version="));
             }
             callback(null, { status: 200, responseText: null });
         });

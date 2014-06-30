@@ -12,9 +12,10 @@
 #import "MSFilter.h"
 #import "MSError.h"
 #import "MSLoginController.h"
+#import "MSPush.h"
 
 #define WindowsAzureMobileServicesSdkMajorVersion 1
-#define WindowsAzureMobileServicesSdkMinorVersion 1
+#define WindowsAzureMobileServicesSdkMinorVersion 2
 #define WindowsAzureMobileServicesSdkBuildVersion 0
 
 #endif
