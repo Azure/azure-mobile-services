@@ -183,4 +183,4 @@ function tryRemoveSetting(name, values) {
         return true;
     }
     return false;
-};
+}
