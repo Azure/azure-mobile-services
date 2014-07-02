@@ -15,8 +15,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     class PushTestUtility : IPushTestUtility
     {
         private const string DefaultChannelUri =
-            "https://bn1.notify.windows.com/?token=AgYAAADs42685sa5PFCEy82eYpuG8WCPB098AWHnwR8kNRQLwUwf%2f9p%2fy0r82m4hxrLSQ%2bfl5aNlSk99E4jrhEatfsWgyutFzqQxHcLk0Xun3mufO2G%2fb2b%2ftjQjCjVcBESjWvY%3d";
-        const string BodyTemplate = "<toast><visual><binding template=\"ToastText01\"><text id=\"1\">$(message)</text></binding></visual></toast>";
+            "17BA0791499DB908433B80F37C5FBC89B870084B";
+        const string BodyTemplate = "{\"first prop\":\"first value\", \"second prop\":\"($message)\"}";
         const string DefaultToastTemplateName = "templateForToastWns";
         readonly string[] DefaultTags = { "fooWns", "barWns" };        
 

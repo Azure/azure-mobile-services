@@ -11,11 +11,11 @@ using Newtonsoft.Json;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
-        /// <summary>
+    /// <summary>
     /// Registration is used to define a target that is registered for notifications. A <see cref="GcmTemplateRegistration"/> allows the client application
     /// to define the format of the registration.
     /// </summary>
-    [JsonObject]
+    [JsonObject(MemberSerialization.OptIn)]
     public sealed class GcmTemplateRegistration : GcmRegistration
     {
         internal GcmTemplateRegistration()
@@ -26,11 +26,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Create a <see cref="GcmTemplateRegistration"/>
         /// </summary>
         /// <param name="deviceId">The device id</param>
-        /// <param name="bodyTemplate">The template xml in string format</param>
+        /// <param name="jsonTemplate">The template json in string format</param>
         /// <param name="expiry">The string defining the expiry template</param>
         /// <param name="templateName">The template name</param>
-        public GcmTemplateRegistration(string deviceId, string bodyTemplate, string templateName)
-            : this(deviceId, bodyTemplate, templateName, null)
+        public GcmTemplateRegistration(string deviceId, string jsonTemplate, string templateName)
+            : this(deviceId, jsonTemplate, templateName, null)
         {
         }
 
@@ -38,11 +38,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Create a <see cref="GcmTemplateRegistration"/>
         /// </summary>
         /// <param name="deviceId">The device id</param>
-        /// <param name="bodyTemplate">The template xml in string format</param>
+        /// <param name="jsonTemplate">The template json in string format</param>
         /// <param name="expiry">The string defining the expiry template</param>
         /// <param name="templateName">The template name</param>
         /// <param name="tags">The tags that restrict which notifications this registration will receive</param>
-        public GcmTemplateRegistration(string deviceId, string bodyTemplate, string templateName, IEnumerable<string> tags)
+        public GcmTemplateRegistration(string deviceId, string jsonTemplate, string templateName, IEnumerable<string> tags)
+            : base(deviceId, tags)
         {
             if (string.IsNullOrWhiteSpace(templateName))
             {
@@ -59,14 +60,14 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentException(Resources.Push_InvalidTemplateName);
             }
 
-            if (string.IsNullOrWhiteSpace(bodyTemplate))
+            if (string.IsNullOrWhiteSpace(jsonTemplate))
             {
-                throw new ArgumentNullException("bodyTemplate");
+                throw new ArgumentNullException("jsonTemplate");
             }
 
-            this.TemplateName = templateName;            
-            this.BodyTemplate = bodyTemplate;
-        }        
+            this.TemplateName = templateName;
+            this.BodyTemplate = jsonTemplate;
+        }
 
         /// <summary>
         /// Get templateName
@@ -75,11 +76,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         public string TemplateName { get; internal set; }
 
         /// <summary>
-        /// Gets bodyTemplate as string
+        /// Gets jsonTemplate as string
         /// </summary>
         [JsonProperty(PropertyName = "templateBody")]
         public string BodyTemplate { get; internal set; }
-
 
         /// <summary>
         /// The name of the registration used in local storage.
@@ -90,6 +90,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return this.TemplateName;
             }
-        }                
-    }    
+        }
+    }
 }

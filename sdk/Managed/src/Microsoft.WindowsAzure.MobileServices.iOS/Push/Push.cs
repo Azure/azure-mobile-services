@@ -64,34 +64,34 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Register a particular deviceToken with a template
         /// </summary>
         /// <param name="deviceToken">The deviceToken to register</param>
-        /// <param name="bodyTemplate">The string defining the template</param>
+        /// <param name="jsonTemplate">The string defining the template</param>
         /// <param name="expiry">The string defining the expiry template</param>
         /// <param name="templateName">The template name</param>
         /// <returns>Task that completes when registration is complete</returns>
-        public Task RegisterTemplateAsync(string deviceToken, string bodyTemplate, string expiry, string templateName)
+        public Task RegisterTemplateAsync(string deviceToken, string jsonTemplate, string expiry, string templateName)
         {
-            return this.RegisterTemplateAsync(deviceToken, bodyTemplate, expiry, templateName, null);
+            return this.RegisterTemplateAsync(deviceToken, jsonTemplate, expiry, templateName, null);
         }
 
         /// <summary>
         /// Register a particular deviceToken with a template
         /// </summary>
         /// <param name="deviceToken">The deviceToken to register</param>
-        /// <param name="bodyTemplate">The string defining the json template</param>
+        /// <param name="jsonTemplate">The string defining the json template</param>
         /// <param name="expiry">The string defining the expiry template</param>
         /// <param name="templateName">The template name</param>
         /// <param name="tags">The tags to register to receive notifications from</param>
         /// <returns>Task that completes when registration is complete</returns>
-        public Task RegisterTemplateAsync(string deviceToken, string bodyTemplate, string expiry, string templateName, IEnumerable<string> tags)
+        public Task RegisterTemplateAsync(string deviceToken, string jsonTemplate, string expiry, string templateName, IEnumerable<string> tags)
         {
             if (string.IsNullOrWhiteSpace(deviceToken))
             {
                 throw new ArgumentNullException("deviceToken");
             }
 
-            if (string.IsNullOrWhiteSpace(bodyTemplate))
+            if (string.IsNullOrWhiteSpace(jsonTemplate))
             {
-                throw new ArgumentNullException("bodyTemplate");
+                throw new ArgumentNullException("jsonTemplate");
             }
 
             if (string.IsNullOrWhiteSpace(templateName))
@@ -99,7 +99,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("templateName");
             }
 
-            var registration = new ApnsTemplateRegistration(deviceToken, bodyTemplate, expiry, templateName, tags);
+            var registration = new ApnsTemplateRegistration(deviceToken, jsonTemplate, expiry, templateName, tags);
             return this.RegistrationManager.RegisterAsync(registration);
         }
 

@@ -16,7 +16,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     [Tag("unit")]
     [Tag("push")]
     [Tag("notNetFramework")]
-    [Tag("notXamarin_iOS")]
     public class PushTest : TestBase
     {        
         const string DefaultChannelUri = "http://channelUri.com/a b";
@@ -112,7 +111,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         string GetExpectedListUri()
         {
             var channelUri = Uri.EscapeUriString(DefaultChannelUri);
-            if (this.platform == "gcm")
+            if (this.platform == "gcm" || this.platform == "apns")
             {
                 channelUri = DefaultChannelUri;
             }

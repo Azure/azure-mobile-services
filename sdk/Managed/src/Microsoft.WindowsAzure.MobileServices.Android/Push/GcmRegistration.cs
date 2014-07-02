@@ -2,6 +2,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 
@@ -10,6 +11,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// <summary>
     /// Registration is used to define a target that is registered for notifications
     /// </summary>
+    [JsonObject(MemberSerialization.OptIn)]
     public class GcmRegistration : Registration
     {
         internal GcmRegistration()
@@ -42,7 +44,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// The Uri of the Channel returned by the Push Notification Channel Manager.
         /// </summary>
-        public string deviceId
+        public string DeviceId
         {
             get
             {

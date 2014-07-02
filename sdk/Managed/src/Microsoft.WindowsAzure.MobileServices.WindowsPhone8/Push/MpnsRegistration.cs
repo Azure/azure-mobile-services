@@ -12,6 +12,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// <summary>
     /// Registration is used to define a target that is registered for notifications
     /// </summary>
+    [JsonObject(MemberSerialization.OptIn)]
     public class MpnsRegistration : Registration
     {
         internal MpnsRegistration()

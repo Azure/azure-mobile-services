@@ -10,7 +10,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>Microsoft.WindowsAzure.Mobile.iOS.Test</RootNamespace>
     <IPhoneResourcePrefix>Resources</IPhoneResourcePrefix>
-    <AssemblyName>MicrosoftWindowsAzureMobileiOSTest</AssemblyName>
+    <AssemblyName>Microsoft.WindowsAzure.Mobile.iOS.Test</AssemblyName>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
   </PropertyGroup>
@@ -89,6 +89,13 @@
     </None>
     <None Include="packages.config" />
     <None Include="readme.txt" />
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore.Test\Functional\PushFunctional.Test.cs">
+      <Link>Functional\PushFunctional.Test.cs</Link>
+    </Compile>
+    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore.Test\TestPlatform\CurrentTestPlatform.cs">
+      <Link>TestPlatform\CurrentTestPlatform.cs</Link>
+    </Compile>
+    <Compile Include="TestPlatform\PushTestUtility.cs" />
     <Compile Include="UI\LoginViewController.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
@@ -141,6 +148,7 @@
       <Name>Microsoft.WindowsAzure.Mobile.Test</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.MonoTouch.CSharp.targets" />
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">
