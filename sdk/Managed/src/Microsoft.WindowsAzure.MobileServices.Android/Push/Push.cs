@@ -64,34 +64,34 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Register a particular deviceId with a template
         /// </summary>
         /// <param name="deviceId">The deviceId to register</param>
-        /// <param name="bodyTemplate">The string defining the template</param>
+        /// <param name="jsonTemplate">The string defining the template</param>
         /// <param name="expiry">The string defining the expiry template</param>
         /// <param name="templateName">The template name</param>
         /// <returns>Task that completes when registration is complete</returns>
-        public Task RegisterTemplateAsync(string deviceId, string bodyTemplate, string templateName)
+        public Task RegisterTemplateAsync(string deviceId, string jsonTemplate, string templateName)
         {
-            return this.RegisterTemplateAsync(deviceId, bodyTemplate, templateName, null);
+            return this.RegisterTemplateAsync(deviceId, jsonTemplate, templateName, null);
         }
 
         /// <summary>
         /// Register a particular deviceId with a template
         /// </summary>
         /// <param name="deviceId">The deviceId to register</param>
-        /// <param name="bodyTemplate">The string defining the json template</param>
+        /// <param name="jsonTemplate">The string defining the json template</param>
         /// <param name="expiry">The string defining the expiry template</param>
         /// <param name="templateName">The template name</param>
         /// <param name="tags">The tags to register to receive notifications from</param>
         /// <returns>Task that completes when registration is complete</returns>
-        public Task RegisterTemplateAsync(string deviceId, string bodyTemplate, string templateName, IEnumerable<string> tags)
+        public Task RegisterTemplateAsync(string deviceId, string jsonTemplate, string templateName, IEnumerable<string> tags)
         {
             if (string.IsNullOrWhiteSpace(deviceId))
             {
                 throw new ArgumentNullException("deviceId");
             }
 
-            if (string.IsNullOrWhiteSpace(bodyTemplate))
+            if (string.IsNullOrWhiteSpace(jsonTemplate))
             {
-                throw new ArgumentNullException("bodyTemplate");
+                throw new ArgumentNullException("jsonTemplate");
             }
 
             if (string.IsNullOrWhiteSpace(templateName))
@@ -99,7 +99,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("templateName");
             }
 
-            var registration = new GcmTemplateRegistration(deviceId, bodyTemplate, templateName, tags);
+            var registration = new GcmTemplateRegistration(deviceId, jsonTemplate, templateName, tags);
             return this.RegistrationManager.RegisterAsync(registration);
         }
 

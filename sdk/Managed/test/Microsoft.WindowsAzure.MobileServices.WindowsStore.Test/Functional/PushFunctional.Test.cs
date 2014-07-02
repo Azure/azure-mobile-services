@@ -102,7 +102,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             push.RegistrationManager.LocalStorageManager.IsRefreshNeeded = true;
             template.PushHandle = this.pushTestUtility.GetUpdatedPushHandle();
 
-            push.RegisterAsync((Registration)template).Wait();
+            push.RegisterAsync(template).Wait();
             registrations = push.ListRegistrationsAsync(template.PushHandle).Result;
             Assert.AreEqual(registrations.Count(), 1, "1 registration should exist after RegisterNativeAsync");
             var registrationAfterUpdate = registrations.First();

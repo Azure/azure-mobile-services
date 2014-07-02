@@ -11,11 +11,11 @@ using Newtonsoft.Json;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
-        /// <summary>
+    /// <summary>
     /// Registration is used to define a target that is registered for notifications. A <see cref="ApnsTemplateRegistration"/> allows the client application
     /// to define the format of the registration.
     /// </summary>
-    [JsonObject]
+    [JsonObject(MemberSerialization.OptIn)]
     internal sealed class ApnsTemplateRegistration : ApnsRegistration
     {
         internal ApnsTemplateRegistration()
@@ -26,11 +26,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Create a <see cref="ApnsTemplateRegistration"/>
         /// </summary>
         /// <param name="deviceToken">The device token</param>
-        /// <param name="bodyTemplate">The template xml in string format</param>
+        /// <param name="jsonTemplate">The template json in string format</param>
         /// <param name="expiry">The string defining the expiry template</param>
         /// <param name="templateName">The template name</param>
-        public ApnsTemplateRegistration(string deviceToken, string bodyTemplate, string expiry, string templateName)
-            : this(deviceToken, bodyTemplate, expiry, templateName, null)
+        public ApnsTemplateRegistration(string deviceToken, string jsonTemplate, string expiry, string templateName)
+            : this(deviceToken, jsonTemplate, expiry, templateName, null)
         {
         }
 
@@ -38,11 +38,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Create a <see cref="ApnsTemplateRegistration"/>
         /// </summary>
         /// <param name="deviceToken">The device token</param>
-        /// <param name="bodyTemplate">The template xml in string format</param>
+        /// <param name="jsonTemplate">The template json in string format</param>
         /// <param name="expiry">The string defining the expiry template</param>
         /// <param name="templateName">The template name</param>
         /// <param name="tags">The tags that restrict which notifications this registration will receive</param>
-        public ApnsTemplateRegistration(string deviceToken, string bodyTemplate, string expiry, string templateName, IEnumerable<string> tags)
+        public ApnsTemplateRegistration(string deviceToken, string jsonTemplate, string expiry, string templateName, IEnumerable<string> tags) 
+            : base(deviceToken, tags)
         {
             if (string.IsNullOrWhiteSpace(templateName))
             {
@@ -59,13 +60,13 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentException(Resources.Push_InvalidTemplateName);
             }
 
-            if (string.IsNullOrWhiteSpace(bodyTemplate))
+            if (string.IsNullOrWhiteSpace(jsonTemplate))
             {
-                throw new ArgumentNullException("bodyTemplate");
+                throw new ArgumentNullException("jsonTemplate");
             }
 
             this.TemplateName = templateName;            
-            this.BodyTemplate = bodyTemplate;
+            this.BodyTemplate = jsonTemplate;
             this.Expiry = expiry;
         }        
 
@@ -76,7 +77,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public string TemplateName { get; internal set; }
 
         /// <summary>
-        /// Gets bodyTemplate as string
+        /// Gets jsonTemplate as string
         /// </summary>
         [JsonProperty(PropertyName = "templateBody")]
         public string BodyTemplate { get; internal set; }

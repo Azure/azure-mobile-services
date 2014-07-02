@@ -15,7 +15,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// Registration is used to define a target that is registered for notifications. A TemplateRegistration allows the client application
     /// to define the format of the registration.
     /// </summary>
-    [JsonObject]
+    [JsonObject(MemberSerialization.OptIn)]
     public sealed class MpnsTemplateRegistration : MpnsRegistration
     {
         /// <summary>
