@@ -27,7 +27,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="deviceId">The device id</param>
         /// <param name="jsonTemplate">The template json in string format</param>
-        /// <param name="expiry">The string defining the expiry template</param>
         /// <param name="templateName">The template name</param>
         public GcmTemplateRegistration(string deviceId, string jsonTemplate, string templateName)
             : this(deviceId, jsonTemplate, templateName, null)
@@ -39,7 +38,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="deviceId">The device id</param>
         /// <param name="jsonTemplate">The template json in string format</param>
-        /// <param name="expiry">The string defining the expiry template</param>
         /// <param name="templateName">The template name</param>
         /// <param name="tags">The tags that restrict which notifications this registration will receive</param>
         public GcmTemplateRegistration(string deviceId, string jsonTemplate, string templateName, IEnumerable<string> tags)

@@ -65,7 +65,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="deviceId">The deviceId to register</param>
         /// <param name="jsonTemplate">The string defining the template</param>
-        /// <param name="expiry">The string defining the expiry template</param>
         /// <param name="templateName">The template name</param>
         /// <returns>Task that completes when registration is complete</returns>
         public Task RegisterTemplateAsync(string deviceId, string jsonTemplate, string templateName)
@@ -78,7 +77,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="deviceId">The deviceId to register</param>
         /// <param name="jsonTemplate">The string defining the json template</param>
-        /// <param name="expiry">The string defining the expiry template</param>
         /// <param name="templateName">The template name</param>
         /// <param name="tags">The tags to register to receive notifications from</param>
         /// <returns>Task that completes when registration is complete</returns>
@@ -160,7 +158,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// DEBUG-ONLY: List the registrations made with the service for a deviceId
         /// </summary>
-        /// <param name="deviceToken">The deviceId to check for</param>
+        /// <param name="deviceId">The deviceId to check for</param>
         /// <returns>List of registrations</returns>
         public Task<List<Registration>> ListRegistrationsAsync(string deviceId)
         {
