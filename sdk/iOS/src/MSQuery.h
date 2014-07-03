@@ -9,9 +9,9 @@
 #pragma mark * MSQuery Public Interface
 
 /// The *MSQuery* class represents a query that can be configured and then
-/// executed against a table of a Windows Azure Mobile Service. The query is
+/// executed against a table of a Microsoft Azure Mobile Service. The query is
 /// serialized as a query string in the URL of the request. A query can be
-/// configured and then sent to the Windows Azure Mobile Service using the
+/// configured and then sent to the Microsoft Azure Mobile Service using the
 /// *readOnSuccess:onError:* method. *MSQuery* instances can be modfied and
 /// reused, but are not threadsafe.
 @interface MSQuery : NSObject
@@ -55,7 +55,7 @@
 /// The array of NSSortDescriptors used to order the query results
 @property (nonatomic, copy) NSArray *orderBy;
 
-/// Indicates if the Windows Azure Mobile Service should also include the total
+/// Indicates if the Microsoft Azure Mobile Service should also include the total
 /// count of items on the server (not just the count of items returned) with
 /// the query results.
 @property (nonatomic) BOOL includeTotalCount;
@@ -91,7 +91,7 @@
 ///@name Executing the query
 ///@{
 
-/// Executes the query by sending a request to the Windows Azure Mobile Service.
+/// Executes the query by sending a request to the Microsoft Azure Mobile Service.
 -(void)readWithCompletion:(MSReadQueryBlock)completion;
 
 ///@}

@@ -16,7 +16,7 @@ using ZumoE2EServerApp.Utils;
 
 namespace ZumoE2EServerApp.Controllers
 {
-    [RequiresAuthorization(AuthorizationLevel.Anonymous)]
+    [AuthorizeLevel(AuthorizationLevel.Anonymous)]
     public class PublicController : TableController<TestUser>
     {
         protected override void Initialize(HttpControllerContext controllerContext)

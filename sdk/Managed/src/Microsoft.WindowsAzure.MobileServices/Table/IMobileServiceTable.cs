@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 namespace Microsoft.WindowsAzure.MobileServices
 {
     /// <summary>
-    /// Provides operations on a table for a Windows Azure Mobile Service.
+    /// Provides operations on a table for a Microsoft Azure Mobile Service.
     /// </summary>
     public interface IMobileServiceTable
     {

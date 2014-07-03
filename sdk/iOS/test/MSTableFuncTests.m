@@ -30,7 +30,7 @@
     // application key for the Windows Mobile Azure Service below and set the
     // 'testsEnabled' BOOL above to YES.
     MSClient *client = [MSClient
-                        clientWithApplicationURLString:@"<Windows Azure Mobile Service App URL>"
+                        clientWithApplicationURLString:@"<Microsoft Azure Mobile Service App URL>"
                         applicationKey:@"<Application Key>"];
     client = [MSClient clientWithApplicationURLString:@"https://philtotesting.azure-mobile.net/"
                                        applicationKey:@"cusnemNWxPUJEBPdESCAZyZGJqIDUv47"];

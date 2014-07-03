@@ -151,6 +151,7 @@
     <Compile Include="..\External\Xamarin.Auth\src\Xamarin.Auth\WebUtilities.cs">
       <Link>Auth\WebUtilities.cs</Link>
     </Compile>
+    <Compile Include="Platform\PushUtility.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Authentication\MobileServiceUIAuthentication.cs" />
     <Compile Include="ExpressionUtility\ExpressionVisitor.cs" />
@@ -158,6 +159,9 @@
     <Compile Include="Platform\ApplicationStorage.cs" />
     <Compile Include="Platform\CurrentPlatform.cs" />
     <Compile Include="Platform\PlatformInformation.cs" />
+    <Compile Include="Push\GcmRegistration.cs" />
+    <Compile Include="Push\GcmTemplateRegistration.cs" />
+    <Compile Include="Push\Push.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.WindowsAzure.MobileServices\Microsoft.WindowsAzure.Mobile.csproj">

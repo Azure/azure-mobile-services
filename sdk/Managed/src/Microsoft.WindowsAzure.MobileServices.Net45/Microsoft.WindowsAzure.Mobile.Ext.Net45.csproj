@@ -60,13 +60,11 @@
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\ExpressionUtility\VisitorHelper.cs">
       <Link>ExpressionUtility\VisitorHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Platform\CurrentPlatform.cs">
-      <Link>Platform\CurrentPlatform.cs</Link>
-    </Compile>
     <Compile Include="..\Microsoft.WindowsAzure.MobileServices.WindowsStore\Platform\ExpressionUtility.cs">
       <Link>Platform\ExpressionUtility.cs</Link>
     </Compile>
     <Compile Include="Platform\ApplicationStorage.cs" />
+    <Compile Include="Platform\CurrentPlatform.cs" />
     <Compile Include="Platform\PlatformInformation.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

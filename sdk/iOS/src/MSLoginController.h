@@ -18,7 +18,7 @@ typedef void (^MSClientLoginBlock)(MSUser *user, NSError *error);
 
 
 /// The *MSLoginController* class provides a UIViewController that can be
-/// presented to allow an end user to authenticate with a Windows Azure Mobile
+/// presented to allow an end user to authenticate with a Microsoft Azure Mobile
 /// Service.
 @interface MSLoginController : UIViewController
 

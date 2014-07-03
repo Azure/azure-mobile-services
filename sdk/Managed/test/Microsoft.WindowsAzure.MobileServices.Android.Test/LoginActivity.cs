@@ -51,6 +51,7 @@ namespace Microsoft.WindowsAzure.Mobile.Android.Test
 
             App.Harness.Settings.Custom["MobileServiceRuntimeUrl"] = this.uriText.Text;
             App.Harness.Settings.Custom["MobileServiceRuntimeKey"] = this.keyText.Text;
+            App.Harness.Settings.TagExpression = this.tagsText.Text;
 
             if (!string.IsNullOrEmpty(App.Harness.Settings.TagExpression))
             {

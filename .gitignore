@@ -19,3 +19,6 @@ obj
 *.csproj.user
 test/ZumoE2EServerApp/Properties/PublishProfiles/
 sdk/Managed/test/Microsoft.WindowsAzure.MobileServices.SQLiteStore.Net45.Test/sqlite3.dll
+StyleCop.Cache
+packages
+*.suo

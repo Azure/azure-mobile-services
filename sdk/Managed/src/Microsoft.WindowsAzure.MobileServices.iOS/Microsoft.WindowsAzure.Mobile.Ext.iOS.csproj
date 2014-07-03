@@ -145,6 +145,10 @@
     <Compile Include="Platform\ApplicationStorage.cs" />
     <Compile Include="Platform\CurrentPlatform.cs" />
     <Compile Include="Platform\PlatformInformation.cs" />
+    <Compile Include="Push\Push.cs" />
+    <Compile Include="Platform\PushUtility.cs" />
+    <Compile Include="Push\ApnsRegistration.cs" />
+    <Compile Include="Push\ApnsTemplateRegistration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -171,6 +175,7 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\iOS\Xamarin.MonoTouch.CSharp.targets" />
   <Import Project="..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets" Condition="Exists('..\..\packages\Microsoft.Bcl.Build.1.0.14\tools\Microsoft.Bcl.Build.targets')" />
   <Target Name="EnsureBclBuildImported" BeforeTargets="BeforeBuild" Condition="'$(BclBuildImported)' == ''">

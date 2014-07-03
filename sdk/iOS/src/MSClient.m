@@ -121,6 +121,7 @@
         applicationURL_ = url;
         applicationKey_ = [key copy];
         login_ = [[MSLogin alloc] initWithClient:self];
+        _push = [[MSPush alloc] initWithClient:self];
     }
     return self;
 }

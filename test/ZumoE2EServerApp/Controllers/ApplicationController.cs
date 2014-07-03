@@ -12,7 +12,7 @@ using ZumoE2EServerApp.DataObjects;
 
 namespace ZumoE2EServerApp.Controllers
 {
-    [RequiresAuthorization(AuthorizationLevel.Application)]
+    [AuthorizeLevel(AuthorizationLevel.Application)]
     public class ApplicationController : PublicController
     {
         public override Task<IQueryable<TestUser>> GetAllTestUser()

@@ -175,7 +175,7 @@
 #pragma mark * Private Methods
 
 -(NSString *) normalizeProvider:(NSString *)provider {
-    // Windows Azure Active Directory can be specified either in
+    // Microsoft Azure Active Directory can be specified either in
     // full or with the 'aad' abbreviation. The service REST API
     // expects 'aad' only.
     if ([[provider lowercaseString] isEqualToString:@"windowsazureactivedirectory"]) {

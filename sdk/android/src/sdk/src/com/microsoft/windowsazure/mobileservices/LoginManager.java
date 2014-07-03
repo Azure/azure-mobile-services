@@ -187,7 +187,7 @@ class LoginManager {
 	}
 
 	/**
-	 * Invokes Windows Azure Mobile Service authentication using a
+	 * Invokes Microsoft Azure Mobile Service authentication using a
 	 * provider-specific oAuth token
 	 * 
 	 * @param provider
@@ -373,7 +373,7 @@ class LoginManager {
 	}
 
 	/**
-	 * Creates a User based on a Windows Azure Mobile Service JSON object
+	 * Creates a User based on a Microsoft Azure Mobile Service JSON object
 	 * containing a UserId and Authentication Token
 	 * 
 	 * @param json
@@ -420,7 +420,7 @@ class LoginManager {
 	}
 
 	/**
-	 * Invokes Windows Azure Mobile Services authentication using the specified
+	 * Invokes Microsoft Azure Mobile Services authentication using the specified
 	 * token
 	 * 
 	 * @param token
