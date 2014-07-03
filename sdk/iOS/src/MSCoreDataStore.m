@@ -136,7 +136,7 @@ NSString *const StoreDeleted = @"ms_deleted";
 
 -(NSUInteger) systemPropetiesForTable:(NSString *)table
 {
-    NSUInteger properties = 0;
+    MSSystemProperties properties = MSSystemPropertyNone;
     NSEntityDescription *entity = [NSEntityDescription entityForName:table
                                               inManagedObjectContext:self.context];
     
@@ -155,7 +155,7 @@ NSString *const StoreDeleted = @"ms_deleted";
         properties = properties | MSSystemPropertyDeleted;
     }
     
-    return MSSystemPropertyNone;
+    return properties;
 }
 
 -(NSDictionary *)readTable:(NSString *)table withItemId:(NSString *)itemId orError:(NSError *__autoreleasing *)error
