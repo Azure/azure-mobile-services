@@ -36,7 +36,7 @@ public class QueryODataWriter {
 	 * 
 	 * @throws MobileServiceException
 	 */
-	public static String getRowFilter(Query query) throws MobileServiceException {
+	public static String getRowFilter(Query query) {
 		QueryNodeODataWriter oDataWriter = new QueryNodeODataWriter();
 
 		if (query != null && query.getQueryNode() != null) {

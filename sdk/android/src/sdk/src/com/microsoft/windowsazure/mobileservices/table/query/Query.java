@@ -22,15 +22,13 @@ package com.microsoft.windowsazure.mobileservices.table.query;
 import java.util.Date;
 import java.util.List;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-
 import android.util.Pair;
 
 /**
  * Interface that represents a query to a table.
  */
 public interface Query {
-	
+
 	public Query deepClone();
 
 	/**
@@ -161,9 +159,8 @@ public interface Query {
 	 * @param fieldName
 	 *            The field to use
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query field(String fieldName) throws MobileServiceException;
+	public Query field(String fieldName);
 
 	/**
 	 * Specifies a numeric value
@@ -171,9 +168,8 @@ public interface Query {
 	 * @param number
 	 *            The numeric value to use
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query val(Number number) throws MobileServiceException;
+	public Query val(Number number);
 
 	/**
 	 * Specifies a boolean value
@@ -181,9 +177,8 @@ public interface Query {
 	 * @param number
 	 *            The boolean value to use
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query val(boolean val) throws MobileServiceException;
+	public Query val(boolean val);
 
 	/**
 	 * Specifies a string value
@@ -191,9 +186,8 @@ public interface Query {
 	 * @param number
 	 *            The string value to use
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query val(String s) throws MobileServiceException;
+	public Query val(String s);
 
 	/**
 	 * Specifies a date value
@@ -201,9 +195,8 @@ public interface Query {
 	 * @param number
 	 *            The date value to use
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query val(Date date) throws MobileServiceException;
+	public Query val(Date date);
 
 	/****** Logical Operators ******/
 
@@ -211,61 +204,54 @@ public interface Query {
 	 * Conditional and.
 	 * 
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query and() throws MobileServiceException;
+	public Query and();
 
 	/**
 	 * Conditional and.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query and(Query otherQuery) throws MobileServiceException;
+	public Query and(Query otherQuery);
 
 	/**
 	 * Conditional or.
 	 * 
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query or() throws MobileServiceException;
+	public Query or();
 
 	/**
 	 * Conditional or.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query or(Query otherQuery) throws MobileServiceException;
+	public Query or(Query otherQuery);
 
 	/**
 	 * Logical not.
 	 * 
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query not() throws MobileServiceException;
+	public Query not();
 
 	/**
 	 * Logical not.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query not(Query otherQuery) throws MobileServiceException;
+	public Query not(Query otherQuery);
 
 	/**
 	 * Logical not.
 	 * 
 	 * @param booleanValue
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query not(boolean booleanValue) throws MobileServiceException;
+	public Query not(boolean booleanValue);
 
 	/****** Comparison Operators ******/
 
@@ -273,247 +259,219 @@ public interface Query {
 	 * Greater than or equal comparison operator.
 	 * 
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query ge() throws MobileServiceException;
+	public Query ge();
 
 	/**
 	 * Greater than or equal comparison operator.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query ge(Query otherQuery) throws MobileServiceException;
+	public Query ge(Query otherQuery);
 
 	/**
 	 * Greater than or equal comparison operator.
 	 * 
 	 * @param numberValue
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query ge(Number numberValue) throws MobileServiceException;
+	public Query ge(Number numberValue);
 
 	/**
 	 * Greater than or equal comparison operator.
 	 * 
 	 * @param dateValue
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query ge(Date dateValue) throws MobileServiceException;
+	public Query ge(Date dateValue);
 
 	/**
 	 * Less than or equal comparison operator.
 	 * 
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query le() throws MobileServiceException;
+	public Query le();
 
 	/**
 	 * Less than or equal comparison operator.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query le(Query otherQuery) throws MobileServiceException;
+	public Query le(Query otherQuery);
 
 	/**
 	 * Less than or equal comparison operator.
 	 * 
 	 * @param numberValue
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query le(Number numberValue) throws MobileServiceException;
+	public Query le(Number numberValue);
 
 	/**
 	 * Less than or equal comparison operator.
 	 * 
 	 * @param dateValue
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query le(Date dateValue) throws MobileServiceException;
+	public Query le(Date dateValue);
 
 	/**
 	 * Greater than comparison operator.
 	 * 
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query gt() throws MobileServiceException;
+	public Query gt();
 
 	/**
 	 * Greater than comparison operator.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query gt(Query otherQuery) throws MobileServiceException;
+	public Query gt(Query otherQuery);
 
 	/**
 	 * Greater than comparison operator.
 	 * 
 	 * @param numberValue
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query gt(Number numberValue) throws MobileServiceException;
+	public Query gt(Number numberValue);
 
 	/**
 	 * Greater than comparison operator.
 	 * 
 	 * @param dateValue
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query gt(Date dateValue) throws MobileServiceException;
+	public Query gt(Date dateValue);
 
 	/**
 	 * Less than comparison operator.
 	 * 
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query lt() throws MobileServiceException;
+	public Query lt();
 
 	/**
 	 * Less than comparison operator.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query lt(Query otherQuery) throws MobileServiceException;
+	public Query lt(Query otherQuery);
 
 	/**
 	 * Less than comparison operator.
 	 * 
 	 * @param numberValue
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query lt(Number numberValue) throws MobileServiceException;
+	public Query lt(Number numberValue);
 
 	/**
 	 * Less than comparison operator.
 	 * 
 	 * @param dateValue
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query lt(Date dateValue) throws MobileServiceException;
+	public Query lt(Date dateValue);
 
 	/**
 	 * Equal comparison operator.
 	 * 
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query eq() throws MobileServiceException;
+	public Query eq();
 
 	/**
 	 * Equal comparison operator.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query eq(Query otherQuery) throws MobileServiceException;
+	public Query eq(Query otherQuery);
 
 	/**
 	 * Equal comparison operator.
 	 * 
 	 * @param numberValue
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query eq(Number numberValue) throws MobileServiceException;
+	public Query eq(Number numberValue);
 
 	/**
 	 * Equal comparison operator.
 	 * 
 	 * @param booleanValue
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query eq(boolean booleanValue) throws MobileServiceException;
+	public Query eq(boolean booleanValue);
 
 	/**
 	 * Equal comparison operator.
 	 * 
 	 * @param stringValue
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query eq(String stringValue) throws MobileServiceException;
+	public Query eq(String stringValue);
 
 	/**
 	 * Equal comparison operator.
 	 * 
 	 * @param dateValue
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query eq(Date dateValue) throws MobileServiceException;
+	public Query eq(Date dateValue);
 
 	/**
 	 * Not equal comparison operator.
 	 * 
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query ne() throws MobileServiceException;
+	public Query ne();
 
 	/**
 	 * Not equal comparison operator.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query ne(Query otherQuery) throws MobileServiceException;
+	public Query ne(Query otherQuery);
 
 	/**
 	 * Not equal comparison operator.
 	 * 
 	 * @param numberValue
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query ne(Number numberValue) throws MobileServiceException;
+	public Query ne(Number numberValue);
 
 	/**
 	 * Not equal comparison operator.
 	 * 
 	 * @param booleanValue
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query ne(boolean booleanValue) throws MobileServiceException;
+	public Query ne(boolean booleanValue);
 
 	/**
 	 * Not equal comparison operator.
 	 * 
 	 * @param stringValue
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query ne(String stringValue) throws MobileServiceException;
+	public Query ne(String stringValue);
 
 	/**
 	 * Not equal comparison operator.
 	 * 
 	 * @param dateValue
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query ne(Date dateValue) throws MobileServiceException;
+	public Query ne(Date dateValue);
 
 	/****** Arithmetic Operators ******/
 
@@ -521,131 +479,116 @@ public interface Query {
 	 * Add operator.
 	 * 
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query add() throws MobileServiceException;
+	public Query add();
 
 	/**
 	 * Add operator.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query add(Query otherQuery) throws MobileServiceException;
+	public Query add(Query otherQuery);
 
 	/**
 	 * Add operator.
 	 * 
 	 * @param val
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query add(Number val) throws MobileServiceException;
+	public Query add(Number val);
 
 	/**
 	 * Subtract operator.
 	 * 
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query sub() throws MobileServiceException;
+	public Query sub();
 
 	/**
 	 * Subtract operator.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query sub(Query otherQuery) throws MobileServiceException;
+	public Query sub(Query otherQuery);
 
 	/**
 	 * Subtract operator.
 	 * 
 	 * @param val
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query sub(Number val) throws MobileServiceException;
+	public Query sub(Number val);
 
 	/**
 	 * Multiply operator.
 	 * 
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query mul() throws MobileServiceException;
-
-	/**
-	 * Multiply operator.
-	 * 
-	 * @param otherQuery
-	 * @return Query
-	 * @throws MobileServiceException
-	 */
-	public Query mul(Query otherQuery) throws MobileServiceException;
+	public Query mul();
 
 	/**
 	 * Multiply operator.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query mul(Number val) throws MobileServiceException;
+	public Query mul(Query otherQuery);
+
+	/**
+	 * Multiply operator.
+	 * 
+	 * @param otherQuery
+	 * @return Query
+	 */
+	public Query mul(Number val);
 
 	/**
 	 * Divide operator.
 	 * 
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query div() throws MobileServiceException;
+	public Query div();
 
 	/**
 	 * Divide operator.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query div(Query otherQuery) throws MobileServiceException;
+	public Query div(Query otherQuery);
 
 	/**
 	 * Divide operator.
 	 * 
 	 * @param val
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query div(Number val) throws MobileServiceException;
+	public Query div(Number val);
 
 	/**
 	 * Reminder (or modulo) operator.
 	 * 
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query mod() throws MobileServiceException;
+	public Query mod();
 
 	/**
 	 * Reminder (or modulo) operator.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query mod(Query otherQuery) throws MobileServiceException;
+	public Query mod(Query otherQuery);
 
 	/**
 	 * Reminder (or modulo) operator.
 	 * 
 	 * @param val
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query mod(Number val) throws MobileServiceException;
+	public Query mod(Number val);
 
 	/****** Date Operators ******/
 
@@ -654,108 +597,96 @@ public interface Query {
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query year(Query otherQuery) throws MobileServiceException;
+	public Query year(Query otherQuery);
 
 	/**
 	 * The year component value of the parameter value.
 	 * 
 	 * @param field
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query year(String field) throws MobileServiceException;
+	public Query year(String field);
 
 	/**
 	 * The month component value of the parameter value.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query month(Query otherQuery) throws MobileServiceException;
+	public Query month(Query otherQuery);
 
 	/**
 	 * The month component value of the parameter value.
 	 * 
 	 * @param field
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query month(String field) throws MobileServiceException;
+	public Query month(String field);
 
 	/**
 	 * The day component value of the parameter value.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query day(Query otherQuery) throws MobileServiceException;
+	public Query day(Query otherQuery);
 
 	/**
 	 * The day component value of the parameter value.
 	 * 
 	 * @param field
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query day(String field) throws MobileServiceException;
+	public Query day(String field);
 
 	/**
 	 * The hour component value of the parameter value.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query hour(Query otherQuery) throws MobileServiceException;
+	public Query hour(Query otherQuery);
 
 	/**
 	 * The hour component value of the parameter value.
 	 * 
 	 * @param field
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query hour(String field) throws MobileServiceException;
+	public Query hour(String field);
 
 	/**
 	 * The minute component value of the parameter value.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query minute(Query otherQuery) throws MobileServiceException;
+	public Query minute(Query otherQuery);
 
 	/**
 	 * The minute component value of the parameter value.
 	 * 
 	 * @param field
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query minute(String field) throws MobileServiceException;
+	public Query minute(String field);
 
 	/**
 	 * The second component value of the parameter value.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query second(Query otherQuery) throws MobileServiceException;
+	public Query second(Query otherQuery);
 
 	/**
 	 * The second component value of the parameter value.
 	 * 
 	 * @param field
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query second(String field) throws MobileServiceException;
+	public Query second(String field);
 
 	/****** Math Functions ******/
 
@@ -764,27 +695,24 @@ public interface Query {
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query floor(Query otherQuery) throws MobileServiceException;
+	public Query floor(Query otherQuery);
 
 	/**
 	 * The smallest integral value greater than or equal to the parameter value.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query ceiling(Query otherQuery) throws MobileServiceException;
+	public Query ceiling(Query otherQuery);
 
 	/**
 	 * The nearest integral value to the parameter value.
 	 * 
 	 * @param otherQuery
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query round(Query otherQuery) throws MobileServiceException;
+	public Query round(Query otherQuery);
 
 	/****** String Operators ******/
 
@@ -794,9 +722,8 @@ public interface Query {
 	 * 
 	 * @param exp
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query toLower(Query exp) throws MobileServiceException;
+	public Query toLower(Query exp);
 
 	/**
 	 * String value with the contents of the parameter value converted to lower
@@ -804,9 +731,8 @@ public interface Query {
 	 * 
 	 * @param field
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query toLower(String field) throws MobileServiceException;
+	public Query toLower(String field);
 
 	/**
 	 * String value with the contents of the parameter value converted to upper
@@ -814,9 +740,8 @@ public interface Query {
 	 * 
 	 * @param exp
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query toUpper(Query exp) throws MobileServiceException;
+	public Query toUpper(Query exp);
 
 	/**
 	 * String value with the contents of the parameter value converted to upper
@@ -824,27 +749,24 @@ public interface Query {
 	 * 
 	 * @param field
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query toUpper(String field) throws MobileServiceException;
+	public Query toUpper(String field);
 
 	/**
 	 * The number of characters in the specified parameter value.
 	 * 
 	 * @param exp
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query length(Query exp) throws MobileServiceException;
+	public Query length(Query exp);
 
 	/**
 	 * The number of characters in the specified parameter value.
 	 * 
 	 * @param field
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query length(String field) throws MobileServiceException;
+	public Query length(String field);
 
 	/**
 	 * String value with the contents of the parameter value with all leading
@@ -852,9 +774,8 @@ public interface Query {
 	 * 
 	 * @param exp
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query trim(Query exp) throws MobileServiceException;
+	public Query trim(Query exp);
 
 	/**
 	 * String value with the contents of the parameter value with all leading
@@ -862,9 +783,8 @@ public interface Query {
 	 * 
 	 * @param field
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query trim(String field) throws MobileServiceException;
+	public Query trim(String field);
 
 	/**
 	 * Whether the beginning of the first parameter values matches the second
@@ -875,9 +795,8 @@ public interface Query {
 	 * @param start
 	 *            Start value
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query startsWith(Query field, Query start) throws MobileServiceException;
+	public Query startsWith(Query field, Query start);
 
 	/**
 	 * Whether the beginning of the first parameter values matches the second
@@ -888,9 +807,8 @@ public interface Query {
 	 * @param start
 	 *            Start value
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query startsWith(String field, String start) throws MobileServiceException;
+	public Query startsWith(String field, String start);
 
 	/**
 	 * Whether the end of the first parameter value matches the second parameter
@@ -901,9 +819,8 @@ public interface Query {
 	 * @param end
 	 *            End value
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query endsWith(Query field, Query end) throws MobileServiceException;
+	public Query endsWith(Query field, Query end);
 
 	/**
 	 * Whether the end of the first parameter value matches the second parameter
@@ -914,9 +831,8 @@ public interface Query {
 	 * @param end
 	 *            End value
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query endsWith(String field, String end) throws MobileServiceException;
+	public Query endsWith(String field, String end);
 
 	/**
 	 * Whether the first parameter string value occurs in the second parameter
@@ -927,9 +843,8 @@ public interface Query {
 	 * @param str2
 	 *            Second string
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query subStringOf(Query str1, Query str2) throws MobileServiceException;
+	public Query subStringOf(Query str1, Query str2);
 
 	/**
 	 * Whether the string parameter occurs in the field
@@ -939,9 +854,8 @@ public interface Query {
 	 * @param field
 	 *            Field to search in
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query subStringOf(String str, String field) throws MobileServiceException;
+	public Query subStringOf(String str, String field);
 
 	/**
 	 * String value which is the first and second parameter values merged
@@ -952,9 +866,8 @@ public interface Query {
 	 * @param str2
 	 *            Second string
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query concat(Query str1, Query str2) throws MobileServiceException;
+	public Query concat(Query str1, Query str2);
 
 	/**
 	 * String value which is the first and second parameter values merged
@@ -965,10 +878,9 @@ public interface Query {
 	 * @param str2
 	 *            Second string
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query concat(Query str1, String str2) throws MobileServiceException;
-	
+	public Query concat(Query str1, String str2);
+
 	/**
 	 * Index of the first occurrence of the second parameter value in the first
 	 * parameter value or -1 otherwise.
@@ -978,9 +890,8 @@ public interface Query {
 	 * @param needle
 	 *            Value to search for
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query indexOf(Query haystack, Query needle) throws MobileServiceException;
+	public Query indexOf(Query haystack, Query needle);
 
 	/**
 	 * Index of the first occurrence of the second parameter value in the first
@@ -991,9 +902,8 @@ public interface Query {
 	 * @param str
 	 *            Value to search for
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query indexOf(String field, String needle) throws MobileServiceException;
+	public Query indexOf(String field, String needle);
 
 	/**
 	 * String value starting at the character index specified by the second
@@ -1004,9 +914,8 @@ public interface Query {
 	 * @param pos
 	 *            Starting position
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query subString(Query str, Query pos) throws MobileServiceException;
+	public Query subString(Query str, Query pos);
 
 	/**
 	 * String value starting at the character index specified by the second
@@ -1017,9 +926,8 @@ public interface Query {
 	 * @param pos
 	 *            Starting position
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query subString(String field, int pos) throws MobileServiceException;
+	public Query subString(String field, int pos);
 
 	/**
 	 * String value starting at the character index specified by the second
@@ -1032,9 +940,8 @@ public interface Query {
 	 * @param length
 	 *            Length
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query subString(Query str, Query pos, Query length) throws MobileServiceException;
+	public Query subString(Query str, Query pos, Query length);
 
 	/**
 	 * String value starting at the character index specified by the second
@@ -1047,9 +954,8 @@ public interface Query {
 	 * @param length
 	 *            Length
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query subString(String field, int pos, int length) throws MobileServiceException;
+	public Query subString(String field, int pos, int length);
 
 	/**
 	 * Finds the second string parameter in the first parameter string value and
@@ -1062,9 +968,8 @@ public interface Query {
 	 * @param replace
 	 *            Replace value
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query replace(Query str, Query find, Query replace) throws MobileServiceException;
+	public Query replace(Query str, Query find, Query replace);
 
 	/**
 	 * Finds the second string parameter in the first parameter string value and
@@ -1077,7 +982,6 @@ public interface Query {
 	 * @param replace
 	 *            Replace value
 	 * @return Query
-	 * @throws MobileServiceException
 	 */
-	public Query replace(String field, String find, String replace) throws MobileServiceException;
+	public Query replace(String field, String find, String replace);
 }

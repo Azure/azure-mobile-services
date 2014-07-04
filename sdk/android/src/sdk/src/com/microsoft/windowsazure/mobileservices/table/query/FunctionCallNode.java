@@ -22,8 +22,6 @@ package com.microsoft.windowsazure.mobileservices.table.query;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-
 /**
  * Class that represents a function call query node
  */
@@ -58,7 +56,7 @@ public class FunctionCallNode implements QueryNode {
 	}
 
 	@Override
-	public <T> T accept(QueryNodeVisitor<T> visitor) throws MobileServiceException {
+	public <T> T accept(QueryNodeVisitor<T> visitor) {
 		return visitor.visit(this);
 	}
 

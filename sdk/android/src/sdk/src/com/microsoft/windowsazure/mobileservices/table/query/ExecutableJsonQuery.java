@@ -24,7 +24,6 @@ import java.util.List;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.JsonElement;
-import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.TableJsonQueryCallback;
 
@@ -85,10 +84,8 @@ public final class ExecutableJsonQuery implements Query {
 
 	/**
 	 * Executes the query
-	 * 
-	 * @throws MobileServiceException
 	 */
-	public ListenableFuture<JsonElement> execute() throws MobileServiceException {
+	public ListenableFuture<JsonElement> execute() {
 		return this.mTable.execute(this);
 	}
 
@@ -99,9 +96,8 @@ public final class ExecutableJsonQuery implements Query {
 	 * 
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
-	 * @throws MobileServiceException
 	 */
-	public void execute(final TableJsonQueryCallback callback) throws MobileServiceException {
+	public void execute(final TableJsonQueryCallback callback) {
 		mTable.execute(this, callback);
 	}
 
@@ -217,31 +213,31 @@ public final class ExecutableJsonQuery implements Query {
 	/**** Query Operations ****/
 
 	@Override
-	public ExecutableJsonQuery field(String fieldName) throws MobileServiceException {
+	public ExecutableJsonQuery field(String fieldName) {
 		this.mQuery.field(fieldName);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery val(Number number) throws MobileServiceException {
+	public ExecutableJsonQuery val(Number number) {
 		this.mQuery.val(number);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery val(boolean val) throws MobileServiceException {
+	public ExecutableJsonQuery val(boolean val) {
 		this.mQuery.val(val);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery val(String s) throws MobileServiceException {
+	public ExecutableJsonQuery val(String s) {
 		this.mQuery.val(s);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery val(Date date) throws MobileServiceException {
+	public ExecutableJsonQuery val(Date date) {
 		this.mQuery.val(date);
 		return this;
 	}
@@ -249,43 +245,43 @@ public final class ExecutableJsonQuery implements Query {
 	/****** Logical Operators ******/
 
 	@Override
-	public ExecutableJsonQuery and() throws MobileServiceException {
+	public ExecutableJsonQuery and() {
 		this.mQuery.and();
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery and(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery and(Query otherQuery) {
 		this.mQuery.and(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery or() throws MobileServiceException {
+	public ExecutableJsonQuery or() {
 		this.mQuery.or();
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery or(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery or(Query otherQuery) {
 		this.mQuery.or(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery not() throws MobileServiceException {
+	public ExecutableJsonQuery not() {
 		this.mQuery.not();
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery not(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery not(Query otherQuery) {
 		this.mQuery.not(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery not(boolean booleanValue) throws MobileServiceException {
+	public ExecutableJsonQuery not(boolean booleanValue) {
 		this.mQuery.not(booleanValue);
 		return this;
 	}
@@ -293,169 +289,169 @@ public final class ExecutableJsonQuery implements Query {
 	/****** Comparison Operators ******/
 
 	@Override
-	public ExecutableJsonQuery ge() throws MobileServiceException {
+	public ExecutableJsonQuery ge() {
 		this.mQuery.ge();
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery ge(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery ge(Query otherQuery) {
 		this.mQuery.ge(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery ge(Number numberValue) throws MobileServiceException {
+	public ExecutableJsonQuery ge(Number numberValue) {
 		this.mQuery.ge(numberValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery ge(Date dateValue) throws MobileServiceException {
+	public ExecutableJsonQuery ge(Date dateValue) {
 		this.mQuery.ge(dateValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery le() throws MobileServiceException {
+	public ExecutableJsonQuery le() {
 		this.mQuery.le();
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery le(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery le(Query otherQuery) {
 		this.mQuery.le(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery le(Number numberValue) throws MobileServiceException {
+	public ExecutableJsonQuery le(Number numberValue) {
 		this.mQuery.le(numberValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery le(Date dateValue) throws MobileServiceException {
+	public ExecutableJsonQuery le(Date dateValue) {
 		this.mQuery.le(dateValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery gt() throws MobileServiceException {
+	public ExecutableJsonQuery gt() {
 		this.mQuery.gt();
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery gt(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery gt(Query otherQuery) {
 		this.mQuery.gt(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery gt(Number numberValue) throws MobileServiceException {
+	public ExecutableJsonQuery gt(Number numberValue) {
 		this.mQuery.gt(numberValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery gt(Date dateValue) throws MobileServiceException {
+	public ExecutableJsonQuery gt(Date dateValue) {
 		this.mQuery.gt(dateValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery lt() throws MobileServiceException {
+	public ExecutableJsonQuery lt() {
 		this.mQuery.lt();
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery lt(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery lt(Query otherQuery) {
 		this.mQuery.lt(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery lt(Number numberValue) throws MobileServiceException {
+	public ExecutableJsonQuery lt(Number numberValue) {
 		this.mQuery.lt(numberValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery lt(Date dateValue) throws MobileServiceException {
+	public ExecutableJsonQuery lt(Date dateValue) {
 		this.mQuery.lt(dateValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery eq() throws MobileServiceException {
+	public ExecutableJsonQuery eq() {
 		this.mQuery.eq();
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery eq(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery eq(Query otherQuery) {
 		this.mQuery.eq(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery eq(Number numberValue) throws MobileServiceException {
+	public ExecutableJsonQuery eq(Number numberValue) {
 		this.mQuery.eq(numberValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery eq(boolean booleanValue) throws MobileServiceException {
+	public ExecutableJsonQuery eq(boolean booleanValue) {
 		this.mQuery.eq(booleanValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery eq(String stringValue) throws MobileServiceException {
+	public ExecutableJsonQuery eq(String stringValue) {
 		this.mQuery.eq(stringValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery eq(Date dateValue) throws MobileServiceException {
+	public ExecutableJsonQuery eq(Date dateValue) {
 		this.mQuery.eq(dateValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery ne() throws MobileServiceException {
+	public ExecutableJsonQuery ne() {
 		this.mQuery.ne();
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery ne(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery ne(Query otherQuery) {
 		this.mQuery.ne(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery ne(Number numberValue) throws MobileServiceException {
+	public ExecutableJsonQuery ne(Number numberValue) {
 		this.mQuery.ne(numberValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery ne(boolean booleanValue) throws MobileServiceException {
+	public ExecutableJsonQuery ne(boolean booleanValue) {
 		this.mQuery.ne(booleanValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery ne(String stringValue) throws MobileServiceException {
+	public ExecutableJsonQuery ne(String stringValue) {
 		this.mQuery.ne(stringValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery ne(Date dateValue) throws MobileServiceException {
+	public ExecutableJsonQuery ne(Date dateValue) {
 		this.mQuery.ne(dateValue);
 		return this;
 	}
@@ -463,91 +459,91 @@ public final class ExecutableJsonQuery implements Query {
 	/****** Arithmetic Operators ******/
 
 	@Override
-	public ExecutableJsonQuery add() throws MobileServiceException {
+	public ExecutableJsonQuery add() {
 		this.mQuery.add();
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery add(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery add(Query otherQuery) {
 		this.mQuery.add(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery add(Number val) throws MobileServiceException {
+	public ExecutableJsonQuery add(Number val) {
 		this.mQuery.add(val);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery sub() throws MobileServiceException {
+	public ExecutableJsonQuery sub() {
 		this.mQuery.sub();
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery sub(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery sub(Query otherQuery) {
 		this.mQuery.sub(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery sub(Number val) throws MobileServiceException {
+	public ExecutableJsonQuery sub(Number val) {
 		this.mQuery.sub(val);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery mul() throws MobileServiceException {
+	public ExecutableJsonQuery mul() {
 		this.mQuery.mul();
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery mul(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery mul(Query otherQuery) {
 		this.mQuery.mul(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery mul(Number val) throws MobileServiceException {
+	public ExecutableJsonQuery mul(Number val) {
 		this.mQuery.mul(val);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery div() throws MobileServiceException {
+	public ExecutableJsonQuery div() {
 		this.mQuery.div();
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery div(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery div(Query otherQuery) {
 		this.mQuery.div(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery div(Number val) throws MobileServiceException {
+	public ExecutableJsonQuery div(Number val) {
 		this.mQuery.div(val);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery mod() throws MobileServiceException {
+	public ExecutableJsonQuery mod() {
 		this.mQuery.mod();
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery mod(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery mod(Query otherQuery) {
 		this.mQuery.mod(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery mod(Number val) throws MobileServiceException {
+	public ExecutableJsonQuery mod(Number val) {
 		this.mQuery.mod(val);
 		return this;
 	}
@@ -555,73 +551,73 @@ public final class ExecutableJsonQuery implements Query {
 	/****** Date Operators ******/
 
 	@Override
-	public ExecutableJsonQuery year(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery year(Query otherQuery) {
 		this.mQuery.year(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery year(String field) throws MobileServiceException {
+	public ExecutableJsonQuery year(String field) {
 		this.mQuery.year(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery month(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery month(Query otherQuery) {
 		this.mQuery.month(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery month(String field) throws MobileServiceException {
+	public ExecutableJsonQuery month(String field) {
 		this.mQuery.month(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery day(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery day(Query otherQuery) {
 		this.mQuery.day(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery day(String field) throws MobileServiceException {
+	public ExecutableJsonQuery day(String field) {
 		this.mQuery.day(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery hour(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery hour(Query otherQuery) {
 		this.mQuery.hour(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery hour(String field) throws MobileServiceException {
+	public ExecutableJsonQuery hour(String field) {
 		this.mQuery.hour(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery minute(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery minute(Query otherQuery) {
 		this.mQuery.minute(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery minute(String field) throws MobileServiceException {
+	public ExecutableJsonQuery minute(String field) {
 		this.mQuery.minute(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery second(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery second(Query otherQuery) {
 		this.mQuery.second(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery second(String field) throws MobileServiceException {
+	public ExecutableJsonQuery second(String field) {
 		this.mQuery.second(field);
 		return this;
 	}
@@ -629,19 +625,19 @@ public final class ExecutableJsonQuery implements Query {
 	/****** Math Functions ******/
 
 	@Override
-	public ExecutableJsonQuery floor(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery floor(Query otherQuery) {
 		this.mQuery.floor(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery ceiling(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery ceiling(Query otherQuery) {
 		this.mQuery.ceiling(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery round(Query otherQuery) throws MobileServiceException {
+	public ExecutableJsonQuery round(Query otherQuery) {
 		this.mQuery.round(otherQuery);
 		return this;
 	}
@@ -649,145 +645,145 @@ public final class ExecutableJsonQuery implements Query {
 	/****** String Operators ******/
 
 	@Override
-	public ExecutableJsonQuery toLower(Query exp) throws MobileServiceException {
+	public ExecutableJsonQuery toLower(Query exp) {
 		this.mQuery.toLower(exp);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery toLower(String field) throws MobileServiceException {
+	public ExecutableJsonQuery toLower(String field) {
 		this.mQuery.toLower(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery toUpper(Query exp) throws MobileServiceException {
+	public ExecutableJsonQuery toUpper(Query exp) {
 		this.mQuery.toUpper(exp);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery toUpper(String field) throws MobileServiceException {
+	public ExecutableJsonQuery toUpper(String field) {
 		this.mQuery.toUpper(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery length(Query exp) throws MobileServiceException {
+	public ExecutableJsonQuery length(Query exp) {
 		this.mQuery.length(exp);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery length(String field) throws MobileServiceException {
+	public ExecutableJsonQuery length(String field) {
 		this.mQuery.length(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery trim(Query exp) throws MobileServiceException {
+	public ExecutableJsonQuery trim(Query exp) {
 		this.mQuery.trim(exp);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery trim(String field) throws MobileServiceException {
+	public ExecutableJsonQuery trim(String field) {
 		this.mQuery.trim(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery startsWith(Query field, Query start) throws MobileServiceException {
+	public ExecutableJsonQuery startsWith(Query field, Query start) {
 		this.mQuery.startsWith(field, start);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery startsWith(String field, String start) throws MobileServiceException {
+	public ExecutableJsonQuery startsWith(String field, String start) {
 		this.mQuery.startsWith(field, start);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery endsWith(Query field, Query end) throws MobileServiceException {
+	public ExecutableJsonQuery endsWith(Query field, Query end) {
 		this.mQuery.endsWith(field, end);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery endsWith(String field, String end) throws MobileServiceException {
+	public ExecutableJsonQuery endsWith(String field, String end) {
 		this.mQuery.endsWith(field, end);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery subStringOf(Query str1, Query str2) throws MobileServiceException {
+	public ExecutableJsonQuery subStringOf(Query str1, Query str2) {
 		this.mQuery.subStringOf(str1, str2);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery subStringOf(String str, String field) throws MobileServiceException {
+	public ExecutableJsonQuery subStringOf(String str, String field) {
 		this.mQuery.subStringOf(str, field);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery concat(Query str1, Query str2) throws MobileServiceException {
+	public ExecutableJsonQuery concat(Query str1, Query str2) {
 		this.mQuery.concat(str1, str2);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery concat(Query str1, String str2) throws MobileServiceException {
+	public ExecutableJsonQuery concat(Query str1, String str2) {
 		this.mQuery.concat(str1, str2);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery indexOf(Query haystack, Query needle) throws MobileServiceException {
+	public ExecutableJsonQuery indexOf(Query haystack, Query needle) {
 		this.mQuery.indexOf(haystack, needle);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery indexOf(String field, String needle) throws MobileServiceException {
+	public ExecutableJsonQuery indexOf(String field, String needle) {
 		this.mQuery.indexOf(field, needle);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery subString(Query str, Query pos) throws MobileServiceException {
+	public ExecutableJsonQuery subString(Query str, Query pos) {
 		this.mQuery.subString(str, pos);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery subString(String field, int pos) throws MobileServiceException {
+	public ExecutableJsonQuery subString(String field, int pos) {
 		this.mQuery.subString(field, pos);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery subString(Query str, Query pos, Query length) throws MobileServiceException {
+	public ExecutableJsonQuery subString(Query str, Query pos, Query length) {
 		this.mQuery.subString(str, pos, length);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery subString(String field, int pos, int length) throws MobileServiceException {
+	public ExecutableJsonQuery subString(String field, int pos, int length) {
 		this.mQuery.subString(field, pos, length);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery replace(Query str, Query find, Query replace) throws MobileServiceException {
+	public ExecutableJsonQuery replace(Query str, Query find, Query replace) {
 		this.mQuery.replace(str, find, replace);
 		return this;
 	}
 
 	@Override
-	public ExecutableJsonQuery replace(String field, String find, String replace) throws MobileServiceException {
+	public ExecutableJsonQuery replace(String field, String find, String replace) {
 		this.mQuery.replace(field, find, replace);
 		return this;
 	}

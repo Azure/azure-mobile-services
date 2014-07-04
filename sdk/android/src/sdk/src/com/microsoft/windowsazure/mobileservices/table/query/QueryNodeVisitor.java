@@ -19,8 +19,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-
 /**
  * Interface of a query node visitor used to extend functionality.
  */
@@ -32,9 +30,8 @@ public interface QueryNodeVisitor<E> {
 	 * @param nodeIn
 	 *            The node to visit
 	 * @return Defined by the implementer.
-	 * @throws MobileServiceException
 	 */
-	public E visit(ConstantNode nodeIn) throws MobileServiceException;
+	public E visit(ConstantNode nodeIn);
 
 	/**
 	 * Visit a field node.
@@ -42,9 +39,8 @@ public interface QueryNodeVisitor<E> {
 	 * @param nodeIn
 	 *            The node to visit
 	 * @return Defined by the implementer.
-	 * @throws MobileServiceException
 	 */
-	public E visit(FieldNode nodeIn) throws MobileServiceException;
+	public E visit(FieldNode nodeIn);
 
 	/**
 	 * Visit a unary operator node.
@@ -52,9 +48,8 @@ public interface QueryNodeVisitor<E> {
 	 * @param nodeIn
 	 *            The node to visit
 	 * @return Defined by the implementer.
-	 * @throws MobileServiceException
 	 */
-	public E visit(UnaryOperatorNode nodeIn) throws MobileServiceException;
+	public E visit(UnaryOperatorNode nodeIn);
 
 	/**
 	 * Visit a binary operator node.
@@ -62,9 +57,8 @@ public interface QueryNodeVisitor<E> {
 	 * @param nodeIn
 	 *            The node to visit
 	 * @return Defined by the implementer.
-	 * @throws MobileServiceException
 	 */
-	public E visit(BinaryOperatorNode nodeIn) throws MobileServiceException;
+	public E visit(BinaryOperatorNode nodeIn);
 
 	/**
 	 * Visit a function call node.
@@ -72,7 +66,6 @@ public interface QueryNodeVisitor<E> {
 	 * @param nodeIn
 	 *            The node to visit
 	 * @return Defined by the implementer.
-	 * @throws MobileServiceException
 	 */
-	public E visit(FunctionCallNode nodeIn) throws MobileServiceException;
+	public E visit(FunctionCallNode nodeIn);
 }

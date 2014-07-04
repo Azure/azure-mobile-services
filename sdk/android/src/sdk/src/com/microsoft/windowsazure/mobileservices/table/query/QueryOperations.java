@@ -21,8 +21,6 @@ package com.microsoft.windowsazure.mobileservices.table.query;
 
 import java.util.Date;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-
 /**
  * Class used to create query operations
  */
@@ -1007,7 +1005,7 @@ public class QueryOperations {
 	public static Query concat(Query str1, String str2) {
 		return function(FunctionCallKind.Concat, str1, val(str2));
 	}
-	
+
 	/**
 	 * Index of the first occurrence of the second parameter value in the first
 	 * parameter value or -1 otherwise.
@@ -1135,9 +1133,8 @@ public class QueryOperations {
 	 *            The destination query to be modified.
 	 * @param rightQuery
 	 *            The source query to be joined with the destination query.
-	 * @throws MobileServiceException
 	 */
-	static void join(Query leftQuery, Query rightQuery) throws MobileServiceException {
+	static void join(Query leftQuery, Query rightQuery) {
 		if (leftQuery == null) {
 			throw new IllegalArgumentException("Left Mobile Service query cannot be null.");
 		}
@@ -1153,7 +1150,7 @@ public class QueryOperations {
 		}
 	}
 
-	private static QueryNode merge(QueryNode leftNode, QueryNode rightNode) throws MobileServiceException {
+	private static QueryNode merge(QueryNode leftNode, QueryNode rightNode) {
 		return leftNode.accept(new QueryNodeMerger(rightNode));
 	}
 

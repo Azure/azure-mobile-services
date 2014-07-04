@@ -19,8 +19,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-
 /**
  * Interface of a query node visitor used to extend functionality.
  */
@@ -33,32 +31,32 @@ public class QueryNodeMerger implements QueryNodeVisitor<QueryNode> {
 	}
 
 	@Override
-	public QueryNode visit(ConstantNode leftNode) throws MobileServiceException {
+	public QueryNode visit(ConstantNode leftNode) {
 		return mRightNode.accept(new ConstantNodeMerger(leftNode));
 	}
 
 	@Override
-	public QueryNode visit(FieldNode leftNode) throws MobileServiceException {
+	public QueryNode visit(FieldNode leftNode) {
 		return mRightNode.accept(new FieldNodeMerger(leftNode));
 	}
 
 	@Override
-	public QueryNode visit(UnaryOperatorNode leftNode) throws MobileServiceException {
+	public QueryNode visit(UnaryOperatorNode leftNode) {
 		return mRightNode.accept(new UnaryOperatorNodeMerger(leftNode));
 
 	}
 
 	@Override
-	public QueryNode visit(BinaryOperatorNode leftNode) throws MobileServiceException {
+	public QueryNode visit(BinaryOperatorNode leftNode) {
 		return mRightNode.accept(new BinaryOperatorNodeMerger(leftNode));
 	}
 
 	@Override
-	public QueryNode visit(FunctionCallNode leftNode) throws MobileServiceException {
+	public QueryNode visit(FunctionCallNode leftNode) {
 		return mRightNode.accept(new FunctionCallNodeMerger(leftNode));
 	}
 
-	static MobileServiceException getInvalidSequenceException() {
-		return new MobileServiceException("Invalid query operations sequence.");
+	static QueryException getInvalidSequenceException() {
+		return new QueryException("Invalid query operations sequence.");
 	}
 }

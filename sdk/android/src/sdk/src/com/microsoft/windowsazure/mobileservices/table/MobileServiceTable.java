@@ -151,9 +151,8 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 	 * 
 	 * @param query
 	 *            The Query instance to execute
-	 * @throws MobileServiceException
 	 */
-	public ListenableFuture<MobileServiceList<E>> execute(Query query) throws MobileServiceException {
+	public ListenableFuture<MobileServiceList<E>> execute(Query query) {
 		// mInternalTable.execute(query, new
 		// ParseResultTableQueryCallback(callback));
 
@@ -198,9 +197,8 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 	 *            The MobileServiceQuery instance to execute
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
-	 * @throws MobileServiceException
 	 */
-	public void execute(Query query, final TableQueryCallback<E> callback) throws MobileServiceException {
+	public void execute(Query query, final TableQueryCallback<E> callback) {
 
 		ListenableFuture<MobileServiceList<E>> executeFuture = execute(query);
 

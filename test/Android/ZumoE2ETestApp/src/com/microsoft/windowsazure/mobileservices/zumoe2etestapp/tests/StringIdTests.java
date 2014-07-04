@@ -30,7 +30,6 @@ import android.util.Pair;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
@@ -55,39 +54,34 @@ public class StringIdTests extends TestGroup {
 	public StringIdTests() {
 		super("String Id tests");
 
-		try {
-			List<StringIdTableItem> allItems = loadInitialItems();
+		List<StringIdTableItem> allItems = loadInitialItems();
 
-			this.addTest(createQueryTest("Data begining with 0-7", allItems, subString("data", 0).ge().val("0").and().subString("data", 0).lt().val("8"),
-					new SimpleFilter<StringIdTableItem>() {
+		this.addTest(createQueryTest("Data begining with 0-7", allItems, subString("data", 0).ge().val("0").and().subString("data", 0).lt().val("8"),
+				new SimpleFilter<StringIdTableItem>() {
 
-						@Override
-						protected boolean criteria(StringIdTableItem element) {
-							return element.data.substring(0, 1).compareToIgnoreCase("0") >= 0 && element.data.substring(0, 1).compareToIgnoreCase("8") < 0;
-						}
-					}));
+					@Override
+					protected boolean criteria(StringIdTableItem element) {
+						return element.data.substring(0, 1).compareToIgnoreCase("0") >= 0 && element.data.substring(0, 1).compareToIgnoreCase("8") < 0;
+					}
+				}));
 
-			this.addTest(createQueryTest("Id begining with 0-7", allItems, subString("id", 0).ge().val("0").and().subString("id", 0).lt().val("8"),
-					new SimpleFilter<StringIdTableItem>() {
+		this.addTest(createQueryTest("Id begining with 0-7", allItems, subString("id", 0).ge().val("0").and().subString("id", 0).lt().val("8"),
+				new SimpleFilter<StringIdTableItem>() {
 
-						@Override
-						protected boolean criteria(StringIdTableItem element) {
-							return element.id.substring(0, 1).compareToIgnoreCase("0") >= 0 && element.id.substring(0, 1).compareToIgnoreCase("8") < 0;
-						}
-					}));
+					@Override
+					protected boolean criteria(StringIdTableItem element) {
+						return element.id.substring(0, 1).compareToIgnoreCase("0") >= 0 && element.id.substring(0, 1).compareToIgnoreCase("8") < 0;
+					}
+				}));
 
-			String jsonItem = "{\"data\": \"" + UUID.randomUUID().toString() + "\"}";
+		String jsonItem = "{\"data\": \"" + UUID.randomUUID().toString() + "\"}";
 
-			this.addTest(createSimpleUntypedRoundTripTestWithException("Round Trip Untyped", jsonItem, null));
+		this.addTest(createSimpleUntypedRoundTripTestWithException("Round Trip Untyped", jsonItem, null));
 
-			StringIdTableItem item = new StringIdTableItem();
-			item.data = UUID.randomUUID().toString();
+		StringIdTableItem item = new StringIdTableItem();
+		item.data = UUID.randomUUID().toString();
 
-			this.addTest(createSimpleTypedRoundTripTestWithException("Round Trip Typed", item, null, false));
-
-		} catch (MobileServiceException e) {
-			e.printStackTrace();
-		}
+		this.addTest(createSimpleTypedRoundTripTestWithException("Round Trip Typed", item, null, false));
 	}
 
 	private List<StringIdTableItem> loadInitialItems() {

@@ -19,8 +19,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-
 /**
  * Class that represents a unary operator query node
  */
@@ -32,7 +30,7 @@ public class UnaryOperatorNode implements QueryNode {
 	public UnaryOperatorNode(UnaryOperatorKind unaryOperatorKind) {
 		this.mUnaryOperatorKind = unaryOperatorKind;
 	}
-	
+
 	@Override
 	public QueryNode deepClone() {
 		UnaryOperatorNode clone = new UnaryOperatorNode(this.mUnaryOperatorKind);
@@ -48,7 +46,7 @@ public class UnaryOperatorNode implements QueryNode {
 	}
 
 	@Override
-	public <T> T accept(QueryNodeVisitor<T> visitor) throws MobileServiceException {
+	public <T> T accept(QueryNodeVisitor<T> visitor) {
 		return visitor.visit(this);
 	}
 

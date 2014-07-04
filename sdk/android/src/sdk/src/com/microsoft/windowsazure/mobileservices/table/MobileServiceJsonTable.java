@@ -97,7 +97,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 *            The query used to retrieve the rows
 	 * @throws MobileServiceException
 	 */
-	public ListenableFuture<JsonElement> execute(final Query query) throws MobileServiceException {
+	public ListenableFuture<JsonElement> execute(final Query query) {
 		final SettableFuture<JsonElement> future = SettableFuture.create();
 
 		String url = null;
@@ -151,9 +151,8 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 *            The query used to retrieve the rows
 	 * @param callback
 	 *            Callback to invoke when the operation is completed
-	 * @throws MobileServiceException
 	 */
-	public void execute(final Query query, final TableJsonQueryCallback callback) throws MobileServiceException {
+	public void execute(final Query query, final TableJsonQueryCallback callback) {
 
 		ListenableFuture<JsonElement> executeFuture = execute(query);
 

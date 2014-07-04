@@ -19,8 +19,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-
 /**
  * Interface of a query node used to represent a row filter expression.
  */
@@ -42,7 +40,6 @@ public interface QueryNode {
 	 *            An implementation of the visitor interface.
 	 * @return An object whose type is determined by the type parameter of the
 	 *         visitor.
-	 * @throws MobileServiceException
 	 */
-	public <T> T accept(QueryNodeVisitor<T> visitor) throws MobileServiceException;
+	public <T> T accept(QueryNodeVisitor<T> visitor);
 }

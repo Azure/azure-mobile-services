@@ -19,8 +19,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-
 /**
  * Interface of a query node visitor used to extend functionality.
  */
@@ -33,22 +31,22 @@ public class BinaryOperatorNodeMerger implements QueryNodeVisitor<QueryNode> {
 	}
 
 	@Override
-	public QueryNode visit(ConstantNode rightNode) throws MobileServiceException {
+	public QueryNode visit(ConstantNode rightNode) {
 		return mergeLeft(rightNode);
 	}
 
 	@Override
-	public QueryNode visit(FieldNode rightNode) throws MobileServiceException {
+	public QueryNode visit(FieldNode rightNode) {
 		return mergeLeft(rightNode);
 	}
 
 	@Override
-	public QueryNode visit(UnaryOperatorNode rightNode) throws MobileServiceException {
+	public QueryNode visit(UnaryOperatorNode rightNode) {
 		return mergeLeft(rightNode);
 	}
 
 	@Override
-	public QueryNode visit(BinaryOperatorNode rightNode) throws MobileServiceException {
+	public QueryNode visit(BinaryOperatorNode rightNode) {
 		if (this.mLeftNode.getRightArgument() != null) {
 			if (rightNode.getLeftArgument() != null) {
 				throw QueryNodeMerger.getInvalidSequenceException();
@@ -65,11 +63,11 @@ public class BinaryOperatorNodeMerger implements QueryNodeVisitor<QueryNode> {
 	}
 
 	@Override
-	public QueryNode visit(FunctionCallNode rightNode) throws MobileServiceException {
+	public QueryNode visit(FunctionCallNode rightNode) {
 		return mergeLeft(rightNode);
 	}
 
-	private QueryNode mergeLeft(QueryNode rightNode) throws MobileServiceException {
+	private QueryNode mergeLeft(QueryNode rightNode) {
 		if (this.mLeftNode.getRightArgument() != null) {
 			throw QueryNodeMerger.getInvalidSequenceException();
 		}

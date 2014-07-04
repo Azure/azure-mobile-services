@@ -17,44 +17,37 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+/**
+ * QueryException.java
+ */
+
 package com.microsoft.windowsazure.mobileservices.table.query;
 
-import java.util.Date;
+public class QueryException extends RuntimeException {
+	/**
+	 * UID used for serialization
+	 */
+	private static final long serialVersionUID = 1663849623026648136L;
 
-/**
- * Class that represents a constant query node
- */
-public class ConstantNode implements QueryNode {
-	private Object mValue;
-
-	@Override
-	public QueryNode deepClone() {
-		ConstantNode clone = new ConstantNode();
-
-		if (this.mValue instanceof Date) {
-			clone.mValue = new Date(((Date) this.mValue).getTime());
-		} else {
-			clone.mValue = this.mValue;
-		}
-
-		return clone;
+	/**
+	 * Creates a new QueryException with a detail message and a cause
+	 * 
+	 * @param detail
+	 *            The detail message
+	 * @param throwable
+	 *            The exception cause
+	 */
+	public QueryException(String detail, Throwable throwable) {
+		super(detail, throwable);
 	}
 
-	@Override
-	public QueryNodeKind getKind() {
-		return QueryNodeKind.Constant;
-	}
-
-	@Override
-	public <T> T accept(QueryNodeVisitor<T> visitor) {
-		return visitor.visit(this);
-	}
-
-	public Object getValue() {
-		return this.mValue;
-	}
-
-	public void setValue(Object value) {
-		this.mValue = value;
+	/**
+	 * Creates a new QueryException with a detail message
+	 * 
+	 * @param detail
+	 *            The detail message
+	 */
+	public QueryException(String detail) {
+		super(detail);
 	}
 }

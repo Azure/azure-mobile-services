@@ -19,8 +19,6 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-
 /**
  * Class that represents a field query node
  */
@@ -42,7 +40,7 @@ public class FieldNode implements QueryNode {
 	}
 
 	@Override
-	public <T> T accept(QueryNodeVisitor<T> visitor) throws MobileServiceException {
+	public <T> T accept(QueryNodeVisitor<T> visitor) {
 		return visitor.visit(this);
 	}
 

@@ -22,7 +22,6 @@ package com.microsoft.windowsazure.mobileservices.table.query;
 import java.util.Date;
 import java.util.Locale;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.table.serialization.DateSerializer;
 
 /**
@@ -64,7 +63,7 @@ public class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
 	}
 
 	@Override
-	public QueryNode visit(UnaryOperatorNode node) throws MobileServiceException {
+	public QueryNode visit(UnaryOperatorNode node) {
 		if (node.getUnaryOperatorKind() == UnaryOperatorKind.Parenthesis) {
 			this.mBuilder.append("(");
 
@@ -86,7 +85,7 @@ public class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
 	}
 
 	@Override
-	public QueryNode visit(BinaryOperatorNode node) throws MobileServiceException {
+	public QueryNode visit(BinaryOperatorNode node) {
 		if (node.getLeftArgument() != null) {
 			node.getLeftArgument().accept(this);
 			this.mBuilder.append(" ");
@@ -103,7 +102,7 @@ public class QueryNodeODataWriter implements QueryNodeVisitor<QueryNode> {
 	}
 
 	@Override
-	public QueryNode visit(FunctionCallNode node) throws MobileServiceException {
+	public QueryNode visit(FunctionCallNode node) {
 		this.mBuilder.append(node.getFunctionCallKind().name().toLowerCase(Locale.getDefault()));
 		this.mBuilder.append("(");
 
