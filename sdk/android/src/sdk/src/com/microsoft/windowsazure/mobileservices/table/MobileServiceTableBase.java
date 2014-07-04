@@ -49,11 +49,8 @@ import com.microsoft.windowsazure.mobileservices.http.RequestAsyncTask;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequestImpl;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
-import com.microsoft.windowsazure.mobileservices.table.query.Query;
-import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 
-public abstract class MobileServiceTableBase<E, F> {
+public abstract class MobileServiceTableBase {
 
 	/**
 	 * Tables URI part
@@ -123,32 +120,6 @@ public abstract class MobileServiceTableBase<E, F> {
 		mTableName = name;
 	}
 
-	public abstract ListenableFuture<E> execute(Query query) throws MobileServiceException;
-
-	public abstract void execute(final Query query, final F callback) throws MobileServiceException;
-
-	/**
-	 * Executes a query to retrieve all the table rows
-	 * 
-	 * @throws MobileServiceException
-	 */
-	public ListenableFuture<E> execute() throws MobileServiceException {
-		return this.where().execute();
-	}
-
-	/**
-	 * Executes the query
-	 * 
-	 * @deprecated use {@link execute()} instead
-	 * 
-	 * @param callback
-	 *            Callback to invoke when the operation is completed
-	 * @throws MobileServiceException
-	 */
-	public void execute(final F callback) throws MobileServiceException {
-		this.where().execute(callback);
-	}
-
 	/**
 	 * Returns the name of the represented table
 	 */
@@ -169,102 +140,6 @@ public abstract class MobileServiceTableBase<E, F> {
 	 */
 	protected MobileServiceClient getClient() {
 		return mClient;
-	}
-
-	/**
-	 * Adds a new user-defined parameter to the query
-	 * 
-	 * @param parameter
-	 *            The parameter name
-	 * @param value
-	 *            The parameter value
-	 * @return ExecutableQuery
-	 */
-	public ExecutableQuery<E, F> parameter(String parameter, String value) {
-		return this.where().parameter(parameter, value);
-	}
-
-	/**
-	 * Creates a query with the specified order
-	 * 
-	 * @param field
-	 *            Field name
-	 * @param order
-	 *            Sorting order
-	 * @return ExecutableQuery
-	 */
-	public ExecutableQuery<E, F> orderBy(String field, QueryOrder order) {
-		return this.where().orderBy(field, order);
-	}
-
-	/**
-	 * Sets the number of records to return
-	 * 
-	 * @param top
-	 *            Number of records to return
-	 * @return ExecutableQuery
-	 */
-	public ExecutableQuery<E, F> top(int top) {
-		return this.where().top(top);
-	}
-
-	/**
-	 * Sets the number of records to skip over a given number of elements in a
-	 * sequence and then return the remainder.
-	 * 
-	 * @param skip
-	 * @return ExecutableQuery
-	 */
-	public ExecutableQuery<E, F> skip(int skip) {
-		return this.where().skip(skip);
-	}
-
-	/**
-	 * Specifies the fields to retrieve
-	 * 
-	 * @param fields
-	 *            Names of the fields to retrieve
-	 * @return ExecutableQuery
-	 */
-	public ExecutableQuery<E, F> select(String... fields) {
-		return this.where().select(fields);
-	}
-
-	/**
-	 * Include a property with the number of records returned.
-	 * 
-	 * @return ExecutableQuery
-	 */
-	public ExecutableQuery<E, F> includeInlineCount() {
-		return this.where().includeInlineCount();
-	}
-
-	/**
-	 * Starts a filter to query the table
-	 * 
-	 * @return The ExecutableQuery<E, F> representing the filter
-	 */
-	public ExecutableQuery<E, F> where() {
-		ExecutableQuery<E, F> query = new ExecutableQuery<E, F>();
-		query.setTable(this);
-		return query;
-	}
-
-	/**
-	 * Starts a filter to query the table with an existing filter
-	 * 
-	 * @param query
-	 *            The existing filter
-	 * @return The ExecutableQuery<E, F> representing the filter
-	 */
-	public ExecutableQuery<E, F> where(Query query) {
-		if (query == null) {
-			throw new IllegalArgumentException("Query must not be null");
-		}
-
-		ExecutableQuery<E, F> baseQuery = new ExecutableQuery<E, F>(query);
-		baseQuery.setTable(this);
-		return baseQuery;
 	}
 
 	/**

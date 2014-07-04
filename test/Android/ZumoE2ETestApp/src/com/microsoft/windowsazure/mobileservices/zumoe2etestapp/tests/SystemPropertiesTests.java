@@ -37,13 +37,11 @@ import android.util.Pair;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.MobileServiceList;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedException;
 import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionBase;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
-import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
@@ -90,7 +88,6 @@ public class SystemPropertiesTests extends TestGroup {
 		public void setItems(List<T> items) {
 			this.mItems = items;
 		}
-
 	}
 
 	protected static final String STRING_ID_TABLE_NAME = "stringIdRoundTripTable";
@@ -677,7 +674,7 @@ public class SystemPropertiesTests extends TestGroup {
 
 	private <T> List<T> read(final MobileServiceTable<T> table, final Query filter, final List<Pair<String, String>> parameters) throws Exception {
 
-		ExecutableQuery<MobileServiceList<T>, TableQueryCallback<T>> query;
+		ExecutableQuery<T> query;
 
 		if (filter != null) {
 			query = table.where(filter);

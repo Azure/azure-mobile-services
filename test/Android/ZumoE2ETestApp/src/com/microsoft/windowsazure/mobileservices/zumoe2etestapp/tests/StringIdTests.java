@@ -31,10 +31,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-import com.microsoft.windowsazure.mobileservices.MobileServiceList;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
-import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
@@ -147,7 +145,7 @@ public class StringIdTests extends TestGroup {
 			@Override
 			protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
 
-				ExecutableQuery<MobileServiceList<StringIdTableItem>, TableQueryCallback<StringIdTableItem>> query;
+				ExecutableQuery<StringIdTableItem> query;
 
 				if (filter != null) {
 					log("add filter");

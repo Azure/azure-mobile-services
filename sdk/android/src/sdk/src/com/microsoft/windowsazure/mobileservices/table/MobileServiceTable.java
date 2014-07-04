@@ -39,13 +39,15 @@ import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.MobileServiceList;
+import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
+import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 import com.microsoft.windowsazure.mobileservices.table.serialization.JsonEntityParser;
 
 /**
  * Represents a Mobile Service Table
  */
-public final class MobileServiceTable<E> extends MobileServiceTableBase<MobileServiceList<E>, TableQueryCallback<E>> {
+public final class MobileServiceTable<E> extends MobileServiceTableBase {
 
 	private MobileServiceJsonTable mInternalTable;
 
@@ -215,6 +217,102 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<MobileSe
 				callback.onCompleted(result, result.size(), null, null);
 			}
 		});
+	}
+
+	/**
+	 * Starts a filter to query the table
+	 * 
+	 * @return The ExecutableQuery<E> representing the filter
+	 */
+	public ExecutableQuery<E> where() {
+		ExecutableQuery<E> query = new ExecutableQuery<E>();
+		query.setTable(this);
+		return query;
+	}
+
+	/**
+	 * Starts a filter to query the table with an existing filter
+	 * 
+	 * @param query
+	 *            The existing filter
+	 * @return The ExecutableQuery<E> representing the filter
+	 */
+	public ExecutableQuery<E> where(Query query) {
+		if (query == null) {
+			throw new IllegalArgumentException("Query must not be null");
+		}
+
+		ExecutableQuery<E> baseQuery = new ExecutableQuery<E>(query);
+		baseQuery.setTable(this);
+		return baseQuery;
+	}
+
+	/**
+	 * Adds a new user-defined parameter to the query
+	 * 
+	 * @param parameter
+	 *            The parameter name
+	 * @param value
+	 *            The parameter value
+	 * @return ExecutableQuery
+	 */
+	public ExecutableQuery<E> parameter(String parameter, String value) {
+		return this.where().parameter(parameter, value);
+	}
+
+	/**
+	 * Creates a query with the specified order
+	 * 
+	 * @param field
+	 *            Field name
+	 * @param order
+	 *            Sorting order
+	 * @return ExecutableQuery
+	 */
+	public ExecutableQuery<E> orderBy(String field, QueryOrder order) {
+		return this.where().orderBy(field, order);
+	}
+
+	/**
+	 * Sets the number of records to return
+	 * 
+	 * @param top
+	 *            Number of records to return
+	 * @return ExecutableQuery
+	 */
+	public ExecutableQuery<E> top(int top) {
+		return this.where().top(top);
+	}
+
+	/**
+	 * Sets the number of records to skip over a given number of elements in a
+	 * sequence and then return the remainder.
+	 * 
+	 * @param skip
+	 * @return ExecutableQuery
+	 */
+	public ExecutableQuery<E> skip(int skip) {
+		return this.where().skip(skip);
+	}
+
+	/**
+	 * Specifies the fields to retrieve
+	 * 
+	 * @param fields
+	 *            Names of the fields to retrieve
+	 * @return ExecutableQuery
+	 */
+	public ExecutableQuery<E> select(String... fields) {
+		return this.where().select(fields);
+	}
+
+	/**
+	 * Include a property with the number of records returned.
+	 * 
+	 * @return ExecutableQuery
+	 */
+	public ExecutableQuery<E> includeInlineCount() {
+		return this.where().includeInlineCount();
 	}
 
 	/**

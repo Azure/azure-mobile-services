@@ -40,12 +40,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.MobileServiceList;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
-import com.microsoft.windowsazure.mobileservices.table.TableJsonQueryCallback;
-import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
+import com.microsoft.windowsazure.mobileservices.table.query.ExecutableJsonQuery;
 import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.ExpectedValueException;
@@ -324,7 +322,7 @@ public class MiscTests extends TestGroup {
 				log("execute query");
 				if (typed) {
 					MobileServiceTable<ParamsTestTableItem> table = client.getTable(PARAM_TEST_TABLE_NAME, ParamsTestTableItem.class);
-					ExecutableQuery<MobileServiceList<ParamsTestTableItem>, TableQueryCallback<ParamsTestTableItem>> query = table.where();
+					ExecutableQuery<ParamsTestTableItem> query = table.where();
 					addParametersToQuery(query, params);
 
 					try {
@@ -356,7 +354,7 @@ public class MiscTests extends TestGroup {
 					}
 				} else {
 					MobileServiceJsonTable table = client.getTable(PARAM_TEST_TABLE_NAME);
-					ExecutableQuery<JsonElement, TableJsonQueryCallback> query = table.where();
+					ExecutableJsonQuery query = table.where();
 					addParametersToQuery(query, params);
 
 					try {

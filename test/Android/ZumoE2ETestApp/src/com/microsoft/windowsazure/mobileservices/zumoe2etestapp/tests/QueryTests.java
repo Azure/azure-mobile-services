@@ -30,7 +30,6 @@ import android.util.Pair;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-import com.microsoft.windowsazure.mobileservices.MobileServiceList;
 import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
@@ -721,7 +720,7 @@ public class QueryTests extends TestGroup {
 			@Override
 			protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
 
-				ExecutableQuery<MobileServiceList<Movie>, TableQueryCallback<Movie>> query;
+				ExecutableQuery<Movie> query;
 
 				if (filter != null) {
 					log("add filter");
@@ -809,7 +808,7 @@ public class QueryTests extends TestGroup {
 			@Override
 			protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
 
-				ExecutableQuery<MobileServiceList<Movie>, TableQueryCallback<Movie>> query;
+				ExecutableQuery<Movie> query;
 
 				if (filter != null) {
 					log("add filter");

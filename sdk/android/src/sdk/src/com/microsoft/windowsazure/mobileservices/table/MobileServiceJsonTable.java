@@ -46,13 +46,15 @@ import com.microsoft.windowsazure.mobileservices.http.RequestAsyncTask;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequestImpl;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.query.ExecutableJsonQuery;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryODataWriter;
+import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 
 /**
  * Represents a Mobile Service Table
  */
-public final class MobileServiceJsonTable extends MobileServiceTableBase<JsonElement, TableJsonQueryCallback> {
+public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
 	/**
 	 * Constructor for MobileServiceJsonTable
@@ -64,6 +66,28 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<JsonEle
 	 */
 	public MobileServiceJsonTable(String name, MobileServiceClient client) {
 		initialize(name, client);
+	}
+
+	/**
+	 * Executes a query to retrieve all the table rows
+	 * 
+	 * @throws MobileServiceException
+	 */
+	public ListenableFuture<JsonElement> execute() throws MobileServiceException {
+		return this.where().execute();
+	}
+
+	/**
+	 * Executes the query
+	 * 
+	 * @deprecated use {@link execute()} instead
+	 * 
+	 * @param callback
+	 *            Callback to invoke when the operation is completed
+	 * @throws MobileServiceException
+	 */
+	public void execute(final TableJsonQueryCallback callback) throws MobileServiceException {
+		this.where().execute(callback);
 	}
 
 	/**
@@ -146,6 +170,102 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<JsonEle
 				callback.onCompleted(result, 1, null, null);
 			}
 		});
+	}
+
+	/**
+	 * Starts a filter to query the table
+	 * 
+	 * @return The ExecutableJsonQuery representing the filter
+	 */
+	public ExecutableJsonQuery where() {
+		ExecutableJsonQuery query = new ExecutableJsonQuery();
+		query.setTable(this);
+		return query;
+	}
+
+	/**
+	 * Starts a filter to query the table with an existing filter
+	 * 
+	 * @param query
+	 *            The existing filter
+	 * @return The ExecutableJsonQuery representing the filter
+	 */
+	public ExecutableJsonQuery where(Query query) {
+		if (query == null) {
+			throw new IllegalArgumentException("Query must not be null");
+		}
+
+		ExecutableJsonQuery baseQuery = new ExecutableJsonQuery(query);
+		baseQuery.setTable(this);
+		return baseQuery;
+	}
+
+	/**
+	 * Adds a new user-defined parameter to the query
+	 * 
+	 * @param parameter
+	 *            The parameter name
+	 * @param value
+	 *            The parameter value
+	 * @return ExecutableJsonQuery
+	 */
+	public ExecutableJsonQuery parameter(String parameter, String value) {
+		return this.where().parameter(parameter, value);
+	}
+
+	/**
+	 * Creates a query with the specified order
+	 * 
+	 * @param field
+	 *            Field name
+	 * @param order
+	 *            Sorting order
+	 * @return ExecutableJsonQuery
+	 */
+	public ExecutableJsonQuery orderBy(String field, QueryOrder order) {
+		return this.where().orderBy(field, order);
+	}
+
+	/**
+	 * Sets the number of records to return
+	 * 
+	 * @param top
+	 *            Number of records to return
+	 * @return ExecutableQuery
+	 */
+	public ExecutableJsonQuery top(int top) {
+		return this.where().top(top);
+	}
+
+	/**
+	 * Sets the number of records to skip over a given number of elements in a
+	 * sequence and then return the remainder.
+	 * 
+	 * @param skip
+	 * @return ExecutableJsonQuery
+	 */
+	public ExecutableJsonQuery skip(int skip) {
+		return this.where().skip(skip);
+	}
+
+	/**
+	 * Specifies the fields to retrieve
+	 * 
+	 * @param fields
+	 *            Names of the fields to retrieve
+	 * @return ExecutableJsonQuery
+	 */
+	public ExecutableJsonQuery select(String... fields) {
+		return this.where().select(fields);
+	}
+
+	/**
+	 * Include a property with the number of records returned.
+	 * 
+	 * @return ExecutableJsonQuery
+	 */
+	public ExecutableJsonQuery includeInlineCount() {
+		return this.where().includeInlineCount();
 	}
 
 	/**

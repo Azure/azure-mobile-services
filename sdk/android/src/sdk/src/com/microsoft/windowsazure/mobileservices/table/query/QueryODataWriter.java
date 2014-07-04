@@ -51,7 +51,7 @@ public class QueryODataWriter {
 	 * 
 	 * @throws UnsupportedEncodingException
 	 */
-	public static String getRowSetModifiers(Query query, MobileServiceTableBase<?, ?> table) throws UnsupportedEncodingException {
+	public static String getRowSetModifiers(Query query, MobileServiceTableBase table) throws UnsupportedEncodingException {
 		StringBuilder sb = new StringBuilder();
 
 		if (query != null) {
