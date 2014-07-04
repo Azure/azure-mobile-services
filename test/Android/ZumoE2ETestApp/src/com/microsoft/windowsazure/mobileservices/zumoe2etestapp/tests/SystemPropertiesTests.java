@@ -43,6 +43,7 @@ import com.microsoft.windowsazure.mobileservices.table.MobileServicePrecondition
 import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionBase;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
+import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOperations;
@@ -676,7 +677,7 @@ public class SystemPropertiesTests extends TestGroup {
 
 	private <T> List<T> read(final MobileServiceTable<T> table, final Query filter, final List<Pair<String, String>> parameters) throws Exception {
 
-		ExecutableQuery<MobileServiceList<T>> query;
+		ExecutableQuery<MobileServiceList<T>, TableQueryCallback<T>> query;
 
 		if (filter != null) {
 			query = table.where(filter);

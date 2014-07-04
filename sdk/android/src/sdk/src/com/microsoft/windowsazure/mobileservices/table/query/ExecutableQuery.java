@@ -25,15 +25,14 @@ import java.util.List;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTableBase;
-import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
 
 import android.util.Pair;
 
 /**
- * Class that represents a query to a table, where E is the callback class to
- * use when executing the query
+ * Class that represents a query to a specific table, where E and F match the
+ * table base parameters
  */
-public final class ExecutableQuery<E> implements Query {
+public final class ExecutableQuery<E, F> implements Query {
 
 	/**
 	 * The Table to query
@@ -43,22 +42,22 @@ public final class ExecutableQuery<E> implements Query {
 	/**
 	 * The Table to query
 	 */
-	private MobileServiceTableBase<E> mTable;
+	private MobileServiceTableBase<E, F> mTable;
 
 	/**
-	 * Returns the MobileServiceTableBase<E> to query
+	 * Returns the MobileServiceTableBase<E,F> to query
 	 */
-	MobileServiceTableBase<E> getTable() {
+	MobileServiceTableBase<E, F> getTable() {
 		return this.mTable;
 	}
 
 	/**
-	 * Sets the MobileServiceTableBase<E> to query
+	 * Sets the MobileServiceTableBase<E,F> to query
 	 * 
 	 * @param table
-	 *            The MobileServiceTableBase<E> to query
+	 *            The MobileServiceTableBase<E,F> to query
 	 */
-	public void setTable(MobileServiceTableBase<E> table) {
+	public void setTable(MobileServiceTableBase<E, F> table) {
 		this.mTable = table;
 	}
 
@@ -101,13 +100,13 @@ public final class ExecutableQuery<E> implements Query {
 	 *            Callback to invoke when the operation is completed
 	 * @throws MobileServiceException
 	 */
-	public void execute(final TableQueryCallback<E> callback) throws MobileServiceException {
+	public void execute(final F callback) throws MobileServiceException {
 		mTable.execute(this, callback);
 	}
 
 	@Override
-	public ExecutableQuery<E> deepClone() {
-		ExecutableQuery<E> clone = new ExecutableQuery<E>();
+	public ExecutableQuery<E, F> deepClone() {
+		ExecutableQuery<E, F> clone = new ExecutableQuery<E, F>();
 
 		if (this.mQuery != null) {
 			clone.mQuery = this.mQuery.deepClone();
@@ -165,7 +164,7 @@ public final class ExecutableQuery<E> implements Query {
 	}
 
 	@Override
-	public ExecutableQuery<E> tableName(String tableName) {
+	public ExecutableQuery<E, F> tableName(String tableName) {
 		this.mQuery.tableName(tableName);
 		return this;
 	}
@@ -173,43 +172,43 @@ public final class ExecutableQuery<E> implements Query {
 	/**** Row Operations ****/
 
 	@Override
-	public ExecutableQuery<E> parameter(String parameter, String value) {
+	public ExecutableQuery<E, F> parameter(String parameter, String value) {
 		this.mQuery.parameter(parameter, value);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> orderBy(String field, QueryOrder order) {
+	public ExecutableQuery<E, F> orderBy(String field, QueryOrder order) {
 		this.mQuery.orderBy(field, order);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> top(int top) {
+	public ExecutableQuery<E, F> top(int top) {
 		this.mQuery.top(top);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> skip(int skip) {
+	public ExecutableQuery<E, F> skip(int skip) {
 		this.mQuery.skip(skip);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> includeInlineCount() {
+	public ExecutableQuery<E, F> includeInlineCount() {
 		this.mQuery.includeInlineCount();
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> removeInlineCount() {
+	public ExecutableQuery<E, F> removeInlineCount() {
 		this.mQuery.removeInlineCount();
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> select(String... fields) {
+	public ExecutableQuery<E, F> select(String... fields) {
 		this.mQuery.select(fields);
 		return this;
 	}
@@ -217,31 +216,31 @@ public final class ExecutableQuery<E> implements Query {
 	/**** Query Operations ****/
 
 	@Override
-	public ExecutableQuery<E> field(String fieldName) throws MobileServiceException {
+	public ExecutableQuery<E, F> field(String fieldName) throws MobileServiceException {
 		this.mQuery.field(fieldName);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> val(Number number) throws MobileServiceException {
+	public ExecutableQuery<E, F> val(Number number) throws MobileServiceException {
 		this.mQuery.val(number);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> val(boolean val) throws MobileServiceException {
+	public ExecutableQuery<E, F> val(boolean val) throws MobileServiceException {
 		this.mQuery.val(val);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> val(String s) throws MobileServiceException {
+	public ExecutableQuery<E, F> val(String s) throws MobileServiceException {
 		this.mQuery.val(s);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> val(Date date) throws MobileServiceException {
+	public ExecutableQuery<E, F> val(Date date) throws MobileServiceException {
 		this.mQuery.val(date);
 		return this;
 	}
@@ -249,43 +248,43 @@ public final class ExecutableQuery<E> implements Query {
 	/****** Logical Operators ******/
 
 	@Override
-	public ExecutableQuery<E> and() throws MobileServiceException {
+	public ExecutableQuery<E, F> and() throws MobileServiceException {
 		this.mQuery.and();
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> and(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> and(Query otherQuery) throws MobileServiceException {
 		this.mQuery.and(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> or() throws MobileServiceException {
+	public ExecutableQuery<E, F> or() throws MobileServiceException {
 		this.mQuery.or();
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> or(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> or(Query otherQuery) throws MobileServiceException {
 		this.mQuery.or(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> not() throws MobileServiceException {
+	public ExecutableQuery<E, F> not() throws MobileServiceException {
 		this.mQuery.not();
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> not(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> not(Query otherQuery) throws MobileServiceException {
 		this.mQuery.not(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> not(boolean booleanValue) throws MobileServiceException {
+	public ExecutableQuery<E, F> not(boolean booleanValue) throws MobileServiceException {
 		this.mQuery.not(booleanValue);
 		return this;
 	}
@@ -293,169 +292,169 @@ public final class ExecutableQuery<E> implements Query {
 	/****** Comparison Operators ******/
 
 	@Override
-	public ExecutableQuery<E> ge() throws MobileServiceException {
+	public ExecutableQuery<E, F> ge() throws MobileServiceException {
 		this.mQuery.ge();
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> ge(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> ge(Query otherQuery) throws MobileServiceException {
 		this.mQuery.ge(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> ge(Number numberValue) throws MobileServiceException {
+	public ExecutableQuery<E, F> ge(Number numberValue) throws MobileServiceException {
 		this.mQuery.ge(numberValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> ge(Date dateValue) throws MobileServiceException {
+	public ExecutableQuery<E, F> ge(Date dateValue) throws MobileServiceException {
 		this.mQuery.ge(dateValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> le() throws MobileServiceException {
+	public ExecutableQuery<E, F> le() throws MobileServiceException {
 		this.mQuery.le();
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> le(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> le(Query otherQuery) throws MobileServiceException {
 		this.mQuery.le(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> le(Number numberValue) throws MobileServiceException {
+	public ExecutableQuery<E, F> le(Number numberValue) throws MobileServiceException {
 		this.mQuery.le(numberValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> le(Date dateValue) throws MobileServiceException {
+	public ExecutableQuery<E, F> le(Date dateValue) throws MobileServiceException {
 		this.mQuery.le(dateValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> gt() throws MobileServiceException {
+	public ExecutableQuery<E, F> gt() throws MobileServiceException {
 		this.mQuery.gt();
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> gt(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> gt(Query otherQuery) throws MobileServiceException {
 		this.mQuery.gt(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> gt(Number numberValue) throws MobileServiceException {
+	public ExecutableQuery<E, F> gt(Number numberValue) throws MobileServiceException {
 		this.mQuery.gt(numberValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> gt(Date dateValue) throws MobileServiceException {
+	public ExecutableQuery<E, F> gt(Date dateValue) throws MobileServiceException {
 		this.mQuery.gt(dateValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> lt() throws MobileServiceException {
+	public ExecutableQuery<E, F> lt() throws MobileServiceException {
 		this.mQuery.lt();
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> lt(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> lt(Query otherQuery) throws MobileServiceException {
 		this.mQuery.lt(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> lt(Number numberValue) throws MobileServiceException {
+	public ExecutableQuery<E, F> lt(Number numberValue) throws MobileServiceException {
 		this.mQuery.lt(numberValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> lt(Date dateValue) throws MobileServiceException {
+	public ExecutableQuery<E, F> lt(Date dateValue) throws MobileServiceException {
 		this.mQuery.lt(dateValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> eq() throws MobileServiceException {
+	public ExecutableQuery<E, F> eq() throws MobileServiceException {
 		this.mQuery.eq();
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> eq(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> eq(Query otherQuery) throws MobileServiceException {
 		this.mQuery.eq(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> eq(Number numberValue) throws MobileServiceException {
+	public ExecutableQuery<E, F> eq(Number numberValue) throws MobileServiceException {
 		this.mQuery.eq(numberValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> eq(boolean booleanValue) throws MobileServiceException {
+	public ExecutableQuery<E, F> eq(boolean booleanValue) throws MobileServiceException {
 		this.mQuery.eq(booleanValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> eq(String stringValue) throws MobileServiceException {
+	public ExecutableQuery<E, F> eq(String stringValue) throws MobileServiceException {
 		this.mQuery.eq(stringValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> eq(Date dateValue) throws MobileServiceException {
+	public ExecutableQuery<E, F> eq(Date dateValue) throws MobileServiceException {
 		this.mQuery.eq(dateValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> ne() throws MobileServiceException {
+	public ExecutableQuery<E, F> ne() throws MobileServiceException {
 		this.mQuery.ne();
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> ne(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> ne(Query otherQuery) throws MobileServiceException {
 		this.mQuery.ne(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> ne(Number numberValue) throws MobileServiceException {
+	public ExecutableQuery<E, F> ne(Number numberValue) throws MobileServiceException {
 		this.mQuery.ne(numberValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> ne(boolean booleanValue) throws MobileServiceException {
+	public ExecutableQuery<E, F> ne(boolean booleanValue) throws MobileServiceException {
 		this.mQuery.ne(booleanValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> ne(String stringValue) throws MobileServiceException {
+	public ExecutableQuery<E, F> ne(String stringValue) throws MobileServiceException {
 		this.mQuery.ne(stringValue);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> ne(Date dateValue) throws MobileServiceException {
+	public ExecutableQuery<E, F> ne(Date dateValue) throws MobileServiceException {
 		this.mQuery.ne(dateValue);
 		return this;
 	}
@@ -463,91 +462,91 @@ public final class ExecutableQuery<E> implements Query {
 	/****** Arithmetic Operators ******/
 
 	@Override
-	public ExecutableQuery<E> add() throws MobileServiceException {
+	public ExecutableQuery<E, F> add() throws MobileServiceException {
 		this.mQuery.add();
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> add(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> add(Query otherQuery) throws MobileServiceException {
 		this.mQuery.add(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> add(Number val) throws MobileServiceException {
+	public ExecutableQuery<E, F> add(Number val) throws MobileServiceException {
 		this.mQuery.add(val);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> sub() throws MobileServiceException {
+	public ExecutableQuery<E, F> sub() throws MobileServiceException {
 		this.mQuery.sub();
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> sub(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> sub(Query otherQuery) throws MobileServiceException {
 		this.mQuery.sub(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> sub(Number val) throws MobileServiceException {
+	public ExecutableQuery<E, F> sub(Number val) throws MobileServiceException {
 		this.mQuery.sub(val);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> mul() throws MobileServiceException {
+	public ExecutableQuery<E, F> mul() throws MobileServiceException {
 		this.mQuery.mul();
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> mul(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> mul(Query otherQuery) throws MobileServiceException {
 		this.mQuery.mul(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> mul(Number val) throws MobileServiceException {
+	public ExecutableQuery<E, F> mul(Number val) throws MobileServiceException {
 		this.mQuery.mul(val);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> div() throws MobileServiceException {
+	public ExecutableQuery<E, F> div() throws MobileServiceException {
 		this.mQuery.div();
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> div(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> div(Query otherQuery) throws MobileServiceException {
 		this.mQuery.div(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> div(Number val) throws MobileServiceException {
+	public ExecutableQuery<E, F> div(Number val) throws MobileServiceException {
 		this.mQuery.div(val);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> mod() throws MobileServiceException {
+	public ExecutableQuery<E, F> mod() throws MobileServiceException {
 		this.mQuery.mod();
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> mod(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> mod(Query otherQuery) throws MobileServiceException {
 		this.mQuery.mod(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> mod(Number val) throws MobileServiceException {
+	public ExecutableQuery<E, F> mod(Number val) throws MobileServiceException {
 		this.mQuery.mod(val);
 		return this;
 	}
@@ -555,73 +554,73 @@ public final class ExecutableQuery<E> implements Query {
 	/****** Date Operators ******/
 
 	@Override
-	public ExecutableQuery<E> year(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> year(Query otherQuery) throws MobileServiceException {
 		this.mQuery.year(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> year(String field) throws MobileServiceException {
+	public ExecutableQuery<E, F> year(String field) throws MobileServiceException {
 		this.mQuery.year(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> month(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> month(Query otherQuery) throws MobileServiceException {
 		this.mQuery.month(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> month(String field) throws MobileServiceException {
+	public ExecutableQuery<E, F> month(String field) throws MobileServiceException {
 		this.mQuery.month(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> day(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> day(Query otherQuery) throws MobileServiceException {
 		this.mQuery.day(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> day(String field) throws MobileServiceException {
+	public ExecutableQuery<E, F> day(String field) throws MobileServiceException {
 		this.mQuery.day(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> hour(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> hour(Query otherQuery) throws MobileServiceException {
 		this.mQuery.hour(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> hour(String field) throws MobileServiceException {
+	public ExecutableQuery<E, F> hour(String field) throws MobileServiceException {
 		this.mQuery.hour(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> minute(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> minute(Query otherQuery) throws MobileServiceException {
 		this.mQuery.minute(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> minute(String field) throws MobileServiceException {
+	public ExecutableQuery<E, F> minute(String field) throws MobileServiceException {
 		this.mQuery.minute(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> second(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> second(Query otherQuery) throws MobileServiceException {
 		this.mQuery.second(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> second(String field) throws MobileServiceException {
+	public ExecutableQuery<E, F> second(String field) throws MobileServiceException {
 		this.mQuery.second(field);
 		return this;
 	}
@@ -629,19 +628,19 @@ public final class ExecutableQuery<E> implements Query {
 	/****** Math Functions ******/
 
 	@Override
-	public ExecutableQuery<E> floor(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> floor(Query otherQuery) throws MobileServiceException {
 		this.mQuery.floor(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> ceiling(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> ceiling(Query otherQuery) throws MobileServiceException {
 		this.mQuery.ceiling(otherQuery);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> round(Query otherQuery) throws MobileServiceException {
+	public ExecutableQuery<E, F> round(Query otherQuery) throws MobileServiceException {
 		this.mQuery.round(otherQuery);
 		return this;
 	}
@@ -649,145 +648,145 @@ public final class ExecutableQuery<E> implements Query {
 	/****** String Operators ******/
 
 	@Override
-	public ExecutableQuery<E> toLower(Query exp) throws MobileServiceException {
+	public ExecutableQuery<E, F> toLower(Query exp) throws MobileServiceException {
 		this.mQuery.toLower(exp);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> toLower(String field) throws MobileServiceException {
+	public ExecutableQuery<E, F> toLower(String field) throws MobileServiceException {
 		this.mQuery.toLower(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> toUpper(Query exp) throws MobileServiceException {
+	public ExecutableQuery<E, F> toUpper(Query exp) throws MobileServiceException {
 		this.mQuery.toUpper(exp);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> toUpper(String field) throws MobileServiceException {
+	public ExecutableQuery<E, F> toUpper(String field) throws MobileServiceException {
 		this.mQuery.toUpper(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> length(Query exp) throws MobileServiceException {
+	public ExecutableQuery<E, F> length(Query exp) throws MobileServiceException {
 		this.mQuery.length(exp);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> length(String field) throws MobileServiceException {
+	public ExecutableQuery<E, F> length(String field) throws MobileServiceException {
 		this.mQuery.length(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> trim(Query exp) throws MobileServiceException {
+	public ExecutableQuery<E, F> trim(Query exp) throws MobileServiceException {
 		this.mQuery.trim(exp);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> trim(String field) throws MobileServiceException {
+	public ExecutableQuery<E, F> trim(String field) throws MobileServiceException {
 		this.mQuery.trim(field);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> startsWith(Query field, Query start) throws MobileServiceException {
+	public ExecutableQuery<E, F> startsWith(Query field, Query start) throws MobileServiceException {
 		this.mQuery.startsWith(field, start);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> startsWith(String field, String start) throws MobileServiceException {
+	public ExecutableQuery<E, F> startsWith(String field, String start) throws MobileServiceException {
 		this.mQuery.startsWith(field, start);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> endsWith(Query field, Query end) throws MobileServiceException {
+	public ExecutableQuery<E, F> endsWith(Query field, Query end) throws MobileServiceException {
 		this.mQuery.endsWith(field, end);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> endsWith(String field, String end) throws MobileServiceException {
+	public ExecutableQuery<E, F> endsWith(String field, String end) throws MobileServiceException {
 		this.mQuery.endsWith(field, end);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> subStringOf(Query str1, Query str2) throws MobileServiceException {
+	public ExecutableQuery<E, F> subStringOf(Query str1, Query str2) throws MobileServiceException {
 		this.mQuery.subStringOf(str1, str2);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> subStringOf(String str, String field) throws MobileServiceException {
+	public ExecutableQuery<E, F> subStringOf(String str, String field) throws MobileServiceException {
 		this.mQuery.subStringOf(str, field);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> concat(Query str1, Query str2) throws MobileServiceException {
+	public ExecutableQuery<E, F> concat(Query str1, Query str2) throws MobileServiceException {
 		this.mQuery.concat(str1, str2);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> concat(Query str1, String str2) throws MobileServiceException {
+	public ExecutableQuery<E, F> concat(Query str1, String str2) throws MobileServiceException {
 		this.mQuery.concat(str1, str2);
 		return this;
 	}
-	
+
 	@Override
-	public ExecutableQuery<E> indexOf(Query haystack, Query needle) throws MobileServiceException {
+	public ExecutableQuery<E, F> indexOf(Query haystack, Query needle) throws MobileServiceException {
 		this.mQuery.indexOf(haystack, needle);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> indexOf(String field, String needle) throws MobileServiceException {
+	public ExecutableQuery<E, F> indexOf(String field, String needle) throws MobileServiceException {
 		this.mQuery.indexOf(field, needle);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> subString(Query str, Query pos) throws MobileServiceException {
+	public ExecutableQuery<E, F> subString(Query str, Query pos) throws MobileServiceException {
 		this.mQuery.subString(str, pos);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> subString(String field, int pos) throws MobileServiceException {
+	public ExecutableQuery<E, F> subString(String field, int pos) throws MobileServiceException {
 		this.mQuery.subString(field, pos);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> subString(Query str, Query pos, Query length) throws MobileServiceException {
+	public ExecutableQuery<E, F> subString(Query str, Query pos, Query length) throws MobileServiceException {
 		this.mQuery.subString(str, pos, length);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> subString(String field, int pos, int length) throws MobileServiceException {
+	public ExecutableQuery<E, F> subString(String field, int pos, int length) throws MobileServiceException {
 		this.mQuery.subString(field, pos, length);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> replace(Query str, Query find, Query replace) throws MobileServiceException {
+	public ExecutableQuery<E, F> replace(Query str, Query find, Query replace) throws MobileServiceException {
 		this.mQuery.replace(str, find, replace);
 		return this;
 	}
 
 	@Override
-	public ExecutableQuery<E> replace(String field, String find, String replace) throws MobileServiceException {
+	public ExecutableQuery<E, F> replace(String field, String find, String replace) throws MobileServiceException {
 		this.mQuery.replace(field, find, replace);
 		return this;
 	}

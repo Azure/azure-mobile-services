@@ -53,7 +53,7 @@ import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 
-public abstract class MobileServiceTableBase<E> {
+public abstract class MobileServiceTableBase<E, F> {
 
 	/**
 	 * Tables URI part
@@ -125,7 +125,7 @@ public abstract class MobileServiceTableBase<E> {
 
 	public abstract ListenableFuture<E> execute(Query query) throws MobileServiceException;
 
-	public abstract void execute(final Query query, final TableQueryCallback<E> callback) throws MobileServiceException;
+	public abstract void execute(final Query query, final F callback) throws MobileServiceException;
 
 	/**
 	 * Executes a query to retrieve all the table rows
@@ -145,7 +145,7 @@ public abstract class MobileServiceTableBase<E> {
 	 *            Callback to invoke when the operation is completed
 	 * @throws MobileServiceException
 	 */
-	public void execute(final TableQueryCallback<E> callback) throws MobileServiceException {
+	public void execute(final F callback) throws MobileServiceException {
 		this.where().execute(callback);
 	}
 
@@ -180,7 +180,7 @@ public abstract class MobileServiceTableBase<E> {
 	 *            The parameter value
 	 * @return ExecutableQuery
 	 */
-	public ExecutableQuery<E> parameter(String parameter, String value) {
+	public ExecutableQuery<E, F> parameter(String parameter, String value) {
 		return this.where().parameter(parameter, value);
 	}
 
@@ -193,7 +193,7 @@ public abstract class MobileServiceTableBase<E> {
 	 *            Sorting order
 	 * @return ExecutableQuery
 	 */
-	public ExecutableQuery<E> orderBy(String field, QueryOrder order) {
+	public ExecutableQuery<E, F> orderBy(String field, QueryOrder order) {
 		return this.where().orderBy(field, order);
 	}
 
@@ -204,7 +204,7 @@ public abstract class MobileServiceTableBase<E> {
 	 *            Number of records to return
 	 * @return ExecutableQuery
 	 */
-	public ExecutableQuery<E> top(int top) {
+	public ExecutableQuery<E, F> top(int top) {
 		return this.where().top(top);
 	}
 
@@ -215,7 +215,7 @@ public abstract class MobileServiceTableBase<E> {
 	 * @param skip
 	 * @return ExecutableQuery
 	 */
-	public ExecutableQuery<E> skip(int skip) {
+	public ExecutableQuery<E, F> skip(int skip) {
 		return this.where().skip(skip);
 	}
 
@@ -226,7 +226,7 @@ public abstract class MobileServiceTableBase<E> {
 	 *            Names of the fields to retrieve
 	 * @return ExecutableQuery
 	 */
-	public ExecutableQuery<E> select(String... fields) {
+	public ExecutableQuery<E, F> select(String... fields) {
 		return this.where().select(fields);
 	}
 
@@ -235,17 +235,17 @@ public abstract class MobileServiceTableBase<E> {
 	 * 
 	 * @return ExecutableQuery
 	 */
-	public ExecutableQuery<E> includeInlineCount() {
+	public ExecutableQuery<E, F> includeInlineCount() {
 		return this.where().includeInlineCount();
 	}
 
 	/**
 	 * Starts a filter to query the table
 	 * 
-	 * @return The ExecutableQuery<E> representing the filter
+	 * @return The ExecutableQuery<E, F> representing the filter
 	 */
-	public ExecutableQuery<E> where() {
-		ExecutableQuery<E> query = new ExecutableQuery<E>();
+	public ExecutableQuery<E, F> where() {
+		ExecutableQuery<E, F> query = new ExecutableQuery<E, F>();
 		query.setTable(this);
 		return query;
 	}
@@ -255,14 +255,14 @@ public abstract class MobileServiceTableBase<E> {
 	 * 
 	 * @param query
 	 *            The existing filter
-	 * @return The ExecutableQuery<E> representing the filter
+	 * @return The ExecutableQuery<E, F> representing the filter
 	 */
-	public ExecutableQuery<E> where(Query query) {
+	public ExecutableQuery<E, F> where(Query query) {
 		if (query == null) {
 			throw new IllegalArgumentException("Query must not be null");
 		}
 
-		ExecutableQuery<E> baseQuery = new ExecutableQuery<E>(query);
+		ExecutableQuery<E, F> baseQuery = new ExecutableQuery<E, F>(query);
 		baseQuery.setTable(this);
 		return baseQuery;
 	}

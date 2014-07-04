@@ -721,7 +721,7 @@ public class QueryTests extends TestGroup {
 			@Override
 			protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
 
-				ExecutableQuery<MobileServiceList<Movie>> query;
+				ExecutableQuery<MobileServiceList<Movie>, TableQueryCallback<Movie>> query;
 
 				if (filter != null) {
 					log("add filter");
@@ -809,7 +809,7 @@ public class QueryTests extends TestGroup {
 			@Override
 			protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
 
-				ExecutableQuery<MobileServiceList<Movie>> query;
+				ExecutableQuery<MobileServiceList<Movie>, TableQueryCallback<Movie>> query;
 
 				if (filter != null) {
 					log("add filter");
@@ -852,10 +852,10 @@ public class QueryTests extends TestGroup {
 				result.setTestCase(testCase);
 
 				try {
-					query.execute(new TableQueryCallback<MobileServiceList<Movie>>() {
+					query.execute(new TableQueryCallback<Movie>() {
 
 						@Override
-						public void onCompleted(MobileServiceList<Movie> movies, int count, Exception exception, ServiceFilterResponse response) {
+						public void onCompleted(List<Movie> movies, int count, Exception exception, ServiceFilterResponse response) {
 
 							if (exception == null) {
 								FilterResult<Movie> expectedData = expectedResultFilter.filter(QueryTestData.getAllMovies());

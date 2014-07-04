@@ -45,7 +45,7 @@ import com.microsoft.windowsazure.mobileservices.table.serialization.JsonEntityP
 /**
  * Represents a Mobile Service Table
  */
-public final class MobileServiceTable<E> extends MobileServiceTableBase<MobileServiceList<E>> {
+public final class MobileServiceTable<E> extends MobileServiceTableBase<MobileServiceList<E>, TableQueryCallback<E>> {
 
 	private MobileServiceJsonTable mInternalTable;
 
@@ -125,7 +125,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<MobileSe
 	 *            Callback to invoke when the operation is completed
 	 * @throws MobileServiceException
 	 */
-	public void execute(final TableQueryCallback<MobileServiceList<E>> callback) throws MobileServiceException {
+	public void execute(final TableQueryCallback<E> callback) throws MobileServiceException {
 
 		ListenableFuture<MobileServiceList<E>> executeFuture = execute();
 
@@ -198,7 +198,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase<MobileSe
 	 *            Callback to invoke when the operation is completed
 	 * @throws MobileServiceException
 	 */
-	public void execute(Query query, final TableQueryCallback<MobileServiceList<E>> callback) throws MobileServiceException {
+	public void execute(Query query, final TableQueryCallback<E> callback) throws MobileServiceException {
 
 		ListenableFuture<MobileServiceList<E>> executeFuture = execute(query);
 

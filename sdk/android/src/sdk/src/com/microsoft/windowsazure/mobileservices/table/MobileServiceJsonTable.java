@@ -52,7 +52,7 @@ import com.microsoft.windowsazure.mobileservices.table.query.QueryODataWriter;
 /**
  * Represents a Mobile Service Table
  */
-public final class MobileServiceJsonTable extends MobileServiceTableBase<JsonElement> {
+public final class MobileServiceJsonTable extends MobileServiceTableBase<JsonElement, TableJsonQueryCallback> {
 
 	/**
 	 * Constructor for MobileServiceJsonTable
@@ -129,7 +129,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<JsonEle
 	 *            Callback to invoke when the operation is completed
 	 * @throws MobileServiceException
 	 */
-	public void execute(final Query query, final TableQueryCallback<JsonElement> callback) throws MobileServiceException {
+	public void execute(final Query query, final TableJsonQueryCallback callback) throws MobileServiceException {
 
 		ListenableFuture<JsonElement> executeFuture = execute(query);
 
@@ -229,7 +229,8 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<JsonEle
 					updateVersionFromETag(results.second, patchedJson);
 
 					future.set(patchedJson);
-					// callback.onCompleted(patchedJson, exception, response);
+					// callback.onCompleted(patchedJson, exception,
+					// response);
 				}
 			}
 		});
@@ -364,7 +365,8 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<JsonEle
 				updateVersionFromETag(result.second, patchedJson);
 
 				future.set(patchedJson);
-				// callback.onCompleted(patchedJson, exception, response);
+				// callback.onCompleted(patchedJson, exception,
+				// response);
 			}
 		});
 
@@ -526,7 +528,8 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase<JsonEle
 				updateVersionFromETag(result.second, patchedJson);
 
 				future.set(patchedJson);
-				// callback.onCompleted(patchedJson, exception, response);
+				// callback.onCompleted(patchedJson, exception,
+				// response);
 			}
 		});
 

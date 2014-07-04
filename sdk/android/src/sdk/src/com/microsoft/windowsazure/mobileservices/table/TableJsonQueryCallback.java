@@ -24,11 +24,25 @@ See the Apache Version 2.0 License for specific language governing permissions a
 package com.microsoft.windowsazure.mobileservices.table;
 
 import com.google.gson.JsonElement;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 /**
  * Callback used after a query is executed using JSON
  * 
  */
-public interface TableJsonQueryCallback extends TableQueryCallback<JsonElement>{
+public interface TableJsonQueryCallback {
+	/**
+	 * Method to call if the operation finishes successfully
+	 * 
+	 * @param result
+	 *            JSON result
+	 * @param count
+	 *            Number of results
+	 * @param exception
+	 *            An exception representing the error, in case there was one
+	 * @param response
+	 *            Response object
+	 */
+	public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response);
 
 }
