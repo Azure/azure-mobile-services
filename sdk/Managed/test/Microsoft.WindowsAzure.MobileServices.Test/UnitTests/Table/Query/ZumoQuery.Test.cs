@@ -313,6 +313,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             AssertFilter(query.Filter, "(Created eq datetime'1994-10-14T00:00:00.000Z')");
         }
 
+        [Tag("notXamarin_iOS")] // LambdaExpression.Compile() is not supported on Xamarin.iOS
         [TestMethod]
         public void CombinedQuery()
         {

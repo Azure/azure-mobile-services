@@ -196,7 +196,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             string[] selection = null;
             QueryNode filter = null;
             IList<OrderByNode> orderings = null;
-            bool includeDeleted = false;
 
             char[] separator = new[] { '=' };
             var parameters = query.Split('&').Select(part => part.Split(separator, 2));
