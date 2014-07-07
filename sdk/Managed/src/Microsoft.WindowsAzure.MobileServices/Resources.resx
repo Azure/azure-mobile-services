@@ -390,4 +390,10 @@
   <data name="MobileServiceTableOperation_ResultNotJObject" xml:space="preserve">
     <value>Mobile Service table operation returned an unexpected response.</value>
   </data>
+  <data name="SyncStore_NotInitialized" xml:space="preserve">
+    <value>The store must be initialized before it can be used.</value>
+  </data>
+  <data name="SyncStore_AlreadyInitialized" xml:space="preserve">
+    <value>The store is already initialized.</value>
+  </data>
 </root>

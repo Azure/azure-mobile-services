@@ -106,23 +106,41 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// </summary>
         public abstract void Collapse(MobileServiceTableOperation newOperation);
 
-        public JObject Serialize()
+        /// <summary>
+        /// Defines the the table for storing operations
+        /// </summary>
+        /// <param name="store">An instance of <see cref="IMobileServiceLocalStore"/></param>
+        internal static void DefineTable(MobileServiceLocalStore store)
+        {
+            store.DefineTable(MobileServiceLocalSystemTables.OperationQueue, new JObject()
+            {
+                { MobileServiceSystemColumns.Id, String.Empty },
+                { "kind", 0 },
+                { "tableName", String.Empty },
+                { "itemId", String.Empty },
+                { "item", String.Empty },
+                { MobileServiceSystemColumns.CreatedAt, DateTime.Now },
+                { "sequence", 0 }
+            });
+        }
+
+        internal JObject Serialize()
         {
             var obj = new JObject()
             {
-                { "id", this.Id },
+                { MobileServiceSystemColumns.Id, this.Id },
                 { "kind", (int)this.Kind },
                 { "tableName", this.TableName },
                 { "itemId", this.ItemId },
                 { "item", this.Item != null && this.SerializeItemToQueue ? this.Item.ToString(Formatting.None) : null },
-                { "__createdAt", this.CreatedAt },
+                { MobileServiceSystemColumns.CreatedAt, this.CreatedAt },
                 { "sequence", this.Sequence }
             };
 
             return obj;
         }
 
-        public static MobileServiceTableOperation Deserialize(JObject obj)
+        internal static MobileServiceTableOperation Deserialize(JObject obj)
         {
             if (obj == null)
             {
@@ -130,12 +148,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
 
             var kind = (MobileServiceTableOperationKind)obj.Value<int>("kind");
-            string id = obj.Value<string>("id");
+            string id = obj.Value<string>(MobileServiceSystemColumns.Id);
             string tableName = obj.Value<string>("tableName");
             string itemId = obj.Value<string>("itemId");
             string itemJson = obj.Value<string>("item");
             JObject item = !String.IsNullOrEmpty(itemJson) ? JObject.Parse(itemJson) : null;
-            DateTime createdAt = obj.Value<DateTime>("__createdAt");
+            DateTime createdAt = obj.Value<DateTime>(MobileServiceSystemColumns.CreatedAt);
             long sequence = obj.Value<long>("sequence");
 
             MobileServiceTableOperation operation = null;

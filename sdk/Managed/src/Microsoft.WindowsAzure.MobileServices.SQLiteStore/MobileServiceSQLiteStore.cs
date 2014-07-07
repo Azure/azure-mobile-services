@@ -17,10 +17,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
     /// <summary>
     /// SQLite based implementation of <see cref="IMobileServiceLocalStore"/>
     /// </summary>
-    public class MobileServiceSQLiteStore: IMobileServiceLocalStore
+    public class MobileServiceSQLiteStore: MobileServiceLocalStore
     {
         private Dictionary<string, TableDefinition> tables = new Dictionary<string, TableDefinition>(StringComparer.OrdinalIgnoreCase);
-        private bool initialized;
         private SQLiteConnection connection;
 
         protected MobileServiceSQLiteStore() { }
@@ -36,33 +35,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 throw new ArgumentNullException("fileName");
             }
 
-            this.connection = new SQLiteConnection(fileName);
-
-            this.DefineTable(MobileServiceLocalSystemTables.OperationQueue, new JObject()
-            {
-                { MobileServiceSystemColumns.Id, String.Empty },
-                { "kind", 0 },
-                { "tableName", String.Empty },
-                { "item", String.Empty },
-                { "itemId", String.Empty },
-                { "__createdAt", DateTime.Now },
-                { "sequence", 0 }
-            });
-            this.DefineTable(MobileServiceLocalSystemTables.SyncErrors, new JObject()
-            {
-                { MobileServiceSystemColumns.Id, String.Empty },
-                { "httpStatus", 0 },
-                { "operationId", String.Empty },
-                { "operationKind", 0 },
-                { "tableName", String.Empty },
-                { "item", String.Empty },
-                { "rawResult", String.Empty }
-            });
-            this.DefineTable(MobileServiceLocalSystemTables.Config, new JObject()
-            {
-                { MobileServiceSystemColumns.Id, String.Empty },
-                { "value", String.Empty },
-            });
+            this.connection = new SQLiteConnection(fileName);            
         }
 
         /// <summary>
@@ -70,7 +43,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         /// </summary>
         /// <param name="tableName">Name of the local table.</param>
         /// <param name="item">An object that represents the structure of the table.</param>
-        public void DefineTable(string tableName, JObject item)
+        public override void DefineTable(string tableName, JObject item)
         {
             if (tableName == null)
             {
@@ -81,7 +54,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 throw new ArgumentNullException("item");
             }
 
-            if (this.initialized)
+            if (this.Initialized)
             {
                 throw new InvalidOperationException(Properties.Resources.SQLiteStore_DefineAfterInitialize);
             }
@@ -116,17 +89,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             this.tables.Add(tableName, new TableDefinition(tableDefinition, sysProperties));
         }
 
-        /// <summary>
-        /// Initializes the local store and creates all the defined tables.
-        /// </summary>
-        /// <returns>Task that completes when initialization is complete.</returns>
-        public async Task InitializeAsync()
+        protected override async Task OnInitialize()
         {
-            if (initialized)
-            {
-                throw new InvalidOperationException(Properties.Resources.SQLiteStore_StoreAlreadyInitialized);
-            }
-
             foreach (KeyValuePair<string, TableDefinition> table in this.tables)
             {
                 this.CreateTableFromObject(table.Key, table.Value.Values);
@@ -139,8 +103,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                     await this.SaveSetting(name, value);
                 }
             }
-
-            this.initialized = true;
         }
 
         /// <summary>
@@ -148,7 +110,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         /// </summary>
         /// <param name="query">The query to execute on local store.</param>
         /// <returns>A task that will return with results when the query finishes.</returns>
-        public Task<JToken> ReadAsync(MobileServiceTableQueryDescription query)
+        public override Task<JToken> ReadAsync(MobileServiceTableQueryDescription query)
         {
             if (query == null)
             {
@@ -185,7 +147,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         /// <param name="items">A list of items to be inserted.</param>
         /// <param name="fromServer"><code>true</code> if the call is made based on data coming from the server e.g. in a pull operation; <code>false</code> if the call is made by the client, such as insert or update calls on an <see cref="IMobileServiceSyncTable"/>.</param>
         /// <returns>A task that completes when item has been upserted in local table.</returns>
-        public Task UpsertAsync(string tableName, IEnumerable<JObject> items, bool fromServer)
+        public override Task UpsertAsync(string tableName, IEnumerable<JObject> items, bool fromServer)
         {
             if (tableName == null)
             {
@@ -250,7 +212,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         /// </summary>
         /// <param name="query">A query to find records to delete.</param>
         /// <returns>A task that completes when delete query has executed.</returns>
-        public Task DeleteAsync(MobileServiceTableQueryDescription query)
+        public override Task DeleteAsync(MobileServiceTableQueryDescription query)
         {
             if (query == null)
             {
@@ -273,7 +235,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         /// <param name="tableName">Name of the local table.</param>
         /// <param name="ids">A list of ids of the items to be deleted</param>
         /// <returns>A task that completes when delete query has executed.</returns>
-        public Task DeleteAsync(string tableName, IEnumerable<string> ids)
+        public override Task DeleteAsync(string tableName, IEnumerable<string> ids)
         {
             if (tableName == null)
             {
@@ -311,7 +273,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         /// <param name="tableName">Name of the local table.</param>
         /// <param name="id">The id of the item to lookup.</param>
         /// <returns>A task that will return with a result when the lookup finishes.</returns>
-        public Task<JObject> LookupAsync(string tableName, string id)
+        public override Task<JObject> LookupAsync(string tableName, string id)
         {
             if (tableName == null)
             {
@@ -507,26 +469,12 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             return row;
         }
 
-        private void EnsureInitialized()
-        {
-            if (!this.initialized)
-            {
-                throw new InvalidOperationException(Properties.Resources.SQLiteStore_StoreNotInitialized);
-            }
-        }
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
                 this.connection.Dispose();
             }
-        }        
+        }
     }
 }

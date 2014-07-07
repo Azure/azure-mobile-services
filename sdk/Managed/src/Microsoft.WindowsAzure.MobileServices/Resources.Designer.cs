@@ -827,6 +827,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The store is already initialized..
+        /// </summary>
+        internal static string SyncStore_AlreadyInitialized {
+            get {
+                return ResourceManager.GetString("SyncStore_AlreadyInitialized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to delete error from the sync store..
         /// </summary>
         internal static string SyncStore_FailedToDeleteError {
@@ -868,6 +877,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         internal static string SyncStore_FailedToUpsertItem {
             get {
                 return ResourceManager.GetString("SyncStore_FailedToUpsertItem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The store must be initialized before it can be used..
+        /// </summary>
+        internal static string SyncStore_NotInitialized {
+            get {
+                return ResourceManager.GetString("SyncStore_NotInitialized", resourceCulture);
             }
         }
         

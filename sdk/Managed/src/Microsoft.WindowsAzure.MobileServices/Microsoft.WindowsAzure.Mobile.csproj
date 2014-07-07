@@ -115,6 +115,7 @@
     <Compile Include="Table\Query\QueryResult.cs" />
     <Compile Include="Table\Serialization\DeletedAttribute.cs" />
     <Compile Include="Table\Sync\IMobileServiceLocalStore.cs" />
+    <Compile Include="Table\Sync\MobileServiceLocalStore.cs" />
     <Compile Include="Table\Sync\MobileServicePushStatus.cs" />
     <Compile Include="Table\Sync\MobileServiceSyncHandler.cs" />
     <Compile Include="Table\Sync\IMobileServiceSyncContext.cs" />

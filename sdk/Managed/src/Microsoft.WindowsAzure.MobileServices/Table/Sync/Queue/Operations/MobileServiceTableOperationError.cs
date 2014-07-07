@@ -119,11 +119,29 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.Handled = true;
         }
 
+        /// <summary>
+        /// Defines the the table for storing errors
+        /// </summary>
+        /// <param name="store">An instance of <see cref="IMobileServiceLocalStore"/></param>
+        internal static void DefineTable(MobileServiceLocalStore store)
+        {
+            store.DefineTable(MobileServiceLocalSystemTables.SyncErrors, new JObject()
+            {
+                { MobileServiceSystemColumns.Id, String.Empty },
+                { "httpStatus", 0 },
+                { "operationId", String.Empty },
+                { "operationKind", 0 },
+                { "tableName", String.Empty },
+                { "item", String.Empty },
+                { "rawResult", String.Empty }
+            });
+        }
+
         internal JObject Serialize()
         {
             return new JObject()
             {
-                { "id", this.Id },
+                { MobileServiceSystemColumns.Id, this.Id },
                 { "httpStatus", this.Status.HasValue ? (int?)this.Status.Value: null },
                 { "operationId", this.OperationId },
                 { "operationKind", (int)this.OperationKind },
@@ -131,7 +149,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 { "item", this.Item.ToString(Formatting.None) },
                 { "rawResult", this.RawResult }
             };
-        }
+        }        
 
         internal static MobileServiceTableOperationError Deserialize(JObject obj, MobileServiceJsonSerializerSettings settings)
         {
@@ -140,21 +158,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 status = (HttpStatusCode?)obj.Value<int?>("httpStatus");
             }
-            MobileServiceTableOperationKind operation = (MobileServiceTableOperationKind)obj.Value<int>("operationKind");
+            string id = obj.Value<string>(MobileServiceSystemColumns.Id);
+            string operationId = obj.Value<string>("operationId");
+            MobileServiceTableOperationKind operationKind = (MobileServiceTableOperationKind)obj.Value<int>("operationKind");
             var tableName = obj.Value<string>("tableName");
             string itemStr = obj.Value<string>("item");
             JObject item = itemStr == null ? null : JObject.Parse(itemStr);
             string rawResult = obj.Value<string>("rawResult");
             var result = rawResult.ParseToJToken(settings) as JObject;
-            string id = obj.Value<string>("id");
-            string operationId = obj.Value<string>("operationId");
+
             return new MobileServiceTableOperationError(status, 
                                                         operationId,
-                                                        operation, 
+                                                        operationKind, 
                                                         tableName, 
                                                         item, 
                                                         rawResult, 
-                                                        result) 
+                                                        result)
             { 
                 Id = id 
             };

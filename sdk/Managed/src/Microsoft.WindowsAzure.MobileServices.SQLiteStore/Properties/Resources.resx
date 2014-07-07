@@ -138,12 +138,6 @@
   <data name="SQLiteStore_QueryExecutionFailed" xml:space="preserve">
     <value>Query execution failed with result: '{0}'.</value>
   </data>
-  <data name="SQLiteStore_StoreAlreadyInitialized" xml:space="preserve">
-    <value>The store is already initialized.</value>
-  </data>
-  <data name="SQLiteStore_StoreNotInitialized" xml:space="preserve">
-    <value>The store must be initialized before it can be used.</value>
-  </data>
   <data name="SQLiteStore_TableNotDefined" xml:space="preserve">
     <value>Table with name '{0}' is not defined.</value>
   </data>

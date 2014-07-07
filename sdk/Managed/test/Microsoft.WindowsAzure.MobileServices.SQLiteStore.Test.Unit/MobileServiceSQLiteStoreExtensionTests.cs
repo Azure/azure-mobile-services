@@ -76,7 +76,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
         {
             bool defined = false;
 
-            var storeMock = new Mock<MobileServiceSQLiteStore>(MockBehavior.Strict) { CallBase = true };
+            var storeMock = new Mock<MobileServiceSQLiteStore>() { CallBase = true };
 
             storeMock.Setup(store => store.CreateTableFromObject(It.IsAny<string>(), It.IsAny<IEnumerable<ColumnDefinition>>()))
                      .Callback<string, IEnumerable<ColumnDefinition>>((tableName, properties) =>

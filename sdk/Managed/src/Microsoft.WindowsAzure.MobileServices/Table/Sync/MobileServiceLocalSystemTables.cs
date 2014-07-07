@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
@@ -31,6 +32,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public static readonly string Config = "__config";
 
         public static IEnumerable<string> All { get; private set; }
+
+        /// <summary>
+        ///  Defines all the system tables on the store
+        /// </summary>
+        /// <param name="store">An instance of <see cref="IMobileServiceLocalStore"/></param>
+        public static void DefineAll(MobileServiceLocalStore store)
+        {
+            MobileServiceTableOperation.DefineTable(store);
+            MobileServiceTableOperationError.DefineTable(store);
+
+            store.DefineTable(MobileServiceLocalSystemTables.Config, new JObject()
+            {
+                { MobileServiceSystemColumns.Id, String.Empty },
+                { "value", String.Empty },
+            });
+        }
 
         static MobileServiceLocalSystemTables()
         {

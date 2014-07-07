@@ -208,7 +208,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             await this.EnsureInitializedAsync();
 
             var table = this.client.GetTable(tableName) as MobileServiceTable;
-            JObject value = await this.Store.LookupAsync(MobileServiceLocalSystemTables.Config, tableName + "_systemProperties");
+            JObject value = await this.Store.LookupAsync(MobileServiceLocalSystemTables.Config, GetSystemPropertiesKey(tableName));
             if (value == null)
             {
                 table.SystemProperties = MobileServiceSystemProperties.Version;
@@ -252,6 +252,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 Task discard = this.syncQueue.Post(action.ExecuteAsync, action.CancellationToken);
             }
+        }
+
+        private static string GetSystemPropertiesKey(string tableName)
+        {
+            return tableName + "_systemProperties";
         }
 
         private async Task EnsureInitializedAsync()
