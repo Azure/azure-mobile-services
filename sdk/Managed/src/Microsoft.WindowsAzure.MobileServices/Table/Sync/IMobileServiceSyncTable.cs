@@ -88,12 +88,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// An OData query that determines which items to 
         /// pull from the remote table.
         /// </param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.
+        /// </param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
         /// </param>
         /// <returns>
         /// A task that completes when pull operation has finished.
         /// </returns>
-        Task PullAsync(string query, CancellationToken cancellationToken);
+        Task PullAsync(string query, IDictionary<string, string> parameters, CancellationToken cancellationToken);
 
         /// <summary>
         /// Deletes all the items in local table that match the query.

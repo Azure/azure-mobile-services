@@ -42,7 +42,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         public async Task DoesNotUpsertAnObject_IfItDoesNotHaveAnId()
         {
             var query = new MobileServiceTableQueryDescription("test");
-            var action = new PullAction(this.table.Object, this.context.Object, query, this.opQueue.Object, this.store.Object, CancellationToken.None);
+            var action = new PullAction(this.table.Object, this.context.Object, query, null, this.opQueue.Object, this.store.Object, CancellationToken.None);
 
             var itemWithId = new JObject(){{"id", "abc"}, {"text", "has id"}};
             var itemWithoutId = new JObject() { { "text", "no id" } };
@@ -68,6 +68,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             table.VerifyAll();
 
             store.Verify(s => s.DeleteAsync("test", It.IsAny<IEnumerable<string>>()), Times.Never(), "There shouldn't be any call to delete");
-        }
+        }        
     }
 }

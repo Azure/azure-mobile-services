@@ -51,7 +51,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
             string queryString = this.queryProvider.ToQueryString(query);
 
-            return this.PullAsync(queryString, cancellationToken);
+            return this.PullAsync(queryString, query.Parameters, cancellationToken);
         }
 
         public Task PurgeAsync<U>(IMobileServiceTableQuery<U> query, CancellationToken cancellationToken)

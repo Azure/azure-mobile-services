@@ -15,19 +15,23 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
     internal class PullAction: TableAction
     {
+        private IDictionary<string, string> parameters;
+
         public PullAction(MobileServiceTable table, 
                           MobileServiceSyncContext context,
                           MobileServiceTableQueryDescription query,
+                          IDictionary<string, string> parameters, 
                           OperationQueue operationQueue, 
                           IMobileServiceLocalStore store,
                           CancellationToken cancellationToken)
             : base(table, query, context, operationQueue, store, cancellationToken)
         {
+            this.parameters = parameters;
         }
 
         protected async override Task ProcessTableAsync()
         {
-            JToken remoteResults = await this.Table.ReadAsync(this.Query.ToQueryString(), MobileServiceTable.IncludeDeleted(null));
+            JToken remoteResults = await this.Table.ReadAsync(this.Query.ToQueryString(), MobileServiceTable.IncludeDeleted(parameters));
             var result = QueryResult.Parse(remoteResults);
 
             this.CancellationToken.ThrowIfCancellationRequested();

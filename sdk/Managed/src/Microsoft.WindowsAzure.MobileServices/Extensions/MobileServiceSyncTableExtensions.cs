@@ -36,7 +36,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </param>
         public static Task PullAsync(this IMobileServiceSyncTable table, string query)
         {
-            return table.PullAsync(query, cancellationToken: CancellationToken.None);
+            return table.PullAsync(query, null, cancellationToken: CancellationToken.None);
         }
 
         /// <summary>

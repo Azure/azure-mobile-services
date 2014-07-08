@@ -3,6 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -155,7 +156,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return await this.Store.LookupAsync(tableName, id);
         }
 
-        public async Task PullAsync(string tableName, string query, CancellationToken cancellationToken)
+        public async Task PullAsync(string tableName, string query, IDictionary<string, string> parameters, CancellationToken cancellationToken)
         {
             await this.EnsureInitializedAsync();
 
@@ -169,7 +170,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             // let us not burden the server to calculate the count when we don't need it for pull
             queryDescription.IncludeTotalCount = false;
 
-            var pull = new PullAction(table, this, queryDescription, this.opQueue, this.Store, cancellationToken);
+            var pull = new PullAction(table, this, queryDescription, parameters, this.opQueue, this.Store, cancellationToken);
             Task discard = this.syncQueue.Post(pull.ExecuteAsync, cancellationToken);
 
             await pull.CompletionTask;

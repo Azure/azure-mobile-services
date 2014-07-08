@@ -37,9 +37,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return this.syncContext.ReadAsync(this.TableName, query);
         }
 
-        public Task PullAsync(string query, CancellationToken cancellationToken)
+        public Task PullAsync(string query, IDictionary<string, string> parameters, CancellationToken cancellationToken)
         {
-            return this.syncContext.PullAsync(this.TableName, query, cancellationToken);
+            return this.syncContext.PullAsync(this.TableName, query, parameters, cancellationToken);
         }
 
         public Task PurgeAsync(string query, CancellationToken cancellationToken)
