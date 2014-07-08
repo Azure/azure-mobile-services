@@ -31,6 +31,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// </summary>
         public static readonly string Config = "__config";
 
+        /// <summary>
+        /// Returns the names of all system tables
+        /// </summary>
         public static IEnumerable<string> All { get; private set; }
 
         /// <summary>
@@ -41,12 +44,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             MobileServiceTableOperation.DefineTable(store);
             MobileServiceTableOperationError.DefineTable(store);
-
-            store.DefineTable(MobileServiceLocalSystemTables.Config, new JObject()
-            {
-                { MobileServiceSystemColumns.Id, String.Empty },
-                { "value", String.Empty },
-            });
+            MobileServiceSyncSettingsManager.DefineTable(store);            
         }
 
         static MobileServiceLocalSystemTables()

@@ -141,6 +141,7 @@
     <Compile Include="Table\Serialization\MobileServiceJsonSerializerSettings.cs" />
     <Compile Include="Table\Serialization\MobileServicePrecisionCheckConverter.cs" />
     <Compile Include="Table\Serialization\MobileServiceIsoDateTimeConverter.cs" />
+    <Compile Include="Table\Sync\MobileServiceSyncSettingsManager.cs" />
     <Compile Include="Table\Sync\Queue\Actions\SyncAction.cs" />
     <Compile Include="Table\Sync\Queue\Actions\PurgeAction.cs" />
     <Compile Include="Table\Sync\Queue\Actions\PullAction.cs" />

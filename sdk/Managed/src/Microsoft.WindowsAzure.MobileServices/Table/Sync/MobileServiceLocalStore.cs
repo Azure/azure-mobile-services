@@ -17,6 +17,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// </summary>
     public abstract class MobileServiceLocalStore: IMobileServiceLocalStore
     {
+        /// <summary>
+        /// Indicates whether store has been initialized or not.
+        /// </summary>
         protected bool Initialized { get; private set; }
 
         /// <summary>
@@ -37,6 +40,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.Initialized = true;
         }
 
+        /// <summary>
+        /// Executed when Initilize is called on the store instance.
+        /// </summary>
+        /// <returns></returns>
         protected virtual Task OnInitialize()
         {
             return Task.FromResult(0);
@@ -90,6 +97,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <returns>A task that returns the item read from local table.</returns>
         public abstract Task<JObject> LookupAsync(string tableName, string id);
 
+        /// <summary>
+        /// Throws an exception if store is not initialized.
+        /// </summary>
         protected void EnsureInitialized()
         {
             if (!this.Initialized)
@@ -98,12 +108,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
         }
 
+        /// <summary>
+        /// Dispose the instance
+        /// </summary>
         public void Dispose()
         {
             this.Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Executed to clean up resources
+        /// </summary>
+        /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
         }

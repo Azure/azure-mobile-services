@@ -36,7 +36,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </param>
         public static Task PullAsync(this IMobileServiceSyncTable table, string query)
         {
-            return table.PullAsync(query, null, cancellationToken: CancellationToken.None);
+            return table.PullAsync(null, query, null, cancellationToken: CancellationToken.None);
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public static Task PullAsync<T, U>(this IMobileServiceSyncTable<T> table, IMobileServiceTableQuery<U> query)
         {
-            return table.PullAsync(query, cancellationToken: CancellationToken.None);
+            return table.PullAsync(null, query, cancellationToken: CancellationToken.None);
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>A task that completes when purge operation has finished.</returns>
         public static Task PurgeAsync(this IMobileServiceSyncTable table, string query)
         {
-            return table.PurgeAsync(query, CancellationToken.None);
+            return table.PurgeAsync(null, query, CancellationToken.None);
         }
 
 
@@ -86,7 +86,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>A task that completes when purge operation has finished.</returns>
         public static Task PurgeAsync<T, U>(this IMobileServiceSyncTable<T> table, IMobileServiceTableQuery<U> query)
         {
-            return table.PurgeAsync(query, CancellationToken.None);
+            return table.PurgeAsync(null, query, CancellationToken.None);
         }
     }
 }

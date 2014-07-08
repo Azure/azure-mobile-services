@@ -183,12 +183,12 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             IMobileServiceClient service = await CreateClient(hijack, store);
             IMobileServiceSyncTable<ToDoWithSystemPropertiesType> table = service.GetSyncTable<ToDoWithSystemPropertiesType>();            
 
-            hijack.OnSendingRequest = async req =>
+            hijack.OnSendingRequest = req =>
             {
                 // we request all the system properties present on DefineTable<> object
                 Assert.AreEqual(req.RequestUri.Query, "?__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt%2C__version");
 
-                return req;
+                return Task.FromResult(req);
             };
             string pullResult = "[{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\",\"__createdAt\":\"2014-01-29T23:01:33.444Z\", \"__updatedAt\":\"2014-01-30T23:01:33.444Z\"}]";
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(pullResult) }); // pull

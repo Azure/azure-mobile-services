@@ -325,7 +325,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                  select new { p.Name, p.Price })
                 .Skip(20)
                 .Take(10));
-            Assert.AreEqual("$filter=((Price le 10M) and (Weight gt 10f)) and not(InStock)&$orderby=Price desc,Name&$skip=20&$top=10&$select=Name,Price,Weight,WeightInKG", query.ToQueryString());
+            Assert.AreEqual("$filter=(((Price le 10M) and (Weight gt 10f)) and not(InStock))&$orderby=Price desc,Name&$skip=20&$top=10&$select=Name,Price,Weight,WeightInKG", query.ToQueryString());
         }
 
         [TestMethod]

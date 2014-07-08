@@ -15,18 +15,24 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     internal class PurgeAction: TableAction
     {
         public PurgeAction(MobileServiceTable table,
+                           string queryKey,
                            MobileServiceTableQueryDescription query,
                            MobileServiceSyncContext context, 
                            OperationQueue operationQueue, 
+                           MobileServiceSyncSettingsManager settings,
                            IMobileServiceLocalStore store,
                            CancellationToken cancellationToken)
-            : base(table, query, context, operationQueue, store, cancellationToken)
+            : base(table, queryKey, query, context, operationQueue, settings, store, cancellationToken)
         {
         }
 
-        protected override Task ProcessTableAsync()
+        protected override async Task ProcessTableAsync()
         {
-            return this.Store.DeleteAsync(this.Query);
+            if (!String.IsNullOrEmpty(this.QueryKey))
+            {
+                await this.Settings.ResetDeltaToken(this.Table.TableName, this.QueryKey);
+            }
+            await this.Store.DeleteAsync(this.Query);
         }
     }
 }

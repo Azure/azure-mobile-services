@@ -15,28 +15,48 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
     internal class PullAction: TableAction
     {
+        private static readonly QueryNode updatedAtNode = new MemberAccessNode(null, MobileServiceSystemColumns.UpdatedAt);
+        private static readonly OrderByNode orderByUpdatedAtNode = new OrderByNode(updatedAtNode, OrderByDirection.Ascending);
         private IDictionary<string, string> parameters;
+        private DateTime maxUpdatedAt = DateTime.MinValue;
 
         public PullAction(MobileServiceTable table, 
                           MobileServiceSyncContext context,
+                          string queryKey,
                           MobileServiceTableQueryDescription query,
                           IDictionary<string, string> parameters, 
-                          OperationQueue operationQueue, 
+                          OperationQueue operationQueue,
+                          MobileServiceSyncSettingsManager settings,
                           IMobileServiceLocalStore store,
                           CancellationToken cancellationToken)
-            : base(table, query, context, operationQueue, store, cancellationToken)
+            : base(table, queryKey, query, context, operationQueue, settings, store, cancellationToken)
         {
             this.parameters = parameters;
         }
 
         protected async override Task ProcessTableAsync()
         {
+            bool incrementalSync = this.IsIncrementalSync();
+            DateTime deltaToken = this.maxUpdatedAt;
+
+            if (incrementalSync)
+            {
+                this.Table.SystemProperties = this.Table.SystemProperties | MobileServiceSystemProperties.UpdatedAt;
+                deltaToken = await this.Settings.GetDeltaToken(this.Query.TableName, this.QueryKey);
+                ApplyDeltaToken(this.Query, deltaToken);
+            }
+
             JToken remoteResults = await this.Table.ReadAsync(this.Query.ToQueryString(), MobileServiceTable.IncludeDeleted(parameters));
             var result = QueryResult.Parse(remoteResults);
 
             this.CancellationToken.ThrowIfCancellationRequested();
 
             await this.ProcessAll(result.Values);
+
+            if (incrementalSync && this.maxUpdatedAt > deltaToken)
+            {
+                await this.Settings.SetDeltaToken(this.Query.TableName, this.QueryKey, this.maxUpdatedAt);
+            }
         }
 
         private async Task ProcessAll(JArray items)
@@ -52,7 +72,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     continue;
                 }
 
-                if (item[MobileServiceSystemColumns.Deleted] != null && item.Value<bool>(MobileServiceSystemColumns.Deleted))
+                DateTime updatedAt = GetUpdatedAt(item);
+                if (updatedAt > this.maxUpdatedAt)
+                {
+                    this.maxUpdatedAt = updatedAt;
+                }
+
+                if (IsDeleted(item))
                 {
                     deletedIds.Add(id);
                 }
@@ -72,5 +98,35 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 await this.Store.DeleteAsync(this.Table.TableName, deletedIds);
             }
         }
+
+        private bool IsIncrementalSync()
+        {
+            return !String.IsNullOrEmpty(this.QueryKey);
+        }
+
+        private void ApplyDeltaToken(MobileServiceTableQueryDescription query, DateTime deltaToken)
+        {
+            query.Ordering.Insert(0, orderByUpdatedAtNode);
+            QueryNode updatedAtGreaterThanOrEqualNode = new BinaryOperatorNode(BinaryOperatorKind.GreaterThanOrEqual, updatedAtNode, new ConstantNode(deltaToken));
+            query.Filter = query.Filter == null ? updatedAtGreaterThanOrEqualNode : new BinaryOperatorNode(BinaryOperatorKind.And, query.Filter, updatedAtGreaterThanOrEqualNode);
+        }
+
+        private static bool IsDeleted(JObject item)
+        {
+            JToken deletedToken = item[MobileServiceSystemColumns.Deleted];
+            bool isDeleted = deletedToken != null && deletedToken.Value<bool>();
+            return isDeleted;
+        }
+
+        private static DateTime GetUpdatedAt(JObject item)
+        {
+            DateTime updatedAt = DateTime.MinValue;
+            JToken updatedAtToken = item[MobileServiceSystemColumns.UpdatedAt];
+            if (updatedAtToken != null)
+            {
+                updatedAt = updatedAtToken.Value<DateTime>();
+            }
+            return updatedAt;
+        }        
     }
 }

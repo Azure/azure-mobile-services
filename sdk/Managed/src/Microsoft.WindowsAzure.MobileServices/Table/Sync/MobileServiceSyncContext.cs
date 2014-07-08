@@ -15,6 +15,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
     internal class MobileServiceSyncContext: IMobileServiceSyncContext, IDisposable  
     {
+        private MobileServiceSyncSettingsManager settings;
         private TaskCompletionSource<object> initializeTask;
         private MobileServiceClient client;
 
@@ -101,8 +102,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
                 this.syncQueue = new ActionBlock();
                 await this.Store.InitializeAsync();
-                this.opQueue = await OperationQueue.LoadAsync(this.Store);
-
+                this.opQueue = await OperationQueue.LoadAsync(store);
+                this.settings = new MobileServiceSyncSettingsManager(store);
                 this.initializeTask.SetResult(null);
             }
         }
@@ -156,7 +157,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return await this.Store.LookupAsync(tableName, id);
         }
 
-        public async Task PullAsync(string tableName, string query, IDictionary<string, string> parameters, CancellationToken cancellationToken)
+        public async Task PullAsync(string tableName, string queryKey, string query, IDictionary<string, string> parameters, CancellationToken cancellationToken)
         {
             await this.EnsureInitializedAsync();
 
@@ -167,22 +168,26 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 throw new ArgumentException(Resources.MobileServiceSyncTable_PullWithSelectNotSupported, "query");
             }
+            if (queryDescription.Ordering.Count > 0 && !String.IsNullOrEmpty(queryKey))
+            {
+                throw new ArgumentException(Resources.MobileServiceSyncTable_IncrementalPullWithOrderNotAllowed, "query");
+            }
             // let us not burden the server to calculate the count when we don't need it for pull
             queryDescription.IncludeTotalCount = false;
 
-            var pull = new PullAction(table, this, queryDescription, parameters, this.opQueue, this.Store, cancellationToken);
+            var pull = new PullAction(table, this, queryKey, queryDescription, parameters, this.opQueue, this.settings, this.Store, cancellationToken);
             Task discard = this.syncQueue.Post(pull.ExecuteAsync, cancellationToken);
 
             await pull.CompletionTask;
         }
 
-        public async Task PurgeAsync(string tableName, string query, CancellationToken cancellationToken)
+        public async Task PurgeAsync(string tableName, string queryKey, string query, CancellationToken cancellationToken)
         {
             await this.EnsureInitializedAsync();
 
             var table = await this.GetTable(tableName);
             var queryDescription = MobileServiceTableQueryDescription.Parse(tableName, query);
-            var purge = new PurgeAction(table, queryDescription, this, this.opQueue, this.Store, cancellationToken);
+            var purge = new PurgeAction(table, queryKey, queryDescription, this, this.opQueue, this.settings, this.Store, cancellationToken);
             Task discard = this.syncQueue.Post(purge.ExecuteAsync, cancellationToken);
 
             await purge.CompletionTask;
@@ -209,15 +214,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             await this.EnsureInitializedAsync();
 
             var table = this.client.GetTable(tableName) as MobileServiceTable;
-            JObject value = await this.Store.LookupAsync(MobileServiceLocalSystemTables.Config, GetSystemPropertiesKey(tableName));
-            if (value == null)
-            {
-                table.SystemProperties = MobileServiceSystemProperties.Version;
-            }
-            else
-            {
-                table.SystemProperties = (MobileServiceSystemProperties)value.Value<int>("value");
-            }
+            table.SystemProperties = await settings.GetSystemProperties(tableName);
             table.AddRequestHeader(MobileServiceHttpClient.ZumoFeaturesHeader, MobileServiceFeatures.Offline);
 
             return table;
@@ -253,11 +250,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 Task discard = this.syncQueue.Post(action.ExecuteAsync, action.CancellationToken);
             }
-        }
-
-        private static string GetSystemPropertiesKey(string tableName)
-        {
-            return tableName + "_systemProperties";
         }
 
         private async Task EnsureInitializedAsync()
@@ -332,6 +324,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             if (disposing && this._store != null)
             {
+                this.settings.Dispose();
                 this._store.Dispose();
             }
         }

@@ -395,6 +395,24 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Incremental pull query must not have orderby clause..
+        /// </summary>
+        internal static string MobileServiceSyncTable_IncrementalPullWithOrderNotAllowed {
+            get {
+                return ResourceManager.GetString("MobileServiceSyncTable_IncrementalPullWithOrderNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The query key must start with a letter and can contain only letters and digits..
+        /// </summary>
+        internal static string MobileServiceSyncTable_InvalidQueryKey {
+            get {
+                return ResourceManager.GetString("MobileServiceSyncTable_InvalidQueryKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Pull query with select clause is not supported..
         /// </summary>
         internal static string MobileServiceSyncTable_PullWithSelectNotSupported {

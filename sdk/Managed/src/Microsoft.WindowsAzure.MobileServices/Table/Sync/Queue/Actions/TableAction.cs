@@ -19,20 +19,26 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     internal abstract class TableAction: SyncAction
     {
         private Task pendingPush;
-
-        protected MobileServiceTableQueryDescription Query { get; private set; }
         private MobileServiceSyncContext context;
+
+        protected string QueryKey { get; private set; }
+        protected MobileServiceTableQueryDescription Query { get; private set; }
         protected MobileServiceTable Table { get; private set; }
+        protected MobileServiceSyncSettingsManager Settings { get; private set; }
 
         public TableAction(MobileServiceTable table,
+                           string queryKey,
                            MobileServiceTableQueryDescription query,
                            MobileServiceSyncContext context, 
-                           OperationQueue operationQueue, 
+                           OperationQueue operationQueue,
+                           MobileServiceSyncSettingsManager settings,
                            IMobileServiceLocalStore store,
                            CancellationToken cancellationToken): base(operationQueue, store, cancellationToken)
         {
             this.Table = table;
+            this.QueryKey = queryKey;
             this.Query = query;
+            this.Settings = settings;
             this.context = context;
         }
 

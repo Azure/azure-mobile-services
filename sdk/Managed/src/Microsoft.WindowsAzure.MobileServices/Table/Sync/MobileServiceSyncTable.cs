@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -16,6 +17,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
     internal class MobileServiceSyncTable: IMobileServiceSyncTable
     {
+        private static readonly Regex queryKeyRegex = new Regex("^[a-zA-Z][a-zA-Z0-9]{0,24}$");
         private MobileServiceSyncContext syncContext;
 
         public MobileServiceClient MobileServiceClient { get; private set; }
@@ -37,14 +39,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return this.syncContext.ReadAsync(this.TableName, query);
         }
 
-        public Task PullAsync(string query, IDictionary<string, string> parameters, CancellationToken cancellationToken)
+        public Task PullAsync(string queryKey, string query, IDictionary<string, string> parameters, CancellationToken cancellationToken)
         {
-            return this.syncContext.PullAsync(this.TableName, query, parameters, cancellationToken);
+            ValidateQueryKey(queryKey);
+            return this.syncContext.PullAsync(this.TableName, queryKey, query, parameters, cancellationToken);
         }
 
-        public Task PurgeAsync(string query, CancellationToken cancellationToken)
+        public Task PurgeAsync(string queryKey, string query, CancellationToken cancellationToken)
         {
-            return this.syncContext.PurgeAsync(this.TableName, query, cancellationToken);
+            ValidateQueryKey(queryKey);
+            return this.syncContext.PurgeAsync(this.TableName, queryKey, query, cancellationToken);
         }
 
         public async Task<JObject> InsertAsync(JObject instance)
@@ -109,6 +113,23 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             object id = MobileServiceSerializer.GetId(instance, ignoreCase: false, allowDefault: false);
             return EnsureIdIsString(id);
+        }
+
+        private static void ValidateQueryKey(string queryKey)
+        {
+            if (string.IsNullOrWhiteSpace(queryKey))
+            {
+                return;
+            }
+
+            if (!queryKeyRegex.IsMatch(queryKey))
+            {
+                throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            Resources.MobileServiceSyncTable_InvalidQueryKey,
+                            "queryKey"));
+            }
         }
 
         protected static string EnsureIdIsString(object id)
