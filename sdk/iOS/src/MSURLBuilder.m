@@ -277,17 +277,17 @@ NSString* encodeToPercentEscapeString(NSString *string) {
         id value = [queryParameters objectForKey:key];
         if ([value isKindOfClass:[NSArray class]]) {
             for (id arrayValue in value) {
-                [MSURLBuilder appendName:name andValue:[arrayValue description] toQueryString:queryString];
+                [MSURLBuilder appendParameterName:name andValue:[arrayValue description] toQueryString:queryString];
             }
         } else {
-            [MSURLBuilder appendName:name andValue:[value description] toQueryString:queryString];
+            [MSURLBuilder appendParameterName:name andValue:[value description] toQueryString:queryString];
         }
     }
     
     return queryString;
 }
 
-+(void) appendName:(NSString *)name andValue:(NSString *)value toQueryString:(NSMutableString *)queryString
++(void) appendParameterName:(NSString *)name andValue:(NSString *)value toQueryString:(NSMutableString *)queryString
 {
     // URL Encode the parameter name and the value
     NSString *encodedValue = encodeToPercentEscapeString(value);
