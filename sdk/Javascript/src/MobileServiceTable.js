@@ -611,12 +611,12 @@ function addSystemProperties(parameters, properties, querystring) {
     parameters = parameters || {};
 
     // Don't override system properties if already set
-    if(!_.isNull(parameters['__systemProperties'])) {
+    if(!_.isNull(parameters.__systemProperties)) {
         return parameters;
     }
 
     if (properties === MobileServiceSystemProperties.All) {
-        parameters['__systemProperties'] = '*';
+        parameters.__systemProperties = '*';
     } else {
         var options = [];
         if (MobileServiceSystemProperties.CreatedAt & properties) {
@@ -628,7 +628,7 @@ function addSystemProperties(parameters, properties, querystring) {
         if (MobileServiceSystemProperties.Version & properties) {
             options.push(MobileServiceSystemColumns.Version);
         }
-        parameters['__systemProperties'] = options.join(',');
+        parameters.__systemProperties = options.join(',');
     }
 
     return parameters;

@@ -9,7 +9,7 @@ using System.Linq;
 using Newtonsoft.Json;
 
 namespace Microsoft.WindowsAzure.MobileServices
-{    
+{
     /// <summary>
     /// The value will be stored in the following keys:
     ///     Version: the storage version
@@ -25,8 +25,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal const string KeyNamePushHandle = "Channel";
         internal const string KeyNameRegistrations = "Registrations";
 
-        private readonly IApplicationStorage storage; 
-        
+        private readonly IApplicationStorage storage;
+
         private string pushHandle;
         private IDictionary<string, StoredRegistrationEntry> registrations;
 
@@ -45,7 +45,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return this.pushHandle;
             }
-            
+
             private set
             {
                 if (this.pushHandle == null || !this.pushHandle.Equals(value))
@@ -161,6 +161,9 @@ namespace Microsoft.WindowsAzure.MobileServices
             if (this.storage.TryReadSetting(KeyNamePushHandle, out channelObject))
             {
                 this.pushHandle = (string)channelObject;
+            }
+            else
+            {
                 this.IsRefreshNeeded = true;
                 return;
             }
@@ -170,7 +173,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             string version;
             if (this.storage.TryReadSetting(KeyNameVersion, out versionObject))
             {
-                version = (string)channelObject;
+                version = (string)versionObject;
             }
             else
             {
@@ -189,9 +192,9 @@ namespace Microsoft.WindowsAzure.MobileServices
             string regsStr = null;
             if (this.storage.TryReadSetting(KeyNameRegistrations, out registrationsObject))
             {
-                regsStr = (string)channelObject;
+                regsStr = (string)registrationsObject;
                 this.IsRefreshNeeded = false;
-            }            
+            }
 
             if (!string.IsNullOrEmpty(regsStr))
             {
