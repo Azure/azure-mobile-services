@@ -13,8 +13,7 @@ exports.validStringIds = [
              "87D5B05C93614F8EBFADF7BC10F7AE8C",
              "someone@someplace.com",
              "id with spaces",
-             //"...", // .NET not supported
-             " .",
+             "id.with.periods",
              "'id' with single quotes",
              "id with 128 characters " + new Array(128 - 24).join('A'), 
              "id with Japanese 私の車はどこですか？",
