@@ -73,7 +73,7 @@ $testGroup('ToDo')
                     $assert.areEqual('GHI', items[0].col1);
 
                     $log('Query for completed');
-                    return table.where(context.newItems).where('Col2 gt 0.0').read();
+                    return table.where(context.newItems).where('col2 gt 0').read();
                 },
                 function (items) {
                     $assert.areEqual(1, items.length);
@@ -96,9 +96,6 @@ $testGroup('ToDo')
                         },
                         function (err) {
                             $assert.contains(err.message, $isDotNet() ? 'Not Found' : 'notreal');
-                            if (!$isDotNet()) {
-                                $assert.contains(err.request.responseText.toString(), 'notreal');
-                            }
                         });
                 });
         }),
@@ -198,7 +195,6 @@ $testGroup('ToDo')
         .tag('TotalCount')
         .checkAsync(function () {
             var table = $getClient().getTable('test_table');
-            var context = {};
             var actions = [];
 
             actions.push(function () {
