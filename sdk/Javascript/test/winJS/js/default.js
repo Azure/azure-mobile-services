@@ -21,7 +21,7 @@
                     $harness.settings.breakOnStart = harnessArgs.BreakOnStart;
                     $harness.settings.custom.MobileServiceRuntimeUrl = harnessArgs.RuntimeUri;
                     $harness.settings.custom.MobileServiceRuntimeKey = harnessArgs.RuntimeKey;
-                    $harness.settings.custom.platform = harnessArgs.platrorm;
+                    $harness.settings.custom.platform = harnessArgs.platform;
                 }
             }
 
