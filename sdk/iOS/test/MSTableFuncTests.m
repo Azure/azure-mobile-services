@@ -9,32 +9,34 @@
 #import "MSJSONSerializer.h"
 
 @interface MSTableFuncTests : SenTestCase
-@property (nonatomic) BOOL testsEnabled;
 @property (nonatomic) BOOL done;
 @property (nonatomic, strong) MSTable *table;
 @end
 
 @implementation MSTableFuncTests
 
-- (void)setUp
+-(void) setUp
 {
     [super setUp];
+    [self raiseAfterFailure];
     
     NSLog(@"%@ setUp", self.name);
-    
-    self.testsEnabled = YES;
-    STAssertTrue(self.testsEnabled, @"The functional tests are currently disabled.");
     
     // These functional tests requires a working Windows Mobile Azure Service
     // with a table named "todoItem". Simply enter the application URL and
     // application key for the Windows Mobile Azure Service below and set the
     // 'testsEnabled' BOOL above to YES.
+    
     MSClient *client = [MSClient
-                        clientWithApplicationURLString:@"<Microsoft Azure Mobile Service App URL>"
-                        applicationKey:@"<Application Key>"];
+              clientWithApplicationURLString:@"<Microsoft Azure Mobile Service App URL>"
+              applicationKey:@"<Application Key>"];
+    client = [MSClient clientWithApplicationURLString:@"https://philtotesting.azure-mobile.net/"
+                                            applicationKey:@"cusnemNWxPUJEBPdESCAZyZGJqIDUv47"];
+    
+    STAssertTrue([client.applicationURL.description hasPrefix:@"https://"], @"The functional tests are currently disabled.");
+    [self continueAfterFailure];
     
     self.table = [client tableWithName:@"stringId_objC_test_table"];
-    
     STAssertNotNil(self.table, @"Could not create test table.");
     
     // Clean up table, all tests start at empty table
@@ -46,7 +48,6 @@
 - (void)tearDown
 {
     // Put teardown code here; it will be run once, after the last test case.
-    [self cleanUpData];
     self.table = nil;
     
     [super tearDown];

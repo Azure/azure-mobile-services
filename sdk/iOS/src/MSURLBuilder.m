@@ -106,7 +106,7 @@ NSString *const inlineCountNone = @"none";
 {        
     // Get the URL for the table
     NSURL *url = [self URLForTable:table
-                    parameters:parameters
+                        parameters:parameters
                            orError:error];
     
     // Add the itemId; NSURL will do the right thing and account for the
@@ -270,24 +270,34 @@ NSString* encodeToPercentEscapeString(NSString *string) {
     // Iterate through the parameters to build the query string as key=value
     // pairs seperated by '&'
     NSMutableString *queryString = [NSMutableString string];
-    for (NSString* key in [queryParameters allKeys]){
-        
-        // Get the paremeter name and value
-        NSString *value = [[queryParameters objectForKey:key] description];
+    for (NSString* key in [queryParameters allKeys]) {
         NSString *name = [key description];
         
-        // URL Encode the parameter name and the value
-        NSString *encodedValue = encodeToPercentEscapeString(value);
-        NSString *encodedName = encodeToPercentEscapeString(name);
-
-        if (queryString.length > 0) {
-            [queryString appendString:@"&"];
+        // Get the paremeter name and value
+        id value = [queryParameters objectForKey:key];
+        if ([value isKindOfClass:[NSArray class]]) {
+            for (id arrayValue in value) {
+                [MSURLBuilder appendName:name andValue:[arrayValue description] toQueryString:queryString];
+            }
+        } else {
+            [MSURLBuilder appendName:name andValue:[value description] toQueryString:queryString];
         }
-        
-        [queryString appendFormat:@"%@=%@", encodedName, encodedValue];
     }
     
     return queryString;
+}
+
++(void) appendName:(NSString *)name andValue:(NSString *)value toQueryString:(NSMutableString *)queryString
+{
+    // URL Encode the parameter name and the value
+    NSString *encodedValue = encodeToPercentEscapeString(value);
+    NSString *encodedName = encodeToPercentEscapeString(name);
+
+    if (queryString.length > 0) {
+        [queryString appendFormat:@"&%@=%@", encodedName, encodedValue];
+    } else {
+        [queryString appendFormat:@"%@=%@", encodedName, encodedValue];
+    }
 }
 
 +(NSURL *) URLByAppendingQueryParameters:(NSDictionary *)queryParameters
