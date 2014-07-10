@@ -186,4 +186,17 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 
 /// @}
 
+
+#pragma mark * Public Connection Methods
+
+
+/// @name Controlling connections to the server
+/// @{
+
+/// Determines where connections made to the mobile service are run. If set, connection related
+/// logic will occur on this queue. Otherwise, the thread that made the call will be used.
+@property (nonatomic, strong) NSOperationQueue *connectionDelegateQueue;
+
+/// @}
+
 @end

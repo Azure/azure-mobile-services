@@ -139,6 +139,8 @@
     // Set the new filters on the copied client
     newClient.filters = filters;
     
+    newClient.connectionDelegateQueue = self.connectionDelegateQueue;
+    
     return newClient;
 }
 
