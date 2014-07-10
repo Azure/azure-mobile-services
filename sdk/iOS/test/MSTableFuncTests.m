@@ -360,7 +360,7 @@
 {
     NSString *myid = @"an id";
     
-    NSDictionary *item = @{ @"id": myid, @"String": @"a value" };
+    NSDictionary *item = @{ @"id": myid, @"string": @"a value" };
     self.table.systemProperties = MSSystemPropertyAll;
     self.done = NO;
     [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
@@ -461,7 +461,7 @@
 
 -(void) testAsyncTableOperationsWithSystemPropertiesSetExplicitly
 {
-    NSDictionary *item = @{ @"String": @"a value" };
+    NSDictionary *item = @{ @"string": @"a value" };
     
     self.table.systemProperties = MSSystemPropertyVersion | MSSystemPropertyCreatedAt | MSSystemPropertyUpdatedAt;
     [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
@@ -524,7 +524,7 @@
         }
         
         NSString *myId = @"an id";
-        NSDictionary *item = @{ @"id": myId, @"String": @"a value" };
+        NSDictionary *item = @{ @"id": myId, @"string": @"a value" };
         
         self.done = NO;
         [self.table insert:item parameters:userParams completion:^(NSDictionary *item, NSError *error) {
@@ -607,7 +607,7 @@
         [self waitForTest:30.0];
         
         self.done = NO;
-        [savedItem setValue:@"Hello!" forKey:@"String"];
+        [savedItem setValue:@"Hello!" forKey:@"string"];
         [self.table update:savedItem parameters:userParams completion:^(NSDictionary *item, NSError *error) {
             STAssertEquals(shouldHaveCreatedAt, (BOOL)([item objectForKey:MSSystemColumnCreatedAt] != nil), @"Property invalid: %@", systemProperties);
             STAssertEquals(shouldHaveUpdatedAt, (BOOL)([item objectForKey:MSSystemColumnUpdatedAt] != nil), @"Property invalid: %@", systemProperties);
@@ -629,7 +629,7 @@
 
 -(void) testAsyncTableOperationsWithInvalidSystemPropertiesQuerystring
 {
-    NSDictionary *item = @{@"id":@"an id", @"String":@"a value"};
+    NSDictionary *item = @{@"id":@"an id", @"string":@"a value"};
     
     __block NSDictionary *savedItem;
     [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
@@ -686,7 +686,7 @@
         [self waitForTest:30.0];
         
         self.done = NO;
-        [savedItem setValue:@"Hello!" forKey:@"String"];
+        [savedItem setValue:@"Hello!" forKey:@"string"];
         [self.table update:savedItem parameters:userParams completion:^(NSDictionary *item, NSError *error) {
             STAssertNotNil(error, @"An error should have occurred");
             STAssertEquals(error.code, [@MSErrorMessageErrorCode integerValue], @"Unexpected error %d", error.code);
@@ -699,7 +699,7 @@
 
 -(void) testAsyncTableOperationsWithInvalidSystemParameterQueryString
 {
-    NSDictionary *item = @{@"id":@"an id", @"String":@"a value"};
+    NSDictionary *item = @{@"id":@"an id", @"string":@"a value"};
 
     __block NSDictionary *savedItem;
     [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
@@ -752,7 +752,7 @@
     [self waitForTest:30.0];
     
     self.done = NO;
-    [savedItem setValue:@"Hello!" forKey:@"String"];
+    [savedItem setValue:@"Hello!" forKey:@"string"];
     [self.table update:savedItem parameters:userParams completion:^(NSDictionary *item, NSError *error) {
         STAssertNotNil(error, @"An error should have occurred");
         STAssertEquals([@MSErrorMessageErrorCode integerValue], error.code, @"Unexpected error code: %d: %@", error.code, error.localizedDescription);
@@ -769,7 +769,7 @@
     __block NSMutableArray *savedItems = [NSMutableArray array];
     for(NSUInteger i = 1; i < 6; i++)
     {
-        NSDictionary *item = @{@"id": [NSString stringWithFormat:@"%lu", (unsigned long)i], @"String": @"a value"};
+        NSDictionary *item = @{@"id": [NSString stringWithFormat:@"%lu", (unsigned long)i], @"string": @"a value"};
         self.done = NO;
         [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
             [savedItems addObject:item];
@@ -883,7 +883,7 @@
 
 -(void) testUpdateAsyncWithWithMergeConflict
 {
-    NSDictionary *item = @{ @"id": @"an id", @"String": @"a value" };
+    NSDictionary *item = @{ @"id": @"an id", @"string": @"a value" };
     self.table.systemProperties = MSSystemPropertyAll;
     __block NSDictionary *savedItem;
     [self.table insert:item completion:^(NSDictionary *item, NSError *error) {
@@ -894,7 +894,7 @@
 
     self.done = NO;
     __block NSDictionary *savedItem2;
-    [savedItem setValue:@"Hello!" forKey:@"String"];
+    [savedItem setValue:@"Hello!" forKey:@"string"];
     [self.table update:savedItem completion:^(NSDictionary *item, NSError *error) {
         STAssertNil(error, @"An error occcurred");
         STAssertFalse([[item objectForKey:@"__verison"] isEqualToString:[savedItem objectForKey:MSSystemColumnVersion]], @"Version should have changed");
@@ -904,7 +904,7 @@
     [self waitForTest:30.0];
 
     self.done = NO;
-    [savedItem setValue:@"But Wait!" forKey:@"String"];
+    [savedItem setValue:@"But Wait!" forKey:@"string"];
     [self.table update:savedItem completion:^(NSDictionary *item, NSError *error) {
         STAssertNotNil(error, @"An error should have occcurred");
         STAssertEquals([@MSErrorPreconditionFailed integerValue], error.code, @"Should have had precondition failed error");
@@ -923,7 +923,7 @@
     [self waitForTest:30.0];
     
     self.done = NO;
-    [savedItem2 setValue:@"Hello Again!" forKey:@"String"];
+    [savedItem2 setValue:@"Hello Again!" forKey:@"string"];
     [self.table update:savedItem2 completion:^(NSDictionary *item, NSError *error) {
         STAssertNil(error, @"An error occcurred");
         STAssertFalse([[item objectForKey:@"__verison"] isEqualToString:[savedItem2 objectForKey:MSSystemColumnVersion]], @"Version should have changed");

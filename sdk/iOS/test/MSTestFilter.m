@@ -37,7 +37,6 @@
             response(nil, nil, self.errorToUse);
         }
         else {
-            
             // Otherwise we'll assume a mock response/data are available
             response(self.responseToUse, self.dataToUse, nil);
         }
