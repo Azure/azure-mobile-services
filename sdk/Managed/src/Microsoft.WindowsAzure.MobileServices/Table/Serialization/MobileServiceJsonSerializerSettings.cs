@@ -22,6 +22,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             this.NullValueHandling = NullValueHandling.Include;
             this.ContractResolver = new MobileServiceContractResolver();
+            this.ObjectCreationHandling = ObjectCreationHandling.Replace;
 
             this.Converters.Add(new MobileServiceIsoDateTimeConverter());
             this.Converters.Add(new MobileServicePrecisionCheckConverter());
