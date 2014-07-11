@@ -10,7 +10,7 @@
 #import "MSAPIRequest.h"
 #import "MSAPIConnection.h"
 #import "MSJSONSerializer.h"
-
+#import "MSPush.h"
 
 #pragma mark * MSClient Private Interface
 

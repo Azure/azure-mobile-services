@@ -711,14 +711,14 @@
     // Verify default behavior (callback on thread calling function, which will be the main thread here
     MSTable *todoTable = [client tableWithName:@"todoItem"];
     [todoTable readWithId:@1 completion:^(NSDictionary *item, NSError *error) {
-        STAssertTrue([NSThread isMainThread], @"expected to not be on main thread");
+        STAssertTrue([NSThread isMainThread], @"expected to be on main thread");
         done = YES;
     }];
     done = NO;
     STAssertTrue([self waitForTest:30.0], @"Test timed out.");
     
     [client invokeAPI:@"testapi" body:nil HTTPMethod:@"GET" parameters:nil headers:nil completion:^(id result, NSHTTPURLResponse *response, NSError *error) {
-        STAssertTrue([NSThread isMainThread], @"expected to not be on main thread");
+        STAssertTrue([NSThread isMainThread], @"expected to be on main thread");
         done = YES;
     }];
     done = NO;
