@@ -32,6 +32,16 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal static readonly string VersionSystemPropertyString = String.Format("{0}{1}", MobileServiceSerializer.SystemPropertyPrefix, MobileServiceSystemProperties.Version.ToString()).ToLowerInvariant();
 
         /// <summary>
+        /// The version system property as a string with the prefix.
+        /// </summary>
+        internal static readonly string UpdatedAtSystemPropertyString = String.Format("{0}{1}", MobileServiceSerializer.SystemPropertyPrefix, MobileServiceSystemProperties.UpdatedAt.ToString().ToLowerInvariant());
+
+        /// <summary>
+        /// The version system property as a string with the prefix.
+        /// </summary>
+        internal static readonly string CreatedAtSystemPropertyString = String.Format("{0}{1}", MobileServiceSerializer.SystemPropertyPrefix, MobileServiceSystemProperties.CreatedAt.ToString().ToLowerInvariant());
+
+        /// <summary>
         /// The name of the reserved Mobile Services id member.
         /// </summary>
         /// <remarks>
@@ -193,10 +203,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="instance">The instance to remove the system properties from.</param>
         /// <param name="version">Set to the value of the version system property before it is removed.</param>
-        /// <returns>
+        /// <param name="propertiesToKeep">The system properties to keep</param>        /// <returns>
         /// The instance with the system properties removed.
         /// </returns>
-        public static JObject RemoveSystemProperties(JObject instance, out string version)
+        public static JObject RemoveSystemProperties(JObject instance, out string version, MobileServiceSystemProperties propertiesToKeep = MobileServiceSystemProperties.None)
         {
             version = null;
 
@@ -216,6 +226,16 @@ namespace Microsoft.WindowsAzure.MobileServices
                     if (String.Equals(property.Name, MobileServiceSerializer.VersionSystemPropertyString, StringComparison.OrdinalIgnoreCase))
                     {
                         version = (string)instance[property.Name];
+                        if ((propertiesToKeep & MobileServiceSystemProperties.Version) == MobileServiceSystemProperties.Version)
+                        {
+                            continue;
+                        }
+                    }
+                    else if (propertiesToKeep == MobileServiceSystemProperties.All ||
+                        IsKeptSystemProperty(property.Name, propertiesToKeep, MobileServiceSystemProperties.CreatedAt, MobileServiceSerializer.CreatedAtSystemPropertyString) ||
+                        IsKeptSystemProperty(property.Name, propertiesToKeep, MobileServiceSystemProperties.UpdatedAt, MobileServiceSerializer.UpdatedAtSystemPropertyString))
+                    {
+                        continue;
                     }
 
                     instance.Remove(property.Name);
@@ -223,6 +243,32 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             return instance;
+        }
+
+        /// <summary>
+        /// Checks if the given system property should be kept or removed from the returned item
+        /// </summary>
+        /// <param name="propertyName">
+        /// Name of the system property to see if it should be removed
+        /// </param> 
+        /// <param name="propertiesToKeep">
+        /// The list of system properties to be kept
+        /// </param> 
+        /// <param name="property">
+        /// Type of the system property to check
+        /// </param> 
+        /// <param name="systemPropertyName">
+        /// Name of the actual system property to look for
+        /// </param> 
+        private static bool IsKeptSystemProperty(string propertyName, MobileServiceSystemProperties propertiesToKeep, MobileServiceSystemProperties property, string systemPropertyName)
+        {
+            if ((propertiesToKeep & property) == property &&
+                    String.Equals(propertyName, systemPropertyName, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
