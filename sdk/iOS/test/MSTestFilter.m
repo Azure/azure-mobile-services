@@ -68,7 +68,6 @@
             if (self.onInspectResponseData) {
                 self.dataToUse = self.onInspectResponseData(request, self.dataToUse);
             }
-            
             // Otherwise we'll assume a mock response/data are available
             response(self.responseToUse, self.dataToUse, nil);
         }

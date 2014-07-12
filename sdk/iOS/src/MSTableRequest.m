@@ -439,6 +439,24 @@ NSString *const httpDelete = @"DELETE";
     return request;
 }
 
+#pragma mark * Private Static Constructors
+
++ (NSString *)getVersionFromItem:(id)item itemId:(id)itemId
+{
+    // If string id, cache the version field as we strip it out during serialization
+    NSString *version= nil;
+    if([itemId isKindOfClass:[NSString class]]) {
+        version = [item objectForKey:MSSystemColumnVersion];
+    }
+    return version;
+}
+
++ (void)setVersion:(NSString *)version request:(MSTableRequest *)request
+{
+    version = [NSString stringWithFormat:@"\"%@\"", [version stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""]];
+    [request addValue:version forHTTPHeaderField:@"If-Match"];
+}
+
 @end
 
 

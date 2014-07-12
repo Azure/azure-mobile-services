@@ -10,7 +10,6 @@
 @interface WindowsAzureMobileServicesFunctionalTests : SenTestCase {
     MSClient *client;
     BOOL done;
-    BOOL testsEnabled;
 }
    
 @end
@@ -23,10 +22,10 @@
 
 - (void) setUp
 {
+    [super setUp];
+    [self raiseAfterFailure];
+    
     NSLog(@"%@ setUp", self.name);
-
-    testsEnabled = YES;
-    STAssertTrue(testsEnabled, @"The functional tests are currently disabled.");
     
     // These functional tests requires a working Windows Mobile Azure Service
     // with a table named "todoItem". Simply enter the application URL and
@@ -36,6 +35,9 @@
     client = [MSClient
                 clientWithApplicationURLString:@"<Microsoft Azure Mobile Service App URL>"
                 applicationKey:@"<Application Key>"];
+    
+    STAssertTrue([client.applicationURL.description hasPrefix:@"https://"], @"The functional tests are currently disabled.");
+    [self continueAfterFailure];
     
     done = NO;
     

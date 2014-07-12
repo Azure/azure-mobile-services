@@ -55,6 +55,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public String Version { get; set; }
     }
 
+    public class TypeWithArray
+    {
+        public string Id { get; set; }
+
+        [JsonProperty("values")]
+        public List<string> Values { get; set; }
+
+    }
+
     [Tag("e2e")]
     [Tag("table")]
     public class MobileServiceTableGenericFunctionalTests : FunctionalTestBase

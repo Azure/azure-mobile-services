@@ -32,7 +32,7 @@
 {
     NSString *userAgent = [MSUserAgentBuilder userAgent];
     
-    STAssertTrue([userAgent isEqualToString:@"ZUMO/1.1 (lang=objective-c; os=--; os_version=--; arch=iOSSimulator; version=1.1.0.0)"],
+    STAssertTrue([userAgent isEqualToString:@"ZUMO/1.2 (lang=objective-c; os=--; os_version=--; arch=iOSSimulator; version=1.2.0.0)"],
                  @"user agent was: %@", userAgent);
 }
 

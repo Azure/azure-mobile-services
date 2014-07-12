@@ -1622,6 +1622,30 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task InsertAsyncWithStringIdAndList_DoesNotDuplicateList()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+            hijack.SetResponseContent("{\"id\":\"an id\",\"Values\":[\"goodbye\",\"universe\"]}");
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            IMobileServiceTable<TypeWithArray> table = service.GetTable<TypeWithArray>();
+            var item = new TypeWithArray()
+            {
+                Id = "an id",
+                Values = new List<string> {
+                    "hello", "world"
+                }
+            };
+
+            await table.InsertAsync(item);
+
+            Assert.AreEqual("an id", item.Id);
+            Assert.AreEqual(item.Values.Count, 2);
+            Assert.AreEqual(item.Values[0], "goodbye");
+            Assert.AreEqual(item.Values[1], "universe");
+        }
+
+        [AsyncTestMethod]
         public async Task InsertAsyncWithIntIdTypeAndIntIdResponseContent()
         {
             long[] testIdData = IdTestData.ValidIntIds.Concat(
