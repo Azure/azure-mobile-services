@@ -107,7 +107,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 						future.set(new MobileServiceList<E>(list, count));
 					} else {
 						List<E> list = parseResults(result);
-						future.set(new MobileServiceList<E>(list, list.size()));
+						future.set(new MobileServiceList<E>(list, -1));
 					}
 				} catch (Exception e) {
 					future.setException(e);
