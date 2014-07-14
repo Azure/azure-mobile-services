@@ -17,10 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/*
+
+/**
  * TableOperationCallback.java
  */
-
 package com.microsoft.windowsazure.mobileservices.table;
 
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
@@ -43,6 +43,5 @@ public interface TableOperationCallback<E> {
 	 * @param response
 	 *            Response object
 	 */
-	public void onCompleted(E entity, Exception exception,
-			ServiceFilterResponse response);
+	public void onCompleted(E entity, Exception exception, ServiceFilterResponse response);
 }

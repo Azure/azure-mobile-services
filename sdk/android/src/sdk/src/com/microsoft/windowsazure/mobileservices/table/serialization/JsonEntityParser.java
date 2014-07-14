@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * JsonEntityParser.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.serialization;
 
 import java.lang.reflect.Field;
@@ -46,8 +50,8 @@ public class JsonEntityParser {
 		String idPropertyName = getIdPropertyName(clazz);
 
 		// Parse results
-		if (results.isJsonArray()) // Query result
-		{
+		if (results.isJsonArray()) {
+			// Query result
 			JsonArray elements = results.getAsJsonArray();
 
 			for (JsonElement element : elements) {
@@ -55,7 +59,8 @@ public class JsonEntityParser {
 				E typedElement = gson.fromJson(element, clazz);
 				result.add(typedElement);
 			}
-		} else { // Lookup result
+		} else {
+			// Lookup result
 			if (results.isJsonObject()) {
 				changeIdPropertyName(results.getAsJsonObject(), idPropertyName);
 			}

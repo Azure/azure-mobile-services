@@ -181,7 +181,7 @@ public class OperationErrorList {
 		JsonObject serverItem = element.get("serveritem") != null ? element.get("serveritem").getAsJsonObject() : null;
 		Date createdAt = DateSerializer.deserialize(element.get("__createdat").getAsString());
 
-		return TableOperationError.parse(id, TableOperationKind.parse(operationKind), tableName, itemId, clientItem, errorMessage, statusCode, serverResponse,
+		return TableOperationError.create(id, TableOperationKind.parse(operationKind), tableName, itemId, clientItem, errorMessage, statusCode, serverResponse,
 				serverItem, createdAt);
 	}
 }

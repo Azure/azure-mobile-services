@@ -17,10 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/**
- * TableOperationCallback.java
- */
 
+/**
+ * TableJsonOperationCallback.java
+ */
 package com.microsoft.windowsazure.mobileservices.table;
 
 import com.google.gson.JsonObject;
@@ -28,6 +28,6 @@ import com.google.gson.JsonObject;
 /**
  * Callback used after a TableOperation is executed using JSON
  */
-public interface TableJsonOperationCallback extends TableOperationCallback<JsonObject>{
+public interface TableJsonOperationCallback extends TableOperationCallback<JsonObject> {
 
 }

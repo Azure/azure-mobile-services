@@ -17,10 +17,10 @@ Apache 2.0 License
 
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/*
+
+/**
  * MobileServiceTable.java
  */
-
 package com.microsoft.windowsazure.mobileservices.table;
 
 import java.lang.reflect.Field;
@@ -153,9 +153,6 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 	 *            The Query instance to execute
 	 */
 	public ListenableFuture<MobileServiceList<E>> execute(Query query) {
-		// mInternalTable.execute(query, new
-		// ParseResultTableQueryCallback(callback));
-
 		final SettableFuture<MobileServiceList<E>> future = SettableFuture.create();
 		ListenableFuture<JsonElement> internalFuture = mInternalTable.execute(query);
 		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
@@ -199,7 +196,6 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 	 *            Callback to invoke when the operation is completed
 	 */
 	public void execute(Query query, final TableQueryCallback<E> callback) {
-
 		ListenableFuture<MobileServiceList<E>> executeFuture = execute(query);
 
 		Futures.addCallback(executeFuture, new FutureCallback<MobileServiceList<E>>() {
@@ -242,6 +238,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 
 		ExecutableQuery<E> baseQuery = new ExecutableQuery<E>(query);
 		baseQuery.setTable(this);
+
 		return baseQuery;
 	}
 
@@ -334,7 +331,6 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 	 *            Callback to invoke after the operation is completed
 	 */
 	public void lookUp(Object id, final TableOperationCallback<E> callback) {
-
 		ListenableFuture<E> lookUpFuture = lookUp(id);
 
 		Futures.addCallback(lookUpFuture, new FutureCallback<E>() {
@@ -413,7 +409,6 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 	 *            Callback to invoke after the operation is completed
 	 */
 	public void lookUp(Object id, List<Pair<String, String>> parameters, final TableOperationCallback<E> callback) {
-
 		ListenableFuture<E> lookUpFuture = lookUp(id, parameters);
 
 		Futures.addCallback(lookUpFuture, new FutureCallback<E>() {
@@ -473,10 +468,6 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 			json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
 		} catch (IllegalArgumentException e) {
 			future.setException(e);
-			/*
-			 * if (callback != null) { callback.onCompleted(null, e, null); }
-			 */
-
 			return future;
 		}
 
@@ -485,9 +476,6 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 		if (idClazz != null && !isIntegerClass(idClazz)) {
 			json = removeSystemProperties(json);
 		}
-
-		// mInternalTable.insert(json, parameters, new
-		// ParseResultOperationCallback(callback, element));
 
 		ListenableFuture<JsonObject> internalFuture = mInternalTable.insert(json, parameters);
 		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
@@ -610,15 +598,9 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 		try {
 			json = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
 		} catch (IllegalArgumentException e) {
-			/*
-			 * if (callback != null) { callback.onCompleted(null, e, null); }
-			 */
 			future.setException(e);
 			return future;
 		}
-
-		// mInternalTable.update(json, parameters, new
-		// ParseResultOperationCallback(callback, element));
 
 		ListenableFuture<JsonObject> internalFuture = mInternalTable.update(json, parameters);
 		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
@@ -681,7 +663,6 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 	 *            Callback to invoke when the operation is completed
 	 */
 	public void update(final E element, final List<Pair<String, String>> parameters, final TableOperationCallback<E> callback) {
-
 		ListenableFuture<E> updateFuture = update(element, parameters);
 
 		Futures.addCallback(updateFuture, new FutureCallback<E>() {

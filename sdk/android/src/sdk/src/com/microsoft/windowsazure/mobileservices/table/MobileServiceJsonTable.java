@@ -17,6 +17,10 @@ Apache 2.0 License
 
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * MobileServiceJsonTable.java
+ */
 package com.microsoft.windowsazure.mobileservices.table;
 
 import java.io.UnsupportedEncodingException;
@@ -114,13 +118,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 					url += "?" + QueryODataWriter.getRowSetModifiers(query, this).substring(1);
 				}
 			}
-
 		} catch (UnsupportedEncodingException e) {
-			/*
-			 * if (callback != null) {
-			 * 
-			 * callback.onCompleted(null, 0, e, null); }
-			 */
 			future.setException(e);
 			return future;
 		}
@@ -337,19 +335,16 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
 			@Override
 			public void onSuccess(Pair<JsonElement, ServiceFilterResponse> results) {
-				if (results.first.isJsonArray()) { // empty result
-					// callback.onCompleted(null, new
-					// MobileServiceException("A record with the specified Id cannot be found"),
-					// response);
+				if (results.first.isJsonArray()) {
+					// empty result
 					future.setException(new MobileServiceException("A record with the specified Id cannot be found", results.second));
-				} else { // Lookup result
+				} else {
+					// Lookup result
 					JsonObject patchedJson = results.first.getAsJsonObject();
 
 					updateVersionFromETag(results.second, patchedJson);
 
 					future.set(patchedJson);
-					// callback.onCompleted(patchedJson, exception,
-					// response);
 				}
 			}
 		});
@@ -462,9 +457,6 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 		try {
 			post.setContent(content);
 		} catch (Exception e) {
-			/*
-			 * if (callback != null) { callback.onCompleted(null, e, null); }
-			 */
 			future.setException(e);
 			return future;
 		}
@@ -484,8 +476,6 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 				updateVersionFromETag(result.second, patchedJson);
 
 				future.set(patchedJson);
-				// callback.onCompleted(patchedJson, exception,
-				// response);
 			}
 		});
 
@@ -510,7 +500,6 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 *             other than default (0), or an invalid string value
 	 */
 	public void insert(final JsonObject element, List<Pair<String, String>> parameters, final TableJsonOperationCallback callback) {
-
 		ListenableFuture<JsonObject> insertFuture = insert(element, parameters);
 
 		Futures.addCallback(insertFuture, new FutureCallback<JsonObject>() {
@@ -631,13 +620,10 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 						future.setException(new MobileServicePreconditionFailedExceptionBase(msExcep, serverEntity));
 					} else {
 						future.setException(exc);
-						// callback.onCompleted(jsonEntity, exception,
-						// response);
 					}
 				} else {
 					future.setException(exc);
 				}
-
 			}
 
 			@Override
@@ -647,8 +633,6 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 				updateVersionFromETag(result.second, patchedJson);
 
 				future.set(patchedJson);
-				// callback.onCompleted(patchedJson, exception,
-				// response);
 			}
 		});
 
@@ -709,13 +693,10 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
 					newEntityJson = new JsonParser().parse(content).getAsJsonObject();
 
-					// callback.onCompleted(newEntityJson, null, result);
 					future.set(Pair.create(newEntityJson, result));
 				} else {
 					future.setException(mTaskException);
-					// callback.onCompleted(null, mTaskException, result);
 				}
-
 			}
 		}.executeTask();
 
@@ -753,19 +734,10 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 						future.set(Pair.create(results, response));
 					} catch (Exception e) {
 						future.setException(new MobileServiceException("Error while retrieving data from response.", e, response));
-						// callback.onCompleted(null, 0, new
-						// MobileServiceException("Error while retrieving data from response.",
-						// e), response);
-						// return;
 					}
-
-					// callback.onCompleted(results, count, null, response);
-
 				} else {
-					// callback.onCompleted(null, 0, mTaskException, response);
 					future.setException(mTaskException);
 				}
-
 			}
 		}.executeTask();
 

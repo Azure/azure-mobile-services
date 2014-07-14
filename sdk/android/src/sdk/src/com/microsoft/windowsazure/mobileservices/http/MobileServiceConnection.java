@@ -17,10 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/*
+
+/**
  * MobileServiceConnection.java
  */
-
 package com.microsoft.windowsazure.mobileservices.http;
 
 import org.apache.http.Header;
@@ -127,25 +127,12 @@ public class MobileServiceConnection {
 
 					future.set(response);
 				} catch (MobileServiceException e) {
-					// Something went wrong, call onResponse with exception
-					// method
-					/*
-					 * if (responseCallback != null) {
-					 * responseCallback.onResponse(response, new
-					 * MobileServiceException("Error while processing request.",
-					 * e)); return; }
-					 */
 					future.setException(e);
 				} catch (Exception e) {
 					future.setException(new MobileServiceException("Error while processing request.", e, response));
 				}
 
 				return future;
-				// Call onResponse method
-				/*
-				 * if (responseCallback != null) {
-				 * responseCallback.onResponse(response, null); }
-				 */
 			}
 		});
 	}
@@ -165,7 +152,7 @@ public class MobileServiceConnection {
 			@Override
 			public void onFailure(Throwable exception) {
 				if (exception instanceof Exception) {
-					responseCallback.onResponse(MobileServiceException.getServiceResponse(exception), (Exception)exception);
+					responseCallback.onResponse(MobileServiceException.getServiceResponse(exception), (Exception) exception);
 				}
 			}
 

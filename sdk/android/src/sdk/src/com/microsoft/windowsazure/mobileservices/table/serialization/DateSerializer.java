@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * DateSerializer.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.serialization;
 
 import java.lang.reflect.Type;
@@ -101,5 +105,4 @@ public class DateSerializer implements JsonSerializer<Date>, JsonDeserializer<Da
 
 		return formatted;
 	}
-
 }

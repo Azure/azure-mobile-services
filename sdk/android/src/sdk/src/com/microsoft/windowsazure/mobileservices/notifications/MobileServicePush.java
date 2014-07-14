@@ -17,10 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/*
+
+/**
  * MobileServicePush.java
  */
-
 package com.microsoft.windowsazure.mobileservices.notifications;
 
 import java.io.UnsupportedEncodingException;
@@ -762,10 +762,8 @@ public class MobileServicePush {
 				if (response != null && response.getStatus().getStatusCode() == 410) {
 
 					// if we get an RegistrationGoneException (410) from
-					// service, we
-					// will recreate registration id and will try to do
-					// upsert one more
-					// time.
+					// service, we will recreate registration id and will try to
+					// do upsert one more time.
 					// This can occur if the backing NotificationHub is changed
 					// or if the registration expires.
 
@@ -786,21 +784,6 @@ public class MobileServicePush {
 
 						@Override
 						public void onSuccess(final String registrationId) {
-							// ListenableFuture<String> setRegistrationIdFuture
-							// = setRegistrationId(registration,
-							// registrationId);
-
-							// Futures.addCallback(setRegistrationIdFuture, new
-							// FutureCallback<String>() {
-							//
-							// @Override
-							// public void onFailure(Throwable exception) {
-							// resultFuture.setException(exception);
-							// }
-							//
-							// @Override
-							// public void onSuccess(final String
-							// registrationId) {
 							ListenableFuture<Void> upsertRegistrationInternalFuture2 = upsertRegistrationInternal(registration);
 
 							Futures.addCallback(upsertRegistrationInternalFuture2, new FutureCallback<Void>() {
@@ -835,9 +818,6 @@ public class MobileServicePush {
 							});
 						}
 					});
-					// }
-					// });
-
 				} else {
 					resultFuture.setException(exception);
 				}
@@ -845,13 +825,13 @@ public class MobileServicePush {
 
 			@Override
 			public void onSuccess(Void v) {
-
 				try {
 					storeRegistrationId(registration.getName(), registration.getRegistrationId(), registration.getPNSHandle());
 				} catch (Exception exception) {
 					resultFuture.setException(exception);
 					return;
 				}
+
 				resultFuture.set(registrationId);
 			}
 		});

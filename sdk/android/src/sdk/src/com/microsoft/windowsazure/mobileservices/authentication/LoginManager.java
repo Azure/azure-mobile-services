@@ -17,10 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
 /**
  * LoginManager.java
  */
-
 package com.microsoft.windowsazure.mobileservices.authentication;
 
 import java.net.URLDecoder;
@@ -162,33 +162,15 @@ public class LoginManager {
 
 						user = createUserFromJSON(json);
 					} catch (Exception e) {
-						// If exists an external callback, call
-						// onComplete method
-						// method with exception
 						future.setException(e);
 						return;
-
-						/*
-						 * if (externalCallback != null) {
-						 * externalCallback.onCompleted(null, e, null); }
-						 * return;
-						 */
 					}
 
-					// If exists an external callback, call
-					// onComplete method
-
 					future.set(user);
-					/*
-					 * if (externalCallback != null) {
-					 * externalCallback.onCompleted(user, null, null); }
-					 */
 				} else {
 					future.setException(exception);
-					// externalCallback.onCompleted(null, exception, null);
 				}
 			}
-
 		});
 
 		return future;
@@ -363,6 +345,7 @@ public class LoginManager {
 				}
 			}
 		});
+
 		wv.getSettings().setJavaScriptEnabled(true);
 
 		DisplayMetrics displaymetrics = new DisplayMetrics();
@@ -528,6 +511,7 @@ public class LoginManager {
 		} catch (Exception e) {
 			// this should never happen
 		}
+
 		final MobileServiceConnection connection = mClient.createConnection();
 
 		// Create the AsyncTask that will execute the request
@@ -543,28 +527,14 @@ public class LoginManager {
 						user = createUserFromJSON((JsonObject) new JsonParser().parse((content.trim())));
 
 					} catch (Exception e) {
-						// Something went wrong, call onCompleted method
-						// with exception
-
 						future.setException(new MobileServiceException("Error while authenticating user.", e, response));
-						// callback.onCompleted(null, new
-						// MobileServiceException("Error while authenticating user.",
-						// e), response);
 						return;
 					}
 
 					future.set(user);
-					// Call onCompleted method
-					// callback.onCompleted(user, null, response);
 				} else {
-					// Something went wrong, call onCompleted method with
-					// exception
 					future.setException(new MobileServiceException("Error while authenticating user.", mTaskException));
-					// callback.onCompleted(null, new
-					// MobileServiceException("Error while authenticating user.",
-					// mTaskException), response);
 				}
-
 			}
 		}.executeTask();
 
@@ -585,6 +555,5 @@ public class LoginManager {
 		 *            An exception representing the error, in case there was one
 		 */
 		void onCompleted(String url, Exception exception);
-
 	}
 }

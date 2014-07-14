@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * TableOperationError.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.operations;
 
 import java.util.Date;
@@ -102,7 +106,7 @@ public class TableOperationError {
 		return this.mCreatedAt;
 	}
 
-	public static TableOperationError parse(String id, TableOperationKind operationKind, String tableName, String itemId, JsonObject clientItem,
+	public static TableOperationError create(String id, TableOperationKind operationKind, String tableName, String itemId, JsonObject clientItem,
 			String errorMessage, Integer statusCode, String serverResponse, JsonObject serverItem, Date createdAt) {
 		TableOperationError operationError = new TableOperationError(operationKind, tableName, itemId, clientItem, errorMessage, statusCode, serverResponse,
 				serverItem);

@@ -17,7 +17,8 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/*
+
+/**
  * MobileServiceSystemProperty.java
  */
 package com.microsoft.windowsazure.mobileservices.table;

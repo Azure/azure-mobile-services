@@ -17,14 +17,13 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/*
+
+/**
  * ServiceFilter.java
  */
-
 package com.microsoft.windowsazure.mobileservices.http;
 
 import com.google.common.util.concurrent.ListenableFuture;
-
 
 /**
  * The service filter can be used to manipulate requests and responses in the
@@ -32,16 +31,14 @@ import com.google.common.util.concurrent.ListenableFuture;
  * associated with a MobileServiceClient via the WithFilter method.
  */
 public interface ServiceFilter {
-    /**
-     * Method to handle the requests
-     * 
-     * @param request
-     *            Request to execute
-     * @param nextServiceFilterCallback
-     *            The next filter to execute
-     * @param responseCallback
-     *            The callback to invoke once the request is executed
-     */
-    //public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback, ServiceFilterResponseCallback responseCallback);
-    public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback);
+	/**
+	 * Method to handle the requests
+	 * 
+	 * @param request
+	 *            Request to execute
+	 * @param nextServiceFilterCallback
+	 *            The next filter to execute
+	 * @return A ListenableFuture of the ServiceFilterResponse
+	 */
+	public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback);
 }

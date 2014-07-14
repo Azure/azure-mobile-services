@@ -17,7 +17,8 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/*
+
+/**
  * MobileServiceClient.java
  */
 package com.microsoft.windowsazure.mobileservices;
@@ -291,17 +292,6 @@ public class MobileServiceClient {
 		});
 
 		return resultFuture;
-		/*
-		 * mLoginManager.authenticate(provider, mContext, new
-		 * UserAuthenticationCallback() {
-		 * 
-		 * @Override public void onCompleted(MobileServiceUser user, Exception
-		 * exception, ServiceFilterResponse response) { mCurrentUser = user;
-		 * mLoginInProgress = false;
-		 * 
-		 * if (externalCallback != null) { externalCallback.onCompleted(user,
-		 * exception, response); } } });
-		 */
 	}
 
 	/**
@@ -477,18 +467,6 @@ public class MobileServiceClient {
 		});
 
 		return resultFuture;
-
-		/*
-		 * mLoginManager.authenticate(provider, oAuthToken, new
-		 * UserAuthenticationCallback() {
-		 * 
-		 * @Override public void onCompleted(MobileServiceUser user, Exception
-		 * exception, ServiceFilterResponse response) { mCurrentUser = user;
-		 * mLoginInProgress = false;
-		 * 
-		 * if (externalCallback != null) { externalCallback.onCompleted(user,
-		 * exception, response); } } });
-		 */
 	}
 
 	/**
@@ -654,8 +632,6 @@ public class MobileServiceClient {
 
 		try {
 			if (account == null) {
-				// callback.onCompleted(null, new
-				// IllegalArgumentException("account"), null);
 				throw new IllegalArgumentException("account");
 			}
 
@@ -693,7 +669,6 @@ public class MobileServiceClient {
 							});
 						}
 					} catch (Exception e) {
-						// callback.onCompleted(null, e, null);
 						future.setException(e);
 					}
 				}
@@ -703,7 +678,6 @@ public class MobileServiceClient {
 			acMgr.getAuthToken(account, scopes, null, activity, authCallback, null);
 
 		} catch (Exception e) {
-			// callback.onCompleted(null, e, null);
 			future.setException(e);
 		}
 
@@ -994,18 +968,13 @@ public class MobileServiceClient {
 	 */
 	public <E> ListenableFuture<E> invokeApi(String apiName, Object body, String httpMethod, List<Pair<String, String>> parameters, final Class<E> clazz) {
 		if (clazz == null) {
-			/*
-			 * if (callback != null) { callback.onCompleted(null, new
-			 * IllegalArgumentException("clazz cannot be null"), null); }
-			 * return;
-			 */
 			throw new IllegalArgumentException("clazz cannot be null");
 		}
 
 		JsonElement json = null;
 		if (body != null) {
 			if (body instanceof JsonElement) {
-				json = (JsonElement)body;
+				json = (JsonElement) body;
 			} else {
 				json = getGsonBuilder().create().toJsonTree(body);
 			}
@@ -1037,38 +1006,13 @@ public class MobileServiceClient {
 					}
 
 					future.set(array);
-					// callback.onCompleted(array, null, response);
 				} else {
 					future.set((E) entities.get(0));
-					// callback.onCompleted((E) entities.get(0), exception,
-					// response);
 				}
 			}
 		});
 
 		return future;
-
-		/*
-		 * invokeApi(apiName, json, httpMethod, parameters, new
-		 * ApiJsonOperationCallback() {
-		 * 
-		 * @SuppressWarnings("unchecked")
-		 * 
-		 * @Override public void onCompleted(JsonElement jsonElement, Exception
-		 * exception, ServiceFilterResponse response) { if (callback != null) {
-		 * if (exception == null) { Class<?> concreteClass = clazz; if
-		 * (clazz.isArray()) { concreteClass = clazz.getComponentType(); }
-		 * 
-		 * List<?> entities = JsonEntityParser.parseResults(jsonElement,
-		 * getGsonBuilder().create(), concreteClass);
-		 * 
-		 * if (clazz.isArray()) { E array = (E) Array.newInstance(concreteClass,
-		 * entities.size()); for (int i = 0; i < entities.size(); i++) {
-		 * Array.set(array, i, entities.get(i)); } callback.onCompleted(array,
-		 * null, response); } else { callback.onCompleted((E) entities.get(0),
-		 * exception, response); } } else { callback.onCompleted(null,
-		 * exception, response); } } } });
-		 */
 	}
 
 	/**
@@ -1218,10 +1162,6 @@ public class MobileServiceClient {
 			try {
 				content = body.toString().getBytes(UTF8_ENCODING);
 			} catch (UnsupportedEncodingException e) {
-				/*
-				 * if (callback != null) { callback.onCompleted(null, e, null);
-				 * } return;
-				 */
 				throw new IllegalArgumentException(e);
 			}
 		}
@@ -1247,18 +1187,6 @@ public class MobileServiceClient {
 				future.set(json);
 			}
 		});
-
-		/*
-		 * invokeApi(apiName, content, httpMethod, requestHeaders, parameters,
-		 * new ServiceFilterResponseCallback() {
-		 * 
-		 * @Override public void onResponse(ServiceFilterResponse response,
-		 * Exception exception) { if (exception == null) { String content =
-		 * response.getContent(); JsonElement json = new
-		 * JsonParser().parse(content);
-		 * 
-		 * future.set(json); } else { future.setException(exception); } } });
-		 */
 
 		return future;
 	}
@@ -1414,7 +1342,6 @@ public class MobileServiceClient {
 
 		MobileServiceConnection conn = createConnection();
 
-		// Create AsyncTask to execute the request and parse the results
 		new RequestAsyncTask(request, conn) {
 			@Override
 			protected void onPostExecute(ServiceFilterResponse response) {
@@ -1546,31 +1473,6 @@ public class MobileServiceClient {
 
 				}
 			};
-
-			/*
-			 * // Composed service filter newClient.mServiceFilter = new
-			 * ServiceFilter() { // Create a filter that after executing the new
-			 * ServiceFilter // executes the existing filter ServiceFilter
-			 * externalServiceFilter = newServiceFilter; ServiceFilter
-			 * internalServiceFilter = oldServiceFilter;
-			 * 
-			 * @Override public void handleRequest(ServiceFilterRequest request,
-			 * final NextServiceFilterCallback nextServiceFilterCallback,
-			 * ServiceFilterResponseCallback responseCallback) {
-			 * 
-			 * // Executes new ServiceFilter
-			 * externalServiceFilter.handleRequest(request, new
-			 * NextServiceFilterCallback() {
-			 * 
-			 * @Override public void onNext(ServiceFilterRequest request,
-			 * ServiceFilterResponseCallback responseCallback) { // Execute
-			 * existing ServiceFilter
-			 * internalServiceFilter.handleRequest(request,
-			 * nextServiceFilterCallback, responseCallback); } },
-			 * responseCallback);
-			 * 
-			 * } };
-			 */
 		}
 
 		return newClient;
@@ -1591,15 +1493,6 @@ public class MobileServiceClient {
 					return nextServiceFilterCallback.onNext(request);
 				}
 			};
-
-			/*
-			 * return new ServiceFilter() {
-			 * 
-			 * @Override public void handleRequest(ServiceFilterRequest request,
-			 * NextServiceFilterCallback nextServiceFilterCallback,
-			 * ServiceFilterResponseCallback responseCallback) {
-			 * nextServiceFilterCallback.onNext(request, responseCallback); } };
-			 */
 		} else {
 			return mServiceFilter;
 		}

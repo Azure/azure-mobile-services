@@ -17,10 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/*
+
+/**
  * ServiceFilterRequest.java
  */
-
 package com.microsoft.windowsazure.mobileservices.http;
 
 import java.net.URISyntaxException;
@@ -31,81 +31,81 @@ import org.apache.http.Header;
  * Represents an HTTP request that can be manipulated by ServiceFilters
  */
 public interface ServiceFilterRequest {
-    /**
-     * 
-     * Returns request's Headers
-     */
-    public Header[] getHeaders();
+	/**
+	 * 
+	 * Returns request's Headers
+	 */
+	public Header[] getHeaders();
 
-    /**
-     * Adds a new Header to the request
-     * 
-     * @param name
-     *            Header Name
-     * @param val
-     *            Header Value
-     */
-    public void addHeader(String name, String val);
+	/**
+	 * Adds a new Header to the request
+	 * 
+	 * @param name
+	 *            Header Name
+	 * @param val
+	 *            Header Value
+	 */
+	public void addHeader(String name, String val);
 
-    /***
-     * Remove Header from the request
-     * 
-     * @param name
-     *            Header Name
-     */
-    public void removeHeader(String name);
+	/***
+	 * Remove Header from the request
+	 * 
+	 * @param name
+	 *            Header Name
+	 */
+	public void removeHeader(String name);
 
-    /**
-     * Sets request content
-     * 
-     * @param content
-     *            string that will be used in the setEntity method
-     * @throws Exception
-     */
-    public void setContent(String content) throws Exception;
+	/**
+	 * Sets request content
+	 * 
+	 * @param content
+	 *            string that will be used in the setEntity method
+	 * @throws Exception
+	 */
+	public void setContent(String content) throws Exception;
 
-    /**
-     * Sets request content
-     * 
-     * @param content
-     *            byte array that will be used in the setEntity method
-     * @throws Exception
-     */
-    public void setContent(byte[] content) throws Exception;
+	/**
+	 * Sets request content
+	 * 
+	 * @param content
+	 *            byte array that will be used in the setEntity method
+	 * @throws Exception
+	 */
+	public void setContent(byte[] content) throws Exception;
 
-    /**
-     * Gets the request's content
-     */
-    public String getContent();
+	/**
+	 * Gets the request's content
+	 */
+	public String getContent();
 
-    /**
-     * Gets the request's content
-     */
-    public byte[] getRawContent();
+	/**
+	 * Gets the request's content
+	 */
+	public byte[] getRawContent();
 
-    /**
-     * Gets request's URL
-     */
-    public String getUrl();
+	/**
+	 * Gets request's URL
+	 */
+	public String getUrl();
 
-    /**
-     * Sets the request's URL
-     * 
-     * @param url
-     * @throws URISyntaxException
-     */
-    public void setUrl(String url) throws URISyntaxException;
+	/**
+	 * Sets the request's URL
+	 * 
+	 * @param url
+	 * @throws URISyntaxException
+	 */
+	public void setUrl(String url) throws URISyntaxException;
 
-    /**
-     * Gets the request's method
-     */
-    public String getMethod();
+	/**
+	 * Gets the request's method
+	 */
+	public String getMethod();
 
-    /**
-     * Executes the request
-     * 
-     * @return ServiceFilterResponse with the request's response
-     * @throws Exception
-     */
-    public ServiceFilterResponse execute() throws Exception;
+	/**
+	 * Executes the request
+	 * 
+	 * @return ServiceFilterResponse with the request's response
+	 * @throws Exception
+	 */
+	public ServiceFilterResponse execute() throws Exception;
 }

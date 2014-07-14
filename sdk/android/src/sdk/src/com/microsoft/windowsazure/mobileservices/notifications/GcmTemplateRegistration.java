@@ -17,10 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/*
+
+/**
  * GcmTemplateRegistration.java
  */
-
 package com.microsoft.windowsazure.mobileservices.notifications;
 
 import com.google.gson.annotations.Expose;
@@ -31,41 +31,41 @@ import com.google.gson.annotations.SerializedName;
  */
 public class GcmTemplateRegistration extends TemplateRegistration {
 
-    @Expose
-    @SerializedName("platform")
-    protected String mPlatform = "gcm";
+	@Expose
+	@SerializedName("platform")
+	protected String mPlatform = "gcm";
 
-    /**
-     * The PNS specific identifier
-     */
-    @Expose
-    @SerializedName("deviceId")
-    protected String mPNSHandle;
+	/**
+	 * The PNS specific identifier
+	 */
+	@Expose
+	@SerializedName("deviceId")
+	protected String mPNSHandle;
 
-    /**
-     * Creates a new template registration
-     */
-    GcmTemplateRegistration() {
-        super();
-    }
+	/**
+	 * Creates a new template registration
+	 */
+	GcmTemplateRegistration() {
+		super();
+	}
 
-    @Override
-    public String getName() {
-        return mName;
-    }
+	@Override
+	public String getName() {
+		return mName;
+	}
 
-    @Override
-    protected void setName(String name) {
-        this.mName = name;
-    }
+	@Override
+	protected void setName(String name) {
+		this.mName = name;
+	}
 
-    @Override
-    public String getPNSHandle() {
-        return mPNSHandle;
-    }
+	@Override
+	public String getPNSHandle() {
+		return mPNSHandle;
+	}
 
-    @Override
-    protected void setPNSHandle(String pNSHandle) {
-        this.mPNSHandle = pNSHandle;
-    }
+	@Override
+	protected void setPNSHandle(String pNSHandle) {
+		this.mPNSHandle = pNSHandle;
+	}
 }

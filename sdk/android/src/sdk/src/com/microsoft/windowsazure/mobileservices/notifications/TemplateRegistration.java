@@ -17,10 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/*
+
+/**
  * TemplateRegistration.java
  */
-
 package com.microsoft.windowsazure.mobileservices.notifications;
 
 import com.google.gson.annotations.Expose;
@@ -31,45 +31,45 @@ import com.google.gson.annotations.SerializedName;
  */
 public abstract class TemplateRegistration extends Registration {
 
-    /**
-     * The template body
-     */
-    @Expose
-    @SerializedName("templateBody")
-    protected String mTemplateBody;
+	/**
+	 * The template body
+	 */
+	@Expose
+	@SerializedName("templateBody")
+	protected String mTemplateBody;
 
-    /**
-     * The registration name
-     */
-    @Expose
-    @SerializedName("templateName")
-    protected String mName;
+	/**
+	 * The registration name
+	 */
+	@Expose
+	@SerializedName("templateName")
+	protected String mName;
 
-    /**
-     * Creates a new template registration
-     */
-    TemplateRegistration() {
-        super();
-    }
+	/**
+	 * Creates a new template registration
+	 */
+	TemplateRegistration() {
+		super();
+	}
 
-    /**
-     * Gets the template body
-     */
-    public String getTemplateBody() {
-        return mTemplateBody;
-    }
+	/**
+	 * Gets the template body
+	 */
+	public String getTemplateBody() {
+		return mTemplateBody;
+	}
 
-    /**
-     * Sets the template body
-     */
-    void setTemplateBody(String templateBody) {
-        mTemplateBody = templateBody;
-    }
+	/**
+	 * Sets the template body
+	 */
+	void setTemplateBody(String templateBody) {
+		mTemplateBody = templateBody;
+	}
 
-    /**
-     * Gets the template name
-     */
-    public String getTemplateName() {
-        return getName();
-    }
+	/**
+	 * Gets the template name
+	 */
+	public String getTemplateName() {
+		return getName();
+	}
 }

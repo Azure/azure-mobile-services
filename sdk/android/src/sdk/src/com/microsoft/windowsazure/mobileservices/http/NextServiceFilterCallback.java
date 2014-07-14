@@ -17,28 +17,24 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/*
+
+/**
  * NextServiceFilterCallback.java
  */
-
 package com.microsoft.windowsazure.mobileservices.http;
 
 import com.google.common.util.concurrent.ListenableFuture;
-
 
 /**
  * Callback used to chain service filters
  */
 public interface NextServiceFilterCallback {
-    /**
-     * Method called to execute the next ServiceFilter in the pipeline
-     * 
-     * @param request
-     *            The ServiceFilterRequest to process
-     * @param responseCallback
-     *            The ServiceFilterResponseCallback to invoke when the response
-     *            is obtained
-     */
-    //public void onNext(ServiceFilterRequest request, ServiceFilterResponseCallback responseCallback);
-    public ListenableFuture<ServiceFilterResponse> onNext(ServiceFilterRequest request);
+	/**
+	 * Method called to execute the next ServiceFilter in the pipeline
+	 * 
+	 * @param request
+	 *            The ServiceFilterRequest to process
+	 * @return A ListenableFuture of the ServiceFilterResponse
+	 */
+	public ListenableFuture<ServiceFilterResponse> onNext(ServiceFilterRequest request);
 }

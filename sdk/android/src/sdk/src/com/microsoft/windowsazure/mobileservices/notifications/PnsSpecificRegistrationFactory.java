@@ -17,10 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/*
+
+/**
  * PnsSpecificRegistrationFactory.java
  */
-
 package com.microsoft.windowsazure.mobileservices.notifications;
 
 import com.google.gson.Gson;
@@ -33,68 +33,68 @@ import com.google.gson.JsonObject;
  */
 final class PnsSpecificRegistrationFactory {
 
-    /**
-     * Creates a new instance of PnsSpecificRegistrationFactory
-     */
-    PnsSpecificRegistrationFactory() {
+	/**
+	 * Creates a new instance of PnsSpecificRegistrationFactory
+	 */
+	PnsSpecificRegistrationFactory() {
 
-    }
+	}
 
-    /**
-     * Creates native registration according the PNS supported on device
-     */
-    public Registration createNativeRegistration() {
-        Registration registration = new GcmNativeRegistration();
+	/**
+	 * Creates native registration according the PNS supported on device
+	 */
+	public Registration createNativeRegistration() {
+		Registration registration = new GcmNativeRegistration();
 
-        registration.setName(Registration.DEFAULT_REGISTRATION_NAME);
+		registration.setName(Registration.DEFAULT_REGISTRATION_NAME);
 
-        return registration;
+		return registration;
 
-    }
+	}
 
-    /**
-     * Creates template registration according the PNS supported on device
-     */
-    public TemplateRegistration createTemplateRegistration() {
-        return new GcmTemplateRegistration();
-    }
+	/**
+	 * Creates template registration according the PNS supported on device
+	 */
+	public TemplateRegistration createTemplateRegistration() {
+		return new GcmTemplateRegistration();
+	}
 
-    /**
-     * Parses a native registration according the PNS supported on device
-     * 
-     * @param registrationJson
-     *            The Json representation of the registration
-     */
-    public Registration parseNativeRegistration(JsonObject registrationJson) {
-        GsonBuilder builder = new GsonBuilder();
-        builder = builder.excludeFieldsWithoutExposeAnnotation();
-        Gson gson = builder.create();
-        Class<? extends Registration> clazz = GcmNativeRegistration.class;
-        Registration registration = gson.fromJson(registrationJson, clazz);
+	/**
+	 * Parses a native registration according the PNS supported on device
+	 * 
+	 * @param registrationJson
+	 *            The Json representation of the registration
+	 */
+	public Registration parseNativeRegistration(JsonObject registrationJson) {
+		GsonBuilder builder = new GsonBuilder();
+		builder = builder.excludeFieldsWithoutExposeAnnotation();
+		Gson gson = builder.create();
+		Class<? extends Registration> clazz = GcmNativeRegistration.class;
+		Registration registration = gson.fromJson(registrationJson, clazz);
 
-        registration.setName(Registration.DEFAULT_REGISTRATION_NAME);
+		registration.setName(Registration.DEFAULT_REGISTRATION_NAME);
 
-        return registration;
-    }
+		return registration;
+	}
 
-    /**
-     * Parses a template registration according the PNS supported on device
-     * 
-     * @param registrationJson
-     *            The Json representation of the registration
-     */
-    public TemplateRegistration parseTemplateRegistration(JsonObject registrationJson) {
-        GsonBuilder builder = new GsonBuilder();
-        builder = builder.excludeFieldsWithoutExposeAnnotation();
-        Gson gson = builder.create();
-        Class<? extends TemplateRegistration> clazz = GcmTemplateRegistration.class;
-        return gson.fromJson(registrationJson, clazz);
-    }
+	/**
+	 * Parses a template registration according the PNS supported on device
+	 * 
+	 * @param registrationJson
+	 *            The Json representation of the registration
+	 */
+	public TemplateRegistration parseTemplateRegistration(JsonObject registrationJson) {
+		GsonBuilder builder = new GsonBuilder();
+		builder = builder.excludeFieldsWithoutExposeAnnotation();
+		Gson gson = builder.create();
+		Class<? extends TemplateRegistration> clazz = GcmTemplateRegistration.class;
+		return gson.fromJson(registrationJson, clazz);
+	}
 
-    /**
-     * Returns PNS handle field name according the PNS supported on device
-     */
-    public String getPlatform() {
-        return GcmNativeRegistration.GCM_PLATFORM;
-    }
+	/**
+	 * Returns PNS handle field name according the PNS supported on device
+	 */
+	public String getPlatform() {
+		return GcmNativeRegistration.GCM_PLATFORM;
+	}
 }

@@ -17,7 +17,8 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/*
+
+/**
  * MobileServiceAuthenticationProvider.java
  */
 package com.microsoft.windowsazure.mobileservices.authentication;
@@ -26,5 +27,5 @@ package com.microsoft.windowsazure.mobileservices.authentication;
  * Authentication providers to use with a Mobile Service
  */
 public enum MobileServiceAuthenticationProvider {
-    MicrosoftAccount, Google, Twitter, Facebook, WindowsAzureActiveDirectory
+	MicrosoftAccount, Google, Twitter, Facebook, WindowsAzureActiveDirectory
 }

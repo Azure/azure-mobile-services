@@ -17,8 +17,9 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
 /**
- * TableOperationCallback.java
+ * ApiJsonOperationCallback.java
  */
 
 package com.microsoft.windowsazure.mobileservices;
@@ -40,6 +41,5 @@ public interface ApiJsonOperationCallback {
 	 * @param response
 	 *            Response object
 	 */
-	public void onCompleted(JsonElement jsonObject, Exception exception,
-			ServiceFilterResponse response);
+	public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response);
 }

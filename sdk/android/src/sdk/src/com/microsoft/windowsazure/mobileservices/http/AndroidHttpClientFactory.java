@@ -18,6 +18,9 @@ Apache 2.0 License
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
 
+/**
+ * AndroidHttpClientFactory.java
+ */
 package com.microsoft.windowsazure.mobileservices.http;
 
 import android.net.http.AndroidHttpClient;
@@ -27,10 +30,10 @@ import android.net.http.AndroidHttpClient;
  */
 public interface AndroidHttpClientFactory {
 
-    /**
-     * Creates a new AndroidHttpClient
-     * 
-     * @return A new AndroidHttpClient
-     */
-    public AndroidHttpClient createAndroidHttpClient();
+	/**
+	 * Creates a new AndroidHttpClient
+	 * 
+	 * @return A new AndroidHttpClient
+	 */
+	public AndroidHttpClient createAndroidHttpClient();
 }

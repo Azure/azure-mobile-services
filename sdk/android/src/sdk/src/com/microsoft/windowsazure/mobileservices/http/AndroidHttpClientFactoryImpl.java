@@ -18,8 +18,10 @@ Apache 2.0 License
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
 
+/**
+ * AndroidHttpClientFactoryImpl.java
+ */
 package com.microsoft.windowsazure.mobileservices.http;
-
 
 import android.net.http.AndroidHttpClient;
 
@@ -28,9 +30,8 @@ import android.net.http.AndroidHttpClient;
  */
 public class AndroidHttpClientFactoryImpl implements AndroidHttpClientFactory {
 
-    @Override
-    public AndroidHttpClient createAndroidHttpClient() {
-        return AndroidHttpClient.newInstance(MobileServiceConnection.getUserAgent());
-    }
-
+	@Override
+	public AndroidHttpClient createAndroidHttpClient() {
+		return AndroidHttpClient.newInstance(MobileServiceConnection.getUserAgent());
+	}
 }

@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * MobileServiceTableBase.java
+ */
 package com.microsoft.windowsazure.mobileservices.table;
 
 import java.lang.reflect.Field;
@@ -202,17 +206,11 @@ public abstract class MobileServiceTableBase {
 		new RequestAsyncTask(delete, mClient.createConnection()) {
 			@Override
 			protected void onPostExecute(ServiceFilterResponse result) {
-				/*
-				 * if (callback != null) { callback.onCompleted(mTaskException,
-				 * result); }
-				 */
-
 				if (mTaskException == null) {
 					future.set(null);
 				} else {
 					future.setException(mTaskException);
 				}
-
 			}
 		}.executeTask();
 
@@ -234,7 +232,6 @@ public abstract class MobileServiceTableBase {
 	 *            Callback to invoke when the operation is completed
 	 */
 	public void delete(Object elementOrId, List<Pair<String, String>> parameters, final TableDeleteCallback callback) {
-
 		ListenableFuture<Void> deleteFuture = delete(elementOrId, parameters);
 
 		Futures.addCallback(deleteFuture, new FutureCallback<Void>() {
@@ -276,24 +273,24 @@ public abstract class MobileServiceTableBase {
 	/**
 	 * Gets the id property from a given element
 	 * 
-	 * @param element
+	 * @param elementOrId
 	 *            The element to use
 	 * @return The id of the element
 	 */
-	protected Object getObjectId(Object element) {
-		if (element == null || (element instanceof JsonNull)) {
+	protected Object getObjectId(Object elementOrId) {
+		if (elementOrId == null || (elementOrId instanceof JsonNull)) {
 			throw new IllegalArgumentException("Element cannot be null");
-		} else if (element instanceof Integer) {
-			return ((Integer) element).intValue();
-		} else if (element instanceof String) {
-			return element;
+		} else if (elementOrId instanceof Integer) {
+			return ((Integer) elementOrId).intValue();
+		} else if (elementOrId instanceof String) {
+			return elementOrId;
 		} else {
 			JsonObject jsonObject;
 
-			if (element instanceof JsonObject) {
-				jsonObject = (JsonObject) element;
+			if (elementOrId instanceof JsonObject) {
+				jsonObject = (JsonObject) elementOrId;
 			} else {
-				jsonObject = mClient.getGsonBuilder().create().toJsonTree(element).getAsJsonObject();
+				jsonObject = mClient.getGsonBuilder().create().toJsonTree(elementOrId).getAsJsonObject();
 			}
 
 			updateIdProperty(jsonObject);
@@ -899,5 +896,4 @@ public abstract class MobileServiceTableBase {
 	protected static <F> boolean isIntegerClass(Class<F> clazz) {
 		return clazz.equals(Integer.class) || clazz.equals(Long.class) || clazz.equals(int.class) || clazz.equals(long.class);
 	}
-
 }
