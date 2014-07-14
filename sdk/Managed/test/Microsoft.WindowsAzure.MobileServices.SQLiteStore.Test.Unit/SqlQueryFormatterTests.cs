@@ -61,7 +61,17 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
 
             string expectedSql = "SELECT * FROM [test] WHERE ([close_dt] > @p1)";
 
-            TestSqlFormatting(f => f.FormatSelect, odata, expectedSql, (DateTime.Parse("2012-05-29T09:13:28")-epoch).TotalSeconds);
+            TestSqlFormatting(f => f.FormatSelect, odata, expectedSql, (DateTime.Parse("2012-05-29T09:13:28") - epoch).TotalSeconds);
+        }
+
+        [TestMethod]
+        public void FormatSelect_DateTimeOffset_Comparison()
+        {
+            string odata = "$filter=close_dt gt datetimeoffset'2012-05-29T09:13:28'";
+
+            string expectedSql = "SELECT * FROM [test] WHERE ([close_dt] > @p1)";
+
+            TestSqlFormatting(f => f.FormatSelect, odata, expectedSql, (DateTime.Parse("2012-05-29T09:13:28") - epoch).TotalSeconds);
         }
 
         [TestMethod]
@@ -221,16 +231,16 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
             string expectedCountSql = "SELECT COUNT(1) AS [count] FROM [test] WHERE (([name] = @p1) AND ([age] > @p2))";
 
             TestSqlFormatting(f => f.FormatSelect, odata, expectedSql, "john", 7L);
-            TestSqlFormatting(f => f.FormatSelectCount, odata, expectedCountSql, "john", 7L);            
+            TestSqlFormatting(f => f.FormatSelectCount, odata, expectedCountSql, "john", 7L);
         }
 
         [TestMethod]
         public void FormatDeletes_GeneratesSQL()
         {
             string odata = "$filter=(name eq 'john' and age gt 7)&$orderby=String desc,id&$skip=5&$top=3&$select=name,age&$inlinecount=allpages";
-            
+
             string expectedSql = "DELETE FROM [test] WHERE [id] IN (SELECT [id] FROM [test] WHERE (([name] = @p1) AND ([age] > @p2)) ORDER BY [String] DESC, [id] LIMIT 3 OFFSET 5)";
-            
+
             TestSqlFormatting(f => f.FormatDelete, odata, expectedSql, "john", 7L);
         }
 
