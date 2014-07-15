@@ -17,12 +17,16 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * BinaryOperatorKind.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 /**
  * Enumeration of binary operators.
  */
-public enum BinaryOperatorKind {
+enum BinaryOperatorKind {
 	/**
 	 * The logical or operator.
 	 */

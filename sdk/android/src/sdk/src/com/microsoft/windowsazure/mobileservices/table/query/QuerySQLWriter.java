@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * QuerySQLWriter.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 import java.util.Locale;
@@ -26,6 +30,9 @@ import android.util.Pair;
 
 public class QuerySQLWriter {
 
+	/**
+	 * Returns the SQL string representation of the query's select clause
+	 */
 	public static String getSelectClause(Query query) {
 		String result = "*";
 
@@ -51,6 +58,9 @@ public class QuerySQLWriter {
 		return result;
 	}
 
+	/**
+	 * Returns the SQL string representation of the query's where clause
+	 */
 	public static String getWhereClause(Query query) throws MobileServiceException {
 		QueryNodeSQLWriter sqlWriter = new QueryNodeSQLWriter();
 
@@ -61,6 +71,9 @@ public class QuerySQLWriter {
 		return sqlWriter.getBuilder().toString();
 	}
 
+	/**
+	 * Returns the SQL string representation of the query's order by clause
+	 */
 	public static String getOrderByClause(Query query) {
 		String result = null;
 
@@ -89,6 +102,9 @@ public class QuerySQLWriter {
 		return result;
 	}
 
+	/**
+	 * Returns the SQL string representation of the query's limit clause
+	 */
 	public static String getLimitClause(Query query) {
 		String result = null;
 

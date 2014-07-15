@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * Query.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 import java.util.Date;
@@ -28,13 +32,17 @@ import android.util.Pair;
  * Interface that represents a query to a table.
  */
 public interface Query {
-
-	public Query deepClone();
+	/**
+	 * Deep clone the Query instance
+	 * 
+	 * @return A cloned instance of the Query
+	 */
+	Query deepClone();
 
 	/**
 	 * Returns the root node of the query
 	 */
-	public QueryNode getQueryNode();
+	QueryNode getQueryNode();
 
 	/**
 	 * Sets the root node of the query
@@ -42,48 +50,48 @@ public interface Query {
 	 * @param queryNode
 	 *            The node to set
 	 */
-	public void setQueryNode(QueryNode queryNode);
+	void setQueryNode(QueryNode queryNode);
 
 	/**
 	 * Returns true if inline count is requested.
 	 */
-	public boolean hasInlineCount();
+	boolean hasInlineCount();
 
 	/**
 	 * Returns a list of fields to order by the results, and their respective
 	 * ordering direction
 	 */
-	public List<Pair<String, QueryOrder>> getOrderBy();
+	List<Pair<String, QueryOrder>> getOrderBy();
 
 	/**
 	 * Returns a requested list of projections;
 	 */
-	public List<String> getProjection();
+	List<String> getProjection();
 
 	/**
 	 * Returns a list of custom parameters set by the user
 	 */
-	public List<Pair<String, String>> getUserDefinedParameters();
+	List<Pair<String, String>> getUserDefinedParameters();
 
 	/**
 	 * Returns a specified top value;
 	 */
-	public int getTop();
+	int getTop();
 
 	/**
 	 * Returns a specified skip value;
 	 */
-	public int getSkip();
+	int getSkip();
 
 	/**
 	 * Returns the table name;
 	 */
-	public String getTableName();
+	String getTableName();
 
 	/**
 	 * Sets the table name;
 	 */
-	public Query tableName(String tableName);
+	Query tableName(String tableName);
 
 	/**** Row Operations ****/
 
@@ -96,7 +104,7 @@ public interface Query {
 	 *            The parameter value
 	 * @return Query
 	 */
-	public Query parameter(String parameter, String value);
+	Query parameter(String parameter, String value);
 
 	/**
 	 * Adds a new order by statement
@@ -107,7 +115,7 @@ public interface Query {
 	 *            Sorting order
 	 * @return Query
 	 */
-	public Query orderBy(String field, QueryOrder order);
+	Query orderBy(String field, QueryOrder order);
 
 	/**
 	 * Sets the number of records to return
@@ -116,7 +124,7 @@ public interface Query {
 	 *            Number of records to return
 	 * @return Query
 	 */
-	public Query top(int top);
+	Query top(int top);
 
 	/**
 	 * Sets the number of records to skip over a given number of elements in a
@@ -125,7 +133,7 @@ public interface Query {
 	 * @param skip
 	 * @return Query
 	 */
-	public Query skip(int skip);
+	Query skip(int skip);
 
 	/**
 	 * The inlinecount property specifies whether or not to retrieve a property
@@ -133,14 +141,14 @@ public interface Query {
 	 * 
 	 * @return Query
 	 */
-	public Query includeInlineCount();
+	Query includeInlineCount();
 
 	/**
 	 * Set the inlinecount property to false.
 	 * 
 	 * @return Query
 	 */
-	public Query removeInlineCount();
+	Query removeInlineCount();
 
 	/**
 	 * Specifies the fields to retrieve
@@ -149,7 +157,7 @@ public interface Query {
 	 *            Names of the fields to retrieve
 	 * @return Query
 	 */
-	public Query select(String... fields);
+	Query select(String... fields);
 
 	/**** Query Operations ****/
 
@@ -160,7 +168,7 @@ public interface Query {
 	 *            The field to use
 	 * @return Query
 	 */
-	public Query field(String fieldName);
+	Query field(String fieldName);
 
 	/**
 	 * Specifies a numeric value
@@ -169,7 +177,7 @@ public interface Query {
 	 *            The numeric value to use
 	 * @return Query
 	 */
-	public Query val(Number number);
+	Query val(Number number);
 
 	/**
 	 * Specifies a boolean value
@@ -178,7 +186,7 @@ public interface Query {
 	 *            The boolean value to use
 	 * @return Query
 	 */
-	public Query val(boolean val);
+	Query val(boolean val);
 
 	/**
 	 * Specifies a string value
@@ -187,7 +195,7 @@ public interface Query {
 	 *            The string value to use
 	 * @return Query
 	 */
-	public Query val(String s);
+	Query val(String s);
 
 	/**
 	 * Specifies a date value
@@ -196,7 +204,7 @@ public interface Query {
 	 *            The date value to use
 	 * @return Query
 	 */
-	public Query val(Date date);
+	Query val(Date date);
 
 	/****** Logical Operators ******/
 
@@ -205,7 +213,7 @@ public interface Query {
 	 * 
 	 * @return Query
 	 */
-	public Query and();
+	Query and();
 
 	/**
 	 * Conditional and.
@@ -213,14 +221,14 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query and(Query otherQuery);
+	Query and(Query otherQuery);
 
 	/**
 	 * Conditional or.
 	 * 
 	 * @return Query
 	 */
-	public Query or();
+	Query or();
 
 	/**
 	 * Conditional or.
@@ -228,14 +236,14 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query or(Query otherQuery);
+	Query or(Query otherQuery);
 
 	/**
 	 * Logical not.
 	 * 
 	 * @return Query
 	 */
-	public Query not();
+	Query not();
 
 	/**
 	 * Logical not.
@@ -243,7 +251,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query not(Query otherQuery);
+	Query not(Query otherQuery);
 
 	/**
 	 * Logical not.
@@ -251,7 +259,7 @@ public interface Query {
 	 * @param booleanValue
 	 * @return Query
 	 */
-	public Query not(boolean booleanValue);
+	Query not(boolean booleanValue);
 
 	/****** Comparison Operators ******/
 
@@ -260,7 +268,7 @@ public interface Query {
 	 * 
 	 * @return Query
 	 */
-	public Query ge();
+	Query ge();
 
 	/**
 	 * Greater than or equal comparison operator.
@@ -268,7 +276,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query ge(Query otherQuery);
+	Query ge(Query otherQuery);
 
 	/**
 	 * Greater than or equal comparison operator.
@@ -276,7 +284,7 @@ public interface Query {
 	 * @param numberValue
 	 * @return Query
 	 */
-	public Query ge(Number numberValue);
+	Query ge(Number numberValue);
 
 	/**
 	 * Greater than or equal comparison operator.
@@ -284,14 +292,14 @@ public interface Query {
 	 * @param dateValue
 	 * @return Query
 	 */
-	public Query ge(Date dateValue);
+	Query ge(Date dateValue);
 
 	/**
 	 * Less than or equal comparison operator.
 	 * 
 	 * @return Query
 	 */
-	public Query le();
+	Query le();
 
 	/**
 	 * Less than or equal comparison operator.
@@ -299,7 +307,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query le(Query otherQuery);
+	Query le(Query otherQuery);
 
 	/**
 	 * Less than or equal comparison operator.
@@ -307,7 +315,7 @@ public interface Query {
 	 * @param numberValue
 	 * @return Query
 	 */
-	public Query le(Number numberValue);
+	Query le(Number numberValue);
 
 	/**
 	 * Less than or equal comparison operator.
@@ -315,14 +323,14 @@ public interface Query {
 	 * @param dateValue
 	 * @return Query
 	 */
-	public Query le(Date dateValue);
+	Query le(Date dateValue);
 
 	/**
 	 * Greater than comparison operator.
 	 * 
 	 * @return Query
 	 */
-	public Query gt();
+	Query gt();
 
 	/**
 	 * Greater than comparison operator.
@@ -330,7 +338,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query gt(Query otherQuery);
+	Query gt(Query otherQuery);
 
 	/**
 	 * Greater than comparison operator.
@@ -338,7 +346,7 @@ public interface Query {
 	 * @param numberValue
 	 * @return Query
 	 */
-	public Query gt(Number numberValue);
+	Query gt(Number numberValue);
 
 	/**
 	 * Greater than comparison operator.
@@ -346,14 +354,14 @@ public interface Query {
 	 * @param dateValue
 	 * @return Query
 	 */
-	public Query gt(Date dateValue);
+	Query gt(Date dateValue);
 
 	/**
 	 * Less than comparison operator.
 	 * 
 	 * @return Query
 	 */
-	public Query lt();
+	Query lt();
 
 	/**
 	 * Less than comparison operator.
@@ -361,7 +369,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query lt(Query otherQuery);
+	Query lt(Query otherQuery);
 
 	/**
 	 * Less than comparison operator.
@@ -369,7 +377,7 @@ public interface Query {
 	 * @param numberValue
 	 * @return Query
 	 */
-	public Query lt(Number numberValue);
+	Query lt(Number numberValue);
 
 	/**
 	 * Less than comparison operator.
@@ -377,14 +385,14 @@ public interface Query {
 	 * @param dateValue
 	 * @return Query
 	 */
-	public Query lt(Date dateValue);
+	Query lt(Date dateValue);
 
 	/**
 	 * Equal comparison operator.
 	 * 
 	 * @return Query
 	 */
-	public Query eq();
+	Query eq();
 
 	/**
 	 * Equal comparison operator.
@@ -392,7 +400,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query eq(Query otherQuery);
+	Query eq(Query otherQuery);
 
 	/**
 	 * Equal comparison operator.
@@ -400,7 +408,7 @@ public interface Query {
 	 * @param numberValue
 	 * @return Query
 	 */
-	public Query eq(Number numberValue);
+	Query eq(Number numberValue);
 
 	/**
 	 * Equal comparison operator.
@@ -408,7 +416,7 @@ public interface Query {
 	 * @param booleanValue
 	 * @return Query
 	 */
-	public Query eq(boolean booleanValue);
+	Query eq(boolean booleanValue);
 
 	/**
 	 * Equal comparison operator.
@@ -416,7 +424,7 @@ public interface Query {
 	 * @param stringValue
 	 * @return Query
 	 */
-	public Query eq(String stringValue);
+	Query eq(String stringValue);
 
 	/**
 	 * Equal comparison operator.
@@ -424,14 +432,14 @@ public interface Query {
 	 * @param dateValue
 	 * @return Query
 	 */
-	public Query eq(Date dateValue);
+	Query eq(Date dateValue);
 
 	/**
 	 * Not equal comparison operator.
 	 * 
 	 * @return Query
 	 */
-	public Query ne();
+	Query ne();
 
 	/**
 	 * Not equal comparison operator.
@@ -439,7 +447,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query ne(Query otherQuery);
+	Query ne(Query otherQuery);
 
 	/**
 	 * Not equal comparison operator.
@@ -447,7 +455,7 @@ public interface Query {
 	 * @param numberValue
 	 * @return Query
 	 */
-	public Query ne(Number numberValue);
+	Query ne(Number numberValue);
 
 	/**
 	 * Not equal comparison operator.
@@ -455,7 +463,7 @@ public interface Query {
 	 * @param booleanValue
 	 * @return Query
 	 */
-	public Query ne(boolean booleanValue);
+	Query ne(boolean booleanValue);
 
 	/**
 	 * Not equal comparison operator.
@@ -463,7 +471,7 @@ public interface Query {
 	 * @param stringValue
 	 * @return Query
 	 */
-	public Query ne(String stringValue);
+	Query ne(String stringValue);
 
 	/**
 	 * Not equal comparison operator.
@@ -471,7 +479,7 @@ public interface Query {
 	 * @param dateValue
 	 * @return Query
 	 */
-	public Query ne(Date dateValue);
+	Query ne(Date dateValue);
 
 	/****** Arithmetic Operators ******/
 
@@ -480,7 +488,7 @@ public interface Query {
 	 * 
 	 * @return Query
 	 */
-	public Query add();
+	Query add();
 
 	/**
 	 * Add operator.
@@ -488,7 +496,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query add(Query otherQuery);
+	Query add(Query otherQuery);
 
 	/**
 	 * Add operator.
@@ -496,14 +504,14 @@ public interface Query {
 	 * @param val
 	 * @return Query
 	 */
-	public Query add(Number val);
+	Query add(Number val);
 
 	/**
 	 * Subtract operator.
 	 * 
 	 * @return Query
 	 */
-	public Query sub();
+	Query sub();
 
 	/**
 	 * Subtract operator.
@@ -511,7 +519,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query sub(Query otherQuery);
+	Query sub(Query otherQuery);
 
 	/**
 	 * Subtract operator.
@@ -519,22 +527,14 @@ public interface Query {
 	 * @param val
 	 * @return Query
 	 */
-	public Query sub(Number val);
+	Query sub(Number val);
 
 	/**
 	 * Multiply operator.
 	 * 
 	 * @return Query
 	 */
-	public Query mul();
-
-	/**
-	 * Multiply operator.
-	 * 
-	 * @param otherQuery
-	 * @return Query
-	 */
-	public Query mul(Query otherQuery);
+	Query mul();
 
 	/**
 	 * Multiply operator.
@@ -542,14 +542,22 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query mul(Number val);
+	Query mul(Query otherQuery);
+
+	/**
+	 * Multiply operator.
+	 * 
+	 * @param otherQuery
+	 * @return Query
+	 */
+	Query mul(Number val);
 
 	/**
 	 * Divide operator.
 	 * 
 	 * @return Query
 	 */
-	public Query div();
+	Query div();
 
 	/**
 	 * Divide operator.
@@ -557,7 +565,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query div(Query otherQuery);
+	Query div(Query otherQuery);
 
 	/**
 	 * Divide operator.
@@ -565,14 +573,14 @@ public interface Query {
 	 * @param val
 	 * @return Query
 	 */
-	public Query div(Number val);
+	Query div(Number val);
 
 	/**
 	 * Reminder (or modulo) operator.
 	 * 
 	 * @return Query
 	 */
-	public Query mod();
+	Query mod();
 
 	/**
 	 * Reminder (or modulo) operator.
@@ -580,7 +588,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query mod(Query otherQuery);
+	Query mod(Query otherQuery);
 
 	/**
 	 * Reminder (or modulo) operator.
@@ -588,7 +596,7 @@ public interface Query {
 	 * @param val
 	 * @return Query
 	 */
-	public Query mod(Number val);
+	Query mod(Number val);
 
 	/****** Date Operators ******/
 
@@ -598,7 +606,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query year(Query otherQuery);
+	Query year(Query otherQuery);
 
 	/**
 	 * The year component value of the parameter value.
@@ -606,7 +614,7 @@ public interface Query {
 	 * @param field
 	 * @return Query
 	 */
-	public Query year(String field);
+	Query year(String field);
 
 	/**
 	 * The month component value of the parameter value.
@@ -614,7 +622,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query month(Query otherQuery);
+	Query month(Query otherQuery);
 
 	/**
 	 * The month component value of the parameter value.
@@ -622,7 +630,7 @@ public interface Query {
 	 * @param field
 	 * @return Query
 	 */
-	public Query month(String field);
+	Query month(String field);
 
 	/**
 	 * The day component value of the parameter value.
@@ -630,7 +638,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query day(Query otherQuery);
+	Query day(Query otherQuery);
 
 	/**
 	 * The day component value of the parameter value.
@@ -638,7 +646,7 @@ public interface Query {
 	 * @param field
 	 * @return Query
 	 */
-	public Query day(String field);
+	Query day(String field);
 
 	/**
 	 * The hour component value of the parameter value.
@@ -646,7 +654,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query hour(Query otherQuery);
+	Query hour(Query otherQuery);
 
 	/**
 	 * The hour component value of the parameter value.
@@ -654,7 +662,7 @@ public interface Query {
 	 * @param field
 	 * @return Query
 	 */
-	public Query hour(String field);
+	Query hour(String field);
 
 	/**
 	 * The minute component value of the parameter value.
@@ -662,7 +670,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query minute(Query otherQuery);
+	Query minute(Query otherQuery);
 
 	/**
 	 * The minute component value of the parameter value.
@@ -670,7 +678,7 @@ public interface Query {
 	 * @param field
 	 * @return Query
 	 */
-	public Query minute(String field);
+	Query minute(String field);
 
 	/**
 	 * The second component value of the parameter value.
@@ -678,7 +686,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query second(Query otherQuery);
+	Query second(Query otherQuery);
 
 	/**
 	 * The second component value of the parameter value.
@@ -686,7 +694,7 @@ public interface Query {
 	 * @param field
 	 * @return Query
 	 */
-	public Query second(String field);
+	Query second(String field);
 
 	/****** Math Functions ******/
 
@@ -696,7 +704,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query floor(Query otherQuery);
+	Query floor(Query otherQuery);
 
 	/**
 	 * The smallest integral value greater than or equal to the parameter value.
@@ -704,7 +712,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query ceiling(Query otherQuery);
+	Query ceiling(Query otherQuery);
 
 	/**
 	 * The nearest integral value to the parameter value.
@@ -712,7 +720,7 @@ public interface Query {
 	 * @param otherQuery
 	 * @return Query
 	 */
-	public Query round(Query otherQuery);
+	Query round(Query otherQuery);
 
 	/****** String Operators ******/
 
@@ -723,7 +731,7 @@ public interface Query {
 	 * @param exp
 	 * @return Query
 	 */
-	public Query toLower(Query exp);
+	Query toLower(Query exp);
 
 	/**
 	 * String value with the contents of the parameter value converted to lower
@@ -732,7 +740,7 @@ public interface Query {
 	 * @param field
 	 * @return Query
 	 */
-	public Query toLower(String field);
+	Query toLower(String field);
 
 	/**
 	 * String value with the contents of the parameter value converted to upper
@@ -741,7 +749,7 @@ public interface Query {
 	 * @param exp
 	 * @return Query
 	 */
-	public Query toUpper(Query exp);
+	Query toUpper(Query exp);
 
 	/**
 	 * String value with the contents of the parameter value converted to upper
@@ -750,7 +758,7 @@ public interface Query {
 	 * @param field
 	 * @return Query
 	 */
-	public Query toUpper(String field);
+	Query toUpper(String field);
 
 	/**
 	 * The number of characters in the specified parameter value.
@@ -758,7 +766,7 @@ public interface Query {
 	 * @param exp
 	 * @return Query
 	 */
-	public Query length(Query exp);
+	Query length(Query exp);
 
 	/**
 	 * The number of characters in the specified parameter value.
@@ -766,7 +774,7 @@ public interface Query {
 	 * @param field
 	 * @return Query
 	 */
-	public Query length(String field);
+	Query length(String field);
 
 	/**
 	 * String value with the contents of the parameter value with all leading
@@ -775,7 +783,7 @@ public interface Query {
 	 * @param exp
 	 * @return Query
 	 */
-	public Query trim(Query exp);
+	Query trim(Query exp);
 
 	/**
 	 * String value with the contents of the parameter value with all leading
@@ -784,7 +792,7 @@ public interface Query {
 	 * @param field
 	 * @return Query
 	 */
-	public Query trim(String field);
+	Query trim(String field);
 
 	/**
 	 * Whether the beginning of the first parameter values matches the second
@@ -796,7 +804,7 @@ public interface Query {
 	 *            Start value
 	 * @return Query
 	 */
-	public Query startsWith(Query field, Query start);
+	Query startsWith(Query field, Query start);
 
 	/**
 	 * Whether the beginning of the first parameter values matches the second
@@ -808,7 +816,7 @@ public interface Query {
 	 *            Start value
 	 * @return Query
 	 */
-	public Query startsWith(String field, String start);
+	Query startsWith(String field, String start);
 
 	/**
 	 * Whether the end of the first parameter value matches the second parameter
@@ -820,7 +828,7 @@ public interface Query {
 	 *            End value
 	 * @return Query
 	 */
-	public Query endsWith(Query field, Query end);
+	Query endsWith(Query field, Query end);
 
 	/**
 	 * Whether the end of the first parameter value matches the second parameter
@@ -832,7 +840,7 @@ public interface Query {
 	 *            End value
 	 * @return Query
 	 */
-	public Query endsWith(String field, String end);
+	Query endsWith(String field, String end);
 
 	/**
 	 * Whether the first parameter string value occurs in the second parameter
@@ -844,7 +852,7 @@ public interface Query {
 	 *            Second string
 	 * @return Query
 	 */
-	public Query subStringOf(Query str1, Query str2);
+	Query subStringOf(Query str1, Query str2);
 
 	/**
 	 * Whether the string parameter occurs in the field
@@ -855,7 +863,7 @@ public interface Query {
 	 *            Field to search in
 	 * @return Query
 	 */
-	public Query subStringOf(String str, String field);
+	Query subStringOf(String str, String field);
 
 	/**
 	 * String value which is the first and second parameter values merged
@@ -867,7 +875,7 @@ public interface Query {
 	 *            Second string
 	 * @return Query
 	 */
-	public Query concat(Query str1, Query str2);
+	Query concat(Query str1, Query str2);
 
 	/**
 	 * String value which is the first and second parameter values merged
@@ -879,7 +887,7 @@ public interface Query {
 	 *            Second string
 	 * @return Query
 	 */
-	public Query concat(Query str1, String str2);
+	Query concat(Query str1, String str2);
 
 	/**
 	 * Index of the first occurrence of the second parameter value in the first
@@ -891,7 +899,7 @@ public interface Query {
 	 *            Value to search for
 	 * @return Query
 	 */
-	public Query indexOf(Query haystack, Query needle);
+	Query indexOf(Query haystack, Query needle);
 
 	/**
 	 * Index of the first occurrence of the second parameter value in the first
@@ -903,7 +911,7 @@ public interface Query {
 	 *            Value to search for
 	 * @return Query
 	 */
-	public Query indexOf(String field, String needle);
+	Query indexOf(String field, String needle);
 
 	/**
 	 * String value starting at the character index specified by the second
@@ -915,7 +923,7 @@ public interface Query {
 	 *            Starting position
 	 * @return Query
 	 */
-	public Query subString(Query str, Query pos);
+	Query subString(Query str, Query pos);
 
 	/**
 	 * String value starting at the character index specified by the second
@@ -927,7 +935,7 @@ public interface Query {
 	 *            Starting position
 	 * @return Query
 	 */
-	public Query subString(String field, int pos);
+	Query subString(String field, int pos);
 
 	/**
 	 * String value starting at the character index specified by the second
@@ -941,7 +949,7 @@ public interface Query {
 	 *            Length
 	 * @return Query
 	 */
-	public Query subString(Query str, Query pos, Query length);
+	Query subString(Query str, Query pos, Query length);
 
 	/**
 	 * String value starting at the character index specified by the second
@@ -955,7 +963,7 @@ public interface Query {
 	 *            Length
 	 * @return Query
 	 */
-	public Query subString(String field, int pos, int length);
+	Query subString(String field, int pos, int length);
 
 	/**
 	 * Finds the second string parameter in the first parameter string value and
@@ -969,7 +977,7 @@ public interface Query {
 	 *            Replace value
 	 * @return Query
 	 */
-	public Query replace(Query str, Query find, Query replace);
+	Query replace(Query str, Query find, Query replace);
 
 	/**
 	 * Finds the second string parameter in the first parameter string value and
@@ -983,5 +991,5 @@ public interface Query {
 	 *            Replace value
 	 * @return Query
 	 */
-	public Query replace(String field, String find, String replace);
+	Query replace(String field, String find, String replace);
 }

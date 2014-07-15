@@ -17,16 +17,25 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * ConstantNodeMerger.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 /**
- * Interface of a query node visitor used to extend functionality.
+ * Class that represents a constant node merger
  */
-public class ConstantNodeMerger implements QueryNodeVisitor<QueryNode> {
+class ConstantNodeMerger implements QueryNodeVisitor<QueryNode> {
+	private ConstantNode mLeftNode;
 
-	ConstantNode mLeftNode;
-
-	public ConstantNodeMerger(ConstantNode leftNode) {
+	/**
+	 * Constructor for ConstantNodeMerger
+	 * 
+	 * @param leftNode
+	 *            The left constant node
+	 */
+	ConstantNodeMerger(ConstantNode leftNode) {
 		this.mLeftNode = leftNode;
 	}
 

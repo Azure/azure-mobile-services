@@ -17,16 +17,25 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * FunctionCallNodeMerger.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 /**
- * Interface of a query node visitor used to extend functionality.
+ * Class that represents a function call node merger
  */
-public class FunctionCallNodeMerger implements QueryNodeVisitor<QueryNode> {
+class FunctionCallNodeMerger implements QueryNodeVisitor<QueryNode> {
+	private FunctionCallNode mLeftNode;
 
-	FunctionCallNode mLeftNode;
-
-	public FunctionCallNodeMerger(FunctionCallNode leftNode) {
+	/**
+	 * Constructor for FunctionCallNodeMerger
+	 * 
+	 * @param leftNode
+	 *            The left function call node
+	 */
+	FunctionCallNodeMerger(FunctionCallNode leftNode) {
 		this.mLeftNode = leftNode;
 	}
 

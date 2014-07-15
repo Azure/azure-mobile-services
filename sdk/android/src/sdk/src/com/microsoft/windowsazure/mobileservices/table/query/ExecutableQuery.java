@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * ExecutableQuery.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 import java.util.Date;
@@ -35,7 +39,7 @@ import android.util.Pair;
 public final class ExecutableQuery<E> implements Query {
 
 	/**
-	 * The Table to query
+	 * The internal base query
 	 */
 	private Query mQuery;
 

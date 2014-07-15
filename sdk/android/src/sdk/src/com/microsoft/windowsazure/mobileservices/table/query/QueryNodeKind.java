@@ -17,12 +17,16 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * QueryNodeKind.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 /**
  * Enumeration of kinds of query nodes.
  */
-public enum QueryNodeKind {
+enum QueryNodeKind {
 
 	/**
 	 * Node used to represent a constant value.

@@ -17,18 +17,27 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * BinaryOperatorNode.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 /**
  * Class that represents a binary operator query node
  */
-public class BinaryOperatorNode implements QueryNode {
+class BinaryOperatorNode implements QueryNode {
 	private BinaryOperatorKind mBinaryOperatorKind;
-
 	private QueryNode mLeftArgument;
 	private QueryNode mRightArgument;
 
-	public BinaryOperatorNode(BinaryOperatorKind binaryOperatorKind) {
+	/**
+	 * Constructor for BinaryOperatorNode
+	 * 
+	 * @param binaryOperatorKind
+	 *            The binary operator kind
+	 */
+	BinaryOperatorNode(BinaryOperatorKind binaryOperatorKind) {
 		this.mBinaryOperatorKind = binaryOperatorKind;
 	}
 
@@ -52,23 +61,38 @@ public class BinaryOperatorNode implements QueryNode {
 		return visitor.visit(this);
 	}
 
-	public BinaryOperatorKind getBinaryOperatorKind() {
+	/**
+	 * Gets the kind of binary operator node.
+	 */
+	BinaryOperatorKind getBinaryOperatorKind() {
 		return this.mBinaryOperatorKind;
 	}
 
-	public QueryNode getLeftArgument() {
+	/**
+	 * Gets the left argument query node of the binary operator node.
+	 */
+	QueryNode getLeftArgument() {
 		return this.mLeftArgument;
 	}
 
-	public void setLeftArgument(QueryNode leftArgument) {
+	/**
+	 * Sets the left argument query node of the binary operator node.
+	 */
+	void setLeftArgument(QueryNode leftArgument) {
 		this.mLeftArgument = leftArgument;
 	}
 
-	public QueryNode getRightArgument() {
+	/**
+	 * Gets the right argument query node of the binary operator node.
+	 */
+	QueryNode getRightArgument() {
 		return this.mRightArgument;
 	}
 
-	public void setRightArgument(QueryNode rightArgument) {
+	/**
+	 * Sets the right argument query node of the binary operator node.
+	 */
+	void setRightArgument(QueryNode rightArgument) {
 		this.mRightArgument = rightArgument;
 	}
 }

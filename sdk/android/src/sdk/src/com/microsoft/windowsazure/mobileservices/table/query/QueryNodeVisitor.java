@@ -17,12 +17,16 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * QueryNodeVisitor.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 /**
  * Interface of a query node visitor used to extend functionality.
  */
-public interface QueryNodeVisitor<E> {
+interface QueryNodeVisitor<E> {
 
 	/**
 	 * Visit a constant node.
@@ -31,7 +35,7 @@ public interface QueryNodeVisitor<E> {
 	 *            The node to visit
 	 * @return Defined by the implementer.
 	 */
-	public E visit(ConstantNode nodeIn);
+	E visit(ConstantNode nodeIn);
 
 	/**
 	 * Visit a field node.
@@ -40,7 +44,7 @@ public interface QueryNodeVisitor<E> {
 	 *            The node to visit
 	 * @return Defined by the implementer.
 	 */
-	public E visit(FieldNode nodeIn);
+	E visit(FieldNode nodeIn);
 
 	/**
 	 * Visit a unary operator node.
@@ -49,7 +53,7 @@ public interface QueryNodeVisitor<E> {
 	 *            The node to visit
 	 * @return Defined by the implementer.
 	 */
-	public E visit(UnaryOperatorNode nodeIn);
+	E visit(UnaryOperatorNode nodeIn);
 
 	/**
 	 * Visit a binary operator node.
@@ -58,7 +62,7 @@ public interface QueryNodeVisitor<E> {
 	 *            The node to visit
 	 * @return Defined by the implementer.
 	 */
-	public E visit(BinaryOperatorNode nodeIn);
+	E visit(BinaryOperatorNode nodeIn);
 
 	/**
 	 * Visit a function call node.
@@ -67,5 +71,5 @@ public interface QueryNodeVisitor<E> {
 	 *            The node to visit
 	 * @return Defined by the implementer.
 	 */
-	public E visit(FunctionCallNode nodeIn);
+	E visit(FunctionCallNode nodeIn);
 }

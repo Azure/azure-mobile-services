@@ -17,14 +17,18 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * FieldNode.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 /**
  * Class that represents a field query node
  */
-public class FieldNode implements QueryNode {
+class FieldNode implements QueryNode {
 	private String mFieldName;
-	
+
 	@Override
 	public QueryNode deepClone() {
 		FieldNode clone = new FieldNode();
@@ -44,11 +48,17 @@ public class FieldNode implements QueryNode {
 		return visitor.visit(this);
 	}
 
-	public String getFieldName() {
+	/**
+	 * Gets the field name
+	 */
+	String getFieldName() {
 		return this.mFieldName;
 	}
 
-	public void setFieldName(String fieldName) {
+	/**
+	 * Sets the field name
+	 */
+	void setFieldName(String fieldName) {
 		this.mFieldName = fieldName;
 	}
 }

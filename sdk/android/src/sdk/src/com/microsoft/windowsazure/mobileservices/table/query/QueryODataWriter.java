@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * QueryODataWriter.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 import java.io.UnsupportedEncodingException;
@@ -24,7 +28,6 @@ import java.net.URLEncoder;
 import java.util.List;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTableBase;
 
 import android.util.Pair;
@@ -33,8 +36,6 @@ public class QueryODataWriter {
 
 	/**
 	 * Returns the OData string representation of the query
-	 * 
-	 * @throws MobileServiceException
 	 */
 	public static String getRowFilter(Query query) {
 		QueryNodeODataWriter oDataWriter = new QueryNodeODataWriter();

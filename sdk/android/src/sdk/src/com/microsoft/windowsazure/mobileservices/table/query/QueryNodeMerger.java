@@ -17,16 +17,25 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * QueryNodeMerger.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 /**
- * Interface of a query node visitor used to extend functionality.
+ * Class that represents a query node merger
  */
-public class QueryNodeMerger implements QueryNodeVisitor<QueryNode> {
+class QueryNodeMerger implements QueryNodeVisitor<QueryNode> {
+	private QueryNode mRightNode;
 
-	QueryNode mRightNode;
-
-	public QueryNodeMerger(QueryNode rightNode) {
+	/**
+	 * Constructor for QueryNodeMerger
+	 * 
+	 * @param rightNode
+	 *            The right query node
+	 */
+	QueryNodeMerger(QueryNode rightNode) {
 		this.mRightNode = rightNode;
 	}
 
@@ -43,7 +52,6 @@ public class QueryNodeMerger implements QueryNodeVisitor<QueryNode> {
 	@Override
 	public QueryNode visit(UnaryOperatorNode leftNode) {
 		return mRightNode.accept(new UnaryOperatorNodeMerger(leftNode));
-
 	}
 
 	@Override
@@ -56,6 +64,10 @@ public class QueryNodeMerger implements QueryNodeVisitor<QueryNode> {
 		return mRightNode.accept(new FunctionCallNodeMerger(leftNode));
 	}
 
+	/**
+	 * Gets a QueryException that represents an invalid sequence of query
+	 * operations
+	 */
 	static QueryException getInvalidSequenceException() {
 		return new QueryException("Invalid query operations sequence.");
 	}

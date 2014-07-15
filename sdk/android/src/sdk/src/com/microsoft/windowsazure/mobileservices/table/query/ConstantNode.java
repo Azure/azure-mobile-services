@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * ConstantNode.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 import java.util.Date;
@@ -24,7 +28,7 @@ import java.util.Date;
 /**
  * Class that represents a constant query node
  */
-public class ConstantNode implements QueryNode {
+class ConstantNode implements QueryNode {
 	private Object mValue;
 
 	@Override
@@ -50,11 +54,17 @@ public class ConstantNode implements QueryNode {
 		return visitor.visit(this);
 	}
 
-	public Object getValue() {
+	/**
+	 * Gets the constant node value.
+	 */
+	Object getValue() {
 		return this.mValue;
 	}
 
-	public void setValue(Object value) {
+	/**
+	 * Sets the constant node value.
+	 */
+	void setValue(Object value) {
 		this.mValue = value;
 	}
 }

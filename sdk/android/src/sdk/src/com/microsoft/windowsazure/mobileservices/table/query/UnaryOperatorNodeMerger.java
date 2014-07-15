@@ -17,16 +17,25 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * UnaryOperatorNodeMerger.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 /**
- * Interface of a query node visitor used to extend functionality.
+ * Class that represents a unary operator node merger
  */
-public class UnaryOperatorNodeMerger implements QueryNodeVisitor<QueryNode> {
+class UnaryOperatorNodeMerger implements QueryNodeVisitor<QueryNode> {
+	private UnaryOperatorNode mLeftNode;
 
-	UnaryOperatorNode mLeftNode;
-
-	public UnaryOperatorNodeMerger(UnaryOperatorNode leftNode) {
+	/**
+	 * Constructor for UnaryOperatorNodeMerger
+	 * 
+	 * @param leftNode
+	 *            The left binary operator node
+	 */
+	UnaryOperatorNodeMerger(UnaryOperatorNode leftNode) {
 		this.mLeftNode = leftNode;
 	}
 

@@ -17,12 +17,16 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * FunctionCallKind.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 /**
- * Enumeration of binary operators.
+ * Enumeration of function calls.
  */
-public enum FunctionCallKind {
+enum FunctionCallKind {
 	/**
 	 * The year date function.
 	 */

@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * QueryNodeSQLWriter.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 import java.util.Date;
@@ -28,14 +32,19 @@ import com.microsoft.windowsazure.mobileservices.table.serialization.DateSeriali
  * Query node visitor used to generate SQL filter.
  */
 public class QueryNodeSQLWriter implements QueryNodeVisitor<QueryNode> {
+	private StringBuilder mBuilder;
 
-	StringBuilder mBuilder;
-
-	public QueryNodeSQLWriter() {
+	/**
+	 * Constructor for QueryNodeSQLWriter
+	 */
+	QueryNodeSQLWriter() {
 		this.mBuilder = new StringBuilder();
 	}
 
-	public StringBuilder getBuilder() {
+	/**
+	 * Gets the StringBuilder with the SQL representation of the node
+	 */
+	StringBuilder getBuilder() {
 		return this.mBuilder;
 	}
 

@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * FunctionCallNode.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 import java.util.ArrayList;
@@ -25,12 +29,18 @@ import java.util.List;
 /**
  * Class that represents a function call query node
  */
-public class FunctionCallNode implements QueryNode {
+class FunctionCallNode implements QueryNode {
 	private FunctionCallKind mFunctionCallKind;
 
 	private List<QueryNode> mArguments;
 
-	public FunctionCallNode(FunctionCallKind functionCallKind) {
+	/**
+	 * Constructor for FunctionCallNode
+	 * 
+	 * @param functionCallKind
+	 *            The kind of function call
+	 */
+	FunctionCallNode(FunctionCallKind functionCallKind) {
 		this.mFunctionCallKind = functionCallKind;
 		this.mArguments = new ArrayList<QueryNode>();
 	}
@@ -60,14 +70,26 @@ public class FunctionCallNode implements QueryNode {
 		return visitor.visit(this);
 	}
 
+	/**
+	 * Gets the function call kind
+	 */
 	public FunctionCallKind getFunctionCallKind() {
 		return this.mFunctionCallKind;
 	}
 
+	/**
+	 * Gets the list of arguments
+	 */
 	public List<QueryNode> getArguments() {
 		return this.mArguments;
 	}
 
+	/**
+	 * Adds and argument to the exiting list
+	 * 
+	 * @param argument
+	 *            The argument to add
+	 */
 	public void addArgument(QueryNode argument) {
 		this.mArguments.add(argument);
 	}

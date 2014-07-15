@@ -17,17 +17,26 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * UnaryOperatorNode.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 /**
  * Class that represents a unary operator query node
  */
-public class UnaryOperatorNode implements QueryNode {
+class UnaryOperatorNode implements QueryNode {
 	private UnaryOperatorKind mUnaryOperatorKind;
-
 	private QueryNode mArgument;
 
-	public UnaryOperatorNode(UnaryOperatorKind unaryOperatorKind) {
+	/**
+	 * Constructor for UnaryOperatorNode
+	 * 
+	 * @param unaryOperatorKind
+	 *            The unary operator kind
+	 */
+	UnaryOperatorNode(UnaryOperatorKind unaryOperatorKind) {
 		this.mUnaryOperatorKind = unaryOperatorKind;
 	}
 
@@ -50,15 +59,24 @@ public class UnaryOperatorNode implements QueryNode {
 		return visitor.visit(this);
 	}
 
-	public UnaryOperatorKind getUnaryOperatorKind() {
+	/**
+	 * Gets the kind of unary operator node.
+	 */
+	UnaryOperatorKind getUnaryOperatorKind() {
 		return this.mUnaryOperatorKind;
 	}
 
-	public QueryNode getArgument() {
+	/**
+	 * Gets the argument query node of the unary operator.
+	 */
+	QueryNode getArgument() {
 		return this.mArgument;
 	}
 
-	public void setArgument(QueryNode argument) {
+	/**
+	 * Sets the argument query node of the unary operator.
+	 */
+	void setArgument(QueryNode argument) {
 		this.mArgument = argument;
 	}
 }

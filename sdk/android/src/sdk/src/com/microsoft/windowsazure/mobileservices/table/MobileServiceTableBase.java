@@ -131,10 +131,16 @@ public abstract class MobileServiceTableBase {
 		return mTableName;
 	}
 
+	/**
+	 * Returns the set of enabled System Properties
+	 */
 	public EnumSet<MobileServiceSystemProperty> getSystemProperties() {
 		return mSystemProperties;
 	}
 
+	/**
+	 * Sets the set of enabled System Properties
+	 */
 	public void setSystemProperties(EnumSet<MobileServiceSystemProperty> systemProperties) {
 		this.mSystemProperties = systemProperties;
 	}

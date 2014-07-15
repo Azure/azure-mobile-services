@@ -17,16 +17,25 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * FieldNodeMerger.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 /**
- * Interface of a query node visitor used to extend functionality.
+ * Class that represents a field node merger
  */
-public class FieldNodeMerger implements QueryNodeVisitor<QueryNode> {
+class FieldNodeMerger implements QueryNodeVisitor<QueryNode> {
+	private FieldNode mLeftNode;
 
-	FieldNode mLeftNode;
-
-	public FieldNodeMerger(FieldNode leftNode) {
+	/**
+	 * Constructor for FieldNodeMerger
+	 * 
+	 * @param leftNode
+	 *            The left field node
+	 */
+	FieldNodeMerger(FieldNode leftNode) {
 		this.mLeftNode = leftNode;
 	}
 

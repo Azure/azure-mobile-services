@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * QueryBase.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 import java.util.ArrayList;
@@ -26,11 +30,9 @@ import java.util.List;
 import android.util.Pair;
 
 /**
- * Class that represents a query to a table, where E is the callback class to
- * use when executing the query
+ * Class that provides a base implementation of query
  */
-public class QueryBase implements Query {
-
+class QueryBase implements Query {
 	/**
 	 * The main text of the query
 	 */
@@ -71,7 +73,7 @@ public class QueryBase implements Query {
 	/**
 	 * Creates an empty QueryBase.
 	 */
-	public QueryBase() {
+	QueryBase() {
 
 	}
 

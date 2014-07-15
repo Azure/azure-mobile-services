@@ -17,16 +17,25 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * BinaryOperatorNodeMerger.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.query;
 
 /**
- * Interface of a query node visitor used to extend functionality.
+ * Class that represents a binary operator node merger
  */
-public class BinaryOperatorNodeMerger implements QueryNodeVisitor<QueryNode> {
+class BinaryOperatorNodeMerger implements QueryNodeVisitor<QueryNode> {
+	private BinaryOperatorNode mLeftNode;
 
-	BinaryOperatorNode mLeftNode;
-
-	public BinaryOperatorNodeMerger(BinaryOperatorNode leftNode) {
+	/**
+	 * Constructor for BinaryOperatorNodeMerger
+	 * 
+	 * @param leftNode
+	 *            The left binary operator node
+	 */
+	BinaryOperatorNodeMerger(BinaryOperatorNode leftNode) {
 		this.mLeftNode = leftNode;
 	}
 
