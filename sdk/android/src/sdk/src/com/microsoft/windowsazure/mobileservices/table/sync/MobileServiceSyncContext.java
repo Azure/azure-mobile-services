@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * MobileServiceSyncContext.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync;
 
 import java.io.IOException;
@@ -75,9 +79,7 @@ import com.microsoft.windowsazure.mobileservices.threading.MultiReadWriteLockDic
 public class MobileServiceSyncContext {
 	private static class PushSyncRequest {
 		private Bookmark mBookmark;
-
 		private Semaphore mSignalDone;
-
 		private MobileServicePushFailedException mPushException;
 
 		private PushSyncRequest(Bookmark bookmark, Semaphore signalDone) {
@@ -89,7 +91,7 @@ public class MobileServiceSyncContext {
 	private static class PushSyncRequestConsumer extends Thread {
 		private MobileServiceSyncContext mContext;
 
-		public PushSyncRequestConsumer(MobileServiceSyncContext context) {
+		private PushSyncRequestConsumer(MobileServiceSyncContext context) {
 			this.mContext = context;
 		}
 
@@ -108,21 +110,21 @@ public class MobileServiceSyncContext {
 		private MultiReadWriteLock<String> mTableLock;
 		private MultiLock<String> mIdLock;
 
-		public LockProtectedOperation(TableOperation operation, MultiReadWriteLock<String> tableLock, MultiLock<String> idLock) {
+		private LockProtectedOperation(TableOperation operation, MultiReadWriteLock<String> tableLock, MultiLock<String> idLock) {
 			this.mOperation = operation;
 			this.mTableLock = tableLock;
 			this.mIdLock = idLock;
 		}
 
-		public TableOperation getOperation() {
+		private TableOperation getOperation() {
 			return this.mOperation;
 		}
 
-		public MultiReadWriteLock<String> getTableLock() {
+		private MultiReadWriteLock<String> getTableLock() {
 			return this.mTableLock;
 		}
 
-		public MultiLock<String> getIdLock() {
+		private MultiLock<String> getIdLock() {
 			return this.mIdLock;
 		}
 	}
@@ -195,8 +197,14 @@ public class MobileServiceSyncContext {
 	 */
 	private Semaphore mPushSRConsumerIdle;
 
-	public MobileServiceSyncContext(MobileServiceClient mobileServiceClient) {
-		this.mClient = mobileServiceClient;
+	/**
+	 * Constructor for MobileServiceSyncContext
+	 * 
+	 * @param client
+	 *            The MobileServiceClient used to invoke table operations
+	 */
+	public MobileServiceSyncContext(MobileServiceClient client) {
+		this.mClient = client;
 		this.mInitLock = new ReentrantReadWriteLock(true);
 		this.mOpLock = new ReentrantReadWriteLock(true);
 		this.mPushSRLock = new ReentrantLock(true);
@@ -335,6 +343,14 @@ public class MobileServiceSyncContext {
 		return result;
 	}
 
+	/**
+	 * Performs a query against the remote table and stores results.
+	 * 
+	 * @param tableName
+	 *            the remote table name
+	 * @param query
+	 *            an optional query to filter results
+	 */
 	void pull(String tableName, Query query) throws Throwable {
 		this.mInitLock.readLock().lock();
 
@@ -389,6 +405,14 @@ public class MobileServiceSyncContext {
 		}
 	}
 
+	/**
+	 * Performs a query against the local table and deletes the results.
+	 * 
+	 * @param tableName
+	 *            the local table name
+	 * @param query
+	 *            an optional query to filter results
+	 */
 	void purge(String tableName, Query query) throws Throwable {
 		this.mInitLock.readLock().lock();
 
@@ -437,6 +461,16 @@ public class MobileServiceSyncContext {
 		}
 	}
 
+	/**
+	 * Retrieve results from the local table.
+	 * 
+	 * @param tableName
+	 *            the local table name
+	 * @param query
+	 *            an optional query to filter results
+	 * 
+	 * @return a JsonElement with the results
+	 */
 	JsonElement read(String tableName, Query query) throws MobileServiceLocalStoreException {
 		String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
 
@@ -449,12 +483,31 @@ public class MobileServiceSyncContext {
 		return this.mStore.read(query);
 	}
 
+	/**
+	 * Looks up an item from the local table.
+	 * 
+	 * @param tableName
+	 *            the local table name
+	 * @param itemId
+	 *            the id of the item to look up
+	 * 
+	 * @return the item found
+	 */
 	JsonObject lookUp(String tableName, String itemId) throws MobileServiceLocalStoreException {
 		String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
 
 		return this.mStore.lookup(invTableName, itemId);
 	}
 
+	/**
+	 * Insert an item into the local table and enqueue the operation to be
+	 * synchronized on context push.
+	 * 
+	 * @param tableName
+	 *            the local table name
+	 * @param item
+	 *            the item to be inserted
+	 */
 	void insert(String tableName, String itemId, JsonObject item) throws Throwable {
 		String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
 
@@ -462,6 +515,15 @@ public class MobileServiceSyncContext {
 		processOperation(operation, item);
 	}
 
+	/**
+	 * Update an item in the local table and enqueue the operation to be
+	 * synchronized on context push.
+	 * 
+	 * @param tableName
+	 *            the local table name
+	 * @param item
+	 *            the item to be updated
+	 */
 	void update(String tableName, String itemId, JsonObject item) throws Throwable {
 		String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
 
@@ -469,6 +531,15 @@ public class MobileServiceSyncContext {
 		processOperation(operation, item);
 	}
 
+	/**
+	 * Delete an item from the local table and enqueue the operation to be
+	 * synchronized on context push.
+	 * 
+	 * @param tableName
+	 *            the local table name
+	 * @param itemId
+	 *            the id of the item to be deleted
+	 */
 	void delete(String tableName, String itemId) throws Throwable {
 		String invTableName = tableName != null ? tableName.trim().toLowerCase(Locale.getDefault()) : null;
 

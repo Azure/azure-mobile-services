@@ -60,6 +60,8 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 	 *            The name of the represented table
 	 * @param client
 	 *            The MobileServiceClient used to invoke table operations
+	 * @param clazz
+	 *            The class used for data serialization
 	 */
 	public MobileServiceTable(String name, MobileServiceClient client, Class<E> clazz) {
 		initialize(name, client);

@@ -1,3 +1,26 @@
+/*
+Copyright (c) Microsoft Open Technologies, Inc.
+All Rights Reserved
+Apache 2.0 License
+ 
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+ 
+     http://www.apache.org/licenses/LICENSE-2.0
+ 
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ 
+See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
+ */
+
+/**
+ * SQLiteLocalStore.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.localstore;
 
 import java.util.ArrayList;
@@ -24,19 +47,57 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QuerySQLWriter;
 
+/**
+ * Implements MobileServiceLocalStore backed by an SQLite DB
+ */
 public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceLocalStore {
 	private static class Statement {
-		public String sql;
-		public List<Object> parameters;
+		private String sql;
+		private List<Object> parameters;
 	}
 
 	private Map<String, Map<String, ColumnDataType>> mTables;
 
+	/**
+	 * Constructor for SQLiteLocalStore
+	 * 
+	 * @param context
+	 *            context to use to open or create the database
+	 * @param name
+	 *            name of the database file, or null for an in-memory database
+	 * @param factory
+	 *            factory to use for creating cursor objects, or null for the
+	 *            default
+	 * @param version
+	 *            version number of the database (starting at 1); if the
+	 *            database is older, onUpgrade will be used to upgrade the
+	 *            database; if the database is newer, onDowngrade will be used
+	 *            to downgrade the database
+	 */
 	public SQLiteLocalStore(Context context, String name, CursorFactory factory, int version) {
 		super(context, name, factory, version);
 		this.mTables = new HashMap<String, Map<String, ColumnDataType>>();
 	}
 
+	/**
+	 * Constructor for SQLiteLocalStore
+	 * 
+	 * @param context
+	 *            context to use to open or create the database
+	 * @param name
+	 *            name of the database file, or null for an in-memory database
+	 * @param factory
+	 *            factory to use for creating cursor objects, or null for the
+	 *            default
+	 * @param version
+	 *            version number of the database (starting at 1); if the
+	 *            database is older, onUpgrade will be used to upgrade the
+	 *            database; if the database is newer, onDowngrade will be used
+	 *            to downgrade the database
+	 * @param errorHandler
+	 *            the DatabaseErrorHandler to be used when sqlite reports
+	 *            database corruption, or null to use the default error handler.
+	 */
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	public SQLiteLocalStore(Context context, String name, CursorFactory factory, int version, DatabaseErrorHandler errorHandler) {
 		super(context, name, factory, version, errorHandler);
@@ -304,17 +365,17 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 	}
 
 	private boolean isSystemProperty(String invColumnName) {
-		
+
 		invColumnName = invColumnName.trim().toLowerCase(Locale.getDefault());
-		
+
 		return invColumnName.equals("__version") || invColumnName.equals("__createdat") || invColumnName.equals("__updatedat")
 				|| invColumnName.equals("__queueloadedat");
 	}
 
 	private void validateReservedProperties(ColumnDataType colDataType, String invColumnName) throws IllegalArgumentException {
-		
+
 		invColumnName = invColumnName.trim().toLowerCase(Locale.getDefault());
-		
+
 		if (invColumnName.equals("id") && colDataType != ColumnDataType.String) {
 			throw new IllegalArgumentException("System column \"id\" must be ColumnDataType.String.");
 		} else if (invColumnName.equals("__version") && colDataType != ColumnDataType.String) {
@@ -380,17 +441,15 @@ public class SQLiteLocalStore extends SQLiteOpenHelper implements MobileServiceL
 		List<Object> parameters = new ArrayList<Object>(item.entrySet().size());
 
 		String delimiter = "";
-		
-		
+
 		Map<String, ColumnDataType> tableDefinition = mTables.get(invTableName);
-		
+
 		for (Entry<String, JsonElement> property : item.entrySet()) {
-		
-			if (isSystemProperty(property.getKey()) && 
-					!tableDefinition.containsKey(property.getKey())) {
+
+			if (isSystemProperty(property.getKey()) && !tableDefinition.containsKey(property.getKey())) {
 				continue;
 			}
-				
+
 			JsonElement value = property.getValue();
 
 			if (value.isJsonNull()) {

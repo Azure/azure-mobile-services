@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * MobileServiceJsonSyncTable.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync;
 
 import java.util.UUID;
@@ -35,18 +39,27 @@ import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileSer
  * Provides operations on local table.
  */
 public class MobileServiceJsonSyncTable {
-
 	private String mName;
-
-	public String getName() {
-		return mName;
-	}
-
 	private MobileServiceClient mClient;
 
+	/**
+	 * Constructor for MobileServiceJsonSyncTable
+	 * 
+	 * @param name
+	 *            The name of the represented table
+	 * @param client
+	 *            The MobileServiceClient used to invoke table operations
+	 */
 	public MobileServiceJsonSyncTable(String name, MobileServiceClient client) {
 		this.mName = name;
 		this.mClient = client;
+	}
+
+	/**
+	 * Returns the name of the represented table
+	 */
+	public String getName() {
+		return mName;
 	}
 
 	/**
@@ -81,8 +94,6 @@ public class MobileServiceJsonSyncTable {
 	/**
 	 * Performs a query against the local table and deletes the results.
 	 * 
-	 * @param tableName
-	 *            the local table name
 	 * @param query
 	 *            an optional query to filter results
 	 * 
