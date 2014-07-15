@@ -17,13 +17,25 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * UpdateOperationCollapser.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.operations;
 
-public class UpdateOperationCollapser implements TableOperationVisitor<TableOperation> {
+/**
+ * Class that encapsulates collapse logic for existing update operation
+ */
+class UpdateOperationCollapser implements TableOperationVisitor<TableOperation> {
+	private UpdateOperation mPreviousOperation;
 
-	UpdateOperation mPreviousOperation;
-
-	public UpdateOperationCollapser(UpdateOperation previousOperation) {
+	/**
+	 * Constructor for UpdateOperationCollapser
+	 * 
+	 * @param existingOperation
+	 *            the existing operation to collapse
+	 */
+	UpdateOperationCollapser(UpdateOperation previousOperation) {
 		this.mPreviousOperation = previousOperation;
 	}
 

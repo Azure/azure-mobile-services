@@ -498,13 +498,13 @@ public class OperationQueue {
 		TableOperation operation = null;
 		switch (kind) {
 		case 0:
-			operation = InsertOperation.parse(id, tableName, itemId, createdAt);
+			operation = InsertOperation.create(id, tableName, itemId, createdAt);
 			break;
 		case 1:
-			operation = UpdateOperation.parse(id, tableName, itemId, createdAt);
+			operation = UpdateOperation.create(id, tableName, itemId, createdAt);
 			break;
 		case 2:
-			operation = DeleteOperation.parse(id, tableName, itemId, createdAt);
+			operation = DeleteOperation.create(id, tableName, itemId, createdAt);
 			break;
 		}
 

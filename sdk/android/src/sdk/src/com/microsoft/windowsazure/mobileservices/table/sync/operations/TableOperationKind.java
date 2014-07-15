@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * TableOperationKind.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.operations;
 
 import android.annotation.SuppressLint;
@@ -59,10 +63,20 @@ public enum TableOperationKind {
 		this.mValue = value;
 	}
 
+	/**
+	 * Return the int value associated to the enum
+	 */
 	public int getValue() {
 		return this.mValue;
 	}
 
+	/**
+	 * Return the TableOperationKind with the provided int value
+	 * 
+	 * @param value
+	 *            the int value
+	 * @return the matching TableOperationKind
+	 */
 	public static TableOperationKind parse(int value) {
 		return mValuesMap.get(value);
 	}

@@ -17,31 +17,40 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * TableOperationCollapser.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.operations;
 
 /**
- * Interface of a query node visitor used to extend functionality.
+ * Class that encapsulates collapse logic for new table operation.
  */
 public class TableOperationCollapser implements TableOperationVisitor<TableOperation> {
+	private TableOperation mNewOperation;
 
-	TableOperation mNewOperation;
-
+	/**
+	 * Constructor for TableOperationCollapser
+	 * 
+	 * @param newOperation
+	 *            the new operation to collapse
+	 */
 	public TableOperationCollapser(TableOperation newOperation) {
 		this.mNewOperation = newOperation;
 	}
 
 	@Override
-	public TableOperation visit(InsertOperation previousOperation) throws Throwable {
-		return mNewOperation.accept(new InsertOperationCollapser(previousOperation));
+	public TableOperation visit(InsertOperation existingOperation) throws Throwable {
+		return mNewOperation.accept(new InsertOperationCollapser(existingOperation));
 	}
 
 	@Override
-	public TableOperation visit(UpdateOperation previousOperation) throws Throwable {
-		return mNewOperation.accept(new UpdateOperationCollapser(previousOperation));
+	public TableOperation visit(UpdateOperation existingOperation) throws Throwable {
+		return mNewOperation.accept(new UpdateOperationCollapser(existingOperation));
 	}
 
 	@Override
-	public TableOperation visit(DeleteOperation previousOperation) throws Throwable {
-		return mNewOperation.accept(new DeleteOperationCollapser(previousOperation));
+	public TableOperation visit(DeleteOperation existingOperation) throws Throwable {
+		return mNewOperation.accept(new DeleteOperationCollapser(existingOperation));
 	}
 }

@@ -33,25 +33,36 @@ import com.google.gson.JsonObject;
  */
 public class TableOperationError {
 	private String mId;
-
 	private TableOperationKind mOperationKind;
-
 	private String mTableName;
-
 	private String mItemId;
-
 	private JsonObject mClientItem;
-
 	private String mErrorMessage;
-
 	private Integer mStatusCode;
-
 	private String mServerResponse;
-
 	private JsonObject mServerItem;
-
 	private Date mCreatedAt;
 
+	/**
+	 * Constructor for TableOperationError
+	 * 
+	 * @param operationKind
+	 *            the kind of table operation
+	 * @param tableName
+	 *            the table name
+	 * @param itemId
+	 *            the item id
+	 * @param clientItem
+	 *            the client item
+	 * @param errorMessage
+	 *            the error message
+	 * @param statusCode
+	 *            the status code of the response
+	 * @param serverResponse
+	 *            the server response
+	 * @param serverItem
+	 *            the server item
+	 */
 	public TableOperationError(TableOperationKind operationKind, String tableName, String itemId, JsonObject clientItem, String errorMessage,
 			Integer statusCode, String serverResponse, JsonObject serverItem) {
 		this.mId = UUID.randomUUID().toString();
@@ -66,46 +77,101 @@ public class TableOperationError {
 		this.mCreatedAt = new Date();
 	}
 
+	/**
+	 * Gets the table operation error id
+	 */
 	public String getId() {
 		return this.mId;
 	}
 
+	/**
+	 * Gets the kind of table operation
+	 */
 	public TableOperationKind getOperationKind() {
 		return this.mOperationKind;
 	}
 
+	/**
+	 * Gets the table name
+	 */
 	public String getTableName() {
 		return this.mTableName;
 	}
 
+	/**
+	 * Gets the item id
+	 */
 	public String getItemId() {
 		return this.mItemId;
 	}
 
+	/**
+	 * Gets the client item
+	 */
 	public JsonObject getClientItem() {
 		return this.mClientItem;
 	}
 
+	/**
+	 * Gets the error message
+	 */
 	public String getErrorMessage() {
 		return this.mErrorMessage;
 	}
 
+	/**
+	 * Gets the status code of the response
+	 */
 	public Integer getStatusCode() {
 		return this.mStatusCode;
 	}
 
+	/**
+	 * Gets the server response
+	 */
 	public String getServerResponse() {
 		return this.mServerResponse;
 	}
 
+	/**
+	 * Gets the server item
+	 */
 	public JsonObject getServerItem() {
 		return this.mServerItem;
 	}
 
+	/**
+	 * Gets the creation date of the table operation error
+	 */
 	public Date getCreatedAt() {
 		return this.mCreatedAt;
 	}
 
+	/**
+	 * Creates a new table operation error
+	 * 
+	 * @param id
+	 *            the table operation error id
+	 * @param operationKind
+	 *            the kind of table operation
+	 * @param tableName
+	 *            the table name
+	 * @param itemId
+	 *            the item id
+	 * @param clientItem
+	 *            the client item
+	 * @param errorMessage
+	 *            the error message
+	 * @param statusCode
+	 *            the status code of the response
+	 * @param serverResponse
+	 *            the server response
+	 * @param serverItem
+	 *            the server item
+	 * @param createdAt
+	 *            the creation date of the table operation error
+	 * @return the table operation error
+	 */
 	public static TableOperationError create(String id, TableOperationKind operationKind, String tableName, String itemId, JsonObject clientItem,
 			String errorMessage, Integer statusCode, String serverResponse, JsonObject serverItem, Date createdAt) {
 		TableOperationError operationError = new TableOperationError(operationKind, tableName, itemId, clientItem, errorMessage, statusCode, serverResponse,

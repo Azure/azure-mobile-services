@@ -17,18 +17,33 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * LocalTableOperationProcessor.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.operations;
 
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStore;
 
+/**
+ * Processes a table operation against a local store.
+ */
 public class LocalTableOperationProcessor implements TableOperationVisitor<Void> {
-	MobileServiceLocalStore mStore;
+	private MobileServiceLocalStore mStore;
+	private JsonObject mItem;
+	private String mItemBackupTable;
 
-	JsonObject mItem;
-
-	String mItemBackupTable;
-
+	/**
+	 * Constructor for LocalTableOperationProcessor
+	 * 
+	 * @param store
+	 *            the local store
+	 * @param item
+	 *            the item to process
+	 * @param itemBackupTable
+	 *            the table name for item backup
+	 */
 	public LocalTableOperationProcessor(MobileServiceLocalStore store, JsonObject item, String itemBackupTable) {
 		this.mStore = store;
 		this.mItem = item;
@@ -68,10 +83,16 @@ public class LocalTableOperationProcessor implements TableOperationVisitor<Void>
 		return null;
 	}
 
+	/**
+	 * Gets the item to process
+	 */
 	public JsonObject getItem() {
 		return this.mItem;
 	}
 
+	/**
+	 * Sets the item to process
+	 */
 	public void setItem(JsonObject item) {
 		this.mItem = item;
 	}

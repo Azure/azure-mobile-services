@@ -17,14 +17,23 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * DeleteOperationCollapser.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.operations;
 
-public class DeleteOperationCollapser implements TableOperationVisitor<TableOperation> {
-
-	DeleteOperation mPreviousOperation;
-
-	public DeleteOperationCollapser(DeleteOperation previousOperation) {
-		this.mPreviousOperation = previousOperation;
+/**
+ * Class that encapsulates collapse logic for existing delete operation
+ */
+class DeleteOperationCollapser implements TableOperationVisitor<TableOperation> {
+	/**
+	 * Constructor for DeleteOperationCollapser
+	 * 
+	 * @param existingOperation
+	 *            the existing operation to collapse
+	 */
+	DeleteOperationCollapser(DeleteOperation existingOperation) {
 	}
 
 	@Override

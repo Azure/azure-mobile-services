@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * InsertOperation.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.operations;
 
 import java.util.Date;
@@ -26,15 +30,19 @@ import java.util.UUID;
  * Class representing an insert operation against remote table.
  */
 public class InsertOperation implements TableOperation {
-
 	private String mId;
-
 	private String mTableName;
-
 	private String mItemId;
-
 	private Date mCreatedAt;
 
+	/**
+	 * Constructor for InsertOperation
+	 * 
+	 * @param tableName
+	 *            the table name
+	 * @param itemId
+	 *            the item id
+	 */
 	public InsertOperation(String tableName, String itemId) {
 		this.mId = UUID.randomUUID().toString();
 		this.mTableName = tableName;
@@ -72,7 +80,20 @@ public class InsertOperation implements TableOperation {
 		return visitor.visit(this);
 	}
 
-	public static InsertOperation parse(String id, String tableName, String itemId, Date createdAt) {
+	/**
+	 * Create a new InsertOperation
+	 * 
+	 * @param id
+	 *            the table operation id
+	 * @param tableName
+	 *            the table name
+	 * @param itemId
+	 *            the item id
+	 * @param createdAt
+	 *            the creation date of the table operation
+	 * @return the InsertOperation
+	 */
+	public static InsertOperation create(String id, String tableName, String itemId, Date createdAt) {
 		InsertOperation operation = new InsertOperation(tableName, itemId);
 		operation.mId = id;
 		operation.mCreatedAt = createdAt;

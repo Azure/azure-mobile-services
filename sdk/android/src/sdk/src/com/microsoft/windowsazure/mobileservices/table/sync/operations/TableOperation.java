@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * TableOperation.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.operations;
 
 import java.util.Date;
@@ -30,35 +34,35 @@ public interface TableOperation {
 	 * 
 	 * @return The unique id.
 	 */
-	public String getId();
+	String getId();
 
 	/**
 	 * Gets the kind of table operation.
 	 * 
 	 * @return The table operation kind.
 	 */
-	public TableOperationKind getKind();
+	TableOperationKind getKind();
 
 	/**
 	 * Gets the name of the table the operation will be executed against.
 	 * 
 	 * @return The table name.
 	 */
-	public String getTableName();
+	String getTableName();
 
 	/**
 	 * Gets the id of the item associated with the operation.
 	 * 
 	 * @return The item id.
 	 */
-	public String getItemId();
+	String getItemId();
 
 	/**
 	 * Gets the creation date of the operation.
 	 * 
 	 * @return The operation creation date.
 	 */
-	public Date getCreatedAt();
+	Date getCreatedAt();
 
 	/**
 	 * Accept a MobileServiceTableOperationVisitor that works against the
@@ -68,7 +72,7 @@ public interface TableOperation {
 	 *            An implementation of the visitor interface.
 	 * @return An object whose type is determined by the type parameter of the
 	 *         visitor.
-	 * @throws Throwable 
+	 * @throws Throwable
 	 */
-	public <T> T accept(TableOperationVisitor<T> visitor) throws Throwable;
+	<T> T accept(TableOperationVisitor<T> visitor) throws Throwable;
 }

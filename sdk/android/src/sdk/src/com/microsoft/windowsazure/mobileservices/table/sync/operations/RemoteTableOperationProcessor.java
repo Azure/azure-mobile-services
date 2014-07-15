@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * RemoteTableOperationProcessor.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.operations;
 
 import java.util.EnumSet;
@@ -32,11 +36,21 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 
+/**
+ * Processes a table operation against a remote store.
+ */
 public class RemoteTableOperationProcessor implements TableOperationVisitor<JsonObject> {
-	MobileServiceClient mClient;
+	private MobileServiceClient mClient;
+	private JsonObject mItem;
 
-	JsonObject mItem;
-
+	/**
+	 * Constructor for RemoteTableOperationProcessor
+	 * 
+	 * @param client
+	 *            the mobile service client
+	 * @param item
+	 *            the item to process
+	 */
 	public RemoteTableOperationProcessor(MobileServiceClient client, JsonObject item) {
 		this.mClient = client;
 		this.mItem = item;
@@ -85,10 +99,16 @@ public class RemoteTableOperationProcessor implements TableOperationVisitor<Json
 		}
 	}
 
+	/**
+	 * Gets the item to process
+	 */
 	public JsonObject getItem() {
 		return this.mItem;
 	}
 
+	/**
+	 * Sets the item to process
+	 */
 	public void setItem(JsonObject item) {
 		this.mItem = item;
 	}

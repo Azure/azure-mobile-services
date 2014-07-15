@@ -17,24 +17,32 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * DeleteOperation.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.operations;
 
 import java.util.Date;
 import java.util.UUID;
 
 /**
- * Class representing an insert operation against remote table.
+ * Class representing a delete operation against remote table.
  */
 public class DeleteOperation implements TableOperation {
-
 	private String mId;
-
 	private String mTableName;
-
 	private String mItemId;
-
 	private Date mCreatedAt;
 
+	/**
+	 * Constructor for DeleteOperation
+	 * 
+	 * @param tableName
+	 *            the table name
+	 * @param itemId
+	 *            the item id
+	 */
 	public DeleteOperation(String tableName, String itemId) {
 		this.mId = UUID.randomUUID().toString();
 		this.mTableName = tableName;
@@ -72,7 +80,20 @@ public class DeleteOperation implements TableOperation {
 		return visitor.visit(this);
 	}
 
-	public static DeleteOperation parse(String id, String tableName, String itemId, Date createdAt) {
+	/**
+	 * Create a new DeleteOperation
+	 * 
+	 * @param id
+	 *            the table operation id
+	 * @param tableName
+	 *            the table name
+	 * @param itemId
+	 *            the item id
+	 * @param createdAt
+	 *            the creation date of the table operation
+	 * @return the DeleteOperation
+	 */
+	public static DeleteOperation create(String id, String tableName, String itemId, Date createdAt) {
 		DeleteOperation operation = new DeleteOperation(tableName, itemId);
 		operation.mId = id;
 		operation.mCreatedAt = createdAt;

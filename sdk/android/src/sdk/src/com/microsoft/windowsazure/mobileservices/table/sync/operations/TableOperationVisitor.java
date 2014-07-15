@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * TableOperationVisitor.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.operations;
 
 /**
@@ -30,9 +34,9 @@ public interface TableOperationVisitor<E> {
 	 * @param operation
 	 *            The operation to visit
 	 * @return Defined by the implementer.
-	 * @throws Throwable 
+	 * @throws Throwable
 	 */
-	public E visit(InsertOperation operation) throws Throwable;
+	E visit(InsertOperation operation) throws Throwable;
 
 	/**
 	 * Visit an update operation.
@@ -40,9 +44,9 @@ public interface TableOperationVisitor<E> {
 	 * @param operation
 	 *            The operation to visit
 	 * @return Defined by the implementer.
-	 * @throws Throwable 
+	 * @throws Throwable
 	 */
-	public E visit(UpdateOperation operation) throws Throwable;
+	E visit(UpdateOperation operation) throws Throwable;
 
 	/**
 	 * Visit a delete operation.
@@ -50,7 +54,7 @@ public interface TableOperationVisitor<E> {
 	 * @param operation
 	 *            The operation to visit
 	 * @return Defined by the implementer.
-	 * @throws Throwable 
+	 * @throws Throwable
 	 */
-	public E visit(DeleteOperation operation) throws Throwable;
+	E visit(DeleteOperation operation) throws Throwable;
 }
