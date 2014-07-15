@@ -81,7 +81,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
                 new JObject() { { "id", "abc" }, { "text", "has id"}, { "__updatedAt", "1985-07-17" } },
                 new JObject() { { "id", "abc" }, { "text", "has id"}, { "__updatedAt", "2014-07-09" } }
             });
-            string expectedOdata = "$filter=(__updatedAt ge datetime'2013-01-01T00:00:00.000Z')&$orderby=__updatedAt";
+            string expectedOdata = "$filter=(__updatedAt ge datetimeoffset'2013-01-01T00:00:00.0000000+00:00')&$orderby=__updatedAt";
             await TestIncrementalSync(query, result, expectedOdata, new DateTime(2014, 07, 09), savesMax: true);
         }
 
@@ -96,7 +96,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
                 new JObject() { { "id", "abc" }, { "text", "has id"}, { "__updatedAt", "1985-07-17" } },
                 new JObject() { { "id", "abc" }, { "text", "has id"}, { "__updatedAt", "2014-07-09" } }
             });
-            string expectedOdata = "$filter=((4 eq 3) and (__updatedAt ge datetime'2013-01-01T00:00:00.000Z'))&$orderby=__updatedAt,text desc";
+            string expectedOdata = "$filter=((4 eq 3) and (__updatedAt ge datetimeoffset'2013-01-01T00:00:00.0000000+00:00'))&$orderby=__updatedAt,text desc";
             await TestIncrementalSync(query, result, expectedOdata, new DateTime(2014, 07, 09), savesMax: true);
         }
 
@@ -105,7 +105,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         {
             var query = new MobileServiceTableQueryDescription("test");
             var result = new JArray();
-            string expectedOdata = "$filter=(__updatedAt ge datetime'2013-01-01T00:00:00.000Z')&$orderby=__updatedAt";
+            string expectedOdata = "$filter=(__updatedAt ge datetimeoffset'2013-01-01T00:00:00.0000000+00:00')&$orderby=__updatedAt";
             await TestIncrementalSync(query, result, expectedOdata, DateTime.MinValue, savesMax: false);
         }
 
@@ -118,7 +118,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             {
                 new JObject() { { "id", "abc" }, { "text", "has id"}, { "__updatedAt", "1985-07-17" } },
             });
-            string expectedOdata = "$filter=((4 eq 3) and (__updatedAt ge datetime'2013-01-01T00:00:00.000Z'))&$orderby=__updatedAt";
+            string expectedOdata = "$filter=((4 eq 3) and (__updatedAt ge datetimeoffset'2013-01-01T00:00:00.0000000+00:00'))&$orderby=__updatedAt";
             await TestIncrementalSync(query, result, expectedOdata, new DateTime(2014, 07, 09), savesMax: false);
         }
 
@@ -132,7 +132,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
                 new JObject() { { "id", "abc" }, { "text", "has id"} },
                 new JObject() { { "id", "abc" }, { "text", "has id"} }
             });
-            string expectedOdata = "$filter=((4 eq 3) and (__updatedAt ge datetime'2013-01-01T00:00:00.000Z'))&$orderby=__updatedAt";
+            string expectedOdata = "$filter=((4 eq 3) and (__updatedAt ge datetimeoffset'2013-01-01T00:00:00.0000000+00:00'))&$orderby=__updatedAt";
             await TestIncrementalSync(query, result, expectedOdata, new DateTime(2014, 07, 09), savesMax: false);
         }
 
@@ -149,7 +149,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
                 this.store.Setup(s => s.UpsertAsync("test", It.IsAny<IEnumerable<JObject>>(), true)).Returns(Task.FromResult(0));
             }
 
-            this.settings.Setup(s => s.GetDeltaTokenAsync("test", "latestItems")).Returns(Task.FromResult(new DateTime(2013, 1, 1, 0, 0, 0, DateTimeKind.Utc)));
+            this.settings.Setup(s => s.GetDeltaTokenAsync("test", "latestItems")).Returns(Task.FromResult(new DateTimeOffset(2013, 1, 1, 0, 0, 0, TimeSpan.Zero)));
             if (savesMax)
             {
                 this.settings.Setup(s => s.SetDeltaTokenAsync("test", "latestItems", maxUpdatedAt)).Returns(Task.FromResult(0));

@@ -288,7 +288,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var store = new MobileServiceLocalStoreMock();
             var settings = new MobileServiceSyncSettingsManager(store);
             await settings.SetDeltaTokenAsync("stringId_test_table", "incquery", new DateTime(2001, 02, 03, 0, 0, 0, DateTimeKind.Utc));
-            await TestIncrementalPull(store, "2001-02-03T00:00:00.000Z");
+            await TestIncrementalPull(store, "2001-02-03T00:00:00.0000000+00:00");
         }
 
         [AsyncTestMethod]
@@ -296,7 +296,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             var store = new MobileServiceLocalStoreMock();
             store.Tables[MobileServiceLocalSystemTables.Config] = new Dictionary<string, JObject>();
-            await TestIncrementalPull(store, "0001-01-01T08:00:00.000Z");
+            await TestIncrementalPull(store, "0001-01-01T00:00:00.0000000+00:00");
         }
 
         private static async Task TestIncrementalPull(MobileServiceLocalStoreMock store, string expectedToken)
@@ -304,10 +304,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             hijack.OnSendingRequest = req =>
             {
-                Assert.AreEqual(req.RequestUri.Query, "?$filter=((String%20eq%20'world')%20and%20(__updatedAt%20ge%20datetime'" + expectedToken + "'))&$orderby=__updatedAt&$skip=5&$top=3&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt");
+                Assert.AreEqual(req.RequestUri.Query, "?$filter=((String%20eq%20'world')%20and%20(__updatedAt%20ge%20datetimeoffset'" + expectedToken + "'))&$orderby=__updatedAt&$skip=5&$top=3&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt");
                 return Task.FromResult(req);
             };
-            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
+                                        {""id"":""def"",""String"":""World"", ""__updatedAt"": ""2001-02-03T00:03:00.0000000+07:00""}]"); // for pull
 
 
             store.Tables[MobileServiceLocalSystemTables.Config]["stringId_test_table_systemProperties"] = new JObject

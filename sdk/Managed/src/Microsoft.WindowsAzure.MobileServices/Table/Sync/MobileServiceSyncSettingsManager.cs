@@ -16,6 +16,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// </summary>
     internal class MobileServiceSyncSettingsManager : IDisposable
     {
+        private const string DefaultDeltaToken = "0001-01-01T00:00:00.000Z";
         private AsyncLockDictionary cacheLock = new AsyncLockDictionary();
         private Dictionary<string, string> cache = new Dictionary<string, string>();
         private IMobileServiceLocalStore store;
@@ -41,13 +42,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return this.store.DeleteAsync(MobileServiceLocalSystemTables.Config, GetDeltaTokenKey(tableName, queryKey));
         }
 
-        public async virtual Task<DateTime> GetDeltaTokenAsync(string tableName, string queryKey)
+        public async virtual Task<DateTimeOffset> GetDeltaTokenAsync(string tableName, string queryKey)
         {
-            string value = await this.GetSettingAsync(GetDeltaTokenKey(tableName, queryKey), DateTime.MinValue.ToString("o"));
-            return DateTime.Parse(value).ToUniversalTime();
+            string value = await this.GetSettingAsync(GetDeltaTokenKey(tableName, queryKey), DefaultDeltaToken);
+            return DateTimeOffset.Parse(value);
         }
 
-        public virtual Task SetDeltaTokenAsync(string tableName, string queryKey, DateTime token)
+        public virtual Task SetDeltaTokenAsync(string tableName, string queryKey, DateTimeOffset token)
         {
             return this.SetSettingAsync(GetDeltaTokenKey(tableName, queryKey), token.ToString("o"));
         }

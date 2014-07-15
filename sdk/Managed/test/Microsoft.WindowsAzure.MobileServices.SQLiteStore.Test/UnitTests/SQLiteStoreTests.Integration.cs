@@ -178,8 +178,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             hijack.OnSendingRequest = req =>
             {
-                // we request all the system properties present on DefineTable<> object
-                Assert.AreEqual(req.RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetime'0001-01-01T08:00:00.000Z')&$orderby=__updatedAt&__includeDeleted=true&__systemproperties=__updatedAt");
+                Assert.AreEqual(req.RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'0001-01-01T00:00:00.0000000+00:00')&$orderby=__updatedAt&__includeDeleted=true&__systemproperties=__updatedAt");
 
                 return Task.FromResult(req);
             };
@@ -190,8 +189,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             hijack.OnSendingRequest = req =>
             {
-                // we request all the system properties present on DefineTable<> object
-                Assert.AreEqual(req.RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetime'2014-01-30T23:01:33.444Z')&$orderby=__updatedAt&__includeDeleted=true&__systemproperties=__updatedAt");
+                Assert.AreEqual(req.RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'2014-01-30T23:01:33.4440000+00:00')&$orderby=__updatedAt&__includeDeleted=true&__systemproperties=__updatedAt");
                 return Task.FromResult(req);
             };
             pullResult = "[{\"id\":\"b\",\"String\":\"Updated\",\"__version\":\"def\", \"__updatedAt\":\"2014-02-27T23:01:33.444Z\"}]";
@@ -213,8 +211,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             hijack.OnSendingRequest = req =>
             {
-                // we request all the system properties present on DefineTable<> object
-                Assert.AreEqual(req.RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetime'0001-01-01T08:00:00.000Z')&$orderby=__updatedAt&__includeDeleted=true&__systemproperties=__updatedAt");
+                Assert.AreEqual(req.RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'0001-01-01T00:00:00.0000000+00:00')&$orderby=__updatedAt&__includeDeleted=true&__systemproperties=__updatedAt");
 
                 return Task.FromResult(req);
             };
@@ -227,8 +224,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             hijack.OnSendingRequest = req =>
             {
-                // we request all the system properties present on DefineTable<> object
-                Assert.AreEqual(req.RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetime'2014-01-30T23:01:33.444Z')&$orderby=__updatedAt&__includeDeleted=true&__systemproperties=__updatedAt");
+                Assert.AreEqual(req.RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetimeoffset'2014-01-30T23:01:33.4440000+00:00')&$orderby=__updatedAt&__includeDeleted=true&__systemproperties=__updatedAt");
                 return Task.FromResult(req);
             };
             pullResult = "[{\"id\":\"b\",\"String\":\"Updated\",\"__version\":\"def\", \"__updatedAt\":\"2014-02-27T23:01:33.444Z\"}]";

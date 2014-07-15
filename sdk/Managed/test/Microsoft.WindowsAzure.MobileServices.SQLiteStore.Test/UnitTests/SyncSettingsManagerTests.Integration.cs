@@ -17,9 +17,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         {
             MobileServiceSyncSettingsManager settings = await GetSettingManager();
 
-            DateTime token = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
+            DateTimeOffset token = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
 
-            Assert.AreEqual(token, DateTime.MinValue.ToUniversalTime());
+            Assert.AreEqual(token, DateTimeOffset.MinValue.ToUniversalTime());
         }
 
         [AsyncTestMethod]
@@ -27,11 +27,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         {
             MobileServiceSyncSettingsManager settings = await GetSettingManager();
 
-            DateTime saved = new DateTime(2014, 7, 24, 3, 4, 5, DateTimeKind.Local);
+            DateTimeOffset saved = new DateTime(2014, 7, 24, 3, 4, 5, DateTimeKind.Local);
             await settings.SetDeltaTokenAsync(TestTable, TestQueryKey, saved);
 
             // with cache
-            DateTime read = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
+            DateTimeOffset read = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
             Assert.AreEqual(read, saved.ToUniversalTime());
 
             // without cache
@@ -45,11 +45,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         {
             MobileServiceSyncSettingsManager settings = await GetSettingManager();
 
-            DateTime saved = new DateTime(2014, 7, 24, 3, 4, 5, DateTimeKind.Utc);
+            var saved = new DateTimeOffset(2014, 7, 24, 3, 4, 5, TimeSpan.Zero);
             await settings.SetDeltaTokenAsync(TestTable, TestQueryKey, saved);
 
             // with cache
-            DateTime read = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
+            DateTimeOffset read = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
             Assert.AreEqual(read, saved);
 
             // without cache
@@ -64,11 +64,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             MobileServiceSyncSettingsManager settings = await GetSettingManager();
 
             // first save
-            DateTime saved = new DateTime(2014, 7, 24, 3, 4, 5, DateTimeKind.Utc);
+            var saved = new DateTimeOffset(2014, 7, 24, 3, 4, 5, TimeSpan.Zero);
             await settings.SetDeltaTokenAsync(TestTable, TestQueryKey, saved);
 
             // then read and update
-            DateTime read = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
+            DateTimeOffset read = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
             await settings.SetDeltaTokenAsync(TestTable, TestQueryKey, read.AddDays(1));
 
             // then read again
