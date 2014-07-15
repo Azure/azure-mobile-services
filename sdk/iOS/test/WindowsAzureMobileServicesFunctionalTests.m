@@ -706,15 +706,56 @@
     STAssertTrue([self waitForTest:90.0], @"Test timed out.");
 }
 
+-(void) testConnectionWithDelegateQueue
+{
+    // Verify default behavior (callback on thread calling function, which will be the main thread here
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
+    [todoTable readWithId:@1 completion:^(NSDictionary *item, NSError *error) {
+        STAssertTrue([NSThread isMainThread], @"expected to be on main thread");
+        done = YES;
+    }];
+    done = NO;
+    STAssertTrue([self waitForTest:30.0], @"Test timed out.");
+    
+    [client invokeAPI:@"testapi" body:nil HTTPMethod:@"GET" parameters:nil headers:nil completion:^(id result, NSHTTPURLResponse *response, NSError *error) {
+        STAssertTrue([NSThread isMainThread], @"expected to be on main thread");
+        done = YES;
+    }];
+    done = NO;
+    STAssertTrue([self waitForTest:30.0], @"Test timed out.");
+
+    // Now verify moved to the operation queue
+    client.connectionDelegateQueue = [[NSOperationQueue alloc] init];
+    client.connectionDelegateQueue.name = @"azure.mobileservices.testing";
+
+    todoTable = [client tableWithName:@"todoItem"];
+    [todoTable readWithId:@1 completion:^(NSDictionary *item, NSError *error) {
+        STAssertFalse([NSThread isMainThread], @"expected to not be on main thread");
+        done = YES;
+    }];
+    
+    done = NO;
+    STAssertTrue([self waitForTest:30.0 forLoopMode:NSRunLoopCommonModes], @"Test timed out.");
+    
+    [client invokeAPI:@"testapi" body:nil HTTPMethod:@"GET" parameters:nil headers:nil completion:^(id result, NSHTTPURLResponse *response, NSError *error) {
+        STAssertFalse([NSThread isMainThread], @"expected to not be on main thread");
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:30.0 forLoopMode:NSRunLoopCommonModes], @"Test timed out.");
+}
 
 #pragma mark * Async Test Helper Method
 
 -(BOOL) waitForTest:(NSTimeInterval)testDuration {
-    
+    return [self waitForTest:testDuration forLoopMode:NSDefaultRunLoopMode];
+}
+
+-(BOOL) waitForTest:(NSTimeInterval)testDuration forLoopMode:(NSString *)loopMode {
+
     NSDate *timeoutAt = [NSDate dateWithTimeIntervalSinceNow:testDuration];
-    
+
     while (!done) {
-        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
+        [[NSRunLoop currentRunLoop] runMode:loopMode
                                  beforeDate:timeoutAt];
         if([timeoutAt timeIntervalSinceNow] <= 0.0) {
             break;
