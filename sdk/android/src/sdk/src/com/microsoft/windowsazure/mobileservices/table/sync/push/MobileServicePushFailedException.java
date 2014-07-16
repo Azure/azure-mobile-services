@@ -17,17 +17,36 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * MobileServicePushFailedException.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.push;
 
+/**
+ * Class that represents an exception during push sync
+ */
 public class MobileServicePushFailedException extends Exception {
+	/**
+	 * UID used for serialization
+	 */
 	private static final long serialVersionUID = 1365719768140939515L;
 
-	MobileServicePushCompletionResult mPushCompletionResult;
+	private MobileServicePushCompletionResult mPushCompletionResult;
 
+	/**
+	 * Constructor for MobileServicePushFailedException
+	 * 
+	 * @param pushCompletionResult
+	 *            the push completion result
+	 */
 	public MobileServicePushFailedException(MobileServicePushCompletionResult pushCompletionResult) {
 		this.mPushCompletionResult = pushCompletionResult;
 	}
 
+	/**
+	 * Gets the push completion result
+	 */
 	public MobileServicePushCompletionResult getPushCompletionResult() {
 		return this.mPushCompletionResult;
 	}

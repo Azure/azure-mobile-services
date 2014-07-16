@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * SimpleSyncHandler.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.synchandler;
 
 import com.google.gson.JsonObject;
@@ -24,6 +28,9 @@ import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOper
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.RemoteTableOperationProcessor;
 import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePushCompletionResult;
 
+/**
+ * Basic implementation of MobileServiceSyncHandler
+ */
 public class SimpleSyncHandler implements MobileServiceSyncHandler {
 
 	@Override

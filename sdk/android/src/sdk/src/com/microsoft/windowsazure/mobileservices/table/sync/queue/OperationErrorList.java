@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * OperationErrorList.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.queue;
 
 import java.text.ParseException;
@@ -40,7 +44,7 @@ import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOper
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOperationKind;
 
 /**
- * Queue of all operation errors
+ * List of all table operation errors
  */
 public class OperationErrorList {
 	/**
@@ -60,6 +64,14 @@ public class OperationErrorList {
 		this.mSyncLock = new ReentrantReadWriteLock(true);
 	}
 
+	/**
+	 * Adds a new table operation error
+	 * 
+	 * @param operationError
+	 *            the table operation error
+	 * @throws ParseException
+	 * @throws MobileServiceLocalStoreException
+	 */
 	public void add(TableOperationError operationError) throws ParseException, MobileServiceLocalStoreException {
 		this.mSyncLock.writeLock().lock();
 
@@ -72,6 +84,9 @@ public class OperationErrorList {
 		}
 	}
 
+	/**
+	 * Returns the count of pending table operation errors
+	 */
 	public int countPending() {
 		this.mSyncLock.readLock().lock();
 
@@ -82,6 +97,9 @@ public class OperationErrorList {
 		}
 	}
 
+	/**
+	 * Returns the list of all pending table operation errors
+	 */
 	public List<TableOperationError> getAll() {
 		this.mSyncLock.readLock().lock();
 
@@ -92,6 +110,11 @@ public class OperationErrorList {
 		}
 	}
 
+	/**
+	 * Empties the list of pending table operation errors
+	 * 
+	 * @throws MobileServiceLocalStoreException
+	 */
 	public void clear() throws MobileServiceLocalStoreException {
 		this.mSyncLock.writeLock().lock();
 
@@ -104,6 +127,13 @@ public class OperationErrorList {
 		}
 	}
 
+	/**
+	 * Initializes requirements on the local store
+	 * 
+	 * @param store
+	 *            the local store
+	 * @throws MobileServiceLocalStoreException
+	 */
 	public static void initializeStore(MobileServiceLocalStore store) throws MobileServiceLocalStoreException {
 		Map<String, ColumnDataType> columns = new HashMap<String, ColumnDataType>();
 		columns.put("id", ColumnDataType.String);
@@ -119,6 +149,15 @@ public class OperationErrorList {
 		store.defineTable(OPERATION_ERROR_TABLE, columns);
 	}
 
+	/**
+	 * Loads the list of table operation errors from the local store
+	 * 
+	 * @param store
+	 *            the local store
+	 * @return the list of table operation errors
+	 * @throws ParseException
+	 * @throws MobileServiceLocalStoreException
+	 */
 	public static OperationErrorList load(MobileServiceLocalStore store) throws ParseException, MobileServiceLocalStoreException {
 		OperationErrorList opQueue = new OperationErrorList(store);
 

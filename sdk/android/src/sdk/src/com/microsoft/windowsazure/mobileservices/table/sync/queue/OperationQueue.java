@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * OperationQueue.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.queue;
 
 import java.text.ParseException;
@@ -46,7 +50,7 @@ import com.microsoft.windowsazure.mobileservices.table.sync.operations.TableOper
 import com.microsoft.windowsazure.mobileservices.table.sync.operations.UpdateOperation;
 
 /**
- * Queue of all operations i.e. Push, Pull, Insert, Update, Delete
+ * Queue of all table operations i.e. Push, Pull, Insert, Update, Delete
  */
 public class OperationQueue {
 	/**
@@ -56,11 +60,8 @@ public class OperationQueue {
 
 	private static class OperationQueueItem implements TableOperation {
 		private TableOperation mOperation;
-
 		private Date mQueueLoadedAt;
-
 		private long mSequence;
-
 		private boolean mCancelled;
 
 		private OperationQueueItem(TableOperation operation, Date queueLoadedAt, long sequence) {
@@ -95,23 +96,23 @@ public class OperationQueue {
 			return this.mOperation.getCreatedAt();
 		}
 
-		public TableOperation getOperation() {
+		private TableOperation getOperation() {
 			return this.mOperation;
 		}
 
-		public Date getQueueLoadedAt() {
+		private Date getQueueLoadedAt() {
 			return this.mQueueLoadedAt;
 		}
 
-		public long getSequence() {
+		private long getSequence() {
 			return this.mSequence;
 		}
 
-		public boolean isCancelled() {
+		private boolean isCancelled() {
 			return this.mCancelled;
 		}
 
-		public void cancel() {
+		private void cancel() {
 			this.mCancelled = true;
 		}
 
@@ -123,9 +124,7 @@ public class OperationQueue {
 
 	private static class BookmarkQueueItem {
 		private Date mQueueLoadedAt;
-
 		private long mSequence;
-
 		private boolean mCancelled;
 
 		private BookmarkQueueItem(Date queueLoadedAt, long sequence) {
@@ -135,9 +134,12 @@ public class OperationQueue {
 		}
 	}
 
+	/**
+	 * Class that represents a push sync bookmark, and table operations within
+	 * it
+	 */
 	public static class Bookmark {
 		private OperationQueue mOpQueue;
-
 		private BookmarkQueueItem mBookmarkQueueItem;
 
 		private Bookmark(OperationQueue opQueue, BookmarkQueueItem bookmarkQueueItem) {
@@ -145,37 +147,47 @@ public class OperationQueue {
 			this.mBookmarkQueueItem = bookmarkQueueItem;
 		}
 
+		/**
+		 * Dequeue the next bookmarked table operation
+		 * 
+		 * @return the table operation
+		 * @throws MobileServiceLocalStoreException
+		 */
 		public TableOperation dequeue() throws MobileServiceLocalStoreException {
 			return this.mOpQueue.dequeueBookmarked(this.mBookmarkQueueItem);
 		}
 
+		/**
+		 * Peek the next bookmarked table operation
+		 * 
+		 * @return the table operation
+		 */
 		public TableOperation peek() {
 			return this.mOpQueue.peekBookmarked(this.mBookmarkQueueItem);
 		}
 
+		/**
+		 * Returns true if the bookmark is the first and current in the queue
+		 */
 		public boolean isCurrentBookmark() {
 			return this.mOpQueue.isCurrentBookmark(this.mBookmarkQueueItem);
 		}
 
+		/**
+		 * Returns true if the bookmark is canceled
+		 */
 		public boolean isCancelled() {
 			return this.mBookmarkQueueItem.mCancelled;
 		}
 	}
 
 	private MobileServiceLocalStore mStore;
-
 	private Queue<OperationQueueItem> mQueue;
-
 	private Queue<BookmarkQueueItem> mBookmarkQueue;
-
 	private Map<String, OperationQueueItem> mIdOperationMap;
-
 	private Map<String, Integer> mTableCountMap;
-
 	private Date mLoadedAt;
-
 	private long mSequence;
-
 	private ReadWriteLock mSyncLock;
 
 	private OperationQueue(MobileServiceLocalStore store) {
@@ -193,6 +205,13 @@ public class OperationQueue {
 		this.mSyncLock = new ReentrantReadWriteLock(true);
 	}
 
+	/**
+	 * Enqueue a new table operation
+	 * 
+	 * @param operation
+	 *            the table operation
+	 * @throws Throwable
+	 */
 	public void enqueue(TableOperation operation) throws Throwable {
 		this.mSyncLock.writeLock().lock();
 
@@ -226,6 +245,13 @@ public class OperationQueue {
 		}
 	}
 
+	/**
+	 * Dequeue the next table operation
+	 * 
+	 * @return the table operation
+	 * @throws ParseException
+	 * @throws MobileServiceLocalStoreException
+	 */
 	public TableOperation dequeue() throws ParseException, MobileServiceLocalStoreException {
 		this.mSyncLock.writeLock().lock();
 
@@ -243,6 +269,11 @@ public class OperationQueue {
 		}
 	}
 
+	/**
+	 * Peek the next table operation
+	 * 
+	 * @return the table operation
+	 */
 	public TableOperation peek() {
 		this.mSyncLock.readLock().lock();
 
@@ -253,6 +284,9 @@ public class OperationQueue {
 		}
 	}
 
+	/**
+	 * Returns the count of pending table operation
+	 */
 	public int countPending() {
 		this.mSyncLock.readLock().lock();
 
@@ -263,6 +297,14 @@ public class OperationQueue {
 		}
 	}
 
+	/**
+	 * Returns the count of pending table operation for a specific table
+	 * 
+	 * @param tableName
+	 *            the table name
+	 * 
+	 * @return the count of operations
+	 */
 	public int countPending(String tableName) {
 		this.mSyncLock.readLock().lock();
 
@@ -273,6 +315,11 @@ public class OperationQueue {
 		}
 	}
 
+	/**
+	 * Adds a new push sync bookmark
+	 * 
+	 * @return the bookmark
+	 */
 	public Bookmark bookmark() {
 		this.mSyncLock.writeLock().lock();
 
@@ -285,6 +332,12 @@ public class OperationQueue {
 		}
 	}
 
+	/**
+	 * Remove a push sync bookmark
+	 * 
+	 * @param bookmark
+	 *            the push sync bookmark
+	 */
 	public void unbookmark(Bookmark bookmark) {
 		this.mSyncLock.writeLock().lock();
 
@@ -297,6 +350,13 @@ public class OperationQueue {
 		}
 	}
 
+	/**
+	 * Initializes requirements on the local store
+	 * 
+	 * @param store
+	 *            the local store
+	 * @throws MobileServiceLocalStoreException
+	 */
 	public static void initializeStore(MobileServiceLocalStore store) throws MobileServiceLocalStoreException {
 		Map<String, ColumnDataType> columns = new HashMap<String, ColumnDataType>();
 		columns.put("id", ColumnDataType.String);
@@ -310,6 +370,15 @@ public class OperationQueue {
 		store.defineTable(OPERATION_QUEUE_TABLE, columns);
 	}
 
+	/**
+	 * Loads the queue of table operations from the local store
+	 * 
+	 * @param store
+	 *            the local store
+	 * @return the queue of table operations
+	 * @throws ParseException
+	 * @throws MobileServiceLocalStoreException
+	 */
 	public static OperationQueue load(MobileServiceLocalStore store) throws ParseException, MobileServiceLocalStoreException {
 		OperationQueue opQueue = new OperationQueue(store);
 

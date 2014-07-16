@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * MobileServiceSyncHandler.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.synchandler;
 
 import com.google.gson.JsonObject;
@@ -29,7 +33,24 @@ import com.microsoft.windowsazure.mobileservices.table.sync.push.MobileServicePu
  */
 public interface MobileServiceSyncHandler {
 
+	/**
+	 * Executes a table operation against a remote store
+	 * 
+	 * @param processor
+	 *            the remote table processor
+	 * @param operation
+	 *            the table operation
+	 * @return the operation result
+	 * @throws MobileServiceSyncHandlerException
+	 */
 	JsonObject executeTableOperation(RemoteTableOperationProcessor processor, TableOperation operation) throws MobileServiceSyncHandlerException;
 
+	/**
+	 * Handles push sync completion
+	 * 
+	 * @param pushCompletionResult
+	 *            the push sync result
+	 * @throws MobileServiceSyncHandlerException
+	 */
 	void onPushComplete(MobileServicePushCompletionResult pushCompletionResult) throws MobileServiceSyncHandlerException;
 }

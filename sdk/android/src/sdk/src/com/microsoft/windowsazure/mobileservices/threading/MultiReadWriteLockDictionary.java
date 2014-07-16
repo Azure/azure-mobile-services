@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * MultiReadWriteLockDictionary.java
+ */
 package com.microsoft.windowsazure.mobileservices.threading;
 
 import java.util.HashMap;
@@ -24,14 +28,27 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+/**
+ * A key-readWriteLock dictionary that discards no longer referenced locks
+ * 
+ * @param <T>
+ *            type of the key and param to the MultiReadWriteLock<T> lock
+ */
 public class MultiReadWriteLockDictionary<T> {
+	/**
+	 * A readWriteLock that implements reference count
+	 * 
+	 * @param <T>
+	 *            type of the corresponding key
+	 */
 	public static class MultiReadWriteLock<T> {
 		private T mKey;
-
 		private int mCount;
-
 		private ReadWriteLock mReadWriteLock;
 
+		/**
+		 * Constructor for MultiReadWriteLock
+		 */
 		public MultiReadWriteLock() {
 			this.mCount = 0;
 			this.mReadWriteLock = new ReentrantReadWriteLock(true);
@@ -39,14 +56,23 @@ public class MultiReadWriteLockDictionary<T> {
 	}
 
 	private Map<T, MultiReadWriteLock<T>> mMap;
-
 	private Object sync;
 
+	/**
+	 * Constructor for MultiReadWriteLockDictionary
+	 */
 	public MultiReadWriteLockDictionary() {
 		this.mMap = new HashMap<T, MultiReadWriteLock<T>>();
 		this.sync = new Object();
 	}
 
+	/**
+	 * Aquire a read lock for the requested key
+	 * 
+	 * @param key
+	 *            the key
+	 * @return the lock
+	 */
 	public MultiReadWriteLock<T> lockRead(T key) {
 		MultiReadWriteLock<T> multiRWLock = increaseLock(key);
 
@@ -55,6 +81,13 @@ public class MultiReadWriteLockDictionary<T> {
 		return multiRWLock;
 	}
 
+	/**
+	 * Aquire a write lock for the requested key
+	 * 
+	 * @param key
+	 *            the key
+	 * @return the lock
+	 */
 	public MultiReadWriteLock<T> lockWrite(T key) {
 		MultiReadWriteLock<T> multiRWLock = increaseLock(key);
 
@@ -63,12 +96,24 @@ public class MultiReadWriteLockDictionary<T> {
 		return multiRWLock;
 	}
 
+	/**
+	 * Release the provided read lock
+	 * 
+	 * @param multiRWLock
+	 *            the lock
+	 */
 	public void unLockRead(MultiReadWriteLock<T> multiRWLock) {
 		multiRWLock.mReadWriteLock.readLock().unlock();
 
 		decreaseLock(multiRWLock);
 	}
 
+	/**
+	 * Release the provided write lock
+	 * 
+	 * @param multiRWLock
+	 *            the lock
+	 */
 	public void unLockWrite(MultiReadWriteLock<T> multiRWLock) {
 		multiRWLock.mReadWriteLock.writeLock().unlock();
 

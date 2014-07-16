@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * MobileServicePushStatus.java
+ */
 package com.microsoft.windowsazure.mobileservices.table.sync.push;
 
 import android.annotation.SuppressLint;
@@ -24,7 +28,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Enumeration for kinds of table operations.
+ * Enumeration for push sync status.
  */
 @SuppressLint("UseSparseArrays")
 public enum MobileServicePushStatus {
@@ -72,10 +76,20 @@ public enum MobileServicePushStatus {
 		this.mValue = value;
 	}
 
+	/**
+	 * Return the int value associated to the enum
+	 */
 	public int getValue() {
 		return this.mValue;
 	}
 
+	/**
+	 * Return the MobileServicePushStatus with the provided int value
+	 * 
+	 * @param value
+	 *            the int value
+	 * @return the matching MobileServicePushStatus
+	 */
 	public static MobileServicePushStatus parse(int value) {
 		return mValuesMap.get(value);
 	}
