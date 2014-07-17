@@ -1,5 +1,13 @@
 # Microsoft Azure Mobile Services Change Log
 
+### Version 1.3
+**iOS SDK**
+- Added support for offline and sync
+
+**Managed SDK** 
+- Added support for offline and sync
+- Added support for soft delete
+
 ### Version 1.2.2
 **iOS SDK**
 - Added support for APNS Azure Notification Hub integration
