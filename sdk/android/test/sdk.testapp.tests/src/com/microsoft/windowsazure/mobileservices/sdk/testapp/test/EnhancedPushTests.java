@@ -21,6 +21,7 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 
 import junit.framework.Assert;
@@ -42,8 +43,11 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.notifications.MobileServicePush;
 import com.microsoft.windowsazure.mobileservices.notifications.Registration;
+import com.microsoft.windowsazure.mobileservices.notifications.RegistrationCallback;
 import com.microsoft.windowsazure.mobileservices.notifications.RegistrationGoneException;
 import com.microsoft.windowsazure.mobileservices.notifications.TemplateRegistration;
+import com.microsoft.windowsazure.mobileservices.notifications.TemplateRegistrationCallback;
+import com.microsoft.windowsazure.mobileservices.notifications.UnregisterCallback;
 
 public class EnhancedPushTests extends InstrumentationTestCase {
 
@@ -81,7 +85,6 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 	}
 
 	public void testRegisterUnregisterNative() throws Throwable {
-
 		Context context = getInstrumentation().getTargetContext();
 		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
 
@@ -111,19 +114,85 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 			container.unregister = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME, null);
 
 		} catch (Exception exception) {
-			
+
 			if (exception instanceof ExecutionException) {
 				container.exception = (Exception) exception.getCause();
 			} else {
 				container.exception = exception;
 			}
-			
+
 			fail(container.exception.getMessage());
 		}
 
 		Assert.assertEquals(registrationId, container.storedRegistrationId);
 		Assert.assertEquals(registrationId, container.registrationId);
 		Assert.assertNull(container.unregister);
+	}
+
+	@SuppressWarnings("deprecation")
+	public void testRegisterUnregisterNativeCallback() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		Context context = getInstrumentation().getTargetContext();
+		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+
+		final Container container = new Container();
+		final String handle = "handle";
+
+		String registrationId = "registrationId";
+
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+
+		client = client.withFilter(getUpsertTestFilter(registrationId));
+
+		final MobileServicePush push = client.getPush();
+
+		forceRefreshSync(push, handle);
+
+		push.register(handle, new String[] { "tag1" }, new RegistrationCallback() {
+
+			@Override
+			public void onRegister(Registration registration, Exception exception) {
+				if (exception != null) {
+					container.exception = exception;
+
+					latch.countDown();
+				} else {
+					container.registrationId = registration.getRegistrationId();
+
+					container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME,
+							null);
+
+					push.unregister(new UnregisterCallback() {
+
+						@Override
+						public void onUnregister(Exception exception) {
+							if (exception != null) {
+								container.exception = exception;
+							} else {
+								container.unregister = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + DEFAULT_REGISTRATION_NAME,
+										null);
+							}
+
+							latch.countDown();
+						}
+					});
+				}
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.exception;
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Assert.assertEquals(registrationId, container.storedRegistrationId);
+			Assert.assertEquals(registrationId, container.registrationId);
+			Assert.assertNull(container.unregister);
+		}
 	}
 
 	public void testRegisterUnregisterTemplate() throws Throwable {
@@ -161,14 +230,79 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 			Assert.assertNull(container.unregister);
 
 		} catch (Exception exception) {
-			
+
 			if (exception instanceof ExecutionException) {
 				container.exception = (Exception) exception.getCause();
 			} else {
 				container.exception = exception;
 			}
-			
+
 			fail(container.exception.getMessage());
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	public void testRegisterUnregisterTemplateCallback() throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+
+		Context context = getInstrumentation().getTargetContext();
+		final SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
+
+		final Container container = new Container();
+		final String handle = "handle";
+		final String templateName = "templateName";
+
+		String registrationId = "registrationId";
+
+		MobileServiceClient client = new MobileServiceClient(appUrl, appKey, context);
+
+		client = client.withFilter(getUpsertTestFilter(registrationId));
+
+		final MobileServicePush push = client.getPush();
+
+		forceRefreshSync(push, handle);
+
+		push.registerTemplate(handle, templateName, "{ }", new String[] { "tag1" }, new TemplateRegistrationCallback() {
+
+			@Override
+			public void onRegister(TemplateRegistration registration, Exception exception) {
+				if (exception != null) {
+					container.exception = exception;
+
+					latch.countDown();
+				} else {
+					container.registrationId = registration.getRegistrationId();
+
+					container.storedRegistrationId = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
+
+					push.unregisterTemplate(templateName, new UnregisterCallback() {
+
+						@Override
+						public void onUnregister(Exception exception) {
+							if (exception != null) {
+								container.exception = exception;
+							} else {
+								container.unregister = sharedPreferences.getString(STORAGE_PREFIX + REGISTRATION_NAME_STORAGE_KEY + templateName, null);
+							}
+
+							latch.countDown();
+						}
+					});
+				}
+			}
+		});
+
+		latch.await();
+
+		// Asserts
+		Exception exception = container.exception;
+
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			Assert.assertEquals(registrationId, container.storedRegistrationId);
+			Assert.assertEquals(registrationId, container.registrationId);
+			Assert.assertNull(container.unregister);
 		}
 	}
 
@@ -200,7 +334,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 			} else {
 				container.exception = exception;
 			}
-			
+
 			if (!(container.exception instanceof RegistrationGoneException)) {
 				fail("Expected Exception RegistrationGoneException");
 			}
@@ -238,7 +372,7 @@ public class EnhancedPushTests extends InstrumentationTestCase {
 			} else {
 				container.exception = exception;
 			}
-			
+
 			if (!(container.exception instanceof RegistrationGoneException)) {
 				fail("Expected Exception RegistrationGoneException");
 			}

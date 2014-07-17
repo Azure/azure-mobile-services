@@ -21,6 +21,7 @@ package com.microsoft.windowsazure.mobileservices.sdk.testapp.test;
 
 import java.net.MalformedURLException;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
 
 import junit.framework.Assert;
 
@@ -34,6 +35,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.UserAuthenticationCallback;
 import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider;
 import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
 import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
@@ -115,7 +117,77 @@ public class LoginTests extends InstrumentationTestCase {
 		// Assert
 		String expectedURL = appUrl + "login/" + provider.toString().toLowerCase(Locale.getDefault());
 		assertEquals(expectedURL, result.getRequestUrl());
+	}
 
+	public void testLoginCallbackOperation() throws Throwable {
+		testLoginCallbackOperation(MobileServiceAuthenticationProvider.Facebook);
+		testLoginCallbackOperation(MobileServiceAuthenticationProvider.Twitter);
+		testLoginCallbackOperation(MobileServiceAuthenticationProvider.MicrosoftAccount);
+		testLoginCallbackOperation(MobileServiceAuthenticationProvider.Google);
+
+		testLoginCallbackOperation("FaCeBoOk");
+		testLoginCallbackOperation("twitter");
+		testLoginCallbackOperation("MicrosoftAccount");
+		testLoginCallbackOperation("GOOGLE");
+	}
+
+	@SuppressWarnings("deprecation")
+	private void testLoginCallbackOperation(final Object provider) throws Throwable {
+		final CountDownLatch latch = new CountDownLatch(1);
+		final ResultsContainer result = new ResultsContainer();
+
+		// Create client
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
+
+			@Override
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+				result.setRequestUrl(request.getUrl());
+
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{authenticationToken:'123abc', user:{userId:'123456'}}");
+
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+				resultFuture.set(response);
+
+				return resultFuture;
+			}
+		});
+
+		UserAuthenticationCallback callback = new UserAuthenticationCallback() {
+
+			@Override
+			public void onCompleted(MobileServiceUser user, Exception exception, ServiceFilterResponse response) {
+				if (exception == null) {
+					assertEquals("123456", user.getUserId());
+					assertEquals("123abc", user.getAuthenticationToken());
+				} else {
+					Assert.fail();
+				}
+
+				latch.countDown();
+			}
+		};
+
+		if (provider.getClass().equals(MobileServiceAuthenticationProvider.class)) {
+			client.login((MobileServiceAuthenticationProvider) provider, "{myToken:123}", callback);
+		} else {
+			client.login((String) provider, "{myToken:123}", callback);
+		}
+
+		latch.await();
+
+		// Assert
+		String expectedURL = appUrl + "login/" + provider.toString().toLowerCase(Locale.getDefault());
+		assertEquals(expectedURL, result.getRequestUrl());
 	}
 
 	public void testLoginShouldThrowError() throws Throwable {
