@@ -78,5 +78,4 @@ typedef void (^MSClientLoginBlock)(MSUser *user, NSError *error);
 ///@}
 
 
-
 @end

@@ -19,6 +19,7 @@ NSString *const jsonContentType = @"application/json";
 NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
 
+
 #pragma mark * MSConnectionDelegate Private Interface
 
 
@@ -159,14 +160,19 @@ static NSOperationQueue *delegateQueue;
     if (!filters || filters.count == 0) {
         dispatch_async(dispatch_get_main_queue(), ^{
         
-            // No filters to invoke so use |NSURLConnection | to actually
-            // send the request.
-            MSConnectionDelegate *delegate = [[MSConnectionDelegate alloc]
-                                              initWithClient:client
-                                                  completion:completion];
+        // No filters to invoke so use |NSURLConnection | to actually
+        // send the request.
+        MSConnectionDelegate *delegate = [[MSConnectionDelegate alloc]
+                                          initWithClient:client
+                                              completion:completion];
         
+        if (client.connectionDelegateQueue) {
+            NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request delegate:delegate startImmediately:NO];
+            [connection setDelegateQueue:client.connectionDelegateQueue];
+            [connection start];
+        } else {
             [NSURLConnection connectionWithRequest:request delegate:delegate];
-        });
+        }});
     }
     else {
         

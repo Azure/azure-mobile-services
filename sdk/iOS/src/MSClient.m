@@ -12,6 +12,7 @@
 #import "MSJSONSerializer.h"
 #import "MSSyncContextInternal.h"
 #import "MSSyncTable.h"
+#import "MSPush.h"
 
 #pragma mark * MSClient Private Interface
 
@@ -149,6 +150,8 @@
     
     // Set the new filters on the copied client
     newClient.filters = filters;
+    
+    newClient.connectionDelegateQueue = self.connectionDelegateQueue;
     
     return newClient;
 }
