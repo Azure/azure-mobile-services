@@ -13,7 +13,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// <summary>
     /// Define a class help to create/update/delete notification registrations
     /// </summary>
-    internal sealed class Push
+    public sealed class Push
     {
         internal readonly RegistrationManager RegistrationManager;
 
