@@ -143,7 +143,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 
 			@Override
 			public void onSuccess(MobileServiceList<E> result) {
-				callback.onCompleted(result, result.size(), null, null);
+				callback.onCompleted(result, result.getTotalCount(), null, null);
 			}
 		});
 	}

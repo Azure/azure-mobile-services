@@ -151,7 +151,6 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 *            Callback to invoke when the operation is completed
 	 */
 	public void execute(final Query query, final TableJsonQueryCallback callback) {
-
 		ListenableFuture<JsonElement> executeFuture = execute(query);
 
 		Futures.addCallback(executeFuture, new FutureCallback<JsonElement>() {
@@ -164,7 +163,14 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
 			@Override
 			public void onSuccess(JsonElement result) {
-				callback.onCompleted(result, 1, null, null);
+				int count = -1;
+
+				if (result.isJsonObject()) {
+					JsonObject jsonObject = result.getAsJsonObject();
+					count = jsonObject.get("count").getAsInt();
+				}
+
+				callback.onCompleted(result, count, null, null);
 			}
 		});
 	}
@@ -367,7 +373,6 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 *            Callback to invoke after the operation is completed
 	 */
 	public void lookUp(Object id, List<Pair<String, String>> parameters, final TableJsonOperationCallback callback) {
-
 		ListenableFuture<JsonObject> lookUpFuture = lookUp(id, parameters);
 
 		Futures.addCallback(lookUpFuture, new FutureCallback<JsonObject>() {
