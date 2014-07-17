@@ -28,16 +28,21 @@ import java.util.Locale;
 import android.util.Pair;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.TableJsonQueryCallback;
 import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
+import com.microsoft.windowsazure.mobileservices.table.query.ExecutableJsonQuery;
 import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
+import com.microsoft.windowsazure.mobileservices.table.serialization.JsonEntityParser;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.ExpectedValueException;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestCase;
 import com.microsoft.windowsazure.mobileservices.zumoe2etestapp.framework.TestExecutionCallback;
@@ -483,6 +488,51 @@ public class QueryTests extends TestGroup {
 
 		this.addTest(createQueryTest("(Neg) Very large top value", field("year").gt(2000), null, 1001, null, null, null, false, MobileServiceException.class));
 
+		this.addTest(createJsonQueryTest("Select multiple fields - Json - List of movies from the 2000's", field("year").ge(2000), new SimpleMovieFilter() {
+
+			@Override
+			protected FilterResult<Movie> getElements(List<Movie> list) {
+				FilterResult<Movie> res = super.getElements(list);
+				FilterResult<Movie> newRes = new FilterResult<Movie>();
+				newRes.totalCount = res.totalCount;
+				newRes.elements = new ArrayList<Movie>();
+
+				for (Movie movie : res.elements) {
+					// only add title, bestPictureWinner,
+					// releaseDate
+					// and duration fields
+					Movie newMovie = new Movie();
+					newMovie.setTitle(movie.getTitle());
+					newMovie.setBestPictureWinner(movie.isBestPictureWinner());
+					newMovie.setReleaseDate(movie.getReleaseDate());
+					newMovie.setDuration(movie.getDuration());
+					newRes.elements.add(newMovie);
+				}
+
+				return newRes;
+			}
+
+			@Override
+			public FilterResult<Movie> filter(List<Movie> list) {
+				return applyTopSkip(super.filter(list), 5, 0);
+			}
+
+			@Override
+			protected boolean criteria(Movie movie) {
+				return movie.getYear() >= 2000;
+			}
+
+			@Override
+			protected List<Movie> applyOrder(List<Movie> movies) {
+				Collections.sort(movies, new MovieComparator(new Pair<String, QueryOrder>("getReleaseDate", QueryOrder.Descending),
+						new Pair<String, QueryOrder>("getTitle", QueryOrder.Ascending)));
+				return movies;
+			}
+
+		}, 5, null,
+				createOrder(new Pair<String, QueryOrder>("releaseDate", QueryOrder.Descending), new Pair<String, QueryOrder>("title", QueryOrder.Ascending)),
+				project("title", "bestPictureWinner", "duration", "releaseDate"), true, null));
+
 		// invalid lookup
 		for (int i = -1; i <= 0; i++) {
 			final int id = i;
@@ -574,6 +624,52 @@ public class QueryTests extends TestGroup {
 				}));
 
 		this.addTest(createQueryWithCallbackTest("With Callback - Select multiple fields - List of movies from the 2000's", field("year").ge(2000),
+				new SimpleMovieFilter() {
+
+					@Override
+					protected FilterResult<Movie> getElements(List<Movie> list) {
+						FilterResult<Movie> res = super.getElements(list);
+						FilterResult<Movie> newRes = new FilterResult<Movie>();
+						newRes.totalCount = res.totalCount;
+						newRes.elements = new ArrayList<Movie>();
+
+						for (Movie movie : res.elements) {
+							// only add title, bestPictureWinner,
+							// releaseDate
+							// and duration fields
+							Movie newMovie = new Movie();
+							newMovie.setTitle(movie.getTitle());
+							newMovie.setBestPictureWinner(movie.isBestPictureWinner());
+							newMovie.setReleaseDate(movie.getReleaseDate());
+							newMovie.setDuration(movie.getDuration());
+							newRes.elements.add(newMovie);
+						}
+
+						return newRes;
+					}
+
+					@Override
+					public FilterResult<Movie> filter(List<Movie> list) {
+						return applyTopSkip(super.filter(list), 5, 0);
+					}
+
+					@Override
+					protected boolean criteria(Movie movie) {
+						return movie.getYear() >= 2000;
+					}
+
+					@Override
+					protected List<Movie> applyOrder(List<Movie> movies) {
+						Collections.sort(movies, new MovieComparator(new Pair<String, QueryOrder>("getReleaseDate", QueryOrder.Descending),
+								new Pair<String, QueryOrder>("getTitle", QueryOrder.Ascending)));
+						return movies;
+					}
+
+				}, 5, null,
+				createOrder(new Pair<String, QueryOrder>("releaseDate", QueryOrder.Descending), new Pair<String, QueryOrder>("title", QueryOrder.Ascending)),
+				project("title", "bestPictureWinner", "duration", "releaseDate"), true, null));
+
+		this.addTest(createJsonQueryWithCallbackTest("With Callback - Select multiple fields - Json - List of movies from the 2000's", field("year").ge(2000),
 				new SimpleMovieFilter() {
 
 					@Override
@@ -773,6 +869,94 @@ public class QueryTests extends TestGroup {
 		return test;
 	}
 
+	private TestCase createJsonQueryTest(String name, final Query filter, final ListFilter<Movie> expectedResultFilter, final Integer top, final Integer skip,
+			final List<Pair<String, QueryOrder>> orderBy, final String[] projection, final boolean includeInlineCount, final Class<?> expectedExceptionClass) {
+
+		final TestCase test = new TestCase() {
+
+			@Override
+			protected void executeTest(MobileServiceClient client, final TestExecutionCallback callback) {
+
+				ExecutableJsonQuery query;
+
+				if (filter != null) {
+					log("add filter");
+					query = client.getTable(MOVIES_TABLE_NAME).where(filter);
+				} else {
+					query = client.getTable(MOVIES_TABLE_NAME).where();
+				}
+
+				if (top != null) {
+					log("add top");
+					query = query.top(top);
+				}
+
+				if (skip != null) {
+					log("add skip");
+					query = query.skip(skip);
+				}
+
+				if (orderBy != null) {
+					log("add orderby");
+					for (Pair<String, QueryOrder> order : orderBy) {
+						query = query.orderBy(order.first, order.second);
+					}
+				}
+
+				if (projection != null) {
+					log("add projection");
+					query = query.select(projection);
+				}
+
+				if (includeInlineCount) {
+					log("add inlinecount");
+					query.includeInlineCount();
+				}
+
+				TestCase testCase = this;
+				TestResult result = new TestResult();
+				result.setStatus(TestStatus.Passed);
+				result.setTestCase(testCase);
+
+				try {
+					JsonElement moviesJson = query.execute().get();
+					List<Movie> movies;
+
+					Gson gson = client.getGsonBuilder().create();
+
+					if (moviesJson.isJsonObject()) {
+						JsonElement elements = moviesJson.getAsJsonObject().get("results");
+
+						movies = JsonEntityParser.parseResults(elements, gson, Movie.class);
+					} else {
+						movies = JsonEntityParser.parseResults(moviesJson, gson, Movie.class);
+					}
+
+					FilterResult<Movie> expectedData = expectedResultFilter.filter(QueryTestData.getAllMovies());
+
+					log("verify result");
+
+					if (Util.compareLists(expectedData.elements, movies)) {
+					} else {
+						createResultFromException(result, new ExpectedValueException(Util.listToString(expectedData.elements), Util.listToString(movies)));
+					}
+
+				} catch (Exception exception) {
+
+					createResultFromException(result, exception);
+				} finally {
+					callback.onTestComplete(testCase, result);
+
+				}
+			}
+		};
+
+		test.setExpectedExceptionClass(expectedExceptionClass);
+		test.setName(name);
+
+		return test;
+	}
+
 	private TestCase createQueryWithCallbackTest(String name, final Query filter, final ListFilter<Movie> expectedResultFilter) {
 
 		return createQueryTest(name, filter, expectedResultFilter, null, null, null, null, false, null);
@@ -841,6 +1025,105 @@ public class QueryTests extends TestGroup {
 						public void onCompleted(List<Movie> movies, int count, Exception exception, ServiceFilterResponse response) {
 
 							if (exception == null) {
+								FilterResult<Movie> expectedData = expectedResultFilter.filter(QueryTestData.getAllMovies());
+
+								log("verify result");
+								if (Util.compareLists(expectedData.elements, movies)) {
+								} else {
+									createResultFromException(result,
+											new ExpectedValueException(Util.listToString(expectedData.elements), Util.listToString(movies)));
+								}
+							} else {
+								createResultFromException(result, exception);
+							}
+
+							if (callback != null)
+								callback.onTestComplete(testCase, result);
+						}
+					});
+				} catch (Exception exception) {
+					createResultFromException(result, exception);
+					callback.onTestComplete(testCase, result);
+				}
+			}
+		};
+
+		test.setExpectedExceptionClass(expectedExceptionClass);
+		test.setName(name);
+
+		return test;
+	}
+
+	@SuppressWarnings("deprecation")
+	private TestCase createJsonQueryWithCallbackTest(String name, final Query filter, final ListFilter<Movie> expectedResultFilter, final Integer top,
+			final Integer skip, final List<Pair<String, QueryOrder>> orderBy, final String[] projection, final boolean includeInlineCount,
+			final Class<?> expectedExceptionClass) {
+
+		final TestCase test = new TestCase() {
+			@Override
+			protected void executeTest(final MobileServiceClient client, final TestExecutionCallback callback) {
+
+				ExecutableJsonQuery query;
+
+				if (filter != null) {
+					log("add filter");
+					query = client.getTable(MOVIES_TABLE_NAME).where(filter);
+				} else {
+					query = client.getTable(MOVIES_TABLE_NAME).where();
+				}
+
+				if (top != null) {
+					log("add top");
+					query = query.top(top);
+				}
+
+				if (skip != null) {
+					log("add skip");
+					query = query.skip(skip);
+				}
+
+				if (orderBy != null) {
+					log("add orderby");
+					for (Pair<String, QueryOrder> order : orderBy) {
+						query = query.orderBy(order.first, order.second);
+					}
+				}
+
+				if (projection != null) {
+					log("add projection");
+					query = query.select(projection);
+				}
+
+				if (includeInlineCount) {
+					log("add inlinecount");
+					query.includeInlineCount();
+				}
+
+				final TestCase testCase = this;
+
+				final TestResult result = new TestResult();
+				result.setStatus(TestStatus.Passed);
+				result.setTestCase(testCase);
+
+				try {
+					query.execute(new TableJsonQueryCallback() {
+
+						@Override
+						public void onCompleted(JsonElement moviesJson, int count, Exception exception, ServiceFilterResponse response) {
+
+							if (exception == null) {
+								List<Movie> movies;
+
+								Gson gson = client.getGsonBuilder().create();
+
+								if (moviesJson.isJsonObject()) {
+									JsonElement elements = moviesJson.getAsJsonObject().get("results");
+
+									movies = JsonEntityParser.parseResults(elements, gson, Movie.class);
+								} else {
+									movies = JsonEntityParser.parseResults(moviesJson, gson, Movie.class);
+								}
+
 								FilterResult<Movie> expectedData = expectedResultFilter.filter(QueryTestData.getAllMovies());
 
 								log("verify result");
