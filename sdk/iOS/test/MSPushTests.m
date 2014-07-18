@@ -5,6 +5,7 @@
 #import <SenTestingKit/SenTestingKit.h>
 #import "MSClient.h"
 #import "MSMultiRequestTestFilter.h"
+#import "MSPush.h"
 
 @interface MSPushTests : SenTestCase
 @property (nonatomic) BOOL done;
