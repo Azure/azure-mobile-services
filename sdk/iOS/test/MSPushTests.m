@@ -131,7 +131,7 @@
 
 - (void)testRegisterNativeRequiredDeviceToken {
     [self.client.push registerNativeWithDeviceToken:nil tags:@[@"tag1",@"tag2"] completion:^(NSError *error) {
-        STAssertEquals(error.code, MSPushRequiredParameter, @"Error code was expected to be MSPushRequiredParameter.");
+        STAssertEquals(error.code, [@MSPushRequiredParameter integerValue], @"Error code was expected to be MSPushRequiredParameter.");
         STAssertEquals(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
         STAssertTrue([error.description rangeOfString:@"deviceToken"].location != NSNotFound, @"Expected deviceToken in error description.");
         self.done = YES;
@@ -142,7 +142,7 @@
 
 - (void)testRegisterTemplateRequiredDeviceToken {
     [self.client.push registerTemplateWithDeviceToken:nil name:nil jsonBodyTemplate:nil expiryTemplate:nil tags:nil completion:^(NSError *error) {
-        STAssertEquals(error.code, MSPushRequiredParameter, @"Error code was expected to be MSPushRequiredParameter.");
+        STAssertEquals(error.code, [@MSPushRequiredParameter integerValue], @"Error code was expected to be MSPushRequiredParameter.");
         STAssertEquals(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
         STAssertTrue([error.description rangeOfString:@"deviceToken"].location != NSNotFound, @"Expected deviceToken in error description.");
         self.done = YES;
@@ -154,7 +154,7 @@
 - (void)testRegisterTemplateRequiredName {
     NSData *deviceToken = [self bytesFromHexString:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8"];
     [self.client.push registerTemplateWithDeviceToken:deviceToken name:nil jsonBodyTemplate:nil expiryTemplate:nil tags:nil completion:^(NSError *error) {
-        STAssertEquals(error.code, MSPushRequiredParameter, @"Error code was expected to be MSPushRequiredParameter.");
+        STAssertEquals(error.code, [@MSPushRequiredParameter integerValue], @"Error code was expected to be MSPushRequiredParameter.");
         STAssertEquals(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
         STAssertTrue([error.description rangeOfString:@"name"].location != NSNotFound, @"Expected name in error description.");
         self.done = YES;
@@ -165,7 +165,7 @@
 
 - (void)testUnregisterTemplateRequiredName {
     [self.client.push unregisterTemplateWithName:nil completion:^(NSError *error) {
-        STAssertEquals(error.code, MSPushRequiredParameter, @"Error code was expected to be MSPushRequiredParameter.");
+        STAssertEquals(error.code, [@MSPushRequiredParameter integerValue], @"Error code was expected to be MSPushRequiredParameter.");
         STAssertEquals(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
         STAssertTrue([error.description rangeOfString:@"name"].location != NSNotFound, @"Expected name in error description.");
         self.done = YES;
@@ -176,7 +176,7 @@
 
 - (void)testUnregisterAllRequiredDeviceToken {
     [self.client.push unregisterAllWithDeviceToken:nil completion:^(NSError *error) {
-        STAssertEquals(error.code, MSPushRequiredParameter, @"Error code was expected to be MSPushRequiredParameter.");
+        STAssertEquals(error.code, [@MSPushRequiredParameter integerValue], @"Error code was expected to be MSPushRequiredParameter.");
         STAssertEquals(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
         STAssertTrue([error.description rangeOfString:@"deviceToken"].location != NSNotFound, @"Expected deviceToken in error description.");
         self.done = YES;
@@ -188,7 +188,7 @@
 - (void)testRegisterTemplateRequiredTemplateBody {
     NSData *deviceToken = [self bytesFromHexString:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8"];
     [self.client.push registerTemplateWithDeviceToken:deviceToken name:@"foo" jsonBodyTemplate:nil expiryTemplate:nil tags:nil completion:^(NSError *error) {
-        STAssertEquals(error.code, MSPushRequiredParameter, @"Error code was expected to be MSPushRequiredParameter.");
+        STAssertEquals(error.code, [@MSPushRequiredParameter integerValue], @"Error code was expected to be MSPushRequiredParameter.");
         STAssertEquals(error.domain, MSErrorDomain, @"Error code was expected to be MSErrorDomain.");
         STAssertTrue([error.description rangeOfString:@"bodyTemplate"].location != NSNotFound, @"Expected bodyTemplate in error description.");
         self.done = YES;
@@ -721,35 +721,24 @@
                                          statusCode:200
                                          HTTPVersion:nil headerFields:nil];
     
+    __block NSMutableArray *expectedUrls = [@[
+                                              [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:@"8313603759421994114-6468852488791307573-7"] absoluteString],
+                                              [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:@"8313603759421994114-6468852488791307573-9"] absoluteString]] mutableCopy];
+    
     testFilterDeleteRegistration.responseToUse = deleteResponse;
     testFilterDeleteRegistration.ignoreNextFilter = YES;
     testFilterDeleteRegistration.onInspectRequest = ^(NSURLRequest *request) {
         STAssertTrue([request.HTTPMethod isEqualToString:@"DELETE"], @"Expected request HTTPMethod to be DELETE.");
-        NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:@"8313603759421994114-6468852488791307573-7"] absoluteString];
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
-        return request;
-    };
-    
-    MSTestFilter *testFilterDeleteRegistration2 = [MSTestFilter new];
-    
-    NSHTTPURLResponse *deleteResponse2 = [[NSHTTPURLResponse alloc]
-                                         initWithURL:nil
-                                         statusCode:200
-                                         HTTPVersion:nil headerFields:nil];
-    
-    testFilterDeleteRegistration2.responseToUse = deleteResponse2;
-    testFilterDeleteRegistration2.ignoreNextFilter = YES;
-    testFilterDeleteRegistration2.onInspectRequest = ^(NSURLRequest *request) {
-        STAssertTrue([request.HTTPMethod isEqualToString:@"DELETE"], @"Expected request HTTPMethod to be DELETE.");
-        NSString *expectedUrl = [[[self.url URLByAppendingPathComponent:@"push/registrations"] URLByAppendingPathComponent:@"8313603759421994114-6468852488791307573-9"] absoluteString];
-        STAssertTrue([expectedUrl isEqualToString:[[request URL] absoluteString]], @"Expected request to have expected Uri.");
+        NSString *actualUrl = request.URL.absoluteString;
+        STAssertTrue([expectedUrls containsObject:actualUrl], @"Expected request to have expected Uri.");
+        [expectedUrls removeObject:actualUrl];
         return request;
     };
     
     MSMultiRequestTestFilter *testFilter = [[MSMultiRequestTestFilter alloc] init];
     testFilter.testFilters = @[testFilterListRegistrations,
                                testFilterDeleteRegistration,
-                               testFilterDeleteRegistration2];
+                               testFilterDeleteRegistration];
     MSClient *filteredClient = [self.client clientWithFilter:testFilter];
     
     NSData *deviceToken = [self bytesFromHexString:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8"];
