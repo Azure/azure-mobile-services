@@ -314,6 +314,8 @@ public class MobileServiceClient {
 			public void onFailure(Throwable exception) {
 				if (exception instanceof Exception) {
 					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
 				}
 			}
 
@@ -491,6 +493,8 @@ public class MobileServiceClient {
 			public void onFailure(Throwable exception) {
 				if (exception instanceof Exception) {
 					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
 				}
 			}
 
@@ -574,6 +578,8 @@ public class MobileServiceClient {
 			public void onFailure(Throwable exception) {
 				if (exception instanceof Exception) {
 					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
 				}
 			}
 
@@ -709,6 +715,8 @@ public class MobileServiceClient {
 			public void onFailure(Throwable exception) {
 				if (exception instanceof Exception) {
 					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
 				}
 			}
 
@@ -1045,6 +1053,8 @@ public class MobileServiceClient {
 			public void onFailure(Throwable exception) {
 				if (exception instanceof Exception) {
 					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
 				}
 			}
 
@@ -1217,6 +1227,8 @@ public class MobileServiceClient {
 			public void onFailure(Throwable exception) {
 				if (exception instanceof Exception) {
 					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
 				}
 			}
 
@@ -1389,6 +1401,8 @@ public class MobileServiceClient {
 			public void onFailure(Throwable exception) {
 				if (exception instanceof Exception) {
 					callback.onResponse(MobileServiceException.getServiceResponse(exception), (Exception) exception);
+				} else {
+					callback.onResponse(MobileServiceException.getServiceResponse(exception), new Exception(exception));
 				}
 			}
 

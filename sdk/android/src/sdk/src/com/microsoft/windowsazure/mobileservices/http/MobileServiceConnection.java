@@ -153,6 +153,8 @@ public class MobileServiceConnection {
 			public void onFailure(Throwable exception) {
 				if (exception instanceof Exception) {
 					responseCallback.onResponse(MobileServiceException.getServiceResponse(exception), (Exception) exception);
+				} else {
+					responseCallback.onResponse(MobileServiceException.getServiceResponse(exception), new Exception(exception));
 				}
 			}
 

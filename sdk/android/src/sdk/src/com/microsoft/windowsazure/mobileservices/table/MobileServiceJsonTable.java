@@ -158,6 +158,8 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 			public void onFailure(Throwable exception) {
 				if (exception instanceof Exception) {
 					callback.onCompleted(null, 0, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, 0, new Exception(exception), MobileServiceException.getServiceResponse(exception));
 				}
 			}
 
@@ -380,6 +382,8 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 			public void onFailure(Throwable exception) {
 				if (exception instanceof Exception) {
 					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
 				}
 			}
 
@@ -512,6 +516,8 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 			public void onFailure(Throwable exception) {
 				if (exception instanceof Exception) {
 					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
 				}
 			}
 
@@ -666,6 +672,8 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 			public void onFailure(Throwable exception) {
 				if (exception instanceof Exception) {
 					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
 				}
 			}
 

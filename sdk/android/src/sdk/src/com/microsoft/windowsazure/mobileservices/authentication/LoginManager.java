@@ -196,6 +196,8 @@ public class LoginManager {
 			public void onFailure(Throwable exception) {
 				if (exception instanceof Exception) {
 					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
 				}
 			}
 
@@ -248,6 +250,8 @@ public class LoginManager {
 			public void onFailure(Throwable exception) {
 				if (exception instanceof Exception) {
 					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
 				}
 			}
 

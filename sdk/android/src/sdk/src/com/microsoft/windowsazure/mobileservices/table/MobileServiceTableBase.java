@@ -245,6 +245,8 @@ public abstract class MobileServiceTableBase {
 			public void onFailure(Throwable exception) {
 				if (exception instanceof Exception) {
 					callback.onCompleted((Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(new Exception(exception), MobileServiceException.getServiceResponse(exception));
 				}
 			}
 
