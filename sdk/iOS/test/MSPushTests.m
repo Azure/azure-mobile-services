@@ -743,6 +743,7 @@
     
     NSData *deviceToken = [self bytesFromHexString:@"59D31B14081B92DAA98FAD91EDC0E61FC23767D5B90892C4F22DF56E312045C8"];
     [filteredClient.push unregisterAllWithDeviceToken:deviceToken completion:^(NSError *error) {
+        STAssertTrue(expectedUrls.count == 0, @"Expected all URLs to have been hit");
         STAssertNil(error, @"Error should be nil %@", error.description);
         self.done = YES;
     }];
