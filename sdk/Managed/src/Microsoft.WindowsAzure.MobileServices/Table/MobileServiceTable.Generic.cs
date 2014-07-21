@@ -606,11 +606,12 @@ namespace Microsoft.WindowsAzure.MobileServices
             Debug.Assert(id != null);
 
             // Create a query for just this item
-            string query = string.Format(
-                CultureInfo.InvariantCulture,
-                "$filter=({0} eq {1})",
-                MobileServiceSystemColumns.Id,
-                ODataExpressionVisitor.ToODataConstant(id));
+            string query = "$filter=" + Uri.EscapeDataString(
+                string.Format(
+                    CultureInfo.InvariantCulture,
+                    "({0} eq {1})",
+                    MobileServiceSystemColumns.Id,
+                    ODataExpressionVisitor.ToODataConstant(id)));
 
             // Send the query
             QueryResult response = await this.ReadAsync(query, parameters, MobileServiceFeatures.TypedTable);

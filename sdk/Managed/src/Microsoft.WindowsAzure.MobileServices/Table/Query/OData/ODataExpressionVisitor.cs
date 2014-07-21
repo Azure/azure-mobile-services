@@ -199,10 +199,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             }
             else if (handle.Equals(typeof(char).TypeHandle))
             {
-                // Escape the char constant by: (1) replacing a single quote with a 
-                // pair of single quotes, and (2) Uri escaping with percent encoding
+                // Escape the char constant by replacing a single quote with a pair of single quotes
                 char ch = (char)value;
-                string charEscaped = Uri.EscapeDataString(ch == '\'' ? "''" : ch.ToString());
+                string charEscaped = (ch == '\'' ? "''" : ch.ToString());
                 return string.Format(CultureInfo.InvariantCulture, "'{0}'", charEscaped);
             }
             else if (handle.Equals(typeof(DateTime).TypeHandle))
@@ -231,10 +230,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             }
             else
             {
-                // Escape the string constant by: (1) replacing single quotes with a 
-                // pair of single quotes, and (2) Uri escaping with percent encoding
-                string text = value.ToString();
-                string textEscaped = Uri.EscapeDataString(text.Replace("'", "''"));
+                // Escape the string constant by replacing single quotes with a pair of single quotes.
+                string textEscaped = value.ToString().Replace("'", "''");
                 return string.Format(CultureInfo.InvariantCulture, "'{0}'", textEscaped);
             }
         }

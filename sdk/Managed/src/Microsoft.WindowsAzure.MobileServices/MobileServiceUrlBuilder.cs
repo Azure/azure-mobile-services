@@ -82,7 +82,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             if (!string.IsNullOrEmpty(queryString))
             {
-                path = string.Format(CultureInfo.InvariantCulture, "{0}?{1}", path,queryString.TrimStart('?'));
+                path = string.Format(CultureInfo.InvariantCulture, "{0}?{1}", path, queryString.TrimStart('?'));
             }
 
             return path;
