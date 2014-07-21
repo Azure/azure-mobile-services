@@ -125,24 +125,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The store is already initialized..
-        /// </summary>
-        internal static string SQLiteStore_StoreAlreadyInitialized {
-            get {
-                return ResourceManager.GetString("SQLiteStore_StoreAlreadyInitialized", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The store must be initialized before it can be used..
-        /// </summary>
-        internal static string SQLiteStore_StoreNotInitialized {
-            get {
-                return ResourceManager.GetString("SQLiteStore_StoreNotInitialized", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Table with name &apos;{0}&apos; is not defined..
         /// </summary>
         internal static string SQLiteStore_TableNotDefined {

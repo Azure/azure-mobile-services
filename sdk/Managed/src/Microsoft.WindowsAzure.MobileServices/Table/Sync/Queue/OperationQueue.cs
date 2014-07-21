@@ -53,7 +53,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             get { return pendingOperations; }
         }
 
-        public async Task<long> CountPending(string tableName)
+        public virtual async Task<long> CountPending(string tableName)
         {
             MobileServiceTableQueryDescription query = CreateQuery();
             query.Filter = new BinaryOperatorNode(BinaryOperatorKind.Equal, new MemberAccessNode(null, "tableName"), new ConstantNode(tableName));

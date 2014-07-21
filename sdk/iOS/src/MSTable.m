@@ -12,9 +12,11 @@
 
 #pragma mark * MSTable Implementation
 
+NSString *const MSSystemColumnId = @"id";
 NSString *const MSSystemColumnCreatedAt = @"__createdAt";
 NSString *const MSSystemColumnUpdatedAt = @"__updatedAt";
 NSString *const MSSystemColumnVersion = @"__version";
+NSString *const MSSystemColumnDeleted = @"__deleted";
 
 @implementation MSTable
 
@@ -134,6 +136,32 @@ NSString *const MSSystemColumnVersion = @"__version";
                                                 completion:completion];
         [connection start];
     }
+}
+
+-(void)undelete:(NSDictionary *)item completion:(MSItemBlock)completion
+{
+    [self undelete:item parameters:nil completion:completion];
+}
+
+-(void)undelete:(NSDictionary *)item
+        parameters:(NSDictionary *)parameters
+        completion:(MSItemBlock)completion
+{
+    // Create the request
+    MSTableItemRequest *request = [MSTableRequest
+                                     requestToUndeleteItem:item
+                                     table:self
+                                     parameters:parameters
+                                     completion:completion];
+                                     
+    // Send the request
+    if (request) {
+        MSTableConnection *connection =
+        [MSTableConnection connectionWithItemRequest:request
+                                          completion:completion];
+        [connection start];
+    }
+    
 }
 
 

@@ -90,7 +90,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             using (var cts = new CancellationTokenSource())
             {
                 // now pull
-                Task pullTask = table.PullAsync(null, cancellationToken: cts.Token);
+                Task pullTask = table.PullAsync(null, null, null, cancellationToken: cts.Token);
                 cts.Cancel();
 
                 var ex = await ThrowsAsync<Exception>(() => pullTask);
@@ -117,7 +117,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await service.SyncContext.PushAsync(); // push to clear the queue 
 
             // now pull
-            await table.PullAsync(null, cancellationToken: CancellationToken.None);
+            await table.PullAsync();
 
             Assert.AreEqual(store.Tables[table.TableName].Count, 2); // 1 from remote and 1 from local
             Assert.AreEqual(hijack.Requests.Count, 2); 
@@ -150,7 +150,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var item = new StringIdType() { Id = "an id", String = "what?" };
             await table2.InsertAsync(item);
 
-            await table1.PullAsync(null, cancellationToken: CancellationToken.None);
+            await table1.PullAsync();
 
             Assert.AreEqual(store.Tables[table1.TableName].Count, 2); // table should contain 2 pulled items
             Assert.AreEqual(hijack.Requests.Count, 2); // 1 for push and 1 for pull
@@ -176,7 +176,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(store.Tables[table1.TableName].Count, 1); // item is inserted
 
             // this should trigger a push
-            await table1.PullAsync(null, cancellationToken: CancellationToken.None);
+            await table1.PullAsync();
 
             Assert.AreEqual(hijack.Requests.Count, 2); // 1 for push and 1 for pull
             Assert.AreEqual(store.Tables[table1.TableName].Count, 2); // table is populated
@@ -200,7 +200,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await table1.InsertAsync(new JObject() { { "id", "abc" } });
 
             // this should trigger a push
-            await table1.PullAsync(null, cancellationToken: CancellationToken.None);
+            await table1.PullAsync();
 
             Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(), "OL");
             Assert.AreEqual(hijack.Requests[1].Headers.GetValues("X-ZUMO-FEATURES").First(), "OL");
@@ -223,7 +223,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(store.Tables[table.TableName].Count, 1); // item is inserted
 
             // this should trigger a push
-            var ex = await ThrowsAsync<MobileServicePushFailedException>(() => table.PullAsync(null, cancellationToken: CancellationToken.None));
+            var ex = await ThrowsAsync<MobileServicePushFailedException>(() => table.PullAsync());
 
             Assert.AreEqual(ex.PushResult.Errors.Count(), 1);
             Assert.AreEqual(hijack.Requests.Count, 1); // 1 for push 
@@ -232,22 +232,29 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task PullAsync_Throws_WhenSelectClauseIsSpecified()
         {
-            var store = new MobileServiceLocalStoreMock();
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
-            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
-            var query = table.Skip(5)
-                             .Take(3)
-                             .Where(t => t.String == "world")
-                             .OrderBy(o => o.Id)
-                             .OrderByDescending(o => o.String)
-                             .IncludeTotalCount()
-                             .Select(x => x.String);
+            var query = table.Select(x => x.String);
 
-            var exception = await ThrowsAsync<ArgumentException>(() => table.PullAsync(query, cancellationToken: CancellationToken.None));
+            var exception = await ThrowsAsync<ArgumentException>(() => table.PullAsync(null, query, cancellationToken: CancellationToken.None));
             Assert.AreEqual(exception.ParamName, "query");
             Assert.StartsWith(exception.Message, "Pull query with select clause is not supported.");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_Throws_WhenOrderByClauseIsSpecifiedWithQueryKey()
+        {
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+            var query = table.OrderBy(x => x.String);
+
+            var exception = await ThrowsAsync<ArgumentException>(() => table.PullAsync("incQuery", query, cancellationToken: CancellationToken.None));
+            Assert.AreEqual(exception.ParamName, "query");
+            Assert.StartsWith(exception.Message, "Incremental pull query must not have orderby clause.");
         }
 
         [AsyncTestMethod]
@@ -256,7 +263,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             hijack.OnSendingRequest = req =>
             {
-                Assert.AreEqual(req.RequestUri.Query, "?$filter=(String%20eq%20'world')&$orderby=String%20desc,id&$skip=5&$top=3&__systemproperties=__version");
+                Assert.AreEqual(req.RequestUri.Query, "?$filter=(String%20eq%20'world')&$orderby=String%20desc,id&$skip=5&$top=3&param1=val1&__includeDeleted=true&__systemproperties=__version");
                 return Task.FromResult(req);
             };
             hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
@@ -270,10 +277,117 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                              .Take(3)
                              .Where(t => t.String == "world")
                              .OrderBy(o => o.Id)
+                             .WithParameters(new Dictionary<string, string>() { { "param1", "val1" } })
                              .OrderByDescending(o => o.String)
                              .IncludeTotalCount();
 
-            await table.PullAsync(query, cancellationToken: CancellationToken.None);
+            await table.PullAsync(null, query, cancellationToken: CancellationToken.None);
+            Assert.AreEqual(hijack.Requests.Count, 1);
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_Incremental_Succeeds()
+        {
+            var store = new MobileServiceLocalStoreMock();
+            var settings = new MobileServiceSyncSettingsManager(store);
+            await settings.SetDeltaToken("stringId_test_table", "incquery", new DateTime(2001, 02, 03, 0, 0, 0, DateTimeKind.Utc));
+            await TestIncrementalPull(store, "2001-02-03T08:00:00.000Z");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_Incremental_WithoutDeltaTokenInDb()
+        {
+            var store = new MobileServiceLocalStoreMock();
+            store.Tables[MobileServiceLocalSystemTables.Config] = new Dictionary<string, JObject>();
+            await TestIncrementalPull(store, "0001-01-01T08:00:00.000Z");
+        }
+
+        private static async Task TestIncrementalPull(MobileServiceLocalStoreMock store, string expectedToken)
+        {
+            var hijack = new TestHttpHandler();
+            hijack.OnSendingRequest = req =>
+            {
+                Assert.AreEqual(req.RequestUri.Query, "?$filter=((String%20eq%20'world')%20and%20(__updatedAt%20ge%20datetime'" + expectedToken + "'))&$orderby=__updatedAt&$skip=5&$top=3&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt");
+                return Task.FromResult(req);
+            };
+            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
+
+
+            store.Tables[MobileServiceLocalSystemTables.Config]["stringId_test_table_systemProperties"] = new JObject
+            {
+                { MobileServiceSystemColumns.Id, "stringId_test_table_systemProperties" },
+                { "value", "1" }
+            };
+
+
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+            var query = table.Skip(5)
+                             .Take(3)
+                             .Where(t => t.String == "world")
+                             .WithParameters(new Dictionary<string, string>() { { "param1", "val1" } })                             
+                             .IncludeTotalCount();
+
+            await table.PullAsync("incquery", query, cancellationToken: CancellationToken.None);
+            Assert.AreEqual(hijack.Requests.Count, 1);
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_OverridesStoreSystemProperties_WhenProvidedInParameters()
+        {
+            await TestPullQueryOverride(new Dictionary<string, string>() 
+                             { 
+                                { "__systemProperties", "createdAt" },
+                                { "param1", "val1" } 
+                             },
+                             "?__systemProperties=createdAt&param1=val1&__includeDeleted=true");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_OverridesIncludeDeleted_WhenProvidedInParameters()
+        {
+            await TestPullQueryOverride(new Dictionary<string, string>() 
+                             { 
+                                { "__includeDeleted", "false" },
+                                { "param1", "val1" } 
+                             },
+                             "?__includeDeleted=false&param1=val1&__systemproperties=__version");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_Throws_WhenQueryKeyIsInvalid()
+        {
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", new TestHttpHandler());
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+
+            await ThrowsAsync<ArgumentException>(() => table.PullAsync("2asdf", table.CreateQuery(), CancellationToken.None));
+            await ThrowsAsync<ArgumentException>(() => table.PullAsync("asd_@#234", table.CreateQuery(), CancellationToken.None));
+            await ThrowsAsync<ArgumentException>(() => table.PullAsync("asd_^^234", table.CreateQuery(), CancellationToken.None));
+        }
+
+        private static async Task TestPullQueryOverride(IDictionary<string, string> parameters, string uriQuery)
+        {
+            var hijack = new TestHttpHandler();
+            hijack.OnSendingRequest = req =>
+            {
+                Assert.AreEqual(req.RequestUri.Query, uriQuery);
+                return Task.FromResult(req);
+            };
+            hijack.AddResponseContent("[]"); // for pull
+
+            var store = new MobileServiceLocalStoreMock();
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+            var query = table.CreateQuery()
+                             .WithParameters(parameters);
+
+            await table.PullAsync(null, query, cancellationToken: CancellationToken.None);
             Assert.AreEqual(hijack.Requests.Count, 1);
         }
 
@@ -307,6 +421,37 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(store.DeleteQueries[1].TableName, table1.TableName); // purged table
             Assert.AreEqual(hijack.Requests.Count, 1); // still 1 means no other push happened
             Assert.AreEqual(store.Tables[table2.TableName].Count, 1); // this table should not be touched
+        }
+
+        [AsyncTestMethod]
+        public async Task PurgeAsync_ResetsDeltaToken_WhenQueryKeyIsSpecified()
+        {
+            var store = new MobileServiceLocalStoreMock();
+            store.Tables["stringId_test_table"] = new Dictionary<string, JObject>();
+            store.Tables[MobileServiceLocalSystemTables.Config] = new Dictionary<string, JObject>();
+            store.Tables[MobileServiceLocalSystemTables.Config]["stringId_test_table_latestNews_deltaToken"] = new JObject();
+
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", new TestHttpHandler());
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+
+            await table.PurgeAsync("latestNews", table.CreateQuery(), CancellationToken.None);
+
+            Assert.IsFalse(store.Tables[MobileServiceLocalSystemTables.Config].ContainsKey("stringId_test_table_latestNews_deltaToken"));
+        }
+
+        [AsyncTestMethod]
+        public async Task PurgeAsync_Throws_WhenQueryKeyIsInvalid()
+        {
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", new TestHttpHandler());
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+
+            await ThrowsAsync<ArgumentException>(() => table.PurgeAsync("2asdf", table.CreateQuery(), CancellationToken.None));
+            await ThrowsAsync<ArgumentException>(() => table.PurgeAsync("asd_@#234", table.CreateQuery(), CancellationToken.None));
+            await ThrowsAsync<ArgumentException>(() => table.PurgeAsync("asd_^^234", table.CreateQuery(), CancellationToken.None));
         }
 
         [AsyncTestMethod]

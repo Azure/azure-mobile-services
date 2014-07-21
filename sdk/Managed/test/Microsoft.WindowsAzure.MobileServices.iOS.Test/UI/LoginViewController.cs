@@ -61,11 +61,11 @@ namespace Microsoft.WindowsAzure.Mobile.iOS.Test
 
             if (!string.IsNullOrEmpty(AppDelegate.Harness.Settings.TagExpression))
             {
-                AppDelegate.Harness.Settings.TagExpression += " - notXamarin";
+                AppDelegate.Harness.Settings.TagExpression += " - notXamarin - notXamarin_iOS";
             }
             else
             {
-                AppDelegate.Harness.Settings.TagExpression = "!notXamarin";
+                AppDelegate.Harness.Settings.TagExpression = "!notXamarin - notXamarin_iOS";
             }
 
             NavigationController.PushViewController (new HarnessViewController(), true);

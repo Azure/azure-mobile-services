@@ -37,6 +37,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             this.client = new Mock<MobileServiceClient>();
             this.client.Object.Serializer = new MobileServiceSerializer();
             this.context = new Mock<MobileServiceSyncContext>(this.client.Object);
+            this.context.Setup(c => c.GetTable(It.IsAny<string>())).Returns(Task.FromResult(new MobileServiceTable("test", this.client.Object)));
             this.action = new PushAction(this.opQueue.Object, this.store.Object, this.handler.Object, this.client.Object, this.context.Object, CancellationToken.None);
         }
 
@@ -111,7 +112,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         [TestMethod]
         public async Task ExecuteAsync_DoesNotSaveTheResult_IfExecuteTableOperationThrows()
         {
-            this.store.Setup(s => s.UpsertAsync(MobileServiceLocalSystemTables.SyncErrors, It.IsAny<JObject>(), false)).Returns(Task.FromResult(0));
+            this.store.Setup(s => s.UpsertAsync(MobileServiceLocalSystemTables.SyncErrors, It.IsAny<JObject[]>(), false)).Returns(Task.FromResult(0));
             var op = new InsertOperation("table", "id") { Item = new JObject() };
             await TestResultSave(op, status: HttpStatusCode.PreconditionFailed, resultId: "id", saved: false);
         }
@@ -129,7 +130,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             var result = new JObject() { { "id", resultId } };
             if (saved)
             {
-                this.store.Setup(s => s.UpsertAsync("table", It.Is<JObject>(o => o.ToString() == result.ToString()), true))
+                this.store.Setup(s => s.UpsertAsync("table", It.Is<JObject[]>(list => list.Any(o => o.ToString() == result.ToString())), true))
                           .Returns(Task.FromResult(0));
             }
             await this.TestExecuteAsync(op, result, status);

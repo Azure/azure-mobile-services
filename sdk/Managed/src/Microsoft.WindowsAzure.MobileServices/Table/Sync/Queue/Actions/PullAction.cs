@@ -15,41 +15,118 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
     internal class PullAction: TableAction
     {
+        private static readonly QueryNode updatedAtNode = new MemberAccessNode(null, MobileServiceSystemColumns.UpdatedAt);
+        private static readonly OrderByNode orderByUpdatedAtNode = new OrderByNode(updatedAtNode, OrderByDirection.Ascending);
+        private IDictionary<string, string> parameters;
+        private DateTime maxUpdatedAt = DateTime.MinValue;
+
         public PullAction(MobileServiceTable table, 
                           MobileServiceSyncContext context,
+                          string queryKey,
                           MobileServiceTableQueryDescription query,
-                          OperationQueue operationQueue, 
+                          IDictionary<string, string> parameters, 
+                          OperationQueue operationQueue,
+                          MobileServiceSyncSettingsManager settings,
                           IMobileServiceLocalStore store,
                           CancellationToken cancellationToken)
-            : base(table, query, context, operationQueue, store, cancellationToken)
+            : base(table, queryKey, query, context, operationQueue, settings, store, cancellationToken)
         {
+            this.parameters = parameters;
         }
 
         protected async override Task ProcessTableAsync()
         {
+            bool incrementalSync = this.IsIncrementalSync();
+            DateTime deltaToken = this.maxUpdatedAt;
 
-            JToken remoteResults = await this.Table.ReadAsync(this.Query.ToQueryString());
+            if (incrementalSync)
+            {
+                this.Table.SystemProperties = this.Table.SystemProperties | MobileServiceSystemProperties.UpdatedAt;
+                deltaToken = await this.Settings.GetDeltaToken(this.Query.TableName, this.QueryKey);
+                ApplyDeltaToken(this.Query, deltaToken);
+            }
+
+            JToken remoteResults = await this.Table.ReadAsync(this.Query.ToQueryString(), MobileServiceTable.IncludeDeleted(parameters));
             var result = QueryResult.Parse(remoteResults);
 
             this.CancellationToken.ThrowIfCancellationRequested();
 
-            await this.UpsertAll(result.Values);
-        }
+            await this.ProcessAll(result.Values);
 
-        private async Task DeleteItems(IEnumerable<string> itemIds)
-        {
-            foreach (string id in itemIds)
+            if (incrementalSync && this.maxUpdatedAt > deltaToken)
             {
-                await this.Store.DeleteAsync(this.Table.TableName, id);
+                await this.Settings.SetDeltaToken(this.Query.TableName, this.QueryKey, this.maxUpdatedAt);
             }
         }
 
-        private async Task UpsertAll(JArray items)
+        private async Task ProcessAll(JArray items)
         {
+            var deletedIds = new List<string>();
+            var upsertList = new List<JObject>();
+
             foreach (JObject item in items)
             {
-                await this.Store.UpsertAsync(this.Table.TableName, item, fromServer: true);
+                string id = (string)item[MobileServiceSystemColumns.Id];
+                if (id == null)
+                {
+                    continue;
+                }
+
+                DateTime updatedAt = GetUpdatedAt(item);
+                if (updatedAt > this.maxUpdatedAt)
+                {
+                    this.maxUpdatedAt = updatedAt;
+                }
+
+                if (IsDeleted(item))
+                {
+                    deletedIds.Add(id);
+                }
+                else
+                {
+                    upsertList.Add(item);                    
+                }
+            }
+
+            if (upsertList.Any())
+            {
+                await this.Store.UpsertAsync(this.Table.TableName, upsertList, fromServer: true);
+            }
+
+            if (deletedIds.Any())
+            {
+                await this.Store.DeleteAsync(this.Table.TableName, deletedIds);
             }
         }
+
+        private bool IsIncrementalSync()
+        {
+            return !String.IsNullOrEmpty(this.QueryKey);
+        }
+
+        private void ApplyDeltaToken(MobileServiceTableQueryDescription query, DateTime deltaToken)
+        {
+            query.Ordering.Insert(0, orderByUpdatedAtNode);
+            QueryNode updatedAtGreaterThanOrEqualNode = new BinaryOperatorNode(BinaryOperatorKind.GreaterThanOrEqual, updatedAtNode, new ConstantNode(deltaToken));
+            query.Filter = query.Filter == null ? updatedAtGreaterThanOrEqualNode : new BinaryOperatorNode(BinaryOperatorKind.And, query.Filter, updatedAtGreaterThanOrEqualNode);
+        }
+
+        private static bool IsDeleted(JObject item)
+        {
+            JToken deletedToken = item[MobileServiceSystemColumns.Deleted];
+            bool isDeleted = deletedToken != null && deletedToken.Value<bool>();
+            return isDeleted;
+        }
+
+        private static DateTime GetUpdatedAt(JObject item)
+        {
+            DateTime updatedAt = DateTime.MinValue;
+            JToken updatedAtToken = item[MobileServiceSystemColumns.UpdatedAt];
+            if (updatedAtToken != null)
+            {
+                updatedAt = updatedAtToken.Value<DateTime>();
+            }
+            return updatedAt;
+        }        
     }
 }

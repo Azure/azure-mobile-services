@@ -19,6 +19,7 @@ NSString *const jsonContentType = @"application/json";
 NSString *const xZumoAuth = @"X-ZUMO-AUTH";
 NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
 
+
 #pragma mark * MSConnectionDelegate Private Interface
 
 
@@ -42,6 +43,8 @@ NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
 
 
 @implementation MSClientConnection
+
+static NSOperationQueue *delegateQueue;
 
 @synthesize client = client_;
 @synthesize request = request_;
@@ -155,13 +158,21 @@ NSString *const xZumoInstallId = @"X-ZUMO-INSTALLATION-ID";
                completion:(MSFilterResponseBlock)completion
 {
     if (!filters || filters.count == 0) {
+        dispatch_async(dispatch_get_main_queue(), ^{
         
         // No filters to invoke so use |NSURLConnection | to actually
         // send the request.
         MSConnectionDelegate *delegate = [[MSConnectionDelegate alloc]
                                           initWithClient:client
                                               completion:completion];
-        [NSURLConnection connectionWithRequest:request delegate:delegate];
+        
+        if (client.connectionDelegateQueue) {
+            NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request delegate:delegate startImmediately:NO];
+            [connection setDelegateQueue:client.connectionDelegateQueue];
+            [connection start];
+        } else {
+            [NSURLConnection connectionWithRequest:request delegate:delegate];
+        }});
     }
     else {
         
@@ -319,7 +330,7 @@ didReceiveResponse:(NSURLResponse *)response
 {
     NSURLRequest *newRequest = nil;
     
-    // Only follow redirects to the Windows Azure Mobile Service and not
+    // Only follow redirects to the Microsoft Azure Mobile Service and not
     // to other hosts
     NSString *requestHost = request.URL.host;
     NSString *applicationHost = self.client.applicationURL.host;

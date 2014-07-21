@@ -40,7 +40,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Style="{StaticResource SubheaderStyle}">Windows Azure Mobile Services</TextBlock>
+            <TextBlock Grid.Row="0" Style="{StaticResource SubheaderStyle}">Microsoft Azure Mobile Services</TextBlock>
             <TextBlock Grid.Row="1"  Style="{StaticResource HeaderStyle}">C# Client Library Tests</TextBlock>
             <TextBlock x:Name="lblStatus" Grid.Row="2" Style="{StaticResource StatusStyle}">Unit Test Run</TextBlock>
             <ListView
@@ -53,7 +53,7 @@
                     <DataTemplate>
                         <StackPanel Margin="8 0">
                             <TextBlock Text="{Binding Name}" Foreground="{Binding Brush}" FontSize="16" FontWeight="ExtraLight" />
-                            <ItemsControl ItemsSource="{Binding Details}" Margin="15 0 0 0" FontSize="12" Foreground="LightGray" />
+                            <!--<ItemsControl ItemsSource="{Binding Details}" Margin="15 0 0 0" FontSize="12" Foreground="LightGray" />-->
                         </StackPanel>                        
                     </DataTemplate>
                 </ListView.ItemTemplate>

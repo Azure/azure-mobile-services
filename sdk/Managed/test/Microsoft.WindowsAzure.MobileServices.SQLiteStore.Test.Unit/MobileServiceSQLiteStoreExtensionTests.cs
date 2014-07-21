@@ -76,7 +76,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
         {
             bool defined = false;
 
-            var storeMock = new Mock<MobileServiceSQLiteStore>(MockBehavior.Strict) { CallBase = true };
+            var storeMock = new Mock<MobileServiceSQLiteStore>() { CallBase = true };
 
             storeMock.Setup(store => store.CreateTableFromObject(It.IsAny<string>(), It.IsAny<IEnumerable<ColumnDefinition>>()))
                      .Callback<string, IEnumerable<ColumnDefinition>>((tableName, properties) =>
@@ -89,6 +89,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
                             CollectionAssert.AreEquivalent(expectedProperties, actualProperties);
                         }
                     });
+
+            storeMock.Setup(store => store.SaveSetting(It.IsAny<string>(), It.IsAny<string>())).Returns(Task.FromResult(0));
 
             storeMock.Object.DefineTable<T>();
             await storeMock.Object.InitializeAsync();

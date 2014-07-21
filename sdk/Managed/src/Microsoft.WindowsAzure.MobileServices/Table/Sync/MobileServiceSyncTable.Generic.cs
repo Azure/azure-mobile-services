@@ -43,7 +43,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return this.queryProvider.Execute(query);
         }
 
-        public Task PullAsync<U>(IMobileServiceTableQuery<U> query, CancellationToken cancellationToken)
+        public Task PullAsync<U>(string queryKey, IMobileServiceTableQuery<U> query, CancellationToken cancellationToken)
         {
             if (query == null)
             {
@@ -51,10 +51,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
             string queryString = this.queryProvider.ToQueryString(query);
 
-            return this.PullAsync(queryString, cancellationToken);
+            return this.PullAsync(queryKey, queryString, query.Parameters, cancellationToken);
         }
 
-        public Task PurgeAsync<U>(IMobileServiceTableQuery<U> query, CancellationToken cancellationToken)
+        public Task PurgeAsync<U>(string queryKey, IMobileServiceTableQuery<U> query, CancellationToken cancellationToken)
         {
             if (query == null)
             {
@@ -62,7 +62,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
             string queryString = this.queryProvider.ToQueryString(query);
 
-            return this.PurgeAsync(queryString);
+            return this.PurgeAsync(queryKey, queryString, cancellationToken);
         }
         
         public async Task RefreshAsync(T instance)
@@ -137,7 +137,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public IMobileServiceTableQuery<T> CreateQuery()
         {
-            return this.queryProvider.Create(this.remoteTable, new T[0].AsQueryable(), new Dictionary<string, string>(), false);
+            return this.queryProvider.Create(this.remoteTable, new T[0].AsQueryable(), new Dictionary<string, string>(), includeTotalCount: false);
         }
 
         public IMobileServiceTableQuery<T> Where(Expression<Func<T, bool>> predicate)

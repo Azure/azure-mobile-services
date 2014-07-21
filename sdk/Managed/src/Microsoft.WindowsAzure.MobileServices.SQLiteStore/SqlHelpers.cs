@@ -3,11 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
@@ -65,7 +61,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         {
             if (columnType == JTokenType.Date)
             {
-                var date = value.Value<DateTime>();
+                var date = value.ToObject<DateTime>();
                 if (date.Kind == DateTimeKind.Unspecified)
                 {
                     date = DateTime.SpecifyKind(date, DateTimeKind.Utc);
@@ -130,7 +126,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 return SqlColumnType.Integer;
             }
             else if (type == typeof(DateTime) ||
-                     type == typeof(float) || 
+                     type == typeof(float) ||
                      type == typeof(double))
             {
                 return SqlColumnType.Real;
@@ -189,7 +185,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
         private static bool IsValidIdentifier(string identifier)
         {
-             if (String.IsNullOrWhiteSpace(identifier) || identifier.Length > 128) {
+            if (String.IsNullOrWhiteSpace(identifier) || identifier.Length > 128)
+            {
                 return false;
             }
 

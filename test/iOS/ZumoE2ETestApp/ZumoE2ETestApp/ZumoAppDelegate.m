@@ -35,9 +35,7 @@
 
 - (void)application:(UIApplication *)application didRegisterForRemoteNotificationsWithDeviceToken:(NSData *)deviceToken {
     [[ZumoTestGlobals sharedInstance] setRemoteNotificationRegistrationStatus:@"Successfully registered for remote notifications"];
-    NSString *token = [deviceToken description];
-    token = [token stringByTrimmingCharactersInSet:[NSCharacterSet characterSetWithCharactersInString:@"<>"]];
-    [[ZumoTestGlobals sharedInstance] setDeviceToken:token];
+    [ZumoTestGlobals sharedInstance].deviceToken = deviceToken;
 }
 
 - (void)application:(UIApplication *)application didReceiveRemoteNotification:(NSDictionary *)userInfo {

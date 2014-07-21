@@ -86,6 +86,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             App.Harness.Settings.TagExpression = tags;
             App.Harness.Settings.Custom["Auto"] = auto ? "True": "False";
 
+            if (!string.IsNullOrEmpty(App.Harness.Settings.TagExpression))
+            {
+                App.Harness.Settings.TagExpression += " - notNetFramework";
+            }
+            else
+            {
+                App.Harness.Settings.TagExpression = "!notNetFramework";
+            }
+
             this.NavigationService.Navigate(new TestPage());
         }
     }

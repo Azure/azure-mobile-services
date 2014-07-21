@@ -1,4 +1,28 @@
-# Windows Azure Mobile Services Change Log
+# Microsoft Azure Mobile Services Change Log
+### Version 1.2.3
+**Managed SDK** 
+- Added support for Xamarin iOS Azure Notification Hub integration
+
+### Version 1.3
+**iOS SDK**
+- Added support for offline and sync
+
+**Managed SDK** 
+- Added support for offline and sync
+- Added support for soft delete
+
+### Version 1.2.2
+**iOS SDK**
+- Added support for APNS Azure Notification Hub integration
+- Support for optimistic concurrency on delete
+
+**Managed SDK** 
+- Support for optimistic concurrency on delete
+- Update to Push surface area with minor object model changes. Added Registration base class in PCL and changed name within each extension to match the push notifcation surface. Example: WnsRegistration, WnsTemplateRegistration
+- Added support for Xamarin Android Azure Notification Hub integration
+
+**Javascript SDK** 
+- Support for optimistic concurrency on delete
 
 ### Version 1.2.1
 **Managed SDK**

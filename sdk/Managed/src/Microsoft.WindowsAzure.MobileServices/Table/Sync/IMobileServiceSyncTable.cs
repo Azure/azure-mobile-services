@@ -84,24 +84,34 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// Pulls all items that match the given query
         /// from the associated remote table.
         /// </summary>
+        /// <param name="queryKey">
+        /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again.
+        /// </param>
         /// <param name="query">
         /// An OData query that determines which items to 
         /// pull from the remote table.
+        /// </param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.
         /// </param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
         /// </param>
         /// <returns>
         /// A task that completes when pull operation has finished.
         /// </returns>
-        Task PullAsync(string query, CancellationToken cancellationToken);
+        Task PullAsync(string queryKey, string query, IDictionary<string, string> parameters, CancellationToken cancellationToken);
 
         /// <summary>
         /// Deletes all the items in local table that match the query.
         /// </summary>
+        /// <param name="queryKey">
+        /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter resets the incremental sync state for the query.
+        /// </param>
         /// <param name="query">An OData query that determines which items to delete.</param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> token to observe
         /// </param>
         /// <returns>A task that completes when purge operation has finished.</returns>
-        Task PurgeAsync(string query, CancellationToken cancellationToken);
+        Task PurgeAsync(string queryKey, string query, CancellationToken cancellationToken);
     }
 }

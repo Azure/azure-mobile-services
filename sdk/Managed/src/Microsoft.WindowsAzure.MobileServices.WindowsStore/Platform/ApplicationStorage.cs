@@ -3,7 +3,8 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Globalization;
+
+using Windows.Foundation.Collections;
 using Windows.Storage;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -18,7 +19,17 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// A singleton instance of the <see cref="IApplicationStorage"/>.
         /// </summary>
-        private static IApplicationStorage instance = new ApplicationStorage();
+        private static readonly IApplicationStorage instance = new ApplicationStorage();
+
+        private ApplicationStorage()
+        {
+            this.Values = ApplicationData.Current.LocalSettings.Values;
+        }
+
+        internal ApplicationStorage(string name)
+        {
+            this.Values = ApplicationData.Current.LocalSettings.CreateContainer(name, ApplicationDataCreateDisposition.Always).Values;
+        }
 
         /// <summary>
         /// A singleton instance of the <see cref="IApplicationStorage"/>.
@@ -30,6 +41,8 @@ namespace Microsoft.WindowsAzure.MobileServices
                 return instance;
             }
         }
+
+        public IPropertySet Values { get; set; }
 
         /// <summary>
         /// Tries to read a setting's value from application storage. 
@@ -53,7 +66,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentException(message);
             }
 
-            return ApplicationData.Current.LocalSettings.Values.TryGetValue(name, out value);
+            return this.Values.TryGetValue(name, out value);
         }
 
         /// <summary>
@@ -77,7 +90,12 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentException(message);
             }
 
-            ApplicationData.Current.LocalSettings.Values[name] = value;
+            this.Values[name] = value;
         }
+
+        public void Save()
+        {
+            // This operation is a no-op on Windows 8
+        }        
     }
 }

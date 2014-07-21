@@ -25,6 +25,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             throw new NotImplementedException();
         }
 
+        public IMobileServiceTableQuery<T> IncludeDeleted()
+        {
+            throw new NotImplementedException();
+        }
+
         public IMobileServiceTableQuery<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector)
         {
             throw new NotImplementedException();

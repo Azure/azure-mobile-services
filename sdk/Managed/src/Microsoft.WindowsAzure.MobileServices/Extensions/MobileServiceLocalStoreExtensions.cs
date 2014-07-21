@@ -18,6 +18,31 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     internal static class MobileServiceLocalStoreExtensions
     {
         /// <summary>
+        /// Updates or inserts data in local table.
+        /// </summary>
+        /// <param name="store">Instance of <see cref="IMobileServiceLocalStore"/></param>
+        /// <param name="tableName">Name of the local table.</param>
+        /// <param name="item">Item to be inserted.</param>
+        /// <param name="fromServer"><code>true</code> if the call is made based on data coming from the server e.g. in a pull operation; <code>false</code> if the call is made by the client, such as insert or update calls on an <see cref="IMobileServiceSyncTable"/>.</param>
+        /// <returns>A task that completes when item has been upserted in local table.</returns>
+        public static Task UpsertAsync(this IMobileServiceLocalStore store, string tableName, JObject item, bool fromServer)
+        {
+            return store.UpsertAsync(tableName, new[] { item }, fromServer);
+        }
+
+        /// <summary>
+        /// Deletes an item with the specified id in the local table.
+        /// </summary>
+        /// <param name="store">Instance of <see cref="IMobileServiceLocalStore"/></param>
+        /// <param name="tableName">Name of the local table.</param>
+        /// <param name="id">Id for the object to be deleted.</param>
+        /// <returns>A task that compltes when delete has been executed on local table.</returns>
+        public static Task DeleteAsync(this IMobileServiceLocalStore store, string tableName, string id)
+        {
+            return store.DeleteAsync(tableName, new[] { id });
+        }
+
+        /// <summary>
         /// Counts all the items in a local table
         /// </summary>
         /// <param name="store">Instance of <see cref="IMobileServiceLocalStore"/></param>

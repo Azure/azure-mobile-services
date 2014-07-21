@@ -1,3 +1,5 @@
+using System;
+
 namespace Microsoft.WindowsAzure.MobileServices
 {
     /// <summary>
@@ -26,6 +28,13 @@ namespace Microsoft.WindowsAzure.MobileServices
         IExpressionUtility IPlatform.ExpressionUtility
         {
             get { return ExpressionUtility.Instance; }
+        }
+
+        IPushUtility IPlatform.PushUtility { get { return Microsoft.WindowsAzure.MobileServices.PushUtility.Instance; } }
+
+        IApplicationStorage IPlatform.GetNamedApplicationStorage(string name)
+        {
+            return new ApplicationStorage(name);
         }
     }
 }

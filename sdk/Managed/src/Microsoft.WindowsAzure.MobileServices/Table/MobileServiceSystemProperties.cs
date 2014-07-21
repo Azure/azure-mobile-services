@@ -34,6 +34,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         Version = 0x4,
 
         /// <summary>
+        /// The __deleted system property
+        /// </summary>
+        Deleted = 0x8,
+
+        /// <summary>
         /// All of the system properties.
         /// </summary>
         All = 0xFFFF,

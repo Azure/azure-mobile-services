@@ -11,7 +11,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// An interface for platform-specific assemblies to provide utility functions
     /// regarding Linq expressions.
     /// </summary>
-    interface IExpressionUtility
+    internal interface IExpressionUtility
     {
         /// <summary>
         /// Evaluate all subtrees of an expression that aren't dependent on

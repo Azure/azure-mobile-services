@@ -3,16 +3,13 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.WindowsAzure.MobileServices.Query
 {
-    internal class ODataExpressionVisitor: QueryNodeVisitor<QueryNode>
+    internal class ODataExpressionVisitor : QueryNodeVisitor<QueryNode>
     {
         private static readonly Type typeofInt = typeof(int);
 
@@ -43,7 +40,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             string odataOperator;
             switch (nodeIn.OperatorKind)
             {
-                case BinaryOperatorKind.Or: 
+                case BinaryOperatorKind.Or:
                     odataOperator = " or ";
                     break;
                 case BinaryOperatorKind.And:
@@ -89,7 +86,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             }
 
             this.Expression.Append(odataOperator);
-            
+
             nodeIn.RightOperand.Accept(this);
 
             this.Expression.Append(")");
@@ -126,9 +123,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         public override QueryNode Visit(UnaryOperatorNode nodeIn)
         {
             Debug.Assert(nodeIn.OperatorKind == UnaryOperatorKind.Not);
-            
+
             this.Expression.Append("not(");
-            
+
             nodeIn.Operand.Accept(this);
 
             this.Expression.Append(")");
@@ -218,13 +215,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             }
             else if (handle.Equals(typeof(DateTimeOffset).TypeHandle))
             {
-                // Format dates in the official OData format (note: the server
-                // doesn't recgonize datetimeoffset'...', so we'll just convert
-                // to a UTC date.
                 return string.Format(
                     CultureInfo.InvariantCulture,
-                    "datetime'{0}'",
-                    ToRoundtripDateString(((DateTimeOffset)value).DateTime));
+                    "datetimeoffset'{0}'",
+                    ((DateTimeOffset)value).ToString("o"));
             }
             else if (handle.Equals(typeof(Guid).TypeHandle))
             {

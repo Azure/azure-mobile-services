@@ -2,6 +2,8 @@
 // Copyright (c) Microsoft Corporation.  All rights reserved.
 //------------------------------------------------------------
 
+using Windows.ApplicationModel;
+
 namespace Microsoft.WindowsAzure.MobileServices
 {
     using System;
@@ -18,6 +20,8 @@ namespace Microsoft.WindowsAzure.MobileServices
     {
         internal readonly RegistrationManager RegistrationManager;
 
+        private const string PrimaryChannelId = "$Primary";
+
         internal Push(MobileServiceClient client)
             : this(client, string.Empty, null)
         {
@@ -32,8 +36,13 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             this.Client = client;
             this.TileId = tileId;
+            if (string.IsNullOrEmpty(tileId))
+            {
+                tileId = PrimaryChannelId;
+            }
 
-            var storageManager = new LocalStorageManager(client.ApplicationUri.Host, tileId);
+            string name = string.Format("{0}-PushContainer-{1}-{2}", Package.Current.Id.Name, client.ApplicationUri.Host, tileId);
+            var storageManager = new LocalStorageManager(name);
             var pushHttpClient = new PushHttpClient(client);
             this.RegistrationManager = new RegistrationManager(pushHttpClient, storageManager);
 
@@ -46,7 +55,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public string TileId { get; private set; }
 
         /// <summary>
-        /// Access this member with an indexer to access secondary tile registrations. Example: push.SecondaryTiles["tileName"].RegisterNativeAsync("mychannelUri");
+        /// Access this member with an indexer to access secondary tile registrations. Example: <code>push.SecondaryTiles["tileName"].RegisterNativeAsync("mychannelUri");</code>
         /// </summary>
         public IDictionary<string, Push> SecondaryTiles { get; set; }
 
@@ -66,7 +75,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Register a particular channelUri
         /// </summary>
         /// <param name="channelUri">The channelUri to register</param>
-        /// <param name="tags">The tags to register to receive notifcations from</param>
+        /// <param name="tags">The tags to register to receive notifications from</param>
         /// <returns>Task that completes when registration is complete</returns>
         public Task RegisterNativeAsync(string channelUri, IEnumerable<string> tags)
         {
@@ -75,7 +84,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("channelUri");
             }
 
-            var registration = new Registration(channelUri, tags);
+            var registration = new WnsRegistration(channelUri, tags);
             return this.RegistrationManager.RegisterAsync(registration);
         }
 
@@ -97,7 +106,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="channelUri">The channelUri to register</param>
         /// <param name="xmlTemplate">The XmlDocument defining the template</param>
         /// <param name="templateName">The template name</param>
-        /// <param name="tags">The tags to register to receive notifcations from</param>
+        /// <param name="tags">The tags to register to receive notifications from</param>
         /// <returns>Task that completes when registration is complete</returns>        
         public Task RegisterTemplateAsync(string channelUri, XmlDocument xmlTemplate, string templateName, IEnumerable<string> tags)
         {
@@ -127,7 +136,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="channelUri">The channelUri to register</param>
         /// <param name="xmlTemplate">The string defining the template</param>
         /// <param name="templateName">The template name</param>
-        /// <param name="tags">The tags to register to receive notifcations from</param>
+        /// <param name="tags">The tags to register to receive notifications from</param>
         /// <returns>Task that completes when registration is complete</returns>
         public Task RegisterTemplateAsync(string channelUri, string xmlTemplate, string templateName, IEnumerable<string> tags)
         {
@@ -146,9 +155,8 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("templateName");
             }
 
-            var registration = new TemplateRegistration(channelUri, xmlTemplate, templateName, tags);
+            var registration = new WnsTemplateRegistration(channelUri, xmlTemplate, templateName, tags);
             return this.RegistrationManager.RegisterAsync(registration);
-
         }
 
         /// <summary>
@@ -197,7 +205,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("registration");
             }
 
-            if (string.IsNullOrWhiteSpace(registration.ChannelUri))
+            if (string.IsNullOrWhiteSpace(registration.PushHandle))
             {
                 throw new ArgumentNullException("registration.ChannelUri");
             }
@@ -206,17 +214,47 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
+        /// DEBUG-ONLY: List the registrations made with the service for a channelUri
+        /// </summary>
+        /// <param name="channelUri">The channelUri to check for</param>
+        /// <returns>List of registrations</returns>
+        public Task<List<Registration>> ListRegistrationsAsync(string channelUri)
+        {
+            return this.RegistrationManager.ListRegistrationsAsync(channelUri);
+        }
+
+        /// <summary>
         /// Collection of Push objects for secondary tiles
         /// </summary>
         private class SecondaryTilesList : IDictionary<string, Push>
         {
-            readonly Push parent;
+            private readonly Push parent;
+            private readonly ConcurrentDictionary<string, Push> hubForTiles = new ConcurrentDictionary<string, Push>();
+
             internal SecondaryTilesList(Push parent)
             {
                 this.parent = parent;
+            }                        
+
+            public ICollection<string> Keys
+            {
+                get { return this.hubForTiles.Keys; }
             }
 
-            readonly ConcurrentDictionary<string, Push> hubForTiles = new ConcurrentDictionary<string, Push>();
+            public ICollection<Push> Values
+            {
+                get { return this.hubForTiles.Values; }
+            }
+
+            public int Count
+            {
+                get { return this.hubForTiles.Count; }
+            }
+
+            public bool IsReadOnly
+            {
+                get { return false; }
+            }
 
             /// <summary>
             /// Indexer for creating/looking up tileId-specific Push objects
@@ -232,13 +270,13 @@ namespace Microsoft.WindowsAzure.MobileServices
                         throw new ArgumentNullException("tileId");
                     }
 
-                    if (hubForTiles.ContainsKey(tileId))
+                    if (this.hubForTiles.ContainsKey(tileId))
                     {
-                        return hubForTiles[tileId];
+                        return this.hubForTiles[tileId];
                     }
 
                     var hubForTile = new Push(this.parent.Client, tileId, this);
-                    return hubForTiles.GetOrAdd(tileId, hubForTile);
+                    return this.hubForTiles.GetOrAdd(tileId, hubForTile);
                 }
 
                 set
@@ -247,8 +285,6 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
             }
 
-            #region IDictionary interface
-
             public void Add(string key, Push value)
             {
                 throw new NotSupportedException();
@@ -256,13 +292,8 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             public bool ContainsKey(string tileId)
             {
-                return hubForTiles.ContainsKey(tileId);
-            }
-
-            public ICollection<string> Keys
-            {
-                get { return hubForTiles.Keys; }
-            }
+                return this.hubForTiles.ContainsKey(tileId);
+            }            
 
             public bool Remove(string tileId)
             {
@@ -273,12 +304,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             public bool TryGetValue(string tileId, out Push value)
             {
                 return this.hubForTiles.TryGetValue(tileId, out value);
-            }
-
-            public ICollection<Push> Values
-            {
-                get { return this.hubForTiles.Values; }
-            }
+            }            
 
             public void Add(KeyValuePair<string, Push> item)
             {
@@ -301,17 +327,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 {
                     array[arrayIndex++] = new KeyValuePair<string, Push>(item.Key, item.Value);
                 }
-            }
-
-            public int Count
-            {
-                get { return this.hubForTiles.Count; }
-            }
-
-            public bool IsReadOnly
-            {
-                get { return false; }
-            }
+            }            
 
             public bool Remove(KeyValuePair<string, Push> item)
             {
@@ -327,7 +343,6 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 return this.hubForTiles.GetEnumerator();
             }
-            #endregion
         }
     }
 }

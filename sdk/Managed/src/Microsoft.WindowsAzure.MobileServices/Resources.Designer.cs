@@ -395,6 +395,24 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Incremental pull query must not have orderby clause..
+        /// </summary>
+        internal static string MobileServiceSyncTable_IncrementalPullWithOrderNotAllowed {
+            get {
+                return ResourceManager.GetString("MobileServiceSyncTable_IncrementalPullWithOrderNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The query key must start with a letter and can contain only letters and digits..
+        /// </summary>
+        internal static string MobileServiceSyncTable_InvalidQueryKey {
+            get {
+                return ResourceManager.GetString("MobileServiceSyncTable_InvalidQueryKey", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Pull query with select clause is not supported..
         /// </summary>
         internal static string MobileServiceSyncTable_PullWithSelectNotSupported {
@@ -719,7 +737,7 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A Windows Azure Mobile Services assembly for the current platform was not found. Ensure that the current project references both {0} and the following platform-specific assembly: {1}..
+        ///   Looks up a localized string similar to A Microsoft Azure Mobile Services assembly for the current platform was not found. Ensure that the current project references both {0} and the following platform-specific assembly: {1}..
         /// </summary>
         internal static string Platform_AssemblyNotFound {
             get {
@@ -827,6 +845,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The store is already initialized..
+        /// </summary>
+        internal static string SyncStore_AlreadyInitialized {
+            get {
+                return ResourceManager.GetString("SyncStore_AlreadyInitialized", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Failed to delete error from the sync store..
         /// </summary>
         internal static string SyncStore_FailedToDeleteError {
@@ -868,6 +895,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         internal static string SyncStore_FailedToUpsertItem {
             get {
                 return ResourceManager.GetString("SyncStore_FailedToUpsertItem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The store must be initialized before it can be used..
+        /// </summary>
+        internal static string SyncStore_NotInitialized {
+            get {
+                return ResourceManager.GetString("SyncStore_NotInitialized", resourceCulture);
             }
         }
         

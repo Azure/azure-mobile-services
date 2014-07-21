@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -14,7 +15,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 {
     public static class ConsoleHelper
     {
-        [DllImport("kernel32.dll")]
+        [SuppressMessage("Microsoft.Design", "CA1060:MovePInvokesToNativeMethodsClass"), DllImport("kernel32.dll")]
         private static extern bool AttachConsole(int dwProcessId);
         private const int ParentProcess = -1;
 

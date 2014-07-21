@@ -151,7 +151,7 @@
     <value>The assembly {0} does not define a type that implements the {1} interface.</value>
   </data>
   <data name="Platform_AssemblyNotFound" xml:space="preserve">
-    <value>A Windows Azure Mobile Services assembly for the current platform was not found. Ensure that the current project references both {0} and the following platform-specific assembly: {1}.</value>
+    <value>A Microsoft Azure Mobile Services assembly for the current platform was not found. Ensure that the current project references both {0} and the following platform-specific assembly: {1}.</value>
   </data>
   <data name="Platform_InstantiationFailed" xml:space="preserve">
     <value>Failed to instantiate the platform implementation of {0} from the assembly {1} due to the following error: {2}</value>
@@ -389,5 +389,17 @@
   </data>
   <data name="MobileServiceTableOperation_ResultNotJObject" xml:space="preserve">
     <value>Mobile Service table operation returned an unexpected response.</value>
+  </data>
+  <data name="SyncStore_NotInitialized" xml:space="preserve">
+    <value>The store must be initialized before it can be used.</value>
+  </data>
+  <data name="SyncStore_AlreadyInitialized" xml:space="preserve">
+    <value>The store is already initialized.</value>
+  </data>
+  <data name="MobileServiceSyncTable_InvalidQueryKey" xml:space="preserve">
+    <value>The query key must start with a letter and can contain only letters and digits.</value>
+  </data>
+  <data name="MobileServiceSyncTable_IncrementalPullWithOrderNotAllowed" xml:space="preserve">
+    <value>Incremental pull query must not have orderby clause.</value>
   </data>
 </root>

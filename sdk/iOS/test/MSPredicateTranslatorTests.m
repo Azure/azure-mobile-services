@@ -209,7 +209,7 @@
            @"Count < $count", @{ @"count":[NSNumber numberWithInt:-25]}],
 
         @[ @"(Count le 500)",
-           @"Count =< %@", [NSNumber numberWithInt:500]],
+           @"Count =< $count", @{ @"count":[NSNumber numberWithInt:500]}],
         
         @[ @"(Price eq 1.99m)",
            @"Price == $price", @{ @"price":[NSDecimalNumber decimalNumberWithString:@"1.99"]}],

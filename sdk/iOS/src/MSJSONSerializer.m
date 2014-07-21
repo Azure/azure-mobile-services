@@ -15,7 +15,7 @@ NSString *const resultsKey = @"results";
 NSString *const countKey = @"count";
 NSString *const errorKey = @"error";
 NSString *const descriptionKey = @"description";
-NSString *const stringIdPattern = @"[+?`""/\\\\]|[\\u0000-\\u001F]|[\\u007F-\\u009F]|^\\.{1,2}$";
+NSString *const stringIdPattern = @"[+?`\"/\\\\]|[\\u0000-\\u001F]|[\\u007F-\\u009F]|^\\.{1,2}$";
 
 #pragma mark * MSJSONSerializer Implementation
 
@@ -210,6 +210,25 @@ static NSArray *allIdKeys;
     return idAsString;
 }
 
+-(NSString *) stringIdFromItem:(NSDictionary *)item orError:(NSError **)error
+{
+    // Get the id field out of the item
+    id itemId = [self itemIdFromItem:item orError:error];
+    if (error && *error) {
+        return nil;
+    }
+    
+    // Verify the Id is a string
+    if (itemId && ![itemId isKindOfClass:[NSString class]]) {
+        if (error) {
+            *error = [self errorForInvalidItemId];
+        }
+        return nil;
+    }
+    
+    return [self stringFromItemId:itemId orError:error];
+}
+
 -(id) itemFromData:(NSData *)data
             withOriginalItem:(id)originalItem
             ensureDictionary:(BOOL)ensureDictionary
@@ -265,6 +284,40 @@ static NSArray *allIdKeys;
     }
     
     return item;
+}
+
+-(NSArray *) arrayFromData:(NSData *)data
+           orError:(NSError **)error
+{
+    id jsonObject = nil;
+    NSError *localError = nil;
+    
+    // Ensure there is data
+    if (!data) {
+        localError = [self errorForNilData];
+    }
+    else {
+        
+        // Try to deserialize the data; if it fails the error will be set
+        // and item will be nil.
+        jsonObject = [NSJSONSerialization JSONObjectWithData:data
+                                               options:NSJSONReadingAllowFragments
+                                                 error:error];
+        
+        if (jsonObject) {
+            // The data should have been of array type
+            if (![jsonObject isKindOfClass:[NSArray class]]) {
+                jsonObject = nil;
+                localError = [self errorForExpectedArray];
+            }
+        }
+    }
+    
+    if (localError && error) {
+        *error = localError;
+    }
+    
+    return jsonObject;
 }
 
 -(NSInteger) totalCountAndItems:(NSArray **)items
@@ -405,6 +458,16 @@ static NSArray *allIdKeys;
     return error;
 }
 
+- (void) removeSystemProperties:(NSMutableDictionary *) item
+{
+    NSSet *systemProperties = [item keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
+        return [[key substringToIndex:2] isEqualToString:@"__"];
+    }];
+    
+    [item removeObjectsForKeys:[systemProperties allObjects]];
+    
+    return;
+}
 
 #pragma mark * Private Pre/Post Serialization Methods
 
@@ -416,10 +479,7 @@ static NSArray *allIdKeys;
         preSerializedItem = [item mutableCopy];
         
         if(removeSystemProperties) {
-            NSSet *systemProperties = [preSerializedItem keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
-                return [[key substringToIndex:2] isEqualToString:@"__"];
-            }];
-            [preSerializedItem removeObjectsForKeys:[systemProperties allObjects]];
+            [self removeSystemProperties:preSerializedItem];
         }
         
         for (NSString *key in [preSerializedItem allKeys]) {
@@ -537,6 +597,12 @@ static NSArray *allIdKeys;
                             andErrorCode:MSExpectedItemWithResponse];
 }
 
+-(NSError *) errorForExpectedArray
+{
+    return [self errorWithDescriptionKey:@"The server did not return object of expected array type."
+                            andErrorCode:MSExpectedItemWithResponse];
+}
+
 -(NSError *) errorForMissingTotalCount
 {
     return [self errorWithDescriptionKey:@"The server did not return the expected total count."
@@ -580,6 +646,15 @@ static NSArray *allIdKeys;
     return [NSError errorWithDomain:MSErrorDomain
                                code:errorCode
                            userInfo:userInfo];
+}
+
+// Generates a random GUID to uniquely identify operations or objects missing an Id
++ (NSString *) generateGUID {
+    CFUUIDRef newUUID = CFUUIDCreate(kCFAllocatorDefault);
+    NSString *newId = (__bridge_transfer NSString *)CFUUIDCreateString(kCFAllocatorDefault, newUUID);
+    CFRelease(newUUID);
+    
+    return newId;
 }
 
 @end

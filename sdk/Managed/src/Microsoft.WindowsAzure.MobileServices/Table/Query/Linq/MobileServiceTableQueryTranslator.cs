@@ -50,7 +50,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
             this.query = query;
 
-            this.queryDescription = new MobileServiceTableQueryDescription(query.Table.TableName) { IncludeTotalCount = query.RequestTotalCount };
+            this.queryDescription = new MobileServiceTableQueryDescription(query.Table.TableName)
+            { 
+                IncludeTotalCount = query.RequestTotalCount,
+            };
         }
 
         /// <summary>

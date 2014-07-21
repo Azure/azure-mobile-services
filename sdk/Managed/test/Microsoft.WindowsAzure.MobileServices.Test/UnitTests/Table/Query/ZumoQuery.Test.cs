@@ -5,9 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Linq;
-using System.Threading;
 using Microsoft.WindowsAzure.MobileServices.Query;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json;
@@ -44,6 +42,41 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         public Product(long id)
+        {
+            this.Id = id;
+        }
+    }
+
+    public class ProductWithDateTimeOffset
+    {
+        public long Id { get; set; }
+        public int SmallId { get; set; }
+        public ulong UnsignedId { get; set; }
+        public uint UnsignedSmallId { get; set; }
+        public string Name { get; set; }
+
+        [JsonProperty(Required = Required.Always)]
+        public float Weight { get; set; }
+
+        [JsonProperty(Required = Required.AllowNull)]
+        public float? WeightInKG { get; set; }
+
+        public Decimal Price { get; set; }
+        public bool InStock { get; set; }
+        public short DisplayAisle { get; set; }
+        public ushort UnsignedDisplayAisle { get; set; }
+        public byte OptionFlags { get; set; }
+        public DateTimeOffset Created { get; set; }
+        public DateTimeOffset? Updated { get; set; }
+        public TimeSpan AvailableTime { get; set; }
+        public List<string> Tags { get; set; }
+        public ProductType Type { get; set; }
+
+        public ProductWithDateTimeOffset()
+        {
+        }
+
+        public ProductWithDateTimeOffset(long id)
         {
             this.Id = id;
         }
@@ -288,10 +321,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             query = Compile<Product, Product>(table => table.Where(p => !p.InStock));
             AssertFilter(query.Filter, "not(InStock)");
+        }
 
+        [Tag("notXamarin_iOS")] // LambdaExpression.Compile() is not supported on Xamarin.iOS
+        [TestMethod]
+        public void Filtering_PartialEval()
+        {
             // Allow New Operations
             float foo = 10;
-            query = Compile<Product, Product>(table => table.Where(p => p.Weight <= new Product() { Weight = foo }.Weight || p.InStock == true));
+            var query = Compile<Product, Product>(table => table.Where(p => p.Weight <= new Product() { Weight = foo }.Weight || p.InStock == true));
             AssertFilter(query.Filter, "((Weight le 10f) or (InStock eq true))");
 
             query = Compile<Product, Product>(table => table.Where(p => p.Weight <= new Product(15) { Weight = foo }.Weight || p.InStock == true));
@@ -306,8 +344,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             query = Compile<Product, Product>(table => table.Where(p => p.Created == new DateTime(1994, 10, 14, 0, 0, 0, DateTimeKind.Utc)));
             AssertFilter(query.Filter, "(Created eq datetime'1994-10-14T00:00:00.000Z')");
+
+            query = Compile<ProductWithDateTimeOffset, ProductWithDateTimeOffset>(table => table.Where(p => p.Created == new DateTimeOffset(1994, 10, 13, 17, 0, 0, TimeSpan.FromHours(7))));
+            AssertFilter(query.Filter, "(Created eq datetimeoffset'1994-10-13T17:00:00.0000000+07:00')");
         }
 
+        [Tag("notXamarin_iOS")] // LambdaExpression.Compile() is not supported on Xamarin.iOS
         [TestMethod]
         public void CombinedQuery()
         {
@@ -319,9 +361,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                  select new { p.Name, p.Price })
                 .Skip(20)
                 .Take(10));
-            Assert.AreEqual(
-                "$filter=(((Price le 10M) and (Weight gt 10f)) and not(InStock))&$orderby=Price desc,Name&$skip=20&$top=10&$select=Name,Price,Weight,WeightInKG",
-                query.ToQueryString());
+            Assert.AreEqual("$filter=(((Price le 10M) and (Weight gt 10f)) and not(InStock))&$orderby=Price desc,Name&$skip=20&$top=10&$select=Name,Price,Weight,WeightInKG", query.ToQueryString());
         }
 
         [TestMethod]

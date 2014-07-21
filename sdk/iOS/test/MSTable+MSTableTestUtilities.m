@@ -126,8 +126,8 @@
              @"id\nwith\n\newline",
              @"id with fowardslash \\",
              @"id with backslash /",
-             @"1/8/2010 8:00:00 AM"
-             @"""idWithQuotes""",
+             @"1/8/2010 8:00:00 AM",
+             @"\"idWithQuotes\"",
              @"?",
              @"\\",
              @"/",
@@ -220,6 +220,8 @@
              @"__systemProperties=__version,__createdAt,__updatedAt",
              @"__systemProperties=__version,__updatedAt",
              @"__systemProperties=__version,__updatedAt, __createdAt",
+             @"__systemProperties=__version,__updatedAt, __createdAt, __deleted",
+             @"__systemProperties=__deleted",
              
              // Trailing commas, extra commas
              @"__systemProperties=__createdAt,",

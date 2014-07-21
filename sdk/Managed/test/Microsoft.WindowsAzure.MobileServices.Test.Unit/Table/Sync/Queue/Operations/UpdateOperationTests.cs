@@ -7,6 +7,7 @@ using Microsoft.WindowsAzure.MobileServices.Sync;
 using Moq;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Operations
@@ -45,7 +46,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             var item = JObject.Parse("{\"id\":\"abc\",\"Text\":\"Example\"}");
 
             await this.operation.ExecuteLocalAsync(store.Object, item);
-            store.Verify(s => s.UpsertAsync("test", item, false), Times.Once());
+            store.Verify(s => s.UpsertAsync("test", It.Is<JObject[]>(list => list.Contains(item)), false), Times.Once());
         }
 
         [TestMethod]
@@ -55,7 +56,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             var storeError = new InvalidOperationException();
             var item = JObject.Parse("{\"id\":\"abc\",\"Text\":\"Example\"}");
 
-            store.Setup(s => s.UpsertAsync("test", item, false)).Throws(storeError);
+            store.Setup(s => s.UpsertAsync("test", It.Is<JObject[]>(list => list.Contains(item)), false)).Throws(storeError);
             var ex = await AssertEx.Throws<InvalidOperationException>(() => this.operation.ExecuteLocalAsync(store.Object, item));
             Assert.AreSame(storeError, ex);
         }

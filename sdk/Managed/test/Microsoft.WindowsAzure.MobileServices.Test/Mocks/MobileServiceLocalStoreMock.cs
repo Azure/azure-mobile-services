@@ -92,17 +92,23 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             return Task.FromResult(0);
         }
 
-        public Task UpsertAsync(string tableName, JObject item, bool fromServer)
+        public Task UpsertAsync(string tableName, IEnumerable<JObject> items, bool fromServer)
         {
-            MockTable table = GetTable(tableName);
-            table[item.Value<string>("id")] = item;
+            foreach (JObject item in items)
+            {
+                MockTable table = GetTable(tableName);
+                table[item.Value<string>("id")] = item;
+            }
             return Task.FromResult(0);
-        }       
+        }
 
-        public Task DeleteAsync(string tableName, string id)
+        public Task DeleteAsync(string tableName, IEnumerable<string> ids)
         {
-            MockTable table = GetTable(tableName);
-            table.Remove(id);
+            foreach (string id in ids)
+            {
+                MockTable table = GetTable(tableName);
+                table.Remove(id);
+            }
             return Task.FromResult(0);
         }
 

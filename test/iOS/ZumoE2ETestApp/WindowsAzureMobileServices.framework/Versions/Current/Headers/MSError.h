@@ -114,4 +114,10 @@ extern NSString *const MSErrorServerItemKey;
 /// Indicates that the login operation failed because an invalid token was used.
 #define MSLoginInvalidToken                     -1505
 
+/// Indicates that a required parameter for push operation was not provided
+#define MSPushRequiredParameter                 -1600
+
+/// Indicates that local storage is corrupt until register or deleteAllRegistrations are invoked
+#define MSPushLocalStorageCorrupt               -1601
+
 #endif

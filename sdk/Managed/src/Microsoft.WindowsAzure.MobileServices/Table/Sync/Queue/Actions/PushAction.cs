@@ -156,13 +156,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
                 Exception error = null;
 
-                operation.Table = GetTable(this.client, operation.TableName);
+                operation.Table = await this.context.GetTable(operation.TableName);
                 await this.LoadOperationItem(operation, batch);
 
                 if (this.CancellationToken.IsCancellationRequested)
                 {
                     return false;
                 }
+
+                // strip out system properties before executing the operation
+                operation.Item = MobileServiceSyncTable.RemoveSystemPropertiesKeepVersion(operation.Item);
 
                 JObject result = null;
                 try
@@ -184,7 +187,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 // save the result if ExecuteTableOperation did not throw
                 if (error == null && result.IsValidItem() && operation.CanWriteResultToStore)
                 {
-                    result = MobileServiceSyncTable.RemoveSystemPropertiesKeepVersion(result);
                     try
                     {
                         await this.Store.UpsertAsync(operation.TableName, result, fromServer: true);
@@ -223,15 +225,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 bool success = error == null;
                 return success;
             }
-        }
-
-        private static MobileServiceTable GetTable(MobileServiceClient client, string tableName)
-        {
-            var table = client.GetTable(tableName) as MobileServiceTable;
-            table.SystemProperties = MobileServiceSystemProperties.Version;
-            table.AddRequestHeader(MobileServiceHttpClient.ZumoFeaturesHeader, MobileServiceFeatures.Offline);
-
-            return table;
         }
 
         private async Task LoadOperationItem(MobileServiceTableOperation operation, OperationBatch batch)
