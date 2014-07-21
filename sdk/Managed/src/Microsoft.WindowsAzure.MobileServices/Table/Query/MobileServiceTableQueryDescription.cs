@@ -126,7 +126,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             if (this.Filter != null)
             {
                 string filterStr = ODataExpressionVisitor.ToODataString(this.Filter);
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$filter={1}", separator, filterStr);
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$filter={1}", separator, Uri.EscapeDataString(filterStr));
                 separator = '&';                
             }
 
@@ -146,7 +146,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                                                         return result;
                                                     });
 
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$orderby={1}", separator, string.Join(",", orderings));
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$orderby={1}", separator, Uri.EscapeDataString(string.Join(",", orderings)));
                 separator = '&';
             }
 
@@ -167,7 +167,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             // Add the selection
             if (this.Selection.Count > 0)
             {
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$select={1}", separator, string.Join(",", this.Selection));
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$select={1}", separator, Uri.EscapeDataString(string.Join(",", this.Selection)));
                 separator = '&';
             }
 
@@ -202,8 +202,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
             foreach (string[] parameter in parameters)
             {
-                string key = parameter[0];
-                string value = parameter.Length > 1 ? parameter[1] : String.Empty;
+                string key = Uri.UnescapeDataString(parameter[0]);
+                string value = Uri.UnescapeDataString(parameter.Length > 1 ? parameter[1] : String.Empty);
                 if (String.IsNullOrEmpty(key))
                 {
                     continue;
