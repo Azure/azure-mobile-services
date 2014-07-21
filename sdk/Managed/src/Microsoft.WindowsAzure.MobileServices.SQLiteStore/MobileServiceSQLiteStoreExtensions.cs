@@ -93,6 +93,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 {
                     item[itemProperty.Name] = String.Empty;
                 }
+                else if (contractProperty.PropertyType == typeof(byte[]))
+                {
+                    item[itemProperty.Name] = new byte[0];
+                }
                 else if (contractProperty.PropertyType.GetTypeInfo().IsGenericType  && contractProperty.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
                 {
                     item[itemProperty.Name] = new JValue(Activator.CreateInstance(contractProperty.PropertyType.GenericTypeArguments[0]));
