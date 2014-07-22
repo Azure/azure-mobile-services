@@ -68,13 +68,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             });
         }
 
-        private Task SetSetting(string key, object value)
+        private async Task SetSetting(string key, object value)
         {
-            return this.store.UpsertAsync(MobileServiceLocalSystemTables.Config, new JObject()
+            await this.store.UpsertAsync(MobileServiceLocalSystemTables.Config, new JObject()
             {
                 { MobileServiceSystemColumns.Id, key },
                 { "value", value == null ? null : (string)Convert.ChangeType(value, typeof(string)) }
             }, fromServer: false);
+
+            this.cache[key] = value;
         }
 
         private async Task<T> GetSetting<T>(string key, T defaultValue)
