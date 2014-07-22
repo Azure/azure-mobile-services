@@ -5,21 +5,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Sync;
-using Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test;
-using Newtonsoft.Json.Linq;
-using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Microsoft.WindowsAzure.MobileServices.Test;
-using System.Net.Http;
-using System.Net;
+using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 {
-    public class SQLiteStoreIntegrationTests: TestBase
+    public class SQLiteStoreIntegrationTests : TestBase
     {
         private const string TestTable = "stringId_test_table";
 
@@ -44,8 +41,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             IMobileServiceSyncTable table = service.GetSyncTable(tableName);
 
             DateTime theDate = new DateTime(2014, 3, 10, 0, 0, 0, DateTimeKind.Utc);
-            JObject inserted = await table.InsertAsync(new JObject() { { "date",  theDate} });
-            
+            JObject inserted = await table.InsertAsync(new JObject() { { "date", theDate } });
+
             Assert.AreEqual(inserted["date"].Value<DateTime>(), theDate);
 
             JObject rehydrated = await table.LookupAsync(inserted["id"].Value<string>());
@@ -77,7 +74,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             Assert.AreEqual(rehydrated.CreatedAt.ToUniversalTime(), theDate);
         }
-        
+
         [AsyncTestMethod]
         public async Task ReadAsync_WithSystemPropertyType_Generic()
         {
@@ -93,11 +90,11 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             IMobileServiceClient service = await CreateClient(hijack, store);
             var table = service.GetSyncTable<ToDoWithSystemPropertiesType>();
 
-            var inserted = new ToDoWithSystemPropertiesType() 
-            { 
-                Id ="123", 
-                Version = "abc", 
-                String = "def" 
+            var inserted = new ToDoWithSystemPropertiesType()
+            {
+                Id = "123",
+                Version = "abc",
+                String = "def"
             };
             await table.InsertAsync(inserted);
 
@@ -181,7 +178,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             store.DefineTable<ToDoWithSystemPropertiesType>();
 
             IMobileServiceClient service = await CreateClient(hijack, store);
-            IMobileServiceSyncTable<ToDoWithSystemPropertiesType> table = service.GetSyncTable<ToDoWithSystemPropertiesType>();            
+            IMobileServiceSyncTable<ToDoWithSystemPropertiesType> table = service.GetSyncTable<ToDoWithSystemPropertiesType>();
 
             hijack.OnSendingRequest = req =>
             {
@@ -216,13 +213,13 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             IMobileServiceSyncTable<ToDoWithSystemPropertiesType> table = service.GetSyncTable<ToDoWithSystemPropertiesType>();
 
             // first insert an item
-            var updatedItem = new ToDoWithSystemPropertiesType() 
-            { 
-                Id = "b", 
-                String = "Hey", 
-                Version = "abc", 
-                CreatedAt = new DateTime(2013,1,1,1,1,1, DateTimeKind.Utc),
-                UpdatedAt = new DateTime(2013,1,1,1,1,2, DateTimeKind.Utc)
+            var updatedItem = new ToDoWithSystemPropertiesType()
+            {
+                Id = "b",
+                String = "Hey",
+                Version = "abc",
+                CreatedAt = new DateTime(2013, 1, 1, 1, 1, 1, DateTimeKind.Utc),
+                UpdatedAt = new DateTime(2013, 1, 1, 1, 1, 2, DateTimeKind.Utc)
             };
             await table.UpdateAsync(updatedItem);
 
@@ -231,7 +228,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             Assert.AreEqual(lookedupItem.String, "Hey");
             Assert.AreEqual(lookedupItem.Version, "abc");
             // we ignored the sys properties on the local object
-            Assert.AreEqual(lookedupItem.CreatedAt, new DateTime(0, DateTimeKind.Utc)); 
+            Assert.AreEqual(lookedupItem.CreatedAt, new DateTime(0, DateTimeKind.Utc));
             Assert.AreEqual(lookedupItem.UpdatedAt, new DateTime(0, DateTimeKind.Utc));
 
             Assert.AreEqual(service.SyncContext.PendingOperations, 1L); // operation pending
@@ -247,7 +244,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             };
             string updateResult = "{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\",\"__createdAt\":\"2014-01-29T23:01:33.444Z\", \"__updatedAt\":\"2014-01-30T23:01:33.444Z\"}";
             hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(updateResult) }); // push
-            await service.SyncContext.PushAsync();            
+            await service.SyncContext.PushAsync();
 
             Assert.AreEqual(service.SyncContext.PendingOperations, 0L); // operation removed
 
@@ -256,7 +253,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             Assert.AreEqual(lookedupItem.Version, "def");
             // we preserved the system properties returned from server on update
             Assert.AreEqual(lookedupItem.CreatedAt.ToUniversalTime(), new DateTime(2014, 01, 29, 23, 1, 33, 444, DateTimeKind.Utc));
-            Assert.AreEqual(lookedupItem.UpdatedAt.ToUniversalTime(), new DateTime(2014, 01, 30, 23, 1, 33, 444, DateTimeKind.Utc)); 
+            Assert.AreEqual(lookedupItem.UpdatedAt.ToUniversalTime(), new DateTime(2014, 01, 30, 23, 1, 33, 444, DateTimeKind.Utc));
         }
 
         [AsyncTestMethod]
@@ -268,7 +265,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             var store = new MobileServiceSQLiteStore(TestDbName);
             store.DefineTable<ToDoWithSystemPropertiesType>();
-            
+
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent(@"{""id"": ""123"", ""__version"": ""xyz""}");
             hijack.AddResponseContent(@"{""id"": ""134"", ""__version"": ""ghi""}");
@@ -326,7 +323,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             // first insert an item
             var updatedItem = new ToDoWithSystemPropertiesType() { Id = "b", String = "Hey", Version = "abc" };
             await table.UpdateAsync(updatedItem);
-            
+
             // then push it to server
             var ex = await ThrowsAsync<MobileServicePushFailedException>(service.SyncContext.PushAsync);
 
@@ -443,7 +440,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             var hijack = new TestHttpHandler();
             var store = new MobileServiceSQLiteStore(TestDbName);
-            store.DefineTable<AllBaseTypesWithAllSystemPropertiesType>();            
+            store.DefineTable<AllBaseTypesWithAllSystemPropertiesType>();
 
             IMobileServiceClient service = await CreateClient(hijack, store);
             IMobileServiceSyncTable<AllBaseTypesWithAllSystemPropertiesType> table = service.GetSyncTable<AllBaseTypesWithAllSystemPropertiesType>();
@@ -453,7 +450,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             {
                 Id = "abc",
                 Bool = true,
-                Byte  = 11,
+                Byte = 11,
                 SByte = -11,
                 UShort = 22,
                 Short = -22,
@@ -466,17 +463,17 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                 Decimal = 77.88M,
                 String = "EightyEight",
                 Char = '9',
-                DateTime = new DateTime(2010,10,10, 10, 10, 10, DateTimeKind.Utc),
-                DateTimeOffset = new DateTimeOffset(2011,11,11,11,11,11, 11, TimeSpan.Zero),
+                DateTime = new DateTime(2010, 10, 10, 10, 10, 10, DateTimeKind.Utc),
+                DateTimeOffset = new DateTimeOffset(2011, 11, 11, 11, 11, 11, 11, TimeSpan.Zero),
                 Nullable = 12.13,
-                NullableDateTime = new DateTime(2014,12,14, 14, 14, 14, DateTimeKind.Utc),
+                NullableDateTime = new DateTime(2014, 12, 14, 14, 14, 14, DateTimeKind.Utc),
                 Uri = new Uri("http://example.com"),
                 Enum1 = Enum1.Enum1Value2,
                 Enum2 = Enum2.Enum2Value2,
                 Enum3 = Enum3.Enum3Value2,
                 Enum4 = Enum4.Enum4Value2,
                 Enum5 = Enum5.Enum5Value2,
-                Enum6 = Enum6.Enum6Value2                
+                Enum6 = Enum6.Enum6Value2
             };
 
             await table.InsertAsync(inserted);
@@ -534,10 +531,10 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
 
             // first insert an item
-            await table.InsertAsync(new ToDoWithStringId() { Id = "b", String = "Hey" }); 
-            
+            await table.InsertAsync(new ToDoWithStringId() { Id = "b", String = "Hey" });
+
             // then push it to server
-            await service.SyncContext.PushAsync(); 
+            await service.SyncContext.PushAsync();
 
             // then pull changes from server
             await table.PullAsync();
@@ -626,6 +623,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             TestUtilities.DropTestTable(TestDbName, testTableName);
             TestUtilities.DropTestTable(TestDbName, MobileServiceLocalSystemTables.OperationQueue);
             TestUtilities.DropTestTable(TestDbName, MobileServiceLocalSystemTables.SyncErrors);
+            TestUtilities.DropTestTable(TestDbName, MobileServiceLocalSystemTables.Config);
         }
     }
 }

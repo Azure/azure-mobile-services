@@ -17,7 +17,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
     /// <summary>
     /// SQLite based implementation of <see cref="IMobileServiceLocalStore"/>
     /// </summary>
-    public class MobileServiceSQLiteStore: MobileServiceLocalStore
+    public class MobileServiceSQLiteStore : MobileServiceLocalStore
     {
         private Dictionary<string, TableDefinition> tables = new Dictionary<string, TableDefinition>(StringComparer.OrdinalIgnoreCase);
         private SQLiteConnection connection;
@@ -35,7 +35,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 throw new ArgumentNullException("fileName");
             }
 
-            this.connection = new SQLiteConnection(fileName);            
+            this.connection = new SQLiteConnection(fileName);
         }
 
         /// <summary>
@@ -91,18 +91,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
         protected override async Task OnInitialize()
         {
-            foreach (KeyValuePair<string, TableDefinition> table in this.tables)
-            {
-                this.CreateTableFromObject(table.Key, table.Value.Values);
-
-                if (!MobileServiceLocalSystemTables.All.Contains(table.Key))
-                {
-                    // preserve system properties setting for non-system tables
-                    string name = String.Format("{0}_systemProperties", table.Key);
-                    string value = ((int)table.Value.SystemProperties).ToString();
-                    await this.SaveSetting(name, value);
-                }
-            }
+            this.CreateAllTables();
+            await this.InitializeConfig();
         }
 
         /// <summary>
@@ -200,12 +190,12 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
             if (parameters.Any())
             {
-                sql.Remove(sql.Length-1, 1); // remove the trailing comma
+                sql.Remove(sql.Length - 1, 1); // remove the trailing comma
                 this.ExecuteNonQuery(sql.ToString(), parameters);
             }
-            
+
             return Task.FromResult(0);
-        }        
+        }
 
         /// <summary>
         /// Deletes items from local table that match the given query.
@@ -250,14 +240,14 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
             string idRange = String.Join(",", ids.Select((_, i) => "@id" + i));
 
-            string sql = string.Format("DELETE FROM {0} WHERE {1} IN ({2})", 
-                                       SqlHelpers.FormatTableName(tableName), 
+            string sql = string.Format("DELETE FROM {0} WHERE {1} IN ({2})",
+                                       SqlHelpers.FormatTableName(tableName),
                                        MobileServiceSystemColumns.Id,
                                        idRange);
 
             var parameters = new Dictionary<string, object>();
 
-            int j=0;
+            int j = 0;
             foreach (string id in ids)
             {
                 parameters.Add("@id" + (j++), id);
@@ -338,7 +328,29 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 { "id", name }, 
                 { "value", value } 
             };
-            await this.UpsertAsyncInternal(MobileServiceLocalSystemTables.Config, new[]{ setting }, fromServer: false);
+            await this.UpsertAsyncInternal(MobileServiceLocalSystemTables.Config, new[] { setting }, fromServer: false);
+        }
+
+        private async Task InitializeConfig()
+        {
+            foreach (KeyValuePair<string, TableDefinition> table in this.tables)
+            {
+                if (!MobileServiceLocalSystemTables.All.Contains(table.Key))
+                {
+                    // preserve system properties setting for non-system tables
+                    string name = String.Format("{0}_systemProperties", table.Key);
+                    string value = ((int)table.Value.SystemProperties).ToString();
+                    await this.SaveSetting(name, value);
+                }
+            }
+        }
+
+        private void CreateAllTables()
+        {
+            foreach (KeyValuePair<string, TableDefinition> table in this.tables)
+            {
+                this.CreateTableFromObject(table.Key, table.Value.Values);
+            }
         }
 
         internal virtual void CreateTableFromObject(string tableName, IEnumerable<ColumnDefinition> columns)
@@ -369,7 +381,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         {
             parameters = parameters ?? new Dictionary<string, object>();
 
-            
+
             using (ISQLiteStatement statement = this.connection.Prepare(sql))
             {
                 foreach (KeyValuePair<string, object> parameter in parameters)
@@ -435,7 +447,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             {
                 return SqlHelpers.ParseText(jsonType, value);
             }
-            
+
             return null;
         }
 
