@@ -1,4 +1,4 @@
-# Microsoft Azure Mobile Services Change Log
+# Azure Mobile Services Change Log
 
 ### Version 1.3 alpha4
 **Managed SDK**
