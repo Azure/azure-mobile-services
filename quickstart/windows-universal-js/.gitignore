@@ -1,0 +1,9 @@
+bin/
+bld/
+obj/
+*.suo
+packages/*
+MobileServices.intellisense.js
+MobileServices.js
+MobileServices.min.js
+MobileServices.pri
