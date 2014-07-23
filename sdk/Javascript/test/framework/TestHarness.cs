@@ -82,6 +82,7 @@ namespace Microsoft.Azure.Zumo.Win8.Test
             // publicly accessible)
             List<TestFilter> filters = new List<TestFilter>();
             filters.Add(new FunctionalTestFilter(this.Settings));
+            filters.Add(new RuntimeTestFilter(this.Settings));
             filters.Add(new TagTestFilter(this.Settings));
 
             // Apply any test filters to the set of tests before we begin

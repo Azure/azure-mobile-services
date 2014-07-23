@@ -23,9 +23,9 @@ zip -d iOS_Swift.zip *.DS_Store
 # Copy to the build share
 if [ "$COPY_TO_SHARE" == "YES" ]; then
   SHARE_PATH_ARRAY=$(echo $QUICKSTART_SHARE_PATHS | tr ";" "\n")
-  for PATH in $SHARE_PATH_ARRAY
+  for SHARE_PATH in $SHARE_PATH_ARRAY
   do
-    rsync -rlK iOS_Swift.zip $PATH
+    rsync -rlK iOS_Swift.zip $SHARE_PATH
   done
 fi
 

@@ -369,12 +369,7 @@ NSString *const httpDelete = @"DELETE";
     // If string id, cache the version field as we strip it out during serialization
     NSString *version= nil;
     if([itemId isKindOfClass:[NSString class]]) {
-        @try {
-            version = [item objectForKey:MSSystemColumnVersion];
-        }
-        @catch (NSException *exception) {
-            // Do nothing
-        }
+        version = [item objectForKey:MSSystemColumnVersion];
     }
     return version;
 }

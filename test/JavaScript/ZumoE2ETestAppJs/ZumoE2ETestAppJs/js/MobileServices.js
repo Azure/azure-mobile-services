@@ -14,9 +14,9 @@
     /// Map module names to either their cached exports or a function which
     /// will define the module's exports when invoked.
     /// </field>
-    var $__modules__ = { };
-    var $__fileVersion__ = "1.0.20616.0";
-    
+    var $__modules__ = {};
+    var $__fileVersion__ = "1.0.20702.0";
+
     function require(name) {
         /// <summary>
         /// Require a module's exports.
@@ -36,7 +36,7 @@
 
         var existing = $__modules__[name];
         if (typeof existing == 'function') {
-            var exports = { };
+            var exports = {};
             $__modules__[name] = exports;
             existing(exports);
             return exports;
@@ -51,11 +51,11 @@
         // ----------------------------------------------------------------------------
         // Copyright (c) Microsoft Corporation. All rights reserved.
         // ----------------------------------------------------------------------------
-        
+
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
         /// <reference path="Generated\MobileServices.DevIntellisense.js" />
-        
+
         var _ = require('Extensions');
         var Validate = require('Validate');
         var Platform = require('Platform');
@@ -64,8 +64,8 @@
         var Push;
         try {
             Push = require('Push').Push;
-        } catch(e) {}
-        
+        } catch (e) { }
+
         function MobileServiceClient(applicationUrl, applicationKey) {
             /// <summary>
             /// Initializes a new instance of the MobileServiceClient class.
@@ -76,14 +76,14 @@
             /// <param name="applicationKey" type="string" mayBeNull="false">
             /// The Mobile Service application's key.
             /// </param>
-        
+
             Validate.isString(applicationUrl, 'applicationUrl');
             Validate.notNullOrEmpty(applicationUrl, 'applicationUrl');
             Validate.isString(applicationKey, 'applicationKey');
-        
+
             this.applicationUrl = applicationUrl;
             this.applicationKey = applicationKey || null;
-        
+
             var sdkInfo = Platform.getSdkInfo();
             var osInfo = Platform.getOperatingSystemInfo();
             var sdkVersion = sdkInfo.fileVersion.split(".").slice(0, 2).join(".");
@@ -101,25 +101,25 @@
                 /// </summary>
                 /// <param name="tableName">The name of the table.</param>
                 /// <returns>A reference to the table.</returns>
-        
+
                 Validate.isString(tableName, 'tableName');
                 Validate.notNullOrEmpty(tableName, 'tableName');
                 return new MobileServiceTable(tableName, this);
             };
-            
+
             if (Push) {
                 this.push = new Push(this);
             }
         }
-        
+
         // Export the MobileServiceClient class
         exports.MobileServiceClient = MobileServiceClient;
-        
+
         // Define the MobileServiceClient in a namespace (note: this has global effects
         // unless the platform we're using chooses to ignore it because exports are
         // good enough).
         Platform.addToMobileServicesClientNamespace({ MobileServiceClient: MobileServiceClient });
-        
+
         MobileServiceClient.prototype.withFilter = function (serviceFilter) {
             /// <summary>
             /// Create a new MobileServiceClient with a filter used to process all
@@ -163,13 +163,13 @@
             /// .withFilter(F3), it's conceptually equivalent to saying:
             ///     var response = F3(F2(F1(next(request)));
             /// </remarks>
-        
+
             Validate.notNull(serviceFilter, 'serviceFilter');
-        
+
             // Clone the current instance
             var client = new MobileServiceClient(this.applicationUrl, this.applicationKey);
             client.currentUser = this.currentUser;
-        
+
             // Chain the service filter with any existing filters
             var existingFilter = this._serviceFilter;
             client._serviceFilter = _.isNull(existingFilter) ?
@@ -182,10 +182,10 @@
                     };
                     serviceFilter(req, composed, callback);
                 };
-        
+
             return client;
         };
-        
+
         MobileServiceClient.prototype._request = function (method, uriFragment, content, ignoreFilters, headers, callback) {
             /// <summary>
             /// Perform a web request and include the standard Mobile Services headers.
@@ -210,33 +210,33 @@
             /// <param name="callback" type="function(error, response)">
             /// Handler that will be called on the response.
             /// </param>
-        
+
             // Account for absent optional arguments
             if (_.isNull(callback) && (typeof headers === 'function')) {
                 callback = headers;
                 headers = null;
             }
-        
+
             if (_.isNull(callback) && (typeof ignoreFilters === 'function')) {
                 callback = ignoreFilters;
                 ignoreFilters = false;
             }
-            
+
             if (_.isNull(callback) && (typeof content === 'function')) {
                 callback = content;
                 content = null;
             }
-        
+
             Validate.isString(method, 'method');
             Validate.notNullOrEmpty(method, 'method');
             Validate.isString(uriFragment, 'uriFragment');
             Validate.notNull(uriFragment, 'uriFragment');
             Validate.notNull(callback, 'callback');
-        
+
             // Create the absolute URI
             var options = { type: method.toUpperCase() };
             options.url = _.url.combinePathSegments(this.applicationUrl, uriFragment);
-        
+
             // Set MobileServices authentication, application, User-Agent and telemetry headers
             options.headers = {};
             if (!_.isNull(headers)) {
@@ -255,7 +255,7 @@
             if (!_.isNullOrEmpty["X-ZUMO-VERSION"]) {
                 options.headers["X-ZUMO-VERSION"] = this.version;
             }
-        
+
             // Add any content as JSON
             if (!_.isNull(content)) {
                 if (!_.isString(content)) {
@@ -263,8 +263,8 @@
                 } else {
                     options.data = content;
                 }
-        
-                if(!_.hasProperty(options.headers, ['Content-Type','content-type','CONTENT-TYPE','Content-type'])) {
+
+                if (!_.hasProperty(options.headers, ['Content-Type', 'content-type', 'CONTENT-TYPE', 'Content-type'])) {
                     options.headers['Content-Type'] = 'application/json';
                 }
             } else {
@@ -272,7 +272,7 @@
                 // will set the content-type to "application/text" for non-GET requests.
                 options.data = null;
             }
-        
+
             // Treat any >=400 status codes as errors.  Also treat the status code 0 as
             // an error (which indicates a connection failure).
             var handler = function (error, response) {
@@ -284,7 +284,7 @@
                 }
                 callback(error, response);
             };
-        
+
             // Make the web request
             if (!_.isNull(this._serviceFilter) && !ignoreFilters) {
                 this._serviceFilter(options, Platform.webRequest, handler);
@@ -292,7 +292,7 @@
                 Platform.webRequest(options, handler);
             }
         };
-        
+
         MobileServiceClient.prototype.login = Platform.async(
             function (provider, token, useSingleSignOn, callback) {
                 /// <summary>
@@ -312,7 +312,7 @@
                 /// <param name="useSingleSignOn" type="Boolean" mayBeNull="true">
                 /// Only applies to Windows 8 clients.  Will be ignored on other platforms.
                 /// Indicates if single sign-on should be used. Single sign-on requires that the 
-                /// application's Package SID be registered with the Windows Azure Mobile Service, 
+                /// application's Package SID be registered with the Microsoft Azure Mobile Service, 
                 /// but it provides a better experience as HTTP cookies are supported so that users 
                 /// do not have to login in everytime the application is launched.
                 /// </param>
@@ -321,16 +321,16 @@
                 /// </param>
                 this._login.login(provider, token, useSingleSignOn, callback);
             });
-        
+
         MobileServiceClient.prototype.logout = function () {
             /// <summary>
             /// Log a user out of a Mobile Services application.
             /// </summary>
             this.currentUser = null;
         };
-        
+
         MobileServiceClient.prototype.invokeApi = Platform.async(
-            function (apiName, options, callback) {   
+            function (apiName, options, callback) {
                 /// <summary>
                 /// Invokes the specified custom api and returns a response object.
                 /// </summary>
@@ -347,9 +347,9 @@
                 /// <param name="callback" type="Function" mayBeNull="true">
                 /// Optional callback accepting (error, results) parameters.
                 /// </param>
-        
+
                 Validate.isString(apiName, 'apiName');
-        
+
                 // Account for absent optional arguments
                 if (_.isNull(callback)) {
                     if (typeof options === 'function') {
@@ -358,14 +358,14 @@
                     }
                 }
                 Validate.notNull(callback, 'callback');
-        
+
                 var parameters, method, body, headers;
                 if (!_.isNull(options)) {
                     parameters = options.parameters;
                     if (!_.isNull(parameters)) {
                         Validate.isValidParametersObject(options.parameters);
                     }
-        
+
                     method = options.method;
                     body = options.body;
                     headers = options.headers;
@@ -373,14 +373,14 @@
                 if (_.isNull(method)) {
                     method = "POST";
                 }
-        
+
                 // Construct the URL
                 var urlFragment = _.url.combinePathSegments("api", apiName);
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
                 }
-        
+
                 // Make the request
                 this._request(
                     method,
@@ -395,19 +395,19 @@
                             if (typeof response.getResponseHeader === 'undefined') { // (when using IframeTransport, IE9)
                                 try {
                                     response.result = _.fromJson(response.responseText);
-                                } catch(e) {
+                                } catch (e) {
                                     // Do nothing, since we don't know the content-type, failing may be ok
                                 }
                             } else if (response.getResponseHeader('Content-Type').toLowerCase().indexOf('json') !== -1) {
                                 response.result = _.fromJson(response.responseText);
                             }
-        
+
                             callback(null, response);
                         }
                     });
-        
+
             });
-        
+
         function getApplicationInstallationId() {
             /// <summary>
             /// Gets or creates the static application installation ID.
@@ -415,11 +415,11 @@
             /// <returns type="string">
             /// The application installation ID.
             /// </returns>
-        
+
             // Get or create a new installation ID that can be passed along on each
             // request to provide telemetry data
             var applicationInstallationId = null;
-        
+
             // Check if the config settings exist
             var path = "MobileServices.Installation.config";
             var contents = Platform.readSetting(path);
@@ -434,59 +434,59 @@
                     // us to fall through to and regenerate a valid config below
                 }
             }
-        
+
             // If no installation ID was found, generate a new one and save the config
             // settings.  This is pulled out as a separate function because we'll do it
             // even if we successfully read an existing config but there's no
             // installation ID.
             if (_.isNullOrEmpty(applicationInstallationId)) {
                 applicationInstallationId = _.createUniqueInstallationId();
-        
+
                 // TODO: How many other settings should we write out as well?
                 var configText = _.toJson({ applicationInstallationId: applicationInstallationId });
                 Platform.writeSetting(path, configText);
             }
-        
+
             return applicationInstallationId;
         }
-        
-        
+
+
         /// <summary>
         /// Get or set the static _applicationInstallationId by checking the settings
         /// and create the value if necessary.
         /// </summary>
         MobileServiceClient._applicationInstallationId = getApplicationInstallationId();
-        
+
         /// <summary>
         /// Get or set the static _userAgent by calling into the Platform.
         /// </summary>
         MobileServiceClient._userAgent = Platform.getUserAgent();
-        
-        
+
+
     };
 
     $__modules__.MobileServiceTable = function (exports) {
         // ----------------------------------------------------------------------------
         // Copyright (c) Microsoft Corporation. All rights reserved.
         // ----------------------------------------------------------------------------
-        
+
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
         /// <reference path="Generated\MobileServices.DevIntellisense.js" />
-        
+
         var _ = require('Extensions');
         var Validate = require('Validate');
         var Platform = require('Platform');
         var Query = require('Query').Query;
-        
+
         // Name of the reserved Mobile Services ID member.
         var idPropertyName = "id";
-        
+
         // The route separator used to denote the table in a uri like
         // .../{app}/collections/{coll}.
         var tableRouteSeperatorName = "tables";
         var idNames = ["ID", "Id", "id", "iD"];
-        
+
         var MobileServiceSystemProperties = {
             None: 0,
             CreatedAt: 1,
@@ -494,20 +494,20 @@
             Version: 4,
             All: 0xFFFF
         };
-        
+
         var MobileServiceSystemColumns = {
             CreatedAt: "__createdAt",
             UpdatedAt: "__updatedAt",
             Version: "__version"
         };
-        
+
         Platform.addToMobileServicesClientNamespace({
             MobileServiceTable:
                 {
                     SystemProperties: MobileServiceSystemProperties
                 }
         });
-        
+
         function MobileServiceTable(tableName, client) {
             /// <summary>
             /// Initializes a new instance of the MobileServiceTable class.
@@ -518,7 +518,7 @@
             /// <param name="client" type="MobileServiceClient" mayBeNull="false">
             /// The MobileServiceClient used to make requests.
             /// </param>
-        
+
             this.getTableName = function () {
                 /// <summary>
                 /// Gets the name of the table.
@@ -526,7 +526,7 @@
                 /// <returns type="String">The name of the table.</returns>
                 return tableName;
             };
-        
+
             this.getMobileServiceClient = function () {
                 /// <summary>
                 /// Gets the MobileServiceClient associated with this table.
@@ -536,13 +536,13 @@
                 /// </returns>
                 return client;
             };
-        
+
             this.systemProperties = 0;
         }
-        
+
         // Export the MobileServiceTable class
         exports.MobileServiceTable = MobileServiceTable;
-        
+
         // We have an internal _read method using callbacks since it's used by both
         // table.read(query) and query.read().
         MobileServiceTable.prototype._read = function (query, parameters, callback) {
@@ -559,10 +559,9 @@
             /// <param name="callback" type="Function">
             /// The callback to invoke when the query is complete.
             /// </param>
-        
+
             // Account for absent optional arguments
-            if (_.isNull(callback))
-            {
+            if (_.isNull(callback)) {
                 if (_.isNull(parameters) && (typeof query === 'function')) {
                     callback = query;
                     query = null;
@@ -582,7 +581,7 @@
                     }
                 }
             }
-        
+
             // Validate the arguments
             if (query && _.isString(query)) {
                 Validate.notNullOrEmpty(query, 'query');
@@ -591,7 +590,7 @@
                 Validate.isValidParametersObject(parameters, 'parameters');
             }
             Validate.notNull(callback, 'callback');
-        
+
             // Get the query string
             var tableName = this.getTableName();
             var queryString = null;
@@ -605,13 +604,13 @@
                     if (components.table) {
                         // If the query has a table name, make sure it's compatible with
                         // the table executing the query
-                        
+
                         if (tableName !== components.table) {
                             var message = _.format(Platform.getResourceString("MobileServiceTable_ReadMismatchedQueryTables"), tableName, components.table);
                             callback(_.createError(message), null);
                             return;
                         }
-        
+
                         // The oDataQuery will include the table name; we need to remove
                         // because the url fragment already includes the table name.
                         var oDataQuery = query.toOData();
@@ -619,7 +618,7 @@
                     }
                 }
             }
-        
+
             // Add any user-defined query string parameters
             parameters = addSystemProperties(parameters, this.systemProperties, queryString);
             if (!_.isNull(parameters)) {
@@ -631,13 +630,13 @@
                     queryString = userDefinedQueryString;
                 }
             }
-            
+
             // Construct the URL
             var urlFragment = _.url.combinePathSegments(tableRouteSeperatorName, tableName);
             if (!_.isNull(queryString)) {
                 urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
             }
-        
+
             // Make the request
             this.getMobileServiceClient()._request(
                 'GET',
@@ -648,7 +647,7 @@
                     if (_.isNull(error)) {
                         // Parse the response
                         values = _.fromJson(response.responseText);
-        
+
                         // If the values include the total count, we'll attach that
                         // directly to the array
                         if (values &&
@@ -659,7 +658,7 @@
                             values.results.totalCount = values.count;
                             values = values.results;
                         }
-        
+
                         // If we have a projection function, apply it to each item
                         // in the collection
                         if (projection !== null) {
@@ -672,9 +671,9 @@
                     callback(error, values);
                 });
         };
-        
+
         MobileServiceTable.prototype.read = Platform.async(MobileServiceTable.prototype._read);
-        
+
         MobileServiceTable.prototype.insert = Platform.async(
             function (instance, parameters, callback) {
                 /// <summary>
@@ -689,24 +688,24 @@
                 /// <param name="callback" type="Function">
                 /// The callback to invoke when the insert is complete.
                 /// </param>
-        
+
                 // Account for absent optional arguments
                 if (_.isNull(callback) && (typeof parameters === 'function')) {
                     callback = parameters;
                     parameters = null;
                 }
-        
+
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
                 if (!_.isNull(parameters)) {
                     Validate.isValidParametersObject(parameters);
                 }
                 Validate.notNull(callback, 'callback');
-        
+
                 // Integer Ids can not have any Id set
                 for (var i in idNames) {
                     var id = instance[idNames[i]];
-        
+
                     if (!_.isNullOrZero(id)) {
                         if (_.isString(id)) {
                             // String Id's are allowed iif using 'id'
@@ -724,7 +723,7 @@
                         }
                     }
                 }
-        
+
                 // Construct the URL
                 var urlFragment = _.url.combinePathSegments(tableRouteSeperatorName, this.getTableName());
                 parameters = addSystemProperties(parameters, this.systemProperties);
@@ -732,7 +731,7 @@
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
                 }
-        
+
                 // Make the request
                 this.getMobileServiceClient()._request(
                     'POST',
@@ -748,7 +747,7 @@
                         }
                     });
             });
-        
+
         MobileServiceTable.prototype.update = Platform.async(
             function (instance, parameters, callback) {
                 /// <summary>
@@ -766,13 +765,13 @@
                 var version,
                     headers = [],
                     serverInstance;
-        
+
                 // Account for absent optional arguments
                 if (_.isNull(callback) && (typeof parameters === 'function')) {
                     callback = parameters;
                     parameters = null;
                 }
-        
+
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
                 Validate.isValidId(instance[idPropertyName], 'instance.' + idPropertyName);
@@ -780,7 +779,7 @@
                     Validate.isValidParametersObject(parameters, 'parameters');
                 }
                 Validate.notNull(callback, 'callback');
-        
+
                 if (_.isString(instance[idPropertyName])) {
                     version = instance.__version;
                     serverInstance = removeSystemProperties(instance);
@@ -788,9 +787,9 @@
                     serverInstance = instance;
                 }
                 parameters = addSystemProperties(parameters, this.systemProperties);
-        
+
                 // Construct the URL
-                var urlFragment =  _.url.combinePathSegments(
+                var urlFragment = _.url.combinePathSegments(
                         tableRouteSeperatorName,
                         this.getTableName(),
                         encodeURIComponent(instance[idPropertyName].toString()));
@@ -798,11 +797,11 @@
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
                 }
-        
+
                 if (!_.isNullOrEmpty(version)) {
                     headers['If-Match'] = getEtagFromVersion(version);
                 }
-        
+
                 // Make the request
                 this.getMobileServiceClient()._request(
                     'PATCH',
@@ -821,7 +820,7 @@
                         }
                     });
             });
-        
+
         MobileServiceTable.prototype.refresh = Platform.async(
             function (instance, parameters, callback) {
                 /// <summary>
@@ -837,17 +836,16 @@
                 /// <param name="callback" type="Function">
                 /// The callback to invoke when the refresh is complete.
                 /// </param>
-        
+
                 // Account for absent optional arguments
                 if (_.isNull(callback) && (typeof parameters === 'function')) {
                     callback = parameters;
                     parameters = null;
                 }
-        
+
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
-                if (!_.isValidId(instance[idPropertyName], idPropertyName))
-                {
+                if (!_.isValidId(instance[idPropertyName], idPropertyName)) {
                     if (typeof instance[idPropertyName] === 'string' && instance[idPropertyName] !== '') {
                         throw _.format(Platform.getResourceString("Validate_InvalidId"), idPropertyName);
                     } else {
@@ -855,29 +853,29 @@
                     }
                     return;
                 }
-        
+
                 if (!_.isNull(parameters)) {
                     Validate.isValidParametersObject(parameters, 'parameters');
                 }
                 Validate.notNull(callback, 'callback');
-        
+
                 // Construct the URL
                 var urlFragment = _.url.combinePathSegments(
                         tableRouteSeperatorName,
                         this.getTableName());
-        
+
                 if (typeof instance[idPropertyName] === 'string') {
                     var id = encodeURIComponent(instance[idPropertyName]).replace(/\'/g, '%27%27');
                     urlFragment = _.url.combinePathAndQuery(urlFragment, "?$filter=id eq '" + id + "'");
                 } else {
                     urlFragment = _.url.combinePathAndQuery(urlFragment, "?$filter=id eq " + encodeURIComponent(instance[idPropertyName].toString()));
                 }
-        
+
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
                 }
-        
+
                 // Make the request
                 this.getMobileServiceClient()._request(
                     'GET',
@@ -891,20 +889,20 @@
                             if (Array.isArray(result)) {
                                 result = result[0]; //get first object from array
                             }
-        
+
                             if (!result) {
-                                var message =_.format(
+                                var message = _.format(
                                     Platform.getResourceString("MobileServiceTable_NotSingleObject"),
                                     idPropertyName);
                                 callback(_.createError(message), null);
                             }
-        
+
                             result = Platform.allowPlatformToMutateOriginal(instance, result);
                             callback(null, result);
                         }
                     });
             });
-        
+
         MobileServiceTable.prototype.lookup = Platform.async(
             function (id, parameters, callback) {
                 /// <summary>
@@ -919,32 +917,32 @@
                 /// <param name="callback" type="Function">
                 /// The callback to invoke when the lookup is complete.
                 /// </param>
-        
+
                 // Account for absent optional arguments
                 if (_.isNull(callback) && (typeof parameters === 'function')) {
                     callback = parameters;
                     parameters = null;
                 }
-        
+
                 // Validate the arguments
                 Validate.isValidId(id, idPropertyName);
                 if (!_.isNull(parameters)) {
                     Validate.isValidParametersObject(parameters);
                 }
                 Validate.notNull(callback, 'callback');
-        
+
                 // Construct the URL
                 var urlFragment = _.url.combinePathSegments(
                         tableRouteSeperatorName,
                         this.getTableName(),
                         encodeURIComponent(id.toString()));
-        
+
                 parameters = addSystemProperties(parameters, this.systemProperties);
                 if (!_.isNull(parameters)) {
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
                 }
-        
+
                 // Make the request
                 this.getMobileServiceClient()._request(
                     'GET',
@@ -959,7 +957,7 @@
                         }
                     });
             });
-        
+
         MobileServiceTable.prototype.del = Platform.async(
             function (instance, parameters, callback) {
                 /// <summary>
@@ -974,13 +972,13 @@
                 /// <param name="callback" type="Function">
                 /// The callback to invoke when the delete is complete.
                 /// </param>
-        
+
                 // Account for absent optional arguments
                 if (_.isNull(callback) && (typeof parameters === 'function')) {
                     callback = parameters;
                     parameters = null;
-                }        
-        
+                }
+
                 // Validate the arguments
                 Validate.notNull(instance, 'instance');
                 Validate.isValidId(instance[idPropertyName], 'instance.' + idPropertyName);
@@ -989,17 +987,17 @@
                     Validate.isValidParametersObject(parameters);
                 }
                 Validate.notNull(callback, 'callback');
-        
+
                 var headers = [];
-        
+
                 if (_.isString(instance[idPropertyName])) {
                     if (!_.isNullOrEmpty(instance.__version)) {
                         headers['If-Match'] = getEtagFromVersion(instance.__version);
                     }
                 }
-        
+
                 // Contruct the URL
-                var urlFragment =  _.url.combinePathSegments(
+                var urlFragment = _.url.combinePathSegments(
                         tableRouteSeperatorName,
                         this.getTableName(),
                         encodeURIComponent(instance[idPropertyName].toString()));
@@ -1007,7 +1005,7 @@
                     var queryString = _.url.getQueryString(parameters);
                     urlFragment = _.url.combinePathAndQuery(urlFragment, queryString);
                 }
-        
+
                 // Make the request
                 this.getMobileServiceClient()._request(
                     'DELETE',
@@ -1022,7 +1020,7 @@
                         callback(error);
                     });
             });
-        
+
         // Copy select Query operators to MobileServiceTable so queries can be created
         // compactly.  We'll just add them to the MobileServiceTable prototype and then
         // forward on directly to a new Query instance.
@@ -1033,11 +1031,11 @@
                 /// <summary>
                 /// Creates a new query.
                 /// </summary>
-        
+
                 // Create a query associated with this table
                 var table = this;
                 var query = new Query(table.getTableName());
-        
+
                 // Add a .read() method on the query which will execute the query.
                 // This method is defined here per query instance because it's
                 // implicitly tied to the table.
@@ -1048,7 +1046,7 @@
                         /// </summary>                
                         table._read(query, parameters, callback);
                     });
-        
+
                 // Invoke the query operator on the newly created query
                 return query[operator].apply(query, arguments);
             };
@@ -1058,31 +1056,31 @@
             // Avoid unintended closure capture
             copyOperator(queryOperators[i]);
         }
-        
+
         // Table system properties
         function removeSystemProperties(instance) {
             var copy = {};
-            for(var property in instance) {
+            for (var property in instance) {
                 if (property.substr(0, 2) !== '__') {
                     copy[property] = instance[property];
                 }
             }
             return copy;
         }
-        
+
         function addSystemProperties(parameters, properties, querystring) {
             if (properties === MobileServiceSystemProperties.None || (typeof querystring === 'string' && querystring.toLowerCase().indexOf('__systemproperties') >= 0)) {
                 return parameters;
             }
-        
+
             // Initialize an object if none passed in
             parameters = parameters || {};
-        
+
             // Don't override system properties if already set
-            if(!_.isNull(parameters['__systemProperties'])) {
+            if (!_.isNull(parameters['__systemProperties'])) {
                 return parameters;
             }
-        
+
             if (properties === MobileServiceSystemProperties.All) {
                 parameters['__systemProperties'] = '*';
             } else {
@@ -1098,10 +1096,10 @@
                 }
                 parameters['__systemProperties'] = options.join(',');
             }
-        
+
             return parameters;
         }
-        
+
         // Add double quotes and unescape any internal quotes
         function getItemFromResponse(response) {
             var result = _.fromJson(response.responseText);
@@ -1113,25 +1111,25 @@
             }
             return result;
         }
-        
+
         // Converts an error to precondition failed error
         function setServerItemIfPreconditionFailed(error) {
             if (error.request && error.request.status === 412) {
                 error.serverInstance = _.fromJson(error.request.responseText);
             }
         }
-        
+
         // Add wrapping double quotes and escape all double quotes
         function getEtagFromVersion(version) {
             var result = version.replace(/\"/g, '\\\"');
             return "\"" + result + "\"";
         }
-        
+
         // Remove surrounding double quotes and unescape internal quotes
         function getVersionFromEtag(etag) {
             var len = etag.length,
                 result = etag;
-        
+
             if (len > 1 && etag[0] === '"' && etag[len - 1] === '"') {
                 result = etag.substr(1, len - 2);
             }
@@ -1143,18 +1141,18 @@
         // ----------------------------------------------------------------------------
         // Copyright (c) Microsoft Corporation. All rights reserved.
         // ----------------------------------------------------------------------------
-        
+
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
         /// <reference path="Generated\MobileServices.DevIntellisense.js" />
-        
+
         var _ = require('Extensions');
         var Validate = require('Validate');
         var Platform = require('Platform');
-        
+
         var loginUrl = "login";
         var loginDone = "done";
-        
+
         function MobileServiceLogin(client, ignoreFilters) {
             /// <summary>
             /// Initializes a new instance of the MobileServiceLogin class.
@@ -1168,20 +1166,20 @@
             /// only be set to false for testing purposes when filters are needed to intercept
             /// and validate requests and responses.
             /// </param>
-        
+
             // Account for absent optional arguments
             if (_.isNull(ignoreFilters)) {
                 ignoreFilters = true;
             }
-        
+
             // Validate arguments
             Validate.notNull(client);
             Validate.isObject(client, 'client');
-        
+
             // Create read/write fields
             this._loginState = { inProcess: false, cancelCallback: null };
             this.ignoreFilters = ignoreFilters;
-        
+
             // Create get accessors for read-only fields
             this.getMobileServiceClient = function () {
                 /// <summary>
@@ -1192,7 +1190,7 @@
                 /// </returns>
                 return client;
             };
-        
+
             this.getLoginInProcess = function () {
                 /// <summary>
                 /// Indicates if a login is currently in process or not.
@@ -1203,15 +1201,15 @@
                 return this._loginState.inProcess;
             };
         }
-        
+
         // Export the MobileServiceLogin class
         exports.MobileServiceLogin = MobileServiceLogin;
-        
+
         // Define the MobileServiceLogin in a namespace (note: this has global effects
         // unless the platform we're using chooses to ignore it because exports are
         // good enough).
         Platform.addToMobileServicesClientNamespace({ MobileServiceLogin: MobileServiceLogin });
-        
+
         MobileServiceLogin.prototype.login = function (provider, token, useSingleSignOn, callback) {
             /// <summary>
             /// Log a user into a Mobile Services application given a provider name and optional token object
@@ -1228,14 +1226,14 @@
             /// <param name="useSingleSignOn" type="Boolean" mayBeNull="true">
             /// Only applies to Windows 8 clients.  Will be ignored on other platforms.
             /// Indicates if single sign-on should be used. Single sign-on requires that the 
-            /// application's Package SID be registered with the Windows Azure Mobile Service, 
+            /// application's Package SID be registered with the Microsoft Azure Mobile Service, 
             /// but it provides a better experience as HTTP cookies are supported so that users 
             /// do not have to login in everytime the application is launched.
             /// </param>
             /// <param name="callback" type="Function"  mayBeNull="true">
             /// Optional callback accepting (error, user) parameters.
             /// </param>
-        
+
             // Account for absent optional arguments
             if (_.isNull(callback)) {
                 if (!_.isNull(useSingleSignOn) && (typeof useSingleSignOn === 'function')) {
@@ -1257,13 +1255,13 @@
                     useSingleSignOn = false;
                 }
             }
-            
+
             // Determine if the provider is actually a Mobile Services authentication token
             if (_.isNull(token) && _.isString(provider) && provider.split('.').length === 3) {
                 token = provider;
                 provider = null;
             }
-        
+
             // Validate parameters; there must be either a provider, a token or both
             if (_.isNull(provider)) {
                 Validate.notNull(token);
@@ -1274,10 +1272,10 @@
                 Validate.isString(provider);
                 provider = provider.toLowerCase();
             }
-        
+
             if (!_.isNull(provider)) {
                 if (provider.toLowerCase() === 'windowsazureactivedirectory') {
-                    // The mobile service REST API uses '/login/aad' for Windows Azure Active Directory
+                    // The mobile service REST API uses '/login/aad' for Microsoft Azure Active Directory
                     provider = 'aad';
                 }
                 this.loginWithProvider(provider, token, useSingleSignOn, callback);
@@ -1286,8 +1284,8 @@
                 this.loginWithMobileServiceToken(token, callback);
             }
         };
-        
-        MobileServiceLogin.prototype.loginWithMobileServiceToken = function(authenticationToken, callback) {
+
+        MobileServiceLogin.prototype.loginWithMobileServiceToken = function (authenticationToken, callback) {
             /// <summary>
             /// Log a user into a Mobile Services application given an Mobile Service authentication token.
             /// </summary>
@@ -1297,24 +1295,24 @@
             /// <param name="callback" type="Function">
             /// Optional callback accepting (error, user) parameters.
             /// </param>
-        
+
             var self = this;
             var client = self.getMobileServiceClient();
-        
+
             Validate.isString(authenticationToken, 'authenticationToken');
             Validate.notNullOrEmpty(authenticationToken, 'authenticationToken');
-        
+
             client._request(
                 'POST',
                 loginUrl,
                 { authenticationToken: authenticationToken },
                 self.ignoreFilters,
-                function(error, response) { 
+                function (error, response) {
                     onLoginResponse(error, response, client, callback);
                 });
         };
-        
-        MobileServiceLogin.prototype.loginWithProvider = function(provider, token, useSingleSignOn, callback) {
+
+        MobileServiceLogin.prototype.loginWithProvider = function (provider, token, useSingleSignOn, callback) {
             /// <summary>
             /// Log a user into a Mobile Services application given a provider name and optional token object.
             /// </summary>
@@ -1327,17 +1325,16 @@
             /// </param>
             /// <param name="useSingleSignOn" type="Boolean" mayBeNull="true">
             /// Optional, indicates if single sign-on should be used.  Single sign-on requires that the
-            /// application's Package SID be registered with the Windows Azure Mobile Service, but it
+            /// application's Package SID be registered with the Microsoft Azure Mobile Service, but it
             /// provides a better experience as HTTP cookies are supported so that users do not have to
             /// login in everytime the application is launched. Is false be default.
             /// </param>
             /// <param name="callback" type="Function" mayBeNull="true">
             /// The callback to execute when the login completes: callback(error, user).
             /// </param>
-        
+
             // Account for absent optional arguments
-            if (_.isNull(callback))
-            {
+            if (_.isNull(callback)) {
                 if (_.isNull(useSingleSignOn) && (typeof token === 'function')) {
                     callback = token;
                     token = null;
@@ -1351,13 +1348,13 @@
                     }
                 }
             }
-        
+
             // Validate arguments
             Validate.isString(provider, 'provider');
             if (!_.isNull(token)) {
                 Validate.isObject(token, 'token');
             }
-        
+
             // Throw if a login is already in process and is not cancellable
             if (this._loginState.inProcess) {
                 var didCancel = this._loginState.cancelCallback && this._loginState.cancelCallback();
@@ -1365,9 +1362,9 @@
                     throw Platform.getResourceString("MobileServiceLogin_LoginErrorResponse");
                 }
             }
-        
+
             provider = provider.toLowerCase();
-            
+
             // Either login with the token or the platform specific login control.
             if (!_.isNull(token)) {
                 loginWithProviderAndToken(this, provider, token, callback);
@@ -1376,7 +1373,7 @@
                 loginWithLoginControl(this, provider, useSingleSignOn, callback);
             }
         };
-        
+
         function onLoginComplete(error, token, client, callback) {
             /// <summary>
             /// Handles the completion of the login and calls the user's callback with
@@ -1397,9 +1394,9 @@
             /// The callback to execute when the login completes: callback(error, user).
             /// </param>
             var user = null;
-        
+
             if (_.isNull(error)) {
-        
+
                 // Validate the token
                 if (_.isNull(token) ||
                     !_.isObject(token) ||
@@ -1414,12 +1411,12 @@
                     user = client.currentUser;
                 }
             }
-        
+
             if (!_.isNull(callback)) {
                 callback(error, user);
             }
         }
-        
+
         function onLoginResponse(error, response, client, callback) {
             /// <summary>
             /// Handles the completion of the login HTTP call and calls the user's callback with
@@ -1439,7 +1436,7 @@
             /// <param name="callback" type="Function" mayBeNull="true">
             /// The callback to execute when the login completes: callback(error, user).
             /// </param>
-        
+
             var mobileServiceToken = null;
             if (_.isNull(error)) {
                 try {
@@ -1449,10 +1446,10 @@
                     error = e;
                 }
             }
-        
+
             onLoginComplete(error, mobileServiceToken, client, callback);
         }
-        
+
         function loginWithProviderAndToken(login, provider, token, callback) {
             /// <summary>
             /// Log a user into a Mobile Services application given a provider name and token object.
@@ -1470,16 +1467,16 @@
             /// <param name="callback" type="Function" mayBeNull="true">
             /// The callback to execute when the login completes: callback(error, user).
             /// </param>
-        
+
             var client = login.getMobileServiceClient();
-        
+
             // This design has always been problematic, because the operation can take arbitrarily
             // long and there is no way for the UI to cancel it. We should probably remove this
             // one-at-a-time restriction.
             login._loginState = { inProcess: true, cancelCallback: null };
-        
+
             // Invoke the POST endpoint to exchange provider-specific token for a 
-            // Windows Azure Mobile Services token
+            // Microsoft Azure Mobile Services token
             client._request(
                 'POST',
                 loginUrl + '/' + provider,
@@ -1490,7 +1487,7 @@
                     onLoginResponse(error, response, client, callback);
                 });
         }
-        
+
         function loginWithLoginControl(login, provider, useSingleSignOn, callback) {
             /// <summary>
             /// Log a user into a Mobile Services application using a platform specific
@@ -1504,21 +1501,21 @@
             /// </param>
             /// <param name="useSingleSignOn" type="Boolean">
             /// Optional, indicates if single sign-on should be used.  Single sign-on requires that the
-            /// application's Package SID be registered with the Windows Azure Mobile Service, but it
+            /// application's Package SID be registered with the Microsoft Azure Mobile Service, but it
             /// provides a better experience as HTTP cookies are supported so that users do not have to
             /// login in everytime the application is launched. Is false be default.
             /// </param>
             /// <param name="callback" type="Function"  mayBeNull="true">
             /// The callback to execute when the login completes: callback(error, user).
             /// </param>
-        
+
             var client = login.getMobileServiceClient();
             var startUri = _.url.combinePathSegments(
                 client.applicationUrl,
                 loginUrl,
                 provider);
             var endUri = null;
-        
+
             // If not single sign-on, then we need to construct a non-null end uri.
             if (!useSingleSignOn) {
                 endUri = _.url.combinePathSegments(
@@ -1526,9 +1523,9 @@
                     loginUrl,
                     loginDone);
             }
-            
+
             login._loginState = { inProcess: true, cancelCallback: null }; // cancelCallback gets set below
-        
+
             // Call the platform to launch the login control, capturing any
             // 'cancel' callback that it returns
             var platformResult = Platform.login(
@@ -1538,7 +1535,7 @@
                     login._loginState = { inProcess: false, cancelCallback: null };
                     onLoginComplete(error, mobileServiceToken, client, callback);
                 });
-            
+
             if (login._loginState.inProcess && platformResult && platformResult.cancelCallback) {
                 login._loginState.cancelCallback = platformResult.cancelCallback;
             }
@@ -1549,16 +1546,16 @@
         // ----------------------------------------------------------------------------
         // Copyright (c) Microsoft Corporation. All rights reserved.
         // ----------------------------------------------------------------------------
-        
+
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
         /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
-        
+
         var Validate = require('Validate');
         var LocalStorageManager = require('LocalStorageManager').LocalStorageManager;
         var RegistrationManager = require('RegistrationManager').RegistrationManager;
         var PushHttpClient = require('PushHttpClient').PushHttpClient;
-        
+
         function Push(mobileServicesClient, tileId) {
             var localStorage = new LocalStorageManager(mobileServicesClient.applicationUrl, tileId);
             this.registrationManager = new RegistrationManager(
@@ -1566,9 +1563,9 @@
                 localStorage
                 );
         }
-        
+
         exports.Push = Push;
-        
+
         Push.prototype.registerNative = function (channelUri, tags) {
             /// <summary>
             /// Register for native notification
@@ -1576,12 +1573,12 @@
             /// <param name="channelUri">The channelUri to register</param>
             /// <param name="tags">Array containing the tags for this registeration</param>
             /// <returns>Promise that will complete when the registration is completed</returns>
-            
+
             var registration = makeCoreRegistration(channelUri, tags);
             return this.registrationManager.register(registration);
         };
-        
-        
+
+
         Push.prototype.registerTemplate = function (channelUri, templateBody, templateName, headers, tags) {
             /// <summary>
             /// Register for template notification
@@ -1592,75 +1589,75 @@
             /// <param name="headers">Object containing key/value pairs for the template to provide to WNS. X-WNS-Type is required. Example: { 'X-WNS-Type' : 'wns/toast' }</param>
             /// <param name="tags">Array containing the tags for this registeration</param>
             /// <returns>Promise that will complete when the template registration is completed</returns>
-            
+
             var registration = makeCoreRegistration(channelUri, tags);
-            
+
             if (templateBody) {
                 Validate.isString(templateBody, 'templateBody');
                 registration.templateBody = templateBody;
                 Validate.isString(templateName, 'templateName');
                 Validate.notNullOrEmpty(templateName);
                 registration.templateName = templateName;
-        
+
                 if (headers) {
                     Validate.isObject(headers);
                     registration.headers = headers;
                 }
             }
-        
+
             return this.registrationManager.register(registration);
         };
-        
+
         Push.prototype.unregisterNative = function () {
             /// <summary>
             /// Unregister for native notification
             /// </summary>
             /// <returns>Promise that will complete when the unregister is completed</returns>
-            
+
             return this.unregisterTemplate(RegistrationManager.nativeRegistrationName);
         };
-        
+
         Push.prototype.unregisterTemplate = function (templateName) {
             /// <summary>
             /// Unregister for template notification
             /// </summary>
             /// <param name="templateName">The name of the template</param>
             /// <returns>Promise that will complete when the unregister is completed</returns>
-            
+
             Validate.notNullOrEmpty(templateName);
             return this.registrationManager.unregister(templateName);
         };
-        
+
         Push.prototype.unregisterAll = function (channelUri) {
             /// <summary>
             /// Unregister all notifications for a specfic channelUri
             /// </summary>
             /// <param name="channelUri">The channelUri to unregister</param>
             /// <returns>Promise that will complete when the unregistration of all registrations at the channelUri is completed</returns>
-            
+
             Validate.notNullOrEmpty(channelUri);
             return this.registrationManager.deleteRegistrationsForChannel(channelUri);
         };
-        
+
         Push.prototype.getSecondaryTile = function (tileId) {
             return new Push(this.mobileServicesClient, tileId);
         };
-        
+
         function makeCoreRegistration(channelUri, tags) {
             var registration = {};
-        
+
             registration.platform = 'wns';
-        
+
             Validate.isString(channelUri, 'channelUri');
             Validate.notNullOrEmpty(channelUri, 'channelUri');
-        
+
             registration.deviceId = channelUri;
-        
+
             if (tags) {
                 Validate.isArray(tags, 'tags');
                 registration.tags = tags;
             }
-        
+
             return registration;
         }
     };
@@ -1669,24 +1666,24 @@
         // ----------------------------------------------------------------------------
         // Copyright (c) Microsoft Corporation. All rights reserved.
         // ----------------------------------------------------------------------------
-        
+
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
         /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
-        
+
         // Declare JSHint globals
         /*global WinJS:false */
-        
+
         function RegistrationManager(pushHttpClient, storageManager) {
             this.pushHttpClient = pushHttpClient;
             this.localStorageManager = storageManager;
         }
-        
+
         exports.RegistrationManager = RegistrationManager;
-        
+
         RegistrationManager.nativeRegistrationName = '$Default';
-        
-        RegistrationManager.prototype.refreshLocalStorage = function(refreshChannelUri) {
+
+        RegistrationManager.prototype.refreshLocalStorage = function (refreshChannelUri) {
             var refreshPromise;
             var self = this;
             // if localStorage is empty or has different storage version, we need retrieve registrations and refresh local storage
@@ -1697,22 +1694,22 @@
                         if (count === 0) {
                             self.localStorageManager.clearRegistrations();
                         }
-        
+
                         for (var i = 0; i < count; i++) {
                             self.localStorageManager.updateRegistrationByRegistrationId(registrations[i].registrationId, registrations[i].registrationName || RegistrationManager.nativeRegistrationName, refreshChannelUri);
                         }
                     })
-                    .then(function() {
+                    .then(function () {
                         self.localStorageManager.refreshFinished(refreshChannelUri);
                     });
-        
+
             } else {
                 refreshPromise = WinJS.Promise.wrap();
             }
-        
+
             return refreshPromise;
         };
-        
+
         RegistrationManager.prototype.register = function (registration) {
             var self = this;
             return this.refreshLocalStorage(this.localStorageManager.channelUri || registration.deviceId)
@@ -1744,25 +1741,25 @@
                                     return self.upsertRegistration(registration);
                                 });
                         }
-        
+
                         throw error;
                     }
                 );
         };
-        
+
         RegistrationManager.prototype.unregister = function (registrationName) {
             var cached = this.localStorageManager.getRegistration(registrationName);
             if (!cached) {
                 return WinJS.Promise.wrap();
             }
-        
+
             var self = this;
             return this.pushHttpClient.unregister(cached.registrationId)
                 .then(function () {
                     self.localStorageManager.deleteRegistrationByName(registrationName);
                 });
         };
-        
+
         RegistrationManager.prototype.deleteRegistrationsForChannel = function (channelUri) {
             var self = this;
             return this.pushHttpClient.listRegistrations(channelUri)
@@ -1775,11 +1772,11 @@
                                 });
                         }));
                 })
-                .then(function() {
+                .then(function () {
                     self.localStorageManager.clearRegistrations();
                 });
         };
-        
+
         RegistrationManager.prototype.createRegistrationId = function (registration) {
             var self = this;
             return this.pushHttpClient.createRegistrationId()
@@ -1788,7 +1785,7 @@
                     self.localStorageManager.updateRegistrationByRegistrationName(registration.templateName || RegistrationManager.nativeRegistrationName, registration.registrationId, registration.deviceId);
                 });
         };
-        
+
         RegistrationManager.prototype.upsertRegistration = function (registration) {
             var self = this;
             return this.pushHttpClient.createOrUpdateRegistration(registration)
@@ -1802,71 +1799,71 @@
         // ----------------------------------------------------------------------------
         // Copyright (c) Microsoft Corporation. All rights reserved.
         // ----------------------------------------------------------------------------
-        
+
         /// <reference path='C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js' />
         /// <reference path='C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js' />
         /// <reference path='..\Generated\MobileServices.DevIntellisense.js' />
-        
+
         // Declare JSHint globals
         /*global WinJS:false, Windows:false */
-        
+
         var _ = require('Extensions');
         var Platform = require('Platform');
-        
+
         function LocalStorageManager(applicationUri, tileId) {
             this.storageVersion = 'v1.0.0';
             this.primaryChannelId = '$Primary';
             this.keyNameVersion = 'Version';
             this.keyNameChannelUri = 'ChannelUri';
             this.keyNameRegistrations = 'Registrations';
-            
+
             if (!tileId) {
                 tileId = this.primaryChannelId;
             }
-        
+
             var name = _.format('{0}-PushContainer-{1}-{2}', Windows.ApplicationModel.Package.current.id.name, applicationUri, tileId);
             this.settings = Windows.Storage.ApplicationData.current.localSettings.createContainer(name, Windows.Storage.ApplicationDataCreateDisposition.always).values;
             this.isRefreshNeeded = false;
-            this.channelUri = null;    
-        
+            this.channelUri = null;
+
             this.initializeRegistrationInfoFromStorage();
         }
-        
+
         exports.LocalStorageManager = LocalStorageManager;
-        
+
         LocalStorageManager.prototype.getChannelUri = function () {
             return this.channelUri;
         };
-        
+
         LocalStorageManager.prototype.setChannelUri = function (channelUri) {
             this.channelUri = channelUri;
             this.flushToSettings();
         };
-        
+
         LocalStorageManager.prototype.getRegistration = function (registrationName) {
             return this.readRegistration(registrationName);
         };
-        
+
         LocalStorageManager.prototype.deleteRegistrationByName = function (registrationName) {
             if (tryRemoveSetting(registrationName, this.registrations)) {
                 this.flushToSettings();
                 return true;
             }
-        
+
             return false;
         };
-        
+
         LocalStorageManager.prototype.deleteRegistrationByRegistrationId = function (registrationId) {
             var registration = this.getFirstRegistrationByRegistrationId(registrationId);
-        
+
             if (registration) {
                 this.deleteRegistrationByName(registration.registrationName);
                 return true;
             }
-        
+
             return false;
         };
-        
+
         LocalStorageManager.prototype.getFirstRegistrationByRegistrationId = function (registrationId) {
             var returnValue = null;
             for (var regName in this.registrations) {
@@ -1878,10 +1875,10 @@
                     }
                 }
             }
-        
+
             return returnValue;
         };
-        
+
         LocalStorageManager.prototype.updateRegistrationByRegistrationName = function (registrationName, registrationId, channelUri) {
             var cacheReg = {};
             cacheReg.registrationName = registrationName;
@@ -1890,12 +1887,12 @@
             this.channelUri = channelUri;
             this.flushToSettings();
         };
-        
+
         LocalStorageManager.prototype.writeRegistration = function (registrationName, cacheReg) {
             var cachedRegForPropertySet = JSON.stringify(cacheReg);
             this.registrations.insert(registrationName, cachedRegForPropertySet);
         };
-        
+
         LocalStorageManager.prototype.readRegistration = function (registrationName) {
             if (this.registrations.hasKey(registrationName)) {
                 var cachedRegFromPropertySet = this.registrations[registrationName];
@@ -1904,60 +1901,60 @@
                 return null;
             }
         };
-        
+
         LocalStorageManager.prototype.updateRegistrationByRegistrationId = function (registrationId, registrationName, channelUri) {
             var registration = this.getFirstRegistrationByRegistrationId(registrationId);
-        
+
             if (registration) {
                 this.updateRegistrationByRegistrationName(registration.registrationName, registration.registrationId, channelUri);
             } else {
                 this.updateRegistrationByRegistrationName(registrationName, registrationId, channelUri);
             }
         };
-        
+
         LocalStorageManager.prototype.clearRegistrations = function () {
             this.registrations.clear();
             this.flushToSettings();
         };
-        
+
         LocalStorageManager.prototype.refreshFinished = function (refreshedChannelUri) {
             this.setChannelUri(refreshedChannelUri);
             this.isRefreshNeeded = false;
         };
-        
+
         LocalStorageManager.prototype.flushToSettings = function () {
             this.settings.insert(this.keyNameVersion, this.storageVersion);
             this.settings.insert(this.keyNameChannelUri, this.channelUri);
-        
+
             var str = '';
             if (this.registrations !== null) {
                 str = JSON.stringify(this.registrations);
             }
-        
+
             this.settings.insert(this.keyNameRegistrations, str);
         };
-        
+
         LocalStorageManager.prototype.initializeRegistrationInfoFromStorage = function () {
             this.registrations = new Windows.Foundation.Collections.PropertySet();
-        
+
             try {
                 // Read channelUri
                 this.channelUri = readContent(this.settings, this.keyNameChannelUri);
-        
+
                 // Verify this.storage version
                 var version = readContent(this.settings, this.keyNameVersion);
                 if (this.storageVersion !== version.toLowerCase()) {
                     this.isRefreshNeeded = true;
                     return;
                 }
-        
+
                 this.isRefreshNeeded = false;
-        
+
                 // read registrations
                 var regsStr = readContent(this.settings, this.keyNameRegistrations);
                 if (regsStr) {
                     var entries = JSON.parse(regsStr);
-        
+
                     for (var reg in entries) {
                         if (entries.hasOwnProperty(reg)) {
                             this.registrations.insert(reg, entries[reg]);
@@ -1970,14 +1967,14 @@
                 this.isRefreshNeeded = true;
             }
         };
-        
+
         function readContent(propertySet, key) {
             if (propertySet.hasKey(key)) {
                 return propertySet[key];
             }
             return '';
         }
-        
+
         function tryRemoveSetting(name, values) {
             if (values[name]) {
                 values.remove(name);
@@ -1991,31 +1988,31 @@
         // ----------------------------------------------------------------------------
         // Copyright (c) Microsoft Corporation. All rights reserved.
         // ----------------------------------------------------------------------------
-        
+
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
         /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
-        
+
         var _ = require('Extensions');
         var Platform = require('Platform');
         var noCacheHeader = { 'If-Modified-Since': 'Mon, 27 Mar 1972 00:00:00 GMT' };
         function PushHttpClient(mobileServicesClient) {
             this.mobileServicesClient = mobileServicesClient;
         }
-        
+
         exports.PushHttpClient = PushHttpClient;
-        
+
         PushHttpClient.prototype.listRegistrations = function (channelUri) {
             return this._request('GET', '/push/registrations?platform=wns&deviceId=' + encodeURIComponent(channelUri), null, null, noCacheHeader)
                 .then(function (request) {
                     return JSON.parse(request.response);
                 });
         };
-        
+
         PushHttpClient.prototype.unregister = function (registrationId) {
             return this._request('DELETE', '/push/registrations/' + encodeURIComponent(registrationId), null, null, noCacheHeader);
         };
-        
+
         PushHttpClient.prototype.createRegistrationId = function () {
             return this._request('POST', '/push/registrationIds', null, null, noCacheHeader)
                 .then(function (response) {
@@ -2023,11 +2020,11 @@
                     return locationHeader.slice(locationHeader.lastIndexOf('/') + 1);
                 });
         };
-        
+
         PushHttpClient.prototype.createOrUpdateRegistration = function (registration) {
             return this._request('PUT', '/push/registrations/' + encodeURIComponent(registration.registrationId), registration, null, noCacheHeader);
         };
-        
+
         PushHttpClient.prototype._request = Platform.async(
             function (method, uriFragment, content, ignoreFilters, headers, callback) {
                 this.mobileServicesClient._request(method, uriFragment, content, ignoreFilters, headers, callback);
@@ -2038,17 +2035,17 @@
         // ----------------------------------------------------------------------------
         // Copyright (c) Microsoft Corporation. All rights reserved.
         // ----------------------------------------------------------------------------
-        
+
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
         /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
-        
+
         // Declare JSHint globals
         /*global WinJS:false, Windows:false, $__fileVersion__:false, $__version__:false */
-        
+
         var _ = require('Extensions');
         var Validate = require('Validate');
-        
+
         exports.async = function async(func) {
             /// <summary>
             /// Wrap a function that takes a callback into platform specific async
@@ -2060,15 +2057,15 @@
             /// <returns type="Function">
             /// Function that when invoked will return a WinJS.Promise.
             /// </returns>
-        
+
             return function () {
                 // Capture the context of the original call
                 var that = this;
                 var args = arguments;
-        
+
                 // Create a new promise that will wrap the async call
                 return new WinJS.Promise(function (complete, error) {
-        
+
                     // Add a callback to the args which will call the appropriate
                     // promise handlers
                     var callback = function (err) {
@@ -2080,7 +2077,7 @@
                         }
                     };
                     Array.prototype.push.call(args, callback);
-        
+
                     try {
                         // Invoke the async method which will in turn invoke our callback
                         // which will in turn invoke the promise's handlers
@@ -2093,7 +2090,7 @@
                 });
             };
         };
-        
+
         exports.addToMobileServicesClientNamespace = function (declarations) {
             /// <summary>
             /// Define a collection of declarations in the Mobile Services Client namespace.
@@ -2101,7 +2098,7 @@
             /// <param name="declarations" type="Object">
             /// Object consisting of names and values to define in the namespace.
             /// </param>
-        
+
             try {
                 // The following namespace is retained for backward compatibility, but
                 // may soon change to 'WindowsAzure'
@@ -2116,7 +2113,7 @@
                 // using other Microsoft libraries in WinJS.        
             }
         };
-        
+
         exports.readSetting = function readSetting(name) {
             /// <summary>
             /// Read a setting from a global configuration store.
@@ -2127,13 +2124,13 @@
             /// <returns type="String" mayBeNull="true">
             /// The value of the setting or null if not set.
             /// </returns>
-        
+
             var localSettings = Windows.Storage.ApplicationData.current.localSettings;
             return !_.isNull(localSettings) ?
                 localSettings.values[name] :
                 null;
         };
-        
+
         exports.writeSetting = function writeSetting(name, value) {
             /// <summary>
             /// Write a setting to a global configuration store.
@@ -2144,13 +2141,13 @@
             /// <param name="value" type="String" mayBeNull="true">
             /// The value of the setting.
             /// </returns>
-        
+
             var localSettings = Windows.Storage.ApplicationData.current.localSettings;
             if (!_.isNull(localSettings)) {
                 localSettings.values[name] = value;
             }
         };
-        
+
         exports.webRequest = function (request, callback) {
             /// <summary>
             /// Make a web request.
@@ -2161,12 +2158,12 @@
             /// <param name="callback" type="Function">
             /// The callback to execute when the request completes.
             /// </param>
-        
+
             WinJS.xhr(request).done(
                 function (response) { callback(null, response); },
                 function (error) { callback(null, error); });
         };
-        
+
         exports.login = function (startUri, endUri, callback) {
             /// <summary>
             /// Log a user into a Mobile Services application by launching a
@@ -2184,27 +2181,27 @@
             /// <param name="callback" type="Function" mayBeNull="true">
             /// The callback to execute when the login completes: callback(error, endUri).
             /// </param>
-        
+
             // Account for absent optional arguments
             if (_.isNull(callback) && typeof endUri === 'function') {
                 callback = endUri;
                 endUri = null;
             }
-        
+
             Validate.notNullOrEmpty(startUri, 'startUri');
             Validate.isString(startUri, 'startUri');
-        
+
             var windowsWebAuthBroker = Windows.Security.Authentication.Web.WebAuthenticationBroker;
             var noneWebAuthOptions = Windows.Security.Authentication.Web.WebAuthenticationOptions.none;
             var successWebAuthStatus = Windows.Security.Authentication.Web.WebAuthenticationStatus.success;
-        
+
             var webAuthBrokerSuccessCallback = null;
             var webAuthBrokerErrorCallback = null;
             if (!_.isNull(callback)) {
                 webAuthBrokerSuccessCallback = function (result) {
                     var error = null;
                     var token = null;
-        
+
                     if (result.responseStatus !== successWebAuthStatus) {
                         error = result;
                     }
@@ -2223,7 +2220,7 @@
                                 }
                             }
                         }
-        
+
                         if (!_.isNull(tokenAsJson)) {
                             try {
                                 token = _.fromJson(tokenAsJson);
@@ -2233,15 +2230,15 @@
                             }
                         }
                     }
-        
+
                     callback(error, token);
                 };
-        
+
                 webAuthBrokerErrorCallback = function (error) {
                     callback(error, null);
                 };
             }
-        
+
             if (!_.isNull(endUri)) {
                 var windowsStartUri = new Windows.Foundation.Uri(startUri);
                 var windowsEndUri = new Windows.Foundation.Uri(endUri);
@@ -2251,7 +2248,7 @@
             else {
                 // If no endURI was given, then we'll use the single sign-on overload of the 
                 // windowsWebAuthBroker. Single sign-on requires that the application's Package SID 
-                // be registered with the Windows Azure Mobile Service, but it provides a better 
+                // be registered with the Microsoft Azure Mobile Service, but it provides a better 
                 // experience as HTTP cookies are supported so that users do not have to
                 // login in everytime the application is launched.
                 var redirectUri = windowsWebAuthBroker.getCurrentApplicationCallbackUri().absoluteUri;
@@ -2261,11 +2258,11 @@
                                     .done(webAuthBrokerSuccessCallback, webAuthBrokerErrorCallback);
             }
         };
-        
+
         exports.getOperatingSystemInfo = function () {
-        
+
             var architecture = "Unknown";
-        
+
             // The Windows API provides the architecture as an enum, so we have to 
             // lookup the string value
             var archValue = Windows.ApplicationModel.Package.current.id.architecture;
@@ -2275,33 +2272,33 @@
                 case 9: architecture = "X64"; break;
                 case 11: architecture = "Neutral"; break;
             }
-        
+
             return {
                 name: "Windows 8",
                 version: "--",
                 architecture: architecture
             };
         };
-        
+
         exports.getSdkInfo = function () {
             return {
                 language: "WinJS",
-                fileVersion: $__fileVersion__        
+                fileVersion: $__fileVersion__
             };
         };
-        
+
         exports.getUserAgent = function () {
             // The User-Agent header can not be set in WinJS
             return null;
         };
-        
+
         exports.toJson = function (value) {
             /// <summary>
             /// Convert an object into JSON format.
             /// </summary>
             /// <param name="value" type="Object">The value to convert.</param>
             /// <returns type="String">The value as JSON.</returns>
-        
+
             // We're wrapping this so we can hook the process and perform custom JSON
             // conversions.  Note that we don't have to add a special hook to correctly
             // serialize dates in ISO8061 because JSON.stringify does that by defualt.
@@ -2309,16 +2306,16 @@
             // TODO: Expose the ability for developers to convert custom types
             return JSON.stringify(value);
         };
-        
+
         exports.tryParseIsoDateString = function (text) {
             /// <summary>
             /// Try to parse an ISO date string.
             /// </summary>
             /// <param name="text" type="String">The text to parse.</param>
             /// <returns type="Date">The parsed Date or null.</returns>
-        
+
             Validate.isString(text);
-        
+
             // Check against a lenient regex
             if (/^(\d{4})-(\d{2})-(\d{2})T(\d{2})\:(\d{2})\:(\d{2})(\.(\d{1,3}))?Z$/.test(text)) {
                 // Try and parse - it will return NaN if invalid
@@ -2328,17 +2325,17 @@
                     return new Date(ticks);
                 }
             }
-        
+
             // Return null if not found
             return null;
         };
-        
+
         exports.getResourceString = function (resourceName) {
             var resourceManager = Windows.ApplicationModel.Resources.Core.ResourceManager.current;
             var resource = resourceManager.mainResourceMap.getValue("MobileServices/Resources/" + resourceName);
             return resource.valueAsString;
         };
-        
+
         exports.allowPlatformToMutateOriginal = function (original, updated) {
             /// <summary>
             /// Patch an object with the values returned by from the server.  Given
@@ -2351,7 +2348,7 @@
             if (!_.isNull(original) && !_.isNull(updated)) {
                 var key = null;
                 var binding = WinJS.Binding.as(original);
-        
+
                 for (key in updated) {
                     if (key in original) {
                         binding[key] = updated[key];
@@ -2359,11 +2356,11 @@
                         binding.addProperty(key, updated[key]);
                     }
                 }
-        
+
                 // TODO: Should we also delete any fields on the original object that
                 // aren't also on the updated object?  Is that a scenario for scripts?
             }
-        
+
             return original;
         };
     };
@@ -2372,18 +2369,18 @@
         // ----------------------------------------------------------------------------
         // Copyright (c) Microsoft Corporation. All rights reserved.
         // ----------------------------------------------------------------------------
-        
+
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
         /// <reference path="..\Generated\MobileServices.DevIntellisense.js" />
-        
+
         // Declare JSHint globals
         /*global XMLHttpRequest:false */
-        
+
         var Validate = require('Validate');
         var Platform = require('Platform');
         var _ = exports;
-        
+
         exports.isNull = function (value) {
             /// <summary>
             /// Gets a value indicating whether the provided value is null (or
@@ -2395,10 +2392,10 @@
             /// <returns type="Boolean">
             /// A value indicating whether the provided value is null (or undefined).
             /// </returns>
-            
+
             return value === null || value === undefined;
         };
-        
+
         exports.isNullOrZero = function (value) {
             /// <summary>
             /// Gets a value indicating whether the provided value is null (or
@@ -2410,10 +2407,10 @@
             /// <returns type="Boolean">
             /// A value indicating whether the provided value is null (or undefined) or zero or empty string.
             /// </returns>
-        
+
             return value === null || value === undefined || value === 0 || value === '';
         };
-        
+
         exports.isNullOrEmpty = function (value) {
             /// <summary>
             /// Gets a value indicating whether the provided value is null (or
@@ -2425,10 +2422,10 @@
             /// <returns type="Boolean">
             /// A value inHdicating whether the provided value is null (or undefined).
             /// </returns>
-        
+
             return _.isNull(value) || value.length === 0;
         };
-        
+
         exports.format = function (message) {
             /// <summary>
             /// Format a string by replacing all of its numbered arguments with
@@ -2442,16 +2439,16 @@
             /// A variable number of arguments that can be used to format the message.
             /// </param>
             /// <returns type="string">The formatted string.</returns>
-        
+
             Validate.isString(message, 'message');
-        
+
             // Note: There are several flaws in this implementation that we are
             // ignoring for simplicity as it's only used internally.  Examples that
             // could be handled better include:
             //    format('{0} {1}', 'arg') => 'arg {1}'
             //    format('{0} {1}', '{1}', 'abc') => 'abc abc'
             //    format('{0}', '{0}') => <stops responding>
-        
+
             if (!_.isNullOrEmpty(message) && arguments.length > 1) {
                 for (var i = 1; i < arguments.length; i++) {
                     var pattern = '{' + (i - 1) + '}';
@@ -2460,10 +2457,10 @@
                     }
                 }
             }
-        
+
             return message;
         };
-        
+
         exports.has = function (value, key) {
             /// <summary>
             /// Determine if an object defines a given property.
@@ -2475,13 +2472,13 @@
             /// <returns type="Boolean">
             /// A value indicating whether the object defines the property.
             /// </returns>
-        
+
             Validate.notNull(key, 'key');
             Validate.isString(key, 'key');
-        
+
             return !_.isNull(value) && value.hasOwnProperty(key);
         };
-        
+
         exports.hasProperty = function (object, properties) {
             /// <summary>
             /// Determines if an object has any of the passed in properties
@@ -2495,7 +2492,7 @@
             }
             return false;
         };
-        
+
         exports.extend = function extend(target, members) {
             /// <summary>
             /// Extends the target with the members of the members object.
@@ -2511,7 +2508,7 @@
             }
             return target;
         };
-        
+
         exports.isObject = function (value) {
             /// <summary>
             /// Determine if a value is an object.
@@ -2520,10 +2517,10 @@
             /// <returns type="boolean">
             /// True if the value is an object (or null), false othwerise.
             /// </returns>
-        
+
             return _.isNull(value) || (typeof value === 'object' && !_.isDate(value));
         };
-        
+
         exports.isValidId = function (value) {
             /// <summary>
             /// Determine if a value is an acceptable id for use by the mobile service
@@ -2535,27 +2532,27 @@
             if (_.isNullOrZero(value)) {
                 return false;
             }
-        
+
             if (_.isString(value)) {
                 // Strings must contain at least one non whitespace character
                 if (value.length === 0 || value.length > 255 || value.trim().length === 0) {
                     return false;
                 }
-        
+
                 var ex = /[+"\/?`\\]|[\u0000-\u001F]|[\u007F-\u009F]|^\.{1,2}$/;
                 if (value.match(ex) !== null) {
                     return false;
                 }
-        
+
                 return true;
-        
+
             } else if (_.isNumber(value)) {
                 return value > 0;
             }
-        
+
             return false;
         };
-        
+
         exports.isString = function (value) {
             /// <summary>
             /// Determine if a value is a string.
@@ -2564,10 +2561,10 @@
             /// <returns type="boolean">
             /// True if the value is a string (or null), false othwerise.
             /// </returns>
-        
+
             return _.isNull(value) || (typeof value === 'string');
         };
-        
+
         exports.isNumber = function (value) {
             /// <summary>
             /// Determine if a value is a number.
@@ -2576,10 +2573,10 @@
             /// <returns type="boolean">
             /// True if the value is a number, false othwerise.
             /// </returns>
-        
+
             return !_.isNull(value) && (typeof value === 'number');
         };
-        
+
         exports.isBool = function (value) {
             /// <summary>
             /// Determine if a value is a boolean.
@@ -2590,11 +2587,11 @@
             /// </returns>
             return !_.isNull(value) && (typeof value == 'boolean');
         };
-        
+
         function classOf(value) {
             return Object.prototype.toString.call(value).slice(8, -1).toLowerCase();
         }
-        
+
         exports.isDate = function (value) {
             /// <summary>
             /// Determine if a value is a date.
@@ -2605,24 +2602,24 @@
             /// </returns>
             return !_.isNull(value) && (classOf(value) == 'date');
         };
-        
+
         exports.toJson = function (value) {
             /// <summary>
             /// Convert an object into JSON format.
             /// </summary>
             /// <param name="value" type="Object">The value to convert.</param>
             /// <returns type="String">The value as JSON.</returns>
-        
+
             return Platform.toJson(value);
         };
-        
+
         exports.fromJson = function (value) {
             /// <summary>
             /// Convert an object from JSON format.
             /// </summary>
             /// <param name="value" type="String">The value to convert.</param>
             /// <returns type="Object">The value as an object.</returns>
-        
+
             var jsonValue = null;
             if (!_.isNullOrEmpty(value)) {
                 // We're wrapping this so we can hook the process and perform custom JSON
@@ -2637,31 +2634,31 @@
                                 return date;
                             }
                         }
-        
+
                         // TODO: Convert geolocations once they're supported
                         // TODO: Expose the ability for developers to convert custom types
-        
+
                         // Return the original value if we couldn't do anything with it
                         return v;
                     });
             }
-        
+
             return jsonValue;
         };
-        
+
         exports.createUniqueInstallationId = function () {
             /// <summary>
             /// Create a unique identifier that can be used for the installation of
             /// the current application.
             /// </summary>
             /// <returns type="String">Unique identifier.</returns>
-        
+
             var pad4 = function (str) { return "0000".substring(str.length) + str; };
             var hex4 = function () { return pad4(Math.floor(Math.random() * 0x10000 /* 65536 */).toString(16)); };
-        
+
             return (hex4() + hex4() + "-" + hex4() + "-" + hex4() + "-" + hex4() + "-" + hex4() + hex4() + hex4());
         };
-        
+
         exports.mapProperties = function (instance, action) {
             /// <summary>
             /// Map a function over the key/value pairs in an instance.
@@ -2673,7 +2670,7 @@
             /// The action to map over the key/value pairs.
             /// </param>
             /// <returns elementType="object">Mapped results.</returns>
-        
+
             var results = [];
             if (!_.isNull(instance)) {
                 var key = null;
@@ -2683,7 +2680,7 @@
             }
             return results;
         };
-        
+
         exports.pad = function (value, length, ch) {
             /// <summary>
             /// Pad the a value with a given character until it reaches the desired
@@ -2693,20 +2690,20 @@
             /// <param name="length" type="Number">The desired length.</param>
             /// <param name="ch" type="String">The character to pad with.</param>
             /// <returns type="String">The padded string.</returns>
-        
+
             Validate.notNull(value, 'value');
             Validate.isInteger(length, 'length');
             Validate.isString(ch, 'ch');
             Validate.notNullOrEmpty(ch, 'ch');
             Validate.length(ch, 1, 'ch');
-        
+
             var text = value.toString();
             while (text.length < length) {
                 text = ch + text;
             }
             return text;
         };
-        
+
         exports.trimEnd = function (text, ch) {
             /// <summary>
             /// Trim all instance of a given characher from the end of a string.
@@ -2717,23 +2714,23 @@
             /// The character to trim.
             /// </param>
             /// <returns type="String">The trimmed string.</returns>
-        
+
             Validate.isString(text, 'text');
             Validate.notNull(text, 'text');
             Validate.isString(ch, 'ch');
             Validate.notNullOrEmpty('ch', 'ch');
             Validate.length(ch, 1, 'ch');
-        
+
             var end = text.length - 1;
             while (end >= 0 && text[end] === ch) {
                 end--;
             }
-        
+
             return end >= 0 ?
                 text.substr(0, end + 1) :
                 '';
         };
-        
+
         exports.trimStart = function (text, ch) {
             /// <summary>
             /// Trim all instance of a given characher from the start of a string.
@@ -2745,23 +2742,23 @@
             /// The character to trim.
             /// </param>
             /// <returns type="String">The trimmed string.</returns>
-        
+
             Validate.isString(text, 'text');
             Validate.notNull(text, 'text');
             Validate.isString(ch, 'ch');
             Validate.notNullOrEmpty(ch, 'ch');
             Validate.length(ch, 1, 'ch');
-        
+
             var start = 0;
             while (start < text.length && text[start] === ch) {
                 start++;
             }
-        
+
             return start < text.length ?
                 text.substr(start, text.length - start) :
                 '';
         };
-        
+
         exports.compareCaseInsensitive = function (first, second) {
             /// <summary>
             /// Compare two strings for equality while igorning case.
@@ -2769,22 +2766,22 @@
             /// <param name="first" type="String">First value.</param>
             /// <param name="second" type="String">Second value.</param>
             /// <returns type="Boolean">Whether the strings are the same.</returns>
-        
+
             // NOTE: We prefer uppercase on Windows for historical reasons where it was
             // possible to have alphabets where several uppercase characters mapped to
             // the same lowercase character.
-        
+
             if (_.isString(first) && !_.isNullOrEmpty(first)) {
                 first = first.toUpperCase();
             }
-        
+
             if (_.isString(first) && !_.isNullOrEmpty(second)) {
                 second = second.toUpperCase();
             }
-        
+
             return first === second;
         };
-        
+
         /// <field name="url" type="Object">
         /// Path specific utilities for working with URIs.
         /// </field>
@@ -2793,7 +2790,7 @@
             /// The path separator character used for combining path segments.
             /// </field>
             separator: '/',
-        
+
             combinePathSegments: function () {
                 /// <summary>
                 /// Combine several segments into a path.
@@ -2802,7 +2799,7 @@
                 /// The segments of the path that should be combined.
                 /// </param>
                 /// <returns type="String">The combined path.</returns>
-        
+
                 // Normalize the segements
                 var segments = [];
                 var i = 0;
@@ -2810,32 +2807,32 @@
                 for (i = 0; i < arguments.length; i++) {
                     var segment = arguments[i];
                     Validate.isString(segment, _.format('argument[{0}]', i));
-        
+
                     if (i !== 0) {
                         segment = _.trimStart(segment || '', _.url.separator);
                     }
                     if (i < arguments.length - 1) {
                         segment = _.trimEnd(segment || '', _.url.separator);
                     }
-        
+
                     segments.push(segment);
                 }
-        
+
                 // Combine the segments
                 return segments.reduce(
                     function (a, b) { return a + _.url.separator + b; });
             },
-        
+
             getQueryString: function (parameters) {
                 /// <summary>
                 /// Converts an Object instance into a query string
                 /// </summary>
                 /// <param name="parameters" type="Object">The parameters from which to create a query string.</param>
                 /// <returns type="String">A query string</returns>
-                
+
                 Validate.notNull(parameters, 'parameters');
                 Validate.isObject(parameters, 'parameters');
-        
+
                 var pairs = [];
                 for (var parameter in parameters) {
                     var value = parameters[parameter];
@@ -2844,10 +2841,10 @@
                     }
                     pairs.push(encodeURIComponent(parameter) + "=" + encodeURIComponent(value));
                 }
-        
+
                 return pairs.join("&");
             },
-        
+
             combinePathAndQuery: function (path, queryString) {
                 /// <summary>
                 /// Concatenates the URI query string to the URI path.
@@ -2861,7 +2858,7 @@
                     return path;
                 }
                 Validate.isString(queryString, 'queryString');
-        
+
                 if (path.indexOf('?') >= 0) {
                     return path + '&' + exports.trimStart(queryString, '?');
                 } else {
@@ -2869,17 +2866,17 @@
                 }
             }
         };
-        
+
         exports.tryParseIsoDateString = function (text) {
             /// <summary>
             /// Try to parse an ISO date string.
             /// </summary>
             /// <param name="text" type="String">The text to parse.</param>
             /// <returns type="Date">The parsed Date or null.</returns>
-        
+
             return Platform.tryParseIsoDateString(text);
         };
-        
+
         exports.createError = function (exceptionOrMessage, request) {
             /// <summary>
             /// Wrap an error thrown as an exception.
@@ -2891,13 +2888,13 @@
             /// The failing request.
             /// </param>
             /// <returns>An object with error details</returns>
-        
+
             // Create an error object to return
             var error = { message: Platform.getResourceString("Extensions_DefaultErrorMessage") };
             error.toString = function () {
                 return error.message;
             };
-        
+
             if (request) {
                 error.request = request;
                 if (request.status === 0) {
@@ -2910,7 +2907,7 @@
                     if (request.getResponseHeader) {
                         isText = request.getResponseHeader('Content-Type').toLowerCase().indexOf("text") >= 0;
                     }
-        
+
                     try {
                         var response = JSON.parse(request.responseText);
                         if (typeof response === 'string') {
@@ -2940,7 +2937,7 @@
                 // default error message
                 error.exception = exceptionOrMessage;
             }
-        
+
             return error;
         };
     };
@@ -2949,14 +2946,14 @@
         // ----------------------------------------------------------------------------
         // Copyright (c) Microsoft Corporation. All rights reserved.
         // ----------------------------------------------------------------------------
-        
+
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\base.js" />
         /// <reference path="C:\Program Files (x86)\Microsoft SDKs\Windows\v8.0\ExtensionSDKs\Microsoft.WinJS.1.0\1.0\DesignTime\CommonConfiguration\Neutral\Microsoft.WinJS.1.0\js\ui.js" />
         /// <reference path="..\Generated\Zumo.DevIntellisense.js" />
-        
+
         var _ = require('Extensions');
         var Platform = require('Platform');
-        
+
         exports.notNull = function (value, name) {
             /// <summary>
             /// Ensure the value is not null (or undefined).
@@ -2965,12 +2962,12 @@
             /// <param name="name" mayBeNull="true" optional="true">
             /// Optional name of the value to throw.
             /// </param>
-        
+
             if (_.isNull(value)) {
                 throw _.format(Platform.getResourceString("Validate_NotNullError"), name || 'Value');
             }
         };
-        
+
         exports.notNullOrEmpty = function (value, name) {
             /// <summary>
             /// Ensure the value is not null, undefined, or empty.
@@ -2979,12 +2976,12 @@
             /// <param name="name" mayBeNull="true" optional="true" type="String">
             /// Optional name of the value to throw.
             /// </param>
-        
+
             if (_.isNullOrEmpty(value)) {
                 throw _.format(Platform.getResourceString("Validate_NotNullOrEmptyError"), name || 'Value');
             }
         };
-        
+
         exports.notNullOrZero = function (value, name) {
             /// <summary>
             /// Ensure the value is not null, undefined, zero, or empty.
@@ -2993,12 +2990,12 @@
             /// <param name="name" mayBeNull="true" optional="true" type="String">
             /// Optional name of the value to throw.
             /// </param>
-        
+
             if (_.isNullOrZero(value)) {
                 throw _.format(Platform.getResourceString("Validate_NotNullOrEmptyError"), name || 'Value');
             }
         };
-        
+
         exports.isValidId = function (value, name) {
             /// <summary>
             /// Ensure the value is a valid id for mobile services.
@@ -3007,12 +3004,12 @@
             /// <param name="name" mayBeNull="true" optional="true" type="String">
             /// Optional name of the value to throw.
             /// </param>
-        
+
             if (!_.isValidId(value)) {
                 throw _.format(Platform.getResourceString("Validate_InvalidId"), name || 'id');
             }
         };
-        
+
         exports.isDate = function (value, name) {
             /// <summary>
             /// Ensure the value is a date.
@@ -3021,8 +3018,8 @@
             /// <param name="name" mayBeNull="true" optional="true" type="String">
             /// Optional name of the value to throw.
             /// </param>
-            
-            exports.notNull(value, name);    
+
+            exports.notNull(value, name);
             if (!_.isDate(value)) {
                 throw _.format(
                     Platform.getResourceString("Validate_TypeCheckError"),
@@ -3031,7 +3028,7 @@
                     typeof value);
             }
         };
-        
+
         exports.isNumber = function (value, name) {
             /// <summary>
             /// Ensure the value is a number.
@@ -3040,9 +3037,9 @@
             /// <param name="name" mayBeNull="true" optional="true" type="String">
             /// Optional name of the value to throw.
             /// </param>
-        
+
             exports.notNull(value, name);
-        
+
             if (!_.isNumber(value)) {
                 throw _.format(
                     Platform.getResourceString("Validate_TypeCheckError"),
@@ -3051,7 +3048,7 @@
                     typeof value);
             }
         };
-        
+
         exports.isValidParametersObject = function (value, name) {
             /// <summary>
             /// Ensure the Object instance of user-defined parameters is valid.
@@ -3060,10 +3057,10 @@
             /// <param name="name" mayBeNull="true" optional="true" type="String">
             /// Optional name of the value to throw.
             /// </param>
-        
+
             exports.notNull(value, name);
             exports.isObject(value, name);
-        
+
             for (var parameter in value) {
                 if (parameter.indexOf('$') === 0) {
                     throw _.format(
@@ -3073,7 +3070,7 @@
                 }
             }
         };
-        
+
         exports.isInteger = function (value, name) {
             /// <summary>
             /// Ensure the value is an integer.
@@ -3082,10 +3079,10 @@
             /// <param name="name" mayBeNull="true" optional="true" type="String">
             /// Optional name of the value to throw.
             /// </param>
-        
+
             exports.notNull(value, name);
             exports.isNumber(value, name);
-        
+
             if (parseInt(value, 10) !== parseFloat(value)) {
                 throw _.format(
                     Platform.getResourceString("Validate_TypeCheckError"),
@@ -3094,7 +3091,7 @@
                     typeof value);
             }
         };
-        
+
         exports.isString = function (value, name) {
             /// <summary>
             /// Ensure the value is a string.
@@ -3103,7 +3100,7 @@
             /// <param name="name" mayBeNull="true" optional="true" type="String">
             /// Optional name of the value to throw.
             /// </param>
-        
+
             if (!_.isString(value)) {
                 throw _.format(
                     Platform.getResourceString("Validate_TypeCheckError"),
@@ -3112,7 +3109,7 @@
                     typeof value);
             }
         };
-        
+
         exports.isObject = function (value, name) {
             /// <summary>
             /// Ensure the value is an Object.
@@ -3121,7 +3118,7 @@
             /// <param name="name" mayBeNull="true" optional="true" type="String">
             /// Optional name of the value to throw.
             /// </param>
-        
+
             if (!_.isObject(value)) {
                 throw _.format(
                     Platform.getResourceString("Validate_TypeCheckError"),
@@ -3130,7 +3127,7 @@
                     typeof value);
             }
         };
-        
+
         exports.isArray = function (value, name) {
             /// <summary>
             /// Ensure the value is an Array.
@@ -3139,7 +3136,7 @@
             /// <param name="name" mayBeNull="true" optional="true" type="String">
             /// Optional name of the value to throw.
             /// </param>
-        
+
             if (!Array.isArray(value)) {
                 throw _.format(
                     Platform.getResourceString("Validate_TypeCheckError"),
@@ -3148,7 +3145,7 @@
                     typeof value);
             }
         };
-        
+
         exports.length = function (value, length, name) {
             /// <summary>
             /// Ensure the value is of a given length.
@@ -3162,10 +3159,10 @@
             /// <param name="name" mayBeNull="true" optional="true" type="String">
             /// Optional name of the value to throw.
             /// </param>
-        
+
             exports.notNull(value, name);
             exports.isInteger(length, 'length');
-        
+
             if (value.length !== length) {
                 throw _.format(
                     Platform.getResourceString("Validate_LengthUnexpected"),
@@ -3178,158 +3175,158 @@
 
     $__modules__.JavaScript = function (exports) {
         // Generated by CoffeeScript 1.7.1
-        
+
         /*
          * ----------------------------------------------------------------------------
          * Copyright (c) Microsoft Corporation. All rights reserved.
          * ----------------------------------------------------------------------------
          */
-        
-        (function() {
-          var JS, JavaScript, JavaScriptToQueryVisitor, PartialEvaluator, esprima;
-        
-          esprima = require('esprima');
-        
-          JS = require('./JavaScriptNodes');
-        
-          PartialEvaluator = require('./PartialEvaluator').PartialEvaluator;
-        
-          JavaScriptToQueryVisitor = require('./JavaScriptToQueryVisitor').JavaScriptToQueryVisitor;
-        
-        
-          /*
-           * Define operations on JavaScript
-           */
-        
-          exports.JavaScript = JavaScript = (function() {
-            function JavaScript() {}
-        
-        
+
+        (function () {
+            var JS, JavaScript, JavaScriptToQueryVisitor, PartialEvaluator, esprima;
+
+            esprima = require('esprima');
+
+            JS = require('./JavaScriptNodes');
+
+            PartialEvaluator = require('./PartialEvaluator').PartialEvaluator;
+
+            JavaScriptToQueryVisitor = require('./JavaScriptToQueryVisitor').JavaScriptToQueryVisitor;
+
+
             /*
-             * Static method to transform a constraint specified as a function into
-             * a QueryExpression tree.
+             * Define operations on JavaScript
              */
-        
-            JavaScript.transformConstraint = function(func, env) {
-        
-              /*
-               * Parse the body of the function into a JavaScriptExpression tree
-               * (into a context that also contains its source and manually reified
-               * environment)
-               */
-              var context, translator;
-              context = JavaScript.getExpression(func, env);
-        
-              /*
-               * Evaluate any independent subexpressions and turn them into
-               * literals.
-               */
-              context.expression = PartialEvaluator.evaluate(context);
-        
-              /*
-               * Convert the JavaScriptExpression tree into a QueryExpression tree
-               */
-              translator = new JavaScriptToQueryVisitor(context);
-              return translator.visit(context.expression);
-            };
-        
-        
-            /*
-             * Static method to walk a projection specified as a function and
-             * determine which fields it uses.
-             */
-        
-            JavaScript.getProjectedFields = function(func) {
-        
-              /*
-               * This currently returns an empty array which indicates all fields.
-               * At some point we'll need to go through and walk the expression
-               * tree for func and see exactly which fields it uses.  This is
-               * complicated by the fact that we support arbitrary expressions and
-               * could for example pass 'this' to a nested lambda which means we
-               * can't just check for MemberExpressions (though in that case we'll
-               * probably just default to [] rather than trying to do alias
-               * analysis across function calls, etc.)
-               */
-              return [];
-            };
-        
-        
-            /*
-             * Turn a function and its explicitly passed environment into an
-             * expression tree
-             */
-        
-            JavaScript.getExpression = function(func, env) {
-        
-              /*
-               * An anonymous function isn't considered a valid program, so we'll wrap
-               * it in an assignment statement to keep the parser happy
-               */
-              var environment, expr, i, name, names, program, source, _i, _len, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
-              source = "var _$$_stmt_$$_ = " + func + ";";
-        
-              /*
-               * Use esprima to parse the source of the function body (and have it
-               * return source locations in character ranges )
-               */
-              program = esprima.parse(source, {
-                range: true
-              });
-        
-              /*
-               * Get the expression from return statement of the function body to use
-               * as our lambda expression
-               */
-              expr = (program != null ? program.type : void 0) === 'Program' && (program != null ? (_ref = program.body) != null ? _ref.length : void 0 : void 0) === 1 && ((_ref1 = program.body[0]) != null ? _ref1.type : void 0) === 'VariableDeclaration' && ((_ref2 = program.body[0]) != null ? (_ref3 = _ref2.declarations) != null ? _ref3.length : void 0 : void 0) === 1 && ((_ref4 = program.body[0].declarations[0]) != null ? _ref4.type : void 0) === 'VariableDeclarator' && ((_ref5 = program.body[0].declarations[0]) != null ? (_ref6 = _ref5.init) != null ? _ref6.type : void 0 : void 0) === 'FunctionExpression' && ((_ref7 = program.body[0].declarations[0].init) != null ? (_ref8 = _ref7.body) != null ? _ref8.type : void 0 : void 0) === 'BlockStatement' && ((_ref9 = program.body[0].declarations[0].init.body) != null ? (_ref10 = _ref9.body) != null ? _ref10.length : void 0 : void 0) === 1 && ((_ref11 = program.body[0].declarations[0].init.body.body[0]) != null ? _ref11.type : void 0) === 'ReturnStatement' && ((_ref12 = program.body[0].declarations[0].init.body.body[0]) != null ? _ref12.argument : void 0);
-              if (!expr) {
-                throw "Expected a predicate with a single return statement, not " + func;
-              }
-        
-              /*
-               * Create the environment mqpping parameters to values
-               */
-              names = (_ref13 = program.body[0].declarations[0].init.params) != null ? _ref13.map(function(p) {
-                return p.name;
-              }) : void 0;
-              if (names.length > env.length) {
-                throw "Expected value(s) for parameter(s) " + names.slice(env.length);
-              } else if (env.length > names.length) {
-                throw "Expected parameter(s) for value(s) " + env.slice(names.length);
-              }
-              environment = {};
-              for (i = _i = 0, _len = names.length; _i < _len; i = ++_i) {
-                name = names[i];
-                environment[name] = env[i];
-              }
-              return {
-        
+
+            exports.JavaScript = JavaScript = (function () {
+                function JavaScript() { }
+
+
                 /*
-                 * Return the environment context
+                 * Static method to transform a constraint specified as a function into
+                 * a QueryExpression tree.
                  */
-                source: source,
-                expression: expr,
-                environment: environment
-              };
-            };
-        
-            return JavaScript;
-        
-          })();
-        
+
+                JavaScript.transformConstraint = function (func, env) {
+
+                    /*
+                     * Parse the body of the function into a JavaScriptExpression tree
+                     * (into a context that also contains its source and manually reified
+                     * environment)
+                     */
+                    var context, translator;
+                    context = JavaScript.getExpression(func, env);
+
+                    /*
+                     * Evaluate any independent subexpressions and turn them into
+                     * literals.
+                     */
+                    context.expression = PartialEvaluator.evaluate(context);
+
+                    /*
+                     * Convert the JavaScriptExpression tree into a QueryExpression tree
+                     */
+                    translator = new JavaScriptToQueryVisitor(context);
+                    return translator.visit(context.expression);
+                };
+
+
+                /*
+                 * Static method to walk a projection specified as a function and
+                 * determine which fields it uses.
+                 */
+
+                JavaScript.getProjectedFields = function (func) {
+
+                    /*
+                     * This currently returns an empty array which indicates all fields.
+                     * At some point we'll need to go through and walk the expression
+                     * tree for func and see exactly which fields it uses.  This is
+                     * complicated by the fact that we support arbitrary expressions and
+                     * could for example pass 'this' to a nested lambda which means we
+                     * can't just check for MemberExpressions (though in that case we'll
+                     * probably just default to [] rather than trying to do alias
+                     * analysis across function calls, etc.)
+                     */
+                    return [];
+                };
+
+
+                /*
+                 * Turn a function and its explicitly passed environment into an
+                 * expression tree
+                 */
+
+                JavaScript.getExpression = function (func, env) {
+
+                    /*
+                     * An anonymous function isn't considered a valid program, so we'll wrap
+                     * it in an assignment statement to keep the parser happy
+                     */
+                    var environment, expr, i, name, names, program, source, _i, _len, _ref, _ref1, _ref10, _ref11, _ref12, _ref13, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8, _ref9;
+                    source = "var _$$_stmt_$$_ = " + func + ";";
+
+                    /*
+                     * Use esprima to parse the source of the function body (and have it
+                     * return source locations in character ranges )
+                     */
+                    program = esprima.parse(source, {
+                        range: true
+                    });
+
+                    /*
+                     * Get the expression from return statement of the function body to use
+                     * as our lambda expression
+                     */
+                    expr = (program != null ? program.type : void 0) === 'Program' && (program != null ? (_ref = program.body) != null ? _ref.length : void 0 : void 0) === 1 && ((_ref1 = program.body[0]) != null ? _ref1.type : void 0) === 'VariableDeclaration' && ((_ref2 = program.body[0]) != null ? (_ref3 = _ref2.declarations) != null ? _ref3.length : void 0 : void 0) === 1 && ((_ref4 = program.body[0].declarations[0]) != null ? _ref4.type : void 0) === 'VariableDeclarator' && ((_ref5 = program.body[0].declarations[0]) != null ? (_ref6 = _ref5.init) != null ? _ref6.type : void 0 : void 0) === 'FunctionExpression' && ((_ref7 = program.body[0].declarations[0].init) != null ? (_ref8 = _ref7.body) != null ? _ref8.type : void 0 : void 0) === 'BlockStatement' && ((_ref9 = program.body[0].declarations[0].init.body) != null ? (_ref10 = _ref9.body) != null ? _ref10.length : void 0 : void 0) === 1 && ((_ref11 = program.body[0].declarations[0].init.body.body[0]) != null ? _ref11.type : void 0) === 'ReturnStatement' && ((_ref12 = program.body[0].declarations[0].init.body.body[0]) != null ? _ref12.argument : void 0);
+                    if (!expr) {
+                        throw "Expected a predicate with a single return statement, not " + func;
+                    }
+
+                    /*
+                     * Create the environment mqpping parameters to values
+                     */
+                    names = (_ref13 = program.body[0].declarations[0].init.params) != null ? _ref13.map(function (p) {
+                        return p.name;
+                    }) : void 0;
+                    if (names.length > env.length) {
+                        throw "Expected value(s) for parameter(s) " + names.slice(env.length);
+                    } else if (env.length > names.length) {
+                        throw "Expected parameter(s) for value(s) " + env.slice(names.length);
+                    }
+                    environment = {};
+                    for (i = _i = 0, _len = names.length; _i < _len; i = ++_i) {
+                        name = names[i];
+                        environment[name] = env[i];
+                    }
+                    return {
+
+                        /*
+                         * Return the environment context
+                         */
+                        source: source,
+                        expression: expr,
+                        environment: environment
+                    };
+                };
+
+                return JavaScript;
+
+            })();
+
         }).call(this);
     };
 
     $__modules__.JavaScriptNodes = function (exports) {
         // Generated by CoffeeScript 1.7.1
-        
+
         /*
          * ----------------------------------------------------------------------------
          * Copyright (c) Microsoft Corporation. All rights reserved.
          * ----------------------------------------------------------------------------
          */
-        
-        
+
+
         /*
          * Define the Esprima node structure for JavaScript parse trees.  This is mostly
          * identical to the SpiderMonkey API defined at
@@ -3341,3078 +3338,3078 @@
          * and not instances of these types.  They're provided primarily for reference
          * and for easily constructing new subtrees during transformations by visitors.
          */
-        
-        
+
+
         /* Get the base Node and Visitor classes. */
-        
-        (function() {
-          var ArrayExpression, ArrayPattern, AssignmentExpression, BinaryExpression, BlockStatement, BreakStatement, CallExpression, CatchClause, ConditionalExpression, ContinueStatement, DebuggerStatement, Declaration, DoWhileStatement, EmptyStatement, Expression, ExpressionStatement, ForInStatement, ForStatement, Function, FunctionDeclaration, FunctionExpression, Identifier, IfStatement, JavaScriptNode, JavaScriptVisitor, LabeledStatement, Literal, LogicalExpression, MemberExpression, NewExpression, Node, ObjectExpression, ObjectPattern, Pattern, Program, ReturnStatement, SequenceExpression, Statement, SwitchCase, SwitchStatement, ThisExpression, ThrowStatement, TryStatement, UnaryExpression, UpdateExpression, VariableDeclaration, VariableDeclarator, Visitor, WhileStatement, WithStatement, _ref,
-            __hasProp = {}.hasOwnProperty,
-            __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-        
-          _ref = require('./Node'), Node = _ref.Node, Visitor = _ref.Visitor;
-        
-        
-          /*
-           * Base node for all JavaScript nodes.
-           */
-        
-          exports.JavaScriptNode = JavaScriptNode = (function(_super) {
-            __extends(JavaScriptNode, _super);
-        
-            function JavaScriptNode() {
-              JavaScriptNode.__super__.constructor.call(this);
-            }
-        
-            return JavaScriptNode;
-        
-          })(Node);
-        
-        
-          /*
-           * Base visitor for all JavaScript nodes.
-           */
-        
-          exports.JavaScriptVisitor = JavaScriptVisitor = (function(_super) {
-            __extends(JavaScriptVisitor, _super);
-        
-            function JavaScriptVisitor() {
-              JavaScriptVisitor.__super__.constructor.call(this);
-            }
-        
-            JavaScriptVisitor.prototype.JavaScriptNode = function(node) {
-              return node;
+
+        (function () {
+            var ArrayExpression, ArrayPattern, AssignmentExpression, BinaryExpression, BlockStatement, BreakStatement, CallExpression, CatchClause, ConditionalExpression, ContinueStatement, DebuggerStatement, Declaration, DoWhileStatement, EmptyStatement, Expression, ExpressionStatement, ForInStatement, ForStatement, Function, FunctionDeclaration, FunctionExpression, Identifier, IfStatement, JavaScriptNode, JavaScriptVisitor, LabeledStatement, Literal, LogicalExpression, MemberExpression, NewExpression, Node, ObjectExpression, ObjectPattern, Pattern, Program, ReturnStatement, SequenceExpression, Statement, SwitchCase, SwitchStatement, ThisExpression, ThrowStatement, TryStatement, UnaryExpression, UpdateExpression, VariableDeclaration, VariableDeclarator, Visitor, WhileStatement, WithStatement, _ref,
+              __hasProp = {}.hasOwnProperty,
+              __extends = function (child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+            _ref = require('./Node'), Node = _ref.Node, Visitor = _ref.Visitor;
+
+
+            /*
+             * Base node for all JavaScript nodes.
+             */
+
+            exports.JavaScriptNode = JavaScriptNode = (function (_super) {
+                __extends(JavaScriptNode, _super);
+
+                function JavaScriptNode() {
+                    JavaScriptNode.__super__.constructor.call(this);
+                }
+
+                return JavaScriptNode;
+
+            })(Node);
+
+
+            /*
+             * Base visitor for all JavaScript nodes.
+             */
+
+            exports.JavaScriptVisitor = JavaScriptVisitor = (function (_super) {
+                __extends(JavaScriptVisitor, _super);
+
+                function JavaScriptVisitor() {
+                    JavaScriptVisitor.__super__.constructor.call(this);
+                }
+
+                JavaScriptVisitor.prototype.JavaScriptNode = function (node) {
+                    return node;
+                };
+
+                return JavaScriptVisitor;
+
+            })(Visitor);
+
+
+            /*
+             * A complete program source tree.
+             */
+
+            exports.Program = Program = (function (_super) {
+                __extends(Program, _super);
+
+
+                /*
+                 * @elements: [Statement]
+                 */
+
+                function Program(elements) {
+                    this.elements = elements;
+                    Program.__super__.constructor.call(this);
+                }
+
+                return Program;
+
+            })(JavaScriptNode);
+
+            JavaScriptVisitor.prototype.Program = function (node) {
+                node = this.JavaScriptNode(node);
+                node.elements = this.visit(node.elements);
+                return node;
             };
-        
-            return JavaScriptVisitor;
-        
-          })(Visitor);
-        
-        
-          /*
-           * A complete program source tree.
-           */
-        
-          exports.Program = Program = (function(_super) {
-            __extends(Program, _super);
-        
-        
+
+
             /*
-             * @elements: [Statement]
+             * A function declaration or expression. The body of the function is a  block
+             * statement.
              */
-        
-            function Program(elements) {
-              this.elements = elements;
-              Program.__super__.constructor.call(this);
-            }
-        
-            return Program;
-        
-          })(JavaScriptNode);
-        
-          JavaScriptVisitor.prototype.Program = function(node) {
-            node = this.JavaScriptNode(node);
-            node.elements = this.visit(node.elements);
-            return node;
-          };
-        
-        
-          /*
-           * A function declaration or expression. The body of the function is a  block
-           * statement.
-           */
-        
-          exports.Function = Function = (function(_super) {
-            __extends(Function, _super);
-        
-        
-            /*
-             * @id: Identifier | null
-             * @params: [Pattern]
-             * @body: BlockStatement
-             */
-        
-            function Function(id, params, body) {
-              this.id = id;
-              this.params = params;
-              this.body = body;
-              Function.__super__.constructor.call(this);
-            }
-        
-            return Function;
-        
-          })(JavaScriptNode);
-        
-          JavaScriptVisitor.prototype.Function = function(node) {
-            node = this.JavaScriptNode(node);
-            node.id = this.visit(node.id);
-            node.params = this.visit(node.params);
-            node.body = this.visit(node.body);
-            return node;
-          };
-        
-        
-          /*
-           * Any statement.
-           */
-        
-          exports.Statement = Statement = (function(_super) {
-            __extends(Statement, _super);
-        
-            function Statement() {
-              Statement.__super__.constructor.call(this);
-            }
-        
-            return Statement;
-        
-          })(JavaScriptNode);
-        
-          JavaScriptVisitor.prototype.Statement = function(node) {
-            node = this.JavaScriptNode(node);
-            return node;
-          };
-        
-        
-          /*
-           * An empty statement, i.e., a solitary semicolon.
-           */
-        
-          exports.EmptyStatement = EmptyStatement = (function(_super) {
-            __extends(EmptyStatement, _super);
-        
-            function EmptyStatement() {
-              EmptyStatement.__super__.constructor.call(this);
-            }
-        
-            return EmptyStatement;
-        
-          })(JavaScriptNode);
-        
-          JavaScriptVisitor.prototype.EmptyStatement = function(node) {
-            node = this.JavaScriptNode(node);
-            return node;
-          };
-        
-        
-          /*
-           * A block statement, i.e., a sequence of statements surrounded by braces.
-           */
-        
-          exports.BlockStatement = BlockStatement = (function(_super) {
-            __extends(BlockStatement, _super);
-        
-        
-            /*
-             * @body: [Statement]
-             */
-        
-            function BlockStatement(body) {
-              this.body = body;
-              BlockStatement.__super__.constructor.call(this);
-            }
-        
-            return BlockStatement;
-        
-          })(Statement);
-        
-          JavaScriptVisitor.prototype.BlockStatement = function(node) {
-            node = this.Statement(node);
-            node.body = this.visit(node.body);
-            return node;
-          };
-        
-        
-          /*
-           * An expression statement, i.e., a statement consisting of a single expression.
-           */
-        
-          exports.ExpressionStatement = ExpressionStatement = (function(_super) {
-            __extends(ExpressionStatement, _super);
-        
-            function ExpressionStatement() {
-              ExpressionStatement.__super__.constructor.call(this);
-            }
-        
-            return ExpressionStatement;
-        
-          })(Statement);
-        
-          JavaScriptVisitor.prototype.ExpressionStatement = function(node) {
-            node = this.Statement(node);
-            return node;
-          };
-        
-        
-          /*
-           * An if statement.
-           */
-        
-          exports.IfStatement = IfStatement = (function(_super) {
-            __extends(IfStatement, _super);
-        
-        
-            /*
-             * @test: Expression
-             * @consequent: Statement
-             * @alternate: Statement | null
-             */
-        
-            function IfStatement(test, consequent, alternate) {
-              this.test = test;
-              this.consequent = consequent;
-              this.alternate = alternate;
-              IfStatement.__super__.constructor.call(this);
-            }
-        
-            return IfStatement;
-        
-          })(Statement);
-        
-          JavaScriptVisitor.prototype.IfStatement = function(node) {
-            node = this.Statement(node);
-            node.test = this.visit(node.test);
-            node.consequent = this.visit(node.consequent);
-            node.alternate = this.visit(node.alternate);
-            return node;
-          };
-        
-        
-          /*
-           * A labeled statement, i.e., a statement prefixed by a break/continue label.
-           */
-        
-          exports.LabeledStatement = LabeledStatement = (function(_super) {
-            __extends(LabeledStatement, _super);
-        
-        
-            /*
-             * @label: Identifier
-             * @body: Statement
-             */
-        
-            function LabeledStatement(label, body) {
-              this.label = label;
-              this.body = body;
-              LabeledStatement.__super__.constructor.call(this);
-            }
-        
-            return LabeledStatement;
-        
-          })(Statement);
-        
-          JavaScriptVisitor.prototype.LabeledStatement = function(node) {
-            node = this.Statement(node);
-            node.label = this.visit(node.label);
-            node.body = this.visit(node.body);
-            return node;
-          };
-        
-        
-          /*
-           * A break statement.
-           */
-        
-          exports.BreakStatement = BreakStatement = (function(_super) {
-            __extends(BreakStatement, _super);
-        
-        
-            /*
-             * @label: Identifier | null
-             */
-        
-            function BreakStatement(label) {
-              this.label = label;
-              BreakStatement.__super__.constructor.call(this);
-            }
-        
-            return BreakStatement;
-        
-          })(Statement);
-        
-          JavaScriptVisitor.prototype.BreakStatement = function(node) {
-            node = this.Statement(node);
-            node.label = this.visit(node.label);
-            return node;
-          };
-        
-        
-          /*
-          A continue statement.
-           */
-        
-          exports.ContinueStatement = ContinueStatement = (function(_super) {
-            __extends(ContinueStatement, _super);
-        
-        
-            /*
-            @label: Identifier | null
-             */
-        
-            function ContinueStatement(label) {
-              this.label = label;
-              ContinueStatement.__super__.constructor.call(this);
-            }
-        
-            return ContinueStatement;
-        
-          })(Statement);
-        
-          JavaScriptVisitor.prototype.ContinueStatement = function(node) {
-            node = this.Statement(node);
-            node.label = this.visit(node.label);
-            return node;
-          };
-        
-        
-          /*
-           * A with statement.
-           */
-        
-          exports.WithStatement = WithStatement = (function(_super) {
-            __extends(WithStatement, _super);
-        
-        
-            /*
-             * @object: Expression
-             * @body: Statement
-             */
-        
-            function WithStatement(object, body) {
-              this.object = object;
-              this.body = body;
-              WithStatement.__super__.constructor.call(this);
-            }
-        
-            return WithStatement;
-        
-          })(Statement);
-        
-          JavaScriptVisitor.prototype.WithStatement = function(node) {
-            node = this.Statement(node);
-            node.object = this.visit(node.object);
-            node.body = this.visit(node.body);
-            return node;
-          };
-        
-        
-          /*
-           * A switch statement.
-           */
-        
-          exports.SwitchStatement = SwitchStatement = (function(_super) {
-            __extends(SwitchStatement, _super);
-        
-        
-            /*
-             * @discriminant: Expression
-             * @cases: [SwitchCase]
-             */
-        
-            function SwitchStatement(discriminant, cases) {
-              this.discriminant = discriminant;
-              this.cases = cases;
-              SwitchStatement.__super__.constructor.call(this);
-            }
-        
-            return SwitchStatement;
-        
-          })(Statement);
-        
-          JavaScriptVisitor.prototype.SwitchStatement = function(node) {
-            node = this.Statement(node);
-            node.discriminant = this.visit(node.discriminant);
-            node.cases = this.visit(node.cases);
-            return node;
-          };
-        
-        
-          /*
-           * A return statement.
-           */
-        
-          exports.ReturnStatement = ReturnStatement = (function(_super) {
-            __extends(ReturnStatement, _super);
-        
-        
-            /*
-             * @argument: Expression | null
-             */
-        
-            function ReturnStatement(argument) {
-              this.argument = argument;
-              ReturnStatement.__super__.constructor.call(this);
-            }
-        
-            return ReturnStatement;
-        
-          })(Statement);
-        
-          JavaScriptVisitor.prototype.ReturnStatement = function(node) {
-            node = this.Statement(node);
-            node.argument = this.visit(node.argument);
-            return node;
-          };
-        
-        
-          /*
-           * A throw statement.
-           */
-        
-          exports.ThrowStatement = ThrowStatement = (function(_super) {
-            __extends(ThrowStatement, _super);
-        
-        
-            /*
-             * @argument: Expression
-             */
-        
-            function ThrowStatement(argument) {
-              this.argument = argument;
-              ThrowStatement.__super__.constructor.call(this);
-            }
-        
-            return ThrowStatement;
-        
-          })(Statement);
-        
-          JavaScriptVisitor.prototype.ThrowStatement = function(node) {
-            node = this.Statement(node);
-            node.argument = this.visit(node.argument);
-            return node;
-          };
-        
-        
-          /*
-           * A try statement.
-           */
-        
-          exports.TryStatement = TryStatement = (function(_super) {
-            __extends(TryStatement, _super);
-        
-        
-            /*
-             * @block: BlockStatement
-             * @handlers: [CatchClause]
-             * @finalizer: BlockStatement | null
-             */
-        
-            function TryStatement(block, handlers, finalizer) {
-              this.block = block;
-              this.handlers = handlers;
-              this.finalizer = finalizer;
-              TryStatement.__super__.constructor.call(this);
-            }
-        
-            return TryStatement;
-        
-          })(Statement);
-        
-          JavaScriptVisitor.prototype.TryStatement = function(node) {
-            node = this.Statement(node);
-            node.block = this.visit(node.block);
-            node.handlers = this.visit(node.handlers);
-            node.finalizer = this.visit(node.finalizer);
-            return node;
-          };
-        
-        
-          /*
-           * A while statement.
-           */
-        
-          exports.WhileStatement = WhileStatement = (function(_super) {
-            __extends(WhileStatement, _super);
-        
-        
-            /*
-             * @test: Expression
-             * @body: Statement
-             */
-        
-            function WhileStatement(test, body) {
-              this.test = test;
-              this.body = body;
-              WhileStatement.__super__.constructor.call(this);
-            }
-        
-            return WhileStatement;
-        
-          })(Statement);
-        
-          JavaScriptVisitor.prototype.WhileStatement = function(node) {
-            node = this.Statement(node);
-            node.test = this.visit(node.test);
-            node.body = this.visit(node.body);
-            return node;
-          };
-        
-        
-          /*
-           * A do/while statement.
-           */
-        
-          exports.DoWhileStatement = DoWhileStatement = (function(_super) {
-            __extends(DoWhileStatement, _super);
-        
-        
-            /*
-             * @body: Statement
-             * @test: Expression
-             */
-        
-            function DoWhileStatement(body, test) {
-              this.body = body;
-              this.test = test;
-              DoWhileStatement.__super__.constructor.call(this);
-            }
-        
-            return DoWhileStatement;
-        
-          })(Statement);
-        
-          JavaScriptVisitor.prototype.DoWhileStatement = function(node) {
-            node = this.Statement(node);
-            node.body = this.visit(node.body);
-            node.test = this.visit(node.test);
-            return node;
-          };
-        
-        
-          /*
-           * A for statement.
-           */
-        
-          exports.ForStatement = ForStatement = (function(_super) {
-            __extends(ForStatement, _super);
-        
-        
-            /*
-             * @init: VariableDeclaration | Expression | null
-             * @test: Expression | null
-             * @update: Expression | null
-             * @body: Statement
-             */
-        
-            function ForStatement(init, test, update, body) {
-              this.init = init;
-              this.test = test;
-              this.update = update;
-              this.body = body;
-              ForStatement.__super__.constructor.call(this);
-            }
-        
-            return ForStatement;
-        
-          })(Statement);
-        
-          JavaScriptVisitor.prototype.ForStatement = function(node) {
-            node = this.Statement(node);
-            node.init = this.visit(node.init);
-            node.test = this.visit(node.test);
-            node.update = this.visit(node.update);
-            node.body = this.visit(node.body);
-            return node;
-          };
-        
-        
-          /*
-           * A for/in statement, or, if each is true, a for each/in statement.
-           */
-        
-          exports.ForInStatement = ForInStatement = (function(_super) {
-            __extends(ForInStatement, _super);
-        
-        
-            /*
-             * @left: VariableDeclaration |  Expression
-             * @right: Expression
-             * @body: Statement
-             */
-        
-            function ForInStatement(left, right, body) {
-              this.left = left;
-              this.right = right;
-              this.body = body;
-              ForInStatement.__super__.constructor.call(this);
-            }
-        
-            return ForInStatement;
-        
-          })(Statement);
-        
-          JavaScriptVisitor.prototype.ForInStatement = function(node) {
-            node = this.Statement(node);
-            node.left = this.visit(node.left);
-            node.right = this.visit(node.right);
-            node.body = this.visit(node.body);
-            return node;
-          };
-        
-        
-          /*
-           * A debugger statement.
-           */
-        
-          exports.DebuggerStatement = DebuggerStatement = (function(_super) {
-            __extends(DebuggerStatement, _super);
-        
-            function DebuggerStatement() {
-              DebuggerStatement.__super__.constructor.call(this);
-            }
-        
-            return DebuggerStatement;
-        
-          })(Statement);
-        
-          JavaScriptVisitor.prototype.DebuggerStatement = function(node) {
-            node = this.Statement(node);
-            return node;
-          };
-        
-        
-          /*
-           * Any declaration node. Note that declarations are considered statements; this
-           * is because declarations can appear in any statement context in the language.
-           */
-        
-          exports.Declaration = Declaration = (function(_super) {
-            __extends(Declaration, _super);
-        
-            function Declaration() {
-              Declaration.__super__.constructor.call(this);
-            }
-        
-            return Declaration;
-        
-          })(Statement);
-        
-          JavaScriptVisitor.prototype.Declaration = function(node) {
-            node = this.Statement(node);
-            return node;
-          };
-        
-        
-          /*
-           * A function declaration.  Note: The id field cannot be null.
-           */
-        
-          exports.FunctionDeclaration = FunctionDeclaration = (function(_super) {
-            __extends(FunctionDeclaration, _super);
-        
-        
-            /*
-             * @id: Identifier
-             * @params: [ Pattern ]
-             * @body: BlockStatement | Expression
-             */
-        
-            function FunctionDeclaration(id, params, body) {
-              this.id = id;
-              this.params = params;
-              this.body = body;
-              FunctionDeclaration.__super__.constructor.call(this);
-            }
-        
-            return FunctionDeclaration;
-        
-          })(Declaration);
-        
-          JavaScriptVisitor.prototype.FunctionDeclaration = function(node) {
-            node = this.Declaration(node);
-            node.id = this.visit(node.id);
-            node.params = this.visit(node.params);
-            node.body = this.visit(node.body);
-            return node;
-          };
-        
-        
-          /*
-           * A variable declaration, via one of var, let, or const.
-           */
-        
-          exports.VariableDeclaration = VariableDeclaration = (function(_super) {
-            __extends(VariableDeclaration, _super);
-        
-        
-            /*
-             * @declarations: [ VariableDeclarator ]
-             * @kind: "var"
-             */
-        
-            function VariableDeclaration(declarations, kind) {
-              this.declarations = declarations;
-              this.kind = kind;
-              VariableDeclaration.__super__.constructor.call(this);
-            }
-        
-            return VariableDeclaration;
-        
-          })(Declaration);
-        
-          JavaScriptVisitor.prototype.VariableDeclaration = function(node) {
-            node = this.Declaration(node);
-            node.declarations = this.visit(node.declarations);
-            return node;
-          };
-        
-        
-          /*
-           * A variable declarator.  Note: The id field cannot be null.
-           */
-        
-          exports.VariableDeclarator = VariableDeclarator = (function(_super) {
-            __extends(VariableDeclarator, _super);
-        
-        
-            /*
-             * @id: Pattern
-             * @init: Expression | null
-             */
-        
-            function VariableDeclarator(id, init) {
-              this.id = id;
-              this.init = init;
-              VariableDeclarator.__super__.constructor.call(this);
-            }
-        
-            return VariableDeclarator;
-        
-          })(JavaScriptNode);
-        
-          JavaScriptVisitor.prototype.VariableDeclarator = function(node) {
-            node = this.JavaScriptNode(node);
-            node.id = this.visit(node.id);
-            node.init = this.visit(node.init);
-            return node;
-          };
-        
-        
-          /*
-           * Any expression node. Since the left-hand side of an assignment may be any
-           * expression in general, an expression can also be a pattern.
-           */
-        
-          exports.Expression = Expression = (function(_super) {
-            __extends(Expression, _super);
-        
-            function Expression() {
-              return Expression.__super__.constructor.apply(this, arguments);
-            }
-        
-            Expression.prototype.constuctor = function() {
-              return Expression.__super__.constuctor.call(this);
+
+            exports.Function = Function = (function (_super) {
+                __extends(Function, _super);
+
+
+                /*
+                 * @id: Identifier | null
+                 * @params: [Pattern]
+                 * @body: BlockStatement
+                 */
+
+                function Function(id, params, body) {
+                    this.id = id;
+                    this.params = params;
+                    this.body = body;
+                    Function.__super__.constructor.call(this);
+                }
+
+                return Function;
+
+            })(JavaScriptNode);
+
+            JavaScriptVisitor.prototype.Function = function (node) {
+                node = this.JavaScriptNode(node);
+                node.id = this.visit(node.id);
+                node.params = this.visit(node.params);
+                node.body = this.visit(node.body);
+                return node;
             };
-        
-            return Expression;
-        
-          })(JavaScriptNode);
-        
-          JavaScriptVisitor.prototype.Expression = function(node) {
-            node = this.JavaScriptNode(node);
-            return node;
-          };
-        
-        
-          /*
-           * A this expression.
-           */
-        
-          exports.ThisExpression = ThisExpression = (function(_super) {
-            __extends(ThisExpression, _super);
-        
-            function ThisExpression() {
-              ThisExpression.__super__.constructor.call(this);
-            }
-        
-            return ThisExpression;
-        
-          })(Expression);
-        
-          JavaScriptVisitor.prototype.ThisExpression = function(node) {
-            node = this.Expression(node);
-            return node;
-          };
-        
-        
-          /*
-           * An array expression.
-           */
-        
-          exports.ArrayExpression = ArrayExpression = (function(_super) {
-            __extends(ArrayExpression, _super);
-        
-        
+
+
             /*
-             * @elements: [ Expression | null ]
+             * Any statement.
              */
-        
-            function ArrayExpression(elements) {
-              this.elements = elements;
-              ArrayExpression.__super__.constructor.call(this);
-            }
-        
-            return ArrayExpression;
-        
-          })(Expression);
-        
-          JavaScriptVisitor.prototype.ArrayExpression = function(node) {
-            node = this.Expression(node);
-            node.elements = this.visit(node.elements);
-            return node;
-          };
-        
-        
-          /*
-           * An object expression. A literal property in an object expression can have
-           * either a string or number as its value.  Ordinary property initializers have a
-           * kind value "init"; getters and setters have the kind values "get" and "set",
-           * respectively.
-           */
-        
-          exports.ObjectExpression = ObjectExpression = (function(_super) {
-            __extends(ObjectExpression, _super);
-        
-        
+
+            exports.Statement = Statement = (function (_super) {
+                __extends(Statement, _super);
+
+                function Statement() {
+                    Statement.__super__.constructor.call(this);
+                }
+
+                return Statement;
+
+            })(JavaScriptNode);
+
+            JavaScriptVisitor.prototype.Statement = function (node) {
+                node = this.JavaScriptNode(node);
+                return node;
+            };
+
+
             /*
-             * @properties: [ { key: Literal | Identifier,
-             *                 value: Expression,
-             *                 kind: "init" | "get" | "set" } ];
+             * An empty statement, i.e., a solitary semicolon.
              */
-        
-            function ObjectExpression(properties) {
-              this.properties = properties;
-              ObjectExpression.__super__.constructor.call(this);
-            }
-        
-            return ObjectExpression;
-        
-          })(Expression);
-        
-          JavaScriptVisitor.prototype.ObjectExpression = function(node) {
-            var setter, _i, _len, _ref1;
-            node = this.Expression(node);
-            _ref1 = node.properties;
-            for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-              setter = _ref1[_i];
-              setter.key = this.visit(setter.key);
-              setter.value = this.visit(setter.value);
-            }
-            return node;
-          };
-        
-        
-          /*
-           * A function expression.
-           */
-        
-          exports.FunctionExpression = FunctionExpression = (function(_super) {
-            __extends(FunctionExpression, _super);
-        
-        
+
+            exports.EmptyStatement = EmptyStatement = (function (_super) {
+                __extends(EmptyStatement, _super);
+
+                function EmptyStatement() {
+                    EmptyStatement.__super__.constructor.call(this);
+                }
+
+                return EmptyStatement;
+
+            })(JavaScriptNode);
+
+            JavaScriptVisitor.prototype.EmptyStatement = function (node) {
+                node = this.JavaScriptNode(node);
+                return node;
+            };
+
+
             /*
-             * @id: Identifier | null
-             * @params: [ Pattern ]
-             * @body: BlockStatement | Expression
+             * A block statement, i.e., a sequence of statements surrounded by braces.
              */
-        
-            function FunctionExpression(id, params, body) {
-              this.id = id;
-              this.params = params;
-              this.body = body;
-              FunctionExpression.__super__.constructor.call(this);
-            }
-        
-            return FunctionExpression;
-        
-          })(Expression);
-        
-          JavaScriptVisitor.prototype.FunctionExpression = function(node) {
-            node = this.Expression(node);
-            node.id = this.visit(node.id);
-            node.params = this.visit(node.params);
-            node.body = this.visit(node.body);
-            return node;
-          };
-        
-        
-          /*
-           * A sequence expression, i.e., a comma-separated sequence of expressions.
-           */
-        
-          exports.SequenceExpression = SequenceExpression = (function(_super) {
-            __extends(SequenceExpression, _super);
-        
-        
+
+            exports.BlockStatement = BlockStatement = (function (_super) {
+                __extends(BlockStatement, _super);
+
+
+                /*
+                 * @body: [Statement]
+                 */
+
+                function BlockStatement(body) {
+                    this.body = body;
+                    BlockStatement.__super__.constructor.call(this);
+                }
+
+                return BlockStatement;
+
+            })(Statement);
+
+            JavaScriptVisitor.prototype.BlockStatement = function (node) {
+                node = this.Statement(node);
+                node.body = this.visit(node.body);
+                return node;
+            };
+
+
             /*
-             * @expressions: [ Expression ]
+             * An expression statement, i.e., a statement consisting of a single expression.
              */
-        
-            function SequenceExpression(expressions) {
-              this.expressions = expressions;
-              SequenceExpression.__super__.constructor.call(this);
-            }
-        
-            return SequenceExpression;
-        
-          })(Expression);
-        
-          JavaScriptVisitor.prototype.SequenceExpression = function(node) {
-            node = this.Expression(node);
-            node.expressions = this.visit(node.expressions);
-            return node;
-          };
-        
-        
-          /*
-           * A unary operator expression.
-           */
-        
-          exports.UnaryExpression = UnaryExpression = (function(_super) {
-            __extends(UnaryExpression, _super);
-        
-        
+
+            exports.ExpressionStatement = ExpressionStatement = (function (_super) {
+                __extends(ExpressionStatement, _super);
+
+                function ExpressionStatement() {
+                    ExpressionStatement.__super__.constructor.call(this);
+                }
+
+                return ExpressionStatement;
+
+            })(Statement);
+
+            JavaScriptVisitor.prototype.ExpressionStatement = function (node) {
+                node = this.Statement(node);
+                return node;
+            };
+
+
             /*
-             * @operator: "-" | "+" | "!" | "~" | "typeof" | "void" | "delete"
-             * @prefix: boolean
-             * @argument: Expression
+             * An if statement.
              */
-        
-            function UnaryExpression(operator, prefix, argument) {
-              this.operator = operator;
-              this.prefix = prefix;
-              this.argument = argument;
-              UnaryExpression.__super__.constructor.call(this);
-            }
-        
-            return UnaryExpression;
-        
-          })(Expression);
-        
-          JavaScriptVisitor.prototype.UnaryExpression = function(node) {
-            node = this.Expression(node);
-            node.argument = this.visit(node.argument);
-            return node;
-          };
-        
-        
-          /*
-           * A binary operator expression.
-           */
-        
-          exports.BinaryExpression = BinaryExpression = (function(_super) {
-            __extends(BinaryExpression, _super);
-        
-        
+
+            exports.IfStatement = IfStatement = (function (_super) {
+                __extends(IfStatement, _super);
+
+
+                /*
+                 * @test: Expression
+                 * @consequent: Statement
+                 * @alternate: Statement | null
+                 */
+
+                function IfStatement(test, consequent, alternate) {
+                    this.test = test;
+                    this.consequent = consequent;
+                    this.alternate = alternate;
+                    IfStatement.__super__.constructor.call(this);
+                }
+
+                return IfStatement;
+
+            })(Statement);
+
+            JavaScriptVisitor.prototype.IfStatement = function (node) {
+                node = this.Statement(node);
+                node.test = this.visit(node.test);
+                node.consequent = this.visit(node.consequent);
+                node.alternate = this.visit(node.alternate);
+                return node;
+            };
+
+
             /*
-             * @operator: "==" | "!=" | "===" | "!==" | "<" | "<=" | ">" | ">="
-             *     | "<<" | ">>" | ">>>" | "+" | "-" | "*" | "/" | "%"
-             *     | "|" | "&" | "^" | "in" | "instanceof" | ".."
-             * @left: Expression
-             * @right: Expression
+             * A labeled statement, i.e., a statement prefixed by a break/continue label.
              */
-        
-            function BinaryExpression(operator, left, right) {
-              this.operator = operator;
-              this.left = left;
-              this.right = right;
-              BinaryExpression.__super__.constructor.call(this);
-            }
-        
-            return BinaryExpression;
-        
-          })(Expression);
-        
-          JavaScriptVisitor.prototype.BinaryExpression = function(node) {
-            node = this.Expression(node);
-            node.left = this.visit(node.left);
-            node.right = this.visit(node.right);
-            return node;
-          };
-        
-        
-          /*
-           * An assignment operator expression.
-           */
-        
-          exports.AssignmentExpression = AssignmentExpression = (function(_super) {
-            __extends(AssignmentExpression, _super);
-        
-        
+
+            exports.LabeledStatement = LabeledStatement = (function (_super) {
+                __extends(LabeledStatement, _super);
+
+
+                /*
+                 * @label: Identifier
+                 * @body: Statement
+                 */
+
+                function LabeledStatement(label, body) {
+                    this.label = label;
+                    this.body = body;
+                    LabeledStatement.__super__.constructor.call(this);
+                }
+
+                return LabeledStatement;
+
+            })(Statement);
+
+            JavaScriptVisitor.prototype.LabeledStatement = function (node) {
+                node = this.Statement(node);
+                node.label = this.visit(node.label);
+                node.body = this.visit(node.body);
+                return node;
+            };
+
+
             /*
-             * @operator: "=" | "+=" | "-=" | "*=" | "/=" | "%="
-             *     | "<<=" | ">>=" | ">>>=" | "|=" | "^=" | "&=";
-             * @left: Expression
-             * @right: Expression
+             * A break statement.
              */
-        
-            function AssignmentExpression(operator, left, right) {
-              this.operator = operator;
-              this.left = left;
-              this.right = right;
-              AssignmentExpression.__super__.constructor.call(this);
-            }
-        
-            return AssignmentExpression;
-        
-          })(Expression);
-        
-          JavaScriptVisitor.prototype.AssignmentExpression = function(node) {
-            node = this.Expression(node);
-            node.left = this.visit(node.left);
-            node.right = this.visit(node.right);
-            return node;
-          };
-        
-        
-          /*
-           * An update (increment or decrement) operator expression.
-           */
-        
-          exports.UpdateExpression = UpdateExpression = (function(_super) {
-            __extends(UpdateExpression, _super);
-        
-        
+
+            exports.BreakStatement = BreakStatement = (function (_super) {
+                __extends(BreakStatement, _super);
+
+
+                /*
+                 * @label: Identifier | null
+                 */
+
+                function BreakStatement(label) {
+                    this.label = label;
+                    BreakStatement.__super__.constructor.call(this);
+                }
+
+                return BreakStatement;
+
+            })(Statement);
+
+            JavaScriptVisitor.prototype.BreakStatement = function (node) {
+                node = this.Statement(node);
+                node.label = this.visit(node.label);
+                return node;
+            };
+
+
             /*
-             * @operator: "++" | "--"
-             * @argument: Expression
-             * @prefix: boolean
+            A continue statement.
              */
-        
-            function UpdateExpression(operator, argument, prefix) {
-              this.operator = operator;
-              this.argument = argument;
-              this.prefix = prefix;
-              UpdateExpression.__super__.constructor.call(this);
-            }
-        
-            return UpdateExpression;
-        
-          })(Expression);
-        
-          JavaScriptVisitor.prototype.UpdateExpression = function(node) {
-            node = this.Expression(node);
-            node.argument = this.visit(node.argument);
-            return node;
-          };
-        
-        
-          /*
-           * A logical operator expression.
-           */
-        
-          exports.LogicalExpression = LogicalExpression = (function(_super) {
-            __extends(LogicalExpression, _super);
-        
-        
+
+            exports.ContinueStatement = ContinueStatement = (function (_super) {
+                __extends(ContinueStatement, _super);
+
+
+                /*
+                @label: Identifier | null
+                 */
+
+                function ContinueStatement(label) {
+                    this.label = label;
+                    ContinueStatement.__super__.constructor.call(this);
+                }
+
+                return ContinueStatement;
+
+            })(Statement);
+
+            JavaScriptVisitor.prototype.ContinueStatement = function (node) {
+                node = this.Statement(node);
+                node.label = this.visit(node.label);
+                return node;
+            };
+
+
             /*
-             * @operator: "||" | "&&"
-             * @left: Expression
-             * @right: Expression
+             * A with statement.
              */
-        
-            function LogicalExpression(operator, left, right) {
-              this.operator = operator;
-              this.left = left;
-              this.right = right;
-              LogicalExpression.__super__.constructor.call(this);
-            }
-        
-            return LogicalExpression;
-        
-          })(Expression);
-        
-          JavaScriptVisitor.prototype.LogicalExpression = function(node) {
-            node = this.Expression(node);
-            node.left = this.visit(node.left);
-            node.right = this.visit(node.right);
-            return node;
-          };
-        
-        
-          /*
-           * A conditional expression, i.e., a ternary ?/: expression.
-           */
-        
-          exports.ConditionalExpression = ConditionalExpression = (function(_super) {
-            __extends(ConditionalExpression, _super);
-        
-        
+
+            exports.WithStatement = WithStatement = (function (_super) {
+                __extends(WithStatement, _super);
+
+
+                /*
+                 * @object: Expression
+                 * @body: Statement
+                 */
+
+                function WithStatement(object, body) {
+                    this.object = object;
+                    this.body = body;
+                    WithStatement.__super__.constructor.call(this);
+                }
+
+                return WithStatement;
+
+            })(Statement);
+
+            JavaScriptVisitor.prototype.WithStatement = function (node) {
+                node = this.Statement(node);
+                node.object = this.visit(node.object);
+                node.body = this.visit(node.body);
+                return node;
+            };
+
+
             /*
-             * @test: Expression
-             * @alternate: Expression
-             * @consequent: Expression
+             * A switch statement.
              */
-        
-            function ConditionalExpression(test, alternate, consequent) {
-              this.test = test;
-              this.alternate = alternate;
-              this.consequent = consequent;
-              ConditionalExpression.__super__.constructor.call(this);
-            }
-        
-            return ConditionalExpression;
-        
-          })(Expression);
-        
-          JavaScriptVisitor.prototype.ConditionalExpression = function(node) {
-            node = this.Expression(node);
-            node.test = this.visit(node.test);
-            node.alternate = this.visit(node.alternate);
-            node.consequent = this.visit(node.consequent);
-            return node;
-          };
-        
-        
-          /*
-           * A new expression.
-           */
-        
-          exports.NewExpression = NewExpression = (function(_super) {
-            __extends(NewExpression, _super);
-        
-        
+
+            exports.SwitchStatement = SwitchStatement = (function (_super) {
+                __extends(SwitchStatement, _super);
+
+
+                /*
+                 * @discriminant: Expression
+                 * @cases: [SwitchCase]
+                 */
+
+                function SwitchStatement(discriminant, cases) {
+                    this.discriminant = discriminant;
+                    this.cases = cases;
+                    SwitchStatement.__super__.constructor.call(this);
+                }
+
+                return SwitchStatement;
+
+            })(Statement);
+
+            JavaScriptVisitor.prototype.SwitchStatement = function (node) {
+                node = this.Statement(node);
+                node.discriminant = this.visit(node.discriminant);
+                node.cases = this.visit(node.cases);
+                return node;
+            };
+
+
             /*
-             * @callee: Expression
-             * @arguments: [ Expression ] | null
+             * A return statement.
              */
-        
-            function NewExpression(callee, _arguments) {
-              this.callee = callee;
-              this["arguments"] = _arguments;
-              NewExpression.__super__.constructor.call(this);
-            }
-        
-            return NewExpression;
-        
-          })(Expression);
-        
-          JavaScriptVisitor.prototype.NewExpression = function(node) {
-            node = this.Expression(node);
-            node.callee = this.visit(node.callee);
-            node["arguments"] = this.visit(node["arguments"]);
-            return node;
-          };
-        
-        
-          /*
-           * A function or method call expression.
-           */
-        
-          exports.CallExpression = CallExpression = (function(_super) {
-            __extends(CallExpression, _super);
-        
-        
+
+            exports.ReturnStatement = ReturnStatement = (function (_super) {
+                __extends(ReturnStatement, _super);
+
+
+                /*
+                 * @argument: Expression | null
+                 */
+
+                function ReturnStatement(argument) {
+                    this.argument = argument;
+                    ReturnStatement.__super__.constructor.call(this);
+                }
+
+                return ReturnStatement;
+
+            })(Statement);
+
+            JavaScriptVisitor.prototype.ReturnStatement = function (node) {
+                node = this.Statement(node);
+                node.argument = this.visit(node.argument);
+                return node;
+            };
+
+
             /*
-             * @callee: Expression
-             * @arguments: [ Expression ]
+             * A throw statement.
              */
-        
-            function CallExpression(callee, _arguments) {
-              this.callee = callee;
-              this["arguments"] = _arguments;
-              CallExpression.__super__.constructor.call(this);
-            }
-        
-            return CallExpression;
-        
-          })(Expression);
-        
-          JavaScriptVisitor.prototype.CallExpression = function(node) {
-            node = this.Expression(node);
-            node.callee = this.visit(node.callee);
-            node["arguments"] = this.visit(node["arguments"]);
-            return node;
-          };
-        
-        
-          /*
-           * A member expression. If computed === true, the node corresponds to a computed
-           * e1[e2] expression and property is an Expression. If computed === false, the
-           * node corresponds to a static e1.x expression and property is an Identifier.
-           */
-        
-          exports.MemberExpression = MemberExpression = (function(_super) {
-            __extends(MemberExpression, _super);
-        
-        
+
+            exports.ThrowStatement = ThrowStatement = (function (_super) {
+                __extends(ThrowStatement, _super);
+
+
+                /*
+                 * @argument: Expression
+                 */
+
+                function ThrowStatement(argument) {
+                    this.argument = argument;
+                    ThrowStatement.__super__.constructor.call(this);
+                }
+
+                return ThrowStatement;
+
+            })(Statement);
+
+            JavaScriptVisitor.prototype.ThrowStatement = function (node) {
+                node = this.Statement(node);
+                node.argument = this.visit(node.argument);
+                return node;
+            };
+
+
             /*
-             * @object: Expression
-             * @property: Identifier | Expression
-             * @computed : boolean
+             * A try statement.
              */
-        
-            function MemberExpression(object, property, computed) {
-              this.object = object;
-              this.property = property;
-              this.computed = computed;
-              MemberExpression.__super__.constructor.call(this);
-            }
-        
-            return MemberExpression;
-        
-          })(Expression);
-        
-          JavaScriptVisitor.prototype.MemberExpression = function(node) {
-            node = this.Expression(node);
-            node.object = this.visit(node.object);
-            node.property = this.visit(node.property);
-            return node;
-          };
-        
-        
-          /*
-           * JavaScript 1.7 introduced destructuring assignment and binding forms.  All
-           * binding forms (such as function parameters, variable declarations, and catch
-           * block headers), accept array and object destructuring patterns in addition to
-           * plain identifiers. The left-hand sides of assignment expressions can be
-           * arbitrary expressions, but in the case where the expression is an object or
-           * array literal, it is interpreted by SpiderMonkey as a destructuring pattern.
-           *
-           * Since the left-hand side of an assignment can in general be any expression, in
-           * an assignment context, a pattern can be any expression. In binding positions
-           * (such as function parameters, variable declarations, and catch headers),
-           * patterns can only be identifiers in the base case, not arbitrary expressions.
-           */
-        
-          exports.Pattern = Pattern = (function(_super) {
-            __extends(Pattern, _super);
-        
-            function Pattern() {
-              Pattern.__super__.constructor.call(this);
-            }
-        
-            return Pattern;
-        
-          })(JavaScriptNode);
-        
-          JavaScriptVisitor.prototype.Pattern = function(node) {
-            node = this.JavaScriptNode(node);
-            return node;
-          };
-        
-        
-          /*
-           * An object-destructuring pattern. A literal property in an object pattern can
-           * have either a string or number as its value.
-           */
-        
-          exports.ObjectPattern = ObjectPattern = (function(_super) {
-            __extends(ObjectPattern, _super);
-        
-        
+
+            exports.TryStatement = TryStatement = (function (_super) {
+                __extends(TryStatement, _super);
+
+
+                /*
+                 * @block: BlockStatement
+                 * @handlers: [CatchClause]
+                 * @finalizer: BlockStatement | null
+                 */
+
+                function TryStatement(block, handlers, finalizer) {
+                    this.block = block;
+                    this.handlers = handlers;
+                    this.finalizer = finalizer;
+                    TryStatement.__super__.constructor.call(this);
+                }
+
+                return TryStatement;
+
+            })(Statement);
+
+            JavaScriptVisitor.prototype.TryStatement = function (node) {
+                node = this.Statement(node);
+                node.block = this.visit(node.block);
+                node.handlers = this.visit(node.handlers);
+                node.finalizer = this.visit(node.finalizer);
+                return node;
+            };
+
+
             /*
-             * @properties: [ { key: Literal | Identifier, value: Pattern } ]
+             * A while statement.
              */
-        
-            function ObjectPattern(properties) {
-              this.properties = properties;
-              ObjectPattern.__super__.constructor.call(this);
-            }
-        
-            return ObjectPattern;
-        
-          })(Pattern);
-        
-          JavaScriptVisitor.prototype.ObjectPattern = function(node) {
-            var setter, _i, _len, _ref1;
-            node = this.Pattern(node);
-            _ref1 = node.properties;
-            for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-              setter = _ref1[_i];
-              setter.key = this.visit(setter.key);
-              setter.value = this.visit(setter.value);
-            }
-            return node;
-          };
-        
-        
-          /*
-           * An array-destructuring pattern.
-           */
-        
-          exports.ArrayPattern = ArrayPattern = (function(_super) {
-            __extends(ArrayPattern, _super);
-        
-        
+
+            exports.WhileStatement = WhileStatement = (function (_super) {
+                __extends(WhileStatement, _super);
+
+
+                /*
+                 * @test: Expression
+                 * @body: Statement
+                 */
+
+                function WhileStatement(test, body) {
+                    this.test = test;
+                    this.body = body;
+                    WhileStatement.__super__.constructor.call(this);
+                }
+
+                return WhileStatement;
+
+            })(Statement);
+
+            JavaScriptVisitor.prototype.WhileStatement = function (node) {
+                node = this.Statement(node);
+                node.test = this.visit(node.test);
+                node.body = this.visit(node.body);
+                return node;
+            };
+
+
             /*
-             * @elements: [ Pattern | null ]
+             * A do/while statement.
              */
-        
-            function ArrayPattern(elements) {
-              this.elements = elements;
-              ArrayPattern.__super__.constructor.call(this);
-            }
-        
-            return ArrayPattern;
-        
-          })(Pattern);
-        
-          JavaScriptVisitor.prototype.ArrayPattern = function(node) {
-            node = this.Pattern(node);
-            node.elements = this.visit(node.elements);
-            return node;
-          };
-        
-        
-          /*
-           * A case (if test is an Expression) or default (if test === null) clause in the
-           * body of a switch statement.
-           */
-        
-          exports.SwitchCase = SwitchCase = (function(_super) {
-            __extends(SwitchCase, _super);
-        
-        
+
+            exports.DoWhileStatement = DoWhileStatement = (function (_super) {
+                __extends(DoWhileStatement, _super);
+
+
+                /*
+                 * @body: Statement
+                 * @test: Expression
+                 */
+
+                function DoWhileStatement(body, test) {
+                    this.body = body;
+                    this.test = test;
+                    DoWhileStatement.__super__.constructor.call(this);
+                }
+
+                return DoWhileStatement;
+
+            })(Statement);
+
+            JavaScriptVisitor.prototype.DoWhileStatement = function (node) {
+                node = this.Statement(node);
+                node.body = this.visit(node.body);
+                node.test = this.visit(node.test);
+                return node;
+            };
+
+
             /*
-             * @test: Expression | null
-             * @consequent: [ Statement ]
+             * A for statement.
              */
-        
-            function SwitchCase(test, consequent) {
-              this.test = test;
-              this.consequent = consequent;
-              SwitchCase.__super__.constructor.call(this);
-            }
-        
-            return SwitchCase;
-        
-          })(JavaScriptNode);
-        
-          JavaScriptVisitor.prototype.SwitchCase = function(node) {
-            node = this.JavaScriptNode(node);
-            node.test = this.visit(node.test);
-            node.consequent = this.visit(node.consequent);
-            return node;
-          };
-        
-        
-          /*
-           * A catch clause following a try block. The optional guard property corresponds
-           * to the optional expression guard on the bound variable.
-           */
-        
-          exports.CatchClause = CatchClause = (function(_super) {
-            __extends(CatchClause, _super);
-        
-        
+
+            exports.ForStatement = ForStatement = (function (_super) {
+                __extends(ForStatement, _super);
+
+
+                /*
+                 * @init: VariableDeclaration | Expression | null
+                 * @test: Expression | null
+                 * @update: Expression | null
+                 * @body: Statement
+                 */
+
+                function ForStatement(init, test, update, body) {
+                    this.init = init;
+                    this.test = test;
+                    this.update = update;
+                    this.body = body;
+                    ForStatement.__super__.constructor.call(this);
+                }
+
+                return ForStatement;
+
+            })(Statement);
+
+            JavaScriptVisitor.prototype.ForStatement = function (node) {
+                node = this.Statement(node);
+                node.init = this.visit(node.init);
+                node.test = this.visit(node.test);
+                node.update = this.visit(node.update);
+                node.body = this.visit(node.body);
+                return node;
+            };
+
+
             /*
-             * @param: Pattern
-             * @body: BlockStatement
+             * A for/in statement, or, if each is true, a for each/in statement.
              */
-        
-            function CatchClause(param, body) {
-              this.param = param;
-              this.body = body;
-              CatchClause.__super__.constructor.call(this);
-            }
-        
-            return CatchClause;
-        
-          })(JavaScriptNode);
-        
-          JavaScriptVisitor.prototype.CatchClause = function(node) {
-            node = this.JavaScriptNode(node);
-            node.param = this.visit(node.param);
-            node.body = this.visit(node.body);
-            return node;
-          };
-        
-        
-          /*
-           * An identifier. Note that an identifier may be an expression or a destructuring
-           * pattern.
-           */
-        
-          exports.Identifier = Identifier = (function(_super) {
-            __extends(Identifier, _super);
-        
-        
+
+            exports.ForInStatement = ForInStatement = (function (_super) {
+                __extends(ForInStatement, _super);
+
+
+                /*
+                 * @left: VariableDeclaration |  Expression
+                 * @right: Expression
+                 * @body: Statement
+                 */
+
+                function ForInStatement(left, right, body) {
+                    this.left = left;
+                    this.right = right;
+                    this.body = body;
+                    ForInStatement.__super__.constructor.call(this);
+                }
+
+                return ForInStatement;
+
+            })(Statement);
+
+            JavaScriptVisitor.prototype.ForInStatement = function (node) {
+                node = this.Statement(node);
+                node.left = this.visit(node.left);
+                node.right = this.visit(node.right);
+                node.body = this.visit(node.body);
+                return node;
+            };
+
+
             /*
-             * @name: string
+             * A debugger statement.
              */
-        
-            function Identifier(name) {
-              this.name = name;
-              Identifier.__super__.constructor.call(this);
-            }
-        
-            return Identifier;
-        
-          })(JavaScriptNode);
-        
-          JavaScriptVisitor.prototype.Identifier = function(node) {
-            node = this.JavaScriptNode(node);
-            return node;
-          };
-        
-        
-          /*
-           * A literal token. Note that a literal can be an expression.
-           */
-        
-          exports.Literal = Literal = (function(_super) {
-            __extends(Literal, _super);
-        
-        
+
+            exports.DebuggerStatement = DebuggerStatement = (function (_super) {
+                __extends(DebuggerStatement, _super);
+
+                function DebuggerStatement() {
+                    DebuggerStatement.__super__.constructor.call(this);
+                }
+
+                return DebuggerStatement;
+
+            })(Statement);
+
+            JavaScriptVisitor.prototype.DebuggerStatement = function (node) {
+                node = this.Statement(node);
+                return node;
+            };
+
+
             /*
-             * @value: string | boolean | null | number | RegExp
+             * Any declaration node. Note that declarations are considered statements; this
+             * is because declarations can appear in any statement context in the language.
              */
-        
-            function Literal(value) {
-              this.value = value;
-              Literal.__super__.constructor.call(this);
-            }
-        
-            return Literal;
-        
-          })(Expression);
-        
-          JavaScriptVisitor.prototype.Literal = function(node) {
-            node = this.Expression(node);
-            return node;
-          };
-        
+
+            exports.Declaration = Declaration = (function (_super) {
+                __extends(Declaration, _super);
+
+                function Declaration() {
+                    Declaration.__super__.constructor.call(this);
+                }
+
+                return Declaration;
+
+            })(Statement);
+
+            JavaScriptVisitor.prototype.Declaration = function (node) {
+                node = this.Statement(node);
+                return node;
+            };
+
+
+            /*
+             * A function declaration.  Note: The id field cannot be null.
+             */
+
+            exports.FunctionDeclaration = FunctionDeclaration = (function (_super) {
+                __extends(FunctionDeclaration, _super);
+
+
+                /*
+                 * @id: Identifier
+                 * @params: [ Pattern ]
+                 * @body: BlockStatement | Expression
+                 */
+
+                function FunctionDeclaration(id, params, body) {
+                    this.id = id;
+                    this.params = params;
+                    this.body = body;
+                    FunctionDeclaration.__super__.constructor.call(this);
+                }
+
+                return FunctionDeclaration;
+
+            })(Declaration);
+
+            JavaScriptVisitor.prototype.FunctionDeclaration = function (node) {
+                node = this.Declaration(node);
+                node.id = this.visit(node.id);
+                node.params = this.visit(node.params);
+                node.body = this.visit(node.body);
+                return node;
+            };
+
+
+            /*
+             * A variable declaration, via one of var, let, or const.
+             */
+
+            exports.VariableDeclaration = VariableDeclaration = (function (_super) {
+                __extends(VariableDeclaration, _super);
+
+
+                /*
+                 * @declarations: [ VariableDeclarator ]
+                 * @kind: "var"
+                 */
+
+                function VariableDeclaration(declarations, kind) {
+                    this.declarations = declarations;
+                    this.kind = kind;
+                    VariableDeclaration.__super__.constructor.call(this);
+                }
+
+                return VariableDeclaration;
+
+            })(Declaration);
+
+            JavaScriptVisitor.prototype.VariableDeclaration = function (node) {
+                node = this.Declaration(node);
+                node.declarations = this.visit(node.declarations);
+                return node;
+            };
+
+
+            /*
+             * A variable declarator.  Note: The id field cannot be null.
+             */
+
+            exports.VariableDeclarator = VariableDeclarator = (function (_super) {
+                __extends(VariableDeclarator, _super);
+
+
+                /*
+                 * @id: Pattern
+                 * @init: Expression | null
+                 */
+
+                function VariableDeclarator(id, init) {
+                    this.id = id;
+                    this.init = init;
+                    VariableDeclarator.__super__.constructor.call(this);
+                }
+
+                return VariableDeclarator;
+
+            })(JavaScriptNode);
+
+            JavaScriptVisitor.prototype.VariableDeclarator = function (node) {
+                node = this.JavaScriptNode(node);
+                node.id = this.visit(node.id);
+                node.init = this.visit(node.init);
+                return node;
+            };
+
+
+            /*
+             * Any expression node. Since the left-hand side of an assignment may be any
+             * expression in general, an expression can also be a pattern.
+             */
+
+            exports.Expression = Expression = (function (_super) {
+                __extends(Expression, _super);
+
+                function Expression() {
+                    return Expression.__super__.constructor.apply(this, arguments);
+                }
+
+                Expression.prototype.constuctor = function () {
+                    return Expression.__super__.constuctor.call(this);
+                };
+
+                return Expression;
+
+            })(JavaScriptNode);
+
+            JavaScriptVisitor.prototype.Expression = function (node) {
+                node = this.JavaScriptNode(node);
+                return node;
+            };
+
+
+            /*
+             * A this expression.
+             */
+
+            exports.ThisExpression = ThisExpression = (function (_super) {
+                __extends(ThisExpression, _super);
+
+                function ThisExpression() {
+                    ThisExpression.__super__.constructor.call(this);
+                }
+
+                return ThisExpression;
+
+            })(Expression);
+
+            JavaScriptVisitor.prototype.ThisExpression = function (node) {
+                node = this.Expression(node);
+                return node;
+            };
+
+
+            /*
+             * An array expression.
+             */
+
+            exports.ArrayExpression = ArrayExpression = (function (_super) {
+                __extends(ArrayExpression, _super);
+
+
+                /*
+                 * @elements: [ Expression | null ]
+                 */
+
+                function ArrayExpression(elements) {
+                    this.elements = elements;
+                    ArrayExpression.__super__.constructor.call(this);
+                }
+
+                return ArrayExpression;
+
+            })(Expression);
+
+            JavaScriptVisitor.prototype.ArrayExpression = function (node) {
+                node = this.Expression(node);
+                node.elements = this.visit(node.elements);
+                return node;
+            };
+
+
+            /*
+             * An object expression. A literal property in an object expression can have
+             * either a string or number as its value.  Ordinary property initializers have a
+             * kind value "init"; getters and setters have the kind values "get" and "set",
+             * respectively.
+             */
+
+            exports.ObjectExpression = ObjectExpression = (function (_super) {
+                __extends(ObjectExpression, _super);
+
+
+                /*
+                 * @properties: [ { key: Literal | Identifier,
+                 *                 value: Expression,
+                 *                 kind: "init" | "get" | "set" } ];
+                 */
+
+                function ObjectExpression(properties) {
+                    this.properties = properties;
+                    ObjectExpression.__super__.constructor.call(this);
+                }
+
+                return ObjectExpression;
+
+            })(Expression);
+
+            JavaScriptVisitor.prototype.ObjectExpression = function (node) {
+                var setter, _i, _len, _ref1;
+                node = this.Expression(node);
+                _ref1 = node.properties;
+                for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+                    setter = _ref1[_i];
+                    setter.key = this.visit(setter.key);
+                    setter.value = this.visit(setter.value);
+                }
+                return node;
+            };
+
+
+            /*
+             * A function expression.
+             */
+
+            exports.FunctionExpression = FunctionExpression = (function (_super) {
+                __extends(FunctionExpression, _super);
+
+
+                /*
+                 * @id: Identifier | null
+                 * @params: [ Pattern ]
+                 * @body: BlockStatement | Expression
+                 */
+
+                function FunctionExpression(id, params, body) {
+                    this.id = id;
+                    this.params = params;
+                    this.body = body;
+                    FunctionExpression.__super__.constructor.call(this);
+                }
+
+                return FunctionExpression;
+
+            })(Expression);
+
+            JavaScriptVisitor.prototype.FunctionExpression = function (node) {
+                node = this.Expression(node);
+                node.id = this.visit(node.id);
+                node.params = this.visit(node.params);
+                node.body = this.visit(node.body);
+                return node;
+            };
+
+
+            /*
+             * A sequence expression, i.e., a comma-separated sequence of expressions.
+             */
+
+            exports.SequenceExpression = SequenceExpression = (function (_super) {
+                __extends(SequenceExpression, _super);
+
+
+                /*
+                 * @expressions: [ Expression ]
+                 */
+
+                function SequenceExpression(expressions) {
+                    this.expressions = expressions;
+                    SequenceExpression.__super__.constructor.call(this);
+                }
+
+                return SequenceExpression;
+
+            })(Expression);
+
+            JavaScriptVisitor.prototype.SequenceExpression = function (node) {
+                node = this.Expression(node);
+                node.expressions = this.visit(node.expressions);
+                return node;
+            };
+
+
+            /*
+             * A unary operator expression.
+             */
+
+            exports.UnaryExpression = UnaryExpression = (function (_super) {
+                __extends(UnaryExpression, _super);
+
+
+                /*
+                 * @operator: "-" | "+" | "!" | "~" | "typeof" | "void" | "delete"
+                 * @prefix: boolean
+                 * @argument: Expression
+                 */
+
+                function UnaryExpression(operator, prefix, argument) {
+                    this.operator = operator;
+                    this.prefix = prefix;
+                    this.argument = argument;
+                    UnaryExpression.__super__.constructor.call(this);
+                }
+
+                return UnaryExpression;
+
+            })(Expression);
+
+            JavaScriptVisitor.prototype.UnaryExpression = function (node) {
+                node = this.Expression(node);
+                node.argument = this.visit(node.argument);
+                return node;
+            };
+
+
+            /*
+             * A binary operator expression.
+             */
+
+            exports.BinaryExpression = BinaryExpression = (function (_super) {
+                __extends(BinaryExpression, _super);
+
+
+                /*
+                 * @operator: "==" | "!=" | "===" | "!==" | "<" | "<=" | ">" | ">="
+                 *     | "<<" | ">>" | ">>>" | "+" | "-" | "*" | "/" | "%"
+                 *     | "|" | "&" | "^" | "in" | "instanceof" | ".."
+                 * @left: Expression
+                 * @right: Expression
+                 */
+
+                function BinaryExpression(operator, left, right) {
+                    this.operator = operator;
+                    this.left = left;
+                    this.right = right;
+                    BinaryExpression.__super__.constructor.call(this);
+                }
+
+                return BinaryExpression;
+
+            })(Expression);
+
+            JavaScriptVisitor.prototype.BinaryExpression = function (node) {
+                node = this.Expression(node);
+                node.left = this.visit(node.left);
+                node.right = this.visit(node.right);
+                return node;
+            };
+
+
+            /*
+             * An assignment operator expression.
+             */
+
+            exports.AssignmentExpression = AssignmentExpression = (function (_super) {
+                __extends(AssignmentExpression, _super);
+
+
+                /*
+                 * @operator: "=" | "+=" | "-=" | "*=" | "/=" | "%="
+                 *     | "<<=" | ">>=" | ">>>=" | "|=" | "^=" | "&=";
+                 * @left: Expression
+                 * @right: Expression
+                 */
+
+                function AssignmentExpression(operator, left, right) {
+                    this.operator = operator;
+                    this.left = left;
+                    this.right = right;
+                    AssignmentExpression.__super__.constructor.call(this);
+                }
+
+                return AssignmentExpression;
+
+            })(Expression);
+
+            JavaScriptVisitor.prototype.AssignmentExpression = function (node) {
+                node = this.Expression(node);
+                node.left = this.visit(node.left);
+                node.right = this.visit(node.right);
+                return node;
+            };
+
+
+            /*
+             * An update (increment or decrement) operator expression.
+             */
+
+            exports.UpdateExpression = UpdateExpression = (function (_super) {
+                __extends(UpdateExpression, _super);
+
+
+                /*
+                 * @operator: "++" | "--"
+                 * @argument: Expression
+                 * @prefix: boolean
+                 */
+
+                function UpdateExpression(operator, argument, prefix) {
+                    this.operator = operator;
+                    this.argument = argument;
+                    this.prefix = prefix;
+                    UpdateExpression.__super__.constructor.call(this);
+                }
+
+                return UpdateExpression;
+
+            })(Expression);
+
+            JavaScriptVisitor.prototype.UpdateExpression = function (node) {
+                node = this.Expression(node);
+                node.argument = this.visit(node.argument);
+                return node;
+            };
+
+
+            /*
+             * A logical operator expression.
+             */
+
+            exports.LogicalExpression = LogicalExpression = (function (_super) {
+                __extends(LogicalExpression, _super);
+
+
+                /*
+                 * @operator: "||" | "&&"
+                 * @left: Expression
+                 * @right: Expression
+                 */
+
+                function LogicalExpression(operator, left, right) {
+                    this.operator = operator;
+                    this.left = left;
+                    this.right = right;
+                    LogicalExpression.__super__.constructor.call(this);
+                }
+
+                return LogicalExpression;
+
+            })(Expression);
+
+            JavaScriptVisitor.prototype.LogicalExpression = function (node) {
+                node = this.Expression(node);
+                node.left = this.visit(node.left);
+                node.right = this.visit(node.right);
+                return node;
+            };
+
+
+            /*
+             * A conditional expression, i.e., a ternary ?/: expression.
+             */
+
+            exports.ConditionalExpression = ConditionalExpression = (function (_super) {
+                __extends(ConditionalExpression, _super);
+
+
+                /*
+                 * @test: Expression
+                 * @alternate: Expression
+                 * @consequent: Expression
+                 */
+
+                function ConditionalExpression(test, alternate, consequent) {
+                    this.test = test;
+                    this.alternate = alternate;
+                    this.consequent = consequent;
+                    ConditionalExpression.__super__.constructor.call(this);
+                }
+
+                return ConditionalExpression;
+
+            })(Expression);
+
+            JavaScriptVisitor.prototype.ConditionalExpression = function (node) {
+                node = this.Expression(node);
+                node.test = this.visit(node.test);
+                node.alternate = this.visit(node.alternate);
+                node.consequent = this.visit(node.consequent);
+                return node;
+            };
+
+
+            /*
+             * A new expression.
+             */
+
+            exports.NewExpression = NewExpression = (function (_super) {
+                __extends(NewExpression, _super);
+
+
+                /*
+                 * @callee: Expression
+                 * @arguments: [ Expression ] | null
+                 */
+
+                function NewExpression(callee, _arguments) {
+                    this.callee = callee;
+                    this["arguments"] = _arguments;
+                    NewExpression.__super__.constructor.call(this);
+                }
+
+                return NewExpression;
+
+            })(Expression);
+
+            JavaScriptVisitor.prototype.NewExpression = function (node) {
+                node = this.Expression(node);
+                node.callee = this.visit(node.callee);
+                node["arguments"] = this.visit(node["arguments"]);
+                return node;
+            };
+
+
+            /*
+             * A function or method call expression.
+             */
+
+            exports.CallExpression = CallExpression = (function (_super) {
+                __extends(CallExpression, _super);
+
+
+                /*
+                 * @callee: Expression
+                 * @arguments: [ Expression ]
+                 */
+
+                function CallExpression(callee, _arguments) {
+                    this.callee = callee;
+                    this["arguments"] = _arguments;
+                    CallExpression.__super__.constructor.call(this);
+                }
+
+                return CallExpression;
+
+            })(Expression);
+
+            JavaScriptVisitor.prototype.CallExpression = function (node) {
+                node = this.Expression(node);
+                node.callee = this.visit(node.callee);
+                node["arguments"] = this.visit(node["arguments"]);
+                return node;
+            };
+
+
+            /*
+             * A member expression. If computed === true, the node corresponds to a computed
+             * e1[e2] expression and property is an Expression. If computed === false, the
+             * node corresponds to a static e1.x expression and property is an Identifier.
+             */
+
+            exports.MemberExpression = MemberExpression = (function (_super) {
+                __extends(MemberExpression, _super);
+
+
+                /*
+                 * @object: Expression
+                 * @property: Identifier | Expression
+                 * @computed : boolean
+                 */
+
+                function MemberExpression(object, property, computed) {
+                    this.object = object;
+                    this.property = property;
+                    this.computed = computed;
+                    MemberExpression.__super__.constructor.call(this);
+                }
+
+                return MemberExpression;
+
+            })(Expression);
+
+            JavaScriptVisitor.prototype.MemberExpression = function (node) {
+                node = this.Expression(node);
+                node.object = this.visit(node.object);
+                node.property = this.visit(node.property);
+                return node;
+            };
+
+
+            /*
+             * JavaScript 1.7 introduced destructuring assignment and binding forms.  All
+             * binding forms (such as function parameters, variable declarations, and catch
+             * block headers), accept array and object destructuring patterns in addition to
+             * plain identifiers. The left-hand sides of assignment expressions can be
+             * arbitrary expressions, but in the case where the expression is an object or
+             * array literal, it is interpreted by SpiderMonkey as a destructuring pattern.
+             *
+             * Since the left-hand side of an assignment can in general be any expression, in
+             * an assignment context, a pattern can be any expression. In binding positions
+             * (such as function parameters, variable declarations, and catch headers),
+             * patterns can only be identifiers in the base case, not arbitrary expressions.
+             */
+
+            exports.Pattern = Pattern = (function (_super) {
+                __extends(Pattern, _super);
+
+                function Pattern() {
+                    Pattern.__super__.constructor.call(this);
+                }
+
+                return Pattern;
+
+            })(JavaScriptNode);
+
+            JavaScriptVisitor.prototype.Pattern = function (node) {
+                node = this.JavaScriptNode(node);
+                return node;
+            };
+
+
+            /*
+             * An object-destructuring pattern. A literal property in an object pattern can
+             * have either a string or number as its value.
+             */
+
+            exports.ObjectPattern = ObjectPattern = (function (_super) {
+                __extends(ObjectPattern, _super);
+
+
+                /*
+                 * @properties: [ { key: Literal | Identifier, value: Pattern } ]
+                 */
+
+                function ObjectPattern(properties) {
+                    this.properties = properties;
+                    ObjectPattern.__super__.constructor.call(this);
+                }
+
+                return ObjectPattern;
+
+            })(Pattern);
+
+            JavaScriptVisitor.prototype.ObjectPattern = function (node) {
+                var setter, _i, _len, _ref1;
+                node = this.Pattern(node);
+                _ref1 = node.properties;
+                for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+                    setter = _ref1[_i];
+                    setter.key = this.visit(setter.key);
+                    setter.value = this.visit(setter.value);
+                }
+                return node;
+            };
+
+
+            /*
+             * An array-destructuring pattern.
+             */
+
+            exports.ArrayPattern = ArrayPattern = (function (_super) {
+                __extends(ArrayPattern, _super);
+
+
+                /*
+                 * @elements: [ Pattern | null ]
+                 */
+
+                function ArrayPattern(elements) {
+                    this.elements = elements;
+                    ArrayPattern.__super__.constructor.call(this);
+                }
+
+                return ArrayPattern;
+
+            })(Pattern);
+
+            JavaScriptVisitor.prototype.ArrayPattern = function (node) {
+                node = this.Pattern(node);
+                node.elements = this.visit(node.elements);
+                return node;
+            };
+
+
+            /*
+             * A case (if test is an Expression) or default (if test === null) clause in the
+             * body of a switch statement.
+             */
+
+            exports.SwitchCase = SwitchCase = (function (_super) {
+                __extends(SwitchCase, _super);
+
+
+                /*
+                 * @test: Expression | null
+                 * @consequent: [ Statement ]
+                 */
+
+                function SwitchCase(test, consequent) {
+                    this.test = test;
+                    this.consequent = consequent;
+                    SwitchCase.__super__.constructor.call(this);
+                }
+
+                return SwitchCase;
+
+            })(JavaScriptNode);
+
+            JavaScriptVisitor.prototype.SwitchCase = function (node) {
+                node = this.JavaScriptNode(node);
+                node.test = this.visit(node.test);
+                node.consequent = this.visit(node.consequent);
+                return node;
+            };
+
+
+            /*
+             * A catch clause following a try block. The optional guard property corresponds
+             * to the optional expression guard on the bound variable.
+             */
+
+            exports.CatchClause = CatchClause = (function (_super) {
+                __extends(CatchClause, _super);
+
+
+                /*
+                 * @param: Pattern
+                 * @body: BlockStatement
+                 */
+
+                function CatchClause(param, body) {
+                    this.param = param;
+                    this.body = body;
+                    CatchClause.__super__.constructor.call(this);
+                }
+
+                return CatchClause;
+
+            })(JavaScriptNode);
+
+            JavaScriptVisitor.prototype.CatchClause = function (node) {
+                node = this.JavaScriptNode(node);
+                node.param = this.visit(node.param);
+                node.body = this.visit(node.body);
+                return node;
+            };
+
+
+            /*
+             * An identifier. Note that an identifier may be an expression or a destructuring
+             * pattern.
+             */
+
+            exports.Identifier = Identifier = (function (_super) {
+                __extends(Identifier, _super);
+
+
+                /*
+                 * @name: string
+                 */
+
+                function Identifier(name) {
+                    this.name = name;
+                    Identifier.__super__.constructor.call(this);
+                }
+
+                return Identifier;
+
+            })(JavaScriptNode);
+
+            JavaScriptVisitor.prototype.Identifier = function (node) {
+                node = this.JavaScriptNode(node);
+                return node;
+            };
+
+
+            /*
+             * A literal token. Note that a literal can be an expression.
+             */
+
+            exports.Literal = Literal = (function (_super) {
+                __extends(Literal, _super);
+
+
+                /*
+                 * @value: string | boolean | null | number | RegExp
+                 */
+
+                function Literal(value) {
+                    this.value = value;
+                    Literal.__super__.constructor.call(this);
+                }
+
+                return Literal;
+
+            })(Expression);
+
+            JavaScriptVisitor.prototype.Literal = function (node) {
+                node = this.Expression(node);
+                return node;
+            };
+
         }).call(this);
     };
 
     $__modules__.JavaScriptToQueryVisitor = function (exports) {
         // Generated by CoffeeScript 1.7.1
-        
+
         /*
          * ----------------------------------------------------------------------------
          * Copyright (c) Microsoft Corporation. All rights reserved.
          * ----------------------------------------------------------------------------
          */
-        
-        (function() {
-          var JS, JavaScriptToQueryVisitor, Q, _,
-            __hasProp = {}.hasOwnProperty,
-            __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-        
-          _ = require('./Utilities');
-        
-          JS = require('./JavaScriptNodes');
-        
-          Q = require('./QueryNodes');
-        
-        
-          /*
-           * Walk the JavaScriptExpression tree and convert its nodes into QueryExpression
-           * trees
-           */
-        
-          exports.JavaScriptToQueryVisitor = JavaScriptToQueryVisitor = (function(_super) {
-            __extends(JavaScriptToQueryVisitor, _super);
-        
-            function JavaScriptToQueryVisitor(context) {
-              this.context = context;
-            }
-        
-        
-            /* Get the source code for a given node */
-        
-            JavaScriptToQueryVisitor.prototype.getSource = function(node) {
-              var _ref, _ref1;
-              return this.context.source.slice(node != null ? (_ref = node.range) != null ? _ref[0] : void 0 : void 0, +((node != null ? (_ref1 = node.range) != null ? _ref1[1] : void 0 : void 0) - 1) + 1 || 9e9);
-            };
-        
-        
-            /* Throw an exception for an invalid node. */
-        
-            JavaScriptToQueryVisitor.prototype.invalid = function(node) {
-              throw "The expression '" + (this.getSource(node)) + "'' is not supported.";
-            };
-        
-        
-            /* Unary expressions just map operators */
-        
-            JavaScriptToQueryVisitor.prototype.translateUnary = function(node, mapping) {
-              var op, value;
-              op = mapping[node.operator];
-              if (op) {
-                value = this.visit(node.argument);
-                return new Q.UnaryExpression(op, value);
-              } else {
-                return null;
-              }
-            };
-        
-        
-            /* Binary expressions just map operators */
-        
-            JavaScriptToQueryVisitor.prototype.translateBinary = function(node, mapping) {
-              var left, op, right;
-              op = mapping[node.operator];
-              if (op) {
-                left = this.visit(node.left);
-                right = this.visit(node.right);
-                return new Q.BinaryExpression(op, left, right);
-              } else {
-                return null;
-              }
-            };
-        
-        
+
+        (function () {
+            var JS, JavaScriptToQueryVisitor, Q, _,
+              __hasProp = {}.hasOwnProperty,
+              __extends = function (child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+            _ = require('./Utilities');
+
+            JS = require('./JavaScriptNodes');
+
+            Q = require('./QueryNodes');
+
+
             /*
-             * The base visit method will throw exceptions for any nodes that remain
-             * untransformed (which allows us to only bother defining meaningful
-             * translations)
+             * Walk the JavaScriptExpression tree and convert its nodes into QueryExpression
+             * trees
              */
-        
-            JavaScriptToQueryVisitor.prototype.visit = function(node) {
-              var visited;
-              visited = JavaScriptToQueryVisitor.__super__.visit.call(this, node);
-              if (node === visited) {
-                this.invalid(node);
-              }
-              return visited;
-            };
-        
-            JavaScriptToQueryVisitor.prototype.MemberExpression = function(node) {
-              var expr;
-              expr = (function() {
-                var _ref, _ref1, _ref2, _ref3;
-                if ((node != null ? (_ref = node.object) != null ? _ref.type : void 0 : void 0) === 'ThisExpression' && (node != null ? (_ref1 = node.property) != null ? _ref1.type : void 0 : void 0) === 'Identifier') {
-        
-                  /* Simple member access */
-                  return new Q.MemberExpression(node.property.name);
-                } else if ((node != null ? (_ref2 = node.object) != null ? _ref2.type : void 0 : void 0) === 'MemberExpression' && ((_ref3 = node.object.object) != null ? _ref3.type : void 0) === 'ThisExpression' && node.property.type === 'Identifier') {
-        
-                  /* Methods that look like properties */
-                  if (node.property.name === 'length') {
-                    return new Q.InvocationExpression(Q.Methods.Length, new Q.MemberExpression(node.object.property.name));
-                  }
+
+            exports.JavaScriptToQueryVisitor = JavaScriptToQueryVisitor = (function (_super) {
+                __extends(JavaScriptToQueryVisitor, _super);
+
+                function JavaScriptToQueryVisitor(context) {
+                    this.context = context;
                 }
-              })();
-              return expr != null ? expr : JavaScriptToQueryVisitor.__super__.MemberExpression.call(this, node);
-            };
-        
-            JavaScriptToQueryVisitor.prototype.Literal = function(node) {
-              return new Q.ConstantExpression(node.value);
-            };
-        
-            JavaScriptToQueryVisitor.prototype.UnaryExpression = function(node) {
-              var mapping, _ref;
-              if (node.operator === '+') {
-        
-                /* Ignore the + in '+52' */
-                return this.visit(node.argument);
-              } else {
-                mapping = {
-                  '!': Q.UnaryOperators.Not,
-                  '-': Q.UnaryOperators.Negate
+
+
+                /* Get the source code for a given node */
+
+                JavaScriptToQueryVisitor.prototype.getSource = function (node) {
+                    var _ref, _ref1;
+                    return this.context.source.slice(node != null ? (_ref = node.range) != null ? _ref[0] : void 0 : void 0, +((node != null ? (_ref1 = node.range) != null ? _ref1[1] : void 0 : void 0) - 1) + 1 || 9e9);
                 };
-                return (_ref = this.translateUnary(node, mapping)) != null ? _ref : JavaScriptToQueryVisitor.__super__.UnaryExpression.call(this, node);
-              }
-            };
-        
-            JavaScriptToQueryVisitor.prototype.UpdateExpression = function(node) {
-              var mapping, _ref;
-              mapping = {
-                '++': Q.UnaryOperators.Increment,
-                '--': Q.UnaryOperators.Decrement
-              };
-              return (_ref = this.translateUnary(node, mapping)) != null ? _ref : JavaScriptToQueryVisitor.__super__.UpdateExpression.call(this, node);
-            };
-        
-            JavaScriptToQueryVisitor.prototype.LogicalExpression = function(node) {
-              var mapping, _ref;
-              mapping = {
-                '&&': Q.BinaryOperators.And,
-                '||': Q.BinaryOperators.Or
-              };
-              return (_ref = this.translateBinary(node, mapping)) != null ? _ref : JavaScriptToQueryVisitor.__super__.LogicalExpression.call(this, node);
-            };
-        
-            JavaScriptToQueryVisitor.prototype.BinaryExpression = function(node) {
-              var k, left, mapping, properties, v, value, _ref;
-              mapping = {
-                '+': Q.BinaryOperators.Add,
-                '-': Q.BinaryOperators.Subtract,
-                '*': Q.BinaryOperators.Multiply,
-                '/': Q.BinaryOperators.Divide,
-                '%': Q.BinaryOperators.Modulo,
-                '>': Q.BinaryOperators.GreaterThan,
-                '>=': Q.BinaryOperators.GreaterThanOrEqual,
-                '<': Q.BinaryOperators.LessThan,
-                '<=': Q.BinaryOperators.LessThanOrEqual,
-                '!=': Q.BinaryOperators.NotEqual,
-                '!==': Q.BinaryOperators.NotEqual,
-                '==': Q.BinaryOperators.Equal,
-                '===': Q.BinaryOperators.Equal
-              };
-              return (function() {
-                var _ref1, _ref2;
-                if ((_ref = this.translateBinary(node, mapping)) != null) {
-                  return _ref;
-                } else if (node.operator === 'in' && ((_ref1 = node.right) != null ? _ref1.type : void 0) === 'Literal' && _.isArray((_ref2 = node.right) != null ? _ref2.value : void 0)) {
-        
-                  /*
-                   * Transform the 'varName in [x, y, z]' operator into a series of
-                   * comparisons like varName == x || varName == y || varName == z.
-                   */
-                  if (node.right.value.length > 0) {
-                    left = this.visit(node.left);
-                    return Q.QueryExpression.groupClauses(Q.BinaryOperators.Or, (function() {
-                      var _i, _len, _ref3, _results;
-                      _ref3 = node.right.value;
-                      _results = [];
-                      for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
-                        value = _ref3[_i];
-        
-                        /*
-                         * If we've got an array of objects who each have
-                         * a single property, we'll use the value of that
-                         * property.  Otherwise we'll throw an exception.
-                         */
-                        if (_.isObject(value)) {
-                          properties = (function() {
-                            var _results1;
-                            _results1 = [];
-                            for (k in value) {
-                              v = value[k];
-                              _results1.push(v);
-                            }
-                            return _results1;
-                          })();
-                          if ((properties != null ? properties.length : void 0) !== 1) {
-                            throw "in operator requires comparison objects with a single field, not " + value + " (" + (JSON.stringify(value)) + "), for expression '" + (this.getSource(node)) + "'";
-                          }
-                          value = properties[0];
-                        }
-                        _results.push(new Q.BinaryExpression(Q.BinaryOperators.Equal, left, new Q.ConstantExpression(value)));
-                      }
-                      return _results;
-                    }).call(this));
-                  } else {
-        
-                    /*
-                     * If the array of values is empty, change the query to
-                     * true == false since it can't be satisfied.
-                     */
-                    return new Q.BinaryExpression(Q.BinaryOperators.Equal, new Q.ConstantExpression(true), new Q.ConstantExpression(false));
-                  }
-                } else {
-                  return JavaScriptToQueryVisitor.__super__.BinaryExpression.call(this, node);
-                }
-              }).call(this);
-            };
-        
-            JavaScriptToQueryVisitor.prototype.CallExpression = function(node) {
-              var expr, func, getSingleArg, getTwoArgs, member, method, _ref;
-              getSingleArg = (function(_this) {
-                return function(name) {
-                  var _ref;
-                  if (((_ref = node["arguments"]) != null ? _ref.length : void 0) !== 1) {
-                    throw "Function " + name + " expects one argument in expression '" + (_this.getSource(node)) + "'";
-                  }
-                  return _this.visit(node["arguments"][0]);
+
+
+                /* Throw an exception for an invalid node. */
+
+                JavaScriptToQueryVisitor.prototype.invalid = function (node) {
+                    throw "The expression '" + (this.getSource(node)) + "'' is not supported.";
                 };
-              })(this);
-              getTwoArgs = (function(_this) {
-                return function(member, name) {
-                  var _ref;
-                  if (((_ref = node["arguments"]) != null ? _ref.length : void 0) !== 2) {
-                    throw "Function " + name + " expects two arguments in expression '" + (_this.getSource(node)) + "'";
-                  }
-                  return [member, _this.visit(node["arguments"][0]), _this.visit(node["arguments"][1])];
-                };
-              })(this);
-        
-              /*
-               * Translate known method calls that aren't attached to an instance.
-               * Note that we can compare against the actual method because the
-               * partial evaluator will have converted it into a literal for us.
-               */
-              func = node != null ? (_ref = node.callee) != null ? _ref.value : void 0 : void 0;
-              expr = (function() {
-                var _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
-                if (func === Math.floor) {
-                  return new Q.InvocationExpression(Q.Methods.Floor, [getSingleArg('floor')]);
-                } else if (func === Math.ceil) {
-                  return new Q.InvocationExpression(Q.Methods.Ceiling, [getSingleArg('ceil')]);
-                } else if (func === Math.round) {
-                  return new Q.InvocationExpression(Q.Methods.Round, [getSingleArg('round')]);
-                } else {
-        
-                  /*
-                   * Translate methods dangling off an instance
-                   */
-                  if (node.callee.type === 'MemberExpression' && ((_ref1 = node.callee.object) != null ? _ref1.__hasThisExp : void 0) === true) {
-                    if ((node != null ? (_ref2 = node.callee) != null ? (_ref3 = _ref2.object) != null ? _ref3.type : void 0 : void 0 : void 0) === 'CallExpression') {
-                      member = this.visit(node.callee.object);
+
+
+                /* Unary expressions just map operators */
+
+                JavaScriptToQueryVisitor.prototype.translateUnary = function (node, mapping) {
+                    var op, value;
+                    op = mapping[node.operator];
+                    if (op) {
+                        value = this.visit(node.argument);
+                        return new Q.UnaryExpression(op, value);
                     } else {
-                      member = new Q.MemberExpression((_ref4 = node.callee.object) != null ? (_ref5 = _ref4.property) != null ? _ref5.name : void 0 : void 0);
+                        return null;
                     }
-                    method = (_ref6 = node.callee) != null ? (_ref7 = _ref6.property) != null ? _ref7.name : void 0 : void 0;
-                    if (method === 'toUpperCase') {
-                      return new Q.InvocationExpression(Q.Methods.ToUpperCase, [member]);
-                    } else if (method === 'toLowerCase') {
-                      return new Q.InvocationExpression(Q.Methods.ToLowerCase, [member]);
-                    } else if (method === 'trim') {
-                      return new Q.InvocationExpression(Q.Methods.Trim, [member]);
-                    } else if (method === 'indexOf') {
-                      return new Q.InvocationExpression(Q.Methods.IndexOf, [member, getSingleArg('indexOf')]);
-                    } else if (method === 'concat') {
-                      return new Q.InvocationExpression(Q.Methods.Concat, [member, getSingleArg('concat')]);
-                    } else if (method === 'substring' || method === 'substr') {
-                      return new Q.InvocationExpression(Q.Methods.Substring, getTwoArgs(member, 'substring'));
-                    } else if (method === 'replace') {
-                      return new Q.InvocationExpression(Q.Methods.Replace, getTwoArgs(member, 'replace'));
-                    } else if (method === 'getFullYear' || method === 'getUTCFullYear') {
-                      return new Q.InvocationExpression(Q.Methods.Year, [member]);
-                    } else if (method === 'getYear') {
-                      return new Q.BinaryExpression(Q.BinaryOperators.Subtract, new Q.InvocationExpression(Q.Methods.Year, [member]), new Q.ConstantExpression(1900));
-                    } else if (method === 'getMonth' || method === 'getUTCMonth') {
-        
-                      /* getMonth is 0 indexed in JavaScript */
-                      return new Q.BinaryExpression(Q.BinaryOperators.Subtract, new Q.InvocationExpression(Q.Methods.Month, [member]), new Q.ConstantExpression(1));
-                    } else if (method === 'getDate' || method === 'getUTCDate') {
-                      return new Q.InvocationExpression(Q.Methods.Day, [member]);
+                };
+
+
+                /* Binary expressions just map operators */
+
+                JavaScriptToQueryVisitor.prototype.translateBinary = function (node, mapping) {
+                    var left, op, right;
+                    op = mapping[node.operator];
+                    if (op) {
+                        left = this.visit(node.left);
+                        right = this.visit(node.right);
+                        return new Q.BinaryExpression(op, left, right);
+                    } else {
+                        return null;
                     }
-                  }
-                }
-              }).call(this);
-              return expr != null ? expr : JavaScriptToQueryVisitor.__super__.CallExpression.call(this, node);
-            };
-        
-            return JavaScriptToQueryVisitor;
-        
-          })(JS.JavaScriptVisitor);
-        
+                };
+
+
+                /*
+                 * The base visit method will throw exceptions for any nodes that remain
+                 * untransformed (which allows us to only bother defining meaningful
+                 * translations)
+                 */
+
+                JavaScriptToQueryVisitor.prototype.visit = function (node) {
+                    var visited;
+                    visited = JavaScriptToQueryVisitor.__super__.visit.call(this, node);
+                    if (node === visited) {
+                        this.invalid(node);
+                    }
+                    return visited;
+                };
+
+                JavaScriptToQueryVisitor.prototype.MemberExpression = function (node) {
+                    var expr;
+                    expr = (function () {
+                        var _ref, _ref1, _ref2, _ref3;
+                        if ((node != null ? (_ref = node.object) != null ? _ref.type : void 0 : void 0) === 'ThisExpression' && (node != null ? (_ref1 = node.property) != null ? _ref1.type : void 0 : void 0) === 'Identifier') {
+
+                            /* Simple member access */
+                            return new Q.MemberExpression(node.property.name);
+                        } else if ((node != null ? (_ref2 = node.object) != null ? _ref2.type : void 0 : void 0) === 'MemberExpression' && ((_ref3 = node.object.object) != null ? _ref3.type : void 0) === 'ThisExpression' && node.property.type === 'Identifier') {
+
+                            /* Methods that look like properties */
+                            if (node.property.name === 'length') {
+                                return new Q.InvocationExpression(Q.Methods.Length, new Q.MemberExpression(node.object.property.name));
+                            }
+                        }
+                    })();
+                    return expr != null ? expr : JavaScriptToQueryVisitor.__super__.MemberExpression.call(this, node);
+                };
+
+                JavaScriptToQueryVisitor.prototype.Literal = function (node) {
+                    return new Q.ConstantExpression(node.value);
+                };
+
+                JavaScriptToQueryVisitor.prototype.UnaryExpression = function (node) {
+                    var mapping, _ref;
+                    if (node.operator === '+') {
+
+                        /* Ignore the + in '+52' */
+                        return this.visit(node.argument);
+                    } else {
+                        mapping = {
+                            '!': Q.UnaryOperators.Not,
+                            '-': Q.UnaryOperators.Negate
+                        };
+                        return (_ref = this.translateUnary(node, mapping)) != null ? _ref : JavaScriptToQueryVisitor.__super__.UnaryExpression.call(this, node);
+                    }
+                };
+
+                JavaScriptToQueryVisitor.prototype.UpdateExpression = function (node) {
+                    var mapping, _ref;
+                    mapping = {
+                        '++': Q.UnaryOperators.Increment,
+                        '--': Q.UnaryOperators.Decrement
+                    };
+                    return (_ref = this.translateUnary(node, mapping)) != null ? _ref : JavaScriptToQueryVisitor.__super__.UpdateExpression.call(this, node);
+                };
+
+                JavaScriptToQueryVisitor.prototype.LogicalExpression = function (node) {
+                    var mapping, _ref;
+                    mapping = {
+                        '&&': Q.BinaryOperators.And,
+                        '||': Q.BinaryOperators.Or
+                    };
+                    return (_ref = this.translateBinary(node, mapping)) != null ? _ref : JavaScriptToQueryVisitor.__super__.LogicalExpression.call(this, node);
+                };
+
+                JavaScriptToQueryVisitor.prototype.BinaryExpression = function (node) {
+                    var k, left, mapping, properties, v, value, _ref;
+                    mapping = {
+                        '+': Q.BinaryOperators.Add,
+                        '-': Q.BinaryOperators.Subtract,
+                        '*': Q.BinaryOperators.Multiply,
+                        '/': Q.BinaryOperators.Divide,
+                        '%': Q.BinaryOperators.Modulo,
+                        '>': Q.BinaryOperators.GreaterThan,
+                        '>=': Q.BinaryOperators.GreaterThanOrEqual,
+                        '<': Q.BinaryOperators.LessThan,
+                        '<=': Q.BinaryOperators.LessThanOrEqual,
+                        '!=': Q.BinaryOperators.NotEqual,
+                        '!==': Q.BinaryOperators.NotEqual,
+                        '==': Q.BinaryOperators.Equal,
+                        '===': Q.BinaryOperators.Equal
+                    };
+                    return (function () {
+                        var _ref1, _ref2;
+                        if ((_ref = this.translateBinary(node, mapping)) != null) {
+                            return _ref;
+                        } else if (node.operator === 'in' && ((_ref1 = node.right) != null ? _ref1.type : void 0) === 'Literal' && _.isArray((_ref2 = node.right) != null ? _ref2.value : void 0)) {
+
+                            /*
+                             * Transform the 'varName in [x, y, z]' operator into a series of
+                             * comparisons like varName == x || varName == y || varName == z.
+                             */
+                            if (node.right.value.length > 0) {
+                                left = this.visit(node.left);
+                                return Q.QueryExpression.groupClauses(Q.BinaryOperators.Or, (function () {
+                                    var _i, _len, _ref3, _results;
+                                    _ref3 = node.right.value;
+                                    _results = [];
+                                    for (_i = 0, _len = _ref3.length; _i < _len; _i++) {
+                                        value = _ref3[_i];
+
+                                        /*
+                                         * If we've got an array of objects who each have
+                                         * a single property, we'll use the value of that
+                                         * property.  Otherwise we'll throw an exception.
+                                         */
+                                        if (_.isObject(value)) {
+                                            properties = (function () {
+                                                var _results1;
+                                                _results1 = [];
+                                                for (k in value) {
+                                                    v = value[k];
+                                                    _results1.push(v);
+                                                }
+                                                return _results1;
+                                            })();
+                                            if ((properties != null ? properties.length : void 0) !== 1) {
+                                                throw "in operator requires comparison objects with a single field, not " + value + " (" + (JSON.stringify(value)) + "), for expression '" + (this.getSource(node)) + "'";
+                                            }
+                                            value = properties[0];
+                                        }
+                                        _results.push(new Q.BinaryExpression(Q.BinaryOperators.Equal, left, new Q.ConstantExpression(value)));
+                                    }
+                                    return _results;
+                                }).call(this));
+                            } else {
+
+                                /*
+                                 * If the array of values is empty, change the query to
+                                 * true == false since it can't be satisfied.
+                                 */
+                                return new Q.BinaryExpression(Q.BinaryOperators.Equal, new Q.ConstantExpression(true), new Q.ConstantExpression(false));
+                            }
+                        } else {
+                            return JavaScriptToQueryVisitor.__super__.BinaryExpression.call(this, node);
+                        }
+                    }).call(this);
+                };
+
+                JavaScriptToQueryVisitor.prototype.CallExpression = function (node) {
+                    var expr, func, getSingleArg, getTwoArgs, member, method, _ref;
+                    getSingleArg = (function (_this) {
+                        return function (name) {
+                            var _ref;
+                            if (((_ref = node["arguments"]) != null ? _ref.length : void 0) !== 1) {
+                                throw "Function " + name + " expects one argument in expression '" + (_this.getSource(node)) + "'";
+                            }
+                            return _this.visit(node["arguments"][0]);
+                        };
+                    })(this);
+                    getTwoArgs = (function (_this) {
+                        return function (member, name) {
+                            var _ref;
+                            if (((_ref = node["arguments"]) != null ? _ref.length : void 0) !== 2) {
+                                throw "Function " + name + " expects two arguments in expression '" + (_this.getSource(node)) + "'";
+                            }
+                            return [member, _this.visit(node["arguments"][0]), _this.visit(node["arguments"][1])];
+                        };
+                    })(this);
+
+                    /*
+                     * Translate known method calls that aren't attached to an instance.
+                     * Note that we can compare against the actual method because the
+                     * partial evaluator will have converted it into a literal for us.
+                     */
+                    func = node != null ? (_ref = node.callee) != null ? _ref.value : void 0 : void 0;
+                    expr = (function () {
+                        var _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7;
+                        if (func === Math.floor) {
+                            return new Q.InvocationExpression(Q.Methods.Floor, [getSingleArg('floor')]);
+                        } else if (func === Math.ceil) {
+                            return new Q.InvocationExpression(Q.Methods.Ceiling, [getSingleArg('ceil')]);
+                        } else if (func === Math.round) {
+                            return new Q.InvocationExpression(Q.Methods.Round, [getSingleArg('round')]);
+                        } else {
+
+                            /*
+                             * Translate methods dangling off an instance
+                             */
+                            if (node.callee.type === 'MemberExpression' && ((_ref1 = node.callee.object) != null ? _ref1.__hasThisExp : void 0) === true) {
+                                if ((node != null ? (_ref2 = node.callee) != null ? (_ref3 = _ref2.object) != null ? _ref3.type : void 0 : void 0 : void 0) === 'CallExpression') {
+                                    member = this.visit(node.callee.object);
+                                } else {
+                                    member = new Q.MemberExpression((_ref4 = node.callee.object) != null ? (_ref5 = _ref4.property) != null ? _ref5.name : void 0 : void 0);
+                                }
+                                method = (_ref6 = node.callee) != null ? (_ref7 = _ref6.property) != null ? _ref7.name : void 0 : void 0;
+                                if (method === 'toUpperCase') {
+                                    return new Q.InvocationExpression(Q.Methods.ToUpperCase, [member]);
+                                } else if (method === 'toLowerCase') {
+                                    return new Q.InvocationExpression(Q.Methods.ToLowerCase, [member]);
+                                } else if (method === 'trim') {
+                                    return new Q.InvocationExpression(Q.Methods.Trim, [member]);
+                                } else if (method === 'indexOf') {
+                                    return new Q.InvocationExpression(Q.Methods.IndexOf, [member, getSingleArg('indexOf')]);
+                                } else if (method === 'concat') {
+                                    return new Q.InvocationExpression(Q.Methods.Concat, [member, getSingleArg('concat')]);
+                                } else if (method === 'substring' || method === 'substr') {
+                                    return new Q.InvocationExpression(Q.Methods.Substring, getTwoArgs(member, 'substring'));
+                                } else if (method === 'replace') {
+                                    return new Q.InvocationExpression(Q.Methods.Replace, getTwoArgs(member, 'replace'));
+                                } else if (method === 'getFullYear' || method === 'getUTCFullYear') {
+                                    return new Q.InvocationExpression(Q.Methods.Year, [member]);
+                                } else if (method === 'getYear') {
+                                    return new Q.BinaryExpression(Q.BinaryOperators.Subtract, new Q.InvocationExpression(Q.Methods.Year, [member]), new Q.ConstantExpression(1900));
+                                } else if (method === 'getMonth' || method === 'getUTCMonth') {
+
+                                    /* getMonth is 0 indexed in JavaScript */
+                                    return new Q.BinaryExpression(Q.BinaryOperators.Subtract, new Q.InvocationExpression(Q.Methods.Month, [member]), new Q.ConstantExpression(1));
+                                } else if (method === 'getDate' || method === 'getUTCDate') {
+                                    return new Q.InvocationExpression(Q.Methods.Day, [member]);
+                                }
+                            }
+                        }
+                    }).call(this);
+                    return expr != null ? expr : JavaScriptToQueryVisitor.__super__.CallExpression.call(this, node);
+                };
+
+                return JavaScriptToQueryVisitor;
+
+            })(JS.JavaScriptVisitor);
+
         }).call(this);
     };
 
     $__modules__.Node = function (exports) {
         // Generated by CoffeeScript 1.7.1
-        
+
         /*
          * ----------------------------------------------------------------------------
          * Copyright (c) Microsoft Corporation. All rights reserved.
          * ----------------------------------------------------------------------------
          */
-        
-        (function() {
-          var Node, Visitor, _;
-        
-          _ = require('./Utilities');
-        
-        
-          /*
-           * The base Node class for all expressions used for analysis and translation by
-           * visitors.  It's designed to interop with other modules that create expression
-           * trees using object literals with a type tag.
-           */
-        
-          exports.Node = Node = (function() {
-        
+
+        (function () {
+            var Node, Visitor, _;
+
+            _ = require('./Utilities');
+
+
             /*
-             * Type tag of the node that allows for eash dispatch in visitors.  This is
-             * automatically set in the constructor (so it's important to call super() in
-             * derived Node classes).
+             * The base Node class for all expressions used for analysis and translation by
+             * visitors.  It's designed to interop with other modules that create expression
+             * trees using object literals with a type tag.
              */
-            Node.prototype.type = 'Node';
-        
-        
-            /*
-             * Initializes a new instance of the Node class and sets its type tag.
-             */
-        
-            function Node() {
-              this.type = _.functionName(this.constructor);
-            }
-        
-            return Node;
-        
-          })();
-        
-        
-          /*
-           * Base class for all visitors
-           */
-        
-          exports.Visitor = Visitor = (function() {
-            function Visitor() {}
-        
-        
-            /*
-             * Visit a node.
-             */
-        
-            Visitor.prototype.visit = function(node) {
-              var element, _i, _len, _results;
-              if (_.isArray(node)) {
-                _results = [];
-                for (_i = 0, _len = node.length; _i < _len; _i++) {
-                  element = node[_i];
-                  _results.push(this.visit(element));
+
+            exports.Node = Node = (function () {
+
+                /*
+                 * Type tag of the node that allows for eash dispatch in visitors.  This is
+                 * automatically set in the constructor (so it's important to call super() in
+                 * derived Node classes).
+                 */
+                Node.prototype.type = 'Node';
+
+
+                /*
+                 * Initializes a new instance of the Node class and sets its type tag.
+                 */
+
+                function Node() {
+                    this.type = _.functionName(this.constructor);
                 }
-                return _results;
-              } else if (!(node != null ? node.type : void 0)) {
-                return node;
-              } else if (!_.isFunction(this[node.type])) {
-                throw "Unsupported expression " + (this.getSource(node));
-              } else {
-                return this[node.type](node);
-              }
-            };
-        
-        
+
+                return Node;
+
+            })();
+
+
             /*
-             * Get the source code corresponding to a node.
+             * Base class for all visitors
              */
-        
-            Visitor.prototype.getSource = function(node) {
-        
-              /* It is expected this will be overridden in derived visitors. */
-              return null;
-            };
-        
-            return Visitor;
-        
-          })();
-        
+
+            exports.Visitor = Visitor = (function () {
+                function Visitor() { }
+
+
+                /*
+                 * Visit a node.
+                 */
+
+                Visitor.prototype.visit = function (node) {
+                    var element, _i, _len, _results;
+                    if (_.isArray(node)) {
+                        _results = [];
+                        for (_i = 0, _len = node.length; _i < _len; _i++) {
+                            element = node[_i];
+                            _results.push(this.visit(element));
+                        }
+                        return _results;
+                    } else if (!(node != null ? node.type : void 0)) {
+                        return node;
+                    } else if (!_.isFunction(this[node.type])) {
+                        throw "Unsupported expression " + (this.getSource(node));
+                    } else {
+                        return this[node.type](node);
+                    }
+                };
+
+
+                /*
+                 * Get the source code corresponding to a node.
+                 */
+
+                Visitor.prototype.getSource = function (node) {
+
+                    /* It is expected this will be overridden in derived visitors. */
+                    return null;
+                };
+
+                return Visitor;
+
+            })();
+
         }).call(this);
     };
 
     $__modules__.ODataProvider = function (exports) {
         // Generated by CoffeeScript 1.7.1
-        
+
         /*
          * ----------------------------------------------------------------------------
          * Copyright (c) Microsoft Corporation. All rights reserved.
          * ----------------------------------------------------------------------------
          */
-        
-        (function() {
-          var ODataFilterQueryVisitor, ODataProvider, Q, Query, _,
-            __hasProp = {}.hasOwnProperty,
-            __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-        
-          _ = require('./Utilities');
-        
-          Q = require('./QueryNodes');
-        
-          Query = require('./Query').Query;
-        
-          exports.ODataProvider = ODataProvider = (function() {
-            function ODataProvider() {}
-        
-        
-            /*
-             * Convert a query into an OData URI.
-             */
-        
-            ODataProvider.prototype.toQuery = function(query) {
-              var odata, s, url;
-              odata = this.toOData(query, true);
-              url = "/" + odata.table;
-              s = '?';
-              if (odata.filters) {
-                url += "" + s + "$filter=" + odata.filters;
-                s = '&';
-              }
-              if (odata.ordering) {
-                url += "" + s + "$orderby=" + odata.ordering;
-                s = '&';
-              }
-              if (odata.skip) {
-                url += "" + s + "$skip=" + odata.skip;
-                s = '&';
-              }
-              if (odata.take || odata.take === 0) {
-                url += "" + s + "$top=" + odata.take;
-                s = '&';
-              }
-              if (odata.selections) {
-                url += "" + s + "$select=" + odata.selections;
-                s = '&';
-              }
-              if (odata.includeTotalCount) {
-                url += "" + s + "$inlinecount=allpages";
-              }
-              return url;
-            };
-        
-        
-            /*
-             * Translate the query components into OData strings
-             */
-        
-            ODataProvider.prototype.toOData = function(query, encodeForUri) {
-              var asc, components, name, odata, ordering, _ref, _ref1;
-              if (encodeForUri == null) {
-                encodeForUri = false;
-              }
-              components = (_ref = query != null ? query.getComponents() : void 0) != null ? _ref : {};
-              ordering = (function() {
-                var _ref1, _results;
-                _ref1 = components != null ? components.ordering : void 0;
-                _results = [];
-                for (name in _ref1) {
-                  asc = _ref1[name];
-                  _results.push(asc ? name : "" + name + " desc");
-                }
-                return _results;
-              })();
-              return odata = {
-                table: components != null ? components.table : void 0,
-                filters: ODataFilterQueryVisitor.convert(components.filters, encodeForUri),
-                ordering: ordering != null ? ordering.toString() : void 0,
-                skip: components != null ? components.skip : void 0,
-                take: components != null ? components.take : void 0,
-                selections: components != null ? (_ref1 = components.selections) != null ? _ref1.toString() : void 0 : void 0,
-                includeTotalCount: components != null ? components.includeTotalCount : void 0
-              };
-            };
-        
-        
-            /*
-             * Convert OData components into a query object
-             */
-        
-            ODataProvider.prototype.fromOData = function(table, filters, ordering, skip, take, selections, includeTotalCount) {
-              var direction, field, item, query, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3;
-              query = new Query(table);
-              if (filters) {
-                query.where(filters);
-              }
-              if (skip || skip === 0) {
-                query.skip(skip);
-              }
-              if (take || take === 0) {
-                query.take(take);
-              }
-              if (includeTotalCount) {
-                query.includeTotalCount();
-              }
-              _ref1 = (_ref = selections != null ? selections.split(',') : void 0) != null ? _ref : [];
-              for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-                field = _ref1[_i];
-                query.select(field.trim());
-              }
-              _ref2 = (function() {
-                var _k, _len1, _ref2, _ref3, _results;
-                _ref3 = (_ref2 = ordering != null ? ordering.split(',') : void 0) != null ? _ref2 : [];
-                _results = [];
-                for (_k = 0, _len1 = _ref3.length; _k < _len1; _k++) {
-                  item = _ref3[_k];
-                  _results.push(item.trim().split(' '));
-                }
-                return _results;
-              })();
-              for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
-                _ref3 = _ref2[_j], field = _ref3[0], direction = _ref3[1];
-                if ((direction != null ? direction.toUpperCase() : void 0) !== 'DESC') {
-                  query.orderBy(field);
-                } else {
-                  query.orderByDescending(field);
-                }
-              }
-              return query;
-            };
-        
-            return ODataProvider;
-        
-          })();
-        
-        
-          /*
-           * Visitor that converts query expression trees into OData filter statements.
-           */
-        
-          ODataFilterQueryVisitor = (function(_super) {
-            __extends(ODataFilterQueryVisitor, _super);
-        
-            function ODataFilterQueryVisitor(encodeForUri) {
-              this.encodeForUri = encodeForUri;
-            }
-        
-            ODataFilterQueryVisitor.convert = function(filters, encodeForUri) {
-              var visitor, _ref;
-              visitor = new ODataFilterQueryVisitor(encodeForUri);
-              return (_ref = (filters ? visitor.visit(filters) : void 0)) != null ? _ref : null;
-            };
-        
-            ODataFilterQueryVisitor.prototype.toOData = function(value) {
-              var text;
-              if ((_.isNumber(value)) || (_.isBoolean(value))) {
-                return value.toString();
-              } else if (_.isString(value)) {
-                value = value.replace(/'/g, "''");
-                if ((this.encodeForUri != null) && this.encodeForUri === true) {
-                  value = encodeURIComponent(value);
-                }
-                return "'" + value + "'";
-              } else if (_.isDate(value)) {
-        
+
+        (function () {
+            var ODataFilterQueryVisitor, ODataProvider, Q, Query, _,
+              __hasProp = {}.hasOwnProperty,
+              __extends = function (child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+            _ = require('./Utilities');
+
+            Q = require('./QueryNodes');
+
+            Query = require('./Query').Query;
+
+            exports.ODataProvider = ODataProvider = (function () {
+                function ODataProvider() { }
+
+
                 /*
-                 * Dates are expected in the format
-                 *   "datetime'yyyy-mm-ddThh:mm[:ss[.fffffff]]'"
-                 * which JSON.stringify gives us by default
+                 * Convert a query into an OData URI.
                  */
-                text = JSON.stringify(value);
-                if (text.length > 2) {
-                  text = text.slice(1, +(text.length - 2) + 1 || 9e9);
+
+                ODataProvider.prototype.toQuery = function (query) {
+                    var odata, s, url;
+                    odata = this.toOData(query, true);
+                    url = "/" + odata.table;
+                    s = '?';
+                    if (odata.filters) {
+                        url += "" + s + "$filter=" + odata.filters;
+                        s = '&';
+                    }
+                    if (odata.ordering) {
+                        url += "" + s + "$orderby=" + odata.ordering;
+                        s = '&';
+                    }
+                    if (odata.skip) {
+                        url += "" + s + "$skip=" + odata.skip;
+                        s = '&';
+                    }
+                    if (odata.take || odata.take === 0) {
+                        url += "" + s + "$top=" + odata.take;
+                        s = '&';
+                    }
+                    if (odata.selections) {
+                        url += "" + s + "$select=" + odata.selections;
+                        s = '&';
+                    }
+                    if (odata.includeTotalCount) {
+                        url += "" + s + "$inlinecount=allpages";
+                    }
+                    return url;
+                };
+
+
+                /*
+                 * Translate the query components into OData strings
+                 */
+
+                ODataProvider.prototype.toOData = function (query, encodeForUri) {
+                    var asc, components, name, odata, ordering, _ref, _ref1;
+                    if (encodeForUri == null) {
+                        encodeForUri = false;
+                    }
+                    components = (_ref = query != null ? query.getComponents() : void 0) != null ? _ref : {};
+                    ordering = (function () {
+                        var _ref1, _results;
+                        _ref1 = components != null ? components.ordering : void 0;
+                        _results = [];
+                        for (name in _ref1) {
+                            asc = _ref1[name];
+                            _results.push(asc ? name : "" + name + " desc");
+                        }
+                        return _results;
+                    })();
+                    return odata = {
+                        table: components != null ? components.table : void 0,
+                        filters: ODataFilterQueryVisitor.convert(components.filters, encodeForUri),
+                        ordering: ordering != null ? ordering.toString() : void 0,
+                        skip: components != null ? components.skip : void 0,
+                        take: components != null ? components.take : void 0,
+                        selections: components != null ? (_ref1 = components.selections) != null ? _ref1.toString() : void 0 : void 0,
+                        includeTotalCount: components != null ? components.includeTotalCount : void 0
+                    };
+                };
+
+
+                /*
+                 * Convert OData components into a query object
+                 */
+
+                ODataProvider.prototype.fromOData = function (table, filters, ordering, skip, take, selections, includeTotalCount) {
+                    var direction, field, item, query, _i, _j, _len, _len1, _ref, _ref1, _ref2, _ref3;
+                    query = new Query(table);
+                    if (filters) {
+                        query.where(filters);
+                    }
+                    if (skip || skip === 0) {
+                        query.skip(skip);
+                    }
+                    if (take || take === 0) {
+                        query.take(take);
+                    }
+                    if (includeTotalCount) {
+                        query.includeTotalCount();
+                    }
+                    _ref1 = (_ref = selections != null ? selections.split(',') : void 0) != null ? _ref : [];
+                    for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
+                        field = _ref1[_i];
+                        query.select(field.trim());
+                    }
+                    _ref2 = (function () {
+                        var _k, _len1, _ref2, _ref3, _results;
+                        _ref3 = (_ref2 = ordering != null ? ordering.split(',') : void 0) != null ? _ref2 : [];
+                        _results = [];
+                        for (_k = 0, _len1 = _ref3.length; _k < _len1; _k++) {
+                            item = _ref3[_k];
+                            _results.push(item.trim().split(' '));
+                        }
+                        return _results;
+                    })();
+                    for (_j = 0, _len1 = _ref2.length; _j < _len1; _j++) {
+                        _ref3 = _ref2[_j], field = _ref3[0], direction = _ref3[1];
+                        if ((direction != null ? direction.toUpperCase() : void 0) !== 'DESC') {
+                            query.orderBy(field);
+                        } else {
+                            query.orderByDescending(field);
+                        }
+                    }
+                    return query;
+                };
+
+                return ODataProvider;
+
+            })();
+
+
+            /*
+             * Visitor that converts query expression trees into OData filter statements.
+             */
+
+            ODataFilterQueryVisitor = (function (_super) {
+                __extends(ODataFilterQueryVisitor, _super);
+
+                function ODataFilterQueryVisitor(encodeForUri) {
+                    this.encodeForUri = encodeForUri;
                 }
-                text = text.replace(/(T\d{2}:\d{2}:\d{2})Z$/, function(all, time) {
-                  var msec;
-                  msec = String(value.getMilliseconds() + 1000).substring(1);
-                  return "" + time + "." + msec + "Z";
-                });
-                return "datetime'" + text + "'";
-              } else if (!value) {
-                return "null";
-              } else {
-                throw "Unsupported literal value " + value;
-              }
-            };
-        
-            ODataFilterQueryVisitor.prototype.ConstantExpression = function(node) {
-              return this.toOData(node.value);
-            };
-        
-            ODataFilterQueryVisitor.prototype.MemberExpression = function(node) {
-              return node.member;
-            };
-        
-            ODataFilterQueryVisitor.prototype.UnaryExpression = function(node) {
-              if (node.operator === Q.UnaryOperators.Not) {
-                return "not " + (this.visit(node.operand));
-              } else if (node.operator === Q.UnaryOperators.Negate) {
-                return "(0 sub " + (this.visit(node.operand)) + ")";
-              } else {
-                throw "Unsupported operator " + node.operator;
-              }
-            };
-        
-            ODataFilterQueryVisitor.prototype.BinaryExpression = function(node) {
-              var mapping, op;
-              mapping = {
-                And: 'and',
-                Or: 'or',
-                Add: 'add',
-                Subtract: 'sub',
-                Multiply: 'mul',
-                Divide: 'div',
-                Modulo: 'mod',
-                GreaterThan: 'gt',
-                GreaterThanOrEqual: 'ge',
-                LessThan: 'lt',
-                LessThanOrEqual: 'le',
-                NotEqual: 'ne',
-                Equal: 'eq'
-              };
-              op = mapping[node.operator];
-              if (op) {
-                return "(" + (this.visit(node.left)) + " " + op + " " + (this.visit(node.right)) + ")";
-              } else {
-                throw "Unsupported operator " + node.operator;
-              }
-            };
-        
-            ODataFilterQueryVisitor.prototype.InvocationExpression = function(node) {
-              var mapping, method;
-              mapping = {
-                Length: 'length',
-                ToUpperCase: 'toupper',
-                ToLowerCase: 'tolower',
-                Trim: 'trim',
-                IndexOf: 'indexof',
-                Replace: 'replace',
-                Substring: 'substring',
-                Concat: 'concat',
-                Day: 'day',
-                Month: 'month',
-                Year: 'year',
-                Floor: 'floor',
-                Ceiling: 'ceiling',
-                Round: 'round'
-              };
-              method = mapping[node.method];
-              if (method) {
-                return "" + method + "(" + (this.visit(node.args)) + ")";
-              } else {
-                throw "Invocation of unsupported method " + node.method;
-              }
-            };
-        
-            ODataFilterQueryVisitor.prototype.LiteralExpression = function(node) {
-              var ch, inString, literal, _i, _len, _ref;
-              literal = '';
-              inString = false;
-              _ref = node.queryString;
-              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-                ch = _ref[_i];
-                if (inString) {
-                  literal += ch;
-                  inString = ch !== "'";
-                } else if (ch === '?') {
-                  if ((!node.args) || (node.args.length <= 0)) {
-                    throw "Too few arguments for " + node.queryString + ".";
-                  }
-                  literal += this.toOData(node.args.shift());
-                } else if (ch === "'") {
-                  literal += ch;
-                  inString = true;
-                } else {
-                  literal += ch;
-                }
-              }
-              if (node.args && node.args.length > 0) {
-                throw "Too many arguments for " + node.queryString;
-              }
-              return literal;
-            };
-        
-            return ODataFilterQueryVisitor;
-        
-          })(Q.QueryExpressionVisitor);
-        
+
+                ODataFilterQueryVisitor.convert = function (filters, encodeForUri) {
+                    var visitor, _ref;
+                    visitor = new ODataFilterQueryVisitor(encodeForUri);
+                    return (_ref = (filters ? visitor.visit(filters) : void 0)) != null ? _ref : null;
+                };
+
+                ODataFilterQueryVisitor.prototype.toOData = function (value) {
+                    var text;
+                    if ((_.isNumber(value)) || (_.isBoolean(value))) {
+                        return value.toString();
+                    } else if (_.isString(value)) {
+                        value = value.replace(/'/g, "''");
+                        if ((this.encodeForUri != null) && this.encodeForUri === true) {
+                            value = encodeURIComponent(value);
+                        }
+                        return "'" + value + "'";
+                    } else if (_.isDate(value)) {
+
+                        /*
+                         * Dates are expected in the format
+                         *   "datetime'yyyy-mm-ddThh:mm[:ss[.fffffff]]'"
+                         * which JSON.stringify gives us by default
+                         */
+                        text = JSON.stringify(value);
+                        if (text.length > 2) {
+                            text = text.slice(1, +(text.length - 2) + 1 || 9e9);
+                        }
+                        text = text.replace(/(T\d{2}:\d{2}:\d{2})Z$/, function (all, time) {
+                            var msec;
+                            msec = String(value.getMilliseconds() + 1000).substring(1);
+                            return "" + time + "." + msec + "Z";
+                        });
+                        return "datetime'" + text + "'";
+                    } else if (!value) {
+                        return "null";
+                    } else {
+                        throw "Unsupported literal value " + value;
+                    }
+                };
+
+                ODataFilterQueryVisitor.prototype.ConstantExpression = function (node) {
+                    return this.toOData(node.value);
+                };
+
+                ODataFilterQueryVisitor.prototype.MemberExpression = function (node) {
+                    return node.member;
+                };
+
+                ODataFilterQueryVisitor.prototype.UnaryExpression = function (node) {
+                    if (node.operator === Q.UnaryOperators.Not) {
+                        return "not " + (this.visit(node.operand));
+                    } else if (node.operator === Q.UnaryOperators.Negate) {
+                        return "(0 sub " + (this.visit(node.operand)) + ")";
+                    } else {
+                        throw "Unsupported operator " + node.operator;
+                    }
+                };
+
+                ODataFilterQueryVisitor.prototype.BinaryExpression = function (node) {
+                    var mapping, op;
+                    mapping = {
+                        And: 'and',
+                        Or: 'or',
+                        Add: 'add',
+                        Subtract: 'sub',
+                        Multiply: 'mul',
+                        Divide: 'div',
+                        Modulo: 'mod',
+                        GreaterThan: 'gt',
+                        GreaterThanOrEqual: 'ge',
+                        LessThan: 'lt',
+                        LessThanOrEqual: 'le',
+                        NotEqual: 'ne',
+                        Equal: 'eq'
+                    };
+                    op = mapping[node.operator];
+                    if (op) {
+                        return "(" + (this.visit(node.left)) + " " + op + " " + (this.visit(node.right)) + ")";
+                    } else {
+                        throw "Unsupported operator " + node.operator;
+                    }
+                };
+
+                ODataFilterQueryVisitor.prototype.InvocationExpression = function (node) {
+                    var mapping, method;
+                    mapping = {
+                        Length: 'length',
+                        ToUpperCase: 'toupper',
+                        ToLowerCase: 'tolower',
+                        Trim: 'trim',
+                        IndexOf: 'indexof',
+                        Replace: 'replace',
+                        Substring: 'substring',
+                        Concat: 'concat',
+                        Day: 'day',
+                        Month: 'month',
+                        Year: 'year',
+                        Floor: 'floor',
+                        Ceiling: 'ceiling',
+                        Round: 'round'
+                    };
+                    method = mapping[node.method];
+                    if (method) {
+                        return "" + method + "(" + (this.visit(node.args)) + ")";
+                    } else {
+                        throw "Invocation of unsupported method " + node.method;
+                    }
+                };
+
+                ODataFilterQueryVisitor.prototype.LiteralExpression = function (node) {
+                    var ch, inString, literal, _i, _len, _ref;
+                    literal = '';
+                    inString = false;
+                    _ref = node.queryString;
+                    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                        ch = _ref[_i];
+                        if (inString) {
+                            literal += ch;
+                            inString = ch !== "'";
+                        } else if (ch === '?') {
+                            if ((!node.args) || (node.args.length <= 0)) {
+                                throw "Too few arguments for " + node.queryString + ".";
+                            }
+                            literal += this.toOData(node.args.shift());
+                        } else if (ch === "'") {
+                            literal += ch;
+                            inString = true;
+                        } else {
+                            literal += ch;
+                        }
+                    }
+                    if (node.args && node.args.length > 0) {
+                        throw "Too many arguments for " + node.queryString;
+                    }
+                    return literal;
+                };
+
+                return ODataFilterQueryVisitor;
+
+            })(Q.QueryExpressionVisitor);
+
         }).call(this);
     };
 
     $__modules__.PartialEvaluator = function (exports) {
         // Generated by CoffeeScript 1.7.1
-        
+
         /*
          * ----------------------------------------------------------------------------
          * Copyright (c) Microsoft Corporation. All rights reserved.
          * ----------------------------------------------------------------------------
          */
-        
-        (function() {
-          var IndependenceNominator, JS, PartialEvaluator, _,
-            __hasProp = {}.hasOwnProperty,
-            __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-        
-          _ = require('./Utilities');
-        
-          JS = require('./JavaScriptNodes');
-        
-        
-          /*
-           * Partially evaluate a complex expression in the context of its environment.
-           * This allows us to support arbitrary JavaScript expressions even though we
-           * only explicitly transform a subset of expressions into QueryExpressions.
-           *
-           * For example, assuming we have an expression like (x) -> @id == x + 1 with an
-           * environment where x == 12, then the entire right hand side of the comparison
-           * is independent of any values computed by the query and could be replaced with
-           * the literal value 13.
-           */
-        
-          exports.PartialEvaluator = PartialEvaluator = (function(_super) {
-            __extends(PartialEvaluator, _super);
-        
-            function PartialEvaluator(context) {
-              this.context = context;
-            }
-        
-            PartialEvaluator.prototype.visit = function(node) {
-              var key, params, source, thunk, value, values, _ref, _ref1, _ref2, _ref3;
-              if (!node.__independent || node.type === 'Literal' || (!node.type)) {
-        
-                /*
-                 * If the node isn't independent or it's already a literal, then
-                 * just keep walking the tree
-                 */
-                return PartialEvaluator.__super__.visit.call(this, node);
-              } else {
-        
-                /*
-                 * Otherwse we'll evaluate the node in the context of the
-                 * environment by either looking up identifiers directly or
-                 * evaluating whole sub expressions
-                 */
-                if (node.type === 'Identifier' && this.context.environment[node.name]) {
-                  return new JS.Literal(this.context.environment[node.name]);
-                } else {
-        
-                  /*
-                   * Evaluate the source of the sub expression in the context
-                   * of the environment
-                   */
-                  source = this.context.source.slice(node != null ? (_ref = node.range) != null ? _ref[0] : void 0 : void 0, +((node != null ? (_ref1 = node.range) != null ? _ref1[1] : void 0 : void 0) - 1) + 1 || 9e9);
-                  params = (_ref2 = (function() {
-                    var _ref3, _results;
-                    _ref3 = this.context.environment;
-                    _results = [];
-                    for (key in _ref3) {
-                      value = _ref3[key];
-                      _results.push(key);
-                    }
-                    return _results;
-                  }).call(this)) != null ? _ref2 : [];
-                  values = (_ref3 = (function() {
-                    var _ref4, _results;
-                    _ref4 = this.context.environment;
-                    _results = [];
-                    for (key in _ref4) {
-                      value = _ref4[key];
-                      _results.push(JSON.stringify(value));
-                    }
-                    return _results;
-                  }).call(this)) != null ? _ref3 : [];
-                  thunk = "(function(" + params + ") { return " + source + "; })(" + values + ")";
-                  value = eval(thunk);
-                  return new JS.Literal(value);
+
+        (function () {
+            var IndependenceNominator, JS, PartialEvaluator, _,
+              __hasProp = {}.hasOwnProperty,
+              __extends = function (child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+            _ = require('./Utilities');
+
+            JS = require('./JavaScriptNodes');
+
+
+            /*
+             * Partially evaluate a complex expression in the context of its environment.
+             * This allows us to support arbitrary JavaScript expressions even though we
+             * only explicitly transform a subset of expressions into QueryExpressions.
+             *
+             * For example, assuming we have an expression like (x) -> @id == x + 1 with an
+             * environment where x == 12, then the entire right hand side of the comparison
+             * is independent of any values computed by the query and could be replaced with
+             * the literal value 13.
+             */
+
+            exports.PartialEvaluator = PartialEvaluator = (function (_super) {
+                __extends(PartialEvaluator, _super);
+
+                function PartialEvaluator(context) {
+                    this.context = context;
                 }
-              }
-            };
-        
-            PartialEvaluator.evaluate = function(context) {
-              var evaluator, nominator;
-              nominator = new IndependenceNominator(context);
-              nominator.visit(context.expression);
-              evaluator = new PartialEvaluator(context);
-              return evaluator.visit(context.expression);
-            };
-        
-            return PartialEvaluator;
-        
-          })(JS.JavaScriptVisitor);
-        
-        
-          /*
-           * Nominate independent nodes in an expression tree that don't depend on any
-           * server side values.
-           */
-        
-          exports.IndependenceNominator = IndependenceNominator = (function(_super) {
-            __extends(IndependenceNominator, _super);
-        
-            function IndependenceNominator(context) {
-              this.context = context;
-            }
-        
-            IndependenceNominator.prototype.Literal = function(node) {
-              IndependenceNominator.__super__.Literal.call(this, node);
-              node.__independent = true;
-              node.__hasThisExp = false;
-              return node;
-            };
-        
-            IndependenceNominator.prototype.ThisExpression = function(node) {
-              IndependenceNominator.__super__.ThisExpression.call(this, node);
-              node.__independent = false;
-              node.__hasThisExp = true;
-              return node;
-            };
-        
-            IndependenceNominator.prototype.Identifier = function(node) {
-              IndependenceNominator.__super__.Identifier.call(this, node);
-              node.__independent = true;
-              node.__hasThisExp = false;
-              return node;
-            };
-        
-            IndependenceNominator.prototype.MemberExpression = function(node) {
-              var _ref;
-              IndependenceNominator.__super__.MemberExpression.call(this, node);
-        
-              /*
-               * Undo independence of identifiers when they're members of this.* or
-               * this.member.* (the latter allows for member functions)
-               */
-              node.__hasThisExp = (_ref = node.object) != null ? _ref.__hasThisExp : void 0;
-              if (node.__hasThisExp) {
-                node.__independent = false;
-                if (node != null) {
-                  node.property.__independent = false;
-                }
-              }
-              return node;
-            };
-        
-            IndependenceNominator.prototype.CallExpression = function(node) {
-              IndependenceNominator.__super__.CallExpression.call(this, node);
-              node.__hasThisExp = node.callee.__hasThisExp;
-              return node;
-            };
-        
-            IndependenceNominator.prototype.ObjectExpression = function(node) {
-              var independence, setter, _i, _j, _len, _len1, _ref, _ref1;
-              IndependenceNominator.__super__.ObjectExpression.call(this, node);
-        
-              /*
-               * Prevent literal key identifiers from being evaluated out of
-               * context
-               */
-              _ref = node.properties;
-              for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-                setter = _ref[_i];
-                setter.key.__independent = false;
-              }
-        
-              /*
-               * An object literal is independent if all of its values are
-               * independent
-               */
-              independence = true;
-              _ref1 = node.properties;
-              for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
-                setter = _ref1[_j];
-                independence &= setter.value.__independent;
-              }
-              node.__independent = independence ? true : false;
-              return node;
-            };
-        
-            IndependenceNominator.prototype.visit = function(node) {
-        
-              /*
-               * Call the base visit method which will both visit all of our
-               * subexpressions and also call the couple of overrides above which
-               * handle the base independence cases
-               */
-              var independence, isIndependent, name, v, value, _i, _len;
-              IndependenceNominator.__super__.visit.call(this, node);
-        
-              /*
-               * If the node's independence wasn't determined automatically by the
-               * base cases above, then it's independence is determined by checking
-               * all of its values and aggregating their independence
-               */
-              if (!(Object.prototype.hasOwnProperty.call(node, '__independent'))) {
-                independence = true;
-                isIndependent = function(node) {
-                  var _ref;
-                  if (_.isObject(node)) {
-                    return (_ref = value.__independent) != null ? _ref : false;
-                  } else {
-                    return true;
-                  }
+
+                PartialEvaluator.prototype.visit = function (node) {
+                    var key, params, source, thunk, value, values, _ref, _ref1, _ref2, _ref3;
+                    if (!node.__independent || node.type === 'Literal' || (!node.type)) {
+
+                        /*
+                         * If the node isn't independent or it's already a literal, then
+                         * just keep walking the tree
+                         */
+                        return PartialEvaluator.__super__.visit.call(this, node);
+                    } else {
+
+                        /*
+                         * Otherwse we'll evaluate the node in the context of the
+                         * environment by either looking up identifiers directly or
+                         * evaluating whole sub expressions
+                         */
+                        if (node.type === 'Identifier' && this.context.environment[node.name]) {
+                            return new JS.Literal(this.context.environment[node.name]);
+                        } else {
+
+                            /*
+                             * Evaluate the source of the sub expression in the context
+                             * of the environment
+                             */
+                            source = this.context.source.slice(node != null ? (_ref = node.range) != null ? _ref[0] : void 0 : void 0, +((node != null ? (_ref1 = node.range) != null ? _ref1[1] : void 0 : void 0) - 1) + 1 || 9e9);
+                            params = (_ref2 = (function () {
+                                var _ref3, _results;
+                                _ref3 = this.context.environment;
+                                _results = [];
+                                for (key in _ref3) {
+                                    value = _ref3[key];
+                                    _results.push(key);
+                                }
+                                return _results;
+                            }).call(this)) != null ? _ref2 : [];
+                            values = (_ref3 = (function () {
+                                var _ref4, _results;
+                                _ref4 = this.context.environment;
+                                _results = [];
+                                for (key in _ref4) {
+                                    value = _ref4[key];
+                                    _results.push(JSON.stringify(value));
+                                }
+                                return _results;
+                            }).call(this)) != null ? _ref3 : [];
+                            thunk = "(function(" + params + ") { return " + source + "; })(" + values + ")";
+                            value = eval(thunk);
+                            return new JS.Literal(value);
+                        }
+                    }
                 };
-                for (name in node) {
-                  value = node[name];
-                  if (_.isArray(value)) {
-                    for (_i = 0, _len = value.length; _i < _len; _i++) {
-                      v = value[_i];
-                      independence &= isIndependent(v);
-                    }
-                  } else if (_.isObject(value)) {
-                    independence &= isIndependent(value);
-                  }
+
+                PartialEvaluator.evaluate = function (context) {
+                    var evaluator, nominator;
+                    nominator = new IndependenceNominator(context);
+                    nominator.visit(context.expression);
+                    evaluator = new PartialEvaluator(context);
+                    return evaluator.visit(context.expression);
+                };
+
+                return PartialEvaluator;
+
+            })(JS.JavaScriptVisitor);
+
+
+            /*
+             * Nominate independent nodes in an expression tree that don't depend on any
+             * server side values.
+             */
+
+            exports.IndependenceNominator = IndependenceNominator = (function (_super) {
+                __extends(IndependenceNominator, _super);
+
+                function IndependenceNominator(context) {
+                    this.context = context;
                 }
-        
-                /* &= will turn true/false into 1/0 so we'll turn it back */
-                node.__independent = independence ? true : false;
-              }
-              return node;
-            };
-        
-            return IndependenceNominator;
-        
-          })(JS.JavaScriptVisitor);
-        
+
+                IndependenceNominator.prototype.Literal = function (node) {
+                    IndependenceNominator.__super__.Literal.call(this, node);
+                    node.__independent = true;
+                    node.__hasThisExp = false;
+                    return node;
+                };
+
+                IndependenceNominator.prototype.ThisExpression = function (node) {
+                    IndependenceNominator.__super__.ThisExpression.call(this, node);
+                    node.__independent = false;
+                    node.__hasThisExp = true;
+                    return node;
+                };
+
+                IndependenceNominator.prototype.Identifier = function (node) {
+                    IndependenceNominator.__super__.Identifier.call(this, node);
+                    node.__independent = true;
+                    node.__hasThisExp = false;
+                    return node;
+                };
+
+                IndependenceNominator.prototype.MemberExpression = function (node) {
+                    var _ref;
+                    IndependenceNominator.__super__.MemberExpression.call(this, node);
+
+                    /*
+                     * Undo independence of identifiers when they're members of this.* or
+                     * this.member.* (the latter allows for member functions)
+                     */
+                    node.__hasThisExp = (_ref = node.object) != null ? _ref.__hasThisExp : void 0;
+                    if (node.__hasThisExp) {
+                        node.__independent = false;
+                        if (node != null) {
+                            node.property.__independent = false;
+                        }
+                    }
+                    return node;
+                };
+
+                IndependenceNominator.prototype.CallExpression = function (node) {
+                    IndependenceNominator.__super__.CallExpression.call(this, node);
+                    node.__hasThisExp = node.callee.__hasThisExp;
+                    return node;
+                };
+
+                IndependenceNominator.prototype.ObjectExpression = function (node) {
+                    var independence, setter, _i, _j, _len, _len1, _ref, _ref1;
+                    IndependenceNominator.__super__.ObjectExpression.call(this, node);
+
+                    /*
+                     * Prevent literal key identifiers from being evaluated out of
+                     * context
+                     */
+                    _ref = node.properties;
+                    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+                        setter = _ref[_i];
+                        setter.key.__independent = false;
+                    }
+
+                    /*
+                     * An object literal is independent if all of its values are
+                     * independent
+                     */
+                    independence = true;
+                    _ref1 = node.properties;
+                    for (_j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
+                        setter = _ref1[_j];
+                        independence &= setter.value.__independent;
+                    }
+                    node.__independent = independence ? true : false;
+                    return node;
+                };
+
+                IndependenceNominator.prototype.visit = function (node) {
+
+                    /*
+                     * Call the base visit method which will both visit all of our
+                     * subexpressions and also call the couple of overrides above which
+                     * handle the base independence cases
+                     */
+                    var independence, isIndependent, name, v, value, _i, _len;
+                    IndependenceNominator.__super__.visit.call(this, node);
+
+                    /*
+                     * If the node's independence wasn't determined automatically by the
+                     * base cases above, then it's independence is determined by checking
+                     * all of its values and aggregating their independence
+                     */
+                    if (!(Object.prototype.hasOwnProperty.call(node, '__independent'))) {
+                        independence = true;
+                        isIndependent = function (node) {
+                            var _ref;
+                            if (_.isObject(node)) {
+                                return (_ref = value.__independent) != null ? _ref : false;
+                            } else {
+                                return true;
+                            }
+                        };
+                        for (name in node) {
+                            value = node[name];
+                            if (_.isArray(value)) {
+                                for (_i = 0, _len = value.length; _i < _len; _i++) {
+                                    v = value[_i];
+                                    independence &= isIndependent(v);
+                                }
+                            } else if (_.isObject(value)) {
+                                independence &= isIndependent(value);
+                            }
+                        }
+
+                        /* &= will turn true/false into 1/0 so we'll turn it back */
+                        node.__independent = independence ? true : false;
+                    }
+                    return node;
+                };
+
+                return IndependenceNominator;
+
+            })(JS.JavaScriptVisitor);
+
         }).call(this);
     };
 
     $__modules__.Query = function (exports) {
         // Generated by CoffeeScript 1.7.1
-        
+
         /*
          * ----------------------------------------------------------------------------
          * Copyright (c) Microsoft Corporation. All rights reserved.
          * ----------------------------------------------------------------------------
          */
-        
-        
+
+
         /* Pull in references */
-        
-        (function() {
-          var JavaScript, ODataProvider, Q, Query, _,
-            __slice = [].slice;
-        
-          _ = require('./Utilities');
-        
-          Q = require('./QueryNodes');
-        
-          JavaScript = require('./JavaScript').JavaScript;
-        
-        
-          /*
-           * Define a query that can be translated into a desired query language and
-           * executed remotely.
-           */
-        
-          exports.Query = Query = (function() {
-            function Query(table, context) {
-              var _context, _filters, _includeTotalCount, _ordering, _projection, _selections, _skip, _table, _take, _version;
-              if (!table || !(_.isString(table))) {
-                throw 'Expected the name of a table!';
-              }
-        
-              /* Store the table name and any extra context */
-              _table = table;
-              _context = context;
-        
-              /* Private Query component members */
-              _filters = null;
-              _projection = null;
-              _selections = [];
-              _ordering = {};
-              _skip = null;
-              _take = null;
-              _includeTotalCount = false;
-        
-              /*
-               * Keep a version flag that's updated on each mutation so we can
-               * track whether changes have been made.  This is to enable caching
-               * of compiled queries without reevaluating unless necessary.
-               */
-              _version = 0;
-        
-              /* Get the individual components of the query */
-              this.getComponents = function() {
-                return {
-                  filters: _filters,
-                  selections: _selections,
-                  projection: _projection,
-                  ordering: _ordering,
-                  skip: _skip,
-                  take: _take,
-                  table: _table,
-                  context: _context,
-                  includeTotalCount: _includeTotalCount,
-                  version: _version
-                };
-              };
-        
-              /*
-               * Set the individual components of the query (this is primarily
-               * meant to be used for rehydrating a query).
-               */
-              this.setComponents = function(components) {
-                var _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8;
-                _version++;
-                _filters = (_ref = components != null ? components.filters : void 0) != null ? _ref : null;
-                _selections = (_ref1 = components != null ? components.selections : void 0) != null ? _ref1 : [];
-                _projection = (_ref2 = components != null ? components.projection : void 0) != null ? _ref2 : null;
-                _ordering = (_ref3 = components != null ? components.ordering : void 0) != null ? _ref3 : {};
-                _skip = (_ref4 = components != null ? components.skip : void 0) != null ? _ref4 : null;
-                _take = (_ref5 = components != null ? components.take : void 0) != null ? _ref5 : null;
-                _includeTotalCount = (_ref6 = components != null ? components.includeTotalCount : void 0) != null ? _ref6 : false;
-                _table = (_ref7 = components != null ? components.table : void 0) != null ? _ref7 : null;
-                _context = (_ref8 = components != null ? components.context : void 0) != null ? _ref8 : null;
-                return this;
-              };
-        
-              /*
-               * Add a constraint to a query.  Constraints can take the form of
-               * a function with a single return statement, key/value pairs of
-               * equality comparisons, or provider-specific literal strings (note
-               * that not all providers support literals).
-               */
-              this.where = function() {
-                var args, constraint, expr, name, value;
-                constraint = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-                _version++;
-        
-                /*
-                 * Translate the constraint from its high level form into a
-                 * QueryExpression tree that can be manipulated by a query
-                 * provider
-                 */
-                expr = (function() {
-                  if (_.isFunction(constraint)) {
-                    return JavaScript.transformConstraint(constraint, args);
-                  } else if (_.isObject(constraint)) {
-        
-                    /*
-                     * Turn an object of key value pairs into a series of
-                     * equality expressions that are and'ed together to form
-                     * a single expression
-                     */
-                    return Q.QueryExpression.groupClauses(Q.BinaryOperators.And, (function() {
-                      var _results;
-                      _results = [];
-                      for (name in constraint) {
-                        value = constraint[name];
-                        _results.push(expr = new Q.BinaryExpression(Q.BinaryOperators.Equal, new Q.MemberExpression(name), new Q.ConstantExpression(value)));
-                      }
-                      return _results;
-                    })());
-                  } else if (_.isString(constraint)) {
-        
-                    /*
-                     * Store the literal query along with any arguments for
-                     * providers that support basic string replacement (i.e.,
-                     * something like where('name eq ?', 'Steve'))
-                     */
-                    return new Q.LiteralExpression(constraint, args);
-                  } else {
-                    throw "Expected a function, object, or string, not " + constraint;
-                  }
-                })();
-        
-                /* Merge the new filters with any existing filters */
-                _filters = Q.QueryExpression.groupClauses(Q.BinaryOperators.And, [_filters, expr]);
-                return this;
-              };
-        
-              /*
-               * Project the query results.  A projection can either be defined as
-               * a set of fields that we'll pull back (instead of the entire row)
-               * or a function that will transform a row into a new type.  If a
-               * function is used, we'll analyze the function to pull back the
-               * minimal number of fields required.
-               */
-              this.select = function() {
-                var param, parameters, projectionOrParameter, _i, _len;
-                projectionOrParameter = arguments[0], parameters = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-                _version++;
-                if (_.isString(projectionOrParameter)) {
-        
-                  /* Add all the literal string parameters */
-                  _selections.push(projectionOrParameter);
-                  for (_i = 0, _len = parameters.length; _i < _len; _i++) {
-                    param = parameters[_i];
-                    if (!(_.isString(param))) {
-                      throw "Expected string parameters, not " + param;
+
+        (function () {
+            var JavaScript, ODataProvider, Q, Query, _,
+              __slice = [].slice;
+
+            _ = require('./Utilities');
+
+            Q = require('./QueryNodes');
+
+            JavaScript = require('./JavaScript').JavaScript;
+
+
+            /*
+             * Define a query that can be translated into a desired query language and
+             * executed remotely.
+             */
+
+            exports.Query = Query = (function () {
+                function Query(table, context) {
+                    var _context, _filters, _includeTotalCount, _ordering, _projection, _selections, _skip, _table, _take, _version;
+                    if (!table || !(_.isString(table))) {
+                        throw 'Expected the name of a table!';
                     }
-                    _selections.push(param);
-                  }
-                } else if (_.isFunction(projectionOrParameter)) {
-        
-                  /* Set the projection and calculate the fields it uses */
-                  _projection = projectionOrParameter;
-                  _selections = JavaScript.getProjectedFields(_projection);
-                } else {
-                  throw "Expected a string or a function, not " + projectionOrParameter;
+
+                    /* Store the table name and any extra context */
+                    _table = table;
+                    _context = context;
+
+                    /* Private Query component members */
+                    _filters = null;
+                    _projection = null;
+                    _selections = [];
+                    _ordering = {};
+                    _skip = null;
+                    _take = null;
+                    _includeTotalCount = false;
+
+                    /*
+                     * Keep a version flag that's updated on each mutation so we can
+                     * track whether changes have been made.  This is to enable caching
+                     * of compiled queries without reevaluating unless necessary.
+                     */
+                    _version = 0;
+
+                    /* Get the individual components of the query */
+                    this.getComponents = function () {
+                        return {
+                            filters: _filters,
+                            selections: _selections,
+                            projection: _projection,
+                            ordering: _ordering,
+                            skip: _skip,
+                            take: _take,
+                            table: _table,
+                            context: _context,
+                            includeTotalCount: _includeTotalCount,
+                            version: _version
+                        };
+                    };
+
+                    /*
+                     * Set the individual components of the query (this is primarily
+                     * meant to be used for rehydrating a query).
+                     */
+                    this.setComponents = function (components) {
+                        var _ref, _ref1, _ref2, _ref3, _ref4, _ref5, _ref6, _ref7, _ref8;
+                        _version++;
+                        _filters = (_ref = components != null ? components.filters : void 0) != null ? _ref : null;
+                        _selections = (_ref1 = components != null ? components.selections : void 0) != null ? _ref1 : [];
+                        _projection = (_ref2 = components != null ? components.projection : void 0) != null ? _ref2 : null;
+                        _ordering = (_ref3 = components != null ? components.ordering : void 0) != null ? _ref3 : {};
+                        _skip = (_ref4 = components != null ? components.skip : void 0) != null ? _ref4 : null;
+                        _take = (_ref5 = components != null ? components.take : void 0) != null ? _ref5 : null;
+                        _includeTotalCount = (_ref6 = components != null ? components.includeTotalCount : void 0) != null ? _ref6 : false;
+                        _table = (_ref7 = components != null ? components.table : void 0) != null ? _ref7 : null;
+                        _context = (_ref8 = components != null ? components.context : void 0) != null ? _ref8 : null;
+                        return this;
+                    };
+
+                    /*
+                     * Add a constraint to a query.  Constraints can take the form of
+                     * a function with a single return statement, key/value pairs of
+                     * equality comparisons, or provider-specific literal strings (note
+                     * that not all providers support literals).
+                     */
+                    this.where = function () {
+                        var args, constraint, expr, name, value;
+                        constraint = arguments[0], args = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+                        _version++;
+
+                        /*
+                         * Translate the constraint from its high level form into a
+                         * QueryExpression tree that can be manipulated by a query
+                         * provider
+                         */
+                        expr = (function () {
+                            if (_.isFunction(constraint)) {
+                                return JavaScript.transformConstraint(constraint, args);
+                            } else if (_.isObject(constraint)) {
+
+                                /*
+                                 * Turn an object of key value pairs into a series of
+                                 * equality expressions that are and'ed together to form
+                                 * a single expression
+                                 */
+                                return Q.QueryExpression.groupClauses(Q.BinaryOperators.And, (function () {
+                                    var _results;
+                                    _results = [];
+                                    for (name in constraint) {
+                                        value = constraint[name];
+                                        _results.push(expr = new Q.BinaryExpression(Q.BinaryOperators.Equal, new Q.MemberExpression(name), new Q.ConstantExpression(value)));
+                                    }
+                                    return _results;
+                                })());
+                            } else if (_.isString(constraint)) {
+
+                                /*
+                                 * Store the literal query along with any arguments for
+                                 * providers that support basic string replacement (i.e.,
+                                 * something like where('name eq ?', 'Steve'))
+                                 */
+                                return new Q.LiteralExpression(constraint, args);
+                            } else {
+                                throw "Expected a function, object, or string, not " + constraint;
+                            }
+                        })();
+
+                        /* Merge the new filters with any existing filters */
+                        _filters = Q.QueryExpression.groupClauses(Q.BinaryOperators.And, [_filters, expr]);
+                        return this;
+                    };
+
+                    /*
+                     * Project the query results.  A projection can either be defined as
+                     * a set of fields that we'll pull back (instead of the entire row)
+                     * or a function that will transform a row into a new type.  If a
+                     * function is used, we'll analyze the function to pull back the
+                     * minimal number of fields required.
+                     */
+                    this.select = function () {
+                        var param, parameters, projectionOrParameter, _i, _len;
+                        projectionOrParameter = arguments[0], parameters = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+                        _version++;
+                        if (_.isString(projectionOrParameter)) {
+
+                            /* Add all the literal string parameters */
+                            _selections.push(projectionOrParameter);
+                            for (_i = 0, _len = parameters.length; _i < _len; _i++) {
+                                param = parameters[_i];
+                                if (!(_.isString(param))) {
+                                    throw "Expected string parameters, not " + param;
+                                }
+                                _selections.push(param);
+                            }
+                        } else if (_.isFunction(projectionOrParameter)) {
+
+                            /* Set the projection and calculate the fields it uses */
+                            _projection = projectionOrParameter;
+                            _selections = JavaScript.getProjectedFields(_projection);
+                        } else {
+                            throw "Expected a string or a function, not " + projectionOrParameter;
+                        }
+                        return this;
+                    };
+                    this.orderBy = function () {
+                        var param, parameters, _i, _len;
+                        parameters = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+                        _version++;
+                        for (_i = 0, _len = parameters.length; _i < _len; _i++) {
+                            param = parameters[_i];
+                            if (!(_.isString(param))) {
+                                throw "Expected string parameters, not " + param;
+                            }
+                            _ordering[param] = true;
+                        }
+                        return this;
+                    };
+                    this.orderByDescending = function () {
+                        var param, parameters, _i, _len;
+                        parameters = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+                        _version++;
+                        for (_i = 0, _len = parameters.length; _i < _len; _i++) {
+                            param = parameters[_i];
+                            if (!(_.isString(param))) {
+                                throw "Expected string parameters, not " + param;
+                            }
+                            _ordering[param] = false;
+                        }
+                        return this;
+                    };
+                    this.skip = function (count) {
+                        _version++;
+                        if (!(_.isNumber(count))) {
+                            throw "Expected a number, not " + count;
+                        }
+                        _skip = count;
+                        return this;
+                    };
+                    this.take = function (count) {
+                        _version++;
+                        if (!(_.isNumber(count))) {
+                            throw "Expected a number, not " + count;
+                        }
+                        _take = count;
+                        return this;
+                    };
+
+                    /*
+                     * Indicate that the query should include the total count for all the
+                     * records that would have been returned ignoring any take paging
+                     * limit clause specified by client or server.
+                     */
+                    this.includeTotalCount = function () {
+                        _version++;
+                        _includeTotalCount = true;
+                        return this;
+                    };
                 }
-                return this;
-              };
-              this.orderBy = function() {
-                var param, parameters, _i, _len;
-                parameters = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-                _version++;
-                for (_i = 0, _len = parameters.length; _i < _len; _i++) {
-                  param = parameters[_i];
-                  if (!(_.isString(param))) {
-                    throw "Expected string parameters, not " + param;
-                  }
-                  _ordering[param] = true;
-                }
-                return this;
-              };
-              this.orderByDescending = function() {
-                var param, parameters, _i, _len;
-                parameters = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-                _version++;
-                for (_i = 0, _len = parameters.length; _i < _len; _i++) {
-                  param = parameters[_i];
-                  if (!(_.isString(param))) {
-                    throw "Expected string parameters, not " + param;
-                  }
-                  _ordering[param] = false;
-                }
-                return this;
-              };
-              this.skip = function(count) {
-                _version++;
-                if (!(_.isNumber(count))) {
-                  throw "Expected a number, not " + count;
-                }
-                _skip = count;
-                return this;
-              };
-              this.take = function(count) {
-                _version++;
-                if (!(_.isNumber(count))) {
-                  throw "Expected a number, not " + count;
-                }
-                _take = count;
-                return this;
-              };
-        
-              /*
-               * Indicate that the query should include the total count for all the
-               * records that would have been returned ignoring any take paging
-               * limit clause specified by client or server.
-               */
-              this.includeTotalCount = function() {
-                _version++;
-                _includeTotalCount = true;
-                return this;
-              };
-            }
-        
-        
-            /*
-             * Static method to register custom provider types.  A custom provider is
-             * an object with a toQuery method that takes a Query instance and
-             * returns a compiled query for that provider.
-             */
-        
-            Query.registerProvider = function(name, provider) {
-              Query.Providers[name] = provider;
-              return Query.prototype["to" + name] = function() {
-                return provider != null ? typeof provider.toQuery === "function" ? provider.toQuery(this) : void 0 : void 0;
-              };
-            };
-        
-        
-            /*
-             * Expose the registered providers via the Query.Providers namespace.
-             */
-        
-            Query.Providers = {};
-        
-        
-            /*
-             * Expose the query expressions and visitors externally via a
-             * Query.Expressions namespace.
-             */
-        
-            Query.Expressions = Q;
-        
-            return Query;
-        
-          })();
-        
-        
-          /* Register the built in OData provider */
-        
-          ODataProvider = require('./ODataProvider').ODataProvider;
-        
-          Query.registerProvider('OData', new ODataProvider);
-        
+
+
+                /*
+                 * Static method to register custom provider types.  A custom provider is
+                 * an object with a toQuery method that takes a Query instance and
+                 * returns a compiled query for that provider.
+                 */
+
+                Query.registerProvider = function (name, provider) {
+                    Query.Providers[name] = provider;
+                    return Query.prototype["to" + name] = function () {
+                        return provider != null ? typeof provider.toQuery === "function" ? provider.toQuery(this) : void 0 : void 0;
+                    };
+                };
+
+
+                /*
+                 * Expose the registered providers via the Query.Providers namespace.
+                 */
+
+                Query.Providers = {};
+
+
+                /*
+                 * Expose the query expressions and visitors externally via a
+                 * Query.Expressions namespace.
+                 */
+
+                Query.Expressions = Q;
+
+                return Query;
+
+            })();
+
+
+            /* Register the built in OData provider */
+
+            ODataProvider = require('./ODataProvider').ODataProvider;
+
+            Query.registerProvider('OData', new ODataProvider);
+
         }).call(this);
     };
 
     $__modules__.QueryNodes = function (exports) {
         // Generated by CoffeeScript 1.7.1
-        
+
         /*
          * ----------------------------------------------------------------------------
          * Copyright (c) Microsoft Corporation. All rights reserved.
          * ----------------------------------------------------------------------------
          */
-        
-        
+
+
         /*
          * Define a low level intermediate query expression language that we can
          * translate other expressions languages (like JavaScript) into.
          */
-        
-        
+
+
         /* Get the base Node class. */
-        
-        (function() {
-          var BinaryExpression, ConstantExpression, InvocationExpression, LiteralExpression, MemberExpression, Node, QueryExpression, QueryExpressionVisitor, UnaryExpression, Visitor, _ref,
-            __hasProp = {}.hasOwnProperty,
-            __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
-        
-          _ref = require('./Node'), Node = _ref.Node, Visitor = _ref.Visitor;
-        
-        
-          /*
-           * Provides the base class from which the classes that represent expression tree
-           * nodes are derived.
-           */
-        
-          exports.QueryExpression = QueryExpression = (function(_super) {
-            __extends(QueryExpression, _super);
-        
-            function QueryExpression() {
-              QueryExpression.__super__.constructor.call(this);
-            }
-        
-        
+
+        (function () {
+            var BinaryExpression, ConstantExpression, InvocationExpression, LiteralExpression, MemberExpression, Node, QueryExpression, QueryExpressionVisitor, UnaryExpression, Visitor, _ref,
+              __hasProp = {}.hasOwnProperty,
+              __extends = function (child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+            _ref = require('./Node'), Node = _ref.Node, Visitor = _ref.Visitor;
+
+
             /*
-             * Group a sequence of clauses together with a given operator (like And
-             * or Or).
+             * Provides the base class from which the classes that represent expression tree
+             * nodes are derived.
              */
-        
-            QueryExpression.groupClauses = function(operator, clauses) {
-              var combine;
-              combine = function(left, right) {
-                if (!left) {
-                  return right;
-                } else if (!right) {
-                  return left;
-                } else {
-                  return new BinaryExpression(operator, left, right);
+
+            exports.QueryExpression = QueryExpression = (function (_super) {
+                __extends(QueryExpression, _super);
+
+                function QueryExpression() {
+                    QueryExpression.__super__.constructor.call(this);
                 }
-              };
-              return clauses.reduce(combine, null);
+
+
+                /*
+                 * Group a sequence of clauses together with a given operator (like And
+                 * or Or).
+                 */
+
+                QueryExpression.groupClauses = function (operator, clauses) {
+                    var combine;
+                    combine = function (left, right) {
+                        if (!left) {
+                            return right;
+                        } else if (!right) {
+                            return left;
+                        } else {
+                            return new BinaryExpression(operator, left, right);
+                        }
+                    };
+                    return clauses.reduce(combine, null);
+                };
+
+                return QueryExpression;
+
+            })(Node);
+
+            exports.QueryExpressionVisitor = QueryExpressionVisitor = (function (_super) {
+                __extends(QueryExpressionVisitor, _super);
+
+                function QueryExpressionVisitor() {
+                    QueryExpressionVisitor.__super__.constructor.call(this);
+                }
+
+                QueryExpressionVisitor.prototype.QueryExpression = function (node) {
+                    return node;
+                };
+
+                return QueryExpressionVisitor;
+
+            })(Visitor);
+
+
+            /*
+             * Represents an expression that has a constant value.
+             */
+
+            exports.ConstantExpression = ConstantExpression = (function (_super) {
+                __extends(ConstantExpression, _super);
+
+
+                /*
+                 * @value: The value of the constant expression.
+                 */
+
+                function ConstantExpression(value) {
+                    this.value = value;
+                    ConstantExpression.__super__.constructor.call(this);
+                }
+
+                return ConstantExpression;
+
+            })(QueryExpression);
+
+            QueryExpressionVisitor.prototype.ConstantExpression = function (node) {
+                return this.QueryExpression(node);
             };
-        
-            return QueryExpression;
-        
-          })(Node);
-        
-          exports.QueryExpressionVisitor = QueryExpressionVisitor = (function(_super) {
-            __extends(QueryExpressionVisitor, _super);
-        
-            function QueryExpressionVisitor() {
-              QueryExpressionVisitor.__super__.constructor.call(this);
-            }
-        
-            QueryExpressionVisitor.prototype.QueryExpression = function(node) {
-              return node;
+
+
+            /*
+             * Represents accessing a field.
+             */
+
+            exports.MemberExpression = MemberExpression = (function (_super) {
+                __extends(MemberExpression, _super);
+
+
+                /*
+                 * @member: Gets the field to be accessed.
+                 */
+
+                function MemberExpression(member) {
+                    this.member = member;
+                    MemberExpression.__super__.constructor.call(this);
+                }
+
+                return MemberExpression;
+
+            })(QueryExpression);
+
+            QueryExpressionVisitor.prototype.MemberExpression = function (node) {
+                return this.QueryExpression(node);
             };
-        
-            return QueryExpressionVisitor;
-        
-          })(Visitor);
-        
-        
-          /*
-           * Represents an expression that has a constant value.
-           */
-        
-          exports.ConstantExpression = ConstantExpression = (function(_super) {
-            __extends(ConstantExpression, _super);
-        
-        
+
+
             /*
-             * @value: The value of the constant expression.
+             * Represents an expression that has a binary operator.
              */
-        
-            function ConstantExpression(value) {
-              this.value = value;
-              ConstantExpression.__super__.constructor.call(this);
-            }
-        
-            return ConstantExpression;
-        
-          })(QueryExpression);
-        
-          QueryExpressionVisitor.prototype.ConstantExpression = function(node) {
-            return this.QueryExpression(node);
-          };
-        
-        
-          /*
-           * Represents accessing a field.
-           */
-        
-          exports.MemberExpression = MemberExpression = (function(_super) {
-            __extends(MemberExpression, _super);
-        
-        
+
+            exports.BinaryExpression = BinaryExpression = (function (_super) {
+                __extends(BinaryExpression, _super);
+
+
+                /*
+                 * @operator: The operator of the binary expression.
+                 * @left: The left operand of the binary operation.
+                 * @right: The right operand of the binary operation.
+                 */
+
+                function BinaryExpression(operator, left, right) {
+                    this.operator = operator;
+                    this.left = left;
+                    this.right = right;
+                    BinaryExpression.__super__.constructor.call(this);
+                }
+
+                return BinaryExpression;
+
+            })(QueryExpression);
+
+            QueryExpressionVisitor.prototype.BinaryExpression = function (node) {
+                node = this.QueryExpression(node);
+                node.left = this.visit(node.left);
+                node.right = this.visit(node.right);
+                return node;
+            };
+
+
             /*
-             * @member: Gets the field to be accessed.
+             * Represents the known binary operators.
              */
-        
-            function MemberExpression(member) {
-              this.member = member;
-              MemberExpression.__super__.constructor.call(this);
-            }
-        
-            return MemberExpression;
-        
-          })(QueryExpression);
-        
-          QueryExpressionVisitor.prototype.MemberExpression = function(node) {
-            return this.QueryExpression(node);
-          };
-        
-        
-          /*
-           * Represents an expression that has a binary operator.
-           */
-        
-          exports.BinaryExpression = BinaryExpression = (function(_super) {
-            __extends(BinaryExpression, _super);
-        
-        
+
+            exports.BinaryOperators = {
+                And: 'And',
+                Or: 'Or',
+                Add: 'Add',
+                Subtract: 'Subtract',
+                Multiply: 'Multiply',
+                Divide: 'Divide',
+                Modulo: 'Modulo',
+                GreaterThan: 'GreaterThan',
+                GreaterThanOrEqual: 'GreaterThanOrEqual',
+                LessThan: 'LessThan',
+                LessThanOrEqual: 'LessThanOrEqual',
+                NotEqual: 'NotEqual',
+                Equal: 'Equal'
+            };
+
+
             /*
-             * @operator: The operator of the binary expression.
-             * @left: The left operand of the binary operation.
-             * @right: The right operand of the binary operation.
+             * Represents the known unary operators.
              */
-        
-            function BinaryExpression(operator, left, right) {
-              this.operator = operator;
-              this.left = left;
-              this.right = right;
-              BinaryExpression.__super__.constructor.call(this);
-            }
-        
-            return BinaryExpression;
-        
-          })(QueryExpression);
-        
-          QueryExpressionVisitor.prototype.BinaryExpression = function(node) {
-            node = this.QueryExpression(node);
-            node.left = this.visit(node.left);
-            node.right = this.visit(node.right);
-            return node;
-          };
-        
-        
-          /*
-           * Represents the known binary operators.
-           */
-        
-          exports.BinaryOperators = {
-            And: 'And',
-            Or: 'Or',
-            Add: 'Add',
-            Subtract: 'Subtract',
-            Multiply: 'Multiply',
-            Divide: 'Divide',
-            Modulo: 'Modulo',
-            GreaterThan: 'GreaterThan',
-            GreaterThanOrEqual: 'GreaterThanOrEqual',
-            LessThan: 'LessThan',
-            LessThanOrEqual: 'LessThanOrEqual',
-            NotEqual: 'NotEqual',
-            Equal: 'Equal'
-          };
-        
-        
-          /*
-           * Represents the known unary operators.
-           */
-        
-          exports.UnaryExpression = UnaryExpression = (function(_super) {
-            __extends(UnaryExpression, _super);
-        
-        
+
+            exports.UnaryExpression = UnaryExpression = (function (_super) {
+                __extends(UnaryExpression, _super);
+
+
+                /*
+                 * @operator: The operator of the unary expression.
+                 * @operand: The operand of the unary expression.
+                 */
+
+                function UnaryExpression(operator, operand) {
+                    this.operator = operator;
+                    this.operand = operand;
+                    UnaryExpression.__super__.constructor.call(this);
+                }
+
+                return UnaryExpression;
+
+            })(QueryExpression);
+
+            QueryExpressionVisitor.prototype.UnaryExpression = function (node) {
+                node = this.QueryExpression(node);
+                node.operand = this.visit(node.operand);
+                return node;
+            };
+
+
             /*
-             * @operator: The operator of the unary expression.
-             * @operand: The operand of the unary expression.
+             * Represents the known unary operators.
              */
-        
-            function UnaryExpression(operator, operand) {
-              this.operator = operator;
-              this.operand = operand;
-              UnaryExpression.__super__.constructor.call(this);
-            }
-        
-            return UnaryExpression;
-        
-          })(QueryExpression);
-        
-          QueryExpressionVisitor.prototype.UnaryExpression = function(node) {
-            node = this.QueryExpression(node);
-            node.operand = this.visit(node.operand);
-            return node;
-          };
-        
-        
-          /*
-           * Represents the known unary operators.
-           */
-        
-          exports.UnaryOperators = {
-            Not: 'Not',
-            Negate: 'Negate',
-            Increment: 'Increment',
-            Decrement: 'Decrement'
-          };
-        
-        
-          /*
-           * Represents a method invocation.
-           */
-        
-          exports.InvocationExpression = InvocationExpression = (function(_super) {
-            __extends(InvocationExpression, _super);
-        
-        
+
+            exports.UnaryOperators = {
+                Not: 'Not',
+                Negate: 'Negate',
+                Increment: 'Increment',
+                Decrement: 'Decrement'
+            };
+
+
             /*
-             * @method: The name of the method to invoke.
-             * @args: The arguments to the method.
+             * Represents a method invocation.
              */
-        
-            function InvocationExpression(method, args) {
-              this.method = method;
-              this.args = args;
-              InvocationExpression.__super__.constructor.call(this);
-            }
-        
-            return InvocationExpression;
-        
-          })(QueryExpression);
-        
-          QueryExpressionVisitor.prototype.InvocationExpression = function(node) {
-            node = this.QueryExpression(node);
-            node.args = this.visit(node.args);
-            return node;
-          };
-        
-        
-          /*
-           * Represents the known unary operators.
-           */
-        
-          exports.Methods = {
-            Length: 'Length',
-            ToUpperCase: 'ToUpperCase',
-            ToLowerCase: 'ToLowerCase',
-            Trim: 'Trim',
-            IndexOf: 'IndexOf',
-            Replace: 'Replace',
-            Substring: 'Substring',
-            Concat: 'Concat',
-            Day: 'Day',
-            Month: 'Month',
-            Year: 'Year',
-            Floor: 'Floor',
-            Ceiling: 'Ceiling',
-            Round: 'Round'
-          };
-        
-        
-          /*
-           * Represents a literal string in the query language.
-           */
-        
-          exports.LiteralExpression = LiteralExpression = (function(_super) {
-            __extends(LiteralExpression, _super);
-        
-        
+
+            exports.InvocationExpression = InvocationExpression = (function (_super) {
+                __extends(InvocationExpression, _super);
+
+
+                /*
+                 * @method: The name of the method to invoke.
+                 * @args: The arguments to the method.
+                 */
+
+                function InvocationExpression(method, args) {
+                    this.method = method;
+                    this.args = args;
+                    InvocationExpression.__super__.constructor.call(this);
+                }
+
+                return InvocationExpression;
+
+            })(QueryExpression);
+
+            QueryExpressionVisitor.prototype.InvocationExpression = function (node) {
+                node = this.QueryExpression(node);
+                node.args = this.visit(node.args);
+                return node;
+            };
+
+
             /*
-             * @queryString
-             * @args
+             * Represents the known unary operators.
              */
-        
-            function LiteralExpression(queryString, args) {
-              this.queryString = queryString;
-              this.args = args != null ? args : [];
-              LiteralExpression.__super__.constructor.call(this);
-            }
-        
-            return LiteralExpression;
-        
-          })(QueryExpression);
-        
-          QueryExpressionVisitor.prototype.LiteralExpression = function(node) {
-            return this.QueryExpression(node);
-          };
-        
+
+            exports.Methods = {
+                Length: 'Length',
+                ToUpperCase: 'ToUpperCase',
+                ToLowerCase: 'ToLowerCase',
+                Trim: 'Trim',
+                IndexOf: 'IndexOf',
+                Replace: 'Replace',
+                Substring: 'Substring',
+                Concat: 'Concat',
+                Day: 'Day',
+                Month: 'Month',
+                Year: 'Year',
+                Floor: 'Floor',
+                Ceiling: 'Ceiling',
+                Round: 'Round'
+            };
+
+
+            /*
+             * Represents a literal string in the query language.
+             */
+
+            exports.LiteralExpression = LiteralExpression = (function (_super) {
+                __extends(LiteralExpression, _super);
+
+
+                /*
+                 * @queryString
+                 * @args
+                 */
+
+                function LiteralExpression(queryString, args) {
+                    this.queryString = queryString;
+                    this.args = args != null ? args : [];
+                    LiteralExpression.__super__.constructor.call(this);
+                }
+
+                return LiteralExpression;
+
+            })(QueryExpression);
+
+            QueryExpressionVisitor.prototype.LiteralExpression = function (node) {
+                return this.QueryExpression(node);
+            };
+
         }).call(this);
     };
 
     $__modules__.Utilities = function (exports) {
         // Generated by CoffeeScript 1.7.1
-        
+
         /*
          * ----------------------------------------------------------------------------
          * Copyright (c) Microsoft Corporation. All rights reserved.
          * ----------------------------------------------------------------------------
          */
-        
-        (function() {
-          var classOf,
-            __slice = [].slice;
-        
-          classOf = function(obj) {
-            return Object.prototype.toString.call(obj).slice(8, -1).toLowerCase();
-          };
-        
-          if (Array.prototype.reduce == null) {
-            Array.prototype.reduce = function() {
-              var accumulator, array, arrayLength, currentIndex, currentValue, moreArgs;
-              accumulator = arguments[0], moreArgs = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
-              array = this;
-              arrayLength = array.length;
-              currentIndex = 0;
-              currentValue = void 0;
-              if (array == null) {
-                throw new TypeError("Object is null or undefined");
-              }
-              if (typeof accumulator !== "function") {
-                throw new TypeError("First argument is not callable");
-              }
-              if (moreArgs.length === 0) {
-                if (arrayLength === 0) {
-                  throw new TypeError("Array length is 0 and no second argument");
-                } else {
-                  currentValue = array[0];
-                  currentIndex = 1;
-                }
-              } else {
-                currentValue = moreArgs[0];
-              }
-              while (currentIndex < arrayLength) {
-                if (currentIndex in array) {
-                  currentValue = accumulator.call(void 0, currentValue, array[currentIndex], array);
-                }
-                ++currentIndex;
-              }
-              return currentValue;
+
+        (function () {
+            var classOf,
+              __slice = [].slice;
+
+            classOf = function (obj) {
+                return Object.prototype.toString.call(obj).slice(8, -1).toLowerCase();
             };
-          }
-        
-          if (Array.prototype.map == null) {
-            Array.prototype.map = function(callback, thisArg) {
-              var elem, index, inputArray, len, outputArray, _i, _len;
-              if (typeof this === "undefined" || this === null) {
-                throw new TypeError("this is null or not defined");
-              }
-              if (typeof callback !== "function") {
-                throw new TypeError(callback + " is not a function");
-              }
-              thisArg = thisArg ? thisArg : void 0;
-              inputArray = Object(this);
-              len = inputArray.length >>> 0;
-              outputArray = new Array(len);
-              for (index = _i = 0, _len = inputArray.length; _i < _len; index = ++_i) {
-                elem = inputArray[index];
-                if (index in inputArray) {
-                  outputArray[index] = callback.call(thisArg, elem, index, inputArray);
-                }
-              }
-              return outputArray;
-            };
-          }
-        
-          if (Array.isArray == null) {
-            Array.isArray = function(vArg) {
-              return Object.prototype.toString.call(vArg) === "[object Array]";
-            };
-          }
-        
-          exports.isObject = function(obj) {
-            return Object.prototype.toString.call(obj).slice(8, -1).toLowerCase() === 'object';
-          };
-        
-          exports.isString = function(obj) {
-            return typeof obj === 'string';
-          };
-        
-          exports.isFunction = function(obj) {
-            return typeof obj === 'function';
-          };
-        
-          exports.isArray = Array.isArray;
-        
-          exports.isNumber = function(obj) {
-            return typeof obj === 'number';
-          };
-        
-          exports.isBoolean = function(obj) {
-            return typeof obj === 'boolean';
-          };
-        
-          exports.isDate = function(obj) {
-            return classOf(obj) === 'date';
-          };
-        
-          exports.functionName = function(fn) {
-            var index, prefix, source;
-            if (typeof Function.prototype.name === 'function') {
-              return Function.prototype.name.call(fn);
-            } else {
-              source = fn.toString();
-              prefix = 'function ';
-              if (source.slice(0, +(prefix.length - 1) + 1 || 9e9) === prefix) {
-                index = source.indexOf('(', prefix.length);
-                if (index > prefix.length) {
-                  return source.slice(prefix.length, +(index - 1) + 1 || 9e9);
-                }
-              }
-              return null;
+
+            if (Array.prototype.reduce == null) {
+                Array.prototype.reduce = function () {
+                    var accumulator, array, arrayLength, currentIndex, currentValue, moreArgs;
+                    accumulator = arguments[0], moreArgs = 2 <= arguments.length ? __slice.call(arguments, 1) : [];
+                    array = this;
+                    arrayLength = array.length;
+                    currentIndex = 0;
+                    currentValue = void 0;
+                    if (array == null) {
+                        throw new TypeError("Object is null or undefined");
+                    }
+                    if (typeof accumulator !== "function") {
+                        throw new TypeError("First argument is not callable");
+                    }
+                    if (moreArgs.length === 0) {
+                        if (arrayLength === 0) {
+                            throw new TypeError("Array length is 0 and no second argument");
+                        } else {
+                            currentValue = array[0];
+                            currentIndex = 1;
+                        }
+                    } else {
+                        currentValue = moreArgs[0];
+                    }
+                    while (currentIndex < arrayLength) {
+                        if (currentIndex in array) {
+                            currentValue = accumulator.call(void 0, currentValue, array[currentIndex], array);
+                        }
+                        ++currentIndex;
+                    }
+                    return currentValue;
+                };
             }
-          };
-        
+
+            if (Array.prototype.map == null) {
+                Array.prototype.map = function (callback, thisArg) {
+                    var elem, index, inputArray, len, outputArray, _i, _len;
+                    if (typeof this === "undefined" || this === null) {
+                        throw new TypeError("this is null or not defined");
+                    }
+                    if (typeof callback !== "function") {
+                        throw new TypeError(callback + " is not a function");
+                    }
+                    thisArg = thisArg ? thisArg : void 0;
+                    inputArray = Object(this);
+                    len = inputArray.length >>> 0;
+                    outputArray = new Array(len);
+                    for (index = _i = 0, _len = inputArray.length; _i < _len; index = ++_i) {
+                        elem = inputArray[index];
+                        if (index in inputArray) {
+                            outputArray[index] = callback.call(thisArg, elem, index, inputArray);
+                        }
+                    }
+                    return outputArray;
+                };
+            }
+
+            if (Array.isArray == null) {
+                Array.isArray = function (vArg) {
+                    return Object.prototype.toString.call(vArg) === "[object Array]";
+                };
+            }
+
+            exports.isObject = function (obj) {
+                return Object.prototype.toString.call(obj).slice(8, -1).toLowerCase() === 'object';
+            };
+
+            exports.isString = function (obj) {
+                return typeof obj === 'string';
+            };
+
+            exports.isFunction = function (obj) {
+                return typeof obj === 'function';
+            };
+
+            exports.isArray = Array.isArray;
+
+            exports.isNumber = function (obj) {
+                return typeof obj === 'number';
+            };
+
+            exports.isBoolean = function (obj) {
+                return typeof obj === 'boolean';
+            };
+
+            exports.isDate = function (obj) {
+                return classOf(obj) === 'date';
+            };
+
+            exports.functionName = function (fn) {
+                var index, prefix, source;
+                if (typeof Function.prototype.name === 'function') {
+                    return Function.prototype.name.call(fn);
+                } else {
+                    source = fn.toString();
+                    prefix = 'function ';
+                    if (source.slice(0, +(prefix.length - 1) + 1 || 9e9) === prefix) {
+                        index = source.indexOf('(', prefix.length);
+                        if (index > prefix.length) {
+                            return source.slice(prefix.length, +(index - 1) + 1 || 9e9);
+                        }
+                    }
+                    return null;
+                }
+            };
+
         }).call(this);
     };
 
@@ -6448,7 +6445,7 @@
           (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
           THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
         */
-        
+
         /*jslint bitwise:true plusplus:true */
         /*global esprima:true, define:true, exports:true, window: true,
         createLocationMarker: true,
@@ -6459,10 +6456,10 @@
         parseLeftHandSideExpression: true,
         parseUnaryExpression: true,
         parseStatement: true, parseSourceElement: true */
-        
+
         (function (root, factory) {
             'use strict';
-        
+
             // Universal Module Definition (UMD) to support AMD, CommonJS/Node.js,
             // Rhino, and plain browser loading.
             if (typeof define === 'function' && define.amd) {
@@ -6474,7 +6471,7 @@
             }
         }(this, function (exports) {
             'use strict';
-        
+
             var Token,
                 TokenName,
                 FnExprTokens,
@@ -6493,7 +6490,7 @@
                 lookahead,
                 state,
                 extra;
-        
+
             Token = {
                 BooleanLiteral: 1,
                 EOF: 2,
@@ -6505,7 +6502,7 @@
                 StringLiteral: 8,
                 RegularExpression: 9
             };
-        
+
             TokenName = {};
             TokenName[Token.BooleanLiteral] = 'Boolean';
             TokenName[Token.EOF] = '<end>';
@@ -6516,7 +6513,7 @@
             TokenName[Token.Punctuator] = 'Punctuator';
             TokenName[Token.StringLiteral] = 'String';
             TokenName[Token.RegularExpression] = 'RegularExpression';
-        
+
             // A function following one of those tokens is an expression.
             FnExprTokens = ['(', '{', '[', 'in', 'typeof', 'instanceof', 'new',
                             'return', 'case', 'delete', 'throw', 'void',
@@ -6527,7 +6524,7 @@
                             '+', '-', '*', '/', '%', '++', '--', '<<', '>>', '>>>', '&',
                             '|', '^', '!', '~', '&&', '||', '?', ':', '===', '==', '>=',
                             '<=', '<', '>', '!=', '!=='];
-        
+
             Syntax = {
                 AssignmentExpression: 'AssignmentExpression',
                 ArrayExpression: 'ArrayExpression',
@@ -6570,82 +6567,82 @@
                 WhileStatement: 'WhileStatement',
                 WithStatement: 'WithStatement'
             };
-        
+
             PropertyKind = {
                 Data: 1,
                 Get: 2,
                 Set: 4
             };
-        
+
             // Error messages should be identical to V8.
             Messages = {
-                UnexpectedToken:  'Unexpected token %0',
-                UnexpectedNumber:  'Unexpected number',
-                UnexpectedString:  'Unexpected string',
-                UnexpectedIdentifier:  'Unexpected identifier',
-                UnexpectedReserved:  'Unexpected reserved word',
-                UnexpectedEOS:  'Unexpected end of input',
-                NewlineAfterThrow:  'Illegal newline after throw',
+                UnexpectedToken: 'Unexpected token %0',
+                UnexpectedNumber: 'Unexpected number',
+                UnexpectedString: 'Unexpected string',
+                UnexpectedIdentifier: 'Unexpected identifier',
+                UnexpectedReserved: 'Unexpected reserved word',
+                UnexpectedEOS: 'Unexpected end of input',
+                NewlineAfterThrow: 'Illegal newline after throw',
                 InvalidRegExp: 'Invalid regular expression',
-                UnterminatedRegExp:  'Invalid regular expression: missing /',
-                InvalidLHSInAssignment:  'Invalid left-hand side in assignment',
-                InvalidLHSInForIn:  'Invalid left-hand side in for-in',
+                UnterminatedRegExp: 'Invalid regular expression: missing /',
+                InvalidLHSInAssignment: 'Invalid left-hand side in assignment',
+                InvalidLHSInForIn: 'Invalid left-hand side in for-in',
                 MultipleDefaultsInSwitch: 'More than one default clause in switch statement',
-                NoCatchOrFinally:  'Missing catch or finally after try',
+                NoCatchOrFinally: 'Missing catch or finally after try',
                 UnknownLabel: 'Undefined label \'%0\'',
                 Redeclaration: '%0 \'%1\' has already been declared',
                 IllegalContinue: 'Illegal continue statement',
                 IllegalBreak: 'Illegal break statement',
                 IllegalReturn: 'Illegal return statement',
-                StrictModeWith:  'Strict mode code may not include a with statement',
-                StrictCatchVariable:  'Catch variable may not be eval or arguments in strict mode',
-                StrictVarName:  'Variable name may not be eval or arguments in strict mode',
-                StrictParamName:  'Parameter name eval or arguments is not allowed in strict mode',
+                StrictModeWith: 'Strict mode code may not include a with statement',
+                StrictCatchVariable: 'Catch variable may not be eval or arguments in strict mode',
+                StrictVarName: 'Variable name may not be eval or arguments in strict mode',
+                StrictParamName: 'Parameter name eval or arguments is not allowed in strict mode',
                 StrictParamDupe: 'Strict mode function may not have duplicate parameter names',
-                StrictFunctionName:  'Function name may not be eval or arguments in strict mode',
-                StrictOctalLiteral:  'Octal literals are not allowed in strict mode.',
-                StrictDelete:  'Delete of an unqualified identifier in strict mode.',
-                StrictDuplicateProperty:  'Duplicate data property in object literal not allowed in strict mode',
-                AccessorDataProperty:  'Object literal may not have data and accessor property with the same name',
-                AccessorGetSet:  'Object literal may not have multiple get/set accessors with the same name',
-                StrictLHSAssignment:  'Assignment to eval or arguments is not allowed in strict mode',
-                StrictLHSPostfix:  'Postfix increment/decrement may not have eval or arguments operand in strict mode',
-                StrictLHSPrefix:  'Prefix increment/decrement may not have eval or arguments operand in strict mode',
-                StrictReservedWord:  'Use of future reserved word in strict mode'
+                StrictFunctionName: 'Function name may not be eval or arguments in strict mode',
+                StrictOctalLiteral: 'Octal literals are not allowed in strict mode.',
+                StrictDelete: 'Delete of an unqualified identifier in strict mode.',
+                StrictDuplicateProperty: 'Duplicate data property in object literal not allowed in strict mode',
+                AccessorDataProperty: 'Object literal may not have data and accessor property with the same name',
+                AccessorGetSet: 'Object literal may not have multiple get/set accessors with the same name',
+                StrictLHSAssignment: 'Assignment to eval or arguments is not allowed in strict mode',
+                StrictLHSPostfix: 'Postfix increment/decrement may not have eval or arguments operand in strict mode',
+                StrictLHSPrefix: 'Prefix increment/decrement may not have eval or arguments operand in strict mode',
+                StrictReservedWord: 'Use of future reserved word in strict mode'
             };
-        
+
             // See also tools/generate-unicode-regex.py.
             Regex = {
                 NonAsciiIdentifierStart: new RegExp('[\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0620-\u064a\u066e\u066f\u0671-\u06d3\u06d5\u06e5\u06e6\u06ee\u06ef\u06fa-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07ca-\u07ea\u07f4\u07f5\u07fa\u0800-\u0815\u081a\u0824\u0828\u0840-\u0858\u08a0\u08a2-\u08ac\u0904-\u0939\u093d\u0950\u0958-\u0961\u0971-\u0977\u0979-\u097f\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc\u09dd\u09df-\u09e1\u09f0\u09f1\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a59-\u0a5c\u0a5e\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0\u0ae1\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3d\u0b5c\u0b5d\u0b5f-\u0b61\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58\u0c59\u0c60\u0c61\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0\u0ce1\u0cf1\u0cf2\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d\u0d4e\u0d60\u0d61\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32\u0e33\u0e40-\u0e46\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb0\u0eb2\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0edc-\u0edf\u0f00\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8c\u1000-\u102a\u103f\u1050-\u1055\u105a-\u105d\u1061\u1065\u1066\u106e-\u1070\u1075-\u1081\u108e\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u1820-\u1877\u1880-\u18a8\u18aa\u18b0-\u18f5\u1900-\u191c\u1950-\u196d\u1970-\u1974\u1980-\u19ab\u19c1-\u19c7\u1a00-\u1a16\u1a20-\u1a54\u1aa7\u1b05-\u1b33\u1b45-\u1b4b\u1b83-\u1ba0\u1bae\u1baf\u1bba-\u1be5\u1c00-\u1c23\u1c4d-\u1c4f\u1c5a-\u1c7d\u1ce9-\u1cec\u1cee-\u1cf1\u1cf5\u1cf6\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u2071\u207f\u2090-\u209c\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cee\u2cf2\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3007\u3021-\u3029\u3031-\u3035\u3038-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua61f\ua62a\ua62b\ua640-\ua66e\ua67f-\ua697\ua6a0-\ua6ef\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8f2-\ua8f7\ua8fb\ua90a-\ua925\ua930-\ua946\ua960-\ua97c\ua984-\ua9b2\ua9cf\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa60-\uaa76\uaa7a\uaa80-\uaaaf\uaab1\uaab5\uaab6\uaab9-\uaabd\uaac0\uaac2\uaadb-\uaadd\uaae0-\uaaea\uaaf2-\uaaf4\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabe2\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe70-\ufe74\ufe76-\ufefc\uff21-\uff3a\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc]'),
                 NonAsciiIdentifierPart: new RegExp('[\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0300-\u0374\u0376\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u0483-\u0487\u048a-\u0527\u0531-\u0556\u0559\u0561-\u0587\u0591-\u05bd\u05bf\u05c1\u05c2\u05c4\u05c5\u05c7\u05d0-\u05ea\u05f0-\u05f2\u0610-\u061a\u0620-\u0669\u066e-\u06d3\u06d5-\u06dc\u06df-\u06e8\u06ea-\u06fc\u06ff\u0710-\u074a\u074d-\u07b1\u07c0-\u07f5\u07fa\u0800-\u082d\u0840-\u085b\u08a0\u08a2-\u08ac\u08e4-\u08fe\u0900-\u0963\u0966-\u096f\u0971-\u0977\u0979-\u097f\u0981-\u0983\u0985-\u098c\u098f\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bc-\u09c4\u09c7\u09c8\u09cb-\u09ce\u09d7\u09dc\u09dd\u09df-\u09e3\u09e6-\u09f1\u0a01-\u0a03\u0a05-\u0a0a\u0a0f\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32\u0a33\u0a35\u0a36\u0a38\u0a39\u0a3c\u0a3e-\u0a42\u0a47\u0a48\u0a4b-\u0a4d\u0a51\u0a59-\u0a5c\u0a5e\u0a66-\u0a75\u0a81-\u0a83\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2\u0ab3\u0ab5-\u0ab9\u0abc-\u0ac5\u0ac7-\u0ac9\u0acb-\u0acd\u0ad0\u0ae0-\u0ae3\u0ae6-\u0aef\u0b01-\u0b03\u0b05-\u0b0c\u0b0f\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32\u0b33\u0b35-\u0b39\u0b3c-\u0b44\u0b47\u0b48\u0b4b-\u0b4d\u0b56\u0b57\u0b5c\u0b5d\u0b5f-\u0b63\u0b66-\u0b6f\u0b71\u0b82\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99\u0b9a\u0b9c\u0b9e\u0b9f\u0ba3\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bbe-\u0bc2\u0bc6-\u0bc8\u0bca-\u0bcd\u0bd0\u0bd7\u0be6-\u0bef\u0c01-\u0c03\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d-\u0c44\u0c46-\u0c48\u0c4a-\u0c4d\u0c55\u0c56\u0c58\u0c59\u0c60-\u0c63\u0c66-\u0c6f\u0c82\u0c83\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbc-\u0cc4\u0cc6-\u0cc8\u0cca-\u0ccd\u0cd5\u0cd6\u0cde\u0ce0-\u0ce3\u0ce6-\u0cef\u0cf1\u0cf2\u0d02\u0d03\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d3a\u0d3d-\u0d44\u0d46-\u0d48\u0d4a-\u0d4e\u0d57\u0d60-\u0d63\u0d66-\u0d6f\u0d7a-\u0d7f\u0d82\u0d83\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0dca\u0dcf-\u0dd4\u0dd6\u0dd8-\u0ddf\u0df2\u0df3\u0e01-\u0e3a\u0e40-\u0e4e\u0e50-\u0e59\u0e81\u0e82\u0e84\u0e87\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa\u0eab\u0ead-\u0eb9\u0ebb-\u0ebd\u0ec0-\u0ec4\u0ec6\u0ec8-\u0ecd\u0ed0-\u0ed9\u0edc-\u0edf\u0f00\u0f18\u0f19\u0f20-\u0f29\u0f35\u0f37\u0f39\u0f3e-\u0f47\u0f49-\u0f6c\u0f71-\u0f84\u0f86-\u0f97\u0f99-\u0fbc\u0fc6\u1000-\u1049\u1050-\u109d\u10a0-\u10c5\u10c7\u10cd\u10d0-\u10fa\u10fc-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u135d-\u135f\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u167f\u1681-\u169a\u16a0-\u16ea\u16ee-\u16f0\u1700-\u170c\u170e-\u1714\u1720-\u1734\u1740-\u1753\u1760-\u176c\u176e-\u1770\u1772\u1773\u1780-\u17d3\u17d7\u17dc\u17dd\u17e0-\u17e9\u180b-\u180d\u1810-\u1819\u1820-\u1877\u1880-\u18aa\u18b0-\u18f5\u1900-\u191c\u1920-\u192b\u1930-\u193b\u1946-\u196d\u1970-\u1974\u1980-\u19ab\u19b0-\u19c9\u19d0-\u19d9\u1a00-\u1a1b\u1a20-\u1a5e\u1a60-\u1a7c\u1a7f-\u1a89\u1a90-\u1a99\u1aa7\u1b00-\u1b4b\u1b50-\u1b59\u1b6b-\u1b73\u1b80-\u1bf3\u1c00-\u1c37\u1c40-\u1c49\u1c4d-\u1c7d\u1cd0-\u1cd2\u1cd4-\u1cf6\u1d00-\u1de6\u1dfc-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u200c\u200d\u203f\u2040\u2054\u2071\u207f\u2090-\u209c\u20d0-\u20dc\u20e1\u20e5-\u20f0\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2160-\u2188\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2ce4\u2ceb-\u2cf3\u2d00-\u2d25\u2d27\u2d2d\u2d30-\u2d67\u2d6f\u2d7f-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2de0-\u2dff\u2e2f\u3005-\u3007\u3021-\u302f\u3031-\u3035\u3038-\u303c\u3041-\u3096\u3099\u309a\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31ba\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fcc\ua000-\ua48c\ua4d0-\ua4fd\ua500-\ua60c\ua610-\ua62b\ua640-\ua66f\ua674-\ua67d\ua67f-\ua697\ua69f-\ua6f1\ua717-\ua71f\ua722-\ua788\ua78b-\ua78e\ua790-\ua793\ua7a0-\ua7aa\ua7f8-\ua827\ua840-\ua873\ua880-\ua8c4\ua8d0-\ua8d9\ua8e0-\ua8f7\ua8fb\ua900-\ua92d\ua930-\ua953\ua960-\ua97c\ua980-\ua9c0\ua9cf-\ua9d9\uaa00-\uaa36\uaa40-\uaa4d\uaa50-\uaa59\uaa60-\uaa76\uaa7a\uaa7b\uaa80-\uaac2\uaadb-\uaadd\uaae0-\uaaef\uaaf2-\uaaf6\uab01-\uab06\uab09-\uab0e\uab11-\uab16\uab20-\uab26\uab28-\uab2e\uabc0-\uabea\uabec\uabed\uabf0-\uabf9\uac00-\ud7a3\ud7b0-\ud7c6\ud7cb-\ud7fb\uf900-\ufa6d\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40\ufb41\ufb43\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe00-\ufe0f\ufe20-\ufe26\ufe33\ufe34\ufe4d-\ufe4f\ufe70-\ufe74\ufe76-\ufefc\uff10-\uff19\uff21-\uff3a\uff3f\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc]')
             };
-        
+
             // Ensure the condition is true, otherwise throw an error.
             // This is only to have a better contract semantic, i.e. another safety net
             // to catch a logic error. The condition shall be fulfilled in normal case.
             // Do NOT use this to enforce a certain condition on any user input.
-        
+
             function assert(condition, message) {
                 if (!condition) {
                     throw new Error('ASSERT: ' + message);
                 }
             }
-        
+
             function isDecimalDigit(ch) {
                 return (ch >= 48 && ch <= 57);   // 0..9
             }
-        
+
             function isHexDigit(ch) {
                 return '0123456789abcdefABCDEF'.indexOf(ch) >= 0;
             }
-        
+
             function isOctalDigit(ch) {
                 return '01234567'.indexOf(ch) >= 0;
             }
-        
-        
+
+
             // 7.2 White Space
-        
+
             function isWhiteSpace(ch) {
                 return (ch === 32) ||  // space
                     (ch === 9) ||      // tab
@@ -6654,15 +6651,15 @@
                     (ch === 0xA0) ||
                     (ch >= 0x1680 && '\u1680\u180E\u2000\u2001\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\uFEFF'.indexOf(String.fromCharCode(ch)) > 0);
             }
-        
+
             // 7.3 Line Terminators
-        
+
             function isLineTerminator(ch) {
                 return (ch === 10) || (ch === 13) || (ch === 0x2028) || (ch === 0x2029);
             }
-        
+
             // 7.6 Identifier Names and Identifiers
-        
+
             function isIdentifierStart(ch) {
                 return (ch === 36) || (ch === 95) ||  // $ (dollar) and _ (underscore)
                     (ch >= 65 && ch <= 90) ||         // A..Z
@@ -6670,7 +6667,7 @@
                     (ch === 92) ||                    // \ (backslash)
                     ((ch >= 0x80) && Regex.NonAsciiIdentifierStart.test(String.fromCharCode(ch)));
             }
-        
+
             function isIdentifierPart(ch) {
                 return (ch === 36) || (ch === 95) ||  // $ (dollar) and _ (underscore)
                     (ch >= 65 && ch <= 90) ||         // A..Z
@@ -6679,89 +6676,89 @@
                     (ch === 92) ||                    // \ (backslash)
                     ((ch >= 0x80) && Regex.NonAsciiIdentifierPart.test(String.fromCharCode(ch)));
             }
-        
+
             // 7.6.1.2 Future Reserved Words
-        
+
             function isFutureReservedWord(id) {
                 switch (id) {
-                case 'class':
-                case 'enum':
-                case 'export':
-                case 'extends':
-                case 'import':
-                case 'super':
-                    return true;
-                default:
-                    return false;
+                    case 'class':
+                    case 'enum':
+                    case 'export':
+                    case 'extends':
+                    case 'import':
+                    case 'super':
+                        return true;
+                    default:
+                        return false;
                 }
             }
-        
+
             function isStrictModeReservedWord(id) {
                 switch (id) {
-                case 'implements':
-                case 'interface':
-                case 'package':
-                case 'private':
-                case 'protected':
-                case 'public':
-                case 'static':
-                case 'yield':
-                case 'let':
-                    return true;
-                default:
-                    return false;
+                    case 'implements':
+                    case 'interface':
+                    case 'package':
+                    case 'private':
+                    case 'protected':
+                    case 'public':
+                    case 'static':
+                    case 'yield':
+                    case 'let':
+                        return true;
+                    default:
+                        return false;
                 }
             }
-        
+
             function isRestrictedWord(id) {
                 return id === 'eval' || id === 'arguments';
             }
-        
+
             // 7.6.1.1 Keywords
-        
+
             function isKeyword(id) {
                 if (strict && isStrictModeReservedWord(id)) {
                     return true;
                 }
-        
+
                 // 'const' is specialized as Keyword in V8.
                 // 'yield' and 'let' are for compatiblity with SpiderMonkey and ES.next.
                 // Some others are from future reserved words.
-        
+
                 switch (id.length) {
-                case 2:
-                    return (id === 'if') || (id === 'in') || (id === 'do');
-                case 3:
-                    return (id === 'var') || (id === 'for') || (id === 'new') ||
-                        (id === 'try') || (id === 'let');
-                case 4:
-                    return (id === 'this') || (id === 'else') || (id === 'case') ||
-                        (id === 'void') || (id === 'with') || (id === 'enum');
-                case 5:
-                    return (id === 'while') || (id === 'break') || (id === 'catch') ||
-                        (id === 'throw') || (id === 'const') || (id === 'yield') ||
-                        (id === 'class') || (id === 'super');
-                case 6:
-                    return (id === 'return') || (id === 'typeof') || (id === 'delete') ||
-                        (id === 'switch') || (id === 'export') || (id === 'import');
-                case 7:
-                    return (id === 'default') || (id === 'finally') || (id === 'extends');
-                case 8:
-                    return (id === 'function') || (id === 'continue') || (id === 'debugger');
-                case 10:
-                    return (id === 'instanceof');
-                default:
-                    return false;
+                    case 2:
+                        return (id === 'if') || (id === 'in') || (id === 'do');
+                    case 3:
+                        return (id === 'var') || (id === 'for') || (id === 'new') ||
+                            (id === 'try') || (id === 'let');
+                    case 4:
+                        return (id === 'this') || (id === 'else') || (id === 'case') ||
+                            (id === 'void') || (id === 'with') || (id === 'enum');
+                    case 5:
+                        return (id === 'while') || (id === 'break') || (id === 'catch') ||
+                            (id === 'throw') || (id === 'const') || (id === 'yield') ||
+                            (id === 'class') || (id === 'super');
+                    case 6:
+                        return (id === 'return') || (id === 'typeof') || (id === 'delete') ||
+                            (id === 'switch') || (id === 'export') || (id === 'import');
+                    case 7:
+                        return (id === 'default') || (id === 'finally') || (id === 'extends');
+                    case 8:
+                        return (id === 'function') || (id === 'continue') || (id === 'debugger');
+                    case 10:
+                        return (id === 'instanceof');
+                    default:
+                        return false;
                 }
             }
-        
+
             // 7.4 Comments
-        
+
             function addComment(type, value, start, end, loc) {
                 var comment;
-        
+
                 assert(typeof start === 'number', 'Comment must have valid position');
-        
+
                 // Because the way the actual token is scanned, often the comments
                 // (if any) are skipped twice during the lexical analysis.
                 // Thus, we need to skip adding a comment if the comment array already
@@ -6770,7 +6767,7 @@
                     return;
                 }
                 state.lastCommentStart = start;
-        
+
                 comment = {
                     type: type,
                     value: value
@@ -6783,10 +6780,10 @@
                 }
                 extra.comments.push(comment);
             }
-        
+
             function skipSingleLineComment() {
                 var start, loc, ch, comment;
-        
+
                 start = index - 2;
                 loc = {
                     start: {
@@ -6794,7 +6791,7 @@
                         column: index - lineStart - 2
                     }
                 };
-        
+
                 while (index < length) {
                     ch = source.charCodeAt(index);
                     ++index;
@@ -6815,7 +6812,7 @@
                         return;
                     }
                 }
-        
+
                 if (extra.comments) {
                     comment = source.slice(start + 2, index);
                     loc.end = {
@@ -6825,10 +6822,10 @@
                     addComment('Line', comment, start, index, loc);
                 }
             }
-        
+
             function skipMultiLineComment() {
                 var start, loc, ch, comment;
-        
+
                 if (extra.comments) {
                     start = index - 2;
                     loc = {
@@ -6838,7 +6835,7 @@
                         }
                     };
                 }
-        
+
                 while (index < length) {
                     ch = source.charCodeAt(index);
                     if (isLineTerminator(ch)) {
@@ -6871,16 +6868,16 @@
                         ++index;
                     }
                 }
-        
+
                 throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
             }
-        
+
             function skipComment() {
                 var ch;
-        
+
                 while (index < length) {
                     ch = source.charCodeAt(index);
-        
+
                     if (isWhiteSpace(ch)) {
                         ++index;
                     } else if (isLineTerminator(ch)) {
@@ -6908,10 +6905,10 @@
                     }
                 }
             }
-        
+
             function scanHexEscape(prefix) {
                 var i, len, ch, code = 0;
-        
+
                 len = (prefix === 'u') ? 4 : 2;
                 for (i = 0; i < len; ++i) {
                     if (index < length && isHexDigit(source[index])) {
@@ -6923,13 +6920,13 @@
                 }
                 return String.fromCharCode(code);
             }
-        
+
             function getEscapedIdentifier() {
                 var ch, id;
-        
+
                 ch = source.charCodeAt(index++);
                 id = String.fromCharCode(ch);
-        
+
                 // '\u' (char #92, char #117) denotes an escaped character.
                 if (ch === 92) {
                     if (source.charCodeAt(index) !== 117) {
@@ -6942,7 +6939,7 @@
                     }
                     id = ch;
                 }
-        
+
                 while (index < length) {
                     ch = source.charCodeAt(index);
                     if (!isIdentifierPart(ch)) {
@@ -6950,7 +6947,7 @@
                     }
                     ++index;
                     id += String.fromCharCode(ch);
-        
+
                     // '\u' (char #92, char #117) denotes an escaped character.
                     if (ch === 92) {
                         id = id.substr(0, id.length - 1);
@@ -6965,13 +6962,13 @@
                         id += ch;
                     }
                 }
-        
+
                 return id;
             }
-        
+
             function getIdentifier() {
                 var start, ch;
-        
+
                 start = index++;
                 while (index < length) {
                     ch = source.charCodeAt(index);
@@ -6986,18 +6983,18 @@
                         break;
                     }
                 }
-        
+
                 return source.slice(start, index);
             }
-        
+
             function scanIdentifier() {
                 var start, id, type;
-        
+
                 start = index;
-        
+
                 // Backslash (char #92) starts an escaped character.
                 id = (source.charCodeAt(index) === 92) ? getEscapedIdentifier() : getIdentifier();
-        
+
                 // There is no keyword or literal with only one character.
                 // Thus, it must be an identifier.
                 if (id.length === 1) {
@@ -7011,7 +7008,7 @@
                 } else {
                     type = Token.Identifier;
                 }
-        
+
                 return {
                     type: type,
                     value: id,
@@ -7020,10 +7017,10 @@
                     range: [start, index]
                 };
             }
-        
-        
+
+
             // 7.7 Punctuators
-        
+
             function scanPunctuator() {
                 var start = index,
                     code = source.charCodeAt(index),
@@ -7032,93 +7029,93 @@
                     ch2,
                     ch3,
                     ch4;
-        
+
                 switch (code) {
-        
-                // Check for most common single-character punctuators.
-                case 46:   // . dot
-                case 40:   // ( open bracket
-                case 41:   // ) close bracket
-                case 59:   // ; semicolon
-                case 44:   // , comma
-                case 123:  // { open curly brace
-                case 125:  // } close curly brace
-                case 91:   // [
-                case 93:   // ]
-                case 58:   // :
-                case 63:   // ?
-                case 126:  // ~
-                    ++index;
-                    if (extra.tokenize) {
-                        if (code === 40) {
-                            extra.openParenToken = extra.tokens.length;
-                        } else if (code === 123) {
-                            extra.openCurlyToken = extra.tokens.length;
-                        }
-                    }
-                    return {
-                        type: Token.Punctuator,
-                        value: String.fromCharCode(code),
-                        lineNumber: lineNumber,
-                        lineStart: lineStart,
-                        range: [start, index]
-                    };
-        
-                default:
-                    code2 = source.charCodeAt(index + 1);
-        
-                    // '=' (char #61) marks an assignment or comparison operator.
-                    if (code2 === 61) {
-                        switch (code) {
-                        case 37:  // %
-                        case 38:  // &
-                        case 42:  // *:
-                        case 43:  // +
-                        case 45:  // -
-                        case 47:  // /
-                        case 60:  // <
-                        case 62:  // >
-                        case 94:  // ^
-                        case 124: // |
-                            index += 2;
-                            return {
-                                type: Token.Punctuator,
-                                value: String.fromCharCode(code) + String.fromCharCode(code2),
-                                lineNumber: lineNumber,
-                                lineStart: lineStart,
-                                range: [start, index]
-                            };
-        
-                        case 33: // !
-                        case 61: // =
-                            index += 2;
-        
-                            // !== and ===
-                            if (source.charCodeAt(index) === 61) {
-                                ++index;
+
+                    // Check for most common single-character punctuators.
+                    case 46:   // . dot
+                    case 40:   // ( open bracket
+                    case 41:   // ) close bracket
+                    case 59:   // ; semicolon
+                    case 44:   // , comma
+                    case 123:  // { open curly brace
+                    case 125:  // } close curly brace
+                    case 91:   // [
+                    case 93:   // ]
+                    case 58:   // :
+                    case 63:   // ?
+                    case 126:  // ~
+                        ++index;
+                        if (extra.tokenize) {
+                            if (code === 40) {
+                                extra.openParenToken = extra.tokens.length;
+                            } else if (code === 123) {
+                                extra.openCurlyToken = extra.tokens.length;
                             }
-                            return {
-                                type: Token.Punctuator,
-                                value: source.slice(start, index),
-                                lineNumber: lineNumber,
-                                lineStart: lineStart,
-                                range: [start, index]
-                            };
-                        default:
-                            break;
                         }
-                    }
-                    break;
+                        return {
+                            type: Token.Punctuator,
+                            value: String.fromCharCode(code),
+                            lineNumber: lineNumber,
+                            lineStart: lineStart,
+                            range: [start, index]
+                        };
+
+                    default:
+                        code2 = source.charCodeAt(index + 1);
+
+                        // '=' (char #61) marks an assignment or comparison operator.
+                        if (code2 === 61) {
+                            switch (code) {
+                                case 37:  // %
+                                case 38:  // &
+                                case 42:  // *:
+                                case 43:  // +
+                                case 45:  // -
+                                case 47:  // /
+                                case 60:  // <
+                                case 62:  // >
+                                case 94:  // ^
+                                case 124: // |
+                                    index += 2;
+                                    return {
+                                        type: Token.Punctuator,
+                                        value: String.fromCharCode(code) + String.fromCharCode(code2),
+                                        lineNumber: lineNumber,
+                                        lineStart: lineStart,
+                                        range: [start, index]
+                                    };
+
+                                case 33: // !
+                                case 61: // =
+                                    index += 2;
+
+                                    // !== and ===
+                                    if (source.charCodeAt(index) === 61) {
+                                        ++index;
+                                    }
+                                    return {
+                                        type: Token.Punctuator,
+                                        value: source.slice(start, index),
+                                        lineNumber: lineNumber,
+                                        lineStart: lineStart,
+                                        range: [start, index]
+                                    };
+                                default:
+                                    break;
+                            }
+                        }
+                        break;
                 }
-        
+
                 // Peek more characters.
-        
+
                 ch2 = source[index + 1];
                 ch3 = source[index + 2];
                 ch4 = source[index + 3];
-        
+
                 // 4-character punctuator: >>>=
-        
+
                 if (ch1 === '>' && ch2 === '>' && ch3 === '>') {
                     if (ch4 === '=') {
                         index += 4;
@@ -7131,9 +7128,9 @@
                         };
                     }
                 }
-        
+
                 // 3-character punctuators: === !== >>> <<= >>=
-        
+
                 if (ch1 === '>' && ch2 === '>' && ch3 === '>') {
                     index += 3;
                     return {
@@ -7144,7 +7141,7 @@
                         range: [start, index]
                     };
                 }
-        
+
                 if (ch1 === '<' && ch2 === '<' && ch3 === '=') {
                     index += 3;
                     return {
@@ -7155,7 +7152,7 @@
                         range: [start, index]
                     };
                 }
-        
+
                 if (ch1 === '>' && ch2 === '>' && ch3 === '=') {
                     index += 3;
                     return {
@@ -7166,9 +7163,9 @@
                         range: [start, index]
                     };
                 }
-        
+
                 // Other 2-character punctuators: ++ -- << >> && ||
-        
+
                 if (ch1 === ch2 && ('+-<>&|'.indexOf(ch1) >= 0)) {
                     index += 2;
                     return {
@@ -7179,7 +7176,7 @@
                         range: [start, index]
                     };
                 }
-        
+
                 if ('<>=!+-*%&|^/'.indexOf(ch1) >= 0) {
                     ++index;
                     return {
@@ -7190,30 +7187,30 @@
                         range: [start, index]
                     };
                 }
-        
+
                 throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
             }
-        
+
             // 7.8.3 Numeric Literals
-        
+
             function scanHexLiteral(start) {
                 var number = '';
-        
+
                 while (index < length) {
                     if (!isHexDigit(source[index])) {
                         break;
                     }
                     number += source[index++];
                 }
-        
+
                 if (number.length === 0) {
                     throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
                 }
-        
+
                 if (isIdentifierStart(source.charCodeAt(index))) {
                     throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
                 }
-        
+
                 return {
                     type: Token.NumericLiteral,
                     value: parseInt('0x' + number, 16),
@@ -7222,7 +7219,7 @@
                     range: [start, index]
                 };
             }
-        
+
             function scanOctalLiteral(start) {
                 var number = '0' + source[index++];
                 while (index < length) {
@@ -7231,11 +7228,11 @@
                     }
                     number += source[index++];
                 }
-        
+
                 if (isIdentifierStart(source.charCodeAt(index)) || isDecimalDigit(source.charCodeAt(index))) {
                     throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
                 }
-        
+
                 return {
                     type: Token.NumericLiteral,
                     value: parseInt(number, 8),
@@ -7245,20 +7242,20 @@
                     range: [start, index]
                 };
             }
-        
+
             function scanNumericLiteral() {
                 var number, start, ch;
-        
+
                 ch = source[index];
                 assert(isDecimalDigit(ch.charCodeAt(0)) || (ch === '.'),
                     'Numeric literal must start with a decimal digit or a decimal point');
-        
+
                 start = index;
                 number = '';
                 if (ch !== '.') {
                     number = source[index++];
                     ch = source[index];
-        
+
                     // Hex number starts with '0x'.
                     // Octal number starts with '0'.
                     if (number === '0') {
@@ -7269,19 +7266,19 @@
                         if (isOctalDigit(ch)) {
                             return scanOctalLiteral(start);
                         }
-        
+
                         // decimal number starts with '0' such as '09' is illegal.
                         if (ch && isDecimalDigit(ch.charCodeAt(0))) {
                             throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
                         }
                     }
-        
+
                     while (isDecimalDigit(source.charCodeAt(index))) {
                         number += source[index++];
                     }
                     ch = source[index];
                 }
-        
+
                 if (ch === '.') {
                     number += source[index++];
                     while (isDecimalDigit(source.charCodeAt(index))) {
@@ -7289,10 +7286,10 @@
                     }
                     ch = source[index];
                 }
-        
+
                 if (ch === 'e' || ch === 'E') {
                     number += source[index++];
-        
+
                     ch = source[index];
                     if (ch === '+' || ch === '-') {
                         number += source[index++];
@@ -7305,11 +7302,11 @@
                         throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
                     }
                 }
-        
+
                 if (isIdentifierStart(source.charCodeAt(index))) {
                     throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
                 }
-        
+
                 return {
                     type: Token.NumericLiteral,
                     value: parseFloat(number),
@@ -7318,22 +7315,22 @@
                     range: [start, index]
                 };
             }
-        
+
             // 7.8.4 String Literals
-        
+
             function scanStringLiteral() {
                 var str = '', quote, start, ch, code, unescaped, restore, octal = false;
-        
+
                 quote = source[index];
                 assert((quote === '\'' || quote === '"'),
                     'String literal must starts with a quote');
-        
+
                 start = index;
                 ++index;
-        
+
                 while (index < length) {
                     ch = source[index++];
-        
+
                     if (ch === quote) {
                         quote = '';
                         break;
@@ -7341,66 +7338,66 @@
                         ch = source[index++];
                         if (!ch || !isLineTerminator(ch.charCodeAt(0))) {
                             switch (ch) {
-                            case 'n':
-                                str += '\n';
-                                break;
-                            case 'r':
-                                str += '\r';
-                                break;
-                            case 't':
-                                str += '\t';
-                                break;
-                            case 'u':
-                            case 'x':
-                                restore = index;
-                                unescaped = scanHexEscape(ch);
-                                if (unescaped) {
-                                    str += unescaped;
-                                } else {
-                                    index = restore;
-                                    str += ch;
-                                }
-                                break;
-                            case 'b':
-                                str += '\b';
-                                break;
-                            case 'f':
-                                str += '\f';
-                                break;
-                            case 'v':
-                                str += '\x0B';
-                                break;
-        
-                            default:
-                                if (isOctalDigit(ch)) {
-                                    code = '01234567'.indexOf(ch);
-        
-                                    // \0 is not octal escape sequence
-                                    if (code !== 0) {
-                                        octal = true;
+                                case 'n':
+                                    str += '\n';
+                                    break;
+                                case 'r':
+                                    str += '\r';
+                                    break;
+                                case 't':
+                                    str += '\t';
+                                    break;
+                                case 'u':
+                                case 'x':
+                                    restore = index;
+                                    unescaped = scanHexEscape(ch);
+                                    if (unescaped) {
+                                        str += unescaped;
+                                    } else {
+                                        index = restore;
+                                        str += ch;
                                     }
-        
-                                    if (index < length && isOctalDigit(source[index])) {
-                                        octal = true;
-                                        code = code * 8 + '01234567'.indexOf(source[index++]);
-        
-                                        // 3 digits are only allowed when string starts
-                                        // with 0, 1, 2, 3
-                                        if ('0123'.indexOf(ch) >= 0 &&
-                                                index < length &&
-                                                isOctalDigit(source[index])) {
-                                            code = code * 8 + '01234567'.indexOf(source[index++]);
+                                    break;
+                                case 'b':
+                                    str += '\b';
+                                    break;
+                                case 'f':
+                                    str += '\f';
+                                    break;
+                                case 'v':
+                                    str += '\x0B';
+                                    break;
+
+                                default:
+                                    if (isOctalDigit(ch)) {
+                                        code = '01234567'.indexOf(ch);
+
+                                        // \0 is not octal escape sequence
+                                        if (code !== 0) {
+                                            octal = true;
                                         }
+
+                                        if (index < length && isOctalDigit(source[index])) {
+                                            octal = true;
+                                            code = code * 8 + '01234567'.indexOf(source[index++]);
+
+                                            // 3 digits are only allowed when string starts
+                                            // with 0, 1, 2, 3
+                                            if ('0123'.indexOf(ch) >= 0 &&
+                                                    index < length &&
+                                                    isOctalDigit(source[index])) {
+                                                code = code * 8 + '01234567'.indexOf(source[index++]);
+                                            }
+                                        }
+                                        str += String.fromCharCode(code);
+                                    } else {
+                                        str += ch;
                                     }
-                                    str += String.fromCharCode(code);
-                                } else {
-                                    str += ch;
-                                }
-                                break;
+                                    break;
                             }
                         } else {
                             ++lineNumber;
-                            if (ch ===  '\r' && source[index] === '\n') {
+                            if (ch === '\r' && source[index] === '\n') {
                                 ++index;
                             }
                         }
@@ -7410,11 +7407,11 @@
                         str += ch;
                     }
                 }
-        
+
                 if (quote !== '') {
                     throwError({}, Messages.UnexpectedToken, 'ILLEGAL');
                 }
-        
+
                 return {
                     type: Token.StringLiteral,
                     value: str,
@@ -7424,18 +7421,18 @@
                     range: [start, index]
                 };
             }
-        
+
             function scanRegExp() {
                 var str, ch, start, pattern, flags, value, classMarker = false, restore, terminated = false;
-        
+
                 lookahead = null;
                 skipComment();
-        
+
                 start = index;
                 ch = source[index];
                 assert(ch === '/', 'Regular expression literal must start with a slash');
                 str = source[index++];
-        
+
                 while (index < length) {
                     ch = source[index++];
                     str += ch;
@@ -7461,21 +7458,21 @@
                         }
                     }
                 }
-        
+
                 if (!terminated) {
                     throwError({}, Messages.UnterminatedRegExp);
                 }
-        
+
                 // Exclude leading and trailing slash.
                 pattern = str.substr(1, str.length - 2);
-        
+
                 flags = '';
                 while (index < length) {
                     ch = source[index];
                     if (!isIdentifierPart(ch.charCodeAt(0))) {
                         break;
                     }
-        
+
                     ++index;
                     if (ch === '\\' && index < length) {
                         ch = source[index];
@@ -7501,16 +7498,16 @@
                         str += ch;
                     }
                 }
-        
+
                 try {
                     value = new RegExp(pattern, flags);
                 } catch (e) {
                     throwError({}, Messages.InvalidRegExp);
                 }
-        
+
                 peek();
-        
-        
+
+
                 if (extra.tokenize) {
                     return {
                         type: Token.RegularExpression,
@@ -7526,14 +7523,14 @@
                     range: [start, index]
                 };
             }
-        
+
             function isIdentifierName(token) {
                 return token.type === Token.Identifier ||
                     token.type === Token.Keyword ||
                     token.type === Token.BooleanLiteral ||
                     token.type === Token.NullLiteral;
             }
-        
+
             function advanceSlash() {
                 var prevToken,
                     checkToken;
@@ -7593,12 +7590,12 @@
                 }
                 return scanPunctuator();
             }
-        
+
             function advance() {
                 var ch;
-        
+
                 skipComment();
-        
+
                 if (index >= length) {
                     return {
                         type: Token.EOF,
@@ -7607,23 +7604,23 @@
                         range: [index, index]
                     };
                 }
-        
+
                 ch = source.charCodeAt(index);
-        
+
                 // Very common: ( and ) and ;
                 if (ch === 40 || ch === 41 || ch === 58) {
                     return scanPunctuator();
                 }
-        
+
                 // String literal starts with single quote (#39) or double quote (#34).
                 if (ch === 39 || ch === 34) {
                     return scanStringLiteral();
                 }
-        
+
                 if (isIdentifierStart(ch)) {
                     return scanIdentifier();
                 }
-        
+
                 // Dot (.) char #46 can also start a floating-point number, hence the need
                 // to check the next character.
                 if (ch === 46) {
@@ -7632,39 +7629,39 @@
                     }
                     return scanPunctuator();
                 }
-        
+
                 if (isDecimalDigit(ch)) {
                     return scanNumericLiteral();
                 }
-        
+
                 // Slash (/) char #47 can also start a regex.
                 if (extra.tokenize && ch === 47) {
                     return advanceSlash();
                 }
-        
+
                 return scanPunctuator();
             }
-        
+
             function lex() {
                 var token;
-        
+
                 token = lookahead;
                 index = token.range[1];
                 lineNumber = token.lineNumber;
                 lineStart = token.lineStart;
-        
+
                 lookahead = advance();
-        
+
                 index = token.range[1];
                 lineNumber = token.lineNumber;
                 lineStart = token.lineStart;
-        
+
                 return token;
             }
-        
+
             function peek() {
                 var pos, line, start;
-        
+
                 pos = index;
                 line = lineNumber;
                 start = lineStart;
@@ -7673,11 +7670,11 @@
                 lineNumber = line;
                 lineStart = start;
             }
-        
+
             SyntaxTreeDelegate = {
-        
+
                 name: 'SyntaxTree',
-        
+
                 markStart: function () {
                     if (extra.loc) {
                         state.markerStack.push(index - lineStart);
@@ -7687,7 +7684,7 @@
                         state.markerStack.push(index);
                     }
                 },
-        
+
                 markEnd: function (node) {
                     if (extra.range) {
                         node.range = [state.markerStack.pop(), index];
@@ -7707,7 +7704,7 @@
                     }
                     return node;
                 },
-        
+
                 markEndIf: function (node) {
                     if (node.range || node.loc) {
                         if (extra.loc) {
@@ -7722,21 +7719,21 @@
                     }
                     return node;
                 },
-        
+
                 postProcess: function (node) {
                     if (extra.source) {
                         node.loc.source = extra.source;
                     }
                     return node;
                 },
-        
+
                 createArrayExpression: function (elements) {
                     return {
                         type: Syntax.ArrayExpression,
                         elements: elements
                     };
                 },
-        
+
                 createAssignmentExpression: function (operator, left, right) {
                     return {
                         type: Syntax.AssignmentExpression,
@@ -7745,7 +7742,7 @@
                         right: right
                     };
                 },
-        
+
                 createBinaryExpression: function (operator, left, right) {
                     var type = (operator === '||' || operator === '&&') ? Syntax.LogicalExpression :
                                 Syntax.BinaryExpression;
@@ -7756,21 +7753,21 @@
                         right: right
                     };
                 },
-        
+
                 createBlockStatement: function (body) {
                     return {
                         type: Syntax.BlockStatement,
                         body: body
                     };
                 },
-        
+
                 createBreakStatement: function (label) {
                     return {
                         type: Syntax.BreakStatement,
                         label: label
                     };
                 },
-        
+
                 createCallExpression: function (callee, args) {
                     return {
                         type: Syntax.CallExpression,
@@ -7778,7 +7775,7 @@
                         'arguments': args
                     };
                 },
-        
+
                 createCatchClause: function (param, body) {
                     return {
                         type: Syntax.CatchClause,
@@ -7786,7 +7783,7 @@
                         body: body
                     };
                 },
-        
+
                 createConditionalExpression: function (test, consequent, alternate) {
                     return {
                         type: Syntax.ConditionalExpression,
@@ -7795,20 +7792,20 @@
                         alternate: alternate
                     };
                 },
-        
+
                 createContinueStatement: function (label) {
                     return {
                         type: Syntax.ContinueStatement,
                         label: label
                     };
                 },
-        
+
                 createDebuggerStatement: function () {
                     return {
                         type: Syntax.DebuggerStatement
                     };
                 },
-        
+
                 createDoWhileStatement: function (body, test) {
                     return {
                         type: Syntax.DoWhileStatement,
@@ -7816,20 +7813,20 @@
                         test: test
                     };
                 },
-        
+
                 createEmptyStatement: function () {
                     return {
                         type: Syntax.EmptyStatement
                     };
                 },
-        
+
                 createExpressionStatement: function (expression) {
                     return {
                         type: Syntax.ExpressionStatement,
                         expression: expression
                     };
                 },
-        
+
                 createForStatement: function (init, test, update, body) {
                     return {
                         type: Syntax.ForStatement,
@@ -7839,7 +7836,7 @@
                         body: body
                     };
                 },
-        
+
                 createForInStatement: function (left, right, body) {
                     return {
                         type: Syntax.ForInStatement,
@@ -7849,7 +7846,7 @@
                         each: false
                     };
                 },
-        
+
                 createFunctionDeclaration: function (id, params, defaults, body) {
                     return {
                         type: Syntax.FunctionDeclaration,
@@ -7862,7 +7859,7 @@
                         expression: false
                     };
                 },
-        
+
                 createFunctionExpression: function (id, params, defaults, body) {
                     return {
                         type: Syntax.FunctionExpression,
@@ -7875,14 +7872,14 @@
                         expression: false
                     };
                 },
-        
+
                 createIdentifier: function (name) {
                     return {
                         type: Syntax.Identifier,
                         name: name
                     };
                 },
-        
+
                 createIfStatement: function (test, consequent, alternate) {
                     return {
                         type: Syntax.IfStatement,
@@ -7891,7 +7888,7 @@
                         alternate: alternate
                     };
                 },
-        
+
                 createLabeledStatement: function (label, body) {
                     return {
                         type: Syntax.LabeledStatement,
@@ -7899,7 +7896,7 @@
                         body: body
                     };
                 },
-        
+
                 createLiteral: function (token) {
                     return {
                         type: Syntax.Literal,
@@ -7907,7 +7904,7 @@
                         raw: source.slice(token.range[0], token.range[1])
                     };
                 },
-        
+
                 createMemberExpression: function (accessor, object, property) {
                     return {
                         type: Syntax.MemberExpression,
@@ -7916,7 +7913,7 @@
                         property: property
                     };
                 },
-        
+
                 createNewExpression: function (callee, args) {
                     return {
                         type: Syntax.NewExpression,
@@ -7924,14 +7921,14 @@
                         'arguments': args
                     };
                 },
-        
+
                 createObjectExpression: function (properties) {
                     return {
                         type: Syntax.ObjectExpression,
                         properties: properties
                     };
                 },
-        
+
                 createPostfixExpression: function (operator, argument) {
                     return {
                         type: Syntax.UpdateExpression,
@@ -7940,14 +7937,14 @@
                         prefix: false
                     };
                 },
-        
+
                 createProgram: function (body) {
                     return {
                         type: Syntax.Program,
                         body: body
                     };
                 },
-        
+
                 createProperty: function (kind, key, value) {
                     return {
                         type: Syntax.Property,
@@ -7956,21 +7953,21 @@
                         kind: kind
                     };
                 },
-        
+
                 createReturnStatement: function (argument) {
                     return {
                         type: Syntax.ReturnStatement,
                         argument: argument
                     };
                 },
-        
+
                 createSequenceExpression: function (expressions) {
                     return {
                         type: Syntax.SequenceExpression,
                         expressions: expressions
                     };
                 },
-        
+
                 createSwitchCase: function (test, consequent) {
                     return {
                         type: Syntax.SwitchCase,
@@ -7978,7 +7975,7 @@
                         consequent: consequent
                     };
                 },
-        
+
                 createSwitchStatement: function (discriminant, cases) {
                     return {
                         type: Syntax.SwitchStatement,
@@ -7986,20 +7983,20 @@
                         cases: cases
                     };
                 },
-        
+
                 createThisExpression: function () {
                     return {
                         type: Syntax.ThisExpression
                     };
                 },
-        
+
                 createThrowStatement: function (argument) {
                     return {
                         type: Syntax.ThrowStatement,
                         argument: argument
                     };
                 },
-        
+
                 createTryStatement: function (block, guardedHandlers, handlers, finalizer) {
                     return {
                         type: Syntax.TryStatement,
@@ -8009,7 +8006,7 @@
                         finalizer: finalizer
                     };
                 },
-        
+
                 createUnaryExpression: function (operator, argument) {
                     if (operator === '++' || operator === '--') {
                         return {
@@ -8026,7 +8023,7 @@
                         prefix: true
                     };
                 },
-        
+
                 createVariableDeclaration: function (declarations, kind) {
                     return {
                         type: Syntax.VariableDeclaration,
@@ -8034,7 +8031,7 @@
                         kind: kind
                     };
                 },
-        
+
                 createVariableDeclarator: function (id, init) {
                     return {
                         type: Syntax.VariableDeclarator,
@@ -8042,7 +8039,7 @@
                         init: init
                     };
                 },
-        
+
                 createWhileStatement: function (test, body) {
                     return {
                         type: Syntax.WhileStatement,
@@ -8050,7 +8047,7 @@
                         body: body
                     };
                 },
-        
+
                 createWithStatement: function (object, body) {
                     return {
                         type: Syntax.WithStatement,
@@ -8059,12 +8056,12 @@
                     };
                 }
             };
-        
+
             // Return true if there is a line terminator before the next token.
-        
+
             function peekLineTerminator() {
                 var pos, line, start, found;
-        
+
                 pos = index;
                 line = lineNumber;
                 start = lineStart;
@@ -8073,12 +8070,12 @@
                 index = pos;
                 lineNumber = line;
                 lineStart = start;
-        
+
                 return found;
             }
-        
+
             // Throw an exception
-        
+
             function throwError(token, messageFormat) {
                 var error,
                     args = Array.prototype.slice.call(arguments, 2),
@@ -8089,7 +8086,7 @@
                             return args[index];
                         }
                     );
-        
+
                 if (typeof token.lineNumber === 'number') {
                     error = new Error('Line ' + token.lineNumber + ': ' + msg);
                     error.index = token.range[0];
@@ -8101,11 +8098,11 @@
                     error.lineNumber = lineNumber;
                     error.column = index - lineStart + 1;
                 }
-        
+
                 error.description = msg;
                 throw error;
             }
-        
+
             function throwErrorTolerant() {
                 try {
                     throwError.apply(null, arguments);
@@ -8117,27 +8114,27 @@
                     }
                 }
             }
-        
-        
+
+
             // Throw an exception because of the token.
-        
+
             function throwUnexpected(token) {
                 if (token.type === Token.EOF) {
                     throwError(token, Messages.UnexpectedEOS);
                 }
-        
+
                 if (token.type === Token.NumericLiteral) {
                     throwError(token, Messages.UnexpectedNumber);
                 }
-        
+
                 if (token.type === Token.StringLiteral) {
                     throwError(token, Messages.UnexpectedString);
                 }
-        
+
                 if (token.type === Token.Identifier) {
                     throwError(token, Messages.UnexpectedIdentifier);
                 }
-        
+
                 if (token.type === Token.Keyword) {
                     if (isFutureReservedWord(token.value)) {
                         throwError(token, Messages.UnexpectedReserved);
@@ -8147,48 +8144,48 @@
                     }
                     throwError(token, Messages.UnexpectedToken, token.value);
                 }
-        
+
                 // BooleanLiteral, NullLiteral, or Punctuator.
                 throwError(token, Messages.UnexpectedToken, token.value);
             }
-        
+
             // Expect the next token to match the specified punctuator.
             // If not, an exception will be thrown.
-        
+
             function expect(value) {
                 var token = lex();
                 if (token.type !== Token.Punctuator || token.value !== value) {
                     throwUnexpected(token);
                 }
             }
-        
+
             // Expect the next token to match the specified keyword.
             // If not, an exception will be thrown.
-        
+
             function expectKeyword(keyword) {
                 var token = lex();
                 if (token.type !== Token.Keyword || token.value !== keyword) {
                     throwUnexpected(token);
                 }
             }
-        
+
             // Return true if the next token matches the specified punctuator.
-        
+
             function match(value) {
                 return lookahead.type === Token.Punctuator && lookahead.value === value;
             }
-        
+
             // Return true if the next token matches the specified keyword
-        
+
             function matchKeyword(keyword) {
                 return lookahead.type === Token.Keyword && lookahead.value === keyword;
             }
-        
+
             // Return true if the next token is an assignment operator
-        
+
             function matchAssign() {
                 var op;
-        
+
                 if (lookahead.type !== Token.Punctuator) {
                     return false;
                 }
@@ -8206,68 +8203,68 @@
                     op === '^=' ||
                     op === '|=';
             }
-        
+
             function consumeSemicolon() {
                 var line;
-        
+
                 // Catch the very common case first: immediately a semicolon (char #59).
                 if (source.charCodeAt(index) === 59) {
                     lex();
                     return;
                 }
-        
+
                 line = lineNumber;
                 skipComment();
                 if (lineNumber !== line) {
                     return;
                 }
-        
+
                 if (match(';')) {
                     lex();
                     return;
                 }
-        
+
                 if (lookahead.type !== Token.EOF && !match('}')) {
                     throwUnexpected(lookahead);
                 }
             }
-        
+
             // Return true if provided expression is LeftHandSideExpression
-        
+
             function isLeftHandSide(expr) {
                 return expr.type === Syntax.Identifier || expr.type === Syntax.MemberExpression;
             }
-        
+
             // 11.1.4 Array Initialiser
-        
+
             function parseArrayInitialiser() {
                 var elements = [];
-        
+
                 expect('[');
-        
+
                 while (!match(']')) {
                     if (match(',')) {
                         lex();
                         elements.push(null);
                     } else {
                         elements.push(parseAssignmentExpression());
-        
+
                         if (!match(']')) {
                             expect(',');
                         }
                     }
                 }
-        
+
                 expect(']');
-        
+
                 return delegate.createArrayExpression(elements);
             }
-        
+
             // 11.1.5 Object Initialiser
-        
+
             function parsePropertyFunction(param, first) {
                 var previousStrict, body;
-        
+
                 previousStrict = strict;
                 skipComment();
                 delegate.markStart();
@@ -8278,40 +8275,40 @@
                 strict = previousStrict;
                 return delegate.markEnd(delegate.createFunctionExpression(null, param, [], body));
             }
-        
+
             function parseObjectPropertyKey() {
                 var token;
-        
+
                 skipComment();
                 delegate.markStart();
                 token = lex();
-        
+
                 // Note: This function is called only from parseObjectProperty(), where
                 // EOF and Punctuator tokens are already filtered out.
-        
+
                 if (token.type === Token.StringLiteral || token.type === Token.NumericLiteral) {
                     if (strict && token.octal) {
                         throwErrorTolerant(token, Messages.StrictOctalLiteral);
                     }
                     return delegate.markEnd(delegate.createLiteral(token));
                 }
-        
+
                 return delegate.markEnd(delegate.createIdentifier(token.value));
             }
-        
+
             function parseObjectProperty() {
                 var token, key, id, value, param;
-        
+
                 token = lookahead;
                 skipComment();
                 delegate.markStart();
-        
+
                 if (token.type === Token.Identifier) {
-        
+
                     id = parseObjectPropertyKey();
-        
+
                     // Property Assignment: Getter and Setter.
-        
+
                     if (token.value === 'get' && !match(':')) {
                         key = parseObjectPropertyKey();
                         expect('(');
@@ -8328,7 +8325,7 @@
                             throwErrorTolerant(token, Messages.UnexpectedToken, token.value);
                             value = parsePropertyFunction([]);
                         } else {
-                            param = [ parseVariableIdentifier() ];
+                            param = [parseVariableIdentifier()];
                             expect(')');
                             value = parsePropertyFunction(param, token);
                         }
@@ -8347,22 +8344,22 @@
                     return delegate.markEnd(delegate.createProperty('init', key, value));
                 }
             }
-        
+
             function parseObjectInitialiser() {
                 var properties = [], property, name, key, kind, map = {}, toString = String;
-        
+
                 expect('{');
-        
+
                 while (!match('}')) {
                     property = parseObjectProperty();
-        
+
                     if (property.key.type === Syntax.Identifier) {
                         name = property.key.name;
                     } else {
                         name = toString(property.key.value);
                     }
                     kind = (property.kind === 'init') ? PropertyKind.Data : (property.kind === 'get') ? PropertyKind.Get : PropertyKind.Set;
-        
+
                     key = '$' + name;
                     if (Object.prototype.hasOwnProperty.call(map, key)) {
                         if (map[key] === PropertyKind.Data) {
@@ -8382,48 +8379,48 @@
                     } else {
                         map[key] = kind;
                     }
-        
+
                     properties.push(property);
-        
+
                     if (!match('}')) {
                         expect(',');
                     }
                 }
-        
+
                 expect('}');
-        
+
                 return delegate.createObjectExpression(properties);
             }
-        
+
             // 11.1.6 The Grouping Operator
-        
+
             function parseGroupExpression() {
                 var expr;
-        
+
                 expect('(');
-        
+
                 expr = parseExpression();
-        
+
                 expect(')');
-        
+
                 return expr;
             }
-        
-        
+
+
             // 11.1 Primary Expressions
-        
+
             function parsePrimaryExpression() {
                 var type, token, expr;
-        
+
                 if (match('(')) {
                     return parseGroupExpression();
                 }
-        
+
                 type = lookahead.type;
                 delegate.markStart();
-        
+
                 if (type === Token.Identifier) {
-                    expr =  delegate.createIdentifier(lex().value);
+                    expr = delegate.createIdentifier(lex().value);
                 } else if (type === Token.StringLiteral || type === Token.NumericLiteral) {
                     if (strict && lookahead.octal) {
                         throwErrorTolerant(lookahead, Messages.StrictOctalLiteral);
@@ -8451,21 +8448,21 @@
                 } else if (match('/') || match('/=')) {
                     expr = delegate.createLiteral(scanRegExp());
                 }
-        
+
                 if (expr) {
                     return delegate.markEnd(expr);
                 }
-        
+
                 throwUnexpected(lex());
             }
-        
+
             // 11.2 Left-Hand-Side Expressions
-        
+
             function parseArguments() {
                 var args = [];
-        
+
                 expect('(');
-        
+
                 if (!match(')')) {
                     while (index < length) {
                         args.push(parseAssignmentExpression());
@@ -8475,61 +8472,61 @@
                         expect(',');
                     }
                 }
-        
+
                 expect(')');
-        
+
                 return args;
             }
-        
+
             function parseNonComputedProperty() {
                 var token;
-        
+
                 delegate.markStart();
                 token = lex();
-        
+
                 if (!isIdentifierName(token)) {
                     throwUnexpected(token);
                 }
-        
+
                 return delegate.markEnd(delegate.createIdentifier(token.value));
             }
-        
+
             function parseNonComputedMember() {
                 expect('.');
-        
+
                 return parseNonComputedProperty();
             }
-        
+
             function parseComputedMember() {
                 var expr;
-        
+
                 expect('[');
-        
+
                 expr = parseExpression();
-        
+
                 expect(']');
-        
+
                 return expr;
             }
-        
+
             function parseNewExpression() {
                 var callee, args;
-        
+
                 delegate.markStart();
                 expectKeyword('new');
                 callee = parseLeftHandSideExpression();
                 args = match('(') ? parseArguments() : [];
-        
+
                 return delegate.markEnd(delegate.createNewExpression(callee, args));
             }
-        
+
             function parseLeftHandSideExpressionAllowCall() {
                 var marker, expr, args, property;
-        
+
                 marker = createLocationMarker();
-        
+
                 expr = matchKeyword('new') ? parseNewExpression() : parsePrimaryExpression();
-        
+
                 while (match('.') || match('[') || match('(')) {
                     if (match('(')) {
                         args = parseArguments();
@@ -8546,17 +8543,17 @@
                         marker.apply(expr);
                     }
                 }
-        
+
                 return expr;
             }
-        
+
             function parseLeftHandSideExpression() {
                 var marker, expr, property;
-        
+
                 marker = createLocationMarker();
-        
+
                 expr = matchKeyword('new') ? parseNewExpression() : parsePrimaryExpression();
-        
+
                 while (match('.') || match('[')) {
                     if (match('[')) {
                         property = parseComputedMember();
@@ -8570,44 +8567,44 @@
                         marker.apply(expr);
                     }
                 }
-        
+
                 return expr;
             }
-        
+
             // 11.3 Postfix Expressions
-        
+
             function parsePostfixExpression() {
                 var expr, token;
-        
+
                 delegate.markStart();
                 expr = parseLeftHandSideExpressionAllowCall();
-        
+
                 if (lookahead.type === Token.Punctuator) {
                     if ((match('++') || match('--')) && !peekLineTerminator()) {
                         // 11.3.1, 11.3.2
                         if (strict && expr.type === Syntax.Identifier && isRestrictedWord(expr.name)) {
                             throwErrorTolerant({}, Messages.StrictLHSPostfix);
                         }
-        
+
                         if (!isLeftHandSide(expr)) {
                             throwError({}, Messages.InvalidLHSInAssignment);
                         }
-        
+
                         token = lex();
                         expr = delegate.createPostfixExpression(token.value, expr);
                     }
                 }
-        
+
                 return delegate.markEndIf(expr);
             }
-        
+
             // 11.4 Unary Operators
-        
+
             function parseUnaryExpression() {
                 var token, expr;
-        
+
                 delegate.markStart();
-        
+
                 if (lookahead.type !== Token.Punctuator && lookahead.type !== Token.Keyword) {
                     expr = parsePostfixExpression();
                 } else if (match('++') || match('--')) {
@@ -8617,11 +8614,11 @@
                     if (strict && expr.type === Syntax.Identifier && isRestrictedWord(expr.name)) {
                         throwErrorTolerant({}, Messages.StrictLHSPrefix);
                     }
-        
+
                     if (!isLeftHandSide(expr)) {
                         throwError({}, Messages.InvalidLHSInAssignment);
                     }
-        
+
                     expr = delegate.createUnaryExpression(token.value, expr);
                 } else if (match('+') || match('-') || match('~') || match('!')) {
                     token = lex();
@@ -8637,81 +8634,81 @@
                 } else {
                     expr = parsePostfixExpression();
                 }
-        
+
                 return delegate.markEndIf(expr);
             }
-        
+
             function binaryPrecedence(token, allowIn) {
                 var prec = 0;
-        
+
                 if (token.type !== Token.Punctuator && token.type !== Token.Keyword) {
                     return 0;
                 }
-        
+
                 switch (token.value) {
-                case '||':
-                    prec = 1;
-                    break;
-        
-                case '&&':
-                    prec = 2;
-                    break;
-        
-                case '|':
-                    prec = 3;
-                    break;
-        
-                case '^':
-                    prec = 4;
-                    break;
-        
-                case '&':
-                    prec = 5;
-                    break;
-        
-                case '==':
-                case '!=':
-                case '===':
-                case '!==':
-                    prec = 6;
-                    break;
-        
-                case '<':
-                case '>':
-                case '<=':
-                case '>=':
-                case 'instanceof':
-                    prec = 7;
-                    break;
-        
-                case 'in':
-                    prec = allowIn ? 7 : 0;
-                    break;
-        
-                case '<<':
-                case '>>':
-                case '>>>':
-                    prec = 8;
-                    break;
-        
-                case '+':
-                case '-':
-                    prec = 9;
-                    break;
-        
-                case '*':
-                case '/':
-                case '%':
-                    prec = 11;
-                    break;
-        
-                default:
-                    break;
+                    case '||':
+                        prec = 1;
+                        break;
+
+                    case '&&':
+                        prec = 2;
+                        break;
+
+                    case '|':
+                        prec = 3;
+                        break;
+
+                    case '^':
+                        prec = 4;
+                        break;
+
+                    case '&':
+                        prec = 5;
+                        break;
+
+                    case '==':
+                    case '!=':
+                    case '===':
+                    case '!==':
+                        prec = 6;
+                        break;
+
+                    case '<':
+                    case '>':
+                    case '<=':
+                    case '>=':
+                    case 'instanceof':
+                        prec = 7;
+                        break;
+
+                    case 'in':
+                        prec = allowIn ? 7 : 0;
+                        break;
+
+                    case '<<':
+                    case '>>':
+                    case '>>>':
+                        prec = 8;
+                        break;
+
+                    case '+':
+                    case '-':
+                        prec = 9;
+                        break;
+
+                    case '*':
+                    case '/':
+                    case '%':
+                        prec = 11;
+                        break;
+
+                    default:
+                        break;
                 }
-        
+
                 return prec;
             }
-        
+
             // 11.5 Multiplicative Operators
             // 11.6 Additive Operators
             // 11.7 Bitwise Shift Operators
@@ -8719,16 +8716,16 @@
             // 11.9 Equality Operators
             // 11.10 Binary Bitwise Operators
             // 11.11 Binary Logical Operators
-        
+
             function parseBinaryExpression() {
                 var marker, markers, expr, token, prec, previousAllowIn, stack, right, operator, left, i;
-        
+
                 previousAllowIn = state.allowIn;
                 state.allowIn = true;
-        
+
                 marker = createLocationMarker();
                 left = parseUnaryExpression();
-        
+
                 token = lookahead;
                 prec = binaryPrecedence(token, previousAllowIn);
                 if (prec === 0) {
@@ -8736,14 +8733,14 @@
                 }
                 token.prec = prec;
                 lex();
-        
+
                 markers = [marker, createLocationMarker()];
                 right = parseUnaryExpression();
-        
+
                 stack = [left, token, right];
-        
+
                 while ((prec = binaryPrecedence(lookahead, previousAllowIn)) > 0) {
-        
+
                     // Reduce: make a binary expression from the three topmost entries.
                     while ((stack.length > 2) && (prec <= stack[stack.length - 2].prec)) {
                         right = stack.pop();
@@ -8759,7 +8756,7 @@
                         stack.push(expr);
                         markers.push(marker);
                     }
-        
+
                     // Shift.
                     token = lex();
                     token.prec = prec;
@@ -8768,9 +8765,9 @@
                     expr = parseUnaryExpression();
                     stack.push(expr);
                 }
-        
+
                 state.allowIn = previousAllowIn;
-        
+
                 // Final reduce to clean-up the stack.
                 i = stack.length - 1;
                 expr = stack[i];
@@ -8784,19 +8781,19 @@
                         marker.apply(expr);
                     }
                 }
-        
+
                 return expr;
             }
-        
-        
+
+
             // 11.12 Conditional Operator
-        
+
             function parseConditionalExpression() {
                 var expr, previousAllowIn, consequent, alternate;
-        
+
                 delegate.markStart();
                 expr = parseBinaryExpression();
-        
+
                 if (match('?')) {
                     lex();
                     previousAllowIn = state.allowIn;
@@ -8805,54 +8802,54 @@
                     state.allowIn = previousAllowIn;
                     expect(':');
                     alternate = parseAssignmentExpression();
-        
+
                     expr = delegate.markEnd(delegate.createConditionalExpression(expr, consequent, alternate));
                 } else {
                     delegate.markEnd({});
                 }
-        
+
                 return expr;
             }
-        
+
             // 11.13 Assignment Operators
-        
+
             function parseAssignmentExpression() {
                 var token, left, right, node;
-        
+
                 token = lookahead;
                 delegate.markStart();
                 node = left = parseConditionalExpression();
-        
+
                 if (matchAssign()) {
                     // LeftHandSideExpression
                     if (!isLeftHandSide(left)) {
                         throwError({}, Messages.InvalidLHSInAssignment);
                     }
-        
+
                     // 11.13.1
                     if (strict && left.type === Syntax.Identifier && isRestrictedWord(left.name)) {
                         throwErrorTolerant(token, Messages.StrictLHSAssignment);
                     }
-        
+
                     token = lex();
                     right = parseAssignmentExpression();
                     node = delegate.createAssignmentExpression(token.value, left, right);
                 }
-        
+
                 return delegate.markEndIf(node);
             }
-        
+
             // 11.14 Comma Operator
-        
+
             function parseExpression() {
                 var expr;
-        
+
                 delegate.markStart();
                 expr = parseAssignmentExpression();
-        
+
                 if (match(',')) {
-                    expr = delegate.createSequenceExpression([ expr ]);
-        
+                    expr = delegate.createSequenceExpression([expr]);
+
                     while (index < length) {
                         if (!match(',')) {
                             break;
@@ -8861,16 +8858,16 @@
                         expr.expressions.push(parseAssignmentExpression());
                     }
                 }
-        
+
                 return delegate.markEndIf(expr);
             }
-        
+
             // 12.1 Block
-        
+
             function parseStatementList() {
                 var list = [],
                     statement;
-        
+
                 while (index < length) {
                     if (match('}')) {
                         break;
@@ -8881,52 +8878,52 @@
                     }
                     list.push(statement);
                 }
-        
+
                 return list;
             }
-        
+
             function parseBlock() {
                 var block;
-        
+
                 skipComment();
                 delegate.markStart();
                 expect('{');
-        
+
                 block = parseStatementList();
-        
+
                 expect('}');
-        
+
                 return delegate.markEnd(delegate.createBlockStatement(block));
             }
-        
+
             // 12.2 Variable Statement
-        
+
             function parseVariableIdentifier() {
                 var token;
-        
+
                 skipComment();
                 delegate.markStart();
                 token = lex();
-        
+
                 if (token.type !== Token.Identifier) {
                     throwUnexpected(token);
                 }
-        
+
                 return delegate.markEnd(delegate.createIdentifier(token.value));
             }
-        
+
             function parseVariableDeclaration(kind) {
                 var init = null, id;
-        
+
                 skipComment();
                 delegate.markStart();
                 id = parseVariableIdentifier();
-        
+
                 // 12.2.1
                 if (strict && isRestrictedWord(id.name)) {
                     throwErrorTolerant({}, Messages.StrictVarName);
                 }
-        
+
                 if (kind === 'const') {
                     expect('=');
                     init = parseAssignmentExpression();
@@ -8934,13 +8931,13 @@
                     lex();
                     init = parseAssignmentExpression();
                 }
-        
+
                 return delegate.markEnd(delegate.createVariableDeclarator(id, init));
             }
-        
+
             function parseVariableDeclarationList(kind) {
                 var list = [];
-        
+
                 do {
                     list.push(parseVariableDeclaration(kind));
                     if (!match(',')) {
@@ -8948,150 +8945,150 @@
                     }
                     lex();
                 } while (index < length);
-        
+
                 return list;
             }
-        
+
             function parseVariableStatement() {
                 var declarations;
-        
+
                 expectKeyword('var');
-        
+
                 declarations = parseVariableDeclarationList();
-        
+
                 consumeSemicolon();
-        
+
                 return delegate.createVariableDeclaration(declarations, 'var');
             }
-        
+
             // kind may be `const` or `let`
             // Both are experimental and not in the specification yet.
             // see http://wiki.ecmascript.org/doku.php?id=harmony:const
             // and http://wiki.ecmascript.org/doku.php?id=harmony:let
             function parseConstLetDeclaration(kind) {
                 var declarations;
-        
+
                 skipComment();
                 delegate.markStart();
-        
+
                 expectKeyword(kind);
-        
+
                 declarations = parseVariableDeclarationList(kind);
-        
+
                 consumeSemicolon();
-        
+
                 return delegate.markEnd(delegate.createVariableDeclaration(declarations, kind));
             }
-        
+
             // 12.3 Empty Statement
-        
+
             function parseEmptyStatement() {
                 expect(';');
                 return delegate.createEmptyStatement();
             }
-        
+
             // 12.4 Expression Statement
-        
+
             function parseExpressionStatement() {
                 var expr = parseExpression();
                 consumeSemicolon();
                 return delegate.createExpressionStatement(expr);
             }
-        
+
             // 12.5 If statement
-        
+
             function parseIfStatement() {
                 var test, consequent, alternate;
-        
+
                 expectKeyword('if');
-        
+
                 expect('(');
-        
+
                 test = parseExpression();
-        
+
                 expect(')');
-        
+
                 consequent = parseStatement();
-        
+
                 if (matchKeyword('else')) {
                     lex();
                     alternate = parseStatement();
                 } else {
                     alternate = null;
                 }
-        
+
                 return delegate.createIfStatement(test, consequent, alternate);
             }
-        
+
             // 12.6 Iteration Statements
-        
+
             function parseDoWhileStatement() {
                 var body, test, oldInIteration;
-        
+
                 expectKeyword('do');
-        
+
                 oldInIteration = state.inIteration;
                 state.inIteration = true;
-        
+
                 body = parseStatement();
-        
+
                 state.inIteration = oldInIteration;
-        
+
                 expectKeyword('while');
-        
+
                 expect('(');
-        
+
                 test = parseExpression();
-        
+
                 expect(')');
-        
+
                 if (match(';')) {
                     lex();
                 }
-        
+
                 return delegate.createDoWhileStatement(body, test);
             }
-        
+
             function parseWhileStatement() {
                 var test, body, oldInIteration;
-        
+
                 expectKeyword('while');
-        
+
                 expect('(');
-        
+
                 test = parseExpression();
-        
+
                 expect(')');
-        
+
                 oldInIteration = state.inIteration;
                 state.inIteration = true;
-        
+
                 body = parseStatement();
-        
+
                 state.inIteration = oldInIteration;
-        
+
                 return delegate.createWhileStatement(test, body);
             }
-        
+
             function parseForVariableDeclaration() {
                 var token, declarations;
-        
+
                 delegate.markStart();
                 token = lex();
                 declarations = parseVariableDeclarationList();
-        
+
                 return delegate.markEnd(delegate.createVariableDeclaration(declarations, token.value));
             }
-        
+
             function parseForStatement() {
                 var init, test, update, left, right, body, oldInIteration;
-        
+
                 init = test = update = null;
-        
+
                 expectKeyword('for');
-        
+
                 expect('(');
-        
+
                 if (match(';')) {
                     lex();
                 } else {
@@ -9099,7 +9096,7 @@
                         state.allowIn = false;
                         init = parseForVariableDeclaration();
                         state.allowIn = true;
-        
+
                         if (init.declarations.length === 1 && matchKeyword('in')) {
                             lex();
                             left = init;
@@ -9110,150 +9107,150 @@
                         state.allowIn = false;
                         init = parseExpression();
                         state.allowIn = true;
-        
+
                         if (matchKeyword('in')) {
                             // LeftHandSideExpression
                             if (!isLeftHandSide(init)) {
                                 throwError({}, Messages.InvalidLHSInForIn);
                             }
-        
+
                             lex();
                             left = init;
                             right = parseExpression();
                             init = null;
                         }
                     }
-        
+
                     if (typeof left === 'undefined') {
                         expect(';');
                     }
                 }
-        
+
                 if (typeof left === 'undefined') {
-        
+
                     if (!match(';')) {
                         test = parseExpression();
                     }
                     expect(';');
-        
+
                     if (!match(')')) {
                         update = parseExpression();
                     }
                 }
-        
+
                 expect(')');
-        
+
                 oldInIteration = state.inIteration;
                 state.inIteration = true;
-        
+
                 body = parseStatement();
-        
+
                 state.inIteration = oldInIteration;
-        
+
                 return (typeof left === 'undefined') ?
                         delegate.createForStatement(init, test, update, body) :
                         delegate.createForInStatement(left, right, body);
             }
-        
+
             // 12.7 The continue statement
-        
+
             function parseContinueStatement() {
                 var label = null, key;
-        
+
                 expectKeyword('continue');
-        
+
                 // Optimize the most common form: 'continue;'.
                 if (source.charCodeAt(index) === 59) {
                     lex();
-        
+
                     if (!state.inIteration) {
                         throwError({}, Messages.IllegalContinue);
                     }
-        
+
                     return delegate.createContinueStatement(null);
                 }
-        
+
                 if (peekLineTerminator()) {
                     if (!state.inIteration) {
                         throwError({}, Messages.IllegalContinue);
                     }
-        
+
                     return delegate.createContinueStatement(null);
                 }
-        
+
                 if (lookahead.type === Token.Identifier) {
                     label = parseVariableIdentifier();
-        
+
                     key = '$' + label.name;
                     if (!Object.prototype.hasOwnProperty.call(state.labelSet, key)) {
                         throwError({}, Messages.UnknownLabel, label.name);
                     }
                 }
-        
+
                 consumeSemicolon();
-        
+
                 if (label === null && !state.inIteration) {
                     throwError({}, Messages.IllegalContinue);
                 }
-        
+
                 return delegate.createContinueStatement(label);
             }
-        
+
             // 12.8 The break statement
-        
+
             function parseBreakStatement() {
                 var label = null, key;
-        
+
                 expectKeyword('break');
-        
+
                 // Catch the very common case first: immediately a semicolon (char #59).
                 if (source.charCodeAt(index) === 59) {
                     lex();
-        
+
                     if (!(state.inIteration || state.inSwitch)) {
                         throwError({}, Messages.IllegalBreak);
                     }
-        
+
                     return delegate.createBreakStatement(null);
                 }
-        
+
                 if (peekLineTerminator()) {
                     if (!(state.inIteration || state.inSwitch)) {
                         throwError({}, Messages.IllegalBreak);
                     }
-        
+
                     return delegate.createBreakStatement(null);
                 }
-        
+
                 if (lookahead.type === Token.Identifier) {
                     label = parseVariableIdentifier();
-        
+
                     key = '$' + label.name;
                     if (!Object.prototype.hasOwnProperty.call(state.labelSet, key)) {
                         throwError({}, Messages.UnknownLabel, label.name);
                     }
                 }
-        
+
                 consumeSemicolon();
-        
+
                 if (label === null && !(state.inIteration || state.inSwitch)) {
                     throwError({}, Messages.IllegalBreak);
                 }
-        
+
                 return delegate.createBreakStatement(label);
             }
-        
+
             // 12.9 The return statement
-        
+
             function parseReturnStatement() {
                 var argument = null;
-        
+
                 expectKeyword('return');
-        
+
                 if (!state.inFunctionBody) {
                     throwErrorTolerant({}, Messages.IllegalReturn);
                 }
-        
+
                 // 'return' followed by a space and an identifier is very common.
                 if (source.charCodeAt(index) === 32) {
                     if (isIdentifierStart(source.charCodeAt(index + 1))) {
@@ -9262,51 +9259,51 @@
                         return delegate.createReturnStatement(argument);
                     }
                 }
-        
+
                 if (peekLineTerminator()) {
                     return delegate.createReturnStatement(null);
                 }
-        
+
                 if (!match(';')) {
                     if (!match('}') && lookahead.type !== Token.EOF) {
                         argument = parseExpression();
                     }
                 }
-        
+
                 consumeSemicolon();
-        
+
                 return delegate.createReturnStatement(argument);
             }
-        
+
             // 12.10 The with statement
-        
+
             function parseWithStatement() {
                 var object, body;
-        
+
                 if (strict) {
                     throwErrorTolerant({}, Messages.StrictModeWith);
                 }
-        
+
                 expectKeyword('with');
-        
+
                 expect('(');
-        
+
                 object = parseExpression();
-        
+
                 expect(')');
-        
+
                 body = parseStatement();
-        
+
                 return delegate.createWithStatement(object, body);
             }
-        
+
             // 12.10 The swith statement
-        
+
             function parseSwitchCase() {
                 var test,
                     consequent = [],
                     statement;
-        
+
                 skipComment();
                 delegate.markStart();
                 if (matchKeyword('default')) {
@@ -9317,7 +9314,7 @@
                     test = parseExpression();
                 }
                 expect(':');
-        
+
                 while (index < length) {
                     if (match('}') || matchKeyword('default') || matchKeyword('case')) {
                         break;
@@ -9325,34 +9322,34 @@
                     statement = parseStatement();
                     consequent.push(statement);
                 }
-        
+
                 return delegate.markEnd(delegate.createSwitchCase(test, consequent));
             }
-        
+
             function parseSwitchStatement() {
                 var discriminant, cases, clause, oldInSwitch, defaultFound;
-        
+
                 expectKeyword('switch');
-        
+
                 expect('(');
-        
+
                 discriminant = parseExpression();
-        
+
                 expect(')');
-        
+
                 expect('{');
-        
+
                 if (match('}')) {
                     lex();
                     return delegate.createSwitchStatement(discriminant);
                 }
-        
+
                 cases = [];
-        
+
                 oldInSwitch = state.inSwitch;
                 state.inSwitch = true;
                 defaultFound = false;
-        
+
                 while (index < length) {
                     if (match('}')) {
                         break;
@@ -9366,191 +9363,191 @@
                     }
                     cases.push(clause);
                 }
-        
+
                 state.inSwitch = oldInSwitch;
-        
+
                 expect('}');
-        
+
                 return delegate.createSwitchStatement(discriminant, cases);
             }
-        
+
             // 12.13 The throw statement
-        
+
             function parseThrowStatement() {
                 var argument;
-        
+
                 expectKeyword('throw');
-        
+
                 if (peekLineTerminator()) {
                     throwError({}, Messages.NewlineAfterThrow);
                 }
-        
+
                 argument = parseExpression();
-        
+
                 consumeSemicolon();
-        
+
                 return delegate.createThrowStatement(argument);
             }
-        
+
             // 12.14 The try statement
-        
+
             function parseCatchClause() {
                 var param, body;
-        
+
                 skipComment();
                 delegate.markStart();
                 expectKeyword('catch');
-        
+
                 expect('(');
                 if (match(')')) {
                     throwUnexpected(lookahead);
                 }
-        
+
                 param = parseVariableIdentifier();
                 // 12.14.1
                 if (strict && isRestrictedWord(param.name)) {
                     throwErrorTolerant({}, Messages.StrictCatchVariable);
                 }
-        
+
                 expect(')');
                 body = parseBlock();
                 return delegate.markEnd(delegate.createCatchClause(param, body));
             }
-        
+
             function parseTryStatement() {
                 var block, handlers = [], finalizer = null;
-        
+
                 expectKeyword('try');
-        
+
                 block = parseBlock();
-        
+
                 if (matchKeyword('catch')) {
                     handlers.push(parseCatchClause());
                 }
-        
+
                 if (matchKeyword('finally')) {
                     lex();
                     finalizer = parseBlock();
                 }
-        
+
                 if (handlers.length === 0 && !finalizer) {
                     throwError({}, Messages.NoCatchOrFinally);
                 }
-        
+
                 return delegate.createTryStatement(block, [], handlers, finalizer);
             }
-        
+
             // 12.15 The debugger statement
-        
+
             function parseDebuggerStatement() {
                 expectKeyword('debugger');
-        
+
                 consumeSemicolon();
-        
+
                 return delegate.createDebuggerStatement();
             }
-        
+
             // 12 Statements
-        
+
             function parseStatement() {
                 var type = lookahead.type,
                     expr,
                     labeledBody,
                     key;
-        
+
                 if (type === Token.EOF) {
                     throwUnexpected(lookahead);
                 }
-        
+
                 skipComment();
                 delegate.markStart();
-        
+
                 if (type === Token.Punctuator) {
                     switch (lookahead.value) {
-                    case ';':
-                        return delegate.markEnd(parseEmptyStatement());
-                    case '{':
-                        return delegate.markEnd(parseBlock());
-                    case '(':
-                        return delegate.markEnd(parseExpressionStatement());
-                    default:
-                        break;
+                        case ';':
+                            return delegate.markEnd(parseEmptyStatement());
+                        case '{':
+                            return delegate.markEnd(parseBlock());
+                        case '(':
+                            return delegate.markEnd(parseExpressionStatement());
+                        default:
+                            break;
                     }
                 }
-        
+
                 if (type === Token.Keyword) {
                     switch (lookahead.value) {
-                    case 'break':
-                        return delegate.markEnd(parseBreakStatement());
-                    case 'continue':
-                        return delegate.markEnd(parseContinueStatement());
-                    case 'debugger':
-                        return delegate.markEnd(parseDebuggerStatement());
-                    case 'do':
-                        return delegate.markEnd(parseDoWhileStatement());
-                    case 'for':
-                        return delegate.markEnd(parseForStatement());
-                    case 'function':
-                        return delegate.markEnd(parseFunctionDeclaration());
-                    case 'if':
-                        return delegate.markEnd(parseIfStatement());
-                    case 'return':
-                        return delegate.markEnd(parseReturnStatement());
-                    case 'switch':
-                        return delegate.markEnd(parseSwitchStatement());
-                    case 'throw':
-                        return delegate.markEnd(parseThrowStatement());
-                    case 'try':
-                        return delegate.markEnd(parseTryStatement());
-                    case 'var':
-                        return delegate.markEnd(parseVariableStatement());
-                    case 'while':
-                        return delegate.markEnd(parseWhileStatement());
-                    case 'with':
-                        return delegate.markEnd(parseWithStatement());
-                    default:
-                        break;
+                        case 'break':
+                            return delegate.markEnd(parseBreakStatement());
+                        case 'continue':
+                            return delegate.markEnd(parseContinueStatement());
+                        case 'debugger':
+                            return delegate.markEnd(parseDebuggerStatement());
+                        case 'do':
+                            return delegate.markEnd(parseDoWhileStatement());
+                        case 'for':
+                            return delegate.markEnd(parseForStatement());
+                        case 'function':
+                            return delegate.markEnd(parseFunctionDeclaration());
+                        case 'if':
+                            return delegate.markEnd(parseIfStatement());
+                        case 'return':
+                            return delegate.markEnd(parseReturnStatement());
+                        case 'switch':
+                            return delegate.markEnd(parseSwitchStatement());
+                        case 'throw':
+                            return delegate.markEnd(parseThrowStatement());
+                        case 'try':
+                            return delegate.markEnd(parseTryStatement());
+                        case 'var':
+                            return delegate.markEnd(parseVariableStatement());
+                        case 'while':
+                            return delegate.markEnd(parseWhileStatement());
+                        case 'with':
+                            return delegate.markEnd(parseWithStatement());
+                        default:
+                            break;
                     }
                 }
-        
+
                 expr = parseExpression();
-        
+
                 // 12.12 Labelled Statements
                 if ((expr.type === Syntax.Identifier) && match(':')) {
                     lex();
-        
+
                     key = '$' + expr.name;
                     if (Object.prototype.hasOwnProperty.call(state.labelSet, key)) {
                         throwError({}, Messages.Redeclaration, 'Label', expr.name);
                     }
-        
+
                     state.labelSet[key] = true;
                     labeledBody = parseStatement();
                     delete state.labelSet[key];
                     return delegate.markEnd(delegate.createLabeledStatement(expr, labeledBody));
                 }
-        
+
                 consumeSemicolon();
-        
+
                 return delegate.markEnd(delegate.createExpressionStatement(expr));
             }
-        
+
             // 13 Function Definition
-        
+
             function parseFunctionSourceElements() {
                 var sourceElement, sourceElements = [], token, directive, firstRestricted,
                     oldLabelSet, oldInIteration, oldInSwitch, oldInFunctionBody;
-        
+
                 skipComment();
                 delegate.markStart();
                 expect('{');
-        
+
                 while (index < length) {
                     if (lookahead.type !== Token.StringLiteral) {
                         break;
                     }
                     token = lookahead;
-        
+
                     sourceElement = parseSourceElement();
                     sourceElements.push(sourceElement);
                     if (sourceElement.expression.type !== Syntax.Literal) {
@@ -9569,17 +9566,17 @@
                         }
                     }
                 }
-        
+
                 oldLabelSet = state.labelSet;
                 oldInIteration = state.inIteration;
                 oldInSwitch = state.inSwitch;
                 oldInFunctionBody = state.inFunctionBody;
-        
+
                 state.labelSet = {};
                 state.inIteration = false;
                 state.inSwitch = false;
                 state.inFunctionBody = true;
-        
+
                 while (index < length) {
                     if (match('}')) {
                         break;
@@ -9590,21 +9587,21 @@
                     }
                     sourceElements.push(sourceElement);
                 }
-        
+
                 expect('}');
-        
+
                 state.labelSet = oldLabelSet;
                 state.inIteration = oldInIteration;
                 state.inSwitch = oldInSwitch;
                 state.inFunctionBody = oldInFunctionBody;
-        
+
                 return delegate.markEnd(delegate.createBlockStatement(sourceElements));
             }
-        
+
             function parseParams(firstRestricted) {
                 var param, params = [], token, stricted, paramSet, key, message;
                 expect('(');
-        
+
                 if (!match(')')) {
                     paramSet = {};
                     while (index < length) {
@@ -9640,9 +9637,9 @@
                         expect(',');
                     }
                 }
-        
+
                 expect(')');
-        
+
                 return {
                     params: params,
                     stricted: stricted,
@@ -9650,13 +9647,13 @@
                     message: message
                 };
             }
-        
+
             function parseFunctionDeclaration() {
                 var id, params = [], body, token, stricted, tmp, firstRestricted, message, previousStrict;
-        
+
                 skipComment();
                 delegate.markStart();
-        
+
                 expectKeyword('function');
                 token = lookahead;
                 id = parseVariableIdentifier();
@@ -9673,7 +9670,7 @@
                         message = Messages.StrictReservedWord;
                     }
                 }
-        
+
                 tmp = parseParams(firstRestricted);
                 params = tmp.params;
                 stricted = tmp.stricted;
@@ -9681,7 +9678,7 @@
                 if (tmp.message) {
                     message = tmp.message;
                 }
-        
+
                 previousStrict = strict;
                 body = parseFunctionSourceElements();
                 if (strict && firstRestricted) {
@@ -9691,16 +9688,16 @@
                     throwErrorTolerant(stricted, message);
                 }
                 strict = previousStrict;
-        
+
                 return delegate.markEnd(delegate.createFunctionDeclaration(id, params, [], body));
             }
-        
+
             function parseFunctionExpression() {
                 var token, id = null, stricted, firstRestricted, message, tmp, params = [], body, previousStrict;
-        
+
                 delegate.markStart();
                 expectKeyword('function');
-        
+
                 if (!match('(')) {
                     token = lookahead;
                     id = parseVariableIdentifier();
@@ -9718,7 +9715,7 @@
                         }
                     }
                 }
-        
+
                 tmp = parseParams(firstRestricted);
                 params = tmp.params;
                 stricted = tmp.stricted;
@@ -9726,7 +9723,7 @@
                 if (tmp.message) {
                     message = tmp.message;
                 }
-        
+
                 previousStrict = strict;
                 body = parseFunctionSourceElements();
                 if (strict && firstRestricted) {
@@ -9736,39 +9733,39 @@
                     throwErrorTolerant(stricted, message);
                 }
                 strict = previousStrict;
-        
+
                 return delegate.markEnd(delegate.createFunctionExpression(id, params, [], body));
             }
-        
+
             // 14 Program
-        
+
             function parseSourceElement() {
                 if (lookahead.type === Token.Keyword) {
                     switch (lookahead.value) {
-                    case 'const':
-                    case 'let':
-                        return parseConstLetDeclaration(lookahead.value);
-                    case 'function':
-                        return parseFunctionDeclaration();
-                    default:
-                        return parseStatement();
+                        case 'const':
+                        case 'let':
+                            return parseConstLetDeclaration(lookahead.value);
+                        case 'function':
+                            return parseFunctionDeclaration();
+                        default:
+                            return parseStatement();
                     }
                 }
-        
+
                 if (lookahead.type !== Token.EOF) {
                     return parseStatement();
                 }
             }
-        
+
             function parseSourceElements() {
                 var sourceElement, sourceElements = [], token, directive, firstRestricted;
-        
+
                 while (index < length) {
                     token = lookahead;
                     if (token.type !== Token.StringLiteral) {
                         break;
                     }
-        
+
                     sourceElement = parseSourceElement();
                     sourceElements.push(sourceElement);
                     if (sourceElement.expression.type !== Syntax.Literal) {
@@ -9787,7 +9784,7 @@
                         }
                     }
                 }
-        
+
                 while (index < length) {
                     sourceElement = parseSourceElement();
                     if (typeof sourceElement === 'undefined') {
@@ -9797,10 +9794,10 @@
                 }
                 return sourceElements;
             }
-        
+
             function parseProgram() {
                 var body;
-        
+
                 skipComment();
                 delegate.markStart();
                 strict = false;
@@ -9808,10 +9805,10 @@
                 body = parseSourceElements();
                 return delegate.markEnd(delegate.createProgram(body));
             }
-        
+
             function collectToken() {
                 var start, loc, token, range, value;
-        
+
                 skipComment();
                 start = index;
                 loc = {
@@ -9820,13 +9817,13 @@
                         column: index - lineStart
                     }
                 };
-        
+
                 token = extra.advance();
                 loc.end = {
                     line: lineNumber,
                     column: index - lineStart
                 };
-        
+
                 if (token.type !== Token.EOF) {
                     range = [token.range[0], token.range[1]];
                     value = source.slice(token.range[0], token.range[1]);
@@ -9837,15 +9834,15 @@
                         loc: loc
                     });
                 }
-        
+
                 return token;
             }
-        
+
             function collectRegex() {
                 var pos, loc, regex, token;
-        
+
                 skipComment();
-        
+
                 pos = index;
                 loc = {
                     start: {
@@ -9853,13 +9850,13 @@
                         column: index - lineStart
                     }
                 };
-        
+
                 regex = extra.scanRegExp();
                 loc.end = {
                     line: lineNumber,
                     column: index - lineStart
                 };
-        
+
                 if (!extra.tokenize) {
                     // Pop the previous token, which is likely '/' or '/='
                     if (extra.tokens.length > 0) {
@@ -9870,7 +9867,7 @@
                             }
                         }
                     }
-        
+
                     extra.tokens.push({
                         type: 'RegularExpression',
                         value: regex.literal,
@@ -9878,13 +9875,13 @@
                         loc: loc
                     });
                 }
-        
+
                 return regex;
             }
-        
+
             function filterTokenLocation() {
                 var i, entry, token, tokens = [];
-        
+
                 for (i = 0; i < extra.tokens.length; ++i) {
                     entry = extra.tokens[i];
                     token = {
@@ -9899,27 +9896,27 @@
                     }
                     tokens.push(token);
                 }
-        
+
                 extra.tokens = tokens;
             }
-        
+
             function createLocationMarker() {
-        
+
                 if (!extra.loc && !extra.range) {
                     return null;
                 }
-        
+
                 skipComment();
-        
+
                 return {
                     marker: [index, lineNumber, index - lineStart, 0, 0, 0],
-        
+
                     end: function () {
                         this.marker[3] = index;
                         this.marker[4] = lineNumber;
                         this.marker[5] = index - lineStart;
                     },
-        
+
                     apply: function (node) {
                         if (extra.range) {
                             node.range = [this.marker[0], this.marker[3]];
@@ -9940,34 +9937,34 @@
                     }
                 };
             }
-        
+
             function patch() {
                 if (typeof extra.tokens !== 'undefined') {
                     extra.advance = advance;
                     extra.scanRegExp = scanRegExp;
-        
+
                     advance = collectToken;
                     scanRegExp = collectRegex;
                 }
             }
-        
+
             function unpatch() {
                 if (typeof extra.scanRegExp === 'function') {
                     advance = extra.advance;
                     scanRegExp = extra.scanRegExp;
                 }
             }
-        
+
             function tokenize(code, options) {
                 var toString,
                     token,
                     tokens;
-        
+
                 toString = String;
                 if (typeof code !== 'string' && !(code instanceof String)) {
                     code = toString(code);
                 }
-        
+
                 delegate = SyntaxTreeDelegate;
                 source = code;
                 index = 0;
@@ -9983,12 +9980,12 @@
                     inSwitch: false,
                     lastCommentStart: -1,
                 };
-        
+
                 extra = {};
-        
+
                 // Options matching.
                 options = options || {};
-        
+
                 // Of course we collect tokens here.
                 options.tokens = true;
                 extra.tokens = [];
@@ -9996,17 +9993,17 @@
                 // The following two fields are necessary to compute the Regex tokens.
                 extra.openParenToken = -1;
                 extra.openCurlyToken = -1;
-        
+
                 extra.range = (typeof options.range === 'boolean') && options.range;
                 extra.loc = (typeof options.loc === 'boolean') && options.loc;
-        
+
                 if (typeof options.comment === 'boolean' && options.comment) {
                     extra.comments = [];
                 }
                 if (typeof options.tolerant === 'boolean' && options.tolerant) {
                     extra.errors = [];
                 }
-        
+
                 if (length > 0) {
                     if (typeof source[0] === 'undefined') {
                         // Try first to convert to a string. This is good as fast path
@@ -10017,15 +10014,15 @@
                         }
                     }
                 }
-        
+
                 patch();
-        
+
                 try {
                     peek();
                     if (lookahead.type === Token.EOF) {
                         return extra.tokens;
                     }
-        
+
                     token = lex();
                     while (lookahead.type !== Token.EOF) {
                         try {
@@ -10042,7 +10039,7 @@
                             }
                         }
                     }
-        
+
                     filterTokenLocation();
                     tokens = extra.tokens;
                     if (typeof extra.comments !== 'undefined') {
@@ -10059,15 +10056,15 @@
                 }
                 return tokens;
             }
-        
+
             function parse(code, options) {
                 var program, toString;
-        
+
                 toString = String;
                 if (typeof code !== 'string' && !(code instanceof String)) {
                     code = toString(code);
                 }
-        
+
                 delegate = SyntaxTreeDelegate;
                 source = code;
                 index = 0;
@@ -10084,16 +10081,16 @@
                     lastCommentStart: -1,
                     markerStack: []
                 };
-        
+
                 extra = {};
                 if (typeof options !== 'undefined') {
                     extra.range = (typeof options.range === 'boolean') && options.range;
                     extra.loc = (typeof options.loc === 'boolean') && options.loc;
-        
+
                     if (extra.loc && options.source !== null && options.source !== undefined) {
                         extra.source = toString(options.source);
                     }
-        
+
                     if (typeof options.tokens === 'boolean' && options.tokens) {
                         extra.tokens = [];
                     }
@@ -10104,7 +10101,7 @@
                         extra.errors = [];
                     }
                 }
-        
+
                 if (length > 0) {
                     if (typeof source[0] === 'undefined') {
                         // Try first to convert to a string. This is good as fast path
@@ -10115,7 +10112,7 @@
                         }
                     }
                 }
-        
+
                 patch();
                 try {
                     program = parseProgram();
@@ -10135,38 +10132,38 @@
                     unpatch();
                     extra = {};
                 }
-        
+
                 return program;
             }
-        
+
             // Sync with package.json and component.json.
             exports.version = '1.1.0-dev';
-        
+
             exports.tokenize = tokenize;
-        
+
             exports.parse = parse;
-        
+
             // Deep copy.
             exports.Syntax = (function () {
                 var name, types = {};
-        
+
                 if (typeof Object.create === 'function') {
                     types = Object.create(null);
                 }
-        
+
                 for (name in Syntax) {
                     if (Syntax.hasOwnProperty(name)) {
                         types[name] = Syntax[name];
                     }
                 }
-        
+
                 if (typeof Object.freeze === 'function') {
                     Object.freeze(types);
                 }
-        
+
                 return types;
             }());
-        
+
         }));
         /* vim: set sw=4 ts=4 et tw=80 : */
     };
@@ -10175,11 +10172,11 @@
 })(this || exports);
 
 // SIG // Begin signature block
-// SIG // MIIkBwYJKoZIhvcNAQcCoIIj+DCCI/QCAQExDzANBglg
+// SIG // MIIkCwYJKoZIhvcNAQcCoIIj/DCCI/gCAQExDzANBglg
 // SIG // hkgBZQMEAgEFADB3BgorBgEEAYI3AgEEoGkwZzAyBgor
 // SIG // BgEEAYI3AgEeMCQCAQEEEBDgyQbOONQRoqMAEEvTUJAC
 // SIG // AQACAQACAQACAQACAQAwMTANBglghkgBZQMEAgEFAAQg
-// SIG // k5lf5tTTFKtMn4ETqds5PA8p1+lPvavkZAy6N+WzVWag
+// SIG // 5sLedTbDAAC4og1zXXPj1Me2K6nAY/HGqXiy0M0ohPug
 // SIG // gg2SMIIGEDCCA/igAwIBAgITMwAAABp3u3SzB9EWuAAA
 // SIG // AAAAGjANBgkqhkiG9w0BAQsFADB+MQswCQYDVQQGEwJV
 // SIG // UzETMBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMH
@@ -10285,7 +10282,7 @@
 // SIG // nvi/a7dLl+LrdXga7Oo3mXkYS//WsyNodeav+vyL6wuA
 // SIG // 6mk7r/ww7QRMjt/fdW1jkT3RnVZOT7+AVyKheBEyIXrv
 // SIG // QQqxP/uozKRdwaGIm1dxVk5IRcBCyZt2WwqASGv9eZ/B
-// SIG // vW1taslScxMNelDNMYIVzTCCFckCAQEwgZUwfjELMAkG
+// SIG // vW1taslScxMNelDNMYIV0TCCFc0CAQEwgZUwfjELMAkG
 // SIG // A1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0b24xEDAO
 // SIG // BgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1pY3Jvc29m
 // SIG // dCBDb3Jwb3JhdGlvbjEoMCYGA1UEAxMfTWljcm9zb2Z0
@@ -10293,31 +10290,31 @@
 // SIG // B9EWuAAAAAAAGjANBglghkgBZQMEAgEFAKCB1DAZBgkq
 // SIG // hkiG9w0BCQMxDAYKKwYBBAGCNwIBBDAcBgorBgEEAYI3
 // SIG // AgELMQ4wDAYKKwYBBAGCNwIBFTAvBgkqhkiG9w0BCQQx
-// SIG // IgQg+TuBWkPHJLb2UdDdrusztdIAt/veCdFlvotY8ZGV
-// SIG // uIUwaAYKKwYBBAGCNwIBDDFaMFigPoA8AE0AaQBjAHIA
+// SIG // IgQg9hiexyo7dV+p93AWxFF1EQDB8dsSaZb2r9MB9V5+
+// SIG // L3QwaAYKKwYBBAGCNwIBDDFaMFigPoA8AE0AaQBjAHIA
 // SIG // bwBzAG8AZgB0ACAAVwBpAG4AZABvAHcAcwAgAEEAegB1
 // SIG // AHIAZQAgAE0AbwBiAGkAbABloRaAFGh0dHA6Ly93d3cu
-// SIG // YXNwLm5ldC8gMA0GCSqGSIb3DQEBAQUABIIBAGksDcdb
-// SIG // MxP8VZKtQSlh4HZWRl96hFy1SKyZyLmIJYePMFE9aOUm
-// SIG // uJDm1RIAI4sjdKk/ppFvZhO9lC7s8uqfRXaFsACWmiUQ
-// SIG // bajGKK8xgeQND04taNHZgIywNMiBn5fiBHgz2bDdmGVp
-// SIG // h4LX0S0k5c4pMhj9sQY20ZUIf7Ht86ozF3ClzyH7QOuY
-// SIG // KP+irte5z9OSvHH0/c4AnGuEXJCsvQHIcWb5b5cBiwt/
-// SIG // BCkiDp75g9It3v90ZoOng5K8oz5lHpoOMSnz+vqFVoDm
-// SIG // pulwAEQOCEFL5o89a0cCJhMnX+YFt0UfFIPcG7b1NJ9U
-// SIG // JYy6xx8m8EFO66MdQHGJngblScqhghMxMIITLQYKKwYB
-// SIG // BAGCNwMDATGCEx0wghMZBgkqhkiG9w0BBwKgghMKMIIT
-// SIG // BgIBAzEPMA0GCWCGSAFlAwQCAQUAMIIBNQYLKoZIhvcN
+// SIG // YXNwLm5ldC8gMA0GCSqGSIb3DQEBAQUABIIBAGf/v8Bx
+// SIG // DjriYPkE+S2bUengCcW8vdj5ZsOYMEYaqXfI6dh8Y/y6
+// SIG // dGiWKhZm3G2C0F0Gp4fc2vwSGPE3xHPZyOTN8oqU/0C2
+// SIG // inzgF09U5Pgm8fR0/5gv1ZT4UVQ6cY6jyQhQzdww57vb
+// SIG // W10Bo7iC4JyseftHXNRjZDL67KC76TvwscieXKX/A6kL
+// SIG // RjxCvxJHkp0OhXLnrmaC06WwaCWNLveC5/xYhwkUyghw
+// SIG // TxBasSLgWj015KkC/e2CGrXmttgfKkQpiJAGevwTy1GK
+// SIG // hd1Re3lFtlJLWzgciIBzLoL5UnlKWhdTF8PF6x02SbN3
+// SIG // qFTvE1Q6iueqn7/AdagsJjo5vDihghM1MIITMQYKKwYB
+// SIG // BAGCNwMDATGCEyEwghMdBgkqhkiG9w0BBwKgghMOMIIT
+// SIG // CgIBAzEPMA0GCWCGSAFlAwQCAQUAMIIBNQYLKoZIhvcN
 // SIG // AQkQAQSgggEkBIIBIDCCARwCAQEGCisGAQQBhFkKAwEw
-// SIG // MTANBglghkgBZQMEAgEFAAQg39i82oBeJuOVOIj2NU4x
-// SIG // T5iiDT3bGCov22pc8gja0QgCBlOfMRwUhRgTMjAxNDA2
-// SIG // MTYyMjQ1MDAuODg4WjAHAgEBgAIB9KCBsaSBrjCBqzEL
+// SIG // MTANBglghkgBZQMEAgEFAAQgQrvkJoFTxoEIkxPN7qs+
+// SIG // 7Z4i0A7qrtj6oQRvRfFRtNsCBlOi+IPLAxgTMjAxNDA3
+// SIG // MDIyMjMzMzYuMzAxWjAHAgEBgAIB9KCBsaSBrjCBqzEL
 // SIG // MAkGA1UEBhMCVVMxCzAJBgNVBAgTAldBMRAwDgYDVQQH
 // SIG // EwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3NvZnQgQ29y
 // SIG // cG9yYXRpb24xDTALBgNVBAsTBE1PUFIxJzAlBgNVBAsT
-// SIG // Hm5DaXBoZXIgRFNFIEVTTjpGNTI4LTM3NzctOEE3NjEl
+// SIG // Hm5DaXBoZXIgRFNFIEVTTjo3RDJFLTM3ODItQjBGNzEl
 // SIG // MCMGA1UEAxMcTWljcm9zb2Z0IFRpbWUtU3RhbXAgU2Vy
-// SIG // dmljZaCCDrwwggZxMIIEWaADAgECAgphCYEqAAAAAAAC
+// SIG // dmljZaCCDsAwggZxMIIEWaADAgECAgphCYEqAAAAAAAC
 // SIG // MA0GCSqGSIb3DQEBCwUAMIGIMQswCQYDVQQGEwJVUzET
 // SIG // MBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVk
 // SIG // bW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0
@@ -10367,28 +10364,28 @@
 // SIG // uLGp25ayp0Kiyc8ZQU3ghvkqmqMRZjDTu3QyS99je/WZ
 // SIG // ii8bxyGvWbWu3EQ8l1Bx16HSxVXjad5XwdHeMMD9zOZN
 // SIG // +w2/XU/pnR4ZOC+8z1gFLu8NoFA12u8JJxzVs341Hgi6
-// SIG // 2jbb01+P3nSISRIwggTSMIIDuqADAgECAhMzAAAATYof
-// SIG // /TMuN/EAAAAAAABNMA0GCSqGSIb3DQEBCwUAMHwxCzAJ
+// SIG // 2jbb01+P3nSISRIwggTSMIIDuqADAgECAhMzAAAAUf1o
+// SIG // 4FZkFcM6AAAAAABRMA0GCSqGSIb3DQEBCwUAMHwxCzAJ
 // SIG // BgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNoaW5ndG9uMRAw
 // SIG // DgYDVQQHEwdSZWRtb25kMR4wHAYDVQQKExVNaWNyb3Nv
 // SIG // ZnQgQ29ycG9yYXRpb24xJjAkBgNVBAMTHU1pY3Jvc29m
 // SIG // dCBUaW1lLVN0YW1wIFBDQSAyMDEwMB4XDTE0MDUyMzE3
-// SIG // MjAwN1oXDTE1MDgyMzE3MjAwN1owgasxCzAJBgNVBAYT
+// SIG // MjAwOVoXDTE1MDgyMzE3MjAwOVowgasxCzAJBgNVBAYT
 // SIG // AlVTMQswCQYDVQQIEwJXQTEQMA4GA1UEBxMHUmVkbW9u
 // SIG // ZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9u
 // SIG // MQ0wCwYDVQQLEwRNT1BSMScwJQYDVQQLEx5uQ2lwaGVy
-// SIG // IERTRSBFU046RjUyOC0zNzc3LThBNzYxJTAjBgNVBAMT
+// SIG // IERTRSBFU046N0QyRS0zNzgyLUIwRjcxJTAjBgNVBAMT
 // SIG // HE1pY3Jvc29mdCBUaW1lLVN0YW1wIFNlcnZpY2UwggEi
-// SIG // MA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCbfeW0
-// SIG // 2THH0TdkyhS8FtFZ2QC1QvHZqQc7J7puYrfp6GjEghHK
-// SIG // 1nclr8eeuTfL4dwevA88vr9ItW7HDGWSjnMNu6hBJWs4
-// SIG // Dzl4cU9mxoQQbgNl9pRsw/QjZzyfI6xvQaunsbXnSIgl
-// SIG // 65iqXjozTfXnaStpg6Qe4BU7iGY7mzSv2DBORbq739a8
-// SIG // XBhe/O4NWcWubpWwlY+N6kBLi5kpbFJnJRMuTtCau6jY
-// SIG // 2zNPZ7WHCl1Pm71GfyNvWc4mjpR/yJizyP0ZOyhAG+f2
-// SIG // hQ+jQ+Cn3Fl32I6D5hWN6enpON8w7MljX7Cyi4DieGAs
-// SIG // RLC4QCjYhRKXcQSBvdm8662BVIKxAgMBAAGjggEbMIIB
-// SIG // FzAdBgNVHQ4EFgQUcSMpS0eWhBieUG9ABA35oN/kiqMw
+// SIG // MA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCdoMHD
+// SIG // CiueaTXOKReXVF98kGuwid2UcrElgBt/PMHHmOrGTOl+
+// SIG // c9s6zVaU+VhAp4QuvSiuv0PxPKhuRYS2C1bHkd2qtEYq
+// SIG // FFsxEYrAwyJuYLbQf1z+dowW4GpHRxIDnBaCTsmeMYrp
+// SIG // geEpQkeOq9UUFIqywM9wTrQTdj521UugGhaSuXqXxClO
+// SIG // TuYWfoyUiVLmVBc3MCfV3JmgJD3j8KrbDf/LWaNpBpmw
+// SIG // 9dKF4NVYQE5cxW74ELcmELrUO4RNYslxwM5jmHYG0w5t
+// SIG // 04YPjt1vEPdamwS2VM2nh9WMbCZqtHExX7DRjilvcSNr
+// SIG // rb1CZGMKc4DwQS+LhQVozmG9qyMFAgMBAAGjggEbMIIB
+// SIG // FzAdBgNVHQ4EFgQURsQO7BFCXdbg4fxRLbhcjVj7mZQw
 // SIG // HwYDVR0jBBgwFoAU1WM6XIoxkPNDe3xGG8UzaFqFbVUw
 // SIG // VgYDVR0fBE8wTTBLoEmgR4ZFaHR0cDovL2NybC5taWNy
 // SIG // b3NvZnQuY29tL3BraS9jcmwvcHJvZHVjdHMvTWljVGlt
@@ -10397,62 +10394,62 @@
 // SIG // b3NvZnQuY29tL3BraS9jZXJ0cy9NaWNUaW1TdGFQQ0Ff
 // SIG // MjAxMC0wNy0wMS5jcnQwDAYDVR0TAQH/BAIwADATBgNV
 // SIG // HSUEDDAKBggrBgEFBQcDCDANBgkqhkiG9w0BAQsFAAOC
-// SIG // AQEAkH0LZnVAqiX7RkutCS5Vr8JXoywOLdWmD6BLRVgt
-// SIG // IdznDsDEA4lSi9fo6Ga5l2s/IcC7zkwwTkBGt1cQRgQl
-// SIG // vSEj+XIVByxScnng4CICkdH/Qtyfx7a/8dcM97y7CiPv
-// SIG // rP7WBZtMkoF9hiz7A4twfPBe6Gw6Of3I5jZptF29+2mp
-// SIG // eJTtY/HSimUn4qIStSadi2m2XxHPRQch5Q7ZCjW+Sl+c
-// SIG // zBGCiY3Py+zQFyhgJxxHofy2ViNVUf7Wm4cg1N0OeFa6
-// SIG // a5CDwfLZoxp3BVzKWHkQN+Z2YPYsh/Bc+uK4EoFnw6Tf
-// SIG // OrZtKJz+I08oU+6dvnT7DqC72PiypjwrYqgM56GCA20w
-// SIG // ggJVAgEBMIHboYGxpIGuMIGrMQswCQYDVQQGEwJVUzEL
+// SIG // AQEAWtViIXrzBsM1Rp+3TjCPFV5I+6mPSuVT7f04J2t7
+// SIG // paDp7R3Mc6XKcw7r955bYklZn8QprPy3CF9hQ9wFRAMl
+// SIG // lxnUPgimir3uN5+AT7Q4OrNLCC0UfFJguGVH70NIGUBc
+// SIG // Bh2cENhuDgV+Clf6Wdt2kNGAX9GbX/SwpQtzGTcPHLLd
+// SIG // /qVOqovfwvnrH25O/8nhHLn8BndeBR5uF6Lvzfvc15JQ
+// SIG // /1qAM0JHvnmAwohkszevEdqJXTEDYYIc8lm5utllZ/ep
+// SIG // ilMP6qa0kOzT+hhmu5ARgIMv0ivUYuoqxGRb8DneJyq7
+// SIG // xiBkQoYxrk6fI96Ci7hbBsuiX77RzLAI9M1xiaGCA3Ew
+// SIG // ggJZAgEBMIHboYGxpIGuMIGrMQswCQYDVQQGEwJVUzEL
 // SIG // MAkGA1UECBMCV0ExEDAOBgNVBAcTB1JlZG1vbmQxHjAc
 // SIG // BgNVBAoTFU1pY3Jvc29mdCBDb3Jwb3JhdGlvbjENMAsG
 // SIG // A1UECxMETU9QUjEnMCUGA1UECxMebkNpcGhlciBEU0Ug
-// SIG // RVNOOkY1MjgtMzc3Ny04QTc2MSUwIwYDVQQDExxNaWNy
+// SIG // RVNOOjdEMkUtMzc4Mi1CMEY3MSUwIwYDVQQDExxNaWNy
 // SIG // b3NvZnQgVGltZS1TdGFtcCBTZXJ2aWNloiUKAQEwCQYF
-// SIG // Kw4DAhoFAAMVAHMoNR+RpexTOIkfsfpflBJ+59tGoIHC
+// SIG // Kw4DAhoFAAMVALPt+sqglgTwYRiGYELfAzF7wkNfoIHC
 // SIG // MIG/pIG8MIG5MQswCQYDVQQGEwJVUzETMBEGA1UECBMK
 // SIG // V2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwG
 // SIG // A1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMQ0wCwYD
 // SIG // VQQLEwRNT1BSMScwJQYDVQQLEx5uQ2lwaGVyIE5UUyBF
 // SIG // U046QjAyNy1DNkY4LTFEODgxKzApBgNVBAMTIk1pY3Jv
 // SIG // c29mdCBUaW1lIFNvdXJjZSBNYXN0ZXIgQ2xvY2swDQYJ
-// SIG // KoZIhvcNAQEFBQACBQDXSa+2MCIYDzIwMTQwNjE2MTgw
-// SIG // MjMwWhgPMjAxNDA2MTcxODAyMzBaMHMwOQYKKwYBBAGE
-// SIG // WQoEATErMCkwCgIFANdJr7YCAQAwBgIBAAIBZDAHAgEA
-// SIG // AgIXGjAKAgUA10sBNgIBADA2BgorBgEEAYRZCgQCMSgw
-// SIG // JjAMBgorBgEEAYRZCgMBoAowCAIBAAIDFuNgoQowCAIB
-// SIG // AAIDB6EgMA0GCSqGSIb3DQEBBQUAA4IBAQAJ/e+5a1It
-// SIG // yKPlRW9KDsLdimgW+dt73i8LNjsagRfLVypthXl2yh1/
-// SIG // AY9/6pneTcke+YXU3ridu+0DJJnrPnV18A4EDOOrRcy6
-// SIG // Y/V5EtJTLITsbwDE6VMtXr38MnrR3YMPKRmAKlXBfJnV
-// SIG // rkaVb1L78o4CDL9MKOfCoTaL/ZYnZFxwzrypMczJXmeg
-// SIG // TevnV/wOKuiDN4D2ZNWb9/snCjRXBQK4Bgfm2l8Cs8hD
-// SIG // XN/JRhNX+h4pduqweodfC7gwnkNmeRM2MFbIevI1/Ck4
-// SIG // hxZHtSgvTLYXQpmXHM7g5QJJl7WwKCMdTIX0F6luQsr1
-// SIG // fot4PMS2IqH6J2a9aerJBNfiMYIC9TCCAvECAQEwgZMw
-// SIG // fDELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0
-// SIG // b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1p
-// SIG // Y3Jvc29mdCBDb3Jwb3JhdGlvbjEmMCQGA1UEAxMdTWlj
-// SIG // cm9zb2Z0IFRpbWUtU3RhbXAgUENBIDIwMTACEzMAAABN
-// SIG // ih/9My438QAAAAAAAE0wDQYJYIZIAWUDBAIBBQCgggEy
-// SIG // MBoGCSqGSIb3DQEJAzENBgsqhkiG9w0BCRABBDAvBgkq
-// SIG // hkiG9w0BCQQxIgQgtMXP3OBgYTfiog/11RvR812wt/l4
-// SIG // unZ4tBs0OE/6yl4wgeIGCyqGSIb3DQEJEAIMMYHSMIHP
-// SIG // MIHMMIGxBBRzKDUfkaXsUziJH7H6X5QSfufbRjCBmDCB
-// SIG // gKR+MHwxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNo
+// SIG // KoZIhvcNAQEFBQACBQDXXtiGMCIYDzIwMTQwNzAyMTkx
+// SIG // NDE0WhgPMjAxNDA3MDMxOTE0MTRaMHcwPQYKKwYBBAGE
+// SIG // WQoEATEvMC0wCgIFANde2IYCAQAwCgIBAAICFP0CAf8w
+// SIG // BwIBAAICGEEwCgIFANdgKgYCAQAwNgYKKwYBBAGEWQoE
+// SIG // AjEoMCYwDAYKKwYBBAGEWQoDAaAKMAgCAQACAxbjYKEK
+// SIG // MAgCAQACAwehIDANBgkqhkiG9w0BAQUFAAOCAQEAZJef
+// SIG // 1XB+JEJFWptXBC9dbb9RTgadYGIHVafUracbInoCBnKu
+// SIG // pqejRB6/6L3C8tDlB8e88KWfoOyU8E2ztkmoe/+iMnfd
+// SIG // FCBl/Kr1hg5eqDl/FzuBJnxuVfUhoeEr4KBsFUyDAAr0
+// SIG // tP/fqbNg7NvnoGxA98FzOcwClnkXwfoNqNEPCVNQMl1M
+// SIG // WppiHJ8euUHwyStpUQAJWvtfDbq1V+6iffjVz6ropsD8
+// SIG // g9EcR2sMyJBvnjerLBMWc2+D42FE4y+kYIQrFOTNYSpT
+// SIG // Wu4HjD+rihH7ogpTCcw0SrJDdtwC8+p3h+ZNofko/HJe
+// SIG // +X3hdTRw5HEh1pneAua8f1zYbPA+0TGCAvUwggLxAgEB
+// SIG // MIGTMHwxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpXYXNo
 // SIG // aW5ndG9uMRAwDgYDVQQHEwdSZWRtb25kMR4wHAYDVQQK
 // SIG // ExVNaWNyb3NvZnQgQ29ycG9yYXRpb24xJjAkBgNVBAMT
 // SIG // HU1pY3Jvc29mdCBUaW1lLVN0YW1wIFBDQSAyMDEwAhMz
-// SIG // AAAATYof/TMuN/EAAAAAAABNMBYEFGBLMEtc1BMw7hyU
-// SIG // xJKVRz22lMiCMA0GCSqGSIb3DQEBCwUABIIBAGULgG8q
-// SIG // k6D/SQnjmfu5YOjVnEJdShqVhIRa5FXeKTcKKYdtrNBz
-// SIG // DgqZXeDWN8h+4Yfu52ljy06Bq/3zsLZjX3XQ9ce/XIqt
-// SIG // 57skGyQ/jRW6C1xIwKDbs87wMkcUSSioH24XWM1lrWyh
-// SIG // HoNue7qc/BdDhSv0dbgxT1IS8eO0SIvgbPubATSLLX5N
-// SIG // loM8xT1X3TXBR7YXo37ymjXSw14Iyq0uDuZ/vPpCT8ML
-// SIG // +n1XSAC5PlxgtryjbbcB8/rJrwn+qHGYGK1OCf7OYnyG
-// SIG // 12a3+2D4C2wDukRuCKOPhiQQiAtuYeTw1iZ8pjuTFTa+
-// SIG // CmSOISndyiq4KXaXHS4quZtZvn4=
+// SIG // AAAAUf1o4FZkFcM6AAAAAABRMA0GCWCGSAFlAwQCAQUA
+// SIG // oIIBMjAaBgkqhkiG9w0BCQMxDQYLKoZIhvcNAQkQAQQw
+// SIG // LwYJKoZIhvcNAQkEMSIEIJ/iS74sdIh+qa8TKZ8Muyyl
+// SIG // 2unmARB6Mbxeu9jpuVAoMIHiBgsqhkiG9w0BCRACDDGB
+// SIG // 0jCBzzCBzDCBsQQUs+36yqCWBPBhGIZgQt8DMXvCQ18w
+// SIG // gZgwgYCkfjB8MQswCQYDVQQGEwJVUzETMBEGA1UECBMK
+// SIG // V2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVkbW9uZDEeMBwG
+// SIG // A1UEChMVTWljcm9zb2Z0IENvcnBvcmF0aW9uMSYwJAYD
+// SIG // VQQDEx1NaWNyb3NvZnQgVGltZS1TdGFtcCBQQ0EgMjAx
+// SIG // MAITMwAAAFH9aOBWZBXDOgAAAAAAUTAWBBQ3yqzN6dia
+// SIG // OdFlEysS4AhfelZPljANBgkqhkiG9w0BAQsFAASCAQAu
+// SIG // DKwxTB5bIEVh5j1NnmKV9hK5m2bK0JIZJcxmrlXBnulE
+// SIG // Avx3sL6naqmgV5lCJ6BOVhUQa533yd72DkjNyN8kHqxl
+// SIG // cfErcCixC5y4V/kvBopb5DvdIYZpi4rQqf0MkbHCEREc
+// SIG // 0co/C4eWH8i9krIUW3jWOV+YUxM0usVR4e/chup+Egyj
+// SIG // Cq7PJT7gEvObT8nP/oNlN3g/RnQFJl+Es9UQfispVDwe
+// SIG // GsnGt2q/CvUKrHX6TVEyrVCqMmUnYJpCZ31Zz5/wmRrq
+// SIG // WjEP/UZY/KEoj9IexJgQ8StIgAqbvmkrB1YIeB5/bc3X
+// SIG // mJdKRaidh1ecguKokL6t7d+XAfuXG0AO
 // SIG // End signature block

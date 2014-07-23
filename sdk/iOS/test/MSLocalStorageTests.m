@@ -142,9 +142,9 @@
     STAssertEquals(storage.deviceToken, @"token2", @"Token is expected to be set correctly after updateWithRegistrationName is called.");
     STAssertEquals(storage.isRefreshNeeded, NO, @"isRefreshNeeded should be NO after updateRegistrations.");
     
-    NSArray *registrationIds = [storage getRegistrationIds];
-    STAssertEquals(registrationIds[0], @"regId2", @"RegistrationIds should match those in storage.");
-    STAssertEquals(registrationIds[1], @"regId", @"RegistrationIds should match those in storage.");
+    NSArray *registrationIds = [[storage getRegistrationIds] sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    STAssertEquals(registrationIds[0], @"regId", @"RegistrationIds should match those in storage.");
+    STAssertEquals(registrationIds[1], @"regId2", @"RegistrationIds should match those in storage.");
 }
 
 @end

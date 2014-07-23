@@ -537,7 +537,10 @@ exports.createError = function (exceptionOrMessage, request) {
             // defaulting to the status
             var isText = false;
             if (request.getResponseHeader) {
-                isText = request.getResponseHeader('Content-Type').toLowerCase().indexOf("text") >= 0;
+                var contentType = request.getResponseHeader('Content-Type');
+                if (contentType) {
+                    isText = contentType.toLowerCase().indexOf("text") >= 0;
+                }
             }
 
             try {

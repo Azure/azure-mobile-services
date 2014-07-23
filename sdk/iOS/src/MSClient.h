@@ -16,8 +16,6 @@
 /// Callback for method with no return other than error.
 typedef void (^MSCompletionBlock)(NSError *error);
 
-#import "MSPush.h"
-
 /// Callback for invokeAPI method that expects a JSON result.
 typedef void (^MSAPIBlock)(id result, NSHTTPURLResponse *response, NSError *error);
 
@@ -183,6 +181,19 @@ typedef void (^MSAPIDataBlock)(NSData *result,
       parameters:(NSDictionary *)parameters
          headers:(NSDictionary *)headers
       completion:(MSAPIDataBlock)completion;
+
+/// @}
+
+
+#pragma mark * Public Connection Methods
+
+
+/// @name Controlling connections to the server
+/// @{
+
+/// Determines where connections made to the mobile service are run. If set, connection related
+/// logic will occur on this queue. Otherwise, the thread that made the call will be used.
+@property (nonatomic, strong) NSOperationQueue *connectionDelegateQueue;
 
 /// @}
 
