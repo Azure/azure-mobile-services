@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Sync;
 using Microsoft.WindowsAzure.MobileServices.Threading;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
@@ -45,7 +46,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return this.store.DeleteAsync(MobileServiceLocalSystemTables.Config, GetDeltaTokenKey(tableName, queryKey));
         }        
 
-        public virtual Task<DateTime> GetDeltaToken(string tableName, string queryKey)
+        public virtual Task<DateTime>  GetDeltaToken(string tableName, string queryKey)
         {
             return this.GetSetting(GetDeltaTokenKey(tableName, queryKey), DateTime.MinValue);
         }
@@ -73,7 +74,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             await this.store.UpsertAsync(MobileServiceLocalSystemTables.Config, new JObject()
             {
                 { MobileServiceSystemColumns.Id, key },
-                { "value", value == null ? null : (string)Convert.ChangeType(value, typeof(string)) }
+                { "value", JsonConvert.SerializeObject(value) }
             }, fromServer: false);
 
             this.cache[key] = value;
@@ -94,7 +95,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     else
                     {
                         string rawValue = setting.Value<string>("value");
-                        value = rawValue == null ? defaultValue : Convert.ChangeType(rawValue, typeof(T));
+                        value = JsonConvert.DeserializeObject<T>(rawValue);
                     }
                     this.cache[key] = value;
                 }
