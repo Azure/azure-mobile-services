@@ -45,7 +45,7 @@ $testGroup('Mobile Service Table Tests')
                             return $chain(
                                 function () {
                                     $log('testing id: ' + testId);
-                                    return table.insert({ id: testId, String: 'Hey' });
+                                    return table.insert({ id: testId, string: 'Hey' });
                                 },
                                 function (item) {
                                     $assert.areEqual(testId, item.id);
@@ -55,44 +55,44 @@ $testGroup('Mobile Service Table Tests')
                                 function (items) {
                                     $assert.areEqual(1, items.length);
                                     $assert.areEqual(testId, items[0].id);
-                                    $assert.areEqual('Hey', items[0].String);
+                                    $assert.areEqual('Hey', items[0].string);
 
                                     return table.where({ id: testId }).read();
                                 },
                                 function (items) {
                                     $assert.areEqual(1, items.length);
                                     $assert.areEqual(testId, items[0].id);
-                                    $assert.areEqual('Hey', items[0].String);
+                                    $assert.areEqual('Hey', items[0].string);
 
-                                    return table.select('id', 'String').read();
+                                    return table.select('id', 'string').read();
                                 }, function (items) {
                                     $assert.areEqual(1, items.length);
                                     $assert.areEqual(testId, items[0].id);
-                                    $assert.areEqual('Hey', items[0].String);
+                                    $assert.areEqual('Hey', items[0].string);
 
                                     return table.lookup(testId);
                                 }, function (item) {
                                     $assert.areEqual(testId, item.id);
-                                    $assert.areEqual('Hey', item.String);
+                                    $assert.areEqual('Hey', item.string);
 
-                                    item.String = "What?";
+                                    item.string = "What?";
                                     return table.update(item);
                                 }, function (item) {
                                     $assert.areEqual(testId, item.id);
-                                    $assert.areEqual('What?', item.String);
+                                    $assert.areEqual('What?', item.string);
 
-                                    item = { id: testId, String: 'hey' };
+                                    item = { id: testId, string: 'hey' };
 
                                     return table.refresh(item);
                                 }, function (item) {
                                     $assert.areEqual(testId, item.id);
-                                    $assert.areEqual('What?', item.String);
+                                    $assert.areEqual('What?', item.string);
 
                                     return table.read();
                                 }, function (items) {
                                     $assert.areEqual(1, items.length);
                                     $assert.areEqual(testId, items[0].id);
-                                    $assert.areEqual('What?', items[0].String);
+                                    $assert.areEqual('What?', items[0].string);
 
                                     return table.del(items[0]);
                                 });
@@ -234,7 +234,7 @@ $testGroup('Mobile Service Table Tests')
                             return table.lookup(testId).then(function (item) {
                                 $assert.fail('should have failed');
                             }, function (error) {
-                                $assert.contains(error.message, 'does not exist.');
+                                $assert.contains(error.message, $isDotNet() ? 'Not Found' : 'does not exist');
                             });
                         });
                     });
@@ -393,7 +393,7 @@ $testGroup('Mobile Service Table Tests')
                             return table.update({ id: testId, string: 'Alright!' }).then(function (item) {
                                 $assert.fail('Should have failed.');
                             }, function (error) {
-                                $assert.contains(error.message, 'does not exist');
+                                $assert.contains(error.message, $isDotNet() ? 'Not Found' : 'does not exist');
                             });
                         });
                     });
@@ -463,6 +463,7 @@ $testGroup('Mobile Service Table Tests')
         }),
 
         $test('AsyncTableOperationsWithIntegerAsStringIdAgainstIntIdTable')
+        .tag('dotNet_not_supported')  //.NET apps don't support integer ids.
         .checkAsync(function () {
             var client = $getClient(),
                 table = client.getTable('IntegerIdJavascriptTable'),
@@ -528,6 +529,7 @@ $testGroup('Mobile Service Table Tests')
         }),
 
         $test('ReadAsyncWithValidIntIdAgainstIntIdTable')
+        .tag('dotNet_not_supported') //.NET apps don't support integer ids.
         .checkAsync(function () {
             var client = $getClient(),
                 table = client.getTable('IntegerIdJavascriptTable'), 
@@ -554,7 +556,9 @@ $testGroup('Mobile Service Table Tests')
 
         $test('AsyncTableOperationsWithAllSystemProperties')
         .tag('SystemProperties')
+        .tag('dotNet_not_supported') 
         .checkAsync(function () {
+
             var client = $getClient(),
                 table = client.getTable('StringIdJavascriptTable'),
                 savedItem,
@@ -568,7 +572,7 @@ $testGroup('Mobile Service Table Tests')
                     return emptyTable(table);
                 },
                 function () {
-                    return table.insert({ id: 'an id', String: 'a value' });
+                    return table.insert({ id: 'an id', string: 'a value' });
                 },
                 function (item) {
                     $assert.isNotNull(item.__createdAt);
@@ -585,7 +589,7 @@ $testGroup('Mobile Service Table Tests')
                     $assert.isNotNull(item.__version);
                     savedItem = item;
 
-                    return table.where(function(value) { return this.__version == value }, item.__version).read();
+                    return table.where(function (value) { return this.__version == value }, item.__version).read();
                 },
                 function (items) {
                     $assert.areEqual(1, items.length);
@@ -620,7 +624,7 @@ $testGroup('Mobile Service Table Tests')
                     $assert.areEqual(item.__createdAt.valueOf(), savedItem.__createdAt.valueOf());
                     $assert.areEqual(item.__version, savedItem.__version);
 
-                    savedItem.String = 'Hello';
+                    savedItem.string = 'Hello';
                     savedVersion = savedItem.__version; //WinJS Mutates
                     savedUpdatedAt = savedItem.__updatedAt.valueOf();
 
@@ -651,7 +655,9 @@ $testGroup('Mobile Service Table Tests')
 
         $test('AsyncTableOperationsWithSystemPropertiesSetExplicitly')
         .tag('SystemProperties')
+        .tag('dotNet_not_supported') // .NET apps always return all system properties on insert operation
         .checkAsync(function () {
+
             var client = $getClient(),
                 table = client.getTable('StringIdJavascriptTable'),
                 props = WindowsAzure.MobileServiceTable.SystemProperties;
@@ -663,7 +669,7 @@ $testGroup('Mobile Service Table Tests')
                     return emptyTable(table);
                 },
                 function () {
-                    return table.insert({ String: 'a value'  });
+                    return table.insert({ string: 'a value'  });
                 },
                 function (item) {
                     $assert.isNotNull(item.__createdAt);
@@ -671,7 +677,7 @@ $testGroup('Mobile Service Table Tests')
                     $assert.isNotNull(item.__version);
 
                     table.systemProperties = props.Version | props.CreatedAt;
-                    return table.insert({ String: 'a value' });
+                    return table.insert({ string: 'a value' });
                 },
                 function (item) {
                     $assert.isNotNull(item.__createdAt);
@@ -679,7 +685,7 @@ $testGroup('Mobile Service Table Tests')
                     $assert.isNull(item.__updatedAt);
 
                     table.systemProperties = props.Version | props.UpdatedAt;
-                    return table.insert({ String: 'a value' });
+                    return table.insert({ string: 'a value' });
                 },
                 function (item) {
                     $assert.isNull(item.__createdAt);
@@ -687,7 +693,7 @@ $testGroup('Mobile Service Table Tests')
                     $assert.isNotNull(item.__version);
 
                     table.systemProperties = props.UpdatedAt | props.CreatedAt;
-                    return table.insert({ String: 'a value' });
+                    return table.insert({ string: 'a value' });
                 },
                 function (item) {
                     $assert.isNotNull(item.__createdAt);
@@ -695,7 +701,7 @@ $testGroup('Mobile Service Table Tests')
                     $assert.isNull(item.__version);
 
                     table.systemProperties = props.UpdatedAt;
-                    return table.insert({ String: 'a value' });
+                    return table.insert({ string: 'a value' });
                 }, function (item) {
                     $assert.isNull(item.__createdAt);
                     $assert.isNotNull(item.__updatedAt);
@@ -707,6 +713,7 @@ $testGroup('Mobile Service Table Tests')
 
         $test('AsyncTableOperationsWithAllSystemPropertiesUsingCustomSystemParameters')
         .tag('SystemProperties')
+        .tag('dotNet_not_supported') // .NET apps don't support filtering system properties
         .checkAsync(function () {
             var client = $getClient(),
                 table = client.getTable('StringIdJavascriptTable'),
@@ -737,7 +744,7 @@ $testGroup('Mobile Service Table Tests')
                         commands.push(function () {
                             return $chain(
                                 function () {
-                                    return table.insert({ id: 'an id', String: 'a value' }, userParams);
+                                    return table.insert({ id: 'an id', string: 'a value' }, userParams);
                                 },
                                 function (item) {
                                     $assert.areEqual(shouldHaveCreatedAt, item.__createdAt !== undefined);
@@ -801,7 +808,7 @@ $testGroup('Mobile Service Table Tests')
                                    $assert.areEqual(shouldHaveUpdatedAt, item.__updatedAt !== undefined);
                                    $assert.areEqual(shouldHaveVersion, item.__version !== undefined);
 
-                                   savedItem.String = 'Hello!';
+                                   savedItem.string = 'Hello!';
                                    savedVersion = item.__version;
                                    return table.update(savedItem, userParams);
                                },
@@ -823,6 +830,7 @@ $testGroup('Mobile Service Table Tests')
 
         $test('AsyncTableOperationsWithInvalidSystemPropertiesQuerystring')
         .tag('SystemProperties')
+        .tag('dotNet_not_supported') // .NET runtime apps always get items whatever you put into __systemproperties
         .checkAsync(function () {
             var client = $getClient(),
                 table = client.getTable('StringIdJavascriptTable'),
@@ -837,7 +845,7 @@ $testGroup('Mobile Service Table Tests')
                 commands.push(
                     function () {
                         $log('querystring: ' + systemProperties);
-                        return table.insert({ id: 'an id', String: 'a value' }, userParams).then(
+                        return table.insert({ id: 'an id', string: 'a value' }, userParams).then(
                             function (item) {
                                 $assert.fail('Should have failed');
                             }, function (error) {
@@ -863,7 +871,7 @@ $testGroup('Mobile Service Table Tests')
                             //$assert.contains(error.message, "is not a supported system property.");
                         });
                     }, function () {
-                        return table.update({ id: 'an id', String: 'new value' }, userParams).then(function (items) {
+                        return table.update({ id: 'an id', string: 'new value' }, userParams).then(function (items) {
                             $assert.fail('Should have failed');
                         }, function (error) {
                             //$assert.contains(error.message, "is not a supported system property.");
@@ -877,6 +885,7 @@ $testGroup('Mobile Service Table Tests')
         $test('AsyncTableOperationsWithInvalidSystemParameterQueryString')
         .description('test table ops with invalid querystrings')
         .tag('SystemProperties')
+        .tag('dotNet_not_supported') // .NET apps don't support filtering system properties
         .checkAsync(function () {
             var client = $getClient(),
                 table = client.getTable('StringIdJavascriptTable'),
@@ -892,7 +901,7 @@ $testGroup('Mobile Service Table Tests')
                     return emptyTable(table);
                 },
                 function () {
-                    return table.insert({ id: 'an id', String: 'a value' }, userParams).then(
+                    return table.insert({ id: 'an id', string: 'a value' }, userParams).then(
                         function (item) {
                             $assert.fail('Should have failed');
                         }, function (error) {
@@ -924,7 +933,7 @@ $testGroup('Mobile Service Table Tests')
                         });
                 },
                 function () {
-                    return table.update({ id: 'an id', String: 'new value'}, userParams).then(
+                    return table.update({ id: 'an id', string: 'new value'}, userParams).then(
                         function (item) {
                             $assert.fail('Should have failed');
                         }, function (error) {
@@ -936,6 +945,7 @@ $testGroup('Mobile Service Table Tests')
         $test('AsyncFilterSelectOrderingOperationsNotImpactedBySystemProperties')
         .description('test table sorting with various system properties')
         .tag('SystemProperties')
+        .tag('dotNet_not_supported') // .NET apps don't support filtering system properties
         .checkAsync(function () {
             var client = $getClient(),
                 table = client.getTable('StringIdJavascriptTable'),
@@ -948,23 +958,23 @@ $testGroup('Mobile Service Table Tests')
                     return emptyTable(table);
                 },
                 function () {
-                    return table.insert({ id: '1', String: 'value' });
+                    return table.insert({ id: '1', string: 'value' });
                 },
                 function (item) {
                     savedItems.push(item);
-                    return table.insert({ id: '2', String: 'value' });
+                    return table.insert({ id: '2', string: 'value' });
                 },
                 function (item) {
                     savedItems.push(item);
-                    return table.insert({ id: '3', String: 'value' });
+                    return table.insert({ id: '3', string: 'value' });
                 },
                 function (item) {
                     savedItems.push(item);
-                    return table.insert({ id: '4', String: 'value' });
+                    return table.insert({ id: '4', string: 'value' });
                 },
                 function (item) {
                     savedItems.push(item);
-                    return table.insert({ id: '5', String: 'value' });
+                    return table.insert({ id: '5', string: 'value' });
                 },
                 function (item) {
                     savedItems.push(item);
@@ -1052,16 +1062,16 @@ $testGroup('Mobile Service Table Tests')
             return $chain(function () {
                 return emptyTable(table);
             }, function () {
-                return table.insert({ id: 'an id', String: 'a value'});
+                return table.insert({ id: 'an id', string: 'a value'});
             }, function (item) {
                 savedVersion = item.__version;
 
-                item.String = 'Hello!';
+                item.string = 'Hello!';
                 return table.update(item);
             }, function (item) {
                 $assert.areNotEqual(item.__version, savedVersion);
 
-                item.String = 'But Wait!';
+                item.string = 'But Wait!';
                 correctVersion = item.__version;
                 item.__version = savedVersion;
 
@@ -1071,7 +1081,7 @@ $testGroup('Mobile Service Table Tests')
                     $assert.areEqual(412, error.request.status);
                     $assert.contains(error.message, "Precondition Failed");
                     $assert.areEqual(error.serverInstance.__version, correctVersion);
-                    $assert.areEqual(error.serverInstance.String, 'Hello!');
+                    $assert.areEqual(error.serverInstance.string, 'Hello!');
 
                     item.__version = correctVersion;
                     return table.update(item);

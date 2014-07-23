@@ -3,27 +3,27 @@
 // ----------------------------------------------------------------------------
 
 exports.validStringIds = [
-            "id",
-            "true",
-            "false",
-            "00000000-0000-0000-0000-000000000000",
-            "aa4da0b5-308c-4877-a5d2-03f274632636",
-            "69C8BE62-A09F-4638-9A9C-6B448E9ED4E7",
-            "{EC26F57E-1E65-4A90-B949-0661159D0546}",
-            "87D5B05C93614F8EBFADF7BC10F7AE8C",
-            "someone@someplace.com",
-            "id with spaces",
-            "...",
-            " .",
-            "'id' with single quotes",
-            "id with 255 characters " + new Array(257 - 24).join('A'),
-            "id with Japanese 私の車はどこですか？",
-            "id with Arabic أين هو سيارتي؟",
-            "id with Russian Где моя машина",
-            "id with some URL significant characters % # &",
-            "id with allowed ascii characters  !#$%&'()*,-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_abcdefghijklmnopqrstuvwxyz{|}",
-            "id with allowed extended ascii characters ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþ"
+             "id",
+             "true",
+             "false",
+             "00000000-0000-0000-0000-000000000000",
+             "aa4da0b5-308c-4877-a5d2-03f274632636",
+             "69C8BE62-A09F-4638-9A9C-6B448E9ED4E7",
+             "{EC26F57E-1E65-4A90-B949-0661159D0546}",
+             "87D5B05C93614F8EBFADF7BC10F7AE8C",
+             "someone@someplace.com",
+             "id with spaces",
+             "id.with.periods",
+             "'id' with single quotes",
+             "id with 128 characters " + new Array(128 - 24).join('A'), 
+             "id with Japanese 私の車はどこですか？",
+             "id with Arabic أين هو سيارتي؟",
+             "id with Russian Где моя машина",
+             "id with some URL significant characters % # &",
+             "id with ascii characters  !#%&'()*,-.0123456789:;<=>@ABCDEFGHIJKLMNOPQRSTUVWXYZ[]^_abcdefghijklmnopqrstuvwxyz{|}", // '$' .NET not supported
+             "id with extended chars ascii ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþ"
 ];
+
 
 exports.emptyStringIds = [""];
 exports.invalidStringIds = [
