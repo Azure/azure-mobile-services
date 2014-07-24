@@ -8,13 +8,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.MobileServices.Query;
 using Microsoft.WindowsAzure.MobileServices.Sync;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
@@ -22,7 +19,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     [Tag("unit")]
     [Tag("table")]
     [Tag("offline")]
-    public class MobileServiceSyncTableGenericTests :TestBase
+    public class MobileServiceSyncTableGenericTests : TestBase
     {
         [AsyncTestMethod]
         public async Task RefreshAsync_Succeeds_WhenIdIsNull()
@@ -120,7 +117,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await table.PullAsync();
 
             Assert.AreEqual(store.Tables[table.TableName].Count, 2); // 1 from remote and 1 from local
-            Assert.AreEqual(hijack.Requests.Count, 2); 
+            Assert.AreEqual(hijack.Requests.Count, 2);
         }
 
         [AsyncTestMethod]
@@ -290,8 +287,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             var store = new MobileServiceLocalStoreMock();
             var settings = new MobileServiceSyncSettingsManager(store);
-            await settings.SetDeltaToken("stringId_test_table", "incquery", new DateTime(2001, 02, 03, 0, 0, 0, DateTimeKind.Utc));
-            await TestIncrementalPull(store, "2001-02-03T08:00:00.000Z");
+            await settings.SetDeltaTokenAsync("stringId_test_table", "incquery", new DateTime(2001, 02, 03, 0, 0, 0, DateTimeKind.Utc));
+            await TestIncrementalPull(store, "2001-02-03T00:00:00.000Z");
         }
 
         [AsyncTestMethod]
@@ -327,7 +324,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var query = table.Skip(5)
                              .Take(3)
                              .Where(t => t.String == "world")
-                             .WithParameters(new Dictionary<string, string>() { { "param1", "val1" } })                             
+                             .WithParameters(new Dictionary<string, string>() { { "param1", "val1" } })
                              .IncludeTotalCount();
 
             await table.PullAsync("incquery", query, cancellationToken: CancellationToken.None);
@@ -465,7 +462,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             // insert an item but don't push
             IMobileServiceSyncTable table1 = service.GetSyncTable("someTable");
-            await table1.InsertAsync(new JObject() { { "id", "abc" } });            
+            await table1.InsertAsync(new JObject() { { "id", "abc" } });
             Assert.AreEqual(store.Tables[table1.TableName].Count, 1); // item is inserted
 
             // this should trigger a push
@@ -527,7 +524,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var item = new StringIdType() { Id = "abc", String = "what?" };
             await table.InsertAsync(item);
 
-            Assert.AreEqual(storeMock.Tables[table.TableName].Count, 1);            
+            Assert.AreEqual(storeMock.Tables[table.TableName].Count, 1);
 
             // for good measure also push it
             await service.SyncContext.PushAsync();
@@ -585,13 +582,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                                           assertRequest: (req, executed) =>
                                           {
                                               if (executed == 1) // order is maintained by doing insert first and delete after that. This means first update was cancelled, not the second one.
-                                               {
-                                                   Assert.AreEqual(req.Method, HttpMethod.Post);
-                                               }
-                                               else
-                                               {
-                                                   Assert.AreEqual(req.Method, HttpMethod.Delete);
-                                               }
+                                              {
+                                                  Assert.AreEqual(req.Method, HttpMethod.Post);
+                                              }
+                                              else
+                                              {
+                                                  Assert.AreEqual(req.Method, HttpMethod.Delete);
+                                              }
                                           });
         }
 
@@ -639,7 +636,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                                             {
                                                 Assert.AreEqual(req.Method, HttpMethod.Delete);
                                             }
-                                        });            
+                                        });
         }
 
         [AsyncTestMethod]
@@ -665,8 +662,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task ReadAsync_PassesOdataToStore_WhenLinqIsUsed()
         {
             var store = new MobileServiceLocalStoreMock();
-            store.ReadResponses.Enqueue("{count: 1, results: [{\"id\":\"abc\",\"String\":\"Hey\"}]}");            
-            
+            store.ReadResponses.Enqueue("{count: 1, results: [{\"id\":\"abc\",\"String\":\"Hey\"}]}");
+
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
@@ -674,9 +671,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             IMobileServiceTableQuery<string> query = table.Skip(5)
                                                           .Take(3)
-                                                          .Where (t=>t.String == "world")
-                                                          .OrderBy(o=>o.Id)
-                                                          .OrderByDescending(o=>o.String)
+                                                          .Where(t => t.String == "world")
+                                                          .OrderBy(o => o.Id)
+                                                          .OrderByDescending(o => o.String)
                                                           .IncludeTotalCount()
                                                           .Select(x => x.String);
 
@@ -684,10 +681,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             string odata = store.ReadQueries.First().ToQueryString();
             Assert.AreEqual(odata, "$filter=(String eq 'world')&" +
-                                    "$orderby=String desc,id&" + 
-                                    "$skip=5&" + 
-                                    "$top=3&" + 
-                                    "$select=String&" + 
+                                    "$orderby=String desc,id&" +
+                                    "$skip=5&" +
+                                    "$top=3&" +
+                                    "$select=String&" +
                                     "$inlinecount=allpages");
         }
 
@@ -695,7 +692,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task ToEnumerableAsync_ParsesOData_WhenRawQueryIsProvided()
         {
             var store = new MobileServiceLocalStoreMock();
-            store.ReadResponses.Enqueue("{count: 1, results: [{\"id\":\"abc\",\"String\":\"Hey\"}]}");            
+            store.ReadResponses.Enqueue("{count: 1, results: [{\"id\":\"abc\",\"String\":\"Hey\"}]}");
 
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
@@ -724,7 +721,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         /// <param name="assertRequest">To check which of the two operations got cancelled</param>
         private async Task TestCollapseCancel(Func<IMobileServiceSyncTable<StringIdType>, StringIdType, Task> firstOperationOnItem1,
                                               Func<IMobileServiceSyncTable<StringIdType>, StringIdType, Task> operationOnItem2,
-                                              Func<IMobileServiceSyncTable<StringIdType>, StringIdType, Task> secondOperationOnItem1, 
+                                              Func<IMobileServiceSyncTable<StringIdType>, StringIdType, Task> secondOperationOnItem1,
                                               Action<HttpRequestMessage, int> assertRequest)
         {
             var hijack = new TestHttpHandler();
@@ -751,7 +748,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(service.SyncContext.PendingOperations, 2L);
 
             await secondOperationOnItem1(table, item1);
-            Assert.AreEqual(service.SyncContext.PendingOperations, 2L); 
+            Assert.AreEqual(service.SyncContext.PendingOperations, 2L);
 
             await service.SyncContext.PushAsync();
 

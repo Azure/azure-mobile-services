@@ -169,16 +169,84 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         }
 
         [AsyncTestMethod]
+        public async Task PullAsync_DoesIncrementalSync_WhenQueryKeyIsSpecified()
+        {
+            ResetDatabase(TestTable);
+
+            var hijack = new TestHttpHandler();
+            IMobileServiceSyncTable<ToDoWithStringId> table = await GetSynctable<ToDoWithStringId>(hijack);
+
+            hijack.OnSendingRequest = req =>
+            {
+                // we request all the system properties present on DefineTable<> object
+                Assert.AreEqual(req.RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetime'0001-01-01T08:00:00.000Z')&$orderby=__updatedAt&__includeDeleted=true&__systemproperties=__updatedAt");
+
+                return Task.FromResult(req);
+            };
+            string pullResult = "[{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\", \"__updatedAt\":\"2014-01-30T23:01:33.444Z\"}]";
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(pullResult) }); // pull
+
+            await table.PullAsync(queryKey: "todoItems", query: table.CreateQuery());
+
+            hijack.OnSendingRequest = req =>
+            {
+                // we request all the system properties present on DefineTable<> object
+                Assert.AreEqual(req.RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetime'2014-01-30T23:01:33.444Z')&$orderby=__updatedAt&__includeDeleted=true&__systemproperties=__updatedAt");
+                return Task.FromResult(req);
+            };
+            pullResult = "[{\"id\":\"b\",\"String\":\"Updated\",\"__version\":\"def\", \"__updatedAt\":\"2014-02-27T23:01:33.444Z\"}]";
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(pullResult) }); // pull
+
+            await table.PullAsync(queryKey: "todoItems", query: table.CreateQuery());
+
+            var item = await table.LookupAsync("b");
+            Assert.AreEqual(item.String, "Updated");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_DoesIncrementalSync_WhenQueryKeyIsSpecified_WithoutCache()
+        {
+            ResetDatabase(TestTable);
+
+            var hijack = new TestHttpHandler();
+            IMobileServiceSyncTable<ToDoWithStringId> table = await GetSynctable<ToDoWithStringId>(hijack);
+
+            hijack.OnSendingRequest = req =>
+            {
+                // we request all the system properties present on DefineTable<> object
+                Assert.AreEqual(req.RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetime'0001-01-01T08:00:00.000Z')&$orderby=__updatedAt&__includeDeleted=true&__systemproperties=__updatedAt");
+
+                return Task.FromResult(req);
+            };
+            string pullResult = "[{\"id\":\"b\",\"String\":\"Wow\",\"__version\":\"def\", \"__updatedAt\":\"2014-01-30T23:01:33.444Z\"}]";
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(pullResult) }); // pull
+
+            await table.PullAsync(queryKey: "todoItems", query: table.CreateQuery());
+
+            table = await GetSynctable<ToDoWithStringId>(hijack);
+
+            hijack.OnSendingRequest = req =>
+            {
+                // we request all the system properties present on DefineTable<> object
+                Assert.AreEqual(req.RequestUri.Query, "?$filter=(__updatedAt%20ge%20datetime'2014-01-30T23:01:33.444Z')&$orderby=__updatedAt&__includeDeleted=true&__systemproperties=__updatedAt");
+                return Task.FromResult(req);
+            };
+            pullResult = "[{\"id\":\"b\",\"String\":\"Updated\",\"__version\":\"def\", \"__updatedAt\":\"2014-02-27T23:01:33.444Z\"}]";
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(pullResult) }); // pull
+
+            await table.PullAsync(queryKey: "todoItems", query: table.CreateQuery());
+
+            var item = await table.LookupAsync("b");
+            Assert.AreEqual(item.String, "Updated");
+        }
+
+        [AsyncTestMethod]
         public async Task PullAsync_RequestsSystemProperties_WhenDefinedOnTableType()
         {
             ResetDatabase(TestTable);
 
             var hijack = new TestHttpHandler();
-            var store = new MobileServiceSQLiteStore(TestDbName);
-            store.DefineTable<ToDoWithSystemPropertiesType>();
-
-            IMobileServiceClient service = await CreateClient(hijack, store);
-            IMobileServiceSyncTable<ToDoWithSystemPropertiesType> table = service.GetSyncTable<ToDoWithSystemPropertiesType>();
+            IMobileServiceSyncTable<ToDoWithSystemPropertiesType> table = await GetSynctable<ToDoWithSystemPropertiesType>(hijack);
 
             hijack.OnSendingRequest = req =>
             {
@@ -604,6 +672,16 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             Assert.AreEqual(remaining.Count(), 0);
         }
 
+        private static async Task<IMobileServiceSyncTable<T>> GetSynctable<T>(TestHttpHandler hijack)
+        {
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable<T>();
+
+            IMobileServiceClient service = await CreateClient(hijack, store);
+            IMobileServiceSyncTable<T> table = service.GetSyncTable<T>();
+            return table;
+        }
+
         private static async Task<IMobileServiceClient> CreateTodoClient(TestHttpHandler hijack)
         {
             var store = new MobileServiceSQLiteStore(TestDbName);
@@ -621,9 +699,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         private static void ResetDatabase(string testTableName)
         {
             TestUtilities.DropTestTable(TestDbName, testTableName);
-            TestUtilities.DropTestTable(TestDbName, MobileServiceLocalSystemTables.OperationQueue);
-            TestUtilities.DropTestTable(TestDbName, MobileServiceLocalSystemTables.SyncErrors);
-            TestUtilities.DropTestTable(TestDbName, MobileServiceLocalSystemTables.Config);
+            TestUtilities.ResetDatabase(TestDbName);
         }
     }
 }

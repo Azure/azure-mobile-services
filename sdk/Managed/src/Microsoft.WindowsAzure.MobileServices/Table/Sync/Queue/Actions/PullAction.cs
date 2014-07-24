@@ -42,7 +42,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             if (incrementalSync)
             {
                 this.Table.SystemProperties = this.Table.SystemProperties | MobileServiceSystemProperties.UpdatedAt;
-                deltaToken = await this.Settings.GetDeltaToken(this.Query.TableName, this.QueryKey);
+                deltaToken = await this.Settings.GetDeltaTokenAsync(this.Query.TableName, this.QueryKey);
                 ApplyDeltaToken(this.Query, deltaToken);
             }
 
@@ -55,7 +55,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             if (incrementalSync && this.maxUpdatedAt > deltaToken)
             {
-                await this.Settings.SetDeltaToken(this.Query.TableName, this.QueryKey, this.maxUpdatedAt);
+                await this.Settings.SetDeltaTokenAsync(this.Query.TableName, this.QueryKey, this.maxUpdatedAt);
             }
         }
 

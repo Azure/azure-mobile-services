@@ -30,7 +30,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             if (!String.IsNullOrEmpty(this.QueryKey))
             {
-                await this.Settings.ResetDeltaToken(this.Table.TableName, this.QueryKey);
+                await this.Settings.ResetDeltaTokenAsync(this.Table.TableName, this.QueryKey);
             }
             await this.Store.DeleteAsync(this.Query);
         }

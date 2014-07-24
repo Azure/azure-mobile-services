@@ -3,17 +3,20 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
+using Microsoft.WindowsAzure.MobileServices.Sync;
 using SQLitePCL;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test
 {
     internal class TestUtilities
     {
+        public static void ResetDatabase(string dbName)
+        {            
+            TestUtilities.DropTestTable(dbName, MobileServiceLocalSystemTables.OperationQueue);
+            TestUtilities.DropTestTable(dbName, MobileServiceLocalSystemTables.SyncErrors);
+            TestUtilities.DropTestTable(dbName, MobileServiceLocalSystemTables.Config);
+        }
+
         public static void DropTestTable(string dbName, string tableName)
         {
             ExecuteNonQuery(dbName, "DROP TABLE IF EXISTS " + tableName);

@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -46,14 +45,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             var query = new MobileServiceTableQueryDescription("test");
             var action = new PullAction(this.table.Object, this.context.Object, null, query, null, this.opQueue.Object, this.settings.Object, this.store.Object, CancellationToken.None);
 
-            var itemWithId = new JObject(){{"id", "abc"}, {"text", "has id"}};
+            var itemWithId = new JObject() { { "id", "abc" }, { "text", "has id" } };
             var itemWithoutId = new JObject() { { "text", "no id" } };
             var result = new JArray(new[]{
                 itemWithId,
                 itemWithoutId
             });
             this.opQueue.Setup(q => q.LockTableAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult<IDisposable>(null));
-            this.opQueue.Setup(q => q.CountPending(It.IsAny<string>())).Returns(Task.FromResult(0L));            
+            this.opQueue.Setup(q => q.CountPending(It.IsAny<string>())).Returns(Task.FromResult(0L));
             this.table.Setup(t => t.ReadAsync(It.IsAny<string>(), It.IsAny<IDictionary<string, string>>())).Returns(Task.FromResult<JToken>(result));
             this.store.Setup(s => s.UpsertAsync("test", It.IsAny<IEnumerable<JObject>>(), true))
                       .Returns(Task.FromResult(0))
@@ -150,10 +149,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
                 this.store.Setup(s => s.UpsertAsync("test", It.IsAny<IEnumerable<JObject>>(), true)).Returns(Task.FromResult(0));
             }
 
-            this.settings.Setup(s => s.GetDeltaToken("test", "latestItems")).Returns(Task.FromResult(new DateTime(2013, 1, 1, 0, 0, 0, DateTimeKind.Utc)));
+            this.settings.Setup(s => s.GetDeltaTokenAsync("test", "latestItems")).Returns(Task.FromResult(new DateTime(2013, 1, 1, 0, 0, 0, DateTimeKind.Utc)));
             if (savesMax)
             {
-                this.settings.Setup(s => s.SetDeltaToken("test", "latestItems", maxUpdatedAt)).Returns(Task.FromResult(0));
+                this.settings.Setup(s => s.SetDeltaTokenAsync("test", "latestItems", maxUpdatedAt)).Returns(Task.FromResult(0));
             }
 
             await action.ExecuteAsync();
