@@ -90,7 +90,17 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             // Send the query
             string odata = compiledQuery.ToQueryString();
-            JToken response = await query.Table.ReadAsync(odata, query.Parameters);
+            JToken response;
+            var table = query.Table as MobileServiceTable;
+            if (table != null)
+            {
+                // Add telemetry information if possible.
+                response = await table.ReadAsync(odata, query.Parameters, true);
+            }
+            else
+            {
+                response = await query.Table.ReadAsync(odata, query.Parameters);
+            }
 
             // Parse the results
             long totalCount;

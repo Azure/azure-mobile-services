@@ -1779,7 +1779,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             string[] testSystemProperties = SystemPropertiesTestData.ValidSystemProperties;
 
             foreach (string testSystemProperty in testSystemProperties)
-            {                
+            {
                 TestHttpHandler hijack = new TestHttpHandler();
                 hijack.SetResponseContent("{\"id\":\"an id\",\"String\":\"Hey\"}");
                 var service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
@@ -2156,6 +2156,67 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 await table.ReadAsync("$select=id,String", new Dictionary<string, string>() { { "__systemproperties", "__createdAt" } });
                 Assert.IsTrue(hijack.Request.RequestUri.ToString().Contains("__systemproperties=__createdAt"));
             }
+        }
+
+        [AsyncTestMethod]
+        public async Task TableOperationsHaveUntypedTableFeaturesHeader()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+            hijack.OnSendingRequest = (request) =>
+            {
+                Assert.AreEqual("TU", request.Headers.GetValues("X-ZUMO-FEATURES").First());
+                return Task.FromResult(request);
+            };
+
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            IMobileServiceTable table = service.GetTable("someTable");
+
+            hijack.SetResponseContent("[{\"id\":\"the id\",\"String\":\"Hey\"}]");
+            await table.ReadAsync("");
+
+            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
+            await table.LookupAsync("the id");
+
+            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
+            JObject obj = JObject.Parse("{\"id\":\"the id\",\"value\":\"new\"}");
+            await table.InsertAsync(obj);
+
+            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
+            await table.UpdateAsync(obj);
+
+            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
+            await table.DeleteAsync(obj);
+        }
+
+        [AsyncTestMethod]
+        public async Task TableOperationsWithQueryParametersHaveQueryFeaturesHeader()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+            hijack.OnSendingRequest = (request) =>
+            {
+                Assert.AreEqual("TU,TQ", request.Headers.GetValues("X-ZUMO-FEATURES").First());
+                return Task.FromResult(request);
+            };
+
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            IMobileServiceTable table = service.GetTable("someTable");
+
+            hijack.SetResponseContent("[{\"id\":\"the id\",\"String\":\"Hey\"}]");
+            var dic = new Dictionary<string, string> { { "hello", "world" } };
+            await table.ReadAsync("", dic);
+
+            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
+            await table.LookupAsync("the id", dic);
+
+            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
+            JObject obj = JObject.Parse("{\"id\":\"the id\",\"value\":\"new\"}");
+            await table.InsertAsync(obj, dic);
+
+            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
+            await table.UpdateAsync(obj, dic);
+
+            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
+            await table.DeleteAsync(obj, dic);
         }
     }
 }
