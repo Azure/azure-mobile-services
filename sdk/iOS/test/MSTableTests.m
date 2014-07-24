@@ -884,7 +884,7 @@
         STAssertNil(itemId, @"item should have been nil.");
         STAssertEquals(error.code, [@MSErrorPreconditionFailed integerValue], @"Error should be precondition");
         NSDictionary* serverItem =[error.userInfo objectForKey:MSErrorServerItemKey];
-        STAssertEquals(serverItem.count, (unsigned int) 0, @"empty JSON object error has no members in userInfo");
+        STAssertTrue(serverItem.count == 0, @"empty JSON object error has no members in userInfo");
         done = YES;
     }];
     
