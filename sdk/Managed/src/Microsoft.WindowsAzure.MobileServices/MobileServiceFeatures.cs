@@ -20,8 +20,23 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal const string UntypedTable = "TU";
 
         /// <summary>
-        /// Feature header value for table requests which include additional query string parameters.
+        /// Feature header value for table / API requests which include additional query string parameters.
         /// </summary>
-        internal const string TableQueryParameters = "TQ";
+        internal const string AdditionalQueryParameters = "QS";
+
+        /// <summary>
+        /// Feature header value for API calls using typed (generic) overloads.
+        /// </summary>
+        internal const string TypedApiCall = "AT";
+
+        /// <summary>
+        /// Feature header value for API calls using JSON overloads.
+        /// </summary>
+        internal const string JsonApiCall = "AJ";
+
+        /// <summary>
+        /// Feature header value for API calls using the generic (HTTP) overload.
+        /// </summary>
+        internal const string GenericApiCall = "AG";
     }
 }

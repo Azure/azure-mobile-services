@@ -2194,7 +2194,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             TestHttpHandler hijack = new TestHttpHandler();
             hijack.OnSendingRequest = (request) =>
             {
-                Assert.AreEqual("TU,TQ", request.Headers.GetValues("X-ZUMO-FEATURES").First());
+                Assert.AreEqual("TU,QS", request.Headers.GetValues("X-ZUMO-FEATURES").First());
                 return Task.FromResult(request);
             };
 

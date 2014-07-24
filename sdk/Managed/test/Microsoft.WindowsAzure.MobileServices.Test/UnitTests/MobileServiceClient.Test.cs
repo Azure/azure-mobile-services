@@ -640,5 +640,88 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 Assert.AreEqual(e.Message, "The request could not be completed.  (Bad Request)");
             }
         }
+
+        [AsyncTestMethod]
+        public async Task InvokeApiJsonOverloads_HasCorrectFeaturesHeader()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+            hijack.OnSendingRequest = (request) =>
+            {
+                Assert.AreEqual("AJ", request.Headers.GetValues("X-ZUMO-FEATURES").First());
+                return Task.FromResult(request);
+            };
+
+            MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            hijack.SetResponseContent("{\"hello\":\"world\"}");
+            await service.InvokeApiAsync("apiName");
+
+            hijack.SetResponseContent("{\"hello\":\"world\"}");
+            await service.InvokeApiAsync("apiName", JObject.Parse("{\"a\":1}"));
+
+            hijack.OnSendingRequest = (request) =>
+            {
+                Assert.AreEqual("AJ,QS", request.Headers.GetValues("X-ZUMO-FEATURES").First());
+                return Task.FromResult(request);
+            };
+
+            var dic = new Dictionary<string, string> { { "a", "b" } };
+            hijack.SetResponseContent("{\"hello\":\"world\"}");
+            await service.InvokeApiAsync("apiName", HttpMethod.Get, dic);
+
+            hijack.SetResponseContent("{\"hello\":\"world\"}");
+            await service.InvokeApiAsync("apiName", null, HttpMethod.Delete, dic);
+        }
+
+        [AsyncTestMethod]
+        public async Task InvokeApiTypedOverloads_HasCorrectFeaturesHeader()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+            hijack.OnSendingRequest = (request) =>
+            {
+                Assert.AreEqual("AT", request.Headers.GetValues("X-ZUMO-FEATURES").First());
+                return Task.FromResult(request);
+            };
+
+            MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            hijack.SetResponseContent("{\"id\":3}");
+            await service.InvokeApiAsync<IntType>("apiName");
+
+            hijack.SetResponseContent("{\"id\":3}");
+            await service.InvokeApiAsync<IntType, IntType>("apiName", new IntType { Id = 1 });
+
+            hijack.OnSendingRequest = (request) =>
+            {
+                Assert.AreEqual("AT,QS", request.Headers.GetValues("X-ZUMO-FEATURES").First());
+                return Task.FromResult(request);
+            };
+
+            var dic = new Dictionary<string, string> { { "a", "b" } };
+            hijack.SetResponseContent("{\"id\":3}");
+            await service.InvokeApiAsync<IntType>("apiName", HttpMethod.Get, dic);
+
+            hijack.SetResponseContent("{\"hello\":\"world\"}");
+            await service.InvokeApiAsync<IntType, IntType>("apiName", new IntType { Id = 1 }, HttpMethod.Put, dic);
+        }
+
+        [AsyncTestMethod]
+        public async Task InvokeApiHttpContentOverload_HasCorrectFeaturesHeader()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+            hijack.OnSendingRequest = (request) =>
+            {
+                Assert.AreEqual("AG", request.Headers.GetValues("X-ZUMO-FEATURES").First());
+                return Task.FromResult(request);
+            };
+
+            MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            hijack.SetResponseContent("{\"id\":3}");
+            var requestContent = new StringContent("hello world", Encoding.UTF8, "text/plain");
+            var reqHeaders = new Dictionary<string, string>();
+            var queryString = new Dictionary<string, string> { { "a", "b" } };
+            await service.InvokeApiAsync("apiName", requestContent, HttpMethod.Put, reqHeaders, queryString);
+        }
     }
 }

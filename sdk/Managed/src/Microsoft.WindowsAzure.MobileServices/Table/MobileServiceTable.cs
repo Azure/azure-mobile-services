@@ -163,7 +163,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             string tableTypeFeature = isTypedCall ? MobileServiceFeatures.TypedTable : MobileServiceFeatures.UntypedTable;
             bool hasQueryParameters = additionalQueryParameters != null && additionalQueryParameters.Count != 0;
             string features = hasQueryParameters ?
-                (tableTypeFeature + "," + MobileServiceFeatures.TableQueryParameters) :
+                (tableTypeFeature + "," + MobileServiceFeatures.AdditionalQueryParameters) :
                 tableTypeFeature;
             return new Dictionary<string, string>
             {
