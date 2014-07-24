@@ -1109,7 +1109,7 @@ public class QueryTests extends TestGroup {
 					query.execute(new TableJsonQueryCallback() {
 
 						@Override
-						public void onCompleted(JsonElement moviesJson, int count, Exception exception, ServiceFilterResponse response) {
+						public void onCompleted(JsonElement moviesJson, Exception exception, ServiceFilterResponse response) {
 
 							if (exception == null) {
 								List<Movie> movies;

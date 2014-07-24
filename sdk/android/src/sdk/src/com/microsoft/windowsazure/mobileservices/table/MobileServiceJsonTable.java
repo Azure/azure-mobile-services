@@ -157,22 +157,15 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 			@Override
 			public void onFailure(Throwable exception) {
 				if (exception instanceof Exception) {
-					callback.onCompleted(null, 0, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
 				} else {
-					callback.onCompleted(null, 0, new Exception(exception), MobileServiceException.getServiceResponse(exception));
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
 				}
 			}
 
 			@Override
 			public void onSuccess(JsonElement result) {
-				int count = -1;
-
-				if (result.isJsonObject()) {
-					JsonObject jsonObject = result.getAsJsonObject();
-					count = jsonObject.get("count").getAsInt();
-				}
-
-				callback.onCompleted(result, count, null, null);
+				callback.onCompleted(result, null, null);
 			}
 		});
 	}

@@ -1807,9 +1807,8 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		client.getTable(tableName).execute(new TableJsonQueryCallback() {
 
 			@Override
-			public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
+			public void onCompleted(JsonElement result, Exception exception, ServiceFilterResponse response) {
 				container.setResponseValue(result.toString());
-				container.setCount(count);
 				latch.countDown();
 			}
 		});
@@ -1818,7 +1817,6 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 		// Asserts
 		assertEquals(responseContent, container.getResponseValue());
-		assertEquals(-1, container.getCount());
 	}
 
 	public void testSimpleQueryShouldReturnEmptyArray() throws Throwable {
