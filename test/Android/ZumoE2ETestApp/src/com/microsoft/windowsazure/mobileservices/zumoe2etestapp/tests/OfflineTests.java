@@ -123,7 +123,7 @@ public class OfflineTests extends TestGroup {
 					tableDefinition.put("name", ColumnDataType.String);
 					tableDefinition.put("age", ColumnDataType.Number);
 					tableDefinition.put("float", ColumnDataType.Number);
-					tableDefinition.put("date1", ColumnDataType.Date);
+					tableDefinition.put("date", ColumnDataType.Date);
 					tableDefinition.put("bool", ColumnDataType.Boolean);
 					tableDefinition.put("__version", ColumnDataType.String);
 
@@ -186,7 +186,7 @@ public class OfflineTests extends TestGroup {
 					log("Now updating the item locally");
 
 					item.setFlag(!item.getFlag());
-					// item.addProperty("date1", DateSerializer.serialize(new
+					// item.addProperty("date", DateSerializer.serialize(new
 					// Date()));
 					// item.addProperty("__updatedAt",
 					// DateSerializer.serialize(new Date()));
@@ -301,7 +301,7 @@ public class OfflineTests extends TestGroup {
 					tableDefinition.put("name", ColumnDataType.String);
 					tableDefinition.put("age", ColumnDataType.Number);
 					tableDefinition.put("float", ColumnDataType.Number);
-					tableDefinition.put("date1", ColumnDataType.Date);
+					tableDefinition.put("date", ColumnDataType.Date);
 					tableDefinition.put("bool", ColumnDataType.Boolean);
 					tableDefinition.put("__version", ColumnDataType.String);
 
@@ -440,7 +440,7 @@ public class OfflineTests extends TestGroup {
 					tableDefinition.put("name", ColumnDataType.String);
 					tableDefinition.put("age", ColumnDataType.Number);
 					tableDefinition.put("float", ColumnDataType.Number);
-					tableDefinition.put("date1", ColumnDataType.Date);
+					tableDefinition.put("date", ColumnDataType.Date);
 					tableDefinition.put("bool", ColumnDataType.Boolean);
 
 					log("Initialized the store and sync context");
@@ -571,7 +571,7 @@ public class OfflineTests extends TestGroup {
 					tableDefinition.put("name", ColumnDataType.String);
 					tableDefinition.put("age", ColumnDataType.Number);
 					tableDefinition.put("float", ColumnDataType.Number);
-					tableDefinition.put("date1", ColumnDataType.Date);
+					tableDefinition.put("date", ColumnDataType.Date);
 					tableDefinition.put("bool", ColumnDataType.Boolean);
 
 					log("Initialized the store and sync context");
@@ -842,7 +842,7 @@ class OfflineReadyItem {
 	@SerializedName("float")
 	private double mFloatingNumber;
 
-	@SerializedName("date1")
+	@SerializedName("date")
 	private Date mDate;
 
 	@SerializedName("bool")
@@ -958,7 +958,7 @@ class OfflineReadyItemNoVersion {
 	@SerializedName("float")
 	private double mFloatingNumber;
 
-	@SerializedName("date1")
+	@SerializedName("date")
 	private Date mDate;
 
 	@SerializedName("bool")
