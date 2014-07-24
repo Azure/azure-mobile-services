@@ -456,8 +456,8 @@
     
     [todoTable pullWithQuery:query completion:^(NSError *error) {
         STAssertNil(error, error.description);
-        STAssertEquals(offline.upsertCalls, 1, @"Unexpected number of upsert calls");
-        STAssertEquals(offline.upsertedItems, 2, @"Unexpected number of upsert calls");
+        STAssertEquals((int)offline.upsertCalls, 1, @"Unexpected number of upsert calls: %d");
+        STAssertEquals((int)offline.upsertedItems, 2, @"Unexpected number of upsert calls: %d");
         done = YES;
     }];
     
@@ -487,8 +487,8 @@
     
     [todoTable pullWithQuery:query completion:^(NSError *error) {
         STAssertNil(error, error.description);
-        STAssertEquals(offline.upsertCalls, 1, @"Unexpected number of upsert calls");
-        STAssertEquals(offline.upsertedItems, 2, @"Unexpected number of upsert calls");
+        STAssertEquals((int)offline.upsertCalls, 1, @"Unexpected number of upsert calls");
+        STAssertEquals((int)offline.upsertedItems, 2, @"Unexpected number of upsert calls");
         done = YES;
     }];
     
@@ -517,10 +517,10 @@
     
     [todoTable pullWithQuery:query completion:^(NSError *error) {
         STAssertNil(error, error.description);
-        STAssertEquals(offline.upsertCalls, 1, @"Unexpected number of upsert calls");
-        STAssertEquals(offline.upsertedItems, 2, @"Unexpected number of upsert calls");
-        STAssertEquals(offline.deleteCalls, 1, @"Unexpected number of delete calls");
-        STAssertEquals(offline.deletedItems, 1, @"Unexpected number of upsert calls");
+        STAssertEquals((int)offline.upsertCalls, 1, @"Unexpected number of upsert calls");
+        STAssertEquals((int)offline.upsertedItems, 2, @"Unexpected number of upsert calls");
+        STAssertEquals((int)offline.deleteCalls, 1, @"Unexpected number of delete calls");
+        STAssertEquals((int)offline.deletedItems, 1, @"Unexpected number of upsert calls");
         done = YES;
     }];
     
@@ -566,8 +566,8 @@
     
     [todoTable pullWithQuery:query completion:^(NSError *error) {
         STAssertNil(error, error.description);
-        STAssertEquals(offline.upsertCalls, 4, @"Unexpected number of upsert calls");
-        STAssertEquals(offline.upsertedItems, 5, @"Unexpected number of upsert calls");
+        STAssertEquals((int)offline.upsertCalls, 4, @"Unexpected number of upsert calls");
+        STAssertEquals((int)offline.upsertedItems, 5, @"Unexpected number of upsert calls");
         
         done = YES;
     }];

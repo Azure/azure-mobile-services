@@ -200,7 +200,7 @@
     [self.store upsertItems:testArray table:@"NoSuchTable" orError:&error];
 
     STAssertNotNil(error, @"upsert failed: %@", error.description);
-    STAssertEquals(error.code, MSSyncTableLocalStoreError, @"Unexpected code");
+    STAssertTrue(error.code == MSSyncTableLocalStoreError, @"Unexpected code: %d", error.code);
 }
 
 -(void)testReadWithQuery
@@ -327,7 +327,7 @@
     STAssertNotNil([item objectForKey:@"text"], @"Expected text");
     STAssertNotNil([item objectForKey:@"__meaningOfLife"], @"Expected __meaningOfLine");
     STAssertNotNil([item objectForKey:MSSystemColumnVersion], @"Expected __version");
-    STAssertEquals(item.count, 3U, @"Select returned extra columns");
+    STAssertTrue(item.count == 3U, @"Select returned extra columns");
 }
 
 -(void)testReadWithQuery_NoTable_Error
@@ -341,7 +341,7 @@
 
     STAssertNil(result, @"Result should have been nil");
     STAssertNotNil(error, @"upsert failed: %@", error.description);
-    STAssertEquals(error.code, MSSyncTableLocalStoreError, @"Unexpected code");
+    STAssertTrue(error.code == MSSyncTableLocalStoreError, @"Unexpected code: %d", error.code);
 }
 
 -(void)testDeleteWithId_Success
@@ -391,7 +391,7 @@
     [self.store deleteItemsWithIds:[NSArray arrayWithObject:@"B"] table:@"NoSuchTable" orError:&error];
     
     STAssertNotNil(error, @"upsert failed: %@", error.description);
-    STAssertEquals(error.code, MSSyncTableLocalStoreError, @"Unexpected code");
+    STAssertTrue(error.code == MSSyncTableLocalStoreError, @"Unexpected code %d", error.code);
 }
 
 - (void)testDeleteWithQuery_AllRecord_Success
@@ -445,7 +445,19 @@
     [self.store deleteUsingQuery:query orError:&error];
 
     STAssertNotNil(error, @"upsert failed: %@", error.description);
-    STAssertEquals(error.code, MSSyncTableLocalStoreError, @"Unexpected code");
+    STAssertTrue(error.code == MSSyncTableLocalStoreError, @"Unexpected code: %d", error.code);
+}
+
+-(void)testSystemProperties
+{
+    MSSystemProperties properties = [self.store systemPropetiesForTable:@"ManySystemColumns"];
+    STAssertEquals(properties, MSSystemPropertyCreatedAt | MSSystemPropertyUpdatedAt | MSSystemPropertyVersion | MSSystemPropertyDeleted, nil);
+
+    properties = [self.store systemPropetiesForTable:@"TodoItem"];
+    STAssertEquals(properties, MSSystemPropertyVersion, nil);
+
+    properties = [self.store systemPropetiesForTable:@"TodoItemNoVersion"];
+    STAssertEquals(properties, MSSystemPropertyNone, nil);
 }
 
 - (void) populateTestData
