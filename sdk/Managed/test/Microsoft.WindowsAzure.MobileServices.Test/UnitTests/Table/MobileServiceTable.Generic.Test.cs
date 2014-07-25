@@ -3071,5 +3071,143 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 Assert.AreEqual(item.Version, testcase.Item1);
             }
         }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableToList()
+        {
+            return this.ValidateFeaturesHeader("TT", true, t => t.ToListAsync());
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableReadViaQuery()
+        {
+            return this.ValidateFeaturesHeader("TT", true, t => t.Where(s => s.String != null).ToListAsync());
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableLookup()
+        {
+            return this.ValidateFeaturesHeader("TT", false, t => t.LookupAsync("id"));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableRefresh()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT", false, t => t.RefreshAsync(obj));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableInsert()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT", false, t => t.InsertAsync(obj));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableUpdate()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT", false, t => t.UpdateAsync(obj));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableDelete()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT", false, t => t.DeleteAsync(obj));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableUntypedMethod()
+        {
+            var obj = JObject.Parse("{\"id\":\"the id\",\"String\":\"hey\"}");
+            return this.ValidateFeaturesHeader("TU", false, t => t.InsertAsync(obj));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableToEnumerableWithQuery()
+        {
+            return this.ValidateFeaturesHeader("TT,QS", true, t => t.WithParameters(new Dictionary<string, string> { { "a", "b" } }).ToEnumerableAsync());
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableReadViaQueryWithQuery()
+        {
+            return this.ValidateFeaturesHeader("TT,QS", true, t => t.Where(s => s.String != null).WithParameters(new Dictionary<string, string> { { "a", "b" } }).ToListAsync());
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableLookupWithQuery()
+        {
+            return this.ValidateFeaturesHeader("TT,QS", false, t => t.LookupAsync("id", new Dictionary<string, string> { { "a", "b" } }));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableRefreshWithQuery()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT,QS", false, t => t.RefreshAsync(obj, new Dictionary<string, string> { { "a", "b" } }));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableInsertWithQuery()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT,QS", false, t => t.InsertAsync(obj, new Dictionary<string, string> { { "a", "b" } }));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableUpdateWithQuery()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT,QS", false, t => t.UpdateAsync(obj, new Dictionary<string, string> { { "a", "b" } }));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableDeleteWithQuery()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT,QS", false, t => t.DeleteAsync(obj, new Dictionary<string, string> { { "a", "b" } }));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableToCollection()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT,TC", true, t => t.ToCollectionAsync());
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableViaQueryToCollection()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT,TC", true, t => t.Where(a => a.String != null).ToCollectionAsync());
+        }
+
+        private async Task ValidateFeaturesHeader(string expectedFeaturesHeader, bool arrayResponse, Func<IMobileServiceTable<StringIdType>, Task> operation)
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+            bool validationDone = false;
+            hijack.OnSendingRequest = (request) =>
+            {
+                Assert.AreEqual(expectedFeaturesHeader, request.Headers.GetValues("X-ZUMO-FEATURES").First());
+                validationDone = true;
+                return Task.FromResult(request);
+            };
+
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            IMobileServiceTable<StringIdType> table = service.GetTable<StringIdType>();
+
+            var responseContent = "{\"id\":\"the id\",\"String\":\"Hey\"}";
+            if (arrayResponse)
+            {
+                responseContent = "[" + responseContent + "]";
+            }
+
+            hijack.SetResponseContent(responseContent);
+            await operation(table);
+            Assert.IsTrue(validationDone);
+        }
     }
 }

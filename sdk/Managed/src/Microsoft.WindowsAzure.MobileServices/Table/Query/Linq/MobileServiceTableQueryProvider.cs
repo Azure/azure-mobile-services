@@ -26,6 +26,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         protected const string InlineCountCountKey = "count";
 
         /// <summary>
+        /// Feature which are sent as telemetry information to the service for all
+        /// outgoing calls.
+        /// </summary>
+        internal MobileServiceFeatures Features { get; set; }
+
+        /// <summary>
         /// Create a new query based off a table and and a new
         /// queryable. This is used via MobileServiceTableQueryable's
         /// combinators to construct new queries from simpler base queries.
@@ -90,7 +96,17 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             // Send the query
             string odata = compiledQuery.ToQueryString();
-            JToken response = await query.Table.ReadAsync(odata, query.Parameters);
+            JToken response;
+            var table = query.Table as MobileServiceTable;
+            if (table != null)
+            {
+                // Add telemetry information if possible.
+                response = await table.ReadAsync(odata, query.Parameters, this.Features | MobileServiceFeatures.TypedTable);
+            }
+            else
+            {
+                response = await query.Table.ReadAsync(odata, query.Parameters);
+            }
 
             // Parse the results
             long totalCount;
