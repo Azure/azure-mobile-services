@@ -44,7 +44,7 @@
     NSDictionary *info = [originalTableOperation serialize];
     MSTableOperation *tableOperation = [[MSTableOperation alloc] initWithItem:info];
     
-    STAssertEquals(tableOperation.operationId, 7, @"Incorrect id");
+    STAssertEquals((int)tableOperation.operationId, 7, @"Incorrect id");
     STAssertEquals(tableOperation.tableName, @"testTable", @"Incorrect table name");
     STAssertEquals(tableOperation.itemId, @"ABC", @"Incorrect table name");
     STAssertEquals(tableOperation.type, MSTableOperationInsert, @"incorrect type");
