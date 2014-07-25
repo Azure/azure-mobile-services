@@ -215,7 +215,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             var table = this.client.GetTable(tableName) as MobileServiceTable;
             table.SystemProperties = await settings.GetSystemPropertiesAsync(tableName);
-            table.AddRequestHeader(MobileServiceHttpClient.ZumoFeaturesHeader, MobileServiceFeatures.Offline);
+            table.Features = MobileServiceFeatures.Offline;
 
             return table;
         }
