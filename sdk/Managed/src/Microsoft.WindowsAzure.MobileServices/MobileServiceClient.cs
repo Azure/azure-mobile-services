@@ -35,7 +35,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Default empty array of HttpMessageHandlers.
         /// </summary>
         private static readonly HttpMessageHandler[] EmptyHttpMessageHandlers = new HttpMessageHandler[0];
-        
+
         /// <summary>
         /// The id used to identify this installation of the application to 
         /// provide telemetry data.
@@ -99,7 +99,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Gets the <see cref="MobileServiceHttpClient"/> associated with this client.
         /// </summary>
         internal MobileServiceHttpClient HttpClient { get; private set; }
-        
+
         /// <summary>
         /// Initializes a new instance of the MobileServiceClient class.
         /// </summary>
@@ -224,7 +224,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             ValidateTableName(tableName);
 
             return new MobileServiceTable(tableName, this);
-        }        
+        }
 
 
         /// <summary>
@@ -235,7 +235,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>The table.</returns>
         public IMobileServiceSyncTable GetSyncTable(string tableName)
         {
-            this.EnsureSyncContextIsInitialized();
             ValidateTableName(tableName);
 
             return new MobileServiceSyncTable(tableName, this);
@@ -270,8 +269,6 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public IMobileServiceSyncTable<T> GetSyncTable<T>()
         {
-            this.EnsureSyncContextIsInitialized();
-
             string tableName = this.SerializerSettings.ContractResolver.ResolveTableName(typeof(T));
             return new MobileServiceSyncTable<T>(tableName, this);
         }
@@ -541,22 +538,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="apiName"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        private string CreateAPIUriString(string apiName, IDictionary<string, string> parameters = null) {
+        private string CreateAPIUriString(string apiName, IDictionary<string, string> parameters = null)
+        {
             string uriFragment = string.Format(CultureInfo.InvariantCulture, "api/{0}", apiName);
             string queryString = MobileServiceUrlBuilder.GetQueryString(parameters, useTableAPIRules: false);
-            
-            return MobileServiceUrlBuilder.CombinePathAndQuery(uriFragment, queryString);            
-        }
 
-        /// <summary>
-        /// Throws if SyncContext is not initialized
-        /// </summary>
-        private void EnsureSyncContextIsInitialized()
-        {
-            if (!this.SyncContext.IsInitialized)
-            {
-                throw new InvalidOperationException(Resources.SyncContext_NotInitialized);
-            }
+            return MobileServiceUrlBuilder.CombinePathAndQuery(uriFragment, queryString);
         }
 
         /// <summary>

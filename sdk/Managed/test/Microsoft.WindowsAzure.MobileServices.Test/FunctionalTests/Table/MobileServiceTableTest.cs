@@ -53,6 +53,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
         [Version]
         public String Version { get; set; }
+
+        public ToDoWithSystemPropertiesType()
+        {
+        }
+
+        public ToDoWithSystemPropertiesType(string id)
+        {
+            this.Id = id;
+        }
     }
 
     public class TypeWithArray
@@ -222,7 +231,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             }
 
             string[] invalidIdData = IdTestData.EmptyStringIds.Concat(
-                                    IdTestData.InvalidStringIds).Concat( 
+                                    IdTestData.InvalidStringIds).Concat(
                                     new string[] { null }).ToArray();
 
             foreach (string invalidId in invalidIdData)
@@ -259,7 +268,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 ToDoWithStringId item = await table.LookupAsync(testId);
                 await table.DeleteAsync(item);
 
-                MobileServiceInvalidOperationException exception = null; 
+                MobileServiceInvalidOperationException exception = null;
                 try
                 {
                     await table.LookupAsync(testId);
@@ -315,7 +324,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             string[] emptyIdData = IdTestData.EmptyStringIds.Concat(
                                     new string[] { null }).ToArray();
             IMobileServiceTable<ToDoWithStringId> table = GetClient().GetTable<ToDoWithStringId>();
-            
+
             int count = 0;
             List<ToDoWithStringId> itemsToDelete = new List<ToDoWithStringId>();
 
@@ -493,7 +502,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             MobileServicePreconditionFailedException<ToDoWithSystemPropertiesType> expectedException = null;
             try
             {
-                 await table.DeleteAsync(item);
+                await table.DeleteAsync(item);
             }
             catch (MobileServicePreconditionFailedException<ToDoWithSystemPropertiesType> exception)
             {
@@ -518,7 +527,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             // Delete one last time with the version from the server
             item.Version = serverVersion;
             await table.DeleteAsync(item);
-            
+
             Assert.IsNull(item.Id);
         }
 
@@ -710,7 +719,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             IMobileServiceTable<ToDoWithIntId> table = GetClient().GetTable<ToDoWithIntId>();
             List<ToDoWithIntId> integerIdItems = new List<ToDoWithIntId>();
-            for (var i = 0; i < 10; i++ )
+            for (var i = 0; i < 10; i++)
             {
                 ToDoWithIntId item = new ToDoWithIntId() { String = i.ToString() };
                 await table.InsertAsync(item);
@@ -725,7 +734,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(10, items.Count());
             for (var i = 0; i < 8; i++)
             {
-                Assert.AreEqual((int.Parse(items[i].Id) + 1).ToString(), items[i+1].Id);
+                Assert.AreEqual((int.Parse(items[i].Id) + 1).ToString(), items[i + 1].Id);
             }
 
             results = await stringIdTable.OrderByDescending(p => p.Id).ToEnumerableAsync();
@@ -764,7 +773,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(1, items.Count());
             Assert.AreEqual(integerIdItems[0].Id.ToString(), items[0].Id);
             Assert.AreEqual("0", items[0].String);
-        
+
             foreach (ToDoWithIntId integerIdItem in integerIdItems)
             {
                 await table.DeleteAsync(integerIdItem);
@@ -977,7 +986,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 string[] systemPropertiesKeyValue = systemProperties.Split('=');
                 string key = systemPropertiesKeyValue[0];
                 string value = systemPropertiesKeyValue[1];
-                Dictionary<string, string> userParameters = new Dictionary<string, string>() { { key, value  } };
+                Dictionary<string, string> userParameters = new Dictionary<string, string>() { { key, value } };
 
                 bool shouldHaveCreatedAt = value.ToLower().Contains("created");
                 bool shouldHaveUpdatedAt = value.ToLower().Contains("updated");
@@ -1027,7 +1036,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 Assert.AreEqual(shouldHaveCreatedAt ? item.CreatedAt : new DateTime(), items[0].CreatedAt);
                 Assert.AreEqual(shouldHaveUpdatedAt ? item.UpdatedAt : new DateTime(), items[0].UpdatedAt);
                 Assert.AreEqual(shouldHaveVersion ? item.Version : null, items[0].Version);
-               
+
                 // Filter against version
                 results = await table.Where(i => i.Version == item.Version).WithParameters(userParameters).ToEnumerableAsync();
                 ToDoWithSystemPropertiesType[] filterItems = results.ToArray();
@@ -1190,7 +1199,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 Assert.IsNotNull(exception);
                 Assert.AreEqual(exception.Response.StatusCode, HttpStatusCode.BadRequest);
                 Assert.IsTrue(exception.Message.Contains("is not a supported system property."));
-              
+
                 // Read
                 exception = null;
                 try
@@ -1332,7 +1341,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             string id = "an id";
             IMobileServiceTable<ToDoWithSystemPropertiesType> table = GetClient().GetTable<ToDoWithSystemPropertiesType>();
             table.SystemProperties = MobileServiceSystemProperties.None;
-            ToDoWithSystemPropertiesType item = new ToDoWithSystemPropertiesType() { Id = id, String = "a value"};
+            ToDoWithSystemPropertiesType item = new ToDoWithSystemPropertiesType() { Id = id, String = "a value" };
 
             // Insert without failing
             await table.InsertAsync(item);
@@ -1518,7 +1527,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 table.SystemProperties = systemProperties;
 
                 // Ordering
-                var results  = await table.OrderBy(t => t.CreatedAt).ToEnumerableAsync();
+                var results = await table.OrderBy(t => t.CreatedAt).ToEnumerableAsync();
                 ToDoWithSystemPropertiesType[] orderItems = results.ToArray();
 
                 for (int i = 0; i < orderItems.Length - 1; i++)
@@ -1543,7 +1552,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 }
 
                 // Filtering
-                results = await table.Where( t => t.CreatedAt >= items[4].CreatedAt).ToEnumerableAsync();
+                results = await table.Where(t => t.CreatedAt >= items[4].CreatedAt).ToEnumerableAsync();
                 ToDoWithSystemPropertiesType[] filteredItems = results.ToArray();
 
                 for (int i = 0; i < filteredItems.Length - 1; i++)
@@ -1568,7 +1577,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 }
 
                 // Selection
-                var selectionResults = await table.Select(t => new { Id = t.Id, CreatedAt = t.CreatedAt  }).ToEnumerableAsync();
+                var selectionResults = await table.Select(t => new { Id = t.Id, CreatedAt = t.CreatedAt }).ToEnumerableAsync();
                 var selectedItems = selectionResults.ToArray();
 
                 for (int i = 0; i < selectedItems.Length; i++)
@@ -1612,7 +1621,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceTable table = GetClient().GetTable("stringId_test_table");
             table.SystemProperties = MobileServiceSystemProperties.Version;
 
-            var item = new JObject() { { "id", id }, {"String", "a value" }};
+            var item = new JObject() { { "id", id }, { "String", "a value" } };
             var inserted = await table.InsertAsync(item);
             item["__version"] = "random";
 
@@ -1661,7 +1670,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             MobileServicePreconditionFailedException<ToDoWithSystemPropertiesType> expectedException = null;
             try
             {
-                 await table.UpdateAsync(item);
+                await table.UpdateAsync(item);
             }
             catch (MobileServicePreconditionFailedException<ToDoWithSystemPropertiesType> exception)
             {

@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Sync;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json.Linq;
 
@@ -218,18 +219,52 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [TestMethod]
-        public void GetSyncTable_Throws_WhenSyncContextIsNotInitialized()
+        public async Task DeleteAsync_Throws_WhenSyncContextIsNotInitialized()
         {
-            var service = new MobileServiceClient("http://www.test.com", "secret...");
-            var ex = AssertEx.Throws<InvalidOperationException>(()=>service.GetSyncTable("test"));
-            Assert.AreEqual(ex.Message, "SyncContext is not yet initialized.");
+            await this.TestSyncContextNotInitialized(table => table.DeleteAsync(new ToDoWithSystemPropertiesType("abc")));
         }
 
         [TestMethod]
-        public void GetSyncTableGeneric_Throws_WhenSyncContextIsNotInitialized()
+        public async Task InsertAsync_Throws_WhenSyncContextIsNotInitialized()
+        {
+            await this.TestSyncContextNotInitialized(table => table.InsertAsync(new ToDoWithSystemPropertiesType("abc")));
+        }
+
+        [TestMethod]
+        public async Task UpdateAsync_Throws_WhenSyncContextIsNotInitialized()
+        {
+            await this.TestSyncContextNotInitialized(table => table.UpdateAsync(new ToDoWithSystemPropertiesType("abc")));
+        }
+
+        [TestMethod]
+        public async Task LookupAsync_Throws_WhenSyncContextIsNotInitialized()
+        {
+            await this.TestSyncContextNotInitialized(table => table.LookupAsync("abc"));
+        }
+
+        [TestMethod]
+        public async Task ReadAsync_Throws_WhenSyncContextIsNotInitialized()
+        {
+            await this.TestSyncContextNotInitialized(table => table.Where(t => t.String == "abc").ToListAsync());
+        }
+
+        [TestMethod]
+        public async Task PurgeAsync_Throws_WhenSyncContextIsNotInitialized()
+        {
+            await this.TestSyncContextNotInitialized(table => table.PurgeAsync(table.Where(t => t.String == "abc")));
+        }
+
+        [TestMethod]
+        public async Task PullAsync_Throws_WhenSyncContextIsNotInitialized()
+        {
+            await this.TestSyncContextNotInitialized(table => table.PullAsync(table.Where(t => t.String == "abc")));
+        }
+
+        private async Task TestSyncContextNotInitialized(Func<IMobileServiceSyncTable<ToDoWithSystemPropertiesType>, Task> action)
         {
             var service = new MobileServiceClient("http://www.test.com", "secret...");
-            var ex = AssertEx.Throws<InvalidOperationException>(() => service.GetSyncTable<ToDoWithStringId>());
+            IMobileServiceSyncTable<ToDoWithSystemPropertiesType> table = service.GetSyncTable<ToDoWithSystemPropertiesType>();
+            var ex = await AssertEx.Throws<InvalidOperationException>(() => action(table));
             Assert.AreEqual(ex.Message, "SyncContext is not yet initialized.");
         }
 
@@ -281,7 +316,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 await service.InvokeApiAsync("", null);
             }
-            catch(ArgumentNullException e)
+            catch (ArgumentNullException e)
             {
                 expected = e;
             }
@@ -371,8 +406,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
                 return request;
             };
-            
-            JToken expected = await service.InvokeApiAsync("calculator/add", new JValue((object) null));
+
+            JToken expected = await service.InvokeApiAsync("calculator/add", new JValue((object)null));
         }
 
 
@@ -382,12 +417,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             TestHttpHandler hijack = new TestHttpHandler();
             MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             hijack.SetResponseContent("{\"id\":3}");
- 
+
             IntType expected = await service.InvokeApiAsync<IntType>("calculator/add?a=1&b=2", HttpMethod.Get, null);
 
             Assert.AreEqual(hijack.Request.RequestUri.LocalPath, "/api/calculator/add");
             Assert.Contains(hijack.Request.RequestUri.Query, "a=1&b=2");
-            Assert.AreEqual(3, expected.Id);  
+            Assert.AreEqual(3, expected.Id);
         }
 
         [AsyncTestMethod]
@@ -411,7 +446,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.SetResponseContent("{\"id\":3}");
             MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
 
-            var myParams = new Dictionary<string, string>() { { "a", "1" }, {"b", "2"} };
+            var myParams = new Dictionary<string, string>() { { "a", "1" }, { "b", "2" } };
             IntType expected = await service.InvokeApiAsync<IntType>("calculator/add", HttpMethod.Get, myParams);
 
             Assert.Contains(hijack.Request.RequestUri.Query, "?a=1&b=2");
@@ -496,7 +531,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             HttpResponseMessage response = await service.InvokeApiAsync("calculator/add?a=1&b=2", null, HttpMethod.Post, null, null);
-            
+
             Assert.AreEqual(hijack.Request.RequestUri.LocalPath, "/api/calculator/add");
             Assert.Contains(hijack.Request.RequestUri.Query, "?a=1&b=2");
             Assert.Contains(response.Content.ReadAsStringAsync().Result, "{\"id\":\"2\"}");

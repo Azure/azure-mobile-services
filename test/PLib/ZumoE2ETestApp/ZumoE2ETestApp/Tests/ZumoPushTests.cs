@@ -368,26 +368,26 @@ namespace ZumoE2ETestApp.Tests
             {
                 var client = ZumoTestGlobals.Instance.Client;
                 var push = client.GetPush();
-                TemplateRegistration reg = null;
+                WnsTemplateRegistration reg = null;
                 switch (nhNotificationType.ToLower())
                 {
                     case "toast":
                         var toastTemplate = BuildXmlToastPayload("sendToastText01", "$(News_English)");
-                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, toastTemplate.ToString(), ZumoPushTestGlobals.NHToastTemplateName, "World English".Split());
+                        reg = new WnsTemplateRegistration(ZumoPushTests.pushChannel.Uri, toastTemplate.ToString(), ZumoPushTestGlobals.NHToastTemplateName, "World English".Split());
                         break;
                     case "raw":
                         var rawTemplate = "<raw>$(News_French)</raw>";
                         IDictionary<string, string> wnsHeaders = new Dictionary<string, string>();
                         wnsHeaders.Add("X-WNS-Type", "wns/raw");
-                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, rawTemplate, ZumoPushTestGlobals.NHRawTemplateName, "World Mandarin".Split(), wnsHeaders);
+                        reg = new WnsTemplateRegistration(ZumoPushTests.pushChannel.Uri, rawTemplate, ZumoPushTestGlobals.NHRawTemplateName, "World Mandarin".Split(), wnsHeaders);
                         break;
                     case "badge":
                         var badgeTemplate = BuildBadgeXmlPayload("$(News_Badge)");
-                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, badgeTemplate.ToString(), ZumoPushTestGlobals.NHBadgeTemplateName, "World Badge".Split());
+                        reg = new WnsTemplateRegistration(ZumoPushTests.pushChannel.Uri, badgeTemplate.ToString(), ZumoPushTestGlobals.NHBadgeTemplateName, "World Badge".Split());
                         break;
                     case "tile":
                         var tileTemplate = BuildXmlTilePayload("TileWideImageAndText02", new[] { "tl-wiat2-1", "$(News_Mandarin)" }, new[] { wideImageUrl }, new[] { "zumowide" });
-                        reg = new TemplateRegistration(ZumoPushTests.pushChannel.Uri, tileTemplate.ToString(), ZumoPushTestGlobals.NHTileTemplateName, "World Mandarin".Split());
+                        reg = new WnsTemplateRegistration(ZumoPushTests.pushChannel.Uri, tileTemplate.ToString(), ZumoPushTestGlobals.NHTileTemplateName, "World Mandarin".Split());
                         break;
                     default:
                         throw new Exception("Template type" + nhNotificationType + "is not supported.");

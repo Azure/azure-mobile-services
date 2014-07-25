@@ -1,15 +1,22 @@
-# Microsoft Azure Mobile Services Change Log
-### Version 1.2.3
-**Managed SDK** 
-- Added support for Xamarin iOS Azure Notification Hub integration
+# Azure Mobile Services Change Log
 
-### Version 1.3
+### Version 1.3 alpha4
+**Managed SDK**
+- Added support for incremental sync (currently, for Mobile Services JavaScript backend only)
+- Added client support for soft delete
+- Added support for offline pull with query string
+
+### Version 1.3 alpha1
 **iOS SDK**
 - Added support for offline and sync
 
 **Managed SDK** 
 - Added support for offline and sync
 - Added support for soft delete
+
+### Version 1.2.3
+**Managed SDK** 
+- Added support for Xamarin iOS Azure Notification Hub integration
 
 ### Version 1.2.2
 **iOS SDK**

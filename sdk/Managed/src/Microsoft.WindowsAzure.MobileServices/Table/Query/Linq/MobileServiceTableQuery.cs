@@ -308,7 +308,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         }
 
         /// <summary>
-        /// Ensure the query will get the deleted records.
+        /// Ensure the query will get the deleted records [JavaScript Mobile Services backend only].
         /// </summary>
         /// <returns>
         /// The query object.

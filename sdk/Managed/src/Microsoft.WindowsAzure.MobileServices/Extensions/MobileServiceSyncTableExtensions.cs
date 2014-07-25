@@ -3,9 +3,6 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Sync;
@@ -21,7 +18,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Pulls all items from the associated remote table.
         /// </summary>
         public static Task PullAsync(this IMobileServiceSyncTable table)
-        {            
+        {
             return table.PullAsync(String.Empty);
         }
 
@@ -54,6 +51,26 @@ namespace Microsoft.WindowsAzure.MobileServices
         public static Task PullAsync<T, U>(this IMobileServiceSyncTable<T> table, IMobileServiceTableQuery<U> query)
         {
             return table.PullAsync(null, query, cancellationToken: CancellationToken.None);
+        }
+
+        /// <summary>
+        /// Pulls all items that match the given query
+        /// from the associated remote table.
+        /// </summary>
+        /// <param name="table">The instance of table to execute pull on.</param>
+        /// <param name="queryKey">
+        /// A string that uniquely identifies this query and is used to keep track of its sync state. [JavaScript Mobile Services backend only] Supplying this parameter enables incremental sync whenever the same key is used again.
+        /// </param>
+        /// <param name="query">
+        /// An OData query that determines which items to 
+        /// pull from the remote table.
+        /// </param>
+        /// <returns>
+        /// A task that completes when pull operation has finished.
+        /// </returns>
+        public static Task PullAsync<T, U>(this IMobileServiceSyncTable<T> table, string queryKey, IMobileServiceTableQuery<U> query)
+        {
+            return table.PullAsync(queryKey, query, cancellationToken: CancellationToken.None);
         }
 
         /// <summary>

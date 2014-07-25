@@ -67,7 +67,6 @@
     <Compile Include="UnitTests\HttpHandlers\TestHttpHandler.cs" />
     <Compile Include="FunctionalTests\BloggingTest.cs" />
     <Compile Include="FunctionalTests\Book.cs" />
-    <Compile Include="FunctionalTests\DataTypesTest.cs" />
     <Compile Include="FunctionalTests\DateTests.cs" />
     <Compile Include="FunctionalTests\FunctionalTestBase.cs" />
     <Compile Include="FunctionalTests\QueryingTest.cs" />
