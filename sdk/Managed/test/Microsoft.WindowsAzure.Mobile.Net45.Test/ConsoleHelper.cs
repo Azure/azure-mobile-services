@@ -3,13 +3,9 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
 {
@@ -25,6 +21,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             consoleWriter = new StreamWriter(Console.OpenStandardOutput());
             AttachConsole(ParentProcess);
+        }
+
+        public static void Flush()
+        {
+            consoleWriter.Flush();
+            Console.Out.Flush();
         }
 
         public static void Write(string format, params object[] args)
