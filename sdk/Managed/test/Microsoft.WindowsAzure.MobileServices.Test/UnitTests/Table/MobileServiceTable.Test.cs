@@ -2159,64 +2159,94 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task TableOperationsHaveUntypedTableFeaturesHeader()
+        public Task FeatureHeaderValidation_UntypedTableRead()
         {
-            TestHttpHandler hijack = new TestHttpHandler();
-            hijack.OnSendingRequest = (request) =>
-            {
-                Assert.AreEqual("TU", request.Headers.GetValues("X-ZUMO-FEATURES").First());
-                return Task.FromResult(request);
-            };
-
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
-            IMobileServiceTable table = service.GetTable("someTable");
-
-            hijack.SetResponseContent("[{\"id\":\"the id\",\"String\":\"Hey\"}]");
-            await table.ReadAsync("");
-
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            await table.LookupAsync("the id");
-
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            JObject obj = JObject.Parse("{\"id\":\"the id\",\"value\":\"new\"}");
-            await table.InsertAsync(obj);
-
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            await table.UpdateAsync(obj);
-
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            await table.DeleteAsync(obj);
+            return this.ValidateFeaturesHeader("TU", true, t => t.ReadAsync(""));
         }
 
         [AsyncTestMethod]
-        public async Task TableOperationsWithQueryParametersHaveQueryFeaturesHeader()
+        public Task FeatureHeaderValidation_UntypedTableLookup()
+        {
+            return this.ValidateFeaturesHeader("TU", false, t => t.LookupAsync("id"));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_UntypedTableInsert()
+        {
+            JObject obj = JObject.Parse("{\"id\":\"the id\",\"value\":\"new\"}");
+            return this.ValidateFeaturesHeader("TU", false, t => t.InsertAsync(obj));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_UntypedTableUpdate()
+        {
+            JObject obj = JObject.Parse("{\"id\":\"the id\",\"value\":\"new\"}");
+            return this.ValidateFeaturesHeader("TU", false, t => t.UpdateAsync(obj));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_UntypedTableDelete()
+        {
+            JObject obj = JObject.Parse("{\"id\":\"the id\",\"value\":\"new\"}");
+            return this.ValidateFeaturesHeader("TU", false, t => t.DeleteAsync(obj));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_UntypedTableReadWithQuery()
+        {
+            return this.ValidateFeaturesHeader("TU,QS", true, t => t.ReadAsync("", new Dictionary<string, string> { { "a", "b" } }));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_UntypedTableLookupWithQuery_FeaturesHeaderIsCorrect()
+        {
+            return this.ValidateFeaturesHeader("TU,QS", false, t => t.LookupAsync("id", new Dictionary<string, string> { { "a", "b" } }));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_UntypedTableInsertWithQuery()
+        {
+            JObject obj = JObject.Parse("{\"id\":\"the id\",\"value\":\"new\"}");
+            return this.ValidateFeaturesHeader("TU,QS", false, t => t.InsertAsync(obj, new Dictionary<string, string> { { "a", "b" } }));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_UntypedTableUpdateWithQuery()
+        {
+            JObject obj = JObject.Parse("{\"id\":\"the id\",\"value\":\"new\"}");
+            return this.ValidateFeaturesHeader("TU,QS", false, t => t.UpdateAsync(obj, new Dictionary<string, string> { { "a", "b" } }));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_UntypedTableDeleteWithQuery()
+        {
+            JObject obj = JObject.Parse("{\"id\":\"the id\",\"value\":\"new\"}");
+            return this.ValidateFeaturesHeader("TU,QS", false, t => t.DeleteAsync(obj, new Dictionary<string, string> { { "a", "b" } }));
+        }
+
+        private async Task ValidateFeaturesHeader(string expectedFeaturesHeader, bool arrayResponse, Func<IMobileServiceTable, Task> operation)
         {
             TestHttpHandler hijack = new TestHttpHandler();
+            bool validationDone = false;
             hijack.OnSendingRequest = (request) =>
             {
-                Assert.AreEqual("TU,QS", request.Headers.GetValues("X-ZUMO-FEATURES").First());
+                Assert.AreEqual(expectedFeaturesHeader, request.Headers.GetValues("X-ZUMO-FEATURES").First());
+                validationDone = true;
                 return Task.FromResult(request);
             };
 
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             IMobileServiceTable table = service.GetTable("someTable");
 
-            hijack.SetResponseContent("[{\"id\":\"the id\",\"String\":\"Hey\"}]");
-            var dic = new Dictionary<string, string> { { "hello", "world" } };
-            await table.ReadAsync("", dic);
+            var responseContent = "{\"id\":\"the id\",\"String\":\"Hey\"}";
+            if (arrayResponse)
+            {
+                responseContent = "[" + responseContent + "]";
+            }
 
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            await table.LookupAsync("the id", dic);
-
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            JObject obj = JObject.Parse("{\"id\":\"the id\",\"value\":\"new\"}");
-            await table.InsertAsync(obj, dic);
-
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            await table.UpdateAsync(obj, dic);
-
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            await table.DeleteAsync(obj, dic);
+            hijack.SetResponseContent(responseContent);
+            await operation(table);
+            Assert.IsTrue(validationDone);
         }
     }
 }

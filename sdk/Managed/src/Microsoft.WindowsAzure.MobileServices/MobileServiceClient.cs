@@ -503,8 +503,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 features |= MobileServiceFeatures.AdditionalQueryParameters;
             }
 
-            var featuresHeaders = MobileServiceFeaturesHelper.GetFeaturesHeader(features);
-            MobileServiceHttpResponse response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, false, featuresHeaders);
+            MobileServiceHttpResponse response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, false, features: features);
             return response.Content;
         }
 
@@ -550,7 +549,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             if (!httpHeaders.ContainsKey(MobileServiceHttpClient.ZumoFeaturesHeader))
             {
-                httpHeaders[MobileServiceHttpClient.ZumoFeaturesHeader] = MobileServiceFeaturesHelper.FeaturesToString(MobileServiceFeatures.GenericApiCall);
+                httpHeaders[MobileServiceHttpClient.ZumoFeaturesHeader] = FeatureCodeAttribute.GetFeatureCode(MobileServiceFeatures.GenericApiCall);
             }
 
             HttpResponseMessage response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, httpHeaders);

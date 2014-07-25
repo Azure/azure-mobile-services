@@ -25,6 +25,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         internal const string ZumoFeaturesHeader = "X-ZUMO-FEATURES";
 
         /// <summary>
+        /// Existing features which can be sent for telemetry purposes to the server.
+        /// </summary>
+        private static readonly List<Tuple<MobileServiceFeatures, string>> AllTelemetryFeatures;
+
+        /// <summary>
         /// Name of the Installation ID header included on each request.
         /// </summary>
         private const string RequestInstallationIdHeader = "X-ZUMO-INSTALLATION-ID";
@@ -98,6 +103,19 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// by the users, since they're "system" operations, so we use a separate
         /// client for them.</remarks>
         private HttpClient httpClientSansHandlers;
+
+        static MobileServiceHttpClient()
+        {
+            AllTelemetryFeatures = new List<Tuple<MobileServiceFeatures, string>>();
+            var features = (MobileServiceFeatures[])Enum.GetValues(typeof(MobileServiceFeatures));
+            foreach (var feature in features)
+            {
+                if (feature != MobileServiceFeatures.None)
+                {
+                    AllTelemetryFeatures.Add(new Tuple<MobileServiceFeatures, string>(feature, FeatureCodeAttribute.GetFeatureCode(feature)));
+                }
+            }
+        }
 
         /// <summary>
         /// Instantiates a new <see cref="MobileServiceHttpClient"/>, 
@@ -188,6 +206,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="requestHeaders">
         /// Additional request headers to include with the request.
         /// </param>
+        /// <param name="features">
+        /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
+        /// </param>
         /// <returns>
         /// The response.
         /// </returns>
@@ -196,10 +217,45 @@ namespace Microsoft.WindowsAzure.MobileServices
                                                              MobileServiceUser user,
                                                              string content = null,
                                                              bool ensureResponseContent = true,
-                                                             IDictionary<string, string> requestHeaders = null)
+                                                             IDictionary<string, string> requestHeaders = null,
+                                                             MobileServiceFeatures features = MobileServiceFeatures.None)
         {
+            if (features != MobileServiceFeatures.None)
+            {
+                if (requestHeaders == null)
+                {
+                    requestHeaders = new Dictionary<string, string>();
+                }
+
+                if (!requestHeaders.ContainsKey(ZumoFeaturesHeader))
+                {
+                    requestHeaders.Add(ZumoFeaturesHeader, FeaturesToString(features));
+                }
+            }
+
             return this.RequestAsync(true, method, uriPathAndQuery, user, content, ensureResponseContent, requestHeaders);
         }
+
+        /// <summary>
+        /// Returns the value to be used in the HTTP header corresponding to the given features.
+        /// </summary>
+        /// <param name="features">The features to be sent as telemetry to the service.</param>
+        /// <returns>The value of the HTTP header to be sent to the service.</returns>
+        private static string FeaturesToString(MobileServiceFeatures features)
+        {
+            var result = new List<string>();
+            foreach (var feature in AllTelemetryFeatures)
+            {
+                if ((features & feature.Item1) == feature.Item1)
+                {
+
+                    result.Add(feature.Item2);
+                }
+            }
+
+            return string.Join(",", result);
+        }
+
 
         /// <summary>
         /// Makes an HTTP request that includes the standard Mobile Services

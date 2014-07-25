@@ -3073,99 +3073,141 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task TypedTableOperationsHaveTypedTableFeaturesHeader()
+        public Task FeatureHeaderValidation_TypedTableToList()
         {
-            TestHttpHandler hijack = new TestHttpHandler();
-            hijack.OnSendingRequest = (request) =>
-            {
-                Assert.AreEqual("TT", request.Headers.GetValues("X-ZUMO-FEATURES").First());
-                return Task.FromResult(request);
-            };
-
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
-            IMobileServiceTable<StringIdType> table = service.GetTable<StringIdType>();
-
-            hijack.SetResponseContent("[{\"id\":\"the id\",\"String\":\"Hey\"}]");
-            await table.ToEnumerableAsync();
-
-            hijack.SetResponseContent("[{\"id\":\"the id\",\"String\":\"Hey\"}]");
-            await table.ToListAsync();
-
-            hijack.SetResponseContent("[{\"id\":\"the id\",\"String\":\"Hey\"}]");
-            await table.Take(1).ToListAsync();
-
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            await table.LookupAsync("the id");
-
-            var obj = new StringIdType { Id = "the id", String = "hey" };
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            await table.RefreshAsync(obj);
-
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            await table.InsertAsync(obj);
-
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            await table.UpdateAsync(obj);
-
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            await table.DeleteAsync(obj);
+            return this.ValidateFeaturesHeader("TT", true, t => t.ToListAsync());
         }
 
         [AsyncTestMethod]
-        public async Task TypedTableOperationsWithQueryParametersHaveQueryFeaturesHeader()
+        public Task FeatureHeaderValidation_TypedTableReadViaQuery()
         {
-            TestHttpHandler hijack = new TestHttpHandler();
-            hijack.OnSendingRequest = (request) =>
-            {
-                Assert.AreEqual("TT,QS", request.Headers.GetValues("X-ZUMO-FEATURES").First());
-                return Task.FromResult(request);
-            };
-
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
-            IMobileServiceTable<StringIdType> table = service.GetTable<StringIdType>();
-            var dic = new Dictionary<string, string> { { "hello", "world" } };
-
-            hijack.SetResponseContent("[{\"id\":\"the id\",\"String\":\"Hey\"}]");
-            await table.WithParameters(dic).ToEnumerableAsync();
-
-            hijack.SetResponseContent("[{\"id\":\"the id\",\"String\":\"Hey\"}]");
-            await table.Take(1).WithParameters(dic).ToListAsync();
-
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            await table.LookupAsync("the id", dic);
-
-            var obj = new StringIdType { Id = "the id", String = "hey" };
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            await table.RefreshAsync(obj, dic);
-
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            await table.InsertAsync(obj, dic);
-
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            await table.UpdateAsync(obj, dic);
-
-            hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
-            await table.DeleteAsync(obj, dic);
+            return this.ValidateFeaturesHeader("TT", true, t => t.Where(s => s.String != null).ToListAsync());
         }
 
         [AsyncTestMethod]
-        [Tag("now")]
-        public async Task TypedTableCollectionHaveQueryFeaturesHeader()
+        public Task FeatureHeaderValidation_TypedTableLookup()
+        {
+            return this.ValidateFeaturesHeader("TT", false, t => t.LookupAsync("id"));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableRefresh()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT", false, t => t.RefreshAsync(obj));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableInsert()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT", false, t => t.InsertAsync(obj));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableUpdate()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT", false, t => t.UpdateAsync(obj));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableDelete()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT", false, t => t.DeleteAsync(obj));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableUntypedMethod()
+        {
+            var obj = JObject.Parse("{\"id\":\"the id\",\"String\":\"hey\"}");
+            return this.ValidateFeaturesHeader("TU", false, t => t.InsertAsync(obj));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableToEnumerableWithQuery()
+        {
+            return this.ValidateFeaturesHeader("TT,QS", true, t => t.WithParameters(new Dictionary<string, string> { { "a", "b" } }).ToEnumerableAsync());
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableReadViaQueryWithQuery()
+        {
+            return this.ValidateFeaturesHeader("TT,QS", true, t => t.Where(s => s.String != null).WithParameters(new Dictionary<string, string> { { "a", "b" } }).ToListAsync());
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableLookupWithQuery()
+        {
+            return this.ValidateFeaturesHeader("TT,QS", false, t => t.LookupAsync("id", new Dictionary<string, string> { { "a", "b" } }));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableRefreshWithQuery()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT,QS", false, t => t.RefreshAsync(obj, new Dictionary<string, string> { { "a", "b" } }));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableInsertWithQuery()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT,QS", false, t => t.InsertAsync(obj, new Dictionary<string, string> { { "a", "b" } }));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableUpdateWithQuery()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT,QS", false, t => t.UpdateAsync(obj, new Dictionary<string, string> { { "a", "b" } }));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableDeleteWithQuery()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT,QS", false, t => t.DeleteAsync(obj, new Dictionary<string, string> { { "a", "b" } }));
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableToCollection()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT,TC", true, t => t.ToCollectionAsync());
+        }
+
+        [AsyncTestMethod]
+        public Task FeatureHeaderValidation_TypedTableViaQueryToCollection()
+        {
+            var obj = new StringIdType { Id = "the id", String = "hey" };
+            return this.ValidateFeaturesHeader("TT,TC", true, t => t.Where(a => a.String != null).ToCollectionAsync());
+        }
+
+        private async Task ValidateFeaturesHeader(string expectedFeaturesHeader, bool arrayResponse, Func<IMobileServiceTable<StringIdType>, Task> operation)
         {
             TestHttpHandler hijack = new TestHttpHandler();
+            bool validationDone = false;
             hijack.OnSendingRequest = (request) =>
             {
-                Assert.AreEqual("TT,TC", request.Headers.GetValues("X-ZUMO-FEATURES").First());
+                Assert.AreEqual(expectedFeaturesHeader, request.Headers.GetValues("X-ZUMO-FEATURES").First());
+                validationDone = true;
                 return Task.FromResult(request);
             };
 
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             IMobileServiceTable<StringIdType> table = service.GetTable<StringIdType>();
-            hijack.SetResponseContent("[{\"id\":\"the id\",\"String\":\"Hey\"}]");
-            var coll = await table.ToCollectionAsync();
 
-            hijack.SetResponseContent("[{\"id\":\"the id\",\"String\":\"Hey\"}]");
-            await table.Where(a => a.String != null).ToCollectionAsync();
+            var responseContent = "{\"id\":\"the id\",\"String\":\"Hey\"}";
+            if (arrayResponse)
+            {
+                responseContent = "[" + responseContent + "]";
+            }
+
+            hijack.SetResponseContent(responseContent);
+            await operation(table);
+            Assert.IsTrue(validationDone);
         }
     }
 }

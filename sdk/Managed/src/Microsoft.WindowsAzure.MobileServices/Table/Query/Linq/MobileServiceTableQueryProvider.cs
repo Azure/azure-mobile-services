@@ -25,17 +25,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         protected const string InlineCountCountKey = "count";
 
-        private MobileServiceFeatures features;
-
         /// <summary>
-        /// Adds a feature which is sent as telemetry information to the service for all
+        /// Feature which are sent as telemetry information to the service for all
         /// outgoing calls.
         /// </summary>
-        /// <param name="feature">Value indicating which features of the SDK are being used provider.</param>
-        internal void AddFeature(MobileServiceFeatures feature)
-        {
-            this.features |= feature;
-        }
+        internal MobileServiceFeatures Features { get; set; }
 
         /// <summary>
         /// Create a new query based off a table and and a new
@@ -107,7 +101,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             if (table != null)
             {
                 // Add telemetry information if possible.
-                response = await table.ReadAsync(odata, query.Parameters, this.features | MobileServiceFeatures.TypedTable);
+                response = await table.ReadAsync(odata, query.Parameters, this.Features | MobileServiceFeatures.TypedTable);
             }
             else
             {

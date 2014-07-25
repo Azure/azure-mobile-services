@@ -91,7 +91,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             MobileServiceTableQuery<TTable> tableQuery = query as MobileServiceTableQuery<TTable>;
             if (tableQuery != null)
             {
-                tableQuery.QueryProvider.AddFeature(MobileServiceFeatures.TableCollection);
+                tableQuery.QueryProvider.Features = MobileServiceFeatures.TableCollection;
             }
 
             this.selectorFunction = selector;

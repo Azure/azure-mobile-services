@@ -140,28 +140,10 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             string uriString = MobileServiceUrlBuilder.CombinePathAndQuery(uriPath, query);
-            Dictionary<string, string> featuresHeader = GetFeaturesHeader(features, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, featuresHeader);
+            features = AddQueryParametersFeature(features, parameters);
+
+            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, features: features);
             return response.Content.ParseToJToken(this.MobileServiceClient.SerializerSettings);
-        }
-
-        /// <summary>
-        /// Returns the value of the features header to be sent in calls made from this table for telemetry purposes.
-        /// </summary>
-        /// <param name="existingFeatures">The features from the SDK being used for the current call.</param>
-        /// <param name="parameters">
-        /// A dictionary of user-defined parameters and values to include in 
-        /// the request URI query string.
-        /// </param>
-        /// <returns>A dictionary with the header to be sent to the service.</returns>
-        private static Dictionary<string, string> GetFeaturesHeader(MobileServiceFeatures existingFeatures, IDictionary<string, string> parameters)
-        {
-            if (parameters != null && parameters.Count > 0)
-            {
-                existingFeatures |= MobileServiceFeatures.AdditionalQueryParameters;
-            }
-
-            return MobileServiceFeaturesHelper.GetFeaturesHeader(existingFeatures);
         }
 
         /// <summary>
@@ -232,11 +214,11 @@ namespace Microsoft.WindowsAzure.MobileServices
                             "instance");
             }
 
-            Dictionary<string, string> featuresHeader = GetFeaturesHeader(features, parameters);
+            features = AddQueryParametersFeature(features, parameters);
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
             string uriString = GetUri(this.TableName, null, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, instance.ToString(Formatting.None), true, featuresHeader);
+            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, instance.ToString(Formatting.None), true, features: features);
             
             var result = GetJTokenFromResponse(response);
             return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
@@ -391,16 +373,16 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("instance");
             }
 
+            features = AddQueryParametersFeature(features, parameters);
             object id = MobileServiceSerializer.GetId(instance);
-            Dictionary<string, string> additionalHeaders = GetFeaturesHeader(features, parameters);
-            StripSystemPropertiesAndAddVersionHeader(additionalHeaders, ref instance, ref parameters, id);
+            Dictionary<string, string> headers = StripSystemPropertiesAndAddVersionHeader(ref instance, ref parameters, id); 
 
             return await this.TransformConflictToPreconditionFailedException(async () =>
             {
                 string content = instance.ToString(Formatting.None);
                 string uriString = GetUri(this.TableName, id, parameters);
 
-                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(patchHttpMethod, uriString, this.MobileServiceClient.CurrentUser, content, true, additionalHeaders);
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(patchHttpMethod, uriString, this.MobileServiceClient.CurrentUser, content, true, headers, features);
 
                 var result = GetJTokenFromResponse(response);
                 return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
@@ -465,10 +447,10 @@ namespace Microsoft.WindowsAzure.MobileServices
             return await TransformConflictToPreconditionFailedException(async () =>
             {
                 object id = MobileServiceSerializer.GetId(instance);
-                Dictionary<string, string> additionalHeaders = GetFeaturesHeader(features, parameters);
-                StripSystemPropertiesAndAddVersionHeader(additionalHeaders, ref instance, ref parameters, id);
+                features = AddQueryParametersFeature(features, parameters);
+                Dictionary<string, string> headers = StripSystemPropertiesAndAddVersionHeader(ref instance, ref parameters, id);
                 string uriString = GetUri(this.TableName, id, parameters);
-                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false, additionalHeaders);
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false, headers, features);
 
                 var result = GetJTokenFromResponse(response);
                 return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
@@ -527,11 +509,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             MobileServiceSerializer.EnsureValidId(id);
 
+            features = AddQueryParametersFeature(features, parameters);
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
             string uriString = GetUri(this.TableName, id, parameters);
-            Dictionary<string, string> featuresHeader = GetFeaturesHeader(features, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, featuresHeader);
+            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, features: features);
             return GetJTokenFromResponse(response);
         }
 
@@ -672,6 +654,26 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
+        /// Adds, if applicable, the <see cref="MobileServiceFeatures.AdditionalQueryParameters"/> value to the
+        /// existing list of features used in the current operation.
+        /// </summary>
+        /// <param name="existingFeatures">The features from the SDK being used for the current operation.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in
+        /// the request URI query string.
+        /// </param>
+        /// <returns>The features used in the current operation.</returns>
+        private static MobileServiceFeatures AddQueryParametersFeature(MobileServiceFeatures existingFeatures, IDictionary<string, string> parameters)
+        {
+            if (parameters != null && parameters.Count > 0)
+            {
+                existingFeatures |= MobileServiceFeatures.AdditionalQueryParameters;
+            }
+
+            return existingFeatures;
+        }
+
+        /// <summary>
         /// Executes a request and transforms a 412 precondition failed response to <see cref="MobileServicePreconditionFailedException"/>.
         /// </summary>
         private async Task<JToken> TransformConflictToPreconditionFailedException(Func<Task<JToken>> action)
@@ -701,7 +703,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// if id is of type string then it strips the system properties and adds version header.
         /// </summary>
         /// <returns>The header collection with if-match header.</returns>
-        private Dictionary<string, string> StripSystemPropertiesAndAddVersionHeader(Dictionary<string, string> headers, ref JObject instance, ref IDictionary<string, string> parameters, object id)
+        private Dictionary<string, string> StripSystemPropertiesAndAddVersionHeader(ref JObject instance, ref IDictionary<string, string> parameters, object id)
         {
             string version = null;
             if (!MobileServiceSerializer.IsIntegerId(id))
@@ -709,19 +711,26 @@ namespace Microsoft.WindowsAzure.MobileServices
                 instance = MobileServiceSerializer.RemoveSystemProperties(instance, out version);
             }
             parameters = AddSystemProperties(this.SystemProperties, parameters);
-            AddIfMatchHeader(version, headers);
+            Dictionary<string, string> headers = AddIfMatchHeader(version, null);
             return headers;
         }
 
         /// <summary>
         /// Adds If-Match header to request if version is non-null.
         /// </summary>
-        private static void AddIfMatchHeader(string version, Dictionary<string, string> headers)
+        private static Dictionary<string, string> AddIfMatchHeader(string version, Dictionary<string, string> headers)
         {
             if (!String.IsNullOrEmpty(version))
             {
+                if (headers == null)
+                {
+                    headers = new Dictionary<string, string>();
+                }
+
                 headers.Add("If-Match", GetEtagFromValue(version));
             }
+
+            return headers;
         } 
 
         /// <summary>

@@ -57,7 +57,7 @@
     <Compile Include="Authentication\MobileServiceAuthentication.cs" />
     <Compile Include="Authentication\MobileServiceAuthenticationProvider.cs" />
     <Compile Include="MobileServiceClient.cs" />
-    <Compile Include="MobileServiceFeaturesHelper.cs" />
+    <Compile Include="FeatureCodeAttribute.cs" />
     <Compile Include="MobileServiceFeatures.cs" />
     <Compile Include="MobileServiceUser.cs" />
     <Compile Include="Platform\IApplicationStorage.cs" />
