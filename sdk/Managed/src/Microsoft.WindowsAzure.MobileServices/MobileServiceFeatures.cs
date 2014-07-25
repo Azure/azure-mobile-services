@@ -42,5 +42,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Feature header value for table / API requests which include additional query string parameters.
         /// </summary>
         AdditionalQueryParameters = 0x20,
+
+        /// <summary>
+        /// Feature header value for requests originated from the <see cref="MobileServiceCollection"/> and derived types.
+        /// </summary>
+        TableCollection = 0x40,
     }
 }

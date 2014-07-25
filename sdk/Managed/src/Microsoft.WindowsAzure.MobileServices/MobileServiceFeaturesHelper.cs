@@ -20,6 +20,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             { MobileServiceFeatures.TypedApiCall, "AT" },
             { MobileServiceFeatures.JsonApiCall, "AJ" },
             { MobileServiceFeatures.GenericApiCall, "AG" },
+            { MobileServiceFeatures.TableCollection, "TC" },
         };
 
         static readonly MobileServiceFeatures[] AllFeatures = (MobileServiceFeatures[])Enum.GetValues(typeof(MobileServiceFeatures));

@@ -88,7 +88,12 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             this.query = query;
-            //by default try to Cast
+            MobileServiceTableQuery<TTable> tableQuery = query as MobileServiceTableQuery<TTable>;
+            if (tableQuery != null)
+            {
+                tableQuery.QueryProvider.AddFeature(MobileServiceFeatures.TableCollection);
+            }
+
             this.selectorFunction = selector;
             this.pageSize = pageSize;
 

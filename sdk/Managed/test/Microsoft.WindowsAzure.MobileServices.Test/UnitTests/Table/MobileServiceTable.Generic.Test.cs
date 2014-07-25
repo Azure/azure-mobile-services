@@ -3147,5 +3147,25 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.SetResponseContent("{\"id\":\"the id\",\"String\":\"Hey\"}");
             await table.DeleteAsync(obj, dic);
         }
+
+        [AsyncTestMethod]
+        [Tag("now")]
+        public async Task TypedTableCollectionHaveQueryFeaturesHeader()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+            hijack.OnSendingRequest = (request) =>
+            {
+                Assert.AreEqual("TT,TC", request.Headers.GetValues("X-ZUMO-FEATURES").First());
+                return Task.FromResult(request);
+            };
+
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            IMobileServiceTable<StringIdType> table = service.GetTable<StringIdType>();
+            hijack.SetResponseContent("[{\"id\":\"the id\",\"String\":\"Hey\"}]");
+            var coll = await table.ToCollectionAsync();
+
+            hijack.SetResponseContent("[{\"id\":\"the id\",\"String\":\"Hey\"}]");
+            await table.Where(a => a.String != null).ToCollectionAsync();
+        }
     }
 }
