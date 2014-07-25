@@ -741,17 +741,10 @@ namespace Microsoft.WindowsAzure.MobileServices
             /// <returns>The value of the HTTP header to be sent to the service.</returns>
             private static string FeaturesToString(MobileServiceFeatures features)
             {
-                var result = new List<string>();
-                foreach (var feature in AllTelemetryFeatures)
-                {
-                    if ((features & feature.Item1) == feature.Item1)
-                    {
-
-                        result.Add(feature.Item2);
-                    }
-                }
-
-                return string.Join(",", result);
+                return string.Join(",",
+                    AllTelemetryFeatures
+                        .Where(t => (features & t.Item1) == t.Item1)
+                        .Select(t => t.Item2));
             }
         }
     }

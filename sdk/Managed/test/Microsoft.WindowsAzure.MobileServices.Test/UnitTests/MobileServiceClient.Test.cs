@@ -706,25 +706,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task InvokeApiHttpContentOverload_HasCorrectFeaturesHeader()
-        {
-            TestHttpHandler hijack = new TestHttpHandler();
-            hijack.OnSendingRequest = (request) =>
-            {
-                Assert.AreEqual("AG", request.Headers.GetValues("X-ZUMO-FEATURES").First());
-                return Task.FromResult(request);
-            };
-
-            MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
-
-            hijack.SetResponseContent("{\"id\":3}");
-            var requestContent = new StringContent("hello world", Encoding.UTF8, "text/plain");
-            var reqHeaders = new Dictionary<string, string>();
-            var queryString = new Dictionary<string, string> { { "a", "b" } };
-            await service.InvokeApiAsync("apiName", requestContent, HttpMethod.Put, reqHeaders, queryString);
-        }
-
-        [AsyncTestMethod]
         public Task FeatureHeaderValidation_InvokeApi_String()
         {
             return this.ValidateFeaturesHeader("AJ", c => c.InvokeApiAsync("apiName"));
