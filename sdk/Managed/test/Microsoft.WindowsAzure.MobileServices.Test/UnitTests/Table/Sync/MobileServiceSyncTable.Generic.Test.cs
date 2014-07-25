@@ -199,8 +199,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             // this should trigger a push
             await table1.PullAsync();
 
-            Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(), "OL");
-            Assert.AreEqual(hijack.Requests[1].Headers.GetValues("X-ZUMO-FEATURES").First(), "OL");
+            Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(), "TU,OL");
+            Assert.AreEqual(hijack.Requests[1].Headers.GetValues("X-ZUMO-FEATURES").First(), "TU,QS,OL");
         }
 
         [AsyncTestMethod]

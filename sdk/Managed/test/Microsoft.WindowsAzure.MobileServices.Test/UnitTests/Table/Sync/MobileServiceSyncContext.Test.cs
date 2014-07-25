@@ -50,9 +50,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(hijack.Requests.Count, 2);
 
             Assert.AreEqual(hijack.RequestContents[0], item1.ToString(Formatting.None));
-            Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(), "OL");
+            Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(), "TU,OL");
             Assert.AreEqual(hijack.RequestContents[1], item2.ToString(Formatting.None));
-            Assert.AreEqual(hijack.Requests[1].Headers.GetValues("X-ZUMO-FEATURES").First(), "OL");
+            Assert.AreEqual(hijack.Requests[1].Headers.GetValues("X-ZUMO-FEATURES").First(), "TU,OL");
 
             // create yet another service to make sure the old items were purged from queue
             hijack = new TestHttpHandler();
@@ -79,7 +79,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await table.InsertAsync(item1);
             await service.SyncContext.PushAsync();
 
-            Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(), "OL");
+            Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(), "TU,OL");
         }
 
         [AsyncTestMethod]
@@ -102,7 +102,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
             await service.SyncContext.PushAsync();
 
-            Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(), "OL");
+            Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(), "TU,OL");
         }
 
         [AsyncTestMethod]
