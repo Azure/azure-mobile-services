@@ -2,41 +2,45 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
+using System;
+
 namespace Microsoft.WindowsAzure.MobileServices
 {
     /// <summary>
-    /// The list of zumo features exposed in the http headers of requests for tracking usages.
+    /// The list of mobile services features exposed in the HTTP headers of requests
+    /// for tracking usages.
     /// </summary>
-    static class MobileServiceFeatures
+    [Flags]
+    internal enum MobileServiceFeatures
     {
         /// <summary>
         /// Feature header value for requests going through typed tables.
         /// </summary>
-        internal const string TypedTable = "TT";
+        TypedTable = 0x01,
 
         /// <summary>
         /// Feature header value for requests going through untyped (JSON) tables.
         /// </summary>
-        internal const string UntypedTable = "TU";
-
-        /// <summary>
-        /// Feature header value for table / API requests which include additional query string parameters.
-        /// </summary>
-        internal const string AdditionalQueryParameters = "QS";
+        UntypedTable = 0x02,
 
         /// <summary>
         /// Feature header value for API calls using typed (generic) overloads.
         /// </summary>
-        internal const string TypedApiCall = "AT";
+        TypedApiCall = 0x04,
 
         /// <summary>
         /// Feature header value for API calls using JSON overloads.
         /// </summary>
-        internal const string JsonApiCall = "AJ";
+        JsonApiCall = 0x08,
 
         /// <summary>
         /// Feature header value for API calls using the generic (HTTP) overload.
         /// </summary>
-        internal const string GenericApiCall = "AG";
+        GenericApiCall = 0x10,
+
+        /// <summary>
+        /// Feature header value for table / API requests which include additional query string parameters.
+        /// </summary>
+        AdditionalQueryParameters = 0x20,
     }
 }

@@ -100,7 +100,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters)
         {
-            return this.ReadAsync(query, parameters, false);
+            return this.ReadAsync(query, parameters, MobileServiceFeatures.UntypedTable);
         }
 
         /// <summary>
@@ -113,14 +113,13 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// A dictionary of user-defined parameters and values to include in 
         /// the request URI query string.
         /// </param>
-        /// <param name="isTypedCall">
-        /// Flag indicating whether the call was made from a typed table (uses serialization)
-        /// or an untyped one (uses JSON).
+        /// <param name="features">
+        /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
         /// </param>
         /// <returns>
         /// A task that will return with results when the query finishes.
         /// </returns>
-        internal async Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters, bool isTypedCall)
+        internal async Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters, MobileServiceFeatures features)
         {
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
@@ -141,9 +140,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             string uriString = MobileServiceUrlBuilder.CombinePathAndQuery(uriPath, query);
-
-            Dictionary<string, string> featuresHeader = GetFeaturesHeader(isTypedCall, parameters);
-
+            Dictionary<string, string> featuresHeader = GetFeaturesHeader(features, parameters);
             MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, featuresHeader);
             return response.Content.ParseToJToken(this.MobileServiceClient.SerializerSettings);
         }
@@ -151,24 +148,20 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// Returns the value of the features header to be sent in calls made from this table for telemetry purposes.
         /// </summary>
-        /// <param name="isTypedCall">
-        /// Flag indicating whether the call was made from a typed table (uses serialization)
-        /// or an untyped one (uses JSON).
+        /// <param name="existingFeatures">The features from the SDK being used for the current call.</param>
+        /// <param name="parameters">
+        /// A dictionary of user-defined parameters and values to include in 
+        /// the request URI query string.
         /// </param>
-        /// <param name="hasQueryParameters">Flag indicating whether additional query string parameters have been passed
-        /// to this call.</param>
         /// <returns>A dictionary with the header to be sent to the service.</returns>
-        private static Dictionary<string, string> GetFeaturesHeader(bool isTypedCall, IDictionary<string, string> additionalQueryParameters)
+        private static Dictionary<string, string> GetFeaturesHeader(MobileServiceFeatures existingFeatures, IDictionary<string, string> parameters)
         {
-            string tableTypeFeature = isTypedCall ? MobileServiceFeatures.TypedTable : MobileServiceFeatures.UntypedTable;
-            bool hasQueryParameters = additionalQueryParameters != null && additionalQueryParameters.Count != 0;
-            string features = hasQueryParameters ?
-                (tableTypeFeature + "," + MobileServiceFeatures.AdditionalQueryParameters) :
-                tableTypeFeature;
-            return new Dictionary<string, string>
+            if (parameters != null && parameters.Count > 0)
             {
-                { MobileServiceHttpClient.ZumoFeaturesHeader, features }
-            };
+                existingFeatures |= MobileServiceFeatures.AdditionalQueryParameters;
+            }
+
+            return MobileServiceFeaturesHelper.GetFeaturesHeader(existingFeatures);
         }
 
         /// <summary>
@@ -200,7 +193,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public Task<JToken> InsertAsync(JObject instance, IDictionary<string, string> parameters)
         {
-            return this.InsertAsync(instance, parameters, false);
+            return this.InsertAsync(instance, parameters, MobileServiceFeatures.UntypedTable);
         }
 
         /// <summary>
@@ -213,14 +206,13 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// A dictionary of user-defined parameters and values to include in 
         /// the request URI query string.
         /// </param>
-        /// <param name="isTypedCall">
-        /// Flag indicating whether the call was made from a typed table (uses serialization)
-        /// or an untyped one (uses JSON).
+        /// <param name="features">
+        /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
         /// </param>
         /// <returns>
         /// A task that will complete when the insert finishes.
         /// </returns>
-        internal async Task<JToken> InsertAsync(JObject instance, IDictionary<string, string> parameters, bool isTypedCall)
+        internal async Task<JToken> InsertAsync(JObject instance, IDictionary<string, string> parameters, MobileServiceFeatures features)
         {
             if (instance == null)
             {
@@ -240,9 +232,8 @@ namespace Microsoft.WindowsAzure.MobileServices
                             "instance");
             }
 
+            Dictionary<string, string> featuresHeader = GetFeaturesHeader(features, parameters);
             parameters = AddSystemProperties(this.SystemProperties, parameters);
-
-            Dictionary<string, string> featuresHeader = GetFeaturesHeader(isTypedCall, parameters);
 
             string uriString = GetUri(this.TableName, null, parameters);
             MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, instance.ToString(Formatting.None), true, featuresHeader);
@@ -374,7 +365,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public Task<JToken> UpdateAsync(JObject instance, IDictionary<string, string> parameters)
         {
-            return this.UpdateAsync(instance, parameters, false);
+            return this.UpdateAsync(instance, parameters, MobileServiceFeatures.UntypedTable);
         }
 
         /// <summary>
@@ -387,14 +378,13 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// A dictionary of user-defined parameters and values to include in 
         /// the request URI query string.
         /// </param>
-        /// <param name="isTypedCall">
-        /// Flag indicating whether the call was made from a typed table (uses serialization)
-        /// or an untyped one (uses JSON).
+        /// <param name="features">
+        /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
         /// </param>
         /// <returns>
         /// A task that will complete when the update finishes.
         /// </returns>
-        internal async Task<JToken> UpdateAsync(JObject instance, IDictionary<string, string> parameters, bool isTypedCall)
+        internal async Task<JToken> UpdateAsync(JObject instance, IDictionary<string, string> parameters, MobileServiceFeatures features)
         {
             if (instance == null)
             {
@@ -402,7 +392,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             object id = MobileServiceSerializer.GetId(instance);
-            Dictionary<string, string> additionalHeaders = GetFeaturesHeader(isTypedCall, parameters);
+            Dictionary<string, string> additionalHeaders = GetFeaturesHeader(features, parameters);
             StripSystemPropertiesAndAddVersionHeader(additionalHeaders, ref instance, ref parameters, id);
 
             return await this.TransformConflictToPreconditionFailedException(async () =>
@@ -446,7 +436,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public Task<JToken> DeleteAsync(JObject instance, IDictionary<string, string> parameters)
         {
-            return this.DeleteAsync(instance, parameters, false);
+            return this.DeleteAsync(instance, parameters, MobileServiceFeatures.UntypedTable);
         }
 
         /// <summary>
@@ -459,14 +449,13 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// A dictionary of user-defined parameters and values to include in 
         /// the request URI query string.
         /// </param>
-        /// <param name="isTypedCall">
-        /// Flag indicating whether the call was made from a typed table (uses serialization)
-        /// or an untyped one (uses JSON).
+        /// <param name="features">
+        /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
         /// </param>
         /// <returns>
         /// A task that will complete when the delete finishes.
         /// </returns>
-        internal async Task<JToken> DeleteAsync(JObject instance, IDictionary<string, string> parameters, bool isTypedCall)
+        internal async Task<JToken> DeleteAsync(JObject instance, IDictionary<string, string> parameters, MobileServiceFeatures features)
         {
             if (instance == null)
             {
@@ -476,7 +465,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             return await TransformConflictToPreconditionFailedException(async () =>
             {
                 object id = MobileServiceSerializer.GetId(instance);
-                Dictionary<string, string> additionalHeaders = GetFeaturesHeader(isTypedCall, parameters);
+                Dictionary<string, string> additionalHeaders = GetFeaturesHeader(features, parameters);
                 StripSystemPropertiesAndAddVersionHeader(additionalHeaders, ref instance, ref parameters, id);
                 string uriString = GetUri(this.TableName, id, parameters);
                 MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false, additionalHeaders);
@@ -515,7 +504,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public Task<JToken> LookupAsync(object id, IDictionary<string, string> parameters)
         {
-            return this.LookupAsync(id, parameters, false);
+            return this.LookupAsync(id, parameters, MobileServiceFeatures.UntypedTable);
         }
 
         /// <summary>
@@ -528,21 +517,20 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// A dictionary of user-defined parameters and values to include in 
         /// the request URI query string.
         /// </param>
-        /// <param name="isTypedCall">
-        /// Flag indicating whether the call was made from a typed table (uses serialization)
-        /// or an untyped one (uses JSON).
+        /// <param name="features">
+        /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
         /// </param>
         /// <returns>
         /// A task that will return with a result when the lookup finishes.
         /// </returns>
-        internal async Task<JToken> LookupAsync(object id, IDictionary<string, string> parameters, bool isTypedCall)
+        internal async Task<JToken> LookupAsync(object id, IDictionary<string, string> parameters, MobileServiceFeatures features)
         {
             MobileServiceSerializer.EnsureValidId(id);
 
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
             string uriString = GetUri(this.TableName, id, parameters);
-            Dictionary<string, string> featuresHeader = GetFeaturesHeader(isTypedCall, parameters);
+            Dictionary<string, string> featuresHeader = GetFeaturesHeader(features, parameters);
             MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, featuresHeader);
             return GetJTokenFromResponse(response);
         }

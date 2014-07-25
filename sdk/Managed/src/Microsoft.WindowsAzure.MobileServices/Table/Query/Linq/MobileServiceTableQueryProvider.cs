@@ -95,7 +95,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             if (table != null)
             {
                 // Add telemetry information if possible.
-                response = await table.ReadAsync(odata, query.Parameters, true);
+                response = await table.ReadAsync(odata, query.Parameters, MobileServiceFeatures.TypedTable);
             }
             else
             {

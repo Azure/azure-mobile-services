@@ -398,7 +398,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 content = serializer.Serialize(body).ToString();
             }
 
-            string response = await this.InternalInvokeApiAsync(apiName, content, method, parameters, true);
+            string response = await this.InternalInvokeApiAsync(apiName, content, method, parameters, MobileServiceFeatures.TypedApiCall);
             if (string.IsNullOrEmpty(response))
             {
                 return default(U);
@@ -477,7 +477,8 @@ namespace Microsoft.WindowsAzure.MobileServices
                         break;
                 }
             }
-            string response = await this.InternalInvokeApiAsync(apiName, content, method, parameters, false);
+
+            string response = await this.InternalInvokeApiAsync(apiName, content, method, parameters, MobileServiceFeatures.JsonApiCall);
             return response.ParseToJToken(this.SerializerSettings);
         }
 
@@ -490,22 +491,19 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="parameters">
         /// A dictionary of user-defined parameters and values to include in the request URI query string.
         /// </param>
-        /// <param name="isTypedCall">Flag indicating whether this call was made from a typed overload (uses
-        /// serialization) or an untyped one (uses JSON).</param>
+        /// <param name="features">
+        /// Value indicating which features of the SDK are being used in this call. Useful for telemetry.
+        /// </param>
         /// <returns>The response content from the custom api invocation.</returns>
-        private async Task<string> InternalInvokeApiAsync(string apiName, string content, HttpMethod method, IDictionary<string, string> parameters, bool isTypedCall)
+        private async Task<string> InternalInvokeApiAsync(string apiName, string content, HttpMethod method, IDictionary<string, string> parameters, MobileServiceFeatures features)
         {
             method = method ?? defaultHttpMethod;
-            string features = isTypedCall ? MobileServiceFeatures.TypedApiCall : MobileServiceFeatures.JsonApiCall;
             if (parameters != null && parameters.Count != 0)
             {
-                features = features + "," + MobileServiceFeatures.AdditionalQueryParameters;
+                features |= MobileServiceFeatures.AdditionalQueryParameters;
             }
 
-            var featuresHeaders = new Dictionary<string, string>
-            {
-                { MobileServiceHttpClient.ZumoFeaturesHeader, features }
-            };
+            var featuresHeaders = MobileServiceFeaturesHelper.GetFeaturesHeader(features);
             MobileServiceHttpResponse response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, false, featuresHeaders);
             return response.Content;
         }
@@ -552,7 +550,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             if (!httpHeaders.ContainsKey(MobileServiceHttpClient.ZumoFeaturesHeader))
             {
-                httpHeaders[MobileServiceHttpClient.ZumoFeaturesHeader] = MobileServiceFeatures.GenericApiCall;
+                httpHeaders[MobileServiceHttpClient.ZumoFeaturesHeader] = MobileServiceFeaturesHelper.FeaturesToString(MobileServiceFeatures.GenericApiCall);
             }
 
             HttpResponseMessage response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, httpHeaders);

@@ -122,7 +122,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 string unused;
                 value = MobileServiceSerializer.RemoveSystemProperties(value, out unused);
             } 
-            JToken insertedValue = await this.InsertAsync(value, parameters, true);
+            JToken insertedValue = await this.InsertAsync(value, parameters, MobileServiceFeatures.TypedTable);
             serializer.Deserialize<T>(insertedValue, instance);
         }
 
@@ -163,7 +163,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
             JObject value = serializer.Serialize(instance) as JObject;
 
-            JToken updatedValue = await TransformPreconditionFailedException(serializer, () => this.UpdateAsync(value, parameters, true));
+            JToken updatedValue = await TransformPreconditionFailedException(serializer, () => this.UpdateAsync(value, parameters, MobileServiceFeatures.TypedTable));
 
             serializer.Deserialize<T>(updatedValue, instance);
         }        
@@ -205,7 +205,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
             JObject value = serializer.Serialize(instance) as JObject;
 
-            await this.TransformPreconditionFailedException(serializer, () => this.DeleteAsync(value, parameters, true));
+            await this.TransformPreconditionFailedException(serializer, () => this.DeleteAsync(value, parameters, MobileServiceFeatures.TypedTable));
 
             // Clear the instance id since it's no longer associated with that
             // id on the server (note that reflection is goodly enough to turn
@@ -244,7 +244,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             // Ensure that the id passed in is assignable to the Id property of T
             this.MobileServiceClient.Serializer.EnsureValidIdForType<T>(id);
-            JToken value = await base.LookupAsync(id, parameters, true);
+            JToken value = await base.LookupAsync(id, parameters, MobileServiceFeatures.TypedTable);
             return this.MobileServiceClient.Serializer.Deserialize<T>(value);
         }
 
@@ -549,7 +549,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 FilterBuildingExpressionVisitor.ToODataConstant(id));
 
             // Send the query
-            JToken response = await this.ReadAsync(query, parameters, true);
+            JToken response = await this.ReadAsync(query, parameters, MobileServiceFeatures.TypedTable);
 
             // Get the first element in the response
             JObject jobject = response as JObject;
