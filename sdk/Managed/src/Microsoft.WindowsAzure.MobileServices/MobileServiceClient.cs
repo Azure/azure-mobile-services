@@ -498,7 +498,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         private async Task<string> InternalInvokeApiAsync(string apiName, string content, HttpMethod method, IDictionary<string, string> parameters, MobileServiceFeatures features)
         {
             method = method ?? defaultHttpMethod;
-            if (parameters != null && parameters.Count != 0)
+            if (parameters != null && parameters.Count > 0)
             {
                 features |= MobileServiceFeatures.AdditionalQueryParameters;
             }
@@ -537,22 +537,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public async Task<HttpResponseMessage> InvokeApiAsync(string apiName, HttpContent content, HttpMethod method, IDictionary<string, string> requestHeaders, IDictionary<string, string> parameters)
         {
             method = method ?? defaultHttpMethod;
-            Dictionary<string, string> httpHeaders;
-            if (requestHeaders != null)
-            {
-                httpHeaders = new Dictionary<string, string>(requestHeaders);
-            }
-            else
-            {
-                httpHeaders = new Dictionary<string, string>();
-            }
-
-            if (!httpHeaders.ContainsKey(MobileServiceHttpClient.ZumoFeaturesHeader))
-            {
-                httpHeaders[MobileServiceHttpClient.ZumoFeaturesHeader] = FeatureCodeAttribute.GetFeatureCode(MobileServiceFeatures.GenericApiCall);
-            }
-
-            HttpResponseMessage response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, httpHeaders);
+            HttpResponseMessage response = await this.HttpClient.RequestAsync(method, CreateAPIUriString(apiName, parameters), this.CurrentUser, content, requestHeaders: requestHeaders, features: MobileServiceFeatures.GenericApiCall);
             return response;
         }
 
