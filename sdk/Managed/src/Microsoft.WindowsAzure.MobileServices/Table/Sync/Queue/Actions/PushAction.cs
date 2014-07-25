@@ -153,8 +153,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     return false;
                 }
 
-                Exception error = null;
-
                 operation.Table = await this.context.GetTable(operation.TableName);
                 await this.LoadOperationItem(operation, batch);
 
@@ -163,38 +161,38 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     return false;
                 }
 
+                await TryUpdateOperationState(operation, MobileServiceTableOperationState.Attempted, batch);
+
                 // strip out system properties before executing the operation
                 operation.Item = MobileServiceSyncTable.RemoveSystemPropertiesKeepVersion(operation.Item);
 
                 JObject result = null;
+                Exception error = null;
                 try
                 {
                     result = await batch.SyncHandler.ExecuteTableOperationAsync(operation);
                 }
                 catch (Exception ex)
                 {
-                    if (TryAbortBatch(batch, ex))
+                    error = ex;
+                }
+
+                if (error != null)
+                {
+                    await TryUpdateOperationState(operation, MobileServiceTableOperationState.Failed, batch);
+
+                    if (TryAbortBatch(batch, error))
                     {
                         // there is no error to save in sync error and no result to capture
                         // this operation will be executed again next time the push happens
                         return false;
                     }
-
-                    error = ex;
                 }
 
                 // save the result if ExecuteTableOperation did not throw
                 if (error == null && result.IsValidItem() && operation.CanWriteResultToStore)
                 {
-                    try
-                    {
-                        await this.Store.UpsertAsync(operation.TableName, result, fromServer: true);
-                    }
-                    catch (Exception ex)
-                    {
-                        batch.Abort(MobileServicePushStatus.CancelledBySyncStoreError);
-                        throw new MobileServiceLocalStoreException(Resources.SyncStore_FailedToUpsertItem, ex);
-                    }
+                    await TryStoreOperation(() => this.Store.UpsertAsync(operation.TableName, result, fromServer: true), batch, Resources.SyncStore_FailedToUpsertItem);
                 }
                 else if (error != null)
                 {
@@ -227,20 +225,34 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
         }
 
+        private async Task TryUpdateOperationState(MobileServiceTableOperation operation, MobileServiceTableOperationState state, OperationBatch batch)
+        {
+            operation.State = state;
+            await TryStoreOperation(() => this.OperationQueue.UpdateAsync(operation), batch, Resources.SyncStore_FailedToUpdateOperation);
+        }
+
         private async Task LoadOperationItem(MobileServiceTableOperation operation, OperationBatch batch)
         {
             // only read the item from store if it is not in the operation already
             if (operation.Item == null)
             {
-                try
+                await TryStoreOperation(async () =>
                 {
                     operation.Item = await this.Store.LookupAsync(operation.TableName, operation.ItemId) as JObject;
-                }
-                catch (Exception ex)
-                {
-                    batch.Abort(MobileServicePushStatus.CancelledBySyncStoreError);
-                    throw new MobileServiceLocalStoreException(Resources.SyncStore_FailedToReadItem, ex);
-                }
+                }, batch, Resources.SyncStore_FailedToReadItem);
+            }
+        }
+
+        private static async Task TryStoreOperation(Func<Task> action, OperationBatch batch, string error)
+        {
+            try
+            {
+                await action();
+            }
+            catch (Exception ex)
+            {
+                batch.Abort(MobileServicePushStatus.CancelledBySyncStoreError);
+                throw new MobileServiceLocalStoreException(error, ex);
             }
         }
 

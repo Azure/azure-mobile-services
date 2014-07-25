@@ -37,6 +37,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 throw new InvalidOperationException(Resources.SyncContext_DuplicateInsert);
             }
+
+            if (newOperation is DeleteOperation && this.State != MobileServiceTableOperationState.Pending)
+            {
+                // if insert was attempted then we can't be sure if it went through or not hence we can't collapse delete
+                throw new InvalidOperationException(Resources.SyncContext_InsertAttempted);
+            }
         }
 
         public override void Collapse(MobileServiceTableOperation newOperation)

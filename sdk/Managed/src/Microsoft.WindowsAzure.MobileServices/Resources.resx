@@ -301,7 +301,7 @@
     <value>SyncContext is not yet initialized.</value>
   </data>
   <data name="SyncStore_FailedToUpsertItem" xml:space="preserve">
-    <value>Failed to update the item in the sync store.</value>
+    <value>Failed to update the item in the local store.</value>
   </data>
   <data name="MobileServiceTableQueryDescription_UnrecognizedQueryParameter" xml:space="preserve">
     <value>Unrecognized query parameter '{0}'.</value>
@@ -364,19 +364,19 @@
     <value>Expected string literal.</value>
   </data>
   <data name="SyncStore_FailedToDeleteOperation" xml:space="preserve">
-    <value>Failed to delete operation from the sync store.</value>
+    <value>Failed to delete operation from the local store.</value>
   </data>
   <data name="SyncStore_FailedToReadItem" xml:space="preserve">
-    <value>Failed to read the item from sync store.</value>
+    <value>Failed to read the item from local store.</value>
   </data>
   <data name="SyncStore_FailedToLoadError" xml:space="preserve">
-    <value>Failed to read errors from the sync store.</value>
+    <value>Failed to read errors from the local store.</value>
   </data>
   <data name="SyncStore_FailedToDeleteError" xml:space="preserve">
-    <value>Failed to delete error from the sync store.</value>
+    <value>Failed to delete error from the local store.</value>
   </data>
   <data name="SyncStore_OperationFailed" xml:space="preserve">
-    <value>Failed to perform operation on sync store.</value>
+    <value>Failed to perform operation on local store.</value>
   </data>
   <data name="MobileServiceSyncTable_PullWithSelectNotSupported" xml:space="preserve">
     <value>Pull query with select clause is not supported.</value>
@@ -403,12 +403,15 @@
     <value>Incremental pull query must not have orderby clause.</value>
   </data>
   <data name="SyncStore_FailedToUpdateOperation" xml:space="preserve">
-    <value>Failed to update operation in the sync store.</value>
+    <value>Failed to update operation in the local store.</value>
   </data>
   <data name="SyncError_OperationUpdated" xml:space="preserve">
     <value>The operation has been updated and cannot be cancelled.</value>
   </data>
   <data name="SyncContext_PurgeOnDirtyTable" xml:space="preserve">
     <value>The table cannot be purged because it has pending operations.</value>
+  </data>
+  <data name="SyncContext_InsertAttempted" xml:space="preserve">
+    <value>The item is in inconsistent state in the local store. Please complete the pending sync by calling PushAsync()before deleting the item.</value>
   </data>
 </root>

@@ -127,6 +127,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task PushAsync_Succeeds_WhenDeleteReturnsNotFound()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.NotFound));
+
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandlerMock());
+
+            IMobileServiceSyncTable table = service.GetSyncTable("someTable");
+
+            await table.DeleteAsync(new JObject() { { "id", "abc" }, { "__version", "Wow" } });
+
+            await service.SyncContext.PushAsync();
+        }
+
+        [AsyncTestMethod]
         public async Task PushAsync_Succeeds_WithClientWinsPolicy()
         {
             var hijack = new TestHttpHandler();

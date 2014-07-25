@@ -10,6 +10,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Net;
+using System.Net.Http;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Operations
 {
@@ -44,6 +45,23 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
             table.Setup(t => t.DeleteAsync(item)).Returns(Task.FromResult<JToken>(item));
 
             await this.operation.ExecuteAsync();
+        }
+
+        [TestMethod]
+        public async Task ExecuteAsync_IgnoresNotFound()
+        {
+            var client = new Mock<MobileServiceClient>(MockBehavior.Strict);
+
+            var table = new Mock<MobileServiceTable>("test", client.Object);
+            this.operation.Table = table.Object;
+
+            var item = JObject.Parse("{\"id\":\"abc\",\"Text\":\"Example\"}");
+            this.operation.Item = item;
+
+            table.Setup(t => t.DeleteAsync(item)).Throws(new MobileServiceInvalidOperationException("not found", new HttpRequestMessage(), new HttpResponseMessage(HttpStatusCode.NotFound)));
+
+            JObject result = await this.operation.ExecuteAsync();
+            Assert.IsNull(result);
         }
 
         [TestMethod]

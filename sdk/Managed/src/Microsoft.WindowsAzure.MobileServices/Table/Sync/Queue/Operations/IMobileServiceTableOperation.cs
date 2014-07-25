@@ -2,7 +2,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
@@ -17,6 +16,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// The kind of operation
         /// </summary>
         MobileServiceTableOperationKind Kind { get; }
+
+        /// <summary>
+        /// The state of the operation
+        /// </summary>
+        MobileServiceTableOperationState State { get; }
 
         /// <summary>
         /// The table that the operation will be executed against.

@@ -827,6 +827,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The item is in inconsistent state in the local store. Please complete the pending sync by calling PushAsync()before deleting the item..
+        /// </summary>
+        internal static string SyncContext_InsertAttempted {
+            get {
+                return ResourceManager.GetString("SyncContext_InsertAttempted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to SyncContext is not yet initialized..
         /// </summary>
         internal static string SyncContext_NotInitialized {
@@ -872,7 +881,7 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to delete error from the sync store..
+        ///   Looks up a localized string similar to Failed to delete error from the local store..
         /// </summary>
         internal static string SyncStore_FailedToDeleteError {
             get {
@@ -881,7 +890,7 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to delete operation from the sync store..
+        ///   Looks up a localized string similar to Failed to delete operation from the local store..
         /// </summary>
         internal static string SyncStore_FailedToDeleteOperation {
             get {
@@ -890,7 +899,7 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to read errors from the sync store..
+        ///   Looks up a localized string similar to Failed to read errors from the local store..
         /// </summary>
         internal static string SyncStore_FailedToLoadError {
             get {
@@ -899,7 +908,7 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to read the item from sync store..
+        ///   Looks up a localized string similar to Failed to read the item from local store..
         /// </summary>
         internal static string SyncStore_FailedToReadItem {
             get {
@@ -908,7 +917,7 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to update operation in the sync store..
+        ///   Looks up a localized string similar to Failed to update operation in the local store..
         /// </summary>
         internal static string SyncStore_FailedToUpdateOperation {
             get {
@@ -917,7 +926,7 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to update the item in the sync store..
+        ///   Looks up a localized string similar to Failed to update the item in the local store..
         /// </summary>
         internal static string SyncStore_FailedToUpsertItem {
             get {
@@ -935,7 +944,7 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed to perform operation on sync store..
+        ///   Looks up a localized string similar to Failed to perform operation on local store..
         /// </summary>
         internal static string SyncStore_OperationFailed {
             get {

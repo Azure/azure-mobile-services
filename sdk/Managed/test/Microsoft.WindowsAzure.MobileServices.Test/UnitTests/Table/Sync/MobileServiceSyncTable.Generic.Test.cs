@@ -541,6 +541,30 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task DeleteAsync_Throws_WhenInsertWasAttempted()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.Response = new HttpResponseMessage(HttpStatusCode.RequestTimeout); // insert response
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
+            IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();
+
+            var item = new StringIdType() { Id = "an id", String = "what?" };
+            await table.InsertAsync(item);
+            // insert is in queue
+            Assert.AreEqual(service.SyncContext.PendingOperations, 1L);
+
+            var pushException = await ThrowsAsync<MobileServicePushFailedException>(service.SyncContext.PushAsync);
+            Assert.AreEqual(pushException.PushResult.Errors.Count(), 1);
+
+            var delException = await ThrowsAsync<InvalidOperationException>(() => table.DeleteAsync(item));
+            Assert.AreEqual(delException.Message, "The item is in inconsistent state in the local store. Please complete the pending sync by calling PushAsync()before deleting the item.");
+
+            // insert still in queue
+            Assert.AreEqual(service.SyncContext.PendingOperations, 1L);
+        }
+
+        [AsyncTestMethod]
         public Task DeleteAsync_Throws_WhenDeleteIsInQueue()
         {
             return this.TestCollapseThrow(firstOperation: (table, item) => table.DeleteAsync(item),

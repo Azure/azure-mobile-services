@@ -150,6 +150,7 @@
     <Compile Include="Table\Sync\Queue\Actions\TableAction.cs" />
     <Compile Include="Table\Sync\Queue\Operations\MobileServiceTableOperationError.cs" />
     <Compile Include="Table\Sync\Queue\Operations\DeleteOperation.cs" />
+    <Compile Include="Table\Sync\Queue\Operations\MobileServiceTableOperationState.cs" />
     <Compile Include="Table\Sync\Queue\Operations\UpdateOperation.cs" />
     <Compile Include="Table\Sync\Queue\Operations\InsertOperation.cs" />
     <Compile Include="Table\Sync\Queue\OperationBatch.cs" />

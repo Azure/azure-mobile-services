@@ -30,6 +30,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         {
             this.store = new Mock<IMobileServiceLocalStore>(MockBehavior.Strict);
             this.opQueue = new Mock<OperationQueue>(MockBehavior.Strict, this.store.Object);
+            this.opQueue.Setup(q => q.UpdateAsync(It.IsAny<MobileServiceTableOperation>())).Returns(Task.FromResult(0));
             this.handler = new Mock<IMobileServiceSyncHandler>(MockBehavior.Strict);
             this.client = new Mock<MobileServiceClient>();
             this.client.Object.Serializer = new MobileServiceSerializer();

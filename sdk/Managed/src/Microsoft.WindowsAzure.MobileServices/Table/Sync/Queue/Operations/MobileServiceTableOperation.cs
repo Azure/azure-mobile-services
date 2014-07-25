@@ -18,6 +18,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public string ItemId { get; private set; }
         public JObject Item { get; set; }
         public DateTime CreatedAt { get; private set; }
+
+        public MobileServiceTableOperationState State { get; internal set; }
         public long Sequence { get; set; }
         public long Version { get; set; }
 
@@ -45,6 +47,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         protected MobileServiceTableOperation(string tableName, string itemId)
         {
             this.Id = Guid.NewGuid().ToString();
+            this.State = MobileServiceTableOperationState.Pending;
             this.CreatedAt = DateTime.UtcNow;
             this.TableName = tableName;
             this.ItemId = itemId;
@@ -119,6 +122,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 { MobileServiceSystemColumns.Id, String.Empty },
                 { "kind", 0 },
+                { "state", 0 },
                 { "tableName", String.Empty },
                 { "itemId", String.Empty },
                 { "item", String.Empty },
@@ -134,6 +138,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 { MobileServiceSystemColumns.Id, this.Id },
                 { "kind", (int)this.Kind },
+                { "state", (int)this.State },
                 { "tableName", this.TableName },
                 { "itemId", this.ItemId },
                 { "item", this.Item != null && this.SerializeItemToQueue ? this.Item.ToString(Formatting.None) : null },
@@ -176,6 +181,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 operation.Version = obj.Value<long>("version");
                 string itemJson = obj.Value<string>("item");
                 operation.Item = !String.IsNullOrEmpty(itemJson) ? JObject.Parse(itemJson) : null;
+                operation.State = (MobileServiceTableOperationState)obj.Value<int>("state");
             }
 
             return operation;
