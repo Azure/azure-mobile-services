@@ -421,6 +421,81 @@
     STAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
+-(void) testDeleteNoVersion_Push_Success
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200
+                                                                 data:@"{\"id\": \"test1\", \"text\":\"test name\"}"];
+    
+    BOOL __block deleteSentToServer = NO;
+    
+    testFilter.ignoreNextFilter = YES;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        STAssertNil(request.allHTTPHeaderFields[@"If-Match"], @"If-Match header should have been nil");
+        deleteSentToServer = YES;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
+    
+    // Create the item
+    NSDictionary *item = @{ @"id": @"test1", @"name":@"test name" };
+    
+    // Insert the item
+    done = NO;
+    [todoTable delete:item completion:^(NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:1000.1], @"Test timed out.");
+    
+    done = NO;
+    [client.syncContext pushWithCompletion:^(NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        STAssertTrue(deleteSentToServer, @"the delete call didn't go to the server");
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:2000.1], @"Test timed out.");
+}
+
+-(void) testDeleteWithVersion_Push_ItemSentWithVersion_Success
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200
+                                                                 data:@"{\"id\": \"test1\", \"text\":\"test name\"}"];
+    
+    BOOL __block deleteSentToServer = NO;
+    
+    testFilter.ignoreNextFilter = YES;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        NSString *ifMatchHeader = request.allHTTPHeaderFields[@"If-Match"];
+        STAssertTrue([ifMatchHeader isEqualToString:@"\"123\""], @"Unexpected header: %@", ifMatchHeader);
+        deleteSentToServer = YES;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
+    
+    // Create the item
+    NSDictionary *item = @{ @"id": @"test1", MSSystemColumnVersion: @"123", @"name":@"test name" };
+    
+    // Insert the item
+    done = NO;
+    [todoTable delete:item completion:^(NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:1000.1], @"Test timed out.");
+    
+    done = NO;
+    [client.syncContext pushWithCompletion:^(NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        STAssertTrue(deleteSentToServer, @"the delete call didn't go to the server");
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:2000.1], @"Test timed out.");
+}
+
 -(void) testReadWithIdNoItemSuccess
 {
     offline.returnErrors = YES;

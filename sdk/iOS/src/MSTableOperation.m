@@ -51,6 +51,8 @@
         itemId_ = [item objectForKey:@"itemId"];
         tableName_ = [item objectForKey:@"table"];
         operationId_ = [[item objectForKey:@"id"] integerValue];
+        
+        item_ = [rawItem objectForKey:@"item"];
     }
     return self;
 }

@@ -40,6 +40,7 @@
     MSTableOperation *originalTableOperation = [[MSTableOperation alloc] initWithTable:@"testTable" type:MSTableOperationInsert itemId:@"ABC"];
     originalTableOperation.operationId = 7;
     originalTableOperation.type = MSTableOperationInsert;
+    originalTableOperation.item = @{ @"id" : @1, @"column1": @NO, @"column2": @"yes" };
     
     NSDictionary *info = [originalTableOperation serialize];
     MSTableOperation *tableOperation = [[MSTableOperation alloc] initWithItem:info];
@@ -48,5 +49,27 @@
     STAssertEquals(tableOperation.tableName, @"testTable", @"Incorrect table name");
     STAssertEquals(tableOperation.itemId, @"ABC", @"Incorrect table name");
     STAssertEquals(tableOperation.type, MSTableOperationInsert, @"incorrect type");
+    STAssertNil(tableOperation.item, @"Did not expect an item");
 }
+
+- (void)testDeleteOperationSerialization_KeepsItem_Success
+{
+    MSTableOperation *originalTableOperation = [[MSTableOperation alloc] initWithTable:@"testTable" type:MSTableOperationInsert itemId:@"ABC"];
+    originalTableOperation.operationId = 7;
+    originalTableOperation.type = MSTableOperationDelete;
+    originalTableOperation.item = @{ @"id" : @1, @"column1": @YES, @"column2": @"Hello" };
+    
+    NSDictionary *info = [originalTableOperation serialize];
+    MSTableOperation *tableOperation = [[MSTableOperation alloc] initWithItem:info];
+    
+    STAssertEquals((int)tableOperation.operationId, 7, @"Incorrect id");
+    STAssertEquals(tableOperation.tableName, @"testTable", @"Incorrect table name");
+    STAssertEquals(tableOperation.itemId, @"ABC", @"Incorrect table name");
+    STAssertEquals(tableOperation.type, MSTableOperationDelete, @"incorrect type");
+    STAssertNotNil(tableOperation.item, @"Expected an item");
+    STAssertEqualObjects(tableOperation.item[@"id"], @1, nil);
+    STAssertEqualObjects(tableOperation.item[@"column1"], @YES, nil);
+    STAssertEqualObjects(tableOperation.item[@"column2"], @"Hello", nil);
+}
+
 @end

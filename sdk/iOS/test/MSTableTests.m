@@ -10,10 +10,11 @@
 
 @interface MSTableTests : SenTestCase {
     MSClient *client;
-        BOOL done;
+    BOOL done;
 }
 
 @end
+
 
 @implementation MSTableTests
 
@@ -840,11 +841,19 @@
     testFilter.ignoreNextFilter = YES;
     testFilter.dataToUse = data;
     
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        NSString *ifMatchHeader = request.allHTTPHeaderFields[@"If-Match"];
+        STAssertTrue([ifMatchHeader isEqualToString:@"\"123\""], @"Unexpected header: %@", ifMatchHeader);
+        
+        return request;
+    };
+    
+    
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
     
     // Create the item
-    id item = @{ @"id":@"120", @"name":@"test name" };
+    id item = @{ @"id":@"120", MSSystemColumnVersion:@"123", @"name":@"test name" };
     
     // Test deletion of the item
     [todoTable delete:item completion:^(id itemId, NSError *error) {
