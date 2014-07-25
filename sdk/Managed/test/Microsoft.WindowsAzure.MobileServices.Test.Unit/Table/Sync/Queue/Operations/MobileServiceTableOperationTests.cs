@@ -2,10 +2,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using System;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.WindowsAzure.MobileServices.Sync;
@@ -24,12 +20,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Opera
         [TestInitialize]
         public void Initialize()
         {
-            this.operation = new Mock<MobileServiceTableOperation>("test", "abc") { CallBase = true };            
+            this.operation = new Mock<MobileServiceTableOperation>("test", "abc") { CallBase = true };
             var client = new Mock<MobileServiceClient>(MockBehavior.Strict);
             client.Object.Serializer = new MobileServiceSerializer();
             this.table = new Mock<MobileServiceTable>("test", client.Object);
             operation.Object.Table = this.table.Object;
-        }        
+        }
 
         [TestMethod]
         public async Task ExecuteAsync_Throws_WhenItemIsNull()

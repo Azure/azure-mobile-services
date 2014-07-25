@@ -402,4 +402,10 @@
   <data name="MobileServiceSyncTable_IncrementalPullWithOrderNotAllowed" xml:space="preserve">
     <value>Incremental pull query must not have orderby clause.</value>
   </data>
+  <data name="SyncStore_FailedToUpdateOperation" xml:space="preserve">
+    <value>Failed to update operation in the sync store.</value>
+  </data>
+  <data name="SyncError_OperationUpdated" xml:space="preserve">
+    <value>The operation has been updated and cannot be cancelled.</value>
+  </data>
 </root>

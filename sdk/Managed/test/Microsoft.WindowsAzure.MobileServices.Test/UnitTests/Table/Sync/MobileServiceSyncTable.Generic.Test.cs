@@ -577,6 +577,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task DeleteAsync_CancelsUpdate_WhenUpdateIsInQueue()
         {
+            var store = new MobileServiceLocalStoreMock();
             await this.TestCollapseCancel(firstOperationOnItem1: (table, item1) => table.UpdateAsync(item1),
                                           operationOnItem2: (table, item2) => table.InsertAsync(item2),
                                           secondOperationOnItem1: (table, item1) => table.DeleteAsync(item1),
@@ -590,6 +591,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                                               {
                                                   Assert.AreEqual(req.Method, HttpMethod.Delete);
                                               }
+                                          },
+                                          assertQueue: queue =>
+                                          {
+                                              var op = queue.Values.Single(o => o.Value<string>("itemId") == "item1");
+                                              Assert.AreEqual(op.Value<long>("version"), 2L);
                                           });
         }
 
@@ -624,6 +630,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task UpdateAsync_CancelsSecondUpdate_WhenUpdateIsInQueue()
         {
+            var store = new MobileServiceLocalStoreMock();
             await this.TestCollapseCancel(firstOperationOnItem1: (table, item1) => table.UpdateAsync(item1),
                                         operationOnItem2: (table, item2) => table.DeleteAsync(item2),
                                         secondOperationOnItem1: (table, item1) => table.UpdateAsync(item1),
@@ -637,6 +644,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                                             {
                                                 Assert.AreEqual(req.Method, HttpMethod.Delete);
                                             }
+                                        },
+                                        assertQueue: queue =>
+                                        {
+                                            var op = queue.Values.Single(o => o.Value<string>("itemId") == "item1");
+                                            Assert.AreEqual(op.Value<long>("version"), 2L);
                                         });
         }
 
@@ -656,7 +668,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                                             {
                                                 Assert.AreEqual(req.Method, HttpMethod.Delete);
                                             }
+                                        },
+                                        assertQueue: queue =>
+                                        {
+                                            var op = queue.Values.Single(o => o.Value<string>("itemId") == "item1");
+                                            Assert.AreEqual(op.Value<long>("version"), 2L);
                                         });
+
         }
 
         [AsyncTestMethod]
@@ -723,13 +741,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         private async Task TestCollapseCancel(Func<IMobileServiceSyncTable<StringIdType>, StringIdType, Task> firstOperationOnItem1,
                                               Func<IMobileServiceSyncTable<StringIdType>, StringIdType, Task> operationOnItem2,
                                               Func<IMobileServiceSyncTable<StringIdType>, StringIdType, Task> secondOperationOnItem1,
-                                              Action<HttpRequestMessage, int> assertRequest)
+                                              Action<HttpRequestMessage, int> assertRequest,
+                                              Action<Dictionary<string, JObject>> assertQueue)
         {
+            var store = new MobileServiceLocalStoreMock();
             var hijack = new TestHttpHandler();
             MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
 
-            var item1 = new StringIdType() { Id = "an id", String = "what?" };
-            var item2 = new StringIdType() { Id = "two", String = "this" };
+            var item1 = new StringIdType() { Id = "item1", String = "what?" };
+            var item2 = new StringIdType() { Id = "item2", String = "this" };
             int executed = 0;
             hijack.SetResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
             hijack.OnSendingRequest = req =>
@@ -739,7 +759,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 return Task.FromResult(req);
             };
 
-            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
             IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();
 
             await firstOperationOnItem1(table, item1);
@@ -750,6 +770,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             await secondOperationOnItem1(table, item1);
             Assert.AreEqual(service.SyncContext.PendingOperations, 2L);
+
+            Dictionary<string, JObject> queue = store.Tables[MobileServiceLocalSystemTables.OperationQueue];
+            assertQueue(queue);
 
             await service.SyncContext.PushAsync();
 

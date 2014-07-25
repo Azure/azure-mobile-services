@@ -29,8 +29,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
-            
-            JObject item1 = new JObject(){{"id", "abc"}}, item2 = new JObject(){{"id", "def"}};
+
+            JObject item1 = new JObject() { { "id", "abc" } }, item2 = new JObject() { { "id", "def" } };
 
             await table.InsertAsync(item1);
             await table.InsertAsync(item2);
@@ -40,9 +40,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             // create a new service to test that operations are loaded from store
             hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
-            hijack.AddResponseContent("{\"id\":\"def\",\"String\":\"What\"}");          
+            hijack.AddResponseContent("{\"id\":\"def\",\"String\":\"What\"}");
 
-            service = new MobileServiceClient("http://www.test.com", "secret...", hijack);            
+            service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             Assert.AreEqual(hijack.Requests.Count, 0);
@@ -110,6 +110,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             var error = new MobileServiceTableOperationError(HttpStatusCode.PreconditionFailed,
                                                             "abc",
+                                                            1,
                                                             MobileServiceTableOperationKind.Update,
                                                             "test",
                                                             new JObject(),
@@ -129,9 +130,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public async Task PushAsync_Succeeds_WithClientWinsPolicy()
         {
             var hijack = new TestHttpHandler();
-            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.PreconditionFailed) 
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.PreconditionFailed)
             {
-                Content = new StringContent("{\"id\":\"abc\",\"__version\":\"Hey\"}") 
+                Content = new StringContent("{\"id\":\"abc\",\"__version\":\"Hey\"}")
             });
             hijack.AddResponseContent(@"{""id"": ""abc""}");
 
@@ -156,7 +157,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             IMobileServiceSyncTable table = service.GetSyncTable("someTable");
 
-            await table.UpdateAsync(new JObject() { { "id", "abc" }, {"__version", "Wow"} });
+            await table.UpdateAsync(new JObject() { { "id", "abc" }, { "__version", "Wow" } });
 
             await service.SyncContext.PushAsync();
         }
@@ -179,16 +180,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.IsNotNull(await store.LookupAsync(MobileServiceLocalSystemTables.OperationQueue, operationId));
             // item doesn't exist before upsert
             Assert.IsNull(await store.LookupAsync(tableName, itemId));
-            
-            var error = new MobileServiceTableOperationError(HttpStatusCode.Conflict, 
-                                                             operationId, 
-                                                             MobileServiceTableOperationKind.Update, 
+
+            var error = new MobileServiceTableOperationError(HttpStatusCode.Conflict,
+                                                             operationId,
+                                                             1,
+                                                             MobileServiceTableOperationKind.Update,
                                                              tableName,
-                                                             item: new JObject() { { "id", itemId } }, 
-                                                             rawResult: "{}", 
+                                                             item: new JObject() { { "id", itemId } },
+                                                             rawResult: "{}",
                                                              result: new JObject());
 
-            var item = new JObject() { { "id", itemId }, { "name", "unknown" } }; 
+            var item = new JObject() { { "id", itemId }, { "name", "unknown" } };
             await context.CancelAndUpdateItemAsync(error, item);
 
             // operation is deleted
@@ -213,7 +215,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             string tableName = "test";
 
             store.Tables[MobileServiceLocalSystemTables.OperationQueue].Add(operationId, new JObject());
-            store.Tables.Add(tableName, new Dictionary<string, JObject>(){{itemId, new JObject()}});
+            store.Tables.Add(tableName, new Dictionary<string, JObject>() { { itemId, new JObject() } });
 
             // operation exists before cancel
             Assert.IsNotNull(await store.LookupAsync(MobileServiceLocalSystemTables.OperationQueue, operationId));
@@ -222,6 +224,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             var error = new MobileServiceTableOperationError(HttpStatusCode.Conflict,
                                                              operationId,
+                                                             1,
                                                              MobileServiceTableOperationKind.Update,
                                                              tableName,
                                                              item: new JObject() { { "id", itemId } },
@@ -235,6 +238,66 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             // item is upserted
             Assert.IsNull(await store.LookupAsync(tableName, itemId));
+        }
+
+        [AsyncTestMethod]
+        public async Task CancelAndUpdateItemAsync_Throws_IfOperationDoesNotExist()
+        {
+            await TestOperationModifiedException(false, (error, context) => context.CancelAndUpdateItemAsync(error, new JObject()));
+        }
+
+        [AsyncTestMethod]
+        public async Task CancelAndDiscardItemAsync_Throws_IfOperationDoesNotExist()
+        {
+            await TestOperationModifiedException(false, (error, context) => context.CancelAndDiscardItemAsync(error));
+        }
+
+
+        [AsyncTestMethod]
+        public async Task CancelAndUpdateItemAsync_Throws_IfOperationIsModified()
+        {
+            await TestOperationModifiedException(true, (error, context) => context.CancelAndUpdateItemAsync(error, new JObject()));
+        }
+
+        [AsyncTestMethod]
+        public async Task CancelAndDiscardItemAsync_Throws_IfOperationIsModified()
+        {
+            await TestOperationModifiedException(true, (error, context) => context.CancelAndDiscardItemAsync(error));
+        }
+
+        private async Task TestOperationModifiedException(bool operationExists, Func<MobileServiceTableOperationError, MobileServiceSyncContext, Task> action)
+        {
+            var client = new MobileServiceClient("http://www.test.com");
+            var store = new MobileServiceLocalStoreMock();
+            var context = new MobileServiceSyncContext(client);
+            await context.InitializeAsync(store);
+
+            string operationId = "abc";
+            string itemId = "def";
+            string tableName = "test";
+
+            if (operationExists)
+            {
+                store.Tables[MobileServiceLocalSystemTables.OperationQueue].Add(operationId, new JObject() { { "version", 3 } });
+            }
+            else
+            {
+                // operation exists before cancel
+                Assert.IsNull(await store.LookupAsync(MobileServiceLocalSystemTables.OperationQueue, operationId));
+            }
+
+            var error = new MobileServiceTableOperationError(HttpStatusCode.Conflict,
+                                                             operationId,
+                                                             1,
+                                                             MobileServiceTableOperationKind.Update,
+                                                             tableName,
+                                                             item: new JObject() { { "id", itemId } },
+                                                             rawResult: "{}",
+                                                             result: new JObject());
+
+            var ex = await ThrowsAsync<InvalidOperationException>(() => action(error, context));
+
+            Assert.AreEqual(ex.Message, "The operation has been updated and cannot be cancelled.");
         }
     }
 }

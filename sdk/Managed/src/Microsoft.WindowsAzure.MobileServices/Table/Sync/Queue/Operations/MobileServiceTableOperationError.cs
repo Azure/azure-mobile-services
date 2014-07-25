@@ -3,10 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -32,6 +29,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// The id of the operation.
         /// </summary>
         internal string OperationId { get; private set; }
+
+        /// <summary>
+        /// The version of the operation.
+        /// </summary>
+        internal long OperationVersion { get; private set; }
 
         /// <summary>
         /// The kind of table operation.
@@ -75,16 +77,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <param name="item">The item associated with the operation.</param>
         /// <param name="rawResult">Raw response of the table operation.</param>
         /// <param name="result">Response of the table operation.</param>
-        public MobileServiceTableOperationError(HttpStatusCode? status, 
+        public MobileServiceTableOperationError(HttpStatusCode? status,
                                                 string operationId,
-                                                MobileServiceTableOperationKind operationKind, 
-                                                string tableName, 
+                                                long operationVersion,
+                                                MobileServiceTableOperationKind operationKind,
+                                                string tableName,
                                                 JObject item,
                                                 string rawResult,
                                                 JObject result)
         {
             this.Id = Guid.NewGuid().ToString();
             this.OperationId = operationId;
+            this.OperationVersion = operationVersion;
             this.Status = status;
             this.OperationKind = operationKind;
             this.TableName = tableName;
@@ -130,6 +134,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 { MobileServiceSystemColumns.Id, String.Empty },
                 { "httpStatus", 0 },
                 { "operationId", String.Empty },
+                { "operationVersion", 0 },
                 { "operationKind", 0 },
                 { "tableName", String.Empty },
                 { "item", String.Empty },
@@ -144,12 +149,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 { MobileServiceSystemColumns.Id, this.Id },
                 { "httpStatus", this.Status.HasValue ? (int?)this.Status.Value: null },
                 { "operationId", this.OperationId },
+                { "operationVersion", this.OperationVersion },
                 { "operationKind", (int)this.OperationKind },
                 { "tableName", this.TableName },
                 { "item", this.Item.ToString(Formatting.None) },
                 { "rawResult", this.RawResult }
             };
-        }        
+        }
 
         internal static MobileServiceTableOperationError Deserialize(JObject obj, MobileServiceJsonSerializerSettings settings)
         {
@@ -160,6 +166,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
             string id = obj.Value<string>(MobileServiceSystemColumns.Id);
             string operationId = obj.Value<string>("operationId");
+            long operationVersion = obj.Value<long>("operationVersion");
             MobileServiceTableOperationKind operationKind = (MobileServiceTableOperationKind)obj.Value<int>("operationKind");
             var tableName = obj.Value<string>("tableName");
             string itemStr = obj.Value<string>("item");
@@ -167,15 +174,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             string rawResult = obj.Value<string>("rawResult");
             var result = rawResult.ParseToJToken(settings) as JObject;
 
-            return new MobileServiceTableOperationError(status, 
+            return new MobileServiceTableOperationError(status,
                                                         operationId,
-                                                        operationKind, 
-                                                        tableName, 
-                                                        item, 
-                                                        rawResult, 
+                                                        operationVersion,
+                                                        operationKind,
+                                                        tableName,
+                                                        item,
+                                                        rawResult,
                                                         result)
-            { 
-                Id = id 
+            {
+                Id = id
             };
         }
     }

@@ -2,12 +2,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -53,7 +50,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
                         {
                             o.AbortPush();
                         });
-            
+
             // loads sync errors
             string syncError = @"[]";
             this.store.Setup(s => s.ReadAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == MobileServiceLocalSystemTables.SyncErrors))).Returns(Task.FromResult(JToken.Parse(syncError)));
@@ -64,7 +61,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
                             Assert.AreEqual(result.Status, MobileServicePushStatus.CancelledByOperation);
                             Assert.AreEqual(result.Errors.Count(), 0);
                         });
-            
+
             // deletes the errors
             this.store.Setup(s => s.DeleteAsync(It.Is<MobileServiceTableQueryDescription>(q => q.TableName == MobileServiceLocalSystemTables.SyncErrors))).Returns(Task.FromResult(0));
 
@@ -152,17 +149,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             else
             {
                 this.handler.Setup(h => h.ExecuteTableOperationAsync(op))
-                            .Throws(new MobileServiceInvalidOperationException("", 
-                                                                               null, 
-                                                                               new HttpResponseMessage(errorCode.Value) 
-                                                                               { 
-                                                                                   Content = new StringContent(result.ToString()) 
+                            .Throws(new MobileServiceInvalidOperationException("",
+                                                                               null,
+                                                                               new HttpResponseMessage(errorCode.Value)
+                                                                               {
+                                                                                   Content = new StringContent(result.ToString())
                                                                                }));
             }
             // removes the operation from queue only if there is no error
             if (errorCode == null)
             {
-                this.opQueue.Setup(q => q.DeleteAsync(It.IsAny<string>())).Returns(Task.FromResult(0));
+                this.opQueue.Setup(q => q.DeleteAsync(It.IsAny<string>(), It.IsAny<long>())).Returns(Task.FromResult(true));
             }
             // loads sync errors
             string syncError = @"[]";

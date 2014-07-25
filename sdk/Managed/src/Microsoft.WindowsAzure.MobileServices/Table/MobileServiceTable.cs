@@ -109,7 +109,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will return with results when the query finishes.
         /// </returns>
-        public Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters)
+        public virtual Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters)
         {
             return this.ReadAsync(query, parameters, MobileServiceFeatures.UntypedTable);
         }

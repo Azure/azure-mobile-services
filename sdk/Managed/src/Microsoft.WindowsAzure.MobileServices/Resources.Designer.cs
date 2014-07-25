@@ -845,6 +845,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The operation has been updated and cannot be cancelled..
+        /// </summary>
+        internal static string SyncError_OperationUpdated {
+            get {
+                return ResourceManager.GetString("SyncError_OperationUpdated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The store is already initialized..
         /// </summary>
         internal static string SyncStore_AlreadyInitialized {
@@ -886,6 +895,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         internal static string SyncStore_FailedToReadItem {
             get {
                 return ResourceManager.GetString("SyncStore_FailedToReadItem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to update operation in the sync store..
+        /// </summary>
+        internal static string SyncStore_FailedToUpdateOperation {
+            get {
+                return ResourceManager.GetString("SyncStore_FailedToUpdateOperation", resourceCulture);
             }
         }
         

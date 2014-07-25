@@ -3,20 +3,13 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Runtime.ExceptionServices;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.MobileServices.Threading;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
-    internal abstract class MobileServiceTableOperation: IMobileServiceTableOperation
+    internal abstract class MobileServiceTableOperation : IMobileServiceTableOperation
     {
         // --- Persisted properties -- //
         public string Id { get; private set; }
@@ -26,6 +19,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public JObject Item { get; set; }
         public DateTime CreatedAt { get; private set; }
         public long Sequence { get; set; }
+        public long Version { get; set; }
 
         // --- Non persisted properties -- //
         IMobileServiceTable IMobileServiceTableOperation.Table
@@ -34,8 +28,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         }
 
         public MobileServiceTable Table { get; set; }
-        
+
         public bool IsCancelled { get; private set; }
+        public bool IsUpdated { get; private set; }
+
         public virtual bool CanWriteResultToStore
         {
             get { return true; }
@@ -44,7 +40,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         protected virtual bool SerializeItemToQueue
         {
             get { return false; }
-        }        
+        }
 
         protected MobileServiceTableOperation(string tableName, string itemId)
         {
@@ -52,6 +48,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.CreatedAt = DateTime.UtcNow;
             this.TableName = tableName;
             this.ItemId = itemId;
+            this.Version = 1;
         }
 
         public void AbortPush()
@@ -60,7 +57,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         }
 
         public async Task<JObject> ExecuteAsync()
-        {            
+        {
             if (this.IsCancelled)
             {
                 return null;
@@ -86,6 +83,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         internal void Cancel()
         {
             this.IsCancelled = true;
+        }
+
+        internal void Update()
+        {
+            this.Version++;
+            this.IsUpdated = true;
         }
 
         /// <summary>
@@ -120,7 +123,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 { "itemId", String.Empty },
                 { "item", String.Empty },
                 { MobileServiceSystemColumns.CreatedAt, DateTime.Now },
-                { "sequence", 0 }
+                { "sequence", 0 },
+                { "version", 0 }
             });
         }
 
@@ -134,7 +138,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 { "itemId", this.ItemId },
                 { "item", this.Item != null && this.SerializeItemToQueue ? this.Item.ToString(Formatting.None) : null },
                 { MobileServiceSystemColumns.CreatedAt, this.CreatedAt },
-                { "sequence", this.Sequence }
+                { "sequence", this.Sequence },
+                { "version", this.Version }
             };
 
             return obj;
@@ -148,20 +153,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
 
             var kind = (MobileServiceTableOperationKind)obj.Value<int>("kind");
-            string id = obj.Value<string>(MobileServiceSystemColumns.Id);
             string tableName = obj.Value<string>("tableName");
             string itemId = obj.Value<string>("itemId");
-            string itemJson = obj.Value<string>("item");
-            JObject item = !String.IsNullOrEmpty(itemJson) ? JObject.Parse(itemJson) : null;
-            DateTime createdAt = obj.Value<DateTime>(MobileServiceSystemColumns.CreatedAt);
-            long sequence = obj.Value<long>("sequence");
+
 
             MobileServiceTableOperation operation = null;
             switch (kind)
             {
                 case MobileServiceTableOperationKind.Insert:
                     operation = new InsertOperation(tableName, itemId); break;
-                case MobileServiceTableOperationKind.Update: 
+                case MobileServiceTableOperationKind.Update:
                     operation = new UpdateOperation(tableName, itemId); break;
                 case MobileServiceTableOperationKind.Delete:
                     operation = new DeleteOperation(tableName, itemId); break;
@@ -169,10 +170,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             if (operation != null)
             {
-                operation.Id = id;
-                operation.Sequence = sequence;
-                operation.CreatedAt = createdAt;
-                operation.Item = item;
+                operation.Id = obj.Value<string>(MobileServiceSystemColumns.Id);
+                operation.Sequence = obj.Value<long>("sequence");
+                operation.CreatedAt = obj.Value<DateTime>(MobileServiceSystemColumns.CreatedAt);
+                operation.Version = obj.Value<long>("version");
+                string itemJson = obj.Value<string>("item");
+                operation.Item = !String.IsNullOrEmpty(itemJson) ? JObject.Parse(itemJson) : null;
             }
 
             return operation;

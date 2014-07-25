@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
@@ -13,7 +12,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
-    internal class MobileServiceSyncContext: IMobileServiceSyncContext, IDisposable  
+    internal class MobileServiceSyncContext : IMobileServiceSyncContext, IDisposable
     {
         private MobileServiceSyncSettingsManager settings;
         private TaskCompletionSource<object> initializeTask;
@@ -22,12 +21,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <summary>
         /// Lock to ensure that multiple insert,update,delete operations don't interleave as they are added to queue and storage
         /// </summary>
-        private AsyncReaderWriterLock storeQueueLock = new AsyncReaderWriterLock();        
+        private AsyncReaderWriterLock storeQueueLock = new AsyncReaderWriterLock();
 
         /// <summary>
         /// Variable for Store property. Not meant to be accessed directly.
         /// </summary>
-        private IMobileServiceLocalStore _store; 
+        private IMobileServiceLocalStore _store;
 
         /// <summary>
         /// Queue for executing sync calls (push,pull) one after the other
@@ -53,7 +52,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     oldStore.Dispose();
                 }
             }
-        }        
+        }
 
         public bool IsInitialized
         {
@@ -72,13 +71,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public long PendingOperations
         {
-            get 
-            { 
+            get
+            {
                 if (!this.IsInitialized)
                 {
                     return 0;
                 }
-                return this.opQueue.PendingOperations; 
+                return this.opQueue.PendingOperations;
             }
         }
 
@@ -127,7 +126,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             };
 
             await this.ExecuteOperationAsync(operation, item);
-        }        
+        }
 
         public async Task UpdateAsync(string tableName, string id, JObject item)
         {
@@ -149,7 +148,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
             await this.ExecuteOperationAsync(operation, item);
         }
-        
+
         public async Task<JObject> LookupAsync(string tableName, string id)
         {
             await this.EnsureInitializedAsync();
@@ -197,17 +196,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             await this.EnsureInitializedAsync();
 
-            var push = new PushAction(this.opQueue, 
-                                      this.Store, 
-                                      this.Handler, 
-                                      this.client, 
+            var push = new PushAction(this.opQueue,
+                                      this.Store,
+                                      this.Handler,
+                                      this.client,
                                       this,
                                       cancellationToken);
 
             Task discard = this.syncQueue.Post(push.ExecuteAsync, cancellationToken);
 
             await push.CompletionTask;
-        }        
+        }
 
         public virtual async Task<MobileServiceTable> GetTable(string tableName)
         {
@@ -225,8 +224,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             string itemId = error.Item.Value<string>(MobileServiceSystemColumns.Id);
             return this.ExecuteOperationSafeAsync(itemId, error.TableName, async () =>
             {
+                await this.TryCancelOperation(error);
                 await this.Store.UpsertAsync(error.TableName, item, fromServer: true);
-                await this.opQueue.DeleteAsync(error.OperationId);
             });
         }
 
@@ -235,8 +234,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             string itemId = error.Item.Value<string>(MobileServiceSystemColumns.Id);
             return this.ExecuteOperationSafeAsync(itemId, error.TableName, async () =>
             {
+                await this.TryCancelOperation(error);
                 await this.Store.DeleteAsync(error.TableName, itemId);
-                await this.opQueue.DeleteAsync(error.OperationId);
             });
         }
 
@@ -252,8 +251,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
         }
 
+        private async Task TryCancelOperation(MobileServiceTableOperationError error)
+        {
+            if (!await this.opQueue.DeleteAsync(error.OperationId, error.OperationVersion))
+            {
+                throw new InvalidOperationException(Resources.SyncError_OperationUpdated);
+            }
+        }
+
         private async Task EnsureInitializedAsync()
-        {            
+        {
             if (this.initializeTask == null)
             {
                 throw new InvalidOperationException(Resources.SyncContext_NotInitialized);
@@ -269,7 +276,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             return this.ExecuteOperationSafeAsync(operation.ItemId, operation.TableName, async () =>
             {
-                MobileServiceTableOperation existing = await this.opQueue.GetOperationAsync(operation.ItemId);
+                MobileServiceTableOperation existing = await this.opQueue.GetOperationByItemIdAsync(operation.ItemId);
                 if (existing != null)
                 {
                     existing.Validate(operation); // make sure this operation is legal and collapses after any previous operation on same item already in the queue
@@ -287,9 +294,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 if (existing != null)
                 {
                     existing.Collapse(operation); // cancel either existing, new or both operation 
-                    if (existing.IsCancelled)
+                    if (existing.IsCancelled) // if cancelled we delete it
                     {
-                        await this.opQueue.DeleteAsync(existing.Id);
+                        await this.opQueue.DeleteAsync(existing.Id, existing.Version);
+                    }
+                    else if (existing.IsUpdated)
+                    {
+                        await this.opQueue.UpdateAsync(existing);
                     }
                 }
 

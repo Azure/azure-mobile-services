@@ -6,8 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -17,23 +15,24 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// <summary>
     /// Responsible for executing a batch of operations from queue until bookmark is found
     /// </summary>
-    internal class PushAction: SyncAction
+    internal class PushAction : SyncAction
     {
         private IMobileServiceSyncHandler syncHandler;
         private MobileServiceClient client;
         private MobileServiceSyncContext context;
 
-        public PushAction(OperationQueue operationQueue, 
-                          IMobileServiceLocalStore store, 
+        public PushAction(OperationQueue operationQueue,
+                          IMobileServiceLocalStore store,
                           IMobileServiceSyncHandler syncHandler,
                           MobileServiceClient client,
                           MobileServiceSyncContext context,
-                          CancellationToken cancellationToken): base(operationQueue, store, cancellationToken)
+                          CancellationToken cancellationToken)
+            : base(operationQueue, store, cancellationToken)
         {
             this.client = client;
             this.syncHandler = syncHandler;
             this.context = context;
-        }        
+        }
 
         public override async Task ExecuteAsync()
         {
@@ -137,7 +136,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 if (success)
                 {
                     // we successfuly executed an operation so remove it from queue
-                    await this.OperationQueue.DeleteAsync(operation.Id);
+                    await this.OperationQueue.DeleteAsync(operation.Id, operation.Version);
                 }
 
                 // get next operation
@@ -170,7 +169,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 JObject result = null;
                 try
                 {
-                    result = await batch.SyncHandler.ExecuteTableOperationAsync(operation);                    
+                    result = await batch.SyncHandler.ExecuteTableOperationAsync(operation);
                 }
                 catch (Exception ex)
                 {
@@ -182,7 +181,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     }
 
                     error = ex;
-                }                
+                }
 
                 // save the result if ExecuteTableOperation did not throw
                 if (error == null && result.IsValidItem() && operation.CanWriteResultToStore)
@@ -211,6 +210,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     }
                     var syncError = new MobileServiceTableOperationError(statusCode,
                                                                          operation.Id,
+                                                                         operation.Version,
                                                                          operation.Kind,
                                                                          operation.TableName,
                                                                          operation.Item,
@@ -247,7 +247,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         private bool TryAbortBatch(OperationBatch batch, Exception ex)
         {
             if (ex.IsNetworkError())
-            {                
+            {
                 batch.Abort(MobileServicePushStatus.CancelledByNetworkError);
             }
             else if (ex.IsAuthenticationError())

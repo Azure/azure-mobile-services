@@ -2,21 +2,22 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
-    internal class InsertOperation: MobileServiceTableOperation
+    internal class InsertOperation : MobileServiceTableOperation
     {
         public override MobileServiceTableOperationKind Kind
         {
             get { return MobileServiceTableOperationKind.Insert; }
         }
 
-        public InsertOperation(string tableName, string itemId):base(tableName, itemId)
+        public InsertOperation(string tableName, string itemId)
+            : base(tableName, itemId)
         {
         }
 
@@ -35,7 +36,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             if (newOperation is InsertOperation)
             {
                 throw new InvalidOperationException(Resources.SyncContext_DuplicateInsert);
-            }            
+            }
         }
 
         public override void Collapse(MobileServiceTableOperation newOperation)
@@ -49,6 +50,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
             else if (newOperation is UpdateOperation)
             {
+                this.Update();
                 newOperation.Cancel();
             }
         }
