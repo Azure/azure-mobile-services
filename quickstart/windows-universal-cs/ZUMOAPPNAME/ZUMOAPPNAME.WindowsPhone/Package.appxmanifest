@@ -1,15 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest" xmlns:m3="http://schemas.microsoft.com/appx/2014/manifest" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest">
-
-  <Identity Name="1010e1f1-6014-4024-afb5-e54464d2e64b"
-            Publisher="CN=alrod"
-            Version="1.0.0.0" />
-
+  
+  <Identity Name="1010e1f1-6014-4024-afb5-e54464d2e64b" Publisher="CN=test" Version="1.0.0.0" />
+  
   <mp:PhoneIdentity PhoneProductId="1010e1f1-6014-4024-afb5-e54464d2e64b" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>ZUMOAPPNAME.WindowsPhone</DisplayName>
-    <PublisherDisplayName>alrod</PublisherDisplayName>
+    <PublisherDisplayName>Mobile Services</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 

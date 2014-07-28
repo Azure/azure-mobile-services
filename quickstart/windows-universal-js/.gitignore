@@ -3,6 +3,7 @@ bld/
 obj/
 *.suo
 packages/*
+*.user
 MobileServices.intellisense.js
 MobileServices.js
 MobileServices.min.js

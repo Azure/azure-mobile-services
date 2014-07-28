@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices;
 using Windows.UI.Popups;
 using Windows.UI.Xaml;
@@ -19,7 +20,7 @@ namespace ZUMOAPPNAME
             this.InitializeComponent();
         }
 
-        private async void InsertTodoItem(TodoItem todoItem)
+        private async Task InsertTodoItem(TodoItem todoItem)
         {
             // This code inserts a new TodoItem into the database. When the operation completes
             // and Mobile Services has assigned an Id, the item is added to the CollectionView
@@ -27,7 +28,7 @@ namespace ZUMOAPPNAME
             items.Add(todoItem);
         }
 
-        private async void RefreshTodoItems()
+        private async Task RefreshTodoItems()
         {
             MobileServiceInvalidOperationException exception = null;
             try
@@ -54,7 +55,7 @@ namespace ZUMOAPPNAME
             }
         }
 
-        private async void UpdateCheckedTodoItem(TodoItem item)
+        private async Task UpdateCheckedTodoItem(TodoItem item)
         {
             // This code takes a freshly completed TodoItem and updates the database. When the MobileService 
             // responds, the item is removed from the list 
@@ -62,27 +63,27 @@ namespace ZUMOAPPNAME
             items.Remove(item);
         }
 
-        private void ButtonRefresh_Click(object sender, RoutedEventArgs e)
+        private async void ButtonRefresh_Click(object sender, RoutedEventArgs e)
         {
-            RefreshTodoItems();
+            await RefreshTodoItems();
         }
 
-        private void ButtonSave_Click(object sender, RoutedEventArgs e)
+        private async void ButtonSave_Click(object sender, RoutedEventArgs e)
         {
             var todoItem = new TodoItem { Text = TextInput.Text };
-            InsertTodoItem(todoItem);
+            await InsertTodoItem(todoItem);
         }
 
-        private void CheckBoxComplete_Checked(object sender, RoutedEventArgs e)
+        private async void CheckBoxComplete_Checked(object sender, RoutedEventArgs e)
         {
             CheckBox cb = (CheckBox)sender;
             TodoItem item = cb.DataContext as TodoItem;
-            UpdateCheckedTodoItem(item);
+            await UpdateCheckedTodoItem(item);
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
-            RefreshTodoItems();
+            await RefreshTodoItems();
         }
     }
 }
