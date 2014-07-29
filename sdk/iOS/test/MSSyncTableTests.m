@@ -50,6 +50,10 @@
                  @"table.name shouldbe 'SomeName'");
 }
 
+
+#pragma mark Insert Tests
+
+
 -(void) testInsertItemWithNoId
 {
     MSSyncTable *todoTable = [client syncTableWithName:@"TodoNoVersion"];
@@ -137,6 +141,7 @@
     testFilter.dataToUse = data;
     testFilter.ignoreNextFilter = YES;
     testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        STAssertEqualObjects(request.HTTPMethod, @"POST", @"Incorrect operation (%@) sent to server", request.HTTPMethod);
         insertRanToServer = YES;
         return request;
     };
@@ -305,16 +310,16 @@
     NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     
     __block NSInteger callsToServer = 0;
-    __block NSInteger postCalls = 0;
     
     testFilter.responseToUse = response;
     testFilter.dataToUse = data;
     testFilter.ignoreNextFilter = YES;
     testFilter.onInspectRequest =  ^(NSURLRequest *request) {
         callsToServer++;
-        if ([request.HTTPMethod isEqualToString:@"POST"]) {
-            postCalls++;
-        }
+        STAssertEqualObjects(request.HTTPMethod, @"POST", @"Unexpected method: %@", request.HTTPMethod);
+        NSString *bodyString = [[NSString alloc] initWithData:request.HTTPBody
+                                                     encoding:NSUTF8StringEncoding];
+        STAssertEqualObjects(bodyString, @"{\"id\":\"test1\",\"text\":\"updated name\"}", nil);
         
         return request;
     };
@@ -323,7 +328,7 @@
     MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
     
     // Create the item
-    NSDictionary *item = @{ @"id": @"test1", @"name": @"test name" };
+    NSDictionary *item = @{ @"id": @"test1", @"text": @"test name" };
     
     // Insert the item
     done = NO;
@@ -335,7 +340,7 @@
     
     // Update the item
     done = NO;
-    item = @{ @"id": @"test1", @"name": @"updated name" };
+    item = @{ @"id": @"test1", @"text": @"updated name" };
     [todoTable update:item completion:^(NSError *error) {
         STAssertNil(error, @"error should have been nil.");
         done = YES;
@@ -347,7 +352,6 @@
     [client.syncContext pushWithCompletion:^(NSError *error) {
         STAssertNil(error, @"error should have been nil.");
         STAssertTrue(callsToServer == 1, @"only one call to server should have been made");
-        STAssertTrue(postCalls == 1, @"call should have been a POST");
         done = YES;
     }];
     STAssertTrue([self waitForTest:0.1], @"Test timed out.");
@@ -414,12 +418,161 @@
     [todoTable insert:item completion:^(NSDictionary *itemOne, NSError *error) {
        [todoTable insert:itemOne completion:^(NSDictionary *itemTwo, NSError *error) {
            STAssertNotNil(error, @"expected an error");
-           STAssertTrue(error.code == -1150, @"unexpected error code");
+           STAssertTrue(error.code == MSSyncTableInvalidAction, @"unexpected error code");
            done = YES;
        }];
     }];
     STAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
+
+
+#pragma mark Update Tests
+
+
+-(void) testUpdate_Push_Success
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200
+                                                                 data:@"{\"id\": \"test1\", \"text\":\"test name\"}"];
+    
+    BOOL __block updateSentToServer = NO;
+    
+    testFilter.ignoreNextFilter = YES;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        STAssertEqualObjects(request.HTTPMethod, @"PATCH", @"Incorrect operation (%@) sent to server", request.HTTPMethod);
+        updateSentToServer = YES;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
+    
+    // Create the item
+    NSDictionary *item = @{ @"id": @"test1", @"name":@"test name" };
+    
+    // Insert the item
+    done = NO;
+    [todoTable update:item completion:^(NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    
+    done = NO;
+    [client.syncContext pushWithCompletion:^(NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        STAssertTrue(updateSentToServer, @"the update call didn't go to the server");
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:2000.1], @"Test timed out.");
+}
+
+-(void) testUpdateInsert_Collapse_Throws
+{
+    MSSyncTable *todoTable = [client syncTableWithName:@"TodoNoVersion"];
+    
+    NSDictionary *item = @{ @"id": @"itemA", @"text": @"throw an error" };
+    
+    [todoTable update:item completion:^(NSError *error) {
+        [todoTable insert:item completion:^(NSDictionary *itemTwo, NSError *error) {
+            STAssertNotNil(error, @"expected an error");
+            STAssertTrue(error.code == MSSyncTableInvalidAction, @"Unexpected error code: %d", error.code);
+            done = YES;
+        }];
+    }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+-(void) testUpdateUpdate_Collapse_Success
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200
+                                                                 data:@"{\"id\": \"test1\", \"text\":\"test name\"}"];
+    
+    NSInteger __block callsToServer = 0;
+    
+    testFilter.ignoreNextFilter = YES;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        STAssertEqualObjects(request.HTTPMethod, @"PATCH", @"Incorrect operation (%@) sent to server", request.HTTPMethod);
+        NSString *bodyString = [[NSString alloc] initWithData:request.HTTPBody
+                                                     encoding:NSUTF8StringEncoding];
+        STAssertEqualObjects(bodyString, @"{\"id\":\"test1\",\"text\":\"updated name\"}", @"Unexpected item: %@", bodyString);
+        callsToServer++;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
+    
+    // Create the item
+    NSDictionary *item = @{ @"id": @"test1", @"text":@"test name" };
+    
+    done = NO;
+    [todoTable update:item completion:^(NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+
+    done = NO;
+    item = @{ @"id": @"test1", @"text":@"updated name" };
+    [todoTable update:item completion:^(NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    
+    done = NO;
+    [client.syncContext pushWithCompletion:^(NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        STAssertTrue(callsToServer == 1, @"expected only 1 call to the server");
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+-(void) testUpdateDelete_CollapseToDelete_Success
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:204];
+    NSInteger __block callsToServer = 0;
+    
+    testFilter.ignoreNextFilter = YES;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        STAssertEqualObjects(request.HTTPMethod, @"DELETE", @"Incorrect operation (%@) sent to server", request.HTTPMethod);
+        STAssertEqualObjects(request.URL.absoluteString, @"https://someUrl/tables/TodoNoVersion/test1?__systemProperties=__version", nil);
+        callsToServer++;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
+    
+    NSDictionary *item = @{ @"id": @"test1", @"text":@"test name" };
+    
+    done = NO;
+    [todoTable update:item completion:^(NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    
+    done = NO;
+    [todoTable delete:item completion:^(NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    
+    done = NO;
+    [client.syncContext pushWithCompletion:^(NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        STAssertTrue(callsToServer == 1, @"expected only 1 call to the server");
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+
+#pragma mark Delete Tests
+
 
 -(void) testDeleteNoVersion_Push_Success
 {
@@ -430,6 +583,7 @@
     
     testFilter.ignoreNextFilter = YES;
     testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        STAssertEqualObjects(request.HTTPMethod, @"DELETE", @"Incorrect operation (%@) sent to server", request.HTTPMethod);
         STAssertNil(request.allHTTPHeaderFields[@"If-Match"], @"If-Match header should have been nil");
         deleteSentToServer = YES;
         return request;
@@ -447,7 +601,7 @@
         STAssertNil(error, @"error should have been nil.");
         done = YES;
     }];
-    STAssertTrue([self waitForTest:1000.1], @"Test timed out.");
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
     
     done = NO;
     [client.syncContext pushWithCompletion:^(NSError *error) {
@@ -455,7 +609,7 @@
         STAssertTrue(deleteSentToServer, @"the delete call didn't go to the server");
         done = YES;
     }];
-    STAssertTrue([self waitForTest:2000.1], @"Test timed out.");
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteWithVersion_Push_ItemSentWithVersion_Success
@@ -496,6 +650,58 @@
     STAssertTrue([self waitForTest:2000.1], @"Test timed out.");
 }
 
+-(void) testDeleteInsert_Collapse_Throws
+{
+    MSSyncTable *todoTable = [client syncTableWithName:@"TodoNoVersion"];
+    
+    NSDictionary *item = @{ @"id": @"itemA", @"text": @"throw an error" };
+    
+    [todoTable delete:item completion:^(NSError *error) {
+        [todoTable insert:item completion:^(NSDictionary *itemTwo, NSError *error) {
+            STAssertNotNil(error, @"expected an error");
+            STAssertTrue(error.code == MSSyncTableInvalidAction, @"Unexpected error code: %d", error.code);
+            done = YES;
+        }];
+    }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+-(void) testDeleteUpdate_Collapse_Throws
+{
+    MSSyncTable *todoTable = [client syncTableWithName:@"TodoNoVersion"];
+    
+    NSDictionary *item = @{ @"id": @"itemA", @"text": @"throw an error" };
+    
+    [todoTable delete:item completion:^(NSError *error) {
+        [todoTable update:item completion:^(NSError *error) {
+            STAssertNotNil(error, @"expected an error");
+            STAssertTrue(error.code == MSSyncTableInvalidAction, @"Unexpected error code: %d", error.code);
+            done = YES;
+        }];
+    }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+-(void) testDeleteDelete_Collapse_Throws
+{
+    MSSyncTable *todoTable = [client syncTableWithName:@"TodoNoVersion"];
+    
+    NSDictionary *item = @{ @"id": @"itemA", @"text": @"throw an error" };
+    
+    [todoTable delete:item completion:^(NSError *error) {
+        [todoTable delete:item completion:^(NSError *error) {
+            STAssertNotNil(error, @"expected an error");
+            STAssertTrue(error.code == MSSyncTableInvalidAction, @"Unexpected error code: %d", error.code);
+            done = YES;
+        }];
+    }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+
+#pragma mark Read Tests
+
+
 -(void) testReadWithIdNoItemSuccess
 {
     offline.returnErrors = YES;
@@ -507,6 +713,10 @@
         STAssertNil(error, @"No error should have been returned");
     }];
 }
+
+
+#pragma mark Pull Tests
+
 
 -(void) testPullSuccess
 {
@@ -650,6 +860,10 @@
     STAssertTrue([self waitForTest:300.0], @"Test timed out.");
 }
 
+
+#pragma mark Purge Tests
+
+
 -(void) testPurgeWithEmptyQueueSuccess
 {
     MSSyncTable *todoTable = [client syncTableWithName:@"TodoNoVersion"];
@@ -759,7 +973,7 @@
         }];
     }];
     
-    STAssertTrue([self waitForTest:1000.1], @"Test timed out.");
+    STAssertTrue([self waitForTest:30.1], @"Test timed out.");
 }
 
 #pragma mark * Async Test Helper Method
