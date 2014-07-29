@@ -250,6 +250,8 @@ NSString *const httpDelete = @"DELETE";
     // Ensure we can get the item Id
     id itemId = [table.client.serializer itemIdFromItem:item orError:&error];
     if (!error) {
+        // If string id, cache the version field as we strip it out during serialization
+        NSString *version = [MSTableRequest versionFromItem:item ItemId:itemId];
         
         // Get the request from the other constructor
         request = [MSTableRequest requestToDeleteItemWithId:itemId
@@ -259,6 +261,11 @@ NSString *const httpDelete = @"DELETE";
         
         // Set the additional properties
         request.item = item;
+        
+        // Version becomes an etag if passed
+        if (version) {
+            [self setVersion:version request:request];
+        }
     }
     
     // If there was an error, call the completion and make sure
