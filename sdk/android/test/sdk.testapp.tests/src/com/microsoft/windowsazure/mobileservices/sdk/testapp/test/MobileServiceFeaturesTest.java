@@ -73,4 +73,144 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 			assertEquals(expected, actual);
 		}
 	}
+	
+	interface ClientTestOperation {
+		void executeOperation(MobileServiceClient client) throws Exception;
+	}
+
+	public void testJsonApiFeatureHeader() {
+		testInvokeApiFeatureHeader(new ClientTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceClient client) throws Exception {
+				client.invokeApi("foo").get();
+			}
+			
+		}, "AJ");
+	}
+
+	public void testJsonApiWithQueryParametersFeatureHeader() {
+		testInvokeApiFeatureHeader(new ClientTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceClient client) throws Exception {
+				List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
+				queryParams.add(new Pair<String, String>("a", "b"));
+				client.invokeApi("apiName", "DELETE", queryParams).get();
+			}
+			
+		}, "AJ,QS");
+	}
+
+	public void testTypedApiFeatureHeader() {
+		testInvokeApiFeatureHeader(new ClientTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceClient client) throws Exception {
+				client.invokeApi("apiName", Address.class).get();
+			}
+			
+		}, "AT");
+	}
+
+	public void testTypedApiWithQueryParametersFeatureHeader() {
+		testInvokeApiFeatureHeader(new ClientTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceClient client) throws Exception {
+				List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
+				queryParams.add(new Pair<String, String>("a", "b"));
+				client.invokeApi("apiName", "GET", queryParams, Address.class).get();
+			}
+			
+		}, "AT,QS");
+	}
+
+	public void testGenericApiFeatureHeader() {
+		testInvokeApiFeatureHeader(new ClientTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceClient client) throws Exception {
+				List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
+				queryParams.add(new Pair<String, String>("a", "b"));
+				List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
+				requestHeaders.add(new Pair<String, String>("Content-Type", "text/plain"));
+				byte[] content = "hello world".getBytes();
+				client.invokeApi("apiName", content, "POST", requestHeaders , queryParams).get();
+			}
+			
+		}, "AG");
+	}
+
+	public void testGenericApiDoesNotOverrideExistingFeatureHeader() {
+		testInvokeApiFeatureHeader(new ClientTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceClient client) throws Exception {
+				List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
+				queryParams.add(new Pair<String, String>("a", "b"));
+				List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
+				requestHeaders.add(new Pair<String, String>("Content-Type", "text/plain"));
+				requestHeaders.add(new Pair<String, String>("X-ZUMO-FEATURES", "something"));
+				byte[] content = "hello world".getBytes();
+				client.invokeApi("apiName", content, "POST", requestHeaders, queryParams).get();
+			}
+			
+		}, "something");
+	}
+
+	private void testInvokeApiFeatureHeader(ClientTestOperation operation, final String expectedFeaturesHeader) {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey,
+					getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
+
+			@Override
+			public ListenableFuture<ServiceFilterResponse> handleRequest(
+					ServiceFilterRequest request,
+					NextServiceFilterCallback nextServiceFilterCallback) {
+
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture
+						.create();
+				String featuresHeaderName = "X-ZUMO-FEATURES";
+				
+				Header[] headers = request.getHeaders();
+				String features = null;
+				for (int i = 0; i < headers.length; i++) {
+					if (headers[i].getName() == featuresHeaderName) {
+						features = headers[i].getValue();
+					}
+				}
+
+				if (features == null) {
+					resultFuture.setException(new Exception("No " + featuresHeaderName + " header on API call"));
+				} else if (!features.equals(expectedFeaturesHeader)) {
+					resultFuture.setException(new Exception("Incorrect features header; expected " + 
+						expectedFeaturesHeader + ", actual " + features));
+				} else {
+					ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+					response.setContent("{}");
+					resultFuture.set(response);
+				}
+
+				return resultFuture;
+			}
+		});
+
+		try {
+			operation.executeOperation(client);
+		} catch (Exception exception) {
+			Throwable ex = exception;
+			while (ex instanceof ExecutionException || ex instanceof MobileServiceException) {
+				ex = ex.getCause();
+			}
+			fail(ex.getMessage());
+		}
+	}
 }

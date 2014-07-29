@@ -26,7 +26,6 @@ package com.microsoft.windowsazure.mobileservices.http;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.EnumSet;
 
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
@@ -36,10 +35,9 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
-
 import android.net.http.AndroidHttpClient;
+
+import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 
 /**
  * 
@@ -47,11 +45,6 @@ import android.net.http.AndroidHttpClient;
  * 
  */
 public class ServiceFilterRequestImpl implements ServiceFilterRequest {
-
-	/**
-	 * Request header to indicate the features in this SDK used by the request.
-	 */
-	private final String X_ZUMO_FEATURES = "X-ZUMO-FEATURES";
 
 	/**
 	 * The request to execute
@@ -64,11 +57,6 @@ public class ServiceFilterRequestImpl implements ServiceFilterRequest {
 	private byte[] mContent;
 
 	private AndroidHttpClientFactory mAndroidHttpClientFactory;
-
-	/**
-	 * Features used in this request.
-	 */
-	private EnumSet<MobileServiceFeatures> mFeatures;
 
 	/**
 	 * @param request
@@ -85,22 +73,8 @@ public class ServiceFilterRequestImpl implements ServiceFilterRequest {
 	 *            AndroidHttpClient objects
 	 */
 	public ServiceFilterRequestImpl(HttpRequestBase request, AndroidHttpClientFactory factory) {
-		this(request, factory, EnumSet.noneOf(MobileServiceFeatures.class));
-	}
-
-	/**
-	 * Constructor
-	 *
-	 * @param request
-	 *            The request to use
-	 * @param factory
-	 *            The AndroidHttpClientFactory instance used to create
-	 *            AndroidHttpClient objects
-	 */
-	public ServiceFilterRequestImpl(HttpRequestBase request, AndroidHttpClientFactory factory, EnumSet<MobileServiceFeatures> features) {
 		mRequest = request;
 		mAndroidHttpClientFactory = factory;
-		mFeatures = features;
 	}
 
 	@Override
@@ -108,12 +82,6 @@ public class ServiceFilterRequestImpl implements ServiceFilterRequest {
 		// Execute request
 		AndroidHttpClient client = mAndroidHttpClientFactory.createAndroidHttpClient();
 		client.getParams().setParameter(HTTP.USER_AGENT, MobileServiceConnection.getUserAgent());
-		if (!mRequest.containsHeader(X_ZUMO_FEATURES)){
-			String featuresHeader = MobileServiceFeatures.featuresToString(mFeatures);
-			if (featuresHeader != null) {
-				mRequest.addHeader(X_ZUMO_FEATURES, featuresHeader);
-			}
-		}
 
 		try {
 			final HttpResponse response = client.execute(mRequest);

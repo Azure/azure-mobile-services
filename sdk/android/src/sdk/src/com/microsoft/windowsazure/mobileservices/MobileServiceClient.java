@@ -32,6 +32,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.apache.http.client.methods.HttpPost;
@@ -978,7 +979,7 @@ public class MobileServiceClient {
 		}
 
 		final SettableFuture<E> future = SettableFuture.create();
-		ListenableFuture<JsonElement> internalFuture = invokeApi(apiName, json, httpMethod, parameters);
+		ListenableFuture<JsonElement> internalFuture = this.invokeApiInternal(apiName, json, httpMethod, parameters, EnumSet.of(MobileServiceFeatures.TypedApiCall));
 
 		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
 			@Override
@@ -1144,7 +1145,7 @@ public class MobileServiceClient {
 
 	/**
 	 * Invokes a custom API
-	 * 
+	 *
 	 * @param apiName
 	 *            The API name
 	 * @param body
@@ -1155,6 +1156,24 @@ public class MobileServiceClient {
 	 *            The query string parameters sent in the request
 	 */
 	public ListenableFuture<JsonElement> invokeApi(String apiName, JsonElement body, String httpMethod, List<Pair<String, String>> parameters) {
+		return this.invokeApiInternal(apiName, body, httpMethod, parameters, EnumSet.of(MobileServiceFeatures.JsonApiCall));
+	}
+
+	/**
+	 * Invokes a custom API
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * @param body
+	 *            The json element to send as the request body
+	 * @param httpMethod
+	 *            The HTTP Method used to invoke the API
+	 * @param parameters
+	 *            The query string parameters sent in the request
+	 * @param features
+	 *            The features used in the request
+	 */
+	private ListenableFuture<JsonElement> invokeApiInternal(String apiName, JsonElement body, String httpMethod, List<Pair<String, String>> parameters, EnumSet<MobileServiceFeatures> features) {
 
 		byte[] content = null;
 		if (body != null) {
@@ -1170,8 +1189,12 @@ public class MobileServiceClient {
 			requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
 		}
 
+		if (parameters != null && !parameters.isEmpty()) {
+			features.add(MobileServiceFeatures.AdditionalQueryParameters);
+		}
+
 		final SettableFuture<JsonElement> future = SettableFuture.create();
-		ListenableFuture<ServiceFilterResponse> internalFuture = invokeApi(apiName, content, httpMethod, requestHeaders, parameters);
+		ListenableFuture<ServiceFilterResponse> internalFuture = invokeApiInternal(apiName, content, httpMethod, requestHeaders, parameters, features);
 
 		Futures.addCallback(internalFuture, new FutureCallback<ServiceFilterResponse>() {
 			@Override
@@ -1244,7 +1267,7 @@ public class MobileServiceClient {
 	 */
 	public ListenableFuture<ServiceFilterResponse> invokeApi(String apiName, byte[] content, String httpMethod, List<Pair<String, String>> requestHeaders,
 			List<Pair<String, String>> parameters) {
-		return invokeApiInternal(apiName, content, httpMethod, requestHeaders, parameters);
+		return invokeApiInternal(apiName, content, httpMethod, requestHeaders, parameters, EnumSet.of(MobileServiceFeatures.GenericApiCall));
 	}
 
 	/**
@@ -1266,63 +1289,7 @@ public class MobileServiceClient {
 	public void invokeApi(String apiName, byte[] content, String httpMethod, List<Pair<String, String>> requestHeaders, List<Pair<String, String>> parameters,
 			final ServiceFilterResponseCallback callback) {
 
-		invokeApiInternal(apiName, content, httpMethod, requestHeaders, parameters, callback);
-	}
-
-	/**
-	 * Invokes a custom API
-	 * 
-	 * @param apiName
-	 *            The API name
-	 * @param content
-	 *            The byte array to send as the request body
-	 * @param httpMethod
-	 *            The HTTP Method used to invoke the API
-	 * @param requestHeaders
-	 *            The extra headers to send in the request
-	 * @param parameters
-	 *            The query string parameters sent in the request
-	 */
-	private ListenableFuture<ServiceFilterResponse> invokeApiInternal(String apiName, byte[] content, String httpMethod,
-			List<Pair<String, String>> requestHeaders, List<Pair<String, String>> parameters) {
-		final SettableFuture<ServiceFilterResponse> future = SettableFuture.create();
-
-		if (apiName == null || apiName.trim().equals("")) {
-			future.setException(new IllegalArgumentException("apiName cannot be null"));
-			return future;
-		}
-
-		MobileServiceHttpClient httpClient = new MobileServiceHttpClient(this);
-		return httpClient.request(CUSTOM_API_URL + apiName, content, httpMethod, requestHeaders, parameters);
-	}
-
-	/**
-	 * Invokes a custom API
-	 * 
-	 * @deprecated use {@link invokeApiInternal(String apiName, byte[] content,
-	 *             String httpMethod, List<Pair<String, String>> requestHeaders,
-	 *             List<Pair<String, String>> parameters, String apiBaseURL)}
-	 *             instead
-	 * 
-	 * @param apiName
-	 *            The API name
-	 * @param content
-	 *            The byte array to send as the request body
-	 * @param httpMethod
-	 *            The HTTP Method used to invoke the API
-	 * @param requestHeaders
-	 *            The extra headers to send in the request
-	 * @param parameters
-	 *            The query string parameters sent in the request
-	 * @param apiBaseURL
-	 *            The base URL for api requests
-	 * @param callback
-	 *            The callback to invoke after the API execution
-	 */
-	private void invokeApiInternal(String apiName, byte[] content, String httpMethod, List<Pair<String, String>> requestHeaders,
-			List<Pair<String, String>> parameters, final ServiceFilterResponseCallback callback) {
-
-		ListenableFuture<ServiceFilterResponse> invokeApiFuture = invokeApiInternal(apiName, content, httpMethod, requestHeaders, parameters);
+		ListenableFuture<ServiceFilterResponse> invokeApiFuture = invokeApi(apiName, content, httpMethod, requestHeaders, parameters);
 
 		Futures.addCallback(invokeApiFuture, new FutureCallback<ServiceFilterResponse>() {
 			@Override
@@ -1339,7 +1306,35 @@ public class MobileServiceClient {
 				callback.onResponse(result, null);
 			}
 		});
+	}
 
+	/**
+	 * Invokes a custom API
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * @param content
+	 *            The byte array to send as the request body
+	 * @param httpMethod
+	 *            The HTTP Method used to invoke the API
+	 * @param requestHeaders
+	 *            The extra headers to send in the request
+	 * @param parameters
+	 *            The query string parameters sent in the request
+	 * @param features
+	 *            The SDK features used in the request
+	 */
+	private ListenableFuture<ServiceFilterResponse> invokeApiInternal(String apiName, byte[] content, String httpMethod,
+			List<Pair<String, String>> requestHeaders, List<Pair<String, String>> parameters, EnumSet<MobileServiceFeatures> features) {
+		final SettableFuture<ServiceFilterResponse> future = SettableFuture.create();
+
+		if (apiName == null || apiName.trim().equals("")) {
+			future.setException(new IllegalArgumentException("apiName cannot be null"));
+			return future;
+		}
+
+		MobileServiceHttpClient httpClient = new MobileServiceHttpClient(this);
+		return httpClient.request(CUSTOM_API_URL + apiName, content, httpMethod, requestHeaders, parameters, features);
 	}
 
 	/**

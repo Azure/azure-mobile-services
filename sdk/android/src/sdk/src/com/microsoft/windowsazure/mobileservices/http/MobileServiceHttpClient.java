@@ -23,6 +23,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.http;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -45,6 +46,11 @@ import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
  */
 public class MobileServiceHttpClient {
 	
+	/**
+	 * Request header to indicate the features in this SDK used by the request.
+	 */
+	private final String X_ZUMO_FEATURES = "X-ZUMO-FEATURES";
+
 	/**
 	 * The client associated with this HTTP caller.
 	 */
@@ -135,6 +141,25 @@ public class MobileServiceHttpClient {
 		} else {
 			future.setException(new IllegalArgumentException("httpMethod not supported"));
 			return future;
+		}
+
+		String featuresHeader = MobileServiceFeatures.featuresToString(features);
+		if (featuresHeader != null) {
+			if (requestHeaders == null) {
+				requestHeaders = new ArrayList<Pair<String, String>>();
+			}
+
+			boolean containsFeatures = false;
+			for (Pair<String, String> header : requestHeaders) {
+				if (header.first.equals(X_ZUMO_FEATURES)) {
+					containsFeatures = true;
+					break;
+				}
+			}
+
+			if (!containsFeatures) {
+				requestHeaders.add(new Pair<String, String>(X_ZUMO_FEATURES, featuresHeader));
+			}
 		}
 
 		if (requestHeaders != null && requestHeaders.size() > 0) {
