@@ -34,10 +34,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
 import org.apache.http.protocol.HTTP;
 
 import android.accounts.Account;
@@ -46,7 +43,6 @@ import android.accounts.AccountManagerCallback;
 import android.accounts.AccountManagerFuture;
 import android.app.Activity;
 import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Pair;
 
@@ -66,13 +62,11 @@ import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAut
 import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
 import com.microsoft.windowsazure.mobileservices.http.AndroidHttpClientFactory;
 import com.microsoft.windowsazure.mobileservices.http.AndroidHttpClientFactoryImpl;
-import com.microsoft.windowsazure.mobileservices.http.HttpPatch;
 import com.microsoft.windowsazure.mobileservices.http.MobileServiceConnection;
+import com.microsoft.windowsazure.mobileservices.http.MobileServiceHttpClient;
 import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
-import com.microsoft.windowsazure.mobileservices.http.RequestAsyncTask;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequestImpl;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.notifications.MobileServicePush;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
@@ -153,11 +147,6 @@ public class MobileServiceClient {
 	 * Custom API Url
 	 */
 	private static final String CUSTOM_API_URL = "api/";
-
-	/**
-	 * PNS API Url
-	 */
-	public static final String PNS_API_URL = "push";
 
 	/**
 	 * Google account type
@@ -1255,7 +1244,7 @@ public class MobileServiceClient {
 	 */
 	public ListenableFuture<ServiceFilterResponse> invokeApi(String apiName, byte[] content, String httpMethod, List<Pair<String, String>> requestHeaders,
 			List<Pair<String, String>> parameters) {
-		return invokeApiInternal(apiName, content, httpMethod, requestHeaders, parameters, CUSTOM_API_URL);
+		return invokeApiInternal(apiName, content, httpMethod, requestHeaders, parameters);
 	}
 
 	/**
@@ -1277,7 +1266,7 @@ public class MobileServiceClient {
 	public void invokeApi(String apiName, byte[] content, String httpMethod, List<Pair<String, String>> requestHeaders, List<Pair<String, String>> parameters,
 			final ServiceFilterResponseCallback callback) {
 
-		invokeApiInternal(apiName, content, httpMethod, requestHeaders, parameters, CUSTOM_API_URL, callback);
+		invokeApiInternal(apiName, content, httpMethod, requestHeaders, parameters, callback);
 	}
 
 	/**
@@ -1293,11 +1282,9 @@ public class MobileServiceClient {
 	 *            The extra headers to send in the request
 	 * @param parameters
 	 *            The query string parameters sent in the request
-	 * @param apiBaseURL
-	 *            The base URL for api requests
 	 */
-	public ListenableFuture<ServiceFilterResponse> invokeApiInternal(String apiName, byte[] content, String httpMethod,
-			List<Pair<String, String>> requestHeaders, List<Pair<String, String>> parameters, String apiBaseURL) {
+	private ListenableFuture<ServiceFilterResponse> invokeApiInternal(String apiName, byte[] content, String httpMethod,
+			List<Pair<String, String>> requestHeaders, List<Pair<String, String>> parameters) {
 		final SettableFuture<ServiceFilterResponse> future = SettableFuture.create();
 
 		if (apiName == null || apiName.trim().equals("")) {
@@ -1305,67 +1292,8 @@ public class MobileServiceClient {
 			return future;
 		}
 
-		if (httpMethod == null || httpMethod.trim().equals("")) {
-			future.setException(new IllegalArgumentException("httpMethod cannot be null"));
-			return future;
-		}
-
-		Uri.Builder uriBuilder = Uri.parse(getAppUrl().toString()).buildUpon();
-		uriBuilder.path(apiBaseURL + apiName);
-
-		if (parameters != null && parameters.size() > 0) {
-			for (Pair<String, String> parameter : parameters) {
-				uriBuilder.appendQueryParameter(parameter.first, parameter.second);
-			}
-		}
-
-		ServiceFilterRequest request;
-		String url = uriBuilder.build().toString();
-
-		if (httpMethod.equalsIgnoreCase(HttpGet.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpGet(url), getAndroidHttpClientFactory());
-		} else if (httpMethod.equalsIgnoreCase(HttpPost.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpPost(url), getAndroidHttpClientFactory());
-		} else if (httpMethod.equalsIgnoreCase(HttpPut.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpPut(url), getAndroidHttpClientFactory());
-		} else if (httpMethod.equalsIgnoreCase(HttpPatch.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpPatch(url), getAndroidHttpClientFactory());
-		} else if (httpMethod.equalsIgnoreCase(HttpDelete.METHOD_NAME)) {
-			request = new ServiceFilterRequestImpl(new HttpDelete(url), getAndroidHttpClientFactory());
-		} else {
-			future.setException(new IllegalArgumentException("httpMethod not supported"));
-			return future;
-		}
-
-		if (requestHeaders != null && requestHeaders.size() > 0) {
-			for (Pair<String, String> header : requestHeaders) {
-				request.addHeader(header.first, header.second);
-			}
-		}
-
-		if (content != null) {
-			try {
-				request.setContent(content);
-			} catch (Exception e) {
-				future.setException(e);
-				return future;
-			}
-		}
-
-		MobileServiceConnection conn = createConnection();
-
-		new RequestAsyncTask(request, conn) {
-			@Override
-			protected void onPostExecute(ServiceFilterResponse response) {
-				if (mTaskException != null) {
-					future.setException(mTaskException);
-				} else {
-					future.set(response);
-				}
-			}
-		}.executeTask();
-
-		return future;
+		MobileServiceHttpClient httpClient = new MobileServiceHttpClient(this);
+		return httpClient.request(CUSTOM_API_URL + apiName, content, httpMethod, requestHeaders, parameters);
 	}
 
 	/**
@@ -1391,10 +1319,10 @@ public class MobileServiceClient {
 	 * @param callback
 	 *            The callback to invoke after the API execution
 	 */
-	public void invokeApiInternal(String apiName, byte[] content, String httpMethod, List<Pair<String, String>> requestHeaders,
-			List<Pair<String, String>> parameters, String apiBaseURL, final ServiceFilterResponseCallback callback) {
+	private void invokeApiInternal(String apiName, byte[] content, String httpMethod, List<Pair<String, String>> requestHeaders,
+			List<Pair<String, String>> parameters, final ServiceFilterResponseCallback callback) {
 
-		ListenableFuture<ServiceFilterResponse> invokeApiFuture = invokeApiInternal(apiName, content, httpMethod, requestHeaders, parameters, apiBaseURL);
+		ListenableFuture<ServiceFilterResponse> invokeApiFuture = invokeApiInternal(apiName, content, httpMethod, requestHeaders, parameters);
 
 		Futures.addCallback(invokeApiFuture, new FutureCallback<ServiceFilterResponse>() {
 			@Override

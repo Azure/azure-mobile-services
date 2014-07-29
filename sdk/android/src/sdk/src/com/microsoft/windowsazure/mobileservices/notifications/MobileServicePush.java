@@ -47,6 +47,7 @@ import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.http.MobileServiceConnection;
+import com.microsoft.windowsazure.mobileservices.http.MobileServiceHttpClient;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 import android.content.Context;
@@ -91,9 +92,14 @@ public class MobileServicePush {
 	private static final String NEW_REGISTRATION_LOCATION_HEADER = "Location";
 
 	/**
-	 * The MobileServiceClient associated with this instance
+	 * Push registration path
 	 */
-	private MobileServiceClient mClient;
+	private static final String PNS_API_URL = "push";
+
+	/**
+	 * The class used to make HTTP clients associated with this instance
+	 */
+	private MobileServiceHttpClient mHttpClient;
 
 	/**
 	 * SharedPreferences reference used to access local storage
@@ -123,7 +129,7 @@ public class MobileServicePush {
 	public MobileServicePush(MobileServiceClient client, Context context) {
 		mPnsSpecificRegistrationFactory = new PnsSpecificRegistrationFactory();
 
-		mClient = client;
+		mHttpClient = new MobileServiceHttpClient(client);
 
 		if (context == null) {
 			throw new IllegalArgumentException("context");
@@ -573,7 +579,7 @@ public class MobileServicePush {
 		}
 
 		// get existing registrations
-		String resource = "/registrations/";
+		String path = PNS_API_URL + "/registrations/";
 
 		List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
 		List<Pair<String, String>> parameters = new ArrayList<Pair<String, String>>();
@@ -581,8 +587,7 @@ public class MobileServicePush {
 		parameters.add(new Pair<String, String>("deviceId", pnsHandle));
 		requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
 
-		ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mClient.invokeApiInternal(resource, null, "GET", requestHeaders, parameters,
-				MobileServiceClient.PNS_API_URL);
+		ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mHttpClient.request(path, null, "GET", requestHeaders, parameters);
 
 		Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>() {
 			@Override
@@ -858,11 +863,10 @@ public class MobileServicePush {
 
 	private ListenableFuture<String> createRegistrationId() {
 
-		String resource = "/registrationids/";
+		String path = PNS_API_URL + "/registrationids/";
 
 		final SettableFuture<String> resultFuture = SettableFuture.create();
-		ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mClient.invokeApiInternal(resource, null, "POST", null, null,
-				MobileServiceClient.PNS_API_URL);
+		ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mHttpClient.request(path, null, "POST", null, null);
 
 		Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>() {
 			@Override
@@ -916,6 +920,7 @@ public class MobileServicePush {
 		Gson gson = gsonBuilder.create();
 
 		String resource = registration.getURI();
+		String path = PNS_API_URL + resource;
 		JsonElement json = gson.toJsonTree(registration);
 		String body = json.toString();
 
@@ -931,8 +936,7 @@ public class MobileServicePush {
 
 		requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
 
-		ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mClient.invokeApiInternal(resource, content, "PUT", requestHeaders, null,
-				MobileServiceClient.PNS_API_URL);
+		ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mHttpClient.request(path, content, "PUT", requestHeaders, null);
 
 		Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>() {
 			@Override
@@ -972,10 +976,9 @@ public class MobileServicePush {
 			return resultFuture;
 		}
 
-		String resource = "/registrations/" + registrationId;
+		String path = PNS_API_URL + "/registrations/" + registrationId;
 
-		ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mClient.invokeApiInternal(resource, null, "DELETE", null, null,
-				MobileServiceClient.PNS_API_URL);
+		ListenableFuture<ServiceFilterResponse> serviceFilterFuture = mHttpClient.request(path, null, "DELETE", null, null);
 
 		Futures.addCallback(serviceFilterFuture, new FutureCallback<ServiceFilterResponse>() {
 			@Override
