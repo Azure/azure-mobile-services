@@ -17,7 +17,8 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/*
+
+/**
  * MobileServiceClient.java
  */
 package com.microsoft.windowsazure.mobileservices;
@@ -49,6 +50,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Pair;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
@@ -56,6 +61,28 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSerializer;
 import com.google.gson.annotations.SerializedName;
+import com.microsoft.windowsazure.mobileservices.authentication.LoginManager;
+import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceAuthenticationProvider;
+import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
+import com.microsoft.windowsazure.mobileservices.http.AndroidHttpClientFactory;
+import com.microsoft.windowsazure.mobileservices.http.AndroidHttpClientFactoryImpl;
+import com.microsoft.windowsazure.mobileservices.http.HttpPatch;
+import com.microsoft.windowsazure.mobileservices.http.MobileServiceConnection;
+import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
+import com.microsoft.windowsazure.mobileservices.http.RequestAsyncTask;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequestImpl;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.notifications.MobileServicePush;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
+import com.microsoft.windowsazure.mobileservices.table.serialization.DateSerializer;
+import com.microsoft.windowsazure.mobileservices.table.serialization.JsonEntityParser;
+import com.microsoft.windowsazure.mobileservices.table.serialization.LongSerializer;
+import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceJsonSyncTable;
+import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncContext;
+import com.microsoft.windowsazure.mobileservices.table.sync.MobileServiceSyncTable;
 
 /**
  * Entry-point for Microsoft Azure Mobile Services interactions
@@ -100,32 +127,38 @@ public class MobileServiceClient {
 	 * Context where the MobileServiceClient is created
 	 */
 	private Context mContext;
-	
+
 	/**
 	 * AndroidHttpClientFactory used for request execution
 	 */
 	private AndroidHttpClientFactory mAndroidHttpClientFactory;
-	
+
 	/**
 	 * MobileServicePush used for push notifications
 	 */
 	private MobileServicePush mPush;
-	
+
+	/**
+	 * MobileServiceSyncContext used for synchronization between local and
+	 * remote databases.
+	 */
+	private MobileServiceSyncContext mSyncContext;
+
 	/**
 	 * UTF-8 encoding
 	 */
 	public static final String UTF8_ENCODING = "UTF-8";
-	
+
 	/**
 	 * Custom API Url
 	 */
 	private static final String CUSTOM_API_URL = "api/";
-	
+
 	/**
 	 * PNS API Url
 	 */
-	static final String PNS_API_URL = "push";
-	
+	public static final String PNS_API_URL = "push";
+
 	/**
 	 * Google account type
 	 */
@@ -166,8 +199,7 @@ public class MobileServiceClient {
 	 * @throws MalformedURLException
 	 * 
 	 */
-	public MobileServiceClient(String appUrl, String appKey, Context context)
-			throws MalformedURLException {
+	public MobileServiceClient(String appUrl, String appKey, Context context) throws MalformedURLException {
 		this(new URL(appUrl), appKey, context);
 	}
 
@@ -178,9 +210,8 @@ public class MobileServiceClient {
 	 *            An existing MobileServiceClient
 	 */
 	public MobileServiceClient(MobileServiceClient client) {
-		initialize(client.getAppUrl(), client.getAppKey(),
-				client.getCurrentUser(), client.getGsonBuilder(),
-				client.getContext(), client.getAndroidHttpClientFactory());
+		initialize(client.getAppUrl(), client.getAppKey(), client.getCurrentUser(), client.getGsonBuilder(), client.getContext(),
+				client.getAndroidHttpClientFactory());
 	}
 
 	/**
@@ -209,45 +240,113 @@ public class MobileServiceClient {
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
-	public void login(MobileServiceAuthenticationProvider provider,
-			UserAuthenticationCallback callback) {
-		login(provider.toString(), callback);
+	public ListenableFuture<MobileServiceUser> login(MobileServiceAuthenticationProvider provider) {
+		return login(provider.toString());
 	}
+
 	/**
 	 * Invokes an interactive authentication process using the specified
 	 * Authentication Provider
+	 * 
+	 * @deprecated use {@link login(MobileServiceAuthenticationProvider
+	 *             provider)} instead
 	 * 
 	 * @param provider
 	 *            The provider used for the authentication process
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
-	public void login(String provider, UserAuthenticationCallback callback) {
+	public void login(MobileServiceAuthenticationProvider provider, UserAuthenticationCallback callback) {
+		login(provider.toString(), callback);
+	}
+
+	/**
+	 * Invokes an interactive authentication process using the specified
+	 * Authentication Provider
+	 * 
+	 * @param provider
+	 *            The provider used for the authentication process
+	 */
+	public ListenableFuture<MobileServiceUser> login(String provider) {
 		mLoginInProgress = true;
 
-		final UserAuthenticationCallback externalCallback = callback;
+		final SettableFuture<MobileServiceUser> resultFuture = SettableFuture.create();
 
-		mLoginManager.authenticate(provider, mContext,
-				new UserAuthenticationCallback() {
+		ListenableFuture<MobileServiceUser> future = mLoginManager.authenticate(provider, mContext);
 
-					@Override
-					public void onCompleted(MobileServiceUser user,
-							Exception exception, ServiceFilterResponse response) {
-						mCurrentUser = user;
-						mLoginInProgress = false;
+		Futures.addCallback(future, new FutureCallback<MobileServiceUser>() {
+			@Override
+			public void onFailure(Throwable e) {
+				mLoginInProgress = false;
 
-						if (externalCallback != null) {
-							externalCallback.onCompleted(user, exception,
-									response);
-						}
-					}
-				});
+				resultFuture.setException(e);
+			}
+
+			@Override
+			public void onSuccess(MobileServiceUser user) {
+				mCurrentUser = user;
+				mLoginInProgress = false;
+
+				resultFuture.set(user);
+			}
+		});
+
+		return resultFuture;
+	}
+
+	/**
+	 * 
+	 * Invokes an interactive authentication process using the specified
+	 * Authentication Provider
+	 * 
+	 * @deprecated use {@link login(String provider)} instead
+	 * 
+	 * @param provider
+	 *            The provider used for the authentication process
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void login(String provider, final UserAuthenticationCallback callback) {
+		ListenableFuture<MobileServiceUser> loginFuture = login(provider);
+
+		Futures.addCallback(loginFuture, new FutureCallback<MobileServiceUser>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(MobileServiceUser user) {
+				callback.onCompleted(user, null, null);
+			}
+		});
 	}
 
 	/**
 	 * Invokes Microsoft Azure Mobile Service authentication using a
 	 * provider-specific oAuth token
-	 *
+	 * 
+	 * @param provider
+	 *            The provider used for the authentication process
+	 * @param oAuthToken
+	 *            A Json object representing the oAuth token used for
+	 *            authentication
+	 */
+	public ListenableFuture<MobileServiceUser> login(MobileServiceAuthenticationProvider provider, JsonObject oAuthToken) {
+		return login(provider.toString(), oAuthToken);
+	}
+
+	/**
+	 * Invokes Microsoft Azure Mobile Service authentication using a
+	 * provider-specific oAuth token
+	 * 
+	 * @deprecated use {@link login(MobileServiceAuthenticationProvider
+	 *             provider, JsonObject oAuthToken)} instead
+	 * 
 	 * @param provider
 	 *            The provider used for the authentication process
 	 * @param oAuthToken
@@ -256,15 +355,35 @@ public class MobileServiceClient {
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
-	public void login(MobileServiceAuthenticationProvider provider,
-			JsonObject oAuthToken, UserAuthenticationCallback callback) {
+	public void login(MobileServiceAuthenticationProvider provider, JsonObject oAuthToken, UserAuthenticationCallback callback) {
 		login(provider.toString(), oAuthToken, callback);
 	}
 
 	/**
 	 * Invokes Microsoft Azure Mobile Service authentication using a
 	 * provider-specific oAuth token
-	 *
+	 * 
+	 * @param provider
+	 *            The provider used for the authentication process
+	 * @param oAuthToken
+	 *            A Json object representing the oAuth token used for
+	 *            authentication
+	 */
+	public ListenableFuture<MobileServiceUser> login(String provider, JsonObject oAuthToken) {
+		if (oAuthToken == null) {
+			throw new IllegalArgumentException("oAuthToken cannot be null");
+		}
+
+		return login(provider, oAuthToken.toString());
+	}
+
+	/**
+	 * Invokes Microsoft Azure Mobile Service authentication using a
+	 * provider-specific oAuth token
+	 * 
+	 * @deprecated use {@link login(String provider, JsonObject oAuthToken)}
+	 *             instead
+	 * 
 	 * @param provider
 	 *            The provider used for the authentication process
 	 * @param oAuthToken
@@ -273,8 +392,7 @@ public class MobileServiceClient {
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
-	public void login(String provider,
-			JsonObject oAuthToken, UserAuthenticationCallback callback) {
+	public void login(String provider, JsonObject oAuthToken, UserAuthenticationCallback callback) {
 		if (oAuthToken == null) {
 			throw new IllegalArgumentException("oAuthToken cannot be null");
 		}
@@ -290,11 +408,26 @@ public class MobileServiceClient {
 	 *            The provider used for the authentication process
 	 * @param oAuthToken
 	 *            The oAuth token used for authentication
+	 */
+	public ListenableFuture<MobileServiceUser> login(MobileServiceAuthenticationProvider provider, String oAuthToken) {
+		return login(provider.toString(), oAuthToken);
+	}
+
+	/**
+	 * Invokes Microsoft Azure Mobile Service authentication using a
+	 * provider-specific oAuth token
+	 * 
+	 * @deprecated use {@link login(MobileServiceAuthenticationProvider
+	 *             provider, String oAuthToken)} instead
+	 * 
+	 * @param provider
+	 *            The provider used for the authentication process
+	 * @param oAuthToken
+	 *            The oAuth token used for authentication
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
-	public void login(MobileServiceAuthenticationProvider provider,
-			String oAuthToken, UserAuthenticationCallback callback) {
+	public void login(MobileServiceAuthenticationProvider provider, String oAuthToken, UserAuthenticationCallback callback) {
 		login(provider.toString(), oAuthToken, callback);
 	}
 
@@ -306,92 +439,264 @@ public class MobileServiceClient {
 	 *            The provider used for the authentication process
 	 * @param oAuthToken
 	 *            The oAuth token used for authentication
-	 * @param callback
-	 *            Callback to invoke when the authentication process finishes
 	 */
-	public void login(String provider, String oAuthToken,
-			UserAuthenticationCallback callback) {
+	public ListenableFuture<MobileServiceUser> login(String provider, String oAuthToken) {
 		if (oAuthToken == null) {
 			throw new IllegalArgumentException("oAuthToken cannot be null");
 		}
 
+		final SettableFuture<MobileServiceUser> resultFuture = SettableFuture.create();
+
 		mLoginInProgress = true;
 
-		final UserAuthenticationCallback externalCallback = callback;
+		ListenableFuture<MobileServiceUser> future = mLoginManager.authenticate(provider, oAuthToken);
 
-		mLoginManager.authenticate(provider, oAuthToken,
-				new UserAuthenticationCallback() {
+		Futures.addCallback(future, new FutureCallback<MobileServiceUser>() {
+			@Override
+			public void onFailure(Throwable e) {
+				mLoginInProgress = false;
 
-					@Override
-					public void onCompleted(MobileServiceUser user,
-							Exception exception, ServiceFilterResponse response) {
-						mCurrentUser = user;
-						mLoginInProgress = false;
+				resultFuture.setException(e);
+			}
 
-						if (externalCallback != null) {
-							externalCallback.onCompleted(user, exception,
-									response);
-						}
-					}
-				});
+			@Override
+			public void onSuccess(MobileServiceUser user) {
+				mCurrentUser = user;
+				mLoginInProgress = false;
+
+				resultFuture.set(user);
+			}
+		});
+
+		return resultFuture;
 	}
-	
+
 	/**
+	 * 
 	 * Invokes Microsoft Azure Mobile Service authentication using a
-	 * the Google account registered in the device
+	 * provider-specific oAuth token
+	 * 
+	 * @deprecated use {@link login(String provider, String oAuthToken)} instead
+	 * 
+	 * @param provider
+	 *            The provider used for the authentication process
+	 * @param oAuthToken
+	 *            The oAuth token used for authentication
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void login(String provider, String oAuthToken, final UserAuthenticationCallback callback) {
+		ListenableFuture<MobileServiceUser> loginFuture = login(provider, oAuthToken);
+
+		Futures.addCallback(loginFuture, new FutureCallback<MobileServiceUser>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(MobileServiceUser user) {
+				callback.onCompleted(user, null, null);
+			}
+		});
+	}
+
+	/**
+	 * Invokes Microsoft Azure Mobile Service authentication using a the Google
+	 * account registered in the device
 	 * 
 	 * @param activity
 	 *            The activity that triggered the authentication
+	 */
+	public ListenableFuture<MobileServiceUser> loginWithGoogleAccount(Activity activity) {
+		return loginWithGoogleAccount(activity, GOOGLE_USER_INFO_SCOPE);
+	}
+
+	/**
+	 * Invokes Microsoft Azure Mobile Service authentication using a the Google
+	 * account registered in the device
+	 * 
+	 * @deprecated use {@link loginWithGoogleAccount(Activity activity)} instead
+	 * 
+	 * @param activity
+	 *            The activity that triggered the authentication
+	 * 
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
 	public void loginWithGoogleAccount(Activity activity, final UserAuthenticationCallback callback) {
 		loginWithGoogleAccount(activity, GOOGLE_USER_INFO_SCOPE, callback);
 	}
-	
+
 	/**
-	 * Invokes Microsoft Azure Mobile Service authentication using a
-	 * the Google account registered in the device
+	 * Invokes Microsoft Azure Mobile Service authentication using a the Google
+	 * account registered in the device
 	 * 
 	 * @param activity
 	 *            The activity that triggered the authentication
 	 * @param scopes
 	 *            The scopes used as authentication token type for login
-	 * @param callback
-	 *            Callback to invoke when the authentication process finishes
 	 */
-	public void loginWithGoogleAccount(Activity activity, String scopes, final UserAuthenticationCallback callback) {
+	public ListenableFuture<MobileServiceUser> loginWithGoogleAccount(Activity activity, String scopes) {
 		AccountManager acMgr = AccountManager.get(activity.getApplicationContext());
 		Account[] accounts = acMgr.getAccountsByType(GOOGLE_ACCOUNT_TYPE);
-		
+
 		Account account;
 		if (accounts.length == 0) {
 			account = null;
 		} else {
 			account = accounts[0];
 		}
-		
-		loginWithGoogleAccount(activity, account, scopes, callback);
+
+		return loginWithGoogleAccount(activity, account, scopes);
 	}
-	
+
 	/**
-	 * Invokes Microsoft Azure Mobile Service authentication using a
-	 * the Google account registered in the device
+	 * Invokes Microsoft Azure Mobile Service authentication using a the Google
+	 * account registered in the device
+	 * 
+	 * @deprecated use {@link loginWithGoogleAccount(Activity activity, String
+	 *             scopes)} instead
+	 * 
+	 * @param activity
+	 *            The activity that triggered the authentication
+	 * 
+	 * @param scopes
+	 *            The scopes used as authentication token type for login
+	 * @param callback
+	 *            Callback to invoke when the authentication process finishes
+	 */
+	public void loginWithGoogleAccount(Activity activity, String scopes, final UserAuthenticationCallback callback) {
+		ListenableFuture<MobileServiceUser> loginFuture = loginWithGoogleAccount(activity, scopes);
+
+		Futures.addCallback(loginFuture, new FutureCallback<MobileServiceUser>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(MobileServiceUser user) {
+				callback.onCompleted(user, null, null);
+			}
+		});
+	}
+
+	/**
+	 * Invokes Microsoft Azure Mobile Service authentication using a the Google
+	 * account registered in the device
 	 * 
 	 * @param activity
 	 *            The activity that triggered the authentication
 	 * @param account
 	 *            The account used for the login operation
+	 */
+	public ListenableFuture<MobileServiceUser> loginWithGoogleAccount(Activity activity, Account account) {
+		return loginWithGoogleAccount(activity, account, GOOGLE_USER_INFO_SCOPE);
+	}
+
+	/**
+	 * Invokes Microsoft Azure Mobile Service authentication using a the Google
+	 * account registered in the device
+	 * 
+	 * @deprecated use {@link loginWithGoogleAccount(Activity activity, Account
+	 *             account)} instead
+	 * 
+	 * @param activity
+	 *            The activity that triggered the authentication
+	 * @param account
+	 *            The account used for the login operation
+	 * 
 	 * @param callback
 	 *            Callback to invoke when the authentication process finishes
 	 */
 	public void loginWithGoogleAccount(Activity activity, Account account, final UserAuthenticationCallback callback) {
 		loginWithGoogleAccount(activity, account, GOOGLE_USER_INFO_SCOPE, callback);
 	}
-	
+
 	/**
-	 * Invokes Microsoft Azure Mobile Service authentication using a
-	 * the Google account registered in the device
+	 * Invokes Microsoft Azure Mobile Service authentication using a the Google
+	 * account registered in the device
+	 * 
+	 * @param activity
+	 *            The activity that triggered the authentication
+	 * @param account
+	 *            The account used for the login operation
+	 * @param scopes
+	 *            The scopes used as authentication token type for login
+	 */
+	public ListenableFuture<MobileServiceUser> loginWithGoogleAccount(Activity activity, Account account, String scopes) {
+		final SettableFuture<MobileServiceUser> future = SettableFuture.create();
+
+		try {
+			if (account == null) {
+				throw new IllegalArgumentException("account");
+			}
+
+			final MobileServiceClient client = this;
+
+			AccountManagerCallback<Bundle> authCallback = new AccountManagerCallback<Bundle>() {
+
+				@Override
+				public void run(AccountManagerFuture<Bundle> futureBundle) {
+					try {
+						if (futureBundle.isCancelled()) {
+							future.setException(new MobileServiceException("User cancelled"));
+							// callback.onCompleted(null, new
+							// MobileServiceException("User cancelled"), null);
+						} else {
+							Bundle bundle = futureBundle.getResult();
+
+							String token = (String) (bundle.get(AccountManager.KEY_AUTHTOKEN));
+
+							JsonObject json = new JsonObject();
+							json.addProperty("access_token", token);
+
+							ListenableFuture<MobileServiceUser> loginFuture = client.login(MobileServiceAuthenticationProvider.Google, json);
+
+							Futures.addCallback(loginFuture, new FutureCallback<MobileServiceUser>() {
+								@Override
+								public void onFailure(Throwable e) {
+									future.setException(e);
+								}
+
+								@Override
+								public void onSuccess(MobileServiceUser user) {
+									future.set(user);
+								}
+							});
+						}
+					} catch (Exception e) {
+						future.setException(e);
+					}
+				}
+			};
+
+			AccountManager acMgr = AccountManager.get(activity.getApplicationContext());
+			acMgr.getAuthToken(account, scopes, null, activity, authCallback, null);
+
+		} catch (Exception e) {
+			future.setException(e);
+		}
+
+		return future;
+	}
+
+	/**
+	 * 
+	 * Invokes Microsoft Azure Mobile Service authentication using a the Google
+	 * account registered in the device
+	 * 
+	 * @deprecated use {@link loginWithGoogleAccount(Activity activity, Account
+	 *             account, String scopes)} instead
 	 * 
 	 * @param activity
 	 *            The activity that triggered the authentication
@@ -403,42 +708,23 @@ public class MobileServiceClient {
 	 *            Callback to invoke when the authentication process finishes
 	 */
 	public void loginWithGoogleAccount(Activity activity, Account account, String scopes, final UserAuthenticationCallback callback) {
-		try {
-			if (account == null) {
-				callback.onCompleted(null, new IllegalArgumentException("account"), null);
-			}
-					
-			final MobileServiceClient client = this;
-			
-			AccountManagerCallback<Bundle> authCallback = new AccountManagerCallback<Bundle>() {
-				
-				@Override
-				public void run(AccountManagerFuture<Bundle> futureBundle) {
-					try {
-						if (futureBundle.isCancelled()) {
-							callback.onCompleted(null, new MobileServiceException("User cancelled"), null);
-						} else {
-							Bundle bundle = futureBundle.getResult();
-							
-							String token = (String)(bundle.get(AccountManager.KEY_AUTHTOKEN));
-							
-							JsonObject json = new JsonObject();
-							json.addProperty("access_token", token);
-							
-							client.login(MobileServiceAuthenticationProvider.Google, json, callback);	
-						}
-					} catch (Exception e) {
-						callback.onCompleted(null, e, null);
-					}
+		ListenableFuture<MobileServiceUser> loginFuture = loginWithGoogleAccount(activity, account, scopes);
+
+		Futures.addCallback(loginFuture, new FutureCallback<MobileServiceUser>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
 				}
-			};
-			
-			AccountManager acMgr = AccountManager.get(activity.getApplicationContext());
-			acMgr.getAuthToken(account, scopes, null, activity, authCallback, null);
-			
-		} catch (Exception e) {
-			callback.onCompleted(null, e, null);
-		}
+			}
+
+			@Override
+			public void onSuccess(MobileServiceUser user) {
+				callback.onCompleted(user, null, null);
+			}
+		});
 	}
 
 	/**
@@ -487,6 +773,15 @@ public class MobileServiceClient {
 	}
 
 	/**
+	 * Returns a MobileServiceSyncContext instance.
+	 * 
+	 * @return the MobileServiceSyncContext instance
+	 */
+	public MobileServiceSyncContext getSyncContext() {
+		return this.mSyncContext;
+	}
+
+	/**
 	 * Creates a MobileServiceJsonTable
 	 * 
 	 * @param name
@@ -495,6 +790,30 @@ public class MobileServiceClient {
 	 */
 	public MobileServiceJsonTable getTable(String name) {
 		return new MobileServiceJsonTable(name, this);
+	}
+
+	/**
+	 * Returns a MobileServiceJsonSyncTable instance, which provides untyped
+	 * data operations for a local table.
+	 * 
+	 * @param name
+	 *            Table name
+	 * @return The MobileServiceJsonSyncTable instance
+	 */
+	public MobileServiceJsonSyncTable getSyncTable(String name) {
+		return new MobileServiceJsonSyncTable(name, this);
+	}
+
+	/**
+	 * Creates a MobileServiceTable
+	 * 
+	 * @param clazz
+	 *            The class used for table name and data serialization
+	 * 
+	 * @return MobileServiceTable with the given name
+	 */
+	public <E> MobileServiceTable<E> getTable(Class<E> clazz) {
+		return this.getTable(clazz.getSimpleName(), clazz);
 	}
 
 	/**
@@ -513,278 +832,496 @@ public class MobileServiceClient {
 	}
 
 	/**
-	 * Creates a MobileServiceTable
+	 * Returns a MobileServiceSyncTable<E> instance, which provides strongly
+	 * typed data operations for a local table.
 	 * 
 	 * @param clazz
 	 *            The class used for table name and data serialization
 	 * 
-	 * @return MobileServiceTable with the given name
+	 * @return The MobileServiceSyncTable instance
 	 */
-	public <E> MobileServiceTable<E> getTable(Class<E> clazz) {
-		validateClass(clazz);
-		
-		return new MobileServiceTable<E>(clazz.getSimpleName(), this, clazz);
+	public <E> MobileServiceSyncTable<E> getSyncTable(Class<E> clazz) {
+		return this.getSyncTable(clazz.getSimpleName(), clazz);
 	}
-	
+
+	/**
+	 * Returns a MobileServiceSyncTable<E> instance, which provides strongly
+	 * typed data operations for a local table.
+	 * 
+	 * @param name
+	 *            Table name
+	 * @param clazz
+	 *            The class used for data serialization
+	 * 
+	 * @return The MobileServiceSyncTable instance
+	 */
+	public <E> MobileServiceSyncTable<E> getSyncTable(String name, Class<E> clazz) {
+		validateClass(clazz);
+		return new MobileServiceSyncTable<E>(name, this, clazz);
+	}
+
 	/**
 	 * Invokes a custom API using POST HTTP method
-	 * @param apiName The API name
-	 * @param clazz The API result class
-	 * @param callback The callback to invoke after the API execution
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * @param clazz
+	 *            The API result class
 	 */
-	public <E> void invokeApi(
-			String apiName, 
-			Class<E> clazz,
-			ApiOperationCallback<E> callback) {
+	public <E> ListenableFuture<E> invokeApi(String apiName, Class<E> clazz) {
+		return invokeApi(apiName, null, HttpPost.METHOD_NAME, null, clazz);
+	}
+
+	/**
+	 * Invokes a custom API using POST HTTP method
+	 * 
+	 * @deprecated use {@link invokeApi(String apiName, Class<E> clazz)} instead
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * @param clazz
+	 *            The API result class
+	 * @param callback
+	 *            The callback to invoke after the API execution
+	 */
+	public <E> void invokeApi(String apiName, Class<E> clazz, ApiOperationCallback<E> callback) {
 		invokeApi(apiName, null, HttpPost.METHOD_NAME, null, clazz, callback);
 	}
-	
+
 	/**
 	 * Invokes a custom API using POST HTTP method
-	 * @param apiName The API name
-	 * @param body The object to send as the request body
-	 * @param clazz The API result class
-	 * @param callback The callback to invoke after the API execution
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * @param body
+	 *            The object to send as the request body
+	 * @param clazz
+	 *            The API result class
 	 */
-	public <E> void invokeApi(
-			String apiName, 
-			Object body,
-			Class<E> clazz,
-			ApiOperationCallback<E> callback) {
+	public <E> ListenableFuture<E> invokeApi(String apiName, Object body, Class<E> clazz) {
+		return invokeApi(apiName, body, HttpPost.METHOD_NAME, null, clazz);
+	}
+
+	/**
+	 * Invokes a custom API using POST HTTP method
+	 * 
+	 * @deprecated use {@link invokeApi(String apiName, Object body, Class<E>
+	 *             clazz)} instead
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * @param body
+	 *            The object to send as the request body
+	 * @param clazz
+	 *            The API result class
+	 * @param callback
+	 *            The callback to invoke after the API execution
+	 */
+	public <E> void invokeApi(String apiName, Object body, Class<E> clazz, ApiOperationCallback<E> callback) {
 		invokeApi(apiName, body, HttpPost.METHOD_NAME, null, clazz, callback);
 	}
 
 	/**
 	 * Invokes a custom API
-	 * @param apiName The API name
-	 * @param httpMethod The HTTP Method used to invoke the API
-	 * @param parameters The query string parameters sent in the request
-	 * @param clazz The API result class
-	 * @param callback The callback to invoke after the API execution
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * @param httpMethod
+	 *            The HTTP Method used to invoke the API
+	 * @param parameters
+	 *            The query string parameters sent in the request
+	 * @param clazz
+	 *            The API result class
 	 */
-	public <E> void invokeApi(
-			String apiName, 
-			String httpMethod, 
-			List<Pair<String, String>> parameters,
-			Class<E> clazz,
-			ApiOperationCallback<E> callback) {
+	public <E> ListenableFuture<E> invokeApi(String apiName, String httpMethod, List<Pair<String, String>> parameters, Class<E> clazz) {
+		return invokeApi(apiName, null, httpMethod, parameters, clazz);
+	}
+
+	/**
+	 * Invokes a custom API
+	 * 
+	 * @deprecated use {@link invokeApi(String apiName, String httpMethod,
+	 *             List<Pair<String, String>> parameters, Class<E> clazz)}
+	 *             instead
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * 
+	 * @param httpMethod
+	 *            The HTTP Method used to invoke the API
+	 * @param parameters
+	 *            The query string parameters sent in the request
+	 * @param clazz
+	 *            The API result class
+	 * @param callback
+	 *            The callback to invoke after the API execution
+	 */
+	public <E> void invokeApi(String apiName, String httpMethod, List<Pair<String, String>> parameters, Class<E> clazz, ApiOperationCallback<E> callback) {
 		invokeApi(apiName, null, httpMethod, parameters, clazz, callback);
 	}
 
 	/**
 	 * Invokes a custom API
-	 * @param apiName The API name
-	 * @param body The object to send as the request body
-	 * @param httpMethod The HTTP Method used to invoke the API
-	 * @param parameters The query string parameters sent in the request
-	 * @param clazz The API result class
-	 * @param callback The callback to invoke after the API execution
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * @param body
+	 *            The object to send as the request body
+	 * @param httpMethod
+	 *            The HTTP Method used to invoke the API
+	 * @param parameters
+	 *            The query string parameters sent in the request
+	 * @param clazz
+	 *            The API result class
 	 */
-	public <E> void invokeApi(
-			String apiName, 
-			Object body, 
-			String httpMethod, 
-			List<Pair<String, String>> parameters,
-			final Class<E> clazz,
-			final ApiOperationCallback<E> callback) {
+	public <E> ListenableFuture<E> invokeApi(String apiName, Object body, String httpMethod, List<Pair<String, String>> parameters, final Class<E> clazz) {
 		if (clazz == null) {
-			if (callback != null) {
-				callback.onCompleted(null, new IllegalArgumentException("clazz cannot be null"), null);
-			}
-			return;
+			throw new IllegalArgumentException("clazz cannot be null");
 		}
-				
+
 		JsonElement json = null;
 		if (body != null) {
 			if (body instanceof JsonElement) {
-				json = (JsonElement)body;
+				json = (JsonElement) body;
 			} else {
 				json = getGsonBuilder().create().toJsonTree(body);
 			}
 		}
-		
-		invokeApi(apiName, json, httpMethod, parameters, new ApiJsonOperationCallback() {
-			
-			@SuppressWarnings("unchecked")
+
+		final SettableFuture<E> future = SettableFuture.create();
+		ListenableFuture<JsonElement> internalFuture = invokeApi(apiName, json, httpMethod, parameters);
+
+		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
 			@Override
-			public void onCompleted(JsonElement jsonElement, Exception exception,
-					ServiceFilterResponse response) {
-				if (callback != null) {
-					if (exception == null) {
-						Class<?> concreteClass = clazz;
-						if (clazz.isArray()) {
-							concreteClass = clazz.getComponentType();
-						}
+			public void onFailure(Throwable e) {
+				future.setException(e);
+			}
 
-						List<?> entities = JsonEntityParser.parseResults(jsonElement, getGsonBuilder().create(), concreteClass);
-
-						if (clazz.isArray()) {
-							E array = (E) Array.newInstance(concreteClass, entities.size());
-							for (int i = 0; i < entities.size(); i++) {
-								Array.set(array, i, entities.get(i));
-							}
-							callback.onCompleted(array, null, response);
-						} else {
-							callback.onCompleted((E)entities.get(0), exception, response);
-						}
-					} else {
-						callback.onCompleted(null, exception, response);
-					}
+			@Override
+			@SuppressWarnings("unchecked")
+			public void onSuccess(JsonElement jsonElement) {
+				Class<?> concreteClass = clazz;
+				if (clazz.isArray()) {
+					concreteClass = clazz.getComponentType();
 				}
+
+				List<?> entities = JsonEntityParser.parseResults(jsonElement, getGsonBuilder().create(), concreteClass);
+
+				if (clazz.isArray()) {
+					E array = (E) Array.newInstance(concreteClass, entities.size());
+					for (int i = 0; i < entities.size(); i++) {
+						Array.set(array, i, entities.get(i));
+					}
+
+					future.set(array);
+				} else {
+					future.set((E) entities.get(0));
+				}
+			}
+		});
+
+		return future;
+	}
+
+	/**
+	 * Invokes a custom API
+	 * 
+	 * @deprecated use {@link invokeApi(String apiName, Object body, String
+	 *             httpMethod, List<Pair<String, String>> parameters, final
+	 *             Class<E> clazz)} instead
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * @param body
+	 *            The object to send as the request body
+	 * @param httpMethod
+	 *            The HTTP Method used to invoke the API
+	 * @param parameters
+	 *            The query string parameters sent in the request
+	 * @param clazz
+	 *            The API result class
+	 * @param callback
+	 *            The callback to invoke after the API execution
+	 */
+	public <E> void invokeApi(String apiName, Object body, String httpMethod, List<Pair<String, String>> parameters, final Class<E> clazz,
+			final ApiOperationCallback<E> callback) {
+
+		ListenableFuture<E> invokeApiFuture = invokeApi(apiName, body, httpMethod, parameters, clazz);
+
+		Futures.addCallback(invokeApiFuture, new FutureCallback<E>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(E result) {
+				callback.onCompleted(result, null, null);
 			}
 		});
 	}
 
+	/**
+	 * Invokes a custom API using POST HTTP method
+	 * 
+	 * @param apiName
+	 *            The API name
+	 */
+	public ListenableFuture<JsonElement> invokeApi(String apiName) {
+		return invokeApi(apiName, (JsonElement) null);
+	}
 
 	/**
 	 * Invokes a custom API using POST HTTP method
-	 * @param apiName The API name
-	 * @param callback The callback to invoke after the API execution
+	 * 
+	 * @deprecated use {@link invokeApi(String apiName)} instead
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * 
+	 * @param callback
+	 *            The callback to invoke after the API execution
 	 */
 	public void invokeApi(String apiName, ApiJsonOperationCallback callback) {
 		invokeApi(apiName, null, callback);
 	}
-	
+
 	/**
 	 * Invokes a custom API using POST HTTP method
-	 * @param apiName The API name
-	 * @param body The json element to send as the request body
-	 * @param callback The callback to invoke after the API execution
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * @param body
+	 *            The json element to send as the request body
+	 */
+	public ListenableFuture<JsonElement> invokeApi(String apiName, JsonElement body) {
+		return invokeApi(apiName, body, HttpPost.METHOD_NAME, null);
+	}
+
+	/**
+	 * Invokes a custom API using POST HTTP method
+	 * 
+	 * @deprecated use {@link invokeApi(String apiName, JsonElement body)}
+	 *             instead
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * @param body
+	 *            The json element to send as the request body
+	 * @param callback
+	 *            The callback to invoke after the API execution
 	 */
 	public void invokeApi(String apiName, JsonElement body, ApiJsonOperationCallback callback) {
 		invokeApi(apiName, body, HttpPost.METHOD_NAME, null, callback);
 	}
-	
+
 	/**
 	 * Invokes a custom API
-	 * @param apiName The API name
-	 * @param httpMethod The HTTP Method used to invoke the API
-	 * @param parameters The query string parameters sent in the request
-	 * @param callback The callback to invoke after the API execution
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * @param httpMethod
+	 *            The HTTP Method used to invoke the API
+	 * @param parameters
+	 *            The query string parameters sent in the request
 	 */
-	public void invokeApi(
-			String apiName, 
-			String httpMethod, 
-			List<Pair<String, String>> parameters, 
-			ApiJsonOperationCallback callback) {
+	public ListenableFuture<JsonElement> invokeApi(String apiName, String httpMethod, List<Pair<String, String>> parameters) {
+		return invokeApi(apiName, null, httpMethod, parameters);
+	}
+
+	/**
+	 * Invokes a custom API
+	 * 
+	 * @deprecated use {@link invokeApi(String apiName, String httpMethod,
+	 *             List<Pair<String, String>> parameters)} instead
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * 
+	 * @param httpMethod
+	 *            The HTTP Method used to invoke the API
+	 * @param parameters
+	 *            The query string parameters sent in the request
+	 * @param callback
+	 *            The callback to invoke after the API execution
+	 */
+	public void invokeApi(String apiName, String httpMethod, List<Pair<String, String>> parameters, ApiJsonOperationCallback callback) {
 		invokeApi(apiName, null, httpMethod, parameters, callback);
 	}
-	
+
 	/**
 	 * Invokes a custom API
-	 * @param apiName The API name
-	 * @param body The json element to send as the request body
-	 * @param httpMethod The HTTP Method used to invoke the API
-	 * @param parameters The query string parameters sent in the request
-	 * @param callback The callback to invoke after the API execution
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * @param body
+	 *            The json element to send as the request body
+	 * @param httpMethod
+	 *            The HTTP Method used to invoke the API
+	 * @param parameters
+	 *            The query string parameters sent in the request
 	 */
-	public void invokeApi(
-			String apiName, 
-			JsonElement body, 
-			String httpMethod, 
-			List<Pair<String, String>> parameters,
-			final ApiJsonOperationCallback callback) {
-		
+	public ListenableFuture<JsonElement> invokeApi(String apiName, JsonElement body, String httpMethod, List<Pair<String, String>> parameters) {
+
 		byte[] content = null;
 		if (body != null) {
 			try {
 				content = body.toString().getBytes(UTF8_ENCODING);
 			} catch (UnsupportedEncodingException e) {
-				if (callback != null) {
-					callback.onCompleted(null, e, null);
-				}
-				return;
+				throw new IllegalArgumentException(e);
 			}
 		}
-		
-		List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String,String>>();
+
+		List<Pair<String, String>> requestHeaders = new ArrayList<Pair<String, String>>();
 		if (body != null) {
-			requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));			
+			requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
 		}
-		
-		invokeApi(apiName, content, httpMethod, requestHeaders, parameters, new ServiceFilterResponseCallback() {
-			
+
+		final SettableFuture<JsonElement> future = SettableFuture.create();
+		ListenableFuture<ServiceFilterResponse> internalFuture = invokeApi(apiName, content, httpMethod, requestHeaders, parameters);
+
+		Futures.addCallback(internalFuture, new FutureCallback<ServiceFilterResponse>() {
 			@Override
-			public void onResponse(ServiceFilterResponse response, Exception exception) {
-				if (callback != null) {
-					if (exception == null) {
-						String content = response.getContent();
-						JsonElement json = new JsonParser().parse(content);
-						
-						callback.onCompleted(json, null, response);
-					} else {
-						callback.onCompleted(null, exception, response);
-					}
+			public void onFailure(Throwable e) {
+				future.setException(e);
+			}
+
+			@Override
+			public void onSuccess(ServiceFilterResponse response) {
+				String content = response.getContent();
+				JsonElement json = new JsonParser().parse(content);
+				future.set(json);
+			}
+		});
+
+		return future;
+	}
+
+	/**
+	 * Invokes a custom API
+	 * 
+	 * @deprecated use {@link invokeApi(String apiName, JsonElement body, String
+	 *             httpMethod, List<Pair<String, String>> parameters)} instead
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * @param body
+	 *            The json element to send as the request body
+	 * @param httpMethod
+	 *            The HTTP Method used to invoke the API
+	 * @param parameters
+	 *            The query string parameters sent in the request
+	 * @param callback
+	 *            The callback to invoke after the API execution
+	 */
+	public void invokeApi(String apiName, JsonElement body, String httpMethod, List<Pair<String, String>> parameters, final ApiJsonOperationCallback callback) {
+
+		ListenableFuture<JsonElement> invokeApiFuture = invokeApi(apiName, body, httpMethod, parameters);
+
+		Futures.addCallback(invokeApiFuture, new FutureCallback<JsonElement>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onCompleted(null, (Exception) exception, MobileServiceException.getServiceResponse(exception));
+				} else {
+					callback.onCompleted(null, new Exception(exception), MobileServiceException.getServiceResponse(exception));
 				}
+			}
+
+			@Override
+			public void onSuccess(JsonElement result) {
+				callback.onCompleted(result, null, null);
 			}
 		});
 	}
-	
+
 	/**
+	 * Invokes a custom API
 	 * 
-	 * @param apiName The API name
-	 * @param content The byte array to send as the request body
-	 * @param httpMethod The HTTP Method used to invoke the API
-	 * @param requestHeaders The extra headers to send in the request
-	 * @param parameters The query string parameters sent in the request
-	 * @param callback The callback to invoke after the API execution
+	 * @param apiName
+	 *            The API name
+	 * @param content
+	 *            The byte array to send as the request body
+	 * @param httpMethod
+	 *            The HTTP Method used to invoke the API
+	 * @param requestHeaders
+	 *            The extra headers to send in the request
+	 * @param parameters
+	 *            The query string parameters sent in the request
 	 */
-	public void invokeApi(
-			String apiName, 
-			byte[] content, 
-			String httpMethod, 
-			List<Pair<String, String>> requestHeaders, 
-			List<Pair<String, String>> parameters, 
+	public ListenableFuture<ServiceFilterResponse> invokeApi(String apiName, byte[] content, String httpMethod, List<Pair<String, String>> requestHeaders,
+			List<Pair<String, String>> parameters) {
+		return invokeApiInternal(apiName, content, httpMethod, requestHeaders, parameters, CUSTOM_API_URL);
+	}
+
+	/**
+	 * Invokes a custom API
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * @param content
+	 *            The byte array to send as the request body
+	 * @param httpMethod
+	 *            The HTTP Method used to invoke the API
+	 * @param requestHeaders
+	 *            The extra headers to send in the request
+	 * @param parameters
+	 *            The query string parameters sent in the request
+	 * @param callback
+	 *            The callback to invoke after the API execution
+	 */
+	public void invokeApi(String apiName, byte[] content, String httpMethod, List<Pair<String, String>> requestHeaders, List<Pair<String, String>> parameters,
 			final ServiceFilterResponseCallback callback) {
-	
+
 		invokeApiInternal(apiName, content, httpMethod, requestHeaders, parameters, CUSTOM_API_URL, callback);
 	}
-	
+
 	/**
+	 * Invokes a custom API
 	 * 
-	 * @param apiName The API name
-	 * @param content The byte array to send as the request body
-	 * @param httpMethod The HTTP Method used to invoke the API
-	 * @param requestHeaders The extra headers to send in the request
-	 * @param parameters The query string parameters sent in the request
-	 * @param apiBaseURL The base URL for api requests
-	 * @param callback The callback to invoke after the API execution
+	 * @param apiName
+	 *            The API name
+	 * @param content
+	 *            The byte array to send as the request body
+	 * @param httpMethod
+	 *            The HTTP Method used to invoke the API
+	 * @param requestHeaders
+	 *            The extra headers to send in the request
+	 * @param parameters
+	 *            The query string parameters sent in the request
+	 * @param apiBaseURL
+	 *            The base URL for api requests
 	 */
-	void invokeApiInternal(
-			String apiName, 
-			byte[] content, 
-			String httpMethod, 
-			List<Pair<String, String>> requestHeaders, 
-			List<Pair<String, String>> parameters,
-			String apiBaseURL,
-			final ServiceFilterResponseCallback callback) {
-		
+	public ListenableFuture<ServiceFilterResponse> invokeApiInternal(String apiName, byte[] content, String httpMethod,
+			List<Pair<String, String>> requestHeaders, List<Pair<String, String>> parameters, String apiBaseURL) {
+		final SettableFuture<ServiceFilterResponse> future = SettableFuture.create();
+
 		if (apiName == null || apiName.trim().equals("")) {
-			if (callback != null) {
-				callback.onResponse(null, new IllegalArgumentException("apiName cannot be null"));
-			}
-			return;
+			future.setException(new IllegalArgumentException("apiName cannot be null"));
+			return future;
 		}
-		
+
 		if (httpMethod == null || httpMethod.trim().equals("")) {
-			if (callback != null) {
-				callback.onResponse(null, new IllegalArgumentException("httpMethod cannot be null"));
-			}
-			return;
+			future.setException(new IllegalArgumentException("httpMethod cannot be null"));
+			return future;
 		}
-		
+
 		Uri.Builder uriBuilder = Uri.parse(getAppUrl().toString()).buildUpon();
 		uriBuilder.path(apiBaseURL + apiName);
-		
+
 		if (parameters != null && parameters.size() > 0) {
 			for (Pair<String, String> parameter : parameters) {
 				uriBuilder.appendQueryParameter(parameter.first, parameter.second);
 			}
 		}
-		
+
 		ServiceFilterRequest request;
 		String url = uriBuilder.build().toString();
-		
+
 		if (httpMethod.equalsIgnoreCase(HttpGet.METHOD_NAME)) {
 			request = new ServiceFilterRequestImpl(new HttpGet(url), getAndroidHttpClientFactory());
 		} else if (httpMethod.equalsIgnoreCase(HttpPost.METHOD_NAME)) {
@@ -796,52 +1333,97 @@ public class MobileServiceClient {
 		} else if (httpMethod.equalsIgnoreCase(HttpDelete.METHOD_NAME)) {
 			request = new ServiceFilterRequestImpl(new HttpDelete(url), getAndroidHttpClientFactory());
 		} else {
-			if (callback != null) {
-				callback.onResponse(null, new IllegalArgumentException("httpMethod not supported"));
-			}
-			return;
+			future.setException(new IllegalArgumentException("httpMethod not supported"));
+			return future;
 		}
-		
+
 		if (requestHeaders != null && requestHeaders.size() > 0) {
-			for (Pair<String, String> header: requestHeaders) {
+			for (Pair<String, String> header : requestHeaders) {
 				request.addHeader(header.first, header.second);
 			}
 		}
-		
+
 		if (content != null) {
 			try {
 				request.setContent(content);
 			} catch (Exception e) {
-				if (callback != null) {
-					callback.onResponse(null, e);
-				}
-				return;
+				future.setException(e);
+				return future;
 			}
 		}
-		
+
 		MobileServiceConnection conn = createConnection();
-		
-		// Create AsyncTask to execute the request and parse the results
+
 		new RequestAsyncTask(request, conn) {
 			@Override
 			protected void onPostExecute(ServiceFilterResponse response) {
-				if (callback != null) {
-					callback.onResponse(response, mTaskException);
+				if (mTaskException != null) {
+					future.setException(mTaskException);
+				} else {
+					future.set(response);
 				}
 			}
-		}.executeTask();	
+		}.executeTask();
+
+		return future;
+	}
+
+	/**
+	 * Invokes a custom API
+	 * 
+	 * @deprecated use {@link invokeApiInternal(String apiName, byte[] content,
+	 *             String httpMethod, List<Pair<String, String>> requestHeaders,
+	 *             List<Pair<String, String>> parameters, String apiBaseURL)}
+	 *             instead
+	 * 
+	 * @param apiName
+	 *            The API name
+	 * @param content
+	 *            The byte array to send as the request body
+	 * @param httpMethod
+	 *            The HTTP Method used to invoke the API
+	 * @param requestHeaders
+	 *            The extra headers to send in the request
+	 * @param parameters
+	 *            The query string parameters sent in the request
+	 * @param apiBaseURL
+	 *            The base URL for api requests
+	 * @param callback
+	 *            The callback to invoke after the API execution
+	 */
+	public void invokeApiInternal(String apiName, byte[] content, String httpMethod, List<Pair<String, String>> requestHeaders,
+			List<Pair<String, String>> parameters, String apiBaseURL, final ServiceFilterResponseCallback callback) {
+
+		ListenableFuture<ServiceFilterResponse> invokeApiFuture = invokeApiInternal(apiName, content, httpMethod, requestHeaders, parameters, apiBaseURL);
+
+		Futures.addCallback(invokeApiFuture, new FutureCallback<ServiceFilterResponse>() {
+			@Override
+			public void onFailure(Throwable exception) {
+				if (exception instanceof Exception) {
+					callback.onResponse(MobileServiceException.getServiceResponse(exception), (Exception) exception);
+				} else {
+					callback.onResponse(MobileServiceException.getServiceResponse(exception), new Exception(exception));
+				}
+			}
+
+			@Override
+			public void onSuccess(ServiceFilterResponse result) {
+				callback.onResponse(result, null);
+			}
+		});
+
 	}
 
 	/**
 	 * Validates the class has an id property defined
+	 * 
 	 * @param clazz
 	 */
 	private <E> void validateClass(Class<E> clazz) {
-		if(clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers()))
-		{
+		if (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
 			throw new IllegalArgumentException("The class type used for creating a MobileServiceTable must be a concrete class");
 		}
-		
+
 		int idPropertyCount = 0;
 		for (Field field : clazz.getDeclaredFields()) {
 			SerializedName serializedName = field.getAnnotation(SerializedName.class);
@@ -855,7 +1437,7 @@ public class MobileServiceClient {
 				}
 			}
 		}
-		
+
 		if (idPropertyCount != 1) {
 			throw new IllegalArgumentException("The class representing the MobileServiceTable must have a single id property defined");
 		}
@@ -883,7 +1465,6 @@ public class MobileServiceClient {
 			final ServiceFilter oldServiceFilter = mServiceFilter;
 			final ServiceFilter newServiceFilter = serviceFilter;
 
-			// Composed service filter
 			newClient.mServiceFilter = new ServiceFilter() {
 				// Create a filter that after executing the new ServiceFilter
 				// executes the existing filter
@@ -891,25 +1472,18 @@ public class MobileServiceClient {
 				ServiceFilter internalServiceFilter = oldServiceFilter;
 
 				@Override
-				public void handleRequest(
-						ServiceFilterRequest request,
-						final NextServiceFilterCallback nextServiceFilterCallback,
-						ServiceFilterResponseCallback responseCallback) {
+				public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request,
+						final NextServiceFilterCallback nextServiceFilterCallback) {
 
 					// Executes new ServiceFilter
-					externalServiceFilter.handleRequest(request,
-							new NextServiceFilterCallback() {
+					return externalServiceFilter.handleRequest(request, new NextServiceFilterCallback() {
 
-								@Override
-								public void onNext(
-										ServiceFilterRequest request,
-										ServiceFilterResponseCallback responseCallback) {
-									// Execute existing ServiceFilter
-									internalServiceFilter.handleRequest(
-											request, nextServiceFilterCallback,
-											responseCallback);
-								}
-							}, responseCallback);
+						@Override
+						public ListenableFuture<ServiceFilterResponse> onNext(ServiceFilterRequest request) {
+							// Execute existing ServiceFilter
+							return internalServiceFilter.handleRequest(request, nextServiceFilterCallback);
+						}
+					});
 
 				}
 			};
@@ -929,10 +1503,8 @@ public class MobileServiceClient {
 			return new ServiceFilter() {
 
 				@Override
-				public void handleRequest(ServiceFilterRequest request,
-						NextServiceFilterCallback nextServiceFilterCallback,
-						ServiceFilterResponseCallback responseCallback) {
-					nextServiceFilterCallback.onNext(request, responseCallback);
+				public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+					return nextServiceFilterCallback.onNext(request);
 				}
 			};
 		} else {
@@ -945,7 +1517,7 @@ public class MobileServiceClient {
 	 * 
 	 * @return MobileServiceConnection
 	 */
-	MobileServiceConnection createConnection() {
+	public MobileServiceConnection createConnection() {
 		return new MobileServiceConnection(this);
 	}
 
@@ -963,9 +1535,8 @@ public class MobileServiceClient {
 	 * @param context
 	 *            The Context where the MobileServiceClient is created
 	 */
-	private void initialize(URL appUrl, String appKey,
-			MobileServiceUser currentUser, GsonBuilder gsonBuiler,
-			Context context, AndroidHttpClientFactory androidHttpClientFactory) {
+	private void initialize(URL appUrl, String appKey, MobileServiceUser currentUser, GsonBuilder gsonBuiler, Context context,
+			AndroidHttpClientFactory androidHttpClientFactory) {
 		if (appUrl == null || appUrl.toString().trim().length() == 0) {
 			throw new IllegalArgumentException("Invalid Application URL");
 		}
@@ -984,6 +1555,7 @@ public class MobileServiceClient {
 				// trailing "/" to a valid URL
 			}
 		}
+
 		mAppUrl = normalizedAppURL;
 		mAppKey = appKey;
 		mLoginManager = new LoginManager(this);
@@ -994,6 +1566,7 @@ public class MobileServiceClient {
 		mGsonBuilder = gsonBuiler;
 		mAndroidHttpClientFactory = androidHttpClientFactory;
 		mPush = new MobileServicePush(this, context);
+		mSyncContext = new MobileServiceSyncContext(this);
 	}
 
 	/**
@@ -1023,8 +1596,7 @@ public class MobileServiceClient {
 	 * @param deserializer
 	 *            The deserializer to use in the registration
 	 */
-	public <T> void registerDeserializer(Type type,
-			JsonDeserializer<T> deserializer) {
+	public <T> void registerDeserializer(Type type, JsonDeserializer<T> deserializer) {
 		mGsonBuilder.registerTypeAdapter(type, deserializer);
 	}
 
@@ -1051,11 +1623,11 @@ public class MobileServiceClient {
 	public void setContext(Context mContext) {
 		this.mContext = mContext;
 	}
-	
+
 	/**
 	 * Gets the AndroidHttpClientFactory
 	 * 
-	 *  @return
+	 * @return
 	 */
 	public AndroidHttpClientFactory getAndroidHttpClientFactory() {
 		return mAndroidHttpClientFactory;
@@ -1067,7 +1639,7 @@ public class MobileServiceClient {
 	public void setAndroidHttpClientFactory(AndroidHttpClientFactory mAndroidHttpClientFactory) {
 		this.mAndroidHttpClientFactory = mAndroidHttpClientFactory;
 	}
-	
+
 	/**
 	 * Gets the MobileServicePush used for push notifications
 	 */

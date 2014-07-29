@@ -17,6 +17,10 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
+/**
+ * MobileServiceApplication.java
+ */
 package com.microsoft.windowsazure.mobileservices;
 
 import java.util.UUID;
@@ -53,14 +57,13 @@ public final class MobileServiceApplication {
 	 * @return The Installation ID
 	 */
 	public static String getInstallationId(Context context) {
-		
-		//if the device is an emulator, return a fixed installation id
+
+		// if the device is an emulator, return a fixed installation id
 		if (isEmulator()) {
 			return "00000000-0000-0000-0000-000000000000";
 		}
-		
-		SharedPreferences preferences = PreferenceManager
-				.getDefaultSharedPreferences(context.getApplicationContext());
+
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context.getApplicationContext());
 
 		if (mInstallationId == null) {
 			String val = preferences.getString(INSTALLATION_ID_KEY, null);
@@ -71,8 +74,7 @@ public final class MobileServiceApplication {
 				mInstallationId = UUID.randomUUID().toString();
 
 				Editor preferencesEditor = preferences.edit();
-				preferencesEditor.putString(INSTALLATION_ID_KEY,
-						mInstallationId);
+				preferencesEditor.putString(INSTALLATION_ID_KEY, mInstallationId);
 				preferencesEditor.commit();
 			}
 		}

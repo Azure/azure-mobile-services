@@ -17,11 +17,14 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/*
+
+/**
  * UserAuthenticationCallback.java
  */
-
 package com.microsoft.windowsazure.mobileservices;
+
+import com.microsoft.windowsazure.mobileservices.authentication.MobileServiceUser;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 /**
  * Callback for the user authentication process
@@ -37,6 +40,5 @@ public interface UserAuthenticationCallback {
 	 * @param response
 	 *            Response object
 	 */
-	public void onCompleted(MobileServiceUser user, Exception exception,
-			ServiceFilterResponse response);
+	public void onCompleted(MobileServiceUser user, Exception exception, ServiceFilterResponse response);
 }

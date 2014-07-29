@@ -17,13 +17,15 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
+
 /**
- * TableOperationCallback.java
+ * ApiJsonOperationCallback.java
  */
 
 package com.microsoft.windowsazure.mobileservices;
 
 import com.google.gson.JsonElement;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 /**
  * Callback used after a custom Api invocation is executed using JSON
@@ -39,6 +41,5 @@ public interface ApiJsonOperationCallback {
 	 * @param response
 	 *            Response object
 	 */
-	public void onCompleted(JsonElement jsonObject, Exception exception,
-			ServiceFilterResponse response);
+	public void onCompleted(JsonElement jsonObject, Exception exception, ServiceFilterResponse response);
 }

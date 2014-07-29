@@ -24,6 +24,7 @@ import java.net.URLEncoder;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 
 import junit.framework.Assert;
 
@@ -32,25 +33,26 @@ import org.apache.http.StatusLine;
 
 import android.test.InstrumentationTestCase;
 
+import com.google.common.util.concurrent.ListenableFuture;
+import com.google.common.util.concurrent.SettableFuture;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-import com.microsoft.windowsazure.mobileservices.MobileServiceJsonTable;
-import com.microsoft.windowsazure.mobileservices.MobileServiceTable;
-import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
-import com.microsoft.windowsazure.mobileservices.QueryOrder;
-import com.microsoft.windowsazure.mobileservices.ServiceFilter;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
-import com.microsoft.windowsazure.mobileservices.TableDeleteCallback;
-import com.microsoft.windowsazure.mobileservices.TableJsonOperationCallback;
-import com.microsoft.windowsazure.mobileservices.TableJsonQueryCallback;
-import com.microsoft.windowsazure.mobileservices.TableOperationCallback;
-import com.microsoft.windowsazure.mobileservices.TableQueryCallback;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
+import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
+import com.microsoft.windowsazure.mobileservices.table.TableDeleteCallback;
+import com.microsoft.windowsazure.mobileservices.table.TableJsonOperationCallback;
+import com.microsoft.windowsazure.mobileservices.table.TableJsonQueryCallback;
+import com.microsoft.windowsazure.mobileservices.table.TableOperationCallback;
+import com.microsoft.windowsazure.mobileservices.table.TableQueryCallback;
+import com.microsoft.windowsazure.mobileservices.table.query.QueryOrder;
 
 public class MobileServiceTableTests extends InstrumentationTestCase {
 	String appUrl = "";
@@ -159,7 +161,7 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	}
 
 	public void testShouldThrowExceptionIfObjectDoesNotHaveIdProperty() throws Throwable {
-		
+
 		String tableName = "MyTableName";
 		MobileServiceClient client = null;
 
@@ -174,63 +176,96 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 			@SuppressWarnings("unused")
 			MobileServiceTable<PersonTestObjectWithoutId> msTable = client.getTable(tableName, PersonTestObjectWithoutId.class);
 			fail("The getTable invokation should fail");
-		}
-		catch (IllegalArgumentException e) {
+		} catch (IllegalArgumentException e) {
 			// It's ok.
 		}
-		
+
 	}
 
 	public void testInsertShouldThrowExceptionIfObjectHasIdPropertyDifferentThanZero() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store the object after the insertion, we need this to do
-		// the asserts outside the onSuccess method
-		final ResultsContainer container = new ResultsContainer();
-
 		// Object to insert
 		final JsonObject testObject = new JsonObject();
 
 		testObject.addProperty("name", "john");
 		testObject.addProperty("ID", 38);
-		
-		runTestOnUiThread(new Runnable() {
+
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Create get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
+
+		// Call the insert method
+		try {
+			msTable.insert(testObject).get();
+		} catch (Exception exception) {
+
+			Exception testException = null;
+
+			if (exception instanceof ExecutionException) {
+				testException = (Exception) exception.getCause();
+			} else {
+				testException = exception;
+			}
+
+			assertEquals("The entity to insert should not have a numeric ID property defined.", testException.getMessage());
+		}
+	}
+
+	public void testInsertShouldReturnEntityWithId() throws Throwable {
+
+		// Object to insert
+		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
+
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"id\":38, \"firstName\":\"John\", \"lastName\":\"Foo\", \"Age\":29}");
+				// call onResponse with the mocked response
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				// Create get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
+				resultFuture.set(response);
 
-				// Call the insert method
-				msTable.insert(testObject, new TableJsonOperationCallback() {
-
-					@Override
-					public void onCompleted(JsonObject entity, Exception exception, ServiceFilterResponse response) {
-						container.setErrorMessage(exception.getMessage());
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		// Create get the MobileService table
+		MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
 
-		// Asserts
-		assertEquals("The entity to insert should not have a numeric ID property defined.", container.getErrorMessage());
-		assertNull(container.getPersonWithoutId());
+		// Call the insert method
+		PersonTestObject p = msTable.insert(person).get();
+
+		Assert.assertNotNull("Person expected", p);
+		Assert.assertEquals(38, p.getId());
+		Assert.assertEquals(person.getFirstName(), p.getFirstName());
+		Assert.assertEquals("Foo", p.getLastName());
+		Assert.assertEquals(person.getAge(), p.getAge());
 	}
-	
-	public void testInsertShouldReturnEntityWithId() throws Throwable {
+
+	@SuppressWarnings("deprecation")
+	public void testInsertShouldReturnEntityWithIdCallback() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store the object after the insertion, we need this to do
@@ -240,47 +275,44 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		// Object to insert
 		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
 
-		runTestOnUiThread(new Runnable() {
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"id\":38, \"firstName\":\"John\", \"lastName\":\"Foo\", \"Age\":29}");
+				// call onResponse with the mocked response
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				resultFuture.set(response);
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				return resultFuture;
+			}
+		});
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{\"id\":38, \"firstName\":\"John\", \"lastName\":\"Foo\", \"Age\":29}");
-						// call onResponse with the mocked response
-						responseCallback.onResponse(response, null);
-					}
-				});
+		// Create get the MobileService table
+		MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
 
-				// Create get the MobileService table
-				MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
+		// Call the insert method
+		msTable.insert(person, new TableOperationCallback<PersonTestObject>() {
 
-				// Call the insert method
-				msTable.insert(person, new TableOperationCallback<PersonTestObject>() {
-
-					@Override
-					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						container.setPerson(entity);
-						latch.countDown();
-					}
-				});
+			@Override
+			public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+				container.setPerson(entity);
+				latch.countDown();
 			}
 		});
 
@@ -294,65 +326,46 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		Assert.assertEquals("Foo", p.getLastName());
 		Assert.assertEquals(person.getAge(), p.getAge());
 	}
-	
+
 	public void testInsertShouldReturnTheSameMutatedObject() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store the object after the insertion, we need this to do
-		// the asserts outside the onSuccess method
-		final ResultsContainer container = new ResultsContainer();
-
 		// Object to insert
 		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
 
-		runTestOnUiThread(new Runnable() {
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"id\":38, \"firstName\":\"John\", \"lastName\":\"Foo\", \"Age\":29}");
+				// call onResponse with the mocked response
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				resultFuture.set(response);
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{\"id\":38, \"firstName\":\"John\", \"lastName\":\"Foo\", \"Age\":29}");
-						// call onResponse with the mocked response
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				// Create get the MobileService table
-				MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
-
-				// Call the insert method
-				msTable.insert(person, new TableOperationCallback<PersonTestObject>() {
-
-					@Override
-					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						container.setPerson(entity);
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		// Create get the MobileService table
+		MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
+
+		// Call the insert method
+		PersonTestObject p = msTable.insert(person).get();
 
 		// Asserts
-		PersonTestObject p = container.getPerson();
 		Assert.assertNotNull("Person expected", p);
 		Assert.assertEquals(person, p);
 		Assert.assertEquals(38, p.getId());
@@ -360,66 +373,46 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		Assert.assertEquals("Foo", p.getLastName());
 		Assert.assertEquals(29, p.getAge());
 	}
-	
-	public void testUpdateShouldReturnTheSameMutatedObject() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
-		// Container to store the object after the insertion, we need this to do
-		// the asserts outside the onSuccess method
-		final ResultsContainer container = new ResultsContainer();
+	public void testUpdateShouldReturnTheSameMutatedObject() throws Throwable {
 
 		// Object to insert
 		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
 		person.setId(38);
 
-		runTestOnUiThread(new Runnable() {
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"id\":38, \"firstName\":\"John\", \"lastName\":\"Foo\", \"Age\":29}");
+				// call onResponse with the mocked response
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				resultFuture.set(response);
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{\"id\":38, \"firstName\":\"John\", \"lastName\":\"Foo\", \"Age\":29}");
-						// call onResponse with the mocked response
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				// Create get the MobileService table
-				MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
-
-				// Call the insert method
-				msTable.update(person, new TableOperationCallback<PersonTestObject>() {
-
-					@Override
-					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						container.setPerson(entity);
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		// Create get the MobileService table
+		MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
 
-		// Asserts
-		PersonTestObject p = container.getPerson();
+		// Call the insert method
+		PersonTestObject p = msTable.update(person).get();
 		Assert.assertNotNull("Person expected", p);
 		Assert.assertEquals(person, p);
 		Assert.assertEquals(38, p.getId());
@@ -429,189 +422,134 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	}
 
 	public void testInsertShouldReturnEntityWithIdWhenUsingAnnotationsForIdProperty() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store the object after the insertion, we need this to do
-		// the asserts outside the onSuccess method
-		final ResultsContainer container = new ResultsContainer();
 
 		// Object to insert
 		final IdPropertyWithGsonAnnotation testObject = new IdPropertyWithGsonAnnotation("John");
 
-		runTestOnUiThread(new Runnable() {
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"id\":38, \"name\":\"John\"}");
+				// call onResponse with the mocked response
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				resultFuture.set(response);
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{\"id\":38, \"name\":\"John\"}");
-						// call onResponse with the mocked response
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				// Create get the MobileService table
-				MobileServiceTable<IdPropertyWithGsonAnnotation> msTable = client.getTable(tableName, IdPropertyWithGsonAnnotation.class);
-
-				// Call the insert method
-				msTable.insert(testObject, new TableOperationCallback<IdPropertyWithGsonAnnotation>() {
-
-					@Override
-					public void onCompleted(IdPropertyWithGsonAnnotation entity, Exception exception, ServiceFilterResponse response) {
-						container.setIdPropertyWithGsonAnnotation(entity);
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		// Create get the MobileService table
+		MobileServiceTable<IdPropertyWithGsonAnnotation> msTable = client.getTable(tableName, IdPropertyWithGsonAnnotation.class);
+
+		// Call the insert method
+		IdPropertyWithGsonAnnotation o = msTable.insert(testObject).get();
 
 		// Asserts
-		IdPropertyWithGsonAnnotation o = container.getIdPropertyWithGsonAnnotation();
 		Assert.assertNotNull("Entity expected", o);
 		Assert.assertEquals(38, o.getId());
 		Assert.assertEquals(testObject.getName(), o.getName());
 	}
 
 	public void testInsertShouldReturnEntityWithIdWhenUsingDifferentCasingForIdProperty() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store the object after the insertion, we need this to do
-		// the asserts outside the onSuccess method
-		final ResultsContainer container = new ResultsContainer();
-
 		// Object to insert
 		final IdPropertyWithDifferentIdPropertyCasing testObject = new IdPropertyWithDifferentIdPropertyCasing("John");
 
-		runTestOnUiThread(new Runnable() {
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"id\":38, \"name\":\"John\"}");
+				// call onResponse with the mocked response
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				resultFuture.set(response);
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{\"id\":38, \"name\":\"John\"}");
-						// call onResponse with the mocked response
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				// Create get the MobileService table
-				MobileServiceTable<IdPropertyWithDifferentIdPropertyCasing> msTable = client.getTable(tableName, IdPropertyWithDifferentIdPropertyCasing.class);
-
-				// Call the insert method
-				msTable.insert(testObject, new TableOperationCallback<IdPropertyWithDifferentIdPropertyCasing>() {
-
-					@Override
-					public void onCompleted(IdPropertyWithDifferentIdPropertyCasing entity, Exception exception, ServiceFilterResponse response) {
-						container.setIdPropertyWithDifferentIdPropertyCasing(entity);
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		// Create get the MobileService table
+		MobileServiceTable<IdPropertyWithDifferentIdPropertyCasing> msTable = client.getTable(tableName, IdPropertyWithDifferentIdPropertyCasing.class);
+
+		// Call the insert method
+		IdPropertyWithDifferentIdPropertyCasing o = msTable.insert(testObject).get();
 
 		// Asserts
-		IdPropertyWithDifferentIdPropertyCasing o = container.getIdPropertyWithDifferentIdPropertyCasing();
 		Assert.assertNotNull("Entity expected", o);
 		Assert.assertEquals(38, o.getId());
 		Assert.assertEquals(testObject.getName(), o.getName());
 	}
-	
-	public void testInsertShouldReturnEntityWithIdWhenUsingStringId() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
-		// Container to store the object after the insertion, we need this to do
-		// the asserts outside the onSuccess method
-		final ResultsContainer container = new ResultsContainer();
+	public void testInsertShouldReturnEntityWithIdWhenUsingStringId() throws Throwable {
 
 		// Object to insert
 		final PersonTestObjectWithStringId person = new PersonTestObjectWithStringId("John", "Doe", 29);
 
-		runTestOnUiThread(new Runnable() {
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"id\":\"38\", \"firstName\":\"John\", \"lastName\":\"Foo\", \"Age\":29}");
+				// call onResponse with the mocked response
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				resultFuture.set(response);
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{\"id\":\"38\", \"firstName\":\"John\", \"lastName\":\"Foo\", \"Age\":29}");
-						// call onResponse with the mocked response
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				// Create get the MobileService table
-				MobileServiceTable<PersonTestObjectWithStringId> msTable = client.getTable(tableName, PersonTestObjectWithStringId.class);
-
-				// Call the insert method
-				msTable.insert(person, new TableOperationCallback<PersonTestObjectWithStringId>() {
-
-					@Override
-					public void onCompleted(PersonTestObjectWithStringId entity, Exception exception, ServiceFilterResponse response) {
-						container.setPersonWithStringId(entity);
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		// Create get the MobileService table
+		MobileServiceTable<PersonTestObjectWithStringId> msTable = client.getTable(tableName, PersonTestObjectWithStringId.class);
+
+		// Call the insert method
+		PersonTestObjectWithStringId p = msTable.insert(person).get();
 
 		// Asserts
-		PersonTestObjectWithStringId p = container.getPersonWithStringId();
 		Assert.assertNotNull("Person expected", p);
 		Assert.assertEquals(person, p);
 		Assert.assertEquals("38", p.getId());
@@ -619,57 +557,45 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		Assert.assertEquals("Foo", p.getLastName());
 		Assert.assertEquals(29, p.getAge());
 	}
-	
+
 	public void testInsertShouldMutateOriginalEntity() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Object to insert
 		final PersonTestObject originalPerson = new PersonTestObject("John", "Doe", 29);
 
-		runTestOnUiThread(new Runnable() {
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"id\":38, \"firstName\":\"John\", \"lastName\":\"Foo\", \"Age\":29}");
+				// call onResponse with the mocked response
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				resultFuture.set(response);
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{\"id\":38, \"firstName\":\"John\", \"lastName\":\"Foo\", \"Age\":29}");
-						// call onResponse with the mocked response
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				// Create get the MobileService table
-				MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
-
-				// Call the insert method
-				msTable.insert(originalPerson, new TableOperationCallback<PersonTestObject>() {
-
-					@Override
-					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		// Create get the MobileService table
+		MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
+
+		// Call the insert method
+		msTable.insert(originalPerson).get();
 
 		// Asserts
 		Assert.assertEquals(38, originalPerson.getId());
@@ -679,6 +605,57 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	}
 
 	public void testInsertShouldReturnJSONWithId() throws Throwable {
+
+		// Object to insert
+		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
+
+		final JsonObject jsonPerson = gsonBuilder.create().toJsonTree(person).getAsJsonObject();
+
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new JSon
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
+
+			@Override
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"id\":38}");
+				// call onResponse with the mocked response
+
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+				resultFuture.set(response);
+
+				return resultFuture;
+			}
+		});
+
+		// Create get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
+
+		// Call the insert method
+		JsonObject jsonEntity = msTable.insert(jsonPerson).get();
+
+		// Asserts
+		PersonTestObject p = gsonBuilder.create().fromJson(jsonEntity, PersonTestObject.class);
+		Assert.assertNotNull("Person expected", p);
+		Assert.assertEquals(38, p.getId());
+		Assert.assertEquals(person.getFirstName(), p.getFirstName());
+		Assert.assertEquals(person.getLastName(), p.getLastName());
+		Assert.assertEquals(person.getAge(), p.getAge());
+	}
+
+	@SuppressWarnings("deprecation")
+	public void testInsertShouldReturnJSONWithIdCallback() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store the object after the insertion, we need this to do
@@ -689,47 +666,45 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
 
 		final JsonObject jsonPerson = gsonBuilder.create().toJsonTree(person).getAsJsonObject();
-		runTestOnUiThread(new Runnable() {
+
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new JSon
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"id\":38}");
+				// call onResponse with the mocked response
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				// Add a filter to handle the request and create a new JSon
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				resultFuture.set(response);
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				return resultFuture;
+			}
+		});
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{\"id\":38}");
-						// call onResponse with the mocked response
-						responseCallback.onResponse(response, null);
-					}
-				});
+		// Create get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
 
-				// Create get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
+		// Call the insert method
+		msTable.insert(jsonPerson, new TableJsonOperationCallback() {
 
-				// Call the insert method
-				msTable.insert(jsonPerson, new TableJsonOperationCallback() {
-
-					@Override
-					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
-						container.setResponseValue(jsonEntity.toString());
-						latch.countDown();
-					}
-				});
+			@Override
+			public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+				container.setResponseValue(jsonEntity.toString());
+				latch.countDown();
 			}
 		});
 
@@ -745,234 +720,248 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	}
 
 	public void testInsertShouldRemoveIdsAndInsertIfJSONObjectHasMultipleIdProperties() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store the object after the insertion, we need this to do
-		// the asserts outside the onSuccess method
-		final ResultsContainer container = new ResultsContainer();
 
 		// Object to insert
 		final IdPropertyMultipleIdsTestObject element = new IdPropertyMultipleIdsTestObject("John");
 
 		final JsonObject jsonElement = gsonBuilder.create().toJsonTree(element).getAsJsonObject();
-		runTestOnUiThread(new Runnable() {
+
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new JSon
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"id\":38}");
+				// call onResponse with the mocked response
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				// Add a filter to handle the request and create a new JSon
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				resultFuture.set(response);
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				return resultFuture;
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{\"id\":38}");
-						// call onResponse with the mocked response
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				// Create get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
-
-
-				msTable.insert(jsonElement, new TableJsonOperationCallback() {
-
-					@Override
-					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
-						container.setResponseValue(jsonEntity.toString());
-						latch.countDown();
-					}
-				});
 			}
 		});
 
-		latch.await();
+		// Create get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
+
+		JsonObject jsonEntity = msTable.insert(jsonElement).get();
 
 		// Asserts
-		IdPropertyMultipleIdsTestObject e = gsonBuilder.create().fromJson(container.getResponseValue(), IdPropertyMultipleIdsTestObject.class);
+		IdPropertyMultipleIdsTestObject e = gsonBuilder.create().fromJson(jsonEntity, IdPropertyMultipleIdsTestObject.class);
 		Assert.assertNotNull("Entity expected", e);
 		Assert.assertEquals(38, e.getId());
 		Assert.assertEquals("John", e.getName());
-
 	}
 
 	public void testOperationHandleServerErrorProperly() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
-		runTestOnUiThread(new Runnable() {
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new JSon
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
-
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
-
-				// Add a filter to handle the request and create a new JSon
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setStatus(new StatusLine() {
 
 					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+					public int getStatusCode() {
+						return 500;
+					}
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setStatus(new StatusLine() {
+					@Override
+					public String getReasonPhrase() {
+						return "Internal server error";
+					}
 
-							@Override
-							public int getStatusCode() {
-								return 500;
-							}
-
-							@Override
-							public String getReasonPhrase() {
-								return "Internal server error";
-							}
-
-							@Override
-							public ProtocolVersion getProtocolVersion() {
-								return null;
-							}
-						});
-
-						response.setContent("{'error': 'Internal server error'}");
-						// call onResponse with the mocked response
-						responseCallback.onResponse(response, new MobileServiceException("ERROR"));
+					@Override
+					public ProtocolVersion getProtocolVersion() {
+						return null;
 					}
 				});
 
-				// Create get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
+				response.setContent("{'error': 'Internal server error'}");
+				// call onResponse with the mocked response
 
-				JsonObject json = new JsonParser().parse("{'myField': 'invalid value'}").getAsJsonObject();
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				// Call the insert method
-				try {
-					msTable.insert(json, new TableJsonOperationCallback() {
+				resultFuture.setException(new MobileServiceException("ERROR"));
 
-						@Override
-						public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
-							if (exception == null) {
-								Assert.fail();
-							} else {
-								assertTrue(exception instanceof MobileServiceException);
-							}
-							latch.countDown();
-						}
-					});
-				} catch (Exception e) {
-					latch.countDown();
-				}
+				return resultFuture;
+
 			}
 		});
 
-		latch.await();
+		// Create get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
+
+		JsonObject json = new JsonParser().parse("{'myField': 'invalid value'}").getAsJsonObject();
+
+		// Call the insert method
+		try {
+			msTable.insert(json).get();
+			Assert.fail();
+		} catch (Exception exception) {
+
+			Exception testException = null;
+
+			if (exception instanceof ExecutionException) {
+				testException = (Exception) exception.getCause();
+			} else {
+				testException = exception;
+			}
+
+			assertTrue(testException instanceof MobileServiceException);
+		}
 	}
 
 	public void testOperationWithErrorAndNoContentShowStatusCode() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
-		runTestOnUiThread(new Runnable() {
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new JSon
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
-
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
-
-				// Add a filter to handle the request and create a new JSon
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setStatus(new StatusLine() {
 
 					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+					public int getStatusCode() {
+						return 500;
+					}
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setStatus(new StatusLine() {
+					@Override
+					public String getReasonPhrase() {
+						return "Internal server error";
+					}
 
-							@Override
-							public int getStatusCode() {
-								return 500;
-							}
-
-							@Override
-							public String getReasonPhrase() {
-								return "Internal server error";
-							}
-
-							@Override
-							public ProtocolVersion getProtocolVersion() {
-								return null;
-							}
-						});
-
-						response.setContent((String)null);
-						// call onResponse with the mocked response
-						responseCallback.onResponse(
-								response,
-								new MobileServiceException("Error while processing request", new MobileServiceException(String.format("{'code': %d}", response
-										.getStatus().getStatusCode()))));
+					@Override
+					public ProtocolVersion getProtocolVersion() {
+						return null;
 					}
 				});
 
-				// Create get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
+				response.setContent((String) null);
+				// call onResponse with the mocked response
 
-				JsonObject json = new JsonParser().parse("{'myField': 'invalid value'}").getAsJsonObject();
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				// Call the insert method
-				try {
-					msTable.insert(json, new TableJsonOperationCallback() {
+				resultFuture.setException(new MobileServiceException("Error while processing request", new MobileServiceException(String.format("{'code': %d}",
+						response.getStatus().getStatusCode()))));
 
-						@Override
-						public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
-							if (exception == null) {
-								Assert.fail();
-							} else {
-								assertTrue(exception instanceof MobileServiceException);
-								Throwable cause = exception.getCause();
-								assertTrue(cause.getMessage().contains("500"));
-								latch.countDown();
-							}
+				return resultFuture;
 
-							latch.countDown();
-						}
-					});
-				} catch (Exception e) {
-					latch.countDown();
-				}
 			}
 		});
 
-		latch.await();
+		// Create get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
+
+		JsonObject json = new JsonParser().parse("{'myField': 'invalid value'}").getAsJsonObject();
+
+		// Call the insert method
+		try {
+			msTable.insert(json).get();
+			Assert.fail();
+		} catch (Exception exception) {
+
+			Exception testException = null;
+
+			if (exception instanceof ExecutionException) {
+				testException = (Exception) exception.getCause();
+			} else {
+				testException = exception;
+			}
+
+			assertTrue(testException instanceof MobileServiceException);
+			assertTrue(testException.getCause().getMessage().contains("500"));
+		}
 	}
 
 	public void testUpdateShouldReturnEntityWithDifferentNameAndAge() throws Throwable {
+
+		// Object to update
+		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
+		person.setId(10);
+
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
+
+			@Override
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"firstName\":\"Mike\", \"age\":50}");
+				// call onResponse with the mocked response
+
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+				resultFuture.set(response);
+
+				return resultFuture;
+			}
+		});
+
+		// Get the MobileService table
+		MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
+
+		// Call the update method
+		PersonTestObject p = msTable.update(person).get();
+
+		// Asserts
+		Assert.assertNotNull("Person expected", p);
+		Assert.assertEquals(person.getId(), p.getId());
+		Assert.assertEquals("Mike", p.getFirstName());
+		Assert.assertEquals(person.getLastName(), p.getLastName());
+		Assert.assertEquals(50, p.getAge());
+	}
+
+	@SuppressWarnings("deprecation")
+	public void testUpdateShouldReturnEntityWithDifferentNameAndAgeCallback() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store the object after the update, we need this to do
@@ -983,47 +972,43 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
 		person.setId(10);
 
-		runTestOnUiThread(new Runnable() {
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"firstName\":\"Mike\", \"age\":50}");
+				// call onResponse with the mocked response
 
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				resultFuture.set(response);
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				return resultFuture;
+			}
+		});
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{\"firstName\":\"Mike\", \"age\":50}");
-						// call onResponse with the mocked response
-						responseCallback.onResponse(response, null);
-					}
-				});
+		// Get the MobileService table
+		MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
 
-				// Get the MobileService table
-				MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
+		// Call the update method
+		msTable.update(person, new TableOperationCallback<PersonTestObject>() {
 
-				// Call the update method
-				msTable.update(person, new TableOperationCallback<PersonTestObject>() {
-
-					@Override
-					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						container.setPerson(entity);
-						latch.countDown();
-					}
-				});
-
+			@Override
+			public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+				container.setPerson(entity);
+				latch.countDown();
 			}
 		});
 
@@ -1039,56 +1024,43 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	}
 
 	public void testUpdateShouldMutateOriginalEntity() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Object to update
 		final PersonTestObject originalPerson = new PersonTestObject("John", "Doe", 29);
 		originalPerson.setId(10);
 
-		runTestOnUiThread(new Runnable() {
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"firstName\":\"Mike\", \"age\":50, \"id\":38}");
+				// call onResponse with the mocked response
 
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				resultFuture.set(response);
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
-
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{\"firstName\":\"Mike\", \"age\":50, \"id\":38}");
-						// call onResponse with the mocked response
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				// Get the MobileService table
-				MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
-
-				// Call the update method
-				msTable.update(originalPerson, new TableOperationCallback<PersonTestObject>() {
-
-					@Override
-					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
-
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		// Get the MobileService table
+		MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
+
+		// Call the update method
+		msTable.update(originalPerson).get();
 
 		// Asserts
 		Assert.assertEquals(38, originalPerson.getId());
@@ -1096,58 +1068,46 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		Assert.assertEquals("Doe", originalPerson.getLastName());
 		Assert.assertEquals(50, originalPerson.getAge());
 	}
-	
+
 	public void testUpdateShouldMutateOriginalEntityWithStringId() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Object to update
 		final PersonTestObjectWithStringId originalPerson = new PersonTestObjectWithStringId("John", "Doe", 29);
 		originalPerson.setId("10");
 
-		runTestOnUiThread(new Runnable() {
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"firstName\":\"Mike\", \"age\":50, \"id\":\"38\"}");
+				// call onResponse with the mocked response
 
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				resultFuture.set(response);
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
-
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{\"firstName\":\"Mike\", \"age\":50, \"id\":\"38\"}");
-						// call onResponse with the mocked response
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				// Get the MobileService table
-				MobileServiceTable<PersonTestObjectWithStringId> msTable = client.getTable(tableName, PersonTestObjectWithStringId.class);
-
-				// Call the update method
-				msTable.update(originalPerson, new TableOperationCallback<PersonTestObjectWithStringId>() {
-
-					@Override
-					public void onCompleted(PersonTestObjectWithStringId entity, Exception exception, ServiceFilterResponse response) {
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 
 			}
 		});
 
-		latch.await();
+		// Get the MobileService table
+		MobileServiceTable<PersonTestObjectWithStringId> msTable = client.getTable(tableName, PersonTestObjectWithStringId.class);
+
+		// Call the update method
+		msTable.update(originalPerson).get();
 
 		// Asserts
 		Assert.assertEquals("38", originalPerson.getId());
@@ -1157,6 +1117,58 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	}
 
 	public void testUpdateShouldReturnJSONWithDifferentNameAndAge() throws Throwable {
+
+		// Object to update
+		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
+		person.setId(10);
+
+		final JsonObject jsonPerson = gsonBuilder.create().toJsonTree(person).getAsJsonObject();
+
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
+
+			@Override
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"firstName\":\"Mike\", \"age\":50}");
+				// call onResponse with the mocked response
+
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+				resultFuture.set(response);
+
+				return resultFuture;
+			}
+		});
+
+		// Get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
+
+		// Call the delete method
+		JsonObject jsonEntity = msTable.update(jsonPerson).get();
+
+		// Asserts
+		PersonTestObject p = gsonBuilder.create().fromJson(jsonEntity, PersonTestObject.class);
+		Assert.assertNotNull("Person expected", p);
+		Assert.assertEquals(person.getId(), p.getId());
+		Assert.assertEquals("Mike", p.getFirstName());
+		Assert.assertEquals(person.getLastName(), p.getLastName());
+		Assert.assertEquals(50, p.getAge());
+	}
+
+	@SuppressWarnings("deprecation")
+	public void testUpdateShouldReturnJSONWithDifferentNameAndAgeCallback() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store the object after the update, we need this to do
@@ -1169,48 +1181,44 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 		final JsonObject jsonPerson = gsonBuilder.create().toJsonTree(person).getAsJsonObject();
 
-		runTestOnUiThread(new Runnable() {
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"firstName\":\"Mike\", \"age\":50}");
+				// call onResponse with the mocked response
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				resultFuture.set(response);
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				return resultFuture;
+			}
+		});
 
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{\"firstName\":\"Mike\", \"age\":50}");
-						// call onResponse with the mocked response
-						responseCallback.onResponse(response, null);
-					}
-				});
+		// Get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
 
-				// Get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
+		// Call the delete method
+		msTable.update(jsonPerson, new TableJsonOperationCallback() {
 
-				// Call the delete method
-				msTable.update(jsonPerson, new TableJsonOperationCallback() {
-
-					@Override
-					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
-						container.setResponseValue(jsonEntity.toString());
-						latch.countDown();
-					}
-				});
-
+			@Override
+			public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+				container.setResponseValue(jsonEntity.toString());
+				latch.countDown();
 			}
 		});
 
@@ -1226,121 +1234,144 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	}
 
 	public void testUpdateShouldReturnJSONWithDifferentNameWhenUsingIdWithDifferentCasing() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store the object after the update, we need this to do
-		// the asserts outside the onSuccess method
-		final ResultsContainer container = new ResultsContainer();
 
 		// Object to update
 		final IdPropertyWithDifferentIdPropertyCasing objectToUpdate = new IdPropertyWithDifferentIdPropertyCasing("John");
 		objectToUpdate.setId(10);
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				MobileServiceClient client = null;
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent("{\"id\":10,\"name\":\"Mike\"}");
+				// call onResponse with the mocked response
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				resultFuture.set(response);
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent("{\"id\":10,\"name\":\"Mike\"}");
-						// call onResponse with the mocked response
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				// Get the MobileService table
-				MobileServiceTable<IdPropertyWithDifferentIdPropertyCasing> msTable = client.getTable(IdPropertyWithDifferentIdPropertyCasing.class);
-
-				// Call the delete method
-				msTable.update(objectToUpdate, new TableOperationCallback<IdPropertyWithDifferentIdPropertyCasing>() {
-					
-					@Override
-					public void onCompleted(IdPropertyWithDifferentIdPropertyCasing entity,
-							Exception exception, ServiceFilterResponse response) {
-						container.setIdPropertyWithDifferentIdPropertyCasing(entity);
-						latch.countDown();						
-					}
-				});
-
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		// Get the MobileService table
+		MobileServiceTable<IdPropertyWithDifferentIdPropertyCasing> msTable = client.getTable(IdPropertyWithDifferentIdPropertyCasing.class);
+
+		// Call the delete method
+		IdPropertyWithDifferentIdPropertyCasing o = msTable.update(objectToUpdate).get();
 
 		// Asserts
-		IdPropertyWithDifferentIdPropertyCasing o = container.getIdPropertyWithDifferentIdPropertyCasing();
 		Assert.assertNotNull("Object expected", o);
 		Assert.assertEquals(objectToUpdate.getId(), o.getId());
 		Assert.assertEquals("Mike", o.getName());
 	}
 
 	public void testUpdateShouldThrowExceptionIfEntityHasNoValidId() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store the object after the update, we need this to do
-		// the asserts outside the onSuccess method
-		final ResultsContainer container = new ResultsContainer();
 
 		// Object to update
 		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
 		person.setId(0);
 
-		runTestOnUiThread(new Runnable() {
+		String tableName = "MyTableName";
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Get the MobileService table
+		MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
+
+		// Call the update method
+
+		PersonTestObject p = null;
+		try {
+			p = msTable.update(person).get();
+			Assert.fail();
+		} catch (Exception exception) {
+			// Asserts
+			Assert.assertNull("Null person expected", p);
+
+			Exception testException = null;
+
+			if (exception instanceof ExecutionException) {
+				testException = (Exception) exception.getCause();
+			} else {
+				testException = exception;
+			}
+
+			Assert.assertEquals("The entity has an invalid numeric value on id property.", testException.getMessage());
+		}
+	}
+
+	public void testDeleteUsingEntityShouldReturnTheExpectedRequestUrl() throws Throwable {
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		// Object to delete
+		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
+		person.setId(10);
+
+		final String tableName = "MyTableName";
+
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and store the request URL.
+		// Send a mock response
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				String tableName = "MyTableName";
-				MobileServiceClient client = null;
+				container.setRequestUrl(request.getUrl());
+				// call onResponse with the mocked response
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-				// Get the MobileService table
-				MobileServiceTable<PersonTestObject> msTable = client.getTable(tableName, PersonTestObject.class);
+				resultFuture.set(new ServiceFilterResponseMock());
 
-				// Call the update method
-				msTable.update(person, new TableOperationCallback<PersonTestObject>() {
-
-					@Override
-					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						container.setPerson(entity);
-						container.setErrorMessage(exception.getMessage());
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 
 			}
 		});
 
-		latch.await();
+		// Get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
 
-		// Asserts
-		PersonTestObject p = container.getPerson();
-		Assert.assertNull("Null person expected", p);
-		Assert.assertEquals("The entity has an invalid numeric value on id property.", container.getErrorMessage());
+		// Call the delete method sending the entity to delete
+		try {
+			msTable.delete(person).get();
+			Assert.assertTrue("Opperation should have succeded", true);
+		} catch (Exception exception) {
+			Assert.assertTrue("Opperation should have succeded", false);
+		}
+
+		assertEquals(this.appUrl + "tables/" + tableName + "/" + person.getId(), container.getRequestUrl());
 	}
 
-	public void testDeleteUsingEntityShouldReturnTheExpectedRequestUrl() throws Throwable {
+	@SuppressWarnings("deprecation")
+	public void testDeleteUsingEntityShouldReturnTheExpectedRequestUrlCallback() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -1352,44 +1383,43 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 		final String tableName = "MyTableName";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and store the request URL.
+		// Send a mock response
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				container.setRequestUrl(request.getUrl());
+				// call onResponse with the mocked response
 
-				// Add a filter to handle the request and store the request URL.
-				// Send a mock response
-				client = client.withFilter(new ServiceFilter() {
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				resultFuture.set(new ServiceFilterResponseMock());
 
-						container.setRequestUrl(request.getUrl());
-						// call onResponse with the mocked response
-						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
-					}
-				});
+				return resultFuture;
 
-				// Get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
+			}
+		});
 
-				// Call the delete method sending the entity to delete
-				msTable.delete(person, new TableDeleteCallback() {
+		// Get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
 
-					@Override
-					public void onCompleted(Exception exception, ServiceFilterResponse response) {
-						container.setOperationSucceded(exception == null);
-						latch.countDown();
-					}
-				});
+		// Call the delete method sending the entity to delete
+		msTable.delete(person, new TableDeleteCallback() {
+
+			@Override
+			public void onCompleted(Exception exception, ServiceFilterResponse response) {
+				container.setOperationSucceded(exception == null);
+				latch.countDown();
 			}
 		});
 
@@ -1401,7 +1431,6 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	}
 
 	public void testDeleteUsingIdShouldReturnTheExpectedRequestUrl() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
@@ -1411,56 +1440,103 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 		final String tableName = "MyTableName";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				container.setRequestUrl(request.getUrl());
+				// call onResponse with the mocked response
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				resultFuture.set(new ServiceFilterResponseMock());
 
-						container.setRequestUrl(request.getUrl());
-						// call onResponse with the mocked response
-						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
-					}
-				});
+				return resultFuture;
+			}
+		});
 
-				// Create get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
+		// Create get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
 
-				// Call the delete method
-				msTable.delete(personId, new TableDeleteCallback() {
+		// Call the delete method
+		try {
+			msTable.delete(personId).get();
+			Assert.assertTrue("Opperation should have succeded", true);
+		} catch (Exception exception) {
+			Assert.assertTrue("Opperation should have succeded", false);
+		}
 
-					@Override
-					public void onCompleted(Exception exception, ServiceFilterResponse response) {
-						container.setOperationSucceded(exception == null);
-						latch.countDown();
-					}
-				});
+		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId, container.getRequestUrl());
+
+	}
+
+	public void testDeleteUsingJSONShouldReturnTheExpectedRequestUrl() throws Throwable {
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		// Object to delete
+		final PersonTestObject person = new PersonTestObject("John", "Doe", 29);
+		person.setId(10);
+
+		final JsonObject jsonPerson = gsonBuilder.create().toJsonTree(person).getAsJsonObject();
+
+		final String tableName = "MyTableName";
+
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and store the request URL.
+		// Send a mock response
+		client = client.withFilter(new ServiceFilter() {
+
+			@Override
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+				container.setRequestUrl(request.getUrl());
+				// call onResponse with the mocked response
+
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+				resultFuture.set(new ServiceFilterResponseMock());
+
+				return resultFuture;
 
 			}
 		});
 
-		latch.await();
+		// Get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
 
-		// Asserts
-		Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
-		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId, container.getRequestUrl());
+		// Call the delete method sending the entity to delete
+		try {
+			msTable.delete(jsonPerson).get();
+			Assert.assertTrue("Opperation should have succeded", true);
+		} catch (Exception exception) {
+			Assert.assertTrue("Opperation should have succeded", false);
+		}
+
+		assertEquals(this.appUrl + "tables/" + tableName + "/" + person.getId(), container.getRequestUrl());
 	}
 
-	public void testDeleteUsingJSONShouldReturnTheExpectedRequestUrl() throws Throwable {
+	@SuppressWarnings("deprecation")
+	public void testDeleteUsingJSONShouldReturnTheExpectedRequestUrlCallback() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -1474,44 +1550,43 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 		final String tableName = "MyTableName";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and store the request URL.
+		// Send a mock response
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				container.setRequestUrl(request.getUrl());
+				// call onResponse with the mocked response
 
-				// Add a filter to handle the request and store the request URL.
-				// Send a mock response
-				client = client.withFilter(new ServiceFilter() {
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				resultFuture.set(new ServiceFilterResponseMock());
 
-						container.setRequestUrl(request.getUrl());
-						// call onResponse with the mocked response
-						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
-					}
-				});
+				return resultFuture;
 
-				// Get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
+			}
+		});
 
-				// Call the delete method sending the entity to delete
-				msTable.delete(jsonPerson, new TableDeleteCallback() {
+		// Get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
 
-					@Override
-					public void onCompleted(Exception exception, ServiceFilterResponse response) {
-						container.setOperationSucceded(exception == null);
-						latch.countDown();
-					}
-				});
+		// Call the delete method sending the entity to delete
+		msTable.delete(jsonPerson, new TableDeleteCallback() {
+
+			@Override
+			public void onCompleted(Exception exception, ServiceFilterResponse response) {
+				container.setOperationSucceded(exception == null);
+				latch.countDown();
 			}
 		});
 
@@ -1523,6 +1598,59 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	}
 
 	public void testSimpleQueryShouldReturnResults() throws Throwable {
+
+		final String tableName = "MyTableName";
+
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
+
+			@Override
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+				// PersonTestObject JSon template
+				String personJsonTemplate = "{\"id\": %d,\"firstName\":\"%s\",\"lastName\":\"%s\",\"age\":%d}";
+
+				// Generate JSon string with 2 objects
+				String responseContent = "[";
+				responseContent += String.format(personJsonTemplate, 1, "Mike", "Foo", 27) + ",";
+				responseContent += String.format(personJsonTemplate, 2, "John", "Doe", 35);
+				responseContent += "]";
+
+				// Create a mock response and set the mocked JSon
+				// content
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+
+				response.setContent(responseContent);
+
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+				resultFuture.set(response);
+
+				return resultFuture;
+
+			}
+		});
+
+		List<PersonTestObject> p = client.getTable(tableName, PersonTestObject.class).execute().get();
+
+		// Asserts
+		assertNotNull("A list of people is expected", p);
+		assertEquals(2, p.size());
+		assertEquals(p.get(0).getId(), 1);
+		assertEquals(p.get(1).getId(), 2);
+		assertEquals(p.get(0).getLastName(), "Foo");
+		assertEquals(p.get(1).getLastName(), "Doe");
+
+	}
+
+	@SuppressWarnings("deprecation")
+	public void testSimpleQueryShouldReturnResultsCallback() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -1530,50 +1658,49 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 		final String tableName = "MyTableName";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				client = client.withFilter(new ServiceFilter() {
+				// PersonTestObject JSon template
+				String personJsonTemplate = "{\"id\": %d,\"firstName\":\"%s\",\"lastName\":\"%s\",\"age\":%d}";
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				// Generate JSon string with 2 objects
+				String responseContent = "[";
+				responseContent += String.format(personJsonTemplate, 1, "Mike", "Foo", 27) + ",";
+				responseContent += String.format(personJsonTemplate, 2, "John", "Doe", 35);
+				responseContent += "]";
 
-						// PersonTestObject JSon template
-						String personJsonTemplate = "{\"id\": %d,\"firstName\":\"%s\",\"lastName\":\"%s\",\"age\":%d}";
+				// Create a mock response and set the mocked JSon
+				// content
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
 
-						// Generate JSon string with 2 objects
-						String responseContent = "[";
-						responseContent += String.format(personJsonTemplate, 1, "Mike", "Foo", 27) + ",";
-						responseContent += String.format(personJsonTemplate, 2, "John", "Doe", 35);
-						responseContent += "]";
+				response.setContent(responseContent);
 
-						// Create a mock response and set the mocked JSon
-						// content
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent(responseContent);
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						responseCallback.onResponse(response, null);
-					}
-				});
+				resultFuture.set(response);
 
-				client.getTable(tableName, PersonTestObject.class).execute(new TableQueryCallback<PersonTestObject>() {
+				return resultFuture;
 
-					@Override
-					public void onCompleted(List<PersonTestObject> result, int count, Exception exception, ServiceFilterResponse response) {
-						container.setPeopleResult(result);
-						container.setCount(count);
-						latch.countDown();
-					}
-				});
+			}
+		});
+
+		client.getTable(tableName, PersonTestObject.class).execute(new TableQueryCallback<PersonTestObject>() {
+
+			@Override
+			public void onCompleted(List<PersonTestObject> result, int count, Exception exception, ServiceFilterResponse response) {
+				container.setPeopleResult(result);
+				container.setCount(count);
+				latch.countDown();
 			}
 		});
 
@@ -1587,11 +1714,55 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		assertEquals(p.get(1).getId(), 2);
 		assertEquals(p.get(0).getLastName(), "Foo");
 		assertEquals(p.get(1).getLastName(), "Doe");
-		assertEquals(0, container.getCount());
-
+		assertEquals(-1, container.getCount());
 	}
 
 	public void testSimpleQueryShouldReturnJSONResults() throws Throwable {
+
+		final String tableName = "MyTableName";
+
+		// PersonTestObject JSon template
+		String personJsonTemplate = "{\"id\":%d,\"firstName\":\"%s\",\"lastName\":\"%s\",\"age\":%d}";
+
+		// Generate JSon string with 2 objects
+		final String responseContent = "[" + String.format(personJsonTemplate, 1, "Mike", "Foo", 27) + ","
+				+ String.format(personJsonTemplate, 2, "John", "Doe", 35) + "]";
+
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
+
+			@Override
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+				// Create a mock response and set the mocked JSon
+				// content
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent(responseContent);
+
+				response.setContent(responseContent);
+
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+				resultFuture.set(response);
+
+				return resultFuture;
+			}
+		});
+
+		JsonElement result = client.getTable(tableName).execute().get();
+
+		// Asserts
+		assertEquals(responseContent, result.toString());
+	}
+
+	@SuppressWarnings("deprecation")
+	public void testSimpleQueryShouldReturnJSONResultsCallback() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -1606,41 +1777,39 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		final String responseContent = "[" + String.format(personJsonTemplate, 1, "Mike", "Foo", 27) + ","
 				+ String.format(personJsonTemplate, 2, "John", "Doe", 35) + "]";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				client = client.withFilter(new ServiceFilter() {
+				// Create a mock response and set the mocked JSon
+				// content
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent(responseContent);
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				response.setContent(responseContent);
 
-						// Create a mock response and set the mocked JSon
-						// content
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent(responseContent);
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						responseCallback.onResponse(response, null);
-					}
-				});
+				resultFuture.set(response);
 
-				client.getTable(tableName).execute(new TableJsonQueryCallback() {
+				return resultFuture;
+			}
+		});
 
-					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
-						container.setResponseValue(result.toString());
-						container.setCount(count);
-						latch.countDown();
-					}
-				});
+		client.getTable(tableName).execute(new TableJsonQueryCallback() {
+
+			@Override
+			public void onCompleted(JsonElement result, Exception exception, ServiceFilterResponse response) {
+				container.setResponseValue(result.toString());
+				latch.countDown();
 			}
 		});
 
@@ -1648,195 +1817,184 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 		// Asserts
 		assertEquals(responseContent, container.getResponseValue());
-		assertEquals(0, container.getCount());
-
 	}
 
 	public void testSimpleQueryShouldReturnEmptyArray() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store callback's results and do the asserts.
-		final ResultsContainer container = new ResultsContainer();
 
 		final String tableName = "MyTableName";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				client = client.withFilter(new ServiceFilter() {
+				// Generate JSon string with 2 objects
+				String responseContent = "[]";
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				// Create a mock response and set the mocked JSon
+				// content
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent(responseContent);
 
-						// Generate JSon string with 2 objects
-						String responseContent = "[]";
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						// Create a mock response and set the mocked JSon
-						// content
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent(responseContent);
+				resultFuture.set(response);
 
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				client.getTable(tableName, PersonTestObject.class).execute(new TableQueryCallback<PersonTestObject>() {
-
-					@Override
-					public void onCompleted(List<PersonTestObject> result, int count, Exception exception, ServiceFilterResponse response) {
-						container.setPeopleResult(result);
-						container.setCount(count);
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		List<PersonTestObject> p = client.getTable(tableName, PersonTestObject.class).execute().get();
 
 		// Asserts
-		List<PersonTestObject> p = container.getPeopleResult();
 		assertNotNull("A list of people is expected", p);
 		assertEquals(0, p.size());
-		assertEquals(0, container.getCount());
-
 	}
 
 	public void testSimpleJSONSelectShouldReturnEmptyJSONArray() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store callback's results and do the asserts.
-		final ResultsContainer container = new ResultsContainer();
 
 		final String tableName = "MyTableName";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				client = client.withFilter(new ServiceFilter() {
+				// Generate JSon string with 2 objects
+				String responseContent = "[]";
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				// Create a mock response and set the mocked JSon
+				// content
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent(responseContent);
 
-						// Generate JSon string with 2 objects
-						String responseContent = "[]";
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						// Create a mock response and set the mocked JSon
-						// content
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent(responseContent);
+				resultFuture.set(response);
 
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				client.getTable(tableName).execute(new TableJsonQueryCallback() {
-
-					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
-						container.setResponseValue(result.toString());
-						container.setCount(count);
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		JsonElement result = client.getTable(tableName).execute().get();
 
 		// Asserts
-		assertEquals("[]", container.getResponseValue());
-		assertEquals(0, container.getCount());
-
+		assertEquals("[]", result.toString());
 	}
 
 	public void testInlineCountSelectShouldReturnResultsWithCount() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store callback's results and do the asserts.
-		final ResultsContainer container = new ResultsContainer();
 
 		final String tableName = "MyTableName";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+				// PersonTestObject JSon template
+				String personJsonTemplate = "{\"id\": %d,\"firstName\":\"%s\",\"lastName\":\"%s\",\"age\":%d}";
 
-				client = client.withFilter(new ServiceFilter() {
+				// Create string with results and count values.
+				String responseContent = "{\"results\":[";
+				responseContent += String.format(personJsonTemplate, 1, "Mike", "Foo", 27) + ",";
+				responseContent += String.format(personJsonTemplate, 2, "John", "Doe", 35);
+				responseContent += "]";
+				responseContent += ",\"count\":\"15\"}";
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-						// PersonTestObject JSon template
-						String personJsonTemplate = "{\"id\": %d,\"firstName\":\"%s\",\"lastName\":\"%s\",\"age\":%d}";
+				// Create a mock response and set the mocked JSon
+				// content
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent(responseContent);
 
-						// Create string with results and count values.
-						String responseContent = "{\"results\":[";
-						responseContent += String.format(personJsonTemplate, 1, "Mike", "Foo", 27) + ",";
-						responseContent += String.format(personJsonTemplate, 2, "John", "Doe", 35);
-						responseContent += "]";
-						responseContent += ",\"count\":\"15\"}";
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						// Create a mock response and set the mocked JSon
-						// content
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent(responseContent);
+				resultFuture.set(response);
 
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				client.getTable(tableName, PersonTestObject.class).execute(new TableQueryCallback<PersonTestObject>() {
-
-					@Override
-					public void onCompleted(List<PersonTestObject> result, int count, Exception exception, ServiceFilterResponse response) {
-						container.setPeopleResult(result);
-						container.setCount(count);
-						latch.countDown();
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		List<PersonTestObject> p = client.getTable(tableName, PersonTestObject.class).execute().get();
 
 		// Asserts
-		List<PersonTestObject> p = container.getPeopleResult();
 		assertNotNull("A list of people is expected", p);
 		assertEquals(2, p.size());
 		assertEquals(p.get(0).getId(), 1);
 		assertEquals(p.get(1).getId(), 2);
 		assertEquals(p.get(0).getLastName(), "Foo");
 		assertEquals(p.get(1).getLastName(), "Doe");
-		assertEquals(15, container.getCount());
 	}
 
 	public void testLookupShouldReturnAPerson() throws Throwable {
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		// Person Id
+		final int personId = 4;
+		final String tableName = "MyTableName";
+
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
+
+			@Override
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+				// Store the request URL
+				container.setRequestUrl(request.getUrl());
+
+				// PersonTestObject JSon template
+				String personJsonTemplate = "{\"id\": %d,\"firstName\":\"%s\",\"lastName\":\"%s\",\"age\":%d}";
+
+				// Create a mock response and set the mocked JSon
+				// content
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent(String.format(personJsonTemplate, 4, "John", "Doe", 35));
+
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+				resultFuture.set(response);
+
+				return resultFuture;
+			}
+		});
+
+		PersonTestObject p = client.getTable(tableName, PersonTestObject.class).lookUp(personId).get();
+
+		// Asserts
+		assertNotNull("A person expected", p);
+		assertEquals(4, p.getId());
+		assertEquals("Doe", p.getLastName());
+		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId, container.getRequestUrl());
+	}
+
+	@SuppressWarnings("deprecation")
+	public void testLookupShouldReturnAPersonCallback() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -1846,45 +2004,42 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		final int personId = 4;
 		final String tableName = "MyTableName";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+				// Store the request URL
+				container.setRequestUrl(request.getUrl());
 
-				client = client.withFilter(new ServiceFilter() {
+				// PersonTestObject JSon template
+				String personJsonTemplate = "{\"id\": %d,\"firstName\":\"%s\",\"lastName\":\"%s\",\"age\":%d}";
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-						// Store the request URL
-						container.setRequestUrl(request.getUrl());
+				// Create a mock response and set the mocked JSon
+				// content
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent(String.format(personJsonTemplate, 4, "John", "Doe", 35));
 
-						// PersonTestObject JSon template
-						String personJsonTemplate = "{\"id\": %d,\"firstName\":\"%s\",\"lastName\":\"%s\",\"age\":%d}";
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-						// Create a mock response and set the mocked JSon
-						// content
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent(String.format(personJsonTemplate, 4, "John", "Doe", 35));
+				resultFuture.set(response);
 
-						responseCallback.onResponse(response, null);
-					}
-				});
+				return resultFuture;
+			}
+		});
 
-				client.getTable(tableName, PersonTestObject.class).lookUp(personId, new TableOperationCallback<PersonTestObject>() {
+		client.getTable(tableName, PersonTestObject.class).lookUp(personId, new TableOperationCallback<PersonTestObject>() {
 
-					@Override
-					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						container.setPerson(entity);
-						latch.countDown();
-					}
-				});
+			@Override
+			public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
+				container.setPerson(entity);
+				latch.countDown();
 			}
 		});
 
@@ -1899,6 +2054,55 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	}
 
 	public void testLookupShouldReturnAJSONPerson() throws Throwable {
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		// Person Id
+		final int personId = 4;
+		final String tableName = "MyTableName";
+
+		// PersonTestObject JSon template
+		String personJsonTemplate = "{\"id\":%d,\"firstName\":\"%s\",\"lastName\":\"%s\",\"age\":%d}";
+
+		final String personJsonString = String.format(personJsonTemplate, 4, "John", "Doe", 35);
+
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
+
+			@Override
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+				// Store the request URL
+				container.setRequestUrl(request.getUrl());
+
+				// Create a mock response and set the mocked JSon
+				// content
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent(personJsonString);
+
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+				resultFuture.set(response);
+
+				return resultFuture;
+			}
+		});
+
+		JsonObject jsonEntity = (JsonObject) client.getTable(tableName).lookUp(personId).get();
+
+		// Asserts
+		assertEquals(personJsonString, jsonEntity.toString());
+		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId, container.getRequestUrl());
+	}
+
+	@SuppressWarnings("deprecation")
+	public void testLookupShouldReturnAJSONPersonCallback() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -1913,43 +2117,40 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 
 		final String personJsonString = String.format(personJsonTemplate, 4, "John", "Doe", 35);
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+				// Store the request URL
+				container.setRequestUrl(request.getUrl());
+
+				// Create a mock response and set the mocked JSon
+				// content
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setContent(personJsonString);
+
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
+
+				resultFuture.set(response);
+
+				return resultFuture;
+			}
+		});
+
+		client.getTable(tableName).lookUp(personId, new TableJsonOperationCallback() {
+			@Override
+			public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
+				if (exception == null) {
+					container.setResponseValue(jsonEntity.toString());
 				}
-
-				client = client.withFilter(new ServiceFilter() {
-
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-						// Store the request URL
-						container.setRequestUrl(request.getUrl());
-
-						// Create a mock response and set the mocked JSon
-						// content
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setContent(personJsonString);
-
-						responseCallback.onResponse(response, null);
-					}
-				});
-
-				client.getTable(tableName).lookUp(personId, new TableJsonOperationCallback() {
-					@Override
-					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
-						if (exception == null) {
-							container.setResponseValue(jsonEntity.toString());
-						}
-						latch.countDown();
-					}
-				});
+				latch.countDown();
 			}
 		});
 
@@ -1961,7 +2162,6 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	}
 
 	public void testLookupShouldReturnErrorIfAPersonDoesNotExist() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
@@ -1970,59 +2170,44 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		final int personId = 4;
 		final String tableName = "MyTableName";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+				// Store the request URL
+				container.setRequestUrl(request.getUrl());
 
-				client = client.withFilter(new ServiceFilter() {
+				// Create a mock response simulating an error
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setStatus(new StatusLineMock(404));
+				response.setContent("{\"error\":404,\"message\":\"entity does not exist\"}");
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-						// Store the request URL
-						container.setRequestUrl(request.getUrl());
+				container.setResponseValue(response.getContent());
 
-						// Create a mock response simulating an error
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setStatus(new StatusLineMock(404));
-						response.setContent("{\"error\":404,\"message\":\"entity does not exist\"}");
+				// create a mock request to replace the existing one
+				ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
 
-						// create a mock request to replace the existing one
-						ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
-						nextServiceFilterCallback.onNext(requestMock, responseCallback);
-					}
-				});
-
-				client.getTable(tableName, PersonTestObject.class).lookUp(personId, new TableOperationCallback<PersonTestObject>() {
-
-					@Override
-					public void onCompleted(PersonTestObject entity, Exception exception, ServiceFilterResponse response) {
-						if (exception != null) {
-							container.setResponseValue(response.getContent());
-						}
-
-						latch.countDown();
-					}
-				});
+				return nextServiceFilterCallback.onNext(requestMock);
 			}
 		});
 
-		latch.await();
-
-		// Asserts
-		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId, container.getRequestUrl());
-		assertTrue(container.getResponseValue().contains("{\"error\":404,\"message\":\"entity does not exist\"}"));
+		try {
+			client.getTable(tableName, PersonTestObject.class).lookUp(personId).get();
+		} catch (Exception exception) {
+			// Asserts
+			assertEquals(this.appUrl + "tables/" + tableName + "/" + personId, container.getRequestUrl());
+			assertTrue(container.getResponseValue().contains("{\"error\":404,\"message\":\"entity does not exist\"}"));
+		}
 	}
 
 	public void testLookupWithJSONShouldReturnErrorIfAPersonDoesNotExist() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
@@ -2031,110 +2216,86 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 		final int personId = 4;
 		final String tableName = "MyTableName";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+				// Store the request URL
+				container.setRequestUrl(request.getUrl());
 
-				client = client.withFilter(new ServiceFilter() {
+				// Create a mock response simulating an error
+				ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+				response.setStatus(new StatusLineMock(404));
+				response.setContent("{\"error\":404,\"message\":\"entity does not exist\"}");
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
-						// Store the request URL
-						container.setRequestUrl(request.getUrl());
+				container.setResponseValue(response.getContent());
+				// create a mock request to replace the existing one
+				ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
 
-						// Create a mock response simulating an error
-						ServiceFilterResponseMock response = new ServiceFilterResponseMock();
-						response.setStatus(new StatusLineMock(404));
-						response.setContent("{\"error\":404,\"message\":\"entity does not exist\"}");
-
-						// create a mock request to replace the existing one
-						ServiceFilterRequestMock requestMock = new ServiceFilterRequestMock(response);
-						nextServiceFilterCallback.onNext(requestMock, responseCallback);
-					}
-				});
-
-				client.getTable(tableName).lookUp(personId, new TableJsonOperationCallback() {
-					@Override
-					public void onCompleted(JsonObject jsonEntity, Exception exception, ServiceFilterResponse response) {
-						if (exception != null) {
-							container.setResponseValue(response.getContent());
-						}
-						latch.countDown();
-
-					}
-				});
+				return nextServiceFilterCallback.onNext(requestMock);
 			}
 		});
 
-		latch.await();
-
-		// Asserts
-		assertEquals(this.appUrl + "tables/" + tableName + "/" + personId, container.getRequestUrl());
-		assertTrue(container.getResponseValue().contains("{\"error\":404,\"message\":\"entity does not exist\"}"));
+		try {
+			client.getTable(tableName).lookUp(personId).get();
+		} catch (Exception exception) {
+			// Asserts
+			assertEquals(this.appUrl + "tables/" + tableName + "/" + personId, container.getRequestUrl());
+			assertTrue(container.getResponseValue().contains("{\"error\":404,\"message\":\"entity does not exist\"}"));
+		}
 	}
 
 	public void testQueryShouldIncludeFilter() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
 
 		final String tableName = "MyTableName";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				container.setRequestUrl(request.getUrl());
+				// call onResponse with the mocked response
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				resultFuture.set(new ServiceFilterResponseMock());
 
-						container.setRequestUrl(request.getUrl());
-						// call onResponse with the mocked response
-						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
-					}
-				});
-
-				// Create get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
-
-				// Call the update method
-				msTable.where().field("fieldName").eq(1).execute(new TableJsonQueryCallback() {
-
-					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
-						container.setOperationSucceded(exception == null);
-						latch.countDown();
-
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		// Create get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
 
+		try {
+			// Call the update method
+			msTable.where().field("fieldName").eq(1).execute().get();
+			Assert.assertTrue("Opperation should have succeded", true);
+		} catch (Exception exception) {
+			Assert.assertTrue("Opperation should have succeded", false);
+		}
 		// Asserts
-		Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
 		assertEquals(queryUrl(tableName) + "?$filter=" + urlencode("fieldName eq (1)"), container.getRequestUrl());
 	}
 
@@ -2151,287 +2312,241 @@ public class MobileServiceTableTests extends InstrumentationTestCase {
 	}
 
 	public void testQueryShouldIncludeTop() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
 
 		final String tableName = "MyTableName";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				container.setRequestUrl(request.getUrl());
+				// call onResponse with the mocked response
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				resultFuture.set(new ServiceFilterResponseMock());
 
-						container.setRequestUrl(request.getUrl());
-						// call onResponse with the mocked response
-						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
-					}
-				});
-
-				// Create get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
-
-				// Call the update method
-				msTable.top(10).execute(new TableJsonQueryCallback() {
-
-					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
-						container.setOperationSucceded(exception == null);
-						latch.countDown();
-
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		// Create get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
+
+		// Call the update method
+		try {
+			msTable.top(10).execute().get();
+			Assert.assertTrue("Opperation should have succeded", true);
+		} catch (Exception exception) {
+			Assert.assertTrue("Opperation should have succeded", false);
+		}
 
 		// Asserts
-		Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
 		assertEquals(queryUrl(tableName) + "?$top=10", container.getRequestUrl());
 	}
 
 	public void testQueryShouldIncludeSkip() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
 
 		final String tableName = "MyTableName";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				container.setRequestUrl(request.getUrl());
+				// call onResponse with the mocked response
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				resultFuture.set(new ServiceFilterResponseMock());
 
-						container.setRequestUrl(request.getUrl());
-						// call onResponse with the mocked response
-						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
-					}
-				});
-
-				// Create get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
-
-				// Call the update method
-				msTable.skip(10).execute(new TableJsonQueryCallback() {
-
-					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
-						container.setOperationSucceded(exception == null);
-						latch.countDown();
-
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		// Create get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
 
-		// Asserts
-		Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
+		// Call the update method
+		try {
+			msTable.skip(10).execute().get();
+			Assert.assertTrue("Opperation should have succeded", true);
+		} catch (Exception exception) {
+			Assert.assertTrue("Opperation should have succeded", false);
+		}
+
 		assertEquals(queryUrl(tableName) + "?$skip=10", container.getRequestUrl());
 	}
 
 	public void testQueryShouldIncludeInlineCount() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
 
 		final String tableName = "MyTableName";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				container.setRequestUrl(request.getUrl());
+				// call onResponse with the mocked response
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				resultFuture.set(new ServiceFilterResponseMock());
 
-						container.setRequestUrl(request.getUrl());
-						// call onResponse with the mocked response
-						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
-					}
-				});
-
-				// Create get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
-
-				// Call the update method
-				msTable.includeInlineCount().execute(new TableJsonQueryCallback() {
-
-					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
-						container.setOperationSucceded(exception == null);
-						latch.countDown();
-
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		// Create get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
+
+		try {
+			// Call the update method
+			msTable.includeInlineCount().execute().get();
+			Assert.assertTrue("Opperation should have succeded", true);
+		} catch (Exception exception) {
+			Assert.assertTrue("Opperation should have succeded", false);
+		}
 
 		// Asserts
-		Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
 		assertEquals(queryUrl(tableName) + "?$inlinecount=allpages", container.getRequestUrl());
 	}
 
 	public void testQueryShouldIncludeOrderBy() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
 
 		final String tableName = "MyTableName";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				container.setRequestUrl(request.getUrl());
+				// call onResponse with the mocked response
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				resultFuture.set(new ServiceFilterResponseMock());
 
-						container.setRequestUrl(request.getUrl());
-						// call onResponse with the mocked response
-						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
-					}
-				});
-
-				// Create get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
-
-				// Call the update method
-				msTable.orderBy("myField", QueryOrder.Ascending).execute(new TableJsonQueryCallback() {
-
-					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
-						container.setOperationSucceded(exception == null);
-						latch.countDown();
-
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		// Create get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
+
+		try {
+			// Call the update method
+			msTable.orderBy("myField", QueryOrder.Ascending).execute().get();
+			Assert.assertTrue("Opperation should have succeded", true);
+		} catch (Exception exception) {
+			Assert.assertTrue("Opperation should have succeded", false);
+		}
 
 		// Asserts
-		Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
 		assertEquals(queryUrl(tableName) + "?$orderby=" + urlencode("myField asc"), container.getRequestUrl());
 	}
 
 	public void testQueryShouldIncludeProjection() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
 
 		final String tableName = "MyTableName";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a filter to handle the request and create a new json
+		// object with an id defined
+		client = client.withFilter(new ServiceFilter() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
+			public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
 
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+				container.setRequestUrl(request.getUrl());
+				// call onResponse with the mocked response
 
-				// Add a filter to handle the request and create a new json
-				// object with an id defined
-				client = client.withFilter(new ServiceFilter() {
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture.create();
 
-					@Override
-					public void handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback,
-							ServiceFilterResponseCallback responseCallback) {
+				resultFuture.set(new ServiceFilterResponseMock());
 
-						container.setRequestUrl(request.getUrl());
-						// call onResponse with the mocked response
-						responseCallback.onResponse(new ServiceFilterResponseMock(), null);
-					}
-				});
-
-				// Create get the MobileService table
-				MobileServiceJsonTable msTable = client.getTable(tableName);
-
-				// Call the update method
-				msTable.select("myField", "otherField").execute(new TableJsonQueryCallback() {
-
-					@Override
-					public void onCompleted(JsonElement result, int count, Exception exception, ServiceFilterResponse response) {
-						container.setOperationSucceded(exception == null);
-						latch.countDown();
-
-					}
-				});
+				return resultFuture;
 			}
 		});
 
-		latch.await();
+		// Create get the MobileService table
+		MobileServiceJsonTable msTable = client.getTable(tableName);
+
+		try {
+			// Call the update method
+			msTable.select("myField", "otherField").execute().get();
+			Assert.assertTrue("Opperation should have succeded", true);
+		} catch (Exception exception) {
+			Assert.assertTrue("Opperation should have succeded", false);
+		}
 
 		// Asserts
-		Assert.assertTrue("Opperation should have succeded", container.getOperationSucceded());
 		assertEquals(queryUrl(tableName) + "?$select=" + urlencode("myField,otherField"), container.getRequestUrl());
 	}
 }

@@ -17,11 +17,13 @@ Apache 2.0 License
  
 See the Apache Version 2.0 License for specific language governing permissions and limitations under the License.
  */
-/*
+
+/**
  * ServiceFilterResponseCallback.java
  */
-
 package com.microsoft.windowsazure.mobileservices;
+
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
 /**
  * Callback to invoke after processing the ServiceFilters and executing the

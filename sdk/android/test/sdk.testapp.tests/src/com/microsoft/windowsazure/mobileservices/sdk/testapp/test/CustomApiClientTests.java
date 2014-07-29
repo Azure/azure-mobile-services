@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -32,6 +33,7 @@ import org.apache.http.client.methods.HttpPost;
 import android.test.InstrumentationTestCase;
 import android.util.Pair;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -39,11 +41,10 @@ import com.microsoft.windowsazure.mobileservices.ApiJsonOperationCallback;
 import com.microsoft.windowsazure.mobileservices.ApiOperationCallback;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-import com.microsoft.windowsazure.mobileservices.NextServiceFilterCallback;
-import com.microsoft.windowsazure.mobileservices.ServiceFilter;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterRequest;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponse;
-import com.microsoft.windowsazure.mobileservices.ServiceFilterResponseCallback;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
+import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 
 public class CustomApiClientTests extends InstrumentationTestCase {
 	String appUrl = "";
@@ -58,52 +59,44 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 	protected void tearDown() throws Exception {
 		super.tearDown();
 	}
-	
-	public void testResponseWithNon2xxStatusShouldThrowException() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
-		// Container to store callback's results and do the asserts.
+	public void testResponseWithNon2xxStatusShouldThrowException() throws Throwable {
+
 		final ResultsContainer container = new ResultsContainer();
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
 
-			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-					
-					client = client.withFilter(new ServiceFilter() {
-						
-						@Override
-						public void handleRequest(ServiceFilterRequest request,
-								NextServiceFilterCallback nextServiceFilterCallback,
-								ServiceFilterResponseCallback responseCallback) {
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-							ServiceFilterResponseMock mockResponse = new ServiceFilterResponseMock();
-							mockResponse.setStatus(new StatusLineMock(418)); //I'm a teapot status code
-							ServiceFilterRequestMock mockRequest = new ServiceFilterRequestMock(mockResponse);
-							
-							nextServiceFilterCallback.onNext(mockRequest, responseCallback);
-						}
-					});
-					
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
+			client = client.withFilter(new ServiceFilter() {
+
+				@Override
+				public ListenableFuture<ServiceFilterResponse> handleRequest(ServiceFilterRequest request, NextServiceFilterCallback nextServiceFilterCallback) {
+
+					ServiceFilterResponseMock mockResponse = new ServiceFilterResponseMock();
+					mockResponse.setStatus(new StatusLineMock(418)); // I'm a
+																		// teapot
+																		// status
+																		// code
+					ServiceFilterRequestMock mockRequest = new ServiceFilterRequestMock(mockResponse);
+
+					return nextServiceFilterCallback.onNext(mockRequest);
 				}
+			});
 
-				client.invokeApi("myApi", new byte[] {1, 2, 3, 4}, HttpPost.METHOD_NAME, null, null, new ServiceFilterResponseCallback() {
+			List<Pair<String, String>> mockHeaders = new ArrayList<Pair<String, String>>();
+			List<Pair<String, String>> mockParameters = new ArrayList<Pair<String, String>>();
 
-					@Override
-					public void onResponse(ServiceFilterResponse response, Exception exception) {
-						container.setException(exception);
-						latch.countDown();
-					}
-				});
+			client.invokeApi("myApi", new byte[] { 1, 2, 3, 4 }, HttpPost.METHOD_NAME, mockHeaders, mockParameters).get();
+
+		} catch (Exception exception) {
+			if (exception instanceof ExecutionException) {
+				container.setException((Exception) exception.getCause());
+			} else {
+				container.setException(exception);
 			}
-		});
-
-		latch.await();
+		}
 
 		// Asserts
 		Exception exception = container.getException();
@@ -113,36 +106,17 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 	}
 
 	public void testInvokeWithNullApiShouldThrowException() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+			client.invokeApi(null, new Object(), null).get();
+		} catch (Exception exception) {
+			container.setException(exception);
+		}
 
-			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
-
-				client.invokeApi(null, null, HttpPost.METHOD_NAME, null, null, new ServiceFilterResponseCallback() {
-
-					@Override
-					public void onResponse(ServiceFilterResponse response, Exception exception) {
-						container.setException(exception);
-						latch.countDown();
-					}
-				});
-			}
-		});
-
-		latch.await();
-
-		// Asserts
 		// Asserts
 		Exception exception = container.getException();
 		if (!(exception instanceof IllegalArgumentException)) {
@@ -151,34 +125,18 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 	}
 
 	public void testInvokeWithNullMethodShouldThrowException() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+			client.invokeApi("myApi", new Object(), null, null, null).get();
 
-			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
-
-				client.invokeApi("myApi", null, null, null, null, new ServiceFilterResponseCallback() {
-
-					@Override
-					public void onResponse(ServiceFilterResponse response, Exception exception) {
-						container.setException(exception);
-						latch.countDown();
-					}
-				});
-			}
-		});
-
-		latch.await();
+		} catch (Exception exception) {
+			container.setException(exception);
+		}
 
 		// Asserts
 		Exception exception = container.getException();
@@ -188,34 +146,17 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 	}
 
 	public void testInvokeWithNotSupportedMethodShouldThrowException() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
 
-		runTestOnUiThread(new Runnable() {
-
-			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
-
-				client.invokeApi("myApi", null, HttpHead.METHOD_NAME, null, null, new ServiceFilterResponseCallback() {
-
-					@Override
-					public void onResponse(ServiceFilterResponse response, Exception exception) {
-						container.setException(exception);
-						latch.countDown();
-					}
-				});
-			}
-		});
-
-		latch.await();
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+			client.invokeApi("myApi", new Object(), HttpHead.METHOD_NAME, null, null).get();
+		} catch (Exception exception) {
+			container.setException(exception);
+		}
 
 		// Asserts
 		Exception exception = container.getException();
@@ -225,35 +166,18 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 	}
 
 	public void testInvokeGenericWithNullClassShouldThrowException() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+			client.invokeApi("myApi", new Object(), HttpPost.METHOD_NAME, null, null).get();
 
-			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
-
-				client.invokeApi("myApi", null, HttpPost.METHOD_NAME, null, null, new ApiOperationCallback<String>() {
-
-					@Override
-					public void onCompleted(String result, Exception exception, ServiceFilterResponse response) {
-						container.setException(exception);
-
-						latch.countDown();
-					}
-				});
-			}
-		});
-
-		latch.await();
+		} catch (Exception exception) {
+			container.setException(exception);
+		}
 
 		// Asserts
 		Exception exception = container.getException();
@@ -263,6 +187,44 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 	}
 
 	public void testInvokeTypedSingleObject() throws Throwable {
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final PersonTestObject p = new PersonTestObject("john", "doe", 30);
+
+		MobileServiceClient client = null;
+		try {
+
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+			client = client.withFilter(new EchoFilter());
+
+			PersonTestObject result = client.invokeApi("myApi", p, HttpPost.METHOD_NAME, null, PersonTestObject.class).get();
+
+			if (result == null) {
+				container.setException(new Exception("Expected one person result"));
+			} else {
+				container.setPerson(result);
+			}
+
+		} catch (Exception exception) {
+			container.setException(exception);
+		}
+
+		// Asserts
+		Exception exception = container.getException();
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertEquals(p.getFirstName(), container.getPerson().getFirstName());
+			assertEquals(p.getLastName(), container.getPerson().getLastName());
+			assertEquals(p.getAge(), container.getPerson().getAge());
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	public void testInvokeTypedSingleObjectCallback() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -270,34 +232,28 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 
 		final PersonTestObject p = new PersonTestObject("john", "doe", 30);
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new EchoFilter());
+
+		client.invokeApi("myApi", p, HttpPost.METHOD_NAME, null, PersonTestObject.class, new ApiOperationCallback<PersonTestObject>() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
+			public void onCompleted(PersonTestObject result, Exception exception, ServiceFilterResponse response) {
+				if (exception != null) {
+					container.setException(exception);
+				} else if (result == null) {
+					container.setException(new Exception("Expected one person result"));
+				} else {
+					container.setPerson(result);
 				}
 
-				client = client.withFilter(new EchoFilter());
-
-				client.invokeApi("myApi", p, HttpPost.METHOD_NAME, null, PersonTestObject.class, new ApiOperationCallback<PersonTestObject>() {
-
-					@Override
-					public void onCompleted(PersonTestObject result, Exception exception, ServiceFilterResponse response) {
-						if (exception != null) {
-							container.setException(exception);
-						} else if (result == null) {
-							container.setException(new Exception("Expected one person result"));
-						} else {
-							container.setPerson(result);
-						}
-
-						latch.countDown();
-					}
-				});
+				latch.countDown();
 			}
 		});
 
@@ -315,100 +271,61 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 	}
 
 	public void testInvokeTypedJsonObjectAsInput() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
-
-		// Container to store callback's results and do the asserts.
-		final ResultsContainer container = new ResultsContainer();
-
 		final JsonObject input = new JsonObject();
 		input.addProperty("firstName", "john");
 		input.addProperty("lastName", "doe");
 		input.addProperty("age", 30);
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
 
-			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+		client = client.withFilter(new EchoFilter());
 
-				client = client.withFilter(new EchoFilter());
-
-				client.invokeApi("myApi", input, HttpPost.METHOD_NAME, null, PersonTestObject.class, new ApiOperationCallback<PersonTestObject>() {
-
-					@Override
-					public void onCompleted(PersonTestObject result, Exception exception, ServiceFilterResponse response) {
-						if (exception != null) {
-							container.setException(exception);
-						} else if (result == null) {
-							container.setException(new Exception("Expected one person result"));
-						} else {
-							container.setPerson(result);
-						}
-
-						latch.countDown();
-					}
-				});
+		try {
+			PersonTestObject result = client.invokeApi("myApi", input, HttpPost.METHOD_NAME, null, PersonTestObject.class).get();
+			if (result == null) {
+				fail("Expected one person result");
+			} else {
+				assertEquals(input.get("firstName").getAsString(), result.getFirstName());
+				assertEquals(input.get("lastName").getAsString(), result.getLastName());
+				assertEquals(input.get("age").getAsInt(), result.getAge());
 			}
-		});
 
-		latch.await();
-
-		// Asserts
-		Exception exception = container.getException();
-		if (exception != null) {
-			fail(exception.getMessage());
-		} else {
-			assertEquals(input.get("firstName").getAsString(), container.getPerson().getFirstName());
-			assertEquals(input.get("lastName").getAsString(), container.getPerson().getLastName());
-			assertEquals(input.get("age").getAsInt(), container.getPerson().getAge());
+		} catch (Exception exception) {
+			if (exception instanceof ExecutionException) {
+				fail(exception.getCause().getMessage());
+			} else {
+				fail(exception.getMessage());
+			}
 		}
 	}
 
 	public void testInvokeTypedSingleString() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
 
 		final String s = "Hello world";
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+			client = client.withFilter(new EchoFilter());
+			String result = client.invokeApi("myApi", s, HttpPost.METHOD_NAME, null, String.class).get();
 
-			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
-
-				client = client.withFilter(new EchoFilter());
-
-				client.invokeApi("myApi", s, HttpPost.METHOD_NAME, null, String.class, new ApiOperationCallback<String>() {
-
-					@Override
-					public void onCompleted(String result, Exception exception, ServiceFilterResponse response) {
-						if (exception != null) {
-							container.setException(exception);
-						} else if (result == null) {
-							container.setException(new Exception("Expected one string result"));
-						} else {
-							container.setCustomResult(result);
-						}
-
-						latch.countDown();
-					}
-				});
+			if (result == null) {
+				container.setException(new Exception("Expected one string result"));
+			} else {
+				container.setCustomResult(result);
 			}
-		});
 
-		latch.await();
+		} catch (Exception exception) {
+			container.setException(exception);
+		}
 
 		// Asserts
 		Exception exception = container.getException();
@@ -418,47 +335,32 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 			assertEquals(s, container.getCustomResult());
 		}
 	}
-	
+
 	public void testInvokeTypedSingleInteger() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
 
 		final Integer i = 42;
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
 
-			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-				client = client.withFilter(new EchoFilter());
+			client = client.withFilter(new EchoFilter());
 
-				client.invokeApi("myApi", i, HttpPost.METHOD_NAME, null, Integer.class, new ApiOperationCallback<Integer>() {
+			Integer result = client.invokeApi("myApi", i, HttpPost.METHOD_NAME, null, Integer.class).get();
 
-					@Override
-					public void onCompleted(Integer result, Exception exception, ServiceFilterResponse response) {
-						if (exception != null) {
-							container.setException(exception);
-						} else if (result == null) {
-							container.setException(new Exception("Expected one integer result"));
-						} else {
-							container.setCustomResult(result);
-						}
-
-						latch.countDown();
-					}
-				});
+			if (result == null) {
+				container.setException(new Exception("Expected one integer result"));
+			} else {
+				container.setCustomResult(result);
 			}
-		});
 
-		latch.await();
+		} catch (Exception exception) {
+			container.setException(exception);
+		}
 
 		// Asserts
 		Exception exception = container.getException();
@@ -468,47 +370,32 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 			assertEquals(i, container.getCustomResult());
 		}
 	}
-	
+
 	public void testInvokeTypedSingleFloat() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
 
 		final Float f = 3.14f;
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
 
-			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+			client = client.withFilter(new EchoFilter());
 
-				client = client.withFilter(new EchoFilter());
+			Float result = client.invokeApi("myApi", f, HttpPost.METHOD_NAME, null, Float.class).get();
 
-				client.invokeApi("myApi", f, HttpPost.METHOD_NAME, null, Float.class, new ApiOperationCallback<Float>() {
-
-					@Override
-					public void onCompleted(Float result, Exception exception, ServiceFilterResponse response) {
-						if (exception != null) {
-							container.setException(exception);
-						} else if (result == null) {
-							container.setException(new Exception("Expected one float result"));
-						} else {
-							container.setCustomResult(result);
-						}
-
-						latch.countDown();
-					}
-				});
+			if (result == null) {
+				container.setException(new Exception("Expected one float result"));
+			} else {
+				container.setCustomResult(result);
 			}
-		});
 
-		latch.await();
+		} catch (Exception exception) {
+			container.setException(exception);
+
+		}
 
 		// Asserts
 		Exception exception = container.getException();
@@ -518,47 +405,31 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 			assertEquals(f, container.getCustomResult());
 		}
 	}
-	
+
 	public void testInvokeTypedSingleBoolean() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
 
 		final Boolean b = true;
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			client = client.withFilter(new EchoFilter());
 
-				client = client.withFilter(new EchoFilter());
+			Boolean result = client.invokeApi("myApi", b, HttpPost.METHOD_NAME, null, Boolean.class).get();
 
-				client.invokeApi("myApi", b, HttpPost.METHOD_NAME, null, Boolean.class, new ApiOperationCallback<Boolean>() {
-
-					@Override
-					public void onCompleted(Boolean result, Exception exception, ServiceFilterResponse response) {
-						if (exception != null) {
-							container.setException(exception);
-						} else if (result == null) {
-							container.setException(new Exception("Expected one boolean result"));
-						} else {
-							container.setCustomResult(result);
-						}
-
-						latch.countDown();
-					}
-				});
+			if (result == null) {
+				container.setException(new Exception("Expected one boolean result"));
+			} else {
+				container.setCustomResult(result);
 			}
-		});
 
-		latch.await();
+		} catch (Exception exception) {
+			container.setException(exception);
+		}
 
 		// Asserts
 		Exception exception = container.getException();
@@ -570,7 +441,6 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 	}
 
 	public void testInvokeTypedMultipleObject() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
@@ -578,42 +448,27 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 		final PersonTestObject p1 = new PersonTestObject("john", "doe", 30);
 		final PersonTestObject p2 = new PersonTestObject("jane", "does", 31);
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			client = client.withFilter(new EchoFilter());
 
-				client = client.withFilter(new EchoFilter());
+			List<PersonTestObject> people = new ArrayList<PersonTestObject>();
+			people.add(p1);
+			people.add(p2);
 
-				List<PersonTestObject> people = new ArrayList<PersonTestObject>();
-				people.add(p1);
-				people.add(p2);
+			PersonTestObject[] entities = client.invokeApi("myApi", people, HttpPost.METHOD_NAME, null, PersonTestObject[].class).get();
 
-				client.invokeApi("myApi", people, HttpPost.METHOD_NAME, null, PersonTestObject[].class, new ApiOperationCallback<PersonTestObject[]>() {
-
-					@Override
-					public void onCompleted(PersonTestObject[] entities, Exception exception, ServiceFilterResponse response) {
-						if (exception != null) {
-							container.setException(exception);
-						} else if (entities == null || entities.length != 2) {
-							container.setException(new Exception("Expected two person result"));
-						} else {
-							container.setPeopleResult(entities);
-						}
-
-						latch.countDown();
-					}
-				});
+			if (entities == null || entities.length != 2) {
+				container.setException(new Exception("Expected two person result"));
+			} else {
+				container.setPeopleResult(entities);
 			}
-		});
 
-		latch.await();
+		} catch (Exception exception) {
+			container.setException(exception);
+		}
 
 		// Asserts
 		Exception exception = container.getException();
@@ -631,6 +486,43 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 	}
 
 	public void testInvokeJsonEcho() throws Throwable {
+
+		// Container to store callback's results and do the asserts.
+		final ResultsContainer container = new ResultsContainer();
+
+		final JsonObject json = new JsonParser().parse("{\"message\": \"hello world\"}").getAsJsonObject();
+
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+
+			client = client.withFilter(new EchoFilter());
+
+			JsonElement result = client.invokeApi("myApi", json, HttpPost.METHOD_NAME, null).get();
+
+			if (result == null) {
+				container.setException(new Exception("Expected result"));
+			} else {
+				container.setJsonResult(result);
+			}
+
+		} catch (Exception exception) {
+			container.setException(exception);
+		}
+
+		// Asserts
+		Exception exception = container.getException();
+		if (exception != null) {
+			fail(exception.getMessage());
+		} else {
+			assertEquals(1, container.getJsonResult().getAsJsonObject().entrySet().size());
+			assertTrue(container.getJsonResult().getAsJsonObject().has("message"));
+			assertEquals(json.get("message"), container.getJsonResult().getAsJsonObject().get("message"));
+		}
+	}
+
+	@SuppressWarnings("deprecation")
+	public void testInvokeJsonEchoCallback() throws Throwable {
 		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
@@ -638,34 +530,28 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 
 		final JsonObject json = new JsonParser().parse("{\"message\": \"hello world\"}").getAsJsonObject();
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		client = client.withFilter(new EchoFilter());
+
+		client.invokeApi("myApi", json, HttpPost.METHOD_NAME, null, new ApiJsonOperationCallback() {
 
 			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
+			public void onCompleted(JsonElement result, Exception exception, ServiceFilterResponse response) {
+				if (exception != null) {
+					container.setException(exception);
+				} else if (result == null) {
+					container.setException(new Exception("Expected result"));
+				} else {
+					container.setJsonResult(result);
 				}
 
-				client = client.withFilter(new EchoFilter());
-
-				client.invokeApi("myApi", json, HttpPost.METHOD_NAME, null, new ApiJsonOperationCallback() {
-
-					@Override
-					public void onCompleted(JsonElement result, Exception exception, ServiceFilterResponse response) {
-						if (exception != null) {
-							container.setException(exception);
-						} else if (result == null) {
-							container.setException(new Exception("Expected result"));
-						} else {
-							container.setJsonResult(result);
-						}
-
-						latch.countDown();
-					}
-				});
+				latch.countDown();
 			}
 		});
 
@@ -683,45 +569,32 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 	}
 
 	public void testInvokeRandomByteEcho() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
 
 		final byte[] content = UUID.randomUUID().toString().getBytes(MobileServiceClient.UTF8_ENCODING);
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			client = client.withFilter(new EchoFilter());
 
-				client = client.withFilter(new EchoFilter());
+			List<Pair<String, String>> mockHeaders = new ArrayList<Pair<String, String>>();
+			List<Pair<String, String>> mockParameters = new ArrayList<Pair<String, String>>();
 
-				client.invokeApi("myApi", content, HttpPost.METHOD_NAME, null, null, new ServiceFilterResponseCallback() {
+			ServiceFilterResponse response = client.invokeApi("myApi", content, HttpPost.METHOD_NAME, mockHeaders, mockParameters).get();
 
-					@Override
-					public void onResponse(ServiceFilterResponse response, Exception exception) {
-						if (exception != null) {
-							container.setException(exception);
-						} else if (response == null || response.getRawContent() == null) {
-							container.setException(new Exception("Expected response"));
-						} else {
-							container.setRawResponseContent(response.getRawContent());
-						}
-
-						latch.countDown();
-					}
-				});
+			if (response == null || response.getRawContent() == null) {
+				container.setException(new Exception("Expected response"));
+			} else {
+				container.setRawResponseContent(response.getRawContent());
 			}
-		});
 
-		latch.await();
+		} catch (Exception exception) {
+			container.setException(exception);
+		}
 
 		// Asserts
 		Exception exception = container.getException();
@@ -733,43 +606,30 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 	}
 
 	public void testInvokeMethodEcho() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			client = client.withFilter(new HttpMetaEchoFilter());
 
-				client = client.withFilter(new HttpMetaEchoFilter());
+			List<Pair<String, String>> mockHeaders = new ArrayList<Pair<String, String>>();
+			List<Pair<String, String>> mockParameters = new ArrayList<Pair<String, String>>();
 
-				client.invokeApi("myApi", null, HttpGet.METHOD_NAME, null, null, new ServiceFilterResponseCallback() {
+			ServiceFilterResponse response = client.invokeApi("myApi", null, HttpGet.METHOD_NAME, mockHeaders, mockParameters).get();
 
-					@Override
-					public void onResponse(ServiceFilterResponse response, Exception exception) {
-						if (exception != null) {
-							container.setException(exception);
-						} else if (response == null || response.getContent() == null) {
-							container.setException(new Exception("Expected response"));
-						} else {
-							container.setResponseValue(response.getContent());
-						}
-
-						latch.countDown();
-					}
-				});
+			if (response == null || response.getContent() == null) {
+				container.setException(new Exception("Expected response"));
+			} else {
+				container.setResponseValue(response.getContent());
 			}
-		});
 
-		latch.await();
+		} catch (Exception exception) {
+			container.setException(exception);
+		}
 
 		// Asserts
 		Exception exception = container.getException();
@@ -782,7 +642,6 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 	}
 
 	public void testInvokeHeadersEcho() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
@@ -791,7 +650,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 
 		for (int i = 0; i < 10; i++) {
 			String name;
-			
+
 			do {
 				name = UUID.randomUUID().toString();
 			} while (headerNames.contains(name));
@@ -800,38 +659,25 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 			headerNames.add(name);
 		}
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			client = client.withFilter(new HttpMetaEchoFilter());
 
-				client = client.withFilter(new HttpMetaEchoFilter());
+			List<Pair<String, String>> fakeParameters = new ArrayList<Pair<String, String>>();
 
-				client.invokeApi("myApi", null, HttpPost.METHOD_NAME, headers, null, new ServiceFilterResponseCallback() {
+			ServiceFilterResponse response = client.invokeApi("myApi", null, HttpPost.METHOD_NAME, headers, fakeParameters).get();
 
-					@Override
-					public void onResponse(ServiceFilterResponse response, Exception exception) {
-						if (exception != null) {
-							container.setException(exception);
-						} else if (response == null || response.getContent() == null) {
-							container.setException(new Exception("Expected response"));
-						} else {
-							container.setResponseValue(response.getContent());
-						}
-
-						latch.countDown();
-					}
-				});
+			if (response == null || response.getContent() == null) {
+				container.setException(new Exception("Expected response"));
+			} else {
+				container.setResponseValue(response.getContent());
 			}
-		});
 
-		latch.await();
+		} catch (Exception exception) {
+			container.setException(exception);
+		}
 
 		// Asserts
 		Exception exception = container.getException();
@@ -857,9 +703,8 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 
 		}
 	}
-	
+
 	public void testInvokeParametersEcho() throws Throwable {
-		final CountDownLatch latch = new CountDownLatch(1);
 
 		// Container to store callback's results and do the asserts.
 		final ResultsContainer container = new ResultsContainer();
@@ -868,7 +713,7 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 
 		for (int i = 0; i < 10; i++) {
 			String name;
-			
+
 			do {
 				name = UUID.randomUUID().toString();
 			} while (parameterNames.contains(name));
@@ -877,38 +722,23 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 			parameterNames.add(name);
 		}
 
-		runTestOnUiThread(new Runnable() {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
 
-			@Override
-			public void run() {
-				MobileServiceClient client = null;
-				try {
-					client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
+			client = client.withFilter(new HttpMetaEchoFilter());
 
-				client = client.withFilter(new HttpMetaEchoFilter());
+			ServiceFilterResponse response = client.invokeApi("myApi", null, HttpPost.METHOD_NAME, null, parameters).get();
 
-				client.invokeApi("myApi", null, HttpPost.METHOD_NAME, null, parameters, new ServiceFilterResponseCallback() {
-
-					@Override
-					public void onResponse(ServiceFilterResponse response, Exception exception) {
-						if (exception != null) {
-							container.setException(exception);
-						} else if (response == null || response.getContent() == null) {
-							container.setException(new Exception("Expected response"));
-						} else {
-							container.setResponseValue(response.getContent());
-						}
-
-						latch.countDown();
-					}
-				});
+			if (response == null || response.getContent() == null) {
+				container.setException(new Exception("Expected response"));
+			} else {
+				container.setResponseValue(response.getContent());
 			}
-		});
 
-		latch.await();
+		} catch (Exception exception) {
+			container.setException(exception);
+		}
 
 		// Asserts
 		Exception exception = container.getException();
@@ -933,5 +763,4 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 			}
 		}
 	}
-
 }

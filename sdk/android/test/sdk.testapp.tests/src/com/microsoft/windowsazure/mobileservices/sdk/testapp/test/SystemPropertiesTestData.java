@@ -23,9 +23,10 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
+
 import android.util.Pair;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceSystemProperty;
 
 public class SystemPropertiesTestData {
 	public static List<EnumSet<MobileServiceSystemProperty>> AllSystemProperties;
