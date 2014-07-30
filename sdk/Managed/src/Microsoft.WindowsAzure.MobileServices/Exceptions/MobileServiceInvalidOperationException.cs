@@ -3,9 +3,8 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -29,10 +28,32 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The returned service response.
         /// </param>
         public MobileServiceInvalidOperationException(string message, HttpRequestMessage request, HttpResponseMessage response)
+            : this(message, request, response, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the
+        /// MobileServiceInvalidOperationException class.
+        /// </summary>
+        /// <param name="message">
+        /// The exception message.
+        /// </param>
+        /// <param name="request">
+        /// The originating service request.
+        /// </param>
+        /// <param name="response">
+        /// The returned service response.
+        /// </param>
+        /// <param name="value">
+        /// Server response deserialized as JObject.
+        /// </param>
+        public MobileServiceInvalidOperationException(string message, HttpRequestMessage request, HttpResponseMessage response, JObject value)
             : base(message)
         {
             this.Request = request;
             this.Response = response;
+            this.Value = value;
         }
 
         /// <summary>
@@ -44,5 +65,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Gets the returned service response.
         /// </summary>
         public HttpResponseMessage Response { get; private set; }
+
+        /// <summary>
+        /// Server response deserialized as JObject.
+        /// </summary>
+        public JObject Value { get; private set; }
     }
 }

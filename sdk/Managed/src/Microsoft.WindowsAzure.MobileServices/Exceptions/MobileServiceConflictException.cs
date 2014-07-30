@@ -7,42 +7,42 @@ using Newtonsoft.Json.Linq;
 namespace Microsoft.WindowsAzure.MobileServices
 {
     /// <summary>
-    /// Provides details of http response with status code of 'Precondition Failed'
+    /// Provides details of http response with status code of 'Conflict'
     /// </summary>
-    public class MobileServicePreconditionFailedException : MobileServiceInvalidOperationException
+    public class MobileServiceConflictException : MobileServiceInvalidOperationException
     {
         /// <summary>
         /// Initializes a new instance of the
-        /// <see cref="MobileServicePreconditionFailedException"/> class.
+        /// <see cref="MobileServiceConflictException"/> class.
         /// </summary>
         /// <param name="source">
         /// The inner exception.
         /// </param>
         /// <param name="value">
-        /// The current instance from the server that the precondition failed for.
+        /// The current instance from the server that the conflict occurred for.
         /// </param>
-        public MobileServicePreconditionFailedException(MobileServiceInvalidOperationException source, JObject value)
+        public MobileServiceConflictException(MobileServiceInvalidOperationException source, JObject value)
             : base(source.Message, source.Request, source.Response, value)
         {
         }
     }
 
     /// <summary>
-    /// Provides details of http response with status code of 'Precondition Failed'
+    /// Provides details of http response with status code of 'Conflict'
     /// </summary>
-    public class MobileServicePreconditionFailedException<T> : MobileServicePreconditionFailedException
+    public class MobileServiceConflictException<T> : MobileServiceConflictException
     {
         /// <summary>
         /// Initializes a new instance of the
-        /// <see cref="MobileServicePreconditionFailedException"/> class.
+        /// <see cref="MobileServiceConflictException"/> class.
         /// </summary>
         /// <param name="source">
         /// The inner exception.
         /// </param>
         /// <param name="item">
-        /// The current instance from the server that the precondition failed for.
+        /// The current instance from the server that the conflict occurred for.
         /// </param>
-        public MobileServicePreconditionFailedException(MobileServiceInvalidOperationException source, T item)
+        public MobileServiceConflictException(MobileServiceInvalidOperationException source, T item)
             : base(source, source.Value)
         {
             this.Item = item;
