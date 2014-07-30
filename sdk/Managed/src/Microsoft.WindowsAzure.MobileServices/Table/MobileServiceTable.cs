@@ -11,7 +11,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Text;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -227,12 +226,14 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             features = this.AddRequestFeatures(features, parameters);
             parameters = AddSystemProperties(this.SystemProperties, parameters);
-
             string uriString = GetUri(this.TableName, null, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, instance.ToString(Formatting.None), true, features: features);
-            
-            var result = GetJTokenFromResponse(response);
-            return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
+
+            return await this.TransformHttpException(async () =>
+            {
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, instance.ToString(Formatting.None), true, features: features);
+                var result = GetJTokenFromResponse(response);
+                return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
+            });
         }
 
         /// <summary>
@@ -266,7 +267,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 return item;
             }
 
-            var actualSystemProperties = GetRequestedSystemProperties(parameters);    
+            var actualSystemProperties = GetRequestedSystemProperties(parameters);
             if (actualSystemProperties == MobileServiceSystemProperties.All)
             {
                 return item;
@@ -387,14 +388,12 @@ namespace Microsoft.WindowsAzure.MobileServices
             features = this.AddRequestFeatures(features, parameters);
             object id = MobileServiceSerializer.GetId(instance);
             Dictionary<string, string> headers = StripSystemPropertiesAndAddVersionHeader(ref instance, ref parameters, id);
+            string content = instance.ToString(Formatting.None);
+            string uriString = GetUri(this.TableName, id, parameters);
 
-            return await this.TransformConflictToPreconditionFailedException(async () =>
+            return await this.TransformHttpException(async () =>
             {
-                string content = instance.ToString(Formatting.None);
-                string uriString = GetUri(this.TableName, id, parameters);
-
                 MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(patchHttpMethod, uriString, this.MobileServiceClient.CurrentUser, content, true, headers, features);
-
                 var result = GetJTokenFromResponse(response);
                 return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
             });
@@ -430,17 +429,17 @@ namespace Microsoft.WindowsAzure.MobileServices
 
 
             Dictionary<string, string> headers = StripSystemPropertiesAndAddVersionHeader(ref instance, ref parameters, id);
+            string content = instance.ToString(Formatting.None);
+            string uriString = GetUri(this.TableName, id, parameters);
 
-            return await this.TransformConflictToPreconditionFailedException(async () =>
+            return await this.TransformHttpException(async () =>
             {
-                string content = instance.ToString(Formatting.None);
-                string uriString = GetUri(this.TableName, id, parameters);
-
                 MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, null, true, headers);
-                return GetJTokenFromResponse(response);
-            });            
+                var result = GetJTokenFromResponse(response);
+                return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
+            });
         }
-     
+
         /// <summary>
         /// Deletes an <paramref name="instance"/> from the table.
         /// </summary>
@@ -496,14 +495,14 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("instance");
             }
 
-            return await TransformConflictToPreconditionFailedException(async () =>
-            {
-                object id = MobileServiceSerializer.GetId(instance);
-                features = this.AddRequestFeatures(features, parameters);
-                Dictionary<string, string> headers = StripSystemPropertiesAndAddVersionHeader(ref instance, ref parameters, id);
-                string uriString = GetUri(this.TableName, id, parameters);
-                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false, headers, features);
+            object id = MobileServiceSerializer.GetId(instance);
+            features = this.AddRequestFeatures(features, parameters);
+            Dictionary<string, string> headers = StripSystemPropertiesAndAddVersionHeader(ref instance, ref parameters, id);
+            string uriString = GetUri(this.TableName, id, parameters);
 
+            return await TransformHttpException(async () =>
+            {
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false, headers, features);
                 var result = GetJTokenFromResponse(response);
                 return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
             });
@@ -652,7 +651,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             string systemPropertiesString = string.Join(",", systemProperties);
             return systemPropertiesString;
-        }       
+        }
 
         /// <summary>
         /// Parses body of the <paramref name="response"/> as JToken
@@ -753,9 +752,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Executes a request and transforms a 412 precondition failed response to <see cref="MobileServicePreconditionFailedException"/>.
+        /// Executes a request and transforms a 412 and 409 response to respective exception type.
         /// </summary>
-        private async Task<JToken> TransformConflictToPreconditionFailedException(Func<Task<JToken>> action)
+        private async Task<JToken> TransformHttpException(Func<Task<JToken>> action)
         {
             MobileServiceInvalidOperationException error = null;
 
@@ -766,7 +765,8 @@ namespace Microsoft.WindowsAzure.MobileServices
             catch (MobileServiceInvalidOperationException ex)
             {
                 if (ex.Response != null &&
-                    ex.Response.StatusCode != HttpStatusCode.PreconditionFailed)
+                    ex.Response.StatusCode != HttpStatusCode.PreconditionFailed &&
+                    ex.Response.StatusCode != HttpStatusCode.Conflict)
                 {
                     throw;
                 }
@@ -775,7 +775,16 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             Tuple<string, JToken> responseContent = await this.ParseContent(error.Response);
-            throw new MobileServicePreconditionFailedException(error, responseContent.Item2.ValidItemOrNull());
+            JObject value = responseContent.Item2.ValidItemOrNull();
+            if (error.Response.StatusCode == HttpStatusCode.Conflict)
+            {
+                error = new MobileServiceConflictException(error, value);
+            }
+            else if (error.Response.StatusCode == HttpStatusCode.PreconditionFailed)
+            {
+                error = new MobileServicePreconditionFailedException(error, value);
+            }
+            throw error;
         }
 
         /// <summary>
@@ -807,7 +816,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             return headers;
-        } 
+        }
 
         /// <summary>
         /// Gets a valid etag from a string value. Etags are surrounded

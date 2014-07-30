@@ -46,6 +46,7 @@
     <Compile Include="Authentication\MobileServiceTokenAuthentication.cs" />
     <Compile Include="Collections\MobileServiceCollection.cs" />
     <Compile Include="EnumValueAttribute.cs" />
+    <Compile Include="Exceptions\MobileServiceConflictException.cs" />
     <Compile Include="Exceptions\MobileServiceInvalidOperationException.cs" />
     <Compile Include="Exceptions\MobileServicePreconditionFailedException.cs" />
     <Compile Include="Exceptions\MobileServiceLocalStoreException.cs" />
