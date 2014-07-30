@@ -24,7 +24,7 @@
 /// @name Working with Native Registrations
 /// @{
 
-/// Register for notififications with given deviceToken and tags. deviceToken is required.
+/// Register for notifications with given deviceToken and tags. deviceToken is required.
 - (void)registerNativeWithDeviceToken:(NSData *)deviceToken
                                  tags:(NSArray *)tags
                            completion:(MSCompletionBlock)completion;

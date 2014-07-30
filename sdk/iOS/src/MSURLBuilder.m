@@ -9,16 +9,18 @@
 #pragma mark * Query String Constants
 
 
-NSString *const topParameter = @"$top";
-NSString *const skipParameter = @"$skip";
-NSString *const selectParameter = @"$select";
-NSString *const orderByParameter = @"$orderby";
-NSString *const orderByAscendingFormat = @"%@ asc";
-NSString *const orderByDescendingFormat = @"%@ desc";
-NSString *const filterParameter = @"$filter";
-NSString *const inlineCountParameter = @"$inlinecount";
-NSString *const inlineCountAllPage = @"allpages";
-NSString *const inlineCountNone = @"none";
+static NSString *const topParameter = @"$top";
+static NSString *const skipParameter = @"$skip";
+static NSString *const selectParameter = @"$select";
+static NSString *const orderByParameter = @"$orderby";
+static NSString *const orderByAscendingFormat = @"%@ asc";
+static NSString *const orderByDescendingFormat = @"%@ desc";
+static NSString *const filterParameter = @"$filter";
+static NSString *const inlineCountParameter = @"$inlinecount";
+static NSString *const inlineCountAllPage = @"allpages";
+static NSString *const inlineCountNone = @"none";
+
+
 #pragma mark * MSURLBuilder Implementation
 
 
