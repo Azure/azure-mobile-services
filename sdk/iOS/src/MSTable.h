@@ -7,9 +7,7 @@
 
 @class MSQuery;
 
-
 #pragma mark * Block Type Definitions
-
 
 /// Callback for updates, inserts or readWithId requests. If there was an
 /// error, the *error* will be non-nil.
@@ -33,19 +31,24 @@ typedef NS_OPTIONS(NSUInteger, MSSystemProperties) {
     MSSystemPropertyCreatedAt   = 1 << 0,
     MSSystemPropertyUpdatedAt   = 1 << 1,
     MSSystemPropertyVersion     = 1 << 2,
+    MSSystemPropertyDeleted     = 1 << 3,
     MSSystemPropertyAll         = 0xFFFF
 };
 
+extern NSString *const MSSystemColumnId;
 extern NSString *const MSSystemColumnCreatedAt;
 extern NSString *const MSSystemColumnUpdatedAt;
 extern NSString *const MSSystemColumnVersion;
+extern NSString *const MSSystemColumnDeleted;
 
 #pragma mark * MSTable Public Interface
 
 
+/// The *MSTable* class represents a table of a Windows Azure Mobile Service.
 /// The *MSTable* class represents a table of a Microsoft Azure Mobile Service.
 /// Items can be inserted, updated, deleted and read from the table. The table
 /// can also be queried to retrieve an array of items that meet the given query
+/// conditions. All table operations result in a request to the Windows Azure
 /// conditions. All table operations result in a request to the Microsoft Azure
 /// Mobile Service to perform the given operation.
 @interface MSTable : NSObject
@@ -123,6 +126,17 @@ extern NSString *const MSSystemColumnVersion;
 -(void)deleteWithId:(id)itemId
          parameters:(NSDictionary *)parameters
          completion:(MSDeleteBlock)completion;
+
+/// Sends a request to the Azure Mobile Service to undelete the item
+/// with the given id in from table.
+-(void)undelete:(NSDictionary *)item completion:(MSItemBlock)completion;
+
+/// Sends a request to the Azure Mobile Service to undelete the item
+/// with the given id in from table. Addtional user-defined parameters are
+/// sent in the request query string.
+-(void)undelete:(NSDictionary *)item
+     parameters:(NSDictionary *)parameters
+     completion:(MSItemBlock)completion;
 
 ///@}
 

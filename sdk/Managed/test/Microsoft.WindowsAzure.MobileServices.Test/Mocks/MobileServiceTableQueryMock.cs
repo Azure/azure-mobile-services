@@ -25,6 +25,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             throw new NotImplementedException();
         }
 
+        public IMobileServiceTableQuery<T> IncludeDeleted()
+        {
+            throw new NotImplementedException();
+        }
+
         public IMobileServiceTableQuery<T> OrderBy<TKey>(Expression<Func<T, TKey>> keySelector)
         {
             throw new NotImplementedException();
@@ -106,6 +111,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         public IDictionary<string, string> Parameters
         {
             get { throw new NotImplementedException(); }
+        }
+
+
+        public IQueryable<T> Query
+        {
+            get { return Enumerable.Empty<T>().AsQueryable(); }
+            set {  }
         }
     }
 }

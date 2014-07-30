@@ -4,14 +4,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Sync;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -38,7 +35,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Default empty array of HttpMessageHandlers.
         /// </summary>
         private static readonly HttpMessageHandler[] EmptyHttpMessageHandlers = new HttpMessageHandler[0];
-        
+
         /// <summary>
         /// The id used to identify this installation of the application to 
         /// provide telemetry data.
@@ -85,15 +82,24 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
+        /// Instance of <see cref="IMobileServiceSyncContext"/>
+        /// </summary>
+        public IMobileServiceSyncContext SyncContext
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
         /// Gets the serializer that is used with the table.
         /// </summary>
-        internal MobileServiceSerializer Serializer { get; private set; }
+        internal MobileServiceSerializer Serializer { get; set; }
 
         /// <summary>
         /// Gets the <see cref="MobileServiceHttpClient"/> associated with this client.
         /// </summary>
         internal MobileServiceHttpClient HttpClient { get; private set; }
-        
+
         /// <summary>
         /// Initializes a new instance of the MobileServiceClient class.
         /// </summary>
@@ -192,6 +198,15 @@ namespace Microsoft.WindowsAzure.MobileServices
             handlers = handlers ?? EmptyHttpMessageHandlers;
             this.HttpClient = new MobileServiceHttpClient(handlers, this.ApplicationUri, this.applicationInstallationId, this.ApplicationKey);
             this.Serializer = new MobileServiceSerializer();
+            this.SyncContext = new MobileServiceSyncContext(this);
+        }
+
+        /// <summary>
+        ///  This is for unit testing only
+        /// </summary>
+        protected MobileServiceClient()
+        {
+
         }
 
         /// <summary>
@@ -206,21 +221,23 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public IMobileServiceTable GetTable(string tableName)
         {
-            if (tableName == null)
-            {
-                throw new ArgumentNullException("tableName");
-            }
-            
-            if (string.IsNullOrWhiteSpace(tableName))
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        Resources.MobileServiceClient_EmptyArgument,
-                        "tableName"));
-            }
+            ValidateTableName(tableName);
 
             return new MobileServiceTable(tableName, this);
+        }
+
+
+        /// <summary>
+        /// Returns a <see cref="IMobileServiceSyncTable"/> instance, which provides
+        /// untyped data operations for that table.
+        /// </summary>
+        /// <param name="tableName">The name of the table.</param>
+        /// <returns>The table.</returns>
+        public IMobileServiceSyncTable GetSyncTable(string tableName)
+        {
+            ValidateTableName(tableName);
+
+            return new MobileServiceSyncTable(tableName, this);
         }
 
         /// <summary>
@@ -239,8 +256,25 @@ namespace Microsoft.WindowsAzure.MobileServices
             return new MobileServiceTable<T>(tableName, this);
         }
 
+
         /// <summary>
-        /// Logs a user into a Microsoft Azure Mobile Service with the provider and optional token object.
+        /// Returns a <see cref="IMobileServiceSyncTable{T}"/> instance, which provides 
+        /// strongly typed data operations for local table.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type of the instances in the table.
+        /// </typeparam>
+        /// <returns>
+        /// The table.
+        /// </returns>
+        public IMobileServiceSyncTable<T> GetSyncTable<T>()
+        {
+            string tableName = this.SerializerSettings.ContractResolver.ResolveTableName(typeof(T));
+            return new MobileServiceSyncTable<T>(tableName, this);
+        }
+
+        /// <summary>
+        /// Logs a user into a Windows Azure Mobile Service with the provider and optional token object.
         /// </summary>
         /// <param name="provider">
         /// Authentication provider to use.
@@ -504,15 +538,16 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="apiName"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        private string CreateAPIUriString(string apiName, IDictionary<string, string> parameters = null) {
+        private string CreateAPIUriString(string apiName, IDictionary<string, string> parameters = null)
+        {
             string uriFragment = string.Format(CultureInfo.InvariantCulture, "api/{0}", apiName);
             string queryString = MobileServiceUrlBuilder.GetQueryString(parameters, useTableAPIRules: false);
-            
-            return MobileServiceUrlBuilder.CombinePathAndQuery(uriFragment, queryString);            
+
+            return MobileServiceUrlBuilder.CombinePathAndQuery(uriFragment, queryString);
         }
 
         /// <summary>
-        /// Invokes a user-defined custom API of a Microsoft Azure Mobile Service using the specified HttpMethod.
+        /// Invokes a user-defined custom API of a Windows Azure Mobile Service using the specified HttpMethod.
         /// Additional data can be sent though the HTTP content or the query string. 
         /// </summary>
         /// <param name="apiName">The name of the custom AP.</param>
@@ -553,8 +588,26 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             if (disposing)
             {
+                ((MobileServiceSyncContext)this.SyncContext).Dispose();
                 // free managed resources
                 this.HttpClient.Dispose();
+            }
+        }
+
+        private static void ValidateTableName(string tableName)
+        {
+            if (tableName == null)
+            {
+                throw new ArgumentNullException("tableName");
+            }
+
+            if (string.IsNullOrWhiteSpace(tableName))
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        Resources.MobileServiceClient_EmptyArgument,
+                        "tableName"));
             }
         }
 

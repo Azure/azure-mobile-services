@@ -27,6 +27,10 @@ NSString *const httpDelete = @"DELETE";
 -(id) initWithURL:(NSURL *)url
         withTable:(MSTable *)table;
 
+-(void) setIfMatchVersion:(NSString *)version;
+
++(NSString *) versionFromItem:(NSDictionary *)item ItemId:(NSString *)itemId;
+
 @end
 
 
@@ -86,6 +90,34 @@ NSString *const httpDelete = @"DELETE";
     }
     
     return self;
+}
+
+
+#pragma mark * Private Class Methods
+
+
+-(void) setIfMatchVersion:(NSString *)version
+{
+    if (!version) {
+        return;
+    }
+    
+    NSString *validHeaderVersion = [NSString stringWithFormat:@"\"%@\"",
+                                    [version stringByReplacingOccurrencesOfString:@"\""
+                                                                       withString:@"\\\""]];
+    
+    [self addValue:validHeaderVersion forHTTPHeaderField:@"If-Match"];
+}
+
+
+#pragma mark - Private Static Helper Functions
+
++(NSString *) versionFromItem:(NSDictionary *)item ItemId:(id)itemId
+{
+    if([itemId isKindOfClass:[NSString class]]) {
+        return item[MSSystemColumnVersion];
+    }
+    return nil;
 }
 
 
@@ -156,20 +188,20 @@ NSString *const httpDelete = @"DELETE";
         NSString *idString = [serializer stringFromItemId:itemId
                                                   orError:&error];
         
-        if (!error) {        
-
+        if (!error) {
             // Create the URL
             NSURL *url = [MSURLBuilder URLForTable:table
                                        itemIdString:idString
                                          parameters:parameters
-                                                orError:&error];
+                                            orError:&error];
             if (!error) {
                 // Create the request
                 request = [[MSTableItemRequest alloc] initWithURL:url
                                                         withTable:table];
                 request.itemId = itemId;
             
-                NSString *version = [self getVersionFromItem:item itemId:itemId];
+                // If string id, cache the version field as we strip it out during serialization
+                NSString *version = [MSTableRequest versionFromItem:item ItemId:itemId];
                 
                 // Create the body or capture the error from serialization
                 NSData *data = [serializer dataFromItem:item
@@ -189,9 +221,7 @@ NSString *const httpDelete = @"DELETE";
                     request.HTTPMethod = httpPatch;
                     
                     // Version becomes an etag if passed
-                    if(version) {
-                        [self setVersion:version request:request];
-                    }
+                    [request setIfMatchVersion:version];
                 }
             }
         }
@@ -220,7 +250,6 @@ NSString *const httpDelete = @"DELETE";
     // Ensure we can get the item Id
     id itemId = [table.client.serializer itemIdFromItem:item orError:&error];
     if (!error) {
-        NSString *version = [self getVersionFromItem:item itemId:itemId];
         
         // Get the request from the other constructor
         request = [MSTableRequest requestToDeleteItemWithId:itemId
@@ -230,11 +259,6 @@ NSString *const httpDelete = @"DELETE";
         
         // Set the additional properties
         request.item = item;
-        
-        // Version becomes an etag if passed
-        if(version) {
-            [self setVersion:version request:request];
-        }
     }
     
     // If there was an error, call the completion and make sure
@@ -279,6 +303,59 @@ NSString *const httpDelete = @"DELETE";
             
             // Set the method and headers
             request.HTTPMethod = httpDelete;
+        }
+    }
+    
+    // If there was an error, call the completion and make sure
+    // to return nil for the request
+    if (error) {
+        request = nil;
+        if (completion) {
+            completion(nil, error);
+        }
+    }
+    
+    return request;
+}
+
++(MSTableItemRequest *) requestToUndeleteItem:(id)item
+                                        table:(MSTable *)table
+                                   parameters:(NSDictionary *)parameters
+                                   completion:(MSItemBlock)completion
+{
+    MSTableItemRequest *request = nil;
+    NSError *error = nil;
+    id<MSSerializer> serializer = table.client.serializer;
+    
+    // Ensure we can get the item Id
+    id itemId = [serializer itemIdFromItem:item orError:&error];
+    if (!error) {
+        // Ensure we can get a string from the item Id
+        NSString *idString = [serializer stringFromItemId:itemId
+                                                  orError:&error];
+        
+        if (!error) {
+            // Create the URL
+            NSURL *url =  [MSURLBuilder URLForTable:table
+                                       itemIdString:idString
+                                         parameters:parameters
+                                            orError:&error];
+            
+            if (!error) {
+                // Create the request
+                request = [[MSTableItemRequest alloc] initWithURL:url
+                                                          withTable:table];
+                
+                // Set the additional properties
+                request.requestType = MSTableUndeleteRequestType;
+                request.itemId = itemId;
+                
+                // Set the method and headers
+                request.HTTPMethod = httpPost;
+                
+                // Add the optional if-match header
+                [request setIfMatchVersion:[MSTableRequest versionFromItem:item ItemId:itemId]];
+            }
         }
     }
     
@@ -369,12 +446,7 @@ NSString *const httpDelete = @"DELETE";
     // If string id, cache the version field as we strip it out during serialization
     NSString *version= nil;
     if([itemId isKindOfClass:[NSString class]]) {
-        @try {
-            version = [item objectForKey:MSSystemColumnVersion];
-        }
-        @catch (NSException *exception) {
-            // Do nothing
-        }
+        version = [item objectForKey:MSSystemColumnVersion];
     }
     return version;
 }

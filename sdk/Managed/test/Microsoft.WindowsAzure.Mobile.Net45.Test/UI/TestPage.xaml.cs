@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -28,11 +29,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     /// </summary>
     public sealed partial class TestPage : Page, ITestReporter
     {
+        private static Color SkippedColor = Color.FromArgb(0xFF, 0x66, 0x66, 0x66);
+        private static Color FailedColor = Color.FromArgb(0xFF, 0xFF, 0x00, 0x6E);
+        private static Color PassedColor = Color.FromArgb(0xFF, 0x2A, 0x9E, 0x39);
+
         private ObservableCollection<GroupDescription> _groups;
         private ObservableCollection<TestDescription> _tests;
         private GroupDescription _currentGroup = null;
         private TestDescription _currentTest = null;
-
+        
         /// <summary>
         /// Initializes a new instance of the TestPage.
         /// </summary>
@@ -69,7 +74,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 pnlFooter.Visibility = Visibility.Collapsed;
                 if (harness.Failures > 0)
-                {
+                {                    
                     lblResults.Text = string.Format(CultureInfo.InvariantCulture, "{0}/{1} tests failed!", harness.Failures, harness.Count);
                     lblResults.Foreground = new SolidColorBrush(Color.FromArgb(0xFF, 0xFF, 0x00, 0x6E));
                 }
@@ -78,6 +83,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                     lblResults.Text = string.Format(CultureInfo.InvariantCulture, "{0} tests passed!", harness.Count);
                 }
                 lblResults.Visibility = Visibility.Visible;
+                if (App.Harness.Settings.Custom["Auto"] == "True")
+                {
+                    Application.Current.Shutdown(harness.Failures);
+                }
             });
         }
 
@@ -118,6 +127,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             await Dispatcher.InvokeAsync(async () =>
             {
+                ConsoleHelper.Write("{0}...", test.Name);
                 _currentTest = new TestDescription { Name = test.Name };
                 _currentGroup.Add(_currentTest);
                 _tests.Add(_currentTest);
@@ -128,22 +138,25 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 });
             });
         }
-
+        
         public async void EndTest(TestMethod method)
         {
             await Dispatcher.InvokeAsync(() =>
             {
                 if (method.Excluded)
                 {
-                    _currentTest.Color = Color.FromArgb(0xFF, 0x66, 0x66, 0x66);
+                    _currentTest.Color = SkippedColor;
+                    ConsoleHelper.WriteLine("Skipped");
                 }
                 else if (!method.Passed)
                 {
-                    _currentTest.Color = Color.FromArgb(0xFF, 0xFF, 0x00, 0x6E);
+                    _currentTest.Color = FailedColor;
+                    ConsoleHelper.WriteLine("Failed"); 
                 }
                 else
                 {
-                    _currentTest.Color = Color.FromArgb(0xFF, 0x2A, 0x9E, 0x39);
+                    _currentTest.Color = PassedColor;
+                    ConsoleHelper.WriteLine("Passed");
                 }
                 _currentTest = null;
             });

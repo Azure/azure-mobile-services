@@ -7,6 +7,9 @@ if [ "$1" = "" ]; then
 else
   azure mobile table create $1 stringIdRoundTripTable
   azure mobile table create $1 stringIdMovies
+  azure mobile table create $1 offlineReady
+  azure mobile table create $1 offlineReadyNoVersion
+  azure mobile table update --deleteColumn __version --quiet $1 offlineReadyNoVersion
   azure mobile table create --integerId $1 public
   azure mobile table create --integerId $1 admin
   azure mobile table create --integerId $1 application
@@ -33,6 +36,7 @@ else
   azure mobile table update -p insert=application,read=application,update=application,delete=application $1 application
   azure mobile table update -p insert=user,read=user,update=user,delete=user $1 authenticated
   azure mobile table update -p insert=application,read=public,update=public,delete=public $1 public
+  azure mobile table update -p insert=user,read=user,update=user,delete=user $1 offlineReadyNoVersionAuthenticated
 
   azure mobile script upload $1 table/stringIdRoundTripTable.insert -f stringIdRoundTripTable.insert.js
   azure mobile script upload $1 table/stringIdRoundTripTable.update -f stringIdRoundTripTable.update.js

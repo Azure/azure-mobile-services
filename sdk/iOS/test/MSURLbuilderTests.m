@@ -106,7 +106,13 @@
     @[ @"http://someApp.com/some%20path/tables/some%20table?%26encode=5",
        @"http://someApp.com/some path",
        @"some table",
-       @{@"&encode" : @5}]
+       @{@"&encode" : @5}],
+    
+    // Array
+    @[ @"http://someApp.com/some%20path/tables/someTable?x=1&x=B",
+       @"http://someApp.com/some path",
+       @"someTable",
+       @{@"x" : @[@1, @"B"]}]
     ];
     
     for (id testCase in testCases) {
@@ -405,7 +411,13 @@
       @[ @"http://someApp.com/some%20path/api/some%20api?%26encode=5",
          @"http://someApp.com/some path",
          @"some api",
-         @{@"&encode" : @5}]
+         @{@"&encode" : @5}],
+      
+      // Array
+      @[ @"http://someApp.com/api/someApi?x=1&x=B",
+         @"http://someApp.com",
+         @"someApi",
+         @{@"x" : @[@1, @"B"]}]
     ];
     
     for (id testCase in testCases) {

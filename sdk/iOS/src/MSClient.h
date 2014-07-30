@@ -7,16 +7,17 @@
 #import "MSError.h"
 #import "MSFilter.h"
 #import "MSLoginController.h"
+#import "MSSyncContext.h"
 
 @class MSTable;
 @class MSUser;
+@class MSSyncTable;
 @class MSPush;
+
 
 #pragma mark * Block Type Definitions
 /// Callback for method with no return other than error.
 typedef void (^MSCompletionBlock)(NSError *error);
-
-#import "MSPush.h"
 
 /// Callback for invokeAPI method that expects a JSON result.
 typedef void (^MSAPIBlock)(id result, NSHTTPURLResponse *response, NSError *error);
@@ -57,6 +58,10 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 /// array is not-mutable. To apply a filter to a client, use the withFilter:
 /// method.
 @property (nonatomic, strong, readonly)         NSArray *filters;
+
+/// A sync context that defines how offline data is synced and allows for manually
+/// syncing data on demand
+@property (nonatomic, strong)     MSSyncContext *syncContext;
 
 /// @name Registering and unregistering for push notifications
 
@@ -159,6 +164,9 @@ typedef void (^MSAPIDataBlock)(NSData *result,
 /// This has been deprecated. Use tableWithName:
 -(MSTable *)getTable:(NSString *)tableName __deprecated;
 
+/// Returns an MSSyncTable instance for a table with the given name.
+-(MSSyncTable *)syncTableWithName:(NSString *)tableName;
+
 /// @}
 
 #pragma mark * Public invokeAPI Methods
@@ -183,6 +191,19 @@ typedef void (^MSAPIDataBlock)(NSData *result,
       parameters:(NSDictionary *)parameters
          headers:(NSDictionary *)headers
       completion:(MSAPIDataBlock)completion;
+
+/// @}
+
+
+#pragma mark * Public Connection Methods
+
+
+/// @name Controlling connections to the server
+/// @{
+
+/// Determines where connections made to the mobile service are run. If set, connection related
+/// logic will occur on this queue. Otherwise, the thread that made the call will be used.
+@property (nonatomic, strong) NSOperationQueue *connectionDelegateQueue;
 
 /// @}
 

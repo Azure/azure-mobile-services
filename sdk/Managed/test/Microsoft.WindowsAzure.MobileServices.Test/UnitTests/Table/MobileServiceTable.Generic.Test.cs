@@ -1391,7 +1391,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             IMobileServiceTable<StringType> table = service.GetTable<StringType>();
 
-            hijack.Response.StatusCode = HttpStatusCode.NotFound;
+            hijack.Response = TestHttpHandler.CreateResponse(String.Empty, HttpStatusCode.NotFound);
             InvalidOperationException expected = null;
 
             try
@@ -1619,6 +1619,30 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 Assert.IsTrue(exception.Message.Contains("An id must not contain any control characters or the characters") || 
                               exception.Message.Contains("is longer than the max string id length of 255 characters"));
             }
+        }
+
+        [AsyncTestMethod]
+        public async Task InsertAsyncWithStringIdAndList_DoesNotDuplicateList()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+            hijack.SetResponseContent("{\"id\":\"an id\",\"Values\":[\"goodbye\",\"universe\"]}");
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            IMobileServiceTable<TypeWithArray> table = service.GetTable<TypeWithArray>();
+            var item = new TypeWithArray()
+            {
+                Id = "an id",
+                Values = new List<string> {
+                    "hello", "world"
+                }
+            };
+
+            await table.InsertAsync(item);
+
+            Assert.AreEqual("an id", item.Id);
+            Assert.AreEqual(item.Values.Count, 2);
+            Assert.AreEqual(item.Values[0], "goodbye");
+            Assert.AreEqual(item.Values[1], "universe");
         }
 
         [AsyncTestMethod]
@@ -2421,6 +2445,36 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.Contains(hijack.Request.RequestUri.Query, "state=WY");
         }
 
+        [AsyncTestMethod]
+        public async Task UndeleteAsync()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+
+            hijack.SetResponseContent("{\"id\":\"an id\",\"String\":\"Hey\"}");
+            hijack.OnSendingRequest = req =>
+            {
+                Assert.AreEqual(req.Method, HttpMethod.Post);
+                Assert.AreEqual(req.RequestUri.Query, "?__systemproperties=__createdAt%2C__updatedAt%2C__version");
+                // only id and version should be sent
+                Assert.IsNull(req.Content);
+                Assert.AreEqual(req.Headers.IfMatch.First().Tag, "\"abc\"");
+                return Task.FromResult(req);
+            };
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            IMobileServiceTable<ToDoWithSystemPropertiesType> table = service.GetTable<ToDoWithSystemPropertiesType>();
+
+            var obj = new ToDoWithSystemPropertiesType();
+            obj.Id = "an id";
+            obj.String = "new";
+            obj.Version = "abc";
+
+            await table.UndeleteAsync(obj, null);
+
+            Assert.AreEqual("an id", obj.Id);
+            Assert.AreEqual("Hey", obj.String);
+        }
+
         [TestMethod]
         public void CreateQueryGeneric()
         {
@@ -2430,6 +2484,24 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceTableQuery<StringType> query = table.CreateQuery();
 
             Assert.IsNotNull(query);
+        }
+
+        [AsyncTestMethod]
+        public async Task IncludeDeleted()
+        {
+            TestHttpHandler hijack = new TestHttpHandler();
+            hijack.SetResponseContent("[{\"id\":12,\"String\":\"Hey\"}]");
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            IMobileServiceTable<StringType> table = service.GetTable<StringType>();
+
+            List<StringType> people = await table.IncludeDeleted().ToListAsync();
+
+            Assert.Contains(hijack.Request.RequestUri.ToString(), "StringType");
+            Assert.Contains(hijack.Request.RequestUri.ToString(), "__includeDeleted=true");
+
+            Assert.AreEqual(12, people[0].Id);
+            Assert.AreEqual("Hey", people[0].String);
         }
 
         [AsyncTestMethod]

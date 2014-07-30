@@ -10,7 +10,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace Microsoft.WindowsAzure.MobileServices
+namespace Microsoft.WindowsAzure.MobileServices.Query
 {
     /// <summary>
     /// Represents a query that can be evaluated against a Mobile Services
@@ -38,14 +38,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="query">
         /// The encapsulated <see cref="IQueryable"/>.
         /// </param>
+        /// <param name="parameters">
+        /// The optional user-defined query string parameters to include with the query.
+        /// </param>
         /// <param name="includeTotalCount">
         /// A value that if set will determine whether the query will request
         /// the total count for all the records that would have been returned
         /// ignoring any take paging/limit clause specified by client or
         /// server.
-        /// </param>
-        /// <param name="parameters">
-        /// The optional user-defined query string parameters to include with the query.
         /// </param>
         internal MobileServiceTableQuery(IMobileServiceTable<T> table,
                                          MobileServiceTableQueryProvider queryProvider,
@@ -53,10 +53,6 @@ namespace Microsoft.WindowsAzure.MobileServices
                                          IDictionary<string, string> parameters,
                                          bool includeTotalCount)
         {
-            if (table == null)
-            {
-                throw new ArgumentNullException("table");
-            }
             if (table == null)
             {
                 throw new ArgumentNullException("table");
@@ -308,7 +304,18 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public IMobileServiceTableQuery<T> IncludeTotalCount()
         {
-            return this.QueryProvider.Create(this.Table, this.Query, this.Parameters, true);
+            return this.QueryProvider.Create(this.Table, this.Query, this.Parameters, includeTotalCount: true);
+        }
+
+        /// <summary>
+        /// Ensure the query will get the deleted records [JavaScript Mobile Services backend only].
+        /// </summary>
+        /// <returns>
+        /// The query object.
+        /// </returns>
+        public IMobileServiceTableQuery<T> IncludeDeleted()
+        {
+            return this.QueryProvider.Create(this.Table, this.Query, MobileServiceTable.IncludeDeleted(this.Parameters), includeTotalCount: true);
         }
 
         /// <summary>

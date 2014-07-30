@@ -313,6 +313,107 @@
     STAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
+-(void) testInsertStripsSystemProperties
+{
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    
+    MSInspectRequestBlock inspectBlock = ^NSURLRequest *(NSURLRequest *request) {
+         testFilter.responseToUse = [[NSHTTPURLResponse alloc]
+                                    initWithURL:request.URL
+                                    statusCode:200
+                                    HTTPVersion:nil headerFields:nil];
+        
+        return request;
+    };
+    
+    NSString* stringData = @"{\"id\": \"A\", \"name\":\"test name\", \"__version\":\"ABC\", \"__createdAt\":\"12-01-01\",\"__unknown\":123}";
+    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    
+    testFilter.dataToUse = data;
+    testFilter.ignoreNextFilter = YES;
+    testFilter.onInspectRequest =  [inspectBlock copy];
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
+    
+    // Create the item
+    id item = @{ @"name":@"test name" };
+    
+    // Insert the item
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+        STAssertNil(error, nil);
+        STAssertNotNil(item, nil);
+
+        STAssertNil(item[MSSystemColumnVersion], nil);
+        STAssertNil(item[MSSystemColumnCreatedAt], nil);
+        STAssertNil(item[@"__unknown"], nil);
+
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");    
+    done = NO;
+    
+    // Allow some through table enum
+    todoTable.systemProperties = MSSystemPropertyCreatedAt | MSSystemPropertyVersion;
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+        STAssertNil(error, nil);
+        STAssertNotNil(item, nil);
+        
+        STAssertNotNil(item[MSSystemColumnVersion], nil);
+        STAssertNotNil(item[MSSystemColumnCreatedAt], nil);
+        STAssertNil(item[@"__unknown"], nil);
+        
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    done = NO;
+    
+    // Allow all now
+    todoTable.systemProperties = MSSystemPropertyAll;
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+        STAssertNil(error, nil);
+        STAssertNotNil(item, nil);
+        
+        STAssertNotNil(item[MSSystemColumnVersion], nil);
+        STAssertNotNil(item[MSSystemColumnCreatedAt], nil);
+        STAssertNotNil(item[@"__unknown"], nil);
+        
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    done = NO;
+    
+    // Now using the querystring instead
+    todoTable.systemProperties = MSSystemPropertyNone;
+    [todoTable insert:item
+           parameters:@{@"__systemProperties":MSSystemColumnCreatedAt}
+           completion:^(NSDictionary *item, NSError *error) {
+        STAssertNil(error, nil);
+        STAssertNotNil(item, nil);
+        
+        STAssertNil(item[MSSystemColumnVersion], nil);
+        STAssertNotNil(item[MSSystemColumnCreatedAt], nil);
+        STAssertNil(item[@"__unknown"], nil);
+        
+        done = YES;
+    }];
+    
+    // And check int Ids keep them all still
+    stringData = @"{\"id\": 123, \"name\":\"test name\", \"__version\":\"ABC\", \"__createdAt\":\"12-01-01\",\"__unknown\":123}";
+    testFilter.dataToUse = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+        STAssertNil(error, nil);
+        STAssertNotNil(item, nil);
+
+        STAssertNotNil(item[MSSystemColumnVersion], nil);
+        STAssertNotNil(item[MSSystemColumnCreatedAt], nil);
+        STAssertNotNil(item[@"__unknown"], nil);
+
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
 
 #pragma mark * Update Method Tests
 
@@ -550,6 +651,113 @@
     
     STAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
+
+-(void) testUpdateStripsSystemProperties
+{
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    
+    MSInspectRequestBlock inspectBlock = ^NSURLRequest *(NSURLRequest *request) {
+        testFilter.responseToUse = [[NSHTTPURLResponse alloc]
+                                    initWithURL:request.URL
+                                    statusCode:200
+                                    HTTPVersion:nil headerFields:nil];
+        
+        return request;
+    };
+    
+    NSString* stringData = @"{\"id\": \"A\", \"name\":\"test name\", \"__version\":\"ABC\", \"__createdAt\":\"12-01-01\",\"__unknown\":123}";
+    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    
+    //testFilter.responseToUse = response;
+    testFilter.dataToUse = data;
+    testFilter.ignoreNextFilter = YES;
+    testFilter.onInspectRequest =  [inspectBlock copy];
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
+    
+    // Create the item
+    id item = @{ @"id": @"A", @"name":@"test name" };
+    
+    // Insert the item
+    [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
+        STAssertNil(error, nil);
+        STAssertNotNil(item, nil);
+        
+        STAssertNil(item[MSSystemColumnVersion], nil);
+        STAssertNil(item[MSSystemColumnCreatedAt], nil);
+        STAssertNil(item[@"__unknown"], nil);
+        
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    done = NO;
+    
+    // Allow some through table enum
+    todoTable.systemProperties = MSSystemPropertyCreatedAt | MSSystemPropertyVersion;
+    [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
+        STAssertNil(error, nil);
+        STAssertNotNil(item, nil);
+        
+        STAssertNotNil(item[MSSystemColumnVersion], nil);
+        STAssertNotNil(item[MSSystemColumnCreatedAt], nil);
+        STAssertNil(item[@"__unknown"], nil);
+        
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    done = NO;
+    
+    // Allow all now
+    todoTable.systemProperties = MSSystemPropertyAll;
+    [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
+        STAssertNil(error, nil);
+        STAssertNotNil(item, nil);
+        
+        STAssertNotNil(item[MSSystemColumnVersion], nil);
+        STAssertNotNil(item[MSSystemColumnCreatedAt], nil);
+        STAssertNotNil(item[@"__unknown"], nil);
+        
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    done = NO;
+    
+    // Now using the querystring instead
+    todoTable.systemProperties = MSSystemPropertyNone;
+    [todoTable update:item
+           parameters:@{@"__systemProperties":MSSystemColumnCreatedAt}
+           completion:^(NSDictionary *item, NSError *error) {
+               STAssertNil(error, nil);
+               STAssertNotNil(item, nil);
+               
+               STAssertNil(item[MSSystemColumnVersion], nil);
+               STAssertNotNil(item[MSSystemColumnCreatedAt], nil);
+               STAssertNil(item[@"__unknown"], nil);
+               
+               done = YES;
+           }];
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    done = NO;
+    
+    // And check int Ids keep them all still
+    stringData = @"{\"id\": 123, \"name\":\"test name\", \"__version\":\"ABC\", \"__createdAt\":\"12-01-01\",\"__unknown\":123}";
+    item = @{ @"id": @123, @"name":@"test name" };
+    testFilter.dataToUse = [stringData dataUsingEncoding:NSUTF8StringEncoding];
+    [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
+        STAssertNil(error, nil);
+        STAssertNotNil(item, nil);
+        
+        STAssertNotNil(item[MSSystemColumnVersion], nil);
+        STAssertNotNil(item[MSSystemColumnCreatedAt], nil);
+        STAssertNotNil(item[@"__unknown"], nil);
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
 
 #pragma mark * Delete Method Tests
 
@@ -1087,6 +1295,103 @@
 }
 
 
+#pragma mark * UndeleteItem Method Tests
+
+
+-(void) testUnDeleteItemWithStringId
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:@"{\"id\":\"an id\",\"String\":\"Hey\"}"];
+
+    __block NSURLRequest *actualRequest;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
+    
+    // Create the item
+    id item = @{ @"id":@"ID-ABC", @"name":@"test name" };
+    
+    // Insert the item
+    [todoTable undelete:item completion:^(NSDictionary *item, NSError *error) {
+        STAssertEqualObjects(actualRequest.HTTPMethod, @"POST", @"Expected undelete to send a POST, not %@", actualRequest.HTTPMethod);
+        STAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/NoSuchTable/ID-ABC", @"Unexpected URL");
+        
+        STAssertNil(error, @"error should have been nil.");
+        
+        STAssertNotNil(item, @"item should not have  been nil.");
+        STAssertEqualObjects(item[@"id"], @"an id", @"item id should have come from server.");
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+-(void) testUnDeleteItemWithParametersWithStringId
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:@"{\"id\":\"an id\",\"String\":\"Hey\", \"__version\":\"def\"}"];
+    
+    __block NSURLRequest *actualRequest;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
+    
+    // Create the item
+    id item = @{ @"id":@"ID-ABC", @"name":@"test name", MSSystemColumnVersion: @"abc" };
+    
+    // Insert the item
+    [todoTable undelete:item parameters:@{@"extra-extra": @"read-all-about-it"} completion:^(NSDictionary *item, NSError *error) {
+        STAssertEqualObjects(actualRequest.HTTPMethod, @"POST", @"Expected undelete to send a POST, not %@", actualRequest.HTTPMethod);
+        STAssertEqualObjects(actualRequest.URL.absoluteString, @"https://someUrl/tables/NoSuchTable/ID-ABC?extra-extra=read-all-about-it", @"Unexpected URL");
+        STAssertEqualObjects(actualRequest.allHTTPHeaderFields[@"If-Match"], @"\"abc\"", @"Missing if-match header");
+                                          
+        STAssertNil(error, @"error should have been nil.");
+        
+        STAssertNotNil(item, @"item should not have  been nil.");
+        STAssertEqualObjects(item[@"id"], @"an id", @"item id should have come from server.");
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+
+-(void) testUnDeleteItemWithNoItemId
+{
+    MSTable *todoTable = [client tableWithName:@"todoItem"];
+    
+    // Create the item
+    NSDictionary *item = @{ @"text":@"Write unit tests!", @"complete": @(NO) };
+    
+    // Update the item
+    [todoTable undelete:item completion:^(NSDictionary *item, NSError *error) {
+        STAssertNil(item, @"item should have been nil.");
+        
+        STAssertNotNil(error, @"error should not have been nil.");
+        STAssertTrue(error.domain == MSErrorDomain,
+                     @"error domain should have been MSErrorDomain.");
+        STAssertTrue(error.code == MSMissingItemIdWithRequest,
+                     @"error code should have been MSMissingItemIdWithRequest.");
+        
+        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        STAssertTrue([description isEqualToString:@"The item provided did not have an id."],
+                     @"description was: %@", description);
+        
+        done = YES;
+    }];
+    
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
+
 #pragma mark * ReadWithId Method Tests
 
 
@@ -1371,27 +1676,29 @@
     NSArray *testProperties = [MSTable testNonSystemProperties];
     testProperties = [testProperties arrayByAddingObjectsFromArray:[MSTable testValidSystemProperties]];
     
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    MSInspectRequestBlock inspectBlock = ^NSURLRequest *(NSURLRequest *request) {
+        actualRequest = request;
+        
+        testFilter.responseToUse = [[NSHTTPURLResponse alloc]
+                                    initWithURL:request.URL
+                                    statusCode:200
+                                    HTTPVersion:nil headerFields:nil];
+        
+        return request;
+    };
     
     for (NSString *property in testProperties)
     {
-        MSTestFilter *testFilter = [[MSTestFilter alloc] init];
-        NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                       initWithURL:nil
-                                       statusCode:200
-                                       HTTPVersion:nil headerFields:nil];
-        testFilter.responseToUse = response;
-        
         NSString *dataString = [NSString stringWithFormat:@"{\"id\":\"an id\",\"%@\":\"a value\",\"string\":\"What?\"}", property];
         testFilter.dataToUse = [dataString dataUsingEncoding:NSUTF8StringEncoding];
         testFilter.ignoreNextFilter = YES;
-        testFilter.onInspectRequest =  ^(NSURLRequest *request) {
-            actualRequest = request;
-            return request;
-        };
+        testFilter.onInspectRequest =  [inspectBlock copy];
         
         MSClient *filteredClient = [client clientWithFilter:testFilter];
         MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
-
+        todoTable.systemProperties = MSSystemPropertyAll;
+        
         NSDictionary *itemToInsert = @{@"id": @"an id", @"string": @"What?", property: @"a value"};
         [todoTable insert:itemToInsert completion:^(NSDictionary *item, NSError *error) {
             NSData *actualBody = actualRequest.HTTPBody;
@@ -1409,25 +1716,28 @@
 {
     __block NSURLRequest *actualRequest = nil;
     NSArray *testSystemProperties = [MSTable testValidSystemProperties];
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    testFilter.ignoreNextFilter = YES;
 
+    MSInspectRequestBlock inspectBlock = ^NSURLRequest *(NSURLRequest *request) {
+        actualRequest = request;
+        testFilter.responseToUse = [[NSHTTPURLResponse alloc]
+                                    initWithURL:request.URL
+                                    statusCode:200
+                                    HTTPVersion:nil headerFields:nil];
+        
+        return request;
+    };
+    
     for (NSString *property in testSystemProperties)
     {
-        MSTestFilter *testFilter = [[MSTestFilter alloc] init];
-        NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
-                                       initWithURL:nil
-                                       statusCode:200
-                                       HTTPVersion:nil headerFields:nil];
-        testFilter.responseToUse = response;
         NSString *dataString = [NSString stringWithFormat:@"{\"id\":\"an id\",\"%@\":\"a value\",\"string\":\"What?\"}", property];
         testFilter.dataToUse = [dataString dataUsingEncoding:NSUTF8StringEncoding];
-        testFilter.ignoreNextFilter = YES;
-        testFilter.onInspectRequest =  ^(NSURLRequest *request) {
-            actualRequest = request;
-            return request;
-        };
+        testFilter.onInspectRequest = [inspectBlock copy];
         
         MSClient *filteredClient = [client clientWithFilter:testFilter];
         MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
+        todoTable.systemProperties = MSSystemPropertyAll;
         
         NSDictionary *itemToInsert = @{@"id": [NSNull null], @"string": @"What?", property: @"a value"};
         [todoTable insert:itemToInsert completion:^(NSDictionary *item, NSError *error) {

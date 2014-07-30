@@ -19,6 +19,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
     /// </summary>
     public sealed partial class TestPage : Page, ITestReporter
     {
+        private static Color SkippedColor = Color.FromArgb(0xFF, 0x66, 0x66, 0x66);
+        private static Color FailedColor = Color.FromArgb(0xFF, 0xFF, 0x00, 0x6E);
+        private static Color PassedColor = Color.FromArgb(0xFF, 0x2A, 0x9E, 0x39);
+
         private ObservableCollection<GroupDescription> _groups;
         private GroupDescription _currentGroup = null;
         private TestDescription _currentTest = null;
@@ -123,15 +127,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 if (method.Excluded)
                 {
-                    _currentTest.Color = Color.FromArgb(0xFF, 0x66, 0x66, 0x66);
+                    _currentTest.Color = SkippedColor;
                 }
                 else if (!method.Passed)
                 {
-                    _currentTest.Color = Color.FromArgb(0xFF, 0xFF, 0x00, 0x6E);
+                    _currentTest.Color = FailedColor;
                 }
                 else
                 {
-                    _currentTest.Color = Color.FromArgb(0xFF, 0x2A, 0x9E, 0x39);
+                    _currentTest.Color = PassedColor;
                 }
                 _currentTest = null;
             });

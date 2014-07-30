@@ -12,7 +12,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace Microsoft.WindowsAzure.MobileServices
+namespace Microsoft.WindowsAzure.MobileServices.Query
 {
     /// <summary>
     /// Compiles a LINQ expression tree into a
@@ -34,7 +34,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// The query which is being translated.
         /// </summary>
-        private MobileServiceTableQuery<T> query;
+        private IMobileServiceTableQuery<T> query;
 
         /// <summary>
         /// Initializes a new instance of the MobileServiceTableQueryTranslator
@@ -44,13 +44,16 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The <see cref="T:MobileServiceTableQuery`1{T}"/> which 
         /// is being translated.
         /// </param>
-        internal MobileServiceTableQueryTranslator(MobileServiceTableQuery<T> query)
+        internal MobileServiceTableQueryTranslator(IMobileServiceTableQuery<T> query)
         {
             Debug.Assert(query != null);
 
             this.query = query;
 
-            this.queryDescription = new MobileServiceTableQueryDescription(query.Table.TableName, query.RequestTotalCount);
+            this.queryDescription = new MobileServiceTableQueryDescription(query.Table.TableName)
+            { 
+                IncludeTotalCount = query.RequestTotalCount,
+            };
         }
 
         /// <summary>
@@ -193,13 +196,13 @@ namespace Microsoft.WindowsAzure.MobileServices
                 LambdaExpression lambda = StripQuote(expression.Arguments[1]) as LambdaExpression;
                 if (lambda != null)
                 {
-                    string filter = FilterBuildingExpressionVisitor.Create(lambda.Body, this.ContractResolver);
+                    QueryNode filter = FilterBuildingExpressionVisitor.Compile(lambda.Body, this.ContractResolver);
                     if (this.queryDescription.Filter != null)
                     {
                         // If there's already a filter value, that means the
                         // query has multiple where clauses which we'll just
                         // join together with "and"s.
-                        this.queryDescription.Filter += " and " + filter;
+                        this.queryDescription.Filter = new BinaryOperatorNode(BinaryOperatorKind.And, this.queryDescription.Filter, filter);
                     }
                     else
                     {
@@ -314,14 +317,16 @@ namespace Microsoft.WindowsAzure.MobileServices
                         string memberName = FilterBuildingExpressionVisitor.GetTableMemberName(memberAccess, this.ContractResolver);
                         if (memberName != null)
                         {
+                            OrderByDirection direction = ascending ? OrderByDirection.Ascending : OrderByDirection.Descending;
+                            var node = new OrderByNode(new MemberAccessNode(null, memberName), direction);
                             // Add the ordering
                             if(prepend)
                             {
-                                this.queryDescription.Ordering.Insert(0, new KeyValuePair<string, bool>(memberName, ascending));
+                                this.queryDescription.Ordering.Insert(0, node);
                             } 
                             else 
                             {
-                                this.queryDescription.Ordering.Add(new KeyValuePair<string, bool>(memberName, ascending));                            
+                                this.queryDescription.Ordering.Add(node);                            
                             }
 
                             return;

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:p1="http://schemas.android.com/apk/res/android"
+    p1:orientation="vertical"
+    p1:layout_width="fill_parent"
+    p1:layout_height="fill_parent"
+    p1:paddingLeft="?android:attr/expandableListPreferredChildPaddingLeft">
+    <TextView
+        p1:id="@+id/TestName"
+        p1:layout_width="wrap_content"
+        p1:layout_height="wrap_content" />
+</LinearLayout>

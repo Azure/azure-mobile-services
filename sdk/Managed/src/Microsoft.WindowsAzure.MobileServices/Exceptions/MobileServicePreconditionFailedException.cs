@@ -21,7 +21,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="value">
         /// The current instance from the server that the precondition failed for.
         /// </param>
-        public MobileServicePreconditionFailedException(MobileServiceInvalidOperationException innerException, JToken value): base(innerException.Message, innerException.Request, innerException.Response)
+        public MobileServicePreconditionFailedException(MobileServiceInvalidOperationException innerException, JObject value): base(innerException.Message, innerException.Request, innerException.Response)
         {
             this.Value = value;
         }
@@ -29,7 +29,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// The current instance from the server that the precondition failed for.
         /// </summary>
-        public JToken Value { get; private set; }
+        public JObject Value { get; private set; }
     }
 
     /// <summary>

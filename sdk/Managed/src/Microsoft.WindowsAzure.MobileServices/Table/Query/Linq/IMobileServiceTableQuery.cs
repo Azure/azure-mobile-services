@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
@@ -35,6 +36,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         IDictionary<string, string> Parameters { get; }
 
         /// <summary>
+        /// Gets the underlying IQueryable associated with this query.
+        /// </summary>
+        IQueryable<T> Query { get; set; }
+
+        /// <summary>
         /// Ensure the query will get the total count for all the records that
         /// would have been returned ignoring any take paging/limit clause
         /// specified by client or server.
@@ -43,6 +49,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The query object.
         /// </returns>
         IMobileServiceTableQuery<T> IncludeTotalCount();
+
+        /// <summary>
+        /// Ensure the query will get the deleted records.
+        /// </summary>
+        /// <returns>
+        /// The query object.
+        /// </returns>
+        IMobileServiceTableQuery<T> IncludeDeleted();
 
         /// <summary>
         /// Applies the specified ascending order clause to the source query.

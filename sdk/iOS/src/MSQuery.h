@@ -4,10 +4,9 @@
 
 #import <Foundation/Foundation.h>
 #import "MSTable.h"
-
+#import "MSSyncTable.h"
 
 #pragma mark * MSQuery Public Interface
-
 
 /// The *MSQuery* class represents a query that can be configured and then
 /// executed against a table of a Microsoft Azure Mobile Service. The query is
@@ -28,6 +27,13 @@
 /// Returns a new *MSQuery* instance with the given table and the given
 /// predicate is used as the filter clause of the query.
 -(id)initWithTable:(MSTable *)table predicate:(NSPredicate *)predicate;
+
+/// Initializes a *MSQuery* instance with the given table.
+-(id)initWithSyncTable:(MSSyncTable *)table;
+
+/// Returns a new *MSQuery* instance with the given table and the given
+/// predicate is used as the filter clause of the query.
+-(id)initWithSyncTable:(MSSyncTable *)table predicate:(NSPredicate *)predicate;
 
 ///@}
 
@@ -103,8 +109,8 @@
 #pragma mark * Public Readonly Properties
 
 /// The table associated with this query.
-@property (nonatomic, strong, readonly)         MSTable *table;
-
+@property (nonatomic, strong)         MSTable *table;
+@property (nonatomic, strong)         MSSyncTable *syncTable;
 ///@}
 
 @end
