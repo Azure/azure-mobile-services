@@ -10,12 +10,12 @@
 #pragma mark * Mobile Services Special Keys String Constants
 
 
-NSString *const idKey = @"id";
-NSString *const resultsKey = @"results";
-NSString *const countKey = @"count";
-NSString *const errorKey = @"error";
-NSString *const descriptionKey = @"description";
-NSString *const stringIdPattern = @"[+?`\"/\\\\]|[\\u0000-\\u001F]|[\\u007F-\\u009F]|^\\.{1,2}$";
+static NSString *const idKey = @"id";
+static NSString *const resultsKey = @"results";
+static NSString *const countKey = @"count";
+static NSString *const errorKey = @"error";
+static NSString *const descriptionKey = @"description";
+static NSString *const stringIdPattern = @"[+?`\"/\\\\]|[\\u0000-\\u001F]|[\\u007F-\\u009F]|^\\.{1,2}$";
 
 #pragma mark * MSJSONSerializer Implementation
 

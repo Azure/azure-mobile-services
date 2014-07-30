@@ -4,7 +4,7 @@
 
 #import <Foundation/Foundation.h>
 
-extern NSString * const NativeRegistrationName;
+extern NSString * const MSNativeRegistrationName;
 
 @interface MSLocalStorage : NSObject
 

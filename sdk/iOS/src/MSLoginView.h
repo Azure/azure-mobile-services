@@ -10,7 +10,7 @@
 
 
 // The error domain for the MSLoginView errors
-NSString *const MSLoginViewErrorDomain;
+extern NSString *const MSLoginViewErrorDomain;
 
 
 #pragma mark * UserInfo Keys
@@ -18,7 +18,7 @@ NSString *const MSLoginViewErrorDomain;
 
 // The key to use with the |NSError| userInfo dictionary to retrieve the
 // data that was returned from a failed attempt to navigate to the end URL.
-NSString *const MSLoginViewErrorResponseData;
+extern NSString *const MSLoginViewErrorResponseData;
 
 
 #pragma mark * MSLoginView Error Codes
