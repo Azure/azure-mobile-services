@@ -8,7 +8,7 @@
 #pragma mark * MSUser Public Interface
 
 
-/// The *MSUser* class represents an end user that can login to a Windows Azure
+/// The *MSUser* class represents an end user that can login to a Microsoft Azure
 /// Mobile Service on a client device.
 @interface MSUser : NSObject <NSCopying>
 
@@ -35,10 +35,10 @@
 
 #pragma mark * Public Readwrite Properties
 
-/// A Windows Azure Mobile Services authentication token for the logged in
+/// A Microsoft Azure Mobile Services authentication token for the logged in
 /// end user. If non-nil, the authentication token will be included in all
-/// requests made to the Windows Azure Mobile Service, allowing the client to
-/// perform all actions on the Windows Azure Mobile Service that require
+/// requests made to the Microsoft Azure Mobile Service, allowing the client to
+/// perform all actions on the Microsoft Azure Mobile Service that require
 /// authenticated-user level permissions.
 @property (nonatomic, copy)         NSString *mobileServiceAuthenticationToken;
 
