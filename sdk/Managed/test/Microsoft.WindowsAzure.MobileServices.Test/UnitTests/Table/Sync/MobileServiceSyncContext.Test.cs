@@ -183,7 +183,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             var error = new MobileServiceTableOperationError(HttpStatusCode.Conflict,
                                                              operationId,
-                                                             1,
+                                                             0,
                                                              MobileServiceTableOperationKind.Update,
                                                              tableName,
                                                              item: new JObject() { { "id", itemId } },
@@ -224,7 +224,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             var error = new MobileServiceTableOperationError(HttpStatusCode.Conflict,
                                                              operationId,
-                                                             1,
+                                                             0,
                                                              MobileServiceTableOperationKind.Update,
                                                              tableName,
                                                              item: new JObject() { { "id", itemId } },
