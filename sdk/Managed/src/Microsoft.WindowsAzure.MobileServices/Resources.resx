@@ -408,4 +408,7 @@
   <data name="SyncError_OperationUpdated" xml:space="preserve">
     <value>The operation has been updated and cannot be cancelled.</value>
   </data>
+  <data name="SyncContext_PurgeOnDirtyTable" xml:space="preserve">
+    <value>The table cannot be purged because it has pending operations.</value>
+  </data>
 </root>

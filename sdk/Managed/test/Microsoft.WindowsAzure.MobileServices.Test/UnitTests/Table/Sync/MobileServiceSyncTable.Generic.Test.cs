@@ -453,7 +453,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task PurgeAsync_TriggersPush_WhenThereIsOperationInTable()
+        public async Task PurgeAsync_Throws_WhenThereIsOperationInTable()
         {
             var hijack = new TestHttpHandler();
             hijack.SetResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}");
@@ -467,12 +467,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(store.Tables[table1.TableName].Count, 1); // item is inserted
 
             // this should trigger a push
-            await table1.PurgeAsync();
+            var ex = await ThrowsAsync<InvalidOperationException>(table1.PurgeAsync);
 
-            Assert.AreEqual(hijack.Requests.Count, 1); // push triggered
-            Assert.AreEqual(store.DeleteQueries.Count, 2);
-            Assert.AreEqual(store.DeleteQueries[0].TableName, MobileServiceLocalSystemTables.SyncErrors); // push deletes all sync erros
-            Assert.AreEqual(store.DeleteQueries[1].TableName, "someTable"); // purged table
+            Assert.AreEqual(ex.Message, "The table cannot be purged because it has pending operations.");
+            Assert.AreEqual(service.SyncContext.PendingOperations, 1L); // operation still in queue
         }
 
         [AsyncTestMethod]

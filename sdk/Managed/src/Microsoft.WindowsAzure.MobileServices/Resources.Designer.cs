@@ -836,6 +836,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The table cannot be purged because it has pending operations..
+        /// </summary>
+        internal static string SyncContext_PurgeOnDirtyTable {
+            get {
+                return ResourceManager.GetString("SyncContext_PurgeOnDirtyTable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An update operation on the item is already in the queue..
         /// </summary>
         internal static string SyncContext_UpdatePending {

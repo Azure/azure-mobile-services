@@ -33,6 +33,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.parameters = parameters;
         }
 
+        protected override bool CanDeferIfDirty
+        {
+            get { return true; }
+        }
+
         protected async override Task ProcessTableAsync()
         {
             bool incrementalSync = this.IsIncrementalSync();

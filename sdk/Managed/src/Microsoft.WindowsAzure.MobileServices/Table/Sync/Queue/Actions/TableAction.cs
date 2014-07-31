@@ -3,20 +3,16 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
-using Microsoft.WindowsAzure.MobileServices.Threading;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
     /// <summary>
     /// Base class for table specific sync actions that push all the pending changes on that table before executing i.e. Purge and Pull
     /// </summary>
-    internal abstract class TableAction: SyncAction
+    internal abstract class TableAction : SyncAction
     {
         private Task pendingPush;
         private MobileServiceSyncContext context;
@@ -26,14 +22,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         protected MobileServiceTable Table { get; private set; }
         protected MobileServiceSyncSettingsManager Settings { get; private set; }
 
+        protected abstract bool CanDeferIfDirty { get; }
+
         public TableAction(MobileServiceTable table,
                            string queryKey,
                            MobileServiceTableQueryDescription query,
-                           MobileServiceSyncContext context, 
+                           MobileServiceSyncContext context,
                            OperationQueue operationQueue,
                            MobileServiceSyncSettingsManager settings,
                            IMobileServiceLocalStore store,
-                           CancellationToken cancellationToken): base(operationQueue, store, cancellationToken)
+                           CancellationToken cancellationToken)
+            : base(operationQueue, store, cancellationToken)
         {
             this.Table = table;
             this.QueryKey = queryKey;
@@ -55,10 +54,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 {
                     if (await this.OperationQueue.CountPending(this.Table.TableName) > 0)
                     {
-                        // there are pending operations on the same table so defer the action
-                        this.pendingPush = this.context.DeferTableActionAsync(this);
-                        // we need to return in order to give PushAsync a chance to execute so we don't await the pending push
-                        return;
+                        if (this.CanDeferIfDirty)
+                        {
+                            // there are pending operations on the same table so defer the action
+                            this.pendingPush = this.context.DeferTableActionAsync(this);
+                            // we need to return in order to give PushAsync a chance to execute so we don't await the pending push
+                            return;
+                        }
+                        throw new InvalidOperationException(Resources.SyncContext_PurgeOnDirtyTable);
                     }
 
                     await this.ProcessTableAsync();

@@ -361,6 +361,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             var result = await table.IncludeTotalCount().Take(0).ToCollectionAsync();
             Assert.AreEqual(result.TotalCount, 2L);
 
+            await service.SyncContext.PushAsync();
             await table.PurgeAsync();
 
             result = await table.IncludeTotalCount().Take(0).ToCollectionAsync();
@@ -583,7 +584,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         }
 
         [AsyncTestMethod]
-        public async Task Insert_ThenPush_ThenPull_ThenRead_ThenUpdate_ThenRefresh_ThenDelete_ThenLookup_ThenPurge_ThenRead()
+        public async Task Insert_ThenPush_ThenPull_ThenRead_ThenUpdate_ThenRefresh_ThenDelete_ThenLookup_ThenPush_ThenPurge_ThenRead()
         {
             ResetDatabase(TestTable);
 
@@ -658,6 +659,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             service = await CreateTodoClient(hijack);
             table = service.GetSyncTable<ToDoWithStringId>();
 
+            await service.SyncContext.PushAsync();
             // now purge the remaining records
             await table.PurgeAsync();
 
