@@ -65,6 +65,8 @@ NSString * const ALL_UNATTENDED_TESTS_GROUP_NAME = @"All tests (unattended)";
                 ZumoTest *newTest = [[ZumoTest alloc] init];
                 [newTest setTestName:[test testName]];
                 [newTest setExecution:[test execution]];
+                newTest.requiredFeatures = test.requiredFeatures;
+                
                 [result addTest:newTest];
             }
         }
