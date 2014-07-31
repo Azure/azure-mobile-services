@@ -18,6 +18,11 @@
 **Managed SDK** 
 - Added support for Xamarin iOS Azure Notification Hub integration
 
+** iOS SDK**
+- Fix issue with const when using both Azure Messaging and Mobile Services frameworks
+- Fix issue [#306](https://github.com/Azure/azure-mobile-services/issues/306) with how arrays passed as query string params to table and custom APIs are converted 
+- Fix issue where system properties (__version, __updatedAt, etc) were returned to the caller when they were not requested
+
 ### Version 1.2.2
 **iOS SDK**
 - Added support for APNS Azure Notification Hub integration

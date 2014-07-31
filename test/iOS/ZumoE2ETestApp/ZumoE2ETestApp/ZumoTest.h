@@ -14,7 +14,6 @@ typedef void (^ZumoTestExecution)(ZumoTest *test, UIViewController *viewControll
 @interface ZumoTest : NSObject
 {
     NSMutableArray *logs;
-    NSMutableArray *requiredFeatures;
 }
 
 @property (nonatomic, weak) id<ZumoTestCallbacks> delegate;
@@ -26,6 +25,7 @@ typedef void (^ZumoTestExecution)(ZumoTest *test, UIViewController *viewControll
 @property (nonatomic) BOOL canRunUnattended;
 @property (nonatomic, copy) NSDate *startTime;
 @property (nonatomic, copy) NSDate *endTime;
+@property (nonatomic, strong) NSMutableArray *requiredFeatures;
 
 + (ZumoTest *)createTestWithName:(NSString *)name andExecution:(ZumoTestExecution)steps;
 

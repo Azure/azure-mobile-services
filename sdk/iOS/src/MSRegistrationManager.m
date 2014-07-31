@@ -71,7 +71,7 @@
 {
     NSString *name = registration[@"templateName"];
     if (!name) {
-        name = NativeRegistrationName;
+        name = MSNativeRegistrationName;
     }
     
     NSString *cachedRegistrationId = [self.storage getRegistrationIdWithName:name];

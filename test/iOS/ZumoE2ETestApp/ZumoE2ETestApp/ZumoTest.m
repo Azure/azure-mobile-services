@@ -18,7 +18,7 @@
         logs = [[NSMutableArray alloc] init];
         _propertyBag = [[NSMutableDictionary alloc] init];
         _canRunUnattended = YES;
-        requiredFeatures = [[NSMutableArray alloc] init];
+        _requiredFeatures = [[NSMutableArray alloc] init];
     }
     
     return self;
@@ -32,7 +32,7 @@
 }
 
 - (void)addRequiredFeature:(NSString *)featureName {
-    [requiredFeatures addObject:featureName];
+    [self.requiredFeatures addObject:featureName];
 }
 
 - (BOOL)shouldBeSkipped {
@@ -43,7 +43,7 @@
         return NO;
     }
     
-    for (NSString *requiredFeature in requiredFeatures) {
+    for (NSString *requiredFeature in self.requiredFeatures) {
         NSNumber *featureEnabled = [features objectForKey:requiredFeature];
         if (!featureEnabled) {
             [self addLog:[NSString stringWithFormat:@"Test requires '%@' feature, but the value wasn't present in the runtime information.", featureEnabled]];

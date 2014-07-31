@@ -169,6 +169,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             JToken updatedValue = await TransformHttpException(serializer, () => this.UpdateAsync(value, parameters, MobileServiceFeatures.TypedTable));
 
+
             serializer.Deserialize<T>(updatedValue, instance);
         }
 

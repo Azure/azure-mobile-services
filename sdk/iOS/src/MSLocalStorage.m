@@ -4,7 +4,9 @@
 
 #import "MSLocalStorage.h"
 
-NSString * const NativeRegistrationName = @"$Default";
+NSString *const MSNativeRegistrationName = @"$Default";
+
+static NSString *const storageVersion = @"v1.0.0";
 
 @interface MSLocalStorage ()
 @property (nonatomic) NSMutableDictionary *registrations;
@@ -16,8 +18,6 @@ NSString * const NativeRegistrationName = @"$Default";
 @end
 
 @implementation MSLocalStorage
-
-NSString * const storageVersion = @"v1.0.0";
 
 - (MSLocalStorage *)initWithMobileServiceHost:(NSString *)mobileServiceHost
 {
@@ -51,7 +51,7 @@ NSString * const storageVersion = @"v1.0.0";
 {
     NSString *name = registrationName;
     if (!name) {
-        name = NativeRegistrationName;
+        name = MSNativeRegistrationName;
     }
     
     [self.registrations setObject:registrationId forKey:name];
@@ -67,7 +67,7 @@ NSString * const storageVersion = @"v1.0.0";
     for (int i = 0; i < [registrations count]; i++) {
         NSString *name = registrations[i][@"templateName"];
         if (!name) {
-            name = NativeRegistrationName;
+            name = MSNativeRegistrationName;
         }
         
         /// All registrations passed to this method will have registrationId as they

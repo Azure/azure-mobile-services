@@ -253,8 +253,7 @@ static NSString *pushClientKey = @"PushClientKey";
         } else {
             MSClient *client = [[ZumoTestGlobals sharedInstance] client];
             if ([ZumoPushTests isNhEnabled]) {
-                NSData *deviceToken = [ZumoTestGlobals sharedInstance].deviceToken;
-                [client.push registerNativeWithDeviceToken:deviceToken tags:@[deviceToken] completion:^(NSError *error) {
+                [client.push registerNativeWithDeviceToken:deviceToken tags:@[deviceTokenString] completion:^(NSError *error) {
                     if (error) {
                         [test addLog:[NSString stringWithFormat:@"Encountered error registering with Mobile Service: %@", error.description]];
                         [test setTestStatus:TSFailed];
