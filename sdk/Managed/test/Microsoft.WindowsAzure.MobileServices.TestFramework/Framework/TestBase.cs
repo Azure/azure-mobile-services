@@ -50,12 +50,12 @@ namespace Microsoft.WindowsAzure.MobileServices.TestFramework
             }
             catch (T ex)
             {
-               TestHarness.Log(
-                        string.Format(
-                            "Caught expected error {0}: {1}",
-                            ex.GetType().Name,
-                            ex.Message.Replace("\n", "   ").Replace("\r", "   ")));
-               return ex;
+                TestHarness.Log(
+                         string.Format(
+                             "Caught expected error {0}: {1}",
+                             ex.GetType().Name,
+                             ex.Message.Replace("\n", "   ").Replace("\r", "   ")));
+                return ex;
             }
             catch (Exception ex)
             {
@@ -68,7 +68,7 @@ namespace Microsoft.WindowsAzure.MobileServices.TestFramework
             return null;
         }
 
-        public async void ThrowsAsync<T>(Func<Task> action)
+        public async Task<T> ThrowsAsync<T>(Func<Task> action)
             where T : Exception
         {
             try
@@ -83,6 +83,7 @@ namespace Microsoft.WindowsAzure.MobileServices.TestFramework
                         "Caught expected error {0}: {1}",
                         ex.GetType().Name,
                         ex.Message.Replace("\n", "   ").Replace("\r", "   ")));
+                return ex;
             }
             catch (Exception ex)
             {
@@ -91,6 +92,7 @@ namespace Microsoft.WindowsAzure.MobileServices.TestFramework
                     ex.GetType().Name,
                     typeof(T).Name));
             }
+            return null;
         }
     }
 }

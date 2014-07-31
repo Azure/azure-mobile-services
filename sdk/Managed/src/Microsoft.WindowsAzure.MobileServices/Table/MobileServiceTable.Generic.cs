@@ -9,6 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
@@ -23,7 +24,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     internal class MobileServiceTable<T> : MobileServiceTable, IMobileServiceTable<T>
     {
         private MobileServiceTableQueryProvider queryProvider;
-        private bool hasIntegerId; 
+        private bool hasIntegerId;
 
         /// <summary>
         /// Initializes a new instance of the MobileServiceTables class.
@@ -41,7 +42,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.SystemProperties = client.Serializer.GetSystemProperties(typeof(T));
             Type idType = client.Serializer.GetIdPropertyType<T>(throwIfNotFound: false);
             this.hasIntegerId = idType == null || MobileServiceSerializer.IsIntegerId(idType);
-        }        
+        }
 
         /// <summary>
         /// Returns instances from a table.
@@ -121,8 +122,10 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 string unused;
                 value = MobileServiceSerializer.RemoveSystemProperties(value, out unused);
-            } 
-            JToken insertedValue = await this.InsertAsync(value, parameters, MobileServiceFeatures.TypedTable);
+            }
+
+            JToken insertedValue = await TransformHttpException(serializer, () => this.InsertAsync(value, parameters, MobileServiceFeatures.TypedTable));
+
             serializer.Deserialize<T>(insertedValue, instance);
         }
 
@@ -163,10 +166,11 @@ namespace Microsoft.WindowsAzure.MobileServices
             MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
             JObject value = serializer.Serialize(instance) as JObject;
 
-            JToken updatedValue = await TransformPreconditionFailedException(serializer, () => this.UpdateAsync(value, parameters, MobileServiceFeatures.TypedTable));
+            JToken updatedValue = await TransformHttpException(serializer, () => this.UpdateAsync(value, parameters, MobileServiceFeatures.TypedTable));
+
 
             serializer.Deserialize<T>(updatedValue, instance);
-        }        
+        }
 
         /// <summary>
         /// Deletes an instance from the table.
@@ -205,7 +209,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
             JObject value = serializer.Serialize(instance) as JObject;
 
-            await this.TransformPreconditionFailedException(serializer, () => this.DeleteAsync(value, parameters, MobileServiceFeatures.TypedTable));
+            await this.TransformHttpException(serializer, () => this.DeleteAsync(value, parameters, MobileServiceFeatures.TypedTable));
 
             // Clear the instance id since it's no longer associated with that
             // id on the server (note that reflection is goodly enough to turn
@@ -503,16 +507,22 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Transforms the <see cref="MobileServicePreconditionFailedException"/> to to a <see cref="MobileServicePreconditionFailedException{T}"/>.
+        /// Executes a request and transforms a 412 and 409 response to respective exception type.
         /// </summary>
-        private async Task<JToken> TransformPreconditionFailedException(MobileServiceSerializer serializer, Func<Task<JToken>> action)
+        private async Task<JToken> TransformHttpException(MobileServiceSerializer serializer, Func<Task<JToken>> action)
         {
             try
             {
                 return await action();
             }
-            catch (MobileServicePreconditionFailedException ex)
+            catch (MobileServiceInvalidOperationException ex)
             {
+                if (ex.Response.StatusCode != HttpStatusCode.PreconditionFailed &&
+                    ex.Response.StatusCode != HttpStatusCode.Conflict)
+                {
+                    throw;
+                }
+
                 T item = default(T);
                 try
                 {
@@ -520,7 +530,15 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
                 catch { }
 
-                throw new MobileServicePreconditionFailedException<T>(ex, item);
+                if (ex.Response.StatusCode == HttpStatusCode.PreconditionFailed)
+                {
+                    throw new MobileServicePreconditionFailedException<T>(ex, item);
+                }
+                else if (ex.Response.StatusCode == HttpStatusCode.Conflict)
+                {
+                    throw new MobileServiceConflictException<T>(ex, item);
+                }
+                throw;
             }
         }
 
