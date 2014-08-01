@@ -25,11 +25,12 @@ package com.microsoft.windowsazure.mobileservices.table;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 
 import org.apache.http.Header;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.protocol.HTTP;
 
 import android.net.Uri;
@@ -44,8 +45,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
-import com.microsoft.windowsazure.mobileservices.http.HttpPatch;
+import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
 import com.microsoft.windowsazure.mobileservices.http.MobileServiceConnection;
+import com.microsoft.windowsazure.mobileservices.http.MobileServiceHttpClient;
 import com.microsoft.windowsazure.mobileservices.http.RequestAsyncTask;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequestImpl;
@@ -69,7 +71,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 *            The MobileServiceClient used to invoke table operations
 	 */
 	public MobileServiceJsonTable(String name, MobileServiceClient client) {
-		initialize(name, client);
+		super(name, client);
 	}
 
 	/**
@@ -78,12 +80,21 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 * @throws MobileServiceException
 	 */
 	public ListenableFuture<JsonElement> execute() throws MobileServiceException {
-		return this.where().execute();
+		return this.executeInternal(EnumSet.of(MobileServiceFeatures.UntypedTable));
+	}
+
+	/**
+	 * Executes a query to retrieve all the table rows
+	 * 
+	 * @throws MobileServiceException
+	 */
+	protected ListenableFuture<JsonElement> executeInternal(EnumSet<MobileServiceFeatures> features) throws MobileServiceException {
+		return this.executeInternal(this.where(), features);
 	}
 
 	/**
 	 * Executes the query
-	 * 
+	 *
 	 * @deprecated use {@link execute()} instead
 	 * 
 	 * @param callback
@@ -96,12 +107,25 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
 	/**
 	 * Retrieves a set of rows from the table using a query
-	 * 
+	 *
 	 * @param query
 	 *            The query used to retrieve the rows
 	 * @throws MobileServiceException
 	 */
 	public ListenableFuture<JsonElement> execute(final Query query) {
+		return executeInternal(query, EnumSet.of(MobileServiceFeatures.UntypedTable));
+	}
+
+	/**
+	 * Retrieves a set of rows from the table using a query
+	 *
+	 * @param query
+	 *            The query used to retrieve the rows
+	 * @param features
+	 *            The features used in this request
+	 * @throws MobileServiceException
+	 */
+	protected ListenableFuture<JsonElement> executeInternal(final Query query, EnumSet<MobileServiceFeatures> features) {
 		final SettableFuture<JsonElement> future = SettableFuture.create();
 
 		String url = null;
@@ -123,7 +147,14 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 			return future;
 		}
 
-		ListenableFuture<Pair<JsonElement, ServiceFilterResponse>> internalFuture = executeGetRecords(url);
+		if (query != null) {
+			List<Pair<String, String>> userParameters = query.getUserDefinedParameters();
+			if (userParameters != null && userParameters.size() > 0) {
+				features.add(MobileServiceFeatures.AdditionalQueryParameters);
+			}
+		}
+
+		ListenableFuture<Pair<JsonElement, ServiceFilterResponse>> internalFuture = executeGetRecords(url, features);
 
 		Futures.addCallback(internalFuture, new FutureCallback<Pair<JsonElement, ServiceFilterResponse>>() {
 			@Override
@@ -278,9 +309,9 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
 	/**
 	 * Looks up a row in the table and retrieves its JSON value.
-	 * 
+	 *
 	 * @deprecated use {@link lookUp(Object id)} instead
-	 * 
+	 *
 	 * @param id
 	 *            The id of the row
 	 * @param callback
@@ -292,7 +323,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
 	/**
 	 * Looks up a row in the table and retrieves its JSON value.
-	 * 
+	 *
 	 * @param id
 	 *            The id of the row
 	 * @param parameters
@@ -300,6 +331,21 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 *            request URI query string
 	 */
 	public ListenableFuture<JsonObject> lookUp(Object id, List<Pair<String, String>> parameters) {
+		return lookUpInternal(id, parameters, EnumSet.of(MobileServiceFeatures.UntypedTable));
+	}
+
+	/**
+	 * Looks up a row in the table and retrieves its JSON value.
+	 *
+	 * @param id
+	 *            The id of the row
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the
+	 *            request URI query string
+	 * @param features
+	 *            The features used in this request
+	 */
+	protected ListenableFuture<JsonObject> lookUpInternal(Object id, List<Pair<String, String>> parameters, EnumSet<MobileServiceFeatures> features) {
 		final SettableFuture<JsonObject> future = SettableFuture.create();
 
 		try {
@@ -316,6 +362,9 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 		uriBuilder.appendPath(mTableName);
 		uriBuilder.appendPath(id.toString());
 
+		if (parameters != null && parameters.size() > 0) {
+			features.add(MobileServiceFeatures.AdditionalQueryParameters);
+		}
 		parameters = addSystemProperties(mSystemProperties, parameters);
 
 		if (parameters != null && parameters.size() > 0) {
@@ -326,7 +375,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
 		url = uriBuilder.build().toString();
 
-		ListenableFuture<Pair<JsonElement, ServiceFilterResponse>> internalFuture = executeGetRecords(url);
+		ListenableFuture<Pair<JsonElement, ServiceFilterResponse>> internalFuture = executeGetRecords(url, features);
 
 		Futures.addCallback(internalFuture, new FutureCallback<Pair<JsonElement, ServiceFilterResponse>>() {
 			@Override
@@ -425,11 +474,13 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 * @param parameters
 	 *            A list of user-defined parameters and values to include in the
 	 *            request URI query string
+	 * @param features
+	 *            The features used in the request
 	 * @throws IllegalArgumentException
 	 *             if the element has an id property set with a numeric value
 	 *             other than default (0), or an invalid string value
 	 */
-	public ListenableFuture<JsonObject> insert(final JsonObject element, List<Pair<String, String>> parameters) {
+	protected ListenableFuture<JsonObject> insertInternal(final JsonObject element, List<Pair<String, String>> parameters, EnumSet<MobileServiceFeatures> features) {
 		final SettableFuture<JsonObject> future = SettableFuture.create();
 		try {
 			validateIdOnInsert(element);
@@ -440,30 +491,13 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
 		String content = element.toString();
 
-		ServiceFilterRequest post;
-
-		Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
-		uriBuilder.path(TABLES_URL);
-		uriBuilder.appendPath(mTableName);
+		if (parameters != null && parameters.size() > 0) {
+			features.add(MobileServiceFeatures.AdditionalQueryParameters);
+		}
 
 		parameters = addSystemProperties(mSystemProperties, parameters);
 
-		if (parameters != null && parameters.size() > 0) {
-			for (Pair<String, String> parameter : parameters) {
-				uriBuilder.appendQueryParameter(parameter.first, parameter.second);
-			}
-		}
-		post = new ServiceFilterRequestImpl(new HttpPost(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());
-		post.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
-
-		try {
-			post.setContent(content);
-		} catch (Exception e) {
-			future.setException(e);
-			return future;
-		}
-
-		ListenableFuture<Pair<JsonObject, ServiceFilterResponse>> internalFuture = executeTableOperation(post);
+		ListenableFuture<Pair<JsonObject, ServiceFilterResponse>> internalFuture = this.executeTableOperation(TABLES_URL + mTableName, content, "POST", null, parameters, features);
 
 		Futures.addCallback(internalFuture, new FutureCallback<Pair<JsonObject, ServiceFilterResponse>>() {
 			@Override
@@ -486,7 +520,23 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
 	/**
 	 * Inserts a JsonObject into a Mobile Service Table
-	 * 
+	 *
+	 * @param element
+	 *            The JsonObject to insert
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the
+	 *            request URI query string
+	 * @throws IllegalArgumentException
+	 *             if the element has an id property set with a numeric value
+	 *             other than default (0), or an invalid string value
+	 */
+	public ListenableFuture<JsonObject> insert(final JsonObject element, List<Pair<String, String>> parameters) {
+		return this.insertInternal(element, parameters, EnumSet.of(MobileServiceFeatures.UntypedTable));
+	}
+
+	/**
+	 * Inserts a JsonObject into a Mobile Service Table
+	 *
 	 * @deprecated use {@link insert(final JsonObject element, List<Pair<String,
 	 *             String>> parameters)} instead
 	 * 
@@ -523,7 +573,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
 	/**
 	 * Updates an element from a Mobile Service Table
-	 * 
+	 *
 	 * @param element
 	 *            The JsonObject to update
 	 */
@@ -533,9 +583,9 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
 	/**
 	 * Updates an element from a Mobile Service Table
-	 * 
+	 *
 	 * @deprecated use {@link update(final JsonObject element)} instead
-	 * 
+	 *
 	 * @param element
 	 *            The JsonObject to update
 	 * @param callback
@@ -547,7 +597,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
 	/**
 	 * Updates an element from a Mobile Service Table
-	 * 
+	 *
 	 * @param element
 	 *            The JsonObject to update
 	 * @param parameters
@@ -555,6 +605,21 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 *            request URI query string
 	 */
 	public ListenableFuture<JsonObject> update(final JsonObject element, List<Pair<String, String>> parameters) {
+		return this.updateInternal(element, parameters, EnumSet.of(MobileServiceFeatures.UntypedTable));
+	}
+
+	/**
+	 * Updates an element from a Mobile Service Table
+	 *
+	 * @param element
+	 *            The JsonObject to update
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the
+	 *            request URI query string
+	 * @param features
+	 *            The features used in the request
+	 */
+	protected ListenableFuture<JsonObject> updateInternal(final JsonObject element, List<Pair<String, String>> parameters, EnumSet<MobileServiceFeatures> features) {
 		final SettableFuture<JsonObject> future = SettableFuture.create();
 
 		Object id = null;
@@ -575,36 +640,18 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 			content = element.toString();
 		}
 
-		ServiceFilterRequest patch;
-
-		Uri.Builder uriBuilder = Uri.parse(mClient.getAppUrl().toString()).buildUpon();
-		uriBuilder.path(TABLES_URL);
-		uriBuilder.appendPath(mTableName);
-		uriBuilder.appendPath(id.toString());
+		if (parameters != null && parameters.size() > 0) {
+			features.add(MobileServiceFeatures.AdditionalQueryParameters);
+		}
 
 		parameters = addSystemProperties(mSystemProperties, parameters);
-
-		if (parameters != null && parameters.size() > 0) {
-			for (Pair<String, String> parameter : parameters) {
-				uriBuilder.appendQueryParameter(parameter.first, parameter.second);
-			}
-		}
-
-		patch = new ServiceFilterRequestImpl(new HttpPatch(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());
-		patch.addHeader(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE);
-
+		List<Pair<String, String>> requestHeaders = null;
 		if (version != null) {
-			patch.addHeader("If-Match", getEtagFromValue(version));
+			requestHeaders = new ArrayList<Pair<String,String>>();
+			requestHeaders.add(new Pair<String, String>("If-Match", getEtagFromValue(version)));
 		}
 
-		try {
-			patch.setContent(content);
-		} catch (Exception e) {
-			future.setException(e);
-			return future;
-		}
-
-		ListenableFuture<Pair<JsonObject, ServiceFilterResponse>> internalFuture = executeTableOperation(patch);
+		ListenableFuture<Pair<JsonObject, ServiceFilterResponse>> internalFuture = this.executeTableOperation(TABLES_URL + mTableName + "/" + id.toString(), content, "PATCH", requestHeaders, parameters, features);
 
 		Futures.addCallback(internalFuture, new FutureCallback<Pair<JsonObject, ServiceFilterResponse>>() {
 			@Override
@@ -682,29 +729,43 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 * 
 	 * @param request
 	 *            Request to execute
-	 * @param callback
-	 *            Callback to invoke when the operation is completed
+	 * @param content
+	 *            The content of the request body
+	 * @param httpMethod
+	 *            The method of the HTTP request
+	 * @param requestHeaders
+	 *            Additional request headers used in the HTTP request
+	 * @param parameters
+	 *            A list of user-defined parameters and values to include in the
+	 *            request URI query string
+	 * @param features
+	 *            The features used in the request
 	 */
-	private ListenableFuture<Pair<JsonObject, ServiceFilterResponse>> executeTableOperation(ServiceFilterRequest request) {
+	private ListenableFuture<Pair<JsonObject, ServiceFilterResponse>> executeTableOperation(
+			String path, String content, String httpMethod, List<Pair<String, String>> requestHeaders, List<Pair<String, String>> parameters, EnumSet<MobileServiceFeatures> features) {
 		final SettableFuture<Pair<JsonObject, ServiceFilterResponse>> future = SettableFuture.create();
 
-		// Create AsyncTask to execute the operation
-		new RequestAsyncTask(request, mClient.createConnection()) {
+		MobileServiceHttpClient httpClient = new MobileServiceHttpClient(mClient);
+		if (requestHeaders == null) {
+			requestHeaders = new ArrayList<Pair<String, String>>();
+		}
+		requestHeaders.add(new Pair<String, String>(HTTP.CONTENT_TYPE, MobileServiceConnection.JSON_CONTENTTYPE));
+		ListenableFuture<ServiceFilterResponse> internalFuture = httpClient.request(path, content, httpMethod, requestHeaders, parameters, features);
+
+		Futures.addCallback(internalFuture, new FutureCallback<ServiceFilterResponse>() {
 			@Override
-			protected void onPostExecute(ServiceFilterResponse result) {
-				JsonObject newEntityJson = null;
-				if (mTaskException == null && result != null) {
-					String content = null;
-					content = result.getContent();
-
-					newEntityJson = new JsonParser().parse(content).getAsJsonObject();
-
-					future.set(Pair.create(newEntityJson, result));
-				} else {
-					future.setException(mTaskException);
-				}
+			public void onFailure(Throwable exc) {
+				future.setException(exc);
 			}
-		}.executeTask();
+
+			@Override
+			public void onSuccess(ServiceFilterResponse result) {
+				String content = null;
+				content = result.getContent();
+				JsonObject newEntityJson = new JsonParser().parse(content).getAsJsonObject();
+				future.set(Pair.create(newEntityJson, result));
+			}
+		});
 
 		return future;
 	}
@@ -714,13 +775,17 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 * 
 	 * @param query
 	 *            The URL used to retrieve the rows
-	 * @param callback
-	 *            Callback to invoke when the operation is completed
+	 * @param features
+	 *            The features used in this request
 	 */
-	private ListenableFuture<Pair<JsonElement, ServiceFilterResponse>> executeGetRecords(final String url) {
+	private ListenableFuture<Pair<JsonElement, ServiceFilterResponse>> executeGetRecords(final String url, EnumSet<MobileServiceFeatures> features) {
 		final SettableFuture<Pair<JsonElement, ServiceFilterResponse>> future = SettableFuture.create();
 
 		ServiceFilterRequest request = new ServiceFilterRequestImpl(new HttpGet(url), mClient.getAndroidHttpClientFactory());
+		String featuresHeader = MobileServiceFeatures.featuresToString(features);
+		if (featuresHeader != null) {
+			request.addHeader(MobileServiceHttpClient.X_ZUMO_FEATURES, featuresHeader);
+		}
 
 		MobileServiceConnection conn = mClient.createConnection();
 		// Create AsyncTask to execute the request and parse the results

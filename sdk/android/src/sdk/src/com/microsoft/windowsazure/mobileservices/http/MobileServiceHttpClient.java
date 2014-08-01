@@ -23,6 +23,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.http;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
@@ -49,7 +50,7 @@ public class MobileServiceHttpClient {
 	/**
 	 * Request header to indicate the features in this SDK used by the request.
 	 */
-	private final String X_ZUMO_FEATURES = "X-ZUMO-FEATURES";
+	public final static String X_ZUMO_FEATURES = "X-ZUMO-FEATURES";
 
 	/**
 	 * The client associated with this HTTP caller.
@@ -83,6 +84,37 @@ public class MobileServiceHttpClient {
 	public ListenableFuture<ServiceFilterResponse> request(String path, byte[] content, String httpMethod,
 			List<Pair<String, String>> requestHeaders, List<Pair<String, String>> parameters) {
 		return this.request(path, content, httpMethod, requestHeaders, parameters, EnumSet.noneOf(MobileServiceFeatures.class));
+	}
+
+	/**
+	 * Makes a request over HTTP
+	 *
+	 * @param path
+	 *            The path of the request URI
+	 * @param content
+	 *            The string to send as the request body
+	 * @param httpMethod
+	 *            The HTTP Method used to invoke the API
+	 * @param requestHeaders
+	 *            The extra headers to send in the request
+	 * @param parameters
+	 *            The query string parameters sent in the request
+	 * @param features
+	 *            The features used in the request
+	 * @throws UnsupportedEncodingException
+	 *            If the content cannot be converted into a byte array.
+	 */
+	public ListenableFuture<ServiceFilterResponse> request(String path, String content, String httpMethod,
+			List<Pair<String, String>> requestHeaders, List<Pair<String, String>> parameters,
+			EnumSet<MobileServiceFeatures> features) {
+		try {
+			byte[] byteContent = content.getBytes(MobileServiceClient.UTF8_ENCODING);
+			return this.request(path, byteContent, httpMethod, requestHeaders, parameters, features);
+		} catch (UnsupportedEncodingException e) {
+			SettableFuture<ServiceFilterResponse> future = SettableFuture.create();
+			future.setException(e);
+			return future;
+		}
 	}
 
 	/**

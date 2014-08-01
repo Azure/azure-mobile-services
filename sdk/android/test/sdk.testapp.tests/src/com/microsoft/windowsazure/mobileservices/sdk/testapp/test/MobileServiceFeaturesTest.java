@@ -29,6 +29,7 @@ import java.util.concurrent.ExecutionException;
 import org.apache.http.Header;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
+import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
 import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
@@ -36,6 +37,8 @@ import com.microsoft.windowsazure.mobileservices.http.NextServiceFilterCallback;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 
 import android.test.InstrumentationTestCase;
 import android.util.Pair;
@@ -73,7 +76,440 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 			assertEquals(expected, actual);
 		}
 	}
-	
+
+	// Tests for typed tables
+	interface TypedTableTestOperation {
+		void executeOperation(MobileServiceTable<PersonTestObjectWithStringId> table) throws Exception;
+	}
+
+	public void testTypedTableInsertFeatureHeader() {
+		testTypedTableFeatureHeader(new TypedTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceTable<PersonTestObjectWithStringId> table) throws Exception {
+				PersonTestObjectWithStringId pto = new PersonTestObjectWithStringId("John", "Doe", 33);
+				table.insert(pto).get();
+			}
+		}, false, "TT");
+	}
+
+	public void testTypedTableInsertWithParametersFeatureHeader() {
+		testTypedTableFeatureHeader(new TypedTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceTable<PersonTestObjectWithStringId> table) throws Exception {
+				PersonTestObjectWithStringId pto = new PersonTestObjectWithStringId("John", "Doe", 33);
+				List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
+				queryParams.add(new Pair<String, String>("a", "b"));
+				table.insert(pto, queryParams).get();
+			}
+		}, false, "QS,TT");
+	}
+
+	public void testTypedTableInsertWithEmptyParametersFeatureHeader() {
+		testTypedTableFeatureHeader(new TypedTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceTable<PersonTestObjectWithStringId> table) throws Exception {
+				PersonTestObjectWithStringId pto = new PersonTestObjectWithStringId("John", "Doe", 33);
+				List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
+				table.insert(pto, queryParams).get();
+			}
+		}, false, "TT");
+	}
+
+	public void testTypedTableUpdateFeatureHeader() {
+		testTypedTableFeatureHeader(new TypedTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceTable<PersonTestObjectWithStringId> table) throws Exception {
+				PersonTestObjectWithStringId pto = new PersonTestObjectWithStringId("John", "Doe", 33);
+				pto.setId("the-id");
+				table.update(pto).get();
+			}
+		}, false, "TT");
+	}
+
+	public void testTypedTableUpdateWithParametersFeatureHeader() {
+		testTypedTableFeatureHeader(new TypedTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceTable<PersonTestObjectWithStringId> table) throws Exception {
+				PersonTestObjectWithStringId pto = new PersonTestObjectWithStringId("John", "Doe", 33);
+				pto.setId("the-id");
+				List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
+				queryParams.add(new Pair<String, String>("a", "b"));
+				table.update(pto, queryParams).get();
+			}
+		}, false, "QS,TT");
+	}
+
+	public void testTypedTableDeleteNoParametersNoFeatureHeader() {
+		// The delete operation is implemented in the base table, so
+		// there's no (clean) way to differentiate between the typed and
+		// untyped (JSON) case. If there are additional query parameters,
+		// it will show up in the features, otherwise no features will be
+		// sent.
+		testTypedTableFeatureHeader(new TypedTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceTable<PersonTestObjectWithStringId> table) throws Exception {
+				PersonTestObjectWithStringId pto = new PersonTestObjectWithStringId("John", "Doe", 33);
+				pto.setId("the-id");
+				table.delete(pto).get();
+			}
+		}, false, null);
+	}
+
+	public void testTypedTableDeleteWithParametersFeatureHeader() {
+		// The delete operation is implemented in the base table, so
+		// there's no (clean) way to differentiate between the typed and
+		// untyped (JSON) case. If there are additional query parameters,
+		// it will show up in the features, otherwise no features will be
+		// sent.
+		testTypedTableFeatureHeader(new TypedTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceTable<PersonTestObjectWithStringId> table) throws Exception {
+				PersonTestObjectWithStringId pto = new PersonTestObjectWithStringId("John", "Doe", 33);
+				pto.setId("the-id");
+				List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
+				queryParams.add(new Pair<String, String>("a", "b"));
+				table.delete(pto, queryParams).get();
+			}
+		}, false, "QS");
+	}
+
+	public void testTypedTableLookupFeatureHeader() {
+		testTypedTableFeatureHeader(new TypedTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceTable<PersonTestObjectWithStringId> table) throws Exception {
+				table.lookUp("1").get();
+			}
+		}, false, "TT");
+	}
+
+	public void testTypedTableLookupWithParametersFeatureHeader() {
+		testTypedTableFeatureHeader(new TypedTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceTable<PersonTestObjectWithStringId> table) throws Exception {
+				List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
+				queryParams.add(new Pair<String, String>("a", "b"));
+				table.lookUp("1", queryParams).get();
+			}
+		}, false, "QS,TT");
+	}
+
+	public void testTypedTableReadFeatureHeader() {
+		testTypedTableFeatureHeader(new TypedTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceTable<PersonTestObjectWithStringId> table) throws Exception {
+				table.execute().get();
+			}
+		}, true, "TT");
+	}
+
+	public void testTypedQueryFeatureHeader() {
+		testTypedTableFeatureHeader(new TypedTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceTable<PersonTestObjectWithStringId> table) throws Exception {
+				table.parameter("a", "b").execute().get();
+			}
+		}, true, "QS,TT");
+	}
+
+	private void testTypedTableFeatureHeader(TypedTableTestOperation operation, final boolean responseIsArray, final String expectedFeaturesHeader) {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey,
+					getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
+
+			@Override
+			public ListenableFuture<ServiceFilterResponse> handleRequest(
+					ServiceFilterRequest request,
+					NextServiceFilterCallback nextServiceFilterCallback) {
+
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture
+						.create();
+				String featuresHeaderName = "X-ZUMO-FEATURES";
+				
+				Header[] headers = request.getHeaders();
+				String features = null;
+				for (int i = 0; i < headers.length; i++) {
+					if (headers[i].getName() == featuresHeaderName) {
+						features = headers[i].getValue();
+					}
+				}
+
+				boolean error = false;
+				if (features == null) {
+					if (expectedFeaturesHeader != null) {
+						resultFuture.setException(new Exception("No " + featuresHeaderName + " header on API call"));
+						error = true;
+					}
+				} else if (!features.equals(expectedFeaturesHeader)) {
+					resultFuture.setException(new Exception("Incorrect features header; expected " + 
+						expectedFeaturesHeader + ", actual " + features));
+					error = true;
+				}
+				
+				if (!error) {
+					ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+					String content = "{\"id\":\"the-id\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"age\":33}";
+					if (responseIsArray) {
+						content = "[" + content + "]";
+					}
+					response.setContent(content);
+					resultFuture.set(response);
+				}
+
+				return resultFuture;
+			}
+		});
+
+		try {
+			MobileServiceTable<PersonTestObjectWithStringId> table = client.getTable(PersonTestObjectWithStringId.class);
+			operation.executeOperation(table);
+		} catch (Exception exception) {
+			Throwable ex = exception;
+			while (ex instanceof ExecutionException || ex instanceof MobileServiceException) {
+				ex = ex.getCause();
+			}
+			ex.printStackTrace();
+			fail(ex.getMessage());
+		}
+	}
+
+	// Tests for untyped/JSON tables
+	interface JsonTableTestOperation {
+		void executeOperation(MobileServiceJsonTable table) throws Exception;
+	}
+
+	private JsonObject createJsonObject() {
+		JsonObject result = new JsonObject();
+		result.addProperty("id", "the-id");
+		result.addProperty("firstName", "John");
+		result.addProperty("lastName", "Doe");
+		result.addProperty("age", 33);
+		return result;
+	}
+
+	public void testJsonTableInsertFeatureHeader() {
+		testJsonTableFeatureHeader(new JsonTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceJsonTable table) throws Exception {
+				JsonObject jo = createJsonObject();
+				table.insert(jo).get();
+			}
+		}, false, "TU");
+	}
+
+	public void testJsonTableInsertWithParametersFeatureHeader() {
+		testJsonTableFeatureHeader(new JsonTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceJsonTable table) throws Exception {
+				JsonObject jo = createJsonObject();
+				List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
+				queryParams.add(new Pair<String, String>("a", "b"));
+				table.insert(jo, queryParams).get();
+			}
+		}, false, "QS,TU");
+	}
+
+	public void testJsonTableInsertWithEmptyParametersFeatureHeader() {
+		testJsonTableFeatureHeader(new JsonTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceJsonTable table) throws Exception {
+				JsonObject jo = createJsonObject();
+				List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
+				table.insert(jo, queryParams).get();
+			}
+		}, false, "TU");
+	}
+
+	public void testJsonTableUpdateFeatureHeader() {
+		testJsonTableFeatureHeader(new JsonTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceJsonTable table) throws Exception {
+				JsonObject jo = createJsonObject();
+				table.update(jo).get();
+			}
+		}, false, "TU");
+	}
+
+	public void testJsonTableUpdateWithParametersFeatureHeader() {
+		testJsonTableFeatureHeader(new JsonTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceJsonTable table) throws Exception {
+				JsonObject jo = createJsonObject();
+				List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
+				queryParams.add(new Pair<String, String>("a", "b"));
+				table.update(jo, queryParams).get();
+			}
+		}, false, "QS,TU");
+	}
+
+	public void testJsonTableDeleteFeatureHeader() {
+		// The delete operation is implemented in the base table, so
+		// there's no (clean) way to differentiate between the typed and
+		// untyped (JSON) case. If there are additional query parameters,
+		// it will show up in the features, otherwise no features will be
+		// sent.
+		testJsonTableFeatureHeader(new JsonTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceJsonTable table) throws Exception {
+				JsonObject jo = createJsonObject();
+				table.delete(jo).get();
+			}
+		}, false, null);
+	}
+
+	public void testJsonTableDeleteWithParametersFeatureHeader() {
+		// The delete operation is implemented in the base table, so
+		// there's no (clean) way to differentiate between the typed and
+		// untyped (JSON) case. If there are additional query parameters,
+		// it will show up in the features, otherwise no features will be
+		// sent.
+		testJsonTableFeatureHeader(new JsonTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceJsonTable table) throws Exception {
+				JsonObject jo = createJsonObject();
+				List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
+				queryParams.add(new Pair<String, String>("a", "b"));
+				table.delete(jo, queryParams).get();
+			}
+		}, false, "QS");
+	}
+
+	public void testJsonTableLookupFeatureHeader() {
+		testJsonTableFeatureHeader(new JsonTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceJsonTable table) throws Exception {
+				table.lookUp("1").get();
+			}
+		}, false, "TU");
+	}
+
+	public void testJsonTableLookupWithParametersFeatureHeader() {
+		testJsonTableFeatureHeader(new JsonTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceJsonTable table) throws Exception {
+				List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
+				queryParams.add(new Pair<String, String>("a", "b"));
+				table.lookUp("1", queryParams).get();
+			}
+		}, false, "QS,TU");
+	}
+
+	public void testJsonTableReadFeatureHeader() {
+		testJsonTableFeatureHeader(new JsonTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceJsonTable table) throws Exception {
+				table.execute().get();
+			}
+		}, true, "TU");
+	}
+
+	public void testJsonQueryFeatureHeader() {
+		testJsonTableFeatureHeader(new JsonTableTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceJsonTable table) throws Exception {
+				table.parameter("a", "b").execute().get();
+			}
+		}, true, "QS,TU");
+	}
+
+	private void testJsonTableFeatureHeader(JsonTableTestOperation operation, final boolean responseIsArray, final String expectedFeaturesHeader) {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey,
+					getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
+
+			@Override
+			public ListenableFuture<ServiceFilterResponse> handleRequest(
+					ServiceFilterRequest request,
+					NextServiceFilterCallback nextServiceFilterCallback) {
+
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture
+						.create();
+				String featuresHeaderName = "X-ZUMO-FEATURES";
+
+				String requestUri = request.getUrl();
+				System.out.println(requestUri);
+				Header[] headers = request.getHeaders();
+				String features = null;
+				for (int i = 0; i < headers.length; i++) {
+					if (headers[i].getName() == featuresHeaderName) {
+						features = headers[i].getValue();
+					}
+				}
+
+				boolean error = false;
+				if (features == null) {
+					if (expectedFeaturesHeader != null) {
+						resultFuture.setException(new Exception("No " + featuresHeaderName + " header on API call"));
+						error = true;
+					}
+				} else if (!features.equals(expectedFeaturesHeader)) {
+					resultFuture.setException(new Exception("Incorrect features header; expected " + 
+						expectedFeaturesHeader + ", actual " + features));
+					error = true;
+				}
+
+				if (!error) {
+					ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+					String content = "{\"id\":\"1\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"age\":33}";
+					if (responseIsArray) {
+						content = "[" + content + "]";
+					}
+					response.setContent(content);
+					resultFuture.set(response);
+				}
+
+				return resultFuture;
+			}
+		});
+
+		try {
+			MobileServiceJsonTable table = client.getTable("Person");
+			operation.executeOperation(table);
+		} catch (Exception exception) {
+			Throwable ex = exception;
+			while (ex instanceof ExecutionException || ex instanceof MobileServiceException) {
+				ex = ex.getCause();
+			}
+			fail(ex.getMessage());
+		}
+	}
+
+	// Tests for custom APIs
 	interface ClientTestOperation {
 		void executeOperation(MobileServiceClient client) throws Exception;
 	}

@@ -38,6 +38,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
 import com.microsoft.windowsazure.mobileservices.MobileServiceList;
 import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
@@ -64,7 +65,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 	 *            The class used for data serialization
 	 */
 	public MobileServiceTable(String name, MobileServiceClient client, Class<E> clazz) {
-		initialize(name, client);
+		super(name, client);
 
 		mInternalTable = new MobileServiceJsonTable(name, client);
 		mClazz = clazz;
@@ -89,7 +90,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 	 */
 	public ListenableFuture<MobileServiceList<E>> execute() throws MobileServiceException {
 		final SettableFuture<MobileServiceList<E>> future = SettableFuture.create();
-		ListenableFuture<JsonElement> internalFuture = mInternalTable.execute();
+		ListenableFuture<JsonElement> internalFuture = mInternalTable.executeInternal(EnumSet.of(MobileServiceFeatures.TypedTable));
 		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
 			@Override
 			public void onFailure(Throwable exc) {
@@ -158,7 +159,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 	 */
 	public ListenableFuture<MobileServiceList<E>> execute(Query query) {
 		final SettableFuture<MobileServiceList<E>> future = SettableFuture.create();
-		ListenableFuture<JsonElement> internalFuture = mInternalTable.execute(query);
+		ListenableFuture<JsonElement> internalFuture = mInternalTable.executeInternal(query, EnumSet.of(MobileServiceFeatures.TypedTable));
 		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
 			@Override
 			public void onFailure(Throwable exc) {
@@ -368,7 +369,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 	public ListenableFuture<E> lookUp(Object id, List<Pair<String, String>> parameters) {
 		final SettableFuture<E> future = SettableFuture.create();
 
-		ListenableFuture<JsonObject> internalFuture = mInternalTable.lookUp(id, parameters);
+		ListenableFuture<JsonObject> internalFuture = mInternalTable.lookUpInternal(id, parameters, EnumSet.of(MobileServiceFeatures.TypedTable));
 		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
 			@Override
 			public void onFailure(Throwable exc) {
@@ -487,7 +488,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 			json = removeSystemProperties(json);
 		}
 
-		ListenableFuture<JsonObject> internalFuture = mInternalTable.insert(json, parameters);
+		ListenableFuture<JsonObject> internalFuture = mInternalTable.insertInternal(json, parameters, EnumSet.of(MobileServiceFeatures.TypedTable));
 		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
 			@Override
 			public void onFailure(Throwable exc) {
@@ -614,7 +615,7 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 			return future;
 		}
 
-		ListenableFuture<JsonObject> internalFuture = mInternalTable.update(json, parameters);
+		ListenableFuture<JsonObject> internalFuture = mInternalTable.updateInternal(json, parameters, EnumSet.of(MobileServiceFeatures.TypedTable));
 		Futures.addCallback(internalFuture, new FutureCallback<JsonElement>() {
 			@Override
 			public void onFailure(Throwable exc) {
