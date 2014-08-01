@@ -145,11 +145,6 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 	}
 
 	public void testTypedTableDeleteNoParametersNoFeatureHeader() {
-		// The delete operation is implemented in the base table, so
-		// there's no (clean) way to differentiate between the typed and
-		// untyped (JSON) case. If there are additional query parameters,
-		// it will show up in the features, otherwise no features will be
-		// sent.
 		testTypedTableFeatureHeader(new TypedTableTestOperation() {
 
 			@Override
@@ -158,15 +153,10 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 				pto.setId("the-id");
 				table.delete(pto).get();
 			}
-		}, false, null);
+		}, false, "TT");
 	}
 
 	public void testTypedTableDeleteWithParametersFeatureHeader() {
-		// The delete operation is implemented in the base table, so
-		// there's no (clean) way to differentiate between the typed and
-		// untyped (JSON) case. If there are additional query parameters,
-		// it will show up in the features, otherwise no features will be
-		// sent.
 		testTypedTableFeatureHeader(new TypedTableTestOperation() {
 
 			@Override
@@ -177,7 +167,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 				queryParams.add(new Pair<String, String>("a", "b"));
 				table.delete(pto, queryParams).get();
 			}
-		}, false, "QS");
+		}, false, "QS,TT");
 	}
 
 	public void testTypedTableLookupFeatureHeader() {
@@ -365,11 +355,6 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 	}
 
 	public void testJsonTableDeleteFeatureHeader() {
-		// The delete operation is implemented in the base table, so
-		// there's no (clean) way to differentiate between the typed and
-		// untyped (JSON) case. If there are additional query parameters,
-		// it will show up in the features, otherwise no features will be
-		// sent.
 		testJsonTableFeatureHeader(new JsonTableTestOperation() {
 
 			@Override
@@ -377,15 +362,10 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 				JsonObject jo = createJsonObject();
 				table.delete(jo).get();
 			}
-		}, false, null);
+		}, false, "TU");
 	}
 
 	public void testJsonTableDeleteWithParametersFeatureHeader() {
-		// The delete operation is implemented in the base table, so
-		// there's no (clean) way to differentiate between the typed and
-		// untyped (JSON) case. If there are additional query parameters,
-		// it will show up in the features, otherwise no features will be
-		// sent.
 		testJsonTableFeatureHeader(new JsonTableTestOperation() {
 
 			@Override
@@ -395,7 +375,7 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 				queryParams.add(new Pair<String, String>("a", "b"));
 				table.delete(jo, queryParams).get();
 			}
-		}, false, "QS");
+		}, false, "QS,TU");
 	}
 
 	public void testJsonTableLookupFeatureHeader() {

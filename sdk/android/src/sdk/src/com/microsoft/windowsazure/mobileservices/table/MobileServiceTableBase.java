@@ -114,6 +114,11 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
 	protected EnumSet<MobileServiceSystemProperty> mSystemProperties = EnumSet.noneOf(MobileServiceSystemProperty.class);
 
 	/**
+	 * Features to be sent in telemetry headers for requests made by this table.
+	 */
+	protected EnumSet<MobileServiceFeatures> mFeatures = EnumSet.noneOf(MobileServiceFeatures.class);
+
+	/**
 	 * Constructor
 	 *
 	 * @param name
@@ -206,7 +211,7 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
 		uriBuilder.appendPath(mTableName);
 		uriBuilder.appendPath(getObjectId(elementOrId).toString());
 
-		EnumSet<MobileServiceFeatures> features = EnumSet.noneOf(MobileServiceFeatures.class);
+		EnumSet<MobileServiceFeatures> features = mFeatures.clone();
 		if (parameters != null && parameters.size() > 0) {
 			features.add(MobileServiceFeatures.AdditionalQueryParameters);
 		}

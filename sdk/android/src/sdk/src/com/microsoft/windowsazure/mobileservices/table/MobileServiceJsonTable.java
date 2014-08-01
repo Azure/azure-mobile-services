@@ -72,6 +72,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 */
 	public MobileServiceJsonTable(String name, MobileServiceClient client) {
 		super(name, client);
+		mFeatures.add(MobileServiceFeatures.UntypedTable);
 	}
 
 	/**
@@ -80,7 +81,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 * @throws MobileServiceException
 	 */
 	public ListenableFuture<JsonElement> execute() throws MobileServiceException {
-		return this.executeInternal(EnumSet.of(MobileServiceFeatures.UntypedTable));
+		return this.executeInternal();
 	}
 
 	/**
@@ -88,8 +89,8 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 * 
 	 * @throws MobileServiceException
 	 */
-	protected ListenableFuture<JsonElement> executeInternal(EnumSet<MobileServiceFeatures> features) throws MobileServiceException {
-		return this.executeInternal(this.where(), features);
+	protected ListenableFuture<JsonElement> executeInternal() throws MobileServiceException {
+		return this.execute(this.where());
 	}
 
 	/**
@@ -113,19 +114,6 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 * @throws MobileServiceException
 	 */
 	public ListenableFuture<JsonElement> execute(final Query query) {
-		return executeInternal(query, EnumSet.of(MobileServiceFeatures.UntypedTable));
-	}
-
-	/**
-	 * Retrieves a set of rows from the table using a query
-	 *
-	 * @param query
-	 *            The query used to retrieve the rows
-	 * @param features
-	 *            The features used in this request
-	 * @throws MobileServiceException
-	 */
-	protected ListenableFuture<JsonElement> executeInternal(final Query query, EnumSet<MobileServiceFeatures> features) {
 		final SettableFuture<JsonElement> future = SettableFuture.create();
 
 		String url = null;
@@ -147,6 +135,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 			return future;
 		}
 
+		EnumSet<MobileServiceFeatures> features = mFeatures.clone();
 		if (query != null) {
 			List<Pair<String, String>> userParameters = query.getUserDefinedParameters();
 			if (userParameters != null && userParameters.size() > 0) {
@@ -331,21 +320,6 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 *            request URI query string
 	 */
 	public ListenableFuture<JsonObject> lookUp(Object id, List<Pair<String, String>> parameters) {
-		return lookUpInternal(id, parameters, EnumSet.of(MobileServiceFeatures.UntypedTable));
-	}
-
-	/**
-	 * Looks up a row in the table and retrieves its JSON value.
-	 *
-	 * @param id
-	 *            The id of the row
-	 * @param parameters
-	 *            A list of user-defined parameters and values to include in the
-	 *            request URI query string
-	 * @param features
-	 *            The features used in this request
-	 */
-	protected ListenableFuture<JsonObject> lookUpInternal(Object id, List<Pair<String, String>> parameters, EnumSet<MobileServiceFeatures> features) {
 		final SettableFuture<JsonObject> future = SettableFuture.create();
 
 		try {
@@ -362,6 +336,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 		uriBuilder.appendPath(mTableName);
 		uriBuilder.appendPath(id.toString());
 
+		EnumSet<MobileServiceFeatures> features = mFeatures.clone();
 		if (parameters != null && parameters.size() > 0) {
 			features.add(MobileServiceFeatures.AdditionalQueryParameters);
 		}
@@ -468,19 +443,17 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
 	/**
 	 * Inserts a JsonObject into a Mobile Service Table
-	 * 
+	 *
 	 * @param element
 	 *            The JsonObject to insert
 	 * @param parameters
 	 *            A list of user-defined parameters and values to include in the
 	 *            request URI query string
-	 * @param features
-	 *            The features used in the request
 	 * @throws IllegalArgumentException
 	 *             if the element has an id property set with a numeric value
 	 *             other than default (0), or an invalid string value
 	 */
-	protected ListenableFuture<JsonObject> insertInternal(final JsonObject element, List<Pair<String, String>> parameters, EnumSet<MobileServiceFeatures> features) {
+	public ListenableFuture<JsonObject> insert(final JsonObject element, List<Pair<String, String>> parameters) {
 		final SettableFuture<JsonObject> future = SettableFuture.create();
 		try {
 			validateIdOnInsert(element);
@@ -491,6 +464,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 
 		String content = element.toString();
 
+		EnumSet<MobileServiceFeatures> features = mFeatures.clone();
 		if (parameters != null && parameters.size() > 0) {
 			features.add(MobileServiceFeatures.AdditionalQueryParameters);
 		}
@@ -516,22 +490,6 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 		});
 
 		return future;
-	}
-
-	/**
-	 * Inserts a JsonObject into a Mobile Service Table
-	 *
-	 * @param element
-	 *            The JsonObject to insert
-	 * @param parameters
-	 *            A list of user-defined parameters and values to include in the
-	 *            request URI query string
-	 * @throws IllegalArgumentException
-	 *             if the element has an id property set with a numeric value
-	 *             other than default (0), or an invalid string value
-	 */
-	public ListenableFuture<JsonObject> insert(final JsonObject element, List<Pair<String, String>> parameters) {
-		return this.insertInternal(element, parameters, EnumSet.of(MobileServiceFeatures.UntypedTable));
 	}
 
 	/**
@@ -605,21 +563,6 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 	 *            request URI query string
 	 */
 	public ListenableFuture<JsonObject> update(final JsonObject element, List<Pair<String, String>> parameters) {
-		return this.updateInternal(element, parameters, EnumSet.of(MobileServiceFeatures.UntypedTable));
-	}
-
-	/**
-	 * Updates an element from a Mobile Service Table
-	 *
-	 * @param element
-	 *            The JsonObject to update
-	 * @param parameters
-	 *            A list of user-defined parameters and values to include in the
-	 *            request URI query string
-	 * @param features
-	 *            The features used in the request
-	 */
-	protected ListenableFuture<JsonObject> updateInternal(final JsonObject element, List<Pair<String, String>> parameters, EnumSet<MobileServiceFeatures> features) {
 		final SettableFuture<JsonObject> future = SettableFuture.create();
 
 		Object id = null;
@@ -640,6 +583,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 			content = element.toString();
 		}
 
+		EnumSet<MobileServiceFeatures> features = mFeatures.clone();
 		if (parameters != null && parameters.size() > 0) {
 			features.add(MobileServiceFeatures.AdditionalQueryParameters);
 		}
