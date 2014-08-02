@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Query;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -90,9 +91,16 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will return with results when the query finishes.
         /// </returns>
-        public virtual Task<JToken> ReadAsync(string query)
+        public async virtual Task<JToken> ReadAsync(string query)
         {
-            return this.ReadAsync(query, null);
+            Uri uri;
+            if (Uri.TryCreate(query, UriKind.Absolute, out uri))
+            {
+                string uriPath = MobileServiceUrlBuilder.CombinePaths(TableRouteSeparatorName, this.TableName);
+                string uriString = MobileServiceUrlBuilder.CombinePathAndQuery(uriPath, uri.Query);
+                return (await this.ReadAsync(uriString, MobileServiceFeatures.UntypedTable | MobileServiceFeatures.ReadWithLinkHeader)).Response;
+            }
+            return await this.ReadAsync(query, null);
         }
 
         /// <summary>
@@ -108,9 +116,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will return with results when the query finishes.
         /// </returns>
-        public virtual Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters)
+        public virtual async Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters)
         {
-            return this.ReadAsync(query, parameters, MobileServiceFeatures.UntypedTable);
+            return (await this.ReadAsync(query, parameters, MobileServiceFeatures.UntypedTable)).Response;
         }
 
         /// <summary>
@@ -129,7 +137,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will return with results when the query finishes.
         /// </returns>
-        internal async Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters, MobileServiceFeatures features)
+        internal virtual async Task<QueryResult> ReadAsync(string query, IDictionary<string, string> parameters, MobileServiceFeatures features)
         {
             features = this.AddRequestFeatures(features, parameters);
             parameters = AddSystemProperties(this.SystemProperties, parameters);
@@ -152,8 +160,19 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             string uriString = MobileServiceUrlBuilder.CombinePathAndQuery(uriPath, query);
 
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, features: features);
-            return response.Content.ParseToJToken(this.MobileServiceClient.SerializerSettings);
+            return await ReadAsync(uriString, features);
+        }
+
+        internal Task<QueryResult> ReadAsync(Uri uri)
+        {
+            return this.ReadAsync(uri.ToString(), this.Features);
+        }
+
+        private async Task<QueryResult> ReadAsync(string uriString, MobileServiceFeatures features)
+        {
+            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, features: this.Features | features);
+
+            return QueryResult.Parse(response, this.MobileServiceClient.SerializerSettings, validate: false);
         }
 
         /// <summary>
@@ -230,7 +249,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return await this.TransformHttpException(async () =>
             {
-                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, instance.ToString(Formatting.None), true, features: features);
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, instance.ToString(Formatting.None), true, features: this.Features | features);
                 var result = GetJTokenFromResponse(response);
                 return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
             });
@@ -393,7 +412,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return await this.TransformHttpException(async () =>
             {
-                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(patchHttpMethod, uriString, this.MobileServiceClient.CurrentUser, content, true, headers, features);
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(patchHttpMethod, uriString, this.MobileServiceClient.CurrentUser, content, true, headers, this.Features | features);
                 var result = GetJTokenFromResponse(response);
                 return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
             });
@@ -418,7 +437,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// the request URI query string.
         /// </param>
         /// <returns>A task that will complete when the undelete finishes.</returns>
-        public async Task<JToken> UndeleteAsync(JObject instance, IDictionary<string, string> parameters)
+        public Task<JToken> UndeleteAsync(JObject instance, IDictionary<string, string> parameters)
+        {
+            return UndeleteAsync(instance, parameters, MobileServiceFeatures.UntypedTable);
+        }
+
+        protected async Task<JToken> UndeleteAsync(JObject instance, IDictionary<string, string> parameters, MobileServiceFeatures features)
         {
             if (instance == null)
             {
@@ -434,7 +458,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return await this.TransformHttpException(async () =>
             {
-                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, null, true, headers);
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Post, uriString, this.MobileServiceClient.CurrentUser, null, true, headers, this.Features | features);
                 var result = GetJTokenFromResponse(response);
                 return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
             });
@@ -502,7 +526,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             return await TransformHttpException(async () =>
             {
-                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false, headers, features);
+                MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Delete, uriString, this.MobileServiceClient.CurrentUser, null, false, headers, this.Features | features);
                 var result = GetJTokenFromResponse(response);
                 return RemoveUnrequestedSystemProperties(result, parameters, response.Etag);
             });
@@ -564,7 +588,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
             string uriString = GetUri(this.TableName, id, parameters);
-            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, features: features);
+            MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, features: this.Features | features);
             return GetJTokenFromResponse(response);
         }
 

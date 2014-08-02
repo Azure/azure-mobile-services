@@ -186,21 +186,118 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}"); // for insert
             hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
 
-            var store = new MobileServiceLocalStoreMock();
-            store.ReadResponses.Enqueue("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
 
+            // insert an item but don't push
+            IMobileServiceSyncTable table = service.GetSyncTable("someTable");
+            await table.InsertAsync(new JObject() { { "id", "abc" } });
+
+            // this should trigger a push
+            await table.PullAsync();
+
+            Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(), "TU,OL");
+            Assert.AreEqual(hijack.Requests[1].Headers.GetValues("X-ZUMO-FEATURES").First(), "QS,OL");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_FollowsNextLinks()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"How\"}]"); // first page
+            hijack.Responses[0].Headers.Add("Link", "http://localhost:31475/tables/Green?$top=1&$select=Text%2CDone%2CId&$skip=2; rel=next");
+            hijack.AddResponseContent("[{\"id\":\"ghi\",\"String\":\"Are\"},{\"id\":\"jkl\",\"String\":\"You\"}]"); // second page
+
+            var queries = new Queue<string>(new[]
+            {
+                "?__includeDeleted=true&__systemproperties=__version",
+                "?$top=1&$select=Text%2CDone%2CId&$skip=2",
+            });
+
+            hijack.OnSendingRequest = req =>
+            {
+                Assert.AreEqual(req.RequestUri.Query, queries.Dequeue());
+                return Task.FromResult(req);
+            };
+
+            var store = new MobileServiceLocalStoreMock();
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
-            // insert an item but don't push
-            IMobileServiceSyncTable table1 = service.GetSyncTable("someTable");
-            await table1.InsertAsync(new JObject() { { "id", "abc" } });
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
 
-            // this should trigger a push
-            await table1.PullAsync();
+            Assert.IsFalse(store.Tables.ContainsKey("stringId_test_table"));
 
-            Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(), "TU,OL");
-            Assert.AreEqual(hijack.Requests[1].Headers.GetValues("X-ZUMO-FEATURES").First(), "TU,QS,OL");
+            await table.PullAsync();
+
+            Assert.AreEqual(store.Tables["stringId_test_table"].Count, 4);
+            Assert.AreEqual(store.Tables["stringId_test_table"]["abc"].Value<string>("String"), "Hey");
+            Assert.AreEqual(store.Tables["stringId_test_table"]["def"].Value<string>("String"), "How");
+            Assert.AreEqual(store.Tables["stringId_test_table"]["ghi"].Value<string>("String"), "Are");
+            Assert.AreEqual(store.Tables["stringId_test_table"]["jkl"].Value<string>("String"), "You");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_DoesNotFollowLink_IfRelationIsNotNext()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"How\"}]"); // first page
+            hijack.Responses[0].Headers.Add("Link", "http://localhost:31475/tables/Green?$top=1&$select=Text%2CDone%2CId&$skip=2; rel=prev");
+            hijack.AddResponseContent("[{\"id\":\"ghi\",\"String\":\"Are\"},{\"id\":\"jkl\",\"String\":\"You\"}]"); // second page
+
+            var store = new MobileServiceLocalStoreMock();
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+
+            Assert.IsFalse(store.Tables.ContainsKey("stringId_test_table"));
+
+            await table.PullAsync();
+
+            Assert.AreEqual(store.Tables["stringId_test_table"].Count, 2);
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_DoesNotFollowLink_IfMaxRecordsAreRetrieved()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"How\"}]"); // first page
+            hijack.Responses[0].Headers.Add("Link", "http://localhost:31475/tables/Green?$top=1&$select=Text%2CDone%2CId&$skip=2; rel=next");
+            hijack.AddResponseContent("[{\"id\":\"ghi\",\"String\":\"Are\"},{\"id\":\"jkl\",\"String\":\"You\"}]"); // second page
+
+            var store = new MobileServiceLocalStoreMock();
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+
+            Assert.IsFalse(store.Tables.ContainsKey("stringId_test_table"));
+
+            await table.PullAsync(table.Take(1));
+
+            Assert.AreEqual(store.Tables["stringId_test_table"].Count, 1);
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_DoesNotFollowLink_IfResultIsEmpty()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("[]"); // first page
+            hijack.Responses[0].Headers.Add("Link", "http://localhost:31475/tables/Green?$top=1&$select=Text%2CDone%2CId&$skip=2; rel=next");
+            hijack.AddResponseContent("[{\"id\":\"ghi\",\"String\":\"Are\"},{\"id\":\"jkl\",\"String\":\"You\"}]"); // second page
+
+            var store = new MobileServiceLocalStoreMock();
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+
+            Assert.IsFalse(store.Tables.ContainsKey("stringId_test_table"));
+
+            await table.PullAsync(table.Take(1));
+
+            Assert.IsFalse(store.Tables.ContainsKey("stringId_test_table"));
         }
 
         [AsyncTestMethod]

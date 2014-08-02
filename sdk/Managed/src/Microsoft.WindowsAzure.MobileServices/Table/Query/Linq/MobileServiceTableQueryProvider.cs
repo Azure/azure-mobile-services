@@ -5,9 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Sync;
 using Newtonsoft.Json.Linq;
@@ -94,10 +92,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
             // Send the query
             string odata = compiledQuery.ToQueryString();
-            JToken response = await this.Execute<T>(query, odata);
+            QueryResult result = await this.Execute<T>(query, odata);
 
-            // Parse the results
-            var result = QueryResult.Parse(response);
             return new TotalCountEnumerable<T>(
                 result.TotalCount,
                 query.Table.MobileServiceClient.Serializer.Deserialize(result.Values, compiledQuery.ProjectionArgumentType).Select(
@@ -114,22 +110,27 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                     }));
         }
 
-        protected virtual Task<JToken> Execute<T>(IMobileServiceTableQuery<T> query, string odata)
+        protected virtual async Task<QueryResult> Execute<T>(IMobileServiceTableQuery<T> query, string odata)
         {
+            JToken result;
             if (this.syncTable == null)
             {
                 var table = query.Table as MobileServiceTable;
                 if (table != null)
                 {
                     // Add telemetry information if possible.
-                    return table.ReadAsync(odata, query.Parameters, this.Features | MobileServiceFeatures.TypedTable);
+                    return await table.ReadAsync(odata, query.Parameters, this.Features | MobileServiceFeatures.TypedTable);
                 }
                 else
                 {
-                    return query.Table.ReadAsync(odata, query.Parameters);
+                    result = await query.Table.ReadAsync(odata, query.Parameters);
                 }
             }
-            return this.syncTable.ReadAsync(odata);
+            else
+            {
+                result = await this.syncTable.ReadAsync(odata);
+            }
+            return QueryResult.Parse(result, null, validate: true);
         }
 
         /// <summary>
@@ -152,6 +153,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         {
             MobileServiceTableQueryDescription description = this.Compile(query);
             return description.ToQueryString();
-        }        
+        }
     }
 }

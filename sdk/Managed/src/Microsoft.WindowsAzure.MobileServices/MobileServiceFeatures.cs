@@ -62,5 +62,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         [EnumValue("OL")]
         Offline = 0x80,
+
+        /// <summary>
+        /// Feature header value for following continuation links
+        /// </summary>
+        [EnumValue("LH")]
+        ReadWithLinkHeader = 0x100,
     }
 }

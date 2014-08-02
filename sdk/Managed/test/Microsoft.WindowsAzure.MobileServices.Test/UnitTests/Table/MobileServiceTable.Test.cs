@@ -130,6 +130,28 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task ReadAsync_WithAbsoluteUri()
+        {
+            bool succeeded = false;
+            var hijack = new TestHttpHandler();
+            hijack.OnSendingRequest = req =>
+            {
+                Assert.AreEqual("TU,LH", req.Headers.GetValues("X-ZUMO-FEATURES").First());
+                Assert.AreEqual(req.RequestUri.ToString(), "http://www.test.com/tables/someTable?$filter=a eq b&$orderby=c");
+                succeeded = true;
+                return Task.FromResult(req);
+            };
+            hijack.SetResponseContent("[{\"String\":\"Hey\"}]");
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+
+            IMobileServiceTable table = service.GetTable("someTable");
+
+            await table.ReadAsync("http://wwww.contoso.com/about/?$filter=a eq b&$orderby=c");
+
+            Assert.IsTrue(succeeded);
+        }
+
+        [AsyncTestMethod]
         public async Task ReadAsyncWithStringIdFilter()
         {
             string[] testIdData = IdTestData.ValidStringIds.Concat(
@@ -1711,7 +1733,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         [AsyncTestMethod]
         public async Task UndeleteAsyncWithParameters()
         {
-            await TestUndeleteAsync("?custom=value", new Dictionary<string,string>(){{"custom", "value"}});
+            await TestUndeleteAsync("?custom=value", new Dictionary<string, string>() { { "custom", "value" } });
         }
 
         private static async Task TestUndeleteAsync(string query, IDictionary<string, string> parameters)
@@ -1723,7 +1745,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 Assert.AreEqual(req.RequestUri.Query, query);
                 Assert.AreEqual(req.Method, HttpMethod.Post);
-                
+
                 // only id and version should be sent
                 Assert.IsNull(req.Content);
                 Assert.AreEqual(req.Headers.IfMatch.First().Tag, "\"abc\"");

@@ -192,7 +192,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             MobileServiceSerializer serializer = this.MobileServiceClient.Serializer;
             JObject value = serializer.Serialize(instance) as JObject;
 
-            JToken updatedValue = await TransformHttpException(serializer, () => this.UndeleteAsync(value, parameters));
+            JToken updatedValue = await TransformHttpException(serializer, () => this.UndeleteAsync(value, parameters, MobileServiceFeatures.TypedTable));
 
             serializer.Deserialize<T>(updatedValue, instance);
         }
@@ -613,23 +613,15 @@ namespace Microsoft.WindowsAzure.MobileServices
                 ODataExpressionVisitor.ToODataConstant(id));
 
             // Send the query
-            JToken response = await this.ReadAsync(query, parameters, MobileServiceFeatures.TypedTable);
+            QueryResult response = await this.ReadAsync(query, parameters, MobileServiceFeatures.TypedTable);
 
             return GetSingleValue(response);
         }
 
-        private static JObject GetSingleValue(JToken response)
+        private static JObject GetSingleValue(QueryResult response)
         {
             // Get the first element in the response
-            JObject jobject = response as JObject;
-            if (jobject == null)
-            {
-                JArray array = response as JArray;
-                if (array != null && array.Count > 0)
-                {
-                    jobject = array.FirstOrDefault() as JObject;
-                }
-            }
+            JObject jobject = response.Values.FirstOrDefault() as JObject;
 
             if (jobject == null)
             {

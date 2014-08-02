@@ -77,7 +77,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <returns>Task that will complete with the parsed result of the query.</returns>
         public static async Task<QueryResult> QueryAsync(this IMobileServiceLocalStore store, MobileServiceTableQueryDescription query)
         {
-            return QueryResult.Parse(await store.ReadAsync(query));
+            return QueryResult.Parse(await store.ReadAsync(query), null, validate: true);
         }
 
         /// <summary>
