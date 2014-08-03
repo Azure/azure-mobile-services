@@ -1,7 +1,7 @@
 ﻿<#@template language="c#" hostspecific="true"#>
 <#@output extension=".config"#>
-<#@parameter type="System.String" name="WinJSSDKVersion"#>
+<#@parameter type="System.String" name="JSSDKVersion"#>
 <?xml version="1.0" encoding="utf-8"?>
 <packages>
-  <package id="WindowsAzure.MobileServices.WinJS" version="<#= WinJSSDKVersion#>" targetFramework="win81" />
+  <package id="WindowsAzure.MobileServices.WinJS" version="<#= JSSDKVersion#>" targetFramework="win81" />
 </packages>

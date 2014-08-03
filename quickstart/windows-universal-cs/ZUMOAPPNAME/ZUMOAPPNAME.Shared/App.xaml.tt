@@ -26,28 +26,29 @@ namespace ZUMOAPPNAME
     /// </summary>
     sealed partial class App : Application
     {
+
+<# if (Runtime=="DOTNET") { #>
+        // This MobileServiceClient has been configured to communicate with your local
+        // test project for debugging purposes.
+        public static MobileServiceClient MobileService = new MobileServiceClient(
+            "http://localhost:ZUMONETRUNTIMESERVERPORT"
+        );
+
+        // This MobileServiceClient has been configured to communicate with your Mobile Service's url
+        // and application key. You're all set to start working with your Mobile Service!
+        //public static MobileServiceClient MobileService = new MobileServiceClient(
+        //    "ZUMOAPPURL",
+        //    "ZUMOAPPKEY"
+        //);
+<# } else { #>
         // This MobileServiceClient has been configured to communicate with your Mobile Service's url
         // and application key. You're all set to start working with your Mobile Service!
         public static MobileServiceClient MobileService = new MobileServiceClient(
             "ZUMOAPPURL",
             "ZUMOAPPKEY"
-        );              
-
-<# if (Runtime=="DOTNET") { #>
-        // This MobileServiceClient has been configured to communicate with your local Windows
-        // test project for debugging purposes.
-        // public static MobileServiceClient MobileService = new MobileServiceClient(
-        //    "http://localhost:ZUMONETRUNTIMESERVERPORT"
-        // );
-
-        // This MobileServiceClient has been configured to communicate with your local Windows Phone
-        // test project for debugging purposes. Please follow these steps to enable access
-        // to the local machine from the Windows Phone Emulator:
-        // http://msdn.microsoft.com/en-us/library/windowsphone/develop/jj684580(v=vs.105).aspx
-        // public static MobileServiceClient MobileService = new MobileServiceClient(
-        //     "http://169.254.80.80:ZUMONETRUNTIMESERVERPORT"
-        // );
+        );
 <# } #>
+
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().

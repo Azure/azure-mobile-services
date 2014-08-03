@@ -17,12 +17,12 @@
             }
             args.setPromise(WinJS.UI.processAll());
 
-            // This MobileServiceClient has been configured to communicate with your Mobile Service's url
-            // and application key. You're all set to start working with your Mobile Service!
-            var client = new WindowsAzure.MobileServiceClient(
+			// This MobileServiceClient has been configured to communicate with your Mobile Service's url
+			// and application key. You're all set to start working with your Mobile Service!
+			var client = new WindowsAzure.MobileServiceClient(
 				"ZUMOAPPURL",
 				"ZUMOAPPKEY"
-            );
+			);
 
             // The WinStore/JavaScript client by default caches the responses to GET requests;
             // since we want the 'Refresh' button to always retrieve the latest data from the

@@ -115,6 +115,7 @@
       <DependentUpon>ZUMOAPPNAME.tt</DependentUpon>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Readme.txt" />
     <Content Include="TextTemplating\Microsoft.TextTemplating.Build.Tasks.dll" />
     <Content Include="TextTemplating\Microsoft.VisualStudio.TextTemplating.Sdk.Host.12.0.dll" />
   </ItemGroup>
@@ -229,11 +230,8 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup />
-  <Import Project="TextTemplating\Microsoft.TextTemplating.targets" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!--<PropertyGroup>
-    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v12.0</VSToolsPath>
-  </PropertyGroup>-->
+  <Import Project="TextTemplating\Microsoft.TextTemplating.targets" />
   <ItemGroup>
     <T4ParameterValues Include="Runtime">
       <Value>$(Runtime)</Value>
@@ -243,8 +241,8 @@
       <Value>$(ManagedSDKVersion)</Value>
       <Visible>false</Visible>
     </T4ParameterValues>
-    <T4ParameterValues Include="WinJSSDKVersion">
-      <Value>$(WinJSSDKVersion)</Value>
+    <T4ParameterValues Include="JSSDKVersion">
+      <Value>$(JSSDKVersion)</Value>
       <Visible>false</Visible>
     </T4ParameterValues>
   </ItemGroup>

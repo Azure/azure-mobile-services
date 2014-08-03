@@ -61,6 +61,7 @@ namespace ZUMOAPPNAME
             // responds, the item is removed from the list 
             await todoTable.UpdateAsync(item);
             items.Remove(item);
+            ListItems.Focus(Windows.UI.Xaml.FocusState.Unfocused);
         }
 
         private async void ButtonRefresh_Click(object sender, RoutedEventArgs e)

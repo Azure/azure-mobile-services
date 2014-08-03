@@ -4,4 +4,4 @@
 - WinJS SDK version
 
 Explample:
-msbuild Setup.csproj /t:TransformAll /p:Runtime=NODE /p:ManagedSDKVersion=1.2.3 /p:WinJSSDKVersion=1.2.2
+msbuild Setup.csproj /t:TransformAll /p:Runtime=NODE /p:ManagedSDKVersion=1.2.3 /p:JSSDKVersion=1.2.2

@@ -6,10 +6,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
-<# if (Runtime == "DOTNET") {#>
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZUMOAPPNAMEService", "ZUMOAPPNAMEService\ZUMOAPPNAMEService.csproj", "{209FA716-A7AD-4095-BD70-C8710FC66FA7}"
-EndProject
-<# } #>
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ZUMOAPPNAME", "ZUMOAPPNAME", "{606E560D-5D21-4809-9663-8978ECEFCD41}"
 EndProject
 Project("{262852C6-CD72-467D-83FE-5EEB1973A190}") = "ZUMOAPPNAME.Windows", "ZUMOAPPNAME\ZUMOAPPNAME.Windows\ZUMOAPPNAME.Windows.jsproj", "{FABFD15B-1688-4739-904D-58828ABBF47F}"
@@ -18,6 +14,10 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "ZUMOAPPNAME.Shared", "ZUMOA
 EndProject
 Project("{262852C6-CD72-467D-83FE-5EEB1973A190}") = "ZUMOAPPNAME.WindowsPhone", "ZUMOAPPNAME\ZUMOAPPNAME.WindowsPhone\ZUMOAPPNAME.WindowsPhone.jsproj", "{CAF58D02-CC24-469C-9FC8-66843C464B39}"
 EndProject
+<# if (Runtime == "DOTNET") {#>
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZUMOAPPNAMEService", "ZUMOAPPNAMEService\ZUMOAPPNAMEService.csproj", "{209FA716-A7AD-4095-BD70-C8710FC66FA7}"
+EndProject
+<# } #>
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		ZUMOAPPNAME\ZUMOAPPNAME.Shared\ZUMOAPPNAME.Shared.projitems*{fabfd15b-1688-4739-904d-58828abbf47f}*SharedItemsImports = 5
