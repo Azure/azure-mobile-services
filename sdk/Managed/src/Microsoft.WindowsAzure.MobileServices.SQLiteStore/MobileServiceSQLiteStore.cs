@@ -3,6 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -19,6 +20,13 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
     /// </summary>
     public class MobileServiceSQLiteStore : MobileServiceLocalStore
     {
+        /// <summary>
+        /// The maximum number of parameters allowed in any "upsert" prepared statement.
+        /// Note: The default maximum number of parameters allowed by sqlite is 999
+        /// See: http://www.sqlite.org/limits.html#max_variable_number
+        /// </summary>
+        private const int MaxParametersPerUpsertQuery = 800;
+
         private Dictionary<string, TableDefinition> tables = new Dictionary<string, TableDefinition>(StringComparer.OrdinalIgnoreCase);
         private SQLiteConnection connection;
 
@@ -157,44 +165,137 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         {
             TableDefinition table = GetTable(tableName);
 
-            var parameters = new Dictionary<string, object>();
-            var sql = new StringBuilder();
-
             var first = items.FirstOrDefault();
-
             if (first == null)
             {
                 return Task.FromResult(0);
             }
 
-            IEnumerable<JProperty> properties = first.Properties();
-            if (fromServer)
+            // Get the columns which we want to map into the database.
+            List<ColumnDefinition> columns = new List<ColumnDefinition>();
+            foreach (var prop in first.Properties())
             {
-                properties = properties.Where(p => table.ContainsKey(p.Name));
+                ColumnDefinition column;
+
+                //If the column is coming from the server we can just ignore it,
+                //otherwise, throw to alert the caller that they have passed an invalid column
+                if (!table.TryGetValue(prop.Name, out column) && !fromServer)
+                {
+                    throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_ColumnNotDefined, prop.Name, tableName));
+                }
+
+                if (column != null)
+                {
+                    columns.Add(column);
+                }
             }
 
-            if (!properties.Any())
+            if (columns.Count == 0)
             {
-                return Task.FromResult(0); // no query to execute if there are no columns in the item
+                // no query to execute if there are no columns in the table
+                return Task.FromResult(0);
             }
 
-            IList<string> columns = properties.Select(c => c.Name).ToList();
-            string columnNames = String.Join(", ", columns.Select(c => SqlHelpers.FormatMember(c)));
+            // Generate the prepared insert statement
+            string sqlBase = String.Format(
+                "INSERT OR REPLACE INTO {0} ({1}) VALUES ",
+                SqlHelpers.FormatTableName(tableName),
+                String.Join(", ", columns.Select(c => c.Property.Name).Select(SqlHelpers.FormatMember))
+            );
 
-            sql.AppendFormat("INSERT OR REPLACE INTO {0} ({1}) VALUES ", SqlHelpers.FormatTableName(tableName), columnNames);
+            // Use int division to calculate how many times this record will fit into our parameter quota
+            int batchSize = MaxParametersPerUpsertQuery / columns.Count;
 
-            foreach (JObject item in items)
+            if (batchSize == 0)
             {
-                AppendInsertValuesSql(tableName, item, table, columns, sql, parameters);
+                throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_TooManyColumns, MaxParametersPerUpsertQuery));
             }
 
-            if (parameters.Any())
+            foreach (var batch in TakeMany(items, maxLength: batchSize))
             {
-                sql.Remove(sql.Length - 1, 1); // remove the trailing comma
-                this.ExecuteNonQuery(sql.ToString(), parameters);
+                var sql = new StringBuilder(sqlBase);
+                var parameters = new Dictionary<string, object>();
+
+                int rowCount = 0;
+                foreach (JObject item in batch)
+                {
+                    if (rowCount > 0)
+                        sql.Append(",");
+
+                    AppendInsertValuesSql(sql, parameters, columns, item);
+
+                    rowCount++;
+                }
+
+                if (parameters.Any())
+                {
+                    this.ExecuteNonQuery(sql.ToString(), parameters);
+                }
             }
 
             return Task.FromResult(0);
+        }
+
+        private static void AppendInsertValuesSql(StringBuilder sql, Dictionary<string, object> parameters, List<ColumnDefinition> columns, JObject item)
+        {
+            sql.Append("(");
+            int colCount = 0;
+            foreach (var column in columns)
+            {
+                if (colCount > 0)
+                    sql.Append(",");
+
+                JToken rawValue = item.GetValue(column.Property.Name, StringComparison.OrdinalIgnoreCase);
+                object value = SqlHelpers.SerializeValue(rawValue, column.SqlType, column.Property.Value.Type);
+
+                //The paramname for this field must be unique within this statement
+                string paramName = "@p" + parameters.Count;
+
+                sql.Append(paramName);
+                parameters[paramName] = value;
+
+                colCount++;
+            }
+            sql.Append(")");
+        }
+
+
+        /// <summary>
+        /// Splits the given sequence into sequences of the given length.
+        /// </summary>
+        private static IEnumerable<IEnumerable<T>> TakeMany<T>(IEnumerable<T> source, int maxLength)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException("source");
+            }
+
+            if (maxLength <= 0)
+            {
+                throw new ArgumentOutOfRangeException("maxLength");
+            }
+
+            var enumerator = source.GetEnumerator();
+            var batch = new List<T>(maxLength);
+
+            while (enumerator.MoveNext())
+            {
+                batch.Add(enumerator.Current);
+
+                //Have we finished this batch? Yield it and start a new one.
+                if (batch.Count == maxLength)
+                {
+                    yield return batch;
+                    batch = new List<T>(maxLength);
+                }
+            }
+
+            //Yield the final batch if it has any elements
+            if (batch.Count > 0)
+            {
+                yield return batch;
+            }
+
         }
 
         /// <summary>
@@ -285,30 +386,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             IList<JObject> results = this.ExecuteQuery(tableName, sql, parameters);
 
             return Task.FromResult(results.FirstOrDefault());
-        }
-
-        private static void AppendInsertValuesSql(string tableName, JObject item, TableDefinition table, IEnumerable<string> columns, StringBuilder sql, Dictionary<string, object> parameters)
-        {
-            string separator = String.Empty;
-            ColumnDefinition columnDefinition;
-
-            sql.Append("(");
-            foreach (string columnName in columns)
-            {
-                if (!table.TryGetValue(columnName, out columnDefinition))
-                {
-                    throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_ColumnNotDefined, columnName, tableName));
-                }
-
-                JToken rawValue = item[columnName];
-
-                object value = SqlHelpers.SerializeValue(rawValue, columnDefinition.SqlType, columnDefinition.Property.Value.Type);
-                string paramName = "@p" + (parameters.Count + 1);
-                parameters.Add(paramName, value);
-                sql.AppendFormat("{0}{1}", separator, paramName);
-                separator = ", ";
-            }
-            sql.Append("),");
         }
 
         private TableDefinition GetTable(string tableName)

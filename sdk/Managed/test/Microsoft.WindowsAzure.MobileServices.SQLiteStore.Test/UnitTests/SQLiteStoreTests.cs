@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
 using Microsoft.WindowsAzure.MobileServices.SQLiteStore;
+using Microsoft.WindowsAzure.MobileServices.Test;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
@@ -323,6 +324,87 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             }
             long count = TestUtilities.CountRows(TestDbName, TestTable);
             Assert.AreEqual(count, 1L);
+        }
+
+        [AsyncTestMethod]
+        public async Task UpsertAsync_Throws_WhenInsertingRecordsWhichAreTooLarge()
+        {
+            TestUtilities.DropTestTable(TestDbName, TestTable);
+
+            using (var store = new MobileServiceSQLiteStore(TestDbName))
+            {
+                var template = new JObject {
+                    { "id", 0 },
+                };
+
+                //SQLite limits us to 999 "parameters" per prepared statement
+                for (var i = 0; i < 1000; i++)
+                    template["column" + i] = "Hello, world";
+
+                store.DefineTable(TestTable, template);
+
+                //create the table
+                await store.InitializeAsync();
+
+                //attempt to insert a couple of items
+                var item1 = new JObject(template);
+                item1["id"] = 1;
+
+                var item2 = new JObject(template);
+                item1["id"] = 2;
+
+                InvalidOperationException ex = await AssertEx.Throws<InvalidOperationException>(() => store.UpsertAsync(TestTable, new[] { item1, item2 }, fromServer: false));
+
+                Assert.AreEqual("The number of fields per entity in an upsert operation is limited to 800.", ex.Message);
+            }
+        }
+
+        [AsyncTestMethod]
+        public async Task UpsertAsync_CanProcessManyRecordsAtOnce()
+        {
+            TestUtilities.DropTestTable(TestDbName, TestTable);
+
+            using (var store = new MobileServiceSQLiteStore(TestDbName))
+            {
+                var template = new JObject {
+                    { "id", 0 },
+                    { "value1", "Hello, world" },
+                    { "value2", "Hello, world" },
+                    { "value3", "Hello, world" },
+                    { "value4", "Hello, world" },
+                    { "value5", "Hello, world" }
+                };
+
+                store.DefineTable(TestTable, template);
+
+                //create the table
+                await store.InitializeAsync();
+
+                //add a whole bunch of items. We want {number of items} * {number of fields} to exceed sqlite's parameter limit
+                const int insertedItemCount = 500;
+
+                var itemsToInsert = Enumerable.Range(1, insertedItemCount)
+                                              .Select(id => {
+                                                  var o = new JObject(template);
+                                                  o["id"] = id;
+                                                  return o;
+                                              })
+                                              .ToArray();
+
+                //Insert the items
+                await store.UpsertAsync(TestTable, itemsToInsert, fromServer: false);
+
+                JArray records = (JArray) await store.ReadAsync(MobileServiceTableQueryDescription.Parse(TestTable, "$orderby=id"));
+
+                //Verify that all 500 records were inserted
+                Assert.AreEqual(records.Count, insertedItemCount);
+
+                //Verify that all fields are intact
+                for (var i = 0; i < insertedItemCount; i++)
+                {
+                    Assert.IsTrue(JToken.DeepEquals(itemsToInsert[i], records[i]), "Results retrieved from DB do not match input");
+                }
+            }
         }
 
         [AsyncTestMethod]

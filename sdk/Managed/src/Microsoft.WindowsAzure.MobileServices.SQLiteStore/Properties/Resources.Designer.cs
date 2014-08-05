@@ -134,6 +134,15 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The number of fields per entity in an upsert operation is limited to {0}..
+        /// </summary>
+        internal static string SQLiteStore_TooManyColumns {
+            get {
+                return ResourceManager.GetString("SQLiteStore_TooManyColumns", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Value of type &apos;{0}&apos; is not supported..
         /// </summary>
         internal static string SQLiteStore_ValueTypeNotSupported {
