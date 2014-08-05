@@ -84,7 +84,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// Pulls all items that match the given query from the associated remote table. Supports incremental sync when using the JavaScript Mobile Services backend. For more information, see http://go.microsoft.com/fwlink/?LinkId=506788.
         /// </summary>
         /// <param name="queryKey">
-        /// A string that uniquely identifies this query and is used to keep track of its sync state. [JavaScript Mobile Services backend only] Supplying this parameter enables incremental sync whenever the same key is used again.
+        /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again.
         /// </param>
         /// <param name="query">
         /// An OData query that determines which items to 

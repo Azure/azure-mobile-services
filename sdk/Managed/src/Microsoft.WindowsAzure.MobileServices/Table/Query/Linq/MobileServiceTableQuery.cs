@@ -308,7 +308,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         }
 
         /// <summary>
-        /// Ensure the query will get the deleted records [JavaScript Mobile Services backend only].
+        /// Ensure the query will get the deleted records. This requires the soft delete feature to be enabled on the Mobile Service. See http://go.microsoft.com/fwlink/?LinkId=507647&clcid=0x409 for details.
         /// </summary>
         /// <returns>
         /// The query object.

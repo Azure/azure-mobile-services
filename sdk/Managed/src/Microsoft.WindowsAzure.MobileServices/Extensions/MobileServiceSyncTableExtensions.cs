@@ -59,7 +59,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         /// <param name="table">The instance of table to execute pull on.</param>
         /// <param name="queryKey">
-        /// A string that uniquely identifies this query and is used to keep track of its sync state. [JavaScript Mobile Services backend only] Supplying this parameter enables incremental sync whenever the same key is used again.
+        /// A string that uniquely identifies this query and is used to keep track of its sync state. Supplying this parameter enables incremental sync whenever the same key is used again.
         /// </param>
         /// <param name="query">
         /// An OData query that determines which items to 
