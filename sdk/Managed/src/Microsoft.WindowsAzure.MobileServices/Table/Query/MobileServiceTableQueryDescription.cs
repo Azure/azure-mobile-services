@@ -97,7 +97,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         public MobileServiceTableQueryDescription Clone()
         {
             var clone = new MobileServiceTableQueryDescription(this.TableName);
-            
+
             clone.Filter = this.Filter;
             clone.Selection = this.Selection.ToList();
             clone.Ordering = this.Ordering.ToList();
@@ -121,24 +121,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         {
             char? separator = null;
             StringBuilder text = new StringBuilder();
-            
+
             // Add the filter
             if (this.Filter != null)
             {
                 string filterStr = ODataExpressionVisitor.ToODataString(this.Filter);
                 text.AppendFormat(CultureInfo.InvariantCulture, "{0}$filter={1}", separator, filterStr);
-                separator = '&';                
+                separator = '&';
             }
 
             // Add the ordering
             if (this.Ordering.Count > 0)
             {
                 IEnumerable<string> orderings = this.Ordering
-                                                    .Select(o => {
-                                                        var exprVisitor = new ODataExpressionVisitor();
-                                                        o.Expression.Accept(exprVisitor);
-                                                        string result = exprVisitor.Expression.ToString();
-
+                                                    .Select(o =>
+                                                    {
+                                                        string result = ODataExpressionVisitor.ToODataString(o.Expression);
                                                         if (o.Direction == OrderByDirection.Descending)
                                                         {
                                                             result += " desc";
@@ -167,7 +165,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             // Add the selection
             if (this.Selection.Count > 0)
             {
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$select={1}", separator, string.Join(",", this.Selection));
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$select={1}", separator, string.Join(",", this.Selection.Select(Uri.EscapeDataString)));
                 separator = '&';
             }
 
@@ -202,8 +200,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
             foreach (string[] parameter in parameters)
             {
-                string key = parameter[0];
-                string value = parameter.Length > 1 ? parameter[1] : String.Empty;
+                string key = Uri.UnescapeDataString(parameter[0]);
+                string value = Uri.UnescapeDataString(parameter.Length > 1 ? parameter[1] : String.Empty);
                 if (String.IsNullOrEmpty(key))
                 {
                     continue;
@@ -234,8 +232,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 }
             }
 
-            var queryDescription = new MobileServiceTableQueryDescription(tableName) 
-            { 
+            var queryDescription = new MobileServiceTableQueryDescription(tableName)
+            {
                 IncludeTotalCount = includeTotalCount,
                 Skip = skip,
                 Top = top
@@ -251,6 +249,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             queryDescription.Filter = filter;
 
             return queryDescription;
-        }        
+        }
     }
 }
