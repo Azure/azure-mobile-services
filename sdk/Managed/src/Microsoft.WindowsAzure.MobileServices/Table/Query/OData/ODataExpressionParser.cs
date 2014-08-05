@@ -20,7 +20,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 				{ "false", new ConstantNode(false) },
 				{ "null", new ConstantNode(null) },
 				{ "datetime", null }, // type constructed dynamically,
-                { "datetimeoffset", null } // type constructed dynamically
+                { "datetimeoffset", null }, // type constructed dynamically
+                { "guid", null } // type constructed dynamically
+                 
 			};
         }
 
@@ -487,6 +489,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                     {
                         var date = DateTimeOffset.Parse(literalValue);
                         typeExpression = new ConstantNode(date);
+                    }
+                    else if (typeIdentifier == "guid")
+                    {
+                        var guid = Guid.Parse(literalValue);
+                        typeExpression = new ConstantNode(guid);
                     }
                 }
                 catch (Exception ex)
