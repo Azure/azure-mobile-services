@@ -20,6 +20,9 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
     /// </summary>
     public class MobileServiceSQLiteStore : MobileServiceLocalStore
     {
+        //Limit batched "Upsert" operations to this many rows at once
+        private const int UpsertBatchSize = 25;
+
         private Dictionary<string, TableDefinition> tables = new Dictionary<string, TableDefinition>(StringComparer.OrdinalIgnoreCase);
         private SQLiteConnection connection;
 
@@ -169,10 +172,14 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             foreach (var prop in first.Properties())
             {
                 ColumnDefinition column;
-                if (!table.TryGetValue(prop.Name, out column))
+
+                //If the column is coming from the server we can just ignore it,
+                //otherwise, throw to alert the caller that they have passed an invalid column
+                if (!table.TryGetValue(prop.Name, out column) && !fromServer)
                     throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_ColumnNotDefined, prop.Name, tableName));
 
-                columns.Add(column);
+                if (column != null)
+                    columns.Add(column);
             }
 
             if (columns.Count == 0)
@@ -188,35 +195,19 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 String.Join(", ", columns.Select(c => c.Property.Name).Select(SqlHelpers.FormatMember))
             );
 
-            int batchSize = 200 / columns.Count; //Limit to 200 parameters per statement
-
-            foreach (JObject[] batch in Batch(items, batchSize))
+            foreach (var batch in TakeMany(items, length: UpsertBatchSize))
             {
                 var sql = new StringBuilder(sqlBase);
                 var parameters = new Dictionary<string, object>();
-                
+
                 int rowCount = 0;
                 foreach (JObject item in batch)
                 {
                     if (rowCount > 0)
                         sql.Append(",");
 
-                    sql.Append("(");
-                    int colCount = 0;
-                    foreach (var column in columns)
-                    {
-                        if (colCount > 0)
-                            sql.Append(",");
+                    AppendInsertValuesSql(sql, parameters, columns, item);
 
-                        JToken rawValue = item.GetValue(column.Property.Name, StringComparison.OrdinalIgnoreCase);
-                        object value = SqlHelpers.SerializeValue(rawValue, column.SqlType, column.Property.Value.Type);
-                        string paramName = "@p" + ((rowCount * columns.Count) + colCount);
-                        sql.Append(paramName);
-                        parameters[paramName] = value;
-
-                        colCount++;
-                    }
-                    sql.Append(")");
                     rowCount++;
                 }
 
@@ -229,24 +220,60 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             return Task.FromResult(0);
         }
 
-        /// <summary>
-        /// Simple function which groups the given enumerable into batches of batchSize
-        /// </summary>
-        private IEnumerable<T[]> Batch<T>(IEnumerable<T> items, int batchSize)
+        private static void AppendInsertValuesSql(StringBuilder sql, Dictionary<string, object> parameters, List<ColumnDefinition> columns, JObject item)
         {
-            var source = items.ToList();
-            int count = 0;
-
-            while (true)
+            sql.Append("(");
+            int colCount = 0;
+            foreach (var column in columns)
             {
-                var batch = source.Skip(batchSize * count).Take(batchSize).ToArray();
+                if (colCount > 0)
+                    sql.Append(",");
+
+                JToken rawValue = item.GetValue(column.Property.Name, StringComparison.OrdinalIgnoreCase);
+                object value = SqlHelpers.SerializeValue(rawValue, column.SqlType, column.Property.Value.Type);
+
+                //The paramname for this field must be unique within this statement
+                string paramName = "@p" + parameters.Count;
+
+                sql.Append(paramName);
+                parameters[paramName] = value;
+
+                colCount++;
+            }
+            sql.Append(")");
+        }
+
+
+        /// <summary>
+        /// Splits the given sequence into sequences of the given length.
+        /// </summary>
+        private static IEnumerable<IEnumerable<T>> TakeMany<T>(IEnumerable<T> source, int length)
+        {
+            if (source == null)
+                throw new ArgumentNullException("source");
+
+            if (length <= 0)
+                throw new ArgumentOutOfRangeException("length");
+
+            var enumerator = source.GetEnumerator();
+            var batch = new List<T>(length);
+
+            while (enumerator.MoveNext())
+            {
+                batch.Add(enumerator.Current);
+
+                //Have we finished a batch? Yield it and start a new one.
+                if (batch.Count == length)
+                {
+                    yield return batch;
+                    batch = new List<T>(length);
+                }
+            }
+
+            //Yield the final batch if it is "full" or not
+            if (batch.Count > 0)
                 yield return batch;
 
-                if (batch.Length != batchSize)
-                    yield break;
-
-                count += 1;
-            }
         }
 
         /// <summary>
