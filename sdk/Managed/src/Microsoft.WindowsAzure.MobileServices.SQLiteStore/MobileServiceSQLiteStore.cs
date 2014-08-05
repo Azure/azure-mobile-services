@@ -172,13 +172,13 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             }
 
             // Get the columns which we want to map into the database.
-            List<ColumnDefinition> columns = new List<ColumnDefinition>();
+            var columns = new List<ColumnDefinition>();
             foreach (var prop in first.Properties())
             {
                 ColumnDefinition column;
 
-                //If the column is coming from the server we can just ignore it,
-                //otherwise, throw to alert the caller that they have passed an invalid column
+                // If the column is coming from the server we can just ignore it,
+                // otherwise, throw to alert the caller that they have passed an invalid column
                 if (!table.TryGetValue(prop.Name, out column) && !fromServer)
                 {
                     throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_ColumnNotDefined, prop.Name, tableName));
@@ -205,30 +205,25 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
             // Use int division to calculate how many times this record will fit into our parameter quota
             int batchSize = MaxParametersPerUpsertQuery / columns.Count;
-
             if (batchSize == 0)
             {
                 throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_TooManyColumns, MaxParametersPerUpsertQuery));
             }
 
-            foreach (var batch in TakeMany(items, maxLength: batchSize))
+            foreach (var batch in items.Split(maxLength: batchSize))
             {
                 var sql = new StringBuilder(sqlBase);
                 var parameters = new Dictionary<string, object>();
 
-                int rowCount = 0;
                 foreach (JObject item in batch)
                 {
-                    if (rowCount > 0)
-                        sql.Append(",");
-
                     AppendInsertValuesSql(sql, parameters, columns, item);
-
-                    rowCount++;
+                    sql.Append(",");
                 }
 
                 if (parameters.Any())
                 {
+                    sql.Remove(sql.Length - 1, 1); // remove the trailing comma
                     this.ExecuteNonQuery(sql.ToString(), parameters);
                 }
             }
@@ -257,45 +252,6 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 colCount++;
             }
             sql.Append(")");
-        }
-
-
-        /// <summary>
-        /// Splits the given sequence into sequences of the given length.
-        /// </summary>
-        private static IEnumerable<IEnumerable<T>> TakeMany<T>(IEnumerable<T> source, int maxLength)
-        {
-            if (source == null)
-            {
-                throw new ArgumentNullException("source");
-            }
-
-            if (maxLength <= 0)
-            {
-                throw new ArgumentOutOfRangeException("maxLength");
-            }
-
-            var enumerator = source.GetEnumerator();
-            var batch = new List<T>(maxLength);
-
-            while (enumerator.MoveNext())
-            {
-                batch.Add(enumerator.Current);
-
-                //Have we finished this batch? Yield it and start a new one.
-                if (batch.Count == maxLength)
-                {
-                    yield return batch;
-                    batch = new List<T>(maxLength);
-                }
-            }
-
-            //Yield the final batch if it has any elements
-            if (batch.Count > 0)
-            {
-                yield return batch;
-            }
-
         }
 
         /// <summary>

@@ -3,17 +3,12 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
-using Microsoft.WindowsAzure.MobileServices.SQLiteStore;
 using Microsoft.WindowsAzure.MobileServices.Test;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json.Linq;
-using Newtonsoft.Json.Schema;
-using SQLitePCL;
 
 namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 {
@@ -53,7 +48,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         {
             var store = new MobileServiceSQLiteStore(TestDbName);
             await store.InitializeAsync();
-            var ex = Throws<InvalidOperationException>(()=> store.DefineTable(TestTable, new JObject()));
+            var ex = Throws<InvalidOperationException>(() => store.DefineTable(TestTable, new JObject()));
             Assert.AreEqual(ex.Message, "Cannot define a table after the store has been initialized.");
         }
 
@@ -128,7 +123,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         [TestMethod]
         public void DeleteAsyncById_Throws_WhenStoreIsNotInitialized()
         {
-            TestStoreThrowOnUninitialized(store => store.DeleteAsync("abc", new[]{""}));
+            TestStoreThrowOnUninitialized(store => store.DeleteAsync("abc", new[] { "" }));
         }
 
         [AsyncTestMethod]
@@ -170,7 +165,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             {
                 DefineTestTable(store);
                 await store.InitializeAsync();
-                await store.DeleteAsync(TestTable, new[]{"abc"});
+                await store.DeleteAsync(TestTable, new[] { "abc" });
             }
 
             // rows should be zero now
@@ -181,7 +176,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         [TestMethod]
         public void UpsertAsync_Throws_WhenStoreIsNotInitialized()
         {
-            TestStoreThrowOnUninitialized(store => store.UpsertAsync("asdf", new[]{new JObject()}, fromServer: false));
+            TestStoreThrowOnUninitialized(store => store.UpsertAsync("asdf", new[] { new JObject() }, fromServer: false));
         }
 
         [AsyncTestMethod]
@@ -197,7 +192,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
                 await store.InitializeAsync();
 
-                var ex = await ThrowsAsync<InvalidOperationException>(() => store.UpsertAsync(TestTable, new[]{new JObject() { { "notDefined", "okok" } }}, fromServer: false));
+                var ex = await ThrowsAsync<InvalidOperationException>(() => store.UpsertAsync(TestTable, new[] { new JObject() { { "notDefined", "okok" } } }, fromServer: false));
 
                 Assert.AreEqual(ex.Message, "Column with name 'notDefined' is not defined on the local table 'todo'.");
             }
@@ -216,7 +211,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
                 await store.InitializeAsync();
 
-                await store.UpsertAsync(TestTable, new[]{new JObject() { { "notDefined", "okok" }, {"dob", DateTime.UtcNow} }}, fromServer: true);
+                await store.UpsertAsync(TestTable, new[] { new JObject() { { "notDefined", "okok" }, { "dob", DateTime.UtcNow } } }, fromServer: true);
             }
         }
 
@@ -233,8 +228,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
                 await store.InitializeAsync();
 
-                await store.UpsertAsync(TestTable, new[]{new JObject()}, fromServer: true);
-                await store.UpsertAsync(TestTable, new[]{new JObject()}, fromServer: false);
+                await store.UpsertAsync(TestTable, new[] { new JObject() }, fromServer: true);
+                await store.UpsertAsync(TestTable, new[] { new JObject() }, fromServer: false);
             }
         }
 
@@ -271,7 +266,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                     { "friends", null },  
                     { "__version", null }
                 };
-                await store.UpsertAsync(TestTable, new[]{inserted}, fromServer: false);
+                await store.UpsertAsync(TestTable, new[] { inserted }, fromServer: false);
 
                 JObject read = await store.LookupAsync(TestTable, "abc");
 
@@ -333,13 +328,16 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             using (var store = new MobileServiceSQLiteStore(TestDbName))
             {
-                var template = new JObject {
+                var template = new JObject
+                {
                     { "id", 0 },
                 };
 
                 //SQLite limits us to 999 "parameters" per prepared statement
                 for (var i = 0; i < 1000; i++)
+                {
                     template["column" + i] = "Hello, world";
+                }
 
                 store.DefineTable(TestTable, template);
 
@@ -366,7 +364,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             using (var store = new MobileServiceSQLiteStore(TestDbName))
             {
-                var template = new JObject {
+                var template = new JObject 
+                {
                     { "id", 0 },
                     { "value1", "Hello, world" },
                     { "value2", "Hello, world" },
@@ -384,7 +383,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                 const int insertedItemCount = 500;
 
                 var itemsToInsert = Enumerable.Range(1, insertedItemCount)
-                                              .Select(id => {
+                                              .Select(id =>
+                                              {
                                                   var o = new JObject(template);
                                                   o["id"] = id;
                                                   return o;
@@ -394,7 +394,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                 //Insert the items
                 await store.UpsertAsync(TestTable, itemsToInsert, fromServer: false);
 
-                JArray records = (JArray) await store.ReadAsync(MobileServiceTableQueryDescription.Parse(TestTable, "$orderby=id"));
+                JArray records = (JArray)await store.ReadAsync(MobileServiceTableQueryDescription.Parse(TestTable, "$orderby=id"));
 
                 //Verify that all 500 records were inserted
                 Assert.AreEqual(records.Count, insertedItemCount);
@@ -432,7 +432,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                 await store.InitializeAsync();
 
                 // first add an item
-                await store.UpsertAsync(TestTable, new[]{originalItem}, fromServer: false);
+                await store.UpsertAsync(TestTable, new[] { originalItem }, fromServer: false);
 
                 // read the item back
                 JObject itemRead = await store.LookupAsync(TestTable, "abc");
@@ -444,7 +444,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                 originalItem["double"] = 111.222d;
 
                 // upsert the item
-                await store.UpsertAsync(TestTable, new[]{originalItem}, fromServer: false);
+                await store.UpsertAsync(TestTable, new[] { originalItem }, fromServer: false);
 
                 // read the updated item
                 JObject updatedItem = await store.LookupAsync(TestTable, "abc");
@@ -459,7 +459,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
                 Assert.AreNotEqual(originalItem.ToString(), itemRead.ToString());
 
                 // now delete the item
-                await store.DeleteAsync(TestTable, new[]{"abc"});
+                await store.DeleteAsync(TestTable, new[] { "abc" });
 
                 // now read it back
                 JObject item4 = await store.LookupAsync(TestTable, "abc");
