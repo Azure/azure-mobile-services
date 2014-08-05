@@ -20,8 +20,12 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
     /// </summary>
     public class MobileServiceSQLiteStore : MobileServiceLocalStore
     {
-        //Limit batched "Upsert" operations to this many rows at once
-        private const int UpsertBatchSize = 25;
+        /// <summary>
+        /// The maximum number of parameters allowed in any "upsert" prepared statement.
+        /// Note: The default maximum number of parameters allowed by sqlite is 999
+        /// See: http://www.sqlite.org/limits.html#max_variable_number
+        /// </summary>
+        private const int MaxParametersPerUpsertQuery = 800;
 
         private Dictionary<string, TableDefinition> tables = new Dictionary<string, TableDefinition>(StringComparer.OrdinalIgnoreCase);
         private SQLiteConnection connection;
@@ -176,10 +180,14 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 //If the column is coming from the server we can just ignore it,
                 //otherwise, throw to alert the caller that they have passed an invalid column
                 if (!table.TryGetValue(prop.Name, out column) && !fromServer)
+                {
                     throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_ColumnNotDefined, prop.Name, tableName));
+                }
 
                 if (column != null)
+                {
                     columns.Add(column);
+                }
             }
 
             if (columns.Count == 0)
@@ -195,7 +203,15 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 String.Join(", ", columns.Select(c => c.Property.Name).Select(SqlHelpers.FormatMember))
             );
 
-            foreach (var batch in TakeMany(items, length: UpsertBatchSize))
+            // Use int division to calculate how many times this record will fit into our parameter quota
+            int batchSize = MaxParametersPerUpsertQuery / columns.Count;
+
+            if (batchSize == 0)
+            {
+                throw new InvalidOperationException(string.Format(Properties.Resources.SQLiteStore_TooManyColumns, MaxParametersPerUpsertQuery));
+            }
+
+            foreach (var batch in TakeMany(items, maxLength: batchSize))
             {
                 var sql = new StringBuilder(sqlBase);
                 var parameters = new Dictionary<string, object>();
@@ -247,32 +263,38 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
         /// <summary>
         /// Splits the given sequence into sequences of the given length.
         /// </summary>
-        private static IEnumerable<IEnumerable<T>> TakeMany<T>(IEnumerable<T> source, int length)
+        private static IEnumerable<IEnumerable<T>> TakeMany<T>(IEnumerable<T> source, int maxLength)
         {
             if (source == null)
+            {
                 throw new ArgumentNullException("source");
+            }
 
-            if (length <= 0)
-                throw new ArgumentOutOfRangeException("length");
+            if (maxLength <= 0)
+            {
+                throw new ArgumentOutOfRangeException("maxLength");
+            }
 
             var enumerator = source.GetEnumerator();
-            var batch = new List<T>(length);
+            var batch = new List<T>(maxLength);
 
             while (enumerator.MoveNext())
             {
                 batch.Add(enumerator.Current);
 
-                //Have we finished a batch? Yield it and start a new one.
-                if (batch.Count == length)
+                //Have we finished this batch? Yield it and start a new one.
+                if (batch.Count == maxLength)
                 {
                     yield return batch;
-                    batch = new List<T>(length);
+                    batch = new List<T>(maxLength);
                 }
             }
 
-            //Yield the final batch if it is "full" or not
+            //Yield the final batch if it has any elements
             if (batch.Count > 0)
+            {
                 yield return batch;
+            }
 
         }
 

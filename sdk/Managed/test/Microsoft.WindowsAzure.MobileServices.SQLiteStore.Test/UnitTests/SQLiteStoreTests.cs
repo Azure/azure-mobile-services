@@ -327,38 +327,35 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         }
 
         [AsyncTestMethod]
-        public async Task UpsertAsync_Throws_WhenInsertingTooManyLargeRecords()
+        public async Task UpsertAsync_Throws_WhenInsertingRecordsWhichAreTooLarge()
         {
             TestUtilities.DropTestTable(TestDbName, TestTable);
 
             using (var store = new MobileServiceSQLiteStore(TestDbName))
             {
                 var template = new JObject {
-                    { "id", String.Empty },
+                    { "id", 0 },
                 };
 
-                //Assuming a batch size of 25, a "large" record is 40+ columns
-                for (var i = 0; i < 40; i++)
-                    template["column" + i] = String.Empty;
+                //SQLite limits us to 999 "parameters" per prepared statement
+                for (var i = 0; i < 1000; i++)
+                    template["column" + i] = "Hello, world";
 
                 store.DefineTable(TestTable, template);
 
                 //create the table
                 await store.InitializeAsync();
 
-                //add a whole bunch of items. (As of this test being written, the upsert batch size was 25)
-                var itemsToInsert = Enumerable.Range(1, 25)
-                                              .Select(id => {
-                                                  var o = new JObject(template);
-                                                  o["id"] = id.ToString();
-                                                  return o;
-                                              })
-                                              .ToArray();
+                //attempt to insert a couple of items
+                var item1 = new JObject(template);
+                item1["id"] = 1;
 
-                SQLiteException ex = await AssertEx.Throws<SQLiteException>(() => store.UpsertAsync(TestTable, itemsToInsert, fromServer: false));
+                var item2 = new JObject(template);
+                item1["id"] = 2;
 
-                Assert.IsTrue(ex.Message.StartsWith("Unable to prepare the sql statement"));
-                Assert.IsTrue(ex.Message.EndsWith("Details: too many SQL variables"));
+                InvalidOperationException ex = await AssertEx.Throws<InvalidOperationException>(() => store.UpsertAsync(TestTable, new[] { item1, item2 }, fromServer: false));
+
+                Assert.AreEqual("The number of fields per entity in an upsert operation is limited to 800.", ex.Message);
             }
         }
 
