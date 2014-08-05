@@ -1,3 +1,6 @@
+<#@template language="c#" hostspecific="true"#>
+<#@parameter type="System.String" name="JSSDKVersion"#>
+<#@ output extension=".html" #>
 <!DOCTYPE html>
 <html>
     <head>
@@ -33,7 +36,7 @@
         </div>
 
         <script src='https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.9.1.min.js'></script>
-        <script src='http://ajax.aspnetcdn.com/ajax/mobileservices/MobileServices.Web-1.2.2.min.js'></script>
+        <script src='http://ajax.aspnetcdn.com/ajax/mobileservices/MobileServices.Web-<#= JSSDKVersion#>.min.js'></script>
         <script src='page.js'></script>
     </body>
 </html>
