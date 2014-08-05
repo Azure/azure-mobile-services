@@ -76,6 +76,61 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
         }
 
         [AsyncTestMethod]
+        public async Task ReadAsync_RoundTripsBytes()
+        {
+            const string tableName = "bytes_test_table";
+
+            ResetDatabase(tableName);
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable(tableName, new JObject {
+                { "id", String.Empty },
+                { "data", new byte[0] }
+            });
+
+            var hijack = new TestHttpHandler();
+            IMobileServiceClient service = await CreateClient(hijack, store);
+            IMobileServiceSyncTable table = service.GetSyncTable(tableName);
+
+            byte[] theData = { 0, 128, 255 };
+
+            JObject inserted = await table.InsertAsync(new JObject { { "data", theData } });
+
+            Assert.AreEquivalent(theData, inserted["data"].Value<byte[]>());
+
+            JObject rehydrated = await table.LookupAsync(inserted["id"].Value<string>());
+
+            Assert.AreEquivalent(theData, rehydrated["data"].Value<byte[]>());
+        }
+
+        [AsyncTestMethod]
+        public async Task ReadAsync_RoundTripsBytes_Generic()
+        {
+            const string tableName = "BytesType";
+
+            ResetDatabase(tableName);
+
+            var store = new MobileServiceSQLiteStore(TestDbName);
+            store.DefineTable<BytesType>();
+
+            var hijack = new TestHttpHandler();
+            IMobileServiceClient service = await CreateClient(hijack, store);
+            IMobileServiceSyncTable<BytesType> table = service.GetSyncTable<BytesType>();
+
+            byte[] theData = { 0, 128, 255 };
+
+            BytesType inserted = new BytesType { Data = theData };
+
+            await table.InsertAsync(inserted);
+
+            Assert.AreEquivalent(inserted.Data, theData);
+
+            BytesType rehydrated = await table.LookupAsync(inserted.Id);
+
+            Assert.AreEquivalent(rehydrated.Data, theData);
+        }
+
+        [AsyncTestMethod]
         public async Task ReadAsync_WithSystemPropertyType_Generic()
         {
             string tableName = "stringId_test_table";
