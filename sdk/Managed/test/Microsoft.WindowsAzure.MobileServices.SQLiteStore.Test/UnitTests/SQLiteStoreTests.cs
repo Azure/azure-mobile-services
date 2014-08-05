@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
 using Microsoft.WindowsAzure.MobileServices.SQLiteStore;
+using Microsoft.WindowsAzure.MobileServices.Test;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Schema;
@@ -323,6 +324,90 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
             }
             long count = TestUtilities.CountRows(TestDbName, TestTable);
             Assert.AreEqual(count, 1L);
+        }
+
+        [AsyncTestMethod]
+        public async Task UpsertAsync_Throws_WhenInsertingTooManyLargeRecords()
+        {
+            TestUtilities.DropTestTable(TestDbName, TestTable);
+
+            using (var store = new MobileServiceSQLiteStore(TestDbName))
+            {
+                var template = new JObject {
+                    { "id", String.Empty },
+                };
+
+                //Assuming a batch size of 25, a "large" record is 40+ columns
+                for (var i = 0; i < 40; i++)
+                    template["column" + i] = String.Empty;
+
+                store.DefineTable(TestTable, template);
+
+                //create the table
+                await store.InitializeAsync();
+
+                //add a whole bunch of items. (As of this test being written, the upsert batch size was 25)
+                var itemsToInsert = Enumerable.Range(1, 25)
+                                              .Select(id => {
+                                                  var o = new JObject(template);
+                                                  o["id"] = id.ToString();
+                                                  return o;
+                                              })
+                                              .ToArray();
+
+                SQLiteException ex = await AssertEx.Throws<SQLiteException>(() => store.UpsertAsync(TestTable, itemsToInsert, fromServer: false));
+
+                Assert.IsTrue(ex.Message.StartsWith("Unable to prepare the sql statement"));
+                Assert.IsTrue(ex.Message.EndsWith("Details: too many SQL variables"));
+            }
+        }
+
+        [AsyncTestMethod]
+        public async Task UpsertAsync_CanProcessManyRecordsAtOnce()
+        {
+            TestUtilities.DropTestTable(TestDbName, TestTable);
+
+            using (var store = new MobileServiceSQLiteStore(TestDbName))
+            {
+                var template = new JObject {
+                    { "id", 0 },
+                    { "value1", "Hello, world" },
+                    { "value2", "Hello, world" },
+                    { "value3", "Hello, world" },
+                    { "value4", "Hello, world" },
+                    { "value5", "Hello, world" }
+                };
+
+                store.DefineTable(TestTable, template);
+
+                //create the table
+                await store.InitializeAsync();
+
+                //add a whole bunch of items. We want {number of items} * {number of fields} to exceed sqlite's parameter limit
+                const int insertedItemCount = 500;
+
+                var itemsToInsert = Enumerable.Range(1, insertedItemCount)
+                                              .Select(id => {
+                                                  var o = new JObject(template);
+                                                  o["id"] = id;
+                                                  return o;
+                                              })
+                                              .ToArray();
+
+                //Insert the items
+                await store.UpsertAsync(TestTable, itemsToInsert, fromServer: false);
+
+                JArray records = (JArray) await store.ReadAsync(MobileServiceTableQueryDescription.Parse(TestTable, "$orderby=id"));
+
+                //Verify that all 500 records were inserted
+                Assert.AreEqual(records.Count, insertedItemCount);
+
+                //Verify that all fields are intact
+                for (var i = 0; i < insertedItemCount; i++)
+                {
+                    Assert.IsTrue(JToken.DeepEquals(itemsToInsert[i], records[i]), "Results retrieved from DB do not match input");
+                }
+            }
         }
 
         [AsyncTestMethod]
