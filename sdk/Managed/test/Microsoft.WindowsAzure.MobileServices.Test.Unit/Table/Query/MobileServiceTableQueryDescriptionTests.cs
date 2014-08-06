@@ -75,7 +75,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Query
         }
 
         [TestMethod]
-        public void ToQueryString_EscapesThe_Uri()
+        public void ToODataString_EscapesThe_Uri()
         {
 
             //__updatedat gt datetimeoffset'2014-04-04T07:00:00.0000000+00:00'
@@ -99,7 +99,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Query
             var and1 = new BinaryOperatorNode(BinaryOperatorKind.And, gt1, and2);
 
             var desc = new MobileServiceTableQueryDescription("someTable") { Filter = and1 };
-            Assert.AreEqual(desc.ToQueryString(), EscapedODataString);
+            Assert.AreEqual(desc.ToODataString(), EscapedODataString);
         }
     }
 }

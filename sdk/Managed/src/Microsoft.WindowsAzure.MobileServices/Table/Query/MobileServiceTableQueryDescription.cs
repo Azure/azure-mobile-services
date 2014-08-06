@@ -117,7 +117,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         /// <returns>
         /// URI fragment representing the query.
         /// </returns>
-        public string ToQueryString()
+        public string ToODataString()
         {
             char? separator = null;
             StringBuilder text = new StringBuilder();

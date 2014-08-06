@@ -49,7 +49,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 throw new ArgumentNullException("query");
             }
-            string queryString = this.queryProvider.ToQueryString(query);
+            string queryString = this.queryProvider.ToODataString(query);
 
             return this.PullAsync(queryKey, queryString, query.Parameters, cancellationToken);
         }
@@ -60,7 +60,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 throw new ArgumentNullException("query");
             }
-            string queryString = this.queryProvider.ToQueryString(query);
+            string queryString = this.queryProvider.ToODataString(query);
 
             return this.PurgeAsync(queryKey, queryString, cancellationToken);
         }

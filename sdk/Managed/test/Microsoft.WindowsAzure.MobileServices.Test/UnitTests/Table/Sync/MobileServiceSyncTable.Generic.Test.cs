@@ -817,7 +817,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             IEnumerable<string> result = await table.ReadAsync(query);
 
-            string odata = store.ReadQueries.First().ToQueryString();
+            string odata = store.ReadQueries.First().ToODataString();
             Assert.AreEqual(odata, "$filter=(String eq 'world')&" +
                                     "$orderby=String desc,id&" +
                                     "$skip=5&" +
@@ -846,7 +846,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             await table.ReadAsync(odata);
 
-            string odata2 = store.ReadQueries.First().ToQueryString();
+            string odata2 = store.ReadQueries.First().ToODataString();
             Assert.AreEqual(odata, odata2);
         }
 

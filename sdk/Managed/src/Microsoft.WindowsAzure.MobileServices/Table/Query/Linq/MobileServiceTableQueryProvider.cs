@@ -91,7 +91,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             MobileServiceTableQueryDescription compiledQuery = this.Compile(query);
 
             // Send the query
-            string odata = compiledQuery.ToQueryString();
+            string odata = compiledQuery.ToODataString();
             QueryResult result = await this.Execute<T>(query, odata);
 
             return new TotalCountEnumerable<T>(
@@ -149,10 +149,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             return compiledQuery;
         }
 
-        internal string ToQueryString<T>(IMobileServiceTableQuery<T> query)
+        internal string ToODataString<T>(IMobileServiceTableQuery<T> query)
         {
             MobileServiceTableQueryDescription description = this.Compile(query);
-            return description.ToQueryString();
+            return description.ToODataString();
         }
     }
 }

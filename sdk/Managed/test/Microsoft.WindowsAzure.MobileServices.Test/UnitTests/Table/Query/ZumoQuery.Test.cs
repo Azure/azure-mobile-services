@@ -99,7 +99,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceTableQuery<U> query = getQuery(table);
             MobileServiceTableQueryProvider provider = new MobileServiceTableQueryProvider();
             MobileServiceTableQueryDescription compiledQuery = provider.Compile((MobileServiceTableQuery<U>)query);
-            Log(">>> " + compiledQuery.ToQueryString());
+            Log(">>> " + compiledQuery.ToODataString());
             return compiledQuery;
         }
 
@@ -361,7 +361,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                  select new { p.Name, p.Price })
                 .Skip(20)
                 .Take(10));
-            Assert.AreEqual("$filter=(((Price le 10M) and (Weight gt 10f)) and not(InStock))&$orderby=Price desc,Name&$skip=20&$top=10&$select=Name,Price,Weight,WeightInKG", query.ToQueryString());
+            Assert.AreEqual("$filter=(((Price le 10M) and (Weight gt 10f)) and not(InStock))&$orderby=Price desc,Name&$skip=20&$top=10&$select=Name,Price,Weight,WeightInKG", query.ToODataString());
         }
 
         [TestMethod]
@@ -1039,7 +1039,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual("Product", query.TableName);
             Assert.AreEqual(0, query.Skip);
             Assert.IsFalse(query.Top.HasValue);
-            Assert.AreEqual("$skip=0", query.ToQueryString());
+            Assert.AreEqual("$skip=0", query.ToODataString());
         }
 
         [TestMethod]
@@ -1049,7 +1049,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual("Product", query.TableName);
             Assert.AreEqual(0, query.Top);
             Assert.IsFalse(query.Skip.HasValue);
-            Assert.AreEqual("$top=0", query.ToQueryString());
+            Assert.AreEqual("$top=0", query.ToODataString());
         }
 
         [TestMethod]

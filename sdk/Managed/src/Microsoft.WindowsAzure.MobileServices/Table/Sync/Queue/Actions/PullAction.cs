@@ -53,7 +53,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 ApplyDeltaToken(this.Query, deltaToken);
             }
 
-            QueryResult result = await this.Table.ReadAsync(this.Query.ToQueryString(), MobileServiceTable.IncludeDeleted(parameters), this.Table.Features);
+            QueryResult result = await this.Table.ReadAsync(this.Query.ToODataString(), MobileServiceTable.IncludeDeleted(parameters), this.Table.Features);
 
             this.CancellationToken.ThrowIfCancellationRequested();
 

@@ -42,7 +42,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 IEnumerable<JObject> items = table.Values;
                 if (query.TableName == MobileServiceLocalSystemTables.OperationQueue)
                 {
-                    string odata = query.ToQueryString();
+                    string odata = query.ToODataString();
                     if ( odata.Contains("$orderby=sequence desc")) // the query to take total count and max sequence
                     {
                         items = items.OrderBy(o => o.Value<long>("sequence"));

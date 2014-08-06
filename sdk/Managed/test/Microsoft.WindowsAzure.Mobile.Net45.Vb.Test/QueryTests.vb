@@ -12,7 +12,7 @@ Imports Newtonsoft.Json
         Dim query As IMobileServiceTableQuery(Of U) = getQuery(table)
         Dim provider As MobileServiceTableQueryProvider = New MobileServiceTableQueryProvider()
         Dim compiledQuery As MobileServiceTableQueryDescription = provider.Compile(CType(query, MobileServiceTableQuery(Of U)))
-        Console.WriteLine(">>> {0}", compiledQuery.ToQueryString())
+        Console.WriteLine(">>> {0}", compiledQuery.ToODataString())
         Return compiledQuery
     End Function
 
@@ -247,7 +247,7 @@ Imports Newtonsoft.Json
                                                      .Take(10))
         Assert.AreEqual( _
             "$filter=(((Price le 10M) and (Weight gt 10f)) and not(InStock))&$orderby=Price desc,Name&$skip=20&$top=10&$select=Name,Price,Weight,WeightInKG", _
-            query.ToQueryString())
+            query.ToODataString())
     End Sub
 
     <TestMethod> Public Sub FilterOperators()
