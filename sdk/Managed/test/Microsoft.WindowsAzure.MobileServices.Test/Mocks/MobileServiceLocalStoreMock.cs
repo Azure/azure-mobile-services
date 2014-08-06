@@ -42,21 +42,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 IEnumerable<JObject> items = table.Values;
                 if (query.TableName == MobileServiceLocalSystemTables.OperationQueue)
                 {
-                    string odata = query.ToQueryString();
-                    if ( odata.Contains("$orderby=sequence desc")) // the query to take total count and max sequence
+                    var parts = QueryStringHelper.EnumerateQueryParts(query.ToQueryString()).ToArray();
+
+                    if (parts.Any(p => p.Key == "$orderby" && p.Value.StartsWith("sequence desc"))) // the query to take total count and max sequence
                     {
                         items = items.OrderBy(o => o.Value<long>("sequence"));
                     }
-                    else if (odata.Contains("$filter=(sequence gt ")) // the query to get next operation
+                    else if (parts.Any(p => p.Key == "$filter" && p.Value.StartsWith("(sequence gt "))) // the query to get next operation
                     {
                         items = items.Where(o => o.Value<long>("sequence") > (long)((ConstantNode)((BinaryOperatorNode)query.Filter).RightOperand).Value);
                         items = items.OrderBy(o => o.Value<long>("sequence"));
                     }
-                    else if (odata.Contains("$filter=(itemId eq '"))
+                    else if (parts.Any(p => p.Key == "$filter" && p.Value.StartsWith("(itemId eq '")))
                     {
                         items = items.Where(o => o.Value<string>("itemId") == ((ConstantNode)((BinaryOperatorNode)query.Filter).RightOperand).Value.ToString());
                     }
-                    else if (odata.Contains("$filter=(tableName eq '"))
+                    else if (parts.Any(p => p.Key == "$filter" && p.Value.StartsWith("(tableName eq '")))
                     {
                         items = items.Where(o => o.Value<string>("tableName") == ((ConstantNode)((BinaryOperatorNode)query.Filter).RightOperand).Value.ToString());
                     }

@@ -81,7 +81,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
                 new JObject() { { "id", "abc" }, { "text", "has id"}, { "__updatedAt", "1985-07-17" } },
                 new JObject() { { "id", "abc" }, { "text", "has id"}, { "__updatedAt", "2014-07-09" } }
             });
-            string expectedOdata = "$filter=(__updatedAt ge datetimeoffset'2013-01-01T00:00:00.0000000+00:00')&$orderby=__updatedAt";
+            var expectedOdata = new Dictionary<string, string> {
+                { "$filter", "(__updatedAt ge datetimeoffset'2013-01-01T00:00:00.0000000+00:00')" },
+                { "$orderby", "__updatedAt" },
+            };
+
             await TestIncrementalSync(query, result, expectedOdata, new DateTime(2014, 07, 09), savesMax: true);
         }
 
@@ -96,7 +100,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
                 new JObject() { { "id", "abc" }, { "text", "has id"}, { "__updatedAt", "1985-07-17" } },
                 new JObject() { { "id", "abc" }, { "text", "has id"}, { "__updatedAt", "2014-07-09" } }
             });
-            string expectedOdata = "$filter=((4 eq 3) and (__updatedAt ge datetimeoffset'2013-01-01T00:00:00.0000000+00:00'))&$orderby=__updatedAt,text desc";
+            var expectedOdata = new Dictionary<string, string> {
+                { "$filter", "((4 eq 3) and (__updatedAt ge datetimeoffset'2013-01-01T00:00:00.0000000+00:00'))" },
+                { "$orderby", "__updatedAt,text desc" },
+            };
             await TestIncrementalSync(query, result, expectedOdata, new DateTime(2014, 07, 09), savesMax: true);
         }
 
@@ -105,7 +112,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
         {
             var query = new MobileServiceTableQueryDescription("test");
             var result = new JArray();
-            string expectedOdata = "$filter=(__updatedAt ge datetimeoffset'2013-01-01T00:00:00.0000000+00:00')&$orderby=__updatedAt";
+            var expectedOdata = new Dictionary<string, string> {
+                { "$filter", "(__updatedAt ge datetimeoffset'2013-01-01T00:00:00.0000000+00:00')" },
+                { "$orderby", "__updatedAt" },
+            };
             await TestIncrementalSync(query, result, expectedOdata, DateTime.MinValue, savesMax: false);
         }
 
@@ -118,7 +128,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             {
                 new JObject() { { "id", "abc" }, { "text", "has id"}, { "__updatedAt", "1985-07-17" } },
             });
-            string expectedOdata = "$filter=((4 eq 3) and (__updatedAt ge datetimeoffset'2013-01-01T00:00:00.0000000+00:00'))&$orderby=__updatedAt";
+            var expectedOdata = new Dictionary<string, string> {
+                { "$filter", "((4 eq 3) and (__updatedAt ge datetimeoffset'2013-01-01T00:00:00.0000000+00:00'))" },
+                { "$orderby", "__updatedAt" },
+            };
             await TestIncrementalSync(query, result, expectedOdata, new DateTime(2014, 07, 09), savesMax: false);
         }
 
@@ -132,17 +145,20 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
                 new JObject() { { "id", "abc" }, { "text", "has id"} },
                 new JObject() { { "id", "abc" }, { "text", "has id"} }
             });
-            string expectedOdata = "$filter=((4 eq 3) and (__updatedAt ge datetimeoffset'2013-01-01T00:00:00.0000000+00:00'))&$orderby=__updatedAt";
+            var expectedOdata = new Dictionary<string, string> {
+                { "$filter", "((4 eq 3) and (__updatedAt ge datetimeoffset'2013-01-01T00:00:00.0000000+00:00'))" },
+                { "$orderby", "__updatedAt" },
+            };
             await TestIncrementalSync(query, result, expectedOdata, new DateTime(2014, 07, 09), savesMax: false);
         }
 
-        private async Task TestIncrementalSync(MobileServiceTableQueryDescription query, JArray result, string odata, DateTime maxUpdatedAt, bool savesMax)
+        private async Task TestIncrementalSync(MobileServiceTableQueryDescription query, JArray result, IEnumerable<KeyValuePair<string, string>> expectedOdataParams, DateTime maxUpdatedAt, bool savesMax)
         {
             var action = new PullAction(this.table.Object, this.context.Object, "latestItems", query, null, this.opQueue.Object, this.settings.Object, this.store.Object, CancellationToken.None);
 
             this.opQueue.Setup(q => q.LockTableAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult<IDisposable>(null));
             this.opQueue.Setup(q => q.CountPending(It.IsAny<string>())).Returns(Task.FromResult(0L));
-            this.table.Setup(t => t.ReadAsync(odata, It.IsAny<IDictionary<string, string>>(), It.IsAny<MobileServiceFeatures>())).Returns(Task.FromResult(QueryResult.Parse(result, null, false)));
+            this.table.Setup(t => t.ReadAsync(It.Is<string>(odata => MatchExpectedOdata(odata, expectedOdataParams)), It.IsAny<IDictionary<string, string>>(), It.IsAny<MobileServiceFeatures>())).Returns(Task.FromResult(QueryResult.Parse(result, null, false)));
 
             if (result.Any())
             {
@@ -163,6 +179,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             this.settings.VerifyAll();
 
             store.Verify(s => s.DeleteAsync("test", It.IsAny<IEnumerable<string>>()), Times.Never(), "There shouldn't be any call to delete");
+        }
+
+        private bool MatchExpectedOdata(string odata, IEnumerable<KeyValuePair<string, string>> expectedOdataParams)
+        {
+            AssertEx.QueryStringContains(odata, expectedOdataParams, matchExactly: true);
+            return true;
         }
     }
 }
