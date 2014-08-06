@@ -31,7 +31,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Query
             Assert.IsNotNull(and1);
             Assert.AreEqual(and1.OperatorKind, BinaryOperatorKind.And);
 
-            var expectedDateTime = new DateTimeOffset(2014, 4, 4, 7, 0, 0, TimeSpan.FromHours(0));
+            var expectedDateTime = new DateTimeOffset(2014, 4, 4, 7, 0, 0, TimeSpan.Zero);
 
             var gt1 = and1.LeftOperand as BinaryOperatorNode;
             Assert.IsNotNull(gt1);
