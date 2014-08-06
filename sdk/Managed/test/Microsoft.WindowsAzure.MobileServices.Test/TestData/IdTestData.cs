@@ -54,7 +54,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             "id\nwith\n\newline",
             "id with fowardslash \\",
             "id with backslash /",
-            new DateTime(2010, 1, 8).ToUniversalTime().ToString(),
             "\"idWithQuotes\"",
             "?",
             "\\",
