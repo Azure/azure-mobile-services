@@ -95,7 +95,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             MobileServiceTableQueryDescription compiledQuery = this.Compile(query);
 
             // Send the query
-            string odata = compiledQuery.ToQueryString();
+            string odata = compiledQuery.ToODataString();
             JToken response;
             var table = query.Table as MobileServiceTable;
             if (table != null)
