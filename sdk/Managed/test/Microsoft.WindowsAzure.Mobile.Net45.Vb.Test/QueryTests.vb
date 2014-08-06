@@ -11,7 +11,7 @@ Imports Newtonsoft.Json
         Dim query As IMobileServiceTableQuery(Of U) = getQuery(table)
         Dim provider As MobileServiceTableQueryProvider = New MobileServiceTableQueryProvider()
         Dim compiledQuery As MobileServiceTableQueryDescription = provider.Compile(CType(query, MobileServiceTableQuery(Of U)))
-        Console.WriteLine(">>> {0}", compiledQuery.ToQueryString())
+        Console.WriteLine(">>> {0}", compiledQuery.ToODataString())
         Return compiledQuery
     End Function
 
@@ -246,7 +246,7 @@ Imports Newtonsoft.Json
                                                      .Take(10))
         Assert.AreEqual( _
             "$filter=((Price le 10M) and (Weight gt 10f)) and not(InStock)&$orderby=Price desc,Name&$skip=20&$top=10&$select=Name,Price,Weight,WeightInKG", _
-            query.ToQueryString())
+            query.ToODataString())
     End Sub
 
     <TestMethod> Public Sub FilterOperators()
@@ -260,25 +260,25 @@ Imports Newtonsoft.Json
                                                             From p In table _
                                                             Where p.Weight + 1.0 = 10 _
                                                             Select p)
-        Assert.AreEqual("((Weight add 1) eq 10)", query.Filter)
+        Assert.AreEqual("((Weight add 1.0) eq 10.0)", query.Filter)
 
         query = Compile(Of Product, Product)(Function(table) _
                                                             From p In table _
                                                             Where p.Weight - 1.0 = 10 _
                                                             Select p)
-        Assert.AreEqual("((Weight sub 1) eq 10)", query.Filter)
+        Assert.AreEqual("((Weight sub 1.0) eq 10.0)", query.Filter)
 
         query = Compile(Of Product, Product)(Function(table) _
                                                             From p In table _
                                                             Where p.Weight * 2.0 = 10 _
                                                             Select p)
-        Assert.AreEqual("((Weight mul 2) eq 10)", query.Filter)
+        Assert.AreEqual("((Weight mul 2.0) eq 10.0)", query.Filter)
 
         query = Compile(Of Product, Product)(Function(table) _
                                                             From p In table _
                                                             Where p.Weight / 2.0 = 10 _
                                                             Select p)
-        Assert.AreEqual("((Weight div 2) eq 10)", query.Filter)
+        Assert.AreEqual("((Weight div 2.0) eq 10.0)", query.Filter)
 
         query = Compile(Of Product, Product)(Function(table) _
                                                             From p In table _
@@ -290,7 +290,7 @@ Imports Newtonsoft.Json
                                                             From p In table _
                                                             Where (p.Weight * 2.0) / 3.0 + 1.0 = 10 _
                                                             Select p)
-        Assert.AreEqual("((((Weight mul 2) div 3) add 1) eq 10)", query.Filter)
+        Assert.AreEqual("((((Weight mul 2.0) div 3.0) add 1.0) eq 10.0)", query.Filter)
     End Sub
 
     <TestMethod> Public Sub FilterMethods()
@@ -342,7 +342,7 @@ Imports Newtonsoft.Json
                                                     From p In table _
                                                     Where Math.Floor(p.Weight) = 10 _
                                                     Select p)
-        Assert.AreEqual("(floor(Weight) eq 10)", query.Filter)
+        Assert.AreEqual("(floor(Weight) eq 10.0)", query.Filter)
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
@@ -354,7 +354,7 @@ Imports Newtonsoft.Json
                                                     From p In table _
                                                     Where Math.Ceiling(p.Weight) = 10 _
                                                     Select p)
-        Assert.AreEqual("(ceiling(Weight) eq 10)", query.Filter)
+        Assert.AreEqual("(ceiling(Weight) eq 10.0)", query.Filter)
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
@@ -366,7 +366,7 @@ Imports Newtonsoft.Json
                                                     From p In table _
                                                     Where Math.Round(p.Weight) = 10 _
                                                     Select p)
-        Assert.AreEqual("(round(Weight) eq 10)", query.Filter)
+        Assert.AreEqual("(round(Weight) eq 10.0)", query.Filter)
 
         query = Compile(Of Product, Product)(Function(table) _
                                                     From p In table _
