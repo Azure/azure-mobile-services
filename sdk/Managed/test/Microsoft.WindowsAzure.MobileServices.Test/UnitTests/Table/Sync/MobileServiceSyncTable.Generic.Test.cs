@@ -352,7 +352,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task PullAsync_Succeds()
+        public async Task PullAsync_Succeeds()
         {
             var hijack = new TestHttpHandler();
             hijack.OnSendingRequest = req =>
@@ -385,7 +385,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var store = new MobileServiceLocalStoreMock();
             var settings = new MobileServiceSyncSettingsManager(store);
             await settings.SetDeltaTokenAsync("stringId_test_table", "incquery", new DateTime(2001, 02, 03, 0, 0, 0, DateTimeKind.Utc));
-            await TestIncrementalPull(store, "2001-02-03T00:00:00.0000000+00:00");
+            await TestIncrementalPull(store, "2001-02-03T00%3A00%3A00.0000000%2B00%3A00");
         }
 
         [AsyncTestMethod]
@@ -393,7 +393,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             var store = new MobileServiceLocalStoreMock();
             store.Tables[MobileServiceLocalSystemTables.Config] = new Dictionary<string, JObject>();
-            await TestIncrementalPull(store, "0001-01-01T00:00:00.0000000+00:00");
+            await TestIncrementalPull(store, "0001-01-01T00%3A00%3A00.0000000%2B00%3A00");
         }
 
         private static async Task TestIncrementalPull(MobileServiceLocalStoreMock store, string expectedToken)

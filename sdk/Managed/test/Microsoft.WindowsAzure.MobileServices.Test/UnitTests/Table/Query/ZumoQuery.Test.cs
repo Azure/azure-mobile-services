@@ -346,7 +346,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             AssertFilter(query.Filter, "(Created eq datetime'1994-10-14T00:00:00.000Z')");
 
             query = Compile<ProductWithDateTimeOffset, ProductWithDateTimeOffset>(table => table.Where(p => p.Created == new DateTimeOffset(1994, 10, 13, 17, 0, 0, TimeSpan.FromHours(7))));
-            AssertFilter(query.Filter, "(Created eq datetimeoffset'1994-10-13T17:00:00.0000000+07:00')");
+            AssertFilter(query.Filter, "(Created eq datetimeoffset'1994-10-13T17%3A00%3A00.0000000%2B07%3A00')");
         }
 
         [Tag("notXamarin_iOS")] // LambdaExpression.Compile() is not supported on Xamarin.iOS
@@ -906,7 +906,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                from p in table
                where p.Updated == DateTime.MinValue
                select p);
-            AssertFilter(query.Filter, "(Updated eq datetime'0001-01-01T08:00:00.000Z')");
+            AssertFilter(query.Filter, "(Updated eq datetime'0001-01-01T00:00:00.000Z')");
 
             query = Compile<Product, Product>(table =>
                 from p in table
