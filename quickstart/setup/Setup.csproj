@@ -1,0 +1,259 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A3866D67-AB29-4DA4-B3F4-045D36F5D1C1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Setup</RootNamespace>
+    <AssemblyName>Setup</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>fce04865</NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\web\index.html">
+      <Link>web\index.html</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>index.tt</DependentUpon>
+    </Content>
+    <Content Include="..\windows-universal-cs\ZUMOAPPNAME\ZUMOAPPNAME.Windows\ZUMOAPPNAME.Windows.csproj">
+      <Link>windows-univeresal-cs\ZUMOAPPNAME.Windows\ZUMOAPPNAME.Windows.csproj</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ZUMOAPPNAME.Windows.tt</DependentUpon>
+    </Content>
+    <Content Include="..\windows-universal-cs\ZUMOAPPNAME\ZUMOAPPNAME.Shared\App.xaml.cs">
+      <Link>windows-univeresal-cs\ZUMOAPPNAME.Shared\App.xaml.cs</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>App.xaml.tt</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\windows-universal-cs\ZUMOAPPNAME\ZUMOAPPNAME.WindowsPhone\ZUMOAPPNAME.WindowsPhone.csproj">
+      <Link>windows-univeresal-cs\ZUMOAPPNAME.WindowsPhone\ZUMOAPPNAME.WindowsPhone.csproj</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ZUMOAPPNAME.WindowsPhone.tt</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\windows-universal-js\ZUMOAPPNAME\ZUMOAPPNAME.Shared\js\default.js">
+      <Link>windows-universal-js\ZUMOAPPNAME\ZUMOAPPNAME.Shared\js\default.js</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>default.tt</DependentUpon>
+    </Content>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="..\windows-universal-cs\ZUMOAPPNAME.sln">
+      <Link>windows-univeresal-cs\ZUMOAPPNAME.sln</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ZUMOAPPNAME.tt</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\windows-universal-js\ZUMOAPPNAME.sln">
+      <Link>windows-universal-js\ZUMOAPPNAME.sln</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ZUMOAPPNAME.tt</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\xamarin.android\ZUMOAPPNAME.sln">
+      <Link>xamarin.android\ZUMOAPPNAME.sln</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ZUMOAPPNAME.tt</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\xamarin.android\ZUMOAPPNAME\ZUMOAPPNAME.csproj">
+      <Link>xamarin.android\ZUMOAPPNAME\ZUMOAPPNAME.csproj</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ZUMOAPPNAME.tt</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\xamarin.iOS\ZUMOAPPNAME.sln">
+      <Link>xanarin.iOS\ZUMOAPPNAME.sln</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ZUMOAPPNAME.tt</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="..\xamarin.iOS\ZUMOAPPNAME\ZUMOAPPNAME.csproj">
+      <Link>xanarin.iOS\ZUMOAPPNAME\ZUMOAPPNAME.csproj</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ZUMOAPPNAME.tt</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Readme.txt" />
+    <Content Include="TextTemplating\Microsoft.TextTemplating.Build.Tasks.dll" />
+    <Content Include="TextTemplating\Microsoft.VisualStudio.TextTemplating.Sdk.Host.12.0.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\web\index.tt">
+      <Link>web\index.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>index.html</LastGenOutput>
+    </None>
+    <None Include="..\windows-universal-cs\ZUMOAPPNAME.tt">
+      <Link>windows-univeresal-cs\ZUMOAPPNAME.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ZUMOAPPNAME.sln</LastGenOutput>
+    </None>
+    <None Include="..\windows-universal-cs\ZUMOAPPNAME\ZUMOAPPNAME.Shared\App.xaml.tt">
+      <Link>windows-univeresal-cs\ZUMOAPPNAME.Shared\App.xaml.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>App.xaml.cs</LastGenOutput>
+    </None>
+    <None Include="..\windows-universal-cs\ZUMOAPPNAME\ZUMOAPPNAME.WindowsPhone\packages.config">
+      <Link>windows-univeresal-cs\ZUMOAPPNAME.WindowsPhone\packages.config</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>packages.tt</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="..\windows-universal-cs\ZUMOAPPNAME\ZUMOAPPNAME.WindowsPhone\packages.tt">
+      <Link>windows-univeresal-cs\ZUMOAPPNAME.WindowsPhone\packages.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>packages.config</LastGenOutput>
+    </None>
+    <None Include="..\windows-universal-cs\ZUMOAPPNAME\ZUMOAPPNAME.WindowsPhone\ZUMOAPPNAME.WindowsPhone.tt">
+      <Link>windows-univeresal-cs\ZUMOAPPNAME.WindowsPhone\ZUMOAPPNAME.WindowsPhone.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ZUMOAPPNAME.WindowsPhone.csproj</LastGenOutput>
+    </None>
+    <None Include="..\windows-universal-cs\ZUMOAPPNAME\ZUMOAPPNAME.Windows\packages.config">
+      <Link>windows-univeresal-cs\ZUMOAPPNAME.Windows\packages.config</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>packages.tt</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\windows-universal-cs\ZUMOAPPNAME\ZUMOAPPNAME.Windows\packages.tt">
+      <Link>windows-univeresal-cs\ZUMOAPPNAME.Windows\packages.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>packages.config</LastGenOutput>
+    </None>
+    <None Include="..\windows-universal-cs\ZUMOAPPNAME\ZUMOAPPNAME.Windows\ZUMOAPPNAME.Windows.tt">
+      <Link>windows-univeresal-cs\ZUMOAPPNAME.Windows\ZUMOAPPNAME.Windows.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ZUMOAPPNAME.Windows.csproj</LastGenOutput>
+    </None>
+    <None Include="..\windows-universal-js\ZUMOAPPNAME.tt">
+      <Link>windows-universal-js\ZUMOAPPNAME.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ZUMOAPPNAME.sln</LastGenOutput>
+    </None>
+    <None Include="..\windows-universal-js\ZUMOAPPNAME\ZUMOAPPNAME.Shared\js\default.tt">
+      <Link>windows-universal-js\ZUMOAPPNAME\ZUMOAPPNAME.Shared\js\default.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>default.js</LastGenOutput>
+    </None>
+    <None Include="..\windows-universal-js\ZUMOAPPNAME\ZUMOAPPNAME.WindowsPhone\packages.config">
+      <Link>windows-universal-js\ZUMOAPPNAME\ZUMOAPPNAME.WindowsPhone\packages.config</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>packages.tt</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Content Include="..\windows-universal-js\ZUMOAPPNAME\ZUMOAPPNAME.WindowsPhone\packages.tt">
+      <Link>windows-universal-js\ZUMOAPPNAME\ZUMOAPPNAME.WindowsPhone\packages.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>packages.config</LastGenOutput>
+    </Content>
+    <Content Include="..\windows-universal-js\ZUMOAPPNAME\ZUMOAPPNAME.Windows\packages.config">
+      <Link>windows-universal-js\ZUMOAPPNAME\ZUMOAPPNMAE.WIndows\packages.config</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>packages.tt</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="..\windows-universal-js\ZUMOAPPNAME\ZUMOAPPNAME.Windows\packages.tt">
+      <Link>windows-universal-js\ZUMOAPPNAME\ZUMOAPPNMAE.WIndows\packages.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>packages.config</LastGenOutput>
+    </None>
+    <None Include="..\xamarin.android\ZUMOAPPNAME.tt">
+      <Link>xamarin.android\ZUMOAPPNAME.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ZUMOAPPNAME.sln</LastGenOutput>
+    </None>
+    <None Include="..\xamarin.android\ZUMOAPPNAME\ZUMOAPPNAME.tt">
+      <Link>xamarin.android\ZUMOAPPNAME\ZUMOAPPNAME.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ZUMOAPPNAME.csproj</LastGenOutput>
+    </None>
+    <None Include="..\xamarin.iOS\ZUMOAPPNAME.tt">
+      <Link>xanarin.iOS\ZUMOAPPNAME.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ZUMOAPPNAME.sln</LastGenOutput>
+    </None>
+    <None Include="..\xamarin.iOS\ZUMOAPPNAME\ZUMOAPPNAME.tt">
+      <Link>xanarin.iOS\ZUMOAPPNAME\ZUMOAPPNAME.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ZUMOAPPNAME.csproj</LastGenOutput>
+    </None>
+    <None Include="TextTemplating\Microsoft.TextTemplating.targets" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="TextTemplating\Microsoft.TextTemplating.targets" />
+  <ItemGroup>
+    <T4ParameterValues Include="Runtime">
+      <Value>$(Runtime)</Value>
+      <Visible>false</Visible>
+    </T4ParameterValues>
+    <T4ParameterValues Include="ManagedSDKVersion">
+      <Value>$(ManagedSDKVersion)</Value>
+      <Visible>false</Visible>
+    </T4ParameterValues>
+    <T4ParameterValues Include="JSSDKVersion">
+      <Value>$(JSSDKVersion)</Value>
+      <Visible>false</Visible>
+    </T4ParameterValues>
+  </ItemGroup>
+  <PropertyGroup>
+    <TransformOutOfDateOnly>false</TransformOutOfDateOnly>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
