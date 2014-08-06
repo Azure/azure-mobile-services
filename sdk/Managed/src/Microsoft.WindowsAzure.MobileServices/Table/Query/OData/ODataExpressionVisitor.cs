@@ -211,14 +211,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 return string.Format(
                     CultureInfo.InvariantCulture,
                     "datetime'{0}'",
-                    ToRoundtripDateString(((DateTime)value)));
+                    Uri.EscapeDataString(
+                        ToRoundtripDateString(((DateTime)value)))
+                    );
             }
             else if (handle.Equals(typeof(DateTimeOffset).TypeHandle))
             {
                 return string.Format(
                     CultureInfo.InvariantCulture,
                     "datetimeoffset'{0}'",
-                    ((DateTimeOffset)value).ToString("o"));
+                    Uri.EscapeDataString(
+                        ((DateTimeOffset)value).ToString("o")
+                    ));
             }
             else if (handle.Equals(typeof(Guid).TypeHandle))
             {
