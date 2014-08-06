@@ -225,7 +225,7 @@ Imports Newtonsoft.Json
 
         query = Compile(Of Product, Product)(Function(table) _
                                                  table.Where(Function(p) p.Created = New DateTime(1994, 10, 14, 0, 0, 0, DateTimeKind.Utc)))
-        Assert.AreEqual("(Created eq datetime'1994-10-14T00:00:00.000Z')", ODataExpressionVisitor.ToODataString(query.Filter))
+        Assert.AreEqual("(Created eq datetime'1994-10-14T00%3A00%3A00.000Z')", ODataExpressionVisitor.ToODataString(query.Filter))
     End Sub
 
     <TestMethod> Public Sub CombinedQuery()

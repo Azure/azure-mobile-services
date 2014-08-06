@@ -14,7 +14,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Query
         private const string EscapedODataString = "$filter=" +
                                                   "((__updatedat gt datetimeoffset'2014-04-04T07%3A00%3A00.0000000%2B00%3A00') and " +
                                                   "((someDate gt datetime'2014-04-04T07%3A00%3A00.000Z') and " +
-                                                  "startswith(text,'this%26''%25%25%3D%2C%3F%23')))";
+                                                  "startswith(text,'this%26%27%27%25%25%3D%2C%3F%23')))";
 
         [TestMethod]
         public void Parse_DoesNotThrow_OnIncompleteQuery()
@@ -77,13 +77,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Query
         [TestMethod]
         public void ToQueryString_EscapesThe_Uri()
         {
-            
+
             //__updatedat gt datetimeoffset'2014-04-04T07:00:00.0000000+00:00'
             var datetime1 = new ConstantNode(new DateTimeOffset(2014, 4, 4, 7, 0, 0, TimeSpan.FromHours(0)));
             var updatedAt = new MemberAccessNode(null, "__updatedat");
             var gt1 = new BinaryOperatorNode(BinaryOperatorKind.GreaterThan, updatedAt, datetime1);
 
-            // __updatedat gt datetimeoffset'4-4-2014 0:0:0.000Z'
+            // __updatedat gt datetime'4-4-2014 0:0:0.000Z'
             var datetime2 = new ConstantNode(new DateTime(2014, 4, 4, 7, 0, 0, DateTimeKind.Utc));
             var someDate = new MemberAccessNode(null, "someDate");
             var gt2 = new BinaryOperatorNode(BinaryOperatorKind.GreaterThan, someDate, datetime2);
