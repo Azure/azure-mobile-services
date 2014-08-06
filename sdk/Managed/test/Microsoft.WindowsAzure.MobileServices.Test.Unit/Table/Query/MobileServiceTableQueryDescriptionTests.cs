@@ -13,7 +13,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Query
     {
         private const string EscapedODataString = "$filter=" +
                                                   "((__updatedat gt datetimeoffset'2014-04-04T07%3A00%3A00.0000000%2B00%3A00') and " +
-                                                  "((someDate gt datetime'2014-04-04T07:00:00.000Z') and " +
+                                                  "((someDate gt datetime'2014-04-04T07%3A00%3A00.000Z') and " +
                                                   "startswith(text,'this%26''%25%25%3D%2C%3F%23')))";
 
         [TestMethod]

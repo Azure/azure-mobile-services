@@ -211,7 +211,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 return string.Format(
                     CultureInfo.InvariantCulture,
                     "datetime'{0}'",
-                    ToRoundtripDateString(((DateTime)value)));
+                    Uri.EscapeDataString(
+                        ToRoundtripDateString(((DateTime)value)))
+                    );
             }
             else if (handle.Equals(typeof(DateTimeOffset).TypeHandle))
             {
