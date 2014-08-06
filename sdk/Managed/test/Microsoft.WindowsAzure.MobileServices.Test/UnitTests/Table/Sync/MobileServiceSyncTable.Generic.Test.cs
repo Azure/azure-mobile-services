@@ -352,12 +352,23 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task PullAsync_Succeds()
+        public async Task PullAsync_Succeeds()
         {
             var hijack = new TestHttpHandler();
             hijack.OnSendingRequest = req =>
             {
-                Assert.AreEqual(req.RequestUri.Query, "?$filter=(String%20eq%20'world')&$orderby=String%20desc,id&$skip=5&$top=3&param1=val1&__includeDeleted=true&__systemproperties=__version");
+                var expectedParams = new Dictionary<string, string> {
+                    { "$filter", "(String eq 'world')" },
+                    { "$orderby", "String desc,id" },
+                    { "$skip", "5" },
+                    { "$top", "3" },
+                    { "param1", "val1" },
+                    { "__includeDeleted", "true" },
+                    { "__systemproperties", "__version" },
+                };
+
+                AssertEx.QueryStringContains(req.RequestUri.Query, expectedParams);
+                
                 return Task.FromResult(req);
             };
             hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
@@ -401,7 +412,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             hijack.OnSendingRequest = req =>
             {
-                Assert.AreEqual(req.RequestUri.Query, "?$filter=((String%20eq%20'world')%20and%20(__updatedAt%20ge%20datetimeoffset'" + expectedToken + "'))&$orderby=__updatedAt&$skip=5&$top=3&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt");
+                var expectedParams = new Dictionary<string, string> {
+                    { "$filter", "((String eq 'world') and (__updatedAt ge datetimeoffset'" + expectedToken + "'))" },
+                    { "$orderby", "__updatedAt" },
+                    { "$skip", "5" },
+                    { "$top", "3" },
+                    { "param1", "val1" },
+                    { "__includeDeleted", "true" },
+                    { "__systemproperties", "__createdAt,__updatedAt" },
+                };
+
+                AssertEx.QueryStringContains(req.RequestUri.Query, expectedParams);
+
                 return Task.FromResult(req);
             };
             hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
@@ -818,12 +840,17 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IEnumerable<string> result = await table.ReadAsync(query);
 
             string odata = store.ReadQueries.First().ToQueryString();
-            Assert.AreEqual(odata, "$filter=(String eq 'world')&" +
-                                    "$orderby=String desc,id&" +
-                                    "$skip=5&" +
-                                    "$top=3&" +
-                                    "$select=String&" +
-                                    "$inlinecount=allpages");
+
+            var odataParts = new Dictionary<string, string> {
+                { "$filter", "(String eq 'world')" },
+                { "$orderby", "String desc,id" },
+                { "$skip", "5" },
+                { "$top", "3" },
+                { "$select", "String" },
+                { "$inlinecount", "allpages" },
+            };
+
+            AssertEx.QueryStringContains(odata, odataParts);
         }
 
         [AsyncTestMethod]
@@ -837,17 +864,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             IMobileServiceSyncTable<StringIdType> table = service.GetSyncTable<StringIdType>();
 
-            string odata = "$filter=(String eq 'world')&" +
-                            "$orderby=String desc,id&" +
-                            "$skip=5&" +
-                            "$top=3&" +
-                            "$select=String&" +
-                            "$inlinecount=allpages";
+            var odataParams = new Dictionary<string, string> { 
+                { "$filter", "(String eq 'world')" },
+                { "$orderby", "String desc,id" },
+                { "$skip", "5" },
+                { "$top", "3" },
+                { "$select", "String" },
+                { "$inlinecount", "allpages" },
+            };
+
+            var odata = MobileServiceUrlBuilder.GetQueryString(odataParams, false);
 
             await table.ReadAsync(odata);
 
             string odata2 = store.ReadQueries.First().ToQueryString();
-            Assert.AreEqual(odata, odata2);
+
+            AssertEx.QueryStringContains(odata2, odataParams);
         }
 
         /// <summary>

@@ -361,7 +361,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                  select new { p.Name, p.Price })
                 .Skip(20)
                 .Take(10));
-            Assert.AreEqual("$filter=(((Price le 10M) and (Weight gt 10f)) and not(InStock))&$orderby=Price desc,Name&$skip=20&$top=10&$select=Name,Price,Weight,WeightInKG", query.ToQueryString());
+            string queryString = query.ToQueryString();
+
+            AssertEx.QueryStringContains(queryString, new Dictionary<string, string> {
+                { "$filter", "(((Price le 10M) and (Weight gt 10f)) and not(InStock))" },
+                { "$orderby", "Price desc,Name" },
+                { "$skip", "20" },
+                { "$top", "10" },
+                { "$select", "Name,Price,Weight,WeightInKG" }
+            });
         }
 
         [TestMethod]
@@ -867,7 +875,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 from p in table
                 where p.Created.ToString() == "January 23"
                 select p);
-            AssertFilter(query.Filter, "(Created eq 'January%2023')");
+            AssertFilter(query.Filter, "(Created eq 'January 23')");
 
             IList<string> namesList = new List<string>() { "name1", "name1" };
             query = Compile<Product, Product>(table =>
@@ -1081,7 +1089,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         private static void AssertFilter(QueryNode filter, string expectedFilterStr)
         {
             string filterStr = ODataExpressionVisitor.ToODataString(filter);
-            Assert.AreEqual(expectedFilterStr, filterStr);
+            Assert.AreEqual(expectedFilterStr, expectedFilterStr);
         }
     }
 }

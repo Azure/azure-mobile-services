@@ -168,12 +168,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 IMobileServiceTable<StringIdType> table = service.GetTable<StringIdType>();
 
                 List<StringIdType> items = await table.Where(t => t.Id == testId).ToListAsync();
-                string idForOdataQuery = Uri.EscapeDataString(testId.Replace("'", "''"));
-                Uri expectedUri = new Uri(string.Format("http://www.test.com/tables/StringIdType?$filter=(id eq '{0}')", idForOdataQuery));
+                string idForOdataQuery = testId.Replace("'", "''");
 
                 Assert.AreEqual(1, items.Count());
                 Assert.AreEqual(testId, items[0].Id);
-                Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
+
+                Assert.AreEqual(hijack.Request.RequestUri.AbsolutePath, "/tables/StringIdType");
+                AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, new Dictionary<string, string>() {
+                    { "$filter", string.Format("(id eq '{0}')", idForOdataQuery) }
+                });
             }
         }
 
@@ -188,11 +191,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceTable<StringIdType> table = service.GetTable<StringIdType>();
 
             List<StringIdType> items = await table.Where(t => t.Id == null).ToListAsync();
-            Uri expectedUri = new Uri("http://www.test.com/tables/StringIdType?$filter=(id eq null)");
-
+            
             Assert.AreEqual(1, items.Count());
             Assert.AreEqual(null, items[0].Id);
-            Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
+            
+            Assert.AreEqual(hijack.Request.RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, new Dictionary<string, string>() {
+                { "$filter", "(id eq null)" }
+            });
         }
 
         [AsyncTestMethod]
@@ -216,12 +222,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 IMobileServiceTable<StringIdType> table = service.GetTable<StringIdType>();
 
                 var items = await table.Select(s => new { Id = s.Id, Message = s.String }).ToListAsync();
-                Uri expectedUri = new Uri("http://www.test.com/tables/StringIdType?$select=id,String");
 
                 Assert.AreEqual(1, items.Count());
                 Assert.AreEqual(testId, items[0].Id);
                 Assert.AreEqual("Hey", items[0].Message);
-                Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
+
+                Assert.AreEqual(hijack.Request.RequestUri.AbsolutePath, "/tables/StringIdType");
+                AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, new Dictionary<string, string>() {
+                    { "$select", "id,String" }
+                });
             }
         }
 
@@ -236,12 +245,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceTable<StringIdType> table = service.GetTable<StringIdType>();
 
             var items = await table.Select(s => new { Id = s.Id, Message = s.String }).ToListAsync();
-            Uri expectedUri = new Uri("http://www.test.com/tables/StringIdType?$select=id,String");
-
+            
             Assert.AreEqual(1, items.Count());
             Assert.AreEqual(null, items[0].Id);
             Assert.AreEqual("Hey", items[0].Message);
-            Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
+            
+            Assert.AreEqual(hijack.Request.RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, new Dictionary<string, string>() {
+                { "$select", "id,String" }
+            });
         }
 
         [AsyncTestMethod]
@@ -255,12 +267,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceTable<StringIdType> table = service.GetTable<StringIdType>();
 
             var items = await table.Select(s => new { Id = s.Id, Message = s.String }).ToListAsync();
-            Uri expectedUri = new Uri("http://www.test.com/tables/StringIdType?$select=id,String");
 
             Assert.AreEqual(1, items.Count());
             Assert.AreEqual(null, items[0].Id);
             Assert.AreEqual("Hey", items[0].Message);
-            Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
+            
+            Assert.AreEqual(hijack.Request.RequestUri.AbsolutePath, "/tables/StringIdType");
+            AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, new Dictionary<string, string>() {
+                { "$select", "id,String" }
+            });
         }
 
         [AsyncTestMethod]
@@ -284,12 +299,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 IMobileServiceTable<StringIdType> table = service.GetTable<StringIdType>();
 
                 var items = await table.OrderBy(s => s.Id).ToListAsync();
-                Uri expectedUri = new Uri("http://www.test.com/tables/StringIdType?$orderby=id");
 
                 Assert.AreEqual(1, items.Count());
                 Assert.AreEqual(testId, items[0].Id);
                 Assert.AreEqual("Hey", items[0].String);
-                Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
+
+                Assert.AreEqual(hijack.Request.RequestUri.AbsolutePath, "/tables/StringIdType");
+                AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, new Dictionary<string, string>() {
+                    { "$orderby", "id" }
+                });
             }
         }
 
@@ -314,12 +332,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 IMobileServiceTable<StringIdType> table = service.GetTable<StringIdType>();
 
                 var items = await table.OrderByDescending(s => s.Id).ToListAsync();
-                Uri expectedUri = new Uri("http://www.test.com/tables/StringIdType?$orderby=id desc");
 
                 Assert.AreEqual(1, items.Count());
                 Assert.AreEqual(testId, items[0].Id);
                 Assert.AreEqual("Hey", items[0].String);
-                Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
+
+                Assert.AreEqual(hijack.Request.RequestUri.AbsolutePath, "/tables/StringIdType");
+                AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, new Dictionary<string, string>() {
+                    { "$orderby", "id desc" }
+                });
             }
         }
 
@@ -448,11 +469,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 IMobileServiceTable<LongIdType> table = service.GetTable<LongIdType>();
 
                 List<LongIdType> items = await table.Where(t => t.Id == testId).ToListAsync();
-                Uri expectedUri = new Uri(string.Format("http://www.test.com/tables/LongIdType?$filter=(id eq {0}L)", testId));
 
                 Assert.AreEqual(1, items.Count());
                 Assert.AreEqual(testId, items[0].Id);
-                Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
+
+                Assert.AreEqual(hijack.Request.RequestUri.AbsolutePath, "/tables/LongIdType");
+                AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, new Dictionary<string, string>() {
+                    { "$filter", string.Format("(id eq {0}L)", testId) }
+                });
             }
         }
 
@@ -471,7 +495,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.AreEqual(1, items.Count());
             Assert.AreEqual(0L, items[0].Id);
-            Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
+
+            Assert.AreEqual(hijack.Request.RequestUri.AbsolutePath, "/tables/LongIdType");
+            AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, new Dictionary<string, string>() {
+                { "$filter", "(id eq null)" }
+            });
         }
 
         [AsyncTestMethod]
@@ -490,12 +518,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 IMobileServiceTable<LongIdType> table = service.GetTable<LongIdType>();
 
                 var items = await table.Select(s => new { Id = s.Id, Message = s.String }).ToListAsync();
-                Uri expectedUri = new Uri("http://www.test.com/tables/LongIdType?$select=id,String");
-
+                
                 Assert.AreEqual(1, items.Count());
                 Assert.AreEqual(testId, items[0].Id);
                 Assert.AreEqual("Hey", items[0].Message);
-                Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
+
+                Assert.AreEqual(hijack.Request.RequestUri.AbsolutePath, "/tables/LongIdType");
+                AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, new Dictionary<string, string>() {
+                    { "$select", "id,String" }
+                });
             }
         }
 
@@ -515,7 +546,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(1, items.Count());
             Assert.AreEqual(0L, items[0].Id);
             Assert.AreEqual("Hey", items[0].Message);
-            Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
+
+            Assert.AreEqual(hijack.Request.RequestUri.AbsolutePath, "/tables/LongIdType");
+            AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, new Dictionary<string, string>() {
+                { "$select", "id,String" }
+            });
         }
 
         [AsyncTestMethod]
@@ -529,12 +564,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             IMobileServiceTable<LongIdType> table = service.GetTable<LongIdType>();
 
             var items = await table.Select(s => new { Id = s.Id, Message = s.String }).ToListAsync();
-            Uri expectedUri = new Uri("http://www.test.com/tables/LongIdType?$select=id,String");
 
             Assert.AreEqual(1, items.Count());
             Assert.AreEqual(0L, items[0].Id);
             Assert.AreEqual("Hey", items[0].Message);
-            Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
+
+            Assert.AreEqual(hijack.Request.RequestUri.AbsolutePath, "/tables/LongIdType");
+            AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, new Dictionary<string, string>() {
+                { "$select", "id,String" }
+            });
         }
 
         [AsyncTestMethod]
@@ -553,12 +591,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 IMobileServiceTable<LongIdType> table = service.GetTable<LongIdType>();
 
                 var items = await table.OrderBy(s => s.Id).ToListAsync();
-                Uri expectedUri = new Uri("http://www.test.com/tables/LongIdType?$orderby=id");
 
                 Assert.AreEqual(1, items.Count());
                 Assert.AreEqual(testId, items[0].Id);
                 Assert.AreEqual("Hey", items[0].String);
-                Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
+
+                Assert.AreEqual(hijack.Request.RequestUri.AbsolutePath, "/tables/LongIdType");
+                AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, new Dictionary<string, string>() {
+                    { "$orderby", "id" }
+                });
             }
         }
 
@@ -578,12 +619,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 IMobileServiceTable<LongIdType> table = service.GetTable<LongIdType>();
 
                 var items = await table.OrderByDescending(s => s.Id).ToListAsync();
-                Uri expectedUri = new Uri("http://www.test.com/tables/LongIdType?$orderby=id desc");
 
                 Assert.AreEqual(1, items.Count());
                 Assert.AreEqual(testId, items[0].Id);
                 Assert.AreEqual("Hey", items[0].String);
-                Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
+
+                Assert.AreEqual(hijack.Request.RequestUri.AbsolutePath, "/tables/LongIdType");
+                AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, new Dictionary<string, string>() {
+                    { "$orderby", "id desc" }
+                });
             }
         }
 
@@ -1112,12 +1156,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 StringIdType item = new StringIdType() { Id = testId, String = "what?" };
                 await table.RefreshAsync(item);
                 
-                string idForOdataQuery = Uri.EscapeDataString(testId.Replace("'", "''"));
-                Uri expectedUri = new Uri(string.Format("http://www.test.com/tables/StringIdType?$filter=(id eq '{0}')", idForOdataQuery));
+                string idForOdataQuery = testId.Replace("'", "''");
 
                 Assert.AreEqual(testId, item.Id);
                 Assert.AreEqual("Hey", item.String);
-                Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
+
+                AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, "$filter", string.Format("(id eq '{0}')", idForOdataQuery));
             }
         }
 
@@ -1313,11 +1357,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 LongIdType item = new LongIdType() { Id = testId, String = "what?" };
                 await table.RefreshAsync(item);
 
-                Uri expectedUri = new Uri(string.Format("http://www.test.com/tables/LongIdType?$filter=(id eq {0}L)", testId));
-
                 Assert.AreEqual(testId, item.Id);
                 Assert.AreEqual("Hey", item.String);
-                Assert.AreEqual(hijack.Request.RequestUri.AbsoluteUri, expectedUri.AbsoluteUri);
+
+                Assert.AreEqual(hijack.Request.RequestUri.AbsolutePath, "/tables/LongIdType");
+                AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, "$filter", string.Format("(id eq {0}L)", testId));
             }
         }
 
@@ -2442,7 +2486,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(0, obj.Id);
             Assert.Contains(hijack.Request.RequestUri.ToString(), "StringType");
             Assert.IsNull(hijack.Request.Content);
-            Assert.Contains(hijack.Request.RequestUri.Query, "state=WY");
+            AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, "state", "WY");
         }
 
         [AsyncTestMethod]
@@ -2454,7 +2498,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.OnSendingRequest = req =>
             {
                 Assert.AreEqual(req.Method, HttpMethod.Post);
-                Assert.AreEqual(req.RequestUri.Query, "?__systemproperties=__createdAt%2C__updatedAt%2C__version");
+                AssertEx.QueryStringContains(req.RequestUri.Query, "__systemproperties", "__createdAt,__updatedAt,__version");
                 // only id and version should be sent
                 Assert.IsNull(req.Content);
                 Assert.AreEqual(req.Headers.IfMatch.First().Tag, "\"abc\"");
@@ -2556,7 +2600,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             List<StringType> people = await table.WithParameters(userDefinedParameters).ToListAsync();
 
             Assert.Contains(hijack.Request.RequestUri.ToString(), "StringType");
-            Assert.Contains(hijack.Request.RequestUri.Query, "state=WY");
+            AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, "state", "WY");
 
             Assert.AreEqual(1, people.Count);
             Assert.AreEqual(12, people[0].Id);
@@ -2574,7 +2618,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             List<StringType> people = await table.Where(p => p.Id == 12).ToListAsync();
 
             Assert.Contains(hijack.Request.RequestUri.ToString(), "StringType");
-            Assert.Contains(hijack.Request.RequestUri.ToString(), "$filter=(id eq 12)");
+            AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, "$filter", "(id eq 12)");
 
             Assert.AreEqual(1, people.Count);
             Assert.AreEqual(12, people[0].Id);
@@ -2592,7 +2636,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             List<StringIdType> people = await table.Where(p => p.Id == "12").ToListAsync();
 
             Assert.Contains(hijack.Request.RequestUri.ToString(), "StringIdType");
-            Assert.Contains(hijack.Request.RequestUri.ToString(), "$filter=(id eq '12')");
+            AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, "$filter", "(id eq '12')");
 
             Assert.AreEqual(1, people.Count);
             Assert.AreEqual("12", people[0].Id);
@@ -2630,7 +2674,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             List<StringType> people = await table.OrderBy(p => p.Id).ThenBy(p => p.String).ToListAsync();
 
             Assert.Contains(hijack.Request.RequestUri.ToString(), "StringType");
-            Assert.Contains(hijack.Request.RequestUri.ToString(), "orderby=id,String");
+            AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, "$orderby", "id,String");
         }
 
         [AsyncTestMethod]
@@ -2644,7 +2688,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             List<StringType> people = await table.OrderBy(p => p.Id).OrderBy(p => p.String).ToListAsync();
 
             Assert.Contains(hijack.Request.RequestUri.ToString(), "StringType");
-            Assert.Contains(hijack.Request.RequestUri.ToString(), "orderby=String,id");
+            AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, "$orderby", "String,id");
         }
 
         [AsyncTestMethod]
@@ -2658,7 +2702,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             List<StringType> people = await table.OrderByDescending(p => p.Id).ThenByDescending(p => p.String).ToListAsync();
 
             Assert.Contains(hijack.Request.RequestUri.ToString(), "StringType");
-            Assert.Contains(hijack.Request.RequestUri.ToString(), "orderby=id desc,String desc");
+            AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, "$orderby", "id desc,String desc");
         }
 
         [AsyncTestMethod]
@@ -2672,7 +2716,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             List<StringType> people = await table.OrderBy(p => p.Id).ThenByDescending(p => p.String).ToListAsync();
 
             Assert.Contains(hijack.Request.RequestUri.ToString(), "StringType");
-            Assert.Contains(hijack.Request.RequestUri.ToString(), "orderby=id,String desc");
+            AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, "$orderby", "id,String desc");
         }
 
         [AsyncTestMethod]
@@ -2686,8 +2730,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             List<StringType> people = await table.Skip(100).Take(10).ToListAsync();
 
             Assert.Contains(hijack.Request.RequestUri.ToString(), "StringType");
-            Assert.Contains(hijack.Request.RequestUri.ToString(), "$skip=100");
-            Assert.Contains(hijack.Request.RequestUri.ToString(), "$top=10");
+            AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, "$skip", "100");
+            AssertEx.QueryStringContains(hijack.Request.RequestUri.Query, "$top", "10");
         }
 
         [AsyncTestMethod]
