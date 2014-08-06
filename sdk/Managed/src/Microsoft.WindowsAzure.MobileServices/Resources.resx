@@ -414,4 +414,7 @@
   <data name="SyncContext_InsertAttempted" xml:space="preserve">
     <value>The item is in inconsistent state in the local store. Please complete the pending sync by calling PushAsync()before deleting the item.</value>
   </data>
+  <data name="MobileServiceSyncTable_IncrementalPullWithSkipTopNotSupported" xml:space="preserve">
+    <value>Incremental pull query must not have skip or top specified.</value>
+  </data>
 </root>

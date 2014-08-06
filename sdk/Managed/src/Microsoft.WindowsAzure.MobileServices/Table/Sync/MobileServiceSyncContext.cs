@@ -167,10 +167,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 throw new ArgumentException(Resources.MobileServiceSyncTable_PullWithSelectNotSupported, "query");
             }
-            if (queryDescription.Ordering.Count > 0 && !String.IsNullOrEmpty(queryKey))
+            bool isIncrementalSync = !String.IsNullOrEmpty(queryKey);
+            if (isIncrementalSync)
             {
-                throw new ArgumentException(Resources.MobileServiceSyncTable_IncrementalPullWithOrderNotAllowed, "query");
+                if (queryDescription.Ordering.Count > 0)
+                {
+                    throw new ArgumentException(Resources.MobileServiceSyncTable_IncrementalPullWithOrderNotAllowed, "query");
+                }
+                if (queryDescription.Top.HasValue || queryDescription.Skip.HasValue)
+                {
+                    throw new ArgumentException(Resources.MobileServiceSyncTable_IncrementalPullWithSkipTopNotSupported, "query");
+                }
             }
+
             // let us not burden the server to calculate the count when we don't need it for pull
             queryDescription.IncludeTotalCount = false;
 

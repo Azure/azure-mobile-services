@@ -72,7 +72,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
             // Try and get the values as an array
             result.Values = response as JArray;
-            if (result.Values == null)
+            if (result.Values == null && response is JObject)
             {
                 // Otherwise try and get the values from the results property
                 // (which is the case when we retrieve the count inline)

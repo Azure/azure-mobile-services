@@ -14,11 +14,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
     internal class PullAction : TableAction
     {
+        private const int DefaultTop = 50;
+
         private static readonly QueryNode updatedAtNode = new MemberAccessNode(null, MobileServiceSystemColumns.UpdatedAt);
         private static readonly OrderByNode orderByUpdatedAtNode = new OrderByNode(updatedAtNode, OrderByDirection.Ascending);
         private IDictionary<string, string> parameters;
         private DateTimeOffset maxUpdatedAt = DateTimeOffset.MinValue; // delta token value calculation
-        private int maxRead; // used to limit the next link navigation because table storage and sql in .NET backend always return a link and also to obey $top if present
+        private readonly int maxRead; // used to limit the next link navigation because table storage and sql in .NET backend always return a link and also to obey $top if present
+        private readonly int initialSkip;
         private int totalRead; // used to track how many we have read so far
 
         public PullAction(MobileServiceTable table,
@@ -34,6 +37,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         {
             this.parameters = parameters;
             this.maxRead = this.Query.Top.GetValueOrDefault(Int32.MaxValue);
+            this.initialSkip = this.Query.Skip.GetValueOrDefault();
         }
 
         protected override bool CanDeferIfDirty
@@ -43,40 +47,79 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         protected async override Task ProcessTableAsync()
         {
-            bool incrementalSync = this.IsIncrementalSync();
+            bool isIncrementalSync = !String.IsNullOrEmpty(this.QueryKey);
             DateTimeOffset deltaToken = this.maxUpdatedAt;
 
-            if (incrementalSync)
+            if (isIncrementalSync)
             {
                 this.Table.SystemProperties = this.Table.SystemProperties | MobileServiceSystemProperties.UpdatedAt;
                 deltaToken = await this.Settings.GetDeltaTokenAsync(this.Query.TableName, this.QueryKey);
                 ApplyDeltaToken(this.Query, deltaToken);
             }
 
-            QueryResult result = await this.Table.ReadAsync(this.Query.ToODataString(), MobileServiceTable.IncludeDeleted(parameters), this.Table.Features);
+            // always download in batches of 50 or less for efficiency 
+            this.Query.Top = Math.Min(this.Query.Top.GetValueOrDefault(DefaultTop), DefaultTop);
 
-            this.CancellationToken.ThrowIfCancellationRequested();
-
-            await this.ProcessAll(result.Values); // process the first batch
-
-            while (result.Values.Count > 0 && // there are some results i.e. we're not at the end of the list
-                  this.totalRead < this.maxRead && // but still we haven't gotten as many as we want
-                  result.NextLink != null) // and there is a link to get more results
+            bool done = false;
+            do
             {
-                result = await this.Table.ReadAsync(result.NextLink);
-                await this.ProcessAll(result.Values); // process the results as soon as we've gotten them
+                this.CancellationToken.ThrowIfCancellationRequested();
 
-                // TODO: UpdateDeltaToken should have been called here but table storage pages are not ordered
+                QueryResult result = await this.Table.ReadAsync(this.Query.ToODataString(), MobileServiceTable.IncludeDeleted(parameters), this.Table.Features);
+
+                this.CancellationToken.ThrowIfCancellationRequested();
+
+                await this.ProcessAll(result.Values); // process the first batch
+
+                // if we are not at the end of result and there is a link to get more results
+                while (!this.EndOfResult(result) && result.NextLink != null)
+                {
+                    this.CancellationToken.ThrowIfCancellationRequested();
+
+                    result = await this.Table.ReadAsync(result.NextLink);
+
+                    this.CancellationToken.ThrowIfCancellationRequested();
+
+                    await this.ProcessAll(result.Values); // process the results as soon as we've gotten them
+                    // TODO: UpdateDeltaToken should have been called here but table storage pages are not ordered
+                }
+
+                // if we are not at the end of result and there is no link to get more results
+                if (!this.EndOfResult(result) && result.NextLink == null)
+                {
+                    // then we continue downloading the changes using skip and top
+                    this.Query.Skip = this.initialSkip + this.totalRead;
+
+                    int remaining = this.maxRead - this.totalRead;
+                    // only read as many as we want
+                    this.Query.Top = Math.Min(this.Query.Top.Value, remaining);
+                }
+                else
+                {
+                    done = true;
+                }
             }
+            while (!done);
 
 
-            // TODO: provide a boolean paramter/setting to do this for each page instead except for table storage
-            await UpdateDeltaTaken(incrementalSync, deltaToken);
+            if (isIncrementalSync)
+            {
+                // TODO: provide a boolean paramter/setting to do this for each page instead except for table storage
+                await UpdateDeltaTaken(deltaToken);
+            }
         }
 
-        private async Task UpdateDeltaTaken(bool incrementalSync, DateTimeOffset deltaToken)
+        private bool EndOfResult(QueryResult result)
         {
-            if (incrementalSync && this.maxUpdatedAt > deltaToken)
+            // if we got as many as we initially wanted 
+            // or there are no more results
+            // then we're at the end
+            return this.totalRead >= this.maxRead || result.Values.Count == 0;
+        }
+
+        private async Task UpdateDeltaTaken(DateTimeOffset deltaToken)
+        {
+            if (this.maxUpdatedAt > deltaToken)
             {
                 await this.Settings.SetDeltaTokenAsync(this.Query.TableName, this.QueryKey, this.maxUpdatedAt.ToUniversalTime());
             }
@@ -125,11 +168,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 await this.Store.DeleteAsync(this.Table.TableName, deletedIds);
             }
-        }
-
-        private bool IsIncrementalSync()
-        {
-            return !String.IsNullOrEmpty(this.QueryKey);
         }
 
         private void ApplyDeltaToken(MobileServiceTableQueryDescription query, DateTimeOffset deltaToken)

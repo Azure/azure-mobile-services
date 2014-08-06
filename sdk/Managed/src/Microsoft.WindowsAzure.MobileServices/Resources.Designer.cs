@@ -404,6 +404,15 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Incremental pull query must not have skip or top specified..
+        /// </summary>
+        internal static string MobileServiceSyncTable_IncrementalPullWithSkipTopNotSupported {
+            get {
+                return ResourceManager.GetString("MobileServiceSyncTable_IncrementalPullWithSkipTopNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The query key must start with a letter and can contain only letters and digits..
         /// </summary>
         internal static string MobileServiceSyncTable_InvalidQueryKey {

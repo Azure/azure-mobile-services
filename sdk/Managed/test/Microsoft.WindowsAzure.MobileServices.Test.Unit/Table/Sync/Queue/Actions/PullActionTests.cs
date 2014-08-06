@@ -53,7 +53,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
             });
             this.opQueue.Setup(q => q.LockTableAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult<IDisposable>(null));
             this.opQueue.Setup(q => q.CountPending(It.IsAny<string>())).Returns(Task.FromResult(0L));
-            this.table.Setup(t => t.ReadAsync(It.IsAny<string>(), It.IsAny<IDictionary<string, string>>(), It.IsAny<MobileServiceFeatures>())).Returns(Task.FromResult(QueryResult.Parse(result, null, false)));
+            this.table.SetupSequence(t => t.ReadAsync(It.IsAny<string>(), It.IsAny<IDictionary<string, string>>(), It.IsAny<MobileServiceFeatures>()))
+                      .Returns(Task.FromResult(QueryResult.Parse(result, null, false)))
+                      .Returns(Task.FromResult(QueryResult.Parse(new JArray(), null, false)));
             this.store.Setup(s => s.UpsertAsync("test", It.IsAny<IEnumerable<JObject>>(), true))
                       .Returns(Task.FromResult(0))
                       .Callback<string, IEnumerable<JObject>, bool>((tableName, items, fromServer) =>
@@ -142,7 +144,14 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Sync.Queue.Actio
 
             this.opQueue.Setup(q => q.LockTableAsync(It.IsAny<string>(), It.IsAny<CancellationToken>())).Returns(Task.FromResult<IDisposable>(null));
             this.opQueue.Setup(q => q.CountPending(It.IsAny<string>())).Returns(Task.FromResult(0L));
-            this.table.Setup(t => t.ReadAsync(odata, It.IsAny<IDictionary<string, string>>(), It.IsAny<MobileServiceFeatures>())).Returns(Task.FromResult(QueryResult.Parse(result, null, false)));
+            this.table.Setup(t => t.ReadAsync(odata + "&$top=50", It.IsAny<IDictionary<string, string>>(), It.IsAny<MobileServiceFeatures>()))
+                      .Returns(Task.FromResult(QueryResult.Parse(result, null, false)));
+
+            if (result.Any())
+            {
+                this.table.Setup(t => t.ReadAsync(odata + "&$skip=" + result.Count + "&$top=50", It.IsAny<IDictionary<string, string>>(), It.IsAny<MobileServiceFeatures>()))
+                          .Returns(Task.FromResult(QueryResult.Parse(new JArray(), null, false)));
+            }
 
             if (result.Any())
             {

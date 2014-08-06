@@ -83,7 +83,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Query
             var updatedAt = new MemberAccessNode(null, "__updatedat");
             var gt1 = new BinaryOperatorNode(BinaryOperatorKind.GreaterThan, updatedAt, datetime1);
 
-            // __updatedat gt datetime'4-4-2014 0:0:0.000Z'
+            // __updatedat gt datetime'2014-04-04T07:0:0.000Z'
             var datetime2 = new ConstantNode(new DateTime(2014, 4, 4, 7, 0, 0, DateTimeKind.Utc));
             var someDate = new MemberAccessNode(null, "someDate");
             var gt2 = new BinaryOperatorNode(BinaryOperatorKind.GreaterThan, someDate, datetime2);
@@ -93,7 +93,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Query
             var value = new ConstantNode("this&'%%=,?#");
             var startswith = new FunctionCallNode("startswith", new QueryNode[] { text, value });
 
-            //__updatedat gt datetimeoffset'4-4-2014 0:0:0.000Z' and startswith(text,'this&''%%=,?#')
+            //__updatedat gt datetimeoffset'2014-04-04T07:00:00.0000000+00:00' and startswith(text,'this&''%%=,?#')
             var and2 = new BinaryOperatorNode(BinaryOperatorKind.And, gt2, startswith);
 
             var and1 = new BinaryOperatorNode(BinaryOperatorKind.And, gt1, and2);

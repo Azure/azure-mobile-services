@@ -103,6 +103,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}"); // for insert
             hijack.AddResponseContent("[{\"id\":\"def\",\"String\":\"World\"}]"); // remote item
+            hijack.AddResponseContent("[]"); // last page
 
             var store = new MobileServiceLocalStoreMock();
 
@@ -117,7 +118,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await table.PullAsync();
 
             Assert.AreEqual(store.Tables[table.TableName].Count, 2); // 1 from remote and 1 from local
-            Assert.AreEqual(hijack.Requests.Count, 2);
+            Assert.AreEqual(hijack.Requests.Count, 3); // one for push and 2 for pull
         }
 
         [AsyncTestMethod]
@@ -126,6 +127,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}"); // for insert
             hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
+            hijack.AddResponseContent("[]"); // last page
 
             var store = new MobileServiceLocalStoreMock();
             store.ReadResponses.Enqueue("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
@@ -150,7 +152,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await table1.PullAsync();
 
             Assert.AreEqual(store.Tables[table1.TableName].Count, 2); // table should contain 2 pulled items
-            Assert.AreEqual(hijack.Requests.Count, 2); // 1 for push and 1 for pull
+            Assert.AreEqual(hijack.Requests.Count, 3); // 1 for push and 2 for pull
             Assert.AreEqual(store.Tables[table2.TableName].Count, 1); // this table should not be touched
         }
 
@@ -160,6 +162,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}"); // for insert
             hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
+            hijack.AddResponseContent("[]"); // last page
 
             var store = new MobileServiceLocalStoreMock();
             store.ReadResponses.Enqueue("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
@@ -175,7 +178,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             // this should trigger a push
             await table1.PullAsync();
 
-            Assert.AreEqual(hijack.Requests.Count, 2); // 1 for push and 1 for pull
+            Assert.AreEqual(hijack.Requests.Count, 3); // 1 for push and 2 for pull
             Assert.AreEqual(store.Tables[table1.TableName].Count, 2); // table is populated
         }
 
@@ -185,6 +188,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("{\"id\":\"abc\",\"String\":\"Hey\"}"); // for insert
             hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
+            hijack.AddResponseContent("[]"); // last page
 
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
@@ -198,6 +202,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.AreEqual(hijack.Requests[0].Headers.GetValues("X-ZUMO-FEATURES").First(), "TU,OL");
             Assert.AreEqual(hijack.Requests[1].Headers.GetValues("X-ZUMO-FEATURES").First(), "QS,OL");
+            Assert.AreEqual(hijack.Requests[2].Headers.GetValues("X-ZUMO-FEATURES").First(), "QS,OL");
         }
 
         [AsyncTestMethod]
@@ -207,18 +212,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"How\"}]"); // first page
             hijack.Responses[0].Headers.Add("Link", "http://localhost:31475/tables/Green?$top=1&$select=Text%2CDone%2CId&$skip=2; rel=next");
             hijack.AddResponseContent("[{\"id\":\"ghi\",\"String\":\"Are\"},{\"id\":\"jkl\",\"String\":\"You\"}]"); // second page
-
-            var queries = new Queue<string>(new[]
-            {
-                "?__includeDeleted=true&__systemproperties=__version",
-                "?$top=1&$select=Text%2CDone%2CId&$skip=2",
-            });
-
-            hijack.OnSendingRequest = req =>
-            {
-                Assert.AreEqual(req.RequestUri.Query, queries.Dequeue());
-                return Task.FromResult(req);
-            };
+            hijack.AddResponseContent("[]"); // end of the list
 
             var store = new MobileServiceLocalStoreMock();
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
@@ -235,6 +229,48 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(store.Tables["stringId_test_table"]["def"].Value<string>("String"), "How");
             Assert.AreEqual(store.Tables["stringId_test_table"]["ghi"].Value<string>("String"), "Are");
             Assert.AreEqual(store.Tables["stringId_test_table"]["jkl"].Value<string>("String"), "You");
+
+            AssertUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$top=50&__includeDeleted=true&__systemproperties=__version",
+                                        "http://localhost:31475/tables/Green?$top=1&$select=Text%2CDone%2CId&$skip=2",
+                                        "http://www.test.com/tables/stringId_test_table?$skip=4&$top=50&__includeDeleted=true&__systemproperties=__version");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_UsesSkipAndTakeThenFollowsLinkThenUsesSkipAndTake()
+        {
+            var hijack = new TestHttpHandler();
+            // first page
+            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"How\"}]");
+            // second page with a link
+            hijack.AddResponseContent("[{\"id\":\"ghi\",\"String\":\"Are\"},{\"id\":\"jkl\",\"String\":\"You\"}]");
+            hijack.Responses[1].Headers.Add("Link", "http://localhost:31475/tables/Green?$top=1&$select=Text%2CDone%2CId&$skip=2; rel=next");
+            // forth page without link
+            hijack.AddResponseContent("[{\"id\":\"mno\",\"String\":\"Mr\"},{\"id\":\"pqr\",\"String\":\"X\"}]");
+            // last page
+            hijack.AddResponseContent("[]");
+
+            var store = new MobileServiceLocalStoreMock();
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+
+            Assert.IsFalse(store.Tables.ContainsKey("stringId_test_table"));
+
+            await table.PullAsync(table.Take(51).Skip(3));
+
+            Assert.AreEqual(store.Tables["stringId_test_table"].Count, 6);
+            Assert.AreEqual(store.Tables["stringId_test_table"]["abc"].Value<string>("String"), "Hey");
+            Assert.AreEqual(store.Tables["stringId_test_table"]["def"].Value<string>("String"), "How");
+            Assert.AreEqual(store.Tables["stringId_test_table"]["ghi"].Value<string>("String"), "Are");
+            Assert.AreEqual(store.Tables["stringId_test_table"]["jkl"].Value<string>("String"), "You");
+            Assert.AreEqual(store.Tables["stringId_test_table"]["mno"].Value<string>("String"), "Mr");
+            Assert.AreEqual(store.Tables["stringId_test_table"]["pqr"].Value<string>("String"), "X");
+
+            AssertUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$skip=3&$top=50&__includeDeleted=true&__systemproperties=__version",
+                                        "http://www.test.com/tables/stringId_test_table?$skip=5&$top=49&__includeDeleted=true&__systemproperties=__version",
+                                        "http://localhost:31475/tables/Green?$top=1&$select=Text%2CDone%2CId&$skip=2",
+                                        "http://www.test.com/tables/stringId_test_table?$skip=9&$top=45&__includeDeleted=true&__systemproperties=__version");
         }
 
         [AsyncTestMethod]
@@ -242,8 +278,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"How\"}]"); // first page
-            hijack.Responses[0].Headers.Add("Link", "http://localhost:31475/tables/Green?$top=1&$select=Text%2CDone%2CId&$skip=2; rel=prev");
+            hijack.Responses[0].Headers.Add("Link", "http://contoso.com:31475/tables/Green?$top=1&$select=Text%2CDone%2CId&$skip=2; rel=prev");
             hijack.AddResponseContent("[{\"id\":\"ghi\",\"String\":\"Are\"},{\"id\":\"jkl\",\"String\":\"You\"}]"); // second page
+            hijack.AddResponseContent("[]"); // end of the list
 
             var store = new MobileServiceLocalStoreMock();
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
@@ -255,7 +292,57 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             await table.PullAsync();
 
+            Assert.AreEqual(store.Tables["stringId_test_table"].Count, 4);
+
+            AssertUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$top=50&__includeDeleted=true&__systemproperties=__version",
+                                        "http://www.test.com/tables/stringId_test_table?$skip=2&$top=50&__includeDeleted=true&__systemproperties=__version",
+                                        "http://www.test.com/tables/stringId_test_table?$skip=4&$top=50&__includeDeleted=true&__systemproperties=__version");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_UsesTopInQuery_IfLessThan50()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"How\"}]"); // first page
+            hijack.AddResponseContent("[]"); // end of the list
+
+            var store = new MobileServiceLocalStoreMock();
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+
+            Assert.IsFalse(store.Tables.ContainsKey("stringId_test_table"));
+
+            await table.PullAsync(table.Take(49));
+
             Assert.AreEqual(store.Tables["stringId_test_table"].Count, 2);
+
+            AssertUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$top=49&__includeDeleted=true&__systemproperties=__version",
+                                        "http://www.test.com/tables/stringId_test_table?$skip=2&$top=47&__includeDeleted=true&__systemproperties=__version");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_DefaultsTo50_IfGreaterThan50()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"How\"}]"); // first page
+            hijack.AddResponseContent("[]"); // end of the list
+
+            var store = new MobileServiceLocalStoreMock();
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+
+            Assert.IsFalse(store.Tables.ContainsKey("stringId_test_table"));
+
+            await table.PullAsync(table.Take(51));
+
+            Assert.AreEqual(store.Tables["stringId_test_table"].Count, 2);
+
+            AssertUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$top=50&__includeDeleted=true&__systemproperties=__version",
+                                        "http://www.test.com/tables/stringId_test_table?$skip=2&$top=49&__includeDeleted=true&__systemproperties=__version");
         }
 
         [AsyncTestMethod]
@@ -352,15 +439,35 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task PullAsync_Throws_WhenTopOrSkipIsSpecifiedWithQueryKey()
+        {
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+            string expectedError = "Incremental pull query must not have skip or top specified.";
+
+            var query = table.Take(5);
+            var exception = await ThrowsAsync<ArgumentException>(() => table.PullAsync("incQuery", query, cancellationToken: CancellationToken.None));
+            Assert.AreEqual(exception.ParamName, "query");
+            Assert.StartsWith(exception.Message, expectedError);
+
+            query = table.Skip(5);
+            exception = await ThrowsAsync<ArgumentException>(() => table.PullAsync("incQuery", query, cancellationToken: CancellationToken.None));
+            Assert.AreEqual(exception.ParamName, "query");
+            Assert.StartsWith(exception.Message, expectedError);
+        }
+
+        [AsyncTestMethod]
         public async Task PullAsync_Succeeds()
         {
             var hijack = new TestHttpHandler();
             hijack.OnSendingRequest = req =>
             {
-                Assert.AreEqual(req.RequestUri.Query, "?$filter=(String%20eq%20'world')&$orderby=String%20desc,id&$skip=5&$top=3&param1=val1&__includeDeleted=true&__systemproperties=__version");
                 return Task.FromResult(req);
             };
             hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"World\"}]"); // for pull
+            hijack.AddResponseContent("[]"); // last page
 
             var store = new MobileServiceLocalStoreMock();
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
@@ -376,7 +483,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                              .IncludeTotalCount();
 
             await table.PullAsync(null, query, cancellationToken: CancellationToken.None);
-            Assert.AreEqual(hijack.Requests.Count, 1);
+            Assert.AreEqual(hijack.Requests.Count, 2);
+            Assert.AreEqual(hijack.Requests[0].RequestUri.Query, "?$filter=(String%20eq%20'world')&$orderby=String%20desc,id&$skip=5&$top=3&param1=val1&__includeDeleted=true&__systemproperties=__version");
         }
 
         [AsyncTestMethod]
@@ -399,13 +507,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         private static async Task TestIncrementalPull(MobileServiceLocalStoreMock store, string expectedToken)
         {
             var hijack = new TestHttpHandler();
-            hijack.OnSendingRequest = req =>
-            {
-                Assert.AreEqual(req.RequestUri.Query, "?$filter=((String%20eq%20'world')%20and%20(__updatedAt%20ge%20datetimeoffset'" + expectedToken + "'))&$orderby=__updatedAt&$skip=5&$top=3&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt");
-                return Task.FromResult(req);
-            };
             hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
                                         {""id"":""def"",""String"":""World"", ""__updatedAt"": ""2001-02-03T00:03:00.0000000+07:00""}]"); // for pull
+            hijack.AddResponseContent(@"[]");
 
 
             store.Tables[MobileServiceLocalSystemTables.Config]["stringId_test_table_systemProperties"] = new JObject
@@ -419,14 +523,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
-            var query = table.Skip(5)
-                             .Take(3)
-                             .Where(t => t.String == "world")
+            var query = table.Where(t => t.String == "world")
                              .WithParameters(new Dictionary<string, string>() { { "param1", "val1" } })
                              .IncludeTotalCount();
 
             await table.PullAsync("incquery", query, cancellationToken: CancellationToken.None);
-            Assert.AreEqual(hijack.Requests.Count, 1);
+            Assert.AreEqual(hijack.Requests.Count, 2);
+            Assert.AreEqual(hijack.Requests[0].RequestUri.Query, "?$filter=((String%20eq%20'world')%20and%20(__updatedAt%20ge%20datetimeoffset'" + expectedToken + "'))&$orderby=__updatedAt&$top=50&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt");
         }
 
         [AsyncTestMethod]
@@ -437,7 +540,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                                 { "__systemProperties", "createdAt" },
                                 { "param1", "val1" } 
                              },
-                             "?__systemProperties=createdAt&param1=val1&__includeDeleted=true");
+                             "?$top=50&__systemProperties=createdAt&param1=val1&__includeDeleted=true");
         }
 
         [AsyncTestMethod]
@@ -448,7 +551,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                                 { "__includeDeleted", "false" },
                                 { "param1", "val1" } 
                              },
-                             "?__includeDeleted=false&param1=val1&__systemproperties=__version");
+                             "?$top=50&__includeDeleted=false&param1=val1&__systemproperties=__version");
         }
 
         [AsyncTestMethod]
@@ -967,6 +1070,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.AreEqual(service.SyncContext.PendingOperations, 0L);
             Assert.AreEqual(operationHandler.PushCompletionResult.Status, MobileServicePushStatus.Complete);
+        }
+
+        private void AssertUris(List<HttpRequestMessage> requests, params string[] uris)
+        {
+            Assert.AreEqual(requests.Count, uris.Length);
+            for (int i = 0; i < uris.Length; i++)
+            {
+                Assert.AreEqual(requests[i].RequestUri.ToString(), uris[i]);
+            }
         }
     }
 }
