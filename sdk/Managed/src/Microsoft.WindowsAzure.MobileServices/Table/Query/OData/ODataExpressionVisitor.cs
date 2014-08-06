@@ -218,7 +218,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 return string.Format(
                     CultureInfo.InvariantCulture,
                     "datetimeoffset'{0}'",
-                    ((DateTimeOffset)value).ToString("o"));
+                    Uri.EscapeDataString(
+                        ((DateTimeOffset)value).ToString("o")
+                    ));
             }
             else if (handle.Equals(typeof(Guid).TypeHandle))
             {

@@ -11,7 +11,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Query
     [TestClass]
     public class MobileServiceTableQueryDescriptionTests
     {
-        private const string EscapedODataString = "$filter=((__updatedat gt datetime'2014-04-04T07:00:00.000Z') and startswith(text,'this%26%27%27%25%25%3D%2C%3F%23'))";
+        private const string EscapedODataString = "$filter=" +
+                                                  "((__updatedat gt datetimeoffset'2014-04-04T07%3A00%3A00.0000000%2B00%3A00') and " +
+                                                  "((__updatedat gt datetime'2014-04-04T07:00:00.000Z') and " +
+                                                  "startswith(text,'this%26''%25%25%3D%2C%3F%23')))";
 
         [TestMethod]
         public void Parse_DoesNotThrow_OnIncompleteQuery()
@@ -24,23 +27,41 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Query
         {
             var desc = MobileServiceTableQueryDescription.Parse("someTable", EscapedODataString);
 
-            var and = desc.Filter as BinaryOperatorNode;
-            Assert.IsNotNull(and);
-            Assert.AreEqual(and.OperatorKind, BinaryOperatorKind.And);
+            var and1 = desc.Filter as BinaryOperatorNode;
+            Assert.IsNotNull(and1);
+            Assert.AreEqual(and1.OperatorKind, BinaryOperatorKind.And);
 
-            var gt = and.LeftOperand as BinaryOperatorNode;
-            Assert.IsNotNull(gt);
-            Assert.AreEqual(gt.OperatorKind, BinaryOperatorKind.GreaterThan);
+            var expectedDateTime = new DateTimeOffset(2014, 4, 4, 7, 0, 0, TimeSpan.FromHours(0));
 
-            var updatedAt = gt.LeftOperand as MemberAccessNode;
-            Assert.IsNotNull(updatedAt);
-            Assert.AreEqual(updatedAt.MemberName, "__updatedat");
+            var gt1 = and1.LeftOperand as BinaryOperatorNode;
+            Assert.IsNotNull(gt1);
+            Assert.AreEqual(gt1.OperatorKind, BinaryOperatorKind.GreaterThan);
+            var updatedAt1 = gt1.LeftOperand as MemberAccessNode;
+            Assert.IsNotNull(updatedAt1);
+            Assert.AreEqual(updatedAt1.MemberName, "__updatedat");
 
-            var datetime = gt.RightOperand as ConstantNode;
-            Assert.IsNotNull(datetime);
-            Assert.AreEqual(datetime.Value, new DateTime(2014, 4, 4, 0, 0, 0, DateTimeKind.Utc));
+            var datetime1 = gt1.RightOperand as ConstantNode;
+            Assert.IsNotNull(datetime1);
+            Assert.AreEqual(datetime1.Value, expectedDateTime);
 
-            var startswith = and.RightOperand as FunctionCallNode;
+            var and2 = and1.RightOperand as BinaryOperatorNode;
+            Assert.IsNotNull(and2);
+            Assert.AreEqual(and2.OperatorKind, BinaryOperatorKind.And);
+
+            var gt2 = and2.LeftOperand as BinaryOperatorNode;
+            Assert.IsNotNull(gt2);
+            Assert.AreEqual(gt2.OperatorKind, BinaryOperatorKind.GreaterThan);
+
+            var updatedAt2 = gt2.LeftOperand as MemberAccessNode;
+            Assert.IsNotNull(updatedAt2);
+            Assert.AreEqual(updatedAt2.MemberName, "__updatedat");
+
+            var datetime2 = gt2.RightOperand as ConstantNode;
+            Assert.IsNotNull(datetime2);
+            //Note - shouldn't the OData value be parsed as UTC?
+            Assert.AreEqual(datetime2.Value, expectedDateTime.LocalDateTime);
+
+            var startswith = and2.RightOperand as FunctionCallNode;
             Assert.IsNotNull(startswith);
             Assert.AreEqual(startswith.Arguments.Count, 2);
 
@@ -56,10 +77,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Query
         [TestMethod]
         public void ToQueryString_EscapesThe_Uri()
         {
-            // __updatedat gt datetimeoffset'4-4-2014 0:0:0.000Z'
             var updatedAt = new MemberAccessNode(null, "__updatedat");
-            var datetime = new ConstantNode(new DateTime(2014, 4, 4, 0, 0, 0));
-            var gt = new BinaryOperatorNode(BinaryOperatorKind.GreaterThan, updatedAt, datetime);
+
+            //__updatedat gt datetimeoffset'2014-04-04T07:00:00.0000000+00:00'
+            var datetime1 = new ConstantNode(new DateTimeOffset(2014, 4, 4, 7, 0, 0, TimeSpan.FromHours(0)));
+            var gt1 = new BinaryOperatorNode(BinaryOperatorKind.GreaterThan, updatedAt, datetime1);
+
+            // __updatedat gt datetimeoffset'4-4-2014 0:0:0.000Z'
+            var datetime2 = new ConstantNode(new DateTime(2014, 4, 4, 7, 0, 0, DateTimeKind.Utc));
+            var gt2 = new BinaryOperatorNode(BinaryOperatorKind.GreaterThan, updatedAt, datetime2);
 
             // startswith(text,'this&''%%=,?#')
             var text = new MemberAccessNode(null, "text");
@@ -67,9 +93,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Test.Unit.Table.Query
             var startswith = new FunctionCallNode("startswith", new QueryNode[] { text, value });
 
             //__updatedat gt datetimeoffset'4-4-2014 0:0:0.000Z' and startswith(text,'this&''%%=,?#')
-            var and = new BinaryOperatorNode(BinaryOperatorKind.And, gt, startswith);
+            var and2 = new BinaryOperatorNode(BinaryOperatorKind.And, gt2, startswith);
 
-            var desc = new MobileServiceTableQueryDescription("someTable") { Filter = and };
+            var and1 = new BinaryOperatorNode(BinaryOperatorKind.And, gt1, and2);
+
+            var desc = new MobileServiceTableQueryDescription("someTable") { Filter = and1 };
             Assert.AreEqual(desc.ToQueryString(), EscapedODataString);
         }
     }
