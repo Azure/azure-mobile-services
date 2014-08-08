@@ -16,6 +16,6 @@
 
 #define WindowsAzureMobileServicesSdkMajorVersion 1
 #define WindowsAzureMobileServicesSdkMinorVersion 2
-#define WindowsAzureMobileServicesSdkBuildVersion 3
+#define WindowsAzureMobileServicesSdkBuildVersion 0
 
 #endif
