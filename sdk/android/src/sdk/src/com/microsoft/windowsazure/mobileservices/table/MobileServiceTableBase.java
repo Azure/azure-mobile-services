@@ -109,12 +109,12 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
 	protected String mTableName;
 
 	/**
-	 * The Mobile Service system properties to be included with items.
+	 * The Mobile Service system properties to be included with items
 	 */
 	protected EnumSet<MobileServiceSystemProperty> mSystemProperties = EnumSet.noneOf(MobileServiceSystemProperty.class);
 
 	/**
-	 * Features to be sent in telemetry headers for requests made by this table.
+	 * Features to be sent in telemetry headers for requests made by this table
 	 */
 	protected EnumSet<MobileServiceFeatures> mFeatures = EnumSet.noneOf(MobileServiceFeatures.class);
 
@@ -137,6 +137,17 @@ abstract class MobileServiceTableBase implements MobileServiceTableSystemPropert
 
 		mClient = client;
 		mTableName = name;
+	}
+
+	/**
+	 * Adds a feature which will be sent in telemetry headers for all requests
+	 * made by this table
+	 *
+	 * @param feature
+	 *            The feature that will be sent in requests by this table
+	 */
+	public void addFeature(MobileServiceFeatures feature) {
+		mFeatures.add(feature);
 	}
 
 	/**
