@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices.Query;
@@ -156,21 +157,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return await this.Store.LookupAsync(tableName, id);
         }
 
-        public async Task PullAsync(string tableName, string queryKey, string query, IDictionary<string, string> parameters, CancellationToken cancellationToken)
+        public async Task PullAsync(string tableName, string queryKey, string query, MobileServiceRemoteTableOptions options, IDictionary<string, string> parameters, CancellationToken cancellationToken)
         {
             await this.EnsureInitializedAsync();
 
             var table = await this.GetTable(tableName);
             var queryDescription = MobileServiceTableQueryDescription.Parse(tableName, query);
             // local schema should be same as remote schema otherwise push can't function
-            if (queryDescription.Selection.Count > 0 || queryDescription.Projections.Count > 0)
+            if (queryDescription.Selection.Any() || queryDescription.Projections.Any())
             {
                 throw new ArgumentException(Resources.MobileServiceSyncTable_PullWithSelectNotSupported, "query");
             }
+
             bool isIncrementalSync = !String.IsNullOrEmpty(queryKey);
             if (isIncrementalSync)
             {
-                if (queryDescription.Ordering.Count > 0)
+                if (queryDescription.Ordering.Any())
                 {
                     throw new ArgumentException(Resources.MobileServiceSyncTable_IncrementalPullWithOrderNotAllowed, "query");
                 }
@@ -180,10 +182,25 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 }
             }
 
+            if (!options.HasFlag(MobileServiceRemoteTableOptions.OrderBy) && queryDescription.Ordering.Any())
+            {
+                throw new ArgumentException(Resources.MobileServiceSyncTable_OrderByNotAllowed, "query");
+            }
+
+            if (!options.HasFlag(MobileServiceRemoteTableOptions.Skip) && queryDescription.Skip.HasValue)
+            {
+                throw new ArgumentException(Resources.MobileServiceSyncTable_SkipNotAllowed, "query");
+            }
+
+            if (!options.HasFlag(MobileServiceRemoteTableOptions.Top) && queryDescription.Top.HasValue)
+            {
+                throw new ArgumentException(Resources.MobileServiceSyncTable_TopNotAllowed, "query");
+            }
+
             // let us not burden the server to calculate the count when we don't need it for pull
             queryDescription.IncludeTotalCount = false;
 
-            var pull = new PullAction(table, this, queryKey, queryDescription, parameters, this.opQueue, this.settings, this.Store, cancellationToken);
+            var pull = new PullAction(table, this, queryKey, queryDescription, parameters, this.opQueue, this.settings, this.Store, options, cancellationToken);
             Task discard = this.syncQueue.Post(pull.ExecuteAsync, cancellationToken);
 
             await pull.CompletionTask;

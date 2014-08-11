@@ -422,11 +422,38 @@ namespace Microsoft.WindowsAzure.MobileServices {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The supported table options does not include orderby..
+        /// </summary>
+        internal static string MobileServiceSyncTable_OrderByNotAllowed {
+            get {
+                return ResourceManager.GetString("MobileServiceSyncTable_OrderByNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Pull query with select clause is not supported..
         /// </summary>
         internal static string MobileServiceSyncTable_PullWithSelectNotSupported {
             get {
                 return ResourceManager.GetString("MobileServiceSyncTable_PullWithSelectNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The supported table options does not include skip. .
+        /// </summary>
+        internal static string MobileServiceSyncTable_SkipNotAllowed {
+            get {
+                return ResourceManager.GetString("MobileServiceSyncTable_SkipNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The supported table options does not include top..
+        /// </summary>
+        internal static string MobileServiceSyncTable_TopNotAllowed {
+            get {
+                return ResourceManager.GetString("MobileServiceSyncTable_TopNotAllowed", resourceCulture);
             }
         }
         

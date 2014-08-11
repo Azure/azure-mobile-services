@@ -1,6 +1,6 @@
 # Azure Mobile Services Change Log
 
-### Version 1.3 alpha5
+### Version 1.3 beta
 **Managed SDK**
 - Added support for incremental sync for .NET backend
 - Added support for byte[] properties in offline
@@ -9,6 +9,7 @@
 - Do not Push changes on PurgeAsync() instead throw an exception
 - Improved error handling for timeout errors during sync
 - Follow link headers returned from .NET backend and use skip and take for PullAsync()
+- Introduced the SupportedOptions enum on IMobileServiceSyncTable to configure the pull strategy
 - **[Breaking]** Renamed ToQueryString method to ToODataString on MobileServiceTableQueryDescription class
 
 ### Version 1.3 alpha4

@@ -14,15 +14,10 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
     internal class PullAction : TableAction
     {
-        private const int DefaultTop = 50;
-
-        private static readonly QueryNode updatedAtNode = new MemberAccessNode(null, MobileServiceSystemColumns.UpdatedAt);
-        private static readonly OrderByNode orderByUpdatedAtNode = new OrderByNode(updatedAtNode, OrderByDirection.Ascending);
         private IDictionary<string, string> parameters;
-        private DateTimeOffset maxUpdatedAt = DateTimeOffset.MinValue; // delta token value calculation
-        private readonly int maxRead; // used to limit the next link navigation because table storage and sql in .NET backend always return a link and also to obey $top if present
-        private readonly int initialSkip;
-        private int totalRead; // used to track how many we have read so far
+        private MobileServiceRemoteTableOptions options; // the supported options on remote table 
+        private readonly PullCursor cursor;
+        private PullStrategy strategy;
 
         public PullAction(MobileServiceTable table,
                           MobileServiceSyncContext context,
@@ -32,12 +27,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                           OperationQueue operationQueue,
                           MobileServiceSyncSettingsManager settings,
                           IMobileServiceLocalStore store,
+                          MobileServiceRemoteTableOptions options,
                           CancellationToken cancellationToken)
             : base(table, queryKey, query, context, operationQueue, settings, store, cancellationToken)
         {
+            this.options = options;
             this.parameters = parameters;
-            this.maxRead = this.Query.Top.GetValueOrDefault(Int32.MaxValue);
-            this.initialSkip = this.Query.Skip.GetValueOrDefault();
+            this.cursor = new PullCursor(query);
         }
 
         protected override bool CanDeferIfDirty
@@ -47,92 +43,35 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         protected async override Task ProcessTableAsync()
         {
-            bool isIncrementalSync = !String.IsNullOrEmpty(this.QueryKey);
-            DateTimeOffset deltaToken = this.maxUpdatedAt;
+            await CreatePullStrategy();
 
-            if (isIncrementalSync)
-            {
-                this.Table.SystemProperties = this.Table.SystemProperties | MobileServiceSystemProperties.UpdatedAt;
-                deltaToken = await this.Settings.GetDeltaTokenAsync(this.Query.TableName, this.QueryKey);
-                ApplyDeltaToken(this.Query, deltaToken);
-            }
-
-            // always download in batches of 50 or less for efficiency 
-            this.Query.Top = Math.Min(this.Query.Top.GetValueOrDefault(DefaultTop), DefaultTop);
-
-            bool done = false;
+            QueryResult result;
             do
             {
                 this.CancellationToken.ThrowIfCancellationRequested();
 
-                QueryResult result = await this.Table.ReadAsync(this.Query.ToODataString(), MobileServiceTable.IncludeDeleted(parameters), this.Table.Features);
-
-                this.CancellationToken.ThrowIfCancellationRequested();
-
+                string odata = this.Query.ToODataString();
+                result = await this.Table.ReadAsync(odata, MobileServiceTable.IncludeDeleted(parameters), this.Table.Features);
                 await this.ProcessAll(result.Values); // process the first batch
 
-                // if we are not at the end of result and there is a link to get more results
-                while (!this.EndOfResult(result) && result.NextLink != null)
-                {
-                    this.CancellationToken.ThrowIfCancellationRequested();
-
-                    result = await this.Table.ReadAsync(result.NextLink);
-
-                    this.CancellationToken.ThrowIfCancellationRequested();
-
-                    await this.ProcessAll(result.Values); // process the results as soon as we've gotten them
-                    // TODO: UpdateDeltaToken should have been called here but table storage pages are not ordered
-                }
-
-                // if we are not at the end of result and there is no link to get more results
-                if (!this.EndOfResult(result) && result.NextLink == null)
-                {
-                    // then we continue downloading the changes using skip and top
-                    this.Query.Skip = this.initialSkip + this.totalRead;
-
-                    int remaining = this.maxRead - this.totalRead;
-                    // only read as many as we want
-                    this.Query.Top = Math.Min(this.Query.Top.Value, remaining);
-                }
-                else
-                {
-                    done = true;
-                }
+                result = await FollowNextLinks(result);
             }
-            while (!done);
+            // if we are not at the end of result and there is no link to get more results                
+            while (!this.EndOfResult(result) && await this.strategy.MoveToNextPageAsync());
 
-
-            if (isIncrementalSync)
-            {
-                // TODO: provide a boolean paramter/setting to do this for each page instead except for table storage
-                await UpdateDeltaTaken(deltaToken);
-            }
-        }
-
-        private bool EndOfResult(QueryResult result)
-        {
-            // if we got as many as we initially wanted 
-            // or there are no more results
-            // then we're at the end
-            return this.totalRead >= this.maxRead || result.Values.Count == 0;
-        }
-
-        private async Task UpdateDeltaTaken(DateTimeOffset deltaToken)
-        {
-            if (this.maxUpdatedAt > deltaToken)
-            {
-                await this.Settings.SetDeltaTokenAsync(this.Query.TableName, this.QueryKey, this.maxUpdatedAt.ToUniversalTime());
-            }
+            await this.strategy.PullCompleteAsync();
         }
 
         private async Task ProcessAll(JArray items)
         {
+            this.CancellationToken.ThrowIfCancellationRequested();
+
             var deletedIds = new List<string>();
             var upsertList = new List<JObject>();
 
             foreach (JObject item in items)
             {
-                if (this.totalRead++ >= this.maxRead)
+                if (!this.cursor.OnNext())
                 {
                     break;
                 }
@@ -143,11 +82,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     continue;
                 }
 
-                DateTimeOffset updatedAt = GetUpdatedAt(item);
-                if (updatedAt > this.maxUpdatedAt)
-                {
-                    this.maxUpdatedAt = updatedAt;
-                }
+                DateTimeOffset updatedAt = GetUpdatedAt(item).ToUniversalTime();
+                strategy.SetUpdateAt(updatedAt);
 
                 if (IsDeleted(item))
                 {
@@ -168,16 +104,53 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             {
                 await this.Store.DeleteAsync(this.Table.TableName, deletedIds);
             }
+
+            await this.strategy.OnResultsProcessedAsync();
         }
 
-        private void ApplyDeltaToken(MobileServiceTableQueryDescription query, DateTimeOffset deltaToken)
+        // follows next links in the query result and returns final result
+        private async Task<QueryResult> FollowNextLinks(QueryResult result)
         {
-            // TODO: provide a boolean paramter/setting to disable doing this for table storage
-            query.Ordering.Insert(0, orderByUpdatedAtNode);
-            // .NET runtime system properties are of datetimeoffset type so we'll use the datetimeoffset odata token
-            QueryNode tokenNode = new ConstantNode(deltaToken);
-            QueryNode updatedAtGreaterThanOrEqualNode = new BinaryOperatorNode(BinaryOperatorKind.GreaterThanOrEqual, updatedAtNode, tokenNode);
-            query.Filter = query.Filter == null ? updatedAtGreaterThanOrEqualNode : new BinaryOperatorNode(BinaryOperatorKind.And, query.Filter, updatedAtGreaterThanOrEqualNode);
+            while (!this.EndOfResult(result) && // if we are not at the end of result
+                    IsNextLinkValid(result.NextLink, this.options)) // and there is a valid link to get more results
+            {
+                this.CancellationToken.ThrowIfCancellationRequested();
+
+                result = await this.Table.ReadAsync(result.NextLink);
+                await this.ProcessAll(result.Values); // process the results as soon as we've gotten them
+            }
+            return result;
+        }
+
+        // mongo doesn't support skip and top yet it generates next links with top and skip
+        private bool IsNextLinkValid(Uri link, MobileServiceRemoteTableOptions options)
+        {
+            if (link == null)
+            {
+                return false;
+            }
+
+            IDictionary<string, string> parameters = HttpUtility.ParseQueryString(link.Query);
+
+            bool isValid = ValidateOption(options, parameters, ODataOptions.Top, MobileServiceRemoteTableOptions.Top) &&
+                           ValidateOption(options, parameters, ODataOptions.Skip, MobileServiceRemoteTableOptions.Skip) &&
+                           ValidateOption(options, parameters, ODataOptions.OrderBy, MobileServiceRemoteTableOptions.OrderBy);
+
+            return isValid;
+        }
+
+        private static bool ValidateOption(MobileServiceRemoteTableOptions validOptions, IDictionary<string, string> parameters, string optionKey, MobileServiceRemoteTableOptions option)
+        {
+            bool hasInvalidOption = parameters.ContainsKey(optionKey) && !validOptions.HasFlag(option);
+            return !hasInvalidOption;
+        }
+
+        private bool EndOfResult(QueryResult result)
+        {
+            // if we got as many as we initially wanted 
+            // or there are no more results
+            // then we're at the end
+            return cursor.Complete || result.Values.Count == 0;
         }
 
         private static bool IsDeleted(JObject item)
@@ -196,6 +169,20 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 updatedAt = updatedAtToken.ToObject<DateTimeOffset>();
             }
             return updatedAt;
+        }
+
+        private async Task CreatePullStrategy()
+        {
+            bool isIncrementalSync = !String.IsNullOrEmpty(this.QueryKey);
+            if (isIncrementalSync)
+            {
+                this.strategy = new IncrementalPullStrategy(this.Table, this.Query, this.QueryKey, this.Settings, this.cursor, this.options);
+            }
+            else
+            {
+                this.strategy = new PullStrategy(this.Query, this.cursor, this.options);
+            }
+            await this.strategy.InitializeAsync();
         }
     }
 }

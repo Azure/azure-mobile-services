@@ -417,4 +417,13 @@
   <data name="MobileServiceSyncTable_IncrementalPullWithSkipTopNotSupported" xml:space="preserve">
     <value>Incremental pull query must not have skip or top specified.</value>
   </data>
+  <data name="MobileServiceSyncTable_SkipNotAllowed" xml:space="preserve">
+    <value>The supported table options does not include skip. </value>
+  </data>
+  <data name="MobileServiceSyncTable_TopNotAllowed" xml:space="preserve">
+    <value>The supported table options does not include top.</value>
+  </data>
+  <data name="MobileServiceSyncTable_OrderByNotAllowed" xml:space="preserve">
+    <value>The supported table options does not include orderby.</value>
+  </data>
 </root>

@@ -230,9 +230,66 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(store.Tables["stringId_test_table"]["ghi"].Value<string>("String"), "Are");
             Assert.AreEqual(store.Tables["stringId_test_table"]["jkl"].Value<string>("String"), "You");
 
-            AssertUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$top=50&__includeDeleted=true&__systemproperties=__version",
+            AssertEx.MatchUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$skip=0&$top=50&__includeDeleted=true&__systemproperties=__version",
                                         "http://localhost:31475/tables/Green?$top=1&$select=Text%2CDone%2CId&$skip=2",
                                         "http://www.test.com/tables/stringId_test_table?$skip=4&$top=50&__includeDeleted=true&__systemproperties=__version");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_UpdatesDeltaToken_AfterEachResult_IfOrderByIsSupported()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
+                                         {""id"":""def"",""String"":""How"", ""__updatedAt"": ""2001-02-04T00:00:00.0000000+00:00""}]"); // first page
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.InternalServerError)); // throw on second page
+
+            var store = new MobileServiceLocalStoreMock();
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+
+            Assert.IsFalse(store.Tables.ContainsKey("stringId_test_table"));
+
+            await ThrowsAsync<MobileServiceInvalidOperationException>(() => table.PullAsync("items", table.CreateQuery()));
+
+            Assert.AreEqual(store.Tables["stringId_test_table"].Count, 2);
+            Assert.AreEqual(store.Tables["stringId_test_table"]["abc"].Value<string>("String"), "Hey");
+            Assert.AreEqual(store.Tables["stringId_test_table"]["def"].Value<string>("String"), "How");
+
+            AssertEx.MatchUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'0001-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version",
+                                                "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'2001-02-04T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version");
+
+            Assert.Equals(store.Tables[MobileServiceLocalSystemTables.Config]["stringId_test_table_items_deltaToken"]["value"], "2001-02-04T00:00:00.0000000+00:00");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_DoesNotUpdateDeltaToken_AfterEachResult_IfOrderByIsNotSupported()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
+                                         {""id"":""def"",""String"":""How"", ""__updatedAt"": ""2001-02-04T00:00:00.0000000+00:00""}]"); // first page
+            hijack.Responses.Add(new HttpResponseMessage(HttpStatusCode.InternalServerError)); // throw on second page
+
+            var store = new MobileServiceLocalStoreMock();
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+            table.SupportedOptions &= ~MobileServiceRemoteTableOptions.OrderBy;
+
+            Assert.IsFalse(store.Tables.ContainsKey("stringId_test_table"));
+
+            await ThrowsAsync<MobileServiceInvalidOperationException>(() => table.PullAsync("items", table.CreateQuery()));
+
+            Assert.AreEqual(store.Tables["stringId_test_table"].Count, 2);
+            Assert.AreEqual(store.Tables["stringId_test_table"]["abc"].Value<string>("String"), "Hey");
+            Assert.AreEqual(store.Tables["stringId_test_table"]["def"].Value<string>("String"), "How");
+
+            AssertEx.MatchUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'0001-01-01T00:00:00.0000000%2B00:00')&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version",
+                                                "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'0001-01-01T00:00:00.0000000%2B00:00')&$skip=2&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version");
+
+            Assert.IsFalse(store.Tables[MobileServiceLocalSystemTables.Config].ContainsKey("stringId_test_table_items_deltaToken"));
         }
 
         [AsyncTestMethod]
@@ -267,7 +324,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(store.Tables["stringId_test_table"]["mno"].Value<string>("String"), "Mr");
             Assert.AreEqual(store.Tables["stringId_test_table"]["pqr"].Value<string>("String"), "X");
 
-            AssertUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$skip=3&$top=50&__includeDeleted=true&__systemproperties=__version",
+            AssertEx.MatchUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$skip=3&$top=50&__includeDeleted=true&__systemproperties=__version",
                                         "http://www.test.com/tables/stringId_test_table?$skip=5&$top=49&__includeDeleted=true&__systemproperties=__version",
                                         "http://localhost:31475/tables/Green?$top=1&$select=Text%2CDone%2CId&$skip=2",
                                         "http://www.test.com/tables/stringId_test_table?$skip=9&$top=45&__includeDeleted=true&__systemproperties=__version");
@@ -294,9 +351,34 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.AreEqual(store.Tables["stringId_test_table"].Count, 4);
 
-            AssertUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$top=50&__includeDeleted=true&__systemproperties=__version",
+            AssertEx.MatchUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$skip=0&$top=50&__includeDeleted=true&__systemproperties=__version",
                                         "http://www.test.com/tables/stringId_test_table?$skip=2&$top=50&__includeDeleted=true&__systemproperties=__version",
                                         "http://www.test.com/tables/stringId_test_table?$skip=4&$top=50&__includeDeleted=true&__systemproperties=__version");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_DoesNotFollowLink_IfLinkHasNonSupportedOptions()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.AddResponseContent("[{\"id\":\"abc\",\"String\":\"Hey\"},{\"id\":\"def\",\"String\":\"How\"}]"); // first page
+            hijack.Responses[0].Headers.Add("Link", "http://contoso.com:31475/tables/Green?$top=1&$select=Text%2CDone%2CId&$skip=2; rel=next");
+            hijack.AddResponseContent("[{\"id\":\"ghi\",\"String\":\"Are\"},{\"id\":\"jkl\",\"String\":\"You\"}]"); // second page
+            hijack.AddResponseContent("[]"); // end of the list
+
+            var store = new MobileServiceLocalStoreMock();
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+            table.SupportedOptions &= ~MobileServiceRemoteTableOptions.Skip;
+
+            Assert.IsFalse(store.Tables.ContainsKey("stringId_test_table"));
+
+            await table.PullAsync();
+
+            Assert.AreEqual(store.Tables["stringId_test_table"].Count, 2);
+
+            AssertEx.MatchUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$top=50&__includeDeleted=true&__systemproperties=__version");
         }
 
         [AsyncTestMethod]
@@ -318,7 +400,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.AreEqual(store.Tables["stringId_test_table"].Count, 2);
 
-            AssertUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$top=49&__includeDeleted=true&__systemproperties=__version",
+            AssertEx.MatchUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$skip=0&$top=49&__includeDeleted=true&__systemproperties=__version",
                                         "http://www.test.com/tables/stringId_test_table?$skip=2&$top=47&__includeDeleted=true&__systemproperties=__version");
         }
 
@@ -341,7 +423,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.AreEqual(store.Tables["stringId_test_table"].Count, 2);
 
-            AssertUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$top=50&__includeDeleted=true&__systemproperties=__version",
+            AssertEx.MatchUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$skip=0&$top=50&__includeDeleted=true&__systemproperties=__version",
                                         "http://www.test.com/tables/stringId_test_table?$skip=2&$top=49&__includeDeleted=true&__systemproperties=__version");
         }
 
@@ -439,6 +521,51 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task PullAsync_Throws_WhenOrderByClauseIsSpecifiedAndOptionIsNotSet()
+        {
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+            table.SupportedOptions &= ~MobileServiceRemoteTableOptions.OrderBy;
+            var query = table.OrderBy(x => x.String);
+
+            var exception = await ThrowsAsync<ArgumentException>(() => table.PullAsync(query));
+            Assert.AreEqual(exception.ParamName, "query");
+            Assert.StartsWith(exception.Message, "The supported table options does not include orderby.");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_Throws_WhenTopClauseIsSpecifiedAndOptionIsNotSet()
+        {
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+            table.SupportedOptions &= ~MobileServiceRemoteTableOptions.Top;
+            var query = table.Take(30);
+
+            var exception = await ThrowsAsync<ArgumentException>(() => table.PullAsync(query));
+            Assert.AreEqual(exception.ParamName, "query");
+            Assert.StartsWith(exception.Message, "The supported table options does not include top.");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_Throws_WhenSkipClauseIsSpecifiedAndOptionIsNotSet()
+        {
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
+            await service.SyncContext.InitializeAsync(new MobileServiceLocalStoreMock(), new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+            table.SupportedOptions &= ~MobileServiceRemoteTableOptions.Skip;
+            var query = table.Skip(30);
+
+            var exception = await ThrowsAsync<ArgumentException>(() => table.PullAsync(query));
+            Assert.AreEqual(exception.ParamName, "query");
+            Assert.StartsWith(exception.Message, "The supported table options does not include skip.");
+        }
+
+        [AsyncTestMethod]
         public async Task PullAsync_Throws_WhenTopOrSkipIsSpecifiedWithQueryKey()
         {
             IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...");
@@ -488,12 +615,75 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task PullAsync_Incremental_Succeeds()
+        public async Task PullAsync_Incremental_AllOptions_MovesByUpdatedAt()
+        {
+            await TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions.All,
+                    "http://test.com/tables/stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt",
+                    "http://test.com/tables/stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_Incremental_MovesByUpdatedAt_ThenUsesSkipAndTop_WhenUpdatedAtDoesNotChange()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.OnSendingRequest = req =>
+            {
+                return Task.FromResult(req);
+            };
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""}]");
+            hijack.AddResponseContent(@"[{""id"":""def"",""String"":""World"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""}]");
+            hijack.AddResponseContent("[]"); // last page
+
+            var store = new MobileServiceLocalStoreMock();
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+
+            await table.PullAsync("items", table.CreateQuery());
+            AssertEx.MatchUris(hijack.Requests,
+                "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'0001-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version",
+                "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version",
+                "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=1&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_Incremental_WithoutOrderBy_MovesBySkipAndTop()
+        {
+            await TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions.Skip | MobileServiceRemoteTableOptions.Top,
+                "http://test.com/tables/stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$skip=0&$top=50&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt",
+                "http://test.com/tables/stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$skip=2&$top=50&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_Incremental_WithoutSkipAndOrderBy_CanNotMoveForward()
+        {
+            await TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions.Top,
+                "http://test.com/tables/stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$top=50&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_Incremental_WithoutTopAndOrderBy_MovesBySkip()
+        {
+            await TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions.Skip,
+                "http://test.com/tables/stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt",
+                "http://test.com/tables/stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$skip=2&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt");
+        }
+
+        [AsyncTestMethod]
+        public async Task PullAsync_Incremental_WithoutSkipAndTop_MovesByUpdatedAt()
+        {
+            await TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions.OrderBy,
+                "http://test.com/tables/stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-01T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt",
+                "http://test.com/tables/stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt");
+        }
+
+        private static async Task TestPullAsyncIncrementalWithOptions(MobileServiceRemoteTableOptions options, params string[] uris)
         {
             var store = new MobileServiceLocalStoreMock();
             var settings = new MobileServiceSyncSettingsManager(store);
-            await settings.SetDeltaTokenAsync("stringId_test_table", "incquery", new DateTime(2001, 02, 03, 0, 0, 0, DateTimeKind.Utc));
-            await TestIncrementalPull(store, "2001-02-03T00%3A00%3A00.0000000%2B00%3A00");
+            await settings.SetDeltaTokenAsync("stringId_test_table", "incquery", new DateTime(2001, 02, 01, 0, 0, 0, DateTimeKind.Utc));
+            await TestIncrementalPull(store, options, uris);
         }
 
         [AsyncTestMethod]
@@ -501,10 +691,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         {
             var store = new MobileServiceLocalStoreMock();
             store.Tables[MobileServiceLocalSystemTables.Config] = new Dictionary<string, JObject>();
-            await TestIncrementalPull(store, "0001-01-01T00%3A00%3A00.0000000%2B00%3A00");
+            await TestIncrementalPull(store, MobileServiceRemoteTableOptions.All,
+                "http://test.com/tables/stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'0001-01-01T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt",
+                "http://test.com/tables/stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt");
         }
 
-        private static async Task TestIncrementalPull(MobileServiceLocalStoreMock store, string expectedToken)
+        private static async Task TestIncrementalPull(MobileServiceLocalStoreMock store, MobileServiceRemoteTableOptions options, params string[] expectedUris)
         {
             var hijack = new TestHttpHandler();
             hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": ""2001-02-03T00:00:00.0000000+00:00""},
@@ -518,18 +710,18 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 { "value", "1" }
             };
 
-
-            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            IMobileServiceClient service = new MobileServiceClient("http://test.com", "secret...", hijack);
             await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
 
             IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+            table.SupportedOptions = options;
             var query = table.Where(t => t.String == "world")
                              .WithParameters(new Dictionary<string, string>() { { "param1", "val1" } })
                              .IncludeTotalCount();
 
             await table.PullAsync("incquery", query, cancellationToken: CancellationToken.None);
-            Assert.AreEqual(hijack.Requests.Count, 2);
-            Assert.AreEqual(hijack.Requests[0].RequestUri.Query, "?$filter=((String%20eq%20'world')%20and%20(__updatedAt%20ge%20datetimeoffset'" + expectedToken + "'))&$orderby=__updatedAt&$top=50&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt");
+
+            AssertEx.MatchUris(hijack.Requests, expectedUris);
         }
 
         [AsyncTestMethod]
@@ -540,7 +732,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                                 { "__systemProperties", "createdAt" },
                                 { "param1", "val1" } 
                              },
-                             "?$top=50&__systemProperties=createdAt&param1=val1&__includeDeleted=true");
+                             "?$skip=0&$top=50&__systemProperties=createdAt&param1=val1&__includeDeleted=true");
         }
 
         [AsyncTestMethod]
@@ -551,7 +743,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                                 { "__includeDeleted", "false" },
                                 { "param1", "val1" } 
                              },
-                             "?$top=50&__includeDeleted=false&param1=val1&__systemproperties=__version");
+                             "?$skip=0&$top=50&__includeDeleted=false&param1=val1&__systemproperties=__version");
         }
 
         [AsyncTestMethod]
@@ -1070,15 +1262,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             Assert.AreEqual(service.SyncContext.PendingOperations, 0L);
             Assert.AreEqual(operationHandler.PushCompletionResult.Status, MobileServicePushStatus.Complete);
-        }
-
-        private void AssertUris(List<HttpRequestMessage> requests, params string[] uris)
-        {
-            Assert.AreEqual(requests.Count, uris.Length);
-            for (int i = 0; i < uris.Length; i++)
-            {
-                Assert.AreEqual(requests[i].RequestUri.ToString(), uris[i]);
-            }
         }
     }
 }

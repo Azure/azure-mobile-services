@@ -126,7 +126,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             if (this.Filter != null)
             {
                 string filterStr = ODataExpressionVisitor.ToODataString(this.Filter);
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$filter={1}", separator, filterStr);
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}={2}", separator, ODataOptions.Filter, filterStr);
                 separator = '&';
             }
 
@@ -144,35 +144,35 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                                                         return result;
                                                     });
 
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$orderby={1}", separator, string.Join(",", orderings));
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}={2}", separator, ODataOptions.OrderBy, string.Join(",", orderings));
                 separator = '&';
             }
 
             // Skip any elements
             if (this.Skip.HasValue && this.Skip >= 0)
             {
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$skip={1}", separator, this.Skip);
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}={2}", separator, ODataOptions.Skip, this.Skip);
                 separator = '&';
             }
 
             // Take the desired number of elements
             if (this.Top.HasValue && this.Top >= 0)
             {
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$top={1}", separator, this.Top);
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}={2}", separator, ODataOptions.Top, this.Top);
                 separator = '&';
             }
 
             // Add the selection
             if (this.Selection.Count > 0)
             {
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$select={1}", separator, string.Join(",", this.Selection.Select(Uri.EscapeDataString)));
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}={2}", separator, ODataOptions.Select, string.Join(",", this.Selection.Select(Uri.EscapeDataString)));
                 separator = '&';
             }
 
             // Add the total count
             if (this.IncludeTotalCount)
             {
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$inlinecount=allpages", separator);
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}=allpages", separator, ODataOptions.InlineCount);
                 separator = '&';
             }
 
@@ -195,13 +195,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             QueryNode filter = null;
             IList<OrderByNode> orderings = null;
 
-            char[] separator = new[] { '=' };
-            var parameters = query.Split('&').Select(part => part.Split(separator, 2));
+            IDictionary<string, string> parameters = HttpUtility.ParseQueryString(query);
 
-            foreach (string[] parameter in parameters)
+            foreach (KeyValuePair<string, string> parameter in parameters)
             {
-                string key = Uri.UnescapeDataString(parameter[0]);
-                string value = Uri.UnescapeDataString(parameter.Length > 1 ? parameter[1] : String.Empty);
+                string key = parameter.Key;
+                string value = parameter.Value;
                 if (String.IsNullOrEmpty(key))
                 {
                     continue;
@@ -209,22 +208,22 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
                 switch (key)
                 {
-                    case "$filter":
+                    case ODataOptions.Filter:
                         filter = ODataExpressionParser.ParseFilter(value);
                         break;
-                    case "$orderby":
+                    case ODataOptions.OrderBy:
                         orderings = ODataExpressionParser.ParseOrderBy(value);
                         break;
-                    case "$skip":
+                    case ODataOptions.Skip:
                         skip = Int32.Parse(value);
                         break;
-                    case "$top":
+                    case ODataOptions.Top:
                         top = Int32.Parse(value);
                         break;
-                    case "$select":
+                    case ODataOptions.Select:
                         selection = value.Split(',');
                         break;
-                    case "$inlinecount":
+                    case ODataOptions.InlineCount:
                         includeTotalCount = "allpages".Equals(value);
                         break;
                     default:

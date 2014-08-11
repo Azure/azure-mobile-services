@@ -6,8 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +13,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
-    internal class MobileServiceSyncTable: IMobileServiceSyncTable
+    internal class MobileServiceSyncTable : IMobileServiceSyncTable
     {
         private static readonly Regex queryKeyRegex = new Regex("^[a-zA-Z][a-zA-Z0-9]{0,24}$");
         private MobileServiceSyncContext syncContext;
@@ -23,6 +21,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public MobileServiceClient MobileServiceClient { get; private set; }
 
         public string TableName { get; private set; }
+
+        public MobileServiceRemoteTableOptions SupportedOptions { get; set; }
 
         public MobileServiceSyncTable(string tableName, MobileServiceClient client)
         {
@@ -32,6 +32,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             this.MobileServiceClient = client;
             this.TableName = tableName;
             this.syncContext = (MobileServiceSyncContext)client.SyncContext;
+            this.SupportedOptions = MobileServiceRemoteTableOptions.All;
         }
 
         public Task<JToken> ReadAsync(string query)
@@ -42,7 +43,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public Task PullAsync(string queryKey, string query, IDictionary<string, string> parameters, CancellationToken cancellationToken)
         {
             ValidateQueryKey(queryKey);
-            return this.syncContext.PullAsync(this.TableName, queryKey, query, parameters, cancellationToken);
+            return this.syncContext.PullAsync(this.TableName, queryKey, query, this.SupportedOptions, parameters, cancellationToken);
         }
 
         public Task PurgeAsync(string queryKey, string query, CancellationToken cancellationToken)
@@ -68,7 +69,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             await this.syncContext.InsertAsync(this.TableName, (string)id, instance);
 
             return instance;
-        }        
+        }
 
         public async Task UpdateAsync(JObject instance)
         {
@@ -76,7 +77,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             instance = RemoveSystemPropertiesKeepVersion(instance);
 
             await this.syncContext.UpdateAsync(this.TableName, id, instance);
-        }        
+        }
 
         public async Task DeleteAsync(JObject instance)
         {

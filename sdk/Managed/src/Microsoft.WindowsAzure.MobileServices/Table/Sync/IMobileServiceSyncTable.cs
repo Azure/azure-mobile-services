@@ -26,6 +26,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         string TableName { get; }
 
         /// <summary>
+        /// The supported odata options on the remote table
+        /// </summary>
+        MobileServiceRemoteTableOptions SupportedOptions { get; set; }
+
+        /// <summary>
         /// Excutes a query against the table.
         /// </summary>
         /// <param name="query">

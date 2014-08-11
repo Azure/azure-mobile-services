@@ -62,6 +62,7 @@
     <Compile Include="Extensions\MobileServiceSyncTableExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="Http\HttpUtility.cs" />
     <Compile Include="Http\LinkHeaderValue.cs" />
     <Compile Include="Http\MobileServiceHttpResponse.cs" />
     <Compile Include="IMobileServiceClient.cs" />
@@ -97,6 +98,7 @@
     <Compile Include="Table\Query\Linq\MobileServiceTableQuery.cs" />
     <Compile Include="Table\Query\Linq\MobileServiceTableQueryProvider.cs" />
     <Compile Include="Table\Query\Linq\MobileServiceTableQueryTranslator.cs" />
+    <Compile Include="Table\Query\ODataOptions.cs" />
     <Compile Include="Table\Query\OData\BinaryOperatorKind.cs" />
     <Compile Include="Table\Query\OData\BinaryOperatorNode.cs" />
     <Compile Include="Table\Query\OData\ConstantNode.cs" />
@@ -145,6 +147,10 @@
     <Compile Include="Table\Serialization\MobileServicePrecisionCheckConverter.cs" />
     <Compile Include="Table\Serialization\MobileServiceIsoDateTimeConverter.cs" />
     <Compile Include="Table\Sync\MobileServiceSyncSettingsManager.cs" />
+    <Compile Include="Table\Sync\MobileServiceRemoteTableOptions.cs" />
+    <Compile Include="Table\Sync\Queue\Actions\IncrementalPullStrategy.cs" />
+    <Compile Include="Table\Sync\Queue\Actions\PullCursor.cs" />
+    <Compile Include="Table\Sync\Queue\Actions\PullStrategy.cs" />
     <Compile Include="Table\Sync\Queue\Actions\SyncAction.cs" />
     <Compile Include="Table\Sync\Queue\Actions\PurgeAction.cs" />
     <Compile Include="Table\Sync\Queue\Actions\PullAction.cs" />
