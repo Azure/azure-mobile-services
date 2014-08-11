@@ -33,9 +33,45 @@ import java.util.Iterator;
  * requests for telemetry purposes.
  */
 public enum MobileServiceFeatures {
-	TypedTable("TT"), UntypedTable("TU"),
-	TypedApiCall("AT"), JsonApiCall("AJ"), GenericApiCall("AG"),
-	AdditionalQueryParameters("QS"), Offline("OL");
+	/**
+	 * Feature header value for requests going through typed tables.
+	 */
+	TypedTable("TT"),
+
+	/**
+	 * Feature header value for requests going through untyped (JSON) tables.
+	 */
+	UntypedTable("TU"),
+
+	/**
+	 * Feature header value for API calls using typed (generic) overloads.
+	 */
+	TypedApiCall("AT"),
+
+	/**
+	 * Feature header value for API calls using JSON overloads.
+	 */
+	JsonApiCall("AJ"),
+
+	/**
+	 * Feature header value for API calls using the generic (HTTP) overload.
+	 */
+	GenericApiCall("AG"),
+
+	/**
+	 * Feature header value for table / API requests which include additional query string parameters.
+	 */
+	AdditionalQueryParameters("QS"),
+
+	/**
+	 * Feature header value for offline initiated requests (push / pull).
+	 */
+	Offline("OL"),
+
+	/**
+	 * Feature header value for conditional updates.
+	 */
+	OpportunisticConcurrency("OC");
 
 	private String value;
 	private final static MobileServiceFeatures[] AllFeatures;
@@ -44,14 +80,33 @@ public enum MobileServiceFeatures {
 		AllFeatures = MobileServiceFeatures.class.getEnumConstants();
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param value the code associated with the feature which will
+	 * be sent to the server in the features header
+	 */
 	MobileServiceFeatures(String value) {
 		this.value = value;
 	}
 
+	/**
+	 * Gets the code will be sent to the server for this feature
+	 * in the features header
+	 *
+	 * @return the code associated with this feature.
+	 */
 	public String getValue() {
 		return value;
 	}
 
+	/**
+	 * Returns a comma-separated list of feature codes which can be sent to
+	 * the service in the features header.
+	 *
+	 * @param features a set of features
+	 * @return a comma-separated list of the feature codes from the given set
+	 */
 	public static String featuresToString(EnumSet<MobileServiceFeatures> features) {
 		ArrayList<String> usedFeatures = new ArrayList<String>();
 		for (MobileServiceFeatures feature : AllFeatures) {

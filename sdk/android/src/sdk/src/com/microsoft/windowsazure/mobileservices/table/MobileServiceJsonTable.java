@@ -593,6 +593,7 @@ public final class MobileServiceJsonTable extends MobileServiceTableBase {
 		if (version != null) {
 			requestHeaders = new ArrayList<Pair<String,String>>();
 			requestHeaders.add(new Pair<String, String>("If-Match", getEtagFromValue(version)));
+			features.add(MobileServiceFeatures.OpportunisticConcurrency);
 		}
 
 		ListenableFuture<Pair<JsonObject, ServiceFilterResponse>> internalFuture = this.executeTableOperation(TABLES_URL + mTableName + "/" + id.toString(), content, "PATCH", requestHeaders, parameters, features);

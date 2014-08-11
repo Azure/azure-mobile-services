@@ -40,6 +40,7 @@ import com.microsoft.windowsazure.mobileservices.http.ServiceFilter;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceTable;
 import com.microsoft.windowsazure.mobileservices.table.query.ExecutableJsonQuery;
 import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
@@ -78,7 +79,8 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 		cases.put(EnumSet.of(MobileServiceFeatures.UntypedTable, MobileServiceFeatures.Offline), "OL,TU");
 		cases.put(EnumSet.of(MobileServiceFeatures.TypedApiCall, MobileServiceFeatures.AdditionalQueryParameters), "AT,QS");
 		cases.put(EnumSet.of(MobileServiceFeatures.JsonApiCall, MobileServiceFeatures.AdditionalQueryParameters), "AJ,QS");
-		
+		cases.put(EnumSet.of(MobileServiceFeatures.OpportunisticConcurrency, MobileServiceFeatures.Offline, MobileServiceFeatures.UntypedTable), "OC,OL,TU");
+
 		for (EnumSet<MobileServiceFeatures> features : cases.keySet()) {
 			String expected = cases.get(features);
 			String actual = MobileServiceFeatures.featuresToString(features);
@@ -664,6 +666,8 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 				JsonObject obj = createJsonObject();
 				jsonTable.insert(obj).get();
 				obj = createJsonObject();
+				obj.remove("id");
+				obj.addProperty("id", "another-id");
 				jsonTable.insert(obj).get();
 				client.getSyncContext().push().get();
 			}
@@ -734,6 +738,127 @@ public class MobileServiceFeaturesTest extends InstrumentationTestCase {
 			MobileServiceSyncTable<PersonTestObjectWithStringId> typedTable = client.getSyncTable(PersonTestObjectWithStringId.class);
 			MobileServiceJsonSyncTable jsonTable = client.getSyncTable("Person");
 			operation.executeOperation(client, typedTable, jsonTable);
+		} catch (Exception exception) {
+			Throwable ex = exception;
+			while (ex instanceof ExecutionException || ex instanceof MobileServiceException) {
+				ex = ex.getCause();
+			}
+			fail(ex.getMessage());
+		}
+	}
+
+	// Tests for opportunistic concurrency (conditional updates)
+	interface OpportunisticConcurrencyTestOperation {
+		void executeOperation(MobileServiceClient client) throws Exception;
+	}
+
+	public void testJsonTableUpdateWithVersionFeatureHeader() {
+		testOpportunisticConcurrencyOperationsFeatureHeader(new OpportunisticConcurrencyTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceClient client) throws Exception {
+				MobileServiceJsonTable jsonTable = client.getTable("Person");
+				jsonTable.setSystemProperties(EnumSet.of(MobileServiceSystemProperty.Version));
+				JsonObject jo = createJsonObject();
+				jo.addProperty("__version", "abc");
+				List<Pair<String, String>> queryParams = new ArrayList<Pair<String, String>>();
+				queryParams.add(new Pair<String, String>("a", "b"));
+				jsonTable.update(jo, queryParams).get();
+			}
+		}, "OC,QS,TU");
+	}
+
+	public void testTypedTableUpdateWithVersionFeatureHeader() {
+		testOpportunisticConcurrencyOperationsFeatureHeader(new OpportunisticConcurrencyTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceClient client) throws Exception {
+				MobileServiceTable<VersionType> table = client.getTable(VersionType.class);
+				VersionType obj = new VersionType();
+				obj.Version = "abc";
+				obj.Id = "the-id";
+				table.update(obj).get();
+			}
+		}, "OC,TT");
+	}
+
+	public void testOfflinePushWithVersionFeatureHeader() {
+		testOpportunisticConcurrencyOperationsFeatureHeader(new OpportunisticConcurrencyTestOperation() {
+
+			@Override
+			public void executeOperation(MobileServiceClient client) throws Exception {
+				MobileServiceSyncTable<VersionType> table = client.getSyncTable(VersionType.class);
+				VersionType obj = new VersionType();
+				obj.Version = "abc";
+				obj.Id = "the-id";
+				table.update(obj).get();
+				client.getSyncContext().push().get();
+			}
+		}, "OC,OL,TU");
+	}
+
+	private void testOpportunisticConcurrencyOperationsFeatureHeader(OpportunisticConcurrencyTestOperation operation, final String expectedFeaturesHeader) {
+		MobileServiceClient client = null;
+		try {
+			client = new MobileServiceClient(appUrl, appKey,
+					getInstrumentation().getTargetContext());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+
+		MobileServiceLocalStoreMock store = new MobileServiceLocalStoreMock();
+		// Add a new filter to the client
+		client = client.withFilter(new ServiceFilter() {
+
+			@Override
+			public ListenableFuture<ServiceFilterResponse> handleRequest(
+					ServiceFilterRequest request,
+					NextServiceFilterCallback nextServiceFilterCallback) {
+
+				final SettableFuture<ServiceFilterResponse> resultFuture = SettableFuture
+						.create();
+				String featuresHeaderName = "X-ZUMO-FEATURES";
+				
+				Header[] headers = request.getHeaders();
+				String features = null;
+				for (int i = 0; i < headers.length; i++) {
+					if (headers[i].getName() == featuresHeaderName) {
+						features = headers[i].getValue();
+					}
+				}
+
+				if (features == null) {
+					resultFuture.setException(new Exception("No " + featuresHeaderName + " header on API call"));
+				} else if (!features.equals(expectedFeaturesHeader)) {
+					resultFuture.setException(new Exception("Incorrect features header; expected " + 
+						expectedFeaturesHeader + ", actual " + features));
+				} else {
+					ServiceFilterResponseMock response = new ServiceFilterResponseMock();
+					Uri requestUri = Uri.parse(request.getUrl());
+					String content = "{\"id\":\"the-id\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"age\":33}";
+					if (request.getMethod().equalsIgnoreCase("GET") && requestUri.getPathSegments().size() == 2) {
+						// GET which should return an array of results
+						content = "[" + content + "]";
+					}
+					response.setContent(content);
+					resultFuture.set(response);
+				}
+
+				return resultFuture;
+			}
+		});
+
+		try {
+			Map<String, ColumnDataType> tableDefinition = new HashMap<String, ColumnDataType>();
+			tableDefinition.put("id", ColumnDataType.String);
+			tableDefinition.put("firstName", ColumnDataType.String);
+			tableDefinition.put("lastName", ColumnDataType.String);
+			tableDefinition.put("age", ColumnDataType.Number);
+			store.defineTable("Person", tableDefinition);
+
+			client.getSyncContext().initialize(store, new SimpleSyncHandler()).get();
+
+			operation.executeOperation(client);
 		} catch (Exception exception) {
 			Throwable ex = exception;
 			while (ex instanceof ExecutionException || ex instanceof MobileServiceException) {
