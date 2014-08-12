@@ -33,6 +33,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
 
@@ -58,7 +59,7 @@ public class RemoteTableOperationProcessor implements TableOperationVisitor<Json
 
 	@Override
 	public JsonObject visit(InsertOperation operation) throws Throwable {
-		MobileServiceJsonTable table = this.mClient.getTable(operation.getTableName());
+		MobileServiceJsonTable table = this.getRemoteTable(operation.getTableName());
 		table.setSystemProperties(EnumSet.allOf(MobileServiceSystemProperty.class));
 
 		JsonObject item = removeSystemProperties(this.mItem);
@@ -74,7 +75,7 @@ public class RemoteTableOperationProcessor implements TableOperationVisitor<Json
 
 	@Override
 	public JsonObject visit(UpdateOperation operation) throws Throwable {
-		MobileServiceJsonTable table = this.mClient.getTable(operation.getTableName());
+		MobileServiceJsonTable table = this.getRemoteTable(operation.getTableName());
 		table.setSystemProperties(getSystemProperties(this.mItem));
 
 		ListenableFuture<JsonObject> future = table.update(this.mItem);
@@ -88,7 +89,8 @@ public class RemoteTableOperationProcessor implements TableOperationVisitor<Json
 
 	@Override
 	public JsonObject visit(DeleteOperation operation) throws Throwable {
-		ListenableFuture<Void> future = this.mClient.getTable(operation.getTableName()).delete(operation.getItemId());
+		MobileServiceJsonTable table = this.getRemoteTable(operation.getTableName());
+		ListenableFuture<Void> future = table.delete(operation.getItemId());
 
 		try {
 			future.get();
@@ -111,6 +113,18 @@ public class RemoteTableOperationProcessor implements TableOperationVisitor<Json
 	 */
 	public void setItem(JsonObject item) {
 		this.mItem = item;
+	}
+
+	/**
+	 * Returns an instance of a remote table to be used by this processor
+	 *
+	 * @param tableName the name of the remote table
+	 * @return an instance of a remote table with the given name
+	 */
+	private MobileServiceJsonTable getRemoteTable(String tableName) {
+		MobileServiceJsonTable table = this.mClient.getTable(tableName);
+		table.addFeature(MobileServiceFeatures.Offline);
+		return table;
 	}
 
 	private static EnumSet<MobileServiceSystemProperty> getSystemProperties(JsonObject instance) {

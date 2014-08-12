@@ -28,7 +28,7 @@ import java.net.URLEncoder;
 import java.util.List;
 
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-import com.microsoft.windowsazure.mobileservices.table.MobileServiceTableBase;
+import com.microsoft.windowsazure.mobileservices.table.MobileServiceTableSystemPropertiesProvider;
 
 import android.util.Pair;
 
@@ -52,7 +52,7 @@ public class QueryODataWriter {
 	 * 
 	 * @throws UnsupportedEncodingException
 	 */
-	public static String getRowSetModifiers(Query query, MobileServiceTableBase table) throws UnsupportedEncodingException {
+	public static String getRowSetModifiers(Query query, MobileServiceTableSystemPropertiesProvider table) throws UnsupportedEncodingException {
 		StringBuilder sb = new StringBuilder();
 
 		if (query != null) {

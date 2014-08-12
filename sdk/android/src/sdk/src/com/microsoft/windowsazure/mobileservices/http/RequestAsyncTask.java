@@ -49,13 +49,6 @@ public abstract class RequestAsyncTask extends AsyncTask<Void, Void, ServiceFilt
 	private ServiceFilterRequest mRequest;
 
 	/**
-	 * Default constructor
-	 */
-	public RequestAsyncTask() {
-
-	}
-
-	/**
 	 * Constructor that specifies request and connection
 	 * 
 	 * @param request

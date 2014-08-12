@@ -152,9 +152,6 @@ public class CustomApiTests extends TestGroup {
 
 		this.addTest(invokeHttpContentApiOverload1WithCallbackTest());
 		this.addTest(invokeHttpContentApiOverload1WithCallbackFailTest());
-		
-		this.addTest(invokeHttpContentApiOverload2WithCallbackTest());
-		this.addTest(invokeHttpContentApiOverload2WithCallbackFailTest());
 	}
 	
 	private TestCase createHttpContentApiTest(final DataFormat inputFormat, final DataFormat outputFormat, final Random rndGen) {
@@ -169,6 +166,7 @@ public class CustomApiTests extends TestGroup {
 			int mExpectedStatusCode;
 			String mHttpMethod;
 			byte[] mContent;
+			private static final String TEST_HEADER_PREFIX = "x-test-zumo-"; 
 
 			TestResult mResult;
 
@@ -245,7 +243,7 @@ public class CustomApiTests extends TestGroup {
 				} else {
 
 					for (Pair<String, String> header : mHeaders) {
-						if (!header.first.equals(HTTP.CONTENT_TYPE)) {
+						if (header.first.startsWith(TEST_HEADER_PREFIX)) {
 							if (!Util.responseContainsHeader(response, header.first)) {
 								mResult.getTestCase().log("Header " + header.first + " not found");
 								return new ExpectedValueException("Header: " + header.first, "");
@@ -315,7 +313,7 @@ public class CustomApiTests extends TestGroup {
 
 				int choice = rndGen.nextInt(5);
 				for (int j = 0; j < choice; j++) {
-					String name = "x-test-zumo-" + j;
+					String name = TEST_HEADER_PREFIX + j;
 					String value = Util.createSimpleRandomString(rndGen, rndGen.nextInt(10) + 1, 'a', 'z');
 					mHeaders.add(new Pair<String, String>(name, value));
 				}
@@ -1720,99 +1718,6 @@ public class CustomApiTests extends TestGroup {
 
 					client.invokeApi(apiUrl, new byte[0], HttpPost.METHOD_NAME, new ArrayList<Pair<String, String>>(), new ArrayList<Pair<String, String>>(),
 							serviceFilterResponseCallback());
-				} catch (Exception exception) {
-					createResultFromException(mResult, exception);
-				}
-			}
-
-			private ServiceFilterResponseCallback serviceFilterResponseCallback() {
-				return new ServiceFilterResponseCallback() {
-
-					@Override
-					public void onResponse(ServiceFilterResponse response, Exception exception) {
-						if (exception == null) {
-							mResult.setStatus(TestStatus.Failed);
-						}
-						mCallback.onTestComplete(mResult.getTestCase(), mResult);
-					}
-				};
-			}
-		};
-
-		return test;
-	}
-
-	@SuppressWarnings("deprecation")
-	private TestCase invokeHttpContentApiOverload2WithCallbackTest() {
-
-		String name = String.format("Http With Callback - Overload 2");
-
-		TestCase test = new TestCase(name) {
-			TestExecutionCallback mCallback;
-
-			TestResult mResult;
-
-			@Override
-			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
-				mResult = new TestResult();
-				mResult.setTestCase(this);
-				mResult.setStatus(TestStatus.Passed);
-				mCallback = callback;
-
-				String apiUrl = APP_API_NAME;
-
-				try {
-
-					client.invokeApiInternal(apiUrl, new byte[0], HttpPost.METHOD_NAME, new ArrayList<Pair<String, String>>(), new ArrayList<Pair<String, String>>(),
-							"api/", serviceFilterResponseCallback());
-
-				} catch (Exception exception) {
-					createResultFromException(mResult, exception);
-				}
-			}
-
-			private ServiceFilterResponseCallback serviceFilterResponseCallback() {
-				return new ServiceFilterResponseCallback() {
-
-					@Override
-					public void onResponse(ServiceFilterResponse response, Exception exception) {
-						if (exception != null) {
-							createResultFromException(mResult, exception);
-						}
-
-						mCallback.onTestComplete(mResult.getTestCase(), mResult);
-					}
-				};
-			}
-		};
-
-		return test;
-	}
-
-	@SuppressWarnings("deprecation")
-	private TestCase invokeHttpContentApiOverload2WithCallbackFailTest() {
-
-		String name = String.format("Http With Callback - Overload 2 - Fail");
-
-		TestCase test = new TestCase(name) {
-			TestExecutionCallback mCallback;
-
-			TestResult mResult;
-
-			@Override
-			protected void executeTest(MobileServiceClient client, TestExecutionCallback callback) {
-				mResult = new TestResult();
-				mResult.setTestCase(this);
-				mResult.setStatus(TestStatus.Passed);
-				mCallback = callback;
-
-				String apiUrl = APP_API_NAME + "inexistent";
-
-				try {
-							
-					client.invokeApiInternal(apiUrl, new byte[0], HttpPost.METHOD_NAME, new ArrayList<Pair<String, String>>(), new ArrayList<Pair<String, String>>(),
-							"api/", serviceFilterResponseCallback());
-					
 				} catch (Exception exception) {
 					createResultFromException(mResult, exception);
 				}

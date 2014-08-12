@@ -44,6 +44,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceJsonTable;
 import com.microsoft.windowsazure.mobileservices.table.MobileServicePreconditionFailedExceptionBase;
 import com.microsoft.windowsazure.mobileservices.table.MobileServiceSystemProperty;
@@ -659,6 +660,7 @@ public class MobileServiceSyncContext {
 		try {
 			MobileServiceJsonTable table = this.mClient.getTable(tableName);
 			table.setSystemProperties(EnumSet.allOf(MobileServiceSystemProperty.class));
+			table.addFeature(MobileServiceFeatures.Offline);
 
 			if (query == null) {
 				query = table.top(1000).orderBy("id", QueryOrder.Ascending);

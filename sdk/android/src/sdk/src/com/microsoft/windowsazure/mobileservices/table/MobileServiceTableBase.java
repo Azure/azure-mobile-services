@@ -49,12 +49,14 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.annotations.SerializedName;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
+import com.microsoft.windowsazure.mobileservices.http.MobileServiceHttpClient;
 import com.microsoft.windowsazure.mobileservices.http.RequestAsyncTask;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequest;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterRequestImpl;
 import com.microsoft.windowsazure.mobileservices.http.ServiceFilterResponse;
 
-public abstract class MobileServiceTableBase {
+abstract class MobileServiceTableBase implements MobileServiceTableSystemPropertiesProvider {
 
 	/**
 	 * Tables URI part
@@ -107,11 +109,24 @@ public abstract class MobileServiceTableBase {
 	protected String mTableName;
 
 	/**
-	 * The Mobile Service system properties to be included with items.
+	 * The Mobile Service system properties to be included with items
 	 */
 	protected EnumSet<MobileServiceSystemProperty> mSystemProperties = EnumSet.noneOf(MobileServiceSystemProperty.class);
 
-	protected void initialize(String name, MobileServiceClient client) {
+	/**
+	 * Features to be sent in telemetry headers for requests made by this table
+	 */
+	protected EnumSet<MobileServiceFeatures> mFeatures = EnumSet.noneOf(MobileServiceFeatures.class);
+
+	/**
+	 * Constructor
+	 *
+	 * @param name
+	 *            The name of the represented table
+	 * @param client
+	 *            The MobileServiceClient used to invoke table operations
+	 */
+	public MobileServiceTableBase(String name, MobileServiceClient client) {
 		if (name == null || name.toString().trim().length() == 0) {
 			throw new IllegalArgumentException("Invalid Table Name");
 		}
@@ -122,6 +137,17 @@ public abstract class MobileServiceTableBase {
 
 		mClient = client;
 		mTableName = name;
+	}
+
+	/**
+	 * Adds a feature which will be sent in telemetry headers for all requests
+	 * made by this table
+	 *
+	 * @param feature
+	 *            The feature that will be sent in requests by this table
+	 */
+	public void addFeature(MobileServiceFeatures feature) {
+		mFeatures.add(feature);
 	}
 
 	/**
@@ -196,6 +222,11 @@ public abstract class MobileServiceTableBase {
 		uriBuilder.appendPath(mTableName);
 		uriBuilder.appendPath(getObjectId(elementOrId).toString());
 
+		EnumSet<MobileServiceFeatures> features = mFeatures.clone();
+		if (parameters != null && parameters.size() > 0) {
+			features.add(MobileServiceFeatures.AdditionalQueryParameters);
+		}
+
 		parameters = addSystemProperties(mSystemProperties, parameters);
 
 		if (parameters != null && parameters.size() > 0) {
@@ -207,6 +238,9 @@ public abstract class MobileServiceTableBase {
 		final SettableFuture<Void> future = SettableFuture.create();
 
 		delete = new ServiceFilterRequestImpl(new HttpDelete(uriBuilder.build().toString()), mClient.getAndroidHttpClientFactory());
+		if (!features.isEmpty()) {
+			delete.addHeader(MobileServiceHttpClient.X_ZUMO_FEATURES, MobileServiceFeatures.featuresToString(features));
+		}
 
 		// Create AsyncTask to execute the request
 		new RequestAsyncTask(delete, mClient.createConnection()) {

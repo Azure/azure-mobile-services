@@ -38,6 +38,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 import com.microsoft.windowsazure.mobileservices.MobileServiceException;
+import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
 import com.microsoft.windowsazure.mobileservices.MobileServiceList;
 import com.microsoft.windowsazure.mobileservices.table.query.ExecutableQuery;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
@@ -64,9 +65,11 @@ public final class MobileServiceTable<E> extends MobileServiceTableBase {
 	 *            The class used for data serialization
 	 */
 	public MobileServiceTable(String name, MobileServiceClient client, Class<E> clazz) {
-		initialize(name, client);
+		super(name, client);
+		mFeatures.add(MobileServiceFeatures.TypedTable);
 
 		mInternalTable = new MobileServiceJsonTable(name, client);
+		mInternalTable.mFeatures = EnumSet.of(MobileServiceFeatures.TypedTable);
 		mClazz = clazz;
 
 		mSystemProperties = getSystemProperties(clazz);

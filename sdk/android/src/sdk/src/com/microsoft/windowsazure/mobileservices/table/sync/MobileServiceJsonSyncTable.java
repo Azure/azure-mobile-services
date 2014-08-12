@@ -23,6 +23,7 @@ See the Apache Version 2.0 License for specific language governing permissions a
  */
 package com.microsoft.windowsazure.mobileservices.table.sync;
 
+import java.util.EnumSet;
 import java.util.UUID;
 
 import com.google.common.util.concurrent.ListenableFuture;
@@ -32,6 +33,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
 import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
+import com.microsoft.windowsazure.mobileservices.MobileServiceFeatures;
 import com.microsoft.windowsazure.mobileservices.table.query.Query;
 import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileServiceLocalStoreException;
 
@@ -41,6 +43,8 @@ import com.microsoft.windowsazure.mobileservices.table.sync.localstore.MobileSer
 public class MobileServiceJsonSyncTable {
 	private String mName;
 	private MobileServiceClient mClient;
+
+	protected EnumSet<MobileServiceFeatures> mFeatures;
 
 	/**
 	 * Constructor for MobileServiceJsonSyncTable
@@ -53,6 +57,7 @@ public class MobileServiceJsonSyncTable {
 	public MobileServiceJsonSyncTable(String name, MobileServiceClient client) {
 		this.mName = name;
 		this.mClient = client;
+		this.mFeatures = EnumSet.noneOf(MobileServiceFeatures.class);
 	}
 
 	/**

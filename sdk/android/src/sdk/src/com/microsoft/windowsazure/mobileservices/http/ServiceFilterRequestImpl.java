@@ -35,9 +35,9 @@ import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.protocol.HTTP;
 
-import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
-
 import android.net.http.AndroidHttpClient;
+
+import com.microsoft.windowsazure.mobileservices.MobileServiceClient;
 
 /**
  * 
