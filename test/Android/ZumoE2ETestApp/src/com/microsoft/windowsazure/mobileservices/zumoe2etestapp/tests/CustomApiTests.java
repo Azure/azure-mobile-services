@@ -166,6 +166,7 @@ public class CustomApiTests extends TestGroup {
 			int mExpectedStatusCode;
 			String mHttpMethod;
 			byte[] mContent;
+			private static final String TEST_HEADER_PREFIX = "x-test-zumo-"; 
 
 			TestResult mResult;
 
@@ -242,7 +243,7 @@ public class CustomApiTests extends TestGroup {
 				} else {
 
 					for (Pair<String, String> header : mHeaders) {
-						if (!header.first.equals(HTTP.CONTENT_TYPE)) {
+						if (header.first.startsWith(TEST_HEADER_PREFIX)) {
 							if (!Util.responseContainsHeader(response, header.first)) {
 								mResult.getTestCase().log("Header " + header.first + " not found");
 								return new ExpectedValueException("Header: " + header.first, "");
@@ -312,7 +313,7 @@ public class CustomApiTests extends TestGroup {
 
 				int choice = rndGen.nextInt(5);
 				for (int j = 0; j < choice; j++) {
-					String name = "x-test-zumo-" + j;
+					String name = TEST_HEADER_PREFIX + j;
 					String value = Util.createSimpleRandomString(rndGen, rndGen.nextInt(10) + 1, 'a', 'z');
 					mHeaders.add(new Pair<String, String>(name, value));
 				}
