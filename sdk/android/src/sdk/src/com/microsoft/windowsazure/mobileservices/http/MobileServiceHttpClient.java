@@ -190,6 +190,8 @@ public class MobileServiceHttpClient {
 			}
 
 			if (!containsFeatures) {
+				// Clone header list to prevent changing user's list
+				requestHeaders = new ArrayList<Pair<String, String>>(requestHeaders);
 				requestHeaders.add(new Pair<String, String>(X_ZUMO_FEATURES, featuresHeader));
 			}
 		}
