@@ -605,6 +605,39 @@ public class CustomApiClientTests extends InstrumentationTestCase {
 		}
 	}
 
+	public void testInvokeBytesShouldNotModifyLists() {
+		final byte[] content = new byte[] { 1, 2, 3, 4 };
+		try {
+			MobileServiceClient client = new MobileServiceClient(appUrl, appKey, getInstrumentation().getTargetContext());
+			client = client.withFilter(new EchoFilter());
+
+			List<Pair<String, String>> expectedHeaders = new ArrayList<Pair<String, String>>();
+			expectedHeaders.add(new Pair<String, String>("header1", "value1"));
+			expectedHeaders.add(new Pair<String, String>("header2", "value2"));
+			List<Pair<String, String>> expectedQueryParameters = new ArrayList<Pair<String, String>>();
+			expectedQueryParameters.add(new Pair<String, String>("query1", "value1"));
+			expectedQueryParameters.add(new Pair<String, String>("query2", "value2"));
+
+			List<Pair<String, String>> headers = new ArrayList<Pair<String, String>>(expectedHeaders); 
+			List<Pair<String, String>> queryParameters = new ArrayList<Pair<String, String>>(expectedQueryParameters); 
+			client.invokeApi("myApi", content, "POST", headers, queryParameters).get();
+
+			assertEquals(expectedHeaders.size(), headers.size());
+			for (int i = 0; i < expectedHeaders.size(); i++) {
+				assertEquals(expectedHeaders.get(i).first, headers.get(i).first);
+				assertEquals(expectedHeaders.get(i).second, headers.get(i).second);
+			}
+
+			assertEquals(expectedQueryParameters.size(), queryParameters.size());
+			for (int i = 0; i < expectedQueryParameters.size(); i++) {
+				assertEquals(expectedQueryParameters.get(i).first, queryParameters.get(i).first);
+				assertEquals(expectedQueryParameters.get(i).second, queryParameters.get(i).second);
+			}
+		} catch (Exception exception) {
+			fail(exception.getMessage());
+		}
+	}
+
 	public void testInvokeMethodEcho() throws Throwable {
 
 		// Container to store callback's results and do the asserts.
