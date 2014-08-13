@@ -89,6 +89,15 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The generic type T does not have parameterless constructor..
+        /// </summary>
+        internal static string SQLiteStore_DefineTableEmptyCtorNotDefined {
+            get {
+                return ResourceManager.GetString("SQLiteStore_DefineTableEmptyCtorNotDefined", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The generic type T is not an object..
         /// </summary>
         internal static string SQLiteStore_DefineTableTNotAnObject {

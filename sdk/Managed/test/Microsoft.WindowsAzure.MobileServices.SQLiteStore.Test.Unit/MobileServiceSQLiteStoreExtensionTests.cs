@@ -45,6 +45,14 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.Unit
         }
 
         [TestMethod]
+        public void DefineTable_Throws_WithTypeWithConstructor()
+        {
+            var storeMock = new Mock<MobileServiceSQLiteStore>() { CallBase = true };
+            var ex = AssertEx.Throws<ArgumentException>(() => storeMock.Object.DefineTable<TypeWithConstructor>());
+            Assert.AreEqual("The generic type T does not have parameterless constructor.", ex.Message);
+        }
+
+        [TestMethod]
         public async Task DefineTable_Succeeds_WithComplexType()
         {
             var columns = new[]

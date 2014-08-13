@@ -126,6 +126,9 @@
   <data name="SQLiteStore_DefineAfterInitialize" xml:space="preserve">
     <value>Cannot define a table after the store has been initialized.</value>
   </data>
+  <data name="SQLiteStore_DefineTableEmptyCtorNotDefined" xml:space="preserve">
+    <value>The generic type T does not have parameterless constructor.</value>
+  </data>
   <data name="SQLiteStore_DefineTableTNotAnObject" xml:space="preserve">
     <value>The generic type T is not an object.</value>
   </data>

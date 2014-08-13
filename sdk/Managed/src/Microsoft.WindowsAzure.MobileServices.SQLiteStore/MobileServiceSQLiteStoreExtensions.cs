@@ -33,16 +33,20 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             {
                 throw new ArgumentException(Properties.Resources.SQLiteStore_DefineTableTNotAnObject);
             }
+            if (contract.DefaultCreator == null)
+            {
+                throw new ArgumentException(Properties.Resources.SQLiteStore_DefineTableEmptyCtorNotDefined);
+            }
 
             // create an empty object
-            object theObject = contract.DefaultCreator();            
+            object theObject = contract.DefaultCreator();
             SetEnumDefault(contract, theObject);
 
             JObject item = ConvertToJObject(settings, theObject);
 
             //// set default values so serialized version can be used to infer types
             SetIdDefault<T>(settings, item);
-            SetNullDefault(contract, item);            
+            SetNullDefault(contract, item);
 
             store.DefineTable(tableName, item);
         }
@@ -97,7 +101,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
                 {
                     item[itemProperty.Name] = new byte[0];
                 }
-                else if (contractProperty.PropertyType.GetTypeInfo().IsGenericType  && contractProperty.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                else if (contractProperty.PropertyType.GetTypeInfo().IsGenericType && contractProperty.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
                 {
                     item[itemProperty.Name] = new JValue(Activator.CreateInstance(contractProperty.PropertyType.GenericTypeArguments[0]));
                 }
