@@ -5,16 +5,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.WindowsAzure.MobileServices;
 using Microsoft.WindowsAzure.MobileServices.SQLiteStore;
 using Microsoft.WindowsAzure.MobileServices.Sync;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Windows.Storage;
 using ZumoE2ETestApp.Framework;
@@ -504,6 +500,11 @@ namespace ZumoE2ETestApp.Tests
             // work, but there will be no conflicts
             return new ZumoTest("Offline without version column", async delegate(ZumoTest test)
             {
+                if (ZumoTestGlobals.Instance.IsNetRuntime)
+                {
+                    return true;
+                }
+
                 DateTime now = DateTime.UtcNow;
                 int seed = now.Year * 10000 + now.Month * 100 + now.Day;
                 test.AddLog("Using random seed: {0}", seed);

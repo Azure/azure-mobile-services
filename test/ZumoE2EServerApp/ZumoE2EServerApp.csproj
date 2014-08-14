@@ -227,7 +227,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Controllers\RuntimeInfoController.cs" />
+    <Compile Include="Controllers\OfflineReadyController.cs" />
     <Compile Include="Controllers\W8JSRoundTripTableController.cs" />
+    <Compile Include="DataObjects\OfflineReady.cs" />
     <Compile Include="DataObjects\ParamsTestTableEntity.cs" />
     <Compile Include="DataObjects\W8JSRoundTripTableItem.cs" />
     <Compile Include="DataObjects\W8PushTestEntity.cs" />
