@@ -51,11 +51,11 @@
     </Reference>
     <Reference Include="SQLitePCL, Version=3.8.5.0, Culture=neutral, PublicKeyToken=bddade01e9c850c5, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\SQLitePCL.3.8.5.0\lib\MonoAndroid\SQLitePCL.dll</HintPath>
+      <HintPath>..\..\packages\SQLitePCL.3.8.5.1\lib\MonoAndroid\SQLitePCL.dll</HintPath>
     </Reference>
     <Reference Include="SQLitePCL.Ext, Version=3.8.5.0, Culture=neutral, PublicKeyToken=bddade01e9c850c5, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\SQLitePCL.3.8.5.0\lib\MonoAndroid\SQLitePCL.Ext.dll</HintPath>
+      <HintPath>..\..\packages\SQLitePCL.3.8.5.1\lib\MonoAndroid\SQLitePCL.Ext.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
