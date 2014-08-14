@@ -10,6 +10,9 @@ NSString *const MSFeaturesHeaderName = @"X-ZUMO-FEATURES";
 NSString *const MSFeatureCodeApiJson = @"AJ";
 NSString *const MSFeatureCodeApiGeneric = @"AG";
 NSString *const MSFeatureCodeQueryParameters = @"QS";
+NSString *const MSFeatureCodeTableReadQuery = @"TQ";
+NSString *const MSFeatureCodeTableReadRaw = @"TR";
+NSString *const MSFeatureCodeOpportunisticConcurrency = @"OC";
 
 @implementation MSSDKFeatures
 
@@ -23,8 +26,17 @@ NSString *const MSFeatureCodeQueryParameters = @"QS";
     if (features & MSFeatureApiJson) {
         [allFeatures addObject:MSFeatureCodeApiJson];
     }
+    if (features & MSFeatureTableReadQuery) {
+        [allFeatures addObject:MSFeatureCodeTableReadQuery];
+    }
+    if (features & MSFeatureTableReadRaw) {
+        [allFeatures addObject:MSFeatureCodeTableReadRaw];
+    }
     if (features & MSFeatureQueryParameters) {
         [allFeatures addObject:MSFeatureCodeQueryParameters];
+    }
+    if (features & MSFeatureOpportunisticConcurrency) {
+        [allFeatures addObject:MSFeatureCodeOpportunisticConcurrency];
     }
 
     return [allFeatures componentsJoinedByString:@","];

@@ -6,6 +6,7 @@
 #import "MSPredicateTranslator.h"
 #import "MSURLBuilder.h"
 #import "MSSyncContextInternal.h"
+#import "MSTableInternal.h"
 
 #pragma mark * MSQuery Implementation
 
@@ -100,8 +101,7 @@
         }
         else {
             // Call read with the query string
-            [self.table readWithQueryString:queryString
-                              completion:completion];
+            [self.table readWithQueryStringInternal:queryString features:MSFeatureTableReadQuery completion:completion];
         }
     }
 }

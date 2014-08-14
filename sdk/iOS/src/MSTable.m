@@ -8,7 +8,7 @@
 #import "MSJSONSerializer.h"
 #import "MSTableRequest.h"
 #import "MSTableConnection.h"
-
+#import "MSSDKFeatures.h"
 
 #pragma mark * MSTable Implementation
 
@@ -195,16 +195,23 @@ NSString *const MSSystemColumnDeleted = @"__deleted";
 -(void) readWithQueryString:(NSString *)queryString
                  completion:(MSReadQueryBlock)completion
 {
+    return [self readWithQueryStringInternal:queryString features:MSFeatureTableReadRaw completion:completion];
+}
+
+-(void)readWithQueryStringInternal:(NSString *)queryString
+                          features:(MSFeatures)features
+                        completion:(MSReadQueryBlock)completion {
     // Create the request
     MSTableReadQueryRequest *request = [MSTableRequest
                                         requestToReadItemsWithQuery:queryString
                                         table:self
+                                        features:features
                                         completion:completion];
     // Send the request
     if (request) {
         MSTableConnection *connection =
-            [MSTableConnection connectionWithReadRequest:request
-                                              completion:completion];
+        [MSTableConnection connectionWithReadRequest:request
+                                          completion:completion];
         [connection start];
     }
 }
@@ -212,7 +219,7 @@ NSString *const MSSystemColumnDeleted = @"__deleted";
 -(void) readWithCompletion:(MSReadQueryBlock)completion
 {
     // Read without a query string
-    [self readWithQueryString:nil completion:completion];
+    [self readWithQueryStringInternal:nil features:MSFeatureNone completion:completion];
 }
 
 -(void) readWithPredicate:(NSPredicate *) predicate

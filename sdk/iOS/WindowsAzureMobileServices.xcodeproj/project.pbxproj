@@ -162,6 +162,7 @@
 		402774F8161F73AB00A23A8F /* MSLoginController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSLoginController.h; sourceTree = "<group>"; };
 		870C0C9A199C246700A134DD /* MSSDKFeatures.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSSDKFeatures.h; sourceTree = "<group>"; };
 		870C0C9B199C246700A134DD /* MSSDKFeatures.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSSDKFeatures.m; sourceTree = "<group>"; };
+		8790D2BE199C5D510000DC4E /* MSTableInternal.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = MSTableInternal.h; sourceTree = "<group>"; };
 		A214410B182631A500C2E762 /* MSTableFuncTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSTableFuncTests.m; sourceTree = "<group>"; };
 		A22CF3711825914700660C79 /* MSTable+MSTableTestUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MSTable+MSTableTestUtilities.h"; sourceTree = "<group>"; };
 		A22CF3721825914700660C79 /* MSTable+MSTableTestUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MSTable+MSTableTestUtilities.m"; sourceTree = "<group>"; };
@@ -472,6 +473,7 @@
 				E8F33B0E161667CE002DD7C6 /* MSQuery.h */,
 				E8F33B0F161667CE002DD7C6 /* MSQuery.m */,
 				E8F33B10161667CE002DD7C6 /* MSTable.h */,
+				8790D2BE199C5D510000DC4E /* MSTableInternal.h */,
 				E8F33B11161667CE002DD7C6 /* MSTable.m */,
 				E8F33B12161667CE002DD7C6 /* MSUser.h */,
 				E8F33B13161667CE002DD7C6 /* MSUser.m */,
@@ -692,6 +694,7 @@
 		E8F33AD21616659C002DD7C6 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastTestingUpgradeCheck = 0510;
 				LastUpgradeCheck = 0500;
 				ORGANIZATIONNAME = "Windows Azure";
 			};
