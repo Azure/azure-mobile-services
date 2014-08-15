@@ -2177,18 +2177,11 @@
 
 -(void) testQueryAddsProperFeaturesHeader {
     __block NSURLRequest *actualRequest = nil;
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:@"[]"];
     testFilter.onInspectRequest = ^(NSURLRequest *request) {
         actualRequest = request;
         return request;
     };
-    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
-                                                           statusCode:200
-                                                          HTTPVersion:nil
-                                                         headerFields:nil];
-
-    testFilter.dataToUse = [@"[]" dataUsingEncoding:NSUTF8StringEncoding];
-    testFilter.ignoreNextFilter = YES;
 
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
@@ -2200,8 +2193,7 @@
 
         NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
         STAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
-        NSString *errorMessage = [NSString stringWithFormat:@"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeTableReadRaw];
-        STAssertTrue([featuresHeader isEqualToString:MSFeatureCodeTableReadRaw], errorMessage);
+        STAssertTrue([featuresHeader isEqualToString:MSFeatureCodeTableReadRaw], @"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeTableReadRaw);
 
         done = YES;
     }];
@@ -2216,8 +2208,7 @@
 
         NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
         STAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
-        NSString *errorMessage = [NSString stringWithFormat:@"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeTableReadQuery];
-        STAssertTrue([featuresHeader isEqualToString:MSFeatureCodeTableReadQuery], errorMessage);
+        STAssertTrue([featuresHeader isEqualToString:MSFeatureCodeTableReadQuery], @"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeTableReadQuery);
 
         done = YES;
     }];
@@ -2235,8 +2226,7 @@
 
         NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
         STAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
-        NSString *errorMessage = [NSString stringWithFormat:@"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeTableReadQuery];
-        STAssertTrue([featuresHeader isEqualToString:MSFeatureCodeTableReadQuery], errorMessage);
+        STAssertTrue([featuresHeader isEqualToString:MSFeatureCodeTableReadQuery], @"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeTableReadQuery);
 
         done = YES;
     }];
@@ -2245,20 +2235,12 @@
 
 -(void) testInsertUpdateDeleteAddsProperFeaturesHeader {
     __block NSURLRequest *actualRequest = nil;
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    NSString* response = @"{\"id\": \"A\", \"name\":\"test name\", \"__version\":\"ABC\"}";
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:response];
     testFilter.onInspectRequest = ^(NSURLRequest *request) {
         actualRequest = request;
         return request;
     };
-    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
-                                                           statusCode:200
-                                                          HTTPVersion:nil
-                                                         headerFields:nil];
-
-    NSString* stringData = @"{\"id\": \"A\", \"name\":\"test name\", \"__version\":\"ABC\"}";
-    NSData* data = [stringData dataUsingEncoding:NSUTF8StringEncoding];
-    testFilter.dataToUse = data;
-    testFilter.ignoreNextFilter = YES;
 
     MSClient *filteredClient = [client clientWithFilter:testFilter];
     MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
@@ -2286,8 +2268,7 @@
 
         NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
         STAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
-        NSString *errorMessage = [NSString stringWithFormat:@"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeQueryParameters];
-        STAssertTrue([featuresHeader isEqualToString:MSFeatureCodeQueryParameters], errorMessage);
+        STAssertTrue([featuresHeader isEqualToString:MSFeatureCodeQueryParameters], @"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeQueryParameters);
 
         done = YES;
     }];
@@ -2316,8 +2297,7 @@
 
         NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
         STAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
-        NSString *errorMessage = [NSString stringWithFormat:@"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeOpportunisticConcurrency];
-        STAssertTrue([featuresHeader isEqualToString:MSFeatureCodeOpportunisticConcurrency], errorMessage);
+        STAssertTrue([featuresHeader isEqualToString:MSFeatureCodeOpportunisticConcurrency], @"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeOpportunisticConcurrency);
 
         done = YES;
     }];
@@ -2333,8 +2313,7 @@
         NSString *expectedHeader = [MSSDKFeatures httpHeaderForFeatures:MSFeatureOpportunisticConcurrency | MSFeatureQueryParameters];
         NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
         STAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
-        NSString *errorMessage = [NSString stringWithFormat:@"Header value (%@) was not as expected (%@)", featuresHeader, expectedHeader];
-        STAssertTrue([featuresHeader isEqualToString:expectedHeader], errorMessage);
+        STAssertTrue([featuresHeader isEqualToString:expectedHeader], @"Header value (%@) was not as expected (%@)", featuresHeader, expectedHeader);
 
         done = YES;
     }];
@@ -2362,8 +2341,7 @@
 
         NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
         STAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
-        NSString *errorMessage = [NSString stringWithFormat:@"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeOpportunisticConcurrency];
-        STAssertTrue([featuresHeader isEqualToString:MSFeatureCodeOpportunisticConcurrency], errorMessage);
+        STAssertTrue([featuresHeader isEqualToString:MSFeatureCodeOpportunisticConcurrency], @"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeOpportunisticConcurrency);
 
         done = YES;
     }];
@@ -2379,8 +2357,7 @@
         NSString *expectedHeader = [MSSDKFeatures httpHeaderForFeatures:MSFeatureOpportunisticConcurrency | MSFeatureQueryParameters];
         NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
         STAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
-        NSString *errorMessage = [NSString stringWithFormat:@"Header value (%@) was not as expected (%@)", featuresHeader, expectedHeader];
-        STAssertTrue([featuresHeader isEqualToString:expectedHeader], errorMessage);
+        STAssertTrue([featuresHeader isEqualToString:expectedHeader], @"Header value (%@) was not as expected (%@)", featuresHeader, expectedHeader);
 
         done = YES;
     }];
@@ -2408,8 +2385,7 @@
 
         NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
         STAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
-        NSString *errorMessage = [NSString stringWithFormat:@"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeQueryParameters];
-        STAssertTrue([featuresHeader isEqualToString:MSFeatureCodeQueryParameters], errorMessage);
+        STAssertTrue([featuresHeader isEqualToString:MSFeatureCodeQueryParameters], @"Header value (%@) was not as expected (%@)", featuresHeader, MSFeatureCodeQueryParameters);
 
         done = YES;
     }];

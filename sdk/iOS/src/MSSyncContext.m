@@ -10,6 +10,7 @@
 #import "MSTableOperationError.h"
 #import "MSJSONSerializer.h"
 #import "MSQuery.h"
+#import "MSQueryInternal.h"
 #import "MSQueuePushOperation.h"
 
 @implementation MSSyncContext {
@@ -348,7 +349,7 @@ static NSOperationQueue *pushQueue_;
         }
         
         // Read from server
-        [query readWithCompletion:^(NSArray *serverItems, NSInteger totalCount, NSError *error) {
+        [query readInternalWithFeatures:MSFeatureOffline completion:^(NSArray *serverItems, NSInteger totalCount, NSError *error) {
             // If error, or no results we can stop processing
             if (error || !serverItems || serverItems.count == 0) {
                 if (completion) {

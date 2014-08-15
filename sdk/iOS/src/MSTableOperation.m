@@ -6,6 +6,7 @@
 #import "MSTableOperationInternal.h"
 #import "MSClient.h"
 #import "MSTable.h"
+#import "MSTableInternal.h"
 #import "MSJSONSerializer.h"
 
 @implementation MSTableOperation
@@ -76,6 +77,7 @@
 - (void) executeWithCompletion:(void(^)(NSDictionary *, NSError *))completion
 {
     MSTable *table = [self.client tableWithName:self.tableName];
+    table.features = MSFeatureOffline;
     
     if ([self.dataSource respondsToSelector:@selector(systemPropetiesForTable:)]) {
         table.systemProperties = [self.dataSource systemPropetiesForTable:self.tableName];

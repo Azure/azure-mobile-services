@@ -7,30 +7,33 @@
 #pragma mark * Telemetry features definitions
 
 typedef NS_OPTIONS(NSUInteger, MSFeatures) {
-    MSFeatureNone              = 0,
+    MSFeatureNone                     = 0,
 
     // Custom API where the request / response body is serialized
     // into / deserialized from JSON
-    MSFeatureApiJson           = 1 << 0,
+    MSFeatureApiJson                  = 1 << 0,
 
     // Custom API where the request / response body is given as a
     // NSData object
-    MSFeatureApiGeneric        = 1 << 1,
+    MSFeatureApiGeneric               = 1 << 1,
 
     // Table or API calls where the caller passes additional query
     // string parameters
-    MSFeatureQueryParameters   = 1 << 2,
+    MSFeatureQueryParameters          = 1 << 2,
 
     // Table reads where the caller uses a MSQuery / NSPredicate to
     // determine the items to be returned
-    MSFeatureTableReadQuery    = 1 << 3,
+    MSFeatureTableReadQuery           = 1 << 3,
 
     // Table reads where the caller uses a raw query string to determine
     // the items to be returned
-    MSFeatureTableReadRaw     = 1 << 4,
+    MSFeatureTableReadRaw             = 1 << 4,
 
     // Conditional table updates / deletes (If-Match based on record version)
     MSFeatureOpportunisticConcurrency = 1 << 5,
+
+    // Table reads / writes originated from a sync (offline) table
+    MSFeatureOffline                  = 1 << 6,
 };
 
 extern NSString *const MSFeaturesHeaderName;
@@ -41,6 +44,7 @@ extern NSString *const MSFeatureCodeQueryParameters;
 extern NSString *const MSFeatureCodeTableReadQuery;
 extern NSString *const MSFeatureCodeTableReadRaw;
 extern NSString *const MSFeatureCodeOpportunisticConcurrency;
+extern NSString *const MSFeatureCodeOffline;
 
 // The |MSSDKFeatures| class defines methods to convert between the
 // |MSFeatures| enumeration and the value to be sent in HTTP requests

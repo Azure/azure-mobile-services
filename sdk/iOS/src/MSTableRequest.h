@@ -58,30 +58,35 @@ typedef enum MSTableRequestTypeEnum {
 +(MSTableItemRequest *) requestToInsertItem:(id)item
                                       table:(MSTable *)table
                                  parameters:(NSDictionary *)parameters
+                                   features:(MSFeatures)features
                                  completion:(MSItemBlock)completion;
 
 // Creates a request to update the item in the given table.
 +(MSTableItemRequest *) requestToUpdateItem:(id)item
                                       table:(MSTable *)table
                                  parameters:(NSDictionary *)parameters
+                                   features:(MSFeatures)features
                                  completion:(MSItemBlock)completion;
 
 // Creates a request to delete the item from the given table.
 +(MSTableDeleteRequest *) requestToDeleteItem:(id)item
                                         table:(MSTable *)table
                                    parameters:(NSDictionary *)parameters
+                                     features:(MSFeatures)features
                                    completion:(MSDeleteBlock)completion;
 
 // Creates a request to delete the item with the given id from the given table.
 +(MSTableDeleteRequest *) requestToDeleteItemWithId:(id)itemId
                                               table:(MSTable *)table
                                          parameters:(NSDictionary *)parameters
+                                           features:(MSFeatures)features
                                          completion:(MSDeleteBlock)completion;
 
 // Creates a request to undelete the item from the given table.
 +(MSTableItemRequest *) requestToUndeleteItem:(id)item
                                         table:(MSTable *)table
                                    parameters:(NSDictionary *)parameters
+                                     features:(MSFeatures)features
                                    completion:(MSItemBlock)completion;
 
 // Creates a request to read the item with the given id from the given table.

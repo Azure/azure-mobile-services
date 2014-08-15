@@ -128,6 +128,7 @@ static NSString *const httpDelete = @"DELETE";
 +(MSTableItemRequest *) requestToInsertItem:(id)item
                                       table:(MSTable *)table
                                  parameters:(NSDictionary *)parameters
+                                   features:(MSFeatures)features
                                  completion:(MSItemBlock)completion
 {
     MSTableItemRequest *request = nil;
@@ -160,7 +161,7 @@ static NSString *const httpDelete = @"DELETE";
             request.HTTPMethod = httpPost;
 
             // Set features header if necessary
-            [self addFeaturesHeaderForRequest:request queryParameters:parameters features:MSFeatureNone];
+            [self addFeaturesHeaderForRequest:request queryParameters:parameters features:features];
         }
     }
     
@@ -179,6 +180,7 @@ static NSString *const httpDelete = @"DELETE";
 +(MSTableItemRequest *) requestToUpdateItem:(id)item
                                       table:(MSTable *)table
                                  parameters:(NSDictionary *)parameters
+                                   features:(MSFeatures)features
                                  completion:(MSItemBlock)completion
 
 {
@@ -228,11 +230,6 @@ static NSString *const httpDelete = @"DELETE";
                     [request setIfMatchVersion:version];
 
                     // Set features header if necessary
-                    MSFeatures features = MSFeatureNone;
-                    if (version) {
-                        features |= MSFeatureOpportunisticConcurrency;
-                    }
-
                     [self addFeaturesHeaderForRequest:request queryParameters:parameters features:features];
                 }
             }
@@ -252,9 +249,10 @@ static NSString *const httpDelete = @"DELETE";
 }
 
 +(MSTableDeleteRequest *) requestToDeleteItem:(id)item
-                                    table:(MSTable *)table
-                               parameters:(NSDictionary *)parameters
-                               completion:(MSDeleteBlock)completion
+                                        table:(MSTable *)table
+                                   parameters:(NSDictionary *)parameters
+                                     features:(MSFeatures)features
+                                   completion:(MSDeleteBlock)completion
 {
     MSTableDeleteRequest *request = nil;
     NSError *error = nil;
@@ -269,6 +267,7 @@ static NSString *const httpDelete = @"DELETE";
         request = [MSTableRequest requestToDeleteItemWithId:itemId
                                                       table:table
                                                  parameters:parameters
+                                                   features:MSFeatureNone
                                                  completion:completion];
         
         // Set the additional properties
@@ -278,11 +277,6 @@ static NSString *const httpDelete = @"DELETE";
         [request setIfMatchVersion:version];
 
         // Set features header if necessary
-        MSFeatures features = MSFeatureNone;
-        if (version) {
-            features |= MSFeatureOpportunisticConcurrency;
-        }
-
         [self addFeaturesHeaderForRequest:request queryParameters:parameters features:features];
     }
     
@@ -301,6 +295,7 @@ static NSString *const httpDelete = @"DELETE";
 +(MSTableDeleteRequest *) requestToDeleteItemWithId:(id)itemId
                                               table:(MSTable *)table
                                          parameters:(NSDictionary *)parameters
+                                           features:(MSFeatures)features
                                          completion:(MSDeleteBlock)completion
 {
     MSTableDeleteRequest *request = nil;
@@ -330,7 +325,7 @@ static NSString *const httpDelete = @"DELETE";
             request.HTTPMethod = httpDelete;
 
             // Set features header if necessary
-            [self addFeaturesHeaderForRequest:request queryParameters:parameters features:MSFeatureNone];
+            [self addFeaturesHeaderForRequest:request queryParameters:parameters features:features];
         }
     }
     
@@ -349,6 +344,7 @@ static NSString *const httpDelete = @"DELETE";
 +(MSTableItemRequest *) requestToUndeleteItem:(id)item
                                         table:(MSTable *)table
                                    parameters:(NSDictionary *)parameters
+                                     features:(MSFeatures)features
                                    completion:(MSItemBlock)completion
 {
     MSTableItemRequest *request = nil;
@@ -386,11 +382,6 @@ static NSString *const httpDelete = @"DELETE";
                 [request setIfMatchVersion:version];
 
                 // Set features header if necessary
-                MSFeatures features = MSFeatureNone;
-                if (version) {
-                    features |= MSFeatureOpportunisticConcurrency;
-                }
-
                 [self addFeaturesHeaderForRequest:request queryParameters:parameters features:features];
             }
         }
@@ -496,6 +487,9 @@ static NSString *const httpDelete = @"DELETE";
 }
 
 + (void)addFeaturesHeaderForRequest:(MSTableRequest *)request queryParameters:(NSDictionary *)parameters features:(MSFeatures)features {
+    if ([[request allHTTPHeaderFields] objectForKey:@"If-Match"]) {
+        features |= MSFeatureOpportunisticConcurrency;
+    }
     if (parameters && [parameters count]) {
         features |= MSFeatureQueryParameters;
     }

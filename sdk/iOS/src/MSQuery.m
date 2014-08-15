@@ -84,9 +84,18 @@
 
 -(void) readWithCompletion:(MSReadQueryBlock)completion;
 {
+    return [self readInternalWithFeatures:MSFeatureNone completion:completion];
+}
+
+
+#pragma mark * Private Methods
+
+-(void)readInternalWithFeatures:(MSFeatures)features completion:(MSReadQueryBlock)completion {
     // Get the query string
     NSError *error = nil;
     
+    features |= MSFeatureTableReadQuery;
+
     // query execution logic depends on if its against a sync or remote table
     if (self.syncTable != nil) {
         [self.syncTable.client.syncContext readWithQuery:self completion:completion];
@@ -101,14 +110,10 @@
         }
         else {
             // Call read with the query string
-            [self.table readWithQueryStringInternal:queryString features:MSFeatureTableReadQuery completion:completion];
+            [self.table readWithQueryStringInternal:queryString features:features completion:completion];
         }
     }
 }
-
-
-#pragma mark * Private Methods
-
 
 -(void) orderBy:(NSString *)field isAscending:(BOOL)isAscending
 {

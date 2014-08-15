@@ -625,12 +625,7 @@
     __block NSURLRequest *actualRequest = nil;
     
     // Use the filter to capture the request being sent
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
-    testFilter.ignoreNextFilter = YES;
-    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
-                                                           statusCode:200
-                                                          HTTPVersion:nil
-                                                         headerFields:nil];
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200];
     testFilter.onInspectRequest = ^(NSURLRequest *request) {
         actualRequest = request;
         return request;
@@ -653,8 +648,7 @@
 
          NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
          STAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
-         NSString *errorMessage = [NSString stringWithFormat:@"Header value (%@) was not as expected (%@)", featuresHeader, expectedFeatures];
-         STAssertTrue([featuresHeader isEqualToString:expectedFeatures], errorMessage);
+         STAssertTrue([featuresHeader isEqualToString:expectedFeatures], @"Header value (%@) was not as expected (%@)", featuresHeader, expectedFeatures);
 
          done = YES;
      }];
@@ -679,12 +673,7 @@
     __block NSURLRequest *actualRequest = nil;
 
     // Use the filter to capture the request being sent
-    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
-    testFilter.ignoreNextFilter = YES;
-    testFilter.responseToUse = [[NSHTTPURLResponse alloc] initWithURL:nil
-                                                           statusCode:200
-                                                          HTTPVersion:nil
-                                                         headerFields:nil];
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200];
     testFilter.onInspectRequest = ^(NSURLRequest *request) {
         actualRequest = request;
         return request;
@@ -706,8 +695,7 @@
 
                      NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
                      STAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
-                     NSString *errorMessage = [NSString stringWithFormat:@"Header value (%@) was not as expected (%@)", featuresHeader, expectedFeatures];
-                     STAssertTrue([featuresHeader isEqualToString:expectedFeatures], errorMessage);
+                     STAssertTrue([featuresHeader isEqualToString:expectedFeatures], @"Header value (%@) was not as expected (%@)", featuresHeader, expectedFeatures);
 
                      done = YES;
                  }];

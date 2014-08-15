@@ -9,6 +9,7 @@
 #import "MSTableRequest.h"
 #import "MSTableConnection.h"
 #import "MSSDKFeatures.h"
+#import "MSTableInternal.h"
 
 #pragma mark * MSTable Implementation
 
@@ -22,7 +23,7 @@ NSString *const MSSystemColumnDeleted = @"__deleted";
 
 @synthesize client = client_;
 @synthesize name = name_;
-
+@synthesize features = features_;
 
 #pragma mark * Public Initializer Methods
 
@@ -34,6 +35,7 @@ NSString *const MSSystemColumnDeleted = @"__deleted";
     {
         client_ = client;
         name_ = tableName;
+        features_ = MSFeatureNone;
     }
     return self;
 }
@@ -56,6 +58,7 @@ NSString *const MSSystemColumnDeleted = @"__deleted";
                                    requestToInsertItem:item
                                    table:self
                                    parameters:parameters
+                                   features:self.features
                                    completion:completion];
     // Send the request
     if (request) {
@@ -79,6 +82,7 @@ NSString *const MSSystemColumnDeleted = @"__deleted";
                                    requestToUpdateItem:item
                                    table:self
                                    parameters:parameters
+                                   features:self.features
                                    completion:completion];
     
     // Send the request
@@ -104,6 +108,7 @@ NSString *const MSSystemColumnDeleted = @"__deleted";
                                      requestToDeleteItem:item
                                      table:self
                                      parameters:parameters
+                                     features:self.features
                                      completion:completion];
     // Send the request
     if (request) {
@@ -128,6 +133,7 @@ NSString *const MSSystemColumnDeleted = @"__deleted";
                                      requestToDeleteItemWithId:itemId
                                      table:self
                                      parameters:parameters
+                                     features:self.features
                                      completion:completion];
     // Send the request
     if (request) {
@@ -152,6 +158,7 @@ NSString *const MSSystemColumnDeleted = @"__deleted";
                                      requestToUndeleteItem:item
                                      table:self
                                      parameters:parameters
+                                   features:self.features
                                      completion:completion];
                                      
     // Send the request
@@ -219,7 +226,7 @@ NSString *const MSSystemColumnDeleted = @"__deleted";
 -(void) readWithCompletion:(MSReadQueryBlock)completion
 {
     // Read without a query string
-    [self readWithQueryStringInternal:nil features:MSFeatureNone completion:completion];
+    [self readWithQueryStringInternal:nil features:self.features completion:completion];
 }
 
 -(void) readWithPredicate:(NSPredicate *) predicate

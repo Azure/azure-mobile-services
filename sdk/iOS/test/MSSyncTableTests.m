@@ -9,6 +9,7 @@
 #import "MSTable+MSTableTestUtilities.h"
 #import "MSOfflinePassthroughHelper.h"
 #import "MSCoreDataStore+TestHelper.h"
+#import "MSSDKFeatures.h"
 
 @interface MSSyncTableTests : SenTestCase {
     MSClient *client;
@@ -860,6 +861,77 @@
     STAssertTrue([self waitForTest:300.0], @"Test timed out.");
 }
 
+-(void) testPullAddsProperFeaturesHeader
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:@"[]"];
+    __block NSURLRequest *actualRequest = nil;
+
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    offline.upsertCalls = 0;
+
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoItem"];
+    MSQuery *query = [todoTable query];
+
+    [todoTable pullWithQuery:query completion:^(NSError *error) {
+        STAssertNil(error, error.description);
+        STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+
+        NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
+        STAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
+        NSString *expectedFeatures = @"TQ,OL";
+        STAssertTrue([featuresHeader isEqualToString:expectedFeatures], @"Header value (%@) was not as expected (%@)", featuresHeader, expectedFeatures);
+
+        done = YES;
+    }];
+
+    STAssertTrue([self waitForTest:30.0], @"Test timed out.");
+}
+
+-(void) testPushAddsProperFeaturesHeader
+{
+    NSString* stringData = @"{\"id\": \"test1\", \"text\":\"test name\"}";
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data:stringData];
+    __block NSURLRequest *actualRequest = nil;
+
+    testFilter.onInspectRequest = ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSSyncTable *todoTable = [filteredClient syncTableWithName:@"TodoNoVersion"];
+
+    // Create the item
+    NSDictionary *item = @{ @"id": @"test1", @"name":@"test name" };
+
+    // Insert the item
+    done = NO;
+    [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        done = YES;
+    }];
+
+    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+
+    done = NO;
+    actualRequest = nil;
+    [client.syncContext pushWithCompletion:^(NSError *error) {
+        STAssertNil(error, @"error should have been nil.");
+        STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+
+        NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
+        STAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
+        NSString *expectedFeatures = @"OL";
+        STAssertTrue([featuresHeader isEqualToString:expectedFeatures], @"Header value (%@) was not as expected (%@)", featuresHeader, expectedFeatures);
+
+        done = YES;
+    }];
+    STAssertTrue([self waitForTest:10.1], @"Test timed out.");
+}
 
 #pragma mark Purge Tests
 
