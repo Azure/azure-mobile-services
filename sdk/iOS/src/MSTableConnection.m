@@ -49,10 +49,7 @@
                     error = [self handleConflictResponse:response data:data connection:connection];
                 }
                 
-                if (response && item && !error) {
-                    // Remove unasked for system columns
-                    [MSTableConnection removeSystemColumnsFromItem:item ifNotInQuery:response.URL.query];
-                    
+                if (response && item && !error) {                    
                     // Add version to item is header is present
                     NSString *version = [[response allHeaderFields] objectForKey:@"Etag"];
                     if (version) {
@@ -62,6 +59,9 @@
                         }
                         [item setValue:[version stringByReplacingOccurrencesOfString:@"\\\"" withString:@"\""] forKey:MSSystemColumnVersion];
                     }
+                    
+                    // Remove unasked for system columns
+                    [MSTableConnection removeSystemColumnsFromItem:item ifNotInQuery:response.URL.query];
                 }
             }
             
