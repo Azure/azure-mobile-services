@@ -6,10 +6,10 @@
 - Added support for byte[] properties in offline
 - Fixed issue with timezone roundtripping in incremental sync
 - Improved exception handling for 409 conflicts
-- Do not Push changes on PurgeAsync() instead throw an exception
 - Improved error handling for timeout errors during sync
-- Follow link headers returned from .NET backend and use skip and take for PullAsync()
+- Follow link headers returned from .NET backend and use skip and top for PullAsync()
 - Introduced the SupportedOptions enum on IMobileServiceSyncTable to configure the pull strategy
+- **[Breaking]** Do not Push changes on PurgeAsync() instead throw an exception
 - **[Breaking]** Renamed ToQueryString method to ToODataString on MobileServiceTableQueryDescription class
 
 ### Version 1.3 alpha4
