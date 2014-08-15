@@ -4,6 +4,7 @@
 
 #import "MSTableRequest.h"
 #import "MSURLBuilder.h"
+#import "MSSDKFeatures.h"
 
 
 #pragma mark * HTTP Method String Constants
@@ -127,6 +128,7 @@ static NSString *const httpDelete = @"DELETE";
 +(MSTableItemRequest *) requestToInsertItem:(id)item
                                       table:(MSTable *)table
                                  parameters:(NSDictionary *)parameters
+                                   features:(MSFeatures)features
                                  completion:(MSItemBlock)completion
 {
     MSTableItemRequest *request = nil;
@@ -157,6 +159,9 @@ static NSString *const httpDelete = @"DELETE";
             
             // Set the method and headers
             request.HTTPMethod = httpPost;
+
+            // Set features header if necessary
+            [self addFeaturesHeaderForRequest:request queryParameters:parameters features:features];
         }
     }
     
@@ -175,6 +180,7 @@ static NSString *const httpDelete = @"DELETE";
 +(MSTableItemRequest *) requestToUpdateItem:(id)item
                                       table:(MSTable *)table
                                  parameters:(NSDictionary *)parameters
+                                   features:(MSFeatures)features
                                  completion:(MSItemBlock)completion
 
 {
@@ -222,6 +228,9 @@ static NSString *const httpDelete = @"DELETE";
                     
                     // Version becomes an etag if passed
                     [request setIfMatchVersion:version];
+
+                    // Set features header if necessary
+                    [self addFeaturesHeaderForRequest:request queryParameters:parameters features:features];
                 }
             }
         }
@@ -240,9 +249,10 @@ static NSString *const httpDelete = @"DELETE";
 }
 
 +(MSTableDeleteRequest *) requestToDeleteItem:(id)item
-                                    table:(MSTable *)table
-                               parameters:(NSDictionary *)parameters
-                               completion:(MSDeleteBlock)completion
+                                        table:(MSTable *)table
+                                   parameters:(NSDictionary *)parameters
+                                     features:(MSFeatures)features
+                                   completion:(MSDeleteBlock)completion
 {
     MSTableDeleteRequest *request = nil;
     NSError *error = nil;
@@ -257,15 +267,17 @@ static NSString *const httpDelete = @"DELETE";
         request = [MSTableRequest requestToDeleteItemWithId:itemId
                                                       table:table
                                                  parameters:parameters
+                                                   features:MSFeatureNone
                                                  completion:completion];
         
         // Set the additional properties
         request.item = item;
         
         // Version becomes an etag if passed
-        if (version) {
-            [self setVersion:version request:request];
-        }
+        [request setIfMatchVersion:version];
+
+        // Set features header if necessary
+        [self addFeaturesHeaderForRequest:request queryParameters:parameters features:features];
     }
     
     // If there was an error, call the completion and make sure
@@ -283,6 +295,7 @@ static NSString *const httpDelete = @"DELETE";
 +(MSTableDeleteRequest *) requestToDeleteItemWithId:(id)itemId
                                               table:(MSTable *)table
                                          parameters:(NSDictionary *)parameters
+                                           features:(MSFeatures)features
                                          completion:(MSDeleteBlock)completion
 {
     MSTableDeleteRequest *request = nil;
@@ -310,6 +323,9 @@ static NSString *const httpDelete = @"DELETE";
             
             // Set the method and headers
             request.HTTPMethod = httpDelete;
+
+            // Set features header if necessary
+            [self addFeaturesHeaderForRequest:request queryParameters:parameters features:features];
         }
     }
     
@@ -328,6 +344,7 @@ static NSString *const httpDelete = @"DELETE";
 +(MSTableItemRequest *) requestToUndeleteItem:(id)item
                                         table:(MSTable *)table
                                    parameters:(NSDictionary *)parameters
+                                     features:(MSFeatures)features
                                    completion:(MSItemBlock)completion
 {
     MSTableItemRequest *request = nil;
@@ -359,9 +376,13 @@ static NSString *const httpDelete = @"DELETE";
                 
                 // Set the method and headers
                 request.HTTPMethod = httpPost;
-                
+
                 // Add the optional if-match header
-                [request setIfMatchVersion:[MSTableRequest versionFromItem:item ItemId:itemId]];
+                NSString *version = [MSTableRequest versionFromItem:item ItemId:itemId];
+                [request setIfMatchVersion:version];
+
+                // Set features header if necessary
+                [self addFeaturesHeaderForRequest:request queryParameters:parameters features:features];
             }
         }
     }
@@ -393,9 +414,9 @@ static NSString *const httpDelete = @"DELETE";
 
         // Create the URL
         NSURL *url =  [MSURLBuilder URLForTable:table
-                                    itemIdString:idString
-                                      parameters:parameters
-                                             orError:&error];
+                                   itemIdString:idString
+                                     parameters:parameters
+                                        orError:&error];
         if (!error) {
             
             // Create the request
@@ -408,6 +429,9 @@ static NSString *const httpDelete = @"DELETE";
             
             // Set the method and headers
             request.HTTPMethod = httpGet;
+
+            // Set features header if necessary
+            [self addFeaturesHeaderForRequest:request queryParameters:parameters features:MSFeatureNone];
         }
     }
     
@@ -425,6 +449,7 @@ static NSString *const httpDelete = @"DELETE";
 
 +(MSTableReadQueryRequest *) requestToReadItemsWithQuery:(NSString *)queryString
                                                    table:(MSTable *)table
+                                                features:(MSFeatures)features
                                               completion:(MSReadQueryBlock)completion
 {
     MSTableReadQueryRequest *request = nil;
@@ -442,7 +467,10 @@ static NSString *const httpDelete = @"DELETE";
     
     // Set the method and headers
     request.HTTPMethod = httpGet;
-    
+
+    // Set features header if necessary
+    [self addFeaturesHeaderForRequest:request queryParameters:nil features:features];
+
     return request;
 }
 
@@ -458,10 +486,15 @@ static NSString *const httpDelete = @"DELETE";
     return version;
 }
 
-+ (void)setVersion:(NSString *)version request:(MSTableRequest *)request
-{
-    version = [NSString stringWithFormat:@"\"%@\"", [version stringByReplacingOccurrencesOfString:@"\"" withString:@"\\\""]];
-    [request addValue:version forHTTPHeaderField:@"If-Match"];
++ (void)addFeaturesHeaderForRequest:(MSTableRequest *)request queryParameters:(NSDictionary *)parameters features:(MSFeatures)features {
+    if ([[request allHTTPHeaderFields] objectForKey:@"If-Match"]) {
+        features |= MSFeatureOpportunisticConcurrency;
+    }
+    if (parameters && [parameters count]) {
+        features |= MSFeatureQueryParameters;
+    }
+
+    [request setValue:[MSSDKFeatures httpHeaderForFeatures:features] forHTTPHeaderField:MSFeaturesHeaderName];
 }
 
 @end
