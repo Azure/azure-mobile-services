@@ -157,7 +157,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 return null;
             }
 
-            var kind = (MobileServiceTableOperationKind)obj.Value<int>("kind");
+            var kind = (MobileServiceTableOperationKind)obj.Value<int?>("kind");
             string tableName = obj.Value<string>("tableName");
             string itemId = obj.Value<string>("itemId");
 
@@ -176,12 +176,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             if (operation != null)
             {
                 operation.Id = obj.Value<string>(MobileServiceSystemColumns.Id);
-                operation.Sequence = obj.Value<long>("sequence");
+                operation.Sequence = obj.Value<long?>("sequence").GetValueOrDefault();
                 operation.CreatedAt = obj.Value<DateTime>(MobileServiceSystemColumns.CreatedAt);
-                operation.Version = obj.Value<long>("version");
+                operation.Version = obj.Value<long?>("version").GetValueOrDefault();
                 string itemJson = obj.Value<string>("item");
                 operation.Item = !String.IsNullOrEmpty(itemJson) ? JObject.Parse(itemJson) : null;
-                operation.State = (MobileServiceTableOperationState)obj.Value<int>("state");
+                operation.State = (MobileServiceTableOperationState)obj.Value<int?>("state").GetValueOrDefault();
             }
 
             return operation;

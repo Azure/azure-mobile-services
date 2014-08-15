@@ -75,6 +75,7 @@
     <Compile Include="Table\Sync\Queue\Actions\PullActionTests.cs" />
     <Compile Include="Table\Sync\Queue\Actions\PushActionTests.cs" />
     <Compile Include="Table\Sync\Queue\Operations\DeleteOperationTests.cs" />
+    <Compile Include="Table\Sync\Queue\Operations\MobileServiceTableOperationErrorTests.cs" />
     <Compile Include="Table\Sync\Queue\Operations\MobileServiceTableOperationTests.cs" />
     <Compile Include="Table\Sync\Queue\Operations\UpdateOperationTests.cs" />
     <Compile Include="Table\Sync\Queue\Operations\InsertOperationTests.cs" />

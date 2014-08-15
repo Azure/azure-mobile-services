@@ -166,7 +166,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             }
             string id = obj.Value<string>(MobileServiceSystemColumns.Id);
             string operationId = obj.Value<string>("operationId");
-            long operationVersion = obj.Value<long>("operationVersion");
+            long operationVersion = obj.Value<long?>("operationVersion").GetValueOrDefault();
             MobileServiceTableOperationKind operationKind = (MobileServiceTableOperationKind)obj.Value<int>("operationKind");
             var tableName = obj.Value<string>("tableName");
             string itemStr = obj.Value<string>("item");
