@@ -660,7 +660,7 @@
         testFilter.responseToUse = [[NSHTTPURLResponse alloc]
                                     initWithURL:request.URL
                                     statusCode:200
-                                    HTTPVersion:nil headerFields:@{@"Etag":@"DEF"}];
+                                    HTTPVersion:nil headerFields:@{@"Etag":@"\"AAAAAAAALNU=\""}];
         
         return request;
     };
