@@ -54,6 +54,7 @@
     <Compile Include="Extensions\MobileServiceCollectionExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
+    <Compile Include="Http\HttpUtility.cs" />
     <Compile Include="Http\MobileServiceHttpResponse.cs" />
     <Compile Include="IMobileServiceClient.cs" />
     <Compile Include="Authentication\MobileServiceAuthentication.cs" />
@@ -88,6 +89,7 @@
     <Compile Include="Table\Query\Linq\MobileServiceTableQuery.cs" />
     <Compile Include="Table\Query\Linq\MobileServiceTableQueryProvider.cs" />
     <Compile Include="Table\Query\Linq\MobileServiceTableQueryTranslator.cs" />
+    <Compile Include="Table\Query\ODataOptions.cs" />
     <Compile Include="Table\Serialization\UpdatedAtAttribute.cs" />
     <Compile Include="Table\Serialization\CreatedAtAttribute.cs" />
     <Compile Include="Table\Serialization\VersionAttribute.cs" />

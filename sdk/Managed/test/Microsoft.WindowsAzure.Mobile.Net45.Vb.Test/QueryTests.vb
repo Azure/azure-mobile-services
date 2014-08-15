@@ -1,6 +1,7 @@
 ﻿Imports System.Text
 Imports Microsoft.VisualStudio.TestTools.UnitTesting
 Imports Microsoft.WindowsAzure.MobileServices
+Imports Microsoft.WindowsAzure.MobileServices.Query
 Imports Newtonsoft.Json
 
 <TestClass()> Public Class QueryTests

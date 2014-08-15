@@ -9,25 +9,25 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace Microsoft.WindowsAzure.MobileServices
+namespace Microsoft.WindowsAzure.MobileServices.Query
 {
     /// <summary>
     /// Represents the structural elements of a Mobile Services query over the
     /// subset of OData it uses.
     /// </summary>
-    /// <remarks>
-    /// Our LINQ OData Provider will effectively compile expression trees into
-    /// MobileServiceTableQueryDescription instances which can be passed to a
-    /// MobileServiceCollectionView and evaluated on the server.  We don't
-    /// compile the expression all the way down to a single Uri fragment
-    /// because we'll need to re-evaluate the query with different Skip/Top
-    /// values for paging and data virtualization.
-    /// </remarks>
-    internal class MobileServiceTableQueryDescription
+    /*
+     * Our LINQ OData Provider will effectively compile expression trees into
+     * MobileServiceTableQueryDescription instances which can be passed to a
+     * MobileServiceCollectionView and evaluated on the server.  We don't
+     * compile the expression all the way down to a single Uri fragment
+     * because we'll need to re-evaluate the query with different Skip/Top
+     * values for paging and data virtualization.
+    */
+    internal sealed class MobileServiceTableQueryDescription
     {
         /// <summary>
         /// Initializes a new instance of the
-        /// MobileServiceTableQueryDescription class.
+        /// <see cref="MobileServiceTableQueryDescription"/> class.
         /// </summary>
         public MobileServiceTableQueryDescription(string tableName, bool includeTotalCount)
         {
@@ -35,7 +35,6 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             this.TableName = tableName;
             this.IncludeTotalCount = includeTotalCount;
-
             this.Selection = new List<string>();
             this.Projections = new List<Delegate>();
             this.Ordering = new List<KeyValuePair<string, bool>>();
@@ -47,7 +46,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public string TableName { get; private set; }
 
         /// <summary>
-        /// Gets of sets the query's filter expression.
+        /// Gets or sets the query's filter expression.
         /// </summary>
         public string Filter { get; set; }
 
@@ -55,15 +54,13 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// Gets a list of fields that should be selected from the items in
         /// the table.
         /// </summary>
-        public List<string> Selection { get; private set; }
+        public IList<string> Selection { get; private set; }
 
         /// <summary>
-        /// Gets a list of (field, direction) pairs that specify the ordering
-        /// constraints imposed on the query.  The direction element is true
-        /// if the field should be ordered in ascending order and false if
-        /// descending.
+        /// Gets a list of expressions that specify the ordering
+        /// constraints imposed on the query.
         /// </summary>
-        public List<KeyValuePair<string, bool>> Ordering { get; private set; }
+        public IList<KeyValuePair<string, bool>> Ordering { get; private set; }
 
         /// <summary>
         /// Gets or sets the number of elements to skip.
@@ -105,11 +102,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
             char? separator = null;
             StringBuilder text = new StringBuilder();
-            
+
             // Add the filter
             if (!string.IsNullOrEmpty(this.Filter))
             {
-                text.AppendFormat(CultureInfo.InvariantCulture, "{0}$filter={1}", separator, this.Filter);
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}={2}", separator, ODataOptions.Filter, this.Filter);
                 separator = '&';
             }
 
@@ -119,7 +116,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 IEnumerable<string> orderings = this.Ordering.Select(
                     f => f.Value ? f.Key : f.Key + " desc");
                 text.AppendFormat(
-                    CultureInfo.InvariantCulture, 
+                    CultureInfo.InvariantCulture,
                     "{0}$orderby={1}",
                     separator,
                     string.Join(",", orderings));
@@ -129,43 +126,28 @@ namespace Microsoft.WindowsAzure.MobileServices
             // Skip any elements
             if (this.Skip.HasValue && this.Skip >= 0)
             {
-                text.AppendFormat(
-                    CultureInfo.InvariantCulture,
-                    "{0}$skip={1}",
-                    separator,
-                    this.Skip);
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}={2}", separator, ODataOptions.Skip, this.Skip);
                 separator = '&';
             }
 
             // Take the desired number of elements
             if (this.Top.HasValue && this.Top >= 0)
             {
-                text.AppendFormat(
-                    CultureInfo.InvariantCulture,
-                    "{0}$top={1}",
-                    separator,
-                    this.Top);
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}={2}", separator, ODataOptions.Top, this.Top);
                 separator = '&';
             }
 
             // Add the selection
             if (this.Selection.Count > 0)
             {
-                text.AppendFormat(
-                    CultureInfo.InvariantCulture,
-                    "{0}$select={1}",
-                    separator,
-                    string.Join(",", this.Selection));
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}={2}", separator, ODataOptions.Select, string.Join(",", this.Selection.Select(Uri.EscapeDataString)));
                 separator = '&';
             }
 
             // Add the total count
             if (this.IncludeTotalCount)
             {
-                text.AppendFormat(
-                    CultureInfo.InvariantCulture,
-                    "{0}$inlinecount=allpages",
-                    separator);
+                text.AppendFormat(CultureInfo.InvariantCulture, "{0}{1}=allpages", separator, ODataOptions.InlineCount);
                 separator = '&';
             }
 
