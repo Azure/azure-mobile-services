@@ -157,7 +157,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 return null;
             }
 
-            var kind = (MobileServiceTableOperationKind)obj.Value<int?>("kind");
+            var kind = (MobileServiceTableOperationKind)obj.Value<int>("kind");
             string tableName = obj.Value<string>("tableName");
             string itemId = obj.Value<string>("itemId");
 

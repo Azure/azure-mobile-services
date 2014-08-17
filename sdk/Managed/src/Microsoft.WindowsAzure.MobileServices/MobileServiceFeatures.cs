@@ -52,7 +52,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         AdditionalQueryParameters = 0x20,
 
         /// <summary>
-        /// Feature header value for requests originated from the <see cref="MobileServiceCollection"/> and derived types.
+        /// Feature header value for requests originated from the <see cref="MobileServiceCollection{T}"/> and derived types.
         /// </summary>
         [EnumValue("TC")]
         TableCollection = 0x40,

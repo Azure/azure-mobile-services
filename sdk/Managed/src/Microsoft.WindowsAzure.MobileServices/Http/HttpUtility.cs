@@ -11,10 +11,10 @@ namespace Microsoft.WindowsAzure.MobileServices
     internal static class HttpUtility
     {
         /// <summary>
-        /// Parses a query string into a <see cref="IDictionary{string,string}"/>
+        /// Parses a query string into a <see cref="System.Collections.Generic.Dictionary{TKey,TValue}"/>
         /// </summary>
         /// <param name="query">The query string to parse.</param>
-        /// <returns>An <see cref="IDictionary{string,string}"/> of query parameters and values.</returns>
+        /// <returns>An <see cref="System.Collections.Generic.Dictionary{TKey,TValue}"/> of query parameters and values.</returns>
         public static IDictionary<string, string> ParseQueryString(string query)
         {
             char[] separator = new[] { '=' };

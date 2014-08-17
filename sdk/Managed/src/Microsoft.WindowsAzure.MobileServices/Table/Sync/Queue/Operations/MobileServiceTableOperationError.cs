@@ -72,6 +72,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// </summary>
         /// <param name="status">The HTTP status code returned by server.</param>
         /// <param name="operationId">The id of the operation.</param>
+        /// <param name="operationVersion">The version of the operation.</param>
         /// <param name="operationKind">The kind of table operation.</param>
         /// <param name="tableName">The name of the remote table.</param>
         /// <param name="item">The item associated with the operation.</param>

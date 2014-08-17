@@ -54,6 +54,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         /// <param name="serializerSettings">
         /// The serialization settings
         /// </param>
+        /// <param name="validate">
+        /// To throw if the content is null or empty
+        /// </param>
         public static QueryResult Parse(MobileServiceHttpResponse httpResponse, JsonSerializerSettings serializerSettings, bool validate)
         {
             Debug.Assert(httpResponse != null);

@@ -153,14 +153,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         Task UpdateAsync(T instance, IDictionary<string, string> parameters);
 
         /// <summary>
-        /// Undeletes an <paramref name="instance"/> from the table. This requires the soft delete feature to be enabled on the Mobile Service. See http://go.microsoft.com/fwlink/?LinkId=507647&clcid=0x409 for details.
+        /// Undeletes an <paramref name="instance"/> from the table. This requires the soft delete feature to be enabled on the Mobile Service. Visit <see href="http://go.microsoft.com/fwlink/?LinkId=507647">the link</see> for details.
         /// </summary>
         /// <param name="instance">The instance to undelete from the table.</param>
         /// <returns>A task that will complete when the undelete finishes.</returns>
         Task UndeleteAsync(T instance);
 
         /// <summary>
-        /// Undeletes an <paramref name="instance"/> from the table. This requires the soft delete feature to be enabled on the Mobile Service. See http://go.microsoft.com/fwlink/?LinkId=507647&clcid=0x409 for details.
+        /// Undeletes an <paramref name="instance"/> from the table. This requires the soft delete feature to be enabled on the Mobile Service. Visit <see href="http://go.microsoft.com/fwlink/?LinkId=507647">the link</see> for details.
         /// </summary>
         /// <param name="instance">The instance to undelete from the table.</param>
         /// <param name="parameters">
@@ -214,7 +214,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         IMobileServiceTableQuery<T> IncludeTotalCount();
 
         /// <summary>
-        /// Creates a query that will ensure it gets the deleted records. This requires the soft delete feature to be enabled on the Mobile Service. See http://go.microsoft.com/fwlink/?LinkId=507647&clcid=0x409 for details.
+        /// Creates a query that will ensure it gets the deleted records. This requires the soft delete feature to be enabled on the Mobile Service. Visit <see href="http://go.microsoft.com/fwlink/?LinkId=507647">the link</see> for details.
         /// </summary>        
         /// <returns>
         /// A query against the table.
