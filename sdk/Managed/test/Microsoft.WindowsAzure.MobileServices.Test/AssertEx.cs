@@ -42,7 +42,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(requests.Count, uris.Length);
             for (int i = 0; i < uris.Length; i++)
             {
-                Assert.AreEqual(requests[i].RequestUri.ToString(), uris[i]);
+                var actualUri = requests[i].RequestUri;
+                var expectedUri = new Uri(uris[i], UriKind.Absolute);
+                Assert.AreEqual(actualUri.Host, expectedUri.Host);
+                Assert.AreEqual(actualUri.AbsolutePath, expectedUri.AbsolutePath);
+                // xamarin.ios encoding of query string is different than other platforms so normalizing them for comparison
+                Assert.AreEqual(Uri.UnescapeDataString(actualUri.Query), Uri.UnescapeDataString(expectedUri.Query));
             }
         }
     }
