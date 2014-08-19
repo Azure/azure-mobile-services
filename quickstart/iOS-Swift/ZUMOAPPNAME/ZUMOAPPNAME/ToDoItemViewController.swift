@@ -23,8 +23,8 @@ protocol ToDoItemDelegate {
 
 class ToDoItemViewController: UIViewController, UINavigationBarDelegate,  UIBarPositioningDelegate, UITextFieldDelegate {
     
-    @IBOutlet var NavBar : UINavigationBar
-    @IBOutlet var text : UITextField
+    @IBOutlet var NavBar : UINavigationBar!
+    @IBOutlet var text : UITextField!
     
     var delegate : ToDoItemDelegate?
     
@@ -55,7 +55,7 @@ class ToDoItemViewController: UIViewController, UINavigationBarDelegate,  UIBarP
     
     func textFieldDidEndEditing(textField: UITextField!)
     {
-        self.dismissModalViewControllerAnimated(true)
+        self.dismissViewControllerAnimated(true, completion: nil);
     }
     
     func textFieldShouldEndEditing(textField: UITextField!) -> Bool

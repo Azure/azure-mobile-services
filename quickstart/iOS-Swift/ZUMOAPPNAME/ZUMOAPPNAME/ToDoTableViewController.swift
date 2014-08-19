@@ -18,7 +18,7 @@ import UIKit
 
 class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
     
-    var records = NSDictionary[]()
+    var records = [NSDictionary]()
     var table : MSTable?
     
     override func viewDidLoad() {
@@ -47,7 +47,7 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
                 return
             }
             
-            self.records = result as NSDictionary[]
+            self.records = result as [NSDictionary]
             println("Information: retrieved %d records", result.count)
             
             self.tableView.reloadData()
@@ -102,19 +102,14 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
         return self.records.count
     }
     
-    override func tableView(tableView: UITableView!, cellForRowAtIndexPath indexPath: NSIndexPath!) -> UITableViewCell!
-    {
+    override func tableView(tableView: UITableView!, cellForRowAtIndexPath indexPath: NSIndexPath!) -> UITableViewCell! {
         let CellIdentifier = "Cell"
         
-        var cell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier, forIndexPath: indexPath) as? UITableViewCell
-        if !cell {
-            cell = UITableViewCell(style: UITableViewCellStyle.Default, reuseIdentifier: CellIdentifier)
-        }
-        
+        let cell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier, forIndexPath: indexPath) as UITableViewCell
         let item = self.records[indexPath.row]
         
-        cell!.textLabel.text = item["text"] as String
-        cell!.textLabel.textColor = UIColor.blackColor()
+        cell.textLabel.text = item["text"] as String
+        cell.textLabel.textColor = UIColor.blackColor()
         
         return cell
     }
