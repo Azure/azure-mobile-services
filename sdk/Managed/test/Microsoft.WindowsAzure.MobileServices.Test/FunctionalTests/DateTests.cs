@@ -67,10 +67,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.Response.StatusCode = HttpStatusCode.OK;
             hijack.SetResponseContent("[]");
 
-            DateTimeOffset date = new DateTimeOffset(
-                new DateTime(2009, 11, 21, 14, 22, 59, 860, DateTimeKind.Utc).ToLocalTime());
+            DateTimeOffset date = new DateTimeOffset(2009, 11, 21, 14, 22, 59, 860, TimeSpan.FromHours(-8));
             await table.Where(b => b.Date == date).ToEnumerableAsync();
-            Assert.EndsWith(hijack.Request.RequestUri.ToString(), "$filter=(DateOffsetExampleDate eq datetime'2009-11-21T14:22:59.860Z')");
+            Assert.EndsWith(hijack.Request.RequestUri.ToString(), "$filter=(DateOffsetExampleDate eq datetimeoffset'2009-11-21T14:22:59.8600000-08:00')");
         }
 
         [AsyncTestMethod]

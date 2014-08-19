@@ -456,9 +456,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var expectedException = await ThrowsAsync<MobileServiceConflictException>(() => table.InsertAsync(item));
 
             Assert.IsNotNull(expectedException);
-            // node runtime needs to be updated to return the paylaod
-            // .NET runtime throws 400 bad request
-            Assert.IsNull(expectedException.Value);
         }
 
         [AsyncTestMethod]
@@ -475,9 +472,6 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var expectedException = await ThrowsAsync<MobileServiceConflictException<ToDoWithSystemPropertiesType>>(() => table.InsertAsync(item));
 
             Assert.IsNotNull(expectedException);
-            // node runtime needs to be updated to return the paylaod
-            // .NET runtime throws 400 bad request
-            Assert.IsNull(expectedException.Item);
         }
 
         [AsyncTestMethod]

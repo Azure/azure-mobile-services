@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
-using System.Threading;
 using Microsoft.WindowsAzure.MobileServices.Query;
 using Microsoft.WindowsAzure.MobileServices.TestFramework;
 using Newtonsoft.Json;
@@ -310,7 +309,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual("((Weight le 10f) or (InStock eq true))", query.Filter);
 
             query = Compile<Product, Product>(table => table.Where(p => p.Created == new DateTime(1994, 10, 14, 0, 0, 0, DateTimeKind.Utc)));
-            Assert.AreEqual("(Created eq datetime'1994-10-14T00:00:00.000Z')", query.Filter);
+            Assert.AreEqual("(Created eq datetime'1994-10-14T00%3A00%3A00.000Z')", query.Filter);
         }
 
         [TestMethod]
@@ -871,7 +870,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                from p in table
                where p.Updated == DateTime.MinValue
                select p);
-            string minDateAsODataString = DateTime.MinValue.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffK", CultureInfo.InvariantCulture);
+            string minDateAsODataString = DateTime.MinValue.ToUniversalTime().ToString("yyyy'-'MM'-'dd'T'HH'%3A'mm'%3A'ss'.'fffK", CultureInfo.InvariantCulture);
             Assert.AreEqual(query.Filter, "(Updated eq datetime'" + minDateAsODataString + "')");
 
             query = Compile<Product, Product>(table =>
@@ -1027,7 +1026,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
                 select p);
             Assert.AreEqual("(Weight gt 1.3f)", query.Filter);
         }
-        
+
         [TestMethod]
         public void DoublesSerializedAsDoubles()
         {
@@ -1039,9 +1038,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             query = Compile<Product, Product>(table =>
                 from p in table
-                where (p.Weight * 31.213 ) == 60200000000000000000000000.0
+                where (p.Weight * 31.213) == 60200000000000000000000000.0
                 select p);
             Assert.AreEqual("((Weight mul 31.213) eq 6.02E+25)", query.Filter);
-        }        
+        }
     }
 }
