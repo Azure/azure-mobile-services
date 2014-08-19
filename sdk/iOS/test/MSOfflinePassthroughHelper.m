@@ -27,6 +27,21 @@
     return NO;
 }
 
+- (BOOL) deleteUsingQuery:(MSQuery *)query orError:(NSError *__autoreleasing *)error
+{
+    self.deleteCalls++;
+    
+    MSSyncContextReadResult *preDeleteResult = [self readWithQuery:query orError:error];
+    if (![super deleteUsingQuery:query orError:error]) {
+        return NO;
+    }
+    
+    MSSyncContextReadResult *postDeleteResult = [self readWithQuery:query orError:error];
+    self.deletedItems += preDeleteResult.items.count - postDeleteResult.items.count;
+    
+    return YES;
+}
+
 - (BOOL) deleteItemsWithIds:(NSArray *)items table:(NSString *)table orError:(NSError **)error
 {
     self.deleteCalls++;

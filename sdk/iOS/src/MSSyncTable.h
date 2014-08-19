@@ -100,8 +100,8 @@
 
 /// Removes all records in the local cache that match the results of the specified query.
 /// If query is nil, all records in the local table will be removed.
-/// Before local data is removed, all pending operations for this table will be pushed to
-/// the server.
+/// Before local data is removed, a check will be made for pending operations on this table. If
+/// any are found the purge will be cancelled and an error returned.
 -(void)purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion;
 
 /// @}

@@ -77,10 +77,11 @@ static NSOperationQueue *pushQueue_;
 
 /// Begin sending pending operations to the remote tables. Abort the push attempt whenever any single operation
 /// recieves an error due to network or authorization. Otherwise operations will all run and all errors returned
-/// to the caller
+/// to the caller at once.
 -(void) pushWithCompletion:(MSSyncBlock)completion
 {
     // TODO: Allow users to cancel operations
+    
     dispatch_async(writeOperationQueue, ^{
         MSQueuePushOperation *push = [[MSQueuePushOperation alloc] initWithSyncContext:self
                                                                          dispatchQueue:writeOperationQueue
@@ -94,9 +95,12 @@ static NSOperationQueue *pushQueue_;
 #pragma mark private interface implementation
 
 
-/// Given an item and an action to perform (insert, update, delete) determines how that should be represented when sent to the
-/// server based on pending operations and how the local store should therefore be updated.
--(void) syncTable:(NSString *)table item:(NSDictionary *)item action:(MSTableOperationTypes)action completion:(MSSyncItemBlock)completion
+/// Given an item and an action to perform (insert, update, delete) determines how that should be represented
+/// when sent to the server based on pending operations.
+-(void) syncTable:(NSString *)table
+             item:(NSDictionary *)item
+           action:(MSTableOperationTypes)action
+       completion:(MSSyncItemBlock)completion
 {
     NSError *error;
     NSMutableDictionary *itemToSave = [item mutableCopy];
@@ -104,7 +108,8 @@ static NSOperationQueue *pushQueue_;
     
     // Validate our input and state
     if (!self.dataSource) {
-        error = [self errorWithDescription:@"Missing required datasource for MSSyncContext" andErrorCode:MSSyncContextInvalid];
+        error = [self errorWithDescription:@"Missing required datasource for MSSyncContext"
+                              andErrorCode:MSSyncContextInvalid];
     }
     else {
         // All sync table operations require a valid string Id
@@ -188,7 +193,7 @@ static NSOperationQueue *pushQueue_;
         else if (condenseAction == MSCondenseToDelete) {
             operation.type = MSTableOperationDelete;
             
-            // FUTURE: Look at moving this upserts into the operation queue object
+            // FUTURE: Look at moving these upserts into the operation queue object
             [self.dataSource upsertItems:[NSArray arrayWithObject:[operation serialize]]
                                   table:[self.dataSource operationTableName]
                                 orError:&error];
@@ -263,6 +268,8 @@ static NSOperationQueue *pushQueue_;
     });
 }
 
+/// Given a pending operation in the queue, removes it from the queue and removes the item from the local
+/// store.
 - (void) cancelOperation:(MSTableOperation *)operation discardItemWithCompletion:(MSSyncBlock)completion
 {
     // Removing an operation requires write access to the queue
@@ -271,13 +278,17 @@ static NSOperationQueue *pushQueue_;
 
         // FUTURE: Verify operation hasn't been modified by others
 
-        [self.dataSource deleteItemsWithIds:[NSArray arrayWithObject:operation.itemId] table:operation.tableName orError:&error];
+        [self.dataSource deleteItemsWithIds:[NSArray arrayWithObject:operation.itemId]
+                                      table:operation.tableName
+                                    orError:&error];
         if (!error) {
             [self.operationQueue removeOperation:operation orError:&error];
         }
         
         if (completion) {
-            completion(error);
+            [self.callbackQueue addOperationWithBlock:^{
+                completion(error);
+            }];
         }
     });
 }
@@ -288,13 +299,16 @@ static NSOperationQueue *pushQueue_;
     // We want to throw on unsupported fields so we can change this decision later
     NSError *error;
     if (query.selectFields) {
-        error = [self errorWithDescription:@"Use of selectFields in not supported in pullWithQuery:" andErrorCode:MSInvalidParameter];
+        error = [self errorWithDescription:@"Use of selectFields in not supported in pullWithQuery:"
+                              andErrorCode:MSInvalidParameter];
     }
     else if (query.includeTotalCount) {
-        error = [self errorWithDescription:@"Use of includeTotalCount is not supported in pullWithQuery:" andErrorCode:MSInvalidParameter];
+        error = [self errorWithDescription:@"Use of includeTotalCount is not supported in pullWithQuery:"
+                              andErrorCode:MSInvalidParameter];
     }
     else if (query.parameters) {
-        error = [self errorWithDescription:@"Use of parameters is not supported in pullWithQuery:" andErrorCode:MSInvalidParameter];
+        error = [self errorWithDescription:@"Use of parameters is not supported in pullWithQuery:"
+                              andErrorCode:MSInvalidParameter];
     }
     else if (query.syncTable) {
         // Otherwise we convert the sync table to a normal table
@@ -303,10 +317,19 @@ static NSOperationQueue *pushQueue_;
     }
     else if (!query.table) {
         // MSQuery itself should disallow this, but for safety verify we have a table object
-        error = [self errorWithDescription:@"Missing required syncTable object in query" andErrorCode:MSInvalidParameter];
+        error = [self errorWithDescription:@"Missing required syncTable object in query"
+                              andErrorCode:MSInvalidParameter];
     }
     
-    // Pulls always include deleted records
+    // Return error if possible, return on calling
+    if (error) {
+        if (completion) {
+            completion(error);
+        }
+        return;
+    }
+    
+    // A pull should always include deleted records
     query.parameters = @{@"__includeDeleted" : @YES };
     
     // Get the required system properties from the server
@@ -407,37 +430,28 @@ static NSOperationQueue *pushQueue_;
 }
 
 /// In order to purge data from the local store, purge first checks if there are any pending operations for
-/// the specific table on the query. If there are, a push is done to the server. Once the push completes, if no
-/// errors (and no new table operations) data is removed from the local store.
+/// the specific table on the query. If there are, no purge is performed and an error returned to the user.
+/// Otherwise clear the local table of all macthing records
 - (void) purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion
 {
+    // purge needs exclusive access to the storage layer
     dispatch_async(writeOperationQueue, ^{
-        // Check if our table is dirty, if so, we need to force a push, otherwise we can proceed
+        // Check if our table is dirty, if so, cancel the purge action
         NSArray *tableOps = [self.operationQueue getOperationsForTable:query.syncTable.name item:nil];
-        
+
+        NSError *error;
         if (tableOps.count > 0) {
-            [self pushWithCompletion:^(NSError *error) {
-                // For now all push errors abort the purge, long term we could try again
-                // if our table operations were successful
-                if (error) {
-                    completion(error);
-                    return;
-                }
-                
-                // try a purge again (more inbound operations could have occurred) so we must start over
-                [self purgeWithQuery:query completion:completion];
-            }];
-        }
-        else {
+            error = [self errorWithDescription:@"The table cannot be purged because it has pending operations"
+                                  andErrorCode:MSPurgeAbortedPendingChanges];
+        } else {
             // We can safely delete all items on this table (no pending operations)
-            NSError *error;
             [self.dataSource deleteUsingQuery:query orError:&error];
-            
-            if (completion) {
-                [self.callbackQueue addOperationWithBlock:^{
-                    completion(error);
-                }];
-            }
+        }
+        
+        if (completion) {
+            [self.callbackQueue addOperationWithBlock:^{
+                completion(error);
+            }];
         }
     });
 }
@@ -449,11 +463,12 @@ static NSOperationQueue *pushQueue_;
 -(NSError *) errorWithDescription:(NSString *)description
                      andErrorCode:(NSInteger)errorCode
 {
-    NSDictionary *userInfo = @{ NSLocalizedDescriptionKey :description };
+    NSDictionary *userInfo = @{ NSLocalizedDescriptionKey: description };
     
     return [NSError errorWithDomain:MSErrorDomain
                                code:errorCode
                            userInfo:userInfo];
 }
+
 
 @end
