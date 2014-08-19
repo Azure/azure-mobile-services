@@ -429,7 +429,7 @@ static NSOperationQueue *pushQueue_;
 }
 
 /// In order to purge data from the local store, purge first checks if there are any pending operations for
-/// the specific table on the query. If there are no push is performed and an error returned to the user.
+/// the specific table on the query. If there are, no purge is performed and an error returned to the user.
 /// Otherwise clear the local table of all macthing records
 - (void) purgeWithQuery:(MSQuery *)query completion:(MSSyncBlock)completion
 {
