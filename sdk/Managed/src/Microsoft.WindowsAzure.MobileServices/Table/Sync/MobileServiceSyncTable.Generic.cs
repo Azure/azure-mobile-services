@@ -198,7 +198,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         public async Task<List<T>> ToListAsync()
         {
-            return new TotalCountList<T>(await this.ReadAsync());
+            return new QueryResultList<T>(await this.ReadAsync());
         }
     }
 }

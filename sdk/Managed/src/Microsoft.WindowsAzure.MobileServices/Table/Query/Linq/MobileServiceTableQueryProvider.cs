@@ -94,8 +94,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             string odata = compiledQuery.ToODataString();
             QueryResult result = await this.Execute<T>(query, odata);
 
-            return new TotalCountEnumerable<T>(
+            return new QueryResultEnumerable<T>(
                 result.TotalCount,
+                result.NextLink,
                 query.Table.MobileServiceClient.Serializer.Deserialize(result.Values, compiledQuery.ProjectionArgumentType).Select(
                     value =>
                     {

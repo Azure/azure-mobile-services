@@ -341,7 +341,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         public async Task<List<T>> ToListAsync()
         {
             IEnumerable<T> items = await this.QueryProvider.Execute(this);
-            return new TotalCountList<T>(items);
+            return new QueryResultList<T>(items);
         }
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.WindowsAzure.MobileServices.TestFramework;
 
 namespace Microsoft.WindowsAzure.MobileServices.Test
 {
+#pragma warning disable 618 // for using obsolete ITotalCountProvider
     [Tag("data")]
     [Tag("e2e")]
     public class DataSourceTest : FunctionalTestBase
@@ -19,7 +20,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             // Create a new CollectionView
             Log("Creating DataSource");
-            MobileServiceCollection<Book,Book> dataSource =
+            MobileServiceCollection<Book, Book> dataSource =
                 await table.OrderByDescending(b => b.Price).ToCollectionAsync();
 
             Log("Verifying loaded");
@@ -36,7 +37,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             // Create a new CollectionView
             Log("Creating DataSource");
-            MobileServiceCollection<Book,Book> dataSource =
+            MobileServiceCollection<Book, Book> dataSource =
                 await table.Take(5).IncludeTotalCount().ToCollectionAsync();
 
             Log("Verifying loaded");

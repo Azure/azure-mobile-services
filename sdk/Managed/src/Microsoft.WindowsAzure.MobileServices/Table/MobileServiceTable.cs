@@ -83,7 +83,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Excutes a query against the table.
+        /// Executes a query against the table.
         /// </summary>
         /// <param name="query">
         /// A query to execute.
@@ -93,18 +93,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public async virtual Task<JToken> ReadAsync(string query)
         {
-            Uri uri;
-            if (Uri.TryCreate(query, UriKind.Absolute, out uri))
-            {
-                string uriPath = MobileServiceUrlBuilder.CombinePaths(TableRouteSeparatorName, this.TableName);
-                string uriString = MobileServiceUrlBuilder.CombinePathAndQuery(uriPath, uri.Query);
-                return (await this.ReadAsync(uriString, MobileServiceFeatures.UntypedTable | MobileServiceFeatures.ReadWithLinkHeader)).Response;
-            }
-            return await this.ReadAsync(query, null);
+
+            return await this.ReadAsync(query, null, wrapResult: false);
         }
 
         /// <summary>
-        /// Excutes a query against the table.
+        /// Executes a query against the table.
         /// </summary>
         /// <param name="query">
         /// A query to execute.
@@ -113,16 +107,27 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// A dictionary of user-defined parameters and values to include in 
         /// the request URI query string.
         /// </param>
+        /// <param name="wrapResult">
+        /// Specifies whether response should be formatted as JObject including extra response details e.g. link header
+        /// </param>
         /// <returns>
         /// A task that will return with results when the query finishes.
         /// </returns>
-        public virtual async Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters)
+        public virtual async Task<JToken> ReadAsync(string query, IDictionary<string, string> parameters, bool wrapResult)
         {
-            return (await this.ReadAsync(query, parameters, MobileServiceFeatures.UntypedTable)).Response;
+            QueryResult result = await this.ReadAsync(query, parameters, MobileServiceFeatures.UntypedTable);
+            if (wrapResult)
+            {
+                return result.ToJObject();
+            }
+            else
+            {
+                return result.Response;
+            }
         }
 
         /// <summary>
-        /// Excutes a query against the table.
+        /// Executes a query against the table.
         /// </summary>
         /// <param name="query">
         /// A query to execute.
@@ -142,7 +147,19 @@ namespace Microsoft.WindowsAzure.MobileServices
             features = this.AddRequestFeatures(features, parameters);
             parameters = AddSystemProperties(this.SystemProperties, parameters);
 
-            string uriPath = MobileServiceUrlBuilder.CombinePaths(TableRouteSeparatorName, this.TableName);
+            string uriPath;
+            Uri uri;
+            if (Uri.TryCreate(query, UriKind.Absolute, out uri))
+            {
+                features |= MobileServiceFeatures.ReadWithLinkHeader;
+                uriPath = uri.GetComponents(UriComponents.Scheme | UriComponents.UserInfo | UriComponents.Host | UriComponents.Port | UriComponents.Path, UriFormat.UriEscaped);
+                query = uri.Query;
+            }
+            else
+            {
+                uriPath = MobileServiceUrlBuilder.CombinePaths(TableRouteSeparatorName, this.TableName);
+            }
+
             string parametersString = MobileServiceUrlBuilder.GetQueryString(parameters);
 
             // Concatenate the query and the user-defined query string parameters

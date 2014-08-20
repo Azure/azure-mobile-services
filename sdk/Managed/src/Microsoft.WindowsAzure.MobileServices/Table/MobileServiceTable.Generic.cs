@@ -84,6 +84,26 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
+        /// Executes a query against the table.
+        /// </summary>
+        /// <param name="query">
+        /// A query to execute.
+        /// </param>
+        /// <returns>
+        /// A task that will return with results when the query finishes.
+        /// </returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Generic are not nested when used via async.")]
+        public async Task<IEnumerable<U>> ReadAsync<U>(string query)
+        {
+            QueryResult result = await base.ReadAsync(query, null, MobileServiceFeatures.TypedTable | MobileServiceFeatures.ReadWithLinkHeader);
+
+            return new QueryResultEnumerable<U>(
+                result.TotalCount,
+                result.NextLink,
+                this.MobileServiceClient.Serializer.Deserialize(result.Values, typeof(U)).Cast<U>());
+        }
+
+        /// <summary>
         /// Inserts a new instance into the table.
         /// </summary>
         /// <param name="instance">
@@ -549,7 +569,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Not nested when used via async pattern.")]
         public async Task<List<T>> ToListAsync()
         {
-            return new TotalCountList<T>(await this.ReadAsync());
+            return new QueryResultList<T>(await this.ReadAsync());
         }
 
         /// <summary>

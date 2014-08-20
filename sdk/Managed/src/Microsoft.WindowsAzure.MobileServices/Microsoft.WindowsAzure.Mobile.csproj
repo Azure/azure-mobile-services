@@ -60,6 +60,7 @@
     <Compile Include="Extensions\MobileServiceLocalStoreExtensions.cs" />
     <Compile Include="Extensions\MobileServiceSyncContextExtensions.cs" />
     <Compile Include="Extensions\MobileServiceSyncTableExtensions.cs" />
+    <Compile Include="Extensions\MobileServiceTableExtensions.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="Extensions\TypeExtensions.cs" />
     <Compile Include="Http\HttpUtility.cs" />
@@ -92,6 +93,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Table\MobileServiceSystemColumns.cs" />
+    <Compile Include="Table\Query\IQueryResultProvider.cs" />
     <Compile Include="Table\Query\Linq\FilterBuildingExpressionVisitor.cs" />
     <Compile Include="Table\Query\Linq\IMobileServiceTableQuery.cs" />
     <Compile Include="Table\Query\Linq\MemberInfoKey.cs" />
@@ -138,8 +140,8 @@
     <Compile Include="MobileServiceUrlBuilder.cs" />
     <Compile Include="Table\Query\ITotalCountProvider.cs" />
     <Compile Include="Table\Query\MobileServiceTableQueryDescription.cs" />
-    <Compile Include="Table\Query\TotalCountEnumerable.cs" />
-    <Compile Include="Table\Query\TotalCountList.cs" />
+    <Compile Include="Table\Query\QueryResultEnumerable.cs" />
+    <Compile Include="Table\Query\QueryResultList.cs" />
     <Compile Include="Table\Serialization\DataTableAttribute.cs" />
     <Compile Include="Table\Serialization\MobileServiceContractResolver.cs" />
     <Compile Include="Table\Serialization\MobileServiceSerializer.cs" />

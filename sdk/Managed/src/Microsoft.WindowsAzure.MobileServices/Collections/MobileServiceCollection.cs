@@ -31,12 +31,14 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// Use the <see cref="MobileServiceCollection{T}"/> class if the table and collection items
     /// are of the same type.
     /// </remarks>
-    public class MobileServiceCollection<TTable, TCollection> : 
+#pragma warning disable 618 // for implementing obsolete ITotalCountProvider
+    public class MobileServiceCollection<TTable, TCollection> :
         ObservableCollection<TCollection>,
-        ITotalCountProvider
+        ITotalCountProvider,
+        IQueryResultProvider
     {
         private bool busy = false;
-        
+
         /// <summary>
         /// The query that when evaluated will populate the data souce with
         /// data.  We'll evaluate the query once per page while data
@@ -72,7 +74,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="pageSize">
         /// The number of items requested per request.
         /// </param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification="Overridable method is only used for change notifications")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors", Justification = "Overridable method is only used for change notifications")]
         public MobileServiceCollection(IMobileServiceTableQuery<TTable> query, Func<IEnumerable<TTable>, IEnumerable<TCollection>> selector, int pageSize = 0)
         {
             if (query == null)
@@ -163,6 +165,28 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
         }
 
+
+        /// <summary>
+        /// The link to next page of result that is returned in response headers.
+        /// </summary>
+        private string nextLink;
+
+        /// <summary>
+        /// Gets the link to next page of result that is returned in response headers.
+        /// </summary>
+        public string NextLink
+        {
+            get { return this.nextLink; }
+            private set
+            {
+                if (this.nextLink != value)
+                {
+                    this.nextLink = value;
+                    this.OnPropertyChanged();
+                }
+            }
+        }
+
         /// <summary>
         /// Evaluates the query and adds the result to the collection.
         /// </summary>
@@ -172,7 +196,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         protected async virtual Task<int> ProcessQueryAsync(CancellationToken token, IMobileServiceTableQuery<TTable> query)
         {
             // Invoke the query on the server and get our data
-            TotalCountEnumerable<TTable> data = await query.ToEnumerableAsync() as TotalCountEnumerable<TTable>;
+            QueryResultEnumerable<TTable> data = await query.ToEnumerableAsync() as QueryResultEnumerable<TTable>;
 
             //check for cancellation
             if (token.IsCancellationRequested)
@@ -186,6 +210,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             this.TotalCount = data.TotalCount;
+            this.NextLink = data.NextLink;
 
             return data.Count();
         }
@@ -363,7 +388,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The number of items requested per request.
         /// </param>
         public MobileServiceCollection(IMobileServiceTableQuery<T> query, int pageSize = 0)
-            : base(query, (Func<IEnumerable<T>,IEnumerable<T>>)(t => t), pageSize)
+            : base(query, (Func<IEnumerable<T>, IEnumerable<T>>)(t => t), pageSize)
         {
         }
     }

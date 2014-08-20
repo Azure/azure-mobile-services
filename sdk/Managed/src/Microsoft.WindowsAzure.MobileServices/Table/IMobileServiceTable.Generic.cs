@@ -19,6 +19,18 @@ namespace Microsoft.WindowsAzure.MobileServices
     public interface IMobileServiceTable<T> : IMobileServiceTable
     {
         /// <summary>
+        /// Executes a query against the table.
+        /// </summary>
+        /// <param name="query">
+        /// A query to execute.
+        /// </param>
+        /// <returns>
+        /// A task that will return with results when the query finishes.
+        /// </returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Generic are not nested when used via async.")]
+        Task<IEnumerable<U>> ReadAsync<U>(string query);
+
+        /// <summary>
         /// Returns instances from a table using a query.
         /// </summary>
         /// <typeparam name="U">

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.30324.0
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mobile.SQLiteStore", "src\Microsoft.WindowsAzure.MobileServices.SQLiteStore\Microsoft.WindowsAzure.Mobile.SQLiteStore.csproj", "{4C20D49A-FE5E-4D9C-98B9-8125450074F5}"
 EndProject
@@ -111,8 +111,6 @@ Global
 		{41E0BBEA-091B-4C06-AE08-B7F50E2BEB8A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
 		{41E0BBEA-091B-4C06-AE08-B7F50E2BEB8A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
 		{41E0BBEA-091B-4C06-AE08-B7F50E2BEB8A}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{41E0BBEA-091B-4C06-AE08-B7F50E2BEB8A}.Debug|x86.ActiveCfg = Debug|x86
-		{41E0BBEA-091B-4C06-AE08-B7F50E2BEB8A}.Debug|x86.Build.0 = Debug|x86
 		{41E0BBEA-091B-4C06-AE08-B7F50E2BEB8A}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{41E0BBEA-091B-4C06-AE08-B7F50E2BEB8A}.Debug|x86.Build.0 = Debug|Any CPU
 		{41E0BBEA-091B-4C06-AE08-B7F50E2BEB8A}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -31,7 +31,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         MobileServiceRemoteTableOptions SupportedOptions { get; set; }
 
         /// <summary>
-        /// Excutes a query against the table.
+        /// Executes a query against the table.
         /// </summary>
         /// <param name="query">
         /// A query to execute.

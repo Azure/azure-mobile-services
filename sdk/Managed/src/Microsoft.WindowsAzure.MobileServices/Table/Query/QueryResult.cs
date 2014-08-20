@@ -1,4 +1,8 @@
-﻿using System;
+﻿// ----------------------------------------------------------------------------
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// ----------------------------------------------------------------------------
+
+using System;
 using System.Diagnostics;
 using System.Globalization;
 using Newtonsoft.Json;
@@ -20,6 +24,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         /// The name of the count key in an inline count response object.
         /// </summary>
         private const string InlineCountCountKey = "count";
+
         /// <summary>
         /// The name of the relation for next page link
         /// </summary>
@@ -35,6 +40,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         /// </summary>
         public JArray Values { get; private set; }
 
+        /// <summary>
+        /// Gets the link to next page of result that is returned in response headers.
+        /// </summary>
         public Uri NextLink { get; private set; }
 
         /// <summary>
@@ -80,7 +88,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 // Otherwise try and get the values from the results property
                 // (which is the case when we retrieve the count inline)
                 result.Values = response[InlineCountResultsKey] as JArray;
-                inlineCount = response.Value<long>(InlineCountCountKey);
+                inlineCount = response.Value<long?>(InlineCountCountKey);
                 if (result.Values == null && validate)
                 {
                     string responseStr = response != null ? response.ToString() : "null";
@@ -95,9 +103,25 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             }
 
             // Get the count via the inline count or default an unspecified count to -1
-            result.TotalCount = inlineCount != null ? inlineCount.Value : -1L;
+            result.TotalCount = inlineCount.GetValueOrDefault(-1L);
 
             result.NextLink = nextLink;
+
+            return result;
+        }
+
+        public JObject ToJObject()
+        {
+            var result = new JObject()
+            {
+                { InlineCountCountKey, this.TotalCount },
+                { InlineCountResultsKey, this.Values },                
+            };
+
+            if (this.NextLink != null)
+            {
+                result[NextRelation] = this.NextLink.ToString();
+            }
 
             return result;
         }
