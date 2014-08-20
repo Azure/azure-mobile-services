@@ -2,11 +2,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 #import "MSTable.h"
 #import "MSURLBuilder.h"
 
-@interface MSURLBuilderTests : SenTestCase
+@interface MSURLBuilderTests : XCTestCase
 
 @end
 
@@ -71,8 +71,8 @@
                                      parameters:nil
                                             orError:nil];
         
-        STAssertNotNil(url, @"url should not be nil");
-        STAssertTrue([[url absoluteString] isEqualToString:expectedURL],
+        XCTAssertNotNil(url, @"url should not be nil");
+        XCTAssertTrue([[url absoluteString] isEqualToString:expectedURL],
                      @"the url was: %@", [url absoluteString]);
     }
 }
@@ -129,8 +129,8 @@
                                      parameters:parameters
                                             orError:nil];
         
-        STAssertNotNil(url, @"url should not be nil");
-        STAssertTrue([[url absoluteString] isEqualToString:expectedURL],
+        XCTAssertNotNil(url, @"url should not be nil");
+        XCTAssertTrue([[url absoluteString] isEqualToString:expectedURL],
                      @"the url was: %@", [url absoluteString]);
     }
 }
@@ -150,15 +150,15 @@
                                  parameters:parameters
                                         orError:&error];
     
-    STAssertNil(url, @"url should be nil");
-    STAssertNotNil(error, @"error should not have been nil.");
-    STAssertTrue(error.domain == MSErrorDomain,
+    XCTAssertNil(url, @"url should be nil");
+    XCTAssertNotNil(error, @"error should not have been nil.");
+    XCTAssertTrue(error.domain == MSErrorDomain,
                  @"error domain should have been MSErrorDomain.");
-    STAssertTrue(error.code == MSInvalidUserParameterWithRequest,
+    XCTAssertTrue(error.code == MSInvalidUserParameterWithRequest,
                  @"error code should have been MSInvalidUserParameterWithRequest.");
     
     NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-    STAssertTrue([description isEqualToString:@"'$notAllowed' is an invalid user-defined query string parameter. User-defined query string parameters must not begin with a '$'."],
+    XCTAssertTrue([description isEqualToString:@"'$notAllowed' is an invalid user-defined query string parameter. User-defined query string parameters must not begin with a '$'."],
                  @"description was: %@", description);
 }
 
@@ -203,8 +203,8 @@
                                      parameters:nil
                                             orError:nil];
         
-        STAssertNotNil(url, @"url should not be nil");
-        STAssertTrue([[url absoluteString] isEqualToString:expectedURL],
+        XCTAssertNotNil(url, @"url should not be nil");
+        XCTAssertTrue([[url absoluteString] isEqualToString:expectedURL],
                      @"the url was: %@", [url absoluteString]);
     }
 }
@@ -255,8 +255,8 @@
                                      parameters:parameters
                                             orError:nil];
         
-        STAssertNotNil(url, @"url should not be nil");
-        STAssertTrue([[url absoluteString] isEqualToString:expectedURL],
+        XCTAssertNotNil(url, @"url should not be nil");
+        XCTAssertTrue([[url absoluteString] isEqualToString:expectedURL],
                      @"the url was: %@", [url absoluteString]);
     }
 }
@@ -278,15 +278,15 @@
                                  parameters:parameters
                                         orError:&error];
     
-    STAssertNil(url, @"url should be nil");
-    STAssertNotNil(error, @"error should not have been nil.");
-    STAssertTrue(error.domain == MSErrorDomain,
+    XCTAssertNil(url, @"url should be nil");
+    XCTAssertNotNil(error, @"error should not have been nil.");
+    XCTAssertTrue(error.domain == MSErrorDomain,
                  @"error domain should have been MSErrorDomain.");
-    STAssertTrue(error.code == MSInvalidUserParameterWithRequest,
+    XCTAssertTrue(error.code == MSInvalidUserParameterWithRequest,
                  @"error code should have been MSInvalidUserParameterWithRequest.");
     
     NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-    STAssertTrue([description isEqualToString:@"'$' is an invalid user-defined query string parameter. User-defined query string parameters must not begin with a '$'."],
+    XCTAssertTrue([description isEqualToString:@"'$' is an invalid user-defined query string parameter. User-defined query string parameters must not begin with a '$'."],
                  @"description was: %@", description);
 }
 
@@ -329,8 +329,8 @@
         NSURL *url = [MSURLBuilder URLForTable:table
                                           query:query];
         
-        STAssertNotNil(url, @"url should not be nil");
-        STAssertTrue([[url absoluteString] isEqualToString:expectedURL],
+        XCTAssertNotNil(url, @"url should not be nil");
+        XCTAssertTrue([[url absoluteString] isEqualToString:expectedURL],
                      @"the url was: %@", [url absoluteString]);
     }
 }
@@ -376,8 +376,8 @@
                                   parameters:nil
                                      orError:nil];
         
-        STAssertNotNil(url, @"url should not be nil");
-        STAssertTrue([[url absoluteString] isEqualToString:expectedURL],
+        XCTAssertNotNil(url, @"url should not be nil");
+        XCTAssertTrue([[url absoluteString] isEqualToString:expectedURL],
                      @"the url was: %@", [url absoluteString]);
     }
 }
@@ -434,8 +434,8 @@
                                   parameters:parameters
                                      orError:nil];
         
-        STAssertNotNil(url, @"url should not be nil");
-        STAssertTrue([[url absoluteString] isEqualToString:expectedURL],
+        XCTAssertNotNil(url, @"url should not be nil");
+        XCTAssertTrue([[url absoluteString] isEqualToString:expectedURL],
                      @"the url was: %@", [url absoluteString]);
     }
 }
@@ -458,8 +458,8 @@
     NSString *queryString = [MSURLBuilder queryStringFromQuery:query
                                                             orError:nil];
     
-    STAssertNotNil(queryString, @"queryString should not be nil");
-    STAssertTrue([queryString isEqualToString:expectedQueryString],
+    XCTAssertNotNil(queryString, @"queryString should not be nil");
+    XCTAssertTrue([queryString isEqualToString:expectedQueryString],
                  @"the queryString was: %@", queryString);
     
 }
@@ -485,15 +485,15 @@
     NSString *queryString = [MSURLBuilder queryStringFromQuery:query
                                                             orError:&error];
     
-    STAssertNil(queryString, @"queryString should be nil");
-    STAssertNotNil(error, @"error should not have been nil.");
-    STAssertTrue(error.domain == MSErrorDomain,
+    XCTAssertNil(queryString, @"queryString should be nil");
+    XCTAssertNotNil(error, @"error should not have been nil.");
+    XCTAssertTrue(error.domain == MSErrorDomain,
                  @"error domain should have been MSErrorDomain.");
-    STAssertTrue(error.code == MSInvalidUserParameterWithRequest,
+    XCTAssertTrue(error.code == MSInvalidUserParameterWithRequest,
                  @"error code should have been MSInvalidUserParameterWithRequest.");
     
     NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-    STAssertTrue([description isEqualToString:@"'$key2' is an invalid user-defined query string parameter. User-defined query string parameters must not begin with a '$'."],
+    XCTAssertTrue([description isEqualToString:@"'$key2' is an invalid user-defined query string parameter. User-defined query string parameters must not begin with a '$'."],
                  @"description was: %@", description);}
 
 @end

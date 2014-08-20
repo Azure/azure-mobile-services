@@ -2,10 +2,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 #import "MSPredicateTranslator.h"
 
-@interface MSPredicateTranslatorTests : SenTestCase
+@interface MSPredicateTranslatorTests : XCTestCase
 
 @end
 
@@ -168,8 +168,8 @@
         NSString *actual = [MSPredicateTranslator queryFilterFromPredicate:predicate
                                                                    orError:&error];
         
-        STAssertNil(error, @"error should have been nil.");
-        STAssertTrue([actual isEqualToString:expected],
+        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertTrue([actual isEqualToString:expected],
                      @"Query filter actual: '%@' and expected: '%@'",
                      actual,
                      expected);
@@ -266,8 +266,8 @@
         NSString *actual = [MSPredicateTranslator queryFilterFromPredicate:predicatewithVariables
                                                                    orError:&error];
         
-        STAssertNil(error, @"error should have been nil.");
-        STAssertTrue([actual isEqualToString:expected],
+        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertTrue([actual isEqualToString:expected],
                      @"Query filter actual: '%@' and expected: '%@'",
                      actual,
                      expected);

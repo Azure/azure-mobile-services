@@ -2,11 +2,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 #import "MSClient.h"
 #import "MSTestFilter.h"
 
-@interface MSClientTests : SenTestCase {
+@interface MSClientTests : XCTestCase {
     BOOL done;
 }
 
@@ -40,14 +40,14 @@
     MSClient *client =
     [MSClient clientWithApplicationURLString:@"http://someURL.com"];
     
-    STAssertNotNil(client, @"client should not be nil.");
+    XCTAssertNotNil(client, @"client should not be nil.");
     
-    STAssertNotNil(client.applicationURL, @"client.applicationURL should not be nil.");
+    XCTAssertNotNil(client.applicationURL, @"client.applicationURL should not be nil.");
     NSString *urlString = [client.applicationURL absoluteString];
-    STAssertTrue([urlString isEqualToString:@"http://someURL.com"],
+    XCTAssertTrue([urlString isEqualToString:@"http://someURL.com"],
                  @"The client should be using the url it was created with.");
     
-    STAssertNil(client.applicationKey, @"client.applicationKey should be nil.");
+    XCTAssertNil(client.applicationKey, @"client.applicationKey should be nil.");
 }
 
 -(void) testStaticConstructor2ReturnsClient
@@ -56,15 +56,15 @@
     [MSClient clientWithApplicationURLString:@"http://someURL.com"
                           applicationKey:@"here is some key"];
     
-    STAssertNotNil(client, @"client should not be nil.");
+    XCTAssertNotNil(client, @"client should not be nil.");
     
-    STAssertNotNil(client.applicationURL, @"client.applicationURL should not be nil.");
+    XCTAssertNotNil(client.applicationURL, @"client.applicationURL should not be nil.");
     NSString *urlString = [client.applicationURL absoluteString];
-    STAssertTrue([urlString isEqualToString:@"http://someURL.com"],
+    XCTAssertTrue([urlString isEqualToString:@"http://someURL.com"],
                  @"The client should be using the url it was created with.");
     
-    STAssertNotNil(client.applicationKey, @"client.applicationKey should not be nil.");
-    STAssertTrue([client.applicationKey isEqualToString:@"here is some key"],
+    XCTAssertNotNil(client.applicationKey, @"client.applicationKey should not be nil.");
+    XCTAssertTrue([client.applicationKey isEqualToString:@"here is some key"],
                  @"The client should be using the url it was created with.");
 }
 
@@ -75,14 +75,14 @@
     MSClient *client =
     [MSClient clientWithApplicationURL:appURL];
     
-    STAssertNotNil(client, @"client should not be nil.");
+    XCTAssertNotNil(client, @"client should not be nil.");
     
-    STAssertNotNil(client.applicationURL, @"client.applicationURL should not be nil.");
+    XCTAssertNotNil(client.applicationURL, @"client.applicationURL should not be nil.");
     NSString *urlString = [client.applicationURL absoluteString];
-    STAssertTrue([urlString isEqualToString:@"http://someURL.com"],
+    XCTAssertTrue([urlString isEqualToString:@"http://someURL.com"],
                  @"The client should be using the url it was created with.");
     
-    STAssertNil(client.applicationKey, @"client.applicationKey should be nil.");
+    XCTAssertNil(client.applicationKey, @"client.applicationKey should be nil.");
 }
 
 -(void) testStaticConstructor4ReturnsClient
@@ -93,15 +93,15 @@
     [MSClient clientWithApplicationURL:appURL
                     applicationKey:@"here is some key"];
     
-    STAssertNotNil(client, @"client should not be nil.");
+    XCTAssertNotNil(client, @"client should not be nil.");
     
-    STAssertNotNil(client.applicationURL, @"client.applicationURL should not be nil.");
+    XCTAssertNotNil(client.applicationURL, @"client.applicationURL should not be nil.");
     NSString *urlString = [client.applicationURL absoluteString];
-    STAssertTrue([urlString isEqualToString:@"http://someURL.com"],
+    XCTAssertTrue([urlString isEqualToString:@"http://someURL.com"],
                  @"The client should be using the url it was created with.");
     
-    STAssertNotNil(client.applicationKey, @"client.applicationKey should not be nil.");
-    STAssertTrue([client.applicationKey isEqualToString:@"here is some key"],
+    XCTAssertNotNil(client.applicationKey, @"client.applicationKey should not be nil.");
+    XCTAssertTrue([client.applicationKey isEqualToString:@"here is some key"],
                  @"The client should be using the url it was created with.");
 }
 
@@ -111,7 +111,7 @@
         [MSClient clientWithApplicationURLString:@"http://yeah! .com"];
     
     NSString *urlString = [client.applicationURL absoluteString];
-    STAssertTrue([urlString isEqualToString:@"http://yeah!%20.com"],
+    XCTAssertTrue([urlString isEqualToString:@"http://yeah!%20.com"],
                  @"The client should have encoded and normalized the url: %@", urlString);
 }
 
@@ -125,23 +125,23 @@
     
     MSClient *client = [[MSClient alloc] initWithApplicationURL:appURL];
     
-    STAssertNotNil(client, @"client should not be nil.");
+    XCTAssertNotNil(client, @"client should not be nil.");
     
-    STAssertNotNil(client.applicationURL, @"client.applicationURL should not be nil.");
+    XCTAssertNotNil(client.applicationURL, @"client.applicationURL should not be nil.");
     NSString *urlString = [client.applicationURL absoluteString];
-    STAssertTrue([urlString isEqualToString:@"http://someURL.com"],
+    XCTAssertTrue([urlString isEqualToString:@"http://someURL.com"],
                  @"The client should be using the url it was created with.");
     
-    STAssertNil(client.applicationKey, @"client.applicationKey should be nil.");
+    XCTAssertNil(client.applicationKey, @"client.applicationKey should be nil.");
 }
 
 -(void) testInitWithApplicationURLAllowsNilURL
 {    
     MSClient *client = [[MSClient alloc] initWithApplicationURL:nil];
     
-    STAssertNotNil(client, @"client should not be nil.");
-    STAssertNil(client.applicationURL, @"client.applicationURL should be nil.");
-    STAssertNil(client.applicationKey, @"client.applicationKey should be nil.");
+    XCTAssertNotNil(client, @"client should not be nil.");
+    XCTAssertNil(client.applicationURL, @"client.applicationURL should be nil.");
+    XCTAssertNil(client.applicationKey, @"client.applicationKey should be nil.");
 }
 
 -(void) testInitWithApplicationURLAndApplicationKey
@@ -152,15 +152,15 @@
     [[MSClient alloc] initWithApplicationURL:appURL
                     applicationKey:@"here is some key"];
     
-    STAssertNotNil(client, @"client should not be nil.");
+    XCTAssertNotNil(client, @"client should not be nil.");
     
-    STAssertNotNil(client.applicationURL, @"client.applicationURL should not be nil.");
+    XCTAssertNotNil(client.applicationURL, @"client.applicationURL should not be nil.");
     NSString *urlString = [client.applicationURL absoluteString];
-    STAssertTrue([urlString isEqualToString:@"http://someURL.com"],
+    XCTAssertTrue([urlString isEqualToString:@"http://someURL.com"],
                  @"The client should be using the url it was created with.");
     
-    STAssertNotNil(client.applicationKey, @"client.applicationKey should not be nil.");
-    STAssertTrue([client.applicationKey isEqualToString:@"here is some key"],
+    XCTAssertNotNil(client.applicationKey, @"client.applicationKey should not be nil.");
+    XCTAssertTrue([client.applicationKey isEqualToString:@"here is some key"],
                  @"The client should be using the url it was created with.");
 }
 
@@ -175,7 +175,7 @@
 
     MSTable *table = [client tableWithName:@"Some Table Name"];
     
-    STAssertNotNil(table, @"table should not be nil.");
+    XCTAssertNotNil(table, @"table should not be nil.");
 }
 
 -(void) testTableWithNameAllowsNilTableName
@@ -185,7 +185,7 @@
     
     MSTable *table = [client tableWithName:nil];
     
-    STAssertNotNil(table, @"table should not be nil.");
+    XCTAssertNotNil(table, @"table should not be nil.");
 }
 
 
@@ -222,27 +222,27 @@
                  completion:
      ^(id result, NSURLResponse *response, NSError *error) {
          
-         STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
-         STAssertNil(error, @"error should have been nil.");
+         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+         XCTAssertNil(error, @"error should have been nil.");
                
          NSString *actualUrl = actualRequest.URL.absoluteString;
-         STAssertTrue([actualUrl isEqualToString:@"http://someURL.com/api/someAPI?x=24"],
+         XCTAssertTrue([actualUrl isEqualToString:@"http://someURL.com/api/someAPI?x=24"],
                       @"URL was not as expected.");
          
          NSString *actualHeader = [actualRequest.allHTTPHeaderFields valueForKey:@"someHeader"];
-         STAssertNotNil(actualHeader, @"actualHeader should not have been nil.");
-         STAssertTrue([actualHeader isEqualToString:@"someValue"],
+         XCTAssertNotNil(actualHeader, @"actualHeader should not have been nil.");
+         XCTAssertTrue([actualHeader isEqualToString:@"someValue"],
                       @"Header value was not as expected.");
          
          NSString *actualMethod = actualRequest.HTTPMethod;
-         STAssertNotNil(actualMethod, @"actualMethod should not have been nil.");
-         STAssertTrue([actualMethod isEqualToString:@"GET"],
+         XCTAssertNotNil(actualMethod, @"actualMethod should not have been nil.");
+         XCTAssertTrue([actualMethod isEqualToString:@"GET"],
                       @"HTTP Method was not as expected.");
          
          done = YES;
      }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInvokeAPISerializesAsJson
@@ -278,23 +278,23 @@
                  completion:
      ^(id result, NSURLResponse *response, NSError *error) {
          
-         STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
-         STAssertNil(error, @"error should have been nil.");
+         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+         XCTAssertNil(error, @"error should have been nil.");
          
          NSData *actualBody = actualRequest.HTTPBody;
          NSString *bodyString = [[NSString alloc] initWithData:actualBody
                                                       encoding:NSUTF8StringEncoding];
-         STAssertTrue([bodyString isEqualToString:@"{\"id\":1,\"name\":\"jim\"}"],
+         XCTAssertTrue([bodyString isEqualToString:@"{\"id\":1,\"name\":\"jim\"}"],
                       @"The body was not serialized as expected.");
          
-         STAssertNotNil(result, @"result should not have been nil.");
-         STAssertTrue([[result valueForKey:@"id"] isEqual:@5], @"The id should have been 5");
-         STAssertTrue([[result valueForKey:@"name"] isEqualToString:@"bob"], @"The name should have been 'bob'");
+         XCTAssertNotNil(result, @"result should not have been nil.");
+         XCTAssertTrue([[result valueForKey:@"id"] isEqual:@5], @"The id should have been 5");
+         XCTAssertTrue([[result valueForKey:@"name"] isEqualToString:@"bob"], @"The name should have been 'bob'");
          
          done = YES;
      }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInvokeAPIPassesAlongData
@@ -331,24 +331,24 @@
                  completion:
      ^(NSData *result, NSURLResponse *response, NSError *error) {
          
-         STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
-         STAssertNil(error, @"error should have been nil.");
+         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+         XCTAssertNil(error, @"error should have been nil.");
          
          NSData *actualBody = actualRequest.HTTPBody;
-         STAssertNotNil(actualBody, @"actualBody should not have been nil.");
-         STAssertEqualObjects(actualBody, testData, @"Should be the same data instance.");
+         XCTAssertNotNil(actualBody, @"actualBody should not have been nil.");
+         XCTAssertEqualObjects(actualBody, testData, @"Should be the same data instance.");
          
-         STAssertNotNil(result, @"result should not have been nil.");
-         STAssertEqualObjects(result, testData, @"Should be the same data instance.");
+         XCTAssertNotNil(result, @"result should not have been nil.");
+         XCTAssertEqualObjects(result, testData, @"Should be the same data instance.");
 
          NSString *contentType = [actualRequest.allHTTPHeaderFields valueForKey:@"Content-Type"];
-         STAssertNotNil(contentType, @"contentType should not have been nil.");
-         STAssertTrue([contentType isEqualToString:@"application/json"],
+         XCTAssertNotNil(contentType, @"contentType should not have been nil.");
+         XCTAssertTrue([contentType isEqualToString:@"application/json"],
                                                    @"Content-Type was not as expected.");
          done = YES;
      }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInvokeAPIHonorsContentTypeIfSet
@@ -385,25 +385,25 @@
                  completion:
      ^(NSData *result, NSURLResponse *response, NSError *error) {
          
-         STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
-         STAssertNil(error, @"error should have been nil.");
+         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+         XCTAssertNil(error, @"error should have been nil.");
          
          NSData *actualBody = actualRequest.HTTPBody;
-         STAssertNotNil(actualBody, @"actualBody should not have been nil.");
-         STAssertEqualObjects(actualBody, testData, @"Should be the same data instance.");
+         XCTAssertNotNil(actualBody, @"actualBody should not have been nil.");
+         XCTAssertEqualObjects(actualBody, testData, @"Should be the same data instance.");
          
-         STAssertNotNil(result, @"result should not have been nil.");
-         STAssertEqualObjects(result, testData, @"Should be the same data instance.");
+         XCTAssertNotNil(result, @"result should not have been nil.");
+         XCTAssertEqualObjects(result, testData, @"Should be the same data instance.");
          
          NSString *contentType = [actualRequest.allHTTPHeaderFields valueForKey:@"Content-Type"];
-         STAssertNotNil(contentType, @"contentType should not have been nil.");
-         STAssertTrue([contentType isEqualToString:@"text/json"],
+         XCTAssertNotNil(contentType, @"contentType should not have been nil.");
+         XCTAssertTrue([contentType isEqualToString:@"text/json"],
                                                    @"Content-Type was not as expected.");
          
          done = YES;
      }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInvokeAPIAllowsNilAPIName
@@ -436,17 +436,17 @@
                  completion:
      ^(id result, NSURLResponse *response, NSError *error) {
          
-         STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
-         STAssertNil(error, @"error should have been nil.");
+         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+         XCTAssertNil(error, @"error should have been nil.");
          
          NSString *actualUrl = actualRequest.URL.absoluteString;
-         STAssertTrue([actualUrl isEqualToString:@"http://someURL.com/api/"],
+         XCTAssertTrue([actualUrl isEqualToString:@"http://someURL.com/api/"],
                       @"URL was not as expected.");
          
          done = YES;
      }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInvokeAPIAllowsNilData
@@ -479,15 +479,15 @@
                  completion:
      ^(NSData *result, NSURLResponse *response, NSError *error) {
          
-         STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
-         STAssertNil(error, @"error should have been nil.");
+         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+         XCTAssertNil(error, @"error should have been nil.");
          
-         STAssertNil(actualRequest.HTTPBody, @"body should have been nil.");
+         XCTAssertNil(actualRequest.HTTPBody, @"body should have been nil.");
          
          done = YES;
      }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInvokeAPIAllowsNilMethod
@@ -520,19 +520,19 @@
                  completion:
      ^(id result, NSURLResponse *response, NSError *error) {
          
-         STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
-         STAssertNil(error, @"error should have been nil.");
+         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+         XCTAssertNil(error, @"error should have been nil.");
          
          NSString *actualUrl = actualRequest.URL.absoluteString;
-         STAssertTrue([actualUrl isEqualToString:@"http://someURL.com/api/someApi"],
+         XCTAssertTrue([actualUrl isEqualToString:@"http://someURL.com/api/someApi"],
                       @"URL was not as expected.");
          
-         STAssertTrue([actualRequest.HTTPMethod isEqualToString:@"POST"], @"The default HTTP method should have been 'POST'");
+         XCTAssertTrue([actualRequest.HTTPMethod isEqualToString:@"POST"], @"The default HTTP method should have been 'POST'");
          
          done = YES;
      }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInvokeReturnsErrorFor400OrGreater
@@ -563,15 +563,15 @@
                  completion:
      ^(NSData *data, NSURLResponse *response, NSError *error) {
          
-         STAssertNil(response, @"response should have been nil.");
-         STAssertNotNil(error, @"error should not have been nil.");
-         STAssertTrue([[error localizedDescription] isEqualToString:
+         XCTAssertNil(response, @"response should have been nil.");
+         XCTAssertNotNil(error, @"error should not have been nil.");
+         XCTAssertTrue([[error localizedDescription] isEqualToString:
                         @"This is the error msg."],
                         @"error description was: %@", [error localizedDescription]);
          done = YES;
      }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 - (void) testInvokeApiAllowsArrayDataOut
@@ -607,14 +607,14 @@
          NSString *bodyString = [[NSString alloc] initWithData:actualRequest.HTTPBody
                                                       encoding:NSUTF8StringEncoding];
          
-         STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
-         STAssertNil(error, @"error should have been nil.");
-         STAssertEqualObjects(@"[\"apple\",\"orange\",\"banana\"]", bodyString, @"Unexpected body found: %@", bodyString);
+         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+         XCTAssertNil(error, @"error should have been nil.");
+         XCTAssertEqualObjects(@"[\"apple\",\"orange\",\"banana\"]", bodyString, @"Unexpected body found: %@", bodyString);
          
          done = YES;
      }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 #pragma mark * Async Test Helper Method

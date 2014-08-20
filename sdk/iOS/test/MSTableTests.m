@@ -2,13 +2,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 #import "MSTable.h"
 #import "MSTestFilter.h"
 #import "MSQuery.h"
 #import "MSTable+MSTableTestUtilities.h"
 
-@interface MSTableTests : SenTestCase {
+@interface MSTableTests : XCTestCase {
     MSClient *client;
         BOOL done;
 }
@@ -42,10 +42,10 @@
 {
     MSTable *table = [[MSTable alloc] initWithName:@"SomeName" client:client];
     
-    STAssertNotNil(table, @"table should not be nil.");
+    XCTAssertNotNil(table, @"table should not be nil.");
     
-    STAssertNotNil(table.client, @"table.client should not be nil.");
-    STAssertTrue([table.name isEqualToString:@"SomeName"],
+    XCTAssertNotNil(table.client, @"table.client should not be nil.");
+    XCTAssertTrue([table.name isEqualToString:@"SomeName"],
                  @"table.name shouldbe 'SomeName'");
 }
 
@@ -53,10 +53,10 @@
 {
     MSTable *table = [[MSTable alloc] initWithName:nil client:nil];
     
-    STAssertNotNil(table, @"table should not be nil.");
+    XCTAssertNotNil(table, @"table should not be nil.");
     
-    STAssertNil(table.client, @"table.client should be nil.");
-    STAssertNil(table.name, @"table.name should be nil.");
+    XCTAssertNil(table.client, @"table.client should be nil.");
+    XCTAssertNil(table.name, @"table.name should be nil.");
 }
 
 
@@ -88,15 +88,15 @@
     
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        STAssertNotNil(item, @"item should not have  been nil.");
-        STAssertNil(error, @"error should have been nil.");
-        STAssertTrue([[item valueForKey:@"name"] isEqualToString:@"test name"],
+        XCTAssertNotNil(item, @"item should not have  been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertTrue([[item valueForKey:@"name"] isEqualToString:@"test name"],
                      @"item should have been inserted.");
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInsertItemWithNilItem
@@ -106,22 +106,22 @@
     // Insert the item
     [todoTable insert:nil completion:^(NSDictionary *item, NSError *error) {
     
-        STAssertNil(item, @"item should have been nil.");
+        XCTAssertNil(item, @"item should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSExpectedItemWithRequest,
+        XCTAssertTrue(error.code == MSExpectedItemWithRequest,
                      @"error code should have been MSExpectedItemWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"No item was provided."],
+        XCTAssertTrue([description isEqualToString:@"No item was provided."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInsertItemWithInvalidItem
@@ -134,22 +134,22 @@
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
     
-        STAssertNil(item, @"item should have been nil.");
+        XCTAssertNil(item, @"item should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemWithRequest,
                      @"error code should have been MSInvalidItemWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided was not valid."],
+        XCTAssertTrue([description isEqualToString:@"The item provided was not valid."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInsertItemWithIdZero
@@ -175,13 +175,13 @@
     
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        STAssertNotNil(item, @"item should not have  been nil.");
-        STAssertNil(error, @"error should have been nil.");
+        XCTAssertNotNil(item, @"item should not have  been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInsertItemWithStringId
@@ -207,13 +207,13 @@
     
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        STAssertNotNil(item, @"item should not have  been nil.");
-        STAssertNil(error, @"error should have been nil.");
+        XCTAssertNotNil(item, @"item should not have  been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInsertItemWithNullId
@@ -239,13 +239,13 @@
     
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        STAssertNotNil(item, @"item should not have  been nil.");
-        STAssertNil(error, @"error should have been nil.");
+        XCTAssertNotNil(item, @"item should not have  been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInsertItemWithEmptyStringId
@@ -271,13 +271,13 @@
     
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        STAssertNotNil(item, @"item should not have  been nil.");
-        STAssertNil(error, @"error should have been nil.");
+        XCTAssertNotNil(item, @"item should not have  been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInsertHasContentType
@@ -305,12 +305,12 @@
     // insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
         
-        STAssertNotNil(contentType, @"Content-Type should not have been nil.");
+        XCTAssertNotNil(contentType, @"Content-Type should not have been nil.");
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInsertStripsSystemProperties
@@ -341,46 +341,46 @@
     
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        STAssertNil(error, nil);
-        STAssertNotNil(item, nil);
+        XCTAssertNil(error);
+        XCTAssertNotNil(item);
 
-        STAssertNil(item[MSSystemColumnVersion], nil);
-        STAssertNil(item[MSSystemColumnCreatedAt], nil);
-        STAssertNil(item[@"__unknown"], nil);
+        XCTAssertNil(item[MSSystemColumnVersion]);
+        XCTAssertNil(item[MSSystemColumnCreatedAt]);
+        XCTAssertNil(item[@"__unknown"]);
 
         done = YES;
     }];
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");    
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");    
     done = NO;
     
     // Allow some through table enum
     todoTable.systemProperties = MSSystemPropertyCreatedAt | MSSystemPropertyVersion;
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        STAssertNil(error, nil);
-        STAssertNotNil(item, nil);
+        XCTAssertNil(error);
+        XCTAssertNotNil(item);
         
-        STAssertNotNil(item[MSSystemColumnVersion], nil);
-        STAssertNotNil(item[MSSystemColumnCreatedAt], nil);
-        STAssertNil(item[@"__unknown"], nil);
+        XCTAssertNotNil(item[MSSystemColumnVersion]);
+        XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
+        XCTAssertNil(item[@"__unknown"]);
         
         done = YES;
     }];
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     done = NO;
     
     // Allow all now
     todoTable.systemProperties = MSSystemPropertyAll;
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        STAssertNil(error, nil);
-        STAssertNotNil(item, nil);
+        XCTAssertNil(error);
+        XCTAssertNotNil(item);
         
-        STAssertNotNil(item[MSSystemColumnVersion], nil);
-        STAssertNotNil(item[MSSystemColumnCreatedAt], nil);
-        STAssertNotNil(item[@"__unknown"], nil);
+        XCTAssertNotNil(item[MSSystemColumnVersion]);
+        XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
+        XCTAssertNotNil(item[@"__unknown"]);
         
         done = YES;
     }];
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     done = NO;
     
     // Now using the querystring instead
@@ -388,12 +388,12 @@
     [todoTable insert:item
            parameters:@{@"__systemProperties":MSSystemColumnCreatedAt}
            completion:^(NSDictionary *item, NSError *error) {
-        STAssertNil(error, nil);
-        STAssertNotNil(item, nil);
+        XCTAssertNil(error);
+        XCTAssertNotNil(item);
         
-        STAssertNil(item[MSSystemColumnVersion], nil);
-        STAssertNotNil(item[MSSystemColumnCreatedAt], nil);
-        STAssertNil(item[@"__unknown"], nil);
+        XCTAssertNil(item[MSSystemColumnVersion]);
+        XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
+        XCTAssertNil(item[@"__unknown"]);
         
         done = YES;
     }];
@@ -402,17 +402,17 @@
     stringData = @"{\"id\": 123, \"name\":\"test name\", \"__version\":\"ABC\", \"__createdAt\":\"12-01-01\",\"__unknown\":123}";
     testFilter.dataToUse = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-        STAssertNil(error, nil);
-        STAssertNotNil(item, nil);
+        XCTAssertNil(error);
+        XCTAssertNotNil(item);
 
-        STAssertNotNil(item[MSSystemColumnVersion], nil);
-        STAssertNotNil(item[MSSystemColumnCreatedAt], nil);
-        STAssertNotNil(item[@"__unknown"], nil);
+        XCTAssertNotNil(item[MSSystemColumnVersion]);
+        XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
+        XCTAssertNotNil(item[@"__unknown"]);
 
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 #pragma mark * Update Method Tests
@@ -444,14 +444,14 @@
     
     // Insert the item
     [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
-        STAssertNotNil(item, @"item should not have  been nil.");
-        STAssertNil(error, @"error should have been nil.");
-        STAssertTrue([[item valueForKey:@"name"] isEqualToString:@"test name updated"],
+        XCTAssertNotNil(item, @"item should not have  been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertTrue([[item valueForKey:@"name"] isEqualToString:@"test name updated"],
                        @"item should have been updated.");
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testUpdateItemWithStringId
@@ -477,14 +477,14 @@
     
     // Insert the item
     [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
-        STAssertNotNil(item, @"item should not have  been nil.");
-        STAssertNil(error, @"error should have been nil.");
-        STAssertTrue([[item valueForKey:@"name"] isEqualToString:@"test name updated"],
+        XCTAssertNotNil(item, @"item should not have  been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertTrue([[item valueForKey:@"name"] isEqualToString:@"test name updated"],
                      @"item should have been updated.");
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testUpdateItemWithNilItem
@@ -494,22 +494,22 @@
     // Update the item
     [todoTable update:nil completion:^(NSDictionary *item, NSError *error) {
     
-        STAssertNil(item, @"item should have been nil.");
+        XCTAssertNil(item, @"item should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSExpectedItemWithRequest,
+        XCTAssertTrue(error.code == MSExpectedItemWithRequest,
                      @"error code should have been MSExpectedItemWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"No item was provided."],
+        XCTAssertTrue([description isEqualToString:@"No item was provided."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testUpdateItemWithInvalidItem
@@ -522,22 +522,22 @@
     // Update the item
     [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
         
-        STAssertNil(item, @"item should have been nil.");
+        XCTAssertNil(item, @"item should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemWithRequest,
                      @"error code should have been MSInvalidItemWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided was not valid."],
+        XCTAssertTrue([description isEqualToString:@"The item provided was not valid."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testUpdateItemWithNoItemId
@@ -550,22 +550,22 @@
     // Update the item
     [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
   
-        STAssertNil(item, @"item should have been nil.");
+        XCTAssertNil(item, @"item should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSMissingItemIdWithRequest,
+        XCTAssertTrue(error.code == MSMissingItemIdWithRequest,
                      @"error code should have been MSMissingItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided did not have an id."],
+        XCTAssertTrue([description isEqualToString:@"The item provided did not have an id."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testUpdateItemWithEmptyStringItemId
@@ -578,22 +578,22 @@
     // Update the item
     [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
     
-        STAssertNil(item, @"item should have been nil.");
+        XCTAssertNil(item, @"item should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemIdWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
+        XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testUpdateItemWithwhiteSpaceItemId
@@ -606,22 +606,22 @@
     // Update the item
     [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
         
-        STAssertNil(item, @"item should have been nil.");
+        XCTAssertNil(item, @"item should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemIdWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
+        XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testUpdateItemWithItemIdZero
@@ -634,22 +634,22 @@
     // Update the item
     [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
         
-        STAssertNil(item, @"item should have been nil.");
+        XCTAssertNil(item, @"item should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemIdWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
+        XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testUpdateStripsSystemProperties
@@ -681,46 +681,46 @@
     
     // Insert the item
     [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
-        STAssertNil(error, nil);
-        STAssertNotNil(item, nil);
+        XCTAssertNil(error);
+        XCTAssertNotNil(item);
         
-        STAssertNil(item[MSSystemColumnVersion], nil);
-        STAssertNil(item[MSSystemColumnCreatedAt], nil);
-        STAssertNil(item[@"__unknown"], nil);
+        XCTAssertNil(item[MSSystemColumnVersion]);
+        XCTAssertNil(item[MSSystemColumnCreatedAt]);
+        XCTAssertNil(item[@"__unknown"]);
         
         done = YES;
     }];
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     done = NO;
     
     // Allow some through table enum
     todoTable.systemProperties = MSSystemPropertyCreatedAt | MSSystemPropertyVersion;
     [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
-        STAssertNil(error, nil);
-        STAssertNotNil(item, nil);
+        XCTAssertNil(error);
+        XCTAssertNotNil(item);
         
-        STAssertNotNil(item[MSSystemColumnVersion], nil);
-        STAssertNotNil(item[MSSystemColumnCreatedAt], nil);
-        STAssertNil(item[@"__unknown"], nil);
+        XCTAssertNotNil(item[MSSystemColumnVersion]);
+        XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
+        XCTAssertNil(item[@"__unknown"]);
         
         done = YES;
     }];
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     done = NO;
     
     // Allow all now
     todoTable.systemProperties = MSSystemPropertyAll;
     [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
-        STAssertNil(error, nil);
-        STAssertNotNil(item, nil);
+        XCTAssertNil(error);
+        XCTAssertNotNil(item);
         
-        STAssertNotNil(item[MSSystemColumnVersion], nil);
-        STAssertNotNil(item[MSSystemColumnCreatedAt], nil);
-        STAssertNotNil(item[@"__unknown"], nil);
+        XCTAssertNotNil(item[MSSystemColumnVersion]);
+        XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
+        XCTAssertNotNil(item[@"__unknown"]);
         
         done = YES;
     }];
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     done = NO;
     
     // Now using the querystring instead
@@ -728,16 +728,16 @@
     [todoTable update:item
            parameters:@{@"__systemProperties":MSSystemColumnCreatedAt}
            completion:^(NSDictionary *item, NSError *error) {
-               STAssertNil(error, nil);
-               STAssertNotNil(item, nil);
+               XCTAssertNil(error);
+               XCTAssertNotNil(item);
                
-               STAssertNil(item[MSSystemColumnVersion], nil);
-               STAssertNotNil(item[MSSystemColumnCreatedAt], nil);
-               STAssertNil(item[@"__unknown"], nil);
+               XCTAssertNil(item[MSSystemColumnVersion]);
+               XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
+               XCTAssertNil(item[@"__unknown"]);
                
                done = YES;
            }];
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     done = NO;
     
     // And check int Ids keep them all still
@@ -745,17 +745,17 @@
     item = @{ @"id": @123, @"name":@"test name" };
     testFilter.dataToUse = [stringData dataUsingEncoding:NSUTF8StringEncoding];
     [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
-        STAssertNil(error, nil);
-        STAssertNotNil(item, nil);
+        XCTAssertNil(error);
+        XCTAssertNotNil(item);
         
-        STAssertNotNil(item[MSSystemColumnVersion], nil);
-        STAssertNotNil(item[MSSystemColumnCreatedAt], nil);
-        STAssertNotNil(item[@"__unknown"], nil);
+        XCTAssertNotNil(item[MSSystemColumnVersion]);
+        XCTAssertNotNil(item[MSSystemColumnCreatedAt]);
+        XCTAssertNotNil(item[@"__unknown"]);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 
@@ -785,15 +785,15 @@
     
     // Insert the item
     [todoTable delete:item completion:^(id itemId, NSError *error) {
-        STAssertNotNil(itemId, @"item should not have  been nil.");
-        STAssertNil(error, @"error should have been nil.");
-        STAssertTrue([itemId isEqualToNumber:@120],
+        XCTAssertNotNil(itemId, @"item should not have  been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertTrue([itemId isEqualToNumber:@120],
                      @"item should have been inserted.");
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteItemWithStringId
@@ -815,15 +815,15 @@
     
     // Insert the item
     [todoTable delete:item completion:^(id itemId, NSError *error) {
-        STAssertNotNil(itemId, @"item should not have  been nil.");
-        STAssertNil(error, @"error should have been nil.");
-        STAssertTrue([itemId isEqualToString:@"120"],
+        XCTAssertNotNil(itemId, @"item should not have  been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertTrue([itemId isEqualToString:@"120"],
                      @"item should have been inserted.");
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteItemWithStringIdConflict
@@ -848,15 +848,15 @@
     
     // Test deletion of the item
     [todoTable delete:item completion:^(id itemId, NSError *error) {
-        STAssertNil(itemId, @"item should have been nil.");
-        STAssertEquals(error.code, [@MSErrorPreconditionFailed integerValue], @"Error should be precondition");
+        XCTAssertNil(itemId, @"item should have been nil.");
+        XCTAssertEqual(error.code, [@MSErrorPreconditionFailed integerValue], @"Error should be precondition");
         NSDictionary* serverItem =[error.userInfo objectForKey:MSErrorServerItemKey];
-        STAssertEqualObjects([serverItem objectForKey:@"id"], @120, @"id portion of ServerItem was not expected value");
-        STAssertEqualObjects([serverItem objectForKey:@"name"], @"test name", @"name portion of ServerItem was not expected value");
+        XCTAssertEqualObjects([serverItem objectForKey:@"id"], @120, @"id portion of ServerItem was not expected value");
+        XCTAssertEqualObjects([serverItem objectForKey:@"name"], @"test name", @"name portion of ServerItem was not expected value");
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteItemWithStringIdConflictWithEmptyJsonError
@@ -881,14 +881,14 @@
     
     // Test deletion of the item
     [todoTable delete:item completion:^(id itemId, NSError *error) {
-        STAssertNil(itemId, @"item should have been nil.");
-        STAssertEquals(error.code, [@MSErrorPreconditionFailed integerValue], @"Error should be precondition");
+        XCTAssertNil(itemId, @"item should have been nil.");
+        XCTAssertEqual(error.code, [@MSErrorPreconditionFailed integerValue], @"Error should be precondition");
         NSDictionary* serverItem =[error.userInfo objectForKey:MSErrorServerItemKey];
-        STAssertTrue(serverItem.count == 0, @"empty JSON object error has no members in userInfo");
+        XCTAssertTrue(serverItem.count == 0, @"empty JSON object error has no members in userInfo");
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteItemWithNilItem
@@ -898,22 +898,22 @@
     // Update the item
     [todoTable delete:nil completion:^(id itemId, NSError *error) {
   
-        STAssertNil(itemId, @"itemId should have been nil.");
+        XCTAssertNil(itemId, @"itemId should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSExpectedItemWithRequest,
+        XCTAssertTrue(error.code == MSExpectedItemWithRequest,
                      @"error code should have been MSExpectedItemWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"No item was provided."],
+        XCTAssertTrue([description isEqualToString:@"No item was provided."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteItemWithInvalidItem
@@ -926,22 +926,22 @@
     // Delete the item
     [todoTable delete:item completion:^(id itemId, NSError *error) {
         
-        STAssertNil(itemId, @"itemId should have been nil.");
+        XCTAssertNil(itemId, @"itemId should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemWithRequest,
                      @"error code should have been MSInvalidItemWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided was not valid."],
+        XCTAssertTrue([description isEqualToString:@"The item provided was not valid."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteItemWithNoItemId
@@ -954,22 +954,22 @@
     // Delete the item
     [todoTable delete:item completion:^(id itemId, NSError *error) {
     
-        STAssertNil(itemId, @"itemId should have been nil.");
+        XCTAssertNil(itemId, @"itemId should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSMissingItemIdWithRequest,
+        XCTAssertTrue(error.code == MSMissingItemIdWithRequest,
                      @"error code should have been MSMissingItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided did not have an id."],
+        XCTAssertTrue([description isEqualToString:@"The item provided did not have an id."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteItemWithInvalidItemId
@@ -982,22 +982,22 @@
     // Delete the item
     [todoTable delete:item completion:^(id itemId, NSError *error) {
         
-        STAssertNil(itemId, @"itemId should have been nil.");
+        XCTAssertNil(itemId, @"itemId should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemIdWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
+        XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteItemWithEmptyStringId
@@ -1010,22 +1010,22 @@
     // Delete the item
     [todoTable delete:item completion:^(id itemId, NSError *error) {
         
-        STAssertNil(itemId, @"itemId should have been nil.");
+        XCTAssertNil(itemId, @"itemId should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemIdWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
+        XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteItemWithWhiteSpaceId
@@ -1038,22 +1038,22 @@
     // Delete the item
     [todoTable delete:item completion:^(id itemId, NSError *error) {
         
-        STAssertNil(itemId, @"itemId should have been nil.");
+        XCTAssertNil(itemId, @"itemId should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemIdWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
+        XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteItemWithItemIdZero
@@ -1066,16 +1066,16 @@
     // Delete the item
     [todoTable delete:item completion:^(id itemId, NSError *error) {
         
-        STAssertNil(itemId, @"itemId should have been nil.");
+        XCTAssertNil(itemId, @"itemId should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemIdWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
+        XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
         done = YES;
@@ -1098,15 +1098,15 @@
 
     // Insert the item
     [todoTable deleteWithId:@120 completion:^(id itemId, NSError *error) {
-        STAssertNotNil(itemId, @"item should not have  been nil.");
-        STAssertNil(error, @"error should have been nil.");
-        STAssertTrue([itemId isEqualToNumber:@120],
+        XCTAssertNotNil(itemId, @"item should not have  been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertTrue([itemId isEqualToNumber:@120],
                      @"item should have been inserted.");
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteItemWithIdwithStringId
@@ -1125,15 +1125,15 @@
     
     // Insert the item
     [todoTable deleteWithId:@"120" completion:^(id itemId, NSError *error) {
-        STAssertNotNil(itemId, @"item should not have  been nil.");
-        STAssertNil(error, @"error should have been nil.");
-        STAssertTrue([itemId isEqualToString:@"120"],
+        XCTAssertNotNil(itemId, @"item should not have  been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertTrue([itemId isEqualToString:@"120"],
                      @"item should have been inserted.");
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteItemWithIdWithNoItemId
@@ -1143,22 +1143,22 @@
     // Delete the item
     [todoTable deleteWithId:nil completion:^(id itemId, NSError *error) {
     
-        STAssertNil(itemId, @"itemId should have been nil.");
+        XCTAssertNil(itemId, @"itemId should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSExpectedItemIdWithRequest,
+        XCTAssertTrue(error.code == MSExpectedItemIdWithRequest,
                      @"error code should have been MSExpectedItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item id was not provided."],
+        XCTAssertTrue([description isEqualToString:@"The item id was not provided."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteItemWithIdWithInvalidItemId
@@ -1171,22 +1171,22 @@
     // Delete the item
     [todoTable deleteWithId:itemId completion:^(id itemId, NSError *error) {
         
-        STAssertNil(itemId, @"itemId should have been nil.");
+        XCTAssertNil(itemId, @"itemId should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemIdWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
+        XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteItemWithIdWithIdZero
@@ -1196,22 +1196,22 @@
     // Delete the item
     [todoTable deleteWithId:@0 completion:^(id itemId, NSError *error) {
         
-        STAssertNil(itemId, @"itemId should have been nil.");
+        XCTAssertNil(itemId, @"itemId should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemIdWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
+        XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteItemWithIdWithEmptyStringId
@@ -1221,22 +1221,22 @@
     // Delete the item
     [todoTable deleteWithId:@"" completion:^(id itemId, NSError *error) {
         
-        STAssertNil(itemId, @"itemId should have been nil.");
+        XCTAssertNil(itemId, @"itemId should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemIdWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
+        XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteItemWithIdWithWhiteSpaceId
@@ -1246,22 +1246,22 @@
     // Delete the item
     [todoTable deleteWithId:@" " completion:^(id itemId, NSError *error) {
         
-        STAssertNil(itemId, @"itemId should have been nil.");
+        XCTAssertNil(itemId, @"itemId should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemIdWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
+        XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testDeleteDoesNotHaveContentType
@@ -1286,12 +1286,12 @@
     // delete the item
     [todoTable deleteWithId:@5 completion:^(id itemId, NSError *error) {
   
-        STAssertNil(contentType, @"Content-Type should not have been set.");
+        XCTAssertNil(contentType, @"Content-Type should not have been set.");
     
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 
@@ -1321,14 +1321,14 @@
 
     // Insert the item
     [todoTable readWithId:@120 completion:^(NSDictionary *item, NSError *error) {
-        STAssertNotNil(item, @"item should not have  been nil.");
-        STAssertNil(error, @"error should have been nil.");
-        STAssertTrue([[item valueForKey:@"id"] isEqualToNumber:@120],
+        XCTAssertNotNil(item, @"item should not have  been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertTrue([[item valueForKey:@"id"] isEqualToNumber:@120],
                      @"item should have been read.");
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testReadItemWithStringId
@@ -1351,14 +1351,14 @@
     
     // Insert the item
     [todoTable readWithId:@"120" completion:^(NSDictionary *item, NSError *error) {
-        STAssertNotNil(item, @"item should not have  been nil.");
-        STAssertNil(error, @"error should have been nil.");
-        STAssertTrue([[item valueForKey:@"id"] isEqualToString:@"120"],
+        XCTAssertNotNil(item, @"item should not have  been nil.");
+        XCTAssertNil(error, @"error should have been nil.");
+        XCTAssertTrue([[item valueForKey:@"id"] isEqualToString:@"120"],
                      @"item should have been read.");
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testReadItemWithIdWithNoItemId
@@ -1368,22 +1368,22 @@
     // Read the item
     [todoTable readWithId:nil completion:^(NSDictionary *item, NSError *error) {
     
-        STAssertNil(item, @"item should have been nil.");
+        XCTAssertNil(item, @"item should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSExpectedItemIdWithRequest,
+        XCTAssertTrue(error.code == MSExpectedItemIdWithRequest,
                      @"error code should have been MSExpectedItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item id was not provided."],
+        XCTAssertTrue([description isEqualToString:@"The item id was not provided."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testReadItemWithIdWithInvalidItemId
@@ -1396,22 +1396,22 @@
     // Read the item
     [todoTable readWithId:itemId completion:^(NSDictionary *item, NSError *error) {
      
-        STAssertNil(item, @"item should have been nil.");
+        XCTAssertNil(item, @"item should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemIdWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
+        XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testReadItemWithIdWithIdZero
@@ -1421,22 +1421,22 @@
     // Read the item
     [todoTable readWithId:@0 completion:^(NSDictionary *item, NSError *error) {
         
-        STAssertNil(item, @"item should have been nil.");
+        XCTAssertNil(item, @"item should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemIdWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
+        XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testReadItemWithEmptyStringId
@@ -1446,22 +1446,22 @@
     // Read the item
     [todoTable readWithId:@"" completion:^(NSDictionary *item, NSError *error) {
         
-        STAssertNil(item, @"item should have been nil.");
+        XCTAssertNil(item, @"item should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemIdWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
+        XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testReadItemWithWhiteSpaceId
@@ -1471,22 +1471,22 @@
     // Read the item
     [todoTable readWithId:@"  " completion:^(NSDictionary *item, NSError *error) {
         
-        STAssertNil(item, @"item should have been nil.");
+        XCTAssertNil(item, @"item should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue(error.domain == MSErrorDomain,
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue(error.domain == MSErrorDomain,
                      @"error domain should have been MSErrorDomain.");
-        STAssertTrue(error.code == MSInvalidItemIdWithRequest,
+        XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
         NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
-        STAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
+        XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testReadItemWithIdDoesNotHaveContentType
@@ -1511,12 +1511,12 @@
     // read with id
     [todoTable readWithId:@5 completion:^(NSDictionary *item, NSError *error){
         
-        STAssertNil(contentType, @"Content-Type should not have been set.");
+        XCTAssertNil(contentType, @"Content-Type should not have been set.");
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 
@@ -1528,7 +1528,7 @@
     MSTable *todoTable = [client tableWithName:@"todoItem"];
     MSQuery *query = [todoTable query];
     
-    STAssertNotNil(query, @"query should not have been nil.");    
+    XCTAssertNotNil(query, @"query should not have been nil.");    
 }
 
 -(void) testQueryWithPredicateReturnsNonNil
@@ -1536,7 +1536,7 @@
     MSTable *todoTable = [client tableWithName:@"todoItem"];
     MSQuery *query = [todoTable queryWithPredicate:nil];
     
-    STAssertNotNil(query, @"query should not have been nil.");
+    XCTAssertNotNil(query, @"query should not have been nil.");
 }
 
 -(void) testQueryDoesNotHaveContentType
@@ -1563,12 +1563,12 @@
     // query
     [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
         
-        STAssertNil(contentType, @"Content-Type should not have been set.");
+        XCTAssertNil(contentType, @"Content-Type should not have been set.");
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 # pragma mark System Property Tests
@@ -1607,11 +1607,11 @@
             NSData *actualBody = actualRequest.HTTPBody;
             NSString *bodyString = [[NSString alloc] initWithData:actualBody
                                                          encoding:NSUTF8StringEncoding];
-            STAssertTrue([bodyString rangeOfString:property].location != NSNotFound, @"The body was not serialized as expected.");
-            STAssertEqualObjects(@"a value", [item objectForKey:property], @"Property %@ was removed", property);
+            XCTAssertTrue([bodyString rangeOfString:property].location != NSNotFound, @"The body was not serialized as expected.");
+            XCTAssertEqualObjects(@"a value", [item objectForKey:property], @"Property %@ was removed", property);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     }
 }
 
@@ -1647,12 +1647,12 @@
             NSData *actualBody = actualRequest.HTTPBody;
             NSString *bodyString = [[NSString alloc] initWithData:actualBody
                                                          encoding:NSUTF8StringEncoding];
-            STAssertTrue([bodyString rangeOfString:property].location != NSNotFound, @"The body was not serialized as expected.");
-            STAssertEqualObjects(@"a value", [item objectForKey:property], @"system property %@ was removed", property);
+            XCTAssertTrue([bodyString rangeOfString:property].location != NSNotFound, @"The body was not serialized as expected.");
+            XCTAssertEqualObjects(@"a value", [item objectForKey:property], @"system property %@ was removed", property);
             
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     }
 }
 
@@ -1685,11 +1685,11 @@
             NSData *actualBody = actualRequest.HTTPBody;
             NSString *bodyString = [[NSString alloc] initWithData:actualBody
                                                          encoding:NSUTF8StringEncoding];
-            STAssertTrue([bodyString rangeOfString:property].location != NSNotFound, @"Error: The body was not serialized as expected.");
-            STAssertEqualObjects(@"a value", [item objectForKey:property], @"Error: Non system property %@ was removed", property);
+            XCTAssertTrue([bodyString rangeOfString:property].location != NSNotFound, @"Error: The body was not serialized as expected.");
+            XCTAssertEqualObjects(@"a value", [item objectForKey:property], @"Error: Non system property %@ was removed", property);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     }
 }
 
@@ -1721,12 +1721,12 @@
             NSData *actualBody = actualRequest.HTTPBody;
             NSString *bodyString = [[NSString alloc] initWithData:actualBody
                                                          encoding:NSUTF8StringEncoding];
-            STAssertEqualObjects(bodyString, @"{\"id\":\"an id\",\"string\":\"What?\"}",
+            XCTAssertEqualObjects(bodyString, @"{\"id\":\"an id\",\"string\":\"What?\"}",
                                  @"The body was not serialized as expected.");
             
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     }
 }
 
@@ -1760,11 +1760,11 @@
             NSData *actualBody = actualRequest.HTTPBody;
             NSString *bodyString = [[NSString alloc] initWithData:actualBody
                                                          encoding:NSUTF8StringEncoding];
-            STAssertTrue([bodyString rangeOfString:property].location != NSNotFound, @"The body was not serialized as expected.");
-            STAssertEqualObjects(@"a value", [item objectForKey:property], @"Non system property %@ was removed", property);
+            XCTAssertTrue([bodyString rangeOfString:property].location != NSNotFound, @"The body was not serialized as expected.");
+            XCTAssertEqualObjects(@"a value", [item objectForKey:property], @"Non system property %@ was removed", property);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     }
 }
 
@@ -1799,12 +1799,12 @@
             NSData *actualBody = actualRequest.HTTPBody;
             NSString *bodyString = [[NSString alloc] initWithData:actualBody
                                                          encoding:NSUTF8StringEncoding];
-            STAssertTrue([bodyString rangeOfString:property].location != NSNotFound,
+            XCTAssertTrue([bodyString rangeOfString:property].location != NSNotFound,
                          @"The body was not serialized as expected: %@", bodyString);
-            STAssertEqualObjects(@"a value", [item objectForKey:property], @"Property %@ was removed", property);
+            XCTAssertEqualObjects(@"a value", [item objectForKey:property], @"Property %@ was removed", property);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     }
 }
 
@@ -1874,79 +1874,79 @@
         NSDictionary *item = @{@"id":@"an id",@"String":@"what?"};
         testFilter.dataToUse = [@"{\"id\":\"an id\",\"String\":\"Hey\"}" dataUsingEncoding:NSUTF8StringEncoding];
         [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error for property %d with url: %@", systemProperty, [[actualRequest URL] query]);
+            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error for property %d with url: %@", systemProperty, [[actualRequest URL] query]);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         done = NO;
         [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
-            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         done = NO;
         [todoTable readWithId:item completion:^(NSDictionary *item, NSError *error) {
-            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         done = NO;
         [todoTable delete:item completion:^(id itemId, NSError *error) {
-            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         // Integer Id
         done = NO;
         item = @{@"String": @"what?"};
         testFilter.dataToUse = [@"{\"id\":5,\"String\":\"Hey\"}" dataUsingEncoding:NSUTF8StringEncoding];
         [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         done = NO;
         item = @{@"id": @5, @"String": @"what?"};
         [todoTable update:item completion:^(NSDictionary *item, NSError *error) {
-            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         done = NO;
         [todoTable readWithId:item completion:^(NSDictionary *item, NSError *error) {
-            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         done = NO;
         [todoTable delete:item completion:^(id itemId, NSError *error) {
-            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 
         // Query
         
         done = NO;
         [todoTable readWithQueryString:@"$filter=id eq 5" completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 
         done = NO;
         [todoTable readWithQueryString:@"$select=id,String" completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
-            STAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
+            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     }
 }
 
@@ -1980,34 +1980,34 @@
         testFilter.dataToUse = [@"{\"id\":\"an id\",\"String\":\"Hey\"}" dataUsingEncoding:NSUTF8StringEncoding];
         [todoTable insert:item parameters:@{ @"__systemProperties": @"__createdAt"} completion:^(NSDictionary *item, NSError *error) {
             NSString *url = [[actualRequest URL] query];
-            STAssertTrue([url rangeOfString:@"__systemProperties=__createdAt"].location != NSNotFound, @"Incorrect query: %@", url);
+            XCTAssertTrue([url rangeOfString:@"__systemProperties=__createdAt"].location != NSNotFound, @"Incorrect query: %@", url);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         done = NO;
         [todoTable update:item parameters:@{ @"__systemProperties": @"createdAt"} completion:^(NSDictionary *item, NSError *error) {
             NSString *url = [[actualRequest URL] query];
-            STAssertTrue([url rangeOfString:@"__systemProperties=createdAt"].location != NSNotFound, @"Incorrect query: %@", url);
+            XCTAssertTrue([url rangeOfString:@"__systemProperties=createdAt"].location != NSNotFound, @"Incorrect query: %@", url);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         done = NO;
         [todoTable readWithId:@"an id" parameters:@{ @"__systemProperties": @"CreatedAt"} completion:^(NSDictionary *item, NSError *error) {
             NSString *url = [[actualRequest URL] query];
-            STAssertTrue([url rangeOfString:@"__systemProperties=CreatedAt"].location != NSNotFound, @"Incorrect query: %@", url);
+            XCTAssertTrue([url rangeOfString:@"__systemProperties=CreatedAt"].location != NSNotFound, @"Incorrect query: %@", url);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         done = NO;
         [todoTable delete:item parameters:@{ @"__systemProperties": @"unknown"} completion:^(id itemId, NSError *error) {
             NSString *url = [[actualRequest URL] query];
-            STAssertTrue([url rangeOfString:@"__systemProperties=unknown"].location != NSNotFound, @"Incorrect query: %@", url);
+            XCTAssertTrue([url rangeOfString:@"__systemProperties=unknown"].location != NSNotFound, @"Incorrect query: %@", url);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         // Integer Id
         done = NO;
@@ -2015,53 +2015,53 @@
         testFilter.dataToUse = [@"{\"id\":5,\"String\":\"Hey\"}" dataUsingEncoding:NSUTF8StringEncoding];
         [todoTable insert:item parameters:@{ @"__systemProperties": @"__createdAt"} completion:^(NSDictionary *item, NSError *error) {
             NSString *url = [[actualRequest URL] query];
-            STAssertTrue([url rangeOfString:@"__systemProperties=__createdAt"].location != NSNotFound, @"Incorrect query: %@", url);
+            XCTAssertTrue([url rangeOfString:@"__systemProperties=__createdAt"].location != NSNotFound, @"Incorrect query: %@", url);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         done = NO;
         item = @{@"id":@5, @"string":@"what?"};
         [todoTable update:item parameters:@{ @"__systemProperties": @"createdAt"} completion:^(NSDictionary *item, NSError *error) {
             NSString *url = [[actualRequest URL] query];
-            STAssertTrue([url rangeOfString:@"__systemProperties=createdAt"].location != NSNotFound, @"Incorrect query: %@", url);
+            XCTAssertTrue([url rangeOfString:@"__systemProperties=createdAt"].location != NSNotFound, @"Incorrect query: %@", url);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         done = NO;
         [todoTable readWithId:@5 parameters:@{ @"__systemProperties": @"CreatedAt"} completion:^(NSDictionary *item, NSError *error) {
             NSString *url = [[actualRequest URL] query];
-            STAssertTrue([url rangeOfString:@"__systemProperties=CreatedAt"].location != NSNotFound, @"Incorrect query: %@", url);
+            XCTAssertTrue([url rangeOfString:@"__systemProperties=CreatedAt"].location != NSNotFound, @"Incorrect query: %@", url);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         done = NO;
         [todoTable delete:item parameters:@{ @"__systemProperties": @"unknown"} completion:^(id itemId, NSError *error) {
             NSString *url = [[actualRequest URL] query];
-            STAssertTrue([url rangeOfString:@"__systemProperties=unknown"].location != NSNotFound, @"Incorrect query: %@", url);
+            XCTAssertTrue([url rangeOfString:@"__systemProperties=unknown"].location != NSNotFound, @"Incorrect query: %@", url);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         // Query
         
         done = NO;
         [todoTable readWithQueryString:@"$filter=id%20eq%205&__systemproperties=__createdAt" completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
             NSString *url = [[actualRequest URL] query];
-            STAssertEqualObjects(@"$filter=id%20eq%205&__systemproperties=__createdAt", url, @"Incorrect query: %@", url);
+            XCTAssertEqualObjects(@"$filter=id%20eq%205&__systemproperties=__createdAt", url, @"Incorrect query: %@", url);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         done = NO;
         [todoTable readWithQueryString:@"$select=id,String&__systemProperties=__CreatedAt" completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
             NSString *url = [[actualRequest URL] query];
-            STAssertEqualObjects(@"$select=id,String&__systemProperties=__CreatedAt", url, @"Incorrect query: %@", url);
+            XCTAssertEqualObjects(@"$select=id,String&__systemProperties=__CreatedAt", url, @"Incorrect query: %@", url);
             done = YES;
         }];
-        STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+        XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     }
 }
 
