@@ -114,7 +114,7 @@
         XCTAssertTrue(error.code == MSExpectedItemWithRequest,
                      @"error code should have been MSExpectedItemWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = error.localizedDescription;
         XCTAssertTrue([description isEqualToString:@"No item was provided."],
                      @"description was: %@", description);
         
@@ -142,7 +142,7 @@
         XCTAssertTrue(error.code == MSInvalidItemWithRequest,
                      @"error code should have been MSInvalidItemWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided was not valid."],
                      @"description was: %@", description);
         
@@ -502,7 +502,7 @@
         XCTAssertTrue(error.code == MSExpectedItemWithRequest,
                      @"error code should have been MSExpectedItemWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"No item was provided."],
                      @"description was: %@", description);
         
@@ -530,7 +530,7 @@
         XCTAssertTrue(error.code == MSInvalidItemWithRequest,
                      @"error code should have been MSInvalidItemWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided was not valid."],
                      @"description was: %@", description);
         
@@ -558,7 +558,7 @@
         XCTAssertTrue(error.code == MSMissingItemIdWithRequest,
                      @"error code should have been MSMissingItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided did not have an id."],
                      @"description was: %@", description);
         
@@ -586,7 +586,7 @@
         XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
@@ -614,7 +614,7 @@
         XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
@@ -642,7 +642,7 @@
         XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
@@ -850,9 +850,9 @@
     [todoTable delete:item completion:^(id itemId, NSError *error) {
         XCTAssertNil(itemId, @"item should have been nil.");
         XCTAssertEqual(error.code, [@MSErrorPreconditionFailed integerValue], @"Error should be precondition");
-        NSDictionary* serverItem =[error.userInfo objectForKey:MSErrorServerItemKey];
-        XCTAssertEqualObjects([serverItem objectForKey:@"id"], @120, @"id portion of ServerItem was not expected value");
-        XCTAssertEqualObjects([serverItem objectForKey:@"name"], @"test name", @"name portion of ServerItem was not expected value");
+        NSDictionary* serverItem =(error.userInfo)[MSErrorServerItemKey];
+        XCTAssertEqualObjects(serverItem[@"id"], @120, @"id portion of ServerItem was not expected value");
+        XCTAssertEqualObjects(serverItem[@"name"], @"test name", @"name portion of ServerItem was not expected value");
         done = YES;
     }];
     
@@ -883,7 +883,7 @@
     [todoTable delete:item completion:^(id itemId, NSError *error) {
         XCTAssertNil(itemId, @"item should have been nil.");
         XCTAssertEqual(error.code, [@MSErrorPreconditionFailed integerValue], @"Error should be precondition");
-        NSDictionary* serverItem =[error.userInfo objectForKey:MSErrorServerItemKey];
+        NSDictionary* serverItem =(error.userInfo)[MSErrorServerItemKey];
         XCTAssertTrue(serverItem.count == 0, @"empty JSON object error has no members in userInfo");
         done = YES;
     }];
@@ -906,7 +906,7 @@
         XCTAssertTrue(error.code == MSExpectedItemWithRequest,
                      @"error code should have been MSExpectedItemWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"No item was provided."],
                      @"description was: %@", description);
         
@@ -934,7 +934,7 @@
         XCTAssertTrue(error.code == MSInvalidItemWithRequest,
                      @"error code should have been MSInvalidItemWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided was not valid."],
                      @"description was: %@", description);
         
@@ -962,7 +962,7 @@
         XCTAssertTrue(error.code == MSMissingItemIdWithRequest,
                      @"error code should have been MSMissingItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided did not have an id."],
                      @"description was: %@", description);
         
@@ -990,7 +990,7 @@
         XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
@@ -1018,7 +1018,7 @@
         XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
@@ -1046,7 +1046,7 @@
         XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
@@ -1074,7 +1074,7 @@
         XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
@@ -1151,7 +1151,7 @@
         XCTAssertTrue(error.code == MSExpectedItemIdWithRequest,
                      @"error code should have been MSExpectedItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item id was not provided."],
                      @"description was: %@", description);
         
@@ -1179,7 +1179,7 @@
         XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
@@ -1204,7 +1204,7 @@
         XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
@@ -1229,7 +1229,7 @@
         XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
@@ -1254,7 +1254,7 @@
         XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
@@ -1376,7 +1376,7 @@
         XCTAssertTrue(error.code == MSExpectedItemIdWithRequest,
                      @"error code should have been MSExpectedItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item id was not provided."],
                      @"description was: %@", description);
         
@@ -1404,7 +1404,7 @@
         XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
@@ -1429,7 +1429,7 @@
         XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
@@ -1454,7 +1454,7 @@
         XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
@@ -1479,7 +1479,7 @@
         XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                      @"error code should have been MSInvalidItemIdWithRequest.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                      @"description was: %@", description);
         
@@ -1608,7 +1608,7 @@
             NSString *bodyString = [[NSString alloc] initWithData:actualBody
                                                          encoding:NSUTF8StringEncoding];
             XCTAssertTrue([bodyString rangeOfString:property].location != NSNotFound, @"The body was not serialized as expected.");
-            XCTAssertEqualObjects(@"a value", [item objectForKey:property], @"Property %@ was removed", property);
+            XCTAssertEqualObjects(@"a value", item[property], @"Property %@ was removed", property);
             done = YES;
         }];
         XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
@@ -1648,7 +1648,7 @@
             NSString *bodyString = [[NSString alloc] initWithData:actualBody
                                                          encoding:NSUTF8StringEncoding];
             XCTAssertTrue([bodyString rangeOfString:property].location != NSNotFound, @"The body was not serialized as expected.");
-            XCTAssertEqualObjects(@"a value", [item objectForKey:property], @"system property %@ was removed", property);
+            XCTAssertEqualObjects(@"a value", item[property], @"system property %@ was removed", property);
             
             done = YES;
         }];
@@ -1686,7 +1686,7 @@
             NSString *bodyString = [[NSString alloc] initWithData:actualBody
                                                          encoding:NSUTF8StringEncoding];
             XCTAssertTrue([bodyString rangeOfString:property].location != NSNotFound, @"Error: The body was not serialized as expected.");
-            XCTAssertEqualObjects(@"a value", [item objectForKey:property], @"Error: Non system property %@ was removed", property);
+            XCTAssertEqualObjects(@"a value", item[property], @"Error: Non system property %@ was removed", property);
             done = YES;
         }];
         XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
@@ -1761,7 +1761,7 @@
             NSString *bodyString = [[NSString alloc] initWithData:actualBody
                                                          encoding:NSUTF8StringEncoding];
             XCTAssertTrue([bodyString rangeOfString:property].location != NSNotFound, @"The body was not serialized as expected.");
-            XCTAssertEqualObjects(@"a value", [item objectForKey:property], @"Non system property %@ was removed", property);
+            XCTAssertEqualObjects(@"a value", item[property], @"Non system property %@ was removed", property);
             done = YES;
         }];
         XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
@@ -1801,7 +1801,7 @@
                                                          encoding:NSUTF8StringEncoding];
             XCTAssertTrue([bodyString rangeOfString:property].location != NSNotFound,
                          @"The body was not serialized as expected: %@", bodyString);
-            XCTAssertEqualObjects(@"a value", [item objectForKey:property], @"Property %@ was removed", property);
+            XCTAssertEqualObjects(@"a value", item[property], @"Property %@ was removed", property);
             done = YES;
         }];
         XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");

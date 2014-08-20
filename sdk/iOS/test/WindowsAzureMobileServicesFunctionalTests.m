@@ -29,8 +29,7 @@
     
     // These functional tests requires a working Windows Mobile Azure Service
     // with a table named "todoItem". Simply enter the application URL and
-    // application key for the Windows Mobile Azure Service below and set the
-    // 'testsEnabled' BOOL above to YES.
+    // application key for the Windows Mobile Azure Service below.
     
     client = [MSClient
                 clientWithApplicationURLString:@"<Microsoft Azure Mobile Service App URL>"
@@ -72,12 +71,12 @@
         
         // Verify that the insert succeeded
         XCTAssertNotNil(newItem, @"newItem should not be nil.");
-        XCTAssertNotNil([newItem objectForKey:@"id"],
+        XCTAssertNotNil(newItem[@"id"],
                        @"newItem should now have an id.");
         
         // Update the item
         NSDictionary *itemToUpdate = @{
-            @"id" :[newItem objectForKey:@"id"],
+            @"id" :newItem[@"id"],
             @"text":@"Write E2E test!",
             @"complete": @(YES)
         };
@@ -92,7 +91,7 @@
             
             // Verify that the update succeeded
             XCTAssertNotNil(updatedItem, @"updatedItem should not be nil.");
-            XCTAssertTrue([[updatedItem objectForKey:@"complete"] boolValue],
+            XCTAssertTrue([updatedItem[@"complete"] boolValue],
                            @"updatedItem should now be completed.");
             
             // Delete the item
@@ -106,7 +105,7 @@
                 
                 // Verify that the delete succeeded
                 XCTAssertTrue([itemId longLongValue] ==
-                            [[updatedItem objectForKey:@"id"] longLongValue],
+                            [updatedItem[@"id"] longLongValue],
                             @"itemId deleted was: %@.", itemId);
                 done = YES;
                 
@@ -197,7 +196,7 @@
         XCTAssertTrue(items.count == 1, @"items.count was: %lu", (unsigned long)items.count);
         XCTAssertTrue(totalCount == -1, @"totalCount was: %ld", (long)totalCount);
         
-        [todoTable readWithId:[[items objectAtIndex:0] valueForKey:@"id"]
+        [todoTable readWithId:[items[0] valueForKey:@"id"]
                     completion:query4AfterQuery3];
     };
     
@@ -277,7 +276,7 @@
         XCTAssertTrue(error.code == MSErrorMessageErrorCode,
                      @"error code should have been MSErrorMessageErrorCode.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"Error: Table 'NoSuchTable' does not exist."],
                      @"description was: %@", description);
         
@@ -396,7 +395,7 @@
             XCTAssertNil(error, @"error from query should have been nil.");
             
             // Now delete the inserted item so as not to corrupt future tests
-            NSNumber *itemIdToDelete = [item objectForKey:@"id"];
+            NSNumber *itemIdToDelete = item[@"id"];
             [todoTable deleteWithId:itemIdToDelete completion:^(NSNumber *itemId,
                                                                 NSError *error) {
                 XCTAssertNil(error, @"error from delete should have been nil.");
@@ -417,8 +416,7 @@
     [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
         
         XCTAssertNotNil(items, @"items should not have been nil.");
-        XCTAssertNil(error, @"error from query was: %@",
-                    [error.userInfo objectForKey:NSLocalizedDescriptionKey]);
+        XCTAssertNil(error, @"error from query was: %@", error.localizedDescription);
         
         done = YES;
     }];
@@ -451,7 +449,7 @@
             XCTAssertNil(error, @"error from update should have been nil.");
 
             // Now delete the inserted item so as not to corrupt future tests
-            NSNumber *itemIdToDelete = [updatedItem objectForKey:@"id"];
+            NSNumber *itemIdToDelete = updatedItem[@"id"];
             [todoTable deleteWithId:itemIdToDelete
                         parameters:parameters
                          completion:^(NSNumber *itemId, NSError *error) {
@@ -486,7 +484,7 @@
         XCTAssertTrue(error.code == MSErrorMessageErrorCode,
                      @"error code should have been MSErrorMessageErrorCode.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"Error: Table 'NoSuchTable' does not exist."],
                      @"description was: %@", description);
         
@@ -521,7 +519,7 @@
         XCTAssertTrue(error.code == MSErrorMessageErrorCode,
                      @"error code should have been MSErrorMessageErrorCode.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"Error: Table 'NoSuchTable' does not exist."],
                      @"description was: %@", description);
         
@@ -553,7 +551,7 @@
         XCTAssertTrue(error.code == MSErrorMessageErrorCode,
                      @"error code should have been MSErrorMessageErrorCode.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"Error: An item with id '-5' does not exist."],
                      @"description was: %@", description);
         
@@ -588,7 +586,7 @@
         XCTAssertTrue(error.code == MSErrorMessageErrorCode,
                      @"error code should have been MSErrorMessageErrorCode.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"Error: Table 'NoSuchTable' does not exist."],
                      @"description was: %@", description);
         
@@ -620,7 +618,7 @@
         XCTAssertTrue(error.code == MSErrorMessageErrorCode,
                      @"error code should have been MSErrorMessageErrorCode.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"Error: An item with id '-5' does not exist."],
                      @"description was: %@", description);
         
@@ -645,7 +643,7 @@
         XCTAssertTrue(error.code == MSErrorMessageErrorCode,
                      @"error code should have been MSErrorMessageErrorCode.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"Error: An item with id '-5' does not exist."],
                      @"description was: %@", description);
         
@@ -673,7 +671,7 @@
         XCTAssertTrue(error.code == MSErrorMessageErrorCode,
                      @"error code should have been MSErrorMessageErrorCode.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"Error: Table 'NoSuchTable' does not exist."],
                      @"description was: %@", description);
         
@@ -698,7 +696,7 @@
         XCTAssertTrue(error.code == MSErrorMessageErrorCode,
                      @"error code should have been MSErrorMessageErrorCode.");
         
-        NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+        NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
         XCTAssertTrue([description isEqualToString:@"Error: An item with id '-5' does not exist."],
                      @"description was: %@", description);
         

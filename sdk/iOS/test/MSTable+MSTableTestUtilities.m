@@ -38,7 +38,7 @@
         else {
             if (lastItemIndex + 1  < items.count) {
                 lastItemIndex++;
-                id itemToDelete = [items objectAtIndex:lastItemIndex];
+                id itemToDelete = items[lastItemIndex];
                 [self delete:itemToDelete completion:weakNextDeleteBlock];
             }
             else {
@@ -64,7 +64,7 @@
         else {
             if (lastItemIndex + 1  < items.count) {
                 lastItemIndex++;
-                id itemToInsert = [items objectAtIndex:lastItemIndex];
+                id itemToInsert = items[lastItemIndex];
                 [self insert:itemToInsert completion:weakNextInsertBlock];
             }
             else {
@@ -150,7 +150,7 @@
 +(NSArray *) testInvalidIntIds
 {
     return @[
-             [NSNumber numberWithInt:-1],
+             @-1,
              @INT_MIN,
              @LONG_LONG_MIN
     ];
@@ -179,15 +179,15 @@
 +(NSArray *) testSystemProperties
 {
     return @[
-        [NSNumber numberWithUnsignedInteger:MSSystemPropertyNone],
-        [NSNumber numberWithUnsignedInteger:MSSystemPropertyAll],
-        [NSNumber numberWithUnsignedInteger:MSSystemPropertyCreatedAt | MSSystemPropertyUpdatedAt | MSSystemPropertyVersion],
-        [NSNumber numberWithUnsignedInteger:MSSystemPropertyCreatedAt | MSSystemPropertyUpdatedAt],
-        [NSNumber numberWithUnsignedInteger:MSSystemPropertyCreatedAt | MSSystemPropertyVersion],
-        [NSNumber numberWithUnsignedInteger:MSSystemPropertyCreatedAt],
-        [NSNumber numberWithUnsignedInteger:MSSystemPropertyUpdatedAt | MSSystemPropertyVersion],
-        [NSNumber numberWithUnsignedInteger:MSSystemPropertyUpdatedAt],
-        [NSNumber numberWithUnsignedInteger:MSSystemPropertyVersion]
+        @(MSSystemPropertyNone),
+        @(MSSystemPropertyAll),
+        @(MSSystemPropertyCreatedAt | MSSystemPropertyUpdatedAt | MSSystemPropertyVersion),
+        @(MSSystemPropertyCreatedAt | MSSystemPropertyUpdatedAt),
+        @(MSSystemPropertyCreatedAt | MSSystemPropertyVersion),
+        @(MSSystemPropertyCreatedAt),
+        @(MSSystemPropertyUpdatedAt | MSSystemPropertyVersion),
+        @(MSSystemPropertyUpdatedAt),
+        @(MSSystemPropertyVersion)
     ];
 }
 

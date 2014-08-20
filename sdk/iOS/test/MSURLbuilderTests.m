@@ -60,9 +60,9 @@
     
     for (id testCase in testCases) {
         
-        NSString *expectedURL = [testCase objectAtIndex:0];
-        NSString *appURL = [testCase objectAtIndex:1];
-        NSString *tableName = [testCase objectAtIndex:2];
+        NSString *expectedURL = testCase[0];
+        NSString *appURL = testCase[1];
+        NSString *tableName = testCase[2];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
         MSTable *table = [client tableWithName:tableName];
@@ -117,10 +117,10 @@
     
     for (id testCase in testCases) {
         
-        NSString *expectedURL = [testCase objectAtIndex:0];
-        NSString *appURL = [testCase objectAtIndex:1];
-        NSString *tableName = [testCase objectAtIndex:2];
-        NSDictionary *parameters = [testCase objectAtIndex:3];
+        NSString *expectedURL = testCase[0];
+        NSString *appURL = testCase[1];
+        NSString *tableName = testCase[2];
+        NSDictionary *parameters = testCase[3];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
         MSTable *table = [client tableWithName:tableName];
@@ -157,7 +157,7 @@
     XCTAssertTrue(error.code == MSInvalidUserParameterWithRequest,
                  @"error code should have been MSInvalidUserParameterWithRequest.");
     
-    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+    NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
     XCTAssertTrue([description isEqualToString:@"'$notAllowed' is an invalid user-defined query string parameter. User-defined query string parameters must not begin with a '$'."],
                  @"description was: %@", description);
 }
@@ -190,10 +190,10 @@
     
     for (id testCase in testCases) {
         
-        NSString *appURL = [testCase objectAtIndex:1];
-        NSString *tableName = [testCase objectAtIndex:2];
-        NSString *itemId = [testCase objectAtIndex:3];
-        NSString *expectedURL = [testCase objectAtIndex:0];
+        NSString *appURL = testCase[1];
+        NSString *tableName = testCase[2];
+        NSString *itemId = testCase[3];
+        NSString *expectedURL = testCase[0];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
         MSTable *table = [client tableWithName:tableName];
@@ -241,11 +241,11 @@
     
     for (id testCase in testCases) {
         
-        NSString *expectedURL = [testCase objectAtIndex:0];
-        NSString *appURL = [testCase objectAtIndex:1];
-        NSString *tableName = [testCase objectAtIndex:2];
-        NSString *itemId = [testCase objectAtIndex:3];
-        NSDictionary *parameters = [testCase objectAtIndex:4];
+        NSString *expectedURL = testCase[0];
+        NSString *appURL = testCase[1];
+        NSString *tableName = testCase[2];
+        NSString *itemId = testCase[3];
+        NSDictionary *parameters = testCase[4];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
         MSTable *table = [client tableWithName:tableName];
@@ -285,7 +285,7 @@
     XCTAssertTrue(error.code == MSInvalidUserParameterWithRequest,
                  @"error code should have been MSInvalidUserParameterWithRequest.");
     
-    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+    NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
     XCTAssertTrue([description isEqualToString:@"'$' is an invalid user-defined query string parameter. User-defined query string parameters must not begin with a '$'."],
                  @"description was: %@", description);
 }
@@ -318,10 +318,10 @@
     
     for (id testCase in testCases) {
         
-        NSString *appURL = [testCase objectAtIndex:1];
-        NSString *tableName = [testCase objectAtIndex:2];
-        NSString *query = [testCase objectAtIndex:3];
-        NSString *expectedURL = [testCase objectAtIndex:0];
+        NSString *appURL = testCase[1];
+        NSString *tableName = testCase[2];
+        NSString *query = testCase[3];
+        NSString *expectedURL = testCase[0];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
         MSTable *table = [client tableWithName:tableName];
@@ -365,9 +365,9 @@
     
     for (id testCase in testCases) {
         
-        NSString *expectedURL = [testCase objectAtIndex:0];
-        NSString *appURL = [testCase objectAtIndex:1];
-        NSString *APIName = [testCase objectAtIndex:2];
+        NSString *expectedURL = testCase[0];
+        NSString *appURL = testCase[1];
+        NSString *APIName = testCase[2];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
         
@@ -422,10 +422,10 @@
     
     for (id testCase in testCases) {
         
-        NSString *expectedURL = [testCase objectAtIndex:0];
-        NSString *appURL = [testCase objectAtIndex:1];
-        NSString *APIName = [testCase objectAtIndex:2];
-        NSDictionary *parameters = [testCase objectAtIndex:3];
+        NSString *expectedURL = testCase[0];
+        NSString *appURL = testCase[1];
+        NSString *APIName = testCase[2];
+        NSDictionary *parameters = testCase[3];
         
         MSClient *client = [MSClient clientWithApplicationURLString:appURL];
         
@@ -492,7 +492,7 @@
     XCTAssertTrue(error.code == MSInvalidUserParameterWithRequest,
                  @"error code should have been MSInvalidUserParameterWithRequest.");
     
-    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+    NSString *description = (error.userInfo)[NSLocalizedDescriptionKey];
     XCTAssertTrue([description isEqualToString:@"'$key2' is an invalid user-defined query string parameter. User-defined query string parameters must not begin with a '$'."],
                  @"description was: %@", description);}
 

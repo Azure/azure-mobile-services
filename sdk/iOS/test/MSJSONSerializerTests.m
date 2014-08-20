@@ -47,8 +47,8 @@
         id testId;
         NSString *expected;
         if([test isKindOfClass:[NSDictionary class]]) {
-            testId = [test objectForKey:@"id"];
-            expected = [test objectForKey:@"string"];
+            testId = test[@"id"];
+            expected = test[@"string"];
         } else {
             testId = test;
             expected = test;
@@ -211,7 +211,7 @@
     XCTAssertTrue(error.code == MSExpectedItemWithRequest,
                  @"error code should have been MSExpectedItemWithRequest.");
     
-    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+    NSString *description = error.localizedDescription;
     XCTAssertTrue([description isEqualToString:@"No item was provided."],
                  @"description was: %@", description);
 }
@@ -277,7 +277,7 @@
     XCTAssertTrue(error.code == MSExistingItemIdWithRequest,
                  @"error code should have been MSExistingItemIdWithRequest.");
     
-    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+    NSString *description = error.localizedDescription;
     XCTAssertTrue([description isEqualToString:@"The item provided must not have an id."],
                  @"description was: %@", description);
 }
@@ -299,7 +299,7 @@
     XCTAssertTrue(error.code == MSExistingItemIdWithRequest,
                  @"error code should have been MSExistingItemIdWithRequest.");
     
-    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+    NSString *description = error.localizedDescription;
     XCTAssertTrue([description isEqualToString:@"The item provided must not have an id."],
                  @"description was: %@", description);
 }
@@ -321,7 +321,7 @@
     XCTAssertTrue(error.code == MSInvalidItemIdWithRequest,
                  @"error code should have been MSInvalidItemIdWithRequest.");
     
-    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+    NSString *description = error.localizedDescription;
     XCTAssertTrue([description isEqualToString:@"The item provided did not have a valid id."],
                  @"description was: %@", description);
 }
@@ -343,7 +343,7 @@
     XCTAssertTrue(error.code == MSExistingItemIdWithRequest,
                  @"error code should have been MSExistingItemIdWithRequest.");
     
-    NSString *description = [error.userInfo objectForKey:NSLocalizedDescriptionKey];
+    NSString *description = error.localizedDescription;
     XCTAssertTrue([description isEqualToString:@"The item provided must not have an id."],
                  @"description was: %@", description);
 }
@@ -465,7 +465,7 @@
     
     XCTAssertNotNil(newItem, @"item was nil after deserializing item.");
     XCTAssertNil(error, @"error was not nil after deserializing item.");
-    XCTAssertTrue([[newItem objectForKey:@"name"] isEqualToString:@"bob"],
+    XCTAssertTrue([newItem[@"name"] isEqualToString:@"bob"],
                  @"The name key should have been updated to 'bob'.");
 }
 
@@ -482,7 +482,7 @@
     
     XCTAssertNotNil(newItem, @"item was nil after deserializing item.");
     XCTAssertNil(error, @"error was not nil after deserializing item.");
-    XCTAssertTrue([[newItem objectForKey:@"name"] isEqualToString:@"bob"],
+    XCTAssertTrue([newItem[@"name"] isEqualToString:@"bob"],
                  @"The name key should have been updated to 'bob'.");
 }
 
@@ -500,7 +500,7 @@
     XCTAssertNotNil(newItem, @"item was nil after deserializing item.");
     XCTAssertNil(error, @"error was not nil after deserializing item.");
     
-    NSDate *date = [newItem objectForKey:@"date"];
+    NSDate *date = newItem[@"date"];
     XCTAssertNotNil(date, @"date was nil after deserializing item.");
     
     NSCalendar *gregorian = [[NSCalendar alloc]
@@ -531,7 +531,7 @@
     XCTAssertNotNil(newItem, @"item was nil after deserializing item.");
     XCTAssertNil(error, @"error was not nil after deserializing item.");
     
-    NSDate *date = [newItem objectForKey:@"date"];
+    NSDate *date = newItem[@"date"];
     XCTAssertNotNil(date, @"date was nil after deserializing item.");
     
     NSCalendar *gregorian = [[NSCalendar alloc]
@@ -599,9 +599,9 @@
     
     XCTAssertNil(error, @"error was not nil after deserializing item.");
     XCTAssertNotNil(newItem, @"newItem was nil after deserializing item.");
-    XCTAssertTrue([[newItem objectAtIndex:0] isEqual:@5],
+    XCTAssertTrue([newItem[0] isEqual:@5],
                  @"The first element should have been a 5.");
-    XCTAssertTrue([[newItem objectAtIndex:1] isEqualToString:@"This is not an object!"],
+    XCTAssertTrue([newItem[1] isEqualToString:@"This is not an object!"],
                  @"The second element should have been 'This is not an object!'.");
 }
 
@@ -627,7 +627,7 @@
     XCTAssertTrue(items.count == 2,
                  @"The items array should have had 2 items in it.");
     
-    XCTAssertTrue([[[items objectAtIndex:0] objectForKey:@"name"]
+    XCTAssertTrue([items[0][@"name"]
                   isEqualToString:@"bob"],
                  @"The name key should have been updated to 'bob'.");
 }
@@ -650,15 +650,15 @@
     XCTAssertTrue(items.count == 2,
                  @"The items array should have had 2 items in it.");
     
-    XCTAssertTrue([[[items objectAtIndex:0] objectForKey:@"name"]
+    XCTAssertTrue([items[0][@"name"]
                   isEqualToString:@"bob"],
                  @"The name key should have been updated to 'bob'.");
     
     
-    NSArray *dates = [[items objectAtIndex:0] objectForKey:@"dates"];
+    NSArray *dates = items[0][@"dates"];
     XCTAssertNotNil(dates, @"dates was nil after deserializing item.");
     
-    NSDate *date = [dates objectAtIndex:0];
+    NSDate *date = dates[0];
     XCTAssertNotNil(date, @"date was nil after deserializing item.");
     
     NSCalendar *gregorian = [[NSCalendar alloc]
@@ -674,7 +674,7 @@
     XCTAssertTrue(dateParts.hour == 15, @"hour was: %d", dateParts.hour);
     XCTAssertTrue(dateParts.second == 29, @"second was: %d", dateParts.second);
     
-    NSDate *date2 = [[items objectAtIndex:1] objectForKey:@"date"];
+    NSDate *date2 = items[1][@"date"];
     XCTAssertNotNil(date2, @"date was nil after deserializing item.");
 
     NSDateComponents *dateParts2 =
@@ -706,7 +706,7 @@
     XCTAssertTrue(items.count == 2,
                  @"The items array should have had 2 items in it.");
     
-    XCTAssertTrue([[[items objectAtIndex:0] objectForKey:@"name"]
+    XCTAssertTrue([items[0][@"name"]
                   isEqualToString:@"bob"],
                  @"The name key should have been updated to 'bob'.");
 }
