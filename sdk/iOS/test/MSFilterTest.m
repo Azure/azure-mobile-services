@@ -119,7 +119,9 @@
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
+
 #pragma mark * Multiple Filters Tests
+
 
 -(void) testFiltersCalledInCorrectOrder
 {
@@ -183,6 +185,7 @@
     
     XCTAssertTrue([self waitForTest:1.0], @"Test timed out.");
 }
+
 
 #pragma mark * Async Test Helper Method
 

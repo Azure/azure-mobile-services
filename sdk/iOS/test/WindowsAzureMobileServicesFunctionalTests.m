@@ -243,7 +243,9 @@
     XCTAssertTrue([self waitForTest:90.0], @"Test timed out.");
 }
 
+
 #pragma mark * End-to-End Filter Tests
+
 
 -(void) testFilterThatModifiesRequest
 {
@@ -369,6 +371,7 @@
 
 #pragma mark * End-to-End URL Encoding Tests
 
+
 -(void) testFilterConstantsAreURLEncoded
 {
     MSTable *todoTable = [client tableWithName:@"todoItem"];
@@ -463,8 +466,8 @@
 }
 
 
-
 #pragma mark * Negative Insert Tests
+
 
 -(void) testInsertItemForNonExistentTable
 {
@@ -496,6 +499,7 @@
 
 
 #pragma mark * Negative Update Tests
+
 
 -(void) testUpdateItemForNonExistentTable
 {
@@ -563,6 +567,7 @@
 
 
 #pragma mark * Negative Delete Tests
+
 
 -(void) testDeleteItemForNonExistentTable
 {
@@ -656,6 +661,7 @@
 
 #pragma mark * Negative ReadWithId Tests
 
+
 -(void) testReadWithIdForNonExistentTable
 {
     MSTable *todoTable = [client tableWithName:@"NoSuchTable"];
@@ -744,7 +750,9 @@
     XCTAssertTrue([self waitForTest:30.0 forLoopMode:NSRunLoopCommonModes], @"Test timed out.");
 }
 
+
 #pragma mark * Async Test Helper Method
+
 
 -(BOOL) waitForTest:(NSTimeInterval)testDuration {
     return [self waitForTest:testDuration forLoopMode:NSDefaultRunLoopMode];
