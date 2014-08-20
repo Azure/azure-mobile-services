@@ -52,22 +52,22 @@
         // We do not test numberWithInteger or numberWithLong as their translation is different
         // on 32 vs 64-bit systems resulting in slightly different oData queries
         @[ @"(Price gt 50f)",
-           @"Price > %@", [NSNumber numberWithFloat:50.0]],
+           @"Price > %@", @50.0f],
         
         @[ @"(Price ge 22.25d)",
-           @"Price >= %@", [NSNumber numberWithDouble:22.25]],
+           @"Price >= %@", @22.25],
         
         @[ @"(Count lt -25)",
-           @"Count < %@", [NSNumber numberWithInt:-25]],
+           @"Count < %@", @-25],
 
         @[ @"(Count le 500)",
-            @"Count =< %@", [NSNumber numberWithInt:500]],
+            @"Count =< %@", @500],
         
         @[ @"(Price eq 1.99m)",
            @"Price == %@", [NSDecimalNumber decimalNumberWithString:@"1.99"]],
         
         @[ @"(Count ne 200l)",
-           @"Count != %@", [NSNumber numberWithLongLong:200]],
+           @"Count != %@", @200LL],
     
         // Test cases for boolean operators
         @[ @"((Count gt 0) and (Price le 5.99d))",
@@ -88,13 +88,13 @@
         
         @[ @"((Weight mul -1.5f) lt 225f)",
            @"Weight * %@ < %@",
-            [NSNumber numberWithFloat:-1.5],
-            [NSNumber numberWithFloat:225]],
+            @-1.5f,
+            @225.0f],
         
         @[ @"((Weight div 3f) gt 225d)",
            @"Weight / %@ > %@",
-            [NSNumber numberWithFloat:3],
-            [NSNumber numberWithDouble:225]],
+            @3.0f,
+            @225.0],
         
         @[ @"((Id mod 2) eq 1)",
            @"modulus:by:(Id,2) == 1"],
@@ -150,11 +150,11 @@
     
     for (NSArray *testCase in testCases) {
         
-        NSString *expected = [testCase objectAtIndex:0];
+        NSString *expected = testCase[0];
         
         NSLog(@"%@ test case start", expected);
         
-        NSString *format = [testCase objectAtIndex:1];
+        NSString *format = testCase[1];
         
         NSRange range;
         range.location = 2;
@@ -200,22 +200,22 @@
     NSArray *testCases = @[
         // Test cases for comparison opperators and number formating.
         @[ @"(Price gt 50f)",
-           @"Price > $price", @{ @"price":[NSNumber numberWithFloat:50.0]}],
+           @"Price > $price", @{ @"price":@50.0f}],
         
         @[ @"(Price ge 22.25d)",
-           @"Price >= $price", @{ @"price":[NSNumber numberWithDouble:22.25]}],
+           @"Price >= $price", @{ @"price":@22.25}],
         
         @[ @"(Count lt -25)",
-           @"Count < $count", @{ @"count":[NSNumber numberWithInt:-25]}],
+           @"Count < $count", @{ @"count":@-25}],
 
         @[ @"(Count le 500)",
-           @"Count =< $count", @{ @"count":[NSNumber numberWithInt:500]}],
+           @"Count =< $count", @{ @"count":@500}],
         
         @[ @"(Price eq 1.99m)",
            @"Price == $price", @{ @"price":[NSDecimalNumber decimalNumberWithString:@"1.99"]}],
         
         @[ @"(Count ne 200l)",
-           @"Count != $count", @{ @"count" :[NSNumber numberWithLongLong:200]}],
+           @"Count != $count", @{ @"count" :@200LL}],
     
         @[ @"(Complete eq true)",
            @"Complete == $complete", @{ @"complete": @YES }],
@@ -251,13 +251,13 @@
     
     for (NSArray *testCase in testCases) {
         
-        NSString *expected = [testCase objectAtIndex:0];
+        NSString *expected = testCase[0];
         
         NSLog(@"%@ test case start", expected);
         
-        NSString *format = [testCase objectAtIndex:1];
+        NSString *format = testCase[1];
         
-        NSDictionary *variables = [testCase objectAtIndex:2];
+        NSDictionary *variables = testCase[2];
         
         NSPredicate *predicate = [NSPredicate predicateWithFormat:format];
         NSPredicate *predicatewithVariables = [predicate predicateWithSubstitutionVariables:variables];
