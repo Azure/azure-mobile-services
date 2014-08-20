@@ -39,10 +39,40 @@
             </BuildableReference>
             <SkippedTests>
                <Test
-                  Identifier = "MSTableFuncTests">
+                  Identifier = "MSClientTests">
                </Test>
                <Test
-                  Identifier = "WindowsAzureMobileServicesFunctionalTests">
+                  Identifier = "MSFilterTest">
+               </Test>
+               <Test
+                  Identifier = "MSJSONSerializerTests">
+               </Test>
+               <Test
+                  Identifier = "MSLocalStorageTests">
+               </Test>
+               <Test
+                  Identifier = "MSPredicateTranslatorTests">
+               </Test>
+               <Test
+                  Identifier = "MSPushHttpTests">
+               </Test>
+               <Test
+                  Identifier = "MSPushTests">
+               </Test>
+               <Test
+                  Identifier = "MSQueryTests">
+               </Test>
+               <Test
+                  Identifier = "MSTableTests">
+               </Test>
+               <Test
+                  Identifier = "MSURLBuilderTests">
+               </Test>
+               <Test
+                  Identifier = "MSUserAgentBuilderTests">
+               </Test>
+               <Test
+                  Identifier = "MSUserTests">
                </Test>
             </SkippedTests>
             <LocationScenarioReference

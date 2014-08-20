@@ -2,10 +2,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 #import "MSUserAgentBuilder.h"
 
-@interface MSUserAgentBuilderTests : SenTestCase
+@interface MSUserAgentBuilderTests : XCTestCase
 
 @end
 

@@ -108,7 +108,6 @@
 		E8EA24C0161CFCF400BE055D /* MSURLbuilderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = E8EA24BE161CFC6400BE055D /* MSURLbuilderTests.m */; };
 		E8EE7842170CAEDC00C2848F /* MSClientInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = E8EE7841170CAEDC00C2848F /* MSClientInternal.h */; };
 		E8F33ADF1616659C002DD7C6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F33ADE1616659C002DD7C6 /* Foundation.framework */; };
-		E8F33AEE1616659C002DD7C6 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F33AED1616659C002DD7C6 /* SenTestingKit.framework */; };
 		E8F33AF11616659C002DD7C6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F33ADE1616659C002DD7C6 /* Foundation.framework */; };
 		E8F33AF41616659C002DD7C6 /* libWindowsAzureMobileServices.a in Frameworks */ = {isa = PBXBuildFile; fileRef = E8F33ADB1616659C002DD7C6 /* libWindowsAzureMobileServices.a */; };
 		E8F33AFA1616659C002DD7C6 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = E8F33AF81616659C002DD7C6 /* InfoPlist.strings */; };
@@ -168,6 +167,7 @@
 		A22CF3711825914700660C79 /* MSTable+MSTableTestUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "MSTable+MSTableTestUtilities.h"; sourceTree = "<group>"; };
 		A22CF3721825914700660C79 /* MSTable+MSTableTestUtilities.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "MSTable+MSTableTestUtilities.m"; sourceTree = "<group>"; };
 		A24701AD196896F500385DA2 /* MSLocalStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSLocalStorage.h; sourceTree = "<group>"; };
+		A24CC80719A46B6600A68AE0 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = Library/Frameworks/XCTest.framework; sourceTree = DEVELOPER_DIR; };
 		A24701AE196896F500385DA2 /* MSLocalStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSLocalStorage.m; sourceTree = "<group>"; };
 		A24701AF196896F500385DA2 /* MSPush.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSPush.h; sourceTree = "<group>"; };
 		A24701B0196896F500385DA2 /* MSPush.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MSPush.m; sourceTree = "<group>"; };
@@ -240,8 +240,7 @@
 		E8F33ADB1616659C002DD7C6 /* libWindowsAzureMobileServices.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libWindowsAzureMobileServices.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8F33ADE1616659C002DD7C6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E8F33AE21616659C002DD7C6 /* WindowsAzureMobileServices-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "WindowsAzureMobileServices-Prefix.pch"; sourceTree = "<group>"; };
-		E8F33AEC1616659C002DD7C6 /* WindowsAzureMobileServicesTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WindowsAzureMobileServicesTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
-		E8F33AED1616659C002DD7C6 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		E8F33AEC1616659C002DD7C6 /* WindowsAzureMobileServicesTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WindowsAzureMobileServicesTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E8F33AF71616659C002DD7C6 /* WindowsAzureMobileServicesTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "WindowsAzureMobileServicesTests-Info.plist"; sourceTree = "<group>"; };
 		E8F33AF91616659C002DD7C6 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		E8F33B0A161667CE002DD7C6 /* MSClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MSClient.h; sourceTree = "<group>"; };
@@ -287,7 +286,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				A28224B0192ACEAE00EF8743 /* CoreData.framework in Frameworks */,
-				E8F33AEE1616659C002DD7C6 /* SenTestingKit.framework in Frameworks */,
 				E84CA4DE16272371009B2588 /* UIKit.framework in Frameworks */,
 				E8F33AF11616659C002DD7C6 /* Foundation.framework in Frameworks */,
 				E8F33AF41616659C002DD7C6 /* libWindowsAzureMobileServices.a in Frameworks */,
@@ -446,7 +444,7 @@
 			isa = PBXGroup;
 			children = (
 				E8F33ADB1616659C002DD7C6 /* libWindowsAzureMobileServices.a */,
-				E8F33AEC1616659C002DD7C6 /* WindowsAzureMobileServicesTests.octest */,
+				E8F33AEC1616659C002DD7C6 /* WindowsAzureMobileServicesTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -457,7 +455,7 @@
 				A28224AF192ACEAE00EF8743 /* CoreData.framework */,
 				E84CA4D216236A6E009B2588 /* UIKit.framework */,
 				E8F33ADE1616659C002DD7C6 /* Foundation.framework */,
-				E8F33AED1616659C002DD7C6 /* SenTestingKit.framework */,
+				A24CC80719A46B6600A68AE0 /* XCTest.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -687,8 +685,8 @@
 			);
 			name = WindowsAzureMobileServicesTests;
 			productName = WindowsAzureMobileServicesTests;
-			productReference = E8F33AEC1616659C002DD7C6 /* WindowsAzureMobileServicesTests.octest */;
-			productType = "com.apple.product-type.bundle";
+			productReference = E8F33AEC1616659C002DD7C6 /* WindowsAzureMobileServicesTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -999,12 +997,12 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"\"$(SDKROOT)/Developer/Library/Frameworks\"",
 					"\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"",
+					"$(inherited)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "src/WindowsAzureMobileServices-Prefix.pch";
 				INFOPLIST_FILE = "test/WindowsAzureMobileServicesTests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				WRAPPER_EXTENSION = octest;
 			};
 			name = Debug;
 		};
@@ -1014,12 +1012,12 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"\"$(SDKROOT)/Developer/Library/Frameworks\"",
 					"\"$(DEVELOPER_LIBRARY_DIR)/Frameworks\"",
+					"$(inherited)",
 				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "src/WindowsAzureMobileServices-Prefix.pch";
 				INFOPLIST_FILE = "test/WindowsAzureMobileServicesTests-Info.plist";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				WRAPPER_EXTENSION = octest;
 			};
 			name = Release;
 		};

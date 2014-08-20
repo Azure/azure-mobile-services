@@ -2,12 +2,12 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 #import "MSClient.h"
 #import "MSTable.h"
 #import "MSTestFilter.h"
 
-@interface MSFilterTest : SenTestCase {
+@interface MSFilterTest : XCTestCase {
     MSClient *client;
         BOOL done;
 }
@@ -66,21 +66,21 @@
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
 
-        STAssertNil(item, @"item should have been nil.");
+        XCTAssertNil(item, @"item should have been nil.");
 
-        STAssertNotNil(error, @"error was nil after deserializing item.");
-        STAssertTrue([error domain] == MSErrorDomain,
+        XCTAssertNotNil(error, @"error was nil after deserializing item.");
+        XCTAssertTrue([error domain] == MSErrorDomain,
                      @"error domain was: %@", [error domain]);
-        STAssertTrue([error code] == MSErrorMessageErrorCode,
-                     @"error code was: %d",[error code]);
-        STAssertTrue([[error localizedDescription] isEqualToString:
+        XCTAssertTrue([error code] == MSErrorMessageErrorCode,
+                     @"error code was: %ld",(long)[error code]);
+        XCTAssertTrue([[error localizedDescription] isEqualToString:
                       @"This is an Error Message!"],
                      @"error description was: %@", [error localizedDescription]);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testFilterThatReturnsErrorImmediately
@@ -105,18 +105,18 @@
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
     
-        STAssertNil(item, @"item should have been nil.");
+        XCTAssertNil(item, @"item should have been nil.");
         
-        STAssertNotNil(error, @"error was nil after deserializing item.");
-        STAssertTrue([[error domain] isEqualToString:@"SomeDomain"],
+        XCTAssertNotNil(error, @"error was nil after deserializing item.");
+        XCTAssertTrue([[error domain] isEqualToString:@"SomeDomain"],
                      @"error domain was: %@", [error domain]);
-        STAssertTrue([error code] == -102,
-                     @"error code was: %d",[error code]);
+        XCTAssertTrue([error code] == -102,
+                     @"error code was: %ld",(long)[error code]);
         
         done = YES;
     }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 #pragma mark * Multiple Filters Tests
@@ -166,22 +166,22 @@
     // Insert the item
     [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
     
-        STAssertNil(item, @"item should have been nil.");
+        XCTAssertNil(item, @"item should have been nil.");
         
-        STAssertNotNil(error, @"error should not have been nil.");
-        STAssertTrue([error.domain isEqualToString:@"TestErrorDomain"],
+        XCTAssertNotNil(error, @"error should not have been nil.");
+        XCTAssertTrue([error.domain isEqualToString:@"TestErrorDomain"],
                      @"error domain should have been TestErrorDomain.");
-        STAssertTrue(error.code == -998,
+        XCTAssertTrue(error.code == -998,
                      @"error code should have been -998.");
         
-        STAssertTrue([finalURL.absoluteString isEqualToString:@"http://someApp/tables/todoItem/A/B/C"],
+        XCTAssertTrue([finalURL.absoluteString isEqualToString:@"http://someApp/tables/todoItem/A/B/C"],
                      @"description was: %@", finalURL.absoluteString);
         
         done = YES;
         
     }];
     
-    STAssertTrue([self waitForTest:1.0], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:1.0], @"Test timed out.");
 }
 
 #pragma mark * Async Test Helper Method
