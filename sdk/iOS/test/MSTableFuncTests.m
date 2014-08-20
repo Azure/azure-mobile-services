@@ -355,7 +355,9 @@
     }
 }
 
-# pragma mark System Properties
+
+#pragma mark System Properties
+
 
 -(void) testAsyncTableOperationsWithAllSystemProperties
 {
@@ -933,7 +935,9 @@
     [self waitForTest:30.0];
 }
 
-# pragma mark Test Utilities
+
+#pragma mark Test Utilities
+
 
 -(BOOL) waitForTest:(NSTimeInterval)testDuration
 {

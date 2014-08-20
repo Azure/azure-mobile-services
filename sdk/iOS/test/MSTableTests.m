@@ -38,6 +38,7 @@
 
 #pragma mark * Init Method Tests
 
+
 -(void) testInitWithNameAndClient
 {
     MSTable *table = [[MSTable alloc] initWithName:@"SomeName" client:client];
@@ -61,6 +62,7 @@
 
 
 #pragma mark * Insert Method Tests
+
 
 // See the WindowsAzureMobileServicesFunctionalTests.m tests for additional
 // insert tests that require a working Microsoft Azure Mobile Service.
@@ -414,6 +416,7 @@
     
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
+
 
 #pragma mark * Update Method Tests
 
@@ -1571,7 +1574,9 @@
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
-# pragma mark System Property Tests
+
+#pragma mark System Property Tests
+
 
 -(void) testInsertStringIdPropertiesNotRemovedFromRequest
 {
@@ -1874,7 +1879,7 @@
         NSDictionary *item = @{@"id":@"an id",@"String":@"what?"};
         testFilter.dataToUse = [@"{\"id\":\"an id\",\"String\":\"Hey\"}" dataUsingEncoding:NSUTF8StringEncoding];
         [todoTable insert:item completion:^(NSDictionary *item, NSError *error) {
-            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error for property %d with url: %@", systemProperty, [[actualRequest URL] query]);
+            XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error for property %lu with url: %@", (unsigned long)systemProperty, [[actualRequest URL] query]);
             done = YES;
         }];
         XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
@@ -2064,6 +2069,7 @@
         XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
     }
 }
+
 
 #pragma mark * Async Test Helper Method
 
