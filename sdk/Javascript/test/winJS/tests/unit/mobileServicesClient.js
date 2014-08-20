@@ -247,11 +247,11 @@ $testGroup('MobileServiceClient.js',
     .check(function () {
         var client = new MobileServiceClient.MobileServiceClient("http://www.test.com", "123456abcdefg");
         client = client.withFilter(function (req, next, callback) {
-            $assert.areEqual(req.data, "\"2014-03-06T09:59:00.000Z\"");
+            $assert.areEqual(req.data, "\"2013-04-14T06:01:59.000Z\"");
             callback(null, { status: 200, responseText: '{"result":3}', getResponseHeader: function () { return 'application/json'; } });
         });
 
-        var date = new Date(2013, 14, 6, 1, 59);
+        var date = new Date(Date.UTC(2013, 3, 14, 6, 1, 59));
         client.invokeApi("scenarios/verifyRequestAccess", { body: date }).done(function (response) {
         }, function (error) {
             $assert.fail("api call failed");
