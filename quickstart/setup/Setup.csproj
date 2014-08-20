@@ -40,6 +40,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="..\web-dotnet\ZUMOAPPNAME\index.html">
+      <Link>web-dotnet\ZUMOAPPNAME\index.html</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>index.tt</DependentUpon>
+    </Content>
     <Content Include="..\web\index.html">
       <Link>web\index.html</Link>
       <AutoGen>True</AutoGen>
@@ -120,6 +126,11 @@
     <Content Include="TextTemplating\Microsoft.VisualStudio.TextTemplating.Sdk.Host.12.0.dll" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\web-dotnet\ZUMOAPPNAME\index.tt">
+      <Link>web-dotnet\ZUMOAPPNAME\index.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>index.html</LastGenOutput>
+    </None>
     <None Include="..\web\index.tt">
       <Link>web\index.tt</Link>
       <Generator>TextTemplatingFileGenerator</Generator>
