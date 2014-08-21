@@ -2,13 +2,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 #import "MSQuery.h"
 #import "MSTable.h"
 #import "MSClient.h"
 
 
-@interface MSQueryTests : SenTestCase {
+@interface MSQueryTests : XCTestCase {
     MSClient *client;
     MSTable *table;
     MSQuery *query;
@@ -27,10 +27,10 @@
     NSLog(@"%@ setUp", self.name);
     
     client = [MSClient clientWithApplicationURLString:@"http://someAppUrl"];
-    STAssertNotNil(client, @"Could not create test client.");
+    XCTAssertNotNil(client, @"Could not create test client.");
     
     table = [[MSTable alloc] initWithName:@"someTable" client:client];
-    STAssertNotNil(table, @"Could not create test table.");
+    XCTAssertNotNil(table, @"Could not create test table.");
 }
 
 - (void) tearDown
@@ -47,7 +47,7 @@
     NSLog(@"%@ start", self.name);
     
     query = [[MSQuery alloc] initWithTable:table predicate:nil];
-    STAssertTrue([query.description isEqualToString:@"$inlinecount=none"],
+    XCTAssertTrue([query.description isEqualToString:@"$inlinecount=none"],
                  @"OData query string was: %@",
                  query.description);
     
@@ -59,7 +59,7 @@
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"name == 'bob'"];
     
     query = [[MSQuery alloc] initWithTable:table predicate:predicate];
-    STAssertTrue([query.description
+    XCTAssertTrue([query.description
                   isEqualToString:@"$filter=(name%20eq%20'bob')&$inlinecount=none"],
                  @"OData query string was: %@",
                  query.description);
@@ -72,7 +72,7 @@
 -(void)testMSQueryTableProperty
 {
     query = [[MSQuery alloc] initWithTable:table predicate:nil];
-    STAssertEqualObjects(query.table,
+    XCTAssertEqualObjects(query.table,
                          table,
                          @"'table' property didn't return the table from init.");
 }
@@ -81,7 +81,7 @@
 {
     query = [[MSQuery alloc] initWithTable:table predicate:nil];
     query.fetchLimit = 22;
-    STAssertTrue([query.description isEqualToString:
+    XCTAssertTrue([query.description isEqualToString:
                   @"$top=22&$inlinecount=none"],
                   @"OData query string was: %@",
                   query.description);
@@ -92,7 +92,7 @@
     query = [[MSQuery alloc] initWithTable:table predicate:nil];
     query.fetchLimit = 0;
     query.includeTotalCount = YES;
-    STAssertTrue([query.description isEqualToString:
+    XCTAssertTrue([query.description isEqualToString:
                   @"$top=0&$inlinecount=allpages"],
                  @"OData query string was: %@",
                  query.description);
@@ -107,7 +107,7 @@
                         sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     NSArray *expected = @[@"$inlinecount=none", @"$skip=542"];
     
-    STAssertTrue([result isEqualToArray:expected],
+    XCTAssertTrue([result isEqualToArray:expected],
                  @"OData query string was: %@",
                  query.description);
 }
@@ -120,7 +120,7 @@
                        sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     NSArray *expected = @[@"$inlinecount=none", @"$skip=0"];
     
-    STAssertTrue([result isEqualToArray:expected],
+    XCTAssertTrue([result isEqualToArray:expected],
                  @"OData query string was: %@",
                  query.description);
 }
@@ -129,7 +129,7 @@
 {
     query = [[MSQuery alloc] initWithTable:table predicate:nil];
     query.includeTotalCount = YES;
-    STAssertTrue([query.description isEqualToString:@"$inlinecount=allpages"],
+    XCTAssertTrue([query.description isEqualToString:@"$inlinecount=allpages"],
                  @"Query string was: %@",
                  query.description);
 }
@@ -138,7 +138,7 @@
 {
     query = [[MSQuery alloc] initWithTable:table predicate:nil];
     query.includeTotalCount = NO;
-    STAssertTrue([query.description isEqualToString:@"$inlinecount=none"],
+    XCTAssertTrue([query.description isEqualToString:@"$inlinecount=none"],
                  @"Query string was: %@",
                  query.description);
 }
@@ -155,7 +155,7 @@
                        sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     NSArray *expected = @[@"$inlinecount=none", @"key1=someValue", @"key2=14"];
     
-    STAssertTrue([result isEqualToArray:expected],
+    XCTAssertTrue([result isEqualToArray:expected],
                  @"Query string was: %@",
                  query.description);
 }
@@ -164,7 +164,7 @@
 {
     query = [[MSQuery alloc] initWithTable:table predicate:nil];
     query.selectFields = @[ @"address", @"birthdate" ];
-    STAssertTrue([query.description isEqualToString:
+    XCTAssertTrue([query.description isEqualToString:
                  @"$select=address,birthdate&$inlinecount=none"],
                  @"Query string was: %@",
                  query.description);
@@ -185,7 +185,7 @@
                        sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     NSArray *expected = @[@"$inlinecount=none", @"$orderby=name%20asc,zipcode%20desc,birthdate%20asc"];
 
-    STAssertTrue([result isEqualToArray:expected],
+    XCTAssertTrue([result isEqualToArray:expected],
                  @"Query string was: %@",
                  query.description);
 }
