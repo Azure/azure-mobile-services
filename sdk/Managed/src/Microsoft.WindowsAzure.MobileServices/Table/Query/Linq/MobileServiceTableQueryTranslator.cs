@@ -35,7 +35,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// The query which is being translated.
         /// </summary>
-        private MobileServiceTableQuery<T> query;
+        private IMobileServiceTableQuery<T> query;
 
         /// <summary>
         /// Initializes a new instance of the MobileServiceTableQueryTranslator
@@ -45,7 +45,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The <see cref="T:MobileServiceTableQuery`1{T}"/> which 
         /// is being translated.
         /// </param>
-        internal MobileServiceTableQueryTranslator(MobileServiceTableQuery<T> query)
+        internal MobileServiceTableQueryTranslator(IMobileServiceTableQuery<T> query)
         {
             Debug.Assert(query != null);
 
