@@ -197,8 +197,8 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
             }
 
             // Generate the prepared insert statement
-            string sqlBase = String.Format(
-                "INSERT OR REPLACE INTO {0} ({1}) VALUES ",
+            var insertSqlBase = String.Format(
+                "INSERT OR IGNORE INTO {0} ({1}) VALUES ",
                 SqlHelpers.FormatTableName(tableName),
                 String.Join(", ", columns.Select(c => c.Property.Name).Select(SqlHelpers.FormatMember))
             );
@@ -212,23 +212,62 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
             foreach (var batch in items.Split(maxLength: batchSize))
             {
-                var sql = new StringBuilder(sqlBase);
-                var parameters = new Dictionary<string, object>();
+                var insertSql = new StringBuilder(insertSqlBase);
+
+                var insertParameters = new Dictionary<string, object>();
 
                 foreach (JObject item in batch)
                 {
-                    AppendInsertValuesSql(sql, parameters, columns, item);
-                    sql.Append(",");
+
+                    // Generate the update statement for the item
+                    var updateSqlBase = string.Concat("UPDATE OR IGNORE {0} SET {1} WHERE ", MobileServiceSystemColumns.Id, " = @pid;");
+                    var updateParameters = new Dictionary<string, object>();
+                    var parametersSql = GetColumnsLetValuesSql(updateParameters, columns, item);
+                    var updateSqlStatement = string.Format(updateSqlBase, SqlHelpers.FormatTableName(tableName), parametersSql);
+                    this.ExecuteNonQuery(updateSqlStatement, updateParameters);
+
+                    AppendInsertValuesSql(insertSql, insertParameters, columns, item);
+
+                    insertSql.Append(",");
                 }
 
-                if (parameters.Any())
+                if (insertParameters.Any())
                 {
-                    sql.Remove(sql.Length - 1, 1); // remove the trailing comma
-                    this.ExecuteNonQuery(sql.ToString(), parameters);
+                    insertSql.Remove(insertSql.Length - 1, 1); // remove the trailing comma
+                    this.ExecuteNonQuery(insertSql.ToString(), insertParameters);
                 }
             }
 
             return Task.FromResult(0);
+        }
+
+        private static string GetColumnsLetValuesSql(Dictionary<string, object> parameters, List<ColumnDefinition> columns, JObject item)
+        {
+            var sql = new StringBuilder();
+            int colCount = 0;
+            foreach (var column in columns)
+            {
+                if (colCount > 0)
+                    sql.Append(",");
+
+                colCount++;
+
+                JToken rawValue = item.GetValue(column.Property.Name, StringComparison.OrdinalIgnoreCase);
+                object value = SqlHelpers.SerializeValue(rawValue, column.SqlType, column.Property.Value.Type);
+
+                //The paramname for this field must be unique within this statement
+                string paramName = "@p" + colCount;
+                if (column.Property.Name.Equals(MobileServiceSystemColumns.Id, StringComparison.OrdinalIgnoreCase))
+                {
+                    //Add @pid parameter for UPDATE WHERE clause
+                    parameters["@pid"] = value;
+                }
+
+                sql.AppendFormat(" {0} = {1}", column.Property.Name, paramName);
+                parameters[paramName] = value;
+            }
+
+            return sql.ToString();
         }
 
         private static void AppendInsertValuesSql(StringBuilder sql, Dictionary<string, object> parameters, List<ColumnDefinition> columns, JObject item)
