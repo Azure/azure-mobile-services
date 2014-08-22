@@ -643,17 +643,17 @@
                  completion:
      ^(id result, NSURLResponse *response, NSError *error) {
 
-         STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
-         STAssertNil(error, @"error should have been nil.");
+         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+         XCTAssertNil(error, @"error should have been nil.");
 
          NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
-         STAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
-         STAssertTrue([featuresHeader isEqualToString:expectedFeatures], @"Header value (%@) was not as expected (%@)", featuresHeader, expectedFeatures);
+         XCTAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
+         XCTAssertTrue([featuresHeader isEqualToString:expectedFeatures], @"Header value (%@) was not as expected (%@)", featuresHeader, expectedFeatures);
 
          done = YES;
      }];
     
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInvokeAPIJsonNoQueryParametersSetsCorrectFeaturesHeader
@@ -690,17 +690,17 @@
                  parameters:queryParams
                     headers:@{@"Content-Type": @"text/plain"}
                  completion:^(NSData *result, NSHTTPURLResponse *response, NSError *error) {
-                     STAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
-                     STAssertNil(error, @"error should have been nil.");
+                     XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
+                     XCTAssertNil(error, @"error should have been nil.");
 
                      NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
-                     STAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
-                     STAssertTrue([featuresHeader isEqualToString:expectedFeatures], @"Header value (%@) was not as expected (%@)", featuresHeader, expectedFeatures);
+                     XCTAssertNotNil(featuresHeader, @"actualHeader should not have been nil.");
+                     XCTAssertTrue([featuresHeader isEqualToString:expectedFeatures], @"Header value (%@) was not as expected (%@)", featuresHeader, expectedFeatures);
 
                      done = YES;
                  }];
 
-    STAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
 -(void) testInvokeAPIDataNoQueryParametersSetsCorrectFeaturesHeader
