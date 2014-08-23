@@ -58,9 +58,15 @@ namespace Microsoft.WindowsAzure.MobileServices
         TableCollection = 0x40,
 
         /// <summary>
-        /// Reserved for future use.
+        /// Feature header value for offline initiated requests
         /// </summary>
         [EnumValue("OL")]
         Offline = 0x80,
+
+        /// <summary>
+        /// Feature header value for following continuation links
+        /// </summary>
+        [EnumValue("LH")]
+        ReadWithLinkHeader = 0x100,
     }
 }

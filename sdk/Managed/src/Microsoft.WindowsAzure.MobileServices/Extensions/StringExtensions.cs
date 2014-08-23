@@ -18,7 +18,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="response">The response to parse.</param>
         /// <param name="settings">The serializer settings used for parsing the response.</param>
         /// <returns>A JToken containing the response or null.</returns>
-        public static JToken ParseToJToken(this string response, MobileServiceJsonSerializerSettings settings)
+        public static JToken ParseToJToken(this string response, JsonSerializerSettings settings)
         {
             if (String.IsNullOrEmpty(response))
             {

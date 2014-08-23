@@ -5,26 +5,15 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.MobileServices.Query;
 using Newtonsoft.Json.Linq;
 
-namespace Microsoft.WindowsAzure.MobileServices
+namespace Microsoft.WindowsAzure.MobileServices.Query
 {
     internal class MobileServiceTableQueryProvider
     {
-        /// <summary>
-        /// The name of the results key in an inline count response object.
-        /// </summary>
-        protected const string InlineCountResultsKey = "results";
-        
-        /// <summary>
-        /// The name of the count key in an inline count response object.
-        /// </summary>
-        protected const string InlineCountCountKey = "count";
+
 
         /// <summary>
         /// Feature which are sent as telemetry information to the service for all
@@ -89,7 +78,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// Results of the query.
         /// </returns>
-        internal async Task<IEnumerable<T>> Execute<T>(MobileServiceTableQuery<T> query)
+        internal async Task<IEnumerable<T>> Execute<T>(IMobileServiceTableQuery<T> query)
         {
             // Compile the query from the underlying IQueryable's expression
             // tree
@@ -97,25 +86,12 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             // Send the query
             string odata = compiledQuery.ToODataString();
-            JToken response;
-            var table = query.Table as MobileServiceTable;
-            if (table != null)
-            {
-                // Add telemetry information if possible.
-                response = await table.ReadAsync(odata, query.Parameters, this.Features | MobileServiceFeatures.TypedTable);
-            }
-            else
-            {
-                response = await query.Table.ReadAsync(odata, query.Parameters);
-            }
+            QueryResult result = await this.Execute<T>(query, odata);
 
-            // Parse the results
-            long totalCount;
-            JArray values = this.GetResponseSequence(response, out totalCount);
-
-            return new TotalCountEnumerable<T>(
-                totalCount,
-                query.Table.MobileServiceClient.Serializer.Deserialize(values, compiledQuery.ProjectionArgumentType).Select(
+            return new QueryResultEnumerable<T>(
+                result.TotalCount,
+                result.NextLink,
+                query.Table.MobileServiceClient.Serializer.Deserialize(result.Values, compiledQuery.ProjectionArgumentType).Select(
                     value =>
                     {
                         // Apply the projection to the instance transforming it
@@ -129,13 +105,28 @@ namespace Microsoft.WindowsAzure.MobileServices
                     }));
         }
 
+        protected virtual async Task<QueryResult> Execute<T>(IMobileServiceTableQuery<T> query, string odata)
+        {
+            var table = query.Table as MobileServiceTable;
+            if (table != null)
+            {
+                // Add telemetry information if possible.
+                return await table.ReadAsync(odata, query.Parameters, this.Features | MobileServiceFeatures.TypedTable);
+            }
+            else
+            {
+                JToken result = await query.Table.ReadAsync(odata, query.Parameters);
+                return QueryResult.Parse(result, null, validate: true);
+            }
+        }
+
         /// <summary>
         /// Compile the query into a MobileServiceTableQueryDescription.
         /// </summary>
         /// <returns>
         /// The compiled OData query.
         /// </returns>
-        internal MobileServiceTableQueryDescription Compile<T>(MobileServiceTableQuery<T> query)
+        internal MobileServiceTableQueryDescription Compile<T>(IMobileServiceTableQuery<T> query)
         {
             // Compile the query from the underlying IQueryable's expression
             // tree
@@ -145,53 +136,10 @@ namespace Microsoft.WindowsAzure.MobileServices
             return compiledQuery;
         }
 
-        /// <summary>
-        /// Parse a JSON response into a sequence of elements and also return
-        /// the count of objects.  This method abstracts out the differences
-        /// between a raw array response and an inline count response.
-        /// </summary>
-        /// <param name="response">
-        /// The JSON response.
-        /// </param>
-        /// <param name="totalCount">
-        /// The total count as requested via the IncludeTotalCount method.
-        /// If the response does not include totalcount, it is set to -1.
-        /// </param>
-        /// <returns>
-        /// The response as a JSON array.
-        /// </returns>
-        internal JArray GetResponseSequence(JToken response, out long totalCount)
+        internal string ToODataString<T>(IMobileServiceTableQuery<T> query)
         {
-            Debug.Assert(response != null);
-
-            long? inlineCount = null;
-
-            // Try and get the values as an array
-            JArray values = response as JArray;
-            if (values == null)
-            {
-                // Otherwise try and get the values from the results property
-                // (which is the case when we retrieve the count inline)
-                values = response[InlineCountResultsKey] as JArray;
-                inlineCount = (long)response[InlineCountCountKey];
-                if (values == null)
-                {
-                    string responseStr = response != null ? response.ToString() : "null";
-                    throw new InvalidOperationException(
-                        string.Format(
-                            CultureInfo.InvariantCulture,
-                            Resources.MobileServiceTable_ExpectedArray,
-                            responseStr));
-                }
-            }
-
-            // Get the count via the inline count or default an unspecified
-            // count to -1
-            totalCount = inlineCount != null ?
-                inlineCount.Value :
-                -1L;
-
-            return values;
+            MobileServiceTableQueryDescription description = this.Compile(query);
+            return description.ToODataString();
         }
     }
 }

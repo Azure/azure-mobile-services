@@ -2,20 +2,19 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using System;
-
 namespace Microsoft.WindowsAzure.MobileServices
 {
     /// <summary>
-    /// The ITotalCountProvider interface provides the total count for all the
-    /// records that would have been returned ignoring any take paging/limit
-    /// clause specified by client or server.  If you call
-    /// query.RequestTotalCount(), you can cast the result (whether its a
-    /// sequence or a list) to ITotalCountProvider.
+    /// The IQueryResultProvider interface provides extra details returned with response
+    /// e.g. total count and next link
     /// </summary>
-    [Obsolete("Use IQueryResultProvider interface")]
-    public interface ITotalCountProvider
+    public interface IQueryResultProvider
     {
+        /// <summary>
+        /// Gets the link to next page of result that is returned in response headers.
+        /// </summary>
+        string NextLink { get; }
+
         /// <summary>
         /// Gets the total count for all the records that would have been
         /// returned ignoring any take paging/limit clause specified by client

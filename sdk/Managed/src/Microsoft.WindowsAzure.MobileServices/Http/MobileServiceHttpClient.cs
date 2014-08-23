@@ -234,11 +234,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// The content of the response as a string.
         /// </returns>
-        private async Task<MobileServiceHttpResponse> RequestAsync(bool UseHandlers, 
-                                                        HttpMethod method, 
+        private async Task<MobileServiceHttpResponse> RequestAsync(bool UseHandlers,
+                                                        HttpMethod method,
                                                         string uriPathAndQuery,
                                                         MobileServiceUser user,
-                                                        string content = null, 
+                                                        string content = null,
                                                         bool ensureResponseContent = true,
                                                         IDictionary<string, string> requestHeaders = null)
         {
@@ -268,11 +268,17 @@ namespace Microsoft.WindowsAzure.MobileServices
                 etag = response.Headers.ETag.Tag;
             }
 
+            LinkHeaderValue link = null;
+            if (response.Headers.Contains("Link"))
+            {
+                link = LinkHeaderValue.Parse(response.Headers.GetValues("Link").FirstOrDefault());
+            }
+
             // Dispose of the request and response
             request.Dispose();
             response.Dispose();
 
-            return new MobileServiceHttpResponse(responseContent, etag);
+            return new MobileServiceHttpResponse(responseContent, etag, link);
         }
 
         /// <summary>
@@ -414,7 +420,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             Debug.Assert(response != null);
             Debug.Assert(!response.IsSuccessStatusCode);
 
-            string responseContent = await response.Content.ReadAsStringAsync();
+            string responseContent = response.Content == null ? null : await response.Content.ReadAsStringAsync();
 
             // Create either an invalid response or connection failed message
             // (check the status code first because some status codes will
@@ -461,7 +467,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                         }
                     }
                     else if (response.Content.Headers.ContentType != null &&
-                                response.Content.Headers.ContentType.MediaType != null && 
+                                response.Content.Headers.ContentType.MediaType != null &&
                                 response.Content.Headers.ContentType.MediaType.Contains("text"))
                     {
                         message = responseContent;
@@ -547,7 +553,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             // Add the content
             if (content != null)
             {
-                request.Content = content; 
+                request.Content = content;
             }
 
             return request;
@@ -664,7 +670,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         private string GetUserAgentHeader()
         {
-            AssemblyFileVersionAttribute fileVersionAttribute = typeof(MobileServiceClient).GetTypeInfo().Assembly                                    
+            AssemblyFileVersionAttribute fileVersionAttribute = typeof(MobileServiceClient).GetTypeInfo().Assembly
                                                                         .GetCustomAttributes(typeof(AssemblyFileVersionAttribute))
                                                                         .Cast<AssemblyFileVersionAttribute>()
                                                                         .FirstOrDefault();

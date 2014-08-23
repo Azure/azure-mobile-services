@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
@@ -33,6 +34,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// The user-defined query string parameters to include with the query.
         /// </summary>
         IDictionary<string, string> Parameters { get; }
+
+        /// <summary>
+        /// Gets the underlying IQueryable associated with this query.
+        /// </summary>
+        IQueryable<T> Query { get; set; }
 
         /// <summary>
         /// Ensure the query will get the total count for all the records that

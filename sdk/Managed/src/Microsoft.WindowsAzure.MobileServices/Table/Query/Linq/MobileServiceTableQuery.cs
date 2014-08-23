@@ -9,6 +9,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Query;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -334,7 +335,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         public async Task<List<T>> ToListAsync()
         {
             IEnumerable<T> items = await this.QueryProvider.Execute(this);
-            return new TotalCountList<T>(items);
+            return new QueryResultList<T>(items);
         }
     }
 }

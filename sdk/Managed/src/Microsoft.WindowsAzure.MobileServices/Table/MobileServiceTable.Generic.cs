@@ -11,6 +11,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 using System.Threading.Tasks;
+using Microsoft.WindowsAzure.MobileServices.Query;
 using Newtonsoft.Json.Linq;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -80,6 +81,26 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             return query.ToEnumerableAsync();
+        }
+
+        /// <summary>
+        /// Executes a query against the table.
+        /// </summary>
+        /// <param name="query">
+        /// A query to execute.
+        /// </param>
+        /// <returns>
+        /// A task that will return with results when the query finishes.
+        /// </returns>
+        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Generic are not nested when used via async.")]
+        public async Task<IEnumerable<U>> ReadAsync<U>(string query)
+        {
+            QueryResult result = await base.ReadAsync(query, null, MobileServiceFeatures.TypedTable | MobileServiceFeatures.ReadWithLinkHeader);
+
+            return new QueryResultEnumerable<U>(
+                result.TotalCount,
+                result.NextLink,
+                this.MobileServiceClient.Serializer.Deserialize(result.Values, typeof(U)).Cast<U>());
         }
 
         /// <summary>
@@ -503,7 +524,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Not nested when used via async pattern.")]
         public async Task<List<T>> ToListAsync()
         {
-            return new TotalCountList<T>(await this.ReadAsync());
+            return new QueryResultList<T>(await this.ReadAsync());
         }
 
         /// <summary>
@@ -563,22 +584,19 @@ namespace Microsoft.WindowsAzure.MobileServices
             string query = string.Format(
                 CultureInfo.InvariantCulture,
                 "$filter=({0} eq {1})",
-                MobileServiceSerializer.IdPropertyName,
+                MobileServiceSystemColumns.Id,
                 FilterBuildingExpressionVisitor.ToODataConstant(id));
 
             // Send the query
-            JToken response = await this.ReadAsync(query, parameters, MobileServiceFeatures.TypedTable);
+            QueryResult response = await this.ReadAsync(query, parameters, MobileServiceFeatures.TypedTable);
 
+            return GetSingleValue(response);
+        }
+
+        private static JObject GetSingleValue(QueryResult response)
+        {
             // Get the first element in the response
-            JObject jobject = response as JObject;
-            if (jobject == null)
-            {
-                JArray array = response as JArray;
-                if (array != null && array.Count > 0)
-                {
-                    jobject = array.FirstOrDefault() as JObject;
-                }
-            }
+            JObject jobject = response.Values.FirstOrDefault() as JObject;
 
             if (jobject == null)
             {
