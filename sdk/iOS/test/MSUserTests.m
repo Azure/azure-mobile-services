@@ -2,10 +2,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 #import "MSUser.h"
 
-@interface MSUserTests : SenTestCase
+@interface MSUserTests : XCTestCase
 
 @end
 
@@ -34,8 +34,8 @@
 {
     MSUser *user = [[MSUser alloc] initWithUserId:@"SomeUserId"];
     
-    STAssertNotNil(user, @"user should not be nil.");
-    STAssertTrue([user.userId isEqualToString:@"SomeUserId"],
+    XCTAssertNotNil(user, @"user should not be nil.");
+    XCTAssertTrue([user.userId isEqualToString:@"SomeUserId"],
                  @"user id should have been set.");
 }
 
@@ -43,8 +43,8 @@
 {
     MSUser *user = [[MSUser alloc] initWithUserId:nil];
     
-    STAssertNotNil(user, @"user should not be nil.");
-    STAssertNil(user.userId, @"user id should have been nil.");
+    XCTAssertNotNil(user, @"user should not be nil.");
+    XCTAssertNil(user.userId, @"user id should have been nil.");
 }
 
 @end

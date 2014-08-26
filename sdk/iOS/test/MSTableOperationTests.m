@@ -2,10 +2,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-#import <SenTestingKit/SenTestingKit.h>
+#import <XCTest/XCTest.h>
 #import "MSTableOperation.h"
 #import "MSTableOperationInternal.h"
-@interface MSTableOperationTests : SenTestCase {
+@interface MSTableOperationTests : XCTestCase {
     BOOL done;
 }
 @end
@@ -32,7 +32,7 @@
     
     [tableOperation cancelPush];
     
-    STAssertTrue(baseOperation.isCancelled, @"NSOperation was not cancelled");
+    XCTAssertTrue(baseOperation.isCancelled, @"NSOperation was not cancelled");
 }
 
 - (void)testOperationSerializationSuccess
@@ -45,11 +45,11 @@
     NSDictionary *info = [originalTableOperation serialize];
     MSTableOperation *tableOperation = [[MSTableOperation alloc] initWithItem:info];
     
-    STAssertEquals((int)tableOperation.operationId, 7, @"Incorrect id");
-    STAssertEquals(tableOperation.tableName, @"testTable", @"Incorrect table name");
-    STAssertEquals(tableOperation.itemId, @"ABC", @"Incorrect table name");
-    STAssertEquals(tableOperation.type, MSTableOperationInsert, @"incorrect type");
-    STAssertNil(tableOperation.item, @"Did not expect an item");
+    XCTAssertEqual((int)tableOperation.operationId, 7, @"Incorrect id");
+    XCTAssertEqual(tableOperation.tableName, @"testTable", @"Incorrect table name");
+    XCTAssertEqual(tableOperation.itemId, @"ABC", @"Incorrect table name");
+    XCTAssertEqual(tableOperation.type, MSTableOperationInsert, @"incorrect type");
+    XCTAssertNil(tableOperation.item, @"Did not expect an item");
 }
 
 - (void)testDeleteOperationSerialization_KeepsItem_Success
@@ -62,14 +62,14 @@
     NSDictionary *info = [originalTableOperation serialize];
     MSTableOperation *tableOperation = [[MSTableOperation alloc] initWithItem:info];
     
-    STAssertEquals((int)tableOperation.operationId, 7, @"Incorrect id");
-    STAssertEquals(tableOperation.tableName, @"testTable", @"Incorrect table name");
-    STAssertEquals(tableOperation.itemId, @"ABC", @"Incorrect table name");
-    STAssertEquals(tableOperation.type, MSTableOperationDelete, @"incorrect type");
-    STAssertNotNil(tableOperation.item, @"Expected an item");
-    STAssertEqualObjects(tableOperation.item[@"id"], @1, nil);
-    STAssertEqualObjects(tableOperation.item[@"column1"], @YES, nil);
-    STAssertEqualObjects(tableOperation.item[@"column2"], @"Hello", nil);
+    XCTAssertEqual((int)tableOperation.operationId, 7, @"Incorrect id");
+    XCTAssertEqual(tableOperation.tableName, @"testTable", @"Incorrect table name");
+    XCTAssertEqual(tableOperation.itemId, @"ABC", @"Incorrect table name");
+    XCTAssertEqual(tableOperation.type, MSTableOperationDelete, @"incorrect type");
+    XCTAssertNotNil(tableOperation.item, @"Expected an item");
+    XCTAssertEqualObjects(tableOperation.item[@"id"], @1);
+    XCTAssertEqualObjects(tableOperation.item[@"column1"], @YES);
+    XCTAssertEqualObjects(tableOperation.item[@"column2"], @"Hello");
 }
 
 @end
