@@ -726,13 +726,9 @@ namespace Microsoft.WindowsAzure.MobileServices
             {
                 if (features != MobileServiceFeatures.None)
                 {
-                    if (requestHeaders == null)
+                    if (requestHeaders == null || !requestHeaders.ContainsKey(ZumoFeaturesHeader))
                     {
-                        requestHeaders = new Dictionary<string, string>();
-                    }
-
-                    if (!requestHeaders.ContainsKey(ZumoFeaturesHeader))
-                    {
+                        requestHeaders = new Dictionary<string, string>(requestHeaders ?? new Dictionary<string, string>());
                         requestHeaders.Add(ZumoFeaturesHeader, FeaturesToString(features));
                     }
                 }

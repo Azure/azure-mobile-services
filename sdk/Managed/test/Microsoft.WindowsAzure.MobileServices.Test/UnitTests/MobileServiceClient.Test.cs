@@ -265,7 +265,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             {
                 await service.InvokeApiAsync("", null);
             }
-            catch(ArgumentNullException e)
+            catch (ArgumentNullException e)
             {
                 expected = e;
             }
@@ -355,8 +355,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
                 return request;
             };
-            
-            JToken expected = await service.InvokeApiAsync("calculator/add", new JValue((object) null));
+
+            JToken expected = await service.InvokeApiAsync("calculator/add", new JValue((object)null));
         }
 
 
@@ -366,12 +366,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             TestHttpHandler hijack = new TestHttpHandler();
             MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             hijack.SetResponseContent("{\"id\":3}");
- 
+
             IntType expected = await service.InvokeApiAsync<IntType>("calculator/add?a=1&b=2", HttpMethod.Get, null);
 
             Assert.AreEqual(hijack.Request.RequestUri.LocalPath, "/api/calculator/add");
             Assert.Contains(hijack.Request.RequestUri.Query, "a=1&b=2");
-            Assert.AreEqual(3, expected.Id);  
+            Assert.AreEqual(3, expected.Id);
         }
 
         [AsyncTestMethod]
@@ -395,7 +395,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             hijack.SetResponseContent("{\"id\":3}");
             MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
 
-            var myParams = new Dictionary<string, string>() { { "a", "1" }, {"b", "2"} };
+            var myParams = new Dictionary<string, string>() { { "a", "1" }, { "b", "2" } };
             IntType expected = await service.InvokeApiAsync<IntType>("calculator/add", HttpMethod.Get, myParams);
 
             Assert.Contains(hijack.Request.RequestUri.Query, "?a=1&b=2");
@@ -480,7 +480,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             MobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
             HttpResponseMessage response = await service.InvokeApiAsync("calculator/add?a=1&b=2", null, HttpMethod.Post, null, null);
-            
+
             Assert.AreEqual(hijack.Request.RequestUri.LocalPath, "/api/calculator/add");
             Assert.Contains(hijack.Request.RequestUri.Query, "?a=1&b=2");
             Assert.Contains(response.Content.ReadAsStringAsync().Result, "{\"id\":\"2\"}");
@@ -518,6 +518,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var myHeaders = new Dictionary<string, string>() { { "x-zumo-test", "test" } };
 
             HttpResponseMessage response = await service.InvokeApiAsync("calculator/add", content, HttpMethod.Post, myHeaders, myParams);
+
+            Assert.AreEqual(myHeaders.Count, 1); // my headers should not be modified
+            Assert.AreEqual(myHeaders["x-zumo-test"], "test");
 
             Assert.AreEqual(hijack.Request.RequestUri.LocalPath, "/api/calculator/add");
             Assert.AreEqual(hijack.Request.Headers.GetValues("x-zumo-test").First(), "test");
