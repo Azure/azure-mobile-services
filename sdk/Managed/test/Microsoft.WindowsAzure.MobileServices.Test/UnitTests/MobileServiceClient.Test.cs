@@ -570,6 +570,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             HttpResponseMessage response = await service.InvokeApiAsync("calculator/add", content, HttpMethod.Post, myHeaders, myParams);
 
+            Assert.AreEqual(myHeaders.Count, 1); // my headers should not be modified
+            Assert.AreEqual(myHeaders["x-zumo-test"], "test");
+
             Assert.AreEqual(hijack.Request.RequestUri.LocalPath, "/api/calculator/add");
             Assert.AreEqual(hijack.Request.Headers.GetValues("x-zumo-test").First(), "test");
             Assert.IsNotNull(hijack.Request.Content);
