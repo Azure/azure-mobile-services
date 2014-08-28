@@ -129,8 +129,6 @@
     <Compile Include="Table\Sync\IMobileServiceSyncContext.cs" />
     <Compile Include="Table\Sync\IMobileServiceSyncTable.cs" />
     <Compile Include="Table\Sync\IMobileServiceSyncTable.Generic.cs" />
-    <Compile Include="Table\MobileServiceSystemProperties.cs" />
-    <Compile Include="Table\Query\QueryResult.cs" />
     <Compile Include="Table\Serialization\UpdatedAtAttribute.cs" />
     <Compile Include="Table\Serialization\CreatedAtAttribute.cs" />
     <Compile Include="Table\Serialization\VersionAttribute.cs" />
