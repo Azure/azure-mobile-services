@@ -19,7 +19,7 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore.Test.UnitTests
 
             DateTimeOffset token = await settings.GetDeltaTokenAsync(TestTable, TestQueryKey);
 
-            Assert.AreEqual(token, DateTimeOffset.MinValue.ToUniversalTime());
+            Assert.AreEqual(token, new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero).ToUniversalTime());
         }
 
         [AsyncTestMethod]
