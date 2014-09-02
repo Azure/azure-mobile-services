@@ -16,7 +16,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     /// </summary>
     internal class MobileServiceSyncSettingsManager : IDisposable
     {
-        private const string DefaultDeltaToken = "0001-01-01T00:00:00.000Z";
+        private const string DefaultDeltaToken = "1970-01-01T00:00:00.000Z";
         private AsyncLockDictionary cacheLock = new AsyncLockDictionary();
         private Dictionary<string, string> cache = new Dictionary<string, string>();
         private IMobileServiceLocalStore store;

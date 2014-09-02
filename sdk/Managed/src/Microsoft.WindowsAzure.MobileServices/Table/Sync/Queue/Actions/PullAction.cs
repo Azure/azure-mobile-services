@@ -14,6 +14,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
     internal class PullAction : TableAction
     {
+        private static readonly DateTimeOffset Epoch = new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
         private IDictionary<string, string> parameters;
         private MobileServiceRemoteTableOptions options; // the supported options on remote table 
         private readonly PullCursor cursor;
@@ -162,7 +164,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         private static DateTimeOffset GetUpdatedAt(JObject item)
         {
-            DateTimeOffset updatedAt = DateTimeOffset.MinValue;
+            DateTimeOffset updatedAt = Epoch;
             JToken updatedAtToken = item[MobileServiceSystemColumns.UpdatedAt];
             if (updatedAtToken != null)
             {

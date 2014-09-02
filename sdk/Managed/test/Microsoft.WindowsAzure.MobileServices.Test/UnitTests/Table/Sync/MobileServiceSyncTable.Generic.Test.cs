@@ -257,7 +257,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(store.Tables["stringId_test_table"]["abc"].Value<string>("String"), "Hey");
             Assert.AreEqual(store.Tables["stringId_test_table"]["def"].Value<string>("String"), "How");
 
-            AssertEx.MatchUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'0001-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version",
+            AssertEx.MatchUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version",
                                                 "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'2001-02-04T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version");
 
             Assert.Equals(store.Tables[MobileServiceLocalSystemTables.Config]["stringId_test_table_items_deltaToken"]["value"], "2001-02-04T00:00:00.0000000+00:00");
@@ -286,8 +286,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(store.Tables["stringId_test_table"]["abc"].Value<string>("String"), "Hey");
             Assert.AreEqual(store.Tables["stringId_test_table"]["def"].Value<string>("String"), "How");
 
-            AssertEx.MatchUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'0001-01-01T00:00:00.0000000%2B00:00')&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version",
-                                                "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'0001-01-01T00:00:00.0000000%2B00:00')&$skip=2&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version");
+            AssertEx.MatchUris(hijack.Requests, "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version",
+                                                "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$skip=2&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version");
 
             Assert.IsFalse(store.Tables[MobileServiceLocalSystemTables.Config].ContainsKey("stringId_test_table_items_deltaToken"));
         }
@@ -642,7 +642,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
 
             await table.PullAsync("items", table.CreateQuery());
             AssertEx.MatchUris(hijack.Requests,
-                "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'0001-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version",
+                "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version",
                 "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version",
                 "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=1&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version");
         }
@@ -692,7 +692,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var store = new MobileServiceLocalStoreMock();
             store.Tables[MobileServiceLocalSystemTables.Config] = new Dictionary<string, JObject>();
             await TestIncrementalPull(store, MobileServiceRemoteTableOptions.All,
-                "http://test.com/tables/stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'0001-01-01T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt",
+                "http://test.com/tables/stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt",
                 "http://test.com/tables/stringId_test_table?$filter=((String eq 'world') and (__updatedAt ge datetimeoffset'2001-02-03T00:00:00.0000000%2B00:00'))&$orderby=__updatedAt&$skip=0&$top=50&param1=val1&__includeDeleted=true&__systemproperties=__createdAt%2C__updatedAt");
         }
 
