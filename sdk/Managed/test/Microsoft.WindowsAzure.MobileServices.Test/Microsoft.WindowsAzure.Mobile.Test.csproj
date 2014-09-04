@@ -89,6 +89,7 @@
     <Compile Include="UnitTests\HttpHandlers\ComplexDelegatingHandler.cs" />
     <Compile Include="UnitTests\MobileServiceFeatures.Test.cs" />
     <Compile Include="UnitTests\MobileServiceClient.Test.cs" />
+    <Compile Include="UnitTests\Authentication\MobileServiceTokenAuthenticationTests.cs" />
     <Compile Include="UnitTests\Push\Push.Test.cs" />
     <Compile Include="UnitTests\Push\PushHttpClient.Test.cs" />
     <Compile Include="UnitTests\Table\MobileServiceTable.Test.cs" />

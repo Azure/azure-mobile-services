@@ -28,8 +28,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="provider">
         /// The authentication provider.
         /// </param>
-        public MobileServiceSingleSignOnAuthentication(IMobileServiceClient client, string provider)
-            : base(client, provider)
+        /// <param name="parameters">
+        /// Provider specific extra parameters that are sent as query string parameters to login endpoint.
+        /// </param>
+        public MobileServiceSingleSignOnAuthentication(IMobileServiceClient client, string provider, IDictionary<string, string> parameters)
+            : base(client, provider, parameters)
         {
         }
 

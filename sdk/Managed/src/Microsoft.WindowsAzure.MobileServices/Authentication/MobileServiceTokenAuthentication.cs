@@ -2,12 +2,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
@@ -37,8 +34,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="token">
         /// The token.
         /// </param>
-        public MobileServiceTokenAuthentication(MobileServiceClient client, string provider, JObject token)
-            :base(client, provider)
+        /// <param name="parameters">
+        /// Provider specific extra parameters that are sent as query string parameters to login endpoint.
+        /// </param>
+        public MobileServiceTokenAuthentication(MobileServiceClient client, string provider, JObject token, IDictionary<string, string> parameters)
+            : base(client, provider, parameters)
         {
             Debug.Assert(client != null, "client should not be null.");
             Debug.Assert(token != null, "token should not be null.");
@@ -55,7 +55,10 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         protected override Task<string> LoginAsyncOverride()
         {
-            return client.HttpClient.RequestWithoutHandlersAsync(HttpMethod.Post, MobileServiceAuthentication.LoginAsyncUriFragment + "/" + this.ProviderName, client.CurrentUser, token.ToString());
+            string path = MobileServiceUrlBuilder.CombinePaths(MobileServiceAuthentication.LoginAsyncUriFragment, this.ProviderName);
+            string queryString = MobileServiceUrlBuilder.GetQueryString(this.Parameters);
+            string pathAndQuery = MobileServiceUrlBuilder.CombinePathAndQuery(path, queryString);
+            return client.HttpClient.RequestWithoutHandlersAsync(HttpMethod.Post, pathAndQuery, client.CurrentUser, token.ToString());
         }
     }
 }
