@@ -10,9 +10,16 @@ var Validate = require('Validate');
 var Promises = require('Promises');
 var Resources = require('Resources');
 var inMemorySettingStore = {};
-if (window.localStorage) {
-    inMemorySettingStore = window.localStorage;
+
+try {
+    var key = '___z'
+    localStorage.setItem(key, key);
+    localStorage.removeItem(key);
+    inMemorySettingStore = localStorage;
+} catch (e) {
+    // localStorage is not available
 }
+
 var bestAvailableTransport = null;
 var knownTransports = [ // In order of preference
     require('DirectAjaxTransport'),
