@@ -15,7 +15,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// The type of the elements in the list.
     /// </typeparam>
 #pragma warning disable 618 // for implementing obsolete ITotalCountProvider
-    internal class QueryResultList<T> : List<T>, ITotalCountProvider, IQueryResultProvider
+    internal class QueryResultList<T> : List<T>, ITotalCountProvider, IQueryResultEnumerable<T>
     {
         /// <summary>
         /// Initializes a new instance of the QueryResultList{T} class.
@@ -30,7 +30,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             // Forward along the total count from our sequence if it was
             // provided
-            var provider = sequence as IQueryResultProvider;
+            var provider = sequence as IQueryResultEnumerable<T>;
             if (provider != null)
             {
                 this.TotalCount = provider.TotalCount;

@@ -13,7 +13,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// query.RequestTotalCount(), you can cast the result (whether its a
     /// sequence or a list) to ITotalCountProvider.
     /// </summary>
-    [Obsolete("Use IQueryResultProvider interface")]
+    [Obsolete("Use IQueryResultEnumerable interface")]
     public interface ITotalCountProvider
     {
         /// <summary>

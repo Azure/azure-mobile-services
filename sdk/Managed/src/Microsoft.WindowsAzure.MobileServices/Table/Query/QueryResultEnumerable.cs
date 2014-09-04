@@ -18,7 +18,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     /// The type of the elements in the sequence.
     /// </typeparam>
 #pragma warning disable 618 // for implementing obsolete ITotalCountProvider
-    internal class QueryResultEnumerable<T> : IEnumerable<T>, ITotalCountProvider, IQueryResultProvider
+    internal class QueryResultEnumerable<T> : ITotalCountProvider, IQueryResultEnumerable<T>
     {
         /// <summary>
         /// The actual sequence of elements to enumerate.

@@ -36,30 +36,30 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
-        public async Task ReadAsync_Returns_IQueryResultProvider()
+        public async Task ReadAsync_Returns_IQueryResultEnumerable()
         {
-            await TestIQueryResultProvider(table => table.ReadAsync<ToDo>("this is a query"));
+            await TestIQueryResultEnumerable(table => table.ReadAsync<ToDo>("this is a query"));
         }
 
         [AsyncTestMethod]
-        public async Task ToCollectionAsync_Returns_IQueryResultProvider()
+        public async Task ToCollectionAsync_Returns_IQueryResultEnumerable()
         {
-            await TestIQueryResultProvider(async table => await table.CreateQuery().ToCollectionAsync());
+            await TestIQueryResultEnumerable(async table => await table.CreateQuery().ToCollectionAsync());
         }
 
         [AsyncTestMethod]
-        public async Task ToEnumerableAsync_Returns_IQueryResultProvider()
+        public async Task ToEnumerableAsync_Returns_IQueryResultEnumerable()
         {
-            await TestIQueryResultProvider(async table => await table.CreateQuery().ToEnumerableAsync());
+            await TestIQueryResultEnumerable(async table => await table.CreateQuery().ToEnumerableAsync());
         }
 
         [AsyncTestMethod]
-        public async Task ToListAsync_Returns_IQueryResultProvider()
+        public async Task ToListAsync_Returns_IQueryResultEnumerable()
         {
-            await TestIQueryResultProvider(async table => await table.CreateQuery().ToListAsync());
+            await TestIQueryResultEnumerable(async table => await table.CreateQuery().ToListAsync());
         }
 
-        private static async Task TestIQueryResultProvider(Func<IMobileServiceTable<ToDo>, Task<IEnumerable<ToDo>>> action)
+        private static async Task TestIQueryResultEnumerable(Func<IMobileServiceTable<ToDo>, Task<IEnumerable<ToDo>>> action)
         {
             var table = GetTableWithResponse(@"{
                                                 ""count"": 53,
@@ -77,7 +77,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             Assert.AreEqual(item.Id, 23L);
             Assert.AreEqual(item.Title, "Hey");
             Assert.AreEqual(item.Complete, true);
-            var provider = result as IQueryResultProvider;
+            var provider = result as IQueryResultEnumerable<ToDo>;
             Assert.AreEqual(provider.TotalCount, 53L);
             Assert.AreEqual(provider.NextLink, "http://contoso.com/tables/Todo?$top=1&$skip=2");
         }

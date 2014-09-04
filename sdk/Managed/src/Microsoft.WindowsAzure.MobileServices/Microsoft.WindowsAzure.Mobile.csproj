@@ -86,7 +86,7 @@
     </Compile>
     <Compile Include="Table\MobileServiceSystemColumns.cs" />
     <Compile Include="Table\MobileServiceSystemProperties.cs" />
-    <Compile Include="Table\Query\IQueryResultProvider.cs" />
+    <Compile Include="Table\Query\IQueryResultEnumerable.cs" />
     <Compile Include="Table\Query\Linq\FilterBuildingExpressionVisitor.cs" />
     <Compile Include="Table\Query\Linq\IMobileServiceTableQuery.cs" />
     <Compile Include="Table\Query\Linq\MemberInfoKey.cs" />
