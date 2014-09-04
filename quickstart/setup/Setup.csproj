@@ -40,17 +40,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\web-dotnet\ZUMOAPPNAME\index.html">
-      <Link>web-dotnet\ZUMOAPPNAME\index.html</Link>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>index.tt</DependentUpon>
-    </Content>
     <Content Include="..\web\index.html">
       <Link>web\index.html</Link>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>index.tt</DependentUpon>
+    </Content>
+    <Content Include="..\web\page.js">
+      <Link>web\page.js</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>page.tt</DependentUpon>
     </Content>
     <Content Include="..\windows-universal-cs\ZUMOAPPNAME\ZUMOAPPNAME.Windows\ZUMOAPPNAME.Windows.csproj">
       <Link>windows-univeresal-cs\ZUMOAPPNAME.Windows\ZUMOAPPNAME.Windows.csproj</Link>
@@ -126,15 +126,15 @@
     <Content Include="TextTemplating\Microsoft.VisualStudio.TextTemplating.Sdk.Host.12.0.dll" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\web-dotnet\ZUMOAPPNAME\index.tt">
-      <Link>web-dotnet\ZUMOAPPNAME\index.tt</Link>
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>index.html</LastGenOutput>
-    </None>
     <None Include="..\web\index.tt">
       <Link>web\index.tt</Link>
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>index.html</LastGenOutput>
+    </None>
+    <None Include="..\web\page.tt">
+      <Link>web\page.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>page.js</LastGenOutput>
     </None>
     <None Include="..\windows-universal-cs\ZUMOAPPNAME.tt">
       <Link>windows-univeresal-cs\ZUMOAPPNAME.tt</Link>

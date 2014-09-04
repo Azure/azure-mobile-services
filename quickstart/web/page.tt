@@ -1,4 +1,8 @@
-$(function () {
+<#@template language="c#" hostspecific="true"#>
+<#@parameter type="System.String" name="Runtime"#>
+<#@ output extension=".js" #>
+$(function() {
+<# if (Runtime=="DOTNET") { #>
     // This MobileServiceClient has been configured to communicate with your local
     // test project for debugging purposes.
     var client = new WindowsAzure.MobileServiceClient(
@@ -11,16 +15,18 @@ $(function () {
     //    "ZUMOAPPURL",
     //    "ZUMOAPPKEY"
     //);
-
-    var todoItemTable = client.getTable('todoitem');
+<# } else { #>
+    var client = new WindowsAzure.MobileServiceClient('ZUMOAPPURL', 'ZUMOAPPKEY'),
+        todoItemTable = client.getTable('todoitem');
+<# } #>
 
     // Read current data and rebuild UI.
     // If you plan to generate complex UIs like this, consider using a JavaScript templating library.
     function refreshTodoItems() {
         var query = todoItemTable.where({ complete: false });
 
-        query.read().then(function (todoItems) {
-            var listItems = $.map(todoItems, function (item) {
+        query.read().then(function(todoItems) {
+            var listItems = $.map(todoItems, function(item) {
                 return $('<li>')
                     .attr('data-todoitem-id', item.id)
                     .append($('<button class="item-delete">Delete</button>'))
@@ -43,7 +49,7 @@ $(function () {
     }
 
     // Handle insert
-    $('#add-item').submit(function (evt) {
+    $('#add-item').submit(function(evt) {
         var textbox = $('#new-item-text'),
             itemText = textbox.val();
         if (itemText !== '') {
@@ -54,12 +60,12 @@ $(function () {
     });
 
     // Handle update
-    $(document.body).on('change', '.item-text', function () {
+    $(document.body).on('change', '.item-text', function() {
         var newText = $(this).val();
         todoItemTable.update({ id: getTodoItemId(this), text: newText }).then(null, handleError);
     });
 
-    $(document.body).on('change', '.item-complete', function () {
+    $(document.body).on('change', '.item-complete', function() {
         var isComplete = $(this).prop('checked');
         todoItemTable.update({ id: getTodoItemId(this), complete: isComplete }).then(refreshTodoItems, handleError);
     });
