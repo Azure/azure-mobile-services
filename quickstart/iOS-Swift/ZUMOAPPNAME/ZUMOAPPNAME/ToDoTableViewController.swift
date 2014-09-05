@@ -26,11 +26,11 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
         // Do any additional setup after loading the view, typically from a nib.
         
         let client = MSClient(applicationURLString: "ZUMOAPPURL", applicationKey: "ZUMOAPPKEY")
-                
-        self.table = client.tableWithName("TodoItem")!
-        self.refreshControl.addTarget(self, action: "onRefresh:", forControlEvents: UIControlEvents.ValueChanged)
         
-        self.refreshControl.beginRefreshing()
+        self.table = client.tableWithName("TodoItem")!
+        self.refreshControl?.addTarget(self, action: "onRefresh:", forControlEvents: UIControlEvents.ValueChanged)
+        
+        self.refreshControl?.beginRefreshing()
         self.onRefresh(self.refreshControl)
     }
     
@@ -42,7 +42,7 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
             result, totalCount, error  in
             
             UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-            if error {
+            if error != nil {
                 println("Error: " + error.description)
                 return
             }
@@ -51,7 +51,7 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
             println("Information: retrieved %d records", result.count)
             
             self.tableView.reloadData()
-            self.refreshControl.endRefreshing()
+            self.refreshControl?.endRefreshing()
         }
     }
     
@@ -61,22 +61,22 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
     
     // Table
     
-    override func tableView(tableView: UITableView!, canEditRowAtIndexPath indexPath: NSIndexPath!) -> Bool
+    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool
     {
         return true
     }
     
-    override func tableView(tableView: UITableView!, editingStyleForRowAtIndexPath indexPath: NSIndexPath!) -> UITableViewCellEditingStyle
+    override func tableView(tableView: UITableView, editingStyleForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCellEditingStyle
     {
         return UITableViewCellEditingStyle.Delete
     }
     
-    override func tableView(tableView: UITableView!, titleForDeleteConfirmationButtonForRowAtIndexPath indexPath: NSIndexPath!) -> String!
+    override func tableView(tableView: UITableView, titleForDeleteConfirmationButtonForRowAtIndexPath indexPath: NSIndexPath) -> String!
     {
         return "Complete"
     }
     
-    override func tableView(tableView: UITableView!, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath!)
+    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath)
     {
         let record = self.records[indexPath.row]
         let completedItem = record.mutableCopy() as NSMutableDictionary
@@ -87,7 +87,7 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
             (result, error) in
             
             UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-            if (error) {
+            if error != nil {
                 println("Error: " + error.description)
                 return
             }
@@ -97,19 +97,19 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
         }
     }
     
-    override func tableView(tableView: UITableView!, numberOfRowsInSection section: Int) -> Int
+    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
         return self.records.count
     }
     
-    override func tableView(tableView: UITableView!, cellForRowAtIndexPath indexPath: NSIndexPath!) -> UITableViewCell! {
+    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let CellIdentifier = "Cell"
         
         let cell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier, forIndexPath: indexPath) as UITableViewCell
         let item = self.records[indexPath.row]
         
-        cell.textLabel.text = item["text"] as String
-        cell.textLabel.textColor = UIColor.blackColor()
+        cell.textLabel?.text = item["text"] as? String
+        cell.textLabel?.textColor = UIColor.blackColor()
         
         return cell
     }
@@ -120,7 +120,7 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
         self.performSegueWithIdentifier("addItem", sender: self)
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue!, sender: AnyObject!)
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!)
     {
         if segue.identifier == "addItem" {
             let todoController = segue.destinationViewController as ToDoItemViewController
@@ -143,7 +143,7 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
         self.table!.insert(itemToInsert) {
             (item, error) in
             UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-            if error {
+            if error != nil {
                 println("Error: " + error.description)
             } else {
                 self.records.append(item)
