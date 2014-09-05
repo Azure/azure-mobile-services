@@ -1666,7 +1666,7 @@
     MSQuery *query = [todoTable queryWithPredicate:predicate];
     
     // query
-    [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
         
         XCTAssertNil(contentType, @"Content-Type should not have been set.");
         
@@ -2042,14 +2042,14 @@
         // Query
         
         done = NO;
-        [todoTable readWithQueryString:@"$filter=id eq 5" completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        [todoTable readWithQueryString:@"$filter=id eq 5" completion:^(MSQueryResult *result, NSError *error) {
             XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
             done = YES;
         }];
         XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 
         done = NO;
-        [todoTable readWithQueryString:@"$select=id,String" completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        [todoTable readWithQueryString:@"$select=id,String" completion:^(MSQueryResult *result, NSError *error) {
             XCTAssertTrue([self checkRequestURL:[actualRequest URL] SystemProperty:systemProperty], @"Error with url: %@", [[actualRequest URL] query]);
             done = YES;
         }];
@@ -2155,7 +2155,7 @@
         // Query
         
         done = NO;
-        [todoTable readWithQueryString:@"$filter=id%20eq%205&__systemproperties=__createdAt" completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        [todoTable readWithQueryString:@"$filter=id%20eq%205&__systemproperties=__createdAt" completion:^(MSQueryResult *result, NSError *error) {
             NSString *url = [[actualRequest URL] query];
             XCTAssertEqualObjects(@"$filter=id%20eq%205&__systemproperties=__createdAt", url, @"Incorrect query: %@", url);
             done = YES;
@@ -2163,7 +2163,7 @@
         XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
         
         done = NO;
-        [todoTable readWithQueryString:@"$select=id,String&__systemProperties=__CreatedAt" completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+        [todoTable readWithQueryString:@"$select=id,String&__systemProperties=__CreatedAt" completion:^(MSQueryResult *result, NSError *error) {
             NSString *url = [[actualRequest URL] query];
             XCTAssertEqualObjects(@"$select=id,String&__systemProperties=__CreatedAt", url, @"Incorrect query: %@", url);
             done = YES;
@@ -2187,7 +2187,7 @@
     MSTable *todoTable = [filteredClient tableWithName:@"NoSuchTable"];
 
     // Read with raw query
-    [todoTable readWithQueryString:@"$filter=a eq 1" completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+    [todoTable readWithQueryString:@"$filter=a eq 1" completion:^(MSQueryResult *result, NSError *error) {
         XCTAssertNotNil(actualRequest);
         XCTAssertNil(error);
 
@@ -2202,7 +2202,7 @@
     done = NO;
 
     // Read with predicate
-    [todoTable readWithPredicate:[NSPredicate predicateWithFormat:@"a = 1"] completion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+    [todoTable readWithPredicate:[NSPredicate predicateWithFormat:@"a = 1"] completion:^(MSQueryResult *result, NSError *error) {
         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
         XCTAssertNil(error, @"error should have been nil.");
 
@@ -2220,7 +2220,7 @@
     MSQuery *query = [todoTable query];
     query.fetchLimit = 10;
     query.fetchOffset = 10;
-    [query readWithCompletion:^(NSArray *items, NSInteger totalCount, NSError *error) {
+    [query readWithCompletion:^(MSQueryResult *result, NSError *error) {
         XCTAssertNotNil(actualRequest, @"actualRequest should not have been nil.");
         XCTAssertNil(error, @"error should have been nil.");
 

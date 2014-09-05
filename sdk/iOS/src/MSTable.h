@@ -4,6 +4,7 @@
 
 #import <Foundation/Foundation.h>
 #import "MSClient.h"
+#import "MSQueryResult.h"
 
 @class MSQuery;
 
@@ -17,13 +18,14 @@ typedef void (^MSItemBlock)(NSDictionary *item, NSError *error);
 typedef void (^MSDeleteBlock)(id itemId, NSError *error);
 
 /// Callback for reads. If there was an error, the *error* will be non-nil. If
-/// there was not an error, then the *items* array will always be non-nil
-/// but may be empty if the query returned no results. If the query included a
+/// there was not an error, then the result will always be non-nil
+/// but but items may be empty if the query returned no results. If the query included a
 /// request for the total count of items on the server (not just those returned
-/// in *items* array), the *totalCount* will have this value; otherwise
+/// in *items* array), the *totalCount* in the result will have this value; otherwise
 /// *totalCount* will be -1.
-typedef void (^MSReadQueryBlock)(NSArray *items,
-                                 NSInteger totalCount,
+/// if the server returned a link to next page of results then
+/// nextLink will be non-nil.
+typedef void (^MSReadQueryBlock)(MSQueryResult *result,
                                  NSError *error);
 
 typedef NS_OPTIONS(NSUInteger, MSSystemProperties) {

@@ -105,7 +105,7 @@
         if (!queryString) {
             // Query string is invalid, so call error handler
             if (completion) {
-                completion(nil, -1, error);
+                completion(nil, error);
             }
         }
         else {
