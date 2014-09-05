@@ -4,7 +4,7 @@
 
 #import "MSTableConnection.h"
 #import "MSSerializer.h"
-
+#import "MSQueryResult.h"
 
 #pragma mark * MSTableConnection Implementation
 
@@ -153,7 +153,8 @@
             }
             
             [connection addRequestAndResponse:response toError:&error];
-            completion(items, totalCount, error);
+            MSQueryResult *result = [[MSQueryResult  alloc] initWithItems:items totalCount:totalCount nextLink: nil];
+            completion(result, error);
             connection = nil;
         };
     }

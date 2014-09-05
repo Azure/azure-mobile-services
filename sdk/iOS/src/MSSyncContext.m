@@ -231,9 +231,10 @@ static NSOperationQueue *pushQueue_;
     
     if (completion) {
         if (error) {
-            completion(nil, -1, error);
+            completion(nil, error);
         } else {
-            completion(result.items, result.totalCount, nil);
+            MSQueryResult *queryResult = [[MSQueryResult alloc] initWithItems:result.items totalCount:result.totalCount nextLink:nil];
+            completion(queryResult, nil);
         }
     }
 }
@@ -372,9 +373,9 @@ static NSOperationQueue *pushQueue_;
         }
         
         // Read from server
-        [query readInternalWithFeatures:MSFeatureOffline completion:^(NSArray *serverItems, NSInteger totalCount, NSError *error) {
+        [query readInternalWithFeatures:MSFeatureOffline completion:^(MSQueryResult*result, NSError *error) {
             // If error, or no results we can stop processing
-            if (error || !serverItems || serverItems.count == 0) {
+            if (error || !result || !result.items || result.items.count == 0) {
                 if (completion) {
                     [self.callbackQueue addOperationWithBlock:^{
                         completion(error);
@@ -396,12 +397,12 @@ static NSOperationQueue *pushQueue_;
                 
                 //Check if results include the deleted column
                 NSError *localDataSourceError;
-                NSArray *itemsToUpsert = serverItems;
-                NSArray *itemsToDelete = [serverItems filteredArrayUsingPredicate:
+                NSArray *itemsToUpsert = result.items;
+                NSArray *itemsToDelete = [result.items filteredArrayUsingPredicate:
                                           [NSPredicate predicateWithFormat:@"%K == YES", MSSystemColumnDeleted]];
                 if ([itemsToDelete count] > 0) {
                     // Remove the deleted items from the overall list if we had some
-                    itemsToUpsert = [serverItems filteredArrayUsingPredicate:
+                    itemsToUpsert = [result.items filteredArrayUsingPredicate:
                                      [NSPredicate predicateWithFormat:@"%K != YES", MSSystemColumnDeleted]];
 
                     
