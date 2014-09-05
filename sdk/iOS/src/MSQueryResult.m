@@ -17,6 +17,7 @@
     if (self) {
         totalCount_ = totalCount;
         items_ = items;
+        nextLink_ = nextLink;
     }
     
     return self;

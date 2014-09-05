@@ -1950,6 +1950,53 @@
     return result;
 }
 
+- (void) testReadWithQueryString_ReturnsLinkHeader_IfPresent
+{
+    [self verifyLinkHeaderOnRead:@"https://contoso.com; rel=next" expectedLink:@"https://contoso.com"];
+    [self verifyLinkHeaderOnRead:@"http://contoso.com; rel=next" expectedLink:@"http://contoso.com"];
+}
+
+- (void) testReadWithQueryString_ReturnsNil_IfNotPresent
+{
+    [self verifyLinkHeaderOnRead:@"" expectedLink:nil];
+}
+
+- (void) testReadWithQueryString_ReturnsNil_IfWrongFormat
+{
+    [self verifyLinkHeaderOnRead:@"http://contoso.com" expectedLink:nil];
+}
+
+- (void) testReadWithQueryString_ReturnsNil_IfRelIsNotNext
+{
+    [self verifyLinkHeaderOnRead:@"http://contoso.com; rel=prev" expectedLink:nil];
+}
+
+- (void) verifyLinkHeaderOnRead: (NSString *) actualLink  expectedLink: (NSString *) expectedLink {
+    MSTestFilter *testFilter = [[MSTestFilter alloc] init];
+    NSHTTPURLResponse *response = [[NSHTTPURLResponse alloc]
+                                   initWithURL:nil
+                                   statusCode:200
+                                   HTTPVersion:nil
+                                   headerFields:@{@"Link": actualLink}];
+    testFilter.responseToUse = response;
+    testFilter.ignoreNextFilter = YES;
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
+    testFilter.dataToUse = [@"[]" dataUsingEncoding:NSUTF8StringEncoding];
+    [todoTable readWithQueryString:@"$filter=1 eq 2" completion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertNil(error);
+        if (expectedLink == nil) {
+            XCTAssertNil(result.nextLink);
+        }
+        else {
+            XCTAssertEqualObjects(result.nextLink, expectedLink);
+        }
+        done = YES;
+    }];
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+}
+
 -(void) testTableOperationSystemPropertiesQueryStringIsCorrect
 {
     __block NSURLRequest *actualRequest = nil;
