@@ -42,7 +42,7 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
             result, totalCount, error  in
             
             UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-            if error {
+            if error != nil {
                 println("Error: " + error.description)
                 return
             }
@@ -87,7 +87,7 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
             (result, error) in
             
             UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-            if (error) {
+            if error != nil {
                 println("Error: " + error.description)
                 return
             }
@@ -143,7 +143,7 @@ class ToDoTableViewController: UITableViewController, ToDoItemDelegate {
         self.table!.insert(itemToInsert) {
             (item, error) in
             UIApplication.sharedApplication().networkActivityIndicatorVisible = false
-            if error {
+            if error != nil {
                 println("Error: " + error.description)
             } else {
                 self.records.append(item)
