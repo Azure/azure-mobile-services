@@ -46,6 +46,12 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>index.tt</DependentUpon>
     </Content>
+    <Content Include="..\web\page.js">
+      <Link>web\page.js</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>page.tt</DependentUpon>
+    </Content>
     <Content Include="..\windows-universal-cs\ZUMOAPPNAME\ZUMOAPPNAME.Windows\ZUMOAPPNAME.Windows.csproj">
       <Link>windows-univeresal-cs\ZUMOAPPNAME.Windows\ZUMOAPPNAME.Windows.csproj</Link>
       <AutoGen>True</AutoGen>
@@ -124,6 +130,11 @@
       <Link>web\index.tt</Link>
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>index.html</LastGenOutput>
+    </None>
+    <None Include="..\web\page.tt">
+      <Link>web\page.tt</Link>
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>page.js</LastGenOutput>
     </None>
     <None Include="..\windows-universal-cs\ZUMOAPPNAME.tt">
       <Link>windows-univeresal-cs\ZUMOAPPNAME.tt</Link>
