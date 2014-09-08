@@ -1997,6 +1997,32 @@
     XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
 }
 
+- (void) testReadWithQueryString_FollowsTheLink_IfQueryIsUri
+{
+    MSTestFilter *testFilter = [MSTestFilter testFilterWithStatusCode:200 data: @"[]"];
+    
+    __block NSURLRequest *actualRequest = nil;
+    testFilter.onInspectRequest =  ^(NSURLRequest *request) {
+        actualRequest = request;
+        return request;
+    };
+    
+    MSClient *filteredClient = [client clientWithFilter:testFilter];
+    MSTable *todoTable = [filteredClient tableWithName:@"someTable"];
+    
+    [todoTable readWithQueryString:@"https://contoso.com?$filter=a%20eq%20c" completion:^(MSQueryResult *result, NSError *error) {
+        XCTAssertNil(error);
+        XCTAssertEqual(result.items.count, 0);
+        done = YES;
+    }];
+    
+    XCTAssertTrue([self waitForTest:0.1], @"Test timed out.");
+    
+    XCTAssertEqualObjects(actualRequest.URL.absoluteString, @"https://contoso.com?$filter=a%20eq%20c");
+    NSString *featuresHeader = [actualRequest.allHTTPHeaderFields valueForKey:MSFeaturesHeaderName];
+    XCTAssertEqualObjects(featuresHeader, @"TR,LH");
+}
+
 -(void) testTableOperationSystemPropertiesQueryStringIsCorrect
 {
     __block NSURLRequest *actualRequest = nil;

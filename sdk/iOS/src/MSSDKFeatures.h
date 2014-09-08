@@ -34,6 +34,9 @@ typedef NS_OPTIONS(NSUInteger, MSFeatures) {
 
     // Table reads / writes originated from a sync (offline) table
     MSFeatureOffline                  = 1 << 6,
+    
+    // Table read with absolute url as queryString parameter
+    MSFeatureReadWithLinkHeader       = 1 << 7
 };
 
 extern NSString *const MSFeaturesHeaderName;

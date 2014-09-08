@@ -160,6 +160,8 @@ extern NSString *const MSSystemColumnDeleted;
 
 /// Sends a request to the Microsoft Azure Mobile Service to return all items
 /// fromm the table that meet the conditions of the given query.
+/// You can also use a URI in place of queryString to fetch results from a URI e.g.
+/// result.nextLink gives you URI to next page of results for a query that you can pass here.
 -(void)readWithQueryString:(NSString *)queryString
                 completion:(MSReadQueryBlock)completion;
 
