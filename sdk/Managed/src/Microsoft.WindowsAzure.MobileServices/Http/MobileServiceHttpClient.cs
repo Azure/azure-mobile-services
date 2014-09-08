@@ -99,6 +99,12 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// client for them.</remarks>
         private HttpClient httpClientSansHandlers;
 
+
+        /// <summary>
+        /// Factory method for creating the default http client handler
+        /// </summary>
+        internal static Func<HttpMessageHandler> DefaultHandlerFactory = GetDefaultHttpClientHandler;
+
         /// <summary>
         /// Instantiates a new <see cref="MobileServiceHttpClient"/>, 
         /// which does all the request to a mobile service.
@@ -127,7 +133,7 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             this.httpHandler = CreatePipeline(handlers);
             this.httpClient = new HttpClient(httpHandler);
-            this.httpClientSansHandlers = new HttpClient(GetDefaultHttpClientHandler());
+            this.httpClientSansHandlers = new HttpClient(DefaultHandlerFactory());
 
             this.userAgentHeaderValue = GetUserAgentHeader();
 
@@ -617,11 +623,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>A chain of <see cref="HttpMessageHandler"/>s</returns>
         private static HttpMessageHandler CreatePipeline(IEnumerable<HttpMessageHandler> handlers)
         {
-            HttpMessageHandler pipeline = handlers.LastOrDefault() ?? GetDefaultHttpClientHandler();
+            HttpMessageHandler pipeline = handlers.LastOrDefault() ?? DefaultHandlerFactory();
             DelegatingHandler dHandler = pipeline as DelegatingHandler;
             if (dHandler != null)
             {
-                dHandler.InnerHandler = GetDefaultHttpClientHandler();
+                dHandler.InnerHandler = DefaultHandlerFactory();
                 pipeline = dHandler;
             }
 
@@ -646,14 +652,14 @@ namespace Microsoft.WindowsAzure.MobileServices
         }
 
         /// <summary>
-        /// Returns a default HttpClientHandler that supports automatic decompression.
+        /// Returns a default HttpMessageHandler that supports automatic decompression.
         /// </summary>
         /// <returns>
         /// A default HttpClientHandler that supports automatic decompression
         /// </returns>
-        private static HttpClientHandler GetDefaultHttpClientHandler()
+        private static HttpMessageHandler GetDefaultHttpClientHandler()
         {
-            HttpClientHandler handler = new HttpClientHandler();
+            var handler = new HttpClientHandler();
             if (handler.SupportsAutomaticDecompression)
             {
                 handler.AutomaticDecompression = DecompressionMethods.GZip;

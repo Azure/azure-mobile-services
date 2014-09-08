@@ -2,10 +2,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Microsoft.WindowsAzure.MobileServices
@@ -21,8 +18,11 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <param name="provider">
         /// The authentication provider.
         /// </param>
-        public MobileServiceUIAuthentication(IMobileServiceClient client, string provider)
-            :base(client, provider)
+        /// <param name="parameters">
+        /// Provider specific extra parameters that are sent as query string parameters to login endpoint.
+        /// </param>
+        public MobileServiceUIAuthentication(IMobileServiceClient client, string provider, IDictionary<string, string> parameters)
+            : base(client, provider, parameters)
         {
         }
 

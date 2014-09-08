@@ -3,15 +3,10 @@
 // ----------------------------------------------------------------------------
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -35,7 +30,7 @@ namespace Microsoft.WindowsAzure.MobileServices
     public class MobileServiceCollection<TTable, TCollection> :
         ObservableCollection<TCollection>,
         ITotalCountProvider,
-        IQueryResultProvider
+        IQueryResultEnumerable<TCollection>
     {
         private bool busy = false;
 
@@ -196,7 +191,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         protected async virtual Task<int> ProcessQueryAsync(CancellationToken token, IMobileServiceTableQuery<TTable> query)
         {
             // Invoke the query on the server and get our data
-            QueryResultEnumerable<TTable> data = await query.ToEnumerableAsync() as QueryResultEnumerable<TTable>;
+            IEnumerable<TTable> items = await query.ToEnumerableAsync();
 
             //check for cancellation
             if (token.IsCancellationRequested)
@@ -204,15 +199,18 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new OperationCanceledException();
             }
 
-            foreach (var item in this.PrepareDataForCollection(data))
+            foreach (var item in this.PrepareDataForCollection(items))
             {
                 this.Add(item);
             }
 
-            this.TotalCount = data.TotalCount;
-            this.NextLink = data.NextLink;
-
-            return data.Count();
+            var result = items as IQueryResultEnumerable<TTable>;
+            if (result != null)
+            {
+                this.TotalCount = result.TotalCount;
+                this.NextLink = result.NextLink;
+            }
+            return items.Count();
         }
 
         /// <summary>

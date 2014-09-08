@@ -351,7 +351,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 throw new ArgumentNullException("token");
             }
 
-            MobileServiceTokenAuthentication auth = new MobileServiceTokenAuthentication(this, provider, token);
+            MobileServiceTokenAuthentication auth = new MobileServiceTokenAuthentication(this, provider, token, parameters: null);
             return auth.LoginAsync();
         }
 

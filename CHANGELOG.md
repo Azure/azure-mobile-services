@@ -31,6 +31,7 @@
 - Added support for following link headers returned from the .NET backend
 - Added a MobileServiceConflictException to detect duplicate inserts
 - Added support for datetimeoffsets in queries
+- Added support for sending provider specific query string parameters in LoginAsync()
 
 **Javascript SDK**
 - Fixed crash when server response did not have a Content-Type header
