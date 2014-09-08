@@ -26,6 +26,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         private const string InlineCountCountKey = "count";
 
         /// <summary>
+        /// The name of the next link in a response object.
+        /// </summary>
+        private const string NextLinkKey = "nextLink";
+
+        /// <summary>
         /// The name of the relation for next page link
         /// </summary>
         private const string NextRelation = "next";
@@ -120,7 +125,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
 
             if (this.NextLink != null)
             {
-                result[NextRelation] = this.NextLink.ToString();
+                result[NextLinkKey] = this.NextLink.ToString();
             }
 
             return result;

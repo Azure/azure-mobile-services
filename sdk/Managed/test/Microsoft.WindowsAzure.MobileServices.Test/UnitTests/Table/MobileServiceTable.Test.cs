@@ -87,7 +87,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
             var item = result as JObject;
             Assert.IsNotNull(item);
             Assert.AreEqual(count, item["count"].Value<long>());
-            Assert.AreEqual(link, (string)item["next"]);
+            Assert.AreEqual(link, (string)item["nextLink"]);
             var items = result["results"].ToArray();
             Assert.AreEqual("abc", (string)items[0]["id"]);
             Assert.AreEqual("Hey", (string)items[0]["String"]);
