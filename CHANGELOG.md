@@ -26,6 +26,23 @@
 - Added support for offline and sync
 - Added support for soft delete
 
+### Version 1.2.4
+**Managed SDK**
+- Added support for following link headers returned from the .NET backend
+- Added a MobileServiceConflictException to detect duplicate inserts
+- Added support for datetimeoffsets in queries
+
+**Javascript SDK**
+- Fixed crash when server response did not have a Content-Type header
+
+**iOS SDK**
+- Address bug where version was returned to caller when not asked for when returned in header field from server
+
+**Quickstarts**
+- Converted Windows Phone and Windows Store quickstarts to a univeral app quickstart
+- Converted WinJS Windows Store quickstart to a universal app quickstart
+- Fix syntax issues in iOS Swift quickstart
+
 ### Version 1.2.3
 **Managed SDK** 
 - Added support for Xamarin iOS Azure Notification Hub integration
