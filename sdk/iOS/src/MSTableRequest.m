@@ -454,8 +454,17 @@ static NSString *const httpDelete = @"DELETE";
 {
     MSTableReadQueryRequest *request = nil;
     
-    // Create the URL
-    NSURL *url = [MSURLBuilder URLForTable:table query:queryString];
+    NSURL *url = [NSURL URLWithString:queryString];
+    
+    if (url && url.scheme && url.host) {
+        // if it is valid absolute URL (e.g. nextLink) then take it as it is
+        queryString = url.query;
+        features |= MSFeatureReadWithLinkHeader;
+    }
+    else {
+        // otherwise consider it to be query string and append it to table endpoint
+        url = [MSURLBuilder URLForTable:table query:queryString];
+    }
     
     // Create the request
     request = [[MSTableReadQueryRequest alloc] initWithURL:url
