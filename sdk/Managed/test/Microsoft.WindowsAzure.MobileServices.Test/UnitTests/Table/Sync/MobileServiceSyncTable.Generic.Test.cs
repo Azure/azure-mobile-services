@@ -623,6 +623,29 @@ namespace Microsoft.WindowsAzure.MobileServices.Test
         }
 
         [AsyncTestMethod]
+        public async Task PullAsync_Incremental_WithNullUpdatedAt_Succeeds()
+        {
+            var hijack = new TestHttpHandler();
+            hijack.OnSendingRequest = req =>
+            {
+                return Task.FromResult(req);
+            };
+            hijack.AddResponseContent(@"[{""id"":""abc"",""String"":""Hey"", ""__updatedAt"": null}]");
+            hijack.AddResponseContent("[]"); // last page
+
+            var store = new MobileServiceLocalStoreMock();
+            IMobileServiceClient service = new MobileServiceClient("http://www.test.com", "secret...", hijack);
+            await service.SyncContext.InitializeAsync(store, new MobileServiceSyncHandler());
+
+            IMobileServiceSyncTable<ToDoWithStringId> table = service.GetSyncTable<ToDoWithStringId>();
+
+            await table.PullAsync("items", table.CreateQuery());
+            AssertEx.MatchUris(hijack.Requests,
+                "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=0&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version",
+                "http://www.test.com/tables/stringId_test_table?$filter=(__updatedAt ge datetimeoffset'1970-01-01T00:00:00.0000000%2B00:00')&$orderby=__updatedAt&$skip=1&$top=50&__includeDeleted=true&__systemproperties=__updatedAt%2C__version");
+        }
+
+        [AsyncTestMethod]
         public async Task PullAsync_Incremental_MovesByUpdatedAt_ThenUsesSkipAndTop_WhenUpdatedAtDoesNotChange()
         {
             var hijack = new TestHttpHandler();

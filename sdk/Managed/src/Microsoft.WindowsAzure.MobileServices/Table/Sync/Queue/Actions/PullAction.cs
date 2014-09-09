@@ -168,7 +168,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             JToken updatedAtToken = item[MobileServiceSystemColumns.UpdatedAt];
             if (updatedAtToken != null)
             {
-                updatedAt = updatedAtToken.ToObject<DateTimeOffset>();
+                updatedAt = updatedAtToken.ToObject<DateTimeOffset?>().GetValueOrDefault(Epoch);
             }
             return updatedAt;
         }
