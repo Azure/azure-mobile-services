@@ -3,7 +3,7 @@
 // ----------------------------------------------------------------------------
 
 using System.Collections.Generic;
-using System.Linq;
+using System.Collections.ObjectModel;
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
@@ -15,7 +15,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <summary>
         /// Errors caused by executing operation against remote table.
         /// </summary>
-        public IEnumerable<MobileServiceTableOperationError> Errors { get; private set; }
+        public ReadOnlyCollection<MobileServiceTableOperationError> Errors { get; private set; }
 
         /// <summary>
         /// The state in which push completed.
@@ -29,7 +29,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         /// <param name="status">The state in which push completed.</param>
         public MobileServicePushCompletionResult(IEnumerable<MobileServiceTableOperationError> errors, MobileServicePushStatus status)
         {
-            this.Errors = errors;
+            this.Errors = new ReadOnlyCollection<MobileServiceTableOperationError>(errors as IList<MobileServiceTableOperationError> ?? new List<MobileServiceTableOperationError>(errors));
             this.Status = status;
         }
     }
