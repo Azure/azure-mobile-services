@@ -1,5 +1,10 @@
 # Azure Mobile Services Change Log
 
+### Version 2.0
+**iOS SDK**
+- Added support for following link headers returned from the .NET backend
+- **[Breaking]** Changed MSReadQueryBlock to return MSQueryResult instead of items and totalCount
+
 ### Version 1.3 beta
 **Managed SDK**
 - Added support for incremental sync for .NET backend
